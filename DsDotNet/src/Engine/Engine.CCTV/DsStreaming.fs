@@ -32,16 +32,16 @@ type DsStreaming() =
 
     let layoutDic =
         _dsl.LayoutInfos
-        |> Seq.groupBy (fun f -> f.Path)
+        |> Seq.groupBy (fun f -> f.ChannelName)
         |> Seq.map (fun (g, values) -> g, values)
         |> dict
 
-    let getImageInfos (url:string) =
+    let getImageInfos (chName:string) (url:string) =
         let showDevs  = 
-            layoutDic[url]
+            layoutDic[chName]
                 .Select(fun f-> _dsl.DsSystem.Devices.First(fun d->d.LoadedName = f.DeviceName))
         let infos = InfoPackageModuleExt.GetInfos(showDevs)
-        showDevs.Select(fun d-> infos.First(fun i->i.Name = d.Name), d.ChannelPoints.First(fun (ch,xy)-> ch = url)|>snd)
+        showDevs.Select(fun d-> infos.First(fun i->i.Name = d.Name), d.ChannelPoints.First(fun (ch,xy)-> ch = $"{chName};{url}")|>snd)
 
 
     let streamingFrontFrame() =
@@ -54,10 +54,11 @@ type DsStreaming() =
                 for kvp in streamList do
                     let item = kvp.Value
                     let url = item.URL
-                    if _backFrame.ContainsKey(url) then
-                        let backFrame = getBackFrameOrNotNullUpdate(url, None) 
+                    let chName = item.ChannelName
+                    if _backFrame.ContainsKey(chName) then
+                        let backFrame = getBackFrameOrNotNullUpdate(chName, None) 
 
-                        let imgInfos = getImageInfos url
+                        let imgInfos = getImageInfos  chName url
                         let frontFrame = getFrontImage(item.ViewType, imgInfos) 
                         let backSize = backFrame.Size
 
@@ -73,7 +74,8 @@ type DsStreaming() =
         Async.Start(streamingTask, cancellationToken = cts.Token) |> ignore
 
     do
-        _dsl.DsSystem.LayoutChannels |> Seq.iter streamingBackFrame
+        _dsl.DsSystem.LayoutCCTVs  |> Seq.iter streamingBackFrame 
+        _dsl.DsSystem.LayoutImages |> Seq.iter(fun img-> createImageBackFrame (img, _dsl.GetImage(img)))
         streamingFrontFrame()
 
 
@@ -82,13 +84,20 @@ type DsStreaming() =
     member x.ImageStreaming(webSocket:WebSocket, screenId:string, viewmodeName, ipPort) =
         async { 
             try
-                let viewKey = $"{screenId}:{ipPort}";
                 let viewType = getViewType(viewmodeName)
                 let id = Convert.ToInt32(screenId)
 
-                let screenInfo = { Id = id; IpPort = ipPort; URL = _dsl.GetScreenUrl(id); ViewType = viewType}
+                let screenInfo = { 
+                                    Id = id
+                                    IpPort = ipPort
+                                    ChannelName = _dsl.GetChannelName(id)  
+                                    ScreenType = _dsl.GetScreenType(id)  
+                                    URL = _dsl.GetUrl(id)
+                                    ViewType = viewType 
+                                 }
+                let viewKey = screenInfo.Key;
+
                 updateOrGetWebViewTypes(Some webSocket, Some screenInfo) |> ignore
-            
                 try
                     while webSocket.State = WebSocketState.Open do
                         if _webStreamSet.ContainsKey(viewKey) then

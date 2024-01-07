@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module DsType =
@@ -53,6 +54,10 @@ module DsType =
         | Rising  ///구현대기 : TXs(ActionOut) Rising Pulse
         | MultiAction  of  int // 동시동작 개수 받기
 
+    [<Flags>]    
+    type ScreenType =
+        | CCTV = 0
+        | IMAGE  = 1
 
     let GetSquareBrackets (name: string, bHead: bool): string option =
         let pattern = "(?<=\[).*?(?=\])"  // 대괄호 안에 내용은 무조건 가져온다

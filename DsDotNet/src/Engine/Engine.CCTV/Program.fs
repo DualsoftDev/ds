@@ -7,8 +7,7 @@ open System.Drawing
 [<EntryPoint>]
 let main _ = 
 
-    //let dsStreaming = DsStreamingModule.DsStreaming()
-    //let infos = dsStreaming.GetImageInfos(dsStreaming.DsLayout.DsSystem.LayoutChannels.First())
+    let dsStreaming = DsStreamingModule.DsStreaming()
     let datas, xywh = OxyImgUtils.createBoxImage ("deviceA \n전진 이상", Rectangle( 400, 300, 200, 200), Color.OrangeRed) 
     let datas, xywh = OxyImgUtils.createPieChartImage ("deviceA", Rectangle(14123, 123, 400, 400), 213, 14) 
     let bitmap = new System.Drawing.Bitmap(datas)

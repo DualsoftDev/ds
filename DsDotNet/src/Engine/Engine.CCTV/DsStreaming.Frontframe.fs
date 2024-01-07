@@ -9,6 +9,8 @@ open DsLayoutLoaderModule
 open OpenCVUtils
 
 
+let _StreamFrontSize = Size(1920, 1080)
+
 let getViewType (viewtype:string) =
     match viewtype with
     | "Normal" -> ViewType.Normal
@@ -16,6 +18,7 @@ let getViewType (viewtype:string) =
     | _ -> ViewType.Normal
 
 
+[<Obsolete("Remove test ErrorMessages test ....")>]
 let getTableImage (imgInfos:(InfoDevice*Xywh) seq) =
     imgInfos.Select(fun (f, xywh)-> 
         f.ErrorMessages.Clear()  
@@ -30,6 +33,7 @@ let getTableImage (imgInfos:(InfoDevice*Xywh) seq) =
     )   
 
                 
+[<Obsolete("Remove random test data....")>]
 let getChartImage (imgInfos:(InfoDevice*Xywh) seq) = 
     imgInfos.Select(fun (f, xywh)->
         let rand = Random()
@@ -40,10 +44,9 @@ let getChartImage (imgInfos:(InfoDevice*Xywh) seq) =
             
 
 let getFrontImage(viewType, imgInfos) =
-    let streamSize = Size(1920, 1080)
     let img =
         match viewType with
-        | ViewType.Normal -> imgInfos |> getChartImage  |> OpenCVUtils.CombineImages streamSize
-        | ViewType.Error  -> imgInfos |> getTableImage  |> OpenCVUtils.CombineImages streamSize
+        | ViewType.Normal -> imgInfos |> getChartImage  |> OpenCVUtils.CombineImages _StreamFrontSize
+        | ViewType.Error  -> imgInfos |> getTableImage  |> OpenCVUtils.CombineImages _StreamFrontSize
         | _ -> failwithf $"GetFrontImage {viewType}: error Type"
     img

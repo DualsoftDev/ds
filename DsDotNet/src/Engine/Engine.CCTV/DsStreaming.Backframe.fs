@@ -19,16 +19,16 @@ let _delayCCTV = 1000 / 100
 let _backFrame = Dictionary<string, Mat>()
 
 let _lockBackFrame = obj()
-let getBackFrameOrNotNullUpdate(url:string, frame:Mat option)  =
+let getBackFrameOrNotNullUpdate(channelName:string, frame:Mat option)  =
     lock _lockBackFrame (fun () ->
         if frame.IsSome then
-            _backFrame.[url] <- frame.Value
+            _backFrame.[channelName] <- frame.Value
         
-        _backFrame.[url]
+        _backFrame.[channelName]
     )
 
 
-let streamingBackFrame(url:string) =
+let streamingBackFrame(channelName:string, url:string) =
     let cts = new CancellationTokenSource()
     let capture = new VideoCapture(url, VideoCapture.API.Ffmpeg)
     let backFrame = new Mat()
@@ -36,7 +36,13 @@ let streamingBackFrame(url:string) =
     Async.Start (async {
         while not cts.Token.IsCancellationRequested do
             capture.Read backFrame |> ignore
-            getBackFrameOrNotNullUpdate(url, Some backFrame) |> ignore
+            getBackFrameOrNotNullUpdate(channelName, Some backFrame) |> ignore
             do! Async.Sleep(_delayCCTV)
     }, cancellationToken = cts.Token)
     |> ignore
+
+
+let createImageBackFrame(channelName:string, image:byte[]) = 
+    let backFrame = OpenCVUtils.ByteArrayToMat(image)
+    getBackFrameOrNotNullUpdate(channelName, Some backFrame) |> ignore
+   

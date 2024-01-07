@@ -67,7 +67,7 @@ type ModelLoaderExt =
         dsFilePath
 
     [<Extension>] 
-    static member saveModelZip (loadingPaths:string seq, activeFilePath:string) = 
+    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq) = 
         let targetPaths = (loadingPaths @ [activeFilePath])
         let zipPathDS  = targetPaths.ToZip()
         let zipPathPPT = targetPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
@@ -83,9 +83,9 @@ type ModelLoaderExt =
         let baseTempFilePath = $"{zipDir}{zipFile}/base.ext"  //상대 경로 구하기 위한 임시경로
         let activeRelaPath = getRelativePath(baseTempFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
 
-        let config = SaveConfigWithPath jsFilePath activeRelaPath
+        let config = SaveConfigWithPath jsFilePath activeRelaPath 
 
-        addFilesToExistingZipAndDeleteFiles zipPathDS [zipPathPPT;config]
+        addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPPT;config]@layoutImgFiles.ToList())
 
         zipPathDS
 

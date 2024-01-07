@@ -106,11 +106,11 @@ module FileManager =
         
 
     //모델 최상단 폴더에 Zip형태로 생성
-    let saveZip(filePaths: string seq, extenstion:string) =
+    let saveZip(filePaths: string seq, extention:string) =
 
         //let filePaths = filePaths.Select(convertValidFile)
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
-        let zipFilePath = getValidZipFileName (topLevel, extenstion )
+        let zipFilePath = getValidZipFileName (topLevel, extention )
          // Create a ZIP archive
         use fileStream = new FileStream(zipFilePath, FileMode.Create)
         use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)

@@ -76,6 +76,9 @@ module CoreExtensionModule =
                       HwSystemItem.CreateHWApi(condiName, x) |> ignore
 
 
+        member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
+        member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
+
         member x.HWSystemConditions     = x.HWConditions :> seq<_>
         member x.HWButtons            = x.HWButtons :> seq<_>
         member x.HWLamps              = x.HWLamps   :> seq<_>
@@ -167,7 +170,7 @@ type SystemExt =
                 let inValidActionTags = inValidActionTags(x);
                 let inValidHwSystemTag = inValidHwSystemTag(x);
                 if inValidActionTags.Any() then
-                    failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidActionTags)}"
+                     failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidActionTags)}"
                 if inValidHwSystemTag.Any() then
                     failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
     [<Extension>]

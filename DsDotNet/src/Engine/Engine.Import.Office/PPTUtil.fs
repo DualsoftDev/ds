@@ -7,11 +7,9 @@ open System
 open System.Linq
 open DocumentFormat.OpenXml
 open DocumentFormat.OpenXml.Drawing
-open System.Data
-open DocumentFormat.OpenXml
-open DocumentFormat.OpenXml.Packaging
-open DocumentFormat.OpenXml.Spreadsheet
-open System.Data
+open System.IO
+open Engine.Core
+open System.Collections.Generic
 
 [<AutoOpen>]
 module PPTUtil =
@@ -21,6 +19,7 @@ module PPTUtil =
     type NonVisualDrawingProperties = Presentation.NonVisualDrawingProperties
     type ConnectionShape = Presentation.ConnectionShape
     type Shape = Presentation.Shape
+    type Picture = Presentation.Picture
     type NonVisualShapeProperties = Presentation.NonVisualShapeProperties
     type NonVisualGroupShapeProperties = Presentation.NonVisualGroupShapeProperties
     type NonVisualGroupShapeDrawingProperties = Presentation.NonVisualGroupShapeDrawingProperties
@@ -657,19 +656,77 @@ module PPTUtil =
             tablesWithPageNumbers
 
         [<Extension>]
-        static member GetLayouts(doc: PresentationDocument) =
+        static member GetLayoutPages(doc: PresentationDocument) =
             let getShapes (slidePart:SlidePart) = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
-            let layouts =
+            let layoutPages =
                 Office.SlidesSkipHide(doc)
                 |> Seq.filter (fun (slidePart ,_) -> getShapes(slidePart).Where(fun s->s.CheckLayout()).Any())
+            layoutPages
+
+
+        [<Extension>]
+        static member GetLayouts(doc: PresentationDocument) =
+
+            let layoutList = HashSet<string>()
+            let layouts =
+                doc.GetLayoutPages()
                 |> Seq.collect (fun (slidePart ,pageIndex) ->
-                    let shapes = getShapes(slidePart)
+                    let shapes = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
+                    let layouts = shapes.Where(fun f->f.ShapeName().StartsWith("TextBox") && f.InnerText.StartsWith("[Layout]"))
                     let paths = shapes.Where(fun f->f.ShapeName().StartsWith("TextBox") && f.InnerText.StartsWith("[Path]"))
-                    if paths.Any()
+                    if paths.Any() && layouts.Any()
                     then
+                        let layout  = layouts.First().InnerText.Split(']').Last()
+                        let path  = paths.First().InnerText.Split(']').Last()
+                           
+                        if layoutList.Contains layout
+                        then 
+                             Office.ErrorPPT(ErrorCase.Page, ErrID._66, "Duplicate layout names found", pageIndex, 0u)
+                        else 
+                            layoutList.Add  layout|>ignore
+
                         shapes.Where(fun s-> s.CheckLayout())        
-                              .Select(fun s-> paths.First().InnerText.Split(']').Last(), s.InnerText, s.GetPosition(doc.SlideSize()))
+                              .Select(fun s-> layout, path, s.InnerText, s.GetPosition(doc.SlideSize()))
                     else
                         Office.ErrorPPT(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)
                   )
             layouts
+
+
+        [<Extension>]
+        static member SaveSlideImage((doc: PresentationDocument), (tempDirName:string)) =
+            let extractSlideImage(slidePart: SlidePart, outputImagePath:string) =
+                let imagePart = slidePart.GetPartsOfType<ImagePart>().FirstOrDefault()
+                match imagePart with
+                | null ->
+                    Office.ErrorPPT(ErrorCase.Page, ErrID._65, "Layouts image Error", slidePart.GetPage(), 0u)
+                | _ ->
+                    use fileStream = new FileStream(outputImagePath, FileMode.Create)
+                    imagePart.GetStream().CopyTo(fileStream)
+            let imgs = HashSet<string>()
+            doc.GetLayoutPages()
+            |> Seq.iter (fun (slidePart ,pageIndex) ->
+                let shapes = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
+                let layouts = shapes.Where(fun f->f.ShapeName().StartsWith("TextBox") && f.InnerText.StartsWith("[Layout]"))
+                let paths = shapes.Where(fun f->f.ShapeName().StartsWith("TextBox") && f.InnerText.StartsWith("[Path]"))
+                if paths.Any() && layouts.Any()
+                then
+                    let layout  = layouts.First().InnerText.Split(']').Last()
+                    let path  = paths.First().InnerText.Split(']').Last()
+                    if path = DsText.TextImageChannel 
+                    then
+                        let tempFileDir = Path.Combine(Path.GetTempPath(), tempDirName)
+                        if not <| Directory.Exists(tempFileDir) then Directory.CreateDirectory(tempFileDir) |>ignore
+
+                        let outputImagePath = Path.Combine(tempFileDir, sprintf "%s.jpg" layout)
+                        imgs.Add outputImagePath|>ignore
+                        extractSlideImage (slidePart, outputImagePath)
+                        
+                else
+                    Office.ErrorPPT(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)
+                )
+            imgs
+
+
+
+    

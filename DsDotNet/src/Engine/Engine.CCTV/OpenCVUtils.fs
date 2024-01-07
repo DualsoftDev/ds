@@ -41,7 +41,11 @@ type OpenCVUtils() =
         frame.ToImage<Bgr, byte>().ToBitmap().Save(stream, System.Drawing.Imaging.ImageFormat.Jpeg)
         stream.ToArray()
 
-
+    static member ByteArrayToMat(bytes : byte[]) : Mat =
+        use stream = new MemoryStream(bytes)
+        use image = new Bitmap(stream)
+        image.ToMat().ToImage<Bgr, byte>().Mat
+  
     static member CombineImages (totalSize: Size) (images: seq<MemoryStream * Rectangle>) : Mat =
         // 새로운 비트맵 생성
         let combinedImage = new Bitmap(totalSize.Width, totalSize.Height)

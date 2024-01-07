@@ -580,7 +580,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let fileSpecCtx = layoutCtx.TryFindFirstChild<FileSpecContext>();
                 let filePath = 
                     match fileSpecCtx with
-                    |Some s ->  x.GetLayoutPath(s)
+                    |Some s -> let path = x.GetLayoutPath(s)
+                               if path.Contains(';')
+                               then path
+                               else failwith $"layout format error \n ex) [layouts file=\"chName;chPath\"] \n but.. {path}"
                     |None -> $"{TextEmtpyChannel}"
 
                 let listPositionDefCtx = layoutCtx.Descendants<PositionDefContext>().ToList()

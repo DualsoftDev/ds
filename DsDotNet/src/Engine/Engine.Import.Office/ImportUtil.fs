@@ -645,13 +645,13 @@ module ImportU =
         [<Extension>]
         static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =
             let layouts = doc.GetLayouts()
-            layouts.Iter(fun (path, dev, rect)->
+            layouts.Iter(fun (layout, path, dev, rect)->
                 let device = sys.Devices.FirstOrDefault(fun f-> f.Name = dev)
                 if(device.IsNonNull()) 
                 then let xywh = Xywh(rect.X, rect.Y, rect.Width, rect.Height)
-                     device.ChannelPoints.Add(path.Trim(), xywh) |> ignore
+                     let lay = layout.Replace(";", "_")
+                     device.ChannelPoints.Add($"{lay};{path.Trim()}", xywh) |> ignore
                 else Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
-
             )        
 
 

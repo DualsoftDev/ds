@@ -19,13 +19,16 @@ module ImportPPTModule =
     type DSFromPPT =
         { System: DsSystem 
           ActivePath: string 
-          LoadingPaths: string seq }
+          LoadingPaths: string seq
+          LayoutImgPaths: string seq
+           }
 
     let dicPptDoc = Dictionary<string, PresentationDocument>()
     let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
     let loadedParentStack = Stack<DsSystem>() //LoadedSystem.AbsoluteParents 구성하여 ExternalSystem 구분 및 UI Tree 구조 구성
     let dicLoaded = Dictionary<LoadedSystem, string>() // LoadedSystem 부모, 형제 호출시 Runtime에 변경하기 위한 정보 사전
-
+    let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
+    
     let getHashKeys (skipCnt: int, path: string) =
         String.Join(
             ",",
@@ -163,6 +166,7 @@ module ImportPPTModule =
             if paras.LoadingType = DuNone then
                 doc.UpdateActionIO(theSys)
                 doc.UpdateLayouts(theSys)
+                layoutImgPaths.AddRange(doc.SaveSlideImage())|>ignore
             
             pathStack.Pop() |> ignore
             pptReop.Add(theSys, doc)
@@ -181,6 +185,8 @@ module ImportPPTModule =
 
             dicLoaded.Clear()
             loadedParentStack.Clear()
+            layoutImgPaths.Clear()
+
             loadedParentStack.Push mySys
             loadSystem (pptReop, mySys, paras)
 
@@ -252,7 +258,6 @@ module ImportPPTModule =
         [<Extension>]
         static member GetDSFromPPTWithLib(fullName: string) =
             pptRepo.Clear()
-
             do
                 // library 파일을 먼저 로딩해서 DS 파일로 변환한다.
 
@@ -284,14 +289,16 @@ module ImportPPTModule =
                 sys.pptxToExportDS fullName
 
             let system, loadingPaths = ParserLoader.LoadFromActivePath exportPath
-
-            { System = system
-              ActivePath =  exportPath 
-              LoadingPaths = loadingPaths }
+            { 
+                System = system
+                ActivePath =  exportPath 
+                LoadingPaths = loadingPaths 
+                LayoutImgPaths = layoutImgPaths 
+            }
 
 
         [<Extension>]
         static member GetRuntimeZipFromPPT(fullName: string)=
-                let ret = ImportPPT.GetDSFromPPTWithLib(fullName)
-                ModelLoaderExt.saveModelZip(ret.LoadingPaths , ret.ActivePath)
+            let ret = ImportPPT.GetDSFromPPTWithLib(fullName)
+            ModelLoaderExt.saveModelZip(ret.LoadingPaths , ret.ActivePath, ret.LayoutImgPaths)
 

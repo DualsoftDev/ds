@@ -14,7 +14,7 @@
 
 @code {
     [Parameter] public HMIReal Real { get; set; }
-    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
+    [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
 
     string _guid;
     string _text;

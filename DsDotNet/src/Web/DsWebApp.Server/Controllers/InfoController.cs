@@ -9,7 +9,7 @@ using static Engine.Core.InfoPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
 
-using SimpleResult = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -25,12 +25,12 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
     // api/info
     [HttpGet]
-    public SimpleResult GetInfoDashboard()
+    public ResultSS GetInfoDashboard()
     {
         InfoSystem infoSystem = InfoPackageModuleExt.GetInfo(_model.System);
         // System.Text.Json.JsonSerializer.Serialize 는 동작 안함.
         string newtonJson = Newtonsoft.Json.JsonConvert.SerializeObject(infoSystem);
-        return SimpleResult.Ok(newtonJson);
+        return ResultSS.Ok(newtonJson);
     }
 }
 

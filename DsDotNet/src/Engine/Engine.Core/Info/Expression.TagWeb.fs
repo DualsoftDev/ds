@@ -59,4 +59,6 @@ type TagWebExt =
             logDebug $"Found true set value for {x.Name}"
         x._SerializedObject <- ObjectHolder.Create(value).Serialize()
     [<Extension>]
-    static member IsEqual(x:TagWeb, y:TagWeb) = x.Name = y.Name && x.Kind = y.Kind
+    static member IsEqual(x:TagWeb, y:TagWeb) =
+        x <> null && y <> null &&
+        x.Name = y.Name && x.Kind = y.Kind

@@ -8,6 +8,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         _hmiPackage = ClientGlobal.HmiPackage;
         if (_hmiPackage == null)
         {
@@ -26,7 +27,6 @@
                 async err => await JsDual.Alert(err));
         }
 
-        await base.OnInitializedAsync();
         _loading = false;
     }
 }

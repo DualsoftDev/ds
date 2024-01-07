@@ -1,11 +1,6 @@
 @* CompHmiRealTable *@
 
 @using Engine.Core
-@using System.Reactive.Subjects
-
-@inherits CompHmiTagManager
-@implements IAsyncDisposable
-
 
 @if (_loading)
 {
@@ -13,29 +8,25 @@
 }
 else
 {
-    // todo : Lamp 표시 (R/G/F/H)
-    <DxGrid Data="Reals" @ref="MyGrid">
+    <DxGrid Data="Reals">
         <Columns>
             <DxGridDataColumn FieldName="Name" Caption="Real"></DxGridDataColumn>
-            <CompHmiRealLampColumn/>
-            <CompHmiButtonColumn ForceWidth=120 Caption="자동시작" TagGetter="@((dataItem) =>((HMIReal)dataItem).StartPush)" />
-            <CompHmiButtonColumn ForceWidth=120 Caption="자동복귀" TagGetter="@((dataItem) =>((HMIReal)dataItem).ResetPush)" />
-            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료SET" TagGetter="@((dataItem) =>((HMIReal)dataItem).ONPush)" />
-            <CompHmiButtonColumn ForceWidth=160 Caption="작업완료RST" TagGetter="@((dataItem) =>((HMIReal)dataItem).OFFPush)" />
-
+            <LampRealColumn Caption="상태(RGFH)"/>
+            <ButtonColumn Caption="자동시작" TagGetter="@((dataItem) =>((HMIReal)dataItem).StartPush)" />
+            <ButtonColumn Caption="자동복귀" TagGetter="@((dataItem) =>((HMIReal)dataItem).ResetPush)" />
+            <ButtonColumn Caption="작업완료SET" TagGetter="@((dataItem) =>((HMIReal)dataItem).ONPush)" />
+            <ButtonColumn Caption="작업완료RST" TagGetter="@((dataItem) =>((HMIReal)dataItem).OFFPush)" />
         </Columns>
     </DxGrid>
 }
 
 @code {
-        bool _loading { get; set; } = true;
-        IGrid MyGrid { get; set; }
-        [Parameter] public HMIReal[] Reals { get; set; }
+    bool _loading = true;
+    [Parameter] public HMIReal[] Reals { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
-        base.ComponentName = "CompHmiRealTable.razor";
         await base.OnInitializedAsync();
         _loading = false;
     }

@@ -3,14 +3,11 @@
 @using Engine.Core
 @using System.Reactive.Subjects
 
-@inherits CompHmiTagManager
-@implements IAsyncDisposable
-
 @if (_loading)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Loading flow tables...</em></p>
 }
-else
+else    
 {
     <DxGrid Data="Flows" @ref="MyGrid">
         <Columns>
@@ -23,30 +20,18 @@ else
                               RenderStyle="ButtonRenderStyle.Info" />
                 </CellDisplayTemplate>
             </DxGridCommandColumn>
-@* 
-            <DxGridCommandColumn Caption="Auto/Manual">
-                <HeaderTemplate>
-                    Auto/Manual
-                </HeaderTemplate>
-                <CellDisplayTemplate>
-                    <WgtAutoManualSelectorPb
-                        TagAuto="(((HMIFlow)context.DataItem).GetAuto())"
-                        TagManual="(((HMIFlow)context.DataItem).GetManual())"
-                        FlowName="@(((HMIFlow)context.DataItem).Name)"
-                        />
-                </CellDisplayTemplate>
-            </DxGridCommandColumn>
- *@
-            <CompHmiButtonLampModeColumn Caption="Auto"     ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode.Item1)" />
-            <CompHmiButtonLampModeColumn Caption="Manual"   ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode.Item2)" />
 
-            <CompHmiButtonLampModeColumn Caption="Drive"    ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode)" />
-            <CompHmiButtonLampModeColumn Caption="Stop"     ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode)" />
-            <CompHmiButtonLampColumn     Caption="Clear"        ButtonLampGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPushLamp)" />
-            <CompHmiButtonLampModeColumn Caption="Em.Stop"  ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPushLampMode)" ForceWidth=120 />
-            <CompHmiButtonLampModeColumn Caption="Test"     ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).TestPushLampMode)" />
-            <CompHmiButtonLampColumn     Caption="Home"         ButtonLampGetter="@((dataItem) =>((HMIFlow)dataItem).HomePushLamp)" />
-            <CompHmiButtonLampModeColumn Caption="Ready"    ButtonLampModeGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPushLampMode)" />
+            <LampFlowColumn Caption="상태" />
+
+            <AutoManualModeSelectorColumn Caption="Auto/Manual" SelectorGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode)" />
+
+            <ButtonLampModeColumn    Caption="Drive"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode)" />
+            <ButtonLampModeColumn    Caption="Stop"    CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode)" />
+            <ButtonLampColumn        Caption="Clear"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPushLamp)" />
+            <ButtonLampModeColumn    Caption="Em.Stop" CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPushLampMode)" ForceWidth=120 />
+            <ButtonLampModeColumn    Caption="Test"    CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).TestPushLampMode)" />
+            <ButtonLampColumn        Caption="Home"    CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).HomePushLamp)" />
+            <ButtonLampModeColumn    Caption="Ready"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPushLampMode)" />
 
         </Columns>
     </DxGrid>
@@ -54,14 +39,14 @@ else
 
 @code {
     IGrid MyGrid { get; set; }
-    bool _loading { get; set; } = true;
+    bool _loading = true;
+    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public HMIFlow[] Flows { get; set; }
 
 
 
     protected override async Task OnInitializedAsync()
     {
-        base.ComponentName = "CompHmiFlowTable.razor";
         await base.OnInitializedAsync();
         _loading = false;
     }
@@ -78,13 +63,13 @@ else
     async Task onAuto(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await PostTag(flow.GetAuto(), true);
+        await TagManager.PostTagAsync(flow.GetAuto(), true);
     }
 
     async Task onManual(object dataItem)
     {
         var flow = (HMIFlow)dataItem;
-        await PostTag(flow.GetManual(), true);
+        await TagManager.PostTagAsync(flow.GetManual(), true);
     }
 }
 

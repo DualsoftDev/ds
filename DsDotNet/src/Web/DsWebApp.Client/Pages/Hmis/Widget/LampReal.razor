@@ -1,0 +1,100 @@
+@* LampReal *@
+
+@implements IDisposable
+
+
+@if (!_loading)
+{
+    <div style="display: flex; align-items: center;">
+        <div class="@getClass()" id="@_guid"></div>
+        <div id="@_guid">@_text</div>
+    </div>
+}
+
+
+@code {
+    [Parameter] public HMIReal Real { get; set; }
+    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
+
+    string _guid;
+    string _text;
+    bool _loading = true;
+    IDisposable _subscription;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (TagManager == null)
+            throw new Exception("TagManager is null on LampReal.");
+        _subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(onTagWebChanged);
+
+        _guid = Guid.NewGuid().ToString();
+        _text = getText();
+        _loading = false;
+    }
+
+    string getText()
+    {
+        if ((bool)Real.ErrorTxLamp.Value)
+            return "TxError";
+        else if ((bool)Real.ErrorRxLamp.Value)
+            return "RxError";
+        else if ((bool)Real.ReadyLamp.Value)
+            return "Ready";
+        else if ((bool)Real.GoingLamp.Value)
+            return "Going";
+        else if ((bool)Real.FinishLamp.Value)
+            return "Finish";
+        else if ((bool)Real.HomingLamp.Value)
+            return "Homing";
+        else if ((bool)Real.OriginLamp.Value)
+            return "Origin";
+        else if ((bool)Real.PauseLamp.Value)
+            return "Pause";
+        else
+            return "Not Yet!";
+    }
+    string getClass()
+    {
+        var xxx = getText();
+        return $"embedded-lamp-real {xxx}";
+    }
+
+    public void Dispose()
+    {
+        _subscription.Dispose();
+    }
+    void onTagWebChanged(TagWeb tag)
+    {
+        TagWeb[] lampTags = [
+            Real.ErrorRxLamp,
+            Real.ReadyLamp,
+            Real.GoingLamp,
+            Real.FinishLamp,
+            Real.HomingLamp,
+            Real.OriginLamp,
+            Real.PauseLamp,
+        ];
+
+        if (lampTags.Any(t => t.IsEqual(tag)))
+        {
+            _text = getText();
+            StateHasChanged();
+        }
+    }
+}
+
+<style>
+    .embedded-lamp-real {
+        width: 10px;
+        height: 20px;
+        border-radius: 10%;
+        background-color: red;  /* erroneous */
+        margin-right: 10px;
+        display: inline-block;
+    }
+        .embedded-lamp-real.Ready { background-color: green; }
+        .embedded-lamp-real.Going { background-color: darkorange; }
+        .embedded-lamp-real.Finish { background-color: blue; }
+        .embedded-lamp-real.Homing { background-color: gray; }
+</style>

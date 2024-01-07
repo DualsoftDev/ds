@@ -107,6 +107,7 @@
     SampleSessionInfo[] ChartsData;
     protected override async Task OnInitializedAsync()
     {
+        await Task.Yield();
         ChartsData = SampleSessionInfo.GetSamples().Take(2).ToArray();
     }
 

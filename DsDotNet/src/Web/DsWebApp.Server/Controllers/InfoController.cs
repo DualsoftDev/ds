@@ -1,3 +1,6 @@
+using Dual.Common.Core;
+
+using Engine.Core;
 using Engine.Info;
 using Engine.Runtime;
 
@@ -31,6 +34,15 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
         // System.Text.Json.JsonSerializer.Serialize 는 동작 안함.
         string newtonJson = Newtonsoft.Json.JsonConvert.SerializeObject(infoSystem);
         return ResultSS.Ok(newtonJson);
+    }
+
+    // api/info/q
+    [HttpGet("q")]
+    public ResultSerializable<InfoQueryResult, string> GetInfoQuery([FromQuery] string Fqdn, [FromQuery] DateTime Start, [FromQuery] DateTime End)
+    {
+        // todo: 검색 결과 생성
+        return ResultSerializable<InfoQueryResult, string>.Ok(new InfoQueryResult());
+        //return ResultSerializable<InfoQueryResult, string>.Err("Not implemented");
     }
 }
 

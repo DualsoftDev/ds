@@ -61,6 +61,7 @@
         <Compile Include="Info\Expression.TagWeb.fs" />
         <Compile Include="Info\HmiPackage.fs" />
         <Compile Include="Info\InfoPackage.fs" />
+        <Compile Include="Info\InfoQueryResult.fs" />
         <Content Include="ValidSyntax.txt" />
         <Content Include="ProgramCodeSyntax.txt" />
         <!--<Compile Include="Program.fs" />-->

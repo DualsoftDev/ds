@@ -121,7 +121,7 @@ module HmiPackageModule =
                 yield! getPushLampModeTags x.ReadyPushLampMode
                 yield! getPushLampTags x.ClearPushLamp
                 yield! getPushLampTags x.HomePushLamp
-                yield x.IdleLamp
+                yield x.IdleLampMode
    
 
                 yield! x.Reals |> Seq.collect (fun r->r.CollectTags())

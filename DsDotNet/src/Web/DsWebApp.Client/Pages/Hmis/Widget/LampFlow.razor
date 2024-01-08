@@ -20,7 +20,7 @@
     string _text;
     bool _loading = true;
     IDisposable _subscription;
-    TagWeb _drive, _stop, _emStop, _test, _ready, _clear, _home, _idle;
+    TagWeb _drive, _stop, _emStop, _test, _ready, _idle;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -31,14 +31,12 @@
 
         _guid = Guid.NewGuid().ToString();
 
-        _drive = Flow.DrivePushLampMode.Item1.Item2;
-        _stop = Flow.StopPushLampMode.Item1.Item2;
-        _emStop = Flow.EmergencyPushLampMode.Item1.Item2;
-        _test = Flow.TestPushLampMode.Item1.Item2;
-        _ready = Flow.ReadyPushLampMode.Item1.Item2;
-        _clear = Flow.ClearPushLamp.Item2;
-        _home = Flow.HomePushLamp.Item2;
-        _idle = Flow.IdleLamp;
+        _drive = Flow.DrivePushLampMode.Item2;
+        _stop = Flow.StopPushLampMode.Item2;
+        _emStop = Flow.EmergencyPushLampMode.Item2;
+        _test = Flow.TestPushLampMode.Item2;
+        _ready = Flow.ReadyPushLampMode.Item2;
+        _idle = Flow.IdleLampMode;
 
         _text = getText();
         _loading = false;
@@ -54,12 +52,8 @@
             return "Drive";
         else if ((bool)_ready.Value)
             return "Ready";
-        else if ((bool)_clear.Value)
-            return "Clear";
-        else if ((bool)_home.Value)
-            return "Homing";
-        else if ((bool)_idle.Value)
-            return "Idle";
+        // else if ((bool)_idle.Value)
+        //     return "Idle";
         else
             return "Not Yet!";
     }
@@ -75,7 +69,7 @@
     }
     void onTagWebChanged(TagWeb tag)
     {
-        TagWeb[] lampTags = [_drive, _stop, _emStop, _test, _ready, _clear, _home, _idle];
+        TagWeb[] lampTags = [_drive, _stop, _emStop, _test, _ready, _idle];
 
         if (lampTags.Any(t => t.IsEqual(tag)))
         {
@@ -98,7 +92,5 @@
         .embedded-lamp-flow.Stop { background-color: orangered; }
         .embedded-lamp-flow.EMStop { background-color: red; }
         .embedded-lamp-flow.Drive { background-color: darkorange; }
-        .embedded-lamp-flow.Clear { background-color: white; }
-        .embedded-lamp-flow.Homing { background-color: gray; }
         .embedded-lamp-flow.Idle { background-color: slateblue; }
 </style>

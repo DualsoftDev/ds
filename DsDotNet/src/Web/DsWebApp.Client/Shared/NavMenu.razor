@@ -16,6 +16,20 @@
                 </Nodes>
             </DxTreeViewNode>
 
+
+            <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/dashboards/dashboard" Text="Dashboard" IconCssClass="oi oi-grid-four-up">
+                <Nodes>
+                    <DxTreeViewNode NavigateUrl="/dashboards/grid" Text="Grid view" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
+                    <DxTreeViewNode NavigateUrl="/dashboards/query" Text="Query" IconCssClass="oi oi-zoom-out"></DxTreeViewNode>
+                </Nodes>
+            </DxTreeViewNode>
+
+            <DxTreeViewNode Text="Etc">
+                <Nodes>
+                    <DxTreeViewNode NavigateUrl="/etc/login" Text="Login" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
+                </Nodes>
+            </DxTreeViewNode>
+            
             <DxTreeViewNode Text="Demo">
                 <Nodes>
                     <DxTreeViewNode NavigateUrl="/demo/widget" Text="Test Widget" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
@@ -26,14 +40,7 @@
                     <DxTreeViewNode NavigateUrl="/demo/pagegridlayout" Text="Grid Layout" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
                 </Nodes>
             </DxTreeViewNode>
-
-            <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/dashboards/dashboard" Text="Dashboard" IconCssClass="oi oi-grid-four-up">
-                <Nodes>
-                    <DxTreeViewNode NavigateUrl="/dashboards/grid" Text="Grid view" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
-                    <DxTreeViewNode NavigateUrl="/dashboards/query" Text="Query" IconCssClass="oi oi-zoom-out"></DxTreeViewNode>
-                </Nodes>
-            </DxTreeViewNode>
-
+            
             <DxTreeViewNode CssClass="@rootNodeCssClass" Click="@onClickSwaggerUI" Text="Swagger" IconCssClass="oi oi-beaker"></DxTreeViewNode>
 
 

@@ -1,0 +1,50 @@
+@* AutoManualModeSelector *@
+@inherits AutoManualSelectorBase
+@if(! _loading)
+{
+    @base.BuildRenderTree
+}
+
+
+@code {
+    bool _loading = true;
+
+    [Parameter] public CsHMISelectLampMode Selector { get; set; }
+    protected async override Task OnInitializedAsync()
+    {
+        var (auto, manual) = (Selector.Item1, Selector.Item2);
+        ((AutoButton, AutoLamp), AutoMode) = auto;
+        ((ManualButton, ManualLamp), ManualMode) = manual;
+
+        // base initializer 를 후반에 배치. 위의 값들을 먼저 설정한 후에 수행
+        await base.OnInitializedAsync();
+
+        // Console.WriteLine($"::: Auto push tag: {autoPushTag.Name}");
+        // Console.WriteLine($"::: Auto lamp tag: {autoLamp.Name}");
+        // Console.WriteLine($"::: Auto mode tag: {autoMode.Name}");
+        // Console.WriteLine($"::: Manual push tag: {manualPushTag.Name}");
+        // Console.WriteLine($"::: Manual lamp tag: {manualLamp.Name}");
+        // Console.WriteLine($"::: Manual mode tag: {manualMode.Name}");
+
+        // _subscription =
+        //     ClientGlobal.TagChangedSubject.Subscribe(tag =>
+        //     {
+        //         if (tag.IsEqual(AutoMode))
+        //         {
+        //             AutoMode = tag;
+        //             Console.WriteLine($"----------- Updating auto mode: {AutoMode.Value}");
+        //             StateHasChanged();
+        //         }
+        //         else if (tag.IsEqual(ManualMode))
+        //         {
+        //             ManualMode = tag;
+        //             Console.WriteLine($"----------- Updating manual mode: {AutoMode.Value}");
+        //             StateHasChanged();
+        //         }
+        //     });
+
+
+        _loading = false;
+    }
+
+}

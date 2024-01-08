@@ -1,53 +1,87 @@
 @* PageHmiAuto *@
 
 @page "/hmis/auto"
-<h3>자동 조작</h3>
-<p> Clear > Ready 후, Auto 나 Manual 누르면 선택 확인</p>
+
+<CompTooltipInlineHidden>
+    <NormalContent>
+        <CompTitle Icon="oi oi-bolt" Title="자동 조작" />
+    </NormalContent>
+    <TooltipContent>
+        <RadzenAlert AlertStyle="AlertStyle.Info" Variant="Variant.Flat" Icon="auto_awesome" Shade="Shade.Lighter">
+            <RadzenText TextStyle="TextStyle.H6" style="color: var(--rz-on-info-lighter);">자동 조작</RadzenText>
+            <p> Clear > Ready 후, Auto 나 Manual 누르면 선택 확인</p>
+        </RadzenAlert>
+    </TooltipContent>
+</CompTooltipInlineHidden>
 
 @using System.Collections.ObjectModel
 @using Engine.Core
 @using static Engine.Core.TagWebModule
 @inherits CompHmiLoader
-@implements IDisposable
 @attribute [Authorize(Roles = "Administrator")]
 
 @* https://supportcenter.devexpress.com/ticket/details/t1017286/datagrid-for-blazor-how-to-set-the-100-height *@
-<CompFullScreenManager FullScreenElementId="auto" />      @* FullScreenStateChanged="@onFullScreenStateChanged" *@ 
+<CompFullScreenManager FullScreenElementId="auto" />      @* FullScreenStateChanged="@onFullScreenStateChanged" *@
+<CompHmiTagManager @ref="TagManager" OnLoaded="@(() => _tagManagerLoading=false)" />
 
-@if (_loading)
+@if (_loading || _tagManagerLoading)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <div id="auto">
-        <p>
-            <WgtGridPbLamp Text="Auto"     DataItem="@(_system.AutoManualSelectLamp.Item1)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Manual"   DataItem="@(_system.AutoManualSelectLamp.Item2)" ButtonLampGetter="@_buttonLampGetter" />
+    Console.WriteLine($"--------------------- TagManager={TagManager}");
+    <CascadingValue Name="TagManager" Value="@TagManager">
+        <div id="auto">
+            <p>
+                <div class="ds-inline">
+                    <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
+                </div>
+                <div class="ds-inline">
+                    <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
+                </div>
+                @*
+            <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
+            <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
+            <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
+            <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
+            <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
+            <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
+            <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
+            <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
+            *@
+            </p>
 
-            <WgtGridPbLamp Text="Ready"    DataItem="@(_system.ReadyPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Drive"    DataItem="@(_system.DrivePushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Home"     DataItem="@(_system.HomePushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Clear"    DataItem="@(_system.ClearPushLamp)"     ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Stop"     DataItem="@(_system.StopPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Em Stop"  DataItem="@(_system.EmergencyPushLamp)" ButtonLampGetter="@_buttonLampGetter" />
-            <WgtGridPbLamp Text="Test"     DataItem="@(_system.TestPushLamp)"      ButtonLampGetter="@_buttonLampGetter" />
-        </p>
-
-        <CompHmiFlowTable Flows="@_system.Flows"/>
-    </div>
+            <CompHmiFlowTable Flows="@_system.Flows" />
+        </div>
+    </CascadingValue>
 }
 
 
 @code {
-    HMIPushLamp _buttonLampGetter(object dataItem) => (HMIPushLamp)dataItem;
-
+    bool _tagManagerLoading = true;
+    public CompHmiTagManager TagManager {get; set; }
     // protected override async Task OnInitializedAsync()
     // {
     //     await base.OnInitializedAsync();
     // }
-    public void Dispose()
-    {
-        Console.WriteLine($"Disposing PageHmiAuto.razor");
-    }
 }
+

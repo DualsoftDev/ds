@@ -30,7 +30,6 @@ else
 @code {
     CompShowHide _refCompShowHide;
     string _showOrHide => (_refCompShowHide == null || _refCompShowHide.IsVisible) ? "Hide" : "Show";
-    IInfoBase _selected;
     InfoBase Selected { get; set; }
     [Parameter] public InfoSystem System { get; set; }
 

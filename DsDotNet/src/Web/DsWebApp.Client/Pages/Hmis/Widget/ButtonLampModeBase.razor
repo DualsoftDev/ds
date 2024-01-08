@@ -1,0 +1,92 @@
+@* ButtonLampModeBase *@
+<style>
+    .transparent {
+        color: transparent;
+    }
+</style>
+
+@implements IDisposable
+
+@if (!_loading)
+{
+    <span class="ds-inline" style="display: flex; align-items: center; justify-content: space-evenly;">
+        @* mode 가 성립하면, button 외곽에 bolt 표시 : lamp 가 on 되어도 여타 다른 조건이 안 맞으면 mode 가 성립하지 않음. *@
+        @if (Mode != null)
+        {
+            <span class="@(() => "oi oi-bolt ds-color-primary" + ((bool)Mode.Value ? "" : " transparent"))" />
+        }
+
+        @* lamp 값을 서버로부터 다시 읽은 것을 반영해서 check 표시 *@
+        <DxButton Text="@Text"
+                  RenderStyleMode="ButtonRenderStyleMode.Outline"
+                  IconCssClass="@((bool)Lamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
+                  Click="onClick" />
+    </span>
+}
+
+@code {
+    bool _loading = true;
+    IDisposable _subscription;
+
+    public TagWeb Button { get; set; }
+    public TagWeb Lamp { get; set; }
+    public TagWeb Mode { get; set; }
+    [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
+    [Parameter] public string Text { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (TagManager == null)
+            throw new Exception("TagManager is null on ButtonLampModeBase.");
+
+        await base.OnInitializedAsync();
+
+        Console.WriteLine($"::: Auto push tag: {Button.Name}/{Button.KindDescription}/{Button.Kind}");
+        Console.WriteLine($"::: Auto lamp tag: {Lamp.Name}/{Lamp.KindDescription}/{Lamp.Kind}");
+        Console.WriteLine($"::: Auto mode tag: {Mode?.Name}/{Mode?.KindDescription}/{Mode?.Kind}");
+        _subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(async tag =>
+            {
+                await onTagWebChanged(tag);
+            });
+
+
+        _loading = false;
+    }
+
+    async Task onTagWebChanged(TagWeb tag)
+    {
+        await Task.Yield();
+
+        Console.WriteLine($"::: Detected tag change: {tag.Name} = {tag.Value}({tag.KindDescription}, {tag.Kind})");
+        if (tag.Name == "sysmanual_lamp")
+            Console.WriteLine("");
+        if (tag.IsEqual(Button))
+            Console.WriteLine($"----------- Detected auto push button change: {Button.Value}");
+
+        if (tag.IsEqual(Lamp))
+        {
+            Console.WriteLine($"----------- Updating auto lamp: {tag.Value}");
+            Lamp = tag;
+            StateHasChanged();
+        }
+        else if (tag.IsEqual(Mode))
+        {
+            Console.WriteLine($"----------- Updating auto mode: {tag.Value}");
+            Mode = tag;
+            StateHasChanged();
+        }
+    }
+
+    void onError(string err) => JsDual.Alert(err);
+    async Task onClick()
+    {
+        Button.SetValue(true);
+        await Button.PostAsync(Http, onError);
+    }
+
+    public void Dispose()
+    {
+        _subscription.Dispose();
+    }
+}

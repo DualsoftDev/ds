@@ -126,7 +126,7 @@ module ConvertHMI =
             let tm = x.TagManager :?> SystemManager
             {
                 Name  = x.Name
-                AutoManualSelectLamp =  getSelectLamp tm (SystemTag.auto_btn  |>int)(SystemTag.auto_lamp  |>int) (SystemTag.manual_btn|>int) (SystemTag.manual_lamp|>int)
+                AutoManualSelectLamp =  getSelectLamp tm (SystemTag.auto_btn  |>int) (SystemTag.auto_lamp  |>int) (SystemTag.manual_btn|>int) (SystemTag.manual_lamp|>int)
                 DrivePushLamp        =  getPushLamp   tm (SystemTag.drive_btn |>int) (SystemTag.drive_lamp |>int)
                 StopPushLamp         =  getPushLamp   tm (SystemTag.stop_btn  |>int) (SystemTag.stop_lamp  |>int)
                 ClearPushLamp        =  getPushLamp   tm (SystemTag.clear_btn |>int) (SystemTag.clear_lamp |>int)

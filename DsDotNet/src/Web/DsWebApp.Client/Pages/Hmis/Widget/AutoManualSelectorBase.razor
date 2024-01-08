@@ -1,0 +1,143 @@
+@* AutoManualSelectorBase *@
+
+@implements IDisposable
+<style>
+    .transparent {
+        color: transparent;
+    }
+</style>
+
+
+@if (!_loading)
+{
+    <div class="ds-inline" style="display: flex; align-items: center; justify-content: space-evenly;">
+        <span>
+            @* mode 가 성립하면, button 외곽에 bolt 표시 : lamp 가 on 되어도 여타 다른 조건이 안 맞으면 mode 가 성립하지 않음. *@
+            @if (AutoMode != null)
+            {
+                <span class="@(() => "oi oi-bolt ds-color-primary" + ((bool)AutoMode.Value ? "" : " transparent"))" />
+            }
+
+            @* lamp 값을 서버로부터 다시 읽은 것을 반영해서 check 표시 *@
+            <DxButton Text="Auto"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      IconCssClass="@((bool)AutoLamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
+                      Click="onAutoClick" />
+        </span>
+        <span>
+            @if (ManualMode != null)
+            {
+                <span class="@(() => "oi oi-bolt ds-color-primary" + ((bool)ManualMode.Value ? "" : " transparent"))" />
+            }
+            <DxButton Text="Manual"
+                      RenderStyleMode="ButtonRenderStyleMode.Outline"
+                      IconCssClass="@((bool)ManualLamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
+                      Click="onManualClick" />
+        </span>
+    </div>
+}
+
+@code {
+    bool _loading = true;
+
+    public TagWeb AutoButton { get; set; }
+    public TagWeb ManualButton { get; set; }
+    public TagWeb AutoLamp { get; set; }
+    public TagWeb ManualLamp { get; set; }
+    public TagWeb AutoMode { get; set; }
+    public TagWeb ManualMode { get; set; }
+
+    [CascadingParameter (Name="TagManager")] public CompHmiTagManager TagManager { get; set; }
+    IDisposable _subscription;
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (TagManager == null)
+            throw new Exception("TagManager is null on AutoManualSelectorBase.");
+
+        await base.OnInitializedAsync();
+
+        Console.WriteLine($"::: Auto push tag: {AutoButton.Name}/{AutoButton.KindDescription}/{AutoButton.Kind}");
+        Console.WriteLine($"::: Auto lamp tag: {AutoLamp.Name}/{AutoLamp.KindDescription}/{AutoLamp.Kind}");
+        Console.WriteLine($"::: Auto mode tag: {AutoMode?.Name}/{AutoMode?.KindDescription}/{AutoMode?.Kind}");
+        Console.WriteLine($"::: Manual push tag: {ManualButton.Name}/{ManualButton.KindDescription}/{ManualButton.Kind}");
+        Console.WriteLine($"::: Manual lamp tag: {ManualLamp.Name}/{ManualLamp.KindDescription}/{ManualLamp.Kind}");
+        Console.WriteLine($"::: Manual mode tag: {ManualMode?.Name}/{ManualMode?.KindDescription}/{ManualMode?.Kind}");
+
+        _subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(async tag =>
+            {
+                await onTagWebChanged(tag);
+            });
+
+
+        _loading = false;
+    }
+
+    public void Dispose()
+    {
+        _subscription.Dispose();
+    }
+
+
+    async Task onTagWebChanged(TagWeb tag)
+    {
+        await Task.Yield();
+
+        Console.WriteLine($"::: Detected tag change: {tag.Name} = {tag.Value}({tag.KindDescription}, {tag.Kind})");
+        if (tag.Name == "sysmanual_lamp")
+            Console.WriteLine("");
+        if (tag.IsEqual(AutoButton))
+            Console.WriteLine($"----------- Detected auto push button change: {AutoButton.Value}");
+        if (tag.IsEqual(ManualButton))
+            Console.WriteLine($"----------- Detected manual push button change: {ManualButton.Value}");
+
+        if (tag.IsEqual(AutoLamp))
+        {
+            Console.WriteLine($"----------- Updating auto lamp: {tag.Value}");
+            AutoLamp = tag;
+            StateHasChanged();
+        }
+        else if (tag.IsEqual(AutoMode))
+        {
+            Console.WriteLine($"----------- Updating auto mode: {tag.Value}");
+            AutoMode = tag;
+            StateHasChanged();
+        }
+        else if (tag.IsEqual(ManualLamp))
+        {
+            Console.WriteLine($"----------- Updating manual lamp: {tag.Value}");
+            ManualLamp = tag;
+            StateHasChanged();
+        }
+        else if (tag.IsEqual(ManualMode))
+        {
+            Console.WriteLine($"----------- Updating manual mode: {tag.Value}");
+            ManualMode = tag;
+            StateHasChanged();
+        }
+    }
+
+    void onError(string err) => JsDual.Alert(err);
+    async Task onAutoClick()
+    {
+        AutoButton.SetValue(true);
+        ManualButton.SetValue(false);
+        await TagManager.PostTagAsync(AutoButton, true);
+        await TagManager.PostTagAsync(ManualButton, false);
+        // await AutoButton.PostAsync(Http, onError);
+        // await ManualButton.PostAsync(Http, onError);
+    }
+
+
+    async Task onManualClick()
+    {
+        AutoButton.SetValue(false);
+        ManualButton.SetValue(true);
+        await TagManager.PostTagAsync(AutoButton, false);
+        await TagManager.PostTagAsync(ManualButton, true);
+        // await AutoButton.PostAsync(Http, onError);
+        // await ManualButton.PostAsync(Http, onError);
+    }
+
+}

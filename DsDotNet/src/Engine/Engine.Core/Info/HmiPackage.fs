@@ -106,7 +106,7 @@ module HmiPackageModule =
         ClearPushLamp            : HMIPushLamp     
         HomePushLamp             : HMIPushLamp    
         
-        IdleLamp                 : HMILamp 
+        IdleLampMode             : HMILamp 
 
         Reals            : HMIReal array      
     } with

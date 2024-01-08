@@ -20,7 +20,8 @@
         <DxButton Text="@Text"
                   RenderStyleMode="ButtonRenderStyleMode.Outline"
                   IconCssClass="@((bool)Lamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
-                  Click="onClick" />
+                  @onmousedown="@((args) => onMouseDown())"
+                  @onmouseup="@((args) => onMouseUp())"/>
     </span>
 }
 
@@ -29,6 +30,7 @@
     IDisposable _subscription;
 
     public TagWeb Button { get; set; }
+    public bool IsPushButton { get; set; } = true;
     public TagWeb Lamp { get; set; }
     public TagWeb Mode { get; set; }
     [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
@@ -40,6 +42,8 @@
             throw new Exception("TagManager is null on ButtonLampModeBase.");
 
         await base.OnInitializedAsync();
+
+        var me = DotNetObjectReference.Create(this);
 
         Console.WriteLine($"::: Auto push tag: {Button.Name}/{Button.KindDescription}/{Button.Kind}");
         Console.WriteLine($"::: Auto lamp tag: {Lamp.Name}/{Lamp.KindDescription}/{Lamp.Kind}");
@@ -79,14 +83,28 @@
     }
 
     void onError(string err) => JsDual.Alert(err);
-    async Task onClick()
-    {
-        Button.SetValue(true);
-        await Button.PostAsync(Http, onError);
-    }
 
     public void Dispose()
     {
         _subscription.Dispose();
     }
+
+
+
+    async Task onMouseDown()
+    {
+        // todo : mouse up 되기 전까지는, 다른 browser 창 등에 의해서 값이 변경되면, true 값을 계속 전송하도록 수정
+        Button.SetValue(true);
+        await Button.PostAsync(Http, onError);
+    }
+    async Task onMouseUp()
+    {
+        Console.WriteLine("OnMouseUp.");
+        if (IsPushButton)
+        {
+            Button.SetValue(false);
+            await Button.PostAsync(Http, onError);
+        }
+    }
+
 }

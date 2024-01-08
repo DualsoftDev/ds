@@ -42,9 +42,7 @@ module ImportIOTable =
 
             let chageParserText newAddr = if newAddr= TextSkip then TextAddrEmpty else newAddr
             let changeValidAddress (address:string)  =
-    
                     let address = address.Trim() 
-                    
                     address |> chageParserText
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
@@ -54,16 +52,11 @@ module ImportIOTable =
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
 
                 let dev = dicJob.[devName]
-                let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim()
-                let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()
-
-                if outAdd.ToUpper().Contains("%MX80001") then ()
-               
-
-                dev.InAddress <-  changeValidAddress inAdd
-                dev.OutAddress <- changeValidAddress outAdd
-                dev.InAddress <-  getValidDevAddress (dev, true) |> changeValidAddress
-                dev.OutAddress <- getValidDevAddress (dev, false)|> changeValidAddress
+                let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim() |>emptyToSkipAddress
+                let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
+              
+                dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, dev.ApiItem.RXs.Count = 0, true)
+                dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, dev.ApiItem.TXs.Count = 0, false)
 
                 let jobName = $"{row.[(int) IOColumn.Job]}"
                 let func = $"{row.[(int) IOColumn.Func]}"

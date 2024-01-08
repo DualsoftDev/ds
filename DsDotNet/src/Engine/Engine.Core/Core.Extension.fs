@@ -205,13 +205,32 @@ type SystemExt =
     [<Extension>]
     static member ValidHwSystemTag(x:DsSystem) = x |> inValidHwSystemTag |> Seq.any
     [<Extension>]
-    static member CheckValidInterfaceTags(x:DsSystem) =
+    static member CheckValidInterfaceNchageParsingAddress(x:DsSystem) =
                 let inValidActionTags = inValidActionTags(x);
                 let inValidHwSystemTag = inValidHwSystemTag(x);
                 if inValidActionTags.Any() then
                      failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidActionTags)}"
                 if inValidHwSystemTag.Any() then
                     failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
+
+                let addrEmpty = TextAddrEmpty
+                x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)
+                       |> Seq.iter(fun d->  
+
+                                    if d.InAddress  = TextSkip then d.InAddress <- addrEmpty                                       
+                                    if d.OutAddress  = TextSkip then d.OutAddress <- addrEmpty
+                        )
+
+                x.HWSystemDefs  
+                        |> Seq.iter(fun h -> 
+                                    match h with
+                                    | :? ButtonDef
+                                    | :? ConditionDef -> if h.InAddress  = TextSkip then h.InAddress <- addrEmpty
+                                    | :? LampDef ->      if h.OutAddress  = TextSkip then h.OutAddress <- addrEmpty
+                                    | _  -> failwith $"inValidHwSystemTag error {h.Name}"
+                                )
+
+
     [<Extension>]
     static member GetDevice(x:TaskDev, sys:DsSystem) = sys.Devices.First(fun f->f.Name  = x.DeviceName)
 

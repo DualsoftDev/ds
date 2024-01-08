@@ -29,10 +29,10 @@
     bool _loading = true;
     IDisposable _subscription;
 
-    public TagWeb Button { get; set; }
-    public bool IsPushButton { get; set; } = true;
     public TagWeb Lamp { get; set; }
     public TagWeb Mode { get; set; }
+    public TagWeb Button { get; set; }
+    [Parameter] public bool IsPushButton { get; set; } = true;
     [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public string Text { get; set; }
 
@@ -42,8 +42,6 @@
             throw new Exception("TagManager is null on ButtonLampModeBase.");
 
         await base.OnInitializedAsync();
-
-        var me = DotNetObjectReference.Create(this);
 
         Console.WriteLine($"::: Auto push tag: {Button.Name}/{Button.KindDescription}/{Button.Kind}");
         Console.WriteLine($"::: Auto lamp tag: {Lamp.Name}/{Lamp.KindDescription}/{Lamp.Kind}");

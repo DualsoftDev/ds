@@ -106,13 +106,9 @@ C4 > C5;
             F.Main = { F.Main.Ap; }
             F.Main.Am = { F.Main; }
         }
-        [layouts file="C:/Windows/Web/Wallpaper/Windows/img0.jpg"] = {
+        [layouts file="cctv1;rtsp://210.99.70.120:1935/live/cctv002.stream"] = {
             A = (1309, 405, 205, 83);
             C = (1600, 500, 300, 300);
-            B."+" = (1400, 300, 300, 300);
-        }
-        [layouts file="C:/Windows/Web/Screen/img100.jpg"] = {
-            B."-" = (1600, 500, 300, 300);
         }
         [layouts] = {
             C = (1600, 500, 300, 300);

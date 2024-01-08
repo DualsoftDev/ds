@@ -15,7 +15,7 @@ module TagKindModule =
         | EventFlow     of Tag: IStorage * Target: Flow         * TagKind: FlowTag
         | EventVertex   of Tag: IStorage * Target: Vertex       * TagKind: VertexTag
         | EventApiItem  of Tag: IStorage * Target: ApiItem      * TagKind: ApiItemTag
-        | EventAction   of Tag: IStorage * Target: DsTask       * TagKind: ActionTag
+        | EventAction   of Tag: IStorage * Target: TaskDev      * TagKind: ActionTag
         | EventHwSys    of Tag: IStorage * Target: HwSystemItem * TagKind: HwSysTag
         | EventVariable of Tag: IStorage * Target: DsSystem     * TagKind: VariableTag
         
@@ -63,7 +63,7 @@ type TagKindExt =
             | :? Flow as f         ->Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
             | :? Vertex as v       ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
             | :? ApiItem as a      ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-            | :? DsTask  as d      ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
+            | :? TaskDev  as d      ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
             | :? HwSystemItem as h ->Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
             |_ -> None
         |None -> None

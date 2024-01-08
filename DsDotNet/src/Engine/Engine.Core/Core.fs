@@ -42,6 +42,15 @@ module CoreModule =
         LoadingType: ParserLoadingType
     }
 
+    // 장치 LayoutInfo  정의
+    type DeviceLayoutInfo = {
+        DeviceName: string
+        ChannelName: string
+        Path: string
+        ScreenType: ScreenType
+        Xywh: Xywh
+    }
+
     [<AbstractClass>]
     type LoadedSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
@@ -56,10 +65,10 @@ module CoreModule =
      
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
 
-        member val Xywh:Xywh = null with get, set
+        //member val Xywh:Xywh = null with get, set
         ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
-        member val Channels = HashSet<string>()
-
+        member val ChannelPoints = HashSet<string*Xywh>()
+        
 
 
         /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
@@ -86,6 +95,16 @@ module CoreModule =
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
+        let channelInfos =
+            loadedSystems 
+            |> Seq.collect(fun s-> 
+                s.ChannelPoints.Where(fun (path, _) -> path <> TextEmtpyChannel)
+                               .Select(fun (path, xywh) ->
+                                    let chName, url = path.Split(';')[0], path.Split(';')[1]
+                                    let typeScreen = if url = TextImageChannel
+                                                     then ScreenType.IMAGE  
+                                                     else ScreenType.CCTV
+                                    { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
 
         interface ISystem 
         member _.AddLoadedSystem(childSys) = 
@@ -97,7 +116,8 @@ module CoreModule =
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
-        member _.LayoutChannels = loadedSystems |> Seq.collect(fun s->s.Channels) |> distinct
+        member _.LayoutInfos = channelInfos
+      
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()
@@ -227,7 +247,7 @@ module CoreModule =
         member _.TargetWrapper = target
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:DsTask list) =
+    type Job (name:string, tasks:TaskDev list) =
         inherit Named(name)
         let mutable funcs = HashSet<Func>()
         member x.ActionType:JobActionType = getJobActionType name
@@ -238,22 +258,15 @@ module CoreModule =
         member x.Funcs = funcs.ToArray() //일괄 셋팅만 가능 append 불가
 
     type TagAddress = string
-    [<AbstractClass>]
-    [<DebuggerDisplay("{ApiName}")>]
-    type DsTask (api:ApiItem, loadedName:string) as this =
-        inherit FqdnObject(api.Name, createFqdnObject([|loadedName|]))
+    /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
+    /// Old name : JobDef
+    type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) as this =
+        inherit FqdnObject(api.Name, createFqdnObject([|deviceName|]))
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
-        member val DeviceName = loadedName
+        member val DeviceName = deviceName
         member val Funcs  = HashSet<Func>() with get, set
-
-
-    /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
-    ///
-    /// Old name : JobDef
-    type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) =
-        inherit DsTask(api, deviceName)
         member val InAddress   = inAddress  with get, set
         member val OutAddress  = outAddress with get, set
         //CPU 생성시 할당됨 InTag
@@ -280,9 +293,9 @@ module CoreModule =
         member _.System = system
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
-        member val Xywh:Xywh = null with get, set
+        //member val Xywh:Xywh = null with get, set
         ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
-        member val Channels = HashSet<string>()
+        //member val Channels = HashSet<string>()
 
 
     /// API 의 reset 정보:  "+" <||> "-";

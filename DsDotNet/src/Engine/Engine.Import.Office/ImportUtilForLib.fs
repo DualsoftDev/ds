@@ -35,9 +35,9 @@ module ImportUtilForLib =
     let updateCallLayout (call:Call, xyhw:Xywh) =
         call.TargetJob.DeviceDefs
             .OfType<TaskDev>()
-            .Iter(fun a ->
-                    a.ApiItem.Xywh <- xyhw
-                    a.ApiItem.Channels.Add(TextEmtpyChannel) |>ignore
+            .Iter(fun d ->
+                    let dev = d.GetDevice(call.Parent.GetSystem())
+                    dev.ChannelPoints.Add(TextEmtpyChannel, xyhw) |>ignore
                     )
 
     let addLoadedLibSystemNCall
@@ -76,7 +76,7 @@ module ImportUtilForLib =
         let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
             let devOrg= addOrGetExistSystem loadedSys newloadedName
             let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-            TaskDev(api, "", "", newloadedName) :> DsTask
+            TaskDev(api, "", "", newloadedName)
 
         let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath
         if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
@@ -84,7 +84,7 @@ module ImportUtilForLib =
 
 
         let job =
-            let tasks = HashSet<DsTask>()
+            let tasks = HashSet<TaskDev>()
             match getJobActionType apiName with
             | MultiAction cnt ->  
                 for i in [1..cnt] do

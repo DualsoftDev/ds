@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Library</OutputType>
         <TargetFramework>net7.0</TargetFramework>
+		<OutputType>Library</OutputType>
 		<LangVersion>8.0</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     </PropertyGroup>
@@ -10,7 +10,7 @@
     <ItemGroup>
         <None Include="SQL.md" />
         <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-        <Compile Include="DBLogger.ORM.fs" />
+		<Compile Include="DBLogger.ORM.fs" />
         <Compile Include="DBLogger.Query.fs" />
         <Compile Include="DBLogger.DBOperation.fs" />
         <Compile Include="DBLogger.fs" />
@@ -26,9 +26,6 @@
 
     <ItemGroup>
         <PackageReference Include="DualSoft-Common-Db" Version="0.1.6" />
-		<PackageReference Include="Emgu.CV" Version="4.8.1.5350" />
-		<PackageReference Include="Emgu.CV.Bitmap" Version="4.8.1.5350" />
-		<PackageReference Include="Emgu.CV.runtime.windows" Version="4.8.1.5350" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9" />
         <PackageReference Include="Dapper" Version="2.0.143" />
     </ItemGroup>

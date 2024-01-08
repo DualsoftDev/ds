@@ -27,14 +27,14 @@ public static class ViewUtil
     public static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
 
     private static ViewVertex CreateViewVertex(ViewNode fv, Vertex v, IEnumerable<ViewNode> viewNodes,
-        List<DsTask> tasks)
+        List<TaskDev> tasks)
     {
         var nodes = new ViewVertex
         {
             Vertex = v,
             FlowNode = fv,
             Status = Status4.Homing,
-            DsTasks = tasks
+            TaskDevs = tasks
         };
        
 
@@ -74,12 +74,12 @@ public static class ViewUtil
             foreach (Vertex v in fv.Flow.Value.GetVerticesOfFlow())
             {
                 var tasks = (v.GetPure() is Call c)
-                    ? c.TargetJob.DeviceDefs.Cast<DsTask>().ToList()
-                    : new List<DsTask>();
+                    ? c.TargetJob.DeviceDefs.Cast<TaskDev>().ToList()
+                    : new List<TaskDev>();
                 var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);
                 DicNode[v] = viewVertex;
 
-                viewVertex.DsTasks.Cast<TaskDev>().Iter(t =>
+                viewVertex.TaskDevs.Cast<TaskDev>().Iter(t =>
                 {
                     if (t.InTag != null)
                     {
@@ -167,7 +167,7 @@ public static class ViewUtil
                 {
                     n.DisplayNodes.Iter(node =>
                     {
-                        var tags = n.DsTasks.Cast<TaskDev>();
+                        var tags = n.TaskDevs.Cast<TaskDev>();
 
                         switch (ea.Tag.TagKind)
                         {

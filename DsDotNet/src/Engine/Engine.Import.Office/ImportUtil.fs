@@ -51,7 +51,7 @@ module ImportU =
                                 Call.Create(job, DuParentReal(parentReal.Value))
                             else
                                 Call.Create(job, DuParentFlow(parentFlow.Value))
-                        updateCallLayout (call, node.Position)
+                        //updateCallLayout (call, node.Position)
                         
                         call
                     else
@@ -144,7 +144,7 @@ module ImportU =
                                 .Select(fun (api, tgt) ->
                                     match node.NodeType with
                                     | OPEN_EXSYS_CALL
-                                    | COPY_DEV -> TaskDev(api, "", "", tgt) :> DsTask
+                                    | COPY_DEV -> TaskDev(api, "", "", tgt) :> TaskDev
                                     | _ -> failwithlog "Error MakeJobs")
 
 
@@ -292,25 +292,26 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", Some flow, new HashSet<Func>())))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", Some flow, new HashSet<Func>())))
             
             headPageLamps
             |> Seq.iter (fun node ->
-                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
+                node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
                 
                 
-        //MakeLayout 만들기
         [<Extension>]
-        static member MakeLayout(doc: pptDoc, mySys: DsSystem) =
+        static member MakeAnimationPoint(doc: pptDoc, mySys: DsSystem) =
             doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType = LAYOUT)
+            |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.iter (fun node ->
-                let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.Name)
+                let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
                 if dev.IsNull() 
                 then node.Shape.ErrorName(ErrID._61, node.PageNum)
-                else dev.Xywh <- Xywh(node.Position.X, node.Position.Y
+                else
+                    let xywh = Xywh(node.Position.X, node.Position.Y
                                    , node.Position.W, node.Position.H) 
-                                   )
+                    dev.ChannelPoints.Add(TextEmtpyChannel,xywh)|>ignore
+                    )
 
         //Condition 조건 적용
         [<Extension>]
@@ -644,13 +645,13 @@ module ImportU =
         [<Extension>]
         static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =
             let layouts = doc.GetLayouts()
-            layouts.Iter(fun (path, dev, rect)->
+            layouts.Iter(fun (layout, path, dev, rect)->
                 let device = sys.Devices.FirstOrDefault(fun f-> f.Name = dev)
                 if(device.IsNonNull()) 
-                then device.Xywh <- Xywh(rect.X, rect.Y, rect.Width, rect.Height)
-                     device.Channels.Add(path.Trim()) |> ignore
+                then let xywh = Xywh(rect.X, rect.Y, rect.Width, rect.Height)
+                     let lay = layout.Replace(";", "_")
+                     device.ChannelPoints.Add($"{lay};{path.Trim()}", xywh) |> ignore
                 else Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
-
             )        
 
 
@@ -705,6 +706,6 @@ module ImportU =
             doc.MakeSafeties(sys)
             //ApiTxRx  만들기
             doc.MakeApiTxRx()
-            //Layout  만들기
-            doc.MakeLayout(sys)
+            //AnimationPoint  만들기
+            doc.MakeAnimationPoint(sys)
             doc.IsBuilded <- true

@@ -10,6 +10,7 @@ module DsText =
     let [<Literal>] TextLibrary   = "DS_Library"
     let [<Literal>] TextDSJson    = "dualsoft.json"
     let [<Literal>] TextEmtpyChannel = "EmtpyChannel" //channel 정보 없는 대상 Dev및 API 
+    let [<Literal>] TextImageChannel = "SlideImage"   //cctv url 대신에 pptx의 SlideImage 사용할 경우
     let [<Literal>] TextSkip      = "-"  //주소 스킵 처리
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
     //edge

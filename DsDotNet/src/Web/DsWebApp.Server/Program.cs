@@ -9,9 +9,6 @@ using Dual.Web.Server.Auth;
 using Microsoft.Data.Sqlite;
 using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
-using static Engine.Core.CoreModule;
-
-//using DsWebApp.Server.Authentication;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 PresetAppSettings(isWinService);

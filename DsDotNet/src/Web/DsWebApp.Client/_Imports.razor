@@ -39,8 +39,10 @@
 
 @using TagFqdn = string
 @using Status4 = Engine.Core.DsType.Status4
-@using HMIPushLamp = Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
-@using HMIPushLampMode = Tuple<Tuple<Engine.Core.TagWebModule.TagWeb, Engine.Core.TagWebModule.TagWeb>, Engine.Core.TagWebModule.TagWeb>  @* HMIPush * HMIFlickerLamp *@
+@using CsHMIPushLamp = Tuple<TagWeb, TagWeb>  @* HMIPush * HMIFlickerLamp *@
+@using CsHMIPushLampMode = Tuple<Tuple<TagWeb, TagWeb>, TagWeb>  @* HMIPushLamp*TagWeb  *@
+@using CsHMISelectLamp = Tuple<Tuple<TagWeb, TagWeb>, Tuple<TagWeb, TagWeb>> @* HMIPushLamp*HMIPushLamp *@
+@using CsHMISelectLampMode = Tuple<Tuple<Tuple<TagWeb, TagWeb>, TagWeb>, Tuple<Tuple<TagWeb, TagWeb>, TagWeb>> @* CsHMIPushLampMode*CsHMIPushLampMode *@
 
 
 @inject AuthenticationStateProvider AuthenticationStateProvider

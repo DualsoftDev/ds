@@ -1,0 +1,104 @@
+@* LampReal *@
+
+@implements IDisposable
+
+
+@if (!_loading)
+{
+    <div style="display: flex; align-items: center;">
+        <div class="@getClass()" id="@_guid"></div>
+        <div id="@_guid">@_text</div>
+    </div>
+}
+
+
+@code {
+    [Parameter] public HMIFlow Flow { get; set; }
+    [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
+
+    string _guid;
+    string _text;
+    bool _loading = true;
+    IDisposable _subscription;
+    TagWeb _drive, _stop, _emStop, _test, _ready, _clear, _home, _idle;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (TagManager == null)
+            throw new Exception("TagManager is null on LampReal.");
+        _subscription =
+            ClientGlobal.TagChangedSubject.Subscribe(onTagWebChanged);
+
+        _guid = Guid.NewGuid().ToString();
+
+        _drive = Flow.DrivePushLampMode.Item1.Item2;
+        _stop = Flow.StopPushLampMode.Item1.Item2;
+        _emStop = Flow.EmergencyPushLampMode.Item1.Item2;
+        _test = Flow.TestPushLampMode.Item1.Item2;
+        _ready = Flow.ReadyPushLampMode.Item1.Item2;
+        _clear = Flow.ClearPushLamp.Item2;
+        _home = Flow.HomePushLamp.Item2;
+        _idle = Flow.IdleLamp;
+
+        _text = getText();
+        _loading = false;
+    }
+
+    string getText()
+    {
+        if ((bool)_emStop.Value)
+            return "EMStop";
+        else if ((bool)_stop.Value)
+            return "Stop";
+        else if ((bool)_drive.Value)
+            return "Drive";
+        else if ((bool)_ready.Value)
+            return "Ready";
+        else if ((bool)_clear.Value)
+            return "Clear";
+        else if ((bool)_home.Value)
+            return "Homing";
+        else if ((bool)_idle.Value)
+            return "Idle";
+        else
+            return "Not Yet!";
+    }
+    string getClass()
+    {
+        var xxx = getText();
+        return $"embedded-lamp-flow {xxx}";
+    }
+
+    public void Dispose()
+    {
+        _subscription.Dispose();
+    }
+    void onTagWebChanged(TagWeb tag)
+    {
+        TagWeb[] lampTags = [_drive, _stop, _emStop, _test, _ready, _clear, _home, _idle];
+
+        if (lampTags.Any(t => t.IsEqual(tag)))
+        {
+            _text = getText();
+            StateHasChanged();
+        }
+    }
+}
+
+<style>
+    .embedded-lamp-flow {
+        width: 10px;
+        height: 20px;
+        border-radius: 10%;
+        background-color: red;  /* erroneous */
+        margin-right: 10px;
+        display: inline-block;
+    }
+        .embedded-lamp-flow.Ready { background-color: green; }
+        .embedded-lamp-flow.Stop { background-color: orangered; }
+        .embedded-lamp-flow.EMStop { background-color: red; }
+        .embedded-lamp-flow.Drive { background-color: darkorange; }
+        .embedded-lamp-flow.Clear { background-color: white; }
+        .embedded-lamp-flow.Homing { background-color: gray; }
+        .embedded-lamp-flow.Idle { background-color: slateblue; }
+</style>

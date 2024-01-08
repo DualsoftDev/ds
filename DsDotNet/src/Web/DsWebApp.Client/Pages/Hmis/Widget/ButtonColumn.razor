@@ -1,0 +1,22 @@
+@* ButtonColumn *@
+
+@inherits DxGridCommandColumn
+@base.BuildRenderTree
+
+
+@code {
+    [Parameter] public string Text { get; set; }
+    [EditorRequired][Parameter] public Func<object, TagWeb> TagGetter { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        HeaderTemplate = context => @<span>@Caption</span>;
+        CellDisplayTemplate = context =>
+        {
+            object row = context.DataItem;
+            return@<Button Text="@(Text?? Caption)" TagWeb="TagGetter.Invoke(row)" />    ;
+        };
+    }
+}

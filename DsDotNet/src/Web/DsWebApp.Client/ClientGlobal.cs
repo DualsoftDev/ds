@@ -21,6 +21,7 @@ namespace DsWebApp.Client;
 public class ClientGlobal : ClientGlobalBase
 {
     public HMIPackage HmiPackage { get; set; }
+
     public Subject<TagWeb> TagChangedSubject = new Subject<TagWeb>();
 
     public ServerSettings ServerSettings { get; private set; }
@@ -42,7 +43,14 @@ public class ClientGlobal : ClientGlobalBase
     public async Task<ResultSerializable<RuntimeModelDto, ErrorMessage>> GetModelDtoAsync(HttpClient http)
     {
         if (_modelDto == null)
-            return await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
+        {
+            var result = await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
+            result.Iter(
+                ok => _modelDto = ok,
+                err => Console.Error.WriteLine($"Error: {err}"));
+
+            return result;
+        }
 
         return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(_modelDto);
     }

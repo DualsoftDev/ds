@@ -292,11 +292,11 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", Some flow, new HashSet<Func>())))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", Some flow, new HashSet<Func>())))
             
             headPageLamps
             |> Seq.iter (fun node ->
-                node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
+                node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
                 
                 
         [<Extension>]

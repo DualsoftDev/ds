@@ -1,0 +1,27 @@
+@* ButtonLampModeColumn *@
+
+@using System.Reactive.Subjects
+@*
+https://supportcenter.devexpress.com/ticket/details/t1135370/grid-for-blazor-how-to-create-reusable-dxgridcommandcolumn
+*@
+
+
+@inherits DxGridCommandColumn
+@base.BuildRenderTree
+
+
+@code {
+    [Parameter] public string Text { get; set; }
+    [Parameter] public Func<object, CsHMIPushLampMode> CompositeGetter { get; set; }
+
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        HeaderTemplate = context => @<span>@Caption</span>;
+        CellDisplayTemplate = context =>
+        {
+            object row = context.DataItem;
+            return@<ButtonLampMode Text="@(Text?? Caption)" Composite="CompositeGetter.Invoke(row)" />    ;
+        };
+    }
+}

@@ -17,8 +17,8 @@ type VertexManager with
         let h = v.H <==        (                      v.RT.Expr  <&&>      v.ET.Expr) //    H      -   o   o
 
         [
-           withExpressionComment $"{getFuncName()}(Ready)"        r
-           withExpressionComment $"{getFuncName()}(Going)"        g
-           withExpressionComment $"{getFuncName()}(Finish)"       f
-           withExpressionComment $"{getFuncName()}(Homming)"      h
+           withExpressionComment $"{getFuncName()}{v.Name}(Ready)"        r
+           withExpressionComment $"{getFuncName()}{v.Name}(Going)"        g
+           withExpressionComment $"{getFuncName()}{v.Name}(Finish)"       f
+           withExpressionComment $"{getFuncName()}{v.Name}(Homming)"      h
         ]

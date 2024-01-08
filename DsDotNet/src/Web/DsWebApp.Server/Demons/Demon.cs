@@ -19,7 +19,6 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 
 namespace DsWebApp.Server.Demons;
-
 public partial class Demon : BackgroundService
 {
     ServerGlobal _serverGlobal;

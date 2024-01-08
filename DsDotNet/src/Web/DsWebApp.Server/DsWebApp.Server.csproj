@@ -26,6 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Engine\Engine.CCTV\Engine.CCTV.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
@@ -33,4 +34,5 @@
 		<ProjectReference Include="..\DsWebApp.Client\DsWebApp.Client.csproj" />
 		<ProjectReference Include="..\DsWebApp.Shared\DsWebApp.Shared.csproj" />
 	</ItemGroup>
+
 </Project>

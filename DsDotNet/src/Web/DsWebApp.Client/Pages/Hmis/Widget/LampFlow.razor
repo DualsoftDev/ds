@@ -52,10 +52,10 @@
             return "Drive";
         else if ((bool)_ready.Value)
             return "Ready";
-        // else if ((bool)_idle.Value)
-        //     return "Idle";
+        else if ((bool)_idle.Value)
+            return "Idle";
         else
-            return "Not Yet!";
+            return "INTERNAL ERROR!";
     }
     string getClass()
     {

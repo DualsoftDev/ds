@@ -40,7 +40,7 @@ else
 @code {
     IGrid MyGrid { get; set; }
     bool _loading = true;
-    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
+    [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public HMIFlow[] Flows { get; set; }
 
 

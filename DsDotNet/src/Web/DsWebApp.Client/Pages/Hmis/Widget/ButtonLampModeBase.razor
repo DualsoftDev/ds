@@ -31,7 +31,7 @@
     public TagWeb Button { get; set; }
     public TagWeb Lamp { get; set; }
     public TagWeb Mode { get; set; }
-    [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
+    [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public string Text { get; set; }
 
     protected async override Task OnInitializedAsync()

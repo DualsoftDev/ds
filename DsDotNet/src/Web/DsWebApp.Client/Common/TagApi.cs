@@ -3,13 +3,13 @@ using Dual.Web.Blazor.ClientSide;
 
 using Microsoft.AspNetCore.Components;
 
-using SimpleResult = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
 
 namespace DsWebApp.Client.Common
 {
     public static class TagApiExtensions
     {
-        public static async Task<SimpleResult> PostTagAsync(this HttpClient http, TagWeb tag, AuthenticationStateProvider auth, NavigationManager navigationManager)
+        public static async Task<ResultSS> PostTagAsync(this HttpClient http, TagWeb tag, AuthenticationStateProvider auth, NavigationManager navigationManager)
         {
             if (await auth.SetAuthHeaderAsync(http))
             {
@@ -18,7 +18,7 @@ namespace DsWebApp.Client.Common
             else
             {
                 navigationManager.NavigateTo("/toplevel/login");
-                return SimpleResult.Err("Not Authenticated");
+                return ResultSS.Err("Not Authenticated");
             }
         }
     }

@@ -6,7 +6,7 @@
 
 @code {
     [Parameter] public string Text { get; set; }
-    [Parameter] public Func<object, TagWeb> TagGetter { get; set; }
+    [EditorRequired][Parameter] public Func<object, TagWeb> TagGetter { get; set; }
 
 
     protected override void OnInitialized()

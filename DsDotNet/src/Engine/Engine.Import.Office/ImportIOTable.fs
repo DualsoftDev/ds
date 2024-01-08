@@ -57,7 +57,8 @@ module ImportIOTable =
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()
 
-                if devName.ToUpper().Contains("SW") then ()
+                if outAdd.ToUpper().Contains("%MX80001") then ()
+               
 
                 dev.InAddress <-  changeValidAddress inAdd
                 dev.OutAddress <- changeValidAddress outAdd

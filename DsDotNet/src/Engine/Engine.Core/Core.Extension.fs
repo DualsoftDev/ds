@@ -171,12 +171,12 @@ module CoreExtensionModule =
                            |> Seq.collect(fun d-> 
                                   [  
                                      if d.ApiItem.RXs.any()
-                                     then yield d, "IN",d.InAddress
+                                     then yield d, "INPUT",d.InAddress
                                      if d.ApiItem.TXs.any()
-                                     then yield d, "OUT",d.OutAddress
+                                     then yield d, "OUTPUT",d.OutAddress
                                   ])
                            |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
-                           |> Seq.map(fun (d, inout, _) -> $"{d.QualifiedName}_{inout}") 
+                           |> Seq.map(fun (d, inout, _) -> $"{d.QualifiedName} <-{inout}") 
 
     let inValidHwSystemTag (x:DsSystem) = 
                     x.HWSystemDefs 
@@ -184,12 +184,12 @@ module CoreExtensionModule =
                                 [
                                     match h with
                                     | :? ButtonDef
-                                    | :? ConditionDef -> yield h, "IN", h.InAddress
-                                    | :? LampDef      -> yield h, "OUT", h.OutAddress
+                                    | :? ConditionDef -> yield h, "INPUT", h.InAddress
+                                    | :? LampDef      -> yield h, "OUTPUT", h.OutAddress
                                     | _  -> failwith $"inValidHwSystemTag error {h.Name}"
                                 ])
                            |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
-                           |> Seq.map(fun (h, inout, _) -> $"{h.Name}_{inout}") 
+                           |> Seq.map(fun (h, inout, _) -> $"{h.Name} <-{inout}") 
 [<Extension>]
 type SystemExt =
     [<Extension>]

@@ -8,7 +8,8 @@
         <DxButton Text="@_text"
                   RenderStyle="ButtonRenderStyle.Primary"
                   RenderStyleMode="ButtonRenderStyleMode.Outline"
-                  Click="onClick" />
+                  @onmousedown="@((args) => onMouseDown())"
+                  @onmouseup="@((args) => onMouseUp())" />
 
     </span>
 }
@@ -21,6 +22,7 @@
     [EditorRequired][Parameter] public TagWeb TagWeb { get; set; }
     [EditorRequired][CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public string Text { get; set; }
+    [Parameter] public bool IsPushButton { get; set; } = true;
     protected async override Task OnInitializedAsync()
     {
         // base initializer 를 후반에 배치. 위의 값들을 먼저 설정한 후에 수행
@@ -29,8 +31,18 @@
         _loading = false;
     }
 
-    async Task onClick()
+    async Task onMouseDown()
     {
+        // todo : mouse up 되기 전까지는, 다른 browser 창 등에 의해서 값이 변경되면, true 값을 계속 전송하도록 수정
         await TagManager.PostTagAsync(TagWeb, true);
     }
+    async Task onMouseUp()
+    {
+        Console.WriteLine("OnMouseUp.");
+        if (IsPushButton)
+        {
+            await TagManager.PostTagAsync(TagWeb, false);
+        }
+    }
+
 }

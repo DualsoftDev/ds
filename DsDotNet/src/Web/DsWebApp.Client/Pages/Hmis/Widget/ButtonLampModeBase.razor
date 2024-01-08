@@ -20,7 +20,8 @@
         <DxButton Text="@Text"
                   RenderStyleMode="ButtonRenderStyleMode.Outline"
                   IconCssClass="@((bool)Lamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
-                  Click="onClick" />
+                  @onmousedown="@((args) => onMouseDown())"
+                  @onmouseup="@((args) => onMouseUp())"/>
     </span>
 }
 
@@ -28,9 +29,10 @@
     bool _loading = true;
     IDisposable _subscription;
 
-    public TagWeb Button { get; set; }
     public TagWeb Lamp { get; set; }
     public TagWeb Mode { get; set; }
+    public TagWeb Button { get; set; }
+    [Parameter] public bool IsPushButton { get; set; } = true;
     [EditorRequired] [CascadingParameter(Name = "TagManager")] public CompHmiTagManager TagManager { get; set; }
     [Parameter] public string Text { get; set; }
 
@@ -79,14 +81,28 @@
     }
 
     void onError(string err) => JsDual.Alert(err);
-    async Task onClick()
-    {
-        Button.SetValue(true);
-        await Button.PostAsync(Http, onError);
-    }
 
     public void Dispose()
     {
         _subscription.Dispose();
     }
+
+
+
+    async Task onMouseDown()
+    {
+        // todo : mouse up 되기 전까지는, 다른 browser 창 등에 의해서 값이 변경되면, true 값을 계속 전송하도록 수정
+        Button.SetValue(true);
+        await Button.PostAsync(Http, onError);
+    }
+    async Task onMouseUp()
+    {
+        Console.WriteLine("OnMouseUp.");
+        if (IsPushButton)
+        {
+            Button.SetValue(false);
+            await Button.PostAsync(Http, onError);
+        }
+    }
+
 }

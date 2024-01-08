@@ -115,7 +115,7 @@ module ConvertHMI =
                 HomePushLamp             = getPushLamp       tm (FlowTag.home_btn  |>int) (FlowTag.home_lamp  |>int)
                                              
           
-                IdleLamp         = getLamp   tm (FlowTag.idle_mode    |>int)
+                IdleLampMode         = getLamp   tm (FlowTag.idle_mode    |>int)
 
                 Reals            = x.Graph.Vertices.OfType<Real>().Select(fun r->r.GetHMI()).ToArray()
             }

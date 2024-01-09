@@ -10,7 +10,6 @@ using Dual.Web.Server.Auth;
 using Microsoft.Data.Sqlite;
 using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
-using static DsStreamingModule;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 
@@ -175,6 +174,9 @@ app.MapHub<HmiTagHub>(HmiTagHub.HubPath)
     .RequireCors(_corsPolicyName);
 
 app.MapFallbackToFile("index.html");
+app.UseWebSockets(); // WebSocket 활성화
+
+
 
 logger.Info($"--- DsWebApp setup finished.  now running...");
 

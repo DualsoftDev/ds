@@ -108,7 +108,7 @@ var serverSettings =
         .Tee(ss => ss.Initialize());
 var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 services.AddSingleton(serverGlobals);
-services.AddDsAuth(serverSettings, conf, commonAppSettings.LoggerDBSettings.ConnectionString);
+services.AddDsAuth(serverGlobals, conf);
 
 await services.AddUnsafeServicesAsync(serverGlobals, logger);
 
@@ -215,12 +215,11 @@ public static class CustomServerExtension
     {
         public string Roles { get; set; }
     }
-    public static IServiceCollection AddDsAuth(this IServiceCollection services, ServerSettings serverSettings, ConfigurationManager conf, string connectionString)
+    public static IServiceCollection AddDsAuth(this IServiceCollection services, ServerGlobal serverGlobal, ConfigurationManager conf)
     {
         Func<string, UserAccount> userInfoExtractor = (string userName) =>
         {
-            using var conn = new SqliteConnection(connectionString);
-            conn.Open();
+            using var conn = serverGlobal.CreateDbConnection();
             var user = conn.QueryFirstOrDefault<User>("SELECT * FROM [user] WHERE [username] = @UserName;", new { UserName = userName });
             if (user is null)
                 return null;
@@ -235,7 +234,7 @@ public static class CustomServerExtension
         };
 
         UserAccountService svc = new(userInfoExtractor);
-        svc.JwtTokenValidityMinutes = serverSettings.JwtTokenValidityMinutes;
+        svc.JwtTokenValidityMinutes = serverGlobal.ServerSettings.JwtTokenValidityMinutes;
         services.AddAuth();
         services.AddSingleton((IUserAccountService)svc);
         return services;

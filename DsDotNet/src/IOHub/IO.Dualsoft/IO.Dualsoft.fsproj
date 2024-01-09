@@ -17,6 +17,7 @@
     </ItemGroup>
     <ItemGroup>
       <Compile Include="Program.Client.FSharp.fs" />
+      <Compile Include="AddressMapModule.fs" />
       <Compile Include="AddressInfoProviderDS.fs" />
     </ItemGroup>
 

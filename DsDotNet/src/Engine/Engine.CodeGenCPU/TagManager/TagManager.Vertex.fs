@@ -40,9 +40,9 @@ module TagManagerModule =
             et
         let originBit      = createTag "OG"   VertexTag.origin
         let pauseBit       = createTag "PA"   VertexTag.pause
-        let errorTxBit     = createTag "E1"   VertexTag.errorTx
-        let errorRxBit     = createTag "E2"   VertexTag.errorRx
-        let errorErrTRXBit = createTag "ErrTRX"   VertexTag.errorTRx
+        let errorTxBit     = createTag "ErrTime"   VertexTag.errorTx
+        let errorRxBit     = createTag "ErrSens"   VertexTag.errorRx
+        let errorErrTRXBit = createTag "ErrTRX"    VertexTag.errorTRx
         let readyBit       = createTag "R"    VertexTag.ready
         let goingBit       = createTag "G"    VertexTag.going
         let finishBit      = createTag "F"    VertexTag.finish

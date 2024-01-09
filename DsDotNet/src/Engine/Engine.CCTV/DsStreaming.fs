@@ -88,7 +88,6 @@ type DsStreaming() =
         |> Seq.iter(fun (ch,url) -> streamingBackFrame (_dsl,ch,url))
         streamingFrontFrame()
 
-
     member x.DsLayout = _dsl
     member x.GetImageInfos (url:string) = getImageInfos url
     member x.ImageStreaming(webSocket:WebSocket, channelName:string, viewmodeName, ipPort) =

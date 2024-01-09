@@ -26,7 +26,7 @@ ConfigurationManager conf = builder.Configuration;
 
 builder.Host.UseWindowsService();
 string asService = isWinService ? " as a window service" : "";
-Streaming.DsStream = new();
+//Streaming.DsStream = new DsStreaming();
 
 IServiceCollection services = builder.Services;
 ILog logger = services.AddLog4net("DsWebAppServerLogger");

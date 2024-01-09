@@ -78,10 +78,21 @@ else
 
 @code {
     bool _tagManagerLoading = true;
+    IDisposable _subscription;
     public CompHmiTagManager TagManager {get; set; }
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     await base.OnInitializedAsync();
-    // }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, onModelChanged);
+    }
+
+    void onModelChanged(RuntimeModelDto modelDto)
+    {
+        Console.WriteLine($"--------------------- modelDto={modelDto}");
+        JsDual.Alert("Model changed.");
+        NavigationManager.NavigateTo(ClientGlobal.CurrentLocation, forceLoad: true);
+    }
+
 }
 

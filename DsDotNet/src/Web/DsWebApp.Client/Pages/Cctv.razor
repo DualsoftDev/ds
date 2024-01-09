@@ -11,9 +11,9 @@
 }
 else
 {
-    <DxComboBox Data="@Mode"
-                @bind-Value="@Value"
-                @bind-Text="@Value"
+    <DxComboBox Data="@ModesArray"
+                @bind-Value="@Mode"
+                @bind-Text="@Mode"
                 CssClass="cw-480"
                 InputId="cbOverview" />
 
@@ -27,8 +27,8 @@ else
     [Parameter]
     public string Name { get; set; } = "";
 
-    string[] Mode;
-    string Value { get; set; }
+    string[] ModesArray;
+    string Mode { get; set; }
 
     public string imageSource { get; set; }
 
@@ -58,7 +58,7 @@ else
             {
                 var viewmodes = ok as string[];
                 Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
-                Mode = viewmodes;
+                ModesArray = viewmodes;
             },
         err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
         );
@@ -71,7 +71,7 @@ else
         ShowImage();
 
         //Value Default: normal
-        Value = Mode[0];        
+        Mode = ModesArray[0];        
     }
 
     protected override Task OnParametersSetAsync()

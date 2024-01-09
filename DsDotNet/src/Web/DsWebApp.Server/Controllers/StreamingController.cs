@@ -1,9 +1,10 @@
 
 
 using Dual.Common.Core;
+using Engine.Core;
 using Engine.Runtime;
 using System.Net.WebSockets;
-using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSS = Dual.Common.Core.ResultSerializable<string[], string>;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -20,12 +21,13 @@ public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger
     [HttpGet("screens")]
     public ResultSS GetScreens()
     {
-        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetServerChannels().JoinString(";"));
+        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetServerChannels().ToArray());
+
     }
     [HttpGet("viewmodes")]
     public ResultSS GetViewTypes()
     {
-        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetViewTypeList().JoinString(";"));
+        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetViewTypeList().ToArray());
     }
 
     [HttpGet("stream")]
@@ -56,6 +58,6 @@ public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger
             await _model.DsStreaming.ImageStreaming(webSocket, channel, viewmode, clientGuid);
         }
 
-        return ResultSS.Ok("WebSocket stream handling logic needs to be implemented here.");
+        return ResultSS.Ok([]);
     }
 }

@@ -31,6 +31,32 @@ else
     {
         await base.OnInitializedAsync();
         ShowImage();
+
+
+
+
+        //test cctv screens
+
+        var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
+        result.Iter(
+            ok => {
+                var screens = ok as string[];
+                Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+        //test cctv
+
+        result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/viewmodes");
+        result.Iter(
+            ok =>
+            {
+                var viewmodes = ok as string[];
+                Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+
     }
 
     protected override Task OnParametersSetAsync()

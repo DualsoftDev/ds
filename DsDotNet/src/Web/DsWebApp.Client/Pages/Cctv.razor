@@ -14,13 +14,13 @@ else
     <DxComboBox Data="@ModesArray"
                 @bind-Value="@Mode"
                 @bind-Text="@Mode"
-                CssClass="cw-480"
+                CssClass="cw-240"
                 InputId="cbOverview" />
-
-    <div id="stream-img" style="height:60vh">
-        <img src="@imageSource" style="height:100%; width:100%;"/>
-    </div>
     <CompFullScreenManager FullScreenElementId="stream-img"/>
+
+    <div id="stream-img" style="width:60vw">
+        <img src="@imageSource" style="height:auto; width:100%;"/>
+    </div>
 }
 
 @code {

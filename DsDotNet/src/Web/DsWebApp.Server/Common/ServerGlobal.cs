@@ -3,6 +3,9 @@ using Engine.Info;
 using Engine.Runtime;
 using IO.Core;
 
+using Microsoft.Data.Sqlite;
+
+using System.Data;
 using System.Reactive.Subjects;
 using static Engine.Core.RuntimeGeneratorModule;
 
@@ -82,4 +85,7 @@ public class ServerGlobal
         _ioHub?.Dispose();
         _ioHub = new IoHub(zmqSettingsJson);
     }
+
+    public IDbConnection CreateDbConnection() => new SqliteConnection(DsCommonAppSettings.LoggerDBSettings.ConnectionString).Tee(c => c.Open());
+
 }

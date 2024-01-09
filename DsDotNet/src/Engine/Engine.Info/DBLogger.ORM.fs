@@ -34,7 +34,7 @@ type QuerySet(startAt: DateTime option, endAt: DateTime option) =
     member val DsConfigJsonPath = "" with get, set
 
 [<AutoOpen>]
-module internal DBLoggerORM =
+module DBLoggerORM =
     // database table names
     module Tn =
         let Storage = "storage"
@@ -153,6 +153,13 @@ CREATE VIEW [{Vn.Log}] AS
         member val Storage = storage with get, set
         member val At = at with get, set
         member val Value: obj = value with get, set
+
+    type ORMVwLog(logId: int, storageId: int, tagKind: int, fqdn: string, tagKindName:string, at: DateTime, value: obj) =
+        inherit ORMLog(logId, storageId, at, value)
+        new() = ORMVwLog(-1, -1, -1, null, null, DateTime.MaxValue, null)
+        member val Fqdn = fqdn with get, set
+        member val TagKind = tagKind with get, set
+        member val TagKindName = tagKindName with get, set
 
     type Fqdn = string
     type StorageKey = TagKind * Fqdn

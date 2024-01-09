@@ -11,9 +11,9 @@
 }
 else *@
 @* { *@
-    <p id="stream-img" style="width:100%">
-        <img src="@imageSource"/>
-    </p>
+<p id="stream-img" style="width:100%">
+    <img src="@imageSource" />
+</p>
 @* } *@
 
 @code {
@@ -47,7 +47,8 @@ else *@
         var testViewMode1 = "";
         var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
         result.Iter(
-            ok => {
+            ok =>
+            {
                 var screens = ok as string[];
                 testScreen1 = screens.Last();
                 Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");

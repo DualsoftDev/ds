@@ -70,10 +70,9 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
 
                         let imgInfos = getImageInfos  chName 
                         let frontFrame = getFrontImage(item.ViewType, imgInfos) 
-                        let backSize = backFrame.Size
 
-                        let frontFrameResize = OpenCVUtils.ResizeImage(frontFrame, backSize.Width, backSize.Height)
-                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrameResize, new Point(0, 0), backFrame)
+                        let backFrameResize = OpenCVUtils.ResizeImage(backFrame, _StreamFrontSize.Width, _StreamFrontSize.Height)
+                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrame, new Point(0, 0), backFrameResize)
                         let compressedImage = OpenCVUtils.CompressImage mixFrame
                         _webStreamSet.[item.Key] <- compressedImage
                     do! Async.Sleep(1)
@@ -109,7 +108,9 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
                         if _webStreamSet.ContainsKey(viewKey) then
                             let byteArray = _webStreamSet.[viewKey]
                             do! webSocket.SendAsync(new ArraySegment<byte>(byteArray), WebSocketMessageType.Binary, true, CancellationToken.None) |> Async.AwaitTask
-                        do! Async.Sleep(_delayFps) 
+                        
+                        //do! Async.Sleep(100)  //test  초당 1장  10장
+                        do! Async.Sleep(_delayFps) //초당 60장 타겟
                 with
                 | ex -> 
                     Console.WriteLine($"Error in image streaming: {ex.Message}")

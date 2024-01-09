@@ -217,17 +217,16 @@ module CoreModule =
     type Real private (name:string, flow:Flow) =
         inherit Vertex([|name|], DuParentFlow flow)
 
-        
         member val Graph = DsGraph()
-        
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         
         member _.Flow = flow
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-        //member x.Finished:bool = name = "RET"  //parser 적용전까지는 임시로 사용
         member val Finished:bool = false with get, set
+        //member val RealData:byte[] = [||] with get, set
+        member val RealData:byte = 0uy with get, set //array타입으로 향후 변경
 
     and RealOtherFlow private (names:Fqdn, target:Real, parent)  =
         inherit Indirect(names, parent)

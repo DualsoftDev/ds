@@ -142,6 +142,7 @@ module TagKindList =
     |counter                   = 11023
     |timerOnDelay              = 11024
     |goingRealy                = 11025
+    |realData                  = 11026
 
 
     /// 12000 ~ 12999

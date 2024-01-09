@@ -28,9 +28,14 @@ type VertexMReal with
                   (v.H.Expr <&&> !!v.OG.Expr) 
         let rst = v._off.Expr
 
-        (set, rst) --| (v.RO, getFuncName())
+        (set, rst) --| (v.RO, getFuncName())   
+        //test ahn 인과 시작조건으로 변경
+    member v.R4_RealDataMove(): CommentedStatement  =
+        let set = v.RD.ToExpression() 
+        (set) --* (v.RD, getFuncName())
 
 type VertexManager with
     member v.R1_RealInitialStart(): CommentedStatement  = (v :?> VertexMReal).R1_RealInitialStart()
     member v.R2_RealJobComplete() : CommentedStatement seq = (v :?> VertexMReal).R2_RealJobComplete()
     member v.R3_RealStartPoint()  : CommentedStatement  = (v :?> VertexMReal).R3_RealStartPoint()
+    member v.R4_RealDataMove()  : CommentedStatement  = (v :?> VertexMReal).R4_RealDataMove()

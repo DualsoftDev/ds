@@ -143,12 +143,20 @@ module TagManagerModule =
 
     and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
-        let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
+        let real = v:?> Real
+        let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag name = this.CreateTag name
 
         let relayGoingBit     = createTag "GG" VertexTag.goingRealy
         let relayRealBit      = createTag "RR" VertexTag.relayReal
         let realOriginAction  = createTag "RO" VertexTag.realOriginAction
+        let realData  = 
+            let vertexTag = VertexTag.realData |> int
+            let name = $"{v.QualifiedName}_RD"
+            createPlanVar  s name DuUINT8 true v vertexTag sys  
+            
 
         member x.OriginInfo
             with get() = originInfo
@@ -160,6 +168,8 @@ module TagManagerModule =
         member _.RR         = relayRealBit
         ///Real Going Relay
         member _.GG         = relayGoingBit
+        ///Real Data
+        member _.RD         = realData
      
 
 

@@ -70,10 +70,9 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
 
                         let imgInfos = getImageInfos  chName 
                         let frontFrame = getFrontImage(item.ViewType, imgInfos) 
-                        let backSize = backFrame.Size
 
-                        let frontFrameResize = OpenCVUtils.ResizeImage(frontFrame, backSize.Width, backSize.Height)
-                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrameResize, new Point(0, 0), backFrame)
+                        let backFrameResize = OpenCVUtils.ResizeImage(backFrame, _StreamFrontSize.Width, _StreamFrontSize.Height)
+                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrame, new Point(0, 0), backFrameResize)
                         let compressedImage = OpenCVUtils.CompressImage mixFrame
                         _webStreamSet.[item.Key] <- compressedImage
                     do! Async.Sleep(1)

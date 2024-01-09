@@ -7,6 +7,7 @@ using Engine.Runtime;
 using System.Net.WebSockets;
 using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
 using ResultSArray = Dual.Common.Core.ResultSerializable<string[], string>;
+using DevExpress.Pdf.Native.BouncyCastle.Asn1;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -23,17 +24,25 @@ public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger
     [HttpGet("screens")]
     public ResultSArray GetScreens()
     {
-        return ResultSArray.Ok(_model.DsStreaming.DsLayout.GetServerChannels().ToArray());
+        if (_model == null)
+            return ResultSArray.Err("RuntimeModel is not uploaded");
 
+        return ResultSArray.Ok(_model.DsStreaming.DsLayout.GetServerChannels().ToArray());
     }
     [HttpGet("viewmodes")]
     public ResultSArray GetViewTypes()
     {
+        if (_model == null)
+            return ResultSArray.Err("RuntimeModel is not uploaded");
+
         return ResultSArray.Ok(_model.DsStreaming.DsLayout.GetViewTypeList().ToArray());
     }
     [HttpGet("streamstart")]
     public async Task<ResultSS> GetStreamAsync(string clientGuid, string channel, string viewmode)
     {
+        if (_model == null)
+            return ResultSS.Err("RuntimeModel is not uploaded");
+
         if (HttpContext.WebSockets.IsWebSocketRequest)
         {
             var clientKey = $"{clientGuid};{channel}";

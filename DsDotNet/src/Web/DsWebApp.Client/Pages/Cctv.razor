@@ -59,14 +59,11 @@ else
         await base.OnInitializedAsync();
 
         //test cctv screens
-        var testScreen1 = "";
-        var testViewMode1 = "";
         var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
         result.Iter(
             ok =>
             {
                 var screens = ok as string[];
-                testScreen1 = screens[1]; //test
                 Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");
                 ScreensArray = screens;
             },
@@ -78,7 +75,6 @@ else
             ok =>
             {
                 var viewmodes = ok as string[];
-                testViewMode1 = viewmodes.First();
                 Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
                 ModesArray = viewmodes;
             },

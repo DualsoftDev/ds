@@ -93,7 +93,7 @@
         container.className = "unity-mobile";
         canvas.className = "unity-mobile";
 
-        // To lower canvas resolution on mobile devices to gain some
+        // To lower canvas resolution on mobile devices to gain someFs
         // performance, uncomment the following line:
         // config.devicePixelRatio = 1;
 
@@ -152,4 +152,8 @@
             background: transparent;
             z-index: 10;
         }
+
+    :fullscreen, ::backdrop {
+        background-color: rgba(255,255,255,0);
+    }
     </style>

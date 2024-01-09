@@ -2,6 +2,7 @@ using Dual.Common.Core;
 
 using Engine.Core;
 using Engine.Info;
+using static Engine.Info.DBLoggerORM;
 using Engine.Runtime;
 
 using Microsoft.AspNetCore.Authorization;
@@ -38,9 +39,16 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
     // api/info/q
     [HttpGet("q")]
-    public ResultSerializable<InfoQueryResult, string> GetInfoQuery([FromQuery] string Fqdn, [FromQuery] DateTime Start, [FromQuery] DateTime End)
+    public async Task<ResultSerializable<InfoQueryResult, string>> GetInfoQuery([FromQuery] string Fqdn, [FromQuery] DateTime Start, [FromQuery] DateTime End)
     {
+        using var conn = global.CreateDbConnection();
+        ORMVwLog[] vwLogs =
+            (await conn.QueryAsync<ORMVwLog>(
+                $"SELECT * FROM [{Vn.Log}] WHERE [fqdn] = @Fqdn AND [at] BETWEEN @Start AND @End;",
+                new { Fqdn, Start, End })).ToArray();
+
         // todo: 검색 결과 생성
+
         return ResultSerializable<InfoQueryResult, string>.Ok(new InfoQueryResult());
         //return ResultSerializable<InfoQueryResult, string>.Err("Not implemented");
     }

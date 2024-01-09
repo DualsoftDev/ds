@@ -2,7 +2,6 @@ using Microsoft.Extensions.Hosting.WindowsServices;
 
 using Dual.Web.Blazor.ServerSide;
 using DsWebApp.Server.Demons;
-using DsWebApp.Server.Stream;
 using Dual.Common.Core.FS;      // for F# common logger setting
 using Engine.Core;
 using Engine.Info;
@@ -25,7 +24,6 @@ ConfigurationManager conf = builder.Configuration;
 
 builder.Host.UseWindowsService();
 string asService = isWinService ? " as a window service" : "";
-//Streaming.DsStream = new DsStreaming();
 
 IServiceCollection services = builder.Services;
 ILog logger = services.AddLog4net("DsWebAppServerLogger");

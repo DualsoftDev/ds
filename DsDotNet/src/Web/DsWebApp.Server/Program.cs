@@ -2,6 +2,7 @@ using Microsoft.Extensions.Hosting.WindowsServices;
 
 using Dual.Web.Blazor.ServerSide;
 using DsWebApp.Server.Demons;
+using DsWebApp.Server.Stream;
 using Dual.Common.Core.FS;      // for F# common logger setting
 using Engine.Core;
 using Engine.Info;
@@ -9,10 +10,10 @@ using Dual.Web.Server.Auth;
 using Microsoft.Data.Sqlite;
 using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
-using System.Net.WebSockets;
 using static DsStreamingModule;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
+
 PresetAppSettings(isWinService);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions()
@@ -25,7 +26,7 @@ ConfigurationManager conf = builder.Configuration;
 
 builder.Host.UseWindowsService();
 string asService = isWinService ? " as a window service" : "";
-
+//Streaming.DsStream = new DsStreaming();
 
 IServiceCollection services = builder.Services;
 ILog logger = services.AddLog4net("DsWebAppServerLogger");
@@ -174,9 +175,6 @@ app.MapHub<HmiTagHub>(HmiTagHub.HubPath)
     .RequireCors(_corsPolicyName);
 
 app.MapFallbackToFile("index.html");
-app.UseWebSockets(); // WebSocket 활성화
-
-
 
 logger.Info($"--- DsWebApp setup finished.  now running...");
 

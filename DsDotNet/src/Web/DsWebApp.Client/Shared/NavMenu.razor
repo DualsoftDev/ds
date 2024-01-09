@@ -42,7 +42,7 @@
             </DxTreeViewNode>
 
             <DxTreeViewNode Text="CCTV">
-                <Nodes >
+                <Nodes>
                     <DxTreeViewNode AllowSelection NavigateUrl="Cctv/1" Text="1" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
                     <DxTreeViewNode AllowSelection NavigateUrl="Cctv/2" Text="2" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
                     <DxTreeViewNode AllowSelection NavigateUrl="Cctv/3" Text="3" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
@@ -56,8 +56,15 @@
     </DxTreeView>
 </div>
 
-@code {
+ @code {
     const string rootNodeCssClass = "root-item";
     [Parameter] public string StateCssClass { get; set; }
     async Task onClickSwaggerUI() => await JsDual.OpenNewWindow("swagger");
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+    }
 }

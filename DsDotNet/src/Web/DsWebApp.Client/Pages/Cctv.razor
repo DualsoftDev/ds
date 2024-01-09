@@ -1,0 +1,41 @@
+﻿@page "/cctv/{Name}"
+@using DevExpress.Drawing.Internal
+
+<h3>CCTV</h3>
+
+<DxTextBox @bind-Text=@Name Enabled=false @onchange="ShowImage"></DxTextBox>
+
+@if (imageSource is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p id="stream-img" style="width:100%">
+        <img src="@imageSource" />
+    </p>
+}
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    public string imageSource { get; set; }
+
+    private void ShowImage()
+    {
+        imageSource = $"images/testCCTVImage/{Name}.png";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        ShowImage();
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        ShowImage();
+        return base.OnParametersSetAsync();
+    }
+}

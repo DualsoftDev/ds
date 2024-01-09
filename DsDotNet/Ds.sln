@@ -151,11 +151,12 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.CCTV", "src\Engine\E
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.TestSimulator", "src\UnitTest\Engine.TestSimulator\Engine.TestSimulator.csproj", "{7F025987-B3B7-4FAA-A74D-1B2991FC1155}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CctvDxBlazorApplication.Server", "CctvDxBlazorApplication\CctvDxBlazorApplication.Server\CctvDxBlazorApplication.Server.csproj", "{88888A6E-42B1-4AFF-9413-E410D4AFE1A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CctvDxBlazorApplication.Server", "CctvDxBlazorApplication\CctvDxBlazorApplication.Server\CctvDxBlazorApplication.Server.csproj", "{88888A6E-42B1-4AFF-9413-E410D4AFE1A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CctvDxBlazorApplication.Client", "CctvDxBlazorApplication\CctvDxBlazorApplication.Client\CctvDxBlazorApplication.Client.csproj", "{30C72447-94CC-4010-950F-415EE36908C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CctvDxBlazorApplication.Client", "CctvDxBlazorApplication\CctvDxBlazorApplication.Client\CctvDxBlazorApplication.Client.csproj", "{30C72447-94CC-4010-950F-415EE36908C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CctvDxBlazorApplication.Shared", "CctvDxBlazorApplication\CctvDxBlazorApplication.Shared\CctvDxBlazorApplication.Shared.csproj", "{5999EF69-E757-4824-B360-B75696244A0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CctvDxBlazorApplication.Shared", "CctvDxBlazorApplication\CctvDxBlazorApplication.Shared\CctvDxBlazorApplication.Shared.csproj", "{5999EF69-E757-4824-B360-B75696244A0B}"
+EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Streaming", "src\Engine\Engine.Streaming\Engine.Streaming.fsproj", "{168542ED-6D3E-4A09-8DEF-2AC962D5EA72}"
 EndProject
 Global

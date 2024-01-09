@@ -60,6 +60,7 @@
 
         var clientWebSocket = new ClientWebSocket();
         var clientGuid = this.GetHashCode().ToString();
+        //<<CCTV> localhost:8889 config에서 가져오기로 수정
         var uri = new Uri($"wss://localhost:8889/api/streaming/streamstart?clientGuid={clientGuid}&channel={testScreen1}&viewmode={testViewMode1}");
 
         try

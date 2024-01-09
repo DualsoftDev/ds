@@ -1,10 +1,12 @@
 
 
 using Dual.Common.Core;
+using Emgu.CV.Ocl;
 using Engine.Core;
 using Engine.Runtime;
 using System.Net.WebSockets;
-using ResultSS = Dual.Common.Core.ResultSerializable<string[], string>;
+using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSArray = Dual.Common.Core.ResultSerializable<string[], string>;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -19,45 +21,38 @@ public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger
     RuntimeModel _model => global.RuntimeModel;
     Dictionary<string, WebSocket> _dicWebSocket = new Dictionary<string, WebSocket>();
     [HttpGet("screens")]
-    public ResultSS GetScreens()
+    public ResultSArray GetScreens()
     {
-        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetServerChannels().ToArray());
+        return ResultSArray.Ok(_model.DsStreaming.DsLayout.GetServerChannels().ToArray());
 
     }
     [HttpGet("viewmodes")]
-    public ResultSS GetViewTypes()
+    public ResultSArray GetViewTypes()
     {
-        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetViewTypeList().ToArray());
+        return ResultSArray.Ok(_model.DsStreaming.DsLayout.GetViewTypeList().ToArray());
     }
-
-    [HttpGet("stream")]
-    public async Task<ResultSS> GetStreamAsync([FromServices] WebSocketManager webSocketManager, string clientGuid, string channel, string viewmode)
+    [HttpGet("streamstart")]
+    public async Task<ResultSS> GetStreamAsync(string clientGuid, string channel, string viewmode)
     {
-        if (webSocketManager.IsWebSocketRequest)
+        if (HttpContext.WebSockets.IsWebSocketRequest)
         {
             var clientKey = $"{clientGuid};{channel}";
-
-            if (_dicWebSocket.ContainsKey(clientKey))
-            {
-                var existingWebSocket = _dicWebSocket[clientKey];
-                await existingWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Reconnecting", CancellationToken.None);
-                _dicWebSocket.Remove(clientKey);
-            }
-
             var webSocket = _dicWebSocket.ContainsKey(clientKey) ? _dicWebSocket[clientKey] : null;
 
             if (webSocket != null && webSocket.State == WebSocketState.Open)
             {
-                Console.WriteLine("Closing previous WebSocket...");
+                Console.WriteLine("Abort previous WebSocket...");
                 webSocket.Abort();
+                _dicWebSocket.Remove(clientKey);
             }
 
-            webSocket = await webSocketManager.AcceptWebSocketAsync();
+            webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
             _dicWebSocket[clientKey] = webSocket;
 
             await _model.DsStreaming.ImageStreaming(webSocket, channel, viewmode, clientGuid);
         }
 
-        return ResultSS.Ok([]);
+        return ResultSS.Ok("streamstart ok");
     }
+    
 }

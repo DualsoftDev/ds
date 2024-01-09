@@ -109,7 +109,8 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
                         if _webStreamSet.ContainsKey(viewKey) then
                             let byteArray = _webStreamSet.[viewKey]
                             do! webSocket.SendAsync(new ArraySegment<byte>(byteArray), WebSocketMessageType.Binary, true, CancellationToken.None) |> Async.AwaitTask
-                        do! Async.Sleep(_delayFps) 
+                        
+                        do! Async.Sleep(5000) 
                 with
                 | ex -> 
                     Console.WriteLine($"Error in image streaming: {ex.Message}")

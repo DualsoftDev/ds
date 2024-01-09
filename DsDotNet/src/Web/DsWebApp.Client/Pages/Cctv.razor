@@ -1,20 +1,20 @@
 ﻿@page "/cctv/{Name}"
 @using DevExpress.Drawing.Internal
+@using System.Net.WebSockets
 
 <h3>CCTV</h3>
 
 <DxTextBox @bind-Text=@Name Enabled=false @onchange="ShowImage"></DxTextBox>
-
-@if (imageSource is null)
+@* @if (imageSource is null)
 {
     <p><em>Loading...</em></p>
 }
-else
-{
+else *@
+@* { *@
     <p id="stream-img" style="width:100%">
-        <img src="@imageSource" />
+        <img src="@imageSource"/>
     </p>
-}
+@* } *@
 
 @code {
     [Parameter]
@@ -27,41 +27,102 @@ else
         imageSource = $"images/testCCTVImage/{Name}.png";
     }
 
+    private async Task ShowImageData(byte[] imgData)
+    {
+        // 이미지 데이터를 Base64 문자열로 변환하여 imageSource에 할당
+        string base64String = Convert.ToBase64String(imgData).ToString();
+        Console.WriteLine(base64String);
+        imageSource = $"data:image/jpeg;base64,{base64String}";
+        Console.WriteLine(imageSource);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         ShowImage();
 
 
-
-
         //test cctv screens
-
+        var testScreen1 = "";
+        var testViewMode1 = "";
         var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
         result.Iter(
             ok => {
                 var screens = ok as string[];
+                testScreen1 = screens.Last();
                 Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");
             },
         err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
         );
         //test cctv
-
         result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/viewmodes");
         result.Iter(
             ok =>
             {
                 var viewmodes = ok as string[];
+                testViewMode1 = viewmodes.First();
                 Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
             },
         err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
         );
 
+        await ConnectToStreamStartEndpointAsync(this.GetHashCode().ToString(), testScreen1, testViewMode1);
+
+    }
+    // WebSocket 연결을 만드는 함수
+    private async Task ConnectToStreamStartEndpointAsync(string clientGuid, string channel, string viewmode)
+    {
+        var clientWebSocket = new ClientWebSocket();
+        var uri = new Uri($"wss://localhost:8889/api/streaming/streamstart?clientGuid={clientGuid}&channel={channel}&viewmode={viewmode}");
+
+        try
+        {
+            await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
+            if (clientWebSocket.State == WebSocketState.Open)
+            {
+                Console.WriteLine("WebSocket connection established.");
+                await ReceiveWebSocketData(clientWebSocket);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"WebSocket connection error: {ex.Message}");
+        }
+
+        async Task ReceiveWebSocketData(ClientWebSocket clientWebSocket)
+        {
+            try
+            {
+                var buffer = new byte[1024 * 256];
+                while (clientWebSocket.State == WebSocketState.Open)
+                {
+                    var result = await clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    Console.WriteLine($"WebSocket clientWebSocket.ReceiveAsync finished result.Count {result.Count}");
+                    if (result.MessageType == WebSocketMessageType.Binary)
+                    {
+                        var imageData = buffer.Take(result.Count).ToArray();
+                        Console.WriteLine($"buffer.Take(result.Count).ToArray() finished result.Count {result.Count}");
+                        await ShowImageData(imageData);
+                        Console.WriteLine($"ShowImageData finished result.Count {result.Count}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"WebSocket receive error: {ex.Message}");
+            }
+        }
     }
 
     protected override Task OnParametersSetAsync()
     {
         ShowImage();
         return base.OnParametersSetAsync();
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine(imageSource);
+        return base.OnAfterRenderAsync(firstRender);
     }
 }

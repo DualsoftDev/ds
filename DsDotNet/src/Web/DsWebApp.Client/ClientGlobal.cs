@@ -15,6 +15,7 @@ using System.Net.Http.Json;
 using System.Reactive.Subjects;
 
 using static Engine.Core.HmiPackageModule;
+using static System.Net.WebRequestMethods;
 
 namespace DsWebApp.Client;
 
@@ -54,15 +55,21 @@ public class ClientGlobal : ClientGlobalBase
 
         return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(_modelDto);
     }
-    public async Task<IDisposable> MonitorModelChangeAsync(NavigationManager navigationManager, Action<RuntimeModelDto> onModelChanged)
+    public async Task<IDisposable> MonitorModelChangeAsync(NavigationManager navigationManager, HttpClient http, Action<RuntimeModelDto> onModelChanged)
     {
         if (_hubConnectionModel == null)
             _hubConnectionModel = await navigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
 
         IDisposable subscription =
-            _hubConnectionModel.On<RuntimeModelDto>(SK.S2CNModelChanged, (RuntimeModelDto newModel) =>
+            _hubConnectionModel.On<RuntimeModelDto>(SK.S2CNModelChanged, async (RuntimeModelDto newModel) =>
             {
                 Console.WriteLine($"Model change detected on signalR: {newModel.SourceDsZipPath}, {newModel.IsCpuRunning}");
+
+                var result = await http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
+                result.Iter(
+                    ok => HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
+                    err => Console.Error.WriteLine(err));
+
                 _modelDto = newModel;
                 onModelChanged(newModel);   // e.g StateHasChanged();
             });

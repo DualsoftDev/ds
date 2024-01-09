@@ -40,9 +40,9 @@ module TagManagerModule =
             et
         let originBit      = createTag "OG"   VertexTag.origin
         let pauseBit       = createTag "PA"   VertexTag.pause
-        let errorTxBit     = createTag "E1"   VertexTag.errorTx
-        let errorRxBit     = createTag "E2"   VertexTag.errorRx
-        let errorErrTRXBit = createTag "ErrTRX"   VertexTag.errorTRx
+        let errorTxBit     = createTag "ErrTime"   VertexTag.errorTx
+        let errorRxBit     = createTag "ErrSens"   VertexTag.errorRx
+        let errorErrTRXBit = createTag "ErrTRX"    VertexTag.errorTRx
         let readyBit       = createTag "R"    VertexTag.ready
         let goingBit       = createTag "G"    VertexTag.going
         let finishBit      = createTag "F"    VertexTag.finish
@@ -143,12 +143,20 @@ module TagManagerModule =
 
     and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
-        let mutable originInfo:OriginInfo = defaultOriginInfo (v:?> Real)
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
+        let real = v:?> Real
+        let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag name = this.CreateTag name
 
         let relayGoingBit     = createTag "GG" VertexTag.goingRealy
         let relayRealBit      = createTag "RR" VertexTag.relayReal
         let realOriginAction  = createTag "RO" VertexTag.realOriginAction
+        let realData  = 
+            let vertexTag = VertexTag.realData |> int
+            let name = $"{v.QualifiedName}_RD"
+            createPlanVar  s name DuUINT8 true v vertexTag sys  
+            
 
         member x.OriginInfo
             with get() = originInfo
@@ -160,6 +168,8 @@ module TagManagerModule =
         member _.RR         = relayRealBit
         ///Real Going Relay
         member _.GG         = relayGoingBit
+        ///Real Data
+        member _.RD         = realData
      
 
 

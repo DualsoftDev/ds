@@ -1,0 +1,82 @@
+﻿@page "/cctv/{Name}"
+@using DevExpress.Drawing.Internal
+
+<h3>CCTV</h3>
+
+<DxTextBox @bind-Text=@Name Enabled=false @onchange="ShowImage"></DxTextBox>
+
+@if (imageSource is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <DxComboBox Data="@ModesArray"
+                @bind-Value="@Mode"
+                @bind-Text="@Mode"
+                CssClass="cw-240"
+                InputId="cbOverview" />
+    <CompFullScreenManager FullScreenElementId="stream-img"/>
+
+    <div id="stream-img" style="width:60vw">
+        <img src="@imageSource" style="height:auto; width:100%;"/>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    string[] ModesArray;
+    string Mode { get; set; }
+
+    public string imageSource { get; set; }
+
+    private void ShowImage()
+    {
+        imageSource = $"images/testCCTVImage/{Name}.png";
+    }
+
+    private async Task GetData()
+    {
+        //test cctv screens
+
+        var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
+        result.Iter(
+            ok =>
+            {
+                var screens = ok as string[];
+                Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+        //test cctv
+
+        result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/viewmodes");
+        result.Iter(
+            ok =>
+            {
+                var viewmodes = ok as string[];
+                Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
+                ModesArray = viewmodes;
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetData();
+        ShowImage();
+
+        //Value Default: normal
+        Mode = ModesArray[0];        
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        ShowImage();
+        return base.OnParametersSetAsync();
+    }
+}

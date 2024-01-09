@@ -40,7 +40,6 @@ else
         _selected = info;
 
         var result = await Http.GetResultSimpleAsync<InfoQueryResult>($"api/info/q?fqdn={_selected.Fqdn}&start={StartDate.ToStringCulture()}&end={EndDate.ToStringCulture()}");
-        // var result = await Http.GetResultSimpleAsync<InfoQueryResult>($"api/info/q?fqdn={_selected.Fqdn}&name2={"string=?hello/world!!!"}");
         result.Iter(
             ok => Console.WriteLine($"Ok: {ok}"),
             err => Console.Error.WriteLine($"Error: {err}"));

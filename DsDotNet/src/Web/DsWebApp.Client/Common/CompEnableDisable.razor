@@ -1,0 +1,17 @@
+﻿@* CompEnableDisable *@
+<div class="@CssClass">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    private string CssClass => Disabled ? "disabled" : string.Empty;
+}
+
+<style>
+    .disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+</style>

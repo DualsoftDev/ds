@@ -11,6 +11,7 @@ using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
+
 PresetAppSettings(isWinService);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions()
@@ -23,7 +24,6 @@ ConfigurationManager conf = builder.Configuration;
 
 builder.Host.UseWindowsService();
 string asService = isWinService ? " as a window service" : "";
-
 
 IServiceCollection services = builder.Services;
 ILog logger = services.AddLog4net("DsWebAppServerLogger");
@@ -108,7 +108,7 @@ var serverSettings =
         .Tee(ss => ss.Initialize());
 var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 services.AddSingleton(serverGlobals);
-services.AddDsAuth(serverSettings, conf, commonAppSettings.LoggerDBSettings.ConnectionString);
+services.AddDsAuth(serverGlobals, conf);
 
 await services.AddUnsafeServicesAsync(serverGlobals, logger);
 
@@ -172,6 +172,9 @@ app.MapHub<HmiTagHub>(HmiTagHub.HubPath)
     .RequireCors(_corsPolicyName);
 
 app.MapFallbackToFile("index.html");
+app.UseWebSockets(); // WebSocket 활성화
+
+
 
 logger.Info($"--- DsWebApp setup finished.  now running...");
 
@@ -212,12 +215,11 @@ public static class CustomServerExtension
     {
         public string Roles { get; set; }
     }
-    public static IServiceCollection AddDsAuth(this IServiceCollection services, ServerSettings serverSettings, ConfigurationManager conf, string connectionString)
+    public static IServiceCollection AddDsAuth(this IServiceCollection services, ServerGlobal serverGlobal, ConfigurationManager conf)
     {
         Func<string, UserAccount> userInfoExtractor = (string userName) =>
         {
-            using var conn = new SqliteConnection(connectionString);
-            conn.Open();
+            using var conn = serverGlobal.CreateDbConnection();
             var user = conn.QueryFirstOrDefault<User>("SELECT * FROM [user] WHERE [username] = @UserName;", new { UserName = userName });
             if (user is null)
                 return null;
@@ -232,7 +234,7 @@ public static class CustomServerExtension
         };
 
         UserAccountService svc = new(userInfoExtractor);
-        svc.JwtTokenValidityMinutes = serverSettings.JwtTokenValidityMinutes;
+        svc.JwtTokenValidityMinutes = serverGlobal.ServerSettings.JwtTokenValidityMinutes;
         services.AddAuth();
         services.AddSingleton((IUserAccountService)svc);
         return services;

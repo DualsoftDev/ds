@@ -89,7 +89,7 @@
         );
 
         var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
-        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, action);
+        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, action);
         _disposables.Add(subscription);
 
         await listFiles();

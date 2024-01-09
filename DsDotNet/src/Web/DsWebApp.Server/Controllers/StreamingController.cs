@@ -1,9 +1,13 @@
 
 
 using Dual.Common.Core;
+using Emgu.CV.Ocl;
+using Engine.Core;
 using Engine.Runtime;
-
+using System.Net.WebSockets;
 using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSArray = Dual.Common.Core.ResultSerializable<string[], string>;
+using DevExpress.Pdf.Native.BouncyCastle.Asn1;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -16,14 +20,48 @@ namespace DsWebApp.Server.Controllers;
 public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
 {
     RuntimeModel _model => global.RuntimeModel;
+    Dictionary<string, WebSocket> _dicWebSocket = new Dictionary<string, WebSocket>();
     [HttpGet("screens")]
-    public ResultSS GetScreens()
+    public ResultSArray GetScreens()
     {
-        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetServerChannels().JoinString(";"));
+        if (_model == null)
+            return ResultSArray.Err("RuntimeModel is not uploaded");
+
+        return ResultSArray.Ok(_model.DsStreaming.DsLayout.GetServerChannels().ToArray());
     }
     [HttpGet("viewmodes")]
-    public ResultSS GetViewTypes()
+    public ResultSArray GetViewTypes()
     {
-        return ResultSS.Ok(_model.DsStreaming.DsLayout.GetViewTypeList().JoinString(";"));
+        if (_model == null)
+            return ResultSArray.Err("RuntimeModel is not uploaded");
+
+        return ResultSArray.Ok(_model.DsStreaming.DsLayout.GetViewTypeList().ToArray());
     }
+    [HttpGet("streamstart")]
+    public async Task<ResultSS> GetStreamAsync(string clientGuid, string channel, string viewmode)
+    {
+        if (_model == null)
+            return ResultSS.Err("RuntimeModel is not uploaded");
+
+        if (HttpContext.WebSockets.IsWebSocketRequest)
+        {
+            var clientKey = $"{clientGuid};{channel}";
+            var webSocket = _dicWebSocket.ContainsKey(clientKey) ? _dicWebSocket[clientKey] : null;
+
+            if (webSocket != null && webSocket.State == WebSocketState.Open)
+            {
+                Console.WriteLine("Abort previous WebSocket...");
+                webSocket.Abort();
+                _dicWebSocket.Remove(clientKey);
+            }
+
+            webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+            _dicWebSocket[clientKey] = webSocket;
+
+            await _model.DsStreaming.ImageStreaming(webSocket, channel, viewmode, clientGuid);
+        }
+
+        return ResultSS.Ok("streamstart ok");
+    }
+    
 }

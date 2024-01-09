@@ -43,8 +43,7 @@ public class AuthController(IUserAccountService userAccountService, ServerGlobal
             var (u, p, a) = (loginRequest.UserName, loginRequest.Password, loginRequest.IsAdmin);
             var encrypted = p.IsNullOrEmpty() ? null : Dual.Common.Utils.Crypto.Encrypt(p, K.CryptKey);
 
-            using var conn = new SqliteConnection(global.DsCommonAppSettings.LoggerDBSettings.ConnectionString);
-            conn.Open();
+            using var conn = global.CreateDbConnection();
 
             var userTable = "user";
             var existing = conn.QueryFirstOrDefault<UserAuthInfo>($"SELECT [password], [isAdmin] FROM [{userTable}] WHERE [username] = @UserName;", new { UserName = u });

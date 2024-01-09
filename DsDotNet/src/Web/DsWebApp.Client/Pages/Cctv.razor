@@ -1,0 +1,164 @@
+﻿@page "/cctv/{Name}"
+@using System.Net.WebSockets
+@inject IJSRuntime JsRuntime
+
+<h3>CCTV</h3>
+
+
+   @*  <p id="stream-img" style="width:100%">
+        <img src="@imageSource" />
+    </p> *@
+    <DxComboBox Data="@ScreensArray"
+                @bind-Value="@Screen"
+                @bind-Text="@Screen"
+                CssClass="cw-240"
+                InputId="cbOverview" 
+                onchange=""/>
+
+    <DxComboBox Data="@ModesArray"
+                @bind-Value="@Mode"
+                @bind-Text="@Mode"
+                CssClass="cw-240"
+                InputId="cbOverview" 
+                onchange=""/>
+    <CompFullScreenManager FullScreenElementId="stream-img" />
+
+   
+
+    <div id="stream-img" style="height:60vw">
+        <img src="@imageSource" style="height:auto; width:100%;" />
+    </div>
+
+
+<script>
+    window.displayImage = (imageData) => {
+        // Blob 객체 생성
+        const blob = new Blob([imageData], { type: 'image/jpeg' });
+
+        // Blob URL 생성
+        const imgUrl = URL.createObjectURL(blob);
+
+        // 이미지 업데이트
+        const imgElement = document.getElementById('stream-img').firstElementChild;
+        imgElement.src = imgUrl;
+    };
+</script>
+
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    string[] ModesArray;
+    string[] ScreensArray;
+    string Mode { get; set; }
+    string Screen { get; set; }
+
+    public string imageSource { get; set; }
+
+
+    private async Task GetData()
+    {
+        await base.OnInitializedAsync();
+
+        //test cctv screens
+        var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
+        result.Iter(
+            ok =>
+            {
+                var screens = ok as string[];
+                Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");
+                ScreensArray = screens;
+                Screen = ScreensArray[0];
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+        //test cctv
+        result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/viewmodes");
+        result.Iter(
+            ok =>
+            {
+                var viewmodes = ok as string[];
+                Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
+                ModesArray = viewmodes;
+                Mode = ModesArray[0];
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetData();
+        //ShowImage();
+
+        //Value Default: normal
+
+
+
+        var clientWebSocket = new ClientWebSocket();
+        var clientGuid = this.GetHashCode().ToString();
+        //<<CCTV> localhost:8889 config에서 가져오기로 수정
+        var uri = new Uri($"wss://localhost:8889/api/streaming/streamstart?clientGuid={clientGuid}&channel={Screen}&viewmode={Mode}");
+
+        try
+        {
+            // WebSocket 연결
+            await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
+            if (clientWebSocket.State == WebSocketState.Open)
+            {
+                Console.WriteLine("WebSocket connection established.");
+
+                // 이미지 수신
+                await ReceiveWebSocketData(clientWebSocket);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"WebSocket connection error: {ex.Message}");
+        }
+
+        async Task ReceiveWebSocketData(ClientWebSocket clientWebSocket)
+        {
+            try
+            {
+                byte[] imageData = Array.Empty<byte>();
+                byte[] buffer = new byte[1024 * 128];
+                while (clientWebSocket.State == WebSocketState.Open)
+                {
+                    var result = await clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                    if (result.MessageType == WebSocketMessageType.Binary)
+                    {
+                        imageData = AppendBytes(imageData, buffer, result.Count);
+
+                        if (result.EndOfMessage)
+                        {
+                            // 이미지 업데이트
+                            await JsRuntime.InvokeVoidAsync("displayImage", imageData);
+                            Console.WriteLine($"이미지 업데이트 {imageData.Length / 1024} kbytes");
+
+                            // 잠시 대기
+                            await Task.Delay(10); //   대기
+
+                            imageData = Array.Empty<byte>(); // 이미지 처리 후 버퍼를 초기화합니다.
+                        }
+                    }
+                }
+                byte[] AppendBytes(byte[] original, byte[] buffer, int length)
+                {
+                    byte[] result = new byte[original.Length + length];
+                    Buffer.BlockCopy(original, 0, result, 0, original.Length);
+                    Buffer.BlockCopy(buffer, 0, result, original.Length, length);
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"WebSocket receive error: {ex.Message}");
+            }
+        }
+    }
+
+}

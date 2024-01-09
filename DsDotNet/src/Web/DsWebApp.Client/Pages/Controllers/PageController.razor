@@ -32,7 +32,9 @@ else
         <button class="btn btn-primary" @onclick="Reset" disabled="@(!_isRunning)">Reset</button>
 
         <br/>
-        <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs" @bind-Value="RuntimePackage" />
+        <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs"
+                          Disabled="@_isRunning"
+            @bind-Value="RuntimePackage" />
     }
 }
 
@@ -66,7 +68,7 @@ else
         _loading = false;
 
         var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
-        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, action);
+        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, action);
         _disposables.Add(subscription);
 
         StateHasChanged();

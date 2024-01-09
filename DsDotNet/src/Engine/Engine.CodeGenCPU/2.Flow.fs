@@ -59,8 +59,9 @@ type VertexManager with
                     if call.UsingTon
                             then call.V.TDON.DN.Expr   //On Delay
                             else call.INsFuns
-                  
-                (action <||> v._sim.Expr)
+                if call.Parent.GetCore() :? Flow
+                then action // flow 위에 있으면 시뮬레이션시에 직접 On/Off
+                else (action <||> v._sim.Expr)
             | _ ->
                 failwithlog "Error"
 

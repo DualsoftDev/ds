@@ -144,7 +144,7 @@ module ImportU =
                                 .Select(fun (api, tgt) ->
                                     match node.NodeType with
                                     | OPEN_EXSYS_CALL
-                                    | COPY_DEV -> TaskDev(api, "", "", tgt) :> TaskDev
+                                    | COPY_DEV -> TaskDev(api, "", "", tgt) 
                                     | _ -> failwithlog "Error MakeJobs")
 
 

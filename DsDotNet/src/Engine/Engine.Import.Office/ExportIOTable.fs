@@ -40,8 +40,8 @@ module ExportIOTable =
             [ TextXlsAddress
               dev.ApiName
               "bool"
-              getValidDevAddress (dev, true)
-              getValidDevAddress (dev, false)
+              getValidAddress(dev.InAddress,  dev.QualifiedName, dev.ApiItem.RXs.Count = 0, true)
+              getValidAddress(dev.OutAddress, dev.QualifiedName, dev.ApiItem.TXs.Count = 0, false)
               jobName
               funcs ]
 

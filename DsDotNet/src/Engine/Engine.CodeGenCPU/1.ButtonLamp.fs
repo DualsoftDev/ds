@@ -31,7 +31,7 @@ type DsSystem with
 
     member s.B3_HWModeLamp(): CommentedStatement list = [
 
-        for sysLamp in s.HWLamps.Filter(fun f-> not(f.IsGlobalSystemHw)) do
+        for sysLamp in s.HWLamps.Filter(fun f-> f.IsGlobalSystemHw) do
             let modeBit =
                 match sysLamp.LampType with
                 | DuAutoLamp      -> s._autoState.Expr   

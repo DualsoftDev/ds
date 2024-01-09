@@ -59,18 +59,11 @@ module ImportIOUtil =
 
             elif addr <> TextSkip && isSkip then
                  failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입 필요."
-                //| _, false  when addr =  TextSkip -> failwithf $"{name} 인터페이스 대상이 있으면 대쉬('-') 대신 실주소 기입 필요."
             else addr
         
-            //parsing을 위헤서 '-' -> '_' 변경 
-       // if newAddr = TextSkip then TextAddrEmpty else newAddr
         newAddr
 
-    let getValidDevAddress (TaskDev: TaskDev, bInput: bool) =
-        let isSkip = if bInput then TaskDev.ApiItem.RXs.Count = 0 else TaskDev.ApiItem.TXs.Count = 0
-        let address =  if bInput then TaskDev.InAddress else TaskDev.OutAddress
-        getValidAddress(address, TaskDev.QualifiedName, isSkip, bInput)
-
+  
     let private getValidBtnHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) =
         let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, true)
         let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, false)

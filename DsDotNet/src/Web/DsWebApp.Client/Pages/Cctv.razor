@@ -1,0 +1,68 @@
+﻿@page "/cctv/{Name}"
+@using DevExpress.Drawing.Internal
+
+<h3>CCTV</h3>
+
+<DxTextBox @bind-Text=@Name Enabled=false @onchange="ShowImage"></DxTextBox>
+
+@if (imageSource is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div id="stream-img" style="height:60vh">
+        <img src="@imageSource" style="height:100%; width:100%;"/>
+    </div>
+    <CompFullScreenManager FullScreenElementId="stream-img"/>
+}
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = "";
+
+    public string imageSource { get; set; }
+
+    private void ShowImage()
+    {
+        imageSource = $"images/testCCTVImage/{Name}.png";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        ShowImage();
+
+
+
+
+        //test cctv screens
+
+        var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
+        result.Iter(
+            ok => {
+                var screens = ok as string[];
+                Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+        //test cctv
+
+        result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/viewmodes");
+        result.Iter(
+            ok =>
+            {
+                var viewmodes = ok as string[];
+                Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+
+    }
+
+    protected override Task OnParametersSetAsync()
+    {
+        ShowImage();
+        return base.OnParametersSetAsync();
+    }
+}

@@ -33,4 +33,5 @@
 		<ProjectReference Include="..\DsWebApp.Client\DsWebApp.Client.csproj" />
 		<ProjectReference Include="..\DsWebApp.Shared\DsWebApp.Shared.csproj" />
 	</ItemGroup>
+
 </Project>

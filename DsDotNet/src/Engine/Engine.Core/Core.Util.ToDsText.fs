@@ -152,9 +152,7 @@ module internal ToDsTextModule =
                     if c.DeviceDefs.any() then
                         let ais = c.DeviceDefs.Select(printDev).JoinWith("; ") + ";"
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
-                    //if c.LinkDefs.any() then
-                    //    let ais = c.LinkDefs.Select(printLink).JoinWith("; ") + ";"
-                    //    yield $"{tab2}{c.Name.QuoteOnDemand()} = {ais}"
+
                     if c.Funcs.any() then
                         for funcString in printFuncions (c.Name.QuoteOnDemand()) c.Funcs do
                             yield funcString

@@ -54,6 +54,7 @@ module internal XgiSymbolsModule =
         then t.Address <- $"%%{t.Address}"
 
 
+
         if t.Address = TextAddrEmpty then
             let allocatorFunctions =
                 match prjParams.MemoryAllocatorSpec with
@@ -82,10 +83,12 @@ module internal XgiSymbolsModule =
             t.Address <- allocator ()
 
 
+
     let xgiSymbolToSymbolInfo (prjParams: XgiProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
+
             autoAdress t prjParams
             let device, dataType =
                 match tryParseXGITag t.Address with

@@ -97,10 +97,14 @@ module ImportUtilForLib =
                 tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
             Job(loadedName + "_" + apiName, tasks |> Seq.toList)
 
+        let jobForCall =
+            let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)
+            if tempJob.IsNull()
+            then mySys.Jobs.Add(job);job
+            else tempJob
 
-        mySys.Jobs.Add(job)
-
-        let call = Call.Create(job, parent)
+        let call = Call.Create(jobForCall, parent)
         updateCallLayout(call, node.Position)
 
         call
+         

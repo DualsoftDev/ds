@@ -3,7 +3,6 @@
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
 		<RootNamespace>Engine.Runtime</RootNamespace>
-		<OutputType>Exe</OutputType>
 		<LangVersion>8.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>
@@ -24,6 +23,7 @@
 	  <ProjectReference Include="..\Engine.Cpu\Engine.Cpu.fsproj" />
 	  <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
 	  <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
+	  <ProjectReference Include="..\Engine.Streaming\Engine.Streaming.fsproj" />
 	</ItemGroup>
 
 </Project>

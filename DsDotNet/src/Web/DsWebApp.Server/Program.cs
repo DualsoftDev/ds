@@ -11,6 +11,7 @@ using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
+
 PresetAppSettings(isWinService);
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(new WebApplicationOptions()
@@ -23,7 +24,6 @@ ConfigurationManager conf = builder.Configuration;
 
 builder.Host.UseWindowsService();
 string asService = isWinService ? " as a window service" : "";
-
 
 IServiceCollection services = builder.Services;
 ILog logger = services.AddLog4net("DsWebAppServerLogger");
@@ -172,6 +172,9 @@ app.MapHub<HmiTagHub>(HmiTagHub.HubPath)
     .RequireCors(_corsPolicyName);
 
 app.MapFallbackToFile("index.html");
+app.UseWebSockets(); // WebSocket 활성화
+
+
 
 logger.Info($"--- DsWebApp setup finished.  now running...");
 

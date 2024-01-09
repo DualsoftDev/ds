@@ -75,7 +75,8 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
 
         for v in ioSpec.Vendors do
             v.AddressResolver <-
-                let oh: ObjectHandle = Activator.CreateInstanceFrom(v.Dll, v.ClassName)
+                let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll) 
+                let oh: ObjectHandle = Activator.CreateInstanceFrom(dllPath, v.ClassName)
                 let obj: obj = oh.Unwrap()
                 obj :?> IAddressInfoProvider
 
@@ -96,8 +97,8 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
                         $"{v.Location}/{f.Name}"
                     else
                         f.Name
-
-                streamManagers.Add(key, streamManager)
+                //경로가 있어서 항상 소문자로 관리
+                streamManagers.Add(key.ToLower(), streamManager)
 
     let mutable terminated = false
 

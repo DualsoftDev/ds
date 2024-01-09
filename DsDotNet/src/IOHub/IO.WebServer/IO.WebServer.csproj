@@ -3,7 +3,8 @@
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
         <!--<Nullable>enable</Nullable>-->
-        <ImplicitUsings>enable</ImplicitUsings>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>cf8adc81-1e4b-417a-b988-0672152d0eb8</UserSecretsId>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
         <DockerfileContext>..\..\..</DockerfileContext>

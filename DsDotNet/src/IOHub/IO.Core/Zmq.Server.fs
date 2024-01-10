@@ -83,6 +83,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
             //showSamples v v.AddressResolver
 
             for f in v.Files do
+                f.Vendor <- v
                 let dir, key =
                     match v.Location with
                     | ""

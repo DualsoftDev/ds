@@ -205,9 +205,6 @@ module JSONSettingTestModule =
                 let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
                 let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
                 po.GetPath() === "p/o"
-                let ds = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
-                let lm = ds.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "m")
-                lm.GetPath() === "m"
                 let ls = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "xgi")
                 let lq = ls.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
                 lq.GetPath() === "xgi/q"

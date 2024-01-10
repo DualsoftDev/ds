@@ -18,12 +18,15 @@ module ZmqTestClient =
         //registerCancelKey cts client
         //clientKeyboardLoop client cts.Token
 
-        let vendor = client.GetMeta().Vendors.First(fun f->f.Location =  "xgi")
+        let iospec = client.GetMeta()
+        iospec|>regulate
+        let vendor = iospec.Vendors.First(fun f->f.Location =  "xgi")
+        
         let scanIO = IOClient.Xgi.ScanImpl.ScanIO($"{zmqHWInfo.HwIP}:{zmqHWInfo.HwPort}", vendor, client)
-
+        scanIO.DoScan()
         //while true do
         //    scanIO.DoScan()    
-        
+        Console.ReadKey()
         0  
 
 

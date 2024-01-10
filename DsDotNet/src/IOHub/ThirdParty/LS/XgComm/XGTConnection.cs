@@ -6,6 +6,10 @@ using System.Threading;
 using XGCommLib;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reactive.Subjects;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+
 namespace XGTComm
 {
 	/// <summary>
@@ -15,16 +19,17 @@ namespace XGTComm
     {
 
         private readonly int tryCnt = 1;
+        public static Subject<Tuple<char, int, bool>> BitChangeSubject = new();
 
-		/// <summary>
-		/// Tries to execute a given function with a specified number of attempts. It's a generic method used for retry logic.
-		/// </summary>
-		/// <param name="budget">The number of attempts to try the function.</param>
-		/// <param name="f">The function to try.</param>
-		/// <param name="arg">The argument to pass to the function.</param>
-		/// <param name="name">The name of the operation for logging purposes.</param>
-		/// <returns>True if the function succeeds within the given attempts, else throws an exception.</returns>
-		private bool tryFunction<T>(int budget, Func<T, int> f, T arg, string name)
+        /// <summary>
+        /// Tries to execute a given function with a specified number of attempts. It's a generic method used for retry logic.
+        /// </summary>
+        /// <param name="budget">The number of attempts to try the function.</param>
+        /// <param name="f">The function to try.</param>
+        /// <param name="arg">The argument to pass to the function.</param>
+        /// <param name="name">The name of the operation for logging purposes.</param>
+        /// <returns>True if the function succeeds within the given attempts, else throws an exception.</returns>
+        private bool tryFunction<T>(int budget, Func<T, int> f, T arg, string name)
         {
             if (budget == 0)
             {
@@ -180,14 +185,80 @@ namespace XGTComm
             else
                 return false;
         }
+        public IEnumerable<XGTDeviceLWord> ReadRandomDevice(IEnumerable<XGTDeviceLWord> xgtDevices)
+        {
+            if (xgtDevices.Count() > MAX_RANDOM_READ_POINTS)
+                throw new Exception($"MAX_RANDOM_READ_POINTS is {MAX_RANDOM_READ_POINTS} : current {xgtDevices.Count()}");
 
-		/// <summary>
-		/// Reads random devices' data into a buffer.
-		/// </summary>
-		/// <param name="buf">The buffer to store the read data.</param>
-		/// <param name="names">The names of the devices to be read.</param>
-		/// <returns>True if the read operation is successful, false otherwise.</returns>
-		private bool ReadRandomDevice(byte[] buf, IEnumerable<string> names)
+            xgtDevices.Select(s => CreateDevice(s.Device, s.MemType, s.Size, s.Offset)).ToList()
+                      .ForEach(f => CommObject.AddDeviceInfo(f));
+
+            byte[] buf = new byte[MAX_RANDOM_READ_POINTS * longSize];
+
+            ReadRandomDevice(buf, xgtDevices.Select(s => s.ToText()));
+            int i = 0;
+            foreach (var xgtLDWord in xgtDevices)
+            {
+                var newVal = BitConverter.ToUInt64(buf, i);
+                if (newVal != xgtLDWord.Value)
+                {
+                    CheckForBitChanges(xgtLDWord.Value, newVal, xgtLDWord);
+                    xgtLDWord.Value = newVal;
+                }
+
+                i += 8;
+            }
+
+            //Parallel.ForEach(xgtDevices, xgtLDWord =>
+            //{
+            //    int i = xgtLDWord.Offset * 8; // Offset을 이용하여 계산
+
+            //    var newVal = BitConverter.ToUInt64(buf, i);
+            //    if (newVal != xgtLDWord.Value)
+            //    {
+            //        CheckForBitChanges(xgtLDWord.Value, newVal, xgtLDWord);
+            //        xgtLDWord.Value = newVal;
+            //    }
+            //});
+            return xgtDevices;
+
+            void CheckForBitChanges(ulong oldValue, ulong newValue, XGTDeviceLWord device)
+            {
+                ulong changedBits = oldValue ^ newValue; // XOR 연산을 사용하여 변경된 비트 찾기
+
+                for (int byteIndex = 0; byteIndex < sizeof(ulong); byteIndex++)
+                {
+                    byte oldByte = (byte)(oldValue >> (byteIndex * 8));
+                    byte newByte = (byte)(newValue >> (byteIndex * 8));
+                    byte changedByte = (byte)(changedBits >> (byteIndex * 8));
+
+                    if (changedByte != 0)
+                    {
+                        for (int bitIndex = 0; bitIndex < 8; bitIndex++)
+                        {
+                            bool oldBit = (oldByte & (1 << bitIndex)) != 0;
+                            bool newBit = (newByte & (1 << bitIndex)) != 0;
+                            bool changedBit = (changedByte & (1 << bitIndex)) != 0;
+
+                            if (changedBit)
+                            {
+                                int absoluteBitIndex = byteIndex * 8 + bitIndex;
+                                BitChangeSubject.OnNext(Tuple.Create(device.Device, device.Offset * 64 + absoluteBitIndex, newBit));
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Reads random devices' data into a buffer.
+        /// </summary>
+        /// <param name="buf">The buffer to store the read data.</param>
+        /// <param name="names">The names of the devices to be read.</param>
+        /// <returns>True if the read operation is successful, false otherwise.</returns>
+        private bool ReadRandomDevice(byte[] buf, IEnumerable<string> names)
         {
             if (CommObject.ReadRandomDevice(buf) != 1)
             {
@@ -211,7 +282,7 @@ namespace XGTComm
         /// </summary>
         /// <param name="xgtDevices">An array of XGTDevice objects to read.</param>
         /// <returns>True if the read operation is successful, false otherwise.</returns>
-        public bool WriteRandomDevice(XGTDevice[] xgtDevices)
+		public bool WriteRandomDevice(XGTDevice[] xgtDevices)
         {
             if (xgtDevices.Count() > MAX_RANDOM_WRITE_POINTS)
                 throw new Exception($"MAX_RANDOM_WRITE_POINTS is {MAX_RANDOM_WRITE_POINTS} : current {xgtDevices.Count()}");

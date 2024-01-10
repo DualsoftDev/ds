@@ -17,7 +17,7 @@ else
         {
             <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
             <DsMultiBarChartEfficiency InfoParent="Selected" />
-            <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" />
+            @* <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" /> *@
         }
     </CompFqdnSelectorOverlay>
 }
@@ -36,6 +36,7 @@ else
 
     void onInfoSystemUpdated(InfoSystem infoSystem)
     {
+        Console.WriteLine($"onInfoSystemUpdated: {infoSystem}");
         if (_selected == null)
             StateHasChanged();
         else

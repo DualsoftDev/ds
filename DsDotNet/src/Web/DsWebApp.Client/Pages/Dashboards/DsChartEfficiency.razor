@@ -4,6 +4,9 @@
                        CategoryProperty="@nameof(EfficiencyCategoryItem.CategoryName)"
                        ValueProperty="@nameof(EfficiencyCategoryItem.Value)"
                        Fills="@EfficiencyPop.FillColors">
+        <ChildContent>
+            <RadzenSeriesDataLabels Visible="true" />
+        </ChildContent>
         <TitleTemplate>
             <div class="rz-donut-content">
                 @InnerTitle

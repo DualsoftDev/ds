@@ -176,6 +176,10 @@ module internal DBLoggerImpl =
                     use conn = createConnection ()
                     use! tr = conn.BeginTransactionAsync()
 
+                    if (logSet.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
+                        let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
+                        logSet.BuildIncremental newLogs
+
                     for l in newLogs do
                         let query =
                             $"""INSERT INTO [{Tn.Log}]

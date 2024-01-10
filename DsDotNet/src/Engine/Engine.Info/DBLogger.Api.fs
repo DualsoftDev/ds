@@ -17,8 +17,8 @@ module DBLoggerApi =
 
         x.DriveSpan <- DBLogger.Sum(fqdn, kindDrive)
         x.DriveAverage <- DBLogger.Average(fqdn, kindDrive)
-        x.ErrorSpan <- DBLogger.Sum(fqdn, kindDrive)
-        x.ErrorAverage <- DBLogger.Average(fqdn, kindDrive)
+        x.ErrorSpan <- DBLogger.Sum(fqdn, kindError)
+        x.ErrorAverage <- DBLogger.Average(fqdn, kindError)
         x.ErrorCount <- DBLogger.Count(fqdn, kindError)
         x.PauseCount <- DBLogger.Count(fqdn, kindPause)
         if (x.DriveSpan + x.ErrorSpan > 0.0) then

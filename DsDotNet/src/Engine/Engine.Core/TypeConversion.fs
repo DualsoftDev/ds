@@ -178,6 +178,7 @@ module TypeConversionModule =
     let (|Bool|_|) (x:obj) =
         match x with
         | :? bool as b -> Some b
+        | :? decimal as n -> Some (n <> 0M)
         | :? single as n -> Some (n <> 0.f)
         | :? double as n -> Some (n <> 0.0)
         | Int32 n -> Some (n <> 0)      (* int32 로 변환 가능한 모든 numeric type 포함 *)

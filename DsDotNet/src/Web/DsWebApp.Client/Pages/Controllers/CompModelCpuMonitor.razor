@@ -1,9 +1,6 @@
 ﻿@* ComModelCpuMonitor *@
-@implements IAsyncDisposable
 
 @code {
-    CompositeDisposable _disposables = new();
-    HubConnection _hubConnectionModel;
     ClientGlobal _cg;
     [Parameter] public bool MonitorHmi { get; set; }
     [Parameter] public EventCallback<string> OnModelChanged { get; set; }
@@ -42,38 +39,6 @@
             }
         };
         await _cg.InitializeAsync(Http, NavigationManager, LocalStorage);
-
-        if (_hubConnectionModel == null)
-            _hubConnectionModel = await NavigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
-
-        IDisposable subscription =
-            _hubConnectionModel.On<string>(SK.S2CNModelChanged, async modelDsZipPath =>
-            {
-                Console.WriteLine($"Model change detected on signalR: {modelDsZipPath}");
-                _cg.ModelDsZipPath = modelDsZipPath;
-                if (MonitorHmi)
-                {
-                    var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
-                    result.Iter(
-                        ok => _cg.HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
-                        err => Console.Error.WriteLine(err));
-                }
-            });
-        _disposables.Add(subscription);
-
-        subscription =
-            _hubConnectionModel.On<bool>(SK.S2CNCpuRunningStatusChanged, (bool isCpuRunning) =>
-            {
-                Console.WriteLine($"-------------- CPU RUNNING STATE CHANGED TO: {isCpuRunning}");
-                _cg.IsCpuRunning = isCpuRunning;
-                OnCpuRunningStatusChanged.InvokeAsync(isCpuRunning);
-            });
-        _disposables.Add(subscription);
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        _disposables.Dispose();
-        await _hubConnectionModel.DisposeAsync();
-    }
 }

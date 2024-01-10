@@ -81,48 +81,6 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
         _disposables.Add(subscription);
     }
 
-    //RuntimeModelDto _modelDto;
-    //HubConnection _hubConnectionModel;
-    //public async Task<ResultSerializable<RuntimeModelDto, ErrorMessage>> GetModelDtoAsync(HttpClient http)
-    //{
-    //    if (_modelDto == null)
-    //    {
-    //        var result = await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
-    //        result.Iter(
-    //            ok =>
-    //            {
-    //                _modelDto = ok;
-    //                IsCpuRunning = _modelDto.IsCpuRunning;
-    //            },
-    //            err => Console.Error.WriteLine($"Error: {err}"));
-
-    //        return result;
-    //    }
-
-    //    return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(_modelDto);
-    //}
-    //public async Task<IDisposable> MonitorModelChangeAsync(NavigationManager navigationManager, HttpClient http, Action<RuntimeModelDto> onModelChanged)
-    //{
-    //    if (_hubConnectionModel == null)
-    //        _hubConnectionModel = await navigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
-
-    //    IDisposable subscription =
-    //        _hubConnectionModel.On<string>(SK.S2CNModelChanged, async (modelDsZipPath) =>
-    //        {
-    //            ModelDsZipPath = modelDsZipPath;
-    //            Console.WriteLine($"Model change detected on signalR: {modelDsZipPath}, {newModel.IsCpuRunning}");
-
-    //            var result = await http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
-    //            result.Iter(
-    //                ok => HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
-    //                err => Console.Error.WriteLine(err));
-
-    //            _modelDto = newModel;
-    //            onModelChanged(newModel);   // e.g StateHasChanged();
-    //        });
-    //    return subscription;
-    //}
-
 
     static int _counter { get; set; } = 0;
 

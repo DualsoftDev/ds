@@ -6,7 +6,6 @@
 
 
 @attribute [Authorize(Roles = "Administrator,User")]
-@implements IDisposable
 
 <CompTitle Icon="oi oi-puzzle-piece" Title="제어" />
 
@@ -16,11 +15,6 @@
 }
 else
 {
-
-@*     <CompModelCpuMonitor
-        OnModelChanged="@(zipPath => StateHasChanged())"
-                         OnCpuRunningStatusChanged="@(isCpuRunning => StateHasChanged())" />
- *@
     @if (ClientGlobal.ModelDsZipPath == null)
     {
         <ul>No model on server.</ul>
@@ -49,13 +43,9 @@ else
 
 
 
-
-
 @code {
     bool _loading = true;
     bool _isRunning => ClientGlobal.IsCpuRunning;
-    RuntimeModelDto _modelDto;
-    CompositeDisposable _disposables = new();
 
     ServerSettings _cgs => ClientGlobal.ServerSettings;
     RuntimePackageCs RuntimePackage {
@@ -74,25 +64,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        // var result = await ClientGlobal.GetModelDtoAsync(Http);
-        // result.Iter(
-        //     ok =>
-        //     {
-        //         _modelDto = ok;
-        //         // _isRunning = _modelDto.IsCpuRunning;
-        //     },
-        //     err => Console.WriteLine($"Failed to get model. {err}")
-        // );
-
-
-        // var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
-        // IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, action);
-        // _disposables.Add(subscription);
-
-        StateHasChanged();
         _loading = false;
     }
-    public void Dispose() => _disposables.Dispose();
 
     async Task executeRestApi(string api, string defaultOkMessage)
     {

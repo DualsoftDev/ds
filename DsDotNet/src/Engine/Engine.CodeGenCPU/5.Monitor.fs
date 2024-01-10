@@ -68,6 +68,8 @@ type VertexManager with
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement list =
         let call= v.Vertex.GetPure() :?> Call
+        let real= call.Parent.GetCore() :?> Real
+        
         let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear_btn.Expr
         let tds = call.TargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
@@ -87,8 +89,8 @@ type VertexManager with
                 yield! (input  , onErr.Expr)   --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
                 yield! (!!input, offErr.Expr)  --^ (offRising, offSet, offTemp, "RXErrOpenOff")
 
-                yield (dop <&&> onRising.Expr  <&&> rxs.Select(fun f -> f.R).ToAnd() , rst<||>v._sim.Expr) ==| (onErr,   getFuncName())
-                yield (dop <&&> offRising.Expr <&&> rxs.Select(fun f -> f.F).ToAnd() , rst<||>v._sim.Expr) ==| (offErr,  getFuncName())
+                yield (dop <&&> real.V.G.Expr <&&> onRising.Expr  <&&> rxs.Select(fun f -> f.R).ToAnd() , rst<||>v._sim.Expr) ==| (onErr,   getFuncName())
+                yield (dop <&&> real.V.G.Expr <&&> offRising.Expr <&&> rxs.Select(fun f -> f.F).ToAnd() , rst<||>v._sim.Expr) ==| (offErr,  getFuncName())
 
             let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
 

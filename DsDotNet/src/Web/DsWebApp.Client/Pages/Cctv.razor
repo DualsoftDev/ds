@@ -4,45 +4,48 @@
 
 <h3>CCTV</h3>
 
-
-   @*  <p id="stream-img" style="width:100%">
+    @*  <p id="stream-img" style="width:100%">
         <img src="@imageSource" />
     </p> *@
     <DxComboBox Data="@ScreensArray"
                 @bind-Value="@Screen"
                 @bind-Text="@Screen"
                 CssClass="cw-240"
-                InputId="cbOverview" 
-                onchange=""/>
+                InputId="cbOverview"
+                onchange="OnNewValue" />
 
     <DxComboBox Data="@ModesArray"
                 @bind-Value="@Mode"
                 @bind-Text="@Mode"
                 CssClass="cw-240"
-                InputId="cbOverview" 
-                onchange=""/>
+                InputId="cbOverview"
+                onchange="OnNewValue" />
     <CompFullScreenManager FullScreenElementId="stream-img" />
 
-   
+
 
     <div id="stream-img" style="height:60vw">
         <img src="@imageSource" style="height:auto; width:100%;" />
     </div>
 
+    <script>
+        window.displayImage = (imageData) => {
+            // Blob 객체 생성
+            const blob = new Blob([imageData], { type: 'image/jpeg' });
 
-<script>
-    window.displayImage = (imageData) => {
-        // Blob 객체 생성
-        const blob = new Blob([imageData], { type: 'image/jpeg' });
+            // Blob URL 생성
+            const imgUrl = URL.createObjectURL(blob);
 
-        // Blob URL 생성
-        const imgUrl = URL.createObjectURL(blob);
+            // 이미지 업데이트
+            const imgElement = document.getElementById('stream-img').firstElementChild;
+            imageSource = imgUrl;
+            imgElement.src = imageSource;
+        };
+    </script>
 
-        // 이미지 업데이트
-        const imgElement = document.getElementById('stream-img').firstElementChild;
-        imgElement.src = imgUrl;
-    };
-</script>
+
+
+
 
 
 @code {
@@ -56,6 +59,7 @@
 
     public string imageSource { get; set; }
 
+    bool isLoading { get; set; } = true;
 
     private async Task GetData()
     {
@@ -87,17 +91,8 @@
         );
     }
 
-
-    protected override async Task OnInitializedAsync()
+    async Task onNewValue()
     {
-        await base.OnInitializedAsync();
-        await GetData();
-        //ShowImage();
-
-        //Value Default: normal
-
-
-
         var clientWebSocket = new ClientWebSocket();
         var clientGuid = this.GetHashCode().ToString();
         //<<CCTV> localhost:8889 config에서 가져오기로 수정
@@ -110,9 +105,9 @@
             if (clientWebSocket.State == WebSocketState.Open)
             {
                 Console.WriteLine("WebSocket connection established.");
-
                 // 이미지 수신
                 await ReceiveWebSocketData(clientWebSocket);
+               
             }
         }
         catch (Exception ex)
@@ -160,5 +155,18 @@
             }
         }
     }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await GetData();
+        //ShowImage();
+
+        //Value Default: normal
+    }
+
+
+
 
 }

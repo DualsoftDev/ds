@@ -11,6 +11,7 @@ using Dual.Web.Blazor.ServerSide;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
+using System.ComponentModel;
 using System.Net.Http.Json;
 using System.Reactive.Subjects;
 
@@ -19,7 +20,7 @@ using static System.Net.WebRequestMethods;
 
 namespace DsWebApp.Client;
 
-public class ClientGlobal : ClientGlobalBase
+public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
 {
     public HMIPackage HmiPackage { get; set; }
 
@@ -27,6 +28,9 @@ public class ClientGlobal : ClientGlobalBase
 
     public ServerSettings ServerSettings { get; private set; }
     public DsClientSettings DsClientSettings => (DsClientSettings)base.ClientSettings;
+    public string ModelDsZipPath { get; set; }
+    public bool IsCpuRunning { get; set; }
+    public event PropertyChangedEventHandler PropertyChanged;
 
     public async Task InitializeAsync(HttpClient http, ILocalStorageService localStorage)
     {

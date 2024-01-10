@@ -1,0 +1,59 @@
+﻿@* ComModelCpuMonitor *@
+@implements IAsyncDisposable
+
+@code {
+    CompositeDisposable _disposables = new();
+    HubConnection _hubConnectionModel;
+    ClientGlobal _cg;
+    [Parameter] public bool MonitorHmi { get; set; }
+    [Parameter] public EventCallback<string> OnModelChanged { get; set; }
+    [Parameter] public EventCallback<bool> OnCpuRunningStatusChanged { get; set; }
+    [Parameter] public EventCallback<HMIPackage> OnHmiPackageChanged { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _cg = ClientGlobal;
+        _cg.PropertyChanged += async (s, e) =>
+        {
+            if (e.PropertyName == nameof(_cg.ModelDsZipPath))
+                await OnModelChanged.InvokeAsync(_cg.ModelDsZipPath);
+            else if (e.PropertyName == nameof(_cg.HmiPackage))
+                await OnHmiPackageChanged.InvokeAsync(_cg.HmiPackage);
+            else if (e.PropertyName == nameof(_cg.IsCpuRunning))
+                await OnCpuRunningStatusChanged.InvokeAsync(_cg.IsCpuRunning);
+        };
+
+        if (_hubConnectionModel == null)
+            _hubConnectionModel = await NavigationManager.ToAbsoluteUri("/hub/model").StartHubAsync();
+
+        IDisposable subscription =
+            _hubConnectionModel.On<string>(SK.S2CNModelChanged, async modelDsZipPath =>
+            {
+                Console.WriteLine($"Model change detected on signalR: {modelDsZipPath}");
+                _cg.ModelDsZipPath = modelDsZipPath;
+                if (MonitorHmi)
+                {
+                    var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
+                    result.Iter(
+                        ok => _cg.HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
+                        err => Console.Error.WriteLine(err));
+                }
+            });
+        _disposables.Add(subscription);
+
+        subscription =
+            _hubConnectionModel.On<bool>(SK.S2CNCpuRunningStatusChanged, (bool isCpuRunning) =>
+            {
+                _cg.IsCpuRunning = isCpuRunning;
+                OnCpuRunningStatusChanged.InvokeAsync(isCpuRunning);
+            });
+        _disposables.Add(subscription);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _disposables.Dispose();
+        await _hubConnectionModel.DisposeAsync();
+    }
+}

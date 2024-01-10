@@ -112,23 +112,23 @@ module TagManagerModule =
 
         member _.GetVertexTag (vt:VertexTag) :IStorage =
             match vt with 
-            | VertexTag.startTag            -> startTagBit           :> IStorage
-            | VertexTag.resetTag            -> resetTagBit           :> IStorage
-            | VertexTag.endTag              -> endTagBit             :> IStorage
-            | VertexTag.ready               -> readyBit              :> IStorage
-            | VertexTag.going               -> goingBit              :> IStorage
-            | VertexTag.finish              -> finishBit             :> IStorage
-            | VertexTag.homing              -> homingBit             :> IStorage
-            | VertexTag.origin              -> originBit             :> IStorage
-            | VertexTag.pause               -> pauseBit              :> IStorage
-            | VertexTag.errorTx             -> errorTxBit            :> IStorage
-            | VertexTag.errorRx             -> errorRxBit            :> IStorage
-            | VertexTag.errorTRx            -> errorErrTRXBit        :> IStorage
+            | VertexTag.startTag            -> startTagBit         :> IStorage
+            | VertexTag.resetTag            -> resetTagBit         :> IStorage
+            | VertexTag.endTag              -> endTagBit           :> IStorage
+            | VertexTag.ready               -> readyBit            :> IStorage
+            | VertexTag.going               -> goingBit            :> IStorage
+            | VertexTag.finish              -> finishBit           :> IStorage
+            | VertexTag.homing              -> homingBit           :> IStorage
+            | VertexTag.origin              -> originBit           :> IStorage
+            | VertexTag.pause               -> pauseBit            :> IStorage
+            | VertexTag.errorTx             -> errorTxBit          :> IStorage
+            | VertexTag.errorRx             -> errorRxBit          :> IStorage
+            | VertexTag.errorTRx            -> errorErrTRXBit      :> IStorage
                                                                   
-            | VertexTag.forceStart            -> forceStartBit       :> IStorage
-            | VertexTag.forceReset            -> forceResetBit       :> IStorage
-            | VertexTag.forceOn               -> forceOnBit          :> IStorage
-            | VertexTag.forceOff              -> forceOffBit         :> IStorage
+            | VertexTag.forceStart          -> forceStartBit       :> IStorage
+            | VertexTag.forceReset          -> forceResetBit       :> IStorage
+            | VertexTag.forceOn             -> forceOnBit          :> IStorage
+            | VertexTag.forceOff            -> forceOffBit         :> IStorage
               
 
             | VertexTag.realOriginAction    -> (v.TagManager:?> VertexMReal).RO    :> IStorage

@@ -143,7 +143,16 @@ type TagKindExt =
             , int VertexTag.going
             , int VertexTag.finish
             , int VertexTag.homing)
-    
+
+
+    //[<Extension>]
+    //static member IsCallFlowEndTag(x:IStorage) =
+    //    let isCallFlow = 
+    //        match x.Target.Value with
+    //        | :? Call as c -> c.Parent.GetCore() :? Flow
+    //        | _ -> false 
+    //    x.TagKind = int VertexTag.endTag && isCallFlow
+
     [<Extension>]
     static member IsNeedSaveDBLog(x:TagDS) =
         match x with

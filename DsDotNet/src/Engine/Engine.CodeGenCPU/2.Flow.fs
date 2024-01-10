@@ -59,11 +59,15 @@ type VertexManager with
                     if call.UsingTon
                             then call.V.TDON.DN.Expr   //On Delay
                             else call.INsFuns
+                        // call이 flow 상에 있으면 시뮬레이션시에 직접 On/Off
                 if call.Parent.GetCore() :? Flow
-                then action // flow 위에 있으면 시뮬레이션시에 직접 On/Off
-                else (action <||> v._sim.Expr)
+                then action 
+                     <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
+                else failwithlog $"Error this call Parent is flow but real {call.QualifiedName}" 
             | _ ->
                 failwithlog "Error"
+             
+
 
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())

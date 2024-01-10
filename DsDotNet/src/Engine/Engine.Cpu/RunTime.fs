@@ -70,9 +70,10 @@ module RunTime =
 
             chTags.Iter(notifyPreExcute)  // 상태보고/물리Out 처리
                   
-            if exeStates.any() then exeStates.Iter(fun s->s.Do())
+            if exeStates.any() 
+            then exeStates.Iter(fun s->s.Do())
+          //       chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
 
-            chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
             chTags
 
 
@@ -118,7 +119,7 @@ module RunTime =
                     let chTags = scanOnce()
                     endStepByStatus <- chTags.isEmpty() 
                                     || chTags.Where(fun f->f.DsSystem = activeSys)
-                                             .Where(fun f->f.IsStatusTag()).any()
+                                             .Where(fun f-> f.IsStatusTag()).any()
             }
 
         
@@ -150,7 +151,7 @@ module RunTime =
 
         member x.Step() =
             doScanStop()
-            scanOnce() |> ignore
+            scanOnce() |> ignore 
 
         member x.StepByStatusAsync(activeSys:DsSystem) = 
             doScanStop()

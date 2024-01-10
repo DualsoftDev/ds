@@ -32,13 +32,14 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
 
     async Task<ResultSS> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
     {
+        await Task.Yield();
         try
         {
             var cpu = _model?.Cpu;
             if (cpu == null)
                 return ResultSS.Err("No Loaded Model");
 
-            await Console.Out.WriteLineAsync($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
+            Trace.WriteLine($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..

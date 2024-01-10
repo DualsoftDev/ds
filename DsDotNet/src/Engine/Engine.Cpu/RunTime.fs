@@ -3,6 +3,7 @@ namespace Engine.Cpu
 open Engine.Core
 open Dual.Common.Core.FS
 open System
+open System.Diagnostics
 open System.Linq
 open System.Collections.Generic
 open System.Threading.Tasks
@@ -42,7 +43,7 @@ module RunTime =
                     if hmiTags.ContainsKey stg.Name   
                     then 
                         let tagWeb = hmiTags[stg.Name]
-                        logDebug $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                        tracefn $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                         tagWeb.SetValue(stg.BoxedValue)
                         tagWebChangedFromCpuSubject.OnNext(tagWeb)
                 )
@@ -56,7 +57,7 @@ module RunTime =
 
         let subscription = 
             tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
-                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                    tracefn $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                     let cpuTag = tagStorages.[tagWeb.Name]
                     cpuTag.BoxedValue <-tagWeb.Value
             )

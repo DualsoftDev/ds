@@ -129,7 +129,7 @@ public partial class Demon : BackgroundService
                     try
                     {
                         if (n % 60 == 0)
-                            _logger.Debug($"{n / 60}: Background Service is working..");
+                            Console.WriteLine($"{n / 60}: Background Service is working..");
 
                         if (n % 3 == 0)
                             Task.Run(async () =>
@@ -142,8 +142,8 @@ public partial class Demon : BackgroundService
                                     var newtonJson = Newtonsoft.Json.JsonConvert.SerializeObject(infoSystem);
                                     await _hubContextInfo.Clients.All.SendAsync(SK.S2CNInfoChanged, newtonJson);
                                 }
-                                else
-                                    _logger.Debug("No InfoHub clients connected");
+                                else if (n % 30 == 0)
+                                    Console.WriteLine("No InfoHub clients connected");
                             }).FireAndForget();
 
                         //if (n % 2 == 0)

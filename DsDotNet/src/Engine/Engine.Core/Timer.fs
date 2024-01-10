@@ -74,7 +74,7 @@ module rec TimerModule =
         do
             ts.ResetStruct()
 
-            tracefn "Timer subscribing to tick event"
+            //tracefn "Timer subscribing to tick event"
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
 
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (timerStruct:>IStorage).DsSystem)

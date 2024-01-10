@@ -63,7 +63,7 @@ module ModelParser =
         ParseFromString2(text, options).TheSystem
 
     let Initialize () =
-        tracefn "Initializing"
+        tracefn "Initializing model parser"
 
         let loadSystemFromDsFile (param: DeviceLoadParameters) =
             let (dsFilePath, loadedName) = param.AbsoluteFilePath, param.LoadedName

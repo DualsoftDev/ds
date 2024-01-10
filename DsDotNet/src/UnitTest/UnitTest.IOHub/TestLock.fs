@@ -14,10 +14,10 @@ module TestLockModule =
     
     let lockedExe (locker:obj) f =
         if isNull(locker) then
-            Trace.WriteLine("Locked")
+            Debug.WriteLine("Locked")
             f()
         else
-            Trace.WriteLine("Unocked")
+            Debug.WriteLine("Unocked")
             lock locker f
 
     let testSizeof<'T> () = 
@@ -42,13 +42,13 @@ module TestLockModule =
 
         [<Test>]
         member x.LockedFunctionTest() =
-            let a = lockedExe x.Locker (fun () -> Trace.WriteLine("A"); 1)
-            let b = lockedExe null (fun () -> Trace.WriteLine("B"); true)
+            let a = lockedExe x.Locker (fun () -> Debug.WriteLine("A"); 1)
+            let b = lockedExe null (fun () -> Debug.WriteLine("B"); true)
             noop()
         [<Test>]
         member x.LockedActionTest() =
-            let a1 = lockedExe x.Locker (fun () -> Trace.WriteLine("A"))
-            Trace.WriteLine($"Unit Result={a1}")
+            let a1 = lockedExe x.Locker (fun () -> Debug.WriteLine("A"))
+            Debug.WriteLine($"Unit Result={a1}")
 
         [<Test>]
         member x.SizeOf() =

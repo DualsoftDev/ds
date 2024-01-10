@@ -196,7 +196,7 @@ partial class ElementsListener : dsBaseListener
         call.TXs.AddRange(txs);
         call.RXs.AddRange(rxs);
         call.Resets.AddRange(resets);
-        //Trace.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
+        //Debug.WriteLine($"Call: {name} = {txs.Select(tx => tx.Name)} ~ {rx?.Name}");
     }
 
 
@@ -220,7 +220,7 @@ partial class ElementsListener : dsBaseListener
         {
             Assert(this.op != null);  //, 'operator expected');
 
-            Trace.WriteLine($"CausalTokensDNF per operator: {left.GetText()} + {op.GetText()} + {ctx.GetText()}");
+            Debug.WriteLine($"CausalTokensDNF per operator: {left.GetText()} + {op.GetText()} + {ctx.GetText()}");
 
             // process operator
             this.processCausal(this.left, this.op, ctx);

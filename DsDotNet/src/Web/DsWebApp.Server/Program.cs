@@ -48,7 +48,7 @@ logger.Info($"ASPNETCORE_URLS = {urls}");
 if (!isWinService)
 {
     builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
-    Trace.WriteLine($"Current = {Directory.GetCurrentDirectory()}");
+    Debug.WriteLine($"Current = {Directory.GetCurrentDirectory()}");
 }
 services.AddSingleton<Demon>();
 services.AddHostedService(provider => provider.GetService<Demon>());

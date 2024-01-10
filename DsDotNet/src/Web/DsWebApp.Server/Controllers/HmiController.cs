@@ -39,7 +39,7 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
             if (cpu == null)
                 return ResultSS.Err("No Loaded Model");
 
-            Trace.WriteLine($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
+            Debug.WriteLine($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..

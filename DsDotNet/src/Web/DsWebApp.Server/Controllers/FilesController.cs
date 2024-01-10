@@ -64,7 +64,7 @@ public class FilesController : ControllerBaseWithLogger
         string uploadedPath = _helper.UploadFile(file);
         return uploadedPath.IsNullOrEmpty() ? BadRequest() : Ok(new { uploadedPath });
 
-        //Trace.WriteLine("UploadFile" + formFile.fileName);
+        //Debug.WriteLine("UploadFile" + formFile.fileName);
         //return Ok(formFile.fileName);
     }
 }

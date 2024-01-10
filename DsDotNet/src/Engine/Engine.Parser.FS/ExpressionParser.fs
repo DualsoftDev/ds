@@ -31,7 +31,7 @@ module rec ExpressionParser =
             let expr =
                 match ctx with
                 | :? FunctionCallExprContext as exp -> // functionName '(' arguments? ')'
-                    tracefn $"FunctionCall: {text}"
+                    debugfn $"FunctionCall: {text}"
                     let funName = exp.TryFindFirstChild<FunctionNameContext>().Value.GetText()
 
                     let args =
@@ -44,14 +44,14 @@ module rec ExpressionParser =
                     createCustomFunctionExpression funName args
 
                 | :? CastingExprContext as exp -> // '(' type ')' expr
-                    tracefn $"Casting: {text}"
+                    debugfn $"Casting: {text}"
                     let castName = exp.TryFindFirstChild<TypeContext>().Value.GetText()
                     let exprCtx = exp.TryFindFirstChild<ExprContext>().Value
                     let expr = helper exprCtx
                     createCustomFunctionExpression castName [ expr ]
 
                 | (:? BinaryExprMultiplicativeContext | :? BinaryExprAdditiveContext | :? BinaryExprBitwiseShiftContext | :? BinaryExprRelationalContext | :? BinaryExprEqualityContext | :? BinaryExprBitwiseAndContext | :? BinaryExprBitwiseXorContext | :? BinaryExprBitwiseOrContext | :? BinaryExprLogicalAndContext | :? BinaryExprLogicalOrContext) ->
-                    tracefn $"Binary: {text}"
+                    debugfn $"Binary: {text}"
 
                     match ctx.children.ToFSharpList() with
                     | left :: op :: [ right ] ->
@@ -63,7 +63,7 @@ module rec ExpressionParser =
 
 
                 | :? UnaryExprContext as exp ->
-                    tracefn $"Unary: {text}"
+                    debugfn $"Unary: {text}"
 
                     match exp.children.ToFSharpList() with
                     | op :: [ opnd ] ->
@@ -73,7 +73,7 @@ module rec ExpressionParser =
                     | _ -> failwithlog "ERROR"
 
                 | :? TerminalExprContext as terminalExp ->
-                    tracefn $"Terminal: {text}"
+                    debugfn $"Terminal: {text}"
                     assert (terminalExp.ChildCount = 1)
                     let terminal = terminalExp.children[0].GetChild(0)
 
@@ -125,11 +125,11 @@ module rec ExpressionParser =
                     | _ -> failwithlog "ERROR"
 
                 | :? ArrayReferenceExprContext ->
-                    tracefn $"ArrayReference: {text}"
+                    debugfn $"ArrayReference: {text}"
                     failwithlog "Not yet"
 
                 | :? ParenthesisExprContext as exp ->
-                    tracefn $"Parenthesis: {text}"
+                    debugfn $"Parenthesis: {text}"
                     let exp = exp.TryFindFirstChild<ExprContext>().Value
                     helper exp
 
@@ -369,7 +369,7 @@ module rec ExpressionParser =
 
             [ for t in topLevels do
                   let text = t.GetOriginalText()
-                  //tracefn $"Toplevel: {text}"
+                  //debugfn $"Toplevel: {text}"
                   assert (t.ChildCount = 1)
 
                   match t.children[0] with

@@ -16,7 +16,7 @@ module DBLoggerApi =
         if DBLoggerImpl.logSet.IsNull() then
             failwithf "do InitializeLogDbOnDemandAsync"
 
-        Trace.WriteLine $"updateInfoBase for fqdn: {fqdn}"
+        Debug.WriteLine $"updateInfoBase for fqdn: {fqdn}"
 
         x.DriveSpan <- DBLogger.Sum(fqdn, kindDrive)
         x.DriveAverage <- DBLogger.Average(fqdn, kindDrive)

@@ -21,7 +21,7 @@ public class Cylinder : IBitObject
         };
 public async Task SetAsync(string objectName)
     {
-        Trace.WriteLine($"Setting {objectName}");
+        Debug.WriteLine($"Setting {objectName}");
 
         var (tagI, tagO) = getIOTags(objectName);
 
@@ -43,7 +43,7 @@ public async Task SetAsync(string objectName)
 
     public async Task ResetAsync(string objectName)
     {
-        Trace.WriteLine($"Resetting {objectName}");
+        Debug.WriteLine($"Resetting {objectName}");
         // simulate long-running task
         await Task.Yield();
         var (tagI, tagO) = getIOTags(objectName);

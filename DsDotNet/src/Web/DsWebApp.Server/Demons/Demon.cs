@@ -89,7 +89,7 @@ public partial class Demon : BackgroundService
         {
             return runtimeModel.Cpu.TagWebChangedFromWebSubject.Subscribe(tagWeb =>
             {
-                _logger.Debug($"Server: Notifying TagWeb({tagWeb.Name}) change from Web to all clients");
+                Debug.WriteLine($"Server: Notifying TagWeb({tagWeb.Name}) change from Web to all clients");
                 hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
             });
         }
@@ -97,7 +97,7 @@ public partial class Demon : BackgroundService
         {
             return runtimeModel.Cpu.TagWebChangedFromCpuSubject.Subscribe(tagWeb =>
             {
-                _logger.Debug($"Server: Notifying TagWeb({tagWeb.Name}) change from CPU to all clients");
+                Debug.WriteLine($"Server: Notifying TagWeb({tagWeb.Name}) change from CPU to all clients");
                 hubContextHmiTag.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);
             });
         }
@@ -134,16 +134,22 @@ public partial class Demon : BackgroundService
                         if (n % 3 == 0)
                             Task.Run(async () =>
                             {
-                                if (_dsSystem != null && InfoHub.ConnectedClients.Any())
+                                bool active = _dsSystem != null && InfoHub.ConnectedClients.Any();
+                                if (active)
                                 {
-                                    Console.WriteLine($"HmiTagHub has {InfoHub.ConnectedClients.Count} connected clients.");
                                     InfoSystem infoSystem = InfoPackageModuleExt.GetInfo(_dsSystem);
                                     // System.Text.Json.JsonSerializer.Serialize 는 동작 안함.
                                     var newtonJson = Newtonsoft.Json.JsonConvert.SerializeObject(infoSystem);
                                     await _hubContextInfo.Clients.All.SendAsync(SK.S2CNInfoChanged, newtonJson);
                                 }
-                                else if (n % 30 == 0)
-                                    Console.WriteLine("No InfoHub clients connected");
+
+                                if (n % 30 == 0)
+                                {
+                                    if (active)
+                                        Console.WriteLine($"InfoHub has {InfoHub.ConnectedClients.Count} connected clients.");
+                                    else
+                                        Console.WriteLine("No InfoHub clients connected");
+                                }
                             }).FireAndForget();
 
                         //if (n % 2 == 0)

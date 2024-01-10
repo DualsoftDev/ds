@@ -120,7 +120,7 @@ type Diamond(output1:ITestOutputHelper) =
                     counter <- counter + 1
                     if counter % 100 = 0 then
                         System.Console.WriteLine($"[{counter}] After finishing Main segment")
-                        Trace.WriteLine($"[{counter}] After finishing Main segment")
+                        Debug.WriteLine($"[{counter}] After finishing Main segment")
                     opc.Write(resetTag, true)
                 elif ssc.Status = Status4.Ready then
                     opc.Write(startTag, true)

@@ -56,7 +56,7 @@ type TagWebExt =
     [<Extension>]
     static member SetValue(x:TagWeb, value:obj) =
         if value = true then
-            tracefn $"Found true set value for {x.Name}"
+            debugfn $"Found true set value for {x.Name}"
         x._SerializedObject <- ObjectHolder.Create(value).Serialize()
     [<Extension>]
     static member IsEqual(x:TagWeb, y:TagWeb) =

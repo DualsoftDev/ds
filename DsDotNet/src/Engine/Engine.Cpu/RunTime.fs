@@ -43,7 +43,7 @@ module RunTime =
                     if hmiTags.ContainsKey stg.Name   
                     then 
                         let tagWeb = hmiTags[stg.Name]
-                        tracefn $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                        debugfn $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                         tagWeb.SetValue(stg.BoxedValue)
                         tagWebChangedFromCpuSubject.OnNext(tagWeb)
                 )
@@ -57,7 +57,7 @@ module RunTime =
 
         let subscription = 
             tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
-                    tracefn $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                    debugfn $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                     let cpuTag = tagStorages.[tagWeb.Name]
                     cpuTag.BoxedValue <-tagWeb.Value
             )

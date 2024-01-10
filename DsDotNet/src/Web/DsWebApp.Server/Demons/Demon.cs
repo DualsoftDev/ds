@@ -17,6 +17,7 @@ using static Engine.Core.Interface;
 using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using static Engine.Info.DBLoggerORM;
 
 namespace DsWebApp.Server.Demons;
 public partial class Demon : BackgroundService
@@ -40,6 +41,7 @@ public partial class Demon : BackgroundService
         _hubContextHmiTag = hubContextHmiTag;
         _hubContextInfo = hubContextInfo;
 
+        CompositeDisposable _modelSubscription = new();
         IDisposable innerSubscriptionFromWeb = null;
         IDisposable innerSubscriptionFromCpu = null;
         if (serverGlobal.RuntimeModel != null)
@@ -64,7 +66,23 @@ public partial class Demon : BackgroundService
 
             DsSystem[] systems = [ runtimeModel.System ];
             ModelCompileInfo mci = new(runtimeModel.SourceDsZipPath, runtimeModel.SourceDsZipPath);
-            DBLogger.InitializeLogWriterOnDemandAsync(_serverGlobal.DsCommonAppSettings,  systems, mci);
+
+            _modelSubscription.Clear();
+            var querySet = new QuerySet(DateTime.Now.AddDays(-1), null) { CommonAppSettings = _serverGlobal.DsCommonAppSettings };
+            var logSetW = DBLogger.InitializeLogReaderWriterOnDemandAsync(querySet, _serverGlobal.DsCommonAppSettings, systems, mci).Result;
+            _modelSubscription.Add(logSetW);
+            IDisposable subscription =
+                CpusEvent.ValueSubject
+                    .Subscribe(tpl =>
+                    {
+                        var (sys, storage, val) = (tpl.Item1, tpl.Item2, tpl.Item3);
+                        var ti = storage.GetTagInfo();
+                        if (ti != null && ti.Value.IsNeedSaveDBLog())
+                            DBLogger.EnqueLogForInsert(new DsLogModule.DsLog(DateTime.Now, storage));
+                    });
+            _modelSubscription.Add(subscription);
+
+
         }
 
         IDisposable subscribeTagChangeWeb(RuntimeModel runtimeModel)

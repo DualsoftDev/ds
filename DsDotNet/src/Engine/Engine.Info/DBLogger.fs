@@ -5,7 +5,6 @@ open Dual.Common.Core.FS
 open System
 open System.IO
 
-
 type DBLogger() =
     static let querySet = QuerySet()
     //static let querySet = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
@@ -20,13 +19,14 @@ type DBLogger() =
         (
             commonAppSetting: DSCommonAppSettings,
             systems: DsSystem seq,
-            modelCompileInfo: ModelCompileInfo
+            modelCompileInfo: ModelCompileInfo,
+            readerWriterType: DBLoggerType
         ) =
         task {
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (commonAppSetting, systems, modelCompileInfo)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (commonAppSetting, systems, modelCompileInfo, readerWriterType)
 
             return logSet :> ILogSet
         }
@@ -42,6 +42,25 @@ type DBLogger() =
             let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync (querySet, systems)
             return logSet :> ILogSet
         }
+
+    /// Reader + Writer 일체형
+    static member InitializeLogReaderWriterOnDemandAsync
+        (
+            querySet: QuerySet,
+            commonAppSetting: DSCommonAppSettings,
+            systems: DsSystem seq,
+            modelCompileInfo: ModelCompileInfo
+        ) =
+        task {
+            Log4NetWrapper.logWithTrace <- true
+
+            let! logSet =
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (commonAppSetting, systems, modelCompileInfo, DBLoggerType.Reader ||| DBLoggerType.Writer)
+
+            return logSet :> ILogSet
+        }
+
+
 
     /// 조회 기간 변경 (reader)
     /// call site 에서는 기존 인자로 주어진 logSet 은 자동 dispose 되며, 새로 return 되는 logSet 을 이용하여야 한다.

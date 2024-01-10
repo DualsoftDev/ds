@@ -28,7 +28,7 @@ module RuntimeTest =
         let systems = [| runtimeModel.System|]
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
         let mci = ModelCompileInfo(runtimeModel.JsonPath, runtimeModel.JsonPath)
-        DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci) |> ignore
+        DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci, DBLoggerType.Writer) |> ignore
         DsSimulator.Do(runtimeModel.Cpu) |> Assert.True //값변경있으면서 구동하면 true
 
 

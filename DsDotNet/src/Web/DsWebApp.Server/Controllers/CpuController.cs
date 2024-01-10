@@ -20,41 +20,34 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
         new RuntimeModelDto(global.ServerSettings.RuntimeModelDsZipPath, newIsCpuRunning);
 
 
-    ResultSS isRunningOK(bool? currentRunningStatus)
-    {
-        if (_cpu == null)
-            return ResultSS.Err("No model loaded");
-        if (currentRunningStatus != null && currentRunningStatus != _cpu.IsRunning)
-            return ResultSS.Err("Already running");
-
-        return ResultSS.Ok("Ok");
-    }
-
     // api/cpu/command/run
     [Authorize(Roles = "Administrator")]
     [HttpGet("command/run")]
-    public ResultSS Run() =>
-        isRunningOK(currentRunningStatus:false).Match(
-            ok => {
-                _cpu.RunInBackground();
-                hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(true));
-                return ResultSS.Ok("Ok");
-            },
-            err => ResultSS.Err(err)
-        );
+    public ResultSS Run()
+    {
+        if (_cpu == null)
+            return ResultSS.Err("No model loaded to run");
+        if (_cpu.IsRunning)
+            return ResultSS.Err("Already running");
+
+        _cpu.RunInBackground();
+        hubContextModel.Clients.All.SendAsync(SK.S2CNCpuRunningStatusChanged, true);
+        return ResultSS.Ok("Ok");
+    }
 
     // api/cpu/command/stop
     [Authorize(Roles = "Administrator")]
     [HttpGet("command/stop")]
-    public ResultSS Stop() =>
-        isRunningOK(currentRunningStatus: true).Match(
-            ok => {
-                _cpu.Stop();
-                hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(false));
-                return ResultSS.Ok("Ok");
-            },
-            err => ResultSS.Err(err)
-        );
+    public ResultSS Stop()
+    {
+        if (_cpu == null)
+            return ResultSS.Err("No model loaded for stop");
+        if (! _cpu.IsRunning)
+            return ResultSS.Err("Already stopped");
+        _cpu.Stop();
+        hubContextModel.Clients.All.SendAsync(SK.S2CNCpuRunningStatusChanged, false);
+        return ResultSS.Ok("Ok");
+    }
 
     // api/cpu/command/reload-model
     [Authorize(Roles = "Administrator")]
@@ -62,7 +55,7 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
     public ResultSS ReloadModel()
     {
         global.ReloadRuntimeModel(global.ServerSettings);
-        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto(false));
+        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, global.ServerSettings.RuntimeModelDsZipPath);
         return ResultSS.Ok("Ok");
     }
 }

@@ -15,9 +15,14 @@ public class SK
     public const string S2CNSIOChanged = "S2CNotifyIoMemoryChanged";
 
     /// <summary>
-    /// Server 2 Client Notify Numeric IO Changed
+    /// Server 2 Client Notify DS Model Changed
     /// </summary>
     public const string S2CNModelChanged = "S2CNotifyModelChanged";
+
+    /// <summary>
+    /// Server 2 Client Notify CPU Running Status Changed
+    /// </summary>
+    public const string S2CNCpuRunningStatusChanged = "S2CNotifyCpuRunningStatusChanged";
 
     /// <summary>
     /// Server 2 Client Notify TagWeb Changed

@@ -1,0 +1,44 @@
+﻿@* ComModelCpuMonitor *@
+
+@code {
+    ClientGlobal _cg;
+    [Parameter] public bool MonitorHmi { get; set; }
+    [Parameter] public EventCallback<string> OnModelChanged { get; set; }
+    [Parameter] public EventCallback<bool> OnCpuRunningStatusChanged { get; set; }
+    [Parameter] public EventCallback<HMIPackage> OnHmiPackageChanged { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+
+        _cg = ClientGlobal;
+        _cg.PropertyChanged += async (s, e) =>
+        {
+            if (e.PropertyName == nameof(_cg.ModelDsZipPath) && !e.Equals(_cg.ModelDsZipPath))
+            {
+                Console.WriteLine($"----------- ZIP path change detected: {_cg.ModelDsZipPath}");
+                if (MonitorHmi)
+                {
+                    var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
+                    result.Iter(
+                        ok => _cg.HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
+                        err => Console.Error.WriteLine(err));
+                }
+
+                await OnModelChanged.InvokeAsync(_cg.ModelDsZipPath);
+            }
+            else if (e.PropertyName == nameof(_cg.HmiPackage) && !e.Equals(_cg.HmiPackage))
+            {
+                Console.WriteLine($"----------- HmiPackage change detected: {_cg.HmiPackage}");
+                await OnHmiPackageChanged.InvokeAsync(_cg.HmiPackage);
+            }
+            else if (e.PropertyName == nameof(_cg.IsCpuRunning) && ! e.Equals(_cg.IsCpuRunning))
+            {
+                Console.WriteLine($"----------- IsCpuRunning change detected: {_cg.IsCpuRunning}");
+                await OnCpuRunningStatusChanged.InvokeAsync(_cg.IsCpuRunning);
+            }
+        };
+        await _cg.InitializeAsync(Http, NavigationManager, LocalStorage);
+    }
+
+}

@@ -6,10 +6,8 @@
 
 
 @attribute [Authorize(Roles = "Administrator,User")]
-@implements IDisposable
 
 <CompTitle Icon="oi oi-puzzle-piece" Title="제어" />
-
 
 @if (_loading)
 {
@@ -17,13 +15,15 @@
 }
 else
 {
-    @if (_modelDto == null)
+    @if (ClientGlobal.ModelDsZipPath == null)
     {
         <ul>No model on server.</ul>
     }
     else
     {
-        <ul>SourceDsZipPath: @_modelDto.SourceDsZipPath</ul>
+        <CompModelCpuMonitor OnModelChanged="@(_ => StateHasChanged())"
+                             OnCpuRunningStatusChanged="@(_ => StateHasChanged())" />
+        <ul>SourceDsZipPath: @ClientGlobal.ModelDsZipPath</ul>
         <ul>Cpu Running: @_isRunning</ul>
 
         <button class="btn btn-primary" @onclick="Run" disabled="@_isRunning">Run</button>
@@ -32,49 +32,41 @@ else
         <button class="btn btn-primary" @onclick="Reset" disabled="@(!_isRunning)">Reset</button>
 
         <br/>
-        <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs"
-                          Disabled="@_isRunning"
-            @bind-Value="RuntimePackage" />
+        @if (_cgs != null)
+        {
+            <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs"
+                              Disabled="@_isRunning"
+                              @bind-Value="RuntimePackage" />
+        }
     }
 }
 
 
 
-
-
 @code {
-    bool _loading { get; set; } = true;
-    bool _isRunning => _modelDto?.IsCpuRunning ?? false;
-    RuntimeModelDto _modelDto;
-    CompositeDisposable _disposables = new();
+    bool _loading = true;
+    bool _isRunning => ClientGlobal.IsCpuRunning;
 
+    ServerSettings _cgs => ClientGlobal.ServerSettings;
     RuntimePackageCs RuntimePackage {
-        get => ClientGlobal.ServerSettings.RuntimePackageCs;
+        get => _cgs.RuntimePackageCs;
         set
         {
-            ClientGlobal.ServerSettings.RuntimePackageCs = value;
-            // todo: api 를 통해 ServerGlobal.ReloadRuntimeModel() 호출되도록
-            reloadModel().Wait();
+            var old = _cgs.RuntimePackageCs;
+            if (old != value)
+            {
+                _cgs.RuntimePackageCs = value;
+                // api 를 통해 ServerGlobal.ReloadRuntimeModel() 호출
+                reloadModel().Wait();
+            }
         }
     }
     protected override async Task OnInitializedAsync()
     {
-        var result = await ClientGlobal.GetModelDtoAsync(Http);
-        result.Iter(
-            ok => _modelDto = ok,
-            err => Console.WriteLine($"Failed to get model. {err}")
-        );
-
-        _loading = false;
-
-        var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
-        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, action);
-        _disposables.Add(subscription);
-
-        StateHasChanged();
         await base.OnInitializedAsync();
+        await ClientGlobal.InitializeAsync(Http, NavigationManager, LocalStorage);
+        _loading = false;
     }
-    public void Dispose() => _disposables.Dispose();
 
     async Task executeRestApi(string api, string defaultOkMessage)
     {
@@ -92,7 +84,6 @@ else
         else
             NavigationManager.NavigateTo("/toplevel/login");
     }
-
 
     async Task Run()
     {

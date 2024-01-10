@@ -15,6 +15,7 @@
 </CompTooltipInlineHidden>
 
 @using System.Collections.ObjectModel
+@using DsWebApp.Client.Pages.Controllers
 @using Engine.Core
 @using static Engine.Core.TagWebModule
 @inherits CompHmiLoader
@@ -24,75 +25,93 @@
 <CompFullScreenManager FullScreenElementId="auto" />      @* FullScreenStateChanged="@onFullScreenStateChanged" *@
 <CompHmiTagManager @ref="TagManager" OnLoaded="@(() => _tagManagerLoading=false)" />
 
-@if (_loading || _tagManagerLoading)
+@if (_loading || _tagManagerLoading || _localLoading)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
+
+    <CompModelCpuMonitor OnModelChanged="onModelChanged"
+                         OnCpuRunningStatusChanged="onCpuRunningStatusChanged" />
+
     Console.WriteLine($"--------------------- TagManager={TagManager}");
     <CascadingValue Name="TagManager" Value="@TagManager">
-        <div id="auto">
-            <p>
-                <div class="ds-inline">
-                    <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
-                </div>
-                <div class="ds-inline">
-                    <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
-                </div>
-                <div class="ds-inline">
-                    <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
-                </div>
-                <div class="ds-inline">
-                    <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
-                </div>
-                <div class="ds-inline">
-                    <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
-                </div>
-                <div class="ds-inline">
-                    <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
-                </div>
-                <div class="ds-inline">
-                    <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
-                </div>
-                <div class="ds-inline">
-                    <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
-                </div>
-                @*
-            <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
-            <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
-            <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
-            <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
-            <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
-            <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
-            <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
-            <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
-            *@
-            </p>
+        <CompEnableDisable Disabled="@(!_isCpuRunning)">
+            <div id="auto">
+                <p>
+                    <div class="ds-inline">
+                        <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
+                    </div>
+                    <div class="ds-inline">
+                        <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
+                    </div>
+                    <div class="ds-inline">
+                        <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
+                    </div>
+                    <div class="ds-inline">
+                        <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
+                    </div>
+                    <div class="ds-inline">
+                        <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
+                    </div>
+                    <div class="ds-inline">
+                        <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
+                    </div>
+                    <div class="ds-inline">
+                        <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
+                    </div>
+                    <div class="ds-inline">
+                        <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
+                    </div>
+                    @*
+                <AutoManualSelector Selector="_system.AutoManualSelectLamp" />
+                <ButtonLamp Text="Ready" Composite="@(_system.ReadyPushLamp)" />
+                <ButtonLamp Text="Drive" Composite="@(_system.DrivePushLamp)" />
+                <ButtonLamp Text="Home" Composite="@(_system.HomePushLamp)" />
+                <ButtonLamp Text="Clear" Composite="@(_system.ClearPushLamp)" />
+                <ButtonLamp Text="Stop" Composite="@(_system.StopPushLamp)" />
+                <ButtonLamp Text="Em Stop" Composite="@(_system.EmergencyPushLamp)" />
+                <ButtonLamp Text="Test" Composite="@(_system.TestPushLamp)" />
+                *@
+                </p>
 
-            <CompHmiFlowTable Flows="@_system.Flows" />
-        </div>
+                <CompHmiFlowTable Flows="@_system.Flows" />
+            </div>
+        </CompEnableDisable>
+
     </CascadingValue>
 }
 
 
 @code {
     bool _tagManagerLoading = true;
-    IDisposable _subscription;
+    bool _localLoading = true;
+    // IDisposable _subscription;
     public CompHmiTagManager TagManager {get; set; }
+    bool _isCpuRunning => ClientGlobal.IsCpuRunning;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await ClientGlobal.InitializeAsync(Http, NavigationManager, LocalStorage);
+        // await ClientGlobal.GetModelDtoAsync(Http);
 
-        _subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, onModelChanged);
+        // _subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, onModelChanged);
+        _localLoading = false;
     }
 
-    void onModelChanged(RuntimeModelDto modelDto)
+    void onModelChanged(string modelDsZipPath)
     {
-        Console.WriteLine($"--------------------- modelDto={modelDto}");
-        JsDual.Alert("Model changed.");
-        NavigationManager.NavigateTo(ClientGlobal.CurrentLocation, forceLoad: true);
+        Console.WriteLine($"--------------------- modelDto={modelDsZipPath}");
+        ToastService.ShowInfo("Model changed.");
+        StateHasChanged();
+        // NavigationManager.NavigateTo(ClientGlobal.CurrentLocation, forceLoad: true);
     }
-
+    void onCpuRunningStatusChanged(bool isCpuRunning)
+    {
+        Console.WriteLine($"--------------------- isCpuRunning={isCpuRunning}");
+        ToastService.ShowInfo("Cpu running status changed.");
+        StateHasChanged();
+    }
 }
 

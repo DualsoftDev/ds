@@ -10,20 +10,26 @@
 
 <CompTitle Icon="oi oi-puzzle-piece" Title="제어" />
 
-
 @if (_loading)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    @if (_modelDto == null)
+
+@*     <CompModelCpuMonitor
+        OnModelChanged="@(zipPath => StateHasChanged())"
+                         OnCpuRunningStatusChanged="@(isCpuRunning => StateHasChanged())" />
+ *@
+    @if (ClientGlobal.ModelDsZipPath == null)
     {
         <ul>No model on server.</ul>
     }
     else
     {
-        <ul>SourceDsZipPath: @_modelDto.SourceDsZipPath</ul>
+        <CompModelCpuMonitor OnModelChanged="OnModelChanged"
+                             OnCpuRunningStatusChanged="OnCpuRunningStatusChanged" />
+        <ul>SourceDsZipPath: @ClientGlobal.ModelDsZipPath</ul>
         <ul>Cpu Running: @_isRunning</ul>
 
         <button class="btn btn-primary" @onclick="Run" disabled="@_isRunning">Run</button>
@@ -32,9 +38,12 @@ else
         <button class="btn btn-primary" @onclick="Reset" disabled="@(!_isRunning)">Reset</button>
 
         <br/>
-        <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs"
-                          Disabled="@_isRunning"
-            @bind-Value="RuntimePackage" />
+        @if (_cgs != null)
+        {
+            <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs"
+                              Disabled="@_isRunning"
+                              @bind-Value="RuntimePackage" />
+        }
     }
 }
 
@@ -43,36 +52,45 @@ else
 
 
 @code {
-    bool _loading { get; set; } = true;
-    bool _isRunning => _modelDto?.IsCpuRunning ?? false;
+    bool _loading = true;
+    bool _isRunning => ClientGlobal.IsCpuRunning;
     RuntimeModelDto _modelDto;
     CompositeDisposable _disposables = new();
 
+    ServerSettings _cgs => ClientGlobal.ServerSettings;
     RuntimePackageCs RuntimePackage {
-        get => ClientGlobal.ServerSettings.RuntimePackageCs;
+        get => _cgs.RuntimePackageCs;
         set
         {
-            ClientGlobal.ServerSettings.RuntimePackageCs = value;
-            // todo: api 를 통해 ServerGlobal.ReloadRuntimeModel() 호출되도록
-            reloadModel().Wait();
+            var old = _cgs.RuntimePackageCs;
+            if (old != value)
+            {
+                _cgs.RuntimePackageCs = value;
+                // api 를 통해 ServerGlobal.ReloadRuntimeModel() 호출
+                reloadModel().Wait();
+            }
         }
     }
     protected override async Task OnInitializedAsync()
     {
-        var result = await ClientGlobal.GetModelDtoAsync(Http);
-        result.Iter(
-            ok => _modelDto = ok,
-            err => Console.WriteLine($"Failed to get model. {err}")
-        );
+        await base.OnInitializedAsync();
+        // var result = await ClientGlobal.GetModelDtoAsync(Http);
+        // result.Iter(
+        //     ok =>
+        //     {
+        //         _modelDto = ok;
+        //         // _isRunning = _modelDto.IsCpuRunning;
+        //     },
+        //     err => Console.WriteLine($"Failed to get model. {err}")
+        // );
 
-        _loading = false;
 
-        var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
-        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, action);
-        _disposables.Add(subscription);
+        // var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
+        // IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, action);
+        // _disposables.Add(subscription);
 
         StateHasChanged();
-        await base.OnInitializedAsync();
+        _loading = false;
     }
     public void Dispose() => _disposables.Dispose();
 
@@ -93,6 +111,16 @@ else
             NavigationManager.NavigateTo("/toplevel/login");
     }
 
+    void OnModelChanged(string modelDsZipPath)
+    {
+        Console.WriteLine($"Model change detected on signalR: {ClientGlobal.ModelDsZipPath}");
+        StateHasChanged();
+    }
+    void OnCpuRunningStatusChanged(bool cpuRunningStatus)
+    {
+        Console.WriteLine($"CPU running state change detected on signalR: {ClientGlobal.IsCpuRunning}");
+        StateHasChanged();
+    }
 
     async Task Run()
     {

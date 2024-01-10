@@ -113,15 +113,15 @@ module JSONSettingTestModule =
 
                 let checkTopLevel() =
                     // LsXgi(=>"") 의 q 파일
-                    let ls = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
+                    let ls = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "xgi")
                     let lsq = ls.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
                     let checkBytes() =
                         let indices = [|0..lsq.Length-1|]
                         let values = indices |> map (uint8 >> byte)
 
-                        client.ClearAll("q") |> checkOk
-                        client.WriteBytes("q", indices, values) |> checkOk
-                        match client.ReadBytes("q", indices) with
+                        client.ClearAll("xgi/q") |> checkOk
+                        client.WriteBytes("xgi/q", indices, values) |> checkOk
+                        match client.ReadBytes("xgi/q", indices) with
                         | Ok obs -> SeqEq obs values
                         | _ -> failwithlog "ERROR"
 
@@ -129,9 +129,9 @@ module JSONSettingTestModule =
                         let indices = [|0..(lsq.Length / 2)-1|]
                         let values = indices |> map uint16
 
-                        client.ClearAll("q") |> checkOk
-                        client.WriteUInt16s("q", indices, values) |> checkOk
-                        match client.ReadUInt16s("q", indices) with
+                        client.ClearAll("xgi/q") |> checkOk
+                        client.WriteUInt16s("xgi/q", indices, values) |> checkOk
+                        match client.ReadUInt16s("xgi/q", indices) with
                         | Ok ows -> SeqEq ows values
                         | _ -> failwithlog "ERROR"
 
@@ -139,9 +139,9 @@ module JSONSettingTestModule =
                         let indices = [|0..(lsq.Length / 4)-1|]
                         let values = indices |> map uint32
 
-                        client.ClearAll("q") |> checkOk
-                        client.WriteUInt32s("q", indices, values) |> checkOk
-                        match client.ReadUInt32s("q", indices) with
+                        client.ClearAll("xgi/q") |> checkOk
+                        client.WriteUInt32s("xgi/q", indices, values) |> checkOk
+                        match client.ReadUInt32s("xgi/q", indices) with
                         | Ok ows -> SeqEq ows values
                         | _ -> failwithlog "ERROR"
 
@@ -149,9 +149,9 @@ module JSONSettingTestModule =
                         let indices = [|0..(lsq.Length / 8)-1|]
                         let values = indices |> map uint64
 
-                        client.ClearAll("q") |> checkOk
-                        client.WriteUInt64s("q", indices, values) |> checkOk
-                        match client.ReadUInt64s("q", indices) with
+                        client.ClearAll("xgi/q") |> checkOk
+                        client.WriteUInt64s("xgi/q", indices, values) |> checkOk
+                        match client.ReadUInt64s("xgi/q", indices) with
                         | Ok ows -> SeqEq ows values
                         | _ -> failwithlog "ERROR"
 
@@ -160,8 +160,8 @@ module JSONSettingTestModule =
                     let checkEndian() =
                         let n8 = 0x07_06_05_04_03_02_01_00UL
                         let bytes = BitConverter.GetBytes(n8)
-                        client.WriteUInt64s("q", [|0|], [|n8|]) |> checkOk
-                        match client.ReadBytes("q", [|0..7|]) with
+                        client.WriteUInt64s("xgi/q", [|0|], [|n8|]) |> checkOk
+                        match client.ReadBytes("xgi/q", [|0..7|]) with
                         | Ok bytes ->
                             bytes[0] === 0x00uy
                             bytes[1] === 0x01uy
@@ -173,9 +173,9 @@ module JSONSettingTestModule =
                             bytes[7] === 0x07uy
                         | _ -> failwithlog "ERROR"
 
-                        client.ClearAll("q") |> checkOk
-                        client.WriteBytes("q", [|0..7|], bytes) |> checkOk
-                        match client.ReadUInt64s("q", [|0|]) with
+                        client.ClearAll("xgi/q") |> checkOk
+                        client.WriteBytes("xgi/q", [|0..7|], bytes) |> checkOk
+                        match client.ReadUInt64s("xgi/q", [|0|]) with
                         | Ok lws -> lws.[0] === n8
                         | _ -> failwithlog "ERROR"
 
@@ -205,10 +205,12 @@ module JSONSettingTestModule =
                 let p = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "p")
                 let po = p.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "o")
                 po.GetPath() === "p/o"
-                let l = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
-                let lq = l.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
-                lq.GetPath() === "q"
-
+                let ds = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "")
+                let lm = ds.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "m")
+                lm.GetPath() === "m"
+                let ls = venders |> Array.find (fun (v:VendorSpec) -> v.Location = "xgi")
+                let lq = ls.Files |> Array.find (fun (v:IOFileSpec) -> v.Name = "q")
+                lq.GetPath() === "xgi/q"
 
                 let length = po.Length
                 match client.ReadBytes("p/o", [|255|]) with

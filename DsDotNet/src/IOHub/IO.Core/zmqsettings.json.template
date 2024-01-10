@@ -3,6 +3,26 @@
   "TopLevelLocation": "/tmp/iomaps",
   "Vendors": [
     {
+      "Name": "DS",
+      "Location": "",
+      "Dll": "IO.Dualsoft.dll",
+      "ClassName": "IO.Dualsoft.AddressInfoProviderDS",
+      "Files": [
+        {
+          "Name": "M",
+          "Length": 65536
+        },
+        {
+          "Name": "T",
+          "Length": 8192
+        },
+        {
+          "Name": "C",
+          "Length": 8192
+        }
+      ]
+    },
+    {
       "Name": "LsXGI",
       "Location": "",
       "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",

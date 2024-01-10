@@ -32,6 +32,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\IOHub\IO.Core\IO.Core.fsproj" />
+        <ProjectReference Include="..\..\IOHub\IO.Dualsoft\IO.Dualsoft.fsproj" />
         <ProjectReference Include="..\..\IOHub\IO.Spec\IO.Spec.csproj" />
         <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
     </ItemGroup>

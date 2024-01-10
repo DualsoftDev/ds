@@ -9,7 +9,6 @@
 @using System.IO.Compression
 @using Dual.Web.Blazor.Shared
 @inject FilesManager FilesManager
-@implements IDisposable
 
 
 <h3>Upload File</h3>
@@ -75,26 +74,14 @@
     long _totalBytes;
     List<string> _fileUrls = new List<string>();
 
-    CompositeDisposable _disposables = new();
     ServerSettings _serverSettings;
-    RuntimeModelDto _modelDto;
     protected override async Task OnInitializedAsync()
     {
-        await ClientGlobal.InitializeAsync(Http, LocalStorage);
         _serverSettings = ClientGlobal.ServerSettings;
-        var result = await ClientGlobal.GetModelDtoAsync(Http);
-        result.Iter(
-            ok => _modelDto = ok,
-            err => Console.WriteLine($"Failed to get model. {err}")
-        );
-
-        var action = new Action<RuntimeModelDto>(modelDto => { _modelDto = modelDto; StateHasChanged(); });
-        IDisposable subscription = await ClientGlobal.MonitorModelChangeAsync(NavigationManager, Http, action);
-        _disposables.Add(subscription);
+        await ClientGlobal.InitializeAsync(Http, NavigationManager, LocalStorage);
 
         await listFiles();
     }
-    public void Dispose() => _disposables.Dispose();
 
     // support for drag/drop
     string _dropClass = string.Empty;
@@ -109,10 +96,10 @@
 
     bool isDeletable(string url)
     {
-        if (_modelDto == null || !_modelDto.IsCpuRunning)
+        if (ClientGlobal.ModelDsZipPath == null || !ClientGlobal.IsCpuRunning)
             return true;
 
-        var runtime = getFileName(_serverSettings.RuntimeModelDsZipPath).ToLower();   // exportDS.Zip
+        var runtime = getFileName(ClientGlobal.ModelDsZipPath).ToLower();   // exportDS.Zip
         var file = getFileName(url).ToLower();
         return runtime != file;
 

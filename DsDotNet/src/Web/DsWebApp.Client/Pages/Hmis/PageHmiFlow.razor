@@ -1,6 +1,7 @@
 @* PageHmiFlow *@
 
 @page "/hmis/flow/{FlowName}"
+@using DsWebApp.Client.Pages.Controllers
 @inherits CompHmiLoader
 
 <CompHmiTagManager @ref="TagManager" OnLoaded="@(() => _tagManagerLoading=false)" />
@@ -11,10 +12,16 @@
 }
 else
 {
+    <CompModelCpuMonitor OnModelChanged="@(_ => StateHasChanged())"
+                         OnCpuRunningStatusChanged="@(_ => StateHasChanged())" />
+
     <h3>Flow @FlowName</h3>
-    <CascadingValue Name="TagManager" Value="@TagManager">
-        <CompHmiRealTable Reals="@_reals" />
-    </CascadingValue>
+
+    <CompEnableDisable Disabled="@(ClientGlobal.ModelDsZipPath.IsNullOrEmpty() || !ClientGlobal.IsCpuRunning)">
+        <CascadingValue Name="TagManager" Value="@TagManager">
+            <CompHmiRealTable Reals="@_reals" />
+        </CascadingValue>
+    </CompEnableDisable>
 }
 
 @code {
@@ -27,6 +34,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await ClientGlobal.InitializeAsync(Http, NavigationManager, LocalStorage);
         _flow = _system.Flows.FirstOrDefault(f => f.Name == FlowName);
         _reals = _flow.Reals;
     }

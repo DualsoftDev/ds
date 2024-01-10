@@ -50,10 +50,8 @@ public partial class Demon : BackgroundService
         {
             onRuntimeModelReady(runtimeModel);
 
-            // todo : notify model change
-            bool isCpuRunning = false;
-            var modelDto = new RuntimeModelDto(serverGlobal.ServerSettings.RuntimeModelDsZipPath, isCpuRunning);
-            hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, modelDto);
+            hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, serverGlobal.ServerSettings.RuntimeModelDsZipPath);
+            hubContextModel.Clients.All.SendAsync(SK.S2CNCpuRunningStatusChanged, runtimeModel.Cpu.IsRunning);
         });
 
         void onRuntimeModelReady(RuntimeModel runtimeModel)

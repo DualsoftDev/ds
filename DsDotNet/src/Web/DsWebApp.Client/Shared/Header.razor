@@ -135,7 +135,7 @@
     protected override async Task OnInitializedAsync()
     {
         _theme = await LocalStorage.GetItemAsync<Theme>("Theme");
-        await ClientGlobal.InitializeAsync(Http, LocalStorage);
+        await ClientGlobal.InitializeAsync(Http, NavigationManager, LocalStorage);
         if (ClientGlobal.ServerSettings == null)
             Console.Error.WriteLine("Error: ServerSettings is null.");
 

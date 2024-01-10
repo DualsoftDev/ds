@@ -26,7 +26,7 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
     public ResultSS Run()
     {
         if (_cpu == null)
-            return ResultSS.Err("No model loaded");
+            return ResultSS.Err("No model loaded to run");
         if (_cpu.IsRunning)
             return ResultSS.Err("Already running");
 
@@ -41,7 +41,7 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
     public ResultSS Stop()
     {
         if (_cpu == null)
-            return ResultSS.Err("No model loaded");
+            return ResultSS.Err("No model loaded for stop");
         if (! _cpu.IsRunning)
             return ResultSS.Err("Already stopped");
         _cpu.Stop();

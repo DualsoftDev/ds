@@ -93,7 +93,7 @@ module OriginModule =
             real.Graph.Vertices.Where(fun w-> not <| pureGroupAlias.Select(fun (f, _)->f).Contains(w.GetPure()))
                                .Concat addAlias
 
-        let mutualInfo = getMutualInfo real.Graph.Vertices
+        let mutualInfo = getMutualInfo (real.Graph.Vertices.OfType<Call>().Cast<Vertex>())
         let tasks =
             verticesToCalculateOrigin
             |> Seq.collect (fun v ->

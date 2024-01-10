@@ -58,6 +58,8 @@ type VertexMCoin with
 
     member coin.C2_CallActionOut(): CommentedStatement list =
         let call = coin.Vertex :?> Call
+        let sop = call.Parent.GetFlow().sop.Expr
+        let eop = call.Parent.GetFlow().eop.Expr
         let rstNormal = coin._off.Expr
         [
             for td in call.TargetJob.DeviceDefs do
@@ -70,8 +72,9 @@ type VertexMCoin with
                     then 
                          let rstPush = td.MutualResetExpr(call.System)
                         
-                         yield (sets, rstPush  ) ==| (td.ActionOut, getFuncName())
-                    else yield (sets, rstNormal) --| (td.ActionOut, getFuncName())
+                         yield (sets, rstPush  <||> sop <||> eop) ==| (td.ActionOut, getFuncName())
+                    else 
+                         yield (sets, rstNormal <||> sop<||> eop) --| (td.ActionOut, getFuncName())
         ]
 
   

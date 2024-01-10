@@ -4,11 +4,7 @@
 
 <h3>CCTV</h3>
 
-
-   @*  <p id="stream-img" style="width:100%">
-        <img src="@imageSource" />
-    </p> *@
-    <DxComboBox Data="@ScreensArray"
+@*     <DxComboBox Data="@ScreensArray"
                 @bind-Value="@Screen"
                 @bind-Text="@Screen"
                 CssClass="cw-240"
@@ -21,16 +17,15 @@
                 CssClass="cw-240"
                 InputId="cbOverview" 
                 onchange=""/>
-    <CompFullScreenManager FullScreenElementId="stream-img" />
+    <CompFullScreenManager FullScreenElementId="stream-img" /> *@
 
-   
-
-    <div id="stream-img" style="height:60vw">
-        <img src="@imageSource" style="height:auto; width:100%;" />
+    <div id="stream-img" style="width:60vw">
+        <img src="@imageSource" style="height:100%; width:100%;" />
     </div>
 
 
 <script>
+
     window.displayImage = (imageData) => {
         // Blob 객체 생성
         const blob = new Blob([imageData], { type: 'image/jpeg' });
@@ -42,6 +37,20 @@
         const imgElement = document.getElementById('stream-img').firstElementChild;
         imgElement.src = imgUrl;
     };
+
+    // 이미지 전체화면으로 변경 이벤트 처리
+    const elem = document.getElementById('stream-img');
+    elem.addEventListener('click', () => {
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) { /* Firefox */
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    });
 </script>
 
 

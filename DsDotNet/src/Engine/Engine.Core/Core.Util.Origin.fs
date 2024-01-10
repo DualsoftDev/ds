@@ -73,29 +73,15 @@ module OriginModule =
         | 1 -> graphOrder source (targets.First()) |> getTypeForSingleTarget
         | _ -> targets |> Seq.map (fun t -> graphOrder source t) |> getTypeForMuiltTarget
 
-   
-
-    // Origin 정보를 얻습니다.
-    let getOriginInfo (real: Real) =
+    let getOriginInfo (real: Real) =  //test ahn 보강필요 알리아스랑 니드체크
         let graphOrder = real.Graph.BuildPairwiseComparer()
-        let pureGroupAlias =
-            real.Graph.Vertices.OfType<Alias>()
-            |> Seq.groupBy (fun f -> f.GetPure())
-
-        let addAlias =
-            pureGroupAlias
-            |> Seq.choose (fun (f, _) ->
-                let pureAlias = real.Graph.Vertices |> Seq.filter (fun v -> v.GetPure() = f)
-                findHeadVertex pureAlias graphOrder)
-
-        //Alias 관련 Vertex는 일괄 걸러낸후 addAlias 로 다시 더함
-        let verticesToCalculateOrigin = 
-            real.Graph.Vertices.Where(fun w-> not <| pureGroupAlias.Select(fun (f, _)->f).Contains(w.GetPure()))
-                               .Concat addAlias
-
-        let mutualInfo = getMutualInfo (real.Graph.Vertices.OfType<Call>().Cast<Vertex>())
+        let pureCalls  = (real.Graph.Vertices.OfType<Call>()
+                         @(real.Graph.Vertices.OfType<Alias>() |> Seq.map (fun f -> f.GetPure():?>Call))
+                         ).Distinct().Cast<Vertex>()
+        
+        let mutualInfo = getMutualInfo pureCalls
         let tasks =
-            verticesToCalculateOrigin
+            pureCalls
             |> Seq.collect (fun v ->
                 let initialType = getInitialType v (mutualInfo.[v]) graphOrder
                 let call = v.GetPure() :?> Call
@@ -103,6 +89,35 @@ module OriginModule =
                 devs |> Seq.map (fun d -> d, initialType))
 
         { Real = real; Tasks = tasks; ResetChains = [||] }
+
+    //// Origin 정보를 얻습니다.  //test ahn 보강필요 알리아스랑 니드체크
+    //let getOriginInfo (real: Real) =
+    //    let graphOrder = real.Graph.BuildPairwiseComparer()
+    //    let pureGroupAlias =
+    //        real.Graph.Vertices.OfType<Alias>()
+    //        |> Seq.groupBy (fun f -> f.GetPure())
+
+    //    let addAlias =
+    //        pureGroupAlias
+    //        |> Seq.choose (fun (f, _) ->
+    //            let pureAlias = real.Graph.Vertices |> Seq.filter (fun v -> v.GetPure() = f)
+    //            findHeadVertex pureAlias graphOrder)
+
+    //    //Alias 관련 Vertex는 일괄 걸러낸후 addAlias 로 다시 더함
+    //    let verticesToCalculateOrigin = 
+    //        real.Graph.Vertices.Where(fun w-> not <| pureGroupAlias.Select(fun (f, _)->f).Contains(w.GetPure()))
+    //                           .Concat addAlias
+
+    //    let mutualInfo = getMutualInfo (real.Graph.Vertices.OfType<Call>().Cast<Vertex>())
+    //    let tasks =
+    //        verticesToCalculateOrigin
+    //        |> Seq.collect (fun v ->
+    //            let initialType = getInitialType v (mutualInfo.[v]) graphOrder
+    //            let call = v.GetPure() :?> Call
+    //            let devs = call.TargetJob.DeviceDefs
+    //            devs |> Seq.map (fun d -> d, initialType))
+
+    //    { Real = real; Tasks = tasks; ResetChains = [||] }
 
 // OriginHelper 타입의 확장 기능을 제공합니다.
 [<Extension>]

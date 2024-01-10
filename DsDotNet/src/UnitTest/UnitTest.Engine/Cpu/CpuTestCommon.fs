@@ -61,6 +61,9 @@ module CpuTestUtil =
         member x.Coins  =  coinTypeAll.Select(getVM)
         member x.Reals  =  realTypeAll.Select(getVM)
         member x.Calls  =  callTypeAll.Select(getVM)
+        member x.VertexInFlows    =  callTypeAll.Where(fun f->f.Parent.GetCore() :? Flow)
+                                                 |> Seq.append ([x.ARInF.Vertex])
+                                                 |> Seq.append ([x.AREInF.Vertex])
         member x.ALL    =  vertexAll.Select(getVM)
         member x.GenerationIO() =  sys.GenerationIO()
 

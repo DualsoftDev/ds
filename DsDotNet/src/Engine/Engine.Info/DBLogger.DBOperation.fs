@@ -224,11 +224,25 @@ module internal DBLoggerImpl =
         let enqueLogForInsert (x: DsLog) = enqueLogsForInsert ([ x ])
 
 
-        let createLogInfoSetForWriterAsync (systems: DsSystem seq, readerWriterType: DBLoggerType) : Task<LogSet> =
+        let createLogInfoSetForWriterAsync (querySet: QuerySet, systems: DsSystem seq) : Task<LogSet> =
             task {
                 use conn = createConnection ()
                 use! tr = conn.BeginTransactionAsync()
-                let! logSet = createLogInfoSetCommonAsync (null, systems, conn, tr, readerWriterType)
+                let mutable readerWriterType = DBLoggerType.Writer
+                if querySet <> null then
+                    readerWriterType <- readerWriterType ||| DBLoggerType.Reader
+                    do! querySet.SetQueryRangeAsync(conn, tr)
+
+                let! logSet = createLogInfoSetCommonAsync (querySet, systems, conn, tr, readerWriterType)
+                if querySet <> null then
+                    let! existingLogs =
+                        conn.QueryAsync<ORMLog>(
+                            $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
+                            {| START = querySet.StartTime
+                               END = querySet.EndTime |}
+                        )
+                    logSet.InitializeForReader(existingLogs)
+
                 do! tr.CommitAsync()
 
                 return logSet
@@ -292,15 +306,15 @@ module internal DBLoggerImpl =
 
         let initializeLogWriterOnDemandAsync
             (
+                querySet: QuerySet,      // reader + writer 인 경우에만 non null 값
                 commonAppSetting: DSCommonAppSettings,
                 systems: DsSystem seq,
-                modelCompileInfo: ModelCompileInfo,
-                readerWriterType: DBLoggerType      // reader + writer 인 경우에만 true
+                modelCompileInfo: ModelCompileInfo
             ) =
             task {
                 do! initializeLogDbOnDemandAsync commonAppSetting
                 do! fillLoggerDBSchemaAsync modelCompileInfo
-                let! logSet_ = createLogInfoSetForWriterAsync (systems, readerWriterType)
+                let! logSet_ = createLogInfoSetForWriterAsync (querySet, systems)
                 logSet <- logSet_
 
                 interval.Subscribe(fun counter -> writePeriodicAsync(counter).Wait())

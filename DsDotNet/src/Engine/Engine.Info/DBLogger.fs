@@ -19,14 +19,13 @@ type DBLogger() =
         (
             commonAppSetting: DSCommonAppSettings,
             systems: DsSystem seq,
-            modelCompileInfo: ModelCompileInfo,
-            readerWriterType: DBLoggerType
+            modelCompileInfo: ModelCompileInfo
         ) =
         task {
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (commonAppSetting, systems, modelCompileInfo, readerWriterType)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (null, commonAppSetting, systems, modelCompileInfo)
 
             return logSet :> ILogSet
         }
@@ -55,7 +54,7 @@ type DBLogger() =
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (commonAppSetting, systems, modelCompileInfo, DBLoggerType.Reader ||| DBLoggerType.Writer)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (querySet, commonAppSetting, systems, modelCompileInfo)
 
             return logSet :> ILogSet
         }

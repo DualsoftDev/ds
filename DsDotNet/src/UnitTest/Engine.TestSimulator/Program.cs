@@ -28,7 +28,7 @@ namespace Engine.TestSimulator
             DSCommonAppSettings commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
 
             ModelCompileInfo mci = new(runModel.JsonPath, runModel.JsonPath);
-            _ = DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci, DBLoggerType.Writer);
+            _ = DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci);
             _ = DsSimulator.Do(runModel.Cpu);
             Console.ReadKey();  
         }

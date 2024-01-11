@@ -18,7 +18,7 @@ let createBoxImage (name: string, rect:Rectangle, backColor:Color) =
     // 직사각형을 그리기 위한 RectangleAnnotation 추가
     model.Annotations.Add(RectangleAnnotation(Fill = (backColor |> oxyColor)))
     // 텍스트 추가
-    let ta = TextAnnotation(Text = name, TextColor = (Color.SkyBlue |> oxyColor))
+    let ta = TextAnnotation(Text = name, TextColor = (Color.Yellow |> oxyColor))
 
     ta.FontWeight <- FontWeights.Bold // 텍스트 굵기 설정
     ta.Font <- (new Font("Tahoma", 1.0f)).ToString() // 폰트 설정
@@ -48,7 +48,7 @@ let createPieChartImage (name: string,  rect:Rectangle, runCnt:int, errCnt:int) 
             AngleSpan = 360.0,
             Diameter = 1.0,
             StrokeThickness = 0.00,
-            FontSize = 15,
+            FontSize = 20,
             InsideLabelFormat = "{0}\n{1}",
             OutsideLabelFormat = null,// 내부 라벨만 표시하도록 설정
             InsideLabelColor = (Color.White |> oxyColor)

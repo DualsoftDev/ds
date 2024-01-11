@@ -40,7 +40,7 @@ module rec TimerModule =
             if ts.TT.Value && not ts.DN.Value && ts.ACC.Value < ts.PRE.Value then
                 ts.ACC.Value <- ts.ACC.Value + MinTickInterval
                 if ts.ACC.Value >= ts.PRE.Value then
-                    tracefn "Timer accumulator value reached"
+                    debugfn "Timer accumulator value reached"
                     ts.TT.Value <- false
                     ts.DN.Value <- true
                     ts.EN.Value <- true
@@ -49,7 +49,7 @@ module rec TimerModule =
             if ts.TT.Value && ts.DN.Value && not ts.EN.Value && ts.ACC.Value < ts.PRE.Value then
                 ts.ACC.Value <- ts.ACC.Value + MinTickInterval
                 if ts.ACC.Value >= ts.PRE.Value then
-                    tracefn "Timer accumulator value reached"
+                    debugfn "Timer accumulator value reached"
                     ts.TT.Value <- false
                     ts.DN.Value <- false
 
@@ -57,13 +57,13 @@ module rec TimerModule =
             if ts.TT.Value && not ts.DN.Value && ts.EN.Value && ts.ACC.Value < ts.PRE.Value then
                 ts.ACC.Value <- ts.ACC.Value + MinTickInterval
                 if ts.ACC.Value >= ts.PRE.Value then
-                    tracefn "Timer accumulator value reached"
+                    debugfn "Timer accumulator value reached"
                     ts.TT.Value <- false
                     ts.EN.Value <- false
                     ts.DN.Value <- true
 
         let accumulate() =
-            //tracefn "Accumulating from %A" ts.ACC.Value
+            //debugfn "Accumulating from %A" ts.ACC.Value
             match tt with
             | TON -> accumulateTON()
             | TOF -> accumulateTOF()
@@ -74,7 +74,7 @@ module rec TimerModule =
         do
             ts.ResetStruct()
 
-            tracefn "Timer subscribing to tick event"
+            //debugfn "Timer subscribing to tick event"
             the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
 
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (timerStruct:>IStorage).DsSystem)
@@ -82,7 +82,7 @@ module rec TimerModule =
                 .Subscribe(fun (_system, _storage, newValue) ->
                     if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
                     let rungInCondition = newValue :?> bool
-                    //tracefn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
+                    //debugfn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
                     match tt, rungInCondition with
                     | TON, true ->
                         ts.TT.Value <- not ts.DN.Value

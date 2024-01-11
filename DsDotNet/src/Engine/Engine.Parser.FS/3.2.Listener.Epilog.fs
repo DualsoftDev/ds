@@ -262,7 +262,7 @@ module EtcListenerModule =
                         [ for value in values -> tryFindRealOrCall value ] |> Seq.choose id
 
                     let holder = safetyKey.Core :?> ISafetyConditoinHolder
-                    tracefn "%A = {%A}" holder safetyConditions
+                    debugfn "%A = {%A}" holder safetyConditions
 
                     safetyConditions.Iter(fun sc ->
                         holder.SafetyConditions.Add(sc)

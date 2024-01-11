@@ -15,11 +15,11 @@ module Loader =
         let dsApi =
             let reader =
                 Func<string, obj>(fun (tag: string) ->
-                    Trace.WriteLine($"Reading {tag}")
+                    Debug.WriteLine($"Reading {tag}")
                     true)
 
             let writer =
-                Action<string, obj>(fun (tag: string) (value: obj) -> Trace.WriteLine($"Writing {tag}={value}"))
+                Action<string, obj>(fun (tag: string) (value: obj) -> Debug.WriteLine($"Writing {tag}={value}"))
 
             DsApi(reader, writer)
 

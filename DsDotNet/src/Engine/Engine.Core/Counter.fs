@@ -253,7 +253,7 @@ module rec CounterModule =
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value >= cs.PRE.Value then
-                        tracefn "Counter accumulator value reached"
+                        debugfn "Counter accumulator value reached"
                         cs.DN.Value <- true
             ) |> disposables.Add
         let registerCTD() =
@@ -265,7 +265,7 @@ module rec CounterModule =
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value - 1us
                     if cs.ACC.Value <= cs.PRE.Value then
-                        tracefn "Counter accumulator value reached"
+                        debugfn "Counter accumulator value reached"
                         cs.DN.Value <- true
             ) |> disposables.Add
 
@@ -277,7 +277,7 @@ module rec CounterModule =
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1us
                     if cs.ACC.Value = cs.PRE.Value then
-                        tracefn "Counter accumulator value reached"
+                        debugfn "Counter accumulator value reached"
                         cs.DN.Value <- true
                     if cs.ACC.Value > cs.PRE.Value then
                         cs.ACC.Value <- 1us
@@ -289,7 +289,7 @@ module rec CounterModule =
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
                 .Where(fun (_system, storage, _newValue) -> storage = cs.RES && cs.RES.Value)
                 .Subscribe(fun (_system, _storage, _newValue) ->
-                    tracefn "Counter reset requested"
+                    debugfn "Counter reset requested"
                     if cs.ACC.Value < 0us || cs.PRE.Value < 0us then
                         failwithlog "ERROR"
                     cs.ACC.Value <- 0us

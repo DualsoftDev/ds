@@ -89,7 +89,7 @@ module internal DBLoggerImpl =
             systems: DsSystem seq,
             conn: IDbConnection,
             tr: IDbTransaction,
-            isReader: bool
+            readerWriterType: DBLoggerType
         ) : Task<LogSet> =
         task {
             let systemStorages: Storage array =
@@ -102,7 +102,7 @@ module internal DBLoggerImpl =
                 |> map Storage
                 |> toArray
 
-            if isReader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
+            if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connectionString}"
 
             let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}]")
@@ -119,7 +119,7 @@ module internal DBLoggerImpl =
                 s.Id <- dbStorages[getStorageKey s].Id
 
             if newStorages.any () then
-                if isReader then
+                if readerWriterType = DBLoggerType.Reader then
                     failwithlogf $"Database can't be sync'ed for {connectionString}"
                 else
                     for s in newStorages do
@@ -139,7 +139,7 @@ module internal DBLoggerImpl =
 
                         s.Id <- id
 
-            return new LogSet(querySet, systems, existingStorages @ newStorages, isReader)
+            return new LogSet(querySet, systems, existingStorages @ newStorages, readerWriterType)
         }
 
     /// DB log writer.  Runtime engine
@@ -149,7 +149,7 @@ module internal DBLoggerImpl =
 
         /// 주기적으로 memory -> DB 로 log 를 write
         let dequeAndWriteDBAsync (nPeriod: int64) =
-            verify (not logSet.IsLogReader)
+            verify (logSet.ReaderWriterType.HasFlag(DBLoggerType.Writer))
 
             // 큐를 배열로 바꾸고 비우는 함수
             let drainQueueToArray (queue: ConcurrentQueue<'T>) : 'T seq =
@@ -175,6 +175,10 @@ module internal DBLoggerImpl =
                     logDebug $"Writing {newLogs.length ()} new logs."
                     use conn = createConnection ()
                     use! tr = conn.BeginTransactionAsync()
+
+                    if (logSet.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
+                        let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
+                        logSet.BuildIncremental newLogs
 
                     for l in newLogs do
                         let query =
@@ -206,7 +210,7 @@ module internal DBLoggerImpl =
                 | _ -> failwithlog "ERROR"
 
 
-            verify (not logSet.IsLogReader)
+            verify (logSet.ReaderWriterType.HasFlag(DBLoggerType.Writer))
 
             for x in xs do
                 match x.Storage.Target with
@@ -224,12 +228,25 @@ module internal DBLoggerImpl =
         let enqueLogForInsert (x: DsLog) = enqueLogsForInsert ([ x ])
 
 
-        let createLogInfoSetForWriterAsync (systems: DsSystem seq) : Task<LogSet> =
+        let createLogInfoSetForWriterAsync (querySet: QuerySet, systems: DsSystem seq) : Task<LogSet> =
             task {
                 use conn = createConnection ()
                 use! tr = conn.BeginTransactionAsync()
-                let isReader = false
-                let! logSet = createLogInfoSetCommonAsync (null, systems, conn, tr, isReader)
+                let mutable readerWriterType = DBLoggerType.Writer
+                if querySet <> null then
+                    readerWriterType <- readerWriterType ||| DBLoggerType.Reader
+                    do! querySet.SetQueryRangeAsync(conn, tr)
+
+                let! logSet = createLogInfoSetCommonAsync (querySet, systems, conn, tr, readerWriterType)
+                if querySet <> null then
+                    let! existingLogs =
+                        conn.QueryAsync<ORMLog>(
+                            $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
+                            {| START = querySet.StartTime
+                               END = querySet.EndTime |}
+                        )
+                    logSet.InitializeForReader(existingLogs)
+
                 do! tr.CommitAsync()
 
                 return logSet
@@ -293,6 +310,7 @@ module internal DBLoggerImpl =
 
         let initializeLogWriterOnDemandAsync
             (
+                querySet: QuerySet,      // reader + writer 인 경우에만 non null 값
                 commonAppSetting: DSCommonAppSettings,
                 systems: DsSystem seq,
                 modelCompileInfo: ModelCompileInfo
@@ -300,7 +318,7 @@ module internal DBLoggerImpl =
             task {
                 do! initializeLogDbOnDemandAsync commonAppSetting
                 do! fillLoggerDBSchemaAsync modelCompileInfo
-                let! logSet_ = createLogInfoSetForWriterAsync (systems)
+                let! logSet_ = createLogInfoSetForWriterAsync (querySet, systems)
                 logSet <- logSet_
 
                 interval.Subscribe(fun counter -> writePeriodicAsync(counter).Wait())
@@ -352,7 +370,7 @@ module internal DBLoggerImpl =
                 querySet.DsConfigJsonPath <- dsConfigJson
 
                 do! querySet.SetQueryRangeAsync(conn, tr)
-                let! logSet = createLogInfoSetCommonAsync (querySet, systems, conn, tr, true)
+                let! logSet = createLogInfoSetCommonAsync (querySet, systems, conn, tr, DBLoggerType.Reader)
 
                 let! existingLogs =
                     conn.QueryAsync<ORMLog>(

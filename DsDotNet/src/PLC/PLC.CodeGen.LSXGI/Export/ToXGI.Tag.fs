@@ -79,7 +79,7 @@ module XGITag = //IEC61131Tag =
     //        | _ ->  failwithlog "Unknown  %s memType:" memType
 
     //        if (alreadyAllocatedAddresses.Contains(address)) then
-    //            Trace.WriteLine $"Adress {address} already in use. Tring to choose other address.."
+    //            Debug.WriteLine $"Adress {address} already in use. Tring to choose other address.."
     //            generate()
     //        else
     //            address

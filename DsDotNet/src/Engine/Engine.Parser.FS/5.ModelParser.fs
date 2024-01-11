@@ -13,7 +13,7 @@ module ModelParser =
         let listener = new DsParserListener(parser, options)
         let sysctx = parser.system ()
         ParseTreeWalker.Default.Walk(listener, sysctx)
-        tracefn ("--- End of skeleton listener")
+        debugfn ("--- End of skeleton listener")
         parser.Reset()
 
         listener.CreateVertices(sysctx)
@@ -63,7 +63,7 @@ module ModelParser =
         ParseFromString2(text, options).TheSystem
 
     let Initialize () =
-        tracefn "Initializing"
+        debugfn "Initializing model parser"
 
         let loadSystemFromDsFile (param: DeviceLoadParameters) =
             let (dsFilePath, loadedName) = param.AbsoluteFilePath, param.LoadedName

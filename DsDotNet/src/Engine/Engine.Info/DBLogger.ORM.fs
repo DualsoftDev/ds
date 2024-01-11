@@ -13,6 +13,13 @@ open Dual.Common.Db
 type ILogSet =
     inherit IDisposable
 
+[<Flags>]
+type DBLoggerType =
+    | None = 0
+    | Writer = 1
+    | Reader = 2
+
+
 /// DB logging query 기준
 /// StartTime: 조회 시작 기간.
 /// Null 이면 사전 지정된 start time 을 사용.  (사전 지정된 값이 없을 경우, DateTime.MinValue 와 동일)
@@ -186,7 +193,7 @@ CREATE VIEW [{Vn.Log}] AS
         member val LastLog: Log option = None with get, set
 
     /// DB logging 관련 전체 설정
-    and LogSet(querySet: QuerySet, systems: DsSystem seq, storages: Storage seq, isReader: bool) as this =
+    and LogSet(querySet: QuerySet, systems: DsSystem seq, storages: Storage seq, readerWriterType: DBLoggerType) as this =
         let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
 
         let summaryDic =
@@ -207,7 +214,7 @@ CREATE VIEW [{Vn.Log}] AS
         member x.Storages = storageDic
         member x.StoragesById = storageByIdDic
         member val LastLog: Log option = None with get, set
-        member x.IsLogReader = isReader
+        member x.ReaderWriterType = readerWriterType
         member x.Disposables = disposables
         member x.GetSummary(summaryKey: StorageKey) = summaryDic[summaryKey]
 

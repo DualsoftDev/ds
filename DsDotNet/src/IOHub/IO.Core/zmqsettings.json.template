@@ -9,28 +9,68 @@
       "ClassName": "IO.Dualsoft.AddressInfoProviderDS",
       "Files": [
         {
-          "Name": "M",
-          "Length": 65536
-        },
-        {
-          "Name": "T",
+          "Name": "boolean",
           "Length": 8192
         },
         {
-          "Name": "C",
-          "Length": 8192
+          "Name": "char",
+          "Length": 1024
+        },
+        {
+          "Name": "single",
+          "Length": 1024
+        },
+        {
+          "Name": "double",
+          "Length": 1024
+        },
+        {
+          "Name": "int16",
+          "Length": 1024
+        },
+        {
+          "Name": "int32",
+          "Length": 1024
+        },
+        {
+          "Name": "int64",
+          "Length": 1024
+        },
+        {
+          "Name": "sbyte",
+          "Length": 1024
+        },
+        {
+          "Name": "string",
+          "Length": 1024
+        },
+        {
+          "Name": "uint16",
+          "Length": 1024
+        },
+        {
+          "Name": "uint32",
+          "Length": 1024
+        },
+        {
+          "Name": "uint64",
+          "Length": 1024
+        },
+        {
+          "Name": "byte",
+          "Length": 1024
         }
       ]
     },
     {
       "Name": "LsXGI",
-      "Location": "",
-      "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "Location": "xgi",
+      "Dll": "D:\\ds\\dsA\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\obj\\Debug\\net7.0\\thirdparty.addressinfo.provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderLsXGI",
       "Files": [
         {
           "Name": "I",
-          "Length": 65536
+          "Length": 1024
         },
         {
           "Name": "Q",
@@ -38,14 +78,18 @@
         },
         {
           "Name": "M",
-          "Length": 2048
+          "Length": 1024
+        },
+        {
+          "Name": "R",
+          "Length": 1024
         }
       ]
     },
     {
       "Name": "Paix",
       "Location": "p",
-      "Dll": "F:\\Git\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "Dll": "D:\\ds\\dsA\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\obj\\Debug\\net7.0\\thirdparty.addressinfo.provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderPaix",
       "Files": [
         {

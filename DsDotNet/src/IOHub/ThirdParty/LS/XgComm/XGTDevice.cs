@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using XGCommLib;
 
 namespace XGTComm
@@ -86,6 +87,7 @@ namespace XGTComm
         public XGTDeviceByte(char device, int offsetBit)
             : base(device, XGTDeviceSize.Byte, offsetBit)
         {
+            if( offsetBit%8 != 0) { throw new Exception($"err size device {device} {offsetBit}"); };
         }
 
         public override string ToTextValue()
@@ -105,6 +107,7 @@ namespace XGTComm
         public XGTDeviceWord(char device, int offsetBit)
             : base(device, XGTDeviceSize.Word, offsetBit)
         {
+            if( offsetBit%16 != 0) { throw new Exception($"err size device {device} {offsetBit}"); };
         }
 
         public override string ToTextValue()
@@ -123,6 +126,7 @@ namespace XGTComm
         public XGTDeviceDWord(char device, int offsetBit)
             : base(device, XGTDeviceSize.DWord, offsetBit)
         {
+            if( offsetBit%32 != 0) { throw new Exception($"err size device {device} {offsetBit}"); };
         }
 
         public override string ToTextValue()
@@ -142,6 +146,7 @@ namespace XGTComm
         public XGTDeviceLWord(char device, int offsetBit)
             : base(device, XGTDeviceSize.LWord, offsetBit)
         {
+            if( offsetBit%64 != 0) { throw new Exception($"err size device {device} {offsetBit}"); };
         }
 
         public override string ToTextValue()

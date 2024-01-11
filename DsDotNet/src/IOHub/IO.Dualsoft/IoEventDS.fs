@@ -18,6 +18,7 @@ module ScanDSImpl =
     type IoEventDS(dsCPU:DsCPU, vendor:VendorSpec, client:Client) =
         let storages = dsCPU.Storages
         let tagSet = dsCPU.TagIndexSet
+        //let actionTags = dsCPU.Storages.Where(fun f-> TagKindExt.is f.Value.TagKind 
         let boolTags =   tagSet.Where(fun f->f.Value|>fst = typedefof<bool>).Select(fun s->s.Value|>snd, s.Key) |>dict
         let byteTags =   tagSet.Where(fun f->f.Value|>fst = typedefof<byte>).Select(fun s->s.Value|>snd, s.Key) |>dict
         let uint16Tags = tagSet.Where(fun f->f.Value|>fst = typedefof<uint16>).Select(fun s->s.Value|>snd, s.Key) |>dict
@@ -37,9 +38,15 @@ module ScanDSImpl =
                 | 1 ->
                     let values = values :?> bool[]
                     offsets.Iter(fun i-> storages[boolTags[i]].BoxedValue <- values[i])
-                | 8 ->
+                | 8 -> //성능때문에 bit를  IOHub로 부터 byte로 받음
                     let values = values :?> byte[]
-                    offsets.Iter(fun i-> storages[byteTags[i]].BoxedValue <- values[i])
+                    offsets.Iter(fun i-> 
+                    
+                        for bitIndex in 0 .. 7 do
+                            let absoluteBitIndex = i * 8 + bitIndex
+                            storages[byteTags[i]].BoxedValue <- values[i]
+                        
+                        )
                 | 16 ->
                     let values = values :?> uint16[]
                     offsets.Iter(fun i-> storages[uint16Tags[i]].BoxedValue <- values[i])

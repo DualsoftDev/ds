@@ -19,7 +19,7 @@
     <ItemGroup>
       <Compile Include="AddressMapModule.fs" />
       <Compile Include="AddressInfoProviderDS.fs" />
-      <Compile Include="ScanDS.fs" />
+      <Compile Include="IoEventDS.fs" />
       <Compile Include="Program.fs" />
     </ItemGroup>
 

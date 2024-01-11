@@ -28,13 +28,13 @@ module ScanImpl =
 
         let dicMemory =
             vendor.Files
-            |> Seq.map(fun file -> file.Name,  [0..file.Length-1].Select(fun i-> i, XGTDeviceLWord(file.Name.ToUpper()[0], i*8))|>dict)
+            |> Seq.map(fun file -> file.Name,  [0..file.Length-1].Select(fun i-> i, XGTDeviceLWord(file.Name.ToUpper()[0], i*64))|>dict)
             |> dict
 
-        let onHwBitTagChanged (change:char*int*bool) =
+        let onHwByteTagChanged (change:char*int*byte) =
             let dName, offset, value = change
             Console.WriteLine   change    
-            client.WriteBits(dName.ToString(), [|offset|], [|value|]) |> ignore
+            client.WriteBytes(dName.ToString(), [|offset|], [|value|]) |> ignore
 
 
         let onTagChanged (change:TagChangedInfo) =
@@ -116,7 +116,7 @@ module ScanImpl =
         do  
             errCheckDeviceName()
             client.TagChangedSubject.Subscribe(onTagChanged) |> ignore
-            XGTConnection.BitChangeSubject.Subscribe(onHwBitTagChanged) |> ignore
+            XGTConnection.ByteChangeSubject.Subscribe(onHwByteTagChanged) |> ignore
                     
       
         member x.DoScan() = 

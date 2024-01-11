@@ -19,7 +19,7 @@ namespace XGTComm
     {
 
         private readonly int tryCnt = 1;
-        public static Subject<Tuple<char, int, bool>> BitChangeSubject = new();
+        public static Subject<Tuple<char, int, byte>> ByteChangeSubject = new();
 
         /// <summary>
         /// Tries to execute a given function with a specified number of attempts. It's a generic method used for retry logic.
@@ -195,7 +195,16 @@ namespace XGTComm
 
             byte[] buf = new byte[MAX_RANDOM_READ_POINTS * longSize];
 
-            ReadRandomDevice(buf, xgtDevices.Select(s => s.ToText()));
+
+            try
+            {
+                ReadRandomDevice(buf, xgtDevices.Select(s => s.ToText()), true);
+            }
+            catch {
+                //time out으로 실패시 재접후 다시시도
+                ReConnect();
+                ReadRandomDevice(buf, xgtDevices.Select(s => s.ToText()));
+            }
             int i = 0;
             foreach (var xgtLDWord in xgtDevices)
             {
@@ -234,18 +243,7 @@ namespace XGTComm
 
                     if (changedByte != 0)
                     {
-                        for (int bitIndex = 0; bitIndex < 8; bitIndex++)
-                        {
-                            bool oldBit = (oldByte & (1 << bitIndex)) != 0;
-                            bool newBit = (newByte & (1 << bitIndex)) != 0;
-                            bool changedBit = (changedByte & (1 << bitIndex)) != 0;
-
-                            if (changedBit)
-                            {
-                                int absoluteBitIndex = byteIndex * 8 + bitIndex;
-                                BitChangeSubject.OnNext(Tuple.Create(device.Device, device.Offset * 64 + absoluteBitIndex, newBit));
-                            }
-                        }
+                        ByteChangeSubject.OnNext(Tuple.Create(device.Device, device.Offset + byteIndex, changedByte));
                     }
                 }
             }
@@ -258,11 +256,13 @@ namespace XGTComm
         /// <param name="buf">The buffer to store the read data.</param>
         /// <param name="names">The names of the devices to be read.</param>
         /// <returns>True if the read operation is successful, false otherwise.</returns>
-        private bool ReadRandomDevice(byte[] buf, IEnumerable<string> names)
+        private bool ReadRandomDevice(byte[] buf, IEnumerable<string> names, bool skipException = false)
         {
             if (CommObject.ReadRandomDevice(buf) != 1)
             {
-                throw new Exception($"ReadRandomDevice ERROR {String.Join(", ", names)}");
+                if(!skipException)
+                    throw new Exception($"ReadRandomDevice ERROR {String.Join(", ", names)}");
+                else return false;  
             }
             CommObject.RemoveAll();
             return true;

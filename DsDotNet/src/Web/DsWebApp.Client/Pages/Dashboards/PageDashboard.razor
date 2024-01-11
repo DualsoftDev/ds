@@ -13,10 +13,10 @@
 else
 {
     <CompFqdnSelectorOverlay System="_compDashboardInfoFetcher.InfoSystem" OnItemSelected="onItemSelected">
-        @if (_pops != null)
+        @if (_selected != null)
         {
             <DsChartEfficiency PopData="_pops" InnerTitle="@_selected.Name" />
-            <DsMultiBarChartEfficiency InfoParent="Selected" />
+            <DsMultiBarChartEfficiency InfoParent="Selected" @ref="_multiBar" />
             @* <DsInfoGridSingle Info="_selected" ClientSettings="@ClientGlobal.ClientSettings" /> *@
         }
     </CompFqdnSelectorOverlay>
@@ -25,6 +25,7 @@ else
 
 @code {
     CompDashboardInfoFetcher _compDashboardInfoFetcher;
+    DsMultiBarChartEfficiency _multiBar;
     IInfoBase _selected;
     InfoBase Selected { get; set; }
     EfficiencyCategoryItem[] _pops;
@@ -32,35 +33,47 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        _pops = [
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.가동 },
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.비가동 },
+            new EfficiencyCategoryItem() { Category = EfficiencyPopType.에러 },
+        ];
     }
 
     void onInfoSystemUpdated(InfoSystem infoSystem)
     {
         Console.WriteLine($"onInfoSystemUpdated: {infoSystem}");
         if (_selected == null)
-            StateHasChanged();
+        {
+            Console.WriteLine($"No selected node.");
+        }
         else
         {
             IInfoBase newInfo = infoSystem.FindInfo(_selected.Fqdn).Value;
-            if (!newInfo.IsEqual(_selected))
+            if (newInfo.IsEqual(_selected))
+            {
+                Console.WriteLine($"No value change for {_selected.Fqdn}");
+                Selected = newInfo as InfoBase;
+            }
+            else
+            {
                 onItemSelected(newInfo);
+            }
         }
-
+        StateHasChanged();
     }
 
     void onItemSelected(IInfoBase info)
     {
         _selected = info;
-        _pops = [
-            new EfficiencyCategoryItem() { Category = EfficiencyPopType.가동 },
-            new EfficiencyCategoryItem() { Category = EfficiencyPopType.비가동 },
-            new EfficiencyCategoryItem() { Category = EfficiencyPopType.에러 },
-        ];
+        Selected = _selected as InfoBase;
+
         var (가동, 비가동, 에러) = (
                 _pops[(int)EfficiencyPopType.가동],
                 _pops[(int)EfficiencyPopType.비가동],
                 _pops[(int)EfficiencyPopType.에러]);
 
+        Console.WriteLine($"onItemSelected: OLD: {info.Fqdn}: 가동={가동.Value}, 비가동={비가동.Value}, 에러={에러.Value}");
         switch (info)
         {
             case InfoBase infoBase:
@@ -92,8 +105,7 @@ else
                 Console.Error.WriteLine($"Unknown InfoBase type: {info.GetType().Name}");
                 break;
         }
+        Console.WriteLine($"onItemSelected: NEW: {info.Fqdn}: 가동={가동.Value}, 비가동={비가동.Value}, 에러={에러.Value}");
 
-        Selected = _selected as InfoBase;
-        StateHasChanged();
     }
 }

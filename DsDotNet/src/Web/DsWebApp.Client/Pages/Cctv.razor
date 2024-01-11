@@ -2,7 +2,8 @@
 @using System.Net.WebSockets
 @inject IJSRuntime JsRuntime
 
-<h3>CCTV</h3>
+<CompTitle Icon="oi oi-monitor" Title="CCTV" />
+
 
    <DxComboBox Data="@ScreensArray"
                 @bind-Value="@Screen"

@@ -12,25 +12,26 @@
 
             <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/hmis/hmi" Text="HMI" IconCssClass="oi oi-info">
                 <Nodes>
-                    <DxTreeViewNode NavigateUrl="/hmis/auto" Text="Auto" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
+                    <DxTreeViewNode NavigateUrl="/hmis/auto" Text="Auto" IconCssClass="oi oi-bolt"></DxTreeViewNode>
                 </Nodes>
             </DxTreeViewNode>
 
+            <DxTreeViewNode AllowSelection NavigateUrl="/Cctv" Text="CCTV" IconCssClass="oi oi-monitor"></DxTreeViewNode>
 
             <DxTreeViewNode CssClass="@rootNodeCssClass" NavigateUrl="/dashboards/dashboard" Text="Dashboard" IconCssClass="oi oi-grid-four-up">
                 <Nodes>
-                    <DxTreeViewNode NavigateUrl="/dashboards/grid" Text="Grid view" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
+                    <DxTreeViewNode NavigateUrl="/dashboards/grid" Text="Grid view" IconCssClass="oi oi-grid-three-up"></DxTreeViewNode>
                     <DxTreeViewNode NavigateUrl="/dashboards/query" Text="Query" IconCssClass="oi oi-zoom-out"></DxTreeViewNode>
                 </Nodes>
             </DxTreeViewNode>
 
-            <DxTreeViewNode Text="Etc">
+            <DxTreeViewNode IconCssClass="oi oi-aperture" Text="Etc">
                 <Nodes>
                     <DxTreeViewNode NavigateUrl="/etc/login" Text="Login" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
                 </Nodes>
             </DxTreeViewNode>
-            
-            <DxTreeViewNode Text="Demo">
+
+            <DxTreeViewNode IconCssClass="oi oi-thumb-up" Text="Demo">
                 <Nodes>
                     <DxTreeViewNode NavigateUrl="/demo/widget" Text="Test Widget" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
                     <DxTreeViewNode NavigateUrl="/demo/tall-widget" Text="Tall Widget" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
@@ -41,7 +42,6 @@
                 </Nodes>
             </DxTreeViewNode>
 
-            <DxTreeViewNode AllowSelection NavigateUrl="/Cctv" Text="CCTV" IconCssClass="oi oi-puzzle-piece"></DxTreeViewNode>
             <DxTreeViewNode CssClass="@rootNodeCssClass" Click="@onClickSwaggerUI" Text="Swagger" IconCssClass="oi oi-beaker"></DxTreeViewNode>
 
 

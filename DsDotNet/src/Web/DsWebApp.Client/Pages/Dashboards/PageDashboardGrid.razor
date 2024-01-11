@@ -1,5 +1,5 @@
 @* PageDashboardGrid *@
-<h3>PageDashboardGrid</h3>
+
 
 @page "/dashboards/grid"
 
@@ -11,6 +11,8 @@
 @implements IAsyncDisposable
 
 @attribute [Authorize(Roles = "Administrator")]
+
+<CompTitle Icon="oi oi-grid-three-up" Title="Grid View" />
 
 <h3>System</h3>
 <DxxGrid Data="_infoSystems" >

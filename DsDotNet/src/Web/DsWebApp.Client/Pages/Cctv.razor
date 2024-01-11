@@ -4,14 +4,14 @@
 
 <h3>CCTV</h3>
 
-@*     <DxComboBox Data="@ScreensArray"
+     <DxComboBox Data="@ScreensArray"
                 @bind-Value="@Screen"
                 @bind-Text="@Screen"
                 CssClass="cw-240"
                 InputId="cbOverview" 
                 onchange=""/>
 
-    <DxComboBox Data="@ModesArray"
+@*  <DxComboBox Data="@ModesArray"
                 @bind-Value="@Mode"
                 @bind-Text="@Mode"
                 CssClass="cw-240"
@@ -38,6 +38,12 @@
         imgElement.src = imgUrl;
     };
 
+    window.setScreens = (screens) => {
+        console.log("screens  ====== : " + screens);
+        DotNet.invokeMethodAsync('DsWebServer', 'setBlazorScreens', screens);
+
+    }
+
     // 이미지 전체화면으로 변경 이벤트 처리
     const elem = document.getElementById('stream-img');
     elem.addEventListener('click', () => {
@@ -51,6 +57,7 @@
             elem.msRequestFullscreen();
         }
     });
+
 </script>
 
 
@@ -77,8 +84,9 @@
             {
                 var screens = ok as string[];
                 Console.WriteLine($"cctv screens ={string.Join("; ", screens)}");
-                ScreensArray = screens;
-                Screen = ScreensArray[0];
+                JsRuntime.InvokeVoidAsync("setScreens", screens);
+                // ScreensArray = screens;
+                // Screen = ScreensArray[0];
             },
         err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
         );
@@ -94,6 +102,18 @@
             },
         err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
         );
+    }
+
+    private async Task SetScreenInJavaScript(string[] screens)
+    {
+        await JsRuntime.InvokeVoidAsync("setBlazorScreens", screens);
+    }
+
+    [JSInvokable]
+    public static void setBlazorScreens(string[] screens)
+    {
+        ScreensArray = { screens};
+        Screen = ScreensArray[0];
     }
 
 

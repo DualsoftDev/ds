@@ -48,7 +48,7 @@ let createPieChartImage (name: string,  rect:Rectangle, runCnt:int, errCnt:int) 
             AngleSpan = 360.0,
             Diameter = 1.0,
             StrokeThickness = 0.00,
-            FontSize = 15,
+            FontSize = 20,
             InsideLabelFormat = "{0}\n{1}",
             OutsideLabelFormat = null,// 내부 라벨만 표시하도록 설정
             InsideLabelColor = (Color.White |> oxyColor)

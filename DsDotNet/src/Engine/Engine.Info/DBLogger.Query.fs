@@ -8,6 +8,8 @@ open Engine.Core
 module internal DBLoggerQueryImpl =
 
     let sum (logSet: LogSet, fqdn: string, tagKind: int) : double =
+        if ( fqdn = "my.STN01_UsingLIB1.WORK1" || fqdn = "my.STN01_UsingLIB1.WORK2") && tagKind = int VertexTag.going then
+            tracefn "HERE..."
         let summary = logSet.GetSummary(tagKind, fqdn)
         summary.Sum
 

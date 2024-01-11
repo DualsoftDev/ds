@@ -18,7 +18,7 @@ let createBoxImage (name: string, rect:Rectangle, backColor:Color) =
     // 직사각형을 그리기 위한 RectangleAnnotation 추가
     model.Annotations.Add(RectangleAnnotation(Fill = (backColor |> oxyColor)))
     // 텍스트 추가
-    let ta = TextAnnotation(Text = name, TextColor = (Color.SkyBlue |> oxyColor))
+    let ta = TextAnnotation(Text = name, TextColor = (Color.Yellow |> oxyColor))
 
     ta.FontWeight <- FontWeights.Bold // 텍스트 굵기 설정
     ta.Font <- (new Font("Tahoma", 1.0f)).ToString() // 폰트 설정

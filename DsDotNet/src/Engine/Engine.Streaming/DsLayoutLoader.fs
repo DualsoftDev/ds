@@ -58,7 +58,7 @@ type DsLayoutLoader(dsSystem:DsSystem, runtimeDir:string) =
 
     member x.GetViewTypeList() =  Enum.GetNames(typeof<ViewType>) 
 
-    member x.GetServerChannels()       = serverImages.Select(fun f->f.ChannelName)
+    member x.GetServerChannels()       = serverImages.Select(fun f->f.ChannelName).Order()
     member x.GetUrl(ch:string)         = serverImages.First(fun f-> f.ChannelName = ch).URL
     member x.GetChannelName(ch:string) = serverImages.First(fun f-> f.ChannelName = ch).ChannelName
     member x.GetScreenType(ch:string)  = serverImages.First(fun f-> f.ChannelName = ch).ScreenType

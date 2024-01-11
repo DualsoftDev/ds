@@ -21,11 +21,11 @@ module ZmqTestClient =
         let iospec = client.GetMeta()
         iospec|>regulate
         let vendor = iospec.Vendors.First(fun f->f.Location =  "xgi")
-        
-        let scanIO = IOClient.Xgi.ScanImpl.ScanIO($"{zmqHWInfo.HwIP}:{zmqHWInfo.HwPort}", vendor, client)
+        let hwConnStr = $"{zmqHWInfo.HwIP}:{zmqHWInfo.HwPort}"
+        let scanIO = IOClient.Xgi.ScanImpl.ScanIO(hwConnStr, vendor, client)
+        let eventIO = IOClient.Xgi.IoEventXGIImpl.IoEventXGI(hwConnStr, iospec.Vendors, client)
+
         scanIO.DoScan()
-        //while true do
-        //    scanIO.DoScan()    
         Console.ReadKey()
         0  
 

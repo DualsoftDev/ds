@@ -24,7 +24,7 @@ namespace XGTComm
         private int _offsetBit;
         private char _device;
 
-        
+
         public XGTDevice(char device, XGTDeviceSize deviceSize, int offsetBit)
         {
             _device = device;
@@ -32,7 +32,8 @@ namespace XGTComm
             _offsetBit = offsetBit;
         }
 
-       
+        public bool InitUpdated { get; set; }
+
         public char Device => _device;
         public string ToText() => $"{_device}{_deviceSize}{_offsetBit}";
 
@@ -53,7 +54,7 @@ namespace XGTComm
                           : throw new Exception($"Size value error : current {_deviceSize}");
 
       
-        public int Offset => _offsetBit / 8;
+        public int OffsetByte => _offsetBit / 8;
         public abstract string ToTextValue();
     }
 
@@ -83,6 +84,7 @@ namespace XGTComm
     {
         
         public byte Value { get; set; }
+
 
         public XGTDeviceByte(char device, int offsetBit)
             : base(device, XGTDeviceSize.Byte, offsetBit)

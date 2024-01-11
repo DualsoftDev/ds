@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open IO.Spec
 open Newtonsoft.Json
 open System.Runtime.CompilerServices
+open System.Runtime.Remoting
 
 [<AutoOpen>]
 module rec ZmqSpec =
@@ -117,9 +118,15 @@ module rec ZmqSpec =
         let regulateDir (dir: string) = (regulatePath dir).TrimEnd(sep)
         x.TopLevelLocation <- regulateDir x.TopLevelLocation
 
+
         for v in x.Vendors do
             v.Location <- regulateDir v.Location
             v.Dll <- regulateDir v.Dll
+            v.AddressResolver <-
+                let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll) 
+                let oh: ObjectHandle = Activator.CreateInstanceFrom(dllPath, v.ClassName)
+                let obj: obj = oh.Unwrap()
+                obj :?> IAddressInfoProvider
 
             for f in v.Files do
                 f.Vendor <- v

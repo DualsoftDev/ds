@@ -24,7 +24,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
 
     let notifyIoChange (memChange: IMemoryChangeInfo) =
         let cri = memChange.ClientRequestInfo :?> ClientRequestInfo
-        Console.WriteLine($"change by client {clientIdentifierToString cri.ClientId}")
+        Console.WriteLine($"change by client (Count:{clients.Count()}) {clientIdentifierToString cri.ClientId}")
 
         let notiTargetClients =
             clients

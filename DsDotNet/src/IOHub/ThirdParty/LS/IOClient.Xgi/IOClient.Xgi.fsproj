@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="IoEventXGI.fs" />
         <Compile Include="ScanIO.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>

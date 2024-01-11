@@ -8,11 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs"/>
+        <Compile Include="..\..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\IO.Spec\IO.Spec.csproj"/>
+        <ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
+        <ProjectReference Include="..\ThirdParty\LS\XgComm\XGTComm.csproj" />
     </ItemGroup>
 
 </Project>

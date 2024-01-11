@@ -27,9 +27,15 @@ type DsSystem with
                 then
                     let sets = btn.ActionINFunc
 
-                    yield (sets, rsts) --| (s._clear_btn, getFuncName())
                     yield (sets, rsts) --| (s._auto_btn, getFuncName())
                     yield (sets, rsts) --| (s._ready_btn, getFuncName())
+
+            for btn in s.HomeHWButtons do
+                if btn.InTag.IsNonNull() 
+                then
+                    let sets = btn.ActionINFunc
+                    yield (sets, rsts) --| (s._clear_btn, getFuncName())
+
 
             (* device not func 로직 처리*)
             let devs = s.Jobs.SelectMany(fun j -> j.DeviceDefs)

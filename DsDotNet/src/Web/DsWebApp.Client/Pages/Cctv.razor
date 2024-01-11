@@ -20,7 +20,7 @@
                 CssClass="cw-240"
                 InputId="cbOverview" 
                 NullText="Select Mode" 
-                onchange=""/>
+                />
     <CompFullScreenManager FullScreenElementId="stream-img" />
 
     <div id="stream-img" style="width:60vw">
@@ -119,7 +119,6 @@
         {
             // WebSocket 연결
             await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
-            await Task.Delay(500); //   대기
             if (clientWebSocket.State == WebSocketState.Open)
             {
                 Console.WriteLine("WebSocket connection established.");

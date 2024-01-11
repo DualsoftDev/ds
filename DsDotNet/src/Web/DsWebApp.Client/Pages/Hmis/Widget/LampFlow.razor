@@ -54,6 +54,8 @@
             return "Ready";
         else if ((bool)_idle.Value)
             return "Idle";
+        else if ((bool)_test.Value)
+            return "Test";
         else
             return "INTERNAL ERROR!";
     }
@@ -93,4 +95,5 @@
         .embedded-lamp-flow.EMStop { background-color: red; }
         .embedded-lamp-flow.Drive { background-color: darkorange; }
         .embedded-lamp-flow.Idle { background-color: slateblue; }
+        .embedded-lamp-flow.Test { background-color: cornflowerblue; }
 </style>

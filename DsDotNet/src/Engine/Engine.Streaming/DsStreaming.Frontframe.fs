@@ -17,36 +17,32 @@ let getViewType (viewtype:string) =
     | "Error" -> ViewType.Error
     | _ -> ViewType.Normal
 
+let mutable cnt = 0
+let getErrorImage (f:InfoDevice, xywh:Xywh) =
+    let errText = String.Join(", ", f.ErrorMessages)
+    let backColor, text = 
+                    if f.ErrorMessages.Any() 
+                    then Color.OrangeRed,  $"{f.Name}\n{errText}"
+                    else Color.Green,  f.Name
+    createBoxImage(text, rect xywh, backColor)
 
-[<Obsolete("Remove test ErrorMessages test ....")>]
-let getTableImage (imgInfos:(InfoDevice*Xywh) seq) =
-    imgInfos.Select(fun (f, xywh)-> 
-        f.ErrorMessages.Clear()  
-        f.ErrorMessages.Add("출력 Timeout")     
-        f.ErrorMessages.Add("센서 고장")     
-        let errText = String.Join(", ", f.ErrorMessages)
-        let backColor, text = 
-                        if f.ErrorMessages.Any() 
-                        then Color.OrangeRed,  $"{f.Name}\n{errText}"
-                        else Color.Green,  f.Name
-        createBoxImage(text, rect xywh, backColor)
-    )   
+let getChartImage (f:InfoDevice, xywh:Xywh) =
+    //let rand = Random()
+    //f.GoingCount <- rand.Next(10,500)
+    //f.ErrorCount <- rand.Next(0,55)
+    createPieChartImage(f.Name, rect xywh, f.GoingCount, f.ErrorCount)
 
-                
-[<Obsolete("Remove random test data....")>]
-let getChartImage (imgInfos:(InfoDevice*Xywh) seq) = 
-    imgInfos.Select(fun (f, xywh)->
-        let rand = Random()
-        f.GoingCount <- rand.Next(10,500)
-        f.ErrorCount <- rand.Next(0,55)
-        createPieChartImage(f.Name, rect xywh, f.GoingCount, f.ErrorCount)
-    )   
-            
+let getErrorImages (imgInfos:(InfoDevice*Xywh) seq) =  imgInfos |> Seq.map(getErrorImage)
+let getChartImages (imgInfos:(InfoDevice*Xywh) seq) = 
+   
+    let normal = imgInfos.Where(fun (d,_)->d.ErrorMessages.Any()) |> Seq.map(getErrorImage) |> Seq.toList
+    let error = imgInfos.Where(fun (d,_)->not(d.ErrorMessages.Any())) |> Seq.map(getChartImage) |> Seq.toList
+    normal @ error
 
 let getFrontImage(viewType, imgInfos) =
     let img =
         match viewType with
-        | ViewType.Normal -> imgInfos |> getChartImage  |> OpenCVUtils.CombineImages _StreamFrontSize
-        | ViewType.Error  -> imgInfos |> getTableImage  |> OpenCVUtils.CombineImages _StreamFrontSize
+        | ViewType.Normal -> imgInfos |> getChartImages  |> OpenCVUtils.CombineImages _StreamFrontSize
+        | ViewType.Error  -> imgInfos |> getErrorImages  |> OpenCVUtils.CombineImages _StreamFrontSize
         | _ -> failwithf $"GetFrontImage {viewType}: error Type"
     img

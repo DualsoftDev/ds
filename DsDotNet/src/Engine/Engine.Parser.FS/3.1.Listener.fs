@@ -106,7 +106,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     exSys
             | _ -> x.TheSystem <- DsSystem(name)
 
-            tracefn ($"System: {name}")
+            debugfn ($"System: {name}")
         | None -> failwithlog "ERROR"
 
     override x.ExitSystem(_ctx: SystemContext) = x.OptLoadedSystemName <- None
@@ -116,7 +116,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         Flow.Create(flowName, x.TheSystem) |> ignore
 
     override x.EnterParentingBlock(ctx: ParentingBlockContext) =
-        tracefn ($"Parenting: {ctx.GetText()}")
+        debugfn ($"Parenting: {ctx.GetText()}")
         let name = ctx.identifier1().TryGetName().Value
         let oci = x.GetObjectContextInformation(x.TheSystem, ctx)
         let flow = oci.Flow.Value
@@ -352,7 +352,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
 
                     match existing with
-                    | Some v -> tracefn $"{v.Name} already exists.  Skip creating it."
+                    | Some v -> debugfn $"{v.Name} already exists.  Skip creating it."
                     | None ->
                         match cycle, ctxInfo.Names with
                         | 0, [ r ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
@@ -373,7 +373,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             ->
                             let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
-                            tracefn $"{realorFlow}.{cr} should already have been created."
+                            debugfn $"{realorFlow}.{cr} should already have been created."
 
                         | 2, [ q ] when isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand()) ->
                             let flow = parent.GetFlow()
@@ -471,7 +471,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                       let tx = getAddress (txAddressCtx)
                                       let rx = getAddress (rxAddressCtx)
 
-                                      tracefn $"TX={tx} RX={rx}"
+                                      debugfn $"TX={tx} RX={rx}"
                                       return TaskDev(apiPoint, rx, tx, device)
                                   }
 

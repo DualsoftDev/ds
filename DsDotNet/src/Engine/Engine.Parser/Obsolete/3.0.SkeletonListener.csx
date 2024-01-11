@@ -29,7 +29,7 @@ class DsParserListener : dsBaseListener
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         ICpu cpu = null;    // todo
         _system = DsSystem.Create(name, cpu, _model);
-        Trace.WriteLine($"System: {name}");
+        Debug.WriteLine($"System: {name}");
     }
     override public void ExitSystem(SystemContext ctx) { _system = null; }
 
@@ -80,7 +80,7 @@ class DsParserListener : dsBaseListener
 
     override public void EnterParenting(ParentingContext ctx)
     {
-        Trace.WriteLine($"Parenting: {ctx.GetText()}");
+        Debug.WriteLine($"Parenting: {ctx.GetText()}");
         var name = ctx.identifier1().GetText().DeQuoteOnDemand();
         _parenting = Segment.Create(name, _rootFlow);
 

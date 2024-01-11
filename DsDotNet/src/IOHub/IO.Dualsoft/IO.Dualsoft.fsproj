@@ -6,6 +6,7 @@
 		<LangVersion>8.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
 
@@ -16,9 +17,10 @@
         <Compile Include="HwServiceManager.fs" />
     </ItemGroup>
     <ItemGroup>
-      <Compile Include="Program.Client.FSharp.fs" />
       <Compile Include="AddressMapModule.fs" />
       <Compile Include="AddressInfoProviderDS.fs" />
+      <Compile Include="ScanDS.fs" />
+      <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -28,6 +30,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Parser\Engine.Parser.csproj" />
         <ProjectReference Include="..\IO.Core\IO.Core.fsproj" />
     </ItemGroup>
 

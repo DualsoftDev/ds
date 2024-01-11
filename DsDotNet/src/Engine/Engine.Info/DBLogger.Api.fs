@@ -3,6 +3,7 @@ namespace Engine.Info
 open Engine.Core
 open Dual.Common.Core.FS
 open System
+open System.Diagnostics
 open System.Linq
 open System.Runtime.CompilerServices
 
@@ -12,13 +13,15 @@ module DBLoggerApi =
     [<Obsolete("Remove random test data....")>]
     let private updateInfoBase (x:InfoBase, fqdn:string, kindDrive:int,  kindError:int,  kindPause:int) = 
 
-        if DBLoggerImpl.logSet.IsNull()
-        then failwithf "do InitializeLogDbOnDemandAsync"
+        if DBLoggerImpl.logSet.IsNull() then
+            failwithf "do InitializeLogDbOnDemandAsync"
+
+        Debug.WriteLine $"updateInfoBase for fqdn: {fqdn}"
 
         x.DriveSpan <- DBLogger.Sum(fqdn, kindDrive)
         x.DriveAverage <- DBLogger.Average(fqdn, kindDrive)
-        x.ErrorSpan <- DBLogger.Sum(fqdn, kindDrive)
-        x.ErrorAverage <- DBLogger.Average(fqdn, kindDrive)
+        x.ErrorSpan <- DBLogger.Sum(fqdn, kindError)
+        x.ErrorAverage <- DBLogger.Average(fqdn, kindError)
         x.ErrorCount <- DBLogger.Count(fqdn, kindError)
         x.PauseCount <- DBLogger.Count(fqdn, kindPause)
         if (x.DriveSpan + x.ErrorSpan > 0.0) then

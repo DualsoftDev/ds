@@ -3,6 +3,7 @@ namespace Engine.Cpu
 open Engine.Core
 open Dual.Common.Core.FS
 open System
+open System.Diagnostics
 open System.Linq
 open System.Collections.Generic
 open System.Threading.Tasks
@@ -34,6 +35,7 @@ module RunTime =
 
         let tagWebChangedFromCpuSubject = new Subject<TagWeb>()
         let tagWebChangedFromWebSubject = new Subject<TagWeb>()
+        let tagChangedForIOHub = new Subject<IStorage seq>()
 
         do
             let subscription =
@@ -42,7 +44,7 @@ module RunTime =
                     if hmiTags.ContainsKey stg.Name   
                     then 
                         let tagWeb = hmiTags[stg.Name]
-                        logDebug $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                        debugfn $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                         tagWeb.SetValue(stg.BoxedValue)
                         tagWebChangedFromCpuSubject.OnNext(tagWeb)
                 )
@@ -56,7 +58,7 @@ module RunTime =
 
         let subscription = 
             tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
-                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                    debugfn $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                     let cpuTag = tagStorages.[tagWeb.Name]
                     cpuTag.BoxedValue <-tagWeb.Value
             )
@@ -64,7 +66,9 @@ module RunTime =
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
             let chTags = cpuStorages.ChangedTags()
-            
+            //Changed 있는것만 IO Hub로 전송
+            if chTags.any() then tagChangedForIOHub.OnNext chTags 
+
             let exeStates = chTags.ExecutableStatements(mapRungs) 
             chTags.ChangedTagsClear(systems)
 
@@ -75,6 +79,12 @@ module RunTime =
           //       chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
 
             chTags
+
+        let storages = mySystem.Storages 
+        let tagIndexSet = storages 
+                          |> Seq.groupBy(fun f->f.Value.DataType)
+                          |> Seq.collect(fun (k, v) -> v |> Seq.mapi(fun i s -> s.Value.Name, (k, i)))
+                          |> dict
 
 
         let mutable ctsScan = new CancellationTokenSource()
@@ -134,6 +144,7 @@ module RunTime =
         ///MySystem + LoadedSystems
         member x.Systems = [x.MySystem] @ loadedSystems
         member x.MySystem = mySystem
+        member x.Storages = storages
         member x.LoadedSystems = loadedSystems
         member x.IsRunning = run
         member x.ScanSimDelay  with get() = scanSimDelay and set(v) = scanSimDelay <- v
@@ -165,10 +176,11 @@ module RunTime =
         member x.QuickDriveReady() =
             systems.Iter(fun sys-> preAction(sys, true))
             scanOnce() |> ignore
-
         member x.TagWebChangedFromWebSubject = tagWebChangedFromWebSubject
         member x.TagWebChangedFromCpuSubject = tagWebChangedFromCpuSubject
-
+        member x.TagChangedForIOHub = tagChangedForIOHub
+        member x.TagIndexSet = tagIndexSet
+        
     [<Extension>]
     type DsCpuExt  =
         //Job 만들기

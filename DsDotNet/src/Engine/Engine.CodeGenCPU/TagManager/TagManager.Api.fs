@@ -32,6 +32,7 @@ module ApiTagManagerModule =
         let trxErr            = cpv ApiItemTag.trxErr
 
         let timerTimeOutBit = timer  stg "TOUT" apiItem.System   
+        let timerSensorOutBit = timer  stg "TOUTSensor" apiItem.System   
         
         interface ITagManager with
             member _.Target = apiItem
@@ -71,6 +72,7 @@ module ApiTagManagerModule =
 
         ///Timer time out
         member _.TOUT   = timerTimeOutBit
+        member _.TOUTSensor   = timerSensorOutBit
         member _.PS   = ps
         member _.PE   = pe
 

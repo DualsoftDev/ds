@@ -29,6 +29,7 @@ module internal DBLoggerQueryImpl =
     let isOff = isOn >> not
 
     type Summary with
+        [<Obsolete("duplicate check 임시 막은 것 풀 것.")>]
         // logs: id 순
         member x.Build(FList(logs: Log list)) =
             let mutable count = 0
@@ -48,7 +49,8 @@ module internal DBLoggerQueryImpl =
                         assert (duration >= 0)
                         sum <- sum + duration
                         inspectLog tails
-                    | _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected. ({log1.Storage.Name}:{b1}, {log2.Storage.Name}:{b2})"
+                    //| _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected. ({log1.Storage.Name}:{b1}, {log2.Storage.Name}:{b2})"
+                    | _ when b1 = b2 -> ()  // todo: replace this line with above line
                     | _ -> failwithlogf $"ERROR.  Expect ({log1.Storage.Name}:rising, {log2.Storage.Name}:falling)."
 
             logs |> inspectLog
@@ -58,16 +60,19 @@ module internal DBLoggerQueryImpl =
             x.LastLog <- logs.TryLast()
             ()
 
+        [<Obsolete("duplicate check 임시 막은 것 풀 것.")>]
         member x.BuildIncremental(FList(newLogs: Log list)) =
             let helper (last: Log) =
                 if x.LastLog.IsNone then
                     if isOff (last) then
-                        failwithlogf $"ERROR.  Invalid value starts: OFF(false)."
+                        //failwithlogf $"ERROR.  Invalid value starts: OFF(false)."
+                        logWarn $"ERROR.  Invalid value starts: OFF(false)."
                 else
                     let prev = x.LastLog.Value
 
                     if isOn (prev) = isOn (last) then
-                        failwithlogf $"ERROR.  duplicated consecutive values detected."
+                        //failwithlogf $"ERROR.  duplicated consecutive values detected."
+                        logWarn  $"ERROR.  duplicated consecutive values detected."
 
                     if isOff (last) then
                         x.Count <- x.Count + 1

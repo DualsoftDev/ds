@@ -31,7 +31,8 @@ services.AddTraceLogAppender("DsWebAppServerLogger");
 logger.Info($"======================= DsWebApp started.");
 logger.Info($"Debugger.IsAttached = {Debugger.IsAttached}");
 Log4NetWrapper.SetLogger(logger);
-
+Dual.Common.Core.Log4NetLogger.Logger = logger;
+logger.Debug($"==================== DEBUG");
 // Add services to the container.
 services.AddSignalR();
 conf.AddEnvironmentVariables();
@@ -47,7 +48,7 @@ logger.Info($"ASPNETCORE_URLS = {urls}");
 if (!isWinService)
 {
     builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
-    Trace.WriteLine($"Current = {Directory.GetCurrentDirectory()}");
+    Debug.WriteLine($"Current = {Directory.GetCurrentDirectory()}");
 }
 services.AddSingleton<Demon>();
 services.AddHostedService(provider => provider.GetService<Demon>());

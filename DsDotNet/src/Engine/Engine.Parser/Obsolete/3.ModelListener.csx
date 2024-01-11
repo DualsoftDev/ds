@@ -146,7 +146,7 @@ class ModelListener : dsBaseListener
 
     override public void EnterCausals(CausalsContext ctx)
     {
-        Trace.WriteLine($"Causals: {ctx.GetText()}");
+        Debug.WriteLine($"Causals: {ctx.GetText()}");
     }
     //override public void ExitCausals(CausalsContext ctx) {}
 

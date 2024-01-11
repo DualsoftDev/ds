@@ -212,7 +212,7 @@ partial class ElementsListener
         */
     private void processCausal(CausalTokensDNFContext ll, CausalOperatorContext opr, CausalTokensDNFContext rr)
     {
-        Trace.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
+        Debug.WriteLine($"{ll.GetText()} {opr.GetText()} {rr.GetText()}");
 
         var ls = this.addNodes(ll);
         var rs = this.addNodes(rr);

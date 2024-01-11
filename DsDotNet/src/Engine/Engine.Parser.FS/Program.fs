@@ -935,7 +935,7 @@ C4 > C5;
         )
         |> ignore
 
-        tracefn "Done"
+        debugfn "Done"
 
 
     let Main (_args: string[]) =

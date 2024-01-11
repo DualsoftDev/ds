@@ -43,7 +43,7 @@ logger.Info($"ASPNETCORE_URLS = {urls}");
 if (!isWinService)
 {
     builder.Host.UseContentRoot(Directory.GetCurrentDirectory());
-    Trace.WriteLine($"Current = {Directory.GetCurrentDirectory()}");
+    Debug.WriteLine($"Current = {Directory.GetCurrentDirectory()}");
 }
 
 // Add services to the container.

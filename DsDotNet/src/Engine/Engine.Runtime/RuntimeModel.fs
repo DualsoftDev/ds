@@ -18,6 +18,7 @@ type RuntimeModel(zipDsPath:FilePath) =
     let model:Model = ParserLoader.LoadFromConfig (jsonPath) 
     let dsCPU, hmiPackage = DsCpuExt.GetDsCPU(model.System)
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
+   
     let dsStreaming = DsStreaming(model.System, PathManager.getDirectoryName(jsonPath|>DsFile))
     interface IDisposable with
         member x.Dispose() = x.Dispose()

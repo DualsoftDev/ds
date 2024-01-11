@@ -1,0 +1,6 @@
+{
+  "HwIP": "192.168.9.102",
+  "HwPort": "2004",
+  "ServerIP": "tcp://localhost",
+  "ServerPort": "5555"
+}

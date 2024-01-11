@@ -99,6 +99,17 @@ module rec ZmqSpec =
             |> JsonConvert.DeserializeObject<IOSpec>
             |> tee regulate
 
+    [<AllowNullLiteral>]
+    type IOSpecHW() =
+        member val ServerIP = "" with get, set
+        member val ServerPort = 0 with get, set
+        member val HwIP = "" with get, set
+        member val HwPort = 0 with get, set
+
+        static member FromJsonFile(jsonPath: string) =
+            jsonPath
+            |> File.ReadAllText
+            |> JsonConvert.DeserializeObject<IOSpecHW>
 
     let regulate (x: IOSpec) =
         let sep = Path.DirectorySeparatorChar

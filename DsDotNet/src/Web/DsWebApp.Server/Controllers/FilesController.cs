@@ -19,8 +19,8 @@ public class FilesController : ControllerBaseWithLogger
         _hubContextModel = hubContextModel;
         var onFileUploaded = new Action<string>(fileName =>
         {
-            // dszip 파일 신규 upload 에 대한 처리
-            System.IO.File.Copy(fileName, _global.ServerSettings.RuntimeModelDsZipPath, overwrite:true);
+            // dszip 파일 신규 upload 에 대한 처리  //copy->move로 변경 동작일단 잘됨
+            System.IO.File.Move(fileName, _global.ServerSettings.RuntimeModelDsZipPath, overwrite:true);
             _global.ServerSettings.RuntimeModelDsZipPath = fileName;
             _global.ReloadRuntimeModel(global.ServerSettings);
             _hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, fileName);
@@ -64,7 +64,7 @@ public class FilesController : ControllerBaseWithLogger
         string uploadedPath = _helper.UploadFile(file);
         return uploadedPath.IsNullOrEmpty() ? BadRequest() : Ok(new { uploadedPath });
 
-        //Trace.WriteLine("UploadFile" + formFile.fileName);
+        //Debug.WriteLine("UploadFile" + formFile.fileName);
         //return Ok(formFile.fileName);
     }
 }

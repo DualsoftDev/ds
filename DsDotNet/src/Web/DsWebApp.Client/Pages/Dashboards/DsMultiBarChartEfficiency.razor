@@ -39,7 +39,7 @@
                 children = real.InfoCalls.ToArray();
                 break;
             case InfoCall call:
-                JsDual.Alert("Call does not supported for children statistics for now!");
+                ToastService.ShowWarning("Call does not supported for children statistics for now!");
                 // children = call.InfoDevices.ToArray();
                 break;
             default:

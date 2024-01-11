@@ -14,35 +14,8 @@ public class ServerSettings
 
     public RuntimePackageCs RuntimePackageCs { get; set; }
 
-    public RuntimePackage GetRuntimePackage() =>
-        RuntimePackageCs switch
-            {
-                RuntimePackageCs.StandardPC => RuntimePackage.StandardPC,
-                RuntimePackageCs.StandardPLC => RuntimePackage.StandardPLC,
-                RuntimePackageCs.LightPC => RuntimePackage.LightPC,
-                RuntimePackageCs.LightPLC => RuntimePackage.LightPLC,
-                RuntimePackageCs.Simulation => RuntimePackage.Simulation,
-                RuntimePackageCs.SimulationDubug => RuntimePackage.SimulationDubug,
-                _ => RuntimePackage.StandardPC,
-            };
-
-    public void SetRuntimePackage(RuntimePackage value)
-    {
-        if (value == RuntimePackage.StandardPC)
-            RuntimePackageCs = RuntimePackageCs.StandardPC;
-        else if (value == RuntimePackage.StandardPLC)
-            RuntimePackageCs = RuntimePackageCs.StandardPLC;
-        else if (value == RuntimePackage.LightPC)
-            RuntimePackageCs = RuntimePackageCs.LightPC;
-        else if (value == RuntimePackage.LightPLC)
-            RuntimePackageCs = RuntimePackageCs.LightPLC;
-        else if (value == RuntimePackage.Simulation)
-            RuntimePackageCs = RuntimePackageCs.Simulation;
-        else if (value == RuntimePackage.SimulationDubug)
-            RuntimePackageCs = RuntimePackageCs.Simulation;
-        else
-            throw new NotImplementedException();
-    }
+    public RuntimePackage GetRuntimePackage() => RuntimePackageCs.ToRuntimePackage();
+    public void SetRuntimePackage(RuntimePackage value) => RuntimePackageCs = value.ToRuntimePackageCs();
 }
 
 /// <summary>
@@ -65,5 +38,34 @@ public static class ServerSettingsExtensions
     {
         Directory.CreateDirectory(Path.GetDirectoryName(serverSettings.RuntimeModelDsZipPath));
         //serverSettings.VncSettings.Initialize();
+    }
+
+    public static RuntimePackage ToRuntimePackage(this RuntimePackageCs runtimePackageCs) =>
+        runtimePackageCs switch
+        {
+                RuntimePackageCs.StandardPC => RuntimePackage.StandardPC,
+                RuntimePackageCs.StandardPLC => RuntimePackage.StandardPLC,
+                RuntimePackageCs.LightPC => RuntimePackage.LightPC,
+                RuntimePackageCs.LightPLC => RuntimePackage.LightPLC,
+                RuntimePackageCs.Simulation => RuntimePackage.Simulation,
+                RuntimePackageCs.SimulationDubug => RuntimePackage.SimulationDubug,
+                _ => RuntimePackage.StandardPC,
+        };
+    public static RuntimePackageCs ToRuntimePackageCs(this RuntimePackage runtimePackage)
+    {
+        if (runtimePackage == RuntimePackage.StandardPC)
+            return RuntimePackageCs.StandardPC;
+        else if (runtimePackage == RuntimePackage.StandardPLC)
+            return RuntimePackageCs.StandardPLC;
+        else if (runtimePackage == RuntimePackage.LightPC)
+            return RuntimePackageCs.LightPC;
+        else if (runtimePackage == RuntimePackage.LightPLC)
+            return RuntimePackageCs.LightPLC;
+        else if (runtimePackage == RuntimePackage.Simulation)
+            return RuntimePackageCs.Simulation;
+        else if (runtimePackage == RuntimePackage.SimulationDubug)
+            return RuntimePackageCs.Simulation;
+        else
+            throw new NotImplementedException();        
     }
 }

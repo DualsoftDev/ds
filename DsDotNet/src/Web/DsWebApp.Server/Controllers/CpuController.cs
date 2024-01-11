@@ -16,21 +16,19 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
     [HttpGet("isRunning")]
     public bool IsCpuRunning() => _cpu?.IsRunning ?? false;
 
-    RuntimeModelDto modelDto(bool newIsCpuRunning) =>
-        new RuntimeModelDto(global.ServerSettings.RuntimeModelDsZipPath, newIsCpuRunning);
-
-
     // api/cpu/command/run
     [Authorize(Roles = "Administrator")]
     [HttpGet("command/run")]
     public ResultSS Run()
     {
         if (_cpu == null)
-            return ResultSS.Err("No model loaded to run");
+            return ResultSS.Err("No CPU instance to run");
         if (_cpu.IsRunning)
-            return ResultSS.Err("Already running");
+            return ResultSS.Err("CPU Already running");
 
         _cpu.RunInBackground();
+        _logger.Info("CPU run in background.");
+
         hubContextModel.Clients.All.SendAsync(SK.S2CNCpuRunningStatusChanged, true);
         return ResultSS.Ok("Ok");
     }
@@ -41,10 +39,11 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
     public ResultSS Stop()
     {
         if (_cpu == null)
-            return ResultSS.Err("No model loaded for stop");
+            return ResultSS.Err("No running CPU for stop");
         if (! _cpu.IsRunning)
-            return ResultSS.Err("Already stopped");
+            return ResultSS.Err("CPU Already stopped");
         _cpu.Stop();
+        _logger.Warn("Stopped CPU.");
         hubContextModel.Clients.All.SendAsync(SK.S2CNCpuRunningStatusChanged, false);
         return ResultSS.Ok("Ok");
     }
@@ -54,8 +53,21 @@ public class CpuController(ServerGlobal global, IHubContext<ModelHub> hubContext
     [HttpGet("command/reload-model")]
     public ResultSS ReloadModel()
     {
+        var zipPath = global.ServerSettings.RuntimeModelDsZipPath;
+        _logger.Info($"Reloading model: {zipPath}");
         global.ReloadRuntimeModel(global.ServerSettings);
-        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, global.ServerSettings.RuntimeModelDsZipPath);
+        hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, zipPath);
+        return ResultSS.Ok("Ok");
+    }
+
+
+    // api/cpu/command/set-runtime-package
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("command/set-runtime-package/{runtimePackage}")]
+    public ResultSS SetRuntimePackage(RuntimePackageCs runtimePackage)
+    {
+        _logger.Info($"RuntimePackage changed: {global.ServerSettings.RuntimePackageCs} => {runtimePackage}");
+        global.ServerSettings.RuntimePackageCs = runtimePackage;
         return ResultSS.Ok("Ok");
     }
 }

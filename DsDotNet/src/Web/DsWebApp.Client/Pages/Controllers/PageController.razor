@@ -21,23 +21,25 @@ else
     }
     else
     {
-        <CompModelCpuMonitor OnModelChanged="@(_ => StateHasChanged())"
-                             OnCpuRunningStatusChanged="@(_ => StateHasChanged())" />
-        <ul>SourceDsZipPath: @ClientGlobal.ModelDsZipPath</ul>
-        <ul>Cpu Running: @_isRunning</ul>
+        <CompEnableDisable Disabled="@_disableUI">
+            <CompModelCpuMonitor OnModelChanged="@(_ => StateHasChanged())"
+                                 OnCpuRunningStatusChanged="@(_ => StateHasChanged())" />
+            <ul>SourceDsZipPath: @ClientGlobal.ModelDsZipPath</ul>
+            <ul>Cpu Running: @_isRunning</ul>
 
-        <button class="btn btn-primary" @onclick="Run" disabled="@_isRunning">Run</button>
-        <button class="btn btn-primary" @onclick="Stop" disabled="@(!_isRunning)">Stop</button>
-        <button class="btn btn-primary" @onclick="Step" disabled="@(!_isRunning)">Step</button>
-        <button class="btn btn-primary" @onclick="Reset" disabled="@(!_isRunning)">Reset</button>
+            <button class="btn btn-primary" @onclick="Run" disabled="@_isRunning">Run</button>
+            <button class="btn btn-primary" @onclick="Stop" disabled="@(!_isRunning)">Stop</button>
+            <button class="btn btn-primary" @onclick="Step" disabled="@(!_isRunning)">Step</button>
+            <button class="btn btn-primary" @onclick="Reset" disabled="@(!_isRunning)">Reset</button>
 
-        <br/>
-        @if (_cgs != null)
-        {
-            <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs"
-                              Disabled="@_isRunning"
-                              @bind-Value="RuntimePackage" />
-        }
+            <br />
+            @if (_cgs != null)
+            {
+                <CompEnumSelector Title="Runtime Package: " TEnum="RuntimePackageCs"
+                                  Disabled="@_isRunning"
+                                  @bind-Value="RuntimePackage" />
+            }
+        </CompEnableDisable>
     }
 }
 
@@ -46,6 +48,7 @@ else
 @code {
     bool _loading = true;
     bool _isRunning => ClientGlobal.IsCpuRunning;
+    bool _disableUI;
 
     ServerSettings _cgs => ClientGlobal.ServerSettings;
     RuntimePackageCs RuntimePackage {
@@ -57,7 +60,7 @@ else
             {
                 _cgs.RuntimePackageCs = value;
                 // api 를 통해 ServerGlobal.ReloadRuntimeModel() 호출
-                reloadModel().Wait();
+                reloadModel(value).Wait();
             }
         }
     }
@@ -104,9 +107,14 @@ else
         await executeRestApi($"api/cpu/command/reset", "Cpu reset'ed.");
     }
 
-    async Task reloadModel()
+    async Task reloadModel(RuntimePackageCs runtimePackage)
     {
+        _disableUI = true;
+        StateHasChanged();
+        await executeRestApi($"api/cpu/command/set-runtime-package/{runtimePackage}", "Runtime package changed.");
         await executeRestApi($"api/cpu/command/reload-model", "Model reloaded.");
+        _disableUI = false;
+        StateHasChanged();
     }
 
 }

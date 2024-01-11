@@ -19,6 +19,9 @@ let getViewType (viewtype:string) =
 
 let mutable cnt = 0
 let getErrorImage (f:InfoDevice, xywh:Xywh) =
+    f.ErrorMessages.Clear()  
+    f.ErrorMessages.Add("출력 Timeout")     
+    f.ErrorMessages.Add("센서 고장")     
     let errText = String.Join(", ", f.ErrorMessages)
     let backColor, text = 
                     if f.ErrorMessages.Any() 
@@ -27,9 +30,9 @@ let getErrorImage (f:InfoDevice, xywh:Xywh) =
     createBoxImage(text, rect xywh, backColor)
 
 let getChartImage (f:InfoDevice, xywh:Xywh) =
-    //let rand = Random()
-    //f.GoingCount <- rand.Next(10,500)
-    //f.ErrorCount <- rand.Next(0,55)
+    let rand = Random()
+    f.GoingCount <- rand.Next(10,500)
+    f.ErrorCount <- rand.Next(0,55)
     createPieChartImage(f.Name, rect xywh, f.GoingCount, f.ErrorCount)
 
 let getErrorImages (imgInfos:(InfoDevice*Xywh) seq) =  imgInfos |> Seq.map(getErrorImage)

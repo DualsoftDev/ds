@@ -50,6 +50,7 @@ type OpenCVUtils() =
     static member CompressImage(frame : Mat) : byte[] =
         use stream = new MemoryStream()
         frame.ToImage<Bgr, byte>().ToBitmap().Save(stream, System.Drawing.Imaging.ImageFormat.Jpeg)
+        frame.Dispose()
         stream.ToArray()
 
     static member ByteArrayToMat(bytes : byte[]) : Mat =

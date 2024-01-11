@@ -28,7 +28,7 @@ type StreamClient = {
 
 [<AutoOpen>]
 type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
-    let _delayFps = 1000 / 60
+    let _delayFps = 1000 / 20
     let _streamClients = Dictionary<WebSocket, StreamClient>()
     let _webStreamSet = Dictionary<string, byte[]>()
     let _dsl = new DsLayoutLoader(dsSystem, runtimeDir)

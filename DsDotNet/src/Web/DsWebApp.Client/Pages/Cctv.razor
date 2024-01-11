@@ -7,6 +7,7 @@
    <DxComboBox Data="@ScreensArray"
                 @bind-Value="@Screen"
                 @bind-Text="@Screen"
+                @onselect="@(async () => await GetImageAync())"
                 NullText="Select Screen"
                 CssClass="cw-240"
                 InputId=""
@@ -15,11 +16,12 @@
    <DxComboBox Data="@ModesArray"
                 @bind-Value="@Mode"
                 @bind-Text="@Mode"
+                @onselect="@(async () => await GetImageAync())"
                 CssClass="cw-240"
                 InputId="cbOverview" 
                 NullText="Select Mode" 
                 />
-    <DxButton Text="확인" @onclick="@(async () => await GetImageAync())"></DxButton>
+<!--<DxButton Text="확인" @onclick="@(async () => await GetImageAync())"></DxButton>-->
 
     <div id="stream-img" style="width:60vw">
         <img src="@imageSource" style="height:100%; width:100%;" />

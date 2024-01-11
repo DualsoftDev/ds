@@ -23,14 +23,19 @@ type OpenCVUtils() =
         result
 
     static member AlphaBlend(front : Mat, locationFront : Point, back : Mat) : Mat =
-        if locationFront.X + front.Width > back.Width || locationFront.Y + front.Height > back.Height then
-            back.Clone()
-        else
-            let modifiedBack = back.Clone()
-            let roi = new Rectangle(locationFront, front.Size)
-            let regionOfInterest = new Mat(modifiedBack, roi)
-            CvInvoke.AddWeighted(front, 0.5, regionOfInterest, 0.5, 0.0, regionOfInterest)
-            modifiedBack
+        try
+            if locationFront.X + front.Width > back.Width || locationFront.Y + front.Height > back.Height then
+                back.Clone()
+            else
+                let modifiedBack = back.Clone()
+                let roi = new Rectangle(locationFront, front.Size)
+                let regionOfInterest = new Mat(modifiedBack, roi)
+                CvInvoke.AddWeighted(front, 0.5, regionOfInterest, 0.5, 0.0, regionOfInterest)
+                modifiedBack
+        with
+        |_ -> Console.WriteLine "err ResizeImage"
+              front.Clone()
+              
 
     static member ResizeImage(img : Mat, newWidth : int, newHeight : int) : Mat =
     

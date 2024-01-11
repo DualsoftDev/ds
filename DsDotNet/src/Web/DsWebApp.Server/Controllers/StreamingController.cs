@@ -11,6 +11,8 @@ using DevExpress.Pdf.Native.BouncyCastle.Asn1;
 
 namespace DsWebApp.Server.Controllers;
 
+
+
 /// <summary>
 /// Streaming controller.  GetScreens/GetViewTypes
 /// </summary>
@@ -20,8 +22,8 @@ namespace DsWebApp.Server.Controllers;
 public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
 {
     RuntimeModel _model => global.RuntimeModel;
-    Dictionary<string, WebSocket> _dicWebSocket = new Dictionary<string, WebSocket>();
-    [HttpGet("screens")]
+    Dictionary<string, WebSocket> _dicWebSocket => Dict.DicWebSocket;
+   [HttpGet("screens")]
     public ResultSArray GetScreens()
     {
         if (_model == null)
@@ -45,7 +47,7 @@ public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger
 
         if (HttpContext.WebSockets.IsWebSocketRequest)
         {
-            var clientKey = $"{clientGuid};{channel}";
+            var clientKey = $"{clientGuid}";
             var webSocket = _dicWebSocket.ContainsKey(clientKey) ? _dicWebSocket[clientKey] : null;
 
             if (webSocket != null && webSocket.State == WebSocketState.Open)
@@ -63,5 +65,11 @@ public class StreamingController(ServerGlobal global) : ControllerBaseWithLogger
 
         return ResultSS.Ok("streamstart ok");
     }
-    
+
 }
+
+public static class Dict
+{
+    public static Dictionary<string, WebSocket> DicWebSocket = new Dictionary<string, WebSocket>();
+}
+

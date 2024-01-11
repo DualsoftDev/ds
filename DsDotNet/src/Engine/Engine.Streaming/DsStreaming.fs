@@ -21,14 +21,14 @@ open DsStreamingBackModule
 type StreamClient = {
         ChannelName :string 
         ViewType : ViewType
-        IpPort : string 
+        ClientGuid : string 
     }
-    with member x.Key =  $"{x.ChannelName}:{x.IpPort}";
+    with member x.Key =  $"{x.ClientGuid};{x.ChannelName}";
 
 
 [<AutoOpen>]
 type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
-    let _delayFps = 1000 / 60
+    let _delayFps = 1000 / 20
     let _streamClients = Dictionary<WebSocket, StreamClient>()
     let _webStreamSet = Dictionary<string, byte[]>()
     let _dsl = new DsLayoutLoader(dsSystem, runtimeDir)
@@ -90,13 +90,13 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
 
     member x.DsLayout = _dsl
     member x.GetImageInfos (url:string) = getImageInfos url
-    member x.ImageStreaming(webSocket:WebSocket, channelName:string, viewmodeName, ipPort) =
+    member x.ImageStreaming(webSocket:WebSocket, channelName:string, viewmodeName, clientGuid) =
         async { 
             try
                 let viewType = getViewType(viewmodeName)
 
                 let screenInfo = { 
-                                    IpPort = ipPort
+                                    ClientGuid = clientGuid
                                     ChannelName = channelName
                                     ViewType = viewType 
                                  }
@@ -115,7 +115,7 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
                 | ex -> 
                     Console.WriteLine($"Error in image streaming: {ex.Message}")
             finally
-                Console.WriteLine($"\"Image streaming ended\" in image streaming: {ipPort}")
+                Console.WriteLine($"\"Image streaming ended\" in image streaming: {clientGuid}")
                 webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Image streaming ended", CancellationToken.None) |> Async.AwaitTask |> ignore
                 _streamClients.Remove(webSocket) |> ignore
         }   |> Async.StartAsTask

@@ -3,11 +3,19 @@
 
 @if (! _loading)
 {
-    <DxCheckBox @bind-Checked="ShowPercentage">Show Percentage</DxCheckBox>
+    <CompInlineContainer>
+        <DxCheckBox @bind-Checked="ShowPercentage">Show Percentage</DxCheckBox>
+        <DxCheckBox @bind-Checked="ShowDataLabels">Show Data Labels</DxCheckBox>
+    </CompInlineContainer>
+
     // https://blazor.radzen.com/stacked-bar-chart
     <RadzenChart style="height: 400px">
-        <RadzenStackedBarSeries Data="@_drives" Title="가동" Fill="@(EfficiencyPopType.가동.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
-        <RadzenStackedBarSeries Data="@_errors" Title="에러" Fill="@(EfficiencyPopType.에러.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed" />
+        <RadzenStackedBarSeries Data="@_drives" Title="가동" Fill="@(EfficiencyPopType.가동.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed">
+            <RadzenSeriesDataLabels Visible="@ShowDataLabels" />
+        </RadzenStackedBarSeries>
+        <RadzenStackedBarSeries Data="@_errors" Title="에러" Fill="@(EfficiencyPopType.에러.ToColor())" CategoryProperty="Category" ValueProperty="Value" LineType="LineType.Dashed">
+            <RadzenSeriesDataLabels Visible="@ShowDataLabels" />
+        </RadzenStackedBarSeries>
         <RadzenBarOptions Radius="5" />
     </RadzenChart>
 }
@@ -16,6 +24,7 @@
     bool _loading = true;
     CategoryItem[] _drives, _errors;
     [Parameter] public InfoBase InfoParent { get; set; }
+    [Parameter] public bool ShowDataLabels { get; set; }
     [Parameter] public bool ShowPercentage { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -50,9 +59,10 @@
         _errors = children?.Select(ch => new CategoryItem() { Category = ch.Name, Value = getErrorValue(ch) }).ToArray() ?? [];
 
         _loading = false;
+        StateHasChanged();
 
-
-        double getDriveValue(InfoBase ib) => ShowPercentage ? 100 * ib.DriveAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.DriveAverage;
-        double getErrorValue(InfoBase ib) => ShowPercentage ? 100 * ib.ErrorAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.ErrorAverage;
+        double getFloored(double value) => Math.Floor(value * 100) / 100;
+        double getDriveValue(InfoBase ib) => getFloored(ShowPercentage ? 100 * ib.DriveAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.DriveSpan);
+        double getErrorValue(InfoBase ib) => getFloored(ShowPercentage ? 100 * ib.ErrorAverage / (ib.DriveAverage + ib.ErrorAverage) : ib.ErrorSpan);
     }
 }

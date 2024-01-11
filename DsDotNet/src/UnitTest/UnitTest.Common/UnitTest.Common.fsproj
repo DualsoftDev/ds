@@ -16,10 +16,10 @@
         <NoWarn>NU1702</NoWarn>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.1.28" />
+        <PackageReference Include="DualSoft-Common-Core" Version="0.2.1" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.23" />
-        <PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.1.4" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.1" />
+        <PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.2.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
         <PackageReference Include="FsUnit" Version="5.0.4" />

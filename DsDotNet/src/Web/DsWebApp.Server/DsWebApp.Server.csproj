@@ -20,9 +20,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Utils" Version="0.1.2" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.1.23" />
-		<PackageReference Include="DualSoft-Web-Server" Version="0.1.12" />
+		<PackageReference Include="DualSoft-Common-Utils" Version="0.2.1" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.1" />
+		<PackageReference Include="DualSoft-Web-Server" Version="0.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>

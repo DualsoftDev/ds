@@ -10,55 +10,55 @@
       "Files": [
         {
           "Name": "boolean",
-          "Length": 8192
+          "Length": 65536
         },
         {
           "Name": "char",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "single",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "double",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "int16",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "int32",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "int64",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "sbyte",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "string",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "uint16",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "uint32",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "uint64",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "byte",
-          "Length": 1024
+          "Length": 2048
         }
       ]
     },
@@ -70,19 +70,19 @@
       "Files": [
         {
           "Name": "I",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "Q",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "M",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "R",
-          "Length": 1024
+          "Length": 2048
         }
       ]
     },
@@ -98,7 +98,7 @@
         },
         {
           "Name": "O",
-          "Length": 1024
+          "Length": 2048
         },
         {
           "Name": "S",

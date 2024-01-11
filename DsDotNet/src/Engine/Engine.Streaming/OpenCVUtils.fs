@@ -7,6 +7,7 @@ open System.Data
 open System.IO
 open System.Drawing
 open Engine.Core
+open System
 
 
 let rect (xywh:Xywh) = Rectangle(xywh.X, xywh.Y //w, h 없을시에 300 기본값
@@ -32,8 +33,13 @@ type OpenCVUtils() =
             modifiedBack
 
     static member ResizeImage(img : Mat, newWidth : int, newHeight : int) : Mat =
+    
         let resizedImage = new Mat()
-        CvInvoke.Resize(img, resizedImage, new Size(newWidth, newHeight), interpolation = Inter.Lanczos4)
+        try
+            CvInvoke.Resize(img, resizedImage, new Size(newWidth, newHeight), interpolation = Inter.Lanczos4)
+        with
+        |_ -> Console.WriteLine "err ResizeImage"
+
         resizedImage
 
     static member CompressImage(frame : Mat) : byte[] =

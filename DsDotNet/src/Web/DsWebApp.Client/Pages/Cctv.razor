@@ -1,4 +1,4 @@
-﻿@page "/cctv/{Name}"
+﻿@page "/cctv"
 @using System.Net.WebSockets
 @inject IJSRuntime JsRuntime
 
@@ -119,6 +119,7 @@
         {
             // WebSocket 연결
             await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
+            await Task.Delay(500); //   대기
             if (clientWebSocket.State == WebSocketState.Open)
             {
                 Console.WriteLine("WebSocket connection established.");

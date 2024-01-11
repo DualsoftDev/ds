@@ -31,13 +31,17 @@
 }
 else
 {
-
     <CompModelCpuMonitor OnModelChanged="onModelChanged"
                          OnCpuRunningStatusChanged="onCpuRunningStatusChanged" />
 
     Console.WriteLine($"--------------------- TagManager={TagManager}");
     <CascadingValue Name="TagManager" Value="@TagManager">
-        <CompEnableDisable Disabled="@(!_isCpuRunning)">
+        <DxLoadingPanel Visible=!_isCpuRunning
+                Text="Wait CPU running..."
+                IsContentBlocked="true"
+                CssClass="w-100"
+                ApplyBackgroundShading="true">
+
             <div id="auto">
                 <p>
                     <div class="ds-inline">
@@ -68,7 +72,7 @@ else
 
                 <CompHmiFlowTable Flows="@_system.Flows" />
             </div>
-        </CompEnableDisable>
+        </DxLoadingPanel>
 
     </CascadingValue>
 }

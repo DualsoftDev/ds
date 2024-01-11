@@ -17,11 +17,15 @@ else
 
     <h3>Flow @FlowName</h3>
 
-    <CompEnableDisable Disabled="@(ClientGlobal.ModelDsZipPath.IsNullOrEmpty() || !ClientGlobal.IsCpuRunning)">
+    <DxLoadingPanel Visible=@(ClientGlobal.ModelDsZipPath.IsNullOrEmpty() || !ClientGlobal.IsCpuRunning)
+        Text="Wait CPU running..."
+        IsContentBlocked="true"
+        CssClass="w-100"
+        ApplyBackgroundShading="true">
         <CascadingValue Name="TagManager" Value="@TagManager">
             <CompHmiRealTable Reals="@_reals" />
         </CascadingValue>
-    </CompEnableDisable>
+    </DxLoadingPanel>
 }
 
 @code {

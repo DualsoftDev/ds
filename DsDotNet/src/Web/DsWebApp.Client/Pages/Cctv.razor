@@ -7,7 +7,6 @@
    <DxComboBox Data="@ScreensArray"
                 @bind-Value="@Screen"
                 @bind-Text="@Screen"
-                @onselect="@(async () => await GetImageAync())"
                 NullText="Select Screen"
                 CssClass="cw-240"
                 InputId=""
@@ -16,12 +15,11 @@
    <DxComboBox Data="@ModesArray"
                 @bind-Value="@Mode"
                 @bind-Text="@Mode"
-                @onselect="@(async () => await GetImageAync())"
                 CssClass="cw-240"
                 InputId="cbOverview" 
                 NullText="Select Mode" 
                 />
-    <CompFullScreenManager FullScreenElementId="stream-img" />
+    <DxButton Text="확인" @onclick="@(async () => await GetImageAync())"></DxButton>
 
     <div id="stream-img" style="width:60vw">
         <img src="@imageSource" style="height:100%; width:100%;" />
@@ -70,6 +68,8 @@
 
     public string imageSource { get; set; }
 
+    string clientGuid;
+
     ClientWebSocket clientWebSocket;
 
     private async Task GetData()
@@ -104,21 +104,27 @@
 
     protected override async Task OnInitializedAsync()
     {
-        clientWebSocket = new ClientWebSocket();
+
+        clientGuid = this.GetHashCode().ToString();
         await base.OnInitializedAsync();
         await GetData();
+        //await GetImageAync();
     }
 
+
+    string prvScreen;
+    string prvMode;
     async Task GetImageAync()
     {
-        var clientGuid = this.GetHashCode().ToString();
+        clientWebSocket = new ClientWebSocket();
         //<<CCTV> localhost:8889 config에서 가져오기로 수정
         var uri = new Uri($"wss://localhost:8889/api/streaming/streamstart?clientGuid={clientGuid}&channel={Screen}&viewmode={Mode}");
         Console.WriteLine($"wss://localhost:8889/api/streaming/streamstart?clientGuid={clientGuid}&channel={Screen}&viewmode={Mode}");
         try
         {
+            
             // WebSocket 연결
-            await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
+            await clientWebSocket.ConnectAsync(uri, CancellationToken.None); 
             if (clientWebSocket.State == WebSocketState.Open)
             {
                 Console.WriteLine("WebSocket connection established.");
@@ -172,5 +178,5 @@
             }
         }
     }
-
+    
 }

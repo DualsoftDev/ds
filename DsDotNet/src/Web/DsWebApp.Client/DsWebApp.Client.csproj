@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>12.0</LangVersion>
@@ -44,5 +44,6 @@
 	
 	<ItemGroup>
 	  <None Include="Components\CompFqdnSelector.razor.cs" />
+	  <None Include="wwwroot\lib\bootstrap-icons\fonts\bootstrap-icons.woff2" />
 	</ItemGroup>
 </Project>

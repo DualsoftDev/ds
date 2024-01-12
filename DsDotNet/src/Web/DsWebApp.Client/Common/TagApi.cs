@@ -3,7 +3,7 @@ using Dual.Web.Blazor.ClientSide;
 
 using Microsoft.AspNetCore.Components;
 
-using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSS = Dual.Web.Blazor.Shared.RestResult<string>;
 
 namespace DsWebApp.Client.Common
 {
@@ -13,7 +13,7 @@ namespace DsWebApp.Client.Common
         {
             if (await auth.SetAuthHeaderAsync(http))
             {
-                return await http.PostAsJsonResultSimpleAsync("api/hmi/tag", tag);
+                return await http.PostAsJsonGetRestResultStringAsync("api/hmi/tag", tag);
             }
             else
             {

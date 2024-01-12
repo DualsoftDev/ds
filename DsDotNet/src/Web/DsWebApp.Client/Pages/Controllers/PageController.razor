@@ -75,7 +75,7 @@ else
     {
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
-            ResultSerializable<string, ErrorMessage> result = await Http.GetResultSimpleAsync<string>(api);
+            RestResult<string> result = await Http.GetRestResultAsync<string>(api);
             Console.WriteLine($"Result={result}, IsOK={result.IsOk}, Ok={result.Value}, Err={result.Error}");
             string message = 
                 result.Match(

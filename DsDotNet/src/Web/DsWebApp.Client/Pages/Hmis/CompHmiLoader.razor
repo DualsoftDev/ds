@@ -13,7 +13,7 @@
         if (_hmiPackage == null)
         {
             Console.WriteLine("Loading HmiPackage from server..");
-            var result = await Http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
+            var result = await Http.GetRestResultAsync<HMIPackage>($"api/hmi/package");
             result.Iter(
                 okPackage => {
                     if (okPackage == null)

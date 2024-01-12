@@ -86,7 +86,7 @@
     //         async some =>
     //         {
     //             _me.Password = some;
-    //             var result = await Http.PostAsJsonResultSimpleAsync($"api/db/c/{DexiK.TnUser}", _me);
+    //             var result = await Http.PostAsJsonGetRestResultStringAsync($"api/db/c/{DexiK.TnUser}", _me);
     //             result.Iter(
     //                 ok => {
     //                     ToastService.ShowInfo("Succeeded to change password.");

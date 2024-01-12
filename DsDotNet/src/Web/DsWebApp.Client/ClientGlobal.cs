@@ -48,7 +48,7 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
 
         base.ClientSettings = await DsClientSettings.ReadAsync(localStorage);
 
-        var result = await http.GetResultSimpleAsync<RuntimeModelDto>($"api/model");
+        var result = await http.GetRestResultAsync<RuntimeModelDto>($"api/model");
         result.Iter(
             ok =>
             {
@@ -65,7 +65,7 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
             {
                 Console.WriteLine($"Model change detected on signalR: {modelDsZipPath}");
                 ModelDsZipPath = modelDsZipPath;
-                var result = await http.GetResultSimpleAsync<HMIPackage>($"api/hmi/package");
+                var result = await http.GetRestResultAsync<HMIPackage>($"api/hmi/package");
                 result.Iter(
                     ok => HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
                     err => Console.Error.WriteLine(err));

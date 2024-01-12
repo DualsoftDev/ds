@@ -5,8 +5,8 @@ using Emgu.CV.Ocl;
 using Engine.Core;
 using Engine.Runtime;
 using System.Net.WebSockets;
-using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
-using ResultSArray = Dual.Common.Core.ResultSerializable<string[], string>;
+using ResultSS = Dual.Web.Blazor.Shared.RestResult<string>;
+using ResultSArray = Dual.Web.Blazor.Shared.RestResult<string[]>;
 using DevExpress.Pdf.Native.BouncyCastle.Asn1;
 
 namespace DsWebApp.Server.Controllers;

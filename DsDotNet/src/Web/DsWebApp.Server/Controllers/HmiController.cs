@@ -6,7 +6,7 @@ using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
 
-using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSS = Dual.Web.Blazor.Shared.RestResult<string>;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -24,7 +24,7 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// "api/hmi/package" : 모든 HMI 태그 정보를 반환
     /// </summary>
     [HttpGet("package")]
-    public ResultSerializable<HMIPackage, ErrorMessage> GetAllHmiTags()
+    public RestResult<HMIPackage> GetAllHmiTags()
     {
         return _model?.HMIPackage;
     }

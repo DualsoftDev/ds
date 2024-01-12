@@ -13,7 +13,7 @@ using static Engine.Core.InfoPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
 
-using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
+using ResultSS = Dual.Web.Blazor.Shared.RestResult<string>;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -39,7 +39,7 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
     // api/info/q
     [HttpGet("q")]
-    public async Task<ResultSerializable<InfoQueryResult, string>> GetInfoQuery([FromQuery] string Fqdn, [FromQuery] DateTime Start, [FromQuery] DateTime End)
+    public async Task<RestResult<InfoQueryResult>> GetInfoQuery([FromQuery] string Fqdn, [FromQuery] DateTime Start, [FromQuery] DateTime End)
     {
         using var conn = global.CreateDbConnection();
         ORMVwLog[] vwLogs =
@@ -49,8 +49,7 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
         // todo: 검색 결과 생성
 
-        return ResultSerializable<InfoQueryResult, string>.Ok(new InfoQueryResult());
-        //return ResultSerializable<InfoQueryResult, string>.Err("Not implemented");
+        return RestResult<InfoQueryResult>.Ok(new InfoQueryResult());
     }
 }
 

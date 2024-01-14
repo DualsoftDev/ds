@@ -41,6 +41,9 @@
         // 이미지 업데이트
         const imgElement = document.getElementById('stream-img').firstElementChild;
         imgElement.src = imgUrl;
+
+        // Blob URL 해제
+        URL.revokeObjectURL(imgUrl);
     };
 
     // 이미지 전체화면으로 변경 이벤트 처리
@@ -162,11 +165,14 @@
 
                             // 잠시 대기
                             await Task.Delay(10); //   대기
-
+                            
                             imageData = Array.Empty<byte>(); // 이미지 처리 후 버퍼를 초기화합니다.
                         }
+                       
                     }
                 }
+                GC.Collect(); // 가비지 컬렉션 호출
+
                 byte[] AppendBytes(byte[] original, byte[] buffer, int length)
                 {
                     byte[] result = new byte[original.Length + length];

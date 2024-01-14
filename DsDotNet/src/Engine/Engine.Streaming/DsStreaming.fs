@@ -28,7 +28,7 @@ type StreamClient = {
 
 [<AutoOpen>]
 type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
-    let _delayFps = 1000 / 20
+    let _delayFps = 1000 / 15
     let _streamClients = Dictionary<WebSocket, StreamClient>()
     let _webStreamSet = Dictionary<string, byte[]>()
     let _dsl = new DsLayoutLoader(dsSystem, runtimeDir)
@@ -65,19 +65,18 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
                 for kvp in streamList do
                     let item = kvp.Value
                     let chName = item.ChannelName
-                    if _dsl.ExistImageScreenData(chName) then
-                        let backFrame = _dsl.GetBackFrame(chName, None) 
+                    let backFrame = _dsl.GetBackFrameOrNotNullUpdate(chName, None) 
 
-                        let imgInfos = getImageInfos  chName 
-                        let frontFrame = getFrontImage(item.ViewType, imgInfos) 
+                    let imgInfos = getImageInfos  chName 
+                    let frontFrame = getFrontImage(item.ViewType, imgInfos) 
 
-                        let backFrameResize = OpenCVUtils.ResizeImage(backFrame, _StreamFrontSize.Width, _StreamFrontSize.Height)
-                        let mixFrame = OpenCVUtils.AlphaBlend(frontFrame, new Point(0, 0), backFrameResize)
-                        let compressedImage = OpenCVUtils.CompressImage mixFrame
-                        _webStreamSet.[item.Key] <- compressedImage
-                    do! Async.Sleep(1)
+                    let mixFrame = OpenCVUtils.AlphaBlend(frontFrame, backFrame)
+                    _webStreamSet.[item.Key] <- OpenCVUtils.CompressImage mixFrame
+                    frontFrame.Dispose()
+                    mixFrame.Dispose()
 
-            mixFrame.Dispose()
+                do! Async.Sleep(_delayFps)
+
         }
 
         Async.Start(streamingTask, cancellationToken = cts.Token) |> ignore
@@ -109,8 +108,7 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
                             let byteArray = _webStreamSet.[viewKey]
                             do! webSocket.SendAsync(new ArraySegment<byte>(byteArray), WebSocketMessageType.Binary, true, CancellationToken.None) |> Async.AwaitTask
                         
-                        //do! Async.Sleep(100)  //test  초당 1장  10장
-                        do! Async.Sleep(_delayFps) //초당 60장 타겟
+                        do! Async.Sleep(_delayFps) //초당 15장 타겟
                 with
                 | ex -> 
                     Console.WriteLine($"Error in image streaming: {ex.Message}")

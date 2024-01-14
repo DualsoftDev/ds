@@ -9,23 +9,26 @@ open OxyPlot.Annotations
 
 let oxyColor (color:Color) =  OxyColor.FromUInt32(color.ToArgb()|>uint)
 
-let createBoxImage (name: string, rect:Rectangle, backColor:Color) =
-    let model = PlotModel()
-    let width = rect.Width * 2
-    model.PlotMargins <- new OxyThickness(-10);
+let createBoxImage (name: string, msgText: string, rect:Rectangle, backColor:Color) =
+    let model = PlotModel(Title = name)
+    model.DefaultFont <-  (new Font("Tahoma", 1.0f)).ToString() // 폰트 설정
+    model.TitleColor <- Color.DarkOrange |> oxyColor
+    model.TitleFontSize <- 30;
+    let errRect = Rectangle ( rect.Location, Size( rect.Width * 2 ,rect.Height * 2 ))
+    model.PlotMargins <- new OxyThickness(-5);
     // 직사각형을 그리기 위한 BarSeries 추가
-    model.Series.Add(BarSeries(ItemsSource = [BarItem(Value = width)]))
+    model.Series.Add(BarSeries(ItemsSource = [BarItem(Value = errRect.Width)]))
     // 직사각형을 그리기 위한 RectangleAnnotation 추가
     model.Annotations.Add(RectangleAnnotation(Fill = (backColor |> oxyColor)))
     // 텍스트 추가
-    let ta = TextAnnotation(Text = name, TextColor = (Color.Yellow |> oxyColor))
+    let ta = TextAnnotation(Text = msgText, TextColor = (Color.Yellow |> oxyColor))
 
     ta.FontWeight <- FontWeights.Bold // 텍스트 굵기 설정
-    ta.Font <- (new Font("Tahoma", 1.0f)).ToString() // 폰트 설정
+    ta.Font <-  (new Font("Tahoma", 1.0f)).ToString() // 폰트 설정
     ta.FontSize <- 30
     ta.TextVerticalAlignment <- VerticalAlignment.Middle
-    ta.TextPosition <- new DataPoint((width|>float)/2.0, 0.0) // 텍스트 위치 설정
-    ta.Padding <- OxyThickness(width)
+    ta.TextPosition <- new DataPoint((errRect.Width|>float)/2.0, 0.0) // 텍스트 위치 설정
+    ta.Padding <- OxyThickness(errRect.Width)
     model.Annotations.Add(ta)
 
     // 모델 크기 설정
@@ -34,13 +37,14 @@ let createBoxImage (name: string, rect:Rectangle, backColor:Color) =
 
     // 이미지 출력
     let memoryStream = new MemoryStream()
-    PngExporter.Export(model, memoryStream, width, rect.Height)
-    memoryStream, rect
+    PngExporter.Export(model, memoryStream, errRect.Width, errRect.Height)
+    memoryStream, errRect
 
 let createPieChartImage (name: string,  rect:Rectangle, runCnt:int, errCnt:int) =
     let model = PlotModel(Title = name)
     model.TitleColor <- Color.DarkOrange |> oxyColor
     model.TitleFontSize <- 30;
+    model.DefaultFont <-  (new Font("Tahoma", 1.0f)).ToString() // 폰트 설정
     let pieSeries = 
         PieSeries(
             StartAngle = 0.0,

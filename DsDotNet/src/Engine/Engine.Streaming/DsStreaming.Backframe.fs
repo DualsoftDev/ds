@@ -15,18 +15,25 @@ open Engine.Core
 open OxyImgUtils
 
 
-let _delayCCTV = 1000 / 100
+let _delayCCTV = 1000 / 60
 
 
 let streamingBackFrame(loader:DsLayoutLoader, channelName:string, url:string) =
     let cts = new CancellationTokenSource()
     let capture = new VideoCapture(url, VideoCapture.API.Ffmpeg)
-    let backFrame = new Mat()
 
     Async.Start (async {
         while not cts.Token.IsCancellationRequested do
-            capture.Read backFrame |> ignore
-            loader.GetBackFrame(channelName, Some backFrame) |> ignore
+            let backFrame = new Mat()
+            
+            if  capture.Read backFrame then
+
+                let backFrameResize = OpenCVUtils.ResizeImage(backFrame, _StreamSize.Width, _StreamSize.Height)
+
+                loader.GetBackFrameOrNotNullUpdate(channelName, Some backFrameResize) |> ignore
+
+                backFrame.Dispose()
+
             do! Async.Sleep(_delayCCTV)
     }, cancellationToken = cts.Token)
     |> ignore

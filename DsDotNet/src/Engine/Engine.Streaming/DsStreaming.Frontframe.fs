@@ -9,8 +9,6 @@ open DsLayoutLoaderModule
 open OpenCVUtils
 
 
-let _StreamFrontSize = Size(1920, 1080)
-
 let getViewType (viewtype:string) =
     match viewtype with
     | "Normal" -> ViewType.Normal
@@ -19,20 +17,20 @@ let getViewType (viewtype:string) =
 
 let mutable cnt = 0
 let getErrorImage (f:InfoDevice, xywh:Xywh) =
-    f.ErrorMessages.Clear()  
-    f.ErrorMessages.Add("출력 Timeout")     
-    f.ErrorMessages.Add("센서 고장")     
-    let errText = String.Join(", ", f.ErrorMessages)
+    //f.ErrorMessages.Clear()  
+    //f.ErrorMessages.Add("Timeout Err")     
+    //f.ErrorMessages.Add("Sensor Err")     
+    let errText = String.Join("\n", f.ErrorMessages)
     let backColor, text = 
                     if f.ErrorMessages.Any() 
-                    then Color.OrangeRed,  $"{f.Name}\n{errText}"
-                    else Color.Green,  f.Name
-    createBoxImage(text, rect xywh, backColor)
+                    then Color.OrangeRed,  $"{errText}"
+                    else Color.Green,  "OK"
+    createBoxImage(f.Name,  text, rect xywh, backColor)
 
 let getChartImage (f:InfoDevice, xywh:Xywh) =
-    let rand = Random()
-    f.GoingCount <- rand.Next(10,500)
-    f.ErrorCount <- rand.Next(0,55)
+    //let rand = Random()
+    //f.GoingCount <- rand.Next(10,500)
+    //f.ErrorCount <- rand.Next(0,55)
     createPieChartImage(f.Name, rect xywh, f.GoingCount, f.ErrorCount)
 
 let getErrorImages (imgInfos:(InfoDevice*Xywh) seq) =  imgInfos |> Seq.map(getErrorImage)
@@ -45,7 +43,7 @@ let getChartImages (imgInfos:(InfoDevice*Xywh) seq) =
 let getFrontImage(viewType, imgInfos) =
     let img =
         match viewType with
-        | ViewType.Normal -> imgInfos |> getChartImages  |> OpenCVUtils.CombineImages _StreamFrontSize
-        | ViewType.Error  -> imgInfos |> getErrorImages  |> OpenCVUtils.CombineImages _StreamFrontSize
+        | ViewType.Normal -> imgInfos |> getChartImages  |> OpenCVUtils.CombineImages _StreamSize
+        | ViewType.Error  -> imgInfos |> getErrorImages  |> OpenCVUtils.CombineImages _StreamSize
         | _ -> failwithf $"GetFrontImage {viewType}: error Type"
     img

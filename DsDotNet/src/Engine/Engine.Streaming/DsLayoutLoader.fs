@@ -7,6 +7,7 @@ open System.IO
 open System.Collections.Generic
 open System.Linq
 open System
+open System.Drawing
 open Engine.CodeGenCPU
 open Emgu.CV
 open OpenCVUtils
@@ -16,6 +17,7 @@ type ViewType =
     | Normal = 0
     | Error  = 1
 
+let _StreamSize = Size(1920, 1080)
 
 type ServerImage(channelName, screenType, url) =
     member x.ChannelName :string  = channelName
@@ -45,7 +47,8 @@ type DsLayoutLoader(dsSystem:DsSystem, runtimeDir:string) =
                     if info.ScreenType = ScreenType.IMAGE 
                     then 
                         let imgPath = PathManager.combineFullPathFile([|runtimeDir;$"{info.ChannelName}.jpg"|])
-                        File.ReadAllBytes(imgPath) |> OpenCVUtils.ByteArrayToMat 
+                        let img = File.ReadAllBytes(imgPath) |> OpenCVUtils.ByteArrayToMat 
+                        OpenCVUtils.ResizeImage(img, _StreamSize.Width, _StreamSize.Height)
                     else new Mat()
 
                 serverImages.Add(screenImage) |>ignore          
@@ -54,7 +57,7 @@ type DsLayoutLoader(dsSystem:DsSystem, runtimeDir:string) =
 
     member x.DsSystem = dsSystem
     member x.LayoutInfos = dsSystem.LayoutInfos
-    member x.GetBackFrame(ch:string, frame:Mat option) = getBackFrameOrNotNullUpdate(ch, frame) 
+    member x.GetBackFrameOrNotNullUpdate(ch:string, frame:Mat option) = getBackFrameOrNotNullUpdate(ch, frame) 
 
     member x.GetViewTypeList() =  Enum.GetNames(typeof<ViewType>) 
 
@@ -64,5 +67,4 @@ type DsLayoutLoader(dsSystem:DsSystem, runtimeDir:string) =
     member x.GetScreenType(ch:string)  = serverImages.First(fun f-> f.ChannelName = ch).ScreenType
     member x.GetImage(ch:string)       = serverImages.First(fun f-> f.ChannelName = ch).ImageScreen
 
-    member x.ExistImageScreenData(ch:string) = x.GetImage(ch).IsEmpty |> not
     

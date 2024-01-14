@@ -16,35 +16,15 @@ let rect (xywh:Xywh) = Rectangle(xywh.X, xywh.Y //w, h 없을시에 300 기본�
 
 [<AutoOpen>]
 type OpenCVUtils() =
- 
-    static member AlphaBlend(front : Mat, back : Mat) : Mat =
+
+    static member AlphaBlend (front : Mat, back : Mat) : Mat =
         let result = new Mat()
-        CvInvoke.AddWeighted(front, 0.5, back, 0.5, 0.0, result) // 알파 블렌딩 수행
+        CvInvoke.AddWeighted(front, 0.6, back, 0.4, 0.0, result)
         result
-
-    static member AlphaBlend(front : Mat, locationFront : Point, back : Mat) : Mat =
-        try
-            if locationFront.X + front.Width > back.Width || locationFront.Y + front.Height > back.Height then
-                back.Clone()
-            else
-                let modifiedBack = back.Clone()
-                let roi = new Rectangle(locationFront, front.Size)
-                let regionOfInterest = new Mat(modifiedBack, roi)
-                CvInvoke.AddWeighted(front, 0.5, regionOfInterest, 0.5, 0.0, regionOfInterest)
-                modifiedBack
-        with
-        |_ -> Console.WriteLine "err ResizeImage"
-              front.Clone()
-              
-
+ 
     static member ResizeImage(img : Mat, newWidth : int, newHeight : int) : Mat =
-    
         let resizedImage = new Mat()
-        try
-            CvInvoke.Resize(img, resizedImage, new Size(newWidth, newHeight), interpolation = Inter.Lanczos4)
-        with
-        |_ -> Console.WriteLine "err ResizeImage"
-
+        CvInvoke.Resize(img, resizedImage, new Size(newWidth, newHeight), interpolation = Inter.Lanczos4)
         resizedImage
 
     static member CompressImage(frame : Mat) : byte[] =
@@ -60,13 +40,14 @@ type OpenCVUtils() =
   
     static member CombineImages (totalSize: Size) (images: seq<MemoryStream * Rectangle>) : Mat =
         // 새로운 비트맵 생성
-        let combinedImage = new Bitmap(totalSize.Width, totalSize.Height)
+        use combinedImage = new Bitmap(totalSize.Width, totalSize.Height)
     
         // 이미지를 그리는 작업 수행
         use g = Graphics.FromImage(combinedImage)
         for (stream, rect) in images do
             use image = new Bitmap(stream)
             g.DrawImage(image, rect)
+            image.Dispose()
         //combinedImage.Save("outputCombinedImage.jpg")
         combinedImage.ToMat().ToImage<Bgr, byte>().Mat
 

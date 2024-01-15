@@ -37,7 +37,7 @@
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
             TagWeb tagWeb = new(_tagWeb.Name, _flag, _tagWeb.Kind, _tagWeb.KindDescription);
-            var result = await Http.PostAsJsonResultSimpleAsync("api/hmi/tag", tagWeb);
+            var result = await Http.PostAsJsonGetRestResultStringAsync("api/hmi/tag", tagWeb);
             var msg = result.IsOk ? "OK" : result.Error;
             Console.WriteLine($"Submit result: {msg}");
         }
@@ -75,7 +75,7 @@
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
             var serializedObject = "{\"RawValue\":false,\"Type\":1}";
-            var result = await Http.PostAsJsonResultSimpleAsync($"api/hmi/tag/Hello/9999", serializedObject);
+            var result = await Http.PostAsJsonGetRestResultStringAsync($"api/hmi/tag/Hello/9999", serializedObject);
             var msg = result.IsOk ? "OK" : result.Error;
             Console.WriteLine($"SendAny result: {msg}");
         }

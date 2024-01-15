@@ -141,7 +141,7 @@
 
         if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
         {
-            ResultSerializable<bool, ErrorMessage> result = await Http.GetResultSimpleAsync<bool>("api/auth/check");
+            RestResult<bool> result = await Http.GetRestResultAsync<bool>("api/auth/check");
             Console.WriteLine($"Result={result}, IsOK={result.IsOk}, Ok={result.Value}, Err={result.Error}");
             result.Iter(
                 ok => _authenticated = ok,

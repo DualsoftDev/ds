@@ -6,7 +6,7 @@ using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
 
-using ResultSS = Dual.Common.Core.ResultSerializable<string, string>;
+using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -24,30 +24,30 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// "api/hmi/package" : 모든 HMI 태그 정보를 반환
     /// </summary>
     [HttpGet("package")]
-    public ResultSerializable<HMIPackage, ErrorMessage> GetAllHmiTags()
+    public RestResult<HMIPackage> GetAllHmiTags()
     {
         return _model?.HMIPackage;
     }
 
 
-    async Task<ResultSS> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
+    async Task<RestResultString> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
     {
         await Task.Yield();
         try
         {
             var cpu = _model?.Cpu;
             if (cpu == null)
-                return ResultSS.Err("No Loaded Model");
+                return RestResultString.Err("No Loaded Model");
 
             Debug.WriteLine($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
-            return ResultSS.Ok("OK");
+            return RestResultString.Ok("OK");
         }
         catch (Exception ex)
         {
-            return ResultSS.Err(ex.Message);
+            return RestResultString.Err(ex.Message);
         }
     }
     /// <summary>
@@ -55,7 +55,7 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// </summary>
     [Authorize(Roles = "Administrator")]
     [HttpPost("tag")]
-    public async Task<ResultSS> SetHmiTag([FromBody] TagWeb tagWeb)
+    public async Task<RestResultString> SetHmiTag([FromBody] TagWeb tagWeb)
     {
         await Console.Out.WriteLineAsync($"About to change {tagWeb.Name}={tagWeb.Value}");
         return await onTagWebChangedByClientBrowserAsync(tagWeb);
@@ -66,10 +66,10 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// </summary>
     [Authorize(Roles = "Administrator")]
     [HttpPost("tag/{fqdn}/{tagKind}")]
-    public async Task<ResultSS> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
+    public async Task<RestResultString> SetHmiTag(string fqdn, int tagKind, [FromBody] string serializedObject)
     {
         if (_model == null)
-            return ResultSS.Err("No Loaded Model");
+            return RestResultString.Err("No Loaded Model");
 
         var kindDescriptions = _model.TagKindDescriptions;
 

@@ -41,7 +41,7 @@ else
     {
         //test cctv screens
 
-        var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
+        var result = await Http.GetRestResultAsync<string[]>("/api/streaming/screens");
         result.Iter(
             ok =>
             {
@@ -52,7 +52,7 @@ else
         );
         //test cctv
 
-        result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/viewmodes");
+        result = await Http.GetRestResultAsync<string[]>("/api/streaming/viewmodes");
         result.Iter(
             ok =>
             {

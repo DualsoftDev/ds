@@ -92,7 +92,7 @@
     private async Task GetData()
     {
         //test cctv screens
-        var result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/screens");
+        var result = await Http.GetRestResultAsync<string[]>("/api/streaming/screens");
         result.Iter(
             ok =>
             {
@@ -105,7 +105,7 @@
         err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
         );
         //test cctv
-        result = await Http.GetResultSimpleAsync<string[]>("/api/streaming/viewmodes");
+        result = await Http.GetRestResultAsync<string[]>("/api/streaming/viewmodes");
         result.Iter(
             ok =>
             {

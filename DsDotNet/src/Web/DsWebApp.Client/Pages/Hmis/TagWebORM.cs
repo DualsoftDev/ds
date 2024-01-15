@@ -25,7 +25,7 @@ public static class TagWebExtension
 {
     public static async Task PostAsync(this TagWeb tagWeb, HttpClient http, Action<string> onError)
     {
-        var result = await http.PostAsJsonResultSimpleAsync("api/hmi/tag", tagWeb);
+        var result = await http.PostAsJsonGetRestResultStringAsync("api/hmi/tag", tagWeb);
         result.Iter(
             ok => { },
             err => onError(err));

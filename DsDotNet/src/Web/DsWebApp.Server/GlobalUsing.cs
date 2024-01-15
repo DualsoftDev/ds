@@ -15,6 +15,8 @@ global using Dual.Common.Db;
 global using Dual.Web.Server;
 global using DsWebApp.Server.Hubs;
 global using Dual.Web.Server.Controllers;
+global using Dual.Web.Blazor.Shared;
+
 
 
 

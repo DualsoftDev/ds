@@ -10,7 +10,7 @@
     {
         await base.OnInitializedAsync();
 
-        var result = await Http.GetResultSimpleAsync<string>("/api/info");
+        var result = await Http.GetRestResultAsync<string>("/api/info");
         result.Iter(
             ok => InfoSystem = Newtonsoft.Json.JsonConvert.DeserializeObject<InfoSystem>(ok),
             err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")

@@ -28,14 +28,14 @@ public class ModelController(ServerGlobal global) : ModelControllerConstructor(g
     */
     // api/model
     [HttpGet]
-    public ResultSerializable<RuntimeModelDto, ErrorMessage> GetModelInfo()
+    public RestResult<RuntimeModelDto> GetModelInfo()
     {
         if (_model == null)
-            return ResultSerializable<RuntimeModelDto, ErrorMessage>.Err("No model"); // 404 Not Found 반환
+            return RestResult<RuntimeModelDto>.Err("No model"); // 404 Not Found 반환
 
         bool isCpuRunning = _model.Cpu?.IsRunning ?? false;
         var model = new RuntimeModelDto(_model.SourceDsZipPath, isCpuRunning);
-        return ResultSerializable<RuntimeModelDto, ErrorMessage>.Ok(model);
+        return RestResult<RuntimeModelDto>.Ok(model);
     }
 }
 

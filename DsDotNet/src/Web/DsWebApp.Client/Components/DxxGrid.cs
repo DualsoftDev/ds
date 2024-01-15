@@ -2,7 +2,11 @@
 
 //using Microsoft.AspNetCore.Components;
 
-//namespace DsWebApp.Client.Components;
+namespace DsWebApp.Client.Components;
+public partial class DxxGrid : Dual.Web.Blazor.Client.Components.Grid.DxxGridBase
+{
+
+}
 
 //public class DxxGrid : DxxGridBase
 //{

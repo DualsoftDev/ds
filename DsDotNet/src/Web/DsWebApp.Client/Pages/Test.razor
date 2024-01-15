@@ -1,0 +1,124 @@
+﻿@page "/test"
+
+<h3>Test</h3>
+<select id="screenSelector"></select>
+<select id="viewmodeSelector"></select>
+<div class="grid-container">
+    <img class="grid-item" id="streamedImage1" src="" style="max-width: 100%; cursor: pointer;" />
+</div>
+
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr); /* 1개의 열 */
+        gap: 5px; /* 이미지 간격 설정 */
+        /* 다른 스타일링 속성 추가 가능 */
+    }
+
+    .grid-item {
+        width: calc(100% - 10px); /* 이미지 너비 */
+        height: auto; /* 이미지 높이 자동 조정 */
+        /* 다른 스타일링 속성 추가 가능 */
+        cursor: pointer; /* 전체화면으로 바꿀 이미지에 대한 커서 스타일 지정 */
+    }
+</style>
+<script>
+    const host = window.location.hostname;
+    const port = 7254;
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    let webSocket;
+
+    const screenSelector = document.getElementById('screenSelector');
+    const viewmodeSelector = document.getElementById('viewmodeSelector');
+    const imgElement = document.getElementById('streamedImage1');
+
+    // WebSocket 연결 함수
+    function connectWebSocket(selectedScreenValue, selectedViewmodeValue) {
+        webSocket = new WebSocket(`${protocol}//${host}:${port}/stream?channel=${selectedScreenValue}&viewmode=${selectedViewmodeValue}&ip=${window.location.hostname}:${port}`);
+        webSocket.onopen = function () { console.log("WebSocket opened"); };
+        webSocket.onmessage = function (event) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imgSrc = URL.createObjectURL(new Blob([e.target.result], { type: 'image/jpeg' }));
+                imgElement.src = imgSrc;
+            };
+            reader.readAsArrayBuffer(event.data);
+        };
+        webSocket.onerror = function (event) { console.error("WebSocket error:", event); };
+        webSocket.onclose = function () { console.log("WebSocket closed"); };
+    }
+
+
+    // 화면 목록을 가져오는 API 호출
+    fetch('/screen/screens')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach((channelName, index) => {
+                const option = new Option(channelName, channelName);
+                screenSelector.add(option);
+
+                if (index === 0) {
+                    screenSelector.selectedIndex = index;
+                    connectWebSocket(channelName);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('화면 목록을 불러오는 중 오류가 발생했습니다2:', error);
+        });
+
+    // 뷰모드 목록을 가져오는 API 호출
+    fetch('/screen/viewmodes')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach((name, index) => {
+                const option = new Option(name, name);
+                viewmodeSelector.add(option);
+            });
+        })
+        .catch(error => {
+            console.error('뷰모드 목록을 불러오는 중 오류가 발생했습니다2:', error);
+        });
+
+
+
+
+    // 콤보박스 변경 시 WebSocket 연결 처리
+    screenSelector.addEventListener('change', event => {
+        const selectedScreenValue = event.target.value;
+        const selectedViewmodeValue = viewmodeSelector.value;
+        connectWebSocket(selectedScreenValue, selectedViewmodeValue);
+    });
+
+    viewmodeSelector.addEventListener('change', event => {
+        const selectedScreenValue = screenSelector.value;
+        const selectedViewmodeValue = event.target.value;
+        connectWebSocket(selectedScreenValue, selectedViewmodeValue);
+    });
+
+
+
+
+    // 이미지 전체화면으로 변경 이벤트 처리
+    imgElement.addEventListener('click', () => {
+        if (imgElement.requestFullscreen) {
+            imgElement.requestFullscreen();
+        } else if (imgElement.webkitRequestFullscreen) {
+            imgElement.webkitRequestFullscreen();
+        } else if (imgElement.msRequestFullscreen) {
+            imgElement.msRequestFullscreen();
+        }
+    });
+</script>
+
+
+
+
+
+
+
+@code {
+
+}
+
+

@@ -8,11 +8,16 @@
         @if (ClientGlobal.UserSession == null || !_authenticated)
         {
             <a class="link-with-underline" data-toggle="modal" data-target="#loginModal">Login</a>
+            Console.WriteLine($"_authenticated={_authenticated}, ClientGlobal.UserSession={ClientGlobal.UserSession}");
         }
         else
         {
-            var user = ClientGlobal?.AuthenticationState?.User;
-            if (user != null)
+            var user = ClientGlobal.AuthenticationState?.User;
+            if (user == null)
+            {
+                Console.Error.WriteLine($"ClientGlobal.AuthenticationState={ClientGlobal.AuthenticationState}, user={ClientGlobal.AuthenticationState?.User}");
+            }
+            else
             {
                 var name = user.Identity?.Name;
                 if (name.NonNullAny())
@@ -163,12 +168,12 @@
             await customAuthStateProvider.UpdateAuthenticationState(userSession);
             await JsRuntime.InvokeVoidAsync("closeModal", "#loginModal");
             await JsRuntime.InvokeVoidAsync("location.reload");     // 우측 Login/Logout update 를 위해서 강제로 페이지 refresh
-        }
-        else if (loginResponse.StatusCode == HttpStatusCode.Unauthorized)
-        {
-            await JsRuntime.InvokeVoidAsync("alert", "Invalid User Name or Password");
             return;
         }
+        if (loginResponse.StatusCode == HttpStatusCode.Unauthorized)
+            await JsRuntime.InvokeVoidAsync("alert", "Invalid User Name or Password");
+        else
+            await JsRuntime.InvokeVoidAsync("alert", $"Login failed with code: {loginResponse.StatusCode}");
     }
 
     void onClickBell()

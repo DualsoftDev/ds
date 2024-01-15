@@ -1,3 +1,4 @@
+using Dual.Web.Blazor.Auth;
 using Dual.Web.Blazor.ClientSide;
 using Dual.Web.Server.Auth;
 
@@ -11,24 +12,24 @@ namespace TwmApp.Server.Controllers;
 [ApiController]
 public class AuthController(IUserAccountService userAccountService, ServerGlobal global) : AuthControllerBase(userAccountService)
 {
-    //// api/auth/check
-    //[HttpGet("check")]
-    //[Authorize(Roles = "Administrator,User")]
-    //public bool CheckToken() => true;
+    // api/auth/check
+    [HttpGet("check")]
+    [Authorize(Roles = "Administrator,User")]
+    public bool CheckToken() => true;
 
 
-    //[HttpPost]
-    //[Route("xlogin")]
-    //[AllowAnonymous]
-    //public ActionResult<UserSession> xLogin([FromBody] LoginRequest loginRequest)
-    //{
-    //    var jwtAuthenticationManager = new JwtAuthenticationManager(userAccountService);
-    //    var userSession = jwtAuthenticationManager.GenerateJwtToken(loginRequest.UserName, loginRequest.Password);
-    //    if (userSession is null)
-    //        return Unauthorized();
-    //    else
-    //        return userSession;
-    //}
+    [HttpPost]
+    [Route("login")]
+    [AllowAnonymous]
+    public ActionResult<UserSession> Login([FromBody] LoginRequest loginRequest)
+    {
+        var jwtAuthenticationManager = new JwtAuthenticationManager(userAccountService);
+        var userSession = jwtAuthenticationManager.GenerateJwtToken(loginRequest.UserName, loginRequest.Password);
+        if (userSession is null)
+            return Unauthorized();
+        else
+            return userSession;
+    }
 
 
     // api/auth/adduser

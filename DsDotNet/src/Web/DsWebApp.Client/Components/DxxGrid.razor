@@ -1,5 +1,5 @@
-@* DxxGrid *@
-@inherits DxxGridBase
+﻿@* DxxGrid *@
+@inherits Dual.Web.Blazor.Client.Components.Grid.DxxGridBase
 @_renderBase()
 
 @code {
@@ -7,3 +7,4 @@
     protected override async Task<ClientSettings> GetClientSettings() =>
         (ClientSettings)(await DsClientSettings.ReadAsync(LocalStorage));
 }
+

@@ -35,19 +35,22 @@ public class ServerGlobal
         ServerSettings = serverSettings;
         DsCommonAppSettings = commonAppSettings;
         Logger = logger;
-        try
+        Task.Run(() =>  // 최초 browser open 을 빨리 수행할 수 있도록 background 에서 실행
         {
-            RuntimeModel = ReloadRuntimeModel(serverSettings);
-            if (serverSettings.AutoStartOnSystemPowerUp)
+            try
             {
-                // Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
-                RuntimeModel?.Cpu.RunInBackground();
+                RuntimeModel = ReloadRuntimeModel(serverSettings);
+                if (serverSettings.AutoStartOnSystemPowerUp)
+                {
+                    // Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
+                    RuntimeModel?.Cpu.RunInBackground();
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            logger.Warn($"Failed to load runtime model: {serverSettings.RuntimeModelDsZipPath}\r\n{ex.Message}");
-        }
+            catch (Exception ex)
+            {
+                logger.Warn($"Failed to load runtime model: {serverSettings.RuntimeModelDsZipPath}\r\n{ex.Message}");
+            }
+        });
     }
 
     public RuntimeModel ReloadRuntimeModel(ServerSettings serverSettings)

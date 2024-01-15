@@ -5,6 +5,8 @@
 @switch(Info)
 {
     case InfoSystem infoSystem:
+        <CompAutoTable Items="@([infoSystem])" ExcludeColumns="@(["InfoFlows", "Name"])" />
+
         <CompInstanceTable TItem="InfoSystem" Instance="infoSystem"/>
         break;
     case InfoFlow infoFlow:

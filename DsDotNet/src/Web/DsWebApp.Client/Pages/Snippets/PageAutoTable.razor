@@ -1,0 +1,25 @@
+﻿@page "/snippets/auto-table"
+<h3>PageAutoTable</h3>
+
+@if (_sampleSessionInfos != null)
+{
+    <CompAutoTable Items="_sampleSessionInfos" CssClass="table-striped"
+                  ExcludeColumns="@(["Total"])"
+                  RenameColumns="_renameColumns">
+    </CompAutoTable>
+}
+
+@code {
+    Demo.SampleSessionInfo[] _sampleSessionInfos;
+    Dictionary<string, string> _renameColumns;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _renameColumns = new Dictionary<string, string>()
+            {
+                ["Country"] = "국가",
+                ["Total"] = "합계",
+            };
+        _sampleSessionInfos = Demo.SampleSessionInfo.GetSamples();
+    }
+}

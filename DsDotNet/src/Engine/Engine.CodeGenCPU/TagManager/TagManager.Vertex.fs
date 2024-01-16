@@ -107,7 +107,7 @@ module TagManagerModule =
         member _.E2         =  errorRxBit
         ///Error TRx Monitor
         member _.ErrTRX         =  errorErrTRXBit
-
+        
         member _.CreateTag(name) = createTag name
 
         member _.GetVertexTag (vt:VertexTag) :IStorage =
@@ -176,11 +176,12 @@ module TagManagerModule =
     and VertexMCoin(v:Vertex)as this =
         inherit VertexManager(v)
         let s    = this.Storages
-        let createTag name = this.CreateTag name
         let sys = this.System
+        let createTag name = this.CreateTag name
 
         let counterBit    = counter  s "CTR"  sys
         let timerOnDelayBit = timer  s "TON"  sys 
+        let memo           = createTag "Memo" VertexTag.memo
 
         /////Call Done Relay
         //member _.CR     = relayCallBit
@@ -190,4 +191,5 @@ module TagManagerModule =
         ///Timer on delay
         member _.TDON    = timerOnDelayBit
 
+        member _.MM           =  memo
 

@@ -27,8 +27,8 @@ module SystemManagerModule =
         //let on     = let onBit = dsSysBit "_onalways"     false   sys   SystemTag.on
         //             onBit.Value <- true  //항상 ON
         //             onBit
-        let on           = dsSysBit   "_onalways"         false sys  SystemTag.on
-        let off          = dsSysBit   "_offalways"        false sys  SystemTag.off
+        let on           = dsSysBit   "_ON"         false sys  SystemTag.on
+        let off          = dsSysBit   "_OFF"        false sys  SystemTag.off
         let auto_btn     = dsSysBit   "sysauto_btn"       true  sys  SystemTag.auto_btn
         let manual_btn   = dsSysBit   "sysmanual_btn"     true  sys  SystemTag.manual_btn
         let drive_btn    = dsSysBit   "sysdrive_btn"      true  sys  SystemTag.drive_btn
@@ -89,6 +89,12 @@ module SystemManagerModule =
             flicker2sec.Address <- "%FX148"
             on.Value <- true
             off.Value <- false
+
+
+            if RuntimeDS.Package = RuntimePackage.LightPLC then
+                on.Address <-  "%FX153"
+                off.Address <-  "%FX154"
+         
 
         interface ITagManager with
             member x.Target = sys

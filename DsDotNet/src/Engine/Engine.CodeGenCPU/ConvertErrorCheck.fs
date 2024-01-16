@@ -37,5 +37,17 @@ module ConvertErrorCheck =
         then 
             let errLamps= StringExt.JoinWith(nullLamps.Select(fun j -> j.Name), "\n")
             failwithlogf $"램프 주소가 없습니다. \n{errLamps}"
-             
+
+    let setSimulationAddress(sys:DsSystem) = 
+        sys.Jobs.ForEach(fun j->
+            j.DeviceDefs.ForEach(fun d-> 
+                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextAddrEmpty
+                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextAddrEmpty)
+            )
+        sys.HWLamps.ForEach(fun l -> 
+                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextAddrEmpty)
+        sys.HWButtons.ForEach(fun b->                                         
+                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextAddrEmpty
+                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextAddrEmpty
+                        )
     

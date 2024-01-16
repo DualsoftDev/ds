@@ -69,6 +69,8 @@ module ConvertCodeCoreExt =
         member a.RXErrShortTemp = getAM(a).RXErrShortTemp
 
         member a.TRxErr = getAM(a).TRxErr
+        member a.RXTags       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
+        member a.TXTags       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
 
     type HwSystemDef with
@@ -371,8 +373,9 @@ module ConvertCodeCoreExt =
                                  //LinkDefs todo 구현 필요
         //member c.INs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
         
-        member c.PSs          = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
-        member c.PEs          = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
+        member c.PSs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
+        member c.PEs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
+        member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun f->f.ExistIn).Select(fun d->d.ActionINFunc).ToAnd()       
         
 
         //개별 부정의 AND  <안전하게 전부 확인>
@@ -385,6 +388,18 @@ module ConvertCodeCoreExt =
             c.TargetJob.DeviceDefs
                 .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
                 .SelectMany(fun a -> c.System.DeviceDefs.Where(fun w-> w.ApiItem = a))
+
+        member c.StartPointExpr =
+            match c.Parent.GetCore() with
+            | :? Real as r ->
+                let tasks = r.V.OriginInfo.Tasks
+                let homeAct = c.Parent.GetFlow().sop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
+                if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
+                        .Select(fun (t,_)->t).ContainsAllOf(c.TargetJob.DeviceDefs)
+                    then (homeAct <||> r.V.RO.Expr) <&&> c.ActionINFuncs      
+                    else (homeAct <||> r.V.RO.Expr) <&&> c._off.Expr
+            | _ -> 
+                c._off.Expr
 
     type Real with
         member r.V = r.TagManager :?> VertexMReal

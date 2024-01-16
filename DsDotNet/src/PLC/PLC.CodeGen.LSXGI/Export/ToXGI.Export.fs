@@ -288,12 +288,13 @@ module XgiExportModule =
             EnableXmlComment <- enableXmlComment
             let xdoc = x.GetTemplateXmlDoc()
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
-
+            
             let existingTaskPous =
                     [ for p in programs do
                           let taskName = p.GetAttribute("Task")
                           let pouName = p.FirstChild.OuterXml
                           taskName, pouName ]
+
 
             (* validation : POU 중복 이름 체크 *)
             do
@@ -317,7 +318,7 @@ module XgiExportModule =
                     xe.SetAttribute("Comment", projComment)
 
             (* xn = Xml Node *)
-
+            
             (* Tasks/Task 삽입 *)
             do
                 let xnTasks = xdoc.SelectSingleNode("//Configurations/Configuration/Tasks")
@@ -409,13 +410,14 @@ module XgiExportModule =
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
                 let mainScanName = if existingTaskPous.any()
-                                   then existingTaskPous.First() |> fst |> Some
-                                   else None 
+                                   then existingTaskPous.First() |> fst
+                                   else 
+                                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
+                                        task.FirstChild.OuterXml 
+
 
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
-                    let mainScan = 
-                        if i = 0 && mainScanName.IsSome
-                        then mainScanName else None
+                    let mainScan =   if i = 0 then Some(mainScanName) else None
                     pou.GenerateXmlNode(x, mainScan) |> xnPrograms.AdoptChild |> ignore
 
             xdoc

@@ -57,6 +57,7 @@ module ApiTagManagerModule =
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
          
 
+        member _.ApiItem   = apiItem
         member _.ErrorText   = 
             let err1 = if txerrtrendout.Value   then "동작편차" else ""
             let err2 = if txerrovertime.Value   then "동작시간" else ""

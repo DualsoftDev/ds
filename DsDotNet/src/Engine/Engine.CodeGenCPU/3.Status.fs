@@ -8,6 +8,7 @@ open Dual.Common.Core.FS
 type VertexManager with
 
     member v.S1_RGFH(): CommentedStatement list =
+
                                                                                       //  Status   ST  RT  CR
                                                                                       //----------------------
         let r = v.R <==  (( (!!) v.ST.Expr                       <&&> (!!) v.ET.Expr) //    R      x   -   x

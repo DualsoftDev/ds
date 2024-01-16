@@ -64,9 +64,8 @@ module ConvertCPU =
                 yield vm.F3_VertexEndWithOutReal()
 
             if IsSpec (v, CallInReal , AliasFalse) then
-                yield! vm.C1_CallPlanSend()
-                yield! vm.C2_CallActionOut()
-                yield! vm.C3_CallPlanReceive()
+                
+                yield vm.C1_CallMemo() 
                 yield! vm.M3_CallErrorTXMonitor() 
                 yield! vm.M4_CallErrorRXMonitor() 
                 yield! vm.M7_CallErrorTRXMonitor() 
@@ -123,23 +122,25 @@ module ConvertCPU =
             yield f.F2_FlowPause()
         ]
 
+    let private callPlanAction(s:DsSystem) =
+        [
+            let apis = s.GetDistinctApis()
+            let callAll = s.GetVertices().OfType<Call>()       
+            let apicallsSet = apis.Select(fun a-> a, callAll.Where(fun c->c.GetCallApis().Contains(a)))
+            
+            for (api, calls) in apicallsSet do
+                let am = api.TagManager :?> ApiItemManager
+                yield am.A1_PlanSend(s)
+                yield am.A2_PlanReceive(s)
+                yield! am.A3_ActionOut(calls)
+        ]
+     
     let private applyTimerCounterSpec(s:DsSystem) =
         [
             yield! s.T1_DelayCall()
         ]
      
-    let setSimulationAddress(sys:DsSystem) = 
-        sys.Jobs.ForEach(fun j->
-            j.DeviceDefs.ForEach(fun d-> 
-                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextAddrEmpty
-                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextAddrEmpty)
-            )
-        sys.HWLamps.ForEach(fun l -> 
-                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextAddrEmpty)
-        sys.HWButtons.ForEach(fun b->                                         
-                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextAddrEmpty
-                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextAddrEmpty
-                        )
+            
 
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
@@ -155,19 +156,23 @@ module ConvertCPU =
         then sys.GenerationOrigins()
 
         [
-            //Active 시스템 적용  //test ahn loaded는 제외 성능 고려해서 다시 구현
-            //if isActive
-            //then 
-            yield! applySystemSpec sys
-            //Flow 적용
+                //Active 시스템 적용  //test ahn loaded는 제외 성능 고려해서 다시 구현
+            if isActive
+            then 
+                yield! applySystemSpec sys
+
+
+                //Flow 적용
             for f in sys.Flows do
                 yield! applyOperationModeSpec f
                 yield! applyFlowMonitorSpec f
 
 
-            //Vertex 적용
+                //Vertex 적용
             for v in sys.GetVertices() do
                 yield! applyVertexSpec v
+
+           // yield! callPlanAction sys
 
             yield! applyTimerCounterSpec sys
         ]

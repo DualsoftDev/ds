@@ -147,6 +147,12 @@ module EdgeModule =
 
         flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
 
+    let getCallApis(x:Call) = x.TargetJob.DeviceDefs.Select(fun d->d.ApiItem)
+    let getDistinctApis(x:DsSystem) =
+        getVerticesOfSystem(x).OfType<Call>()   
+                            .SelectMany(fun c->getCallApis(c))
+                            .Distinct()
+
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
                                    
@@ -165,6 +171,8 @@ type EdgeExt =
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
+    [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
+    [<Extension>] static member GetCallApis(x:Call) =  getCallApis x
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs

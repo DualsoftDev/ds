@@ -6,7 +6,6 @@
 		<LangVersion>8.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
-        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
       <Compile Include="IoEventDS.fs" />

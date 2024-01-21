@@ -1,0 +1,148 @@
+﻿@page "/test"
+@using System.Net.WebSockets
+@inject IJSRuntime JsRuntime
+
+<CompTitle Icon="oi oi-monitor" Title="TEST" />
+@if (LoadedScreens != null)
+{
+<div class="d-flex flex-wrap cw-800">
+    <DxListBox Data="@LoadedScreens"
+               ListRenderMode="ListRenderMode.Virtual"
+               SelectionMode="ListBoxSelectionMode.Multiple"
+               ShowCheckboxes="true"
+               TData="string"
+               TValue="string"
+               @bind-Values="@SelectScreens"
+               CssClass="cw-400 chi-220">
+    </DxListBox>
+
+    <div class="demo-part card mt-1 me-1 flex-grow-1 max-h-220" style="flex-basis: 240px">
+        <div class="demo-part-header card-header bg-transparent text-body border-bottom-0">
+            Selected Items:
+        </div>
+        <div class="demo-part-body card-body p-0 pb-2 overflow-auto">
+            <ul class="list-group list-group-flush bg-transparent border-0">
+                @if (SelectScreens != null)
+                {
+                    @foreach (var item in SelectScreens)
+                    {
+                        <li class="list-group-item bg-transparent text-body py-1 border-0">
+                            @item
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<script>
+        const host = window.location.hostname;
+        const port = 8889;
+        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const webSocket = new WebSocket(`${protocol}//${host}:${port}/stream`);
+        //wss://localhost:8889/api/streaming/streamstart?clientGuid={clientGuid}&channel={Screen}&viewmode={Mode}
+        const reader = new FileReader();
+        webSocket.onopen = function (event) {
+            console.log("WebSocket opened");
+        };
+
+        webSocket.onmessage = function (event) {
+            //const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const imageData = e.target.result;
+                const indexBytes = imageData.slice(-4);
+                const index = new Int32Array(indexBytes)[0];
+
+                const imgSrc = URL.createObjectURL(new Blob([imageData.slice(0, -4)], { type: 'image/jpeg' }));
+
+                const imgElement = document.getElementById(`streamedImage${index}`);
+                if (imgElement) {
+                    imgElement.src = imgSrc;
+                    handleImageClick(index); // 이미지 클릭 이벤트 핸들러 추가
+                    imgElement.onload = function () {
+                        URL.revokeObjectURL(imgSrc); // 이미지 로드 후 Blob URL 해제
+                    };
+                }
+            };
+
+
+            reader.readAsArrayBuffer(event.data);
+        };
+
+        webSocket.onerror = function (event) {
+            console.error("WebSocket error:", event);
+        };
+
+        webSocket.onclose = function (event) {
+            console.log("WebSocket closed");
+        };
+
+
+
+</script>
+
+}
+
+@code{
+    [Parameter]
+    public string Name { get; set; } = "";
+    [Parameter]
+    public string[] ModesArray { get; set; } = ["modes"];
+    [Parameter]
+    public IEnumerable<string> LoadedScreens { get; set; } = ["screens"];
+    IEnumerable<string> SelectScreens { get; set; }
+
+
+    public string[] Screens { get; set; } = ["screens"];
+    public string Mode { get; set; }
+    public string Screen { get; set; }
+
+    public string imageSource { get; set; }
+
+
+    bool _isFullrequest = false;
+    string clientGuid;
+
+    ClientWebSocket clientWebSocket;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientGuid = this.GetHashCode().ToString();
+        await base.OnInitializedAsync();
+        await GetData();
+        //await GetImageAync();
+    }
+
+    private async Task GetData()
+    {
+        //test cctv screens
+        var result = await Http.GetRestResultAsync<string[]>("/api/streaming/screens");
+        result.Iter(
+            ok =>
+            {
+                var screens = ok as string[];
+                LoadedScreens = screens.ToArray();
+                //Screen = ScreensArray[0];
+                Console.WriteLine($"cctv screens ={string.Join("; ", LoadedScreens)}");
+                Console.WriteLine($"cctv screen ={Screen}");
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+        //test cctv
+        result = await Http.GetRestResultAsync<string[]>("/api/streaming/viewmodes");
+        result.Iter(
+            ok =>
+            {
+                var viewmodes = ok as string[];
+                Console.WriteLine($"cctv viewmodes ={string.Join("; ", viewmodes)}");
+                ModesArray = viewmodes;
+                Mode = ModesArray[0];
+            },
+        err => JsDual.Alert($"Failed to fetch info for dashboard.  {err}")
+        );
+    }
+
+}

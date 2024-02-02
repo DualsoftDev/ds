@@ -139,14 +139,12 @@ module ConvertCodeCoreExt =
         member s._homeHW  =  
                     let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
                     if homes.any()
-                            then homes.Select(fun s->s.ActionINFunc).ToOr()
+                            then homes.Select(fun s->s.ActionINFunc).ToOrElseOn()
                             else s._off.Expr    
-
 
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationCondition()  = x.HWSystemConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
-       
 
         member private x.GenerationTaskDevIO() =
             let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
@@ -217,7 +215,7 @@ module ConvertCodeCoreExt =
     let private getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool>  =
         let tags = btns.Where(fun b -> b.SettingFlows.Contains(flow))
                        .Select(fun b ->b.ActionINFunc)
-        if tags.any() then tags.ToOr() else flow.System._off.Expr
+        if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
     let getConditionInputs(flow:Flow, condis:ConditionDef seq) : Tag<bool> seq =
         condis
@@ -350,7 +348,7 @@ module ConvertCodeCoreExt =
 
         member td.MutualResetExpr(x:DsSystem) =
             let myMutualDevs =  td.MutualReset(x).Where(fun d->d.ExistIn).Select(fun d->d.ActionINFunc)
-            if myMutualDevs.any() then myMutualDevs.ToAnd() else x._on.Expr
+            if myMutualDevs.any() then myMutualDevs.ToAndElseOff() else x._on.Expr
 
     type Call with
        
@@ -375,14 +373,14 @@ module ConvertCodeCoreExt =
         
         member c.PSs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
         member c.PEs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
-        member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun f->f.ExistIn).Select(fun d->d.ActionINFunc).ToAnd()       
+        member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun f->f.ExistIn).Select(fun d->d.ActionINFunc).ToAndElseOff()       
         
 
         //개별 부정의 AND  <안전하게 전부 확인>
         member c.INsFuns  = let ins = c.TargetJob.DeviceDefs
                                         .Where(fun j -> j.ApiItem.RXs.any())
                                         .Select(fun j -> j.ActionINFunc)
-                            if ins.any() then ins.ToAnd() else c._on.Expr
+                            if ins.any() then ins.ToAndElseOff() else c._on.Expr
                          
         member c.MutualResets =
             c.TargetJob.DeviceDefs

@@ -16,7 +16,7 @@ type VertexMReal with
 
     member v.R2_RealJobComplete(): CommentedStatement seq=
         let real = v.Vertex :?> Real
-        let setCoins = real.CoinRelays.ToAndElseOn v.System
+        let setCoins = real.CoinRelays.ToAndElseOn()
 
         [   
             (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName())  //finish 전에 GR 한번 연결 

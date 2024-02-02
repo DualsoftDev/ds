@@ -11,7 +11,7 @@ type Flow with
 
 
     member f.F1_FlowError(): CommentedStatement =
-        let set = f.Graph.Vertices.OfType<Real>().SelectMany(fun r->r.Errors).ToOrElseOff(f.System)
+        let set = f.Graph.Vertices.OfType<Real>().SelectMany(fun r->r.Errors).ToOrElseOff()
         let rst = f._off.Expr
         (set, rst) --| (f.stopError, getFuncName())
 

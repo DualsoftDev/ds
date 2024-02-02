@@ -2,6 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module SystemManagerModule =
@@ -156,3 +157,9 @@ module SystemManagerModule =
             | SystemTag.flicker2s       -> flicker2sec
             | SystemTag.sim             ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"
+
+    [<Extension>]
+    type SystemManagerExt =
+        [<Extension>] static member OnTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag.on) :?> PlanVar<'T>
+        [<Extension>] static member OffTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag.off) :?> PlanVar<'T>
+       

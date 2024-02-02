@@ -16,9 +16,6 @@ module CodeConvertUtil =
     let getSharedCall(v:VertexManager) : Vertex seq =
             (v.Vertex :?> Call).GetVertexSharedCall()
 
-      
-
-
     let private getOriginTasks(vr:VertexMReal, initialType:InitialType) =
         let origins = vr.OriginInfo.Tasks
         origins
@@ -132,15 +129,15 @@ module CodeConvertUtil =
                 [for is in taskMaps do
                     let is = is.Select(fun f->f.ApiItem.PE)
                     [
-                        for i in is do i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
-                    ].ToOr()
+                        for i in is do i.Expr <&&> !!(is.Except([i]).ToOrElseOn())   // --| |--|/|--|/|--
+                    ].ToOrElseOn()
                 ]
             else
                 [for is in taskMaps do
                     let is = is.Select(fun f->f.InTag :?> Tag<bool>)
                     [
-                        for i in is do i.Expr <&&> !!(is.Except([i]).ToOr())   // --| |--|/|--|/|--
-                    ].ToOr()
+                        for i in is do i.Expr <&&> !!(is.Except([i]).ToOrElseOn())   // --| |--|/|--|/|--
+                    ].ToOrElseOn()
                 ]
                 //각 리셋체인 단위로 하나라도 켜있으면 됨
             //         resetChain1         resetChain2       ...
@@ -148,7 +145,7 @@ module CodeConvertUtil =
             //      --|/|--| |--|/|--    --|/|--| |--|/|--
             //      --|/|--|/|--| |--    --|/|--|/|--| |--
         if sets.Any()
-        then sets.ToAnd()
+        then sets.ToAndElseOff()
         else real._on.Expr
 
 
@@ -162,10 +159,7 @@ module CodeConvertUtil =
         [<Extension>] static member ETs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.ET)
         [<Extension>] static member ERRs(FList(vms:VertexManager list)): PlanVar<bool> list = vms |> bind(fun vm -> [vm.E1; vm.E2])
 
-        [<Extension>] static member ToAndElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._on.Expr
-        [<Extension>] static member ToAndElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToAnd() else sys._off.Expr
-        [<Extension>] static member ToOrElseOn(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._on.Expr
-        [<Extension>] static member ToOrElseOff(ts:#TypedValueStorage<bool> seq, sys:DsSystem) = if ts.Any() then ts.ToOr()  else sys._off.Expr
+
         [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
         [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
         ///Real 자신이거나 RealEx Target Real
@@ -198,24 +192,24 @@ module CodeConvertUtil =
         [<Extension>]
         static member GetWeakStartRootAndCausals  (v:VertexManager) =
             let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
-            tags.ToAndElseOff(v.System)
+            tags.ToAndElseOff()
 
         [<Extension>]
         static member GetWeakStartDAGAndCausals  (v:VertexManager) =
             let tags = getStartWeakEdgeSources(v).GetStartCausals(false)
-            tags.ToAndElseOff(v.System)
+            tags.ToAndElseOff()
 
         [<Extension>]
         static member GetWeakResetRootAndCausals  (v:VertexManager) =
             let tags = getResetWeakEdgeSources(v).GetResetCausals()
-            tags.ToAndElseOff(v.System)
+            tags.ToAndElseOff()
 
         [<Extension>]
         static member GetStrongStartRootAndCausals  (v:VertexManager) =
             let tags = getStartStrongEdgeSources(v).GetStartCausals(true)
-            tags.ToAndElseOff(v.System)
+            tags.ToAndElseOff()
 
         [<Extension>]
         static member GetStrongResetRootAndCausals  (v:VertexManager) =
             let tags = getResetStrongEdgeSources(v).GetResetCausals()
-            tags.ToAndElseOff(v.System)
+            tags.ToAndElseOff()

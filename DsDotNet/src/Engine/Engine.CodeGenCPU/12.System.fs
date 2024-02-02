@@ -21,25 +21,25 @@ type DsSystem with
         ]
         
     member s.Y2_SystemError(): CommentedStatement  =
-        let sets =  s.Flows.Select(fun f->f.stopError).ToOrElseOff(s)
+        let sets =  s.Flows.Select(fun f->f.stopError).ToOrElseOff()
         (sets, s._off.Expr) --| (s._stopErr, getFuncName())
 
 
     member s.Y3_SystemPause(): CommentedStatement  =
-        let sets =  s.Flows.Select(fun f->f.stopPause).ToOrElseOff(s)
+        let sets =  s.Flows.Select(fun f->f.stopPause).ToOrElseOff()
         (sets, s._off.Expr) --| (s._stopPause, getFuncName())
 
 
     member s.Y4_SystemState(): CommentedStatement list  =
         [
-            (s.Flows.Select(fun f->f.aop).ToAndElseOff(s), s._off.Expr) --| (s._autoState  , getFuncName())
-            (s.Flows.Select(fun f->f.mop).ToAndElseOff(s), s._off.Expr) --| (s._manualState, getFuncName())
-            (s.Flows.Select(fun f->f.dop).ToAndElseOff(s), s._off.Expr) --| (s._driveState , getFuncName())
-            (s.Flows.Select(fun f->f.sop).ToAndElseOff(s), s._off.Expr) --| (s._stopState  , getFuncName())
-            (s.Flows.Select(fun f->f.eop).ToAndElseOff(s), s._off.Expr) --| (s._emgState   , getFuncName())
-            (s.Flows.Select(fun f->f.top).ToAndElseOff(s), s._off.Expr) --| (s._testState  , getFuncName())
-            (s.Flows.Select(fun f->f.rop).ToAndElseOff(s), s._off.Expr) --| (s._readyState , getFuncName())
-            (s.Flows.Select(fun f->f.iop).ToAndElseOff(s), s._off.Expr) --| (s._idleState  , getFuncName())
+            (s.Flows.Select(fun f->f.aop).ToAndElseOff(), s._off.Expr) --| (s._autoState  , getFuncName())
+            (s.Flows.Select(fun f->f.mop).ToAndElseOff(), s._off.Expr) --| (s._manualState, getFuncName())
+            (s.Flows.Select(fun f->f.dop).ToAndElseOff(), s._off.Expr) --| (s._driveState , getFuncName())
+            (s.Flows.Select(fun f->f.sop).ToAndElseOff(), s._off.Expr) --| (s._stopState  , getFuncName())
+            (s.Flows.Select(fun f->f.eop).ToAndElseOff(), s._off.Expr) --| (s._emgState   , getFuncName())
+            (s.Flows.Select(fun f->f.top).ToAndElseOff(), s._off.Expr) --| (s._testState  , getFuncName())
+            (s.Flows.Select(fun f->f.rop).ToAndElseOff(), s._off.Expr) --| (s._readyState , getFuncName())
+            (s.Flows.Select(fun f->f.iop).ToAndElseOff(), s._off.Expr) --| (s._idleState  , getFuncName())
         ]
 
     

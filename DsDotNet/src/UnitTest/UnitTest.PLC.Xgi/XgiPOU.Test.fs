@@ -76,6 +76,7 @@ type XgiPOUTest() =
         defaultXgiProjectParams with
             ProjectName = projName
             POUs = [pou11.Value; pou12.Value; pou21.Value]
+            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 유닛테스트 연속호출시 누적되므로 새로 호출
     }
     [<Test>]
     member __.``POU1 test`` () =

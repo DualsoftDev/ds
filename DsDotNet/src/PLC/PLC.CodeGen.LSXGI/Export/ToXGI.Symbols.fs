@@ -108,7 +108,7 @@ module internal XgiSymbolsModule =
                 | PLCHwModel.DataType.LWord -> "LWORD"
                 | _ -> failwithlog "ERROR"
 
-            let comment = "FAKECOMMENT"
+            let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
 
             { defaultSymbolInfo with
@@ -215,7 +215,6 @@ module internal XgiSymbolsModule =
         //storagesToXml false globalStorages
         let symbolInfos =
             storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
-            |> filter (fun f-> not(f.Address.StartsWith("%F")))  //시스템 Address는 생성안함  ex) _OFF %FX154
 
         (* check any error *)
         do

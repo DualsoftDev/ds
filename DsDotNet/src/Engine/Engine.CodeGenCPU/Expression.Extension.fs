@@ -76,14 +76,18 @@ module ExpressionExtension =
     /// Tag<'T> (들)로부터 OR  Expression<'T> 생성
     let toOr xs = tryToOr xs |> Option.get
 
+    let onExpr() = RuntimeDS.System.OnTag().Expr
+    let offExpr() = RuntimeDS.System.OffTag().Expr
+
     [<Extension>]
     type ExpressionExt =
-        [<Extension>] static member ToAnd (xs:#TypedValueStorage<bool> seq)       = xs |> toAnd
-        [<Extension>] static member ToAnd (xs:Expression<bool> seq) = xs.Reduce(<&&>)
+        [<Extension>] static member ToAndElseOn  (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toAnd else onExpr()
+        [<Extension>] static member ToAndElseOff (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toAnd else offExpr()
+        [<Extension>] static member ToAndElseOn  (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<&&>) else onExpr()
+        [<Extension>] static member ToAndElseOff (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<&&>) else offExpr()
 
-        [<Extension>] static member ToOr  (xs:#TypedValueStorage<bool> seq)       = xs |> toOr
-        [<Extension>] static member ToOr  (xs:Expression<bool> seq) = xs.Reduce(<||>)
-
-
-
-
+        [<Extension>] static member ToOrElseOn  (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else onExpr()
+        [<Extension>] static member ToOrElseOff (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else offExpr()
+        [<Extension>] static member ToOrElseOn  (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<||>) else onExpr()
+        [<Extension>] static member ToOrElseOff (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<||>) else offExpr()
+        

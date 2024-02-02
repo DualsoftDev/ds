@@ -71,6 +71,9 @@ module TagManagerUtil =
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
+    let createSystemPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) (sys:ISystem) =
+        let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
+        t
 
     type BridgeType = | Device | Button | Lamp | Condition | DummyTemp
     let createBridgeTag(stg:Storages, name, address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed): ITag option=

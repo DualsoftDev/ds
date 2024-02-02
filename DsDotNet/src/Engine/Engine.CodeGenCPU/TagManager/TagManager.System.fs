@@ -2,6 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module SystemManagerModule =
@@ -15,7 +16,7 @@ module SystemManagerModule =
                 let systemTag = systemTag |> int
                 match dt with
                 | (DuBOOL | DuUINT16 | DuUINT8) ->
-                    createPlanVar stg  name  dt  autoAddr target systemTag sys
+                    createSystemPlanVar stg  name  dt  autoAddr target systemTag sys
                 | _ -> failwithlog $"not support system TagType {dt}"
 
 
@@ -84,16 +85,22 @@ module SystemManagerModule =
         let flicker1sec    = dsSysBit "_T1S"   true  sys   SystemTag.flicker1s
         let flicker2sec    = dsSysBit "_T2S"   true  sys   SystemTag.flicker2s
         do 
-            flicker200msec.Address <- "%FX146"
-            flicker1sec.Address <- "%FX147"
-            flicker2sec.Address <- "%FX148"
+ 
             on.Value <- true
             off.Value <- false
 
-
-            if RuntimeDS.Package = RuntimePackage.LightPLC then
-                on.Address <-  "%FX153"
-                off.Address <-  "%FX154"
+            //if RuntimeDS.Package = RuntimePackage.LightPLC then
+            //    on.Address <-  "%FX153"
+            //    off.Address <-  "%FX154"
+            //    flicker200msec.Address <- "%FX146"
+            //    flicker1sec.Address <- "%FX147"
+            //    flicker2sec.Address <- "%FX148"
+                //dtimeyy.Address <- "%FB106" 
+                //dtimemm.Address <- "%FB107" 
+                //dtimedd.Address <- "%FB108" 
+                //dtimeh.Address <- "%FB109"  
+                //dtimem.Address <- "%FB110"  
+                //dtimes.Address <- "%FB111"  
          
 
         interface ITagManager with
@@ -156,3 +163,9 @@ module SystemManagerModule =
             | SystemTag.flicker2s       -> flicker2sec
             | SystemTag.sim             ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"
+
+    [<Extension>]
+    type SystemManagerExt =
+        [<Extension>] static member OnTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag.on) :?> PlanVar<'T>
+        [<Extension>] static member OffTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag.off) :?> PlanVar<'T>
+       

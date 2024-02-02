@@ -22,11 +22,11 @@ type VertexManager with
         let locks     = getNeedCheckIOs (real, false)
         let lockSims  = getNeedCheckIOs (real ,true)
 
-        let onExpr    = if ons.any() then ons.ToAnd() else v._on.Expr
-        let offExpr   = if offs.any() then offs.ToOr() else v._off.Expr
+        let onExpr    = if ons.any() then ons.ToAndElseOff() else v._on.Expr
+        let offExpr   = if offs.any() then offs.ToOrElseOn() else v._off.Expr
 
-        let onSimExpr    = onSims.ToAndElseOn v.System
-        let offSimExpr   = offSims.ToOrElseOff v.System
+        let onSimExpr    = onSims.ToAndElseOn()
+        let offSimExpr   = offSims.ToOrElseOff()
 
         let set =   (onExpr    <&&> locks    <&&> (!!offExpr))
                 <||>(onSimExpr <&&> lockSims <&&> (!!offSimExpr) <&&> v._sim.Expr)
@@ -62,7 +62,7 @@ type VertexManager with
                 else 
                     yield (api.TOUT.DN.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
 
-            let sets = tds.Select(fun s->s.ApiItem.TXErrOverTime).ToOrElseOff(v.System)
+            let sets = tds.Select(fun s->s.ApiItem.TXErrOverTime).ToOrElseOff()
             yield (sets, v._off.Expr) --| (v.E1, getFuncName())
         ]
 
@@ -89,8 +89,8 @@ type VertexManager with
                 yield! (input  , onErr.Expr)   --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
                 yield! (!!input, offErr.Expr)  --^ (offRising, offSet, offTemp, "RXErrOpenOff")
 
-                yield (dop <&&> real.V.G.Expr <&&> onRising.Expr  <&&> rxs.Select(fun f -> f.R).ToAnd() , rst<||>v._sim.Expr) ==| (onErr,   getFuncName())
-                yield (dop <&&> real.V.G.Expr <&&> offRising.Expr <&&> rxs.Select(fun f -> f.F).ToAnd() , rst<||>v._sim.Expr) ==| (offErr,  getFuncName())
+                yield (dop <&&> real.V.G.Expr <&&> onRising.Expr  <&&> rxs.Select(fun f -> f.R).ToAndElseOff() , rst<||>v._sim.Expr) ==| (onErr,   getFuncName())
+                yield (dop <&&> real.V.G.Expr <&&> offRising.Expr <&&> rxs.Select(fun f -> f.F).ToAndElseOff() , rst<||>v._sim.Expr) ==| (offErr,  getFuncName())
 
             let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
 
@@ -98,7 +98,7 @@ type VertexManager with
             then 
                 yield (v._off.Expr, v._off.Expr) --| (v.E2, getFuncName())
             else 
-                yield (sets.ToOrElseOff(v.System), v._off.Expr) --| (v.E2, getFuncName())
+                yield (sets.ToOrElseOff(), v._off.Expr) --| (v.E2, getFuncName())
 
 
         ]
@@ -106,7 +106,7 @@ type VertexManager with
 
     member v.M5_RealErrorTXMonitor(): CommentedStatement  =
         let real = v.Vertex :?> Real
-        let set = real.ErrorTXs.ToOrElseOff v.System
+        let set = real.ErrorTXs.ToOrElseOff()
         let rst = v._off.Expr
 
         (set, rst) --| (v.E1, getFuncName())
@@ -114,7 +114,7 @@ type VertexManager with
 
     member v.M6_RealErrorRXMonitor(): CommentedStatement  =
         let real = v.Vertex :?> Real
-        let set = real.ErrorRXs.ToOrElseOff v.System
+        let set = real.ErrorRXs.ToOrElseOff()
         let rst = v._off.Expr
 
         (set, rst) --| (v.E2, getFuncName())
@@ -133,14 +133,14 @@ type VertexManager with
                         td.ApiItem.TXErrOverTime
                         td.ApiItem.TXErrTrendOut
                     ]
-                yield (errs.ToOrElseOff(v.System) , v._off.Expr) --| (td.ApiItem.TRxErr,   getFuncName())
+                yield (errs.ToOrElseOff() , v._off.Expr) --| (td.ApiItem.TRxErr,   getFuncName())
 
 
-            yield (tds.Select(fun d-> d.ApiItem.TRxErr).ToOrElseOff(v.System) , v._off.Expr) --| (v.ErrTRX,   getFuncName())
+            yield (tds.Select(fun d-> d.ApiItem.TRxErr).ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())
         ]
 
     member v.M8_RealErrorTRXMonitor(): CommentedStatement  =
         let real = v.Vertex :?> Real
-        let txs = real.ErrorRXs.ToOrElseOff v.System
-        let rxs = real.ErrorRXs.ToOrElseOff v.System
+        let txs = real.ErrorRXs.ToOrElseOff()
+        let rxs = real.ErrorRXs.ToOrElseOff()
         (txs <||> rxs, v._off.Expr) --| (v.ErrTRX, getFuncName())

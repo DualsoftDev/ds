@@ -156,7 +156,8 @@ module XgiExportModule =
         rgi <- rgi.Add(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
-
+    let internal getGlobalTagSkipSysTag(xs:IStorage seq) = 
+                    xs |> filter(fun stg-> not(stg.GetSystemTagKind().IsSome && stg.Name.StartsWith("_")))
 
     /// [S] -> [XS]
     let internal commentedStatementsToCommentedXgiStatements
@@ -183,7 +184,7 @@ module XgiExportModule =
 
         newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
-
+        
     type XgiPOUParams with
 
         member x.GenerateXmlString(prjParam: XgiProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
@@ -220,7 +221,8 @@ module XgiExportModule =
                               logWarn $"Unknown struct name {structName}"
                       | _ -> yield stg ]
                 |> distinct
-                |> List.sortBy (fun stg -> stg.Name)
+                |> getGlobalTagSkipSysTag
+                |> Seq.sortBy (fun stg -> stg.Name)
 
             (* storage 참조 무결성 체크 *)
             do
@@ -382,6 +384,7 @@ module XgiExportModule =
                 // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
                 let globalStoragesSortedByAllocSize =
                     globalStorages.Values
+                    |> getGlobalTagSkipSysTag
                     |> Seq.sortByDescending (fun t ->
                         if t :? TimerCounterBaseStruct || isNull t.Address || t.Address <> "" then
                             0

@@ -17,16 +17,16 @@ type VertexMCoin with
                 <||> (dop <&&> coin.ST.Expr)
                 <||> (mop <&&> coin.SF.Expr)
             )
-            <&&>
-            !!call.MutualResets.Select(fun d->d.ActionINFunc).ToOr()
-
+            <&&> 
+            !!call.MutualResets.Select(fun d->d.ActionINFunc).ToOrElseOn()
+            
         let rsts =
             let action =
-                    if call.UsingTon
-                        then call.V.TDON.DN.Expr   //On Delay
-                        else call.ActionINFuncs    
+                if call.UsingTon
+                    then call.V.TDON.DN.Expr   //On Delay
+                    else call.ActionINFuncs    
 
-            let plan = call.GetCallApis().Select(fun f->f.PE).ToAnd()
+            let plan = call.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
 
             (plan <&&> coin._sim.Expr)
             <||>
@@ -76,11 +76,11 @@ type VertexManager with
 type ApiItemManager with
 
     member a.A1_PlanSend(activeSys:DsSystem) : CommentedStatement  =
-        let sets =  a.ApiItem.RXTags.ToAndElseOn(activeSys) 
+        let sets =  a.ApiItem.RXTags.ToAndElseOn() 
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
     member a.A2_PlanReceive(activeSys:DsSystem) : CommentedStatement  =
-        let sets =  a.ApiItem.RXTags.ToAndElseOn(activeSys) 
+        let sets =  a.ApiItem.RXTags.ToAndElseOn() 
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
     member a.A3_ActionOut(calls:Call seq) : CommentedStatement list   =

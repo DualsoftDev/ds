@@ -45,7 +45,7 @@ type VertexManager with
                             then call.V.TDON.DN.Expr   //On Delay
                             else call.INsFuns
                   
-                    (action <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn(coin.System) 
+                    (action <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn() 
                   
 
                 let sets = coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr

@@ -30,9 +30,9 @@ type Flow with
 
     member f.O4_EmergencyOperationState(): CommentedStatement =
         let set = f.emg_btn.Expr <||> f.HWBtnEmgExpr
-        let rst = f._off.Expr
+        let rst = f.clear_btn.Expr
 
-        (set, rst) --| (f.eop, getFuncName())
+        (set, rst) ==| (f.eop, getFuncName())
 
     member f.O5_StopOperationState(): CommentedStatement  =
         let setPause = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) <&&> !!f.HWBtnClearExpr
@@ -44,7 +44,7 @@ type Flow with
         (set, rst) ==| (f.sop, getFuncName())
 
     member f.O6_DriveOperationMode (): CommentedStatement =
-        let set = f.drive_btn.Expr <||> f.HWBtnDriveExpr 
+        let set = f.drive_btn.Expr <||> f.HWBtnDriveExpr    
         let rst = !!f.aop.Expr <||>  f.top.Expr
 
         (set, rst) ==| (f.dop, getFuncName())

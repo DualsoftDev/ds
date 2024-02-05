@@ -144,7 +144,6 @@ module ScanDSImpl =
             client.TagChangedSubject.Subscribe(onIOTagChanged) |> ignore
             dsCPU.TagChangedForIOHub.Subscribe(onDSTagChanged) |> ignore
             dsCPU.RunInBackground()
-            dsCPU.QuickDriveReady()
             dsCPU.MySystem.Flows.Iter(fun f ->
                     let reals = f.Graph.Vertices.OfType<Real>()
                     if reals.Any() then

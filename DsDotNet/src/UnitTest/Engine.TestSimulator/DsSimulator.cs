@@ -17,11 +17,10 @@ namespace Engine.TestSimulator
     {
         public static bool Do(DsCPU dsCpu)
         {
-            var a = RuntimeDS.Package;
+            RuntimeDS.Package = RuntimePackage.Simulation;
             bool resultMoving = false;    
             Task.Run(async () => {
 
-                dsCpu.QuickDriveReady();
                 dsCpu.MySystem.Flows.Iter(f =>
                 {
                     var reals = f.Graph.Vertices.OfType<Real>();

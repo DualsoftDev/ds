@@ -173,9 +173,7 @@ module RunTime =
             syncReset(mySystem)
             scanOnce() |> ignore
 
-        member x.QuickDriveReady() =
-            systems.Iter(fun sys-> preAction(sys, true))
-            scanOnce() |> ignore
+
         member x.TagWebChangedFromWebSubject = tagWebChangedFromWebSubject
         member x.TagWebChangedFromCpuSubject = tagWebChangedFromCpuSubject
         member x.TagChangedForIOHub = tagChangedForIOHub

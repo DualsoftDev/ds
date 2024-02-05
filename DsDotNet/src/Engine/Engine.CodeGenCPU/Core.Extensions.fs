@@ -252,11 +252,11 @@ module ConvertCodeCoreExt =
         member f.HwManuExpr = getButtonExpr(f, f.System.ManualHWButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.HWBtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) <||> f._sim.Expr
+        member f.HWBtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) (*<||> f._sim.Expr*)
         member f.HWBtnStopExpr  = getButtonExpr(f, f.System.StopHWButtons     )
         member f.HWBtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
         member f.HWBtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
-        member f.HWBtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) <||> f._sim.Expr
+        member f.HWBtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) (*<||> f._sim.Expr*)
         member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 

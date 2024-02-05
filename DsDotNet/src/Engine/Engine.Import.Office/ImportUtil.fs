@@ -51,7 +51,7 @@ module ImportU =
                                 Call.Create(job, DuParentReal(parentReal.Value))
                             else
                                 Call.Create(job, DuParentFlow(parentFlow.Value))
-                        //updateCallLayout (call, node.Position)
+
                         
                         call
                     else
@@ -310,7 +310,7 @@ module ImportU =
                 else
                     let xywh = Xywh(node.Position.X, node.Position.Y
                                    , node.Position.W, node.Position.H) 
-                    dev.ChannelPoints.Add(TextEmtpyChannel,xywh)|>ignore
+                    dev.ChannelPoints[TextEmtpyChannel] <-xywh
                     )
 
         //Condition 조건 적용

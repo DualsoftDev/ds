@@ -291,12 +291,12 @@ module internal ToDsTextModule =
                 ] |> combineLines
 
             let layoutList = system.LoadedSystems 
-                             |> Seq.collect (fun f-> f.ChannelPoints.Select(fst))
+                             |> Seq.collect (fun f-> f.ChannelPoints.Select(fun kv->kv.Key))
                              |> Seq.distinct
 
             let layoutPointDic = layoutList
                                  |> Seq.map (fun f-> f, system.LoadedSystems 
-                                                        |> Seq.collect (fun dev-> dev.ChannelPoints.Select(fun (ch,x)-> dev.Name, ch, x))
+                                                        |> Seq.collect (fun dev-> dev.ChannelPoints.Select(fun kv-> dev.Name, kv.Key, kv.Value))
                                                         |> Seq.filter (fun (_, ch, _)-> ch = f)
                                                         )
                                  |> dict

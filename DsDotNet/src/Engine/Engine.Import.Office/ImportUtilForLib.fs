@@ -32,13 +32,7 @@ module ImportUtilForLib =
 
           LoadingType = loadingType }
           
-    let updateCallLayout (call:Call, xyhw:Xywh) =
-        call.TargetJob.DeviceDefs
-            .OfType<TaskDev>()
-            .Iter(fun d ->
-                    let dev = d.GetDevice(call.Parent.GetSystem())
-                    dev.ChannelPoints.Add(TextEmtpyChannel, xyhw) |>ignore
-                    )
+    
 
     let addLoadedLibSystemNCall
         (
@@ -103,8 +97,5 @@ module ImportUtilForLib =
             then mySys.Jobs.Add(job);job
             else tempJob
 
-        let call = Call.Create(jobForCall, parent)
-        updateCallLayout(call, node.Position)
-
-        call
+        Call.Create(jobForCall, parent)
          

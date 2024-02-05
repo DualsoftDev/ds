@@ -67,7 +67,7 @@ module CoreModule =
 
         //member val Xywh:Xywh = null with get, set
         ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
-        member val ChannelPoints = HashSet<string*Xywh>()
+        member val ChannelPoints = Dictionary<string, Xywh>()
         
 
 
@@ -98,8 +98,10 @@ module CoreModule =
         let channelInfos =
             loadedSystems 
             |> Seq.collect(fun s-> 
-                s.ChannelPoints.Where(fun (path, _) -> path <> TextEmtpyChannel)
-                               .Select(fun (path, xywh) ->
+                s.ChannelPoints.Where(fun kv -> kv.Key <> TextEmtpyChannel)
+                               .Select(fun kv ->
+                                    let path = kv.Key
+                                    let xywh = kv.Value
                                     let chName, url = path.Split(';')[0], path.Split(';')[1]
                                     let typeScreen = if url = TextImageChannel
                                                      then ScreenType.IMAGE  

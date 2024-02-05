@@ -52,7 +52,8 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
             layoutDic[chName]
                 .Select(fun f-> _dsl.DsSystem.Devices.First(fun d->d.LoadedName = f.DeviceName))
         let infos = InfoPackageModuleExt.GetInfos(showDevs)
-        showDevs.Select(fun d-> infos.First(fun i->i.Name = d.Name), d.ChannelPoints.First(fun (ch,xy)-> ch.Split(';')[0] = $"{chName}")|>snd)
+        showDevs.Select(fun d-> infos.First(fun i->i.Name = d.Name)
+                              , d.ChannelPoints.First(fun kv-> kv.Key.Split(';')[0] = $"{chName}").Value)
 
 
     let streamingFrontFrame() =

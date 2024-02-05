@@ -45,102 +45,55 @@ type VertexManager with
         let real= call.Parent.GetCore() :?> Real
         let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear_btn.Expr
-        let tds = call.TargetJob.DeviceDefs
-                          .Where(fun f->f.ApiItem.TXs.any() && f.ApiItem.RXs.any())
         [
-          
-            for td in tds do
-                let api = td.ApiItem
-                let running = api.PS.Expr <&&> !!td.ActionINFunc  <&&> dop
-                yield running --@ (api.TOUT, v.System._tout.Value, getFuncName())
-                if(RuntimeDS.Package = RuntimePackage.SimulationDubug)
-                then 
-                    yield (api.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (api.TXErrOverTime , getFuncName())
-                elif(RuntimeDS.Package = RuntimePackage.Simulation)
-                then 
-                    yield (call._off.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
-                else 
-                    yield (api.TOUT.DN.Expr, rst) ==| (api.TXErrOverTime , getFuncName())
+            let running = v.MM.Expr <&&> !!call.INsFuns <&&> dop
+            yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
 
-            let sets = tds.Select(fun s->s.ApiItem.TXErrOverTime).ToOrElseOff()
-            yield (sets, v._off.Expr) --| (v.E1, getFuncName())
+            match RuntimeDS.Package with 
+            | SimulationDubug ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrTimeOver , getFuncName())
+            | Simulation ->   yield (call._off.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
+            | _ ->         yield (v.TOUT.DN.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
+         
         ]
 
     member v.M4_CallErrorRXMonitor(): CommentedStatement list =
-        let call= v.Vertex.GetPure() :?> Call
-        let real= call.Parent.GetCore() :?> Real
+        let callV = v :?> VertexMCoin
+        let call  = v.Vertex.GetPure() :?> Call
+        let real  = call.Parent.GetCore() :?> Real
         
         let dop = call.V.Flow.dop.Expr
         let rst = v.Flow.clear_btn.Expr
-        let tds = call.TargetJob.DeviceDefs.Where(fun f->f.ApiItem.RXs.any())
         [
-            for td in tds do
-                let input, rxs = td.ActionINFunc, td.ApiItem.RXs.Select(getVM)
-                let offSet     = td.ApiItem.RXErrOpenOff
-                let offRising  = td.ApiItem.RXErrOpenRising
-                let offTemp    = td.ApiItem.RXErrOpenTemp
-                let offErr     = td.ApiItem.RXErrOpen
+            let input      = call.INsFuns
+            let offSet     = callV.RXErrOpenOff
+            let offRising  = callV.RXErrOpenRising
+            let offTemp    = callV.RXErrOpenTemp
+                                
+            let onSet      = callV.RXErrShortOn
+            let onRising   = callV.RXErrShortRising
+            let onTenmp    = callV.RXErrShortTemp
 
-                let onSet      = td.ApiItem.RXErrShortOn
-                let onRising   = td.ApiItem.RXErrShortRising
-                let onTenmp    = td.ApiItem.RXErrShortTemp
-                let onErr      = td.ApiItem.RXErrShort
+            yield! (input  , v.ErrShort.Expr)  --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
+            yield! (!!input, v.ErrOpen.Expr)   --^ (offRising, offSet, offTemp, "RXErrOpenOff")
 
-                yield! (input  , onErr.Expr)   --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
-                yield! (!!input, offErr.Expr)  --^ (offRising, offSet, offTemp, "RXErrOpenOff")
-
-                yield (dop <&&> real.V.G.Expr <&&> onRising.Expr  <&&> rxs.Select(fun f -> f.R).ToAndElseOff() , rst<||>v._sim.Expr) ==| (onErr,   getFuncName())
-                yield (dop <&&> real.V.G.Expr <&&> offRising.Expr <&&> rxs.Select(fun f -> f.F).ToAndElseOff() , rst<||>v._sim.Expr) ==| (offErr,  getFuncName())
-
-            let sets = tds |> Seq.collect(fun s->[s.ApiItem.RXErrOpen;s.ApiItem.RXErrShort])
-
-            if(RuntimeDS.Package = RuntimePackage.Simulation)
-            then 
-                yield (v._off.Expr, v._off.Expr) --| (v.E2, getFuncName())
-            else 
-                yield (sets.ToOrElseOff(), v._off.Expr) --| (v.E2, getFuncName())
-
-
+            yield (dop <&&> real.V.G.Expr <&&> onRising.Expr  <&&> call.RXs.Select(fun f -> f.V.R).ToAndElseOff() , rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
+            yield (dop <&&> real.V.G.Expr <&&> offRising.Expr <&&> call.RXs.Select(fun f -> f.V.F).ToAndElseOff() , rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
         ]
         
 
-    member v.M5_RealErrorTXMonitor(): CommentedStatement  =
+    member v.M5_RealErrorTotalMonitor(): CommentedStatement list =
         let real = v.Vertex :?> Real
-        let set = real.ErrorTXs.ToOrElseOff()
         let rst = v._off.Expr
-
-        (set, rst) --| (v.E1, getFuncName())
-
-
-    member v.M6_RealErrorRXMonitor(): CommentedStatement  =
-        let real = v.Vertex :?> Real
-        let set = real.ErrorRXs.ToOrElseOff()
-        let rst = v._off.Expr
-
-        (set, rst) --| (v.E2, getFuncName())
-
-  
-    member v.M7_CallErrorTRXMonitor(): CommentedStatement list =
-        let v= v :?> VertexMCoin
-        let call= v.Vertex.GetPure() :?> Call
-        let tds = call.TargetJob.DeviceDefs
         [
-            for td in tds do
-                let errs = 
-                    [
-                        td.ApiItem.RXErrOpen
-                        td.ApiItem.RXErrShort
-                        td.ApiItem.TXErrOverTime
-                        td.ApiItem.TXErrTrendOut
-                    ]
-                yield (errs.ToOrElseOff() , v._off.Expr) --| (td.ApiItem.TRxErr,   getFuncName())
-
-
-            yield (tds.Select(fun d-> d.ApiItem.TRxErr).ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())
+            (real.ErrOpens.ToOrElseOff(), rst)  --| (v.ErrOpen, getFuncName())
+            (real.ErrShorts.ToOrElseOff(), rst) --| (v.ErrShort, getFuncName())
+            (real.ErrTrendOuts.ToOrElseOff(), rst) --| (v.ErrTrendOut, getFuncName())
+            (real.ErrTimeOvers.ToOrElseOff(), rst) --| (v.ErrTimeOver, getFuncName())
+            (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
         ]
 
-    member v.M8_RealErrorTRXMonitor(): CommentedStatement  =
-        let real = v.Vertex :?> Real
-        let txs = real.ErrorRXs.ToOrElseOff()
-        let rxs = real.ErrorRXs.ToOrElseOff()
-        (txs <||> rxs, v._off.Expr) --| (v.ErrTRX, getFuncName())
+   
+    member v.M6_CallErrorTotalMonitor(): CommentedStatement  =
+        let v= v :?> VertexMCoin
+        let call= v.Vertex.GetPure() :?> Call
+        (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())

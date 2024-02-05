@@ -37,7 +37,7 @@ type Flow with
     member f.O5_StopOperationState(): CommentedStatement  =
         let setPause = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) <&&> !!f.HWBtnClearExpr
         let setError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
-                        |> Seq.collect(fun r-> [|r.E1; r.E2|])).ToOrElseOff()
+                        |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
         let set = setPause <||> setError
         let rst = f.clear_btn.Expr
            

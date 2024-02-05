@@ -128,8 +128,6 @@ module TagKindList =
     |homing                    = 11009
     |origin                    = 11010
     |pause                     = 11011
-    |errorTx                   = 11012
-    |errorRx                   = 11013
     |errorTRx                  = 11014
     |realOriginAction          = 11016
     |relayReal                 = 11017
@@ -145,6 +143,17 @@ module TagKindList =
     |realData                  = 11026
     |memo                      = 11027
 
+    |txErrTrendOut             = 11033
+    |txErrTimeOver             = 11034
+    |rxErrShort                = 11035
+    |rxErrShortOn              = 11036
+    |rxErrShortRising          = 11037
+    |rxErrShortTemp            = 11038
+    |rxErrOpen                 = 11039
+    |rxErrOpenOff              = 11040
+    |rxErrOpenRising           = 11041
+    |rxErrOpenTemp             = 11042
+
 
     /// 12000 ~ 12999
     [<Flags>]
@@ -152,18 +161,7 @@ module TagKindList =
     |planSet                   = 12000
     //|planRst                   = 12001  //not use
     |planEnd                   = 12002
-    |txErrTrendOut             = 12003
-    |txErrTimeOver             = 12004
-    |rxErrShort                = 12005
-    |rxErrShortOn              = 12006
-    |rxErrShortRising          = 12007
-    |rxErrShortTemp            = 12008
-    |rxErrOpen                 = 12009
-    |rxErrOpenOff              = 12010
-    |rxErrOpenRising           = 12011
-    |rxErrOpenTemp             = 12012
-    |trxErr                    = 12013
-
+  
     
 
     /// 13000 ~ 13999

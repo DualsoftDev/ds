@@ -23,18 +23,7 @@ module ConvertCodeCoreExt =
     let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
 
 
-
-    let errTexts (x:Call)  = 
-        x.TargetJob.DeviceDefs
-                        .Select(fun s -> s.ApiItem.TagManager)
-                        .Cast<ApiItemManager>()
-                        .Where(fun w ->not(w.ErrorText.IsNullOrEmpty()))
-                        .Select(fun s -> s.ErrorText)
-
-
-    let errTextByDevice (x:Call)  = 
-        x.TargetJob.DeviceDefs
-                        .Select(fun s ->s.ApiName, (s.ApiItem.TagManager :?> ApiItemManager).ErrorText)
+    let errText (x:Call)  = getVMCoin(x).ErrorText
 
     let createHwApiBridgeTag (x:HwSystemDef, sys:DsSystem)  = 
         let hwApi =   sys.HWSystemItems.First(fun f->f.Name = x.Name)
@@ -55,20 +44,7 @@ module ConvertCodeCoreExt =
     type ApiItem with
         member a.PS     = getAM(a).PS
         member a.PE     = getAM(a).PE
-        member a.TOUT   = getAM(a).TOUT   
-        member a.TXErrTrendOut   = getAM(a).TXErrTrendOut
-        member a.TXErrOverTime   = getAM(a).TXErrOverTime
-        member a.RXErrOpen       = getAM(a).RXErrOpen
-        member a.RXErrOpenOff  = getAM(a).RXErrOpenOff
-        member a.RXErrOpenTemp  = getAM(a).RXErrOpenTemp
-        member a.RXErrOpenRising  = getAM(a).RXErrOpenRising
-
-        member a.RXErrShort      = getAM(a).RXErrShort
-        member a.RXErrShortOn = getAM(a).RXErrShortOn
-        member a.RXErrShortRising = getAM(a).RXErrShortRising
-        member a.RXErrShortTemp = getAM(a).RXErrShortTemp
-
-        member a.TRxErr = getAM(a).TRxErr
+    
         member a.RXTags       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
         member a.TXTags       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
@@ -360,7 +336,7 @@ module ConvertCodeCoreExt =
         member c._on     = c.System._on
         member c._off     = c.System._off
     
-        
+      
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
                                 else failwith $"{c.Name} not use timer" 
@@ -368,19 +344,25 @@ module ConvertCodeCoreExt =
         member c.PresetCounter = if c.UsingCtr
                                  then c.TargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
                                  else failwith $"{c.Name} not use counter"
-                                 //LinkDefs todo 구현 필요
-        //member c.INs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun j -> j.ActionIN)
         
-        member c.PSs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS )
-        member c.PEs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PE )
+        member c.PSs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS)
+        member c.PEs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun f->f.ApiItem.PE)
+        member c.TXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.TXs)
+        member c.RXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.RXs)
         member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun f->f.ExistIn).Select(fun d->d.ActionINFunc).ToAndElseOff()       
+        member c.Errors       = [
+                                     getVMCoin(c).ErrTimeOver
+                                     getVMCoin(c).ErrTrendOut 
+                                     getVMCoin(c).ErrShort 
+                                     getVMCoin(c).ErrOpen 
+                                 ]
         
 
         //개별 부정의 AND  <안전하게 전부 확인>
         member c.INsFuns  = let ins = c.TargetJob.DeviceDefs
                                         .Where(fun j -> j.ApiItem.RXs.any())
                                         .Select(fun j -> j.ActionINFunc)
-                            if ins.any() then ins.ToAndElseOff() else c._on.Expr
+                            if ins.any() then ins.ToAndElseOn() else c._on.Expr
                          
         member c.MutualResets =
             c.TargetJob.DeviceDefs
@@ -402,9 +384,11 @@ module ConvertCodeCoreExt =
     type Real with
         member r.V = r.TagManager :?> VertexMReal
         member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
-        member r.ErrorTXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E1)
-        member r.ErrorRXs   = r.Graph.Vertices.Select(getVM    ).Select(fun f->f.E2)
-        member r.Errors     = r.ErrorTXs @ r.ErrorRXs 
+        member r.ErrTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeOver) 
+        member r.ErrTrendOuts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTrendOut) 
+        member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 
+        member r.ErrShorts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrShort) 
+        member r.Errors     = r.ErrTimeOvers @ r.ErrTrendOuts @ r.ErrOpens @ r.ErrShorts 
 
     type Indirect with
         member a.V = a.TagManager :?> VertexMCoin

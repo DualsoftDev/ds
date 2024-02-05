@@ -77,7 +77,7 @@ type ApiItemManager with
 
     member a.A1_PlanSend(activeSys:DsSystem) : CommentedStatement  =
         let sets =  a.ApiItem.RXTags.ToAndElseOn() 
-        (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
+        (sets, activeSys._off.Expr) --| (a.PS, getFuncName())
 
     member a.A2_PlanReceive(activeSys:DsSystem) : CommentedStatement  =
         let sets =  a.ApiItem.RXTags.ToAndElseOn() 

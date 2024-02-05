@@ -36,12 +36,12 @@ type Spec05_MonitorStatement() =
             coin.V.M4_CallErrorRXMonitor() |> doChecks
 
     [<Test>]
-    member __.``M5 Real Error TX Monitor`` () =
+    member __.``M5_Real Error Total Monitor`` () =
          for real in t.Reals do
-            real.M5_RealErrorTXMonitor() |> doCheck
+            real.M5_RealErrorTotalMonitor() |> doChecks
 
     [<Test>]
-    member __.``M6 Real Error RX Monitor`` () =
-        for real in t.Reals do
-            real.M6_RealErrorRXMonitor() |> doCheck
+    member __.``M6_Call Error Total Monitor`` () =
+        for call in t.Coins do
+            call.M6_CallErrorTotalMonitor() |> doCheck
 

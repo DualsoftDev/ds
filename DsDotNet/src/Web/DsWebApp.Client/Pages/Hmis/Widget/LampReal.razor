@@ -35,10 +35,14 @@
 
     string getText()
     {
-        if ((bool)Real.ErrorTxLamp.Value)
-            return "TxError";
-        else if ((bool)Real.ErrorRxLamp.Value)
-            return "RxError";
+        if ((bool)Real.ErrorOpen.Value)
+            return "ErrorOpen";
+        else if ((bool)Real.ErrorShort.Value)
+            return "ErrorShort";
+        else if ((bool)Real.ErrTimeOver.Value)
+            return "ErrTimeOver";
+        else if ((bool)Real.ErrTrendOut.Value)
+            return "ErrTrendOut";
         else if ((bool)Real.ReadyLamp.Value)
             return "Ready";
         else if ((bool)Real.GoingLamp.Value)
@@ -67,7 +71,10 @@
     void onTagWebChanged(TagWeb tag)
     {
         TagWeb[] lampTags = [
-            Real.ErrorRxLamp,
+            Real.ErrorOpen,
+            Real.ErrorShort,
+            Real.ErrTimeOver,
+            Real.ErrTrendOut,
             Real.ReadyLamp,
             Real.GoingLamp,
             Real.FinishLamp,

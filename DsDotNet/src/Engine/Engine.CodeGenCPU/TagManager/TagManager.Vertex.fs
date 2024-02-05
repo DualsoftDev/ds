@@ -40,9 +40,7 @@ module TagManagerModule =
             et
         let originBit      = createTag "OG"   VertexTag.origin
         let pauseBit       = createTag "PA"   VertexTag.pause
-        let errorTxBit     = createTag "ErrTime"   VertexTag.errorTx
-        let errorRxBit     = createTag "ErrSens"   VertexTag.errorRx
-        let errorErrTRXBit = createTag "ErrTRX"    VertexTag.errorTRx
+
         let readyBit       = createTag "R"    VertexTag.ready
         let goingBit       = createTag "G"    VertexTag.going
         let finishBit      = createTag "F"    VertexTag.finish
@@ -53,6 +51,20 @@ module TagManagerModule =
         let forceOnBit     = createTag "ON"   VertexTag.forceOn
         let forceOffBit    = createTag "OFF"  VertexTag.forceOff
 
+
+        let txErrTrendOut    = createTag "txErrTrendOut"      VertexTag.txErrTrendOut   
+        let txErrTimeOver    = createTag "txErrTimeOver"      VertexTag.txErrTimeOver   
+        let rxErrShort       = createTag "rxErrShort"         VertexTag.rxErrShort      
+        let rxErrOpen        = createTag "rxErrOpen"          VertexTag.rxErrOpen    
+
+        let errorErrTRXBit = createTag "ErrTRX"    VertexTag.errorTRx
+
+        let errors = 
+            let err1 = if txErrTrendOut.Value   then "동작편차" else ""
+            let err2 = if txErrTimeOver.Value   then "동작시간" else ""
+            let err3 = if rxErrShort.Value      then "센서감지" else ""
+            let err4 = if rxErrOpen.Value       then "센서오프" else ""
+            [err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
 
         interface ITagManager with
             member x.Target = v
@@ -101,11 +113,12 @@ module TagManagerModule =
         member _.OG         =  originBit
         ///PAuse Monitor
         member _.PA         =  pauseBit
-        ///Error Tx Monitor
-        member _.E1         =  errorTxBit
-        ///Error Rx Monitor
-        member _.E2         =  errorRxBit
-        ///Error TRx Monitor
+
+        member _.ErrTrendOut   = txErrTrendOut 
+        member _.ErrTimeOver   =  txErrTimeOver 
+        member _.ErrShort       = rxErrShort    
+        member _.ErrOpen       =  rxErrOpen     
+     
         member _.ErrTRX         =  errorErrTRXBit
         
         member _.CreateTag(name) = createTag name
@@ -121,15 +134,20 @@ module TagManagerModule =
             | VertexTag.homing              -> homingBit           :> IStorage
             | VertexTag.origin              -> originBit           :> IStorage
             | VertexTag.pause               -> pauseBit            :> IStorage
-            | VertexTag.errorTx             -> errorTxBit          :> IStorage
-            | VertexTag.errorRx             -> errorRxBit          :> IStorage
-            | VertexTag.errorTRx            -> errorErrTRXBit      :> IStorage
-                                                                  
+
+            | VertexTag.txErrTrendOut       -> txErrTrendOut   :> IStorage
+            | VertexTag.txErrTimeOver       -> txErrTimeOver   :> IStorage
+            | VertexTag.rxErrShort          -> rxErrShort      :> IStorage
+            | VertexTag.rxErrOpen           -> rxErrOpen       :> IStorage
+            | VertexTag.errorTRx            -> errorErrTRXBit  :> IStorage
+                                      
+
+
+
             | VertexTag.forceStart          -> forceStartBit       :> IStorage
             | VertexTag.forceReset          -> forceResetBit       :> IStorage
             | VertexTag.forceOn             -> forceOnBit          :> IStorage
             | VertexTag.forceOff            -> forceOffBit         :> IStorage
-              
 
             | VertexTag.realOriginAction    -> (v.TagManager:?> VertexMReal).RO    :> IStorage
             | VertexTag.relayReal           -> (v.TagManager:?> VertexMReal).RR    :> IStorage
@@ -140,6 +158,14 @@ module TagManagerModule =
 
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
          
+        member _.ErrorList   =  errors
+        member _.ErrorText   = 
+            if errors.any()
+            then
+                let errText = String.Join(",", errors)
+                $"{_.Name} {errText} 이상"
+            else 
+                ""
 
     and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
@@ -183,13 +209,29 @@ module TagManagerModule =
         let timerOnDelayBit = timer  s "TON"  sys 
         let memo           = createTag "Memo" VertexTag.memo
 
-        /////Call Done Relay
-        //member _.CR     = relayCallBit
-
+   
+        let rxErrShortOn     = createTag "rxErrShortOn"       VertexTag.rxErrShortOn    
+        let rxErrShortRising = createTag "rxErrShortRising"   VertexTag.rxErrShortRising
+        let rxErrShortTemp   = createTag "rxErrShortTemp"     VertexTag.rxErrShortTemp  
+        let rxErrOpenOff     = createTag "rxErrOpenOff"       VertexTag.rxErrOpenOff    
+        let rxErrOpenRising  = createTag "rxErrOpenRising"    VertexTag.rxErrOpenRising 
+        let rxErrOpenTemp    = createTag "rxErrOpenTemp"      VertexTag.rxErrOpenTemp   
+        let timerTimeOutBit = timer  s "TOUT" sys 
+        
         ///Ring Counter
         member _.CTR     = counterBit
         ///Timer on delay
         member _.TDON    = timerOnDelayBit
 
         member _.MM           =  memo
+
+        member _.TOUT   = timerTimeOutBit
+
+
+        member _.RXErrOpenOff       = rxErrShortOn    
+        member _.RXErrOpenTemp      = rxErrShortRising
+        member _.RXErrOpenRising    = rxErrShortTemp  
+        member _.RXErrShortOn       = rxErrOpenOff    
+        member _.RXErrShortRising   = rxErrOpenRising 
+        member _.RXErrShortTemp     = rxErrOpenTemp   
 

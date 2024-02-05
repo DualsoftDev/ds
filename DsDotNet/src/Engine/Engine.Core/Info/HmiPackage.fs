@@ -11,8 +11,8 @@ module HmiPackageModule =
     let getPushLampTags     (x:HMIPushLamp)     = seq {yield fst x; yield snd x}
     let getPushLampModeTags (x:HMIPushLampMode) = seq {yield! getPushLampTags(fst x); yield snd x; }
     
-    //디바이스 소속된 행위 Api
-    type HMIApiItem = {
+    //디바이스 를 호출한 행위 
+    type HMICall = {
         Name : string
         
         TrendOutErrorLamp : HMILamp        
@@ -34,9 +34,9 @@ module HmiPackageModule =
     //모니터링 전용 (명령은 소속Job 통해서)
     type HMIDevice = {
         Name : string
-        ApiItems   : HMIApiItem array  
+        Calls : HMICall array  
     } with
-        member x.CollectTags () = x.ApiItems |> Seq.collect (fun ai -> ai.CollectTags())
+        member x.CollectTags () = x.Calls |> Seq.collect (fun c -> c.CollectTags())
 
     ///수동 동작의 단위 jobA = { Dev1.ADV, Dev2.ADV, ... }
     ///하나의 명령으로 복수의 디바이스 행위  
@@ -67,8 +67,10 @@ module HmiPackageModule =
         HomingLamp       : HMILamp 
         OriginLamp       : HMILamp 
         PauseLamp        : HMILamp 
-        ErrorTxLamp      : HMILamp 
-        ErrorRxLamp      : HMILamp
+        ErrorOpen        : HMILamp 
+        ErrorShort       : HMILamp
+        ErrTimeOver      : HMILamp 
+        ErrTrendOut      : HMILamp
 
         Devices          : HMIDevice array //loaded system
         Jobs             : HMIJob array      
@@ -86,8 +88,10 @@ module HmiPackageModule =
                 yield x.HomingLamp  
                 yield x.OriginLamp  
                 yield x.PauseLamp   
-                yield x.ErrorTxLamp 
-                yield x.ErrorRxLamp
+                yield x.ErrorOpen 
+                yield x.ErrorShort
+                yield x.ErrTrendOut
+                yield x.ErrTimeOver  
                         //yield! x.Devices |> Seq.collect (fun d -> d.CollectTags())  필요시 HMIPackage Devices : string array 이름으로 별도로 찾아야함 
                 yield! x.Jobs |> Seq.collect (fun j -> j.CollectTags())
             }

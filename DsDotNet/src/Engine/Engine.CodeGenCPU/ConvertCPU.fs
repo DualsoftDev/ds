@@ -43,9 +43,7 @@ module ConvertCPU =
             if IsSpec (v, RealInFlow, AliasFalse) then
 
                 yield vm.M1_OriginMonitor()
-                yield vm.M5_RealErrorTXMonitor()
-                yield vm.M6_RealErrorRXMonitor()
-                yield vm.M8_RealErrorTRXMonitor() 
+                yield! vm.M5_RealErrorTotalMonitor() 
 
                 yield vm.R1_RealInitialStart()
                 yield! vm.R2_RealJobComplete()
@@ -68,7 +66,7 @@ module ConvertCPU =
                 yield vm.C1_CallMemo() 
                 yield! vm.M3_CallErrorTXMonitor() 
                 yield! vm.M4_CallErrorRXMonitor() 
-                yield! vm.M7_CallErrorTRXMonitor() 
+                yield vm.M6_CallErrorTotalMonitor() 
                 
 
             if IsSpec (v, VertexAll, AliasNotCare) then

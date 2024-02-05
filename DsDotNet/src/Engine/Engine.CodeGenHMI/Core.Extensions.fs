@@ -40,26 +40,26 @@ module ConvertHMI =
         getWebTag tm pushKind, lampTags.Select(fun f-> TagWebExt.GetWebTag(f, kindDescriptions))
         
 
-    type ApiItem with
+    type Call with
         member private x.GetHMI()   =
-            let tm = x.TagManager :?> ApiItemManager
+            let tm = x.TagManager :?> VertexMCoin
             {
                 Name = x.Name
-                TrendOutErrorLamp  = getLamp  tm (ApiItemTag.txErrTrendOut |>int)
-                TimeOverErrorLamp  = getLamp  tm (ApiItemTag.txErrTimeOver |>int)
-                ShortErrorLamp     = getLamp  tm (ApiItemTag.rxErrShort |>int)
-                OpenErrorLamp      = getLamp  tm (ApiItemTag.rxErrOpen |>int)
-                ErrorTotalLamp     = getLamp  tm (ApiItemTag.trxErr |>int)
+                TrendOutErrorLamp  = getLamp  tm (VertexTag.txErrTrendOut |>int)
+                TimeOverErrorLamp  = getLamp  tm (VertexTag.txErrTimeOver |>int)
+                ShortErrorLamp     = getLamp  tm (VertexTag.rxErrShort |>int)
+                OpenErrorLamp      = getLamp  tm (VertexTag.rxErrOpen |>int)
+                ErrorTotalLamp     = getLamp  tm (VertexTag.errorTRx |>int)
             }
 
     type LoadedSystem with
         member private x.GetHMI()   =
-            let containerSysApis = x.ContainerSystem.ApiUsages
+            let containerCalls = x.ContainerSystem.GetVertices().OfType<Call>()
             {
                 Name        = x.Name
-                ApiItems    = x.ReferenceSystem
-                               .ApiItems.Where(fun a->containerSysApis.Contains(a))
-                                        .Select(fun s->s.GetHMI()).ToArray()
+                Calls    = containerCalls
+                                .Where(fun c->c.TargetJob.DeviceDefs.any(fun d->d.ApiItem.System = x.ReferenceSystem))
+                                .Select(fun c->c.GetHMI()).ToArray()
             }
 
     type Job with
@@ -83,14 +83,16 @@ module ConvertHMI =
                 ResetPush    = getPush tm (VertexTag.resetTag |>int)  
                 ONPush       = getPush tm (VertexTag.forceOn |>int)  
                 OFFPush      = getPush tm (VertexTag.forceOff |>int)  
-                ReadyLamp    = getPush tm (VertexTag.ready |>int)  
-                GoingLamp    = getPush tm (VertexTag.going |>int)  
-                FinishLamp   = getPush tm (VertexTag.finish |>int)  
-                HomingLamp   = getPush tm (VertexTag.homing |>int)  
-                OriginLamp   = getPush tm (VertexTag.origin |>int)  
-                PauseLamp    = getPush tm (VertexTag.pause |>int)  
-                ErrorTxLamp  = getPush tm (VertexTag.errorRx |>int)  
-                ErrorRxLamp  = getPush tm (VertexTag.errorTx |>int)  
+                ReadyLamp    = getLamp tm (VertexTag.ready |>int)  
+                GoingLamp    = getLamp tm (VertexTag.going |>int)  
+                FinishLamp   = getLamp tm (VertexTag.finish |>int)  
+                HomingLamp   = getLamp tm (VertexTag.homing |>int)  
+                OriginLamp   = getLamp tm (VertexTag.origin |>int)  
+                PauseLamp    = getLamp tm (VertexTag.pause |>int)  
+                ErrorOpen    = getLamp  tm (VertexTag.rxErrOpen |>int)  
+                ErrorShort   = getLamp  tm (VertexTag.rxErrShort |>int)  
+                ErrTimeOver  = getLamp  tm (VertexTag.txErrTimeOver |>int)  
+                ErrTrendOut  = getLamp  tm (VertexTag.txErrTrendOut |>int)  
                 
                 Devices      = calls.SelectMany(fun c->
                                       c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()

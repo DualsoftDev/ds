@@ -134,8 +134,12 @@ type TagKindExt =
     [<Extension>]
     static member IsVertexErrTag(x:TagDS) =
         match x with
-        |EventVertex (_, _, kind) ->  kind.IsOneOf(  VertexTag.errorTx
-                                                    , VertexTag.errorRx)
+        |EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.errorTRx
+                                                    , VertexTag.rxErrOpen
+                                                    , VertexTag.rxErrShort
+                                                    , VertexTag.txErrTimeOver
+                                                    , VertexTag.txErrTrendOut
+                                                    )
         |_->false
 
     [<Extension>]
@@ -182,14 +186,14 @@ type TagKindExt =
                                         //, VertexTag.homing       
                                         , VertexTag.pause       
                                         , VertexTag.errorTRx       
-                                        , VertexTag.errorRx       
-                                        , VertexTag.errorTx)
+                                        , VertexTag.rxErrOpen
+                                        , VertexTag.rxErrShort
+                                        , VertexTag.txErrTimeOver
+                                        , VertexTag.txErrTrendOut
+                                        
+                                        )
                                           
-        |EventApiItem(_, _, kind) ->  kind = ApiItemTag.trxErr
-                                        || kind = ApiItemTag.rxErrOpen  
-                                        || kind = ApiItemTag.rxErrShort  
-                                        || kind = ApiItemTag.txErrTimeOver  
-                                        || kind = ApiItemTag.txErrTrendOut  
+        |EventApiItem (_, _, _) -> false
         |EventAction (_, _, _) -> false
         |EventHwSys  (_, _, _) -> false
         |EventVariable  (_, _, _) -> true

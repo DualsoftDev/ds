@@ -31,7 +31,7 @@ module DBLoggerTestModule =
                 now.AddSeconds(counter())
             helper
 
-        let cyl1Error = createStorage "cyl1.trxErr" (int ApiItemTag.trxErr)
+        let cyl1Error = createStorage "cyl1.trxErr" (int VertexTag.errorTRx)
         (*             2s      1s
                       +--|--+  +--+
                 ------+     +--+  +--------
@@ -47,17 +47,17 @@ module DBLoggerTestModule =
 
         let storages = [
             cyl1Error
-            createStorage "my.Test2.TRXERR" (int ApiItemTag.trxErr)
+            createStorage "my.Test2.TRXERR" (int VertexTag.errorTRx)
         ]
 
         let querySet = QuerySet()
         let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
-        let fqdn, kind = cyl1Error.Fqdn, int ApiItemTag.trxErr
+        let fqdn, kind = cyl1Error.Fqdn, int VertexTag.errorTRx
 
         [<Test>]
         member __.``Basic Test`` () =
-            let cyl2Error = createStorage "cyl2.trxErr" (int ApiItemTag.trxErr)
-            let cyl2Error = createStorage "cyl2.trxErr" (int ApiItemTag.trxErr)
+            let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorTRx)
+            let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorTRx)
 
             2 === DBLogger.Count(fqdn, kind, logSet)
             false === DBLogger.GetLastValue(fqdn, kind, logSet)

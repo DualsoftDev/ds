@@ -39,7 +39,11 @@ namespace Engine.TestSimulator
         {
             List<string> changedNames = new();
 
-            var subscription = dsCpu.TagWebChangedFromCpuSubject.Subscribe(s => changedNames.Add(s.Name));
+            var subscription = dsCpu.TagWebChangedFromCpuSubject.Subscribe(s =>
+            {
+                Console.WriteLine($"Name:{s.Name}\t Value:{s.Value}");
+                changedNames.Add(s.Name); 
+            });
             await Task.Delay(2000);
             subscription.Dispose();
 

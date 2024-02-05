@@ -597,7 +597,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     if (nameCompo).Count() = 1
                     then 
                         let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
-                        device.ChannelPoints.Add (filePath, xywh) |>ignore
+                        device.ChannelPoints[filePath] <- xywh 
                     //| 2 ->
                     //    system.Jobs
                     //    |> iter (fun job ->

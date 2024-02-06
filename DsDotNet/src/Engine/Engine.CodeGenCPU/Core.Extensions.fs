@@ -115,8 +115,8 @@ module ConvertCodeCoreExt =
         member s._homeHW  =  
                     let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
                     if homes.any()
-                            then homes.Select(fun s->s.ActionINFunc).ToOrElseOn()
-                            else s._off.Expr    
+                        then homes.Select(fun s->s.ActionINFunc).ToOrElseOn()
+                        else s._off.Expr    
 
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
@@ -193,11 +193,11 @@ module ConvertCodeCoreExt =
                        .Select(fun b ->b.ActionINFunc)
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
-    let getConditionInputs(flow:Flow, condis:ConditionDef seq) : Tag<bool> seq =
-        condis
-            .Where(fun b -> b.SettingFlows.Contains(flow))
-            .Select(fun b -> b.InTag)
-            .Cast<Tag<bool>>()
+    let private getConditionInputs(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
+        let tags = condis
+                    .Where(fun c -> c.SettingFlows.Contains(flow))
+                    .Select(fun c ->c.ActionINFunc)
+        if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
 
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
@@ -260,9 +260,13 @@ module ConvertCodeCoreExt =
         member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
+
+        member f.HWConditionsExpr = getConditionInputs(f, f.System.HWConditions    ) 
+
         member f.ModeAutoHwHMIExpr   =  if f.HwManuSelects.any() 
                                         then f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
                                         else f.HwAutoExpr <&&> !!f._off.Expr  <||> f._sim.Expr
+
         member f.ModeManualHwHMIExpr =  if f.HwManuSelects.any() 
                                         then f.HwManuExpr <&&> !!f.HwAutoExpr 
                                         else f.HwManuExpr <&&> !!f._off.Expr  
@@ -350,12 +354,13 @@ module ConvertCodeCoreExt =
         member c.TXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.TXs)
         member c.RXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.RXs)
         member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun f->f.ExistIn).Select(fun d->d.ActionINFunc).ToAndElseOff()       
-        member c.Errors       = [
-                                     getVMCoin(c).ErrTimeOver
-                                     getVMCoin(c).ErrTrendOut 
-                                     getVMCoin(c).ErrShort 
-                                     getVMCoin(c).ErrOpen 
-                                 ]
+        member c.Errors       = 
+                                [
+                                    getVMCoin(c).ErrTimeOver
+                                    getVMCoin(c).ErrTrendOut 
+                                    getVMCoin(c).ErrShort 
+                                    getVMCoin(c).ErrOpen 
+                                ]
         
 
         //개별 부정의 AND  <안전하게 전부 확인>
@@ -373,11 +378,14 @@ module ConvertCodeCoreExt =
             match c.Parent.GetCore() with
             | :? Real as r ->
                 let tasks = r.V.OriginInfo.Tasks
-                let homeAct = c.Parent.GetFlow().sop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
+                let flow = c.Parent.GetFlow()
+                let homeManuAct = flow.mop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
+                let homeAutoAct = flow.dop.Expr <&&> r.V.RO.Expr
+
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).ContainsAllOf(c.TargetJob.DeviceDefs)
-                    then (homeAct <||> r.V.RO.Expr) <&&> c.ActionINFuncs      
-                    else (homeAct <||> r.V.RO.Expr) <&&> c._off.Expr
+                    then (homeManuAct <||> homeAutoAct) <&&> !!c.ActionINFuncs      
+                    else c._off.Expr
             | _ -> 
                 c._off.Expr
 

@@ -170,8 +170,8 @@ module PPTDocModule =
             let shapes = Office.PageShapes(doc)
                             |> Seq.filter (fun (shape, page, _, _) -> 
                                         page <> pptHeadPage && pages.Values.Select(fun w -> w.PageNum).Contains(page)
-                                        || page = pptHeadPage && (shape.CheckBevelShapeRound() ||shape.CheckBevelShapePlate())
-                                        )
+                                        || page = pptHeadPage && shape.CheckBevelShape())
+                                      
             
             
             pages.Values.Iter(fun pptPage -> 

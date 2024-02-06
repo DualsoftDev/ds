@@ -6,16 +6,16 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 
-type VertexMCoin with
-    member coin.C1_CallMemo(): CommentedStatement  =
-        let call = coin.Vertex :?> Call
-        let dop, mop = coin.Flow.dop.Expr, coin.Flow.mop.Expr
+type VertexManager with
+    member v.C1_CallMemo(): CommentedStatement  =
+        let v, call  = v :?> VertexMCoin, v.Vertex :?> Call 
+        let dop, mop = v.Flow.dop.Expr, v.Flow.mop.Expr
         
         let sets = 
             (
                 call.StartPointExpr
-                <||> (dop <&&> coin.ST.Expr)
-                <||> (mop <&&> coin.SF.Expr)
+                <||> (dop <&&> v.ST.Expr)
+                <||> (mop <&&> v.SF.Expr)
             )
             <&&> 
             !!call.MutualResets.Select(fun d->d.ActionINFunc).ToOrElseOn()
@@ -28,9 +28,9 @@ type VertexMCoin with
 
             let plan = call.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
 
-            (plan <&&> coin._sim.Expr)
+            (plan <&&> v._sim.Expr)
             <||>
-            (action <||> !!coin._sim.Expr)
+            (action <||> !!v._sim.Expr)
 
         (sets, rsts) ==| (call.V.MM, getFuncName())
 
@@ -67,11 +67,6 @@ type VertexMCoin with
     //            yield (sets, coin._off.Expr) --| (td.ApiItem.PE, getFuncName() )
     //    ]
 
-
-type VertexManager with
-    member v.C1_CallMemo()           : CommentedStatement  = (v :?> VertexMCoin).C1_CallMemo()
-    //member v.C2_CallActionOut()      : CommentedStatement list = (v :?> VertexMCoin).C2_CallActionOut()
-    //member v.C3_CallPlanReceive()    : CommentedStatement list = (v :?> VertexMCoin).C3_CallPlanReceive()
 
 type ApiItemManager with
 

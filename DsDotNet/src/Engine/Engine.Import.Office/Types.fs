@@ -24,6 +24,7 @@ module InterfaceClass =
         | BUTTON //버튼 emg,start, ...
         | LAYOUT //위치 디바이스 기준
         | LAMP //램프 runmode,stopmode, ...
+        | CONDITION //READY조건
 
         member x.IsReal = x = REAL || x = REALExF || x = REALExS
         member x.IsCall = x = CALL

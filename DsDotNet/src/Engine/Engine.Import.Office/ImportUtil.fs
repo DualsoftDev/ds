@@ -248,7 +248,7 @@ module ImportU =
 
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
 
-        //EMG & Start & Auto 리스트 만들기
+        //MakeButtons 리스트 만들기
         [<Extension>]
         static member MakeButtons(doc: pptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
@@ -257,7 +257,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow, new HashSet<Func>())))
+                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}_{b.Key}", "", "", flow, new HashSet<Func>())))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
@@ -269,7 +269,7 @@ module ImportU =
                         node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value, new HashSet<Func>())))
                 )        
                 
-        //EMG & Start & Auto 리스트 만들기
+        //MakeLamps 리스트 만들기
         [<Extension>]
         static member MakeLamps(doc: pptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
@@ -288,16 +288,34 @@ module ImportU =
                 let duplicateNode = allLampNodes.First(fun f->f.Name = duplicateName)
                 Office.ErrorName(duplicateNode.Shape, ErrID._64, duplicateNode.PageNum)
 
-
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", Some flow, new HashSet<Func>())))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}_{l.Key}", "", "", Some flow, new HashSet<Func>())))
             
             headPageLamps
             |> Seq.iter (fun node ->
                 node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
                 
+        //MakeReadyConditions 리스트 만들기
+        [<Extension>]
+        static member MakeConditions(doc: pptDoc, mySys: DsSystem) =
+            let dicFlow = doc.DicFlow
+            doc.Nodes
+            |> Seq.filter (fun node -> node.CondiDefs.any())
+            |> Seq.iter (fun node ->
+                let flow = dicFlow.[node.PageNum]
+                node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow, new HashSet<Func>())))
+
+            doc.NodesHeadPage
+            |> Seq.filter (fun node -> node.CondiHeadPageDefs.any())
+            |> Seq.iter (fun node ->
+                        
+                if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
+                else 
+                    dicFlow.Iter(fun flow ->
+                        node.CondiHeadPageDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, c.Key, "", "", flow.Value, new HashSet<Func>())))
+                )     
                 
         [<Extension>]
         static member MakeAnimationPoint(doc: pptDoc, mySys: DsSystem) =
@@ -313,26 +331,6 @@ module ImportU =
                     dev.ChannelPoints[TextEmtpyChannel] <-xywh
                     )
 
-        //Condition 조건 적용
-        [<Extension>]
-        static member MakeCondition(doc: pptDoc, mySys: DsSystem) = () ///작성 필요
-            //let dicFlow = doc.DicFlow
-
-            //doc.Nodes
-            //|> Seq.filter (fun node -> node.LampDefs.any ())
-            //|> Seq.iter (fun node ->
-            //    let flow = dicFlow.[node.PageNum]
-            //    node.LampDefs.ForEach(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", flow, new HashSet<Func>())))
-            
-            //doc.NodesHeadPage
-            //|> Seq.filter (fun node -> node.LampHeadPageDefs.any())
-            //|> Seq.iter (fun node ->
-            //    dicFlow.Iter(fun flow ->
-            //        if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
-            //        else 
-            //            node.LampHeadPageDefs.ForEach(fun l -> mySys.AddLamp(l.Value, $"{l.Key}_{flow.Value.Name}", "", "", flow.Value, new HashSet<Func>())))
-            //    )
-     
         //real call alias  만들기
         [<Extension>]
         static member MakeSegment(doc: pptDoc, mySys: DsSystem) =
@@ -694,10 +692,9 @@ module ImportU =
             
             doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
-            //EMG & Start & Auto 리스트 만들기
             doc.MakeButtons(sys)
-            //run / stop mode  램프 리스트 만들기
             doc.MakeLamps(sys)
+            doc.MakeConditions(sys)
             //segment 리스트 만들기
             doc.MakeSegment(sys)
             //Edge  만들기

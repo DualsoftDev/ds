@@ -82,6 +82,7 @@ module ErrID =
     let _64 = "중복된 Lamp 이름이 존재합니다."
     let _65 = "Layout slide에 배경 이미지가 없습니다."
     let _66 = "중복된 Layout 이름이 존재합니다."
+    let _67 = "중복된 Condition 이름이 존재합니다."
     
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

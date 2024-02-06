@@ -233,6 +233,7 @@ module PPTObjectModule =
         | REAL
         | DUMMY
         | BUTTON
+        | CONDITION
         | LAYOUT
         | LAMP -> checkDotErr ()
 
@@ -256,6 +257,7 @@ module PPTObjectModule =
         let btnDefs = Dictionary<string, BtnType>()
         let lampHeadPageDefs = Dictionary<string, LampType>()
         let lampDefs = Dictionary<string, LampType>()
+        let condiHeadPageDefs = Dictionary<string, ConditionType>()
         let condiDefs = Dictionary<string, ConditionType>()
 
         let mutable name = ""
@@ -369,7 +371,9 @@ module PPTObjectModule =
                 elif (shape.CheckBevelShapePlate()) then
                     LAMP
                 elif (shape.CheckBevelShapeRound()) then
-                    BUTTON
+                    BUTTON     
+                elif (shape.CheckBevelShapeMaxRound()) then
+                    CONDITION
                 elif (shape.CheckLayout()) then
                     shape.ErrorName(ErrID._62, iPage)
                 else
@@ -407,11 +411,16 @@ module PPTObjectModule =
                 let addDic = if isHeadPage then btnHeadPageDefs else btnDefs
                 getBracketItems(shape.InnerText)
                     .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getBtnType))
+
             | LAMP ->
                 let addDic = if isHeadPage then lampHeadPageDefs else lampDefs
                 getBracketItems(shape.InnerText)
                     .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getLampType))
 
+            | CONDITION ->
+                let addDic = if isHeadPage then condiHeadPageDefs else condiDefs
+                getBracketItems(shape.InnerText)
+                    .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getConditionType))
 
             | REALExF
             | REALExS
@@ -465,6 +474,8 @@ module PPTObjectModule =
         member val ButtonDefs = btnDefs
         member val LampHeadPageDefs = lampHeadPageDefs
         member val LampDefs = lampDefs
+        member val CondiHeadPageDefs = condiHeadPageDefs
+        member val CondiDefs = condiDefs
         
 
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)

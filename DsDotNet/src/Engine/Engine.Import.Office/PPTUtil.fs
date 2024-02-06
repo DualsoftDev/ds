@@ -239,43 +239,81 @@ module PPTUtil =
                     .Descendants<Drawing.ShapeGuide>()
 
             shapeGuide.Any() |> not || shapeGuide.First().Formula.Value = "val 0" |> not
+      
+        [<Extension>]
+        static member GetGeometry(shape: Shape) =
+                    shape
+                        .Descendants<ShapeProperties>()
+                        .First()
+                        .Descendants<Drawing.PresetGeometry>()
+                        .FirstOrDefault()
+
+        [<Extension>]
+        static member GetShapeGuide(geometry: #Drawing.PresetGeometry) =
+            //shapeGuide 없으면 기본 Round
+            geometry.Descendants<Drawing.AdjustValueList>().First()
+                    .Descendants<Drawing.ShapeGuide>()
 
         [<Extension>]
         static member CheckBevelShapeRound(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
-
-                if geometry = null 
-                then false
-                else 
-                    let round =  geometry.CheckRound() 
-
-                    geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && round
+                let geometry = shape.GetGeometry()
+                if geometry <> null && geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel
+                then 
+                    let shapeGuide = geometry.GetShapeGuide()
+                    if shapeGuide.Any() 
+                    then 
+                        let formulaVal = shapeGuide.First().Formula.Value 
+                        formulaVal <> "val 0" && formulaVal <> "val 50000"
+                    else 
+                        true//shapeGuide 없으면 기본 ShapeRound
+                     
+                else false
+               
+                    
+        [<Extension>]
+        static member CheckBevelShapeMaxRound(shape: Shape) =
+            if (Office.CheckShape(shape) |> not) then
+                false
+            else
+                let geometry = shape.GetGeometry()
+                if geometry <> null && geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel
+                then 
+                    let shapeGuide = geometry.GetShapeGuide()
+                    if shapeGuide.Any() 
+                    then 
+                        let formulaVal = shapeGuide.First().Formula.Value 
+                        formulaVal = "val 50000"
+                    else 
+                        false//shapeGuide 없으면 기본 ShapeRound
+                     
+                else false
 
         [<Extension>]
         static member CheckBevelShapePlate(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
+                let geometry = shape.GetGeometry()
+                if geometry <> null && geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel
+                then 
+                    let shapeGuide = geometry.GetShapeGuide()
+                    if shapeGuide.Any() 
+                    then 
+                        let formulaVal = shapeGuide.First().Formula.Value 
+                        formulaVal = "val 0"
+                    else 
+                        false//shapeGuide 없으면 기본 ShapeRound
+                     
+                else false
 
-                if geometry = null 
-                then false
-                else 
-                    let round =  geometry.CheckRound() 
-                    geometry.Preset.Value = Drawing.ShapeTypeValues.Bevel && (round|>not)
+        [<Extension>]
+        static member CheckBevelShape(shape: Shape) =
+                      shape.CheckBevelShapePlate()
+                      || shape.CheckBevelShapeRound()
+                      || shape.CheckBevelShapeMaxRound()
 
         [<Extension>]
         static member CheckDonutShape(shape: Shape) =
@@ -283,12 +321,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
+                let geometry = shape.GetGeometry()
 
                 (geometry.Preset.Value = Drawing.ShapeTypeValues.Donut)
 
@@ -299,12 +332,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
+                let geometry = shape.GetGeometry()
                 if geometry = null 
                 then false
                 else 
@@ -323,12 +351,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
+                let geometry = shape.GetGeometry()
                 if geometry = null 
                 then false
                 else 
@@ -344,13 +367,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
-
+                let geometry = shape.GetGeometry()
                 if geometry = null 
                 then false
                 else 
@@ -362,13 +379,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
-
+                let geometry = shape.GetGeometry()
                 if geometry = null 
                 then false
                 else 
@@ -380,13 +391,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
-
+                let geometry = shape.GetGeometry()
                 if geometry = null 
                 then false
                 else 
@@ -400,13 +405,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
-
+                let geometry = shape.GetGeometry()
                 geometry.Preset.Value = Drawing.ShapeTypeValues.NoSmoking
 
         [<Extension>]
@@ -414,13 +413,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
-
+                let geometry = shape.GetGeometry()
                 geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc
 
 
@@ -431,12 +424,7 @@ module PPTUtil =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
-                let geometry =
-                    shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.PresetGeometry>()
-                        .FirstOrDefault()
+                let geometry = shape.GetGeometry()
                 if geometry = null 
                 then false
                 else 
@@ -568,6 +556,7 @@ module PPTUtil =
         static member IsAbleShape(shape: Shape) =
             (shape.CheckRectangle() //real
              || shape.CheckEllipse() //call
+             || shape.CheckBevelShapeMaxRound() //condition
              || shape.CheckBevelShapeRound() //btn
              || shape.CheckBevelShapePlate() //lamp
              || shape.CheckFoldedCornerRound() //COPY_DEV

@@ -17,15 +17,16 @@ type Flow with
 
     member f.O2_AutoOperationState(): CommentedStatement =
         let set = f.AutoExpr 
-        let rst = !!f.rop.Expr <||> f.ModeManualHwHMIExpr
-
-        (set, rst) ==| (f.aop, getFuncName())
+        let rst = !!f.rop.Expr
+        
+        (set, rst) --| (f.aop, getFuncName())
+            
 
     member f.O3_ManualOperationState (): CommentedStatement =
         let set = f.ManuExpr
-        let rst = !!f.rop.Expr <||> f.ModeAutoHwHMIExpr
-
-        (set, rst) ==| (f.mop, getFuncName())
+        let rst = !!f.rop.Expr 
+        
+        (set, rst) --| (f.mop, getFuncName())
 
 
     member f.O4_EmergencyOperationState(): CommentedStatement =
@@ -35,7 +36,7 @@ type Flow with
         (set, rst) ==| (f.eop, getFuncName())
 
     member f.O5_StopOperationState(): CommentedStatement  =
-        let setPause = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) <&&> !!f.HWBtnClearExpr
+        let setPause = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) 
         let setError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
                         |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
         let set = setPause <||> setError

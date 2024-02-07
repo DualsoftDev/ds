@@ -86,11 +86,3 @@ type DsSystem with
             yield (f.ready_btn.Expr , s._off.Expr) --| (f.ready_lamp , getFuncName())
     ]
    
-    member s.B5_HWBtnConnetToSW(): CommentedStatement list =  [
-        for cond in s.HWConditions do
-            if cond.OutTag.IsNonNull()  //OutAddress 주소가 있어야 IN-OUT cond Check Lamp 연결
-            then
-                let sets = cond.ActionINFunc
-                let out = cond.OutTag :?> Tag<bool>
-                yield (sets, s._off.Expr) --| (out, getFuncName())
-    ]

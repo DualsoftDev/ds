@@ -10,14 +10,14 @@ type DsSystem with
     member s.Y1_SystemBitSetFlow(): CommentedStatement list = [
             for flow in s.Flows do
                 yield (s._auto_btn.Expr  , s._off.Expr) --| (flow.auto_btn,   getFuncName())
-                yield (s._manual_btn.Expr, s._off.Expr) --| (flow.manual_btn, "")
-                yield (s._drive_btn.Expr , s._off.Expr) --| (flow.drive_btn,  "")
-                yield (s._stop_btn.Expr  , s._off.Expr) --| (flow.stop_btn,   "")
-                yield (s._emg_btn.Expr   , s._off.Expr) --| (flow.emg_btn,    "")
-                yield (s._test_btn.Expr  , s._off.Expr) --| (flow.test_btn,   "")
-                yield (s._clear_btn.Expr , s._off.Expr) --| (flow.clear_btn,  "")
-                yield (s._home_btn.Expr  , s._off.Expr) --| (flow.home_btn,   "")
-                yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  "")
+                yield (s._manual_btn.Expr, s._off.Expr) --| (flow.manual_btn, getFuncName())
+                yield (s._drive_btn.Expr , s._off.Expr) --| (flow.drive_btn,  getFuncName())
+                yield (s._stop_btn.Expr  , s._off.Expr) --| (flow.stop_btn,   getFuncName())
+                yield (s._emg_btn.Expr   , s._off.Expr) --| (flow.emg_btn,    getFuncName())
+                yield (s._test_btn.Expr  , s._off.Expr) --| (flow.test_btn,   getFuncName())
+                yield (s._clear_btn.Expr , s._off.Expr) --| (flow.clear_btn,  getFuncName())
+                yield (s._home_btn.Expr  , s._off.Expr) --| (flow.home_btn,   getFuncName())
+                yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
         ]
         
     member s.Y2_SystemError(): CommentedStatement  =

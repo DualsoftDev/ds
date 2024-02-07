@@ -80,7 +80,7 @@ module ImportIOTable =
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
-                match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName) with
+                match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName.DeQuoteOnDemand()) with
                 | Some btn ->
                     btn.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
@@ -98,7 +98,7 @@ module ImportIOTable =
 
                 let lamps = sys.HWLamps.Where(fun w -> w.LampType = lampType)
 
-                match lamps.TryFind(fun f -> f.Name = name) with
+                match lamps.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some lamp ->
                     lamp.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"
@@ -115,7 +115,7 @@ module ImportIOTable =
 
                 let conds = sys.HWConditions.Where(fun w -> w.ConditionType = cType)
 
-                match conds.TryFind(fun f -> f.Name = name) with
+                match conds.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some cond ->
                     cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     cond.OutAddress <- $"{row.[(int) IOColumn.Output]}"

@@ -108,6 +108,9 @@ module ConvertCodeCoreExt =
         member s.GetTempTag(x:TaskDev) = 
             let name = x.InAddress.Replace("%", "_").Replace(".", "_")
             getSM(s).GetTempBoolTag(name, x.InAddress, x)
+        member s.GetTempTimer(x:HwSystemDef) = 
+            let name = x.InAddress.Replace("%", "_").Replace(".", "_")
+            getSM(s).GetTempTimerTag(name)
 
         member x.S = x |> getSM
         member x.Storages = x.TagManager.Storages
@@ -260,30 +263,21 @@ module ConvertCodeCoreExt =
         member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
-
         member f.HWConditionsExpr = getConditionExpr(f, f.System.HWConditions    ) 
 
-        member f.ModeAutoHwHMIExpr   =  if f.HwManuSelects.any() 
-                                        then f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr
-                                        else f.HwAutoExpr <&&> !!f._off.Expr  <||> f._sim.Expr
-
-        member f.ModeManualHwHMIExpr =  if f.HwManuSelects.any() 
-                                        then f.HwManuExpr <&&> !!f.HwAutoExpr 
-                                        else f.HwManuExpr <&&> !!f._off.Expr  
-        member f.ModeAutoSwHMIExpr   =    f.auto_btn.Expr <&&> !!f.manual_btn.Expr
-        member f.ModeManualSwHMIExpr =  !!f.auto_btn.Expr <&&>   f.manual_btn.Expr
-
         member f.AutoExpr   =  
-                if f.HwAutoSelects.any() //hw 있으면 hw만 보는것으로
-                then f.ModeAutoHwHMIExpr
-                else f.ModeAutoSwHMIExpr
+                let hmiAuto = f.auto_btn.Expr <&&> !!f.manual_btn.Expr
+                let hwAuto  = f.HwAutoExpr <&&> !!f.HwManuExpr
+                if f.HwAutoSelects.any() //반드시 a/m 쌍으로 존재함  checkErrHWItem 체크중
+                then hwAuto <&&> hmiAuto //HW, HMI Select and 처리
+                else hmiAuto
 
         member f.ManuExpr   =  
-                if f.HwManuSelects.any() //hw 있으면 hw만 보는것으로
-                then f.ModeManualHwHMIExpr
-                else f.ModeManualSwHMIExpr
-
-                    
+                let hmiManu = !!f.auto_btn.Expr <&&> f.manual_btn.Expr
+                let hwManu  = !!f.HwAutoExpr <&&> f.HwManuExpr
+                if f.HwManuSelects.any() 
+                then hwManu <||> hmiManu //HW, HMI Select or 처리
+                else hmiManu
 
         member f.GetReadAbleTags() =
             FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()

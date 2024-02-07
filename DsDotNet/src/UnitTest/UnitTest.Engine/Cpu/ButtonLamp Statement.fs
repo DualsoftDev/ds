@@ -26,7 +26,3 @@ type Spec12_ButtonLampStatement() =
     [<Test>]
     member __.``B4 SW Mode Lamp`` () =
         t.Sys.B4_SWModeLamp() |> doChecks
-    [<Test>]
-    member __.``B5 HWBtnConnetToSW`` () =
-        t.Sys.B5_HWBtnConnetToSW() |> doChecks
-        

@@ -9,7 +9,26 @@ open System.Collections.Generic
 [<AutoOpen>]
 module ConvertErrorCheck =
     
-    let checkNullAddressErr(sys:DsSystem) = 
+    let checkErrHWItem(sys:DsSystem) = 
+        let hwManuFlows = sys.ManualHWButtons |>Seq.collect(fun f->f.SettingFlows)
+        let hwAutoFlows = sys.AutoHWButtons |>Seq.collect(fun f->f.SettingFlows)
+        for btn in sys.AutoHWButtons do
+            for flow in btn.SettingFlows do
+                if not(hwManuFlows.Contains flow)
+                then failwithf $"{flow.Name} manual btn not exist"
+
+        for btn in sys.ManualHWButtons do
+            for flow in btn.SettingFlows do
+                if not(hwAutoFlows.Contains flow)
+                then failwithf $"{flow.Name} auto btn not exist"
+
+    let checkErrLightPLC(sys:DsSystem) = 
+        let hwManuFlows = sys.ManualHWButtons |>Seq.collect(fun f->f.SettingFlows)
+        let hwAutoFlows = sys.AutoHWButtons |>Seq.collect(fun f->f.SettingFlows)
+        if hwAutoFlows.any() ||hwManuFlows.any()
+        then failwithf $"Cannot create auto/manual button \nwhen Light PLC mode"
+
+    let checkErrNullAddress(sys:DsSystem) = 
         let nullTagJobs = sys.Jobs
                              .Where(fun j-> j.DeviceDefs.Where(fun f-> 
                                             f.InTag.IsNull() && f.ApiItem.RXs.any()

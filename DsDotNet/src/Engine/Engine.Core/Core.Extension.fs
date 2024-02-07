@@ -78,6 +78,7 @@ module CoreExtensionModule =
 
 
     type DsSystem with
+
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, btnName)
           
@@ -88,10 +89,12 @@ module CoreExtensionModule =
             then failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
-            | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.HWButtons.Add(ButtonDef(btnName,x, btnType, inAddress, outAddress, HashSet[|flow|], funcs))
-                      |> verifyM $"Duplicated ButtonDef [{btnName}]"
+            | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated Button [flow:{flow.Name} name:{btnName}]"
+            | None -> 
+                      x.HWButtons.Add(ButtonDef(btnName,x, btnType, inAddress, outAddress, HashSet[|flow|], funcs))
+                      |> verifyM $"Duplicated ButtonDef [flow:{flow.Name} name:{btnName}]"
                       HwSystemItem.CreateHWApi(btnName, x) |> ignore
+
 
         member x.AddLamp(lmpType:LampType, lmpName: string, inAddr:string, outAddr:string, flow:Flow option, funcs:HashSet<Func>) =
             if flow.IsSome then
@@ -102,16 +105,18 @@ module CoreExtensionModule =
             | None -> 
                       let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
                       x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, flows , funcs))
-                      |> verifyM $"Duplicated LampDef [{lmpName}]"
+                      |> verifyM $"Duplicated LampDef [name:{lmpName}]"
                       HwSystemItem.CreateHWApi(lmpName, x) |> ignore
+
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, outAddr:string, flow:Flow, funcs:HashSet<Func>) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
-            | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated flow [{flow.Name}]"
-            | None -> x.HWConditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], funcs))
-                      |> verifyM $"Duplicated ConditionDef [{condiName}]"
+            | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated Condtion [flow:{flow.Name} name:{condiName}]"
+            | None -> 
+                      x.HWConditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], funcs))
+                      |> verifyM $"Duplicated ConditionDef [flow:{flow.Name} name:{condiName}]"
                       HwSystemItem.CreateHWApi(condiName, x) |> ignore
 
 

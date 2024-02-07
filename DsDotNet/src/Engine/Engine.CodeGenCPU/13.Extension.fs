@@ -12,7 +12,6 @@ type DsSystem with
         let rsts = s._off.Expr
          (* device not func 로직 처리*)
         [
-       
             let devs = s.Jobs.SelectMany(fun j -> j.DeviceDefs)
             let reverseInputs = devs.Where(fun w-> hasNot w.Funcs)
             let orgInTag (revDev:TaskDev)=
@@ -31,23 +30,29 @@ type DsSystem with
 
     member s.E2_LightPLCOnly(): CommentedStatement list=
         let rsts = s._off.Expr
-            (*drive btn => _auto_btn, _ready_btn 동시 동작
-            stop btn => _manual_btn 동시 동작
-            clear btn  => 누름 3초 유지시 _home_btn 동시 동작*)
+            (*drive btn => _auto_btn 동시 동작
+            clear btn  => _ready_btn, manual_btn  동시 동작 and  누름 3초 유지시 _home_btn 동작*)
         [
+
             for btn in s.DriveHWButtons do
                 let sets = btn.ActionINFunc
-
-                yield (sets, rsts) --| (s._auto_btn, getFuncName())
-                yield (sets, rsts) --| (s._ready_btn, getFuncName())
+                for flow in btn.SettingFlows do
+                    yield (sets, rsts) --| (flow.drive_btn, getFuncName())
+                    yield (sets, flow.clear_btn.Expr) ==| (flow.auto_btn, getFuncName())
 
             for btn in s.StopHWButtons do
                 let sets = btn.ActionINFunc
-
-                yield (sets, rsts) --| (s._manual_btn, getFuncName())
+                for flow in btn.SettingFlows do
+                    yield (sets, rsts) --| (flow.stop_btn, getFuncName())
 
             for btn in s.ClearHWButtons do
                 let sets = btn.ActionINFunc
-
-                yield (sets, rsts) --| (s._clear_btn, getFuncName())
+                let tm = s.GetTempTimer(btn)
+                for flow in btn.SettingFlows do
+                    //누름 3초 유지시 _home_btn 동시 동작
+                    yield sets --@ (tm, 3000us, getFuncName())
+                    yield (tm.DN.Expr, rsts) --| (flow.home_btn, getFuncName())
+                    yield (sets, flow.drive_btn.Expr) ==| (flow.manual_btn, getFuncName())
+                    yield (sets, rsts) --| (flow.ready_btn, getFuncName())
+                    yield (sets, rsts) --| (flow.clear_btn, getFuncName())
         ]

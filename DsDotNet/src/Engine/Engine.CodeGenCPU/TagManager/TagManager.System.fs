@@ -111,6 +111,9 @@ module SystemManagerModule =
                 if stg.ContainsKey(name) then stg[name]
                 else
                     createBridgeTag(stg, name, address, SystemTag.temp|>int, BridgeType.DummyTemp, sys, fqdn).Value
+
+        member s.GetTempTimerTag(name:string) : TimerStruct =
+                timer stg name sys
             
         member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with

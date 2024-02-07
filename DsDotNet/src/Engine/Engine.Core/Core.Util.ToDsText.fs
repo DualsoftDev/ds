@@ -205,7 +205,7 @@ module internal ToDsTextModule =
                                         ""
                                 let inAddr =  if isNullOrEmpty  hw.InAddress  then "_" else hw.InAddress
                                 let outAddr = if isNullOrEmpty  hw.OutAddress then "_" else hw.OutAddress
-                                yield $"{tab3}{hw.Name}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
+                                yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
                                 if hw.Funcs.any() then
                                     for funcString in printFuncions hw.Name hw.Funcs do
                                         yield funcString

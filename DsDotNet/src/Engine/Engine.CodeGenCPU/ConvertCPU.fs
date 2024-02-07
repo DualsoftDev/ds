@@ -79,15 +79,15 @@ module ConvertCPU =
     let private applySystemSpec(s:DsSystem) =
         [
             yield! s.B1_HWButtonOutput()
-            yield! s.B2_SWButtonOutput()
-            
             yield! s.B3_HWModeLamp()
-            yield! s.B4_SWModeLamp()
-
-
-            yield! s.B5_HWBtnConnetToSW()
             
-            yield! s.Y1_SystemBitSetFlow()
+            if RuntimeDS.Package <> RuntimePackage.LightPLC 
+            then
+                yield! s.B2_SWButtonOutput()
+                yield! s.B4_SWModeLamp()
+                yield! s.Y1_SystemBitSetFlow()
+
+            
             yield s.Y2_SystemError()
             yield s.Y3_SystemPause()
             yield! s.Y4_SystemState()
@@ -149,7 +149,12 @@ module ConvertCPU =
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
 
-        checkNullAddressErr(sys)
+        checkErrNullAddress(sys)
+        checkErrHWItem(sys)
+
+        if RuntimeDS.Package = RuntimePackage.LightPLC 
+        then
+            checkErrLightPLC(sys)
 
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()

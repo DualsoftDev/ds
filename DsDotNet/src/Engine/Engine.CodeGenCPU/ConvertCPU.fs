@@ -129,7 +129,7 @@ module ConvertCPU =
             
             for (api, calls) in apicallsSet do
                 let am = api.TagManager :?> ApiItemManager
-                yield am.A1_PlanSend(s)
+                yield am.A1_PlanSend(s, calls)
                 yield am.A2_PlanReceive(s)
                 yield! am.A3_ActionOut(calls)
         ]
@@ -176,7 +176,7 @@ module ConvertCPU =
             for v in sys.GetVertices() do
                 yield! applyVertexSpec v
 
-           // yield! callPlanAction sys
+            yield! callPlanAction sys
 
             yield! applyTimerCounterSpec sys
         ]

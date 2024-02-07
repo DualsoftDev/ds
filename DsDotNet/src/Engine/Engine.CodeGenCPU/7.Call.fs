@@ -18,7 +18,7 @@ type VertexManager with
                 <||> (mop <&&> v.SF.Expr)
             )
             <&&> 
-            !!call.MutualResets.Select(fun d->d.ActionINFunc).ToOrElseOn()
+            !!call.MutualResets.Select(fun d->d.ActionINFunc).ToOrElseOff()
             
         let rsts =
             let action =
@@ -35,43 +35,10 @@ type VertexManager with
         (sets, rsts) ==| (call.V.MM, getFuncName())
 
 
-    //member coin.C2_CallActionOut(): CommentedStatement list =
-    //    let call = coin.Vertex :?> Call
-    //    let sop = call.Parent.GetFlow().sop.Expr
-    //    let eop = call.Parent.GetFlow().eop.Expr
-    //    let rstNormal = coin._off.Expr
-    //    [
-    //        for td in call.TargetJob.DeviceDefs do
-    //            if td.ApiItem.TXs.any()
-    //            then 
-    //                let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
-    //                       //<&&> coin.Flow.dop.Expr
-
-    //                if call.TargetJob.ActionType = JobActionType.Push 
-    //                then 
-    //                     let rstPush = td.MutualResetExpr(call.System)
-                        
-    //                     yield (sets, rstPush  <||> sop <||> eop) ==| (td.ActionOut, getFuncName())
-    //                else 
-    //                     yield (sets, rstNormal <||> sop<||> eop) --| (td.ActionOut, getFuncName())
-    //    ]
-
-  
-    //member coin.C3_CallPlanReceive(): CommentedStatement list =
-    //    let call = coin.Vertex :?> Call
-    //    [
-    //        for td in call.TargetJob.DeviceDefs do
-
-    //            let sets =  td.RXTags.ToAndElseOn(coin.System) 
-
-    //            yield (sets, coin._off.Expr) --| (td.ApiItem.PE, getFuncName() )
-    //    ]
-
-
 type ApiItemManager with
 
-    member a.A1_PlanSend(activeSys:DsSystem) : CommentedStatement  =
-        let sets =  a.ApiItem.RXTags.ToAndElseOn() 
+    member a.A1_PlanSend(activeSys:DsSystem, calls:Call seq) : CommentedStatement  =
+        let sets =  calls.Select(fun c->c.V.MM).ToOrElseOff()
         (sets, activeSys._off.Expr) --| (a.PS, getFuncName())
 
     member a.A2_PlanReceive(activeSys:DsSystem) : CommentedStatement  =
@@ -82,8 +49,7 @@ type ApiItemManager with
         [
             for call in calls do
                 let rstNormal = call._off.Expr
-                let sop = call.Parent.GetFlow().sop.Expr
-                let eop = call.Parent.GetFlow().eop.Expr
+                let rop = call.Parent.GetFlow().rop.Expr
                 for td in call.TargetJob.DeviceDefs do
                     if td.ApiItem.TXs.any()
                     then 
@@ -92,7 +58,7 @@ type ApiItemManager with
                         then 
                              let rstPush = td.MutualResetExpr(call.System)
                         
-                             yield (sets, rstPush   <||> sop <||> eop) ==| (td.ActionOut, getFuncName())
+                             yield (sets, rstPush   <||> !!rop) ==| (td.ActionOut, getFuncName())
                         else 
-                             yield (sets, rstNormal <||> sop<||> eop) --| (td.ActionOut, getFuncName())
+                             yield (sets, rstNormal <||> !!rop) --| (td.ActionOut, getFuncName())
         ]

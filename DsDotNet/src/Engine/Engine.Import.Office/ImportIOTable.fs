@@ -113,7 +113,7 @@ module ImportIOTable =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let func = $"{row.[(int) IOColumn.Func]}"
 
-                let conds = sys.HWSystemConditions.Where(fun w -> w.ConditionType = cType)
+                let conds = sys.HWConditions.Where(fun w -> w.ConditionType = cType)
 
                 match conds.TryFind(fun f -> f.Name = name) with
                 | Some cond ->
@@ -124,7 +124,7 @@ module ImportIOTable =
                     cond.InAddress  <-inaddr |> changeValidAddress
                     cond.OutAddress <-outaddr  |> changeValidAddress    
                     functionUpdate (cond.Name, func, cond.Funcs, tableIO, false, page)
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 
             dts
             |> Seq.iter (fun (page, dt) ->

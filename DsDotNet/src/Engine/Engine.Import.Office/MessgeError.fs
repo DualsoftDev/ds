@@ -91,6 +91,7 @@ module ErrID =
     let _1004 = "Job 이 해당 시스템에 없습니다."
     let _1005 = "시스템 램프 or 버튼 or 조건은 Not($n) 함수만 사용가능합니다."
     let _1006 = "Device가 해당 시스템에 없습니다."
+    let _1007 = "시스템에 Condition 이름이 없습니다."
 
 //todo
 // "리얼 행위의 자식은 한곳에만 정의가능합니다.(alias, exFlow 정의불가)"

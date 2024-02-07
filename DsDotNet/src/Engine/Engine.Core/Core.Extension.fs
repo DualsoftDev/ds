@@ -118,7 +118,7 @@ module CoreExtensionModule =
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
 
-        member x.HWSystemConditions     = x.HWConditions :> seq<_>
+        member x.HWConditions     = x.HWConditions :> seq<_>
         member x.HWButtons            = x.HWButtons :> seq<_>
         member x.HWLamps              = x.HWLamps   :> seq<_>
 

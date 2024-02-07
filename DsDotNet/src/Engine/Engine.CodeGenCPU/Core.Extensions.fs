@@ -120,7 +120,7 @@ module ConvertCodeCoreExt =
 
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
-        member private x.GenerationCondition()  = x.HWSystemConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
+        member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
 
         member private x.GenerationTaskDevIO() =
             let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
@@ -193,7 +193,7 @@ module ConvertCodeCoreExt =
                        .Select(fun b ->b.ActionINFunc)
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
-    let private getConditionInputs(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
+    let private getConditionExpr(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
         let tags = condis
                     .Where(fun c -> c.SettingFlows.Contains(flow))
                     .Select(fun c ->c.ActionINFunc)
@@ -261,7 +261,7 @@ module ConvertCodeCoreExt =
         member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
 
-        member f.HWConditionsExpr = getConditionInputs(f, f.System.HWConditions    ) 
+        member f.HWConditionsExpr = getConditionExpr(f, f.System.HWConditions    ) 
 
         member f.ModeAutoHwHMIExpr   =  if f.HwManuSelects.any() 
                                         then f.HwAutoExpr <&&> !!f.HwManuExpr <||> f._sim.Expr

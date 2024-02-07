@@ -31,20 +31,23 @@ type DsSystem with
 
     member s.E2_LightPLCOnly(): CommentedStatement list=
         let rsts = s._off.Expr
-            (*drive btn => _clear_btn,_auto_btn, _ready_btn 동시 동작*)
+            (*drive btn => _auto_btn, _ready_btn 동시 동작
+            stop btn => _manual_btn 동시 동작
+            clear btn  => 누름 3초 유지시 _home_btn 동시 동작*)
         [
             for btn in s.DriveHWButtons do
-                if btn.InTag.IsNonNull() 
-                then
-                    let sets = btn.ActionINFunc
+                let sets = btn.ActionINFunc
 
-                    yield (sets, rsts) --| (s._clear_btn, getFuncName())
-                    yield (sets, rsts) --| (s._auto_btn, getFuncName())
-                    yield (sets, rsts) --| (s._ready_btn, getFuncName())
+                yield (sets, rsts) --| (s._auto_btn, getFuncName())
+                yield (sets, rsts) --| (s._ready_btn, getFuncName())
 
             for btn in s.StopHWButtons do
-                if btn.InTag.IsNonNull() 
-                then
-                    let sets = btn.ActionINFunc
-                    yield (sets, rsts) --| (s._manual_btn, getFuncName())
-       ]
+                let sets = btn.ActionINFunc
+
+                yield (sets, rsts) --| (s._manual_btn, getFuncName())
+
+            for btn in s.ClearHWButtons do
+                let sets = btn.ActionINFunc
+
+                yield (sets, rsts) --| (s._clear_btn, getFuncName())
+        ]

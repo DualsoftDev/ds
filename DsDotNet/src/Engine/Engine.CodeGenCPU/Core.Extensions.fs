@@ -322,7 +322,7 @@ module ConvertCodeCoreExt =
         member c._on     = c.System._on
         member c._off     = c.System._off
 
-        member c.InTags  = c.TargetJob.DeviceDefs.Where(fun d->d.ApiItem.RXs.any())
+        member c.InTags  = c.TaskDevs.Where(fun d->d.ApiItem.RXs.any())
                                                  .Select(fun d->d.InTag :?> Tag<bool>)
 
         member c.UsingTon  = c.TargetJob.Func |> hasTime
@@ -350,10 +350,10 @@ module ConvertCodeCoreExt =
                                  then c.TargetJob.Func.Value.GetRingCount()
                                  else failwith $"{c.Name} not use counter"
         
-        member c.PSs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS)
-        member c.PEs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun f->f.ApiItem.PE)
-        member c.TXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.TXs)
-        member c.RXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.RXs)
+        member c.PSs           = c.TaskDevs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS)
+        member c.PEs           = c.TaskDevs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun f->f.ApiItem.PE)
+        member c.TXs           = c.TaskDevs|>Seq.collect(fun j -> j.ApiItem.TXs)
+        member c.RXs           = c.TaskDevs|>Seq.collect(fun j -> j.ApiItem.RXs)
         member c.Errors       = 
                                 [
                                     getVMCoin(c).ErrTimeOver
@@ -372,13 +372,18 @@ module ConvertCodeCoreExt =
                 let initOnCalls  = r.V.OriginInfo.CallInitials
                                      .Where(fun (_,ty) -> ty = InitialType.On)
                                      .Select(fun (call,_)->call)
-                let homeManuAct = f.mop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
-                let homeAutoAct = f.dop.Expr <&&> r.V.RO.Expr
-
+               
                 if initOnCalls.Contains(c)
-                    then (homeManuAct <||> homeAutoAct) <&&> !!c.EndAction      
+                    then 
+                        let homeManuAct = f.mop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
+                        let homeAutoAct = f.dop.Expr <&&> r.V.RO.Expr
+                        let homeAct =  homeManuAct <||> homeAutoAct
+                        homeAct <&&> (!!c.EndAction <&&> !!c.System._sim.Expr)    
+                                     <||>
+                                     (!!c.EndPlan <&&> c.System._sim.Expr)     
+
                     else c._off.Expr
-            | _ -> 
+            | _ ->  
                 c._off.Expr
 
     type Real with

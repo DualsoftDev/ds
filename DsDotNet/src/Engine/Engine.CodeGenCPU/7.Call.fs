@@ -17,8 +17,8 @@ type VertexManager with
                 <||> (dop <&&> v.ST.Expr)
                 <||> (mop <&&> v.SF.Expr)
             )
-            <&&> 
-            !!call.MutualResetCalls.Select(fun c-> c.EndAction).ToOrElseOff()
+            //<&&> 
+            //!!call.MutualResetCalls.Select(fun c-> c.EndAction).ToOrElseOff()  //들뜨면 RX 에러 발생해서 잡음
             
         let rsts =
             let plan = call.EndPlan
@@ -46,7 +46,7 @@ type ApiItemManager with
             for call in calls do
                 let rstNormal = call._off.Expr
                 let rop = call.Parent.GetFlow().rop.Expr
-                for td in call.TargetJob.DeviceDefs do
+                for td in call.TaskDevs do
                     if td.ApiItem.TXs.any()
                     then 
                         let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 

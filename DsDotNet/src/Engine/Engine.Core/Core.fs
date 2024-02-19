@@ -239,6 +239,7 @@ module CoreModule =
     type Call (target:Job, parent) =
         inherit Indirect(target.Name, parent)
         member _.TargetJob = target
+        member _.TaskDevs = target.DeviceDefs
         member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()

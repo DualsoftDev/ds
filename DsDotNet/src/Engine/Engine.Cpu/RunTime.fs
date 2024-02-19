@@ -164,9 +164,9 @@ module RunTime =
             doScanStop()
             scanOnce() |> ignore 
 
-        member x.StepByStatusAsync(activeSys:DsSystem) = 
+        member x.StepByStatusAsync() = 
             doScanStop()
-            doStepByStatusAsync(activeSys)
+            doStepByStatusAsync(mySystem)
 
         member x.Reset() =
             doScanStop()

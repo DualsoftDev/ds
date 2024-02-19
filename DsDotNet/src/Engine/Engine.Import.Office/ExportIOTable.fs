@@ -27,13 +27,11 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Job}", typeof<string>)   |> ignore
         dt.Columns.Add($"{IOColumn.Func}", typeof<string>)  |> ignore
 
-        let funcToText (xs: Func seq) =
-            xs.Select(fun f -> f.ToDsText()).JoinWith(";")
-
+      
         let rowItems (dev: TaskDev, job: Job option) =
             let jobName, funcs =
                 if job.IsSome then
-                    job.Value.Name, job.Value.Funcs.Cast<Func>() |> funcToText
+                    job.Value.Name, if job.Value.Func.IsSome then job.Value.Func.Value.ToDsText() else ""
                 else
                     "↑", "↑"
 
@@ -75,7 +73,7 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let func = btn.Funcs |> funcToText
+                    let func =  if btn.Func.IsSome then btn.Func.Value.ToDsText() else ""
                     let i, o = getValidBtnAddress(btn)
                     dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool",  i, o , "", func)
                     |> ignore
@@ -83,7 +81,7 @@ module ExportIOTable =
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let func = lamp.Funcs |> funcToText
+                    let func =  if lamp.Func.IsSome then lamp.Func.Value.ToDsText() else ""
 
                     let i, o = getValidLampAddress(lamp)
                     dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool",   i, o, "", func)
@@ -92,7 +90,7 @@ module ExportIOTable =
         let toCondiText (conds: ConditionDef seq, xlsCase: ExcelCase) =
             for cond in conds do
                 if containSys then
-                    let func = cond.Funcs |> funcToText
+                    let func =  if cond.Func.IsSome then cond.Func.Value.ToDsText() else ""
                     let i, o = getValidCondiAddress(cond)
                     dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool",i, o  ,  "", func)
                     |> ignore

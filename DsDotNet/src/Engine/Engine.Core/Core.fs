@@ -155,7 +155,7 @@ module CoreModule =
 
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inAddress: TagAddress, outAddress: TagAddress, funcs: HashSet<Func>)=
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inAddress: TagAddress, outAddress: TagAddress, func: Func option)=
         inherit FqdnObject(name, system)
         member x.Name = name
         member val SettingFlows = flows with get, set
@@ -169,19 +169,19 @@ module CoreModule =
         member val InTag = getNull<ITag>() with get, set
         /// CPU 생성 시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
-        member val Funcs = funcs with get, set
+        member val Func = func with get, set
 
 
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, funcs: HashSet<Func>) =
-        inherit HwSystemDef(name, system,flows, inAddress, outAddress, funcs)
+    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, func: Func option) =
+        inherit HwSystemDef(name, system,flows, inAddress, outAddress, func)
         member x.ButtonType = btnType
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress,  flows: HashSet<Flow>, funcs: HashSet<Func>) =
-        inherit HwSystemDef(name, system, flows, inAddress, outAddress, funcs) //inAddress lamp check bit
+    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress,  flows: HashSet<Flow>, func: Func option) =
+        inherit HwSystemDef(name, system, flows, inAddress, outAddress, func) //inAddress lamp check bit
         member x.LampType = lampType
 
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, funcs: HashSet<Func>) =
-        inherit HwSystemDef(name,  system,flows, inAddress, outAddress, funcs) // outAddress condition check bit
+    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, func: Func option) =
+        inherit HwSystemDef(name,  system,flows, inAddress, outAddress, func) // outAddress condition check bit
         member x.ConditionType = conditionType
 
 
@@ -248,12 +248,12 @@ module CoreModule =
         member _.TargetWrapper = target
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:TaskDev list) =
+    type Job (name:string, tasks:TaskDev list, func: Func option) =
         inherit Named(name)
         member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks.OfType<TaskDev>()
-        //하나의 Job에는 하나의 Func만 지원 적용 테스트중
-        member val Funcs  = HashSet<Func>() with get, set
+        //하나의 Job에는 하나의 Func만 지원 적용 
+        member val Func = func with get, set
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
@@ -264,7 +264,6 @@ module CoreModule =
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
         member val DeviceName = deviceName
-        member val Funcs  = HashSet<Func>() with get, set
         member val InAddress   = inAddress  with get, set
         member val OutAddress  = outAddress with get, set
         //CPU 생성시 할당됨 InTag

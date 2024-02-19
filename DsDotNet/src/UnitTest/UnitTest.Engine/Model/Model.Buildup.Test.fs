@@ -35,10 +35,10 @@ module ModelBuildupTests1 =
             let apiM = apis.First(fun ai -> ai.Name = "RET")
             let callAp =
                 let apiItem = TaskDev(apiP, "%I1", "%Q1",  dev.Name)
-                Job("Ap", [apiItem])
+                Job("Ap", [apiItem], None)
             let callAm =
                 let apiItem = TaskDev(apiM, "%I2", "%Q2", dev.Name)
-                Job("Am", [apiItem])
+                Job("Am", [apiItem], None)
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 
@@ -179,12 +179,12 @@ module ModelBuildupTests1 =
         member __.``Model with buttons test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            system.AddButton(BtnType.DuEmergencyBTN, "STOP", "%I1","%Q1",flow, new HashSet<Func>())
-            system.AddButton(BtnType.DuDriveBTN, "START", "%I1","%Q1",flow, new HashSet<Func>())
+            system.AddButton(BtnType.DuEmergencyBTN, "STOP", "%I1","%Q1",flow, None)
+            system.AddButton(BtnType.DuDriveBTN, "START", "%I1","%Q1",flow, None)
 
             let flow2 = Flow.Create("F2", system)
-            system.AddButton(BtnType.DuEmergencyBTN, "STOP2", "%I1","%Q1",flow2, new HashSet<Func>())
-            system.AddButton(BtnType.DuDriveBTN, "START2", "%I1","%Q1",flow2, new HashSet<Func>())
+            system.AddButton(BtnType.DuEmergencyBTN, "STOP2", "%I1","%Q1",flow2, None)
+            system.AddButton(BtnType.DuDriveBTN, "START2", "%I1","%Q1",flow2, None)
 
             let generated = system.ToDsText(true)
             let answer = """

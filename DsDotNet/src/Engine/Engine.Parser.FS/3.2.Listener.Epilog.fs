@@ -89,7 +89,7 @@ module EtcListenerModule =
                                   let funcSet = commonFunctionSetter btnName buttonFuncs
 
                                   if flows.Count > 0 then
-                                      return targetBtnType, btnName, addrIn, addrOut, flows, funcSet
+                                      return targetBtnType, btnName, addrIn, addrOut, flows, (if funcSet.any() then Some (funcSet.First()) else None)
                                   else
                                       failwithlog "There are no flows in button"
                               } ]
@@ -97,11 +97,11 @@ module EtcListenerModule =
                     flowBtnInfo
                     |> List.choose id
                     |> List.iter (fun ps ->
-                        let targetBtnType, btnName, addrIn, addrOut, flows, funcSet = ps
+                        let targetBtnType, btnName, addrIn, addrOut, flows, func = ps
 
                         flows
                         |> Seq.iter (fun flow ->
-                            system.AddButton(targetBtnType, btnName, addrIn, addrOut, flow, funcSet)))
+                            system.AddButton(targetBtnType, btnName, addrIn, addrOut, flow, func)))
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
             for ctxChild in ctx.children do
@@ -138,12 +138,13 @@ module EtcListenerModule =
                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
                                     
                                   let funcSet = commonFunctionSetter lmpName lampFuncs
+                                  let func = if funcSet.any() then Some (funcSet.First()) else None
                                   if flowNameCtxs.length() = 0
                                   then
-                                       return targetLmpType, lmpName, addrIn, addrOut, None, funcSet 
+                                       return targetLmpType, lmpName, addrIn, addrOut, None, func 
                                   else
                                        let! flow = flowNameCtxs.First().GetText() |> system.TryFindFlow
-                                       return targetLmpType, lmpName, addrIn, addrOut, Some flow, funcSet 
+                                       return targetLmpType, lmpName, addrIn, addrOut, Some flow, func 
                               } ]
 
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
@@ -171,6 +172,7 @@ module EtcListenerModule =
 
                                   let cndName, addrIn, addrOut = getHwSysItem cd
                                   let funcSet = commonFunctionSetter cndName conditionFuncs
+                                  let func = if funcSet.any() then Some (funcSet.First()) else None
                                   let flows =
                                       cd
                                           .Descendants<FlowNameContext>()
@@ -182,16 +184,16 @@ module EtcListenerModule =
                                           .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                                           .ToHashSet()
 
-                                  return targetCndType, cndName, addrIn, addrOut, flows, funcSet  //test
+                                  return targetCndType, cndName, addrIn, addrOut, flows, func 
                               } ]
 
                     flowConditionInfo
                     |> List.choose id
                     |> List.iter (fun ps ->
-                        let targetCndType, cndName, inAddr, outAddr, flows, funcSet = ps
+                        let targetCndType, cndName, inAddr, outAddr, flows, func = ps
 
                         flows
-                        |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, inAddr, outAddr, flow, funcSet)))
+                        |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, inAddr, outAddr, flow, func)))
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

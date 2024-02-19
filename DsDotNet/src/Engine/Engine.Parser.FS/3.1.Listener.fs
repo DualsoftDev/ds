@@ -482,9 +482,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                           | _ -> failwithlog "ERROR" ]
 
                 let funcSet = commonFunctionSetter jobName jobFuncs
+                let func = if funcSet.any() then Some (funcSet.First()) else None 
                 assert (apiItems.Any())
-                let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList)
-                job.Funcs <-funcSet
+                let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList, func)
                 job |> system.Jobs.Add
 
 

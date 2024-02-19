@@ -89,7 +89,7 @@ module ImportUtilForLib =
                     tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
             | _->
                 tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
-            Job(loadedName + "_" + apiName, tasks |> Seq.toList)
+            Job(loadedName + "_" + apiName, tasks |> Seq.toList, None)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)

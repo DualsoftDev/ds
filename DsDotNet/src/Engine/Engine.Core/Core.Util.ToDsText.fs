@@ -155,8 +155,8 @@ module internal ToDsTextModule =
                         let ais = c.DeviceDefs.Select(printDev).JoinWith("; ") + ";"
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
 
-                    if c.Funcs.any() then
-                        for funcString in printFuncions (c.Name.QuoteOnDemand()) c.Funcs do
+                    if c.Func.IsSome then
+                        for funcString in printFuncions (c.Name.QuoteOnDemand()) [c.Func.Value] do
                             yield funcString
                 yield $"{tab}{rb}"
 
@@ -208,8 +208,8 @@ module internal ToDsTextModule =
                             let inAddr =  if isNullOrEmpty  hw.InAddress  then "_" else hw.InAddress
                             let outAddr = if isNullOrEmpty  hw.OutAddress then "_" else hw.OutAddress
                             yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
-                            if hw.Funcs.any() then
-                                for funcString in printFuncions hw.Name hw.Funcs do
+                            if hw.Func.IsSome then
+                                for funcString in printFuncions hw.Name [hw.Func.Value] do
                                     yield funcString
                         yield $"{tab2}{rb}"
                 ] |> combineLines

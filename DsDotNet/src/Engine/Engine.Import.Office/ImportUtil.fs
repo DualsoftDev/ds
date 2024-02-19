@@ -148,7 +148,7 @@ module ImportU =
                                     | _ -> failwithlog "Error MakeJobs")
 
 
-                        let job = Job(jobBase + "_" + api.Name, devs |> Seq.toList)
+                        let job = Job(jobBase + "_" + api.Name, devs |> Seq.toList, None)
 
                         if dicJobName.ContainsKey(job.Name) then
                             Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
@@ -257,7 +257,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}_{b.Key}", "", "", flow, new HashSet<Func>())))
+                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}_{b.Key}", "", "", flow, None)))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
@@ -266,7 +266,7 @@ module ImportU =
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
                 else 
                     dicFlow.Iter(fun flow ->
-                        node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value, new HashSet<Func>())))
+                        node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value, None)))
                 )        
                 
         //MakeLamps 리스트 만들기
@@ -291,11 +291,11 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}_{l.Key}", "", "", Some flow, new HashSet<Func>())))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}_{l.Key}", "", "", Some flow, None)))
             
             headPageLamps
             |> Seq.iter (fun node ->
-                node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, new HashSet<Func>())))
+                node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, None)))
                 
         //MakeReadyConditions 리스트 만들기
         [<Extension>]
@@ -305,7 +305,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.CondiDefs.any())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow, new HashSet<Func>())))
+                node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow, None)))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.CondiHeadPageDefs.any())
@@ -314,7 +314,7 @@ module ImportU =
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
                 else 
                     dicFlow.Iter(fun flow ->
-                        node.CondiHeadPageDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, c.Key, "", "", flow.Value, new HashSet<Func>())))
+                        node.CondiHeadPageDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, c.Key, "", "", flow.Value, None)))
                 )     
                 
         [<Extension>]

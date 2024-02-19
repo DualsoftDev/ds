@@ -12,8 +12,10 @@ type DsSystem with
         let rsts = s._off.Expr
          (* device not func 로직 처리*)
         [
+            let reverseInputs = s.Jobs.Where(fun j -> hasNot j.Func)
+                                      .SelectMany(fun j->j.DeviceDefs)
+
             let devs = s.Jobs.SelectMany(fun j -> j.DeviceDefs)
-            let reverseInputs = devs.Where(fun w-> hasNot w.Funcs)
             let orgInTag (revDev:TaskDev)=
                 let orgList = devs.Except(reverseInputs)
                                   .Where(fun f->f.InAddress = revDev.InAddress)

@@ -36,7 +36,7 @@ module ImportIOTable =
                             Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funName}", page, 0u)
 
                         funcs.Add(Func(funName, parms)) |> ignore)
-                funcs
+                if funcs.any() then Some (funcs.Head()) else None
 
             let dicJob =
                 sys.Jobs
@@ -67,7 +67,10 @@ module ImportIOTable =
 
                 match sys.Jobs.TryFind(fun f -> f.Name = jobName) with
                 | Some job ->
-                    job.Funcs <- getFunction (job.Name, func, tableIO, true, page)
+                    let func = getFunction (job.Name, func, tableIO, true, page)
+                    if func.IsSome
+                    then 
+                        job.Func <- func
                 | None ->
                     if
                         "↑" <> jobName //이름이 위와 같지 않은 경우
@@ -91,7 +94,7 @@ module ImportIOTable =
                     btn.InAddress  <-inaddr |> changeValidAddress
                     btn.OutAddress <-outaddr|> changeValidAddress
 
-                    btn.Funcs <- getFunction (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page)
+                    btn.Func <- getFunction (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
 
 
@@ -109,7 +112,7 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidLampAddress (lamp)
                     lamp.InAddress  <-inaddr|> changeValidAddress
                     lamp.OutAddress <-outaddr|> changeValidAddress
-                    lamp.Funcs <- getFunction (lamp.Name, func,  tableIO, false, page)
+                    lamp.Func <- getFunction (lamp.Name, func,  tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
@@ -126,7 +129,7 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidCondiAddress (cond)
                     cond.InAddress  <-inaddr |> changeValidAddress
                     cond.OutAddress <-outaddr  |> changeValidAddress    
-                    cond.Funcs <- getFunction (cond.Name, func, tableIO, false, page)
+                    cond.Func <- getFunction (cond.Name, func, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 
             dts

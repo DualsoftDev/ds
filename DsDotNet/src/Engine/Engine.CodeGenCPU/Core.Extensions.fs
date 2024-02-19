@@ -9,10 +9,10 @@ open System
 [<AutoOpen>]
 module ConvertCodeCoreExt =
     
-    let hasTime (xs:Func seq) = xs.Any(fun f->f.Name = TextOnDelayTimer)
-    let hasCount(xs:Func seq) = xs.Any(fun f->f.Name = TextRingCounter)
-    let hasMove (xs:Func seq) = xs.Any(fun f->f.Name = TextMove)
-    let hasNot  (xs:Func seq) = xs.Any(fun f->f.Name = TextNot )
+    let hasTime (x:Func option) = x.IsSome && x.Value.Name = TextOnDelayTimer
+    let hasCount(x:Func option) = x.IsSome && x.Value.Name = TextRingCounter
+    let hasMove (x:Func option) = x.IsSome && x.Value.Name = TextMove
+    let hasNot  (x:Func option) = x.IsSome && x.Value.Name = TextNot 
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexManager
     let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
@@ -48,11 +48,6 @@ module ConvertCodeCoreExt =
         member a.RXTags       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
         member a.TXTags       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
-
-    type HwSystemDef with
-        member s.ActionINFunc = 
-                let inTag = (s.InTag :?> Tag<bool>).Expr
-                if hasNot(s.Funcs)then !!inTag else inTag  
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -298,12 +293,6 @@ module ConvertCodeCoreExt =
             writeAble |> map (getFM(f).GetFlowTag)
 
     type TaskDev with
-        //member td.ActionINFunc  = 
-        //                    if(td.InTag.IsNull()) then failwithf $"{td.QualifiedName} Input 주소 할당이 없습니다."
-
-        //                    if hasNot td.Funcs 
-        //                    then !!(td.InTag  :?> Tag<bool>).Expr 
-        //                    else (td.InTag  :?> Tag<bool>).Expr
 
         member td.ActionOut = 
                             if(td.OutTag.IsNull()) then failwithf $"{td.QualifiedName} Output 주소 할당이 없습니다."
@@ -312,23 +301,7 @@ module ConvertCodeCoreExt =
         member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
         member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
-        //member td.MutualReset(x:DsSystem) =
-        //    let exMutualApis = td.ApiItem.System.GetMutualResetApis(td.ApiItem)
-        //    let myMutualDevs = 
-        //            exMutualApis.SelectMany(fun api -> 
-        //                        x.DeviceDefs.Where(fun dev-> dev.ApiItem = api))
-        //    myMutualDevs
-
-        //member td.MutualResetExpr(x:DsSystem) =
-        //    let getMutualReset(taskDev:TaskDev) = 
-        //        let exMutualApis = taskDev.ApiItem.System.GetMutualResetApis(taskDev.ApiItem)
-        //        let myMutualDevs = 
-        //                exMutualApis.SelectMany(fun api -> 
-        //                            x.DeviceDefs.Where(fun dev-> dev.ApiItem = api))
-        //        myMutualDevs
-
-        //    let myMutualDevs =  getMutualReset(td).Where(fun d->d.ApiItem.RXs.any()).Select(fun d->d.ActionINFunc)
-        //    if myMutualDevs.any() then myMutualDevs.ToAndElseOff() else x._on.Expr
+     
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
@@ -337,6 +310,14 @@ module ConvertCodeCoreExt =
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
 
+        
+    type HwSystemDef with
+        member s.ActionINFunc = 
+            let inTag = (s.InTag :?> Tag<bool>).Expr
+            if hasNot (s.Func)
+            then !!inTag else inTag  
+
+
     type Call with
         member c._on     = c.System._on
         member c._off     = c.System._off
@@ -344,11 +325,12 @@ module ConvertCodeCoreExt =
         member c.InTags  = c.TargetJob.DeviceDefs.Where(fun d->d.ApiItem.RXs.any())
                                                  .Select(fun d->d.InTag :?> Tag<bool>)
 
-        member c.UsingTon  = c.TargetJob.Funcs |> hasTime
-        member c.UsingCtr  = c.TargetJob.Funcs |> hasCount
-        member c.UsingNot  = c.TargetJob.Funcs |> hasNot
-        member c.UsingMove = c.TargetJob.Funcs |> hasMove
+        member c.UsingTon  = c.TargetJob.Func |> hasTime
+        member c.UsingCtr  = c.TargetJob.Func |> hasCount
+        member c.UsingNot  = c.TargetJob.Func |> hasNot
+        member c.UsingMove = c.TargetJob.Func |> hasMove
       
+        member c.EndPlan = c.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
         member c.EndAction = 
                 if c.UsingMove   then c._on.Expr  //todo : Move 처리 완료시 End
                 elif c.UsingCtr  then c.VC.CTR.DN.Expr 
@@ -360,20 +342,18 @@ module ConvertCodeCoreExt =
 
                 else c.InTags.ToAndElseOn() 
       
-        member c.EndPlan = c.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
         member c.PresetTime =   if c.UsingTon
-                                then c.TargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
+                                then c.TargetJob.Func.Value.GetDelayTime()
                                 else failwith $"{c.Name} not use timer" 
 
         member c.PresetCounter = if c.UsingCtr
-                                 then c.TargetJob.Funcs.First(fun f->f.Name = TextRingCounter).GetRingCount()
+                                 then c.TargetJob.Func.Value.GetRingCount()
                                  else failwith $"{c.Name} not use counter"
         
         member c.PSs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.TXs.any()).Select(fun f->f.ApiItem.PS)
         member c.PEs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun f->f.ApiItem.PE)
         member c.TXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.TXs)
         member c.RXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.RXs)
-        //member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun d->d.ApiItem.RXs.any()).Select(fun d->d.ActionINFunc).ToAndElseOff()       
         member c.Errors       = 
                                 [
                                     getVMCoin(c).ErrTimeOver
@@ -381,21 +361,10 @@ module ConvertCodeCoreExt =
                                     getVMCoin(c).ErrShort 
                                     getVMCoin(c).ErrOpen 
                                 ]
-        //개별 부정의 AND  <안전하게 전부 확인>
-        //member c.INsFuns  = let ins = c.TargetJob.DeviceDefs
-        //                                .Where(fun j -> j.ApiItem.RXs.any())
-        //                                .Select(fun j -> j.ActionINFunc)
-        //                    if ins.any() then ins.ToAndElseOn() else c._on.Expr
+    
                          
         member c.MutualResetCalls =  c.System.S.MutualCalls[c].Cast<Call>()
           
-            //let dev = c.TargetJob.DeviceDefs.Head() // 동일한 Api 만 Call로 구성되어 아무거나 가져옴
-            //let mutualDevs = dev.ApiItem.System.GetMutualResetApis(dev.ApiItem)
-            //                    .SelectMany(fun a -> c.System.DeviceDefs.Where(fun w-> w.ApiItem = a))
-
-            //let mutualJobs = mutualDevs.SelectMany(fun td-> c.System.Jobs.Where(fun j-> j.DeviceDefs.Contains(td)))
-            
-                               
         member c.StartPointExpr =
             let f = c.Parent.GetFlow()
             match c.Parent.GetCore() with

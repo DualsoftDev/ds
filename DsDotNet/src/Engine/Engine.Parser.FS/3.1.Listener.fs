@@ -484,7 +484,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 assert (apiItems.Any())
                 let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList)
-                job.SetFuncs(funcSet)
+                job.Funcs <-funcSet
                 job |> system.Jobs.Add
 
 

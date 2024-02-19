@@ -23,16 +23,20 @@ module ImportIOTable =
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try
-            let functionUpdate (name, funcText, funcs: HashSet<Func>, tableIO: Data.DataTable, isJob: bool, page) =
-                funcs.Clear()
-
+            
+            let getFunction (name, funcText, tableIO: Data.DataTable, isJob: bool, page) =
+                let funcs = HashSet<Func>()
                 if not <| ((trimSpace funcText) = "" || funcText = TextSkip || funcText = "↑") then
-                    getFunctions (funcText)
-                    |> Seq.iter (fun (name, parms) ->
-                        if (not <| isJob) && name <> "n" then
-                            Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{name}", page, 0u)
+                    let funTexts = getFunctions (funcText)
+                    if funTexts.length() > 1 then 
+                        Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{name}", page, 0u)
 
-                        funcs.Add(Func(name, parms)) |> ignore)
+                    funTexts |> Seq.iter (fun (funName, parms) ->
+                        if (not <| isJob) && funName <> "n" then
+                            Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funName}", page, 0u)
+
+                        funcs.Add(Func(funName, parms)) |> ignore)
+                funcs
 
             let dicJob =
                 sys.Jobs
@@ -63,9 +67,7 @@ module ImportIOTable =
 
                 match sys.Jobs.TryFind(fun f -> f.Name = jobName) with
                 | Some job ->
-                    let funcs = new HashSet<Func>()
-                    functionUpdate (job.Name, func, funcs, tableIO, true, page)
-                    job.SetFuncs funcs
+                    job.Funcs <- getFunction (job.Name, func, tableIO, true, page)
                 | None ->
                     if
                         "↑" <> jobName //이름이 위와 같지 않은 경우
@@ -88,7 +90,8 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidBtnAddress (btn)
                     btn.InAddress  <-inaddr |> changeValidAddress
                     btn.OutAddress <-outaddr|> changeValidAddress
-                    functionUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", btn.Funcs, tableIO, false, page)
+
+                    btn.Funcs <- getFunction (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
 
 
@@ -106,7 +109,7 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidLampAddress (lamp)
                     lamp.InAddress  <-inaddr|> changeValidAddress
                     lamp.OutAddress <-outaddr|> changeValidAddress
-                    functionUpdate (lamp.Name, func, lamp.Funcs, tableIO, false, page)
+                    lamp.Funcs <- getFunction (lamp.Name, func,  tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
@@ -123,7 +126,7 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidCondiAddress (cond)
                     cond.InAddress  <-inaddr |> changeValidAddress
                     cond.OutAddress <-outaddr  |> changeValidAddress    
-                    functionUpdate (cond.Name, func, cond.Funcs, tableIO, false, page)
+                    cond.Funcs <- getFunction (cond.Name, func, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 
             dts

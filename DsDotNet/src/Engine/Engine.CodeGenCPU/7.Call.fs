@@ -21,24 +21,20 @@ type VertexManager with
             !!call.MutualResets.Select(fun d->d.ActionINFunc).ToOrElseOff()
             
         let rsts =
-            let action =
-                if call.UsingTon
-                    then call.V.TDON.DN.Expr   //On Delay
-                    else call.ActionINFuncs    
-
+            let action = call.EndAction
             let plan = call.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
 
             (plan <&&> v._sim.Expr)
             <||>
-            (action <||> !!v._sim.Expr)
+            (action <&&> !!v._sim.Expr)
 
-        (sets, rsts) ==| (call.V.MM, getFuncName())
+        (sets, rsts) ==| (call.VC.MM, getFuncName())
 
 
 type ApiItemManager with
 
     member a.A1_PlanSend(activeSys:DsSystem, calls:Call seq) : CommentedStatement  =
-        let sets =  calls.Select(fun c->c.V.MM).ToOrElseOff()
+        let sets =  calls.Select(fun c->c.VC.MM).ToOrElseOff()
         (sets, activeSys._off.Expr) --| (a.PS, getFuncName())
 
     member a.A2_PlanReceive(activeSys:DsSystem) : CommentedStatement  =

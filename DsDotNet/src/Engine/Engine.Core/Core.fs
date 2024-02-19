@@ -250,13 +250,10 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (name:string, tasks:TaskDev list) =
         inherit Named(name)
-        let mutable funcs = HashSet<Func>()
         member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks.OfType<TaskDev>()
-        member x.SetFuncs(func) = 
-                    tasks.Iter(fun t->t.Funcs <- func) 
-                    funcs <- func
-        member x.Funcs = funcs.ToArray() //일괄 셋팅만 가능 append 불가
+        //하나의 Job에는 하나의 Func만 지원 적용 테스트중
+        member val Funcs  = HashSet<Func>() with get, set
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }

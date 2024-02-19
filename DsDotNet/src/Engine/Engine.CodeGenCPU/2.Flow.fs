@@ -55,13 +55,8 @@ type VertexManager with
             | :? Alias   as rf -> rf.V.GetPure().V.ET.Expr
             | :? RealExF as rf -> rf.V.GetPure().V.ET.Expr
             | :? Call as call ->
-                let action =
-                    if call.UsingTon
-                            then call.V.TDON.DN.Expr   //On Delay
-                            else call.INsFuns
-                        // call이 flow 상에 있으면 시뮬레이션시에 직접 On/Off
                 if call.Parent.GetCore() :? Flow
-                then action 
+                then call.EndAction 
                      <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
                 else failwithlog $"Error this call Parent is flow but real {call.QualifiedName}" 
             | _ ->

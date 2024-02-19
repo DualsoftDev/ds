@@ -20,10 +20,10 @@ type DsSystem with
         [
             for call in calls do
                 let sets = call.V.F.Expr
-                yield (sets) --% (call.V.CTR, call.PresetCounter,  getFuncName())
+                yield (sets) --% (call.VC.CTR, call.PresetCounter,  getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.GetPureCall().Value
                 let sets = alias.V.F.Expr
-                yield (sets) --% (alias.V.CTR, call.PresetCounter, getFuncName())
+                yield (sets) --% (alias.VC.CTR, call.PresetCounter, getFuncName())
         ]

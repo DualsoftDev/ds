@@ -122,6 +122,8 @@ module internal ToDsTextModule =
         let tab3 = getTab 3
         let tab4 = getTab 4
         let printFuncions (targetName:string) (funcs:Func seq) =
+            if funcs.length() > 1
+            then failwithf $"not support Multi Function : {targetName} {funcs.length()}"
             [
                 $"{tab3}{targetName}.func = {lb}"
                 for func in funcs do
@@ -193,24 +195,24 @@ module internal ToDsTextModule =
 
 
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
-                    [
-                        if hws.length() > 0 then
-                            yield $"{tab2}[{category}] = {lb}"
-                            for hw in hws do
-                                let flows = (hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
-                                let flowTexts =
-                                    if flows.Count() > 0 then
-                                        flows + ";"
-                                    else
-                                        ""
-                                let inAddr =  if isNullOrEmpty  hw.InAddress  then "_" else hw.InAddress
-                                let outAddr = if isNullOrEmpty  hw.OutAddress then "_" else hw.OutAddress
-                                yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
-                                if hw.Funcs.any() then
-                                    for funcString in printFuncions hw.Name hw.Funcs do
-                                        yield funcString
-                            yield $"{tab2}{rb}"
-                    ] |> combineLines
+                [
+                    if hws.length() > 0 then
+                        yield $"{tab2}[{category}] = {lb}"
+                        for hw in hws do
+                            let flows = (hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
+                            let flowTexts =
+                                if flows.Count() > 0 then
+                                    flows + ";"
+                                else
+                                    ""
+                            let inAddr =  if isNullOrEmpty  hw.InAddress  then "_" else hw.InAddress
+                            let outAddr = if isNullOrEmpty  hw.OutAddress then "_" else hw.OutAddress
+                            yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
+                            if hw.Funcs.any() then
+                                for funcString in printFuncions hw.Name hw.Funcs do
+                                    yield funcString
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
 
 
             if btns.Any() then

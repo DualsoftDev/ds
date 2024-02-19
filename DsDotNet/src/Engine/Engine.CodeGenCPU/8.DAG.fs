@@ -40,12 +40,8 @@ type VertexManager with
                 let coin = child :?> VertexMCoin
                 let call = coin.GetPure().V.Vertex :?> Call
                 let setEnd =
-                    let action =
-                        if call.UsingTon
-                            then call.V.TDON.DN.Expr   //On Delay
-                            else call.INsFuns
                   
-                    (action <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn() 
+                    (call.EndAction <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn() 
                   
 
                 let sets = coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr

@@ -298,7 +298,6 @@ module ConvertCodeCoreExt =
             writeAble |> map (getFM(f).GetFlowTag)
 
     type TaskDev with
-        member td.ExistIn  = td.ApiItem.RXs.any()
         member td.ActionINFunc  = 
                             if(td.InTag.IsNull()) then failwithf $"{td.QualifiedName} Input 주소 할당이 없습니다."
 
@@ -321,19 +320,38 @@ module ConvertCodeCoreExt =
             myMutualDevs
 
         member td.MutualResetExpr(x:DsSystem) =
-            let myMutualDevs =  td.MutualReset(x).Where(fun d->d.ExistIn).Select(fun d->d.ActionINFunc)
+            let myMutualDevs =  td.MutualReset(x).Where(fun d->d.ApiItem.RXs.any()).Select(fun d->d.ActionINFunc)
             if myMutualDevs.any() then myMutualDevs.ToAndElseOff() else x._on.Expr
 
+    type Vertex with
+        member r.V = r.TagManager :?> VertexManager
+        member r.VC = r.TagManager :?> VertexMCoin
+        member r.VR = r.TagManager :?> VertexMReal
+        member r._on  = r.Parent.GetSystem()._on
+        member r._off = r.Parent.GetSystem()._off
+
     type Call with
-       
-                                    
+        member c._on     = c.System._on
+        member c._off     = c.System._off
+
+        member c.InTags  = c.TargetJob.DeviceDefs.Where(fun d->d.ApiItem.RXs.any())
+                                                 .Select(fun d->d.InTag :?> Tag<bool>)
+
         member c.UsingTon  = c.TargetJob.Funcs |> hasTime
         member c.UsingCtr  = c.TargetJob.Funcs |> hasCount
         member c.UsingNot  = c.TargetJob.Funcs |> hasNot
         member c.UsingMove = c.TargetJob.Funcs |> hasMove
-        member c._on     = c.System._on
-        member c._off     = c.System._off
-    
+      
+        member c.EndAction = 
+                if c.UsingMove   then c._on.Expr  //todo : Move 처리 완료시 End
+                elif c.UsingCtr  then c.VC.CTR.DN.Expr 
+                elif c.UsingTon  then c.VC.TDON.DN.Expr
+                elif c.UsingNot  then 
+                                 if c.InTags.any() 
+                                 then !!c.InTags.ToOrElseOff() 
+                                 else failwithf $"'Not function' requires an InTag. {c.Name} input error"   
+
+                else c.InTags.ToAndElseOn() 
       
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
@@ -347,7 +365,7 @@ module ConvertCodeCoreExt =
         member c.PEs           = c.TargetJob.DeviceDefs.Where(fun j -> j.ApiItem.RXs.any()).Select(fun f->f.ApiItem.PE)
         member c.TXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.TXs)
         member c.RXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.RXs)
-        member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun f->f.ExistIn).Select(fun d->d.ActionINFunc).ToAndElseOff()       
+        //member c.ActionINFuncs = c.TargetJob.DeviceDefs.Where(fun d->d.ApiItem.RXs.any()).Select(fun d->d.ActionINFunc).ToAndElseOff()       
         member c.Errors       = 
                                 [
                                     getVMCoin(c).ErrTimeOver
@@ -358,10 +376,10 @@ module ConvertCodeCoreExt =
         
 
         //개별 부정의 AND  <안전하게 전부 확인>
-        member c.INsFuns  = let ins = c.TargetJob.DeviceDefs
-                                        .Where(fun j -> j.ApiItem.RXs.any())
-                                        .Select(fun j -> j.ActionINFunc)
-                            if ins.any() then ins.ToAndElseOn() else c._on.Expr
+        //member c.INsFuns  = let ins = c.TargetJob.DeviceDefs
+        //                                .Where(fun j -> j.ApiItem.RXs.any())
+        //                                .Select(fun j -> j.ActionINFunc)
+        //                    if ins.any() then ins.ToAndElseOn() else c._on.Expr
                          
         member c.MutualResets =
             c.TargetJob.DeviceDefs
@@ -378,7 +396,7 @@ module ConvertCodeCoreExt =
 
                 if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
                         .Select(fun (t,_)->t).ContainsAllOf(c.TargetJob.DeviceDefs)
-                    then (homeManuAct <||> homeAutoAct) <&&> !!c.ActionINFuncs      
+                    then (homeManuAct <||> homeAutoAct) <&&> !!c.EndAction      
                     else c._off.Expr
             | _ -> 
                 c._off.Expr
@@ -392,13 +410,7 @@ module ConvertCodeCoreExt =
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrShort) 
         member r.Errors     = r.ErrTimeOvers @ r.ErrTrendOuts @ r.ErrOpens @ r.ErrShorts 
 
-    type Indirect with
-        member a.V = a.TagManager :?> VertexMCoin
 
-    type Vertex with
-        member r.V = r.TagManager :?> VertexManager
-        member r._on  = r.Parent.GetSystem()._on
-        member r._off = r.Parent.GetSystem()._off
 
 
 

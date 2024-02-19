@@ -274,7 +274,6 @@ module ModelComponentAnswers =
             LeakErr(%I3, _) = { F2; }
             LeakErr.func = {
                 $t 2000;
-                $c 5;
             }
         }
     }
@@ -321,7 +320,6 @@ module ModelComponentAnswers =
             ReadyMode(_, %Q1) = { F4; }
             ReadyMode.func = {
                 $t 2000;
-                $c 5;
             }
         }
         [i] = {
@@ -377,7 +375,6 @@ module ModelComponentAnswers =
             HomeBTN(_, _) = { F1;F2;F3;F5; }
             HomeBTN.func = {
                 $t 2000;
-                $c 5;
             }
         }
     }
@@ -436,7 +433,6 @@ module ModelComponentAnswers =
         C1 = { B."+"(%I1, %Q1); A."+"(_, %Q999.2343); }
         C1.func = {
             $t 2000;
-            $c 5;
         }
         C2 = { A."-"(_, %Q3); B."-"(%I1, _); }
     }

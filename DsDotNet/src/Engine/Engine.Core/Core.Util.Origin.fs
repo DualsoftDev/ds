@@ -9,19 +9,18 @@ module OriginModule =
     type InitialType =
         | Off         // 행동 값이 반드시 0인 상태
         | On          // 행동 값이 반드시 1인 상태
-        | NeedCheck   // 인터락 구성요소 중 하나가 1인지를 체크하는 상태
+        //NeedCheck 삭제 (조건 Safety 추가로 해결)
+        //| NeedCheck   // 인터락 구성요소 중 하나가 1인지를 체크하는 상태  
         | NotCare     // On 또는 Off의 상태를 따르지 않음
 
     // 기본 Origin 정보를 정의합니다.
     type OriginInfo = {
         Real: Real
-        Tasks: (TaskDev * InitialType) seq
-        ResetChains: string list seq
+        CallInitials: (Call * InitialType) seq
     }
     let defaultOriginInfo(real) = {
         Real  = real
-        Tasks = [||]
-        ResetChains = [||]
+        CallInitials = [||]
     }
  
     // 상호 정보를 얻습니다.
@@ -60,64 +59,34 @@ module OriginModule =
 
         let getTypeForMuiltTarget (vs:bool option seq)= 
                 if vs.any(fun d-> d.IsNone)  //하나라도 순서없으면
-                then InitialType.NeedCheck
+                then InitialType.NotCare
                 else
                     if vs.Choose(id).AllEqual(true)
                     then InitialType.Off 
                     elif vs.Choose(id).AllEqual(false)
                     then InitialType.On
-                    else InitialType.NeedCheck
+                    else InitialType.NotCare
 
         match targets.Count() with
         | 0 -> InitialType.NotCare
         | 1 -> graphOrder source (targets.First()) |> getTypeForSingleTarget
         | _ -> targets |> Seq.map (fun t -> graphOrder source t) |> getTypeForMuiltTarget
 
-    let getOriginInfo (real: Real) =  //test ahn 보강필요 알리아스랑 니드체크
+    let getOriginInfo (real: Real) =  
         let graphOrder = real.Graph.BuildPairwiseComparer()
         let pureCalls  = (real.Graph.Vertices.OfType<Call>()
                          @(real.Graph.Vertices.OfType<Alias>() |> Seq.map (fun f -> f.GetPure():?>Call))
                          ).Distinct().Cast<Vertex>()
         
         let mutualInfo = getMutualInfo pureCalls
-        let tasks =
+        let calls =
             pureCalls
-            |> Seq.collect (fun v ->
+            |> Seq.map (fun v ->
                 let initialType = getInitialType v (mutualInfo.[v]) graphOrder
-                let call = v.GetPure() :?> Call
-                let devs = call.TargetJob.DeviceDefs
-                devs |> Seq.map (fun d -> d, initialType))
+                v.GetPure() :?> Call, initialType)
+                
+        { Real = real; CallInitials = calls }
 
-        { Real = real; Tasks = tasks; ResetChains = [||] }
-
-    //// Origin 정보를 얻습니다.  //test ahn 보강필요 알리아스랑 니드체크
-    //let getOriginInfo (real: Real) =
-    //    let graphOrder = real.Graph.BuildPairwiseComparer()
-    //    let pureGroupAlias =
-    //        real.Graph.Vertices.OfType<Alias>()
-    //        |> Seq.groupBy (fun f -> f.GetPure())
-
-    //    let addAlias =
-    //        pureGroupAlias
-    //        |> Seq.choose (fun (f, _) ->
-    //            let pureAlias = real.Graph.Vertices |> Seq.filter (fun v -> v.GetPure() = f)
-    //            findHeadVertex pureAlias graphOrder)
-
-    //    //Alias 관련 Vertex는 일괄 걸러낸후 addAlias 로 다시 더함
-    //    let verticesToCalculateOrigin = 
-    //        real.Graph.Vertices.Where(fun w-> not <| pureGroupAlias.Select(fun (f, _)->f).Contains(w.GetPure()))
-    //                           .Concat addAlias
-
-    //    let mutualInfo = getMutualInfo (real.Graph.Vertices.OfType<Call>().Cast<Vertex>())
-    //    let tasks =
-    //        verticesToCalculateOrigin
-    //        |> Seq.collect (fun v ->
-    //            let initialType = getInitialType v (mutualInfo.[v]) graphOrder
-    //            let call = v.GetPure() :?> Call
-    //            let devs = call.TargetJob.DeviceDefs
-    //            devs |> Seq.map (fun d -> d, initialType))
-
-    //    { Real = real; Tasks = tasks; ResetChains = [||] }
 
 // OriginHelper 타입의 확장 기능을 제공합니다.
 [<Extension>]
@@ -126,8 +95,11 @@ type OriginHelper =
     [<Extension>]
     static member GetOriginInfo (real: Real) = getOriginInfo real
 
-    // 태스크 이름별로 Origin 정보를 가져옵니다.
+        // 태스크 이름별로 Origin 정보를 가져옵니다.
     [<Extension>]
     static member GetOriginInfoByTaskName (real: Real) =
         getOriginInfo real
-        |> fun info -> info.Tasks |> Seq.map (fun (d, t) -> d.QualifiedName, t)
+        |> fun info -> info.CallInitials.SelectMany(fun (c, t) ->
+                            c.TargetJob.DeviceDefs |> Seq.map (fun d-> d.QualifiedName, t) 
+                            )
+

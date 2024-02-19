@@ -11,7 +11,6 @@ type VertexManager with
 
     member v.M1_OriginMonitor(): CommentedStatement  =
         let v = v :?> VertexMReal
-        let real = v.Vertex :?> Real
 
         let ons       = getOriginIOExprs     (v, InitialType.On)
         let onSims    = getOriginSimPlanEnds (v, InitialType.On)
@@ -19,17 +18,14 @@ type VertexManager with
         let offs      = getOriginIOExprs     (v, InitialType.Off)
         let offSims   = getOriginSimPlanEnds (v, InitialType.Off)
 
-        let locks     = getNeedCheckIOs (real, false)
-        let lockSims  = getNeedCheckIOs (real ,true)
-
         let onExpr    = if ons.any() then ons.ToAndElseOff() else v._on.Expr
         let offExpr   = if offs.any() then offs.ToOrElseOn() else v._off.Expr
 
         let onSimExpr    = onSims.ToAndElseOn()
         let offSimExpr   = offSims.ToOrElseOff()
 
-        let set =   (onExpr    <&&> locks    <&&> (!!offExpr))
-                <||>(onSimExpr <&&> lockSims <&&> (!!offSimExpr) <&&> v._sim.Expr)
+        let set =   (onExpr     <&&> (!!offExpr))
+                <||>(onSimExpr  <&&> (!!offSimExpr) <&&> v._sim.Expr)
 
         (set, v._off.Expr) --| (v.OG, getFuncName())
 

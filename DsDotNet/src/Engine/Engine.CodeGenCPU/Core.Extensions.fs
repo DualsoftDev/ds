@@ -298,12 +298,12 @@ module ConvertCodeCoreExt =
             writeAble |> map (getFM(f).GetFlowTag)
 
     type TaskDev with
-        member td.ActionINFunc  = 
-                            if(td.InTag.IsNull()) then failwithf $"{td.QualifiedName} Input 주소 할당이 없습니다."
+        //member td.ActionINFunc  = 
+        //                    if(td.InTag.IsNull()) then failwithf $"{td.QualifiedName} Input 주소 할당이 없습니다."
 
-                            if hasNot td.Funcs 
-                            then !!(td.InTag  :?> Tag<bool>).Expr 
-                            else (td.InTag  :?> Tag<bool>).Expr
+        //                    if hasNot td.Funcs 
+        //                    then !!(td.InTag  :?> Tag<bool>).Expr 
+        //                    else (td.InTag  :?> Tag<bool>).Expr
 
         member td.ActionOut = 
                             if(td.OutTag.IsNull()) then failwithf $"{td.QualifiedName} Output 주소 할당이 없습니다."
@@ -312,16 +312,23 @@ module ConvertCodeCoreExt =
         member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
         member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
-        member td.MutualReset(x:DsSystem) =
-            let exMutualApis = td.ApiItem.System.GetMutualResetApis(td.ApiItem)
-            let myMutualDevs = 
-                    exMutualApis.SelectMany(fun api -> 
-                                x.DeviceDefs.Where(fun dev-> dev.ApiItem = api))
-            myMutualDevs
+        //member td.MutualReset(x:DsSystem) =
+        //    let exMutualApis = td.ApiItem.System.GetMutualResetApis(td.ApiItem)
+        //    let myMutualDevs = 
+        //            exMutualApis.SelectMany(fun api -> 
+        //                        x.DeviceDefs.Where(fun dev-> dev.ApiItem = api))
+        //    myMutualDevs
 
-        member td.MutualResetExpr(x:DsSystem) =
-            let myMutualDevs =  td.MutualReset(x).Where(fun d->d.ApiItem.RXs.any()).Select(fun d->d.ActionINFunc)
-            if myMutualDevs.any() then myMutualDevs.ToAndElseOff() else x._on.Expr
+        //member td.MutualResetExpr(x:DsSystem) =
+        //    let getMutualReset(taskDev:TaskDev) = 
+        //        let exMutualApis = taskDev.ApiItem.System.GetMutualResetApis(taskDev.ApiItem)
+        //        let myMutualDevs = 
+        //                exMutualApis.SelectMany(fun api -> 
+        //                            x.DeviceDefs.Where(fun dev-> dev.ApiItem = api))
+        //        myMutualDevs
+
+        //    let myMutualDevs =  getMutualReset(td).Where(fun d->d.ApiItem.RXs.any()).Select(fun d->d.ActionINFunc)
+        //    if myMutualDevs.any() then myMutualDevs.ToAndElseOff() else x._on.Expr
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
@@ -353,6 +360,7 @@ module ConvertCodeCoreExt =
 
                 else c.InTags.ToAndElseOn() 
       
+        member c.EndPlan = c.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.Funcs.First(fun f->f.Name = TextOnDelayTimer).GetDelayTime()
                                 else failwith $"{c.Name} not use timer" 
@@ -373,29 +381,32 @@ module ConvertCodeCoreExt =
                                     getVMCoin(c).ErrShort 
                                     getVMCoin(c).ErrOpen 
                                 ]
-        
-
         //개별 부정의 AND  <안전하게 전부 확인>
         //member c.INsFuns  = let ins = c.TargetJob.DeviceDefs
         //                                .Where(fun j -> j.ApiItem.RXs.any())
         //                                .Select(fun j -> j.ActionINFunc)
         //                    if ins.any() then ins.ToAndElseOn() else c._on.Expr
                          
-        member c.MutualResets =
-            c.TargetJob.DeviceDefs
-                .SelectMany(fun j -> j.ApiItem.System.GetMutualResetApis(j.ApiItem))
-                .SelectMany(fun a -> c.System.DeviceDefs.Where(fun w-> w.ApiItem = a))
+        member c.MutualResetCalls =  c.System.S.MutualCalls[c].Cast<Call>()
+          
+            //let dev = c.TargetJob.DeviceDefs.Head() // 동일한 Api 만 Call로 구성되어 아무거나 가져옴
+            //let mutualDevs = dev.ApiItem.System.GetMutualResetApis(dev.ApiItem)
+            //                    .SelectMany(fun a -> c.System.DeviceDefs.Where(fun w-> w.ApiItem = a))
 
+            //let mutualJobs = mutualDevs.SelectMany(fun td-> c.System.Jobs.Where(fun j-> j.DeviceDefs.Contains(td)))
+            
+                               
         member c.StartPointExpr =
+            let f = c.Parent.GetFlow()
             match c.Parent.GetCore() with
             | :? Real as r ->
-                let tasks = r.V.OriginInfo.Tasks
-                let flow = c.Parent.GetFlow()
-                let homeManuAct = flow.mop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
-                let homeAutoAct = flow.dop.Expr <&&> r.V.RO.Expr
+                let initOnCalls  = r.V.OriginInfo.CallInitials
+                                     .Where(fun (_,ty) -> ty = InitialType.On)
+                                     .Select(fun (call,_)->call)
+                let homeManuAct = f.mop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
+                let homeAutoAct = f.dop.Expr <&&> r.V.RO.Expr
 
-                if tasks.Where(fun (_,ty) -> ty = InitialType.On) //NeedCheck 처리 필요 test ahn
-                        .Select(fun (t,_)->t).ContainsAllOf(c.TargetJob.DeviceDefs)
+                if initOnCalls.Contains(c)
                     then (homeManuAct <||> homeAutoAct) <&&> !!c.EndAction      
                     else c._off.Expr
             | _ -> 

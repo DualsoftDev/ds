@@ -18,11 +18,11 @@ type VertexManager with
                 <||> (mop <&&> v.SF.Expr)
             )
             <&&> 
-            !!call.MutualResets.Select(fun d->d.ActionINFunc).ToOrElseOff()
+            !!call.MutualResetCalls.Select(fun c-> c.EndAction).ToOrElseOff()
             
         let rsts =
+            let plan = call.EndPlan
             let action = call.EndAction
-            let plan = call.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
 
             (plan <&&> v._sim.Expr)
             <||>
@@ -52,7 +52,7 @@ type ApiItemManager with
                         let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
                         if call.TargetJob.ActionType = JobActionType.Push 
                         then 
-                             let rstPush = td.MutualResetExpr(call.System)
+                             let rstPush = call.MutualResetCalls.Select(fun c->c.VC.MM).ToOrElseOff()
                         
                              yield (sets, rstPush   <||> !!rop) ==| (td.ActionOut, getFuncName())
                         else 

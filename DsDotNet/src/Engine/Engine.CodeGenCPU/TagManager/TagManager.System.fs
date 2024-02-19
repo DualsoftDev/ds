@@ -3,6 +3,7 @@ namespace Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
+open System.Linq
 
 [<AutoOpen>]
 module SystemManagerModule =
@@ -24,6 +25,10 @@ module SystemManagerModule =
         let dsSysBit    name autoAddr target (t:SystemTag) = (dsSysTag DuBOOL   name  autoAddr target t) :?> PlanVar<bool>
         let dsSysUint8  name autoAddr target (t:SystemTag) = (dsSysTag DuUINT8  name  autoAddr target t) :?> PlanVar<uint8>
         let dsSysUint16 name autoAddr target (t:SystemTag) = (dsSysTag DuUINT16 name  autoAddr target t) :?> PlanVar<uint16>
+
+
+        let mutualCalls = getMutualInfo (sys.GetVertices().OfType<Call>().Cast<Vertex>())
+
 
         //let on     = let onBit = dsSysBit "_onalways"     false   sys   SystemTag.on
         //             onBit.Value <- true  //항상 ON
@@ -106,7 +111,8 @@ module SystemManagerModule =
         interface ITagManager with
             member x.Target = sys
             member x.Storages = stg
-
+            
+        member s.MutualCalls = mutualCalls 
         member s.GetTempBoolTag(name:string, address:string, fqdn:IQualifiedNamed) : IStorage=
                 if stg.ContainsKey(name) then stg[name]
                 else

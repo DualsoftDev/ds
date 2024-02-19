@@ -27,15 +27,15 @@ module OriginTestModule =
                 (answer:seq<KeyValuePair<string, InitialType>>) =
             genConfig(filePath)
             let model = ParserLoader.LoadFromConfig(configFile)
-            let originChecker =
+            let originChecker = 
                 [
                         for f in model.System.Flows do
                             for v in f.Graph.Vertices do
                                 match v with
-                                | :? Real as r -> OriginHelper.GetOriginInfo r
+                                | :? Real as r -> yield! OriginHelper.GetOriginInfoByTaskName r
                                 | _ -> ()
                 ]
-                |> Seq.collect (fun f-> f.Tasks |> Seq.map(fun (d, t)->d.QualifiedName, t)) |> dict
+                |> dict
 
             for r in originChecker do
                 printfn "org %A" r
@@ -50,10 +50,10 @@ module OriginTestModule =
             let answer:seq<KeyValuePair<string, InitialType>> =
                 seq {
                     KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NeedCheck);
+                    KeyValuePair("S101_Copy1.Func4", NotCare);
                     KeyValuePair("S101_Copy1.Func5", On);
                     KeyValuePair("S101_Copy2.Func1", On);
-                    KeyValuePair("S101_Copy2.Func2", NeedCheck);
+                    KeyValuePair("S101_Copy2.Func2", NotCare);
                     KeyValuePair("S101_Copy1.Func1", Off);
                     KeyValuePair("S101_Copy1.Func2", On);
                     KeyValuePair("S101_Copy1.Func6", NotCare);

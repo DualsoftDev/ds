@@ -44,6 +44,7 @@ module ConvertCodeCoreExt =
     type ApiItem with
         member a.PS     = getAM(a).PS
         member a.PE     = getAM(a).PE
+        member a.LINK     = getAM(a).LINK
     
         member a.RXTags       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
         member a.TXTags       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)

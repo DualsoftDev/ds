@@ -141,7 +141,8 @@ module TagKindList =
     |timerOnDelay              = 11024
     |goingRealy                = 11025
     |realData                  = 11026
-    |memo                      = 11027
+    |realSync                  = 11027
+    |callMemo                  = 11028
 
     |txErrTrendOut             = 11033
     |txErrTimeOver             = 11034
@@ -161,6 +162,7 @@ module TagKindList =
     |planSet                   = 12000
     //|planRst                   = 12001  //not use
     |planEnd                   = 12002
+    |actionLink                = 12003
   
     
 

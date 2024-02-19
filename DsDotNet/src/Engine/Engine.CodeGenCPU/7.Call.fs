@@ -35,13 +35,24 @@ type ApiItemManager with
 
     member a.A1_PlanSend(activeSys:DsSystem, calls:Call seq) : CommentedStatement  =
         let sets =  calls.Select(fun c->c.VC.MM).ToOrElseOff()
+
+        //let sync = [
+        //            for call in calls do
+        //                let rstNormal = call._off.Expr
+        //                let rop = call.Parent.GetFlow().rop.Expr
+        //           ]
+
         (sets, activeSys._off.Expr) --| (a.PS, getFuncName())
 
     member a.A2_PlanReceive(activeSys:DsSystem) : CommentedStatement  =
         let sets =  a.ApiItem.RXTags.ToAndElseOn() 
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
-    member a.A3_ActionOut(calls:Call seq) : CommentedStatement list   =
+    member a.A3_ActionLink(activeSys:DsSystem) : CommentedStatement  =
+        let sets =  a.PS.Expr <&&> a.PE.Expr
+        (sets, activeSys._off.Expr) ==| (a.LINK, getFuncName())
+
+    member a.A4_ActionOut(calls:Call seq) : CommentedStatement list   =
         [
             for call in calls do
                 let rstNormal = call._off.Expr

@@ -48,7 +48,8 @@ module ConvertCPU =
                 yield vm.R1_RealInitialStart()
                 yield! vm.R2_RealJobComplete()
                 yield vm.R3_RealStartPoint()
-                //yield vm.R4_RealDataMove() //test ahn
+                yield vm.R4_RealSync() 
+                //yield vm.R5_RealDataMove() 
                 
                 yield! vm.D1_DAGHeadStart()
                 yield! vm.D2_DAGTailStart()
@@ -131,7 +132,8 @@ module ConvertCPU =
                 let am = api.TagManager :?> ApiItemManager
                 yield am.A1_PlanSend(s, calls)
                 yield am.A2_PlanReceive(s)
-                yield! am.A3_ActionOut(calls)
+                yield am.A3_ActionLink(s)
+                yield! am.A4_ActionOut(calls)
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =

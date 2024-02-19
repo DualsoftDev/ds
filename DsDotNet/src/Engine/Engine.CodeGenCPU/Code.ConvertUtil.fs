@@ -87,64 +87,6 @@ module CodeConvertUtil =
         getWeakEdgeTargets (source.Vertex.Parent.GetGraph(), source.Vertex, true) 
 
     
-    ///// 원위치 고려했을 때, reset chain 중 하나라도 켜져 있는지 검사하는 expression 반환
-    //let private getNeedCheckTasks(real:Real) =
-    //    let origins      = real.V.OriginInfo.Calls
-    //    let resetChains  = real.V.OriginInfo.ResetChains
-
-    //    (* [ KeyValuePair(JogDef, InitialType) ] *)
-    //    let needChecks = origins.Where(fun (_, init)-> init = NeedCheck)
-
-    //    let needCheckSet:TaskDev list list =
-    //        let apiNameToInTagMap =
-    //            needChecks.Where(fun (task, _) -> task.ApiItem.RXs.any())
-    //                      .Map(fun   (task, _) -> task.ApiName, task)
-    //            |> Tuple.toDictionary
-    //        [
-    //            if apiNameToInTagMap.Any() then
-    //                (*
-    //                    apiNameToInTagMap: [ "A.+" => "A.+.I"; ... ]        // name => tag
-    //                    r: "A.+"
-    //                    rs ["A.+"; "A.-"]
-    //                    resetChains = [ ["A.+"; "A.-"]; ]
-    //                 *)
-    //                for rs in resetChains do
-    //                    [
-    //                        for r in rs do
-    //                            apiNameToInTagMap.TryFind(r)//.Map(fun intag -> intag)
-    //                    ] |> List.choose id
-    //        ] |> List.filter List.any
-
-    //    needCheckSet
-
-    //let getNeedCheckIOs(real:Real, bSim:bool) =
-    //    let taskMaps = getNeedCheckTasks(real)
-    //    let sets =
-    //        if bSim
-    //        then
-    //            [for is in taskMaps do
-    //                let is = is.Select(fun f->f.ApiItem.PE)
-    //                [
-    //                    for i in is do i.Expr <&&> !!(is.Except([i]).ToOrElseOn())   // --| |--|/|--|/|--
-    //                ].ToOrElseOn()
-    //            ]
-    //        else
-    //            [for is in taskMaps do
-    //                let is = is.Select(fun f->f.InTag :?> Tag<bool>)
-    //                [
-    //                    for i in is do i.Expr <&&> !!(is.Except([i]).ToOrElseOn())   // --| |--|/|--|/|--
-    //                ].ToOrElseOn()
-    //            ]
-    //            //각 리셋체인 단위로 하나라도 켜있으면 됨
-    //        //         resetChain1         resetChain2       ...
-    //        //      --| |--|/|--|/|--------| |--|/|--|/|--   ...
-    //        //      --|/|--| |--|/|--    --|/|--| |--|/|--
-    //        //      --|/|--|/|--| |--    --|/|--|/|--| |--
-    //    if sets.Any()
-    //    then sets.ToAndElseOff()
-    //    else real._on.Expr
-
-
 
     [<AutoOpen>]
     [<Extension>]

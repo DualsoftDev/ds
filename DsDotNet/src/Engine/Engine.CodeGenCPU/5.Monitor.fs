@@ -24,7 +24,7 @@ type VertexManager with
         let onSimExpr    = onSims.ToAndElseOn()
         let offSimExpr   = offSims.ToOrElseOff()
 
-        let set =   (onExpr     <&&> (!!offExpr))
+        let set =   (onExpr     <&&> (!!offExpr)    <&&> v.SYNC.Expr)
                 <||>(onSimExpr  <&&> (!!offSimExpr) <&&> v._sim.Expr)
 
         (set, v._off.Expr) --| (v.OG, getFuncName())

@@ -178,6 +178,10 @@ module TagManagerModule =
         let relayGoingBit     = createTag "GG" VertexTag.goingRealy
         let relayRealBit      = createTag "RR" VertexTag.relayReal
         let realOriginAction  = createTag "RO" VertexTag.realOriginAction
+        let realSync          = createTag "Sync" VertexTag.realSync
+
+
+        
         let realData  = 
             let vertexTag = VertexTag.realData |> int
             let name = $"{v.QualifiedName}_RD"
@@ -196,7 +200,8 @@ module TagManagerModule =
         member _.GG         = relayGoingBit
         ///Real Data
         member _.RD         = realData
-     
+        ///Synchronized with physical sensors
+        member _.SYNC         = realSync
 
 
     and VertexMCoin(v:Vertex)as this =
@@ -207,7 +212,7 @@ module TagManagerModule =
 
         let counterBit    = counter  s "CTR"  sys
         let timerOnDelayBit = timer  s "TON"  sys 
-        let memo           = createTag "Memo" VertexTag.memo
+        let memo           = createTag "Memo" VertexTag.callMemo
 
    
         let rxErrShortOn     = createTag "rxErrShortOn"       VertexTag.rxErrShortOn    

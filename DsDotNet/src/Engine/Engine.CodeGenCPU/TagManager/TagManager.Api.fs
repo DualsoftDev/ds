@@ -18,7 +18,8 @@ module ApiTagManagerModule =
 
         let ps = cpv ApiItemTag.planSet
         let pe = cpv ApiItemTag.planEnd
-
+        let link = cpv ApiItemTag.actionLink
+        
    
         interface ITagManager with
             member _.Target = apiItem
@@ -37,4 +38,6 @@ module ApiTagManagerModule =
     
         member _.PS   = ps
         member _.PE   = pe
+        member _.LINK   = link
 
+        

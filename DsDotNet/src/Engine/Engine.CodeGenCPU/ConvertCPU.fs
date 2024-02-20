@@ -130,11 +130,14 @@ module ConvertCPU =
             
             for (api, coins) in apiCoinsSet do
                 let am = api.TagManager :?> ApiItemManager
-                yield am.A1_PlanSend(s, coins)
                 yield am.A2_PlanReceive(s)
-                yield am.A3_ActionSend(s, coins)
-                yield am.A4_ActionLink(s, coins)
-                yield! am.A5_ActionOut(coins)
+
+                if coins.any()
+                then
+                    yield am.A1_PlanSend(s, coins)
+                    yield am.A3_ActionSend(s, coins)
+                    yield am.A4_ActionLink(s, coins)
+                    yield! am.A5_ActionOut(coins)
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =

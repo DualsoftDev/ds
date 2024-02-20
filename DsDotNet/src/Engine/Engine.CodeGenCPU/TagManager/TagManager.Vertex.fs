@@ -35,9 +35,12 @@ module TagManagerModule =
         let resetTagBit   = createTag "RT"   VertexTag.resetTag
         let endTagBit     =
             let et = createTag "ET"   VertexTag.endTag
-            if v :? Real && (v :?> Real).Finished
-            then et.Value <- true           
+            if RuntimeDS.Package.IsPackageSIM()
+            then 
+                if v :? Real && (v :?> Real).Finished
+                then et.Value <- true           
             et
+
         let originBit      = createTag "OG"   VertexTag.origin
         let pauseBit       = createTag "PA"   VertexTag.pause
 

@@ -17,30 +17,24 @@ type ApiItemManager with
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
     member a.A3_ActionSend(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+        let input = coins.First().GetEndAction(a.ApiItem)
+        
         let sets = 
-            coins.Select(fun c->
-                let input = c.GetEndAction(a.ApiItem)
-                let r = c.Parent.GetCore() :?> Real
-
-                !!r.V.SYNC.Expr <&&> !!a.AL.Expr <&&> r.V.G.Expr 
-                <&&> (      input <&&> !!a.PE.Expr)
-                ).ToOrElseOn()
+            coins.Select(fun c->c.SyncExpr).ToOrElseOff()
+            <&&> 
+            (input <&&> !!a.PE.Expr <&&> !!a.AL.Expr)
 
         (sets, activeSys._off.Expr) --| (a.AS, getFuncName())
 
-
     member a.A4_ActionLink(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+        let input = coins.First().GetEndAction(a.ApiItem)
         let sets = 
-            coins.Select(fun c->
-                let input = c.GetEndAction(a.ApiItem)
-                let r = c.Parent.GetCore() :?> Real
-
-                !!r.V.SYNC.Expr <&&> r.V.G.Expr 
-                <&&> (      input <&&> a.PE.Expr
-                     <||> !!input <&&> !!a.PE.Expr)
-                ).ToOrElseOn() 
-
-            <||> activeSys._sim.Expr
+            coins.Select(fun c->c.SyncExpr).ToOrElseOff()
+            <&&>( 
+                        input <&&> a.PE.Expr
+                 <||> !!input <&&> !!a.PE.Expr
+                 <||> activeSys._sim.Expr
+                 )
 
         (sets, activeSys._off.Expr) ==| (a.AL, getFuncName())
 

@@ -344,6 +344,11 @@ module ConvertCodeCoreExt =
             if c.UsingNot  then !!inTag.Expr
                            else inTag.Expr
       
+
+        member c.SyncExpr =
+                 let r = c.Parent.GetCore() :?> Real
+                 !!r.V.SYNC.Expr  <&&> r.V.G.Expr 
+
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.Func.Value.GetDelayTime()
                                 else failwith $"{c.Name} not use timer" 

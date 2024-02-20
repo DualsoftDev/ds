@@ -322,13 +322,16 @@ module ImportU =
             doc.Nodes
             |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.iter (fun node ->
-                let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
-                if dev.IsNull() 
-                then node.Shape.ErrorName(ErrID._61, node.PageNum)
-                else
-                    let xywh = Xywh(node.Position.X, node.Position.Y
-                                   , node.Position.W, node.Position.H) 
-                    dev.ChannelPoints[TextEmtpyChannel] <-xywh
+                match getJobActionType node.CallApiName with
+                | MultiAction cnt -> ()
+                | _ ->
+                    let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
+                    if dev.IsNull()
+                    then node.Shape.ErrorName(ErrID._61, node.PageNum)
+                    else
+                        let xywh = Xywh(node.Position.X, node.Position.Y
+                                       , node.Position.W, node.Position.H) 
+                        dev.ChannelPoints[TextEmtpyChannel] <-xywh
                     )
 
         //real call alias  만들기

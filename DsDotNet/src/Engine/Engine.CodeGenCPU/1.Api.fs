@@ -52,7 +52,7 @@ type ApiItemManager with
                         then 
                              let rstPush = coin.MutualResetCalls.Select(fun c->c.VC.MM).ToOrElseOff()
                         
-                             yield (sets, rstPush   <||> !!rop) ==| (td.ActionOut, getFuncName())
+                             yield (sets, rstPush   <||> !!rop) ==| (td.AO, getFuncName())
                         else 
-                             yield (sets, rstNormal <||> !!rop) --| (td.ActionOut, getFuncName())
+                             yield (sets, rstNormal <||> !!rop) --| (td.AO, getFuncName())
         ]

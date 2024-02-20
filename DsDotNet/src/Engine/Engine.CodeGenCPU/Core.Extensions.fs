@@ -295,7 +295,7 @@ module ConvertCodeCoreExt =
 
     type TaskDev with
 
-        member td.ActionOut = td.OutTag :?> Tag<bool>
+        member td.AO = td.OutTag :?> Tag<bool>
 
 
 

@@ -44,10 +44,11 @@ module ConvertCodeCoreExt =
     type ApiItem with
         member a.PS     = getAM(a).PS
         member a.PE     = getAM(a).PE
-        member a.LINK     = getAM(a).LINK
+        member a.AS     = getAM(a).AS
+        member a.AL     = getAM(a).AL
     
-        member a.RXTags       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
-        member a.TXTags       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
+        member a.RxETs       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
+        member a.TxSTs       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
 
     type DsSystem with
@@ -158,9 +159,8 @@ module ConvertCodeCoreExt =
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send
-        member x.GetPSs(r:Real) =
-            x.ApiItems.Where(fun api-> api.TXs.Contains(r))
-                      .Select(fun api -> api.PS)
+        member x.GetPSs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.PS)
+        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.AS)
     
 
         member x.GetReadAbleTags() =
@@ -295,14 +295,9 @@ module ConvertCodeCoreExt =
 
     type TaskDev with
 
-        member td.ActionOut = 
-                            if(td.OutTag.IsNull()) then failwithf $"{td.QualifiedName} Output 주소 할당이 없습니다."
-                            td.OutTag :?> Tag<bool>
+        member td.ActionOut = td.OutTag :?> Tag<bool>
 
-        member td.RXTags       = td.ApiItem.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
-        member td.TXTags       = td.ApiItem.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
 
-     
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
@@ -342,6 +337,12 @@ module ConvertCodeCoreExt =
                                  else failwithf $"'Not function' requires an InTag. {c.Name} input error"   
 
                 else c.InTags.ToAndElseOn() 
+
+
+        member c.GetEndAction(x:ApiItem) =
+            let inTag = c.TaskDevs.First(fun d->d.ApiItem = x).InTag :?> Tag<bool>
+            if c.UsingNot  then !!inTag.Expr
+                           else inTag.Expr
       
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.Func.Value.GetDelayTime()

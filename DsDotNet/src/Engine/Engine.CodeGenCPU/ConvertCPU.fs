@@ -125,15 +125,16 @@ module ConvertCPU =
     let private callPlanAction(s:DsSystem) =
         [
             let apis = s.GetDistinctApis()
-            let callAll = s.GetVertices().OfType<Call>()       
-            let apicallsSet = apis.Select(fun a-> a, callAll.Where(fun c->c.GetCallApis().Contains(a)))
+            let coinAll = s.GetVerticesOfCoins()  
+            let apiCoinsSet = apis.Select(fun a-> a, coinAll.Where(fun c->c.GetCallApis().Contains(a)))
             
-            for (api, calls) in apicallsSet do
+            for (api, coins) in apiCoinsSet do
                 let am = api.TagManager :?> ApiItemManager
-                yield am.A1_PlanSend(s, calls)
+                yield am.A1_PlanSend(s, coins)
                 yield am.A2_PlanReceive(s)
-                yield am.A3_ActionLink(s)
-                yield! am.A4_ActionOut(calls)
+                yield am.A3_ActionSend(s, coins)
+                yield am.A4_ActionLink(s, coins)
+                yield! am.A5_ActionOut(coins)
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =

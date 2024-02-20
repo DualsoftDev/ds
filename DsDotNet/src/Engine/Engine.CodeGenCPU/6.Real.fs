@@ -33,7 +33,7 @@ type VertexMReal with
         let real = v.Vertex :?> Real
         let set = real.Graph.Vertices.OfType<Call>()
                       .SelectMany(fun call -> call.GetCallApis())
-                      .Select(fun api-> api.LINK).ToAndElseOn()
+                      .Select(fun api-> api.AL).ToAndElseOn()
 
         let rst = v._off.Expr
         (set, rst) --| (v.SYNC, getFuncName())

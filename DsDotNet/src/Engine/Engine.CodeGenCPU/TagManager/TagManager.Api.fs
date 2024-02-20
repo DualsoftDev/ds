@@ -15,10 +15,11 @@ module ApiTagManagerModule =
             let name = $"{apiItem.System.Name}_{apiItem.Name}_{n}"
             let pv:IStorage = createPlanVar stg name DuBOOL true apiItem (int apiItemTag) apiItem.System 
             pv :?> PlanVar<bool>
-
+            
         let ps = cpv ApiItemTag.planSet
         let pe = cpv ApiItemTag.planEnd
-        let link = cpv ApiItemTag.actionLink
+        let actionSend = cpv ApiItemTag.actionSend
+        let actionLink = cpv ApiItemTag.actionLink
         
    
         interface ITagManager with
@@ -36,8 +37,9 @@ module ApiTagManagerModule =
         member _.ApiItem   = apiItem
 
     
+        member _.AS   = actionSend
+        member _.AL   = actionLink
         member _.PS   = ps
         member _.PE   = pe
-        member _.LINK   = link
 
         

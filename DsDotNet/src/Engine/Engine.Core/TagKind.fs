@@ -162,7 +162,8 @@ module TagKindList =
     |planSet                   = 12000
     //|planRst                   = 12001  //not use
     |planEnd                   = 12002
-    |actionLink                = 12003
+    |actionSend                = 12003
+    |actionLink                = 12004
   
     
 

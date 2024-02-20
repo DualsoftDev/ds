@@ -170,6 +170,7 @@ type EdgeExt =
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
+    [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = x.GetVertices().OfType<Call>().Where(fun c->c.Parent.GetCore() :? Real)     
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
     [<Extension>] static member GetCallApis(x:Call) =  getCallApis x

@@ -21,7 +21,7 @@ type ApiItemManager with
         
         let sets = 
             coins.Select(fun c->c.SyncExpr).ToOrElseOff()
-            <&&> 
+            <&&>  
             (input <&&> !!a.PE.Expr <&&> !!a.AL.Expr)
 
         (sets, activeSys._off.Expr) --| (a.AS, getFuncName())
@@ -31,8 +31,8 @@ type ApiItemManager with
         let sets = 
             coins.Select(fun c->c.SyncExpr).ToOrElseOff()
             <&&>( 
-                        input <&&> a.PE.Expr
-                 <||> !!input <&&> !!a.PE.Expr
+                      (  input <&&> a.PE.Expr)
+                 <||> (!!input <&&> !!a.PE.Expr)
                  <||> activeSys._sim.Expr
                  )
 

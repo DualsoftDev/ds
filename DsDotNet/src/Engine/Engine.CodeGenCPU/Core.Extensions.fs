@@ -382,7 +382,7 @@ module ConvertCodeCoreExt =
                
                 if initOnCalls.Contains(c)
                     then 
-                        let homeManuAct = f.mop.Expr <&&> (c.Parent.GetSystem()._homeHW <||> r.V.H.Expr)
+                        let homeManuAct = f.mop.Expr <&&> r.V.RT.Expr
                         let homeAutoAct = f.dop.Expr <&&> r.V.RO.Expr
                         let homeAct =  homeManuAct <||> homeAutoAct
                         homeAct <&&> (!!c.EndAction <&&> !!c.System._sim.Expr)    

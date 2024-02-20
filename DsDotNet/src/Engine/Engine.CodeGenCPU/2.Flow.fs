@@ -38,13 +38,12 @@ type VertexManager with
             else v._off.Expr
 
         let sets =  (
-                    (wrDirect <||> wsShareds <||> srDirect<||> v.RT.Expr) <&&> real.V.ET.Expr
+                    (wrDirect <||> wsShareds <||> srDirect ) <&&> real.V.ET.Expr
                     ) 
                     <||> 
                     (
-                    v.RF.Expr <||> (real.Flow.sop.Expr <&&> real.Parent.GetSystem()._homeHW)
+                    v.RF.Expr <||> (real.Flow.mop.Expr <&&> real.Flow.home_btn.Expr)
                     )
-                
 
         let rsts = v._off.Expr 
         [(sets, rsts) --| (v.RT, getFuncName())] //reset tag

@@ -16,7 +16,11 @@ module EdgeModule =
          |]
 
    
-
+    let validateParentOfEdgeVertices (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
+        let invalid = (mei.Sources @ mei.Targets).Select(fun v -> v.Parent.GetCore()).TryFind(fun c -> c <> parent)
+        match invalid with
+        | Some v -> failwith $"Vertex {v.Name} is not child of flow {parent.Name}"
+        | None -> ()
 
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) =
         let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
@@ -147,10 +151,9 @@ module EdgeModule =
 
         flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
 
-    let getCallApis(x:Call) = x.TargetJob.DeviceDefs.Select(fun d->d.ApiItem)
     let getDistinctApis(x:DsSystem) =
         getVerticesOfSystem(x).OfType<Call>()   
-                            .SelectMany(fun c->getCallApis(c))
+                            .SelectMany(fun c-> c.TargetJob.ApiDefs)
                             .Distinct()
 
     type DsSystem with
@@ -173,7 +176,7 @@ type EdgeExt =
     [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = x.GetVertices().OfType<Call>().Where(fun c->c.Parent.GetCore() :? Real)     
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
-    [<Extension>] static member GetCallApis(x:Call) =  getCallApis x
+    
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs

@@ -249,10 +249,11 @@ module CoreModule =
         member _.TargetWrapper = target
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:TaskDev list, func: Func option) =
+    type Job (name:string, tasks:TaskDev seq, func: Func option) =
         inherit Named(name)
         member x.ActionType:JobActionType = getJobActionType name
-        member x.DeviceDefs = tasks.OfType<TaskDev>()
+        member x.DeviceDefs = tasks
+        member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
         //하나의 Job에는 하나의 Func만 지원 적용 
         member val Func = func with get, set
 

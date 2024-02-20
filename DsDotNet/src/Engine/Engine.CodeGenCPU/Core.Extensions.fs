@@ -326,7 +326,7 @@ module ConvertCodeCoreExt =
         member c.UsingNot  = c.TargetJob.Func |> hasNot
         member c.UsingMove = c.TargetJob.Func |> hasMove
       
-        member c.EndPlan = c.GetCallApis().Select(fun f->f.PE).ToAndElseOff()
+        member c.EndPlan = c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAndElseOff()
         member c.EndAction = 
                 if c.UsingMove   then c._on.Expr  //todo : Move 처리 완료시 End
                 elif c.UsingCtr  then c.VC.CTR.DN.Expr 

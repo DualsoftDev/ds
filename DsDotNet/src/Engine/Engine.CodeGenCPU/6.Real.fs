@@ -32,7 +32,7 @@ type VertexMReal with
     member v.R4_RealSync(): CommentedStatement  =
         let real = v.Vertex :?> Real
         let set = real.Graph.Vertices.OfType<Call>()
-                      .SelectMany(fun call -> call.GetCallApis())
+                      .SelectMany(fun call -> call.TargetJob.ApiDefs)
                       .Select(fun api-> api.AL).ToAndElseOn()
 
         let rst = v._off.Expr

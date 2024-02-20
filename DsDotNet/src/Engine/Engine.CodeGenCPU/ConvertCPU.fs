@@ -126,7 +126,7 @@ module ConvertCPU =
         [
             let apis = s.GetDistinctApis()
             let coinAll = s.GetVerticesOfCoins()  
-            let apiCoinsSet = apis.Select(fun a-> a, coinAll.Where(fun c->c.GetCallApis().Contains(a)))
+            let apiCoinsSet = apis.Select(fun a-> a, coinAll.Where(fun c->c.TargetJob.ApiDefs.Contains(a)))
             
             for (api, coins) in apiCoinsSet do
                 let am = api.TagManager :?> ApiItemManager

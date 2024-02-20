@@ -54,7 +54,7 @@ module ModelParser =
         let system = listener.TheSystem
         system.CreateMRIEdgesTransitiveClosure()
 
-        system.ValidateGraph() |> ignore
+        system.Validate() |> ignore
 
         listener
 

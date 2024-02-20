@@ -41,39 +41,37 @@ module ValidateMoudle =
                     //| _ -> failwithlog $"The 'Action' start command must occur within the 'Work'. ((Work-Action Group work is required.))[{edge.Source.Name} > {edge.Target.Name}]"
                 )
 
-    let validateSystemEdge(system:DsSystem) =
-         for f in system.Flows do
+    let validateSystemEdge(sys:DsSystem) =
+         for f in sys.Flows do
             validateEdge (f.Graph ,true)
             f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
                     validateEdge (r.Graph, false)
                 )
 
-    let validateGraphOfSystem(system:DsSystem) =
-        validateSystemEdge system
-        for f in system.Flows do
+    let validateGraphOfSystem(sys:DsSystem) =
+        validateSystemEdge sys
+        for f in sys.Flows do
             f.Graph.ValidateCylce(true) |> ignore    //flow는 사이클 허용
             f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
                 r.Graph.ValidateCylce(false) |> ignore //real는 사이클 허용 X
                 )
 
-    let guardedValidateSystem(system:DsSystem) =
-        try validateGraphOfSystem system
+    let guardedValidateSystem(sys:DsSystem) =
+        try validateGraphOfSystem sys
         with exn ->
             logWarn $"%A{exn}"
 
-  
-    let validateParentOfEdgeVertices (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
-        let invalid = (mei.Sources @ mei.Targets).Select(fun v -> v.Parent.GetCore()).TryFind(fun c -> c <> parent)
-        match invalid with
-        | Some v -> failwith $"Vertex {v.Name} is not child of flow {parent.Name}"
-        | None -> ()
-
+    let validateJobs(sys:DsSystem) =
+        sys.ApiUsages.Iter(fun a->
+            let parentJob = sys.Jobs.Where(fun j-> j.ApiDefs.Contains(a))
+            if(parentJob.Count() > 1)
+            then 
+                let jobNames = StringExt.JoinWith(parentJob.Select(fun j->j.Name), ", ")
+                failwithf $"{a.QualifiedName} is duplicated assigned ({jobNames})"
+        )
 
     type DsSystem with
-        member x.ValidateGraph() = validateGraphOfSystem x
+        member x.Validate() = 
+            validateGraphOfSystem x
+            validateJobs x
                 
-
-[<Extension>]
-type ValidateExt =
-    [<Extension>] static member ValidateGraph(x:DsSystem)   = validateGraphOfSystem x
-

@@ -47,7 +47,7 @@ type VertexManager with
                     v.RF.Expr <||> (real.Flow.mop.Expr <&&> real.Flow.home_btn.Expr)
                     )
 
-        let rsts  = real.V.ST.Expr <||> real.V.R.Expr
+        let rsts  = real.V.R.Expr
         [(sets, rsts) ==| (v.RT, getFuncName())]//조건에 의한 릴레이
 
 

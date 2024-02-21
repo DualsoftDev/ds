@@ -17,7 +17,7 @@ type VertexManager with
             for coin in coins do
                 let coin = coin :?> VertexMCoin
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> coin.Call.SafetyExpr
-                let rsts = coin.ET.Expr <||>coin.RT.Expr <||> !!v.Flow.dop.Expr
+                let rsts = coin.ET.Expr <||>coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, getFuncName())
         ]
 
@@ -28,7 +28,7 @@ type VertexManager with
             for coin in coins do
                 let coin = coin :?> VertexMCoin
                 let sets = coin.GetWeakStartDAGAndCausals()  <&&>  v.G.Expr <&&> coin.Call.SafetyExpr
-                let rsts = coin.ET.Expr <||>coin.RT.Expr <||> !!v.Flow.dop.Expr
+                let rsts = coin.ET.Expr <||>coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]
         

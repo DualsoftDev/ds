@@ -202,18 +202,28 @@ module PPTObjectModule =
         //REAL other flow 아니면 이름에 '.' 불가
         let checkDotErr () =
             if nodeType <> REALExF && name.Contains(".") then
-                shape.ErrorName(ErrID._19, iPage)
+                            shape.ErrorName(ErrID._19, iPage)
+        let checkSafetyErr() =
+            match GetSquareBrackets(shape.InnerText, true) with
+                | Some text -> //safety 체크
+                        text.Split(';').Iter(fun f->
+                             if not(f.Contains("."))
+                             then 
+                                shape.ErrorName(ErrID._68, iPage)
+                        )
+                        
+                | None -> ()
 
         match nodeType with
+        | REAL -> checkSafetyErr();checkDotErr();
         | REALExF ->
             if name.Contains(".") |> not then
                 shape.ErrorName(ErrID._54, iPage)
-        | REALExS ->
-            if name.Contains("$") |> not then
-                shape.ErrorName(ErrID._55, iPage)
+            checkSafetyErr();
         | CALL ->
-            if not (name.Contains("$") || name.Contains(".")) then
+            if not (name.Contains(".")) then
                 shape.ErrorName(ErrID._56, iPage)
+            checkSafetyErr();
 
         | OPEN_EXSYS_CALL
         | OPEN_EXSYS_LINK
@@ -230,12 +240,11 @@ module PPTObjectModule =
 
         | IF_DEVICE
         | IF_LINK
-        | REAL
         | DUMMY
         | BUTTON
         | CONDITION
         | LAYOUT
-        | LAMP -> checkDotErr ()
+        | LAMP -> checkDotErr()
 
 
 
@@ -272,24 +281,14 @@ module PPTObjectModule =
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
         let updateSafety (barckets: string) =
-            barckets.Split(';') |> Seq.iter (fun f -> safeties.Add(f) |> ignore)
+            barckets.Split(';')
+                |> Seq.iter (fun f ->
+                        safeties.Add(f) |> ignore
+                    )
 
         let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
             if (groupJob > 0) then
                 shape.ErrorName(ErrID._19, iPage)
-                //job action 으로 기능 대체
-                //let jobBaseName = $"{pageTitle}_{barckets}" //jobBaseName + apiName = JobName
-                //jobInfos.Add(jobBaseName, HashSet<string>())
-
-                //let copys =
-                //    [ for i in [ 1..groupJob ] do
-                //          yield sprintf "%s%d" jobBaseName i ]
-
-                //copys
-                //|> Seq.iter (fun copy ->
-                //    copySystems.Add(copy, orgiSysName)
-                //    jobInfos[jobBaseName].Add(copy) |> ignore)
-
             else
                 let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
                 let copys = copyRows.Select(fun sys -> $"{pageTitle}_{sys}")
@@ -350,8 +349,8 @@ module PPTObjectModule =
 
             nodeType <-
                 if (shape.CheckRectangle()) then
-                    if shape.InnerText.Contains(".") then REALExF
-                    elif shape.InnerText.Contains("$") then REALExS
+                    let name = GetBracketsRemoveName(shape.InnerText)
+                    if name.Contains(".") then REALExF
                     else REAL
                 elif (shape.CheckHomePlate()) then
                     match GetSquareBrackets(shape.InnerText, false) with
@@ -423,7 +422,6 @@ module PPTObjectModule =
                     .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getConditionType))
 
             | REALExF
-            | REALExS
             | LAYOUT
             | DUMMY -> ()
 

@@ -83,6 +83,7 @@ module ErrID =
     let _65 = "Layout slide에 배경 이미지가 없습니다."
     let _66 = "중복된 Layout 이름이 존재합니다."
     let _67 = "중복된 Condition 이름이 존재합니다."
+    let _68 = "Safety조건으로는 Action만 가능합니다. Dev.Api 형식으로 입력하세요"
     
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

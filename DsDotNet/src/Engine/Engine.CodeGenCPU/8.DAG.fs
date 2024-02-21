@@ -42,7 +42,6 @@ type VertexManager with
                 let setEnd =
                   
                     (call.EndAction <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn() 
-                  
 
                 let sets = coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr
                 let rsts = coin.RT.Expr

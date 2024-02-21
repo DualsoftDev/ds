@@ -13,7 +13,6 @@ module InterfaceClass =
     type NodeType =
         | REAL //실제 나의 시스템 1 bit
         | REALExF //다른 Flow real
-        | REALExS //다른 System real
         | CALL //지시관찰
         | IF_DEVICE //인터페이스
         | IF_LINK //인터페이스
@@ -26,7 +25,7 @@ module InterfaceClass =
         | LAMP //램프 runmode,stopmode, ...
         | CONDITION //READY조건
 
-        member x.IsReal = x = REAL || x = REALExF || x = REALExS
+        member x.IsReal = x = REAL || x = REALExF
         member x.IsCall = x = CALL
         member x.IsLoadSys = x = COPY_DEV || x = OPEN_EXSYS_LINK || x = OPEN_EXSYS_CALL
         member x.IsRealorCall = x.IsReal || x.IsCall

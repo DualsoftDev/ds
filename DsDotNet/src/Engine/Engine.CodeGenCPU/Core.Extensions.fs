@@ -372,6 +372,10 @@ module ConvertCodeCoreExt =
                          
         member c.MutualResetCalls =  c.System.S.MutualCalls[c].Cast<Call>()
           
+        member c.SafetyExpr = c.SafetyConditions.OfType<Call>()
+                                .Select(fun f->f.EndAction)
+                                .ToAndElseOn()
+
         member c.StartPointExpr =
             let f = c.Parent.GetFlow()
             match c.Parent.GetCore() with
@@ -401,6 +405,7 @@ module ConvertCodeCoreExt =
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrShort) 
         member r.Errors     = r.ErrTimeOvers @ r.ErrTrendOuts @ r.ErrOpens @ r.ErrShorts 
+        member r.SafetyExpr     = r.SafetyConditions.OfType<Call>().Select(fun c->c.EndAction).ToAndElseOn()
 
 
 

@@ -21,7 +21,8 @@ type VertexManager with
             then shareds.Select(fun s -> s.GetWeakStartRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
-        let sets = wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect <||> plans <||> actionLinks
+        let sets = (wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect <||> plans <||> actionLinks)
+                   <&&> real.SafetyExpr
         let rsts  = real.V.RT.Expr <||> real.V.F.Expr
         [ (sets, rsts) ==| (v.ST, getFuncName()) ]
 

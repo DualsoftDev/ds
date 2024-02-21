@@ -9,14 +9,21 @@ open Dual.Common.Core.FS
 type ApiItemManager with
 
     member a.A1_PlanSend(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
-        let sets = coins.Select(fun c->c.VC.MM).ToOrElseOff()
+
+        let sets = coins.Select(fun c->c.VC.MM)
+                        .ToOrElseOff()
+
         (sets, activeSys._off.Expr) --| (a.PS, getFuncName())
 
     member a.A2_PlanReceive(activeSys:DsSystem) : CommentedStatement  =
-        let sets =  a.ApiItem.RxETs.ToAndElseOn() 
+
+        let sets =  a.ApiItem.RxETs
+                     .ToAndElseOn() 
+
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
     member a.A3_ActionSend(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+
         let input = coins.First().GetEndAction(a.ApiItem)
         
         let sets = 
@@ -27,6 +34,7 @@ type ApiItemManager with
         (sets, activeSys._off.Expr) --| (a.AS, getFuncName())
 
     member a.A4_ActionLink(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+
         let input = coins.First().GetEndAction(a.ApiItem)
         let sets = 
             coins.Select(fun c->c.SyncExpr).ToOrElseOff()
@@ -45,12 +53,14 @@ type ApiItemManager with
                 let rstNormal = coin._off.Expr
                 let rop = coin.Parent.GetFlow().rop.Expr
                 for td in coin.TaskDevs do
-                    if td.ApiItem.TXs.any()
+                    let api = td.ApiItem
+                    if api.TXs.any()
                     then 
-                        let sets = td.ApiItem.PE.Expr <&&> td.ApiItem.PS.Expr 
+                        let sets = api.PE.Expr <&&> api.PS.Expr <&&> coin.SafetyExpr
                         if coin.TargetJob.ActionType = JobActionType.Push 
                         then 
-                             let rstPush = coin.MutualResetCalls.Select(fun c->c.VC.MM).ToOrElseOff()
+                             let rstPush = coin.MutualResetCalls.Select(fun c->c.VC.MM)
+                                                                .ToOrElseOff()
                         
                              yield (sets, rstPush   <||> !!rop) ==| (td.AO, getFuncName())
                         else 

@@ -162,8 +162,8 @@ module TagKindList =
     |planSet                   = 12000
     //|planRst                   = 12001  //not use
     |planEnd                   = 12002
-    |actionSend                = 12003
-    |actionLink                = 12004
+    |sensorLinking             = 12003
+    |sensorLinked              = 12004
   
     
 

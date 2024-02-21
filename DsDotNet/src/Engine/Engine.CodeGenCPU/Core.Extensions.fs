@@ -44,8 +44,10 @@ module ConvertCodeCoreExt =
     type ApiItem with
         member a.PS     = getAM(a).PS
         member a.PE     = getAM(a).PE
-        member a.AS     = getAM(a).AS
-        member a.AL     = getAM(a).AL
+        ///sensorLinking
+        member a.SL1     = getAM(a).SL1
+        ///sensorLinked
+        member a.SL2     = getAM(a).SL2
     
         member a.RxETs       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
         member a.TxSTs       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
@@ -160,7 +162,7 @@ module ConvertCodeCoreExt =
 
         //자신이 사용된 API Plan Set Send
         member x.GetPSs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.PS)
-        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.AS)
+        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.SL1)
     
 
         member x.GetReadAbleTags() =

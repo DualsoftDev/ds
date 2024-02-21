@@ -135,8 +135,8 @@ module ConvertCPU =
                 if coins.any()
                 then
                     yield am.A1_PlanSend(s, coins)
-                    yield am.A3_ActionSend(s, coins)
-                    yield am.A4_ActionLink(s, coins)
+                    yield am.A3_SensorLinking(s, coins)
+                    yield am.A4_SensorLinked(s, coins)
                     yield! am.A5_ActionOut(coins)
         ]
      

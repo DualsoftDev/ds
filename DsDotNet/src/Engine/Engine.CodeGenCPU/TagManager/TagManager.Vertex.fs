@@ -226,7 +226,7 @@ module TagManagerModule =
         let rxErrOpenTemp    = createTag "rxErrOpenTemp"      VertexTag.rxErrOpenTemp   
         let timerTimeOutBit = timer  s "TOUT" sys 
         
-        member _.Call     = v :?> Call
+        
         ///Ring Counter
         member _.CTR     = counterBit
         ///Timer on delay

@@ -18,8 +18,8 @@ module ApiTagManagerModule =
             
         let ps = cpv ApiItemTag.planSet
         let pe = cpv ApiItemTag.planEnd
-        let actionSend = cpv ApiItemTag.actionSend
-        let actionLink = cpv ApiItemTag.actionLink
+        let sensorLinking = cpv ApiItemTag.sensorLinking
+        let sensorLinked = cpv ApiItemTag.sensorLinked
         
    
         interface ITagManager with
@@ -37,8 +37,8 @@ module ApiTagManagerModule =
         member _.ApiItem   = apiItem
 
     
-        member _.AS   = actionSend
-        member _.AL   = actionLink
+        member _.SL1   = sensorLinking
+        member _.SL2   = sensorLinked
         member _.PS   = ps
         member _.PE   = pe
 

@@ -22,18 +22,18 @@ type ApiItemManager with
 
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
-    member a.A3_ActionSend(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+    member a.A3_SensorLinking(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
 
         let input = coins.First().GetEndAction(a.ApiItem)
         
         let sets = 
             coins.Select(fun c->c.SyncExpr).ToOrElseOff()
             <&&>  
-            (input <&&> !!a.PE.Expr <&&> !!a.AL.Expr)
+            (input <&&> !!a.PE.Expr <&&> !!a.SL2.Expr)
 
-        (sets, activeSys._off.Expr) --| (a.AS, getFuncName())
+        (sets, activeSys._off.Expr) --| (a.SL1, getFuncName())
 
-    member a.A4_ActionLink(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+    member a.A4_SensorLinked(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
 
         let input = coins.First().GetEndAction(a.ApiItem)
         let sets = 
@@ -44,7 +44,7 @@ type ApiItemManager with
                  <||> activeSys._sim.Expr
                  )
 
-        (sets, activeSys._off.Expr) ==| (a.AL, getFuncName())
+        (sets, activeSys._off.Expr) ==| (a.SL2, getFuncName())
 
 
     member a.A5_ActionOut(coins:Call seq) : CommentedStatement list   =

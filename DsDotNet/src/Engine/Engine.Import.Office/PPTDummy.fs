@@ -59,18 +59,18 @@ type PPTDummyExt =
         | None -> HashSet<pptNode>()
 
     [<Extension>]
-    static member AddDummys(dummys: HashSet<pptDummy>, pptNodes: pptNode seq) =
-        match
-            pptNodes
-            |> Seq.tryFind (fun pptNode -> dummys.TryFindDummy(pptNode).IsNonNull())
-        with
-        | Some findNode ->
-            let findDummy = dummys.TryFindDummy(findNode)
-
-            pptNodes.Except(Seq.singleton findNode)
-            |> Seq.iter (fun f -> findDummy.Value.Items.Add(f) |> ignore)
-        | None ->
-            let dummyNode = pptNodes.First()
-            let newDummy = pptDummy (dummyNode.Shape.ShapeName(), dummyNode.PageNum)
-            pptNodes |> Seq.iter (fun f -> newDummy.Items.Add(f) |> ignore)
+    static member AddDummys(dummys: HashSet<pptDummy>, srcNode: pptNode , tgtNode: pptNode ) =
+        match dummys.TryFindDummy(srcNode), dummys.TryFindDummy(tgtNode) with
+        | Some srcDummy, Some tgtDummy -> 
+                                 srcDummy.Items.AddRange [srcNode;tgtNode] |>ignore
+                                 srcDummy.Items.AddRange tgtDummy.Items    |>ignore
+                                 dummys.Remove(tgtDummy)|>ignore
+        | Some srcDummy, None -> srcDummy.Items.AddRange [srcNode;tgtNode] |>ignore
+        | None, Some tgtDummy -> tgtDummy.Items.AddRange [srcNode;tgtNode] |>ignore  
+        | None, None ->  
+            let newDummy = pptDummy (srcNode.Shape.ShapeName(), srcNode.PageNum)
+            newDummy.Items.Add(srcNode) |> ignore
+            newDummy.Items.Add(tgtNode) |> ignore
             dummys.Add(newDummy) |> ignore
+
+        

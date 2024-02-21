@@ -265,7 +265,7 @@ module PPTDocModule =
                         conn.ErrorConnect(ErrID._14, $"{eName}", "", iPage)
 
                     if conn.IsNonDirectional() then
-                        dummys.AddDummys([| sNode; eNode |])
+                        dummys.AddDummys(sNode, eNode)
                     else
                         edges.Add(pptEdge (conn, Id, iPage, sNode, eNode)) |> ignore))
 

@@ -56,7 +56,7 @@ type ApiItemManager with
                     let api = td.ApiItem
                     if api.TXs.any()
                     then 
-                        let sets = api.PE.Expr <&&> api.PS.Expr <&&> coin.SafetyExpr
+                        let sets = api.PE.Expr <&&> api.PS.Expr 
                         if coin.TargetJob.ActionType = JobActionType.Push 
                         then 
                              let rstPush = coin.MutualResetCalls.Select(fun c->c.VC.MM)

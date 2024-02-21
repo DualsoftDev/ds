@@ -13,10 +13,10 @@ type VertexManager with
         let real = v.Vertex :?> Real
         let v = v :?> VertexMReal
         let coins = real.Graph.Inits.Select(getVM)
-        let sets = v.RR.Expr <&&>  v.G.Expr
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
+                let sets = v.RR.Expr <&&>  v.G.Expr <&&> coin.Call.SafetyExpr
                 let rsts = coin.ET.Expr <||>coin.RT.Expr <||> !!v.Flow.dop.Expr
                 yield (sets, rsts) ==| (coin.ST, getFuncName())
         ]
@@ -27,7 +27,7 @@ type VertexManager with
         [
             for coin in coins do
                 let coin = coin :?> VertexMCoin
-                let sets = coin.GetWeakStartDAGAndCausals()  <&&>  v.G.Expr
+                let sets = coin.GetWeakStartDAGAndCausals()  <&&>  v.G.Expr <&&> coin.Call.SafetyExpr
                 let rsts = coin.ET.Expr <||>coin.RT.Expr <||> !!v.Flow.dop.Expr
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]

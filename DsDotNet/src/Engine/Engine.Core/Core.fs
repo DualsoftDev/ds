@@ -342,6 +342,25 @@ module CoreModule =
         | DuSafetyConditionCall of Call
         | DuSafetyConditionRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
+    type SafetyCondition with
+        member x.GetSafetyCall() =
+            match x with
+            | DuSafetyConditionReal _ -> None
+            | DuSafetyConditionCall c -> Some c
+            | DuSafetyConditionRealExFlow _ -> None
+
+        member x.GetSafetyReal() =
+            match x with
+            | DuSafetyConditionReal r -> Some r
+            | DuSafetyConditionCall _ -> None 
+            | DuSafetyConditionRealExFlow _ -> None
+
+        member x.GetSafetyRealExFlow() =
+            match x with
+            | DuSafetyConditionReal _ -> None
+            | DuSafetyConditionCall _ -> None
+            | DuSafetyConditionRealExFlow rf -> Some rf
+
           ///Vertex의 부모의 타입을 구분한다.
     type ParentWrapper =
         | DuParentFlow of Flow //Real/Call/Alias 의 부모

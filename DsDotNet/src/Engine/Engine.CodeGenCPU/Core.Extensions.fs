@@ -22,7 +22,7 @@ module ConvertCodeCoreExt =
     let getFM (x:Flow)     = x.TagManager :?> FlowManager
     let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
 
-
+   
     let errText (x:Call)  = getVMCoin(x).ErrorText
 
     let createHwApiBridgeTag (x:HwSystemDef, sys:DsSystem)  = 
@@ -199,6 +199,11 @@ module ConvertCodeCoreExt =
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
 
+    let getSafetyExpr(xs:Call seq, sys:DsSystem) =        
+        (xs.Select(fun f->f.EndAction).ToAndElseOn() <&&> !!sys._sim.Expr)
+        <||> 
+        (xs.Select(fun f->f.EndPlan).ToAndElseOn() <&&> sys._sim.Expr)
+
 //운영 모드 는 Flow 별로 제공된 모드 On/Off 상태 나타낸다.
     type Flow with
 
@@ -372,9 +377,7 @@ module ConvertCodeCoreExt =
                          
         member c.MutualResetCalls =  c.System.S.MutualCalls[c].Cast<Call>()
           
-        member c.SafetyExpr = c.SafetyConditions.OfType<Call>()
-                                .Select(fun f->f.EndAction)
-                                .ToAndElseOn()
+        member c.SafetyExpr = getSafetyExpr(c.SafetyConditions.Choose(fun f->f.GetSafetyCall()), c.System)
 
         member c.StartPointExpr =
             let f = c.Parent.GetFlow()
@@ -405,9 +408,7 @@ module ConvertCodeCoreExt =
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrShort) 
         member r.Errors     = r.ErrTimeOvers @ r.ErrTrendOuts @ r.ErrOpens @ r.ErrShorts 
-        member r.SafetyExpr     = r.SafetyConditions.OfType<Call>().Select(fun c->c.EndAction).ToAndElseOn()
-
-
+        member r.SafetyExpr = getSafetyExpr(r.SafetyConditions.Choose(fun f->f.GetSafetyCall()), r.Parent.GetSystem())
 
 
 

@@ -17,6 +17,7 @@ type VertexManager with
                 <||> (dop <&&> v.ST.Expr)
                 <||> (mop <&&> v.SF.Expr)
             )
+            <&&> call.SafetyExpr
             //<&&> 
             //!!call.MutualResetCalls.Select(fun c-> c.EndAction).ToOrElseOff()  //들뜨면 RX 에러 발생해서 잡음
             

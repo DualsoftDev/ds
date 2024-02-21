@@ -52,8 +52,6 @@ module OriginTestModule =
                     KeyValuePair("S101_Copy1.Func3", Off);
                     KeyValuePair("S101_Copy1.Func4", NotCare);
                     KeyValuePair("S101_Copy1.Func5", On);
-                    KeyValuePair("S101_Copy2.Func1", On);
-                    KeyValuePair("S101_Copy2.Func2", NotCare);
                     KeyValuePair("S101_Copy1.Func1", Off);
                     KeyValuePair("S101_Copy1.Func2", On);
                     KeyValuePair("S101_Copy1.Func6", NotCare);

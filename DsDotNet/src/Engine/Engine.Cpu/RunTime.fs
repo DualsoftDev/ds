@@ -3,12 +3,10 @@ namespace Engine.Cpu
 open Engine.Core
 open Dual.Common.Core.FS
 open System
-open System.Diagnostics
 open System.Linq
 open System.Collections.Generic
 open System.Threading.Tasks
 open System.Threading
-open Engine.Core.TagKindModule
 open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
 open System.Reactive.Subjects
@@ -76,7 +74,7 @@ module RunTime =
                   
             if exeStates.any() 
             then exeStates.Iter(fun s->s.Do())
-          //       chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
+            //chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
 
             chTags
 
@@ -121,18 +119,14 @@ module RunTime =
             cts <- new CancellationTokenSource() 
             run <- false;
 
-        let doStepByStatusAsync(activeSys) =
+        let doStepByStatus(activeSys) =
             for s in statements do s.Do() 
-            task {
-                let mutable endStepByStatus = false
-                while not(endStepByStatus) do
-                    let chTags = scanOnce()
-                    endStepByStatus <- chTags.isEmpty() 
-                                    || chTags.Where(fun f->f.DsSystem = activeSys)
-                                             .Where(fun f-> f.IsStatusTag()).any()
-            }
-
-        
+            let mutable endStepByStatus = false
+            while not(endStepByStatus) do
+                let chTags = scanOnce()
+                endStepByStatus <- chTags.isEmpty() 
+                                || chTags.Where(fun f->f.DsSystem = activeSys)
+                                            .Where(fun f-> f.IsStatusTag()).any()
 
         do
             disposables.Add subscription
@@ -164,9 +158,9 @@ module RunTime =
             doScanStop()
             scanOnce() |> ignore 
 
-        member x.StepByStatusAsync() = 
+        member x.StepByStatus() = 
             doScanStop()
-            doStepByStatusAsync(mySystem)
+            doStepByStatus(mySystem)
 
         member x.Reset() =
             doScanStop()

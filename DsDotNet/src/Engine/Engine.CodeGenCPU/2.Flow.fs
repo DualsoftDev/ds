@@ -23,8 +23,9 @@ type VertexManager with
 
         let sets = (wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect <||> plans <||> actionLinks)
                    <&&> real.SafetyExpr
+
         let rsts  = real.V.RT.Expr <||> real.V.F.Expr
-        [ (sets, rsts) ==| (v.ST, getFuncName()) ]
+        [ (sets, rsts) ==| (v.ST, getFuncName()) ]//조건에 의한 릴레이
 
 
     member v.F2_RootReset() : CommentedStatement list=
@@ -46,8 +47,8 @@ type VertexManager with
                     v.RF.Expr <||> (real.Flow.mop.Expr <&&> real.Flow.home_btn.Expr)
                     )
 
-        let rsts = v._off.Expr 
-        [(sets, rsts) --| (v.RT, getFuncName())] //reset tag
+        let rsts  = real.V.ST.Expr <||> real.V.R.Expr
+        [(sets, rsts) ==| (v.RT, getFuncName())]//조건에 의한 릴레이
 
 
     member v.F3_VertexEndWithOutReal() : CommentedStatement  =

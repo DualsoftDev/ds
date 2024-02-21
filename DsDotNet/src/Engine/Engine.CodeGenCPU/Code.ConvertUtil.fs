@@ -119,8 +119,8 @@ module CodeConvertUtil =
         static member GetResetCausals(xs:Vertex seq) =
                 xs.Select(fun f ->
                     match getPure f with
-                    | :? Real    as r  -> r.V.GG
-                    | :? RealExF as rf -> rf.Real.V.GG
+                    | :? Real    as r  -> r.V.G
+                    | :? RealExF as rf -> rf.Real.V.G
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
    

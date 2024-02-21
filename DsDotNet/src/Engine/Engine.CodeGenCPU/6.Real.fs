@@ -17,9 +17,14 @@ type VertexMReal with
     member v.R2_RealJobComplete(): CommentedStatement seq=
         let real = v.Vertex :?> Real
         let setCoins = real.CoinRelays.ToAndElseOn()
+        let set = (v.GG.Expr <&&> setCoins) <||> v.ON.Expr 
+        let rst = v.H.Expr <||> v.OFF.Expr
         [   
-            (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName())  //finish 전에 GR 한번 연결 
-            (v.GG.Expr <&&> setCoins <||> v.ON.Expr , v.H.Expr <||> v.OFF.Expr) ==| (v.ET, getFuncName())
+            //수식 순서 중요 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
+            //1. EndTag 
+            (set, rst) ==| (v.ET, getFuncName())              
+            //2. 다른 Real Reset Tag Relay을 위한 1Scan 소비 (Scan에서 제어방식 바뀌면 H/S 필요)
+            (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
         ]
 
     member v.R3_RealStartPoint(): CommentedStatement  =

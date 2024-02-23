@@ -19,6 +19,9 @@ module Util =
     let mutable currentFileName = ""
 
 
+    let getDummyDeviceName (loadedName:string) index = $"{loadedName}_G{index}"
+
+
     let GetTailNumber (name: string) =
         let pattern = "\d+$" // 글자 마지막 숫자를 찾음
         let matches = System.Text.RegularExpressions.Regex.Matches(name, pattern)

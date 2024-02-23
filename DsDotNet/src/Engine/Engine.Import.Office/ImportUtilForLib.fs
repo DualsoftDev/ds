@@ -85,7 +85,7 @@ module ImportUtilForLib =
                     let devOrg = if i = 1 then devOrg
                                     else ParserLoader.LoadFromActivePath libFilePath |> fst
 
-                    let mutiName = $"{loadedName}_G{i}"
+                    let mutiName = getDummyDeviceName loadedName i
                     tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
             | _->
                 tasks.Add(getLoadedTasks devOrg loadedName)|>ignore

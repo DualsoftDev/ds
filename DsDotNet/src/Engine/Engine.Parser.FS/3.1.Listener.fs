@@ -562,18 +562,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     tryParseAndReturn (getText (xywh.h ()))
                 )
 
-            //let putXywh (task: TaskDev) (xywh: Xywh)  (channel: string) =
-            //    task.ApiItem.Channels.Add channel |>ignore
-            //    task.ApiItem.Xywh <- xywh
-
-            //let iterTasks (nameCompo: Fqdn) (xywh: Xywh)  (channel: string) (tasks: List<'T>) =
-            //    if tasks.Any() then
-            //        let task = tasks.TryFindWithNameComponents(nameCompo)
-
-            //        if task.IsSome then
-            //            putXywh task.Value xywh channel
-
-      
 
             for layoutCtx in listLayoutCtx do
                 
@@ -598,11 +586,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     then 
                         let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
                         device.ChannelPoints[filePath] <- xywh 
-                    //| 2 ->
-                    //    system.Jobs
-                    //    |> iter (fun job ->
-                    //        job.DeviceDefs.ToList() |> iterTasks nameCompo xywh filePath)
-                    //| _ -> failwithlog "invalid name component"
+                    else 
+                        failwithlog "invalid parser name component"
 
         let fillFinished (system: DsSystem) (listFinishedCtx: List<dsParser.FinishBlockContext>) =
             for finishedCtx in listFinishedCtx do

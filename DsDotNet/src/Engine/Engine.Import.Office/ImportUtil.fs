@@ -319,19 +319,26 @@ module ImportU =
                 
         [<Extension>]
         static member MakeAnimationPoint(doc: pptDoc, mySys: DsSystem) =
-            doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType = CALL)
-            |> Seq.iter (fun node ->
-                match getJobActionType node.CallApiName with
-                | MultiAction cnt -> ()
-                | _ ->
-                    let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
-                    if dev.IsNull()
+
+            let addChannelPoints (dev:Device) (node:pptNode) = 
+                if dev.IsNull()
                     then node.Shape.ErrorName(ErrID._61, node.PageNum)
                     else
                         let xywh = Xywh(node.Position.X, node.Position.Y
                                        , node.Position.W, node.Position.H) 
                         dev.ChannelPoints[TextEmtpyChannel] <-xywh
+
+            doc.Nodes
+            |> Seq.filter (fun node -> node.NodeType = CALL)
+            |> Seq.iter (fun node ->
+                match getJobActionType node.CallApiName with
+                | MultiAction cnt -> 
+                    for i in [1..cnt] do 
+                        let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = (getDummyDeviceName node.CallName i))
+                        addChannelPoints dev node
+                | _ ->
+                    let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
+                    addChannelPoints dev node
                     )
 
         //real call alias  만들기

@@ -11,7 +11,7 @@ type Flow with
 
     member f.O1_ReadyOperationState(): CommentedStatement =
         let set = f.ready_btn.Expr <||> f.HWBtnReadyExpr 
-        let rst = f.eop.Expr <||> f.sop.Expr <||> f.HWConditionsExpr
+        let rst = (f.eop.Expr <||> f.sop.Expr) <||> (f.HWConditionsErrorExpr <&&> !!f._sim.Expr)
 
         (set, rst) ==| (f.rop, getFuncName())
 

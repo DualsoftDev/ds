@@ -194,12 +194,11 @@ module ConvertCodeCoreExt =
                        .Select(fun b ->b.ActionINFunc)
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
-    let private getConditionExpr(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
+    let private getConditionsError(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
         let tags = condis
                     .Where(fun c -> c.SettingFlows.Contains(flow))
-                    .Select(fun c ->c.ActionINFunc)
-        if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
-
+                    .Select(fun c -> !!c.ActionINFunc)
+        if tags.any() then tags.ToOrElseOff() else flow.System._off.Expr
 
     let getSafetyExpr(xs:Call seq, sys:DsSystem) =        
         (xs.Select(fun f->f.EndAction).ToAndElseOn() <&&> !!sys._sim.Expr)
@@ -266,7 +265,7 @@ module ConvertCodeCoreExt =
         member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
-        member f.HWConditionsExpr = getConditionExpr(f, f.System.HWConditions    ) 
+        member f.HWConditionsErrorExpr = getConditionsError(f, f.System.HWConditions    ) 
 
         member f.AutoExpr   =  
                 let hmiAuto = f.auto_btn.Expr <&&> !!f.manual_btn.Expr

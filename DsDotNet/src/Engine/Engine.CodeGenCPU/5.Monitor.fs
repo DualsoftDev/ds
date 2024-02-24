@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 
 type VertexManager with
 
-    member v.M1_OriginMonitor(): CommentedStatement  =
+    member v.M1_OriginMonitor() =
         let v = v :?> VertexMReal
 
         let ons       = getOriginIOExprs     (v, InitialType.On)
@@ -29,13 +29,13 @@ type VertexManager with
 
         (set, v._off.Expr) --| (v.OG, getFuncName())
 
-    member v.M2_PauseMonitor(): CommentedStatement  =
+    member v.M2_PauseMonitor() =
         let set = v.Flow.sop.Expr
         let rst = v._off.Expr
 
         (set, rst) --| (v.PA, getFuncName())
 
-    member v.M3_CallErrorTXMonitor(): CommentedStatement list =
+    member v.M3_CallErrorTXMonitor() =
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> Call
         let real= call.Parent.GetCore() :?> Real
@@ -52,7 +52,7 @@ type VertexManager with
          
         ]
 
-    member v.M4_CallErrorRXMonitor(): CommentedStatement list =
+    member v.M4_CallErrorRXMonitor() =
         let callV = v :?> VertexMCoin
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
@@ -77,7 +77,7 @@ type VertexManager with
         ]
         
 
-    member v.M5_RealErrorTotalMonitor(): CommentedStatement list =
+    member v.M5_RealErrorTotalMonitor() =
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
         [
@@ -89,7 +89,7 @@ type VertexManager with
         ]
 
    
-    member v.M6_CallErrorTotalMonitor(): CommentedStatement  =
+    member v.M6_CallErrorTotalMonitor() =
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())

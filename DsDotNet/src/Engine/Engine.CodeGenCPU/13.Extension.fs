@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 
 type DsSystem with
 
-    member s.E1_PLCNotFunc(): CommentedStatement list=
+    member s.E1_PLCNotFunc() =
         let rsts = s._off.Expr
          (* device not func 로직 처리*)
         [
@@ -30,7 +30,7 @@ type DsSystem with
         ]
 
 
-    member s.E2_LightPLCOnly(): CommentedStatement list=
+    member s.E2_LightPLCOnly() =
         let rsts = s._off.Expr
             (*drive btn => _auto_btn 동시 동작
             clear btn  => _ready_btn, manual_btn  동시 동작 and  누름 3초 유지시 _home_btn 동작*)

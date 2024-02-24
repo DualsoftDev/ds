@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 
 type VertexMReal with
 
-    member v.R1_RealInitialStart(): CommentedStatement  =
+    member v.R1_RealInitialStart() =
         let set = v.G.Expr <&&> v.OG.Expr
         let rst = v.RT.Expr
 
@@ -27,14 +27,14 @@ type VertexMReal with
             (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
         ]
 
-    member v.R3_RealStartPoint(): CommentedStatement  =
+    member v.R3_RealStartPoint() =
         let set = (v.G.Expr <&&> !!v.RR.Expr<&&> v.SYNC.Expr)
         let rst = v._off.Expr
 
         (set, rst) --| (v.RO, getFuncName())   
 
 
-    member v.R4_RealSync(): CommentedStatement  =
+    member v.R4_RealSync() =
         let real = v.Vertex :?> Real
         let set = real.Graph.Vertices.OfType<Call>()
                       .SelectMany(fun call -> call.TargetJob.ApiDefs)
@@ -44,13 +44,13 @@ type VertexMReal with
         (set, rst) --| (v.SYNC, getFuncName())
       
         //test ahn 인과 시작조건으로 변경
-    member v.R5_RealDataMove(): CommentedStatement  =
+    member v.R5_RealDataMove() =
         let set = v.RD.ToExpression() 
         (set) --* (v.RD, getFuncName())
 
 type VertexManager with
-    member v.R1_RealInitialStart(): CommentedStatement  = (v :?> VertexMReal).R1_RealInitialStart()
+    member v.R1_RealInitialStart() = (v :?> VertexMReal).R1_RealInitialStart()
     member v.R2_RealJobComplete() : CommentedStatement seq = (v :?> VertexMReal).R2_RealJobComplete()
-    member v.R3_RealStartPoint()  : CommentedStatement  = (v :?> VertexMReal).R3_RealStartPoint()
-    member v.R4_RealSync()  : CommentedStatement  = (v :?> VertexMReal).R4_RealSync()
-    member v.R5_RealDataMove()  : CommentedStatement  = (v :?> VertexMReal).R5_RealDataMove()
+    member v.R3_RealStartPoint()  = (v :?> VertexMReal).R3_RealStartPoint()
+    member v.R4_RealSync()  = (v :?> VertexMReal).R4_RealSync()
+    member v.R5_RealDataMove()  = (v :?> VertexMReal).R5_RealDataMove()

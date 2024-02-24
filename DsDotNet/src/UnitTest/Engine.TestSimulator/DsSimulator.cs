@@ -15,7 +15,7 @@ namespace Engine.TestSimulator
 {
     public static class DsSimulator
     {
-        public static bool Do(DsCPU dsCpu)
+        public static bool Do(DsCPU dsCpu, int checkTime = 2000)
         {
             RuntimeDS.Package = RuntimePackage.Simulation;
             bool resultMoving = false;    
@@ -29,13 +29,13 @@ namespace Engine.TestSimulator
                 });
                 dsCpu.RunInBackground();
 
-                resultMoving = await CheckEventCountAsync(dsCpu);
+                resultMoving = await CheckEventCountAsync(dsCpu, checkTime);
             }).Wait();
 
             return resultMoving;
         }
 
-        static async Task<bool> CheckEventCountAsync(DsCPU dsCpu)
+        static async Task<bool> CheckEventCountAsync(DsCPU dsCpu, int checkTime)
         {
             List<string> changedNames = new();
 
@@ -44,7 +44,7 @@ namespace Engine.TestSimulator
                 Console.WriteLine($"Name:{s.Name}\t Value:{s.Value}");
                 changedNames.Add(s.Name); 
             });
-            await Task.Delay(2000);
+            await Task.Delay(checkTime);
             subscription.Dispose();
 
             var groupedNames = changedNames.GroupBy(name => name);

@@ -10,12 +10,12 @@ open Dual.Common.Core.FS
 type Flow with
 
 
-    member f.F1_FlowError(): CommentedStatement =
+    member f.F1_FlowError() =
         let set = f.Graph.Vertices.OfType<Real>().SelectMany(fun r->r.Errors).ToOrElseOff()
         let rst = f._off.Expr
         (set, rst) --| (f.stopError, getFuncName())
 
-    member f.F2_FlowPause(): CommentedStatement =
+    member f.F2_FlowPause() =
         let set = f.sop.Expr <&&> !!f.stopError.Expr
         let rst = f._off.Expr
         (set, rst) --| (f.stopPause, getFuncName())

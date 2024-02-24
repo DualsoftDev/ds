@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 
 type VertexManager with
 
-    member v.F1_RootStart(): CommentedStatement list =
+    member v.F1_RootStart() =
         let real = v.Vertex :?> Real
         let wsDirect =  v.GetWeakStartRootAndCausals()
         let ssDirect =  v.GetStrongStartRootAndCausals()
@@ -28,7 +28,7 @@ type VertexManager with
         [ (sets, rsts) ==| (v.ST, getFuncName()) ]//조건에 의한 릴레이
 
 
-    member v.F2_RootReset() : CommentedStatement list=
+    member v.F2_RootReset()  =
         let real = v.GetPureReal()
         let wrDirect =  v.GetWeakResetRootAndCausals()
         let srDirect =  v.GetStrongResetRootAndCausals()
@@ -51,7 +51,7 @@ type VertexManager with
         [(sets, rsts) ==| (v.RT, getFuncName())]//조건에 의한 릴레이
 
 
-    member v.F3_VertexEndWithOutReal() : CommentedStatement  =
+    member v.F3_VertexEndWithOutReal() =
         let sets =
             match v.Vertex  with
             | :? Alias   as rf -> rf.V.GetPure().V.ET.Expr

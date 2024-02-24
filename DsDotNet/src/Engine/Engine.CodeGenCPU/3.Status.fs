@@ -7,7 +7,7 @@ open Dual.Common.Core.FS
 
 type VertexManager with
 
-    member v.S1_RGFH(): CommentedStatement list =
+    member v.S1_RGFH() =
 
                                                                                       //  Status   ST  RT  CR
                                                                                       //----------------------

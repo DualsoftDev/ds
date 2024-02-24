@@ -6,7 +6,7 @@ open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 type DsSystem with
-    member s.B1_HWButtonOutput(): CommentedStatement list = [
+    member s.B1_HWButtonOutput() = [
         for btn in s.HWButtons do
             if btn.OutTag.IsNonNull()  //OutAddress 주소가 있어야 IN-OUT btn 연결
             then
@@ -16,7 +16,7 @@ type DsSystem with
     ]
 
 
-    member s.B2_SWButtonOutput(): CommentedStatement list = [
+    member s.B2_SWButtonOutput() = [
                 yield (s._auto_btn.Expr  , s._off.Expr) --| (s._auto_lamp  , getFuncName())
                 yield (s._manual_btn.Expr, s._off.Expr) --| (s._manual_lamp, getFuncName())
                 yield (s._drive_btn.Expr , s._off.Expr) --| (s._drive_lamp , getFuncName())
@@ -29,7 +29,7 @@ type DsSystem with
         ]
         
 
-    member s.B3_HWModeLamp(): CommentedStatement list = [
+    member s.B3_HWModeLamp() = [
 
         for sysLamp in s.HWLamps.Filter(fun f-> f.IsGlobalSystemHw) do
             let modeBit =
@@ -73,7 +73,7 @@ type DsSystem with
             yield (sets, s._off.Expr) --| (out, getFuncName())
     ]
 
-    member s.B4_SWModeLamp(): CommentedStatement list = [
+    member s.B4_SWModeLamp() = [
         for f in s.Flows do
             yield (f.auto_btn.Expr  , s._off.Expr) --| (f.auto_lamp  , getFuncName())
             yield (f.manual_btn.Expr, s._off.Expr) --| (f.manual_lamp, getFuncName())

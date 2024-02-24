@@ -86,13 +86,10 @@ module ConvertCPU =
             then
                 yield! s.B2_SWButtonOutput()
                 yield! s.B4_SWModeLamp()
-                yield! s.Y1_SystemBitSetFlow()
 
-            
             yield s.Y2_SystemError()
             yield s.Y3_SystemPause()
             yield! s.Y4_SystemState()
-
 
             if RuntimeDS.Package.IsPackagePLC() then
                 yield! s.E1_PLCNotFunc()
@@ -170,6 +167,10 @@ module ConvertCPU =
             if isActive
             then 
                 yield! applySystemSpec sys
+
+
+            yield! sys.Y1_SystemBitSetFlow()
+
 
 
                 //Flow 적용

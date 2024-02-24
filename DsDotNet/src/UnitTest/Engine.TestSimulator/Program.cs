@@ -29,7 +29,7 @@ namespace Engine.TestSimulator
 
             ModelCompileInfo mci = new(runModel.JsonPath, runModel.JsonPath);
             _ = DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci);
-            _ = DsSimulator.Do(runModel.Cpu);
+            _ = DsSimulator.Do(runModel.Cpu, 10000);
             Console.ReadKey();  
         }
     }

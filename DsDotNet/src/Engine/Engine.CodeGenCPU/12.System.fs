@@ -7,7 +7,7 @@ open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 type DsSystem with
-    member s.Y1_SystemBitSetFlow(): CommentedStatement list = [
+    member s.Y1_SystemBitSetFlow() = [
             for flow in s.Flows do
                 yield (s._auto_btn.Expr  , s._off.Expr) --| (flow.auto_btn,   getFuncName())
                 yield (s._manual_btn.Expr, s._off.Expr) --| (flow.manual_btn, getFuncName())
@@ -20,17 +20,17 @@ type DsSystem with
                 yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
         ]
         
-    member s.Y2_SystemError(): CommentedStatement  =
+    member s.Y2_SystemError() =
         let sets =  s.Flows.Select(fun f->f.stopError).ToOrElseOff()
         (sets, s._off.Expr) --| (s._stopErr, getFuncName())
 
 
-    member s.Y3_SystemPause(): CommentedStatement  =
+    member s.Y3_SystemPause() =
         let sets =  s.Flows.Select(fun f->f.stopPause).ToOrElseOff()
         (sets, s._off.Expr) --| (s._stopPause, getFuncName())
 
 
-    member s.Y4_SystemState(): CommentedStatement list  =
+    member s.Y4_SystemState() =
         [
             (s.Flows.Select(fun f->f.aop).ToAndElseOff(), s._off.Expr) --| (s._autoState  , getFuncName())
             (s.Flows.Select(fun f->f.mop).ToAndElseOff(), s._off.Expr) --| (s._manualState, getFuncName())

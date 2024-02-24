@@ -8,21 +8,21 @@ open Dual.Common.Core.FS
 
 type ApiItemManager with
 
-    member a.A1_PlanSend(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+    member a.A1_PlanSend(activeSys:DsSystem, coins:Call seq) =
 
         let sets = coins.Select(fun c->c.VC.MM)
                         .ToOrElseOff()
 
         (sets, activeSys._off.Expr) --| (a.PS, getFuncName())
 
-    member a.A2_PlanReceive(activeSys:DsSystem) : CommentedStatement  =
+    member a.A2_PlanReceive(activeSys:DsSystem) =
 
         let sets =  a.ApiItem.RxETs
                      .ToAndElseOn() 
 
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
-    member a.A3_SensorLinking(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+    member a.A3_SensorLinking(activeSys:DsSystem, coins:Call seq) =
 
         let input = coins.First().GetEndAction(a.ApiItem)
         
@@ -33,7 +33,7 @@ type ApiItemManager with
 
         (sets, activeSys._off.Expr) --| (a.SL1, getFuncName())
 
-    member a.A4_SensorLinked(activeSys:DsSystem, coins:Call seq) : CommentedStatement  =
+    member a.A4_SensorLinked(activeSys:DsSystem, coins:Call seq) =
 
         let input = coins.First().GetEndAction(a.ApiItem)
         let sets = 
@@ -47,7 +47,7 @@ type ApiItemManager with
         (sets, activeSys._off.Expr) ==| (a.SL2, getFuncName())
 
 
-    member a.A5_ActionOut(coins:Call seq) : CommentedStatement list   =
+    member a.A5_ActionOut(coins:Call seq) =
         [
             for coin in coins do
                 let rstNormal = coin._off.Expr

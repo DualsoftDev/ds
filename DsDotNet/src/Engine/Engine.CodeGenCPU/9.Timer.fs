@@ -10,7 +10,7 @@ open Dual.Common.Core.FS
 
 type DsSystem with
 
-    member s.T1_DelayCall(): CommentedStatement list =
+    member s.T1_DelayCall() =
         let allVertices = s.GetVertices()
         let calls = allVertices.OfType<Call>()
                           .Where(fun f->f.UsingTon)

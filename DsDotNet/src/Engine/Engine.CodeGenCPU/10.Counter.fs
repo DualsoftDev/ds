@@ -11,7 +11,7 @@ open Dual.Common.Core.FS
 
 type DsSystem with
 
-    member s.C1_FinishRingCounter(): CommentedStatement list  =
+    member s.C1_FinishRingCounter() =
         let allVertices = s.GetVertices()
         let calls = allVertices.OfType<Call>()
                           .Where(fun f->f.UsingCtr)

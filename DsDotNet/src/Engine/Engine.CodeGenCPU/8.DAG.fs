@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 
 type VertexManager with
 
-    member v.D1_DAGHeadStart(): CommentedStatement list =
+    member v.D1_DAGHeadStart() =
         let real = v.Vertex :?> Real
         let v = v :?> VertexMReal
         let coins = real.Graph.Inits.Select(getVM)
@@ -22,7 +22,7 @@ type VertexManager with
                 yield (sets, rsts) ==| (coin.ST, getFuncName())
         ]
 
-    member v.D2_DAGTailStart(): CommentedStatement list =
+    member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVM)
         [
@@ -34,7 +34,7 @@ type VertexManager with
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]
         
-    member v.D3_DAGCoinEnd(): CommentedStatement list =
+    member v.D3_DAGCoinEnd() =
         let real = v.Vertex :?> Real
         let children = real.Graph.Vertices.Select(getVM)
         [
@@ -51,7 +51,7 @@ type VertexManager with
         ]
 
 
-    member v.D4_DAGCoinReset(): CommentedStatement list =
+    member v.D4_DAGCoinReset() =
         let real = v.Vertex :?> Real
         let children = real.Graph.Vertices.Select(getVM)
         [

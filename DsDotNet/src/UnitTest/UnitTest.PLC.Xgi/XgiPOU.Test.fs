@@ -167,8 +167,10 @@ type XgiPOUTest() =
         }
         let xml = projectParams.GenerateXmlString()
 
-        globalStorages["gg1"].Address === "%MX24"
-        globalStorages["xm0"].Address === "%MX25"
+
+        //주소 없는 auto 변수 사용
+        globalStorages["gg1"].Address === "_"
+        globalStorages["xm0"].Address === "_"
 
         saveTestResult f xml
 

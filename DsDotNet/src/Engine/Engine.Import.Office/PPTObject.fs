@@ -439,9 +439,7 @@ module PPTObjectModule =
         member x.NodeType = nodeType
         member x.PageTitle = pageTitle
 
-        member x.Position =
-            let rect = shape.GetPosition(slieSize)
-            Xywh(rect.X, rect.Y, rect.Width, rect.Height)
+        member x.Position = shape.GetPosition(slieSize)
 
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 

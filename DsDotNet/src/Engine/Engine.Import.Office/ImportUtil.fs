@@ -324,9 +324,11 @@ module ImportU =
                 if dev.IsNull()
                     then node.Shape.ErrorName(ErrID._61, node.PageNum)
                     else
-                        let xywh = Xywh(node.Position.X, node.Position.Y
-                                       , node.Position.W, node.Position.H) 
-                        dev.ChannelPoints[TextEmtpyChannel] <-xywh
+                        if node.Position.X >=0 && node.Position.Y >= 0
+                        then 
+                             let xywh = Xywh(node.Position.X, node.Position.Y
+                                           , node.Position.Width, node.Position.Height) 
+                             dev.ChannelPoints[TextEmtpyChannel] <-xywh
 
             doc.Nodes
             |> Seq.filter (fun node -> node.NodeType = CALL)

@@ -131,6 +131,9 @@ module ImportViewModule =
         system.IdleHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuIdleLamp)) |> ignore)
 
+        system.HomingHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuHomingLamp)) |> ignore)
+
         if newNode.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore
 

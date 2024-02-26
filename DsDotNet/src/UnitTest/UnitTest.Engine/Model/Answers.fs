@@ -368,14 +368,14 @@ module ModelComponentAnswers =
         [t] = {
             StartTestBTN(_, _) = { F5; }
         }
-        [c] = {
-            ClearBTN(_, _) = { F1;F2;F3;F5; }
-        }
         [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
             HomeBTN.func = {
                 $t 2000;
             }
+        }
+        [c] = {
+            ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
     }
 }

@@ -63,6 +63,7 @@ module TagKindList =
     | testState                = 0037
     | readyState               = 0038
     | idleState                = 0039
+    | homingState              = 0040
     
 
  
@@ -86,6 +87,7 @@ module TagKindList =
     |stop_mode                 = 10005
     |emg_mode                  = 10006
     |idle_mode                 = 10007
+    |homing_mode               = 10008
 
     |auto_btn                  = 10011
     |manual_btn                = 10012
@@ -110,6 +112,7 @@ module TagKindList =
     ///stopType
     | flowStopError                = 10030
     | flowStopPause                = 10031
+    | flowStopConditionErr         = 10032
 
     /// 11000 ~ 11999
     [<Flags>]

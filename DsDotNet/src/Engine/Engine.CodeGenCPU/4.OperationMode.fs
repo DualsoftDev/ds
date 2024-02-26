@@ -36,9 +36,10 @@ type Flow with
         (set, rst) ==| (f.eop, getFuncName())
 
     member f.O5_StopOperationState() =
-        let setPause = (f.stop_btn.Expr <||> f.HWBtnStopExpr <||> f.sop.Expr) 
+        let setPause = f.stop_btn.Expr <||> f.HWBtnStopExpr
         let setError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
                         |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
+                        <||> f.HWConditionsErrorExpr 
         let set = setPause <||> setError
         let rst = f.clear_btn.Expr
            
@@ -61,4 +62,10 @@ type Flow with
         let rst = f._off.Expr
 
         (set, rst) --| (f.iop, getFuncName())
+
+    member f.O9_homingOperationMode() =
+        let set = f.home_btn.Expr <||> f.HWBtnHomeExpr
+        let rst = f._off.Expr
+
+        (set, rst) --| (f.hop, getFuncName())
 

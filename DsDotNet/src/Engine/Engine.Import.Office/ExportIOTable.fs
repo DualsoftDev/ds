@@ -119,6 +119,7 @@ module ExportIOTable =
         toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
         toLampText (sys.ReadyHWLamps, ExcelCase.XlsReadyLamp)
         toLampText (sys.IdleHWLamps, ExcelCase.XlsIdleLamp)
+        toLampText (sys.HomingHWLamps, ExcelCase.XlsHomingLamp)
 
         emptyLine ()
         emptyLine ()

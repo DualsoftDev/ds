@@ -165,6 +165,7 @@ module ImportIOTable =
                         | XlsTestLamp -> updateLamp (row, LampType.DuTestDriveLamp, tableIO, page)
                         | XlsReadyLamp -> updateLamp (row, LampType.DuReadyLamp, tableIO, page)
                         | XlsIdleLamp -> updateLamp (row, LampType.DuIdleLamp, tableIO, page)
+                        | XlsHomingLamp -> updateLamp (row, LampType.DuHomingLamp, tableIO, page)
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
                         | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState, tableIO, page)

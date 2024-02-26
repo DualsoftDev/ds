@@ -42,7 +42,8 @@ type DsSystem with
                 | DuTestDriveLamp -> s._testState.Expr   
                 | DuReadyLamp     -> s._readyState.Expr 
                 | DuIdleLamp      -> s._idleState.Expr 
-
+                | DuHomingLamp    -> s._homingState.Expr 
+                
             let sets = if sysLamp.InTag.IsNull()
                        then modeBit  
                        else modeBit <||> sysLamp.ActionINFunc //강제 체크 비트
@@ -64,6 +65,8 @@ type DsSystem with
                 | DuTestDriveLamp -> f.top
                 | DuReadyLamp     -> f.rop
                 | DuIdleLamp      -> f.iop
+                | DuHomingLamp    -> f.hop
+
 
             let sets = if lamp.InTag.IsNull()
                        then modeBit.Expr 

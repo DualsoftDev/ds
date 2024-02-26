@@ -42,7 +42,7 @@ module internal XgiSymbolsModule =
                       Some(s, XgiSymbol.DuStorage s) ]
         |> List.choose id
 
-    let autoAdress (t:IStorage) (prjParams: XgiProjectParams) = 
+    let autoAllocatorAdress (t:IStorage) (prjParams: XgiProjectParams) = 
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
         if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
@@ -52,8 +52,6 @@ module internal XgiSymbolsModule =
             && t.Address <> TextAddrEmpty 
             && not(t.Address.StartsWith("%"))
         then t.Address <- $"%%{t.Address}"
-
-
 
         if t.Address = TextAddrEmpty then
             let allocatorFunctions =
@@ -80,24 +78,34 @@ module internal XgiSymbolsModule =
             if t.Name.StartsWith("_") then
                 logWarn $"Something fish: trying to generate auto M address for {t.Name}"
 
-            t.Address <- allocator ()
+            if t.Address <> TextAddrEmpty 
+            then
+                t.Address <- allocator ()
 
-
+    let getDataType (dsType:string) : PLCHwModel.DataType= 
+        match dsType with
+        | DsDataType.BOOL ->  DataType.Bit
+        | DsDataType.UINT8 ->  DataType.Byte
+        | DsDataType.UINT16 ->  DataType.Word
+        | DsDataType.UINT32 ->  DataType.DWord
+        | DsDataType.UINT64 ->  DataType.LWord
+        | _ ->
+            failwith $"Invalid tag DataType {dsType}"
+        
 
     let xgiSymbolToSymbolInfo (prjParams: XgiProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
 
-            autoAdress t prjParams
-            let device, dataType =
+            autoAllocatorAdress t prjParams
+            let address, device, dataType =
                 match tryParseXGITag t.Address with
-                | Some t -> t.Device, t.DataType
+                | Some tag -> t.Address, tag.Device.ToString(), tag.DataType
                 | _ -> 
                     if t.Address = TextAddrEmpty 
-                    then  failwith $"empty tag address for {name}"
+                    then  "", "", t.DataType.Name |> getDataType
                     else  failwith $"Invalid tag address {t.Address} for {name}"
-                       
 
             let plcType =
                 match dataType with
@@ -115,9 +123,9 @@ module internal XgiSymbolsModule =
                 Name = name
                 Comment = comment
                 Type = plcType
-                Address = t.Address
-                InitValue = initValue
+                Address = address
                 Device = device.ToString()
+                InitValue = initValue
                 Kind = kindVar }
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
@@ -127,13 +135,14 @@ module internal XgiSymbolsModule =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
 
-                autoAdress t prjParams
+                autoAllocatorAdress t prjParams
 
                 { defaultSymbolInfo with
                     Name = t.Name
                     Comment = comment
                     Type = plcType
-                    Address = t.Address
+                    Device = ""
+                    Address = ""
                     InitValue = t.BoxedValue
                     Kind = kindVar }
 

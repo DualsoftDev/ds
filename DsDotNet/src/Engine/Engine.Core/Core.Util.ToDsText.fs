@@ -225,8 +225,8 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("e", system.EmergencyHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("r", system.ReadyHWButtons.Cast<HwSystemDef>())
-                yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("h", system.HomeHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
 
@@ -239,7 +239,9 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("e", system.EmergencyHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("r", system.ReadyHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("h", system.HomingHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("i", system.IdleHWLamps.Cast<HwSystemDef>())
+
                 yield $"{tab}{rb}"
 
             let cnds = system.HWConditions

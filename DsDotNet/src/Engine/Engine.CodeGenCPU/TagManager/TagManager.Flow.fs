@@ -20,6 +20,8 @@ module FlowManagerModule =
         let f_dop        = cpv $"DOP_{fn}"     FlowTag.drive_mode              // Drive Operation Mode
         let f_top        = cpv $"TOP_{fn}"     FlowTag.test_mode         // Test  Operation Mode (시운전)
         let f_iop        = cpv $"IOP_{fn}"     FlowTag.idle_mode              // Idle  Operation Mode
+        let f_hop        = cpv $"HOP_{fn}"     FlowTag.homing_mode              // homing   Operation Mode
+
         //let f_readycondi = cpv $"SCR_{fn}"     FlowTag.readycondi_btn             //system condition ready
         //let f_drivecondi = cpv $"SCD_{fn}"     FlowTag.drivecondi_btn           //system condition drive
         let f_auto_btn       = cpv $"auto_btn_{fn}"    FlowTag.auto_btn       
@@ -45,6 +47,7 @@ module FlowManagerModule =
 
         let f_stop_error      = cpv $"error_{fn}"   FlowTag.flowStopError
         let f_stop_pause      = cpv $"pause_{fn}"   FlowTag.flowStopPause
+        let f_stop_condiErr   = cpv $"condiErr_{fn}"   FlowTag.flowStopConditionErr
        
         interface ITagManager with
             member x.Target = f
@@ -61,6 +64,9 @@ module FlowManagerModule =
                 | FlowTag.stop_mode         -> f_sop
                 | FlowTag.emg_mode          -> f_eop
                 | FlowTag.idle_mode         -> f_iop
+                | FlowTag.homing_mode       -> f_hop
+                
+
                 | FlowTag.auto_btn        -> f_auto_btn
                 | FlowTag.manual_btn      -> f_manual_btn
                 | FlowTag.drive_btn       -> f_drive_btn
@@ -83,5 +89,6 @@ module FlowManagerModule =
 
                 | FlowTag.flowStopError    -> f_stop_error
                 | FlowTag.flowStopPause    -> f_stop_pause
+                | FlowTag.flowStopConditionErr    -> f_stop_condiErr
                 | _ -> failwithlog $"Error : GetFlowTag {ft} type not support!!"
             t :?> PlanVar<bool>

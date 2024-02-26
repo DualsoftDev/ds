@@ -16,8 +16,14 @@ type Flow with
         (set, rst) --| (f.stopError, getFuncName())
 
     member f.F2_FlowPause() =
-        let set = f.sop.Expr <&&> !!f.stopError.Expr
+        let set = f.sop.Expr <&&> !!f.stopError.Expr<&&> !!f.HWConditionsErrorExpr 
         let rst = f._off.Expr
         (set, rst) --| (f.stopPause, getFuncName())
+
+    member f.F3_FlowConditionErr() =
+        let set = f.HWConditionsErrorExpr
+        let rst = f._off.Expr
+        (set, rst) --| (f.stopConditionErr, getFuncName())
+
 
 

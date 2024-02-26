@@ -20,7 +20,7 @@
     string _text;
     bool _loading = true;
     IDisposable _subscription;
-    TagWeb _drive, _stop, _emStop, _test, _ready, _idle;
+    TagWeb _drive, _stop, _emStop, _test, _ready, _idle, _homing;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -37,7 +37,8 @@
         _test = Flow.TestPushLampMode.Item2;
         _ready = Flow.ReadyPushLampMode.Item2;
         _idle = Flow.IdleLampMode;
-
+        _homing = Flow.HomingLampMode;
+        
         _text = getText();
         _loading = false;
     }

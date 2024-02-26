@@ -111,7 +111,8 @@ module HmiPackageModule =
         HomePushLamp             : HMIPushLamp    
         
         IdleLampMode             : HMILamp 
-
+        HomingLampMode           : HMILamp 
+        
         Reals            : HMIReal array      
     } with
         member x.CollectTags () =
@@ -126,7 +127,7 @@ module HmiPackageModule =
                 yield! getPushLampTags x.ClearPushLamp
                 yield! getPushLampTags x.HomePushLamp
                 yield x.IdleLampMode
-   
+                yield x.HomingLampMode
 
                 yield! x.Reals |> Seq.collect (fun r->r.CollectTags())
             }

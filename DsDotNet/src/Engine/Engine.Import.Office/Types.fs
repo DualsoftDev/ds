@@ -72,6 +72,7 @@ module InterfaceClass =
         | XlsEmergencyLamp //비상 램프
         | XlsReadyLamp //준비 램프
         | XlsIdleLamp //대기 램프
+        | XlsHomingLamp //원위치중 램프
         | XlsTestLamp //시운전 램프
         | XlsConditionReady //준비 램프
         | XlsConditionDrive //운전 램프
@@ -97,6 +98,7 @@ module InterfaceClass =
             | XlsTestLamp -> TextXlsTestLamp
             | XlsReadyLamp -> TextXlsReadyLamp
             | XlsIdleLamp -> TextXlsIdleLamp
+            | XlsHomingLamp -> TextXlsHomingLamp
             | XlsConditionReady -> TextXlsConditionReady
             | XlsConditionDrive -> TextXlsConditionDrive
 
@@ -121,6 +123,8 @@ module InterfaceClass =
         | TextXlsEmergencyLamp -> XlsEmergencyLamp
         | TextXlsReadyLamp -> XlsReadyLamp
         | TextXlsIdleLamp -> XlsIdleLamp
+        | TextXlsHomingLamp -> XlsHomingLamp
+        
         | TextXlsConditionReady -> XlsConditionReady
         | TextXlsConditionDrive -> XlsConditionDrive
 

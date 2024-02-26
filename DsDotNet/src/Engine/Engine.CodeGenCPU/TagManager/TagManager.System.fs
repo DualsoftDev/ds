@@ -84,6 +84,7 @@ module SystemManagerModule =
         let sysTestState    = dsSysBit "sysTestState"   true  sys   SystemTag.testState   
         let sysReadyState   = dsSysBit "sysReadyState"  true  sys   SystemTag.readyState  
         let sysIdleState    = dsSysBit "sysIdleState"   true  sys   SystemTag.idleState  
+        let sysHomingState  = dsSysBit "sysHomingState" true  sys   SystemTag.homingState  
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
         let flicker200msec  = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
@@ -93,20 +94,6 @@ module SystemManagerModule =
  
             on.Value <- true
             off.Value <- false
-
-            //if RuntimeDS.Package = RuntimePackage.LightPLC then
-            //    on.Address <-  "%FX153"
-            //    off.Address <-  "%FX154"
-            //    flicker200msec.Address <- "%FX146"
-            //    flicker1sec.Address <- "%FX147"
-            //    flicker2sec.Address <- "%FX148"
-                //dtimeyy.Address <- "%FB106" 
-                //dtimemm.Address <- "%FB107" 
-                //dtimedd.Address <- "%FB108" 
-                //dtimeh.Address <- "%FB109"  
-                //dtimem.Address <- "%FB110"  
-                //dtimes.Address <- "%FB111"  
-         
 
         interface ITagManager with
             member x.Target = sys
@@ -165,6 +152,7 @@ module SystemManagerModule =
             | SystemTag.testState          ->    sysTestState   
             | SystemTag.readyState         ->    sysReadyState  
             | SystemTag.idleState         ->     sysIdleState
+            | SystemTag.homingState       ->     sysHomingState
 
 
             | SystemTag.flicker200ms    -> flicker200msec

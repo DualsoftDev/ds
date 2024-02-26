@@ -95,6 +95,7 @@ module Util =
         | "T" -> LampType.DuTestDriveLamp
         | "R" -> LampType.DuReadyLamp
         | "I" -> LampType.DuIdleLamp
+        | "H" -> LampType.DuHomingLamp
         | _ -> if key = ""
                 then failwith $"램프는 '[타입]이름' 형식으로 작성해야 합니다.\nEx)[S]stopStation1~3"
                 else failwith $"{key}은 램프 타입이 아님니다. 가능타입 리스트
@@ -105,6 +106,7 @@ module Util =
                         \n[E]EmergencyLamp
                         \n[T]TestDriveLamp
                         \n[R]ReadyLamp
+                        \n[H]HomingLamp
                         \n[I]IdleLamp"
 
     let getConditionType (key: string) =

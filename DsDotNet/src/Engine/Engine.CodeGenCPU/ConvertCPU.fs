@@ -111,12 +111,16 @@ module ConvertCPU =
             yield f.O6_DriveOperationMode()
             yield f.O7_TestOperationMode()
             yield f.O8_IdleOperationMode()
+            yield f.O9_homingOperationMode()
+            
         ]
 
     let private applyFlowMonitorSpec(f:Flow) =
         [
             yield f.F1_FlowError()
             yield f.F2_FlowPause()
+            yield f.F3_FlowConditionErr()
+            
         ]
 
     let private callPlanAction(s:DsSystem) =
@@ -155,23 +159,21 @@ module ConvertCPU =
         checkErrNullAddress(sys)
         checkErrHWItem(sys)
 
-        if RuntimeDS.Package = RuntimePackage.LightPLC 
-        then
-            checkErrLightPLC(sys)
+
 
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()
-
         [
                 //Active 시스템 적용  //test ahn loaded는 제외 성능 고려해서 다시 구현
             if isActive
             then 
                 yield! applySystemSpec sys
 
-
-            yield! sys.Y1_SystemBitSetFlow()
-
-
+            if RuntimeDS.Package = RuntimePackage.LightPLC 
+            then
+                checkErrLightPLC(sys)
+            else
+                yield! sys.Y1_SystemBitSetFlow()
 
                 //Flow 적용
             for f in sys.Flows do

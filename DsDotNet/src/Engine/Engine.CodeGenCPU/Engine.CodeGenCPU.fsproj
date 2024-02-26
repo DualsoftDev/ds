@@ -33,8 +33,8 @@
         <Compile Include="10.Counter.fs" />
         <Compile Include="11.FlowMonitor.fs" />
         <Compile Include="12.System.fs" />
-        <Compile Include="13.Extension.fs" />
-        <Compile Include="14.ButtonLamp.fs" />
+        <Compile Include="13.ButtonLamp.fs" />
+        <Compile Include="14.Extension.fs" />
         <Compile Include="ConvertErrorCheck.fs" />
         <Compile Include="ConvertCPU.fs" />
         <Compile Include="Loader.fs" />

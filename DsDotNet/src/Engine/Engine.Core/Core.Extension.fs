@@ -145,6 +145,7 @@ module CoreExtensionModule =
         member x.TestHWLamps          = getLamps(x, DuTestDriveLamp)
         member x.ReadyHWLamps         = getLamps(x, DuReadyLamp)
         member x.IdleHWLamps          = getLamps(x, DuIdleLamp)
+        member x.HomingHWLamps        = getLamps(x, DuHomingLamp)
 
         member x.ReadyConditions     = getConditions(x, DuReadyState)
         member x.DriveConditions     = getConditions(x, DuDriveState)

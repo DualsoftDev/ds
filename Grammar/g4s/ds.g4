@@ -187,7 +187,7 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 addressInOut: LPARENTHESIS inAddr COMMA outAddr RPARENTHESIS (SEIMCOLON)?;
 inAddr: addressItem;
 outAddr: addressItem;
-addressItem: tagAddress | funAddress;
+addressItem: tagAddress | funAddress | '-';
 tagAddress: TAG_ADDRESS;
 funAddress: IDENTIFIER1;
 

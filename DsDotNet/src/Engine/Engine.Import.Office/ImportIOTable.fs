@@ -44,10 +44,11 @@ module ImportIOTable =
                 |> Seq.map (fun j -> j.ApiName, j)
                 |> dict
 
-            let chageParserText newAddr = if newAddr= TextSkip then TextAddrEmpty else newAddr
-            let changeValidAddress (address:string)  =
-                    let address = address.Trim() 
-                    address |> chageParserText
+            //let chageParserText newAddr =  newAddr//if newAddr= TextSkip then TextAddrEmpty else newAddr
+            ////let chageParserText newAddr = if newAddr= TextSkip then TextAddrEmpty else newAddr
+            //let changeValidAddress (address:string)  =
+            //        let address = address.Trim() 
+            //        address |> chageParserText
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = $"{row.[(int) IOColumn.Name]}"
@@ -91,8 +92,8 @@ module ImportIOTable =
                     btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidBtnAddress (btn)
-                    btn.InAddress  <-inaddr |> changeValidAddress
-                    btn.OutAddress <-outaddr|> changeValidAddress
+                    btn.InAddress  <-inaddr.Trim() 
+                    btn.OutAddress <-outaddr.Trim() 
 
                     btn.Func <- getFunction (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
@@ -110,8 +111,8 @@ module ImportIOTable =
                     lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidLampAddress (lamp)
-                    lamp.InAddress  <-inaddr|> changeValidAddress
-                    lamp.OutAddress <-outaddr|> changeValidAddress
+                    lamp.InAddress  <-inaddr.Trim() 
+                    lamp.OutAddress <-outaddr.Trim() 
                     lamp.Func <- getFunction (lamp.Name, func,  tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
@@ -127,8 +128,8 @@ module ImportIOTable =
                     cond.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidCondiAddress (cond)
-                    cond.InAddress  <-inaddr |> changeValidAddress
-                    cond.OutAddress <-outaddr  |> changeValidAddress    
+                    cond.InAddress  <-inaddr.Trim() 
+                    cond.OutAddress <-outaddr.Trim()  
                     cond.Func <- getFunction (cond.Name, func, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 
@@ -167,7 +168,6 @@ module ImportIOTable =
                         | XlsHomingLamp -> updateLamp (row, LampType.DuOriginLamp, tableIO, page)
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
-                        | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState, tableIO, page)
 
             )
 

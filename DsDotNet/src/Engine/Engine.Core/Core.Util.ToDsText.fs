@@ -139,7 +139,7 @@ module internal ToDsTextModule =
                     String.concat "" funcDefs
                 $"{tab3}{rb}";
             ]
-
+        let addressPrint (addr:string) = if isNullOrEmpty  addr then "_" else addr
         [
             yield $"[sys] {system.Name.QuoteOnDemand()} = {lb}"
 
@@ -147,7 +147,6 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             if system.Jobs.Any() then
-                let addressPrint (addr:string) = if isNullOrEmpty addr || addr = "　" then "_" else addr
                 let printDev (ai:TaskDev) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
@@ -205,8 +204,8 @@ module internal ToDsTextModule =
                                     flows + ";"
                                 else
                                     ""
-                            let inAddr =  if isNullOrEmpty  hw.InAddress  then "_" else hw.InAddress
-                            let outAddr = if isNullOrEmpty  hw.OutAddress then "_" else hw.OutAddress
+                            let inAddr =  addressPrint  hw.InAddress  
+                            let outAddr = addressPrint  hw.OutAddress 
                             yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
                             if hw.Func.IsSome then
                                 for funcString in printFuncions hw.Name [hw.Func.Value] do
@@ -221,12 +220,12 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("a", system.AutoHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("m", system.ManualHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("d", system.DriveHWButtons.Cast<HwSystemDef>())
-                yield HwSystemToDs("p", system.PauseHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("e", system.EmergencyHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("r", system.ReadyHWButtons.Cast<HwSystemDef>())
-                yield HwSystemToDs("h", system.HomeHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("p", system.PauseHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("c", system.ClearHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("h", system.HomeHWButtons.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
 
@@ -238,8 +237,8 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("e", system.ErrorHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("r", system.ReadyHWLamps.Cast<HwSystemDef>())
-                yield HwSystemToDs("o", system.OriginHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("i", system.IdleHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("o", system.OriginHWLamps.Cast<HwSystemDef>())
 
                 yield $"{tab}{rb}"
 

@@ -26,7 +26,7 @@ module ConvertCpuVertex =
         member c._on     = c.System._on
         member c._off     = c.System._off
 
-        member c.InTags  = c.TaskDevs.Where(fun d->d.ApiItem.RXs.any())
+        member c.InTags  = c.TaskDevs.Where(fun d->d.ApiItem.RXs.any() && d.InAddress <> TextSkip)
                                                  .Select(fun d->d.InTag :?> Tag<bool>)
 
         member c.UsingTon  = c.TargetJob.Func |> hasTime

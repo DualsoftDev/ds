@@ -89,15 +89,15 @@ module ConvertCpuDsSystem =
                 if b.ApiItem.RXs.length() = 0 && b.ApiItem.TXs.length() = 0
                 then failwith $"Error {getFuncName()}"
 
-                //if b.ApiItem.RXs.any() then
-                let inT = createBridgeTag(x.Storages, b.ApiName, b.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , b).Value
-                b.InTag <- inT
-                b.InAddress <- inT.Address
+                if  b.InAddress <> TextSkip then
+                    let inT = createBridgeTag(x.Storages, b.ApiName, b.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , b).Value
+                    b.InTag <- inT
+                    b.InAddress <- inT.Address
                       
-                //if b.ApiItem.TXs.any() then
-                let outT = createBridgeTag(x.Storages, b.ApiName, b.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , b).Value
-                b.OutTag <- outT
-                b.OutAddress <- outT.Address
+                if  b.OutAddress <> TextSkip then
+                    let outT = createBridgeTag(x.Storages, b.ApiName, b.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , b).Value
+                    b.OutTag <- outT
+                    b.OutAddress <- outT.Address
 
 
         member x.GenerationIO() =

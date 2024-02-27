@@ -31,8 +31,8 @@ module ConvertErrorCheck =
     let checkErrNullAddress(sys:DsSystem) = 
         let nullTagJobs = sys.Jobs
                              .Where(fun j-> j.DeviceDefs.Where(fun f-> 
-                                            f.InTag.IsNull() && f.ApiItem.RXs.any()
-                                            ||f.OutTag.IsNull() && f.ApiItem.TXs.any()
+                                            f.InTag.IsNull() && f.ApiItem.RXs.any() && f.InAddress <> TextSkip
+                                            ||f.OutTag.IsNull() && f.ApiItem.TXs.any()  && f.OutAddress <> TextSkip
                                             ).any())
                       
         if nullTagJobs.any()

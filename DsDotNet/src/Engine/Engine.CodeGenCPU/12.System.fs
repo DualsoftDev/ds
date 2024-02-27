@@ -29,17 +29,17 @@ type DsSystem with
 
     member s.Y3_SystemState() =
         [
-            (s.Flows.Select(fun f->f.aop).ToAndElseOff(), s._off.Expr) --| (s._autoState   , getFuncName())
-            (s.Flows.Select(fun f->f.mop).ToAndElseOff(), s._off.Expr) --| (s._manualState , getFuncName())
-            (s.Flows.Select(fun f->f.dop).ToAndElseOff(), s._off.Expr) --| (s._driveState  , getFuncName())
-            (s.Flows.Select(fun f->f.eop).ToOrElseOff(), s._off.Expr)  --| (s._errorState  , getFuncName())
-            (s.Flows.Select(fun f->f.emg).ToOrElseOff(), s._off.Expr)  --| (s._emgState    , getFuncName())
-            (s.Flows.Select(fun f->f.top).ToAndElseOff(), s._off.Expr) --| (s._testState   , getFuncName())
-            (s.Flows.Select(fun f->f.rop).ToAndElseOff(), s._off.Expr) --| (s._readyState  , getFuncName())
-            (s.Flows.Select(fun f->f.iop).ToAndElseOff(), s._off.Expr) --| (s._idleState   , getFuncName())
-            (s.Flows.Select(fun f->f.oop).ToAndElseOff(), s._off.Expr) --| (s._originState , getFuncName())
-            (s.Flows.Select(fun f->f.hop).ToOrElseOff() , s._off.Expr) --| (s._homingState , getFuncName())
-            (s.Flows.Select(fun f->f.gop).ToOrElseOff() , s._off.Expr) --| (s._goingState , getFuncName())
+            (s.Flows.Select(fun f->f.iop).ToAndElseOff(), s._off.Expr)      --| (s._idleMonitor   , getFuncName())
+            (s.Flows.Select(fun f->f.aop).ToAndElseOff(), s._off.Expr)      --| (s._autoMonitor   , getFuncName())
+            (s.Flows.Select(fun f->f.mop).ToAndElseOff(), s._off.Expr)      --| (s._manualMonitor , getFuncName())
+            (s.Flows.Select(fun f->f.d_st).ToAndElseOff(), s._off.Expr)     --| (s._driveMonitor  , getFuncName())
+            (s.Flows.Select(fun f->f.e_st).ToOrElseOff(), s._off.Expr)      --| (s._errorMonitor  , getFuncName())
+            (s.Flows.Select(fun f->f.emg_st).ToOrElseOff(), s._off.Expr)    --| (s._emgState    , getFuncName())
+            (s.Flows.Select(fun f->f.t_st).ToAndElseOff(), s._off.Expr)     --| (s._testMonitor   , getFuncName())
+            (s.Flows.Select(fun f->f.r_st).ToAndElseOff(), s._off.Expr)     --| (s._readyMonitor  , getFuncName())
+            (s.Flows.Select(fun f->f.o_st).ToAndElseOff(), s._off.Expr)     --| (s._originMonitor , getFuncName())
+            (s.Flows.Select(fun f->f.h_st).ToOrElseOff() , s._off.Expr)     --| (s._homingMonitor , getFuncName())
+            (s.Flows.Select(fun f->f.g_st).ToOrElseOff() , s._off.Expr)     --| (s._goingMonitor , getFuncName())
             
         ]
 

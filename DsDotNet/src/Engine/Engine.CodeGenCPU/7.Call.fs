@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 type VertexManager with
     member v.C1_CallMemo() =
         let v, call  = v :?> VertexMCoin, v.Vertex :?> Call 
-        let dop, mop = v.Flow.dop.Expr, v.Flow.mop.Expr
+        let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
         
         let sets = 
             (

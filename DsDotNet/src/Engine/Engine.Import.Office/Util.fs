@@ -87,14 +87,14 @@ module Util =
 
     let getLampType (key: string) =
         match key.Trim().ToUpper() with
-        | "A" -> LampType.DuAutoLamp
-        | "M" -> LampType.DuManualLamp
-        | "D" -> LampType.DuDriveLamp
-        | "E" -> LampType.DuErrorLamp
-        | "T" -> LampType.DuTestDriveLamp
-        | "R" -> LampType.DuReadyLamp
-        | "I" -> LampType.DuIdleLamp
-        | "O" -> LampType.DuOriginLamp
+        | "A" -> LampType.DuAutoModeLamp
+        | "M" -> LampType.DuManualModeLamp
+        | "D" -> LampType.DuDriveStateLamp
+        | "E" -> LampType.DuErrorStateLamp
+        | "T" -> LampType.DuTestDriveStateLamp
+        | "R" -> LampType.DuReadyStateLamp
+        | "I" -> LampType.DuIdleModeLamp
+        | "O" -> LampType.DuOriginStateLamp
         | _ -> if key = ""
                 then failwith $"램프는 '[타입]이름' 형식으로 작성해야 합니다.\nEx)[S]stopErrStation1~3"
                 else failwith $"{key}은 램프 타입이 아님니다. 가능타입 리스트

@@ -35,7 +35,7 @@ module TagWebModule =
     type HMILamp              = TagWeb
     ///btn/lamp            ex)drive_btn/drive_lamp 
     type HMIPushLamp          = TagWeb*TagWeb 
-    ///HMIPushLamp/mode    ex)drive_btn/drive_lamp/drive_mode
+    ///HMIPushLamp/mode    ex)drive_btn/drive_lamp/drive_state
     type HMIPushLampMode      = HMIPushLamp*TagWeb 
     ///HMIPushLampA/HMIPushLampB  ex)Sys_Auto/Sys_Manu 
     type HMISelectLamp        = HMIPushLamp*HMIPushLamp 

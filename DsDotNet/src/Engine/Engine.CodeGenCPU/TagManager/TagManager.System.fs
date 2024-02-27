@@ -73,19 +73,18 @@ module SystemManagerModule =
             tout.Value <- 15000us
             tout
 
-        let sysPause        = dsSysBit "sysPause"       true  sys   SystemTag.sysPause
-
-        let sysAutoState    = dsSysBit "sysAutoState"   true  sys   SystemTag.autoState   
-        let sysManualState  = dsSysBit "sysManualState" true  sys   SystemTag.manualState 
-        let sysDriveState   = dsSysBit "sysDriveState"  true  sys   SystemTag.driveState  
-        let sysErrorState   = dsSysBit "sysErrorState"   true  sys   SystemTag.errorState   
-        let sysEmgState     = dsSysBit "sysEmgState"    true  sys   SystemTag.emgState    
-        let sysTestState    = dsSysBit "sysTestState"   true  sys   SystemTag.testState   
-        let sysReadyState   = dsSysBit "sysReadyState"  true  sys   SystemTag.readyState  
-        let sysIdleState    = dsSysBit "sysIdleState"   true  sys   SystemTag.idleState  
-        let sysOriginState  = dsSysBit "sysOriginState" true  sys   SystemTag.originState  
-        let sysHomingState  = dsSysBit "sysHomingState" true  sys   SystemTag.homingState  
-        let sysGoingState   = dsSysBit "sysGoingState"  true  sys   SystemTag.goingState  
+        let pauseMonitor      = dsSysBit "pauseMonitor"     true  sys   SystemTag.pauseMonitor
+        let autoMonitor       = dsSysBit "autoMonitor"      true  sys   SystemTag.autoMonitor   
+        let manualMonitor     = dsSysBit "manualMonitor"    true  sys   SystemTag.manualMonitor 
+        let driveMonitor      = dsSysBit "driveMonitor"     true  sys   SystemTag.driveMonitor  
+        let errorMonitor      = dsSysBit "errorMonitor"     true  sys   SystemTag.errorMonitor   
+        let emergencyMonitor  = dsSysBit "emergencyMonitor" true  sys   SystemTag.emergencyMonitor    
+        let testMonitor       = dsSysBit "testMonitor"      true  sys   SystemTag.testMonitor   
+        let readyMonitor      = dsSysBit "readyMonitor"     true  sys   SystemTag.readyMonitor  
+        let idleMonitor       = dsSysBit "idleMonitor"      true  sys   SystemTag.idleMonitor  
+        let originMonitor     = dsSysBit "originMonitor"    true  sys   SystemTag.originMonitor  
+        let homingMonitor     = dsSysBit "homingMonitor"    true  sys   SystemTag.homingMonitor  
+        let goingMonitor      = dsSysBit "goingMonitor"     true  sys   SystemTag.goingMonitor  
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
         let flicker200msec  = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
@@ -143,18 +142,18 @@ module SystemManagerModule =
             | SystemTag.datet_s         ->    dtimes
             | SystemTag.timeout         ->    tout
             
-            | SystemTag.autoState          ->    sysAutoState   
-            | SystemTag.manualState        ->    sysManualState 
-            | SystemTag.driveState         ->    sysDriveState  
-            | SystemTag.errorState         ->    sysErrorState   
-            | SystemTag.emgState           ->    sysEmgState    
-            | SystemTag.testState          ->    sysTestState   
-            | SystemTag.readyState         ->    sysReadyState  
-            | SystemTag.idleState          ->    sysIdleState
-            | SystemTag.originState        ->    sysOriginState
-            | SystemTag.homingState        ->    sysHomingState
-            | SystemTag.goingState         ->    sysGoingState
-            | SystemTag.sysPause           ->    sysPause
+            | SystemTag.pauseMonitor         ->    pauseMonitor
+            | SystemTag.idleMonitor          ->    idleMonitor     
+            | SystemTag.autoMonitor          ->    autoMonitor     
+            | SystemTag.manualMonitor        ->    manualMonitor   
+            | SystemTag.driveMonitor         ->    driveMonitor    
+            | SystemTag.errorMonitor         ->    errorMonitor    
+            | SystemTag.emergencyMonitor     ->    emergencyMonitor
+            | SystemTag.testMonitor          ->    testMonitor     
+            | SystemTag.readyMonitor         ->    readyMonitor    
+            | SystemTag.originMonitor        ->    originMonitor   
+            | SystemTag.homingMonitor        ->    homingMonitor   
+            | SystemTag.goingMonitor         ->    goingMonitor    
             
             
             | SystemTag.flicker200ms    -> flicker200msec

@@ -12,23 +12,20 @@ module FlowManagerModule =
         let cpv name (flowTag:FlowTag) = createPlanVar s name DuBOOL true f (int flowTag) f.System
         let fn = f.Name
 
-        let f_rop        = cpv $"ROP_{fn}"     FlowTag.ready_mode             // Ready Operation State
+        let f_iop        = cpv $"IOP_{fn}"     FlowTag.idle_mode              // Idle  Operation Mode
         let f_aop        = cpv $"AOP_{fn}"     FlowTag.auto_mode              // Auto Operation State
         let f_mop        = cpv $"MOP_{fn}"     FlowTag.manual_mode            // Manual Operation State
-        let f_eop        = cpv $"EOP_{fn}"     FlowTag.error_mode             // error Operation State
-        let f_dop        = cpv $"DOP_{fn}"     FlowTag.drive_mode              // Drive Operation Mode
-        let f_top        = cpv $"TOP_{fn}"     FlowTag.test_mode         // Test  Operation Mode (시운전)
-        let f_iop        = cpv $"IOP_{fn}"     FlowTag.idle_mode              // Idle  Operation Mode
-        let f_oop        = cpv $"OOP_{fn}"     FlowTag.origin_mode              // origin   Operation Mode
-        let f_hop        = cpv $"HOP_{fn}"     FlowTag.homing_mode              // homing   Operation Mode
-        let f_gop        = cpv $"GOP_{fn}"     FlowTag.going_mode              // going   Operation Mode
-        
+       
+       
+        let f_e_st        = cpv $"E_ST_{fn}"     FlowTag.error_state             // error State 
+        let f_d_st        = cpv $"D_ST_{fn}"     FlowTag.drive_state              // Drive State
+        let f_r_st        = cpv $"R_ST_{fn}"     FlowTag.ready_state             // Ready  State
+        let f_t_st        = cpv $"T_ST_{fn}"     FlowTag.test_state         // Test  Operation State (시운전)
+        let f_o_st        = cpv $"O_ST_{fn}"     FlowTag.origin_state              // origin   State
+        let f_h_st        = cpv $"H_ST_{fn}"     FlowTag.homing_state              // homing State
+        let f_g_st        = cpv $"G_ST_{fn}"     FlowTag.going_state              // going  State
+        let f_emg_st        = cpv $"EMG_ST_{fn}"   FlowTag.emergency_state             // Emergency  State
 
-        let f_emg        = cpv $"EOP_{fn}"     FlowTag.emg_mode             // Emergency Operation State
-
-
-        //let f_readycondi = cpv $"SCR_{fn}"     FlowTag.readycondi_btn             //system condition ready
-        //let f_drivecondi = cpv $"SCD_{fn}"     FlowTag.drivecondi_btn           //system condition drive
         let f_auto_btn       = cpv $"auto_btn_{fn}"    FlowTag.auto_btn       
         let f_manual_btn     = cpv $"manual_btn_{fn}"  FlowTag.manual_btn     
         let f_drive_btn      = cpv $"drive_btn_{fn}"   FlowTag.drive_btn
@@ -49,7 +46,6 @@ module FlowManagerModule =
         let f_test_lamp      = cpv $"test_lamp_{fn}"    FlowTag.test_lamp
         let f_home_lamp      = cpv $"home_lamp_{fn}"    FlowTag.home_lamp
 
-
         let f_stop_error      = cpv $"error_{fn}"   FlowTag.flowStopError
         let f_pause           = cpv $"pause_{fn}"   FlowTag.flowPause
         let f_stop_condiErr   = cpv $"condiErr_{fn}"   FlowTag.flowStopConditionErr
@@ -61,17 +57,17 @@ module FlowManagerModule =
         member f.GetFlowTag(ft:FlowTag)     =
             let t =
                 match ft with
-                | FlowTag.ready_mode        -> f_rop
+                | FlowTag.ready_state       -> f_r_st
                 | FlowTag.auto_mode         -> f_aop
                 | FlowTag.manual_mode       -> f_mop
-                | FlowTag.drive_mode        -> f_dop
-                | FlowTag.test_mode         -> f_top
-                | FlowTag.error_mode        -> f_eop
+                | FlowTag.drive_state       -> f_d_st
+                | FlowTag.test_state        -> f_t_st
+                | FlowTag.error_state       -> f_e_st
                 | FlowTag.idle_mode         -> f_iop
-                | FlowTag.origin_mode       -> f_oop
-                | FlowTag.homing_mode       -> f_hop
-                | FlowTag.going_mode        -> f_gop
-                | FlowTag.emg_mode          -> f_emg
+                | FlowTag.origin_state      -> f_o_st
+                | FlowTag.homing_state      -> f_h_st
+                | FlowTag.going_state       -> f_g_st
+                | FlowTag.emergency_state   -> f_emg_st
                 
                 
                 | FlowTag.auto_btn        -> f_auto_btn

@@ -39,7 +39,7 @@ type VertexManager with
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> Call
         let real= call.Parent.GetCore() :?> Real
-        let dop = call.V.Flow.dop.Expr
+        let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.clear_btn.Expr
         [
             let running = v.MM.Expr <&&> !!call.EndAction <&&> dop
@@ -57,7 +57,7 @@ type VertexManager with
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
         
-        let dop = call.V.Flow.dop.Expr
+        let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.clear_btn.Expr
         [
             let input      = call.EndAction

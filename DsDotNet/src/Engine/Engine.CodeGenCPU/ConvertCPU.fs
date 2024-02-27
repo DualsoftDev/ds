@@ -102,14 +102,14 @@ module ConvertCPU =
     ///flow 별 운영모드 적용
     let private applyOperationModeSpec(f:Flow) =
         [
-            yield f.O1_ReadyOperationState()
-            yield f.O2_AutoOperationState()
-            yield f.O3_ManualOperationState()
+            yield f.O1_IdleOperationMode()
+            yield f.O2_AutoOperationMode()
+            yield f.O3_ManualOperationMode()
             yield f.O4_EmergencyOperationState()
             yield f.O5_StopOperationState()
             yield f.O6_DriveOperationMode()
             yield f.O7_TestOperationMode()
-            yield f.O8_IdleOperationMode()
+            yield f.O8_ReadyOperationState()
             yield f.O9_originOperationMode()
             yield f.O10_homingOperationMode()
             yield f.O11_goingOperationMode()

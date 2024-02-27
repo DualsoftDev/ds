@@ -52,22 +52,19 @@ module TagKindList =
     ///systxErrTimetag             
     | timeout                  = 0027
 
-    | sysPause                 = 0031
+    | pauseMonitor               = 0031
+    | idleMonitor                = 0032
+    | autoMonitor                = 0033
+    | manualMonitor              = 0034
+    | driveMonitor               = 0035
+    | testMonitor                = 0036
+    | errorMonitor               = 0037
+    | emergencyMonitor           = 0038
+    | readyMonitor               = 0039
+    | originMonitor              = 0040
+    | homingMonitor              = 0041
+    | goingMonitor               = 0042
 
-    | autoState                = 0032
-    | manualState              = 0033
-    | driveState               = 0034
-    | errorState               = 0035
-    | emgState                 = 0036
-    | testState                = 0037
-    | readyState               = 0038
-    | idleState                = 0039
-    | originState              = 0040
-    | homingState              = 0041
-    | goingState               = 0042
-    
-    
- 
     ///flicker
     | flicker200ms              = 0100
     | flicker1s                 = 0101
@@ -79,28 +76,16 @@ module TagKindList =
     | sim                      = 9999
     /// 10000 ~ 10999
     [<Flags>]
-    type FlowTag    =        
-    |ready_mode                = 10000
-    |auto_mode                 = 10001
-    |manual_mode               = 10002
-    |drive_mode                = 10003
-    |test_mode                 = 10004
-    |error_mode                = 10005
-    |emg_mode                  = 10006
-    |idle_mode                 = 10007
-    |origin_mode               = 10008
-    |homing_mode               = 10009
-    |going_mode                = 10010
-    
-    |auto_btn                  = 10011
-    |manual_btn                = 10012
-    |drive_btn                 = 10013
-    |pause_btn                 = 10014
-    |ready_btn                 = 10015
-    |clear_btn                 = 10016
-    |emg_btn                   = 10017
-    |test_btn                  = 10018
-    |home_btn                  = 10019
+    type FlowTag    =  
+    |auto_btn                  = 10001
+    |manual_btn                = 10002
+    |drive_btn                 = 10003
+    |pause_btn                 = 10004
+    |ready_btn                 = 10005
+    |clear_btn                 = 10006
+    |emg_btn                   = 10007
+    |test_btn                  = 10008
+    |home_btn                  = 10009
 
     |auto_lamp                 = 10021
     |manual_lamp               = 10022
@@ -112,9 +97,24 @@ module TagKindList =
     |test_lamp                 = 10028
     |home_lamp                 = 10029
     
-    | flowStopError                = 10030
-    | flowStopConditionErr         = 10031
-    | flowPause                    = 10032
+    | flowStopError            = 10040
+    | flowStopConditionErr     = 10041
+    | flowPause                = 10042
+
+      //복수 mode  존재 불가
+    |idle_mode                 = 10100
+    |auto_mode                 = 10101
+    |manual_mode               = 10102
+
+    //복수 state  존재 가능
+    |drive_state                = 10103
+    |test_state                 = 10104
+    |error_state                = 10105
+    |emergency_state            = 10106
+    |ready_state                = 10107
+    |origin_state               = 10108
+    |homing_state               = 10109
+    |going_state                = 10110
 
     /// 11000 ~ 11999
     [<Flags>]

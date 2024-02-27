@@ -157,17 +157,17 @@ type TagKindExt =
     static member IsNeedSaveDBLog(x:TagDS) =
         match x with
         |EventSystem (_, _, kind) ->  kind.IsOneOf(  
-                                                      SystemTag.autoState     
-                                                    , SystemTag.manualState   
-                                                    , SystemTag.driveState    
-                                                    , SystemTag.errorState     
-                                                    , SystemTag.emgState      
-                                                    , SystemTag.testState     
-                                                    , SystemTag.readyState    
-                                                    , SystemTag.sysPause
+                                                      SystemTag.autoMonitor     
+                                                    , SystemTag.manualMonitor   
+                                                    , SystemTag.driveMonitor    
+                                                    , SystemTag.errorMonitor     
+                                                    , SystemTag.emergencyMonitor      
+                                                    , SystemTag.testMonitor     
+                                                    , SystemTag.readyMonitor    
+                                                    , SystemTag.pauseMonitor
                                                     , SystemTag.clear_btn)
 
-        |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_mode
+        |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_state
                                                     , FlowTag.flowPause
                                                     , FlowTag.flowStopError
                                                     )

@@ -28,6 +28,7 @@
         <Compile Include="Code.ConvertUtil.fs" />
         <Compile Include="1.Api.fs" />
         <Compile Include="2.FlowOperationMode.fs" />
+        <Compile Include="2.OperationMode.fs" />
         <Compile Include="3.FlowState.fs" />
         <Compile Include="2.Flow.fs" />
         <Compile Include="3.Status.fs" />

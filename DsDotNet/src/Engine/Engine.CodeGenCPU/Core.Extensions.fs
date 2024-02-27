@@ -88,7 +88,7 @@ module ConvertCodeCoreExt =
         member s._dtimes      = s.GetPv<uint8>(SystemTag.datet_s )
 
 
-        member s._stopPause   = s.GetPv<bool>(SystemTag.sysStopPause)
+        member s._pause       = s.GetPv<bool>(SystemTag.sysPause)
         member s._stopErr     = s.GetPv<bool>(SystemTag.sysStopError)
         member s._autoState   = s.GetPv<bool>(SystemTag.autoState   )
         member s._manualState = s.GetPv<bool>(SystemTag.manualState )
@@ -100,6 +100,7 @@ module ConvertCodeCoreExt =
         member s._idleState   = s.GetPv<bool>(SystemTag.idleState  )
         member s._originState = s.GetPv<bool>(SystemTag.originState  )
         member s._homingState = s.GetPv<bool>(SystemTag.homingState  )
+        member s._goingState  = s.GetPv<bool>(SystemTag.goingState  )
 
         member s._tout        = s.GetPv<uint16>(SystemTag.timeout)
         member s._flicker200msec = s.GetPv<bool>(SystemTag.flicker200ms)
@@ -229,6 +230,8 @@ module ConvertCodeCoreExt =
         member f.oop    = getFM(f).GetFlowTag(FlowTag.origin_mode)
         /// hoiming state
         member f.hop    = getFM(f).GetFlowTag(FlowTag.homing_mode)
+        /// going state
+        member f.gop    = getFM(f).GetFlowTag(FlowTag.going_mode)
         
         member f.auto_btn   = getFM(f).GetFlowTag(FlowTag.auto_btn    )
         member f.manual_btn = getFM(f).GetFlowTag(FlowTag.manual_btn  )
@@ -251,8 +254,8 @@ module ConvertCodeCoreExt =
         member f.home_lamp   = getFM(f).GetFlowTag(FlowTag.home_lamp    )
 
         member f.stopError  = getFM(f).GetFlowTag(FlowTag.flowStopError    )
-        member f.stopPause    = getFM(f).GetFlowTag(FlowTag.flowStopPause    )
         member f.stopConditionErr= getFM(f).GetFlowTag(FlowTag.flowStopConditionErr    )
+        member f.pause    = getFM(f).GetFlowTag(FlowTag.flowPause    )
         member f.F = f |> getFM
         member f._on     = f.System._on
         member f._off    = f.System._off
@@ -397,7 +400,7 @@ module ConvertCodeCoreExt =
                
                 if initOnCalls.Contains(c)
                     then 
-                        let homeManuAct = f.mop.Expr <&&> r.V.RT.Expr
+                        let homeManuAct = f.mop.Expr <&&> f.home_btn.Expr
                         let homeAutoAct = f.dop.Expr <&&> r.V.RO.Expr
                         let homeAct =  homeManuAct <||> homeAutoAct
                         homeAct <&&> (!!c.EndAction <&&> !!c.System._sim.Expr)    

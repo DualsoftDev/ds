@@ -36,12 +36,12 @@ type DsSystem with
                 match sysLamp.LampType with
                 | DuAutoLamp      -> s._autoState.Expr   
                 | DuManualLamp    -> s._manualState.Expr 
-                | DuDriveLamp     -> s._driveState.Expr  
-                | DuStopLamp      -> s._stopPause.Expr <||> (s._stopErr.Expr <&&> s._flicker1sec.Expr)
+                | DuDriveLamp     -> (s._driveState.Expr <&&> !!s._goingState.Expr ) <||> (s._goingState.Expr <&&> s._flicker1sec.Expr)
+                | DuStopLamp      -> s._emgState.Expr <||> (s._stopErr.Expr <&&> s._flicker1sec.Expr)
                 | DuEmergencyLamp -> s._emgState.Expr   
                 | DuTestDriveLamp -> s._testState.Expr   
                 | DuReadyLamp     -> s._readyState.Expr 
-                | DuIdleLamp      -> s._idleState.Expr 
+                | DuIdleLamp      -> (s._idleState.Expr <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
                 | DuOriginLamp    -> s._originState.Expr <||> (s._homingState.Expr <&&> s._flicker200msec.Expr)
                 
             let sets = if sysLamp.InTag.IsNull()

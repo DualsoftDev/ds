@@ -164,12 +164,12 @@ type TagKindExt =
                                                     , SystemTag.emgState      
                                                     , SystemTag.testState     
                                                     , SystemTag.readyState    
-                                                    , SystemTag.sysStopPause
+                                                    , SystemTag.sysPause
                                                     , SystemTag.sysStopError
                                                     , SystemTag.clear_btn)
 
         |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_mode
-                                                    , FlowTag.flowStopPause
+                                                    , FlowTag.flowPause
                                                     , FlowTag.flowStopError
                                                     )
 

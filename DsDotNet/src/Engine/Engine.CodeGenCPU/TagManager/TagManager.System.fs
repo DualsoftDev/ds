@@ -74,7 +74,7 @@ module SystemManagerModule =
             tout
 
         let sysStopError    = dsSysBit "sysStopError"   true  sys   SystemTag.sysStopError
-        let sysStopPause    = dsSysBit "sysStopPause"   true  sys   SystemTag.sysStopPause
+        let sysPause        = dsSysBit "sysPause"       true  sys   SystemTag.sysPause
 
         let sysAutoState    = dsSysBit "sysAutoState"   true  sys   SystemTag.autoState   
         let sysManualState  = dsSysBit "sysManualState" true  sys   SystemTag.manualState 
@@ -86,6 +86,7 @@ module SystemManagerModule =
         let sysIdleState    = dsSysBit "sysIdleState"   true  sys   SystemTag.idleState  
         let sysOriginState  = dsSysBit "sysOriginState" true  sys   SystemTag.originState  
         let sysHomingState  = dsSysBit "sysHomingState" true  sys   SystemTag.homingState  
+        let sysGoingState   = dsSysBit "sysGoingState"  true  sys   SystemTag.goingState  
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
         let flicker200msec  = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
@@ -143,7 +144,7 @@ module SystemManagerModule =
             | SystemTag.datet_s         ->    dtimes
             | SystemTag.timeout         ->    tout
             | SystemTag.sysStopError    ->    sysStopError
-            | SystemTag.sysStopPause    ->    sysStopPause
+            | SystemTag.sysPause        ->    sysPause
             
             | SystemTag.autoState          ->    sysAutoState   
             | SystemTag.manualState        ->    sysManualState 
@@ -152,11 +153,12 @@ module SystemManagerModule =
             | SystemTag.emgState           ->    sysEmgState    
             | SystemTag.testState          ->    sysTestState   
             | SystemTag.readyState         ->    sysReadyState  
-            | SystemTag.idleState         ->     sysIdleState
-            | SystemTag.originState       ->     sysOriginState
-            | SystemTag.homingState       ->     sysHomingState
+            | SystemTag.idleState          ->    sysIdleState
+            | SystemTag.originState        ->    sysOriginState
+            | SystemTag.homingState        ->    sysHomingState
+            | SystemTag.goingState         ->    sysGoingState
 
-
+            
             | SystemTag.flicker200ms    -> flicker200msec
             | SystemTag.flicker1s       -> flicker1sec
             | SystemTag.flicker2s       -> flicker2sec

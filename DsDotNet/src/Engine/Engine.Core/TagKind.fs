@@ -51,9 +51,9 @@ module TagKindList =
     | datet_s                  = 0026
     ///systxErrTimetag             
     | timeout                  = 0027
-    ///stopType
+
     | sysStopError             = 0030
-    | sysStopPause             = 0031
+    | sysPause                 = 0031
 
     | autoState                = 0032
     | manualState              = 0033
@@ -65,8 +65,9 @@ module TagKindList =
     | idleState                = 0039
     | originState              = 0040
     | homingState              = 0041
+    | goingState               = 0042
     
-
+    
  
     ///flicker
     | flicker200ms              = 0100
@@ -90,7 +91,8 @@ module TagKindList =
     |idle_mode                 = 10007
     |origin_mode               = 10008
     |homing_mode               = 10009
-
+    |going_mode                = 10010
+    
     |auto_btn                  = 10011
     |manual_btn                = 10012
     |drive_btn                 = 10013
@@ -111,10 +113,9 @@ module TagKindList =
     |test_lamp                 = 10028
     |home_lamp                 = 10029
     
-    ///stopType
     | flowStopError                = 10030
-    | flowStopPause                = 10031
-    | flowStopConditionErr         = 10032
+    | flowStopConditionErr         = 10031
+    | flowPause                    = 10032
 
     /// 11000 ~ 11999
     [<Flags>]

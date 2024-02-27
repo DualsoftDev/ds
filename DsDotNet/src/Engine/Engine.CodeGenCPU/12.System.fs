@@ -26,8 +26,8 @@ type DsSystem with
 
 
     member s.Y3_SystemPause() =
-        let sets =  s.Flows.Select(fun f->f.stopPause).ToOrElseOff()
-        (sets, s._off.Expr) --| (s._stopPause, getFuncName())
+        let sets =  s.Flows.Select(fun f->f.pause).ToOrElseOff()
+        (sets, s._off.Expr) --| (s._pause, getFuncName())
 
 
     member s.Y4_SystemState() =
@@ -42,6 +42,8 @@ type DsSystem with
             (s.Flows.Select(fun f->f.iop).ToAndElseOff(), s._off.Expr) --| (s._idleState   , getFuncName())
             (s.Flows.Select(fun f->f.oop).ToAndElseOff(), s._off.Expr) --| (s._originState , getFuncName())
             (s.Flows.Select(fun f->f.hop).ToOrElseOff() , s._off.Expr) --| (s._homingState , getFuncName())
+            (s.Flows.Select(fun f->f.gop).ToOrElseOff() , s._off.Expr) --| (s._goingState , getFuncName())
+            
         ]
 
     

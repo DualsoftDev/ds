@@ -20,23 +20,20 @@ type DsSystem with
                 yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
         ]
         
-    member s.Y2_SystemError() =
-        let sets =  s.Flows.Collect(fun f-> [f.stopError;f.stopConditionErr]).ToOrElseOff()
-        (sets, s._off.Expr) --| (s._stopErr, getFuncName())
+  
 
-
-    member s.Y3_SystemPause() =
+    member s.Y2_SystemPause() =
         let sets =  s.Flows.Select(fun f->f.pause).ToOrElseOff()
         (sets, s._off.Expr) --| (s._pause, getFuncName())
 
 
-    member s.Y4_SystemState() =
+    member s.Y3_SystemState() =
         [
             (s.Flows.Select(fun f->f.aop).ToAndElseOff(), s._off.Expr) --| (s._autoState   , getFuncName())
             (s.Flows.Select(fun f->f.mop).ToAndElseOff(), s._off.Expr) --| (s._manualState , getFuncName())
             (s.Flows.Select(fun f->f.dop).ToAndElseOff(), s._off.Expr) --| (s._driveState  , getFuncName())
             (s.Flows.Select(fun f->f.eop).ToOrElseOff(), s._off.Expr)  --| (s._errorState  , getFuncName())
-            (s.Flows.Select(fun f->f.eop).ToOrElseOff(), s._off.Expr)  --| (s._emgState    , getFuncName())
+            (s.Flows.Select(fun f->f.emg).ToOrElseOff(), s._off.Expr)  --| (s._emgState    , getFuncName())
             (s.Flows.Select(fun f->f.top).ToAndElseOff(), s._off.Expr) --| (s._testState   , getFuncName())
             (s.Flows.Select(fun f->f.rop).ToAndElseOff(), s._off.Expr) --| (s._readyState  , getFuncName())
             (s.Flows.Select(fun f->f.iop).ToAndElseOff(), s._off.Expr) --| (s._idleState   , getFuncName())

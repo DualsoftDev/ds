@@ -211,11 +211,8 @@ namespace Engine
         [d] = {
             RunMode(_,%Q1) = { F3  }
         }
-        [s] = {
-            StopMode(_,%Q1) = { F3 }
-        }
         [e] = {
-            EmgMode(_,%Q1) = { F3 }
+            ErrorMode(_,%Q1) = { F3 }
         }
         [t] = {
             TestMode(_,%Q1) = { F5 }

@@ -73,7 +73,6 @@ module SystemManagerModule =
             tout.Value <- 15000us
             tout
 
-        let sysStopError    = dsSysBit "sysStopError"   true  sys   SystemTag.sysStopError
         let sysPause        = dsSysBit "sysPause"       true  sys   SystemTag.sysPause
 
         let sysAutoState    = dsSysBit "sysAutoState"   true  sys   SystemTag.autoState   
@@ -143,8 +142,6 @@ module SystemManagerModule =
             | SystemTag.datet_m         ->    dtimem
             | SystemTag.datet_s         ->    dtimes
             | SystemTag.timeout         ->    tout
-            | SystemTag.sysStopError    ->    sysStopError
-            | SystemTag.sysPause        ->    sysPause
             
             | SystemTag.autoState          ->    sysAutoState   
             | SystemTag.manualState        ->    sysManualState 
@@ -157,7 +154,8 @@ module SystemManagerModule =
             | SystemTag.originState        ->    sysOriginState
             | SystemTag.homingState        ->    sysHomingState
             | SystemTag.goingState         ->    sysGoingState
-
+            | SystemTag.sysPause           ->    sysPause
+            
             
             | SystemTag.flicker200ms    -> flicker200msec
             | SystemTag.flicker1s       -> flicker1sec

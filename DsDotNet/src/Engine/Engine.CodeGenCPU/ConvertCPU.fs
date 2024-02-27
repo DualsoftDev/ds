@@ -87,9 +87,8 @@ module ConvertCPU =
                 yield! s.B2_SWButtonOutput()
                 yield! s.B4_SWModeLamp()
 
-            yield s.Y2_SystemError()
-            yield s.Y3_SystemPause()
-            yield! s.Y4_SystemState()
+            yield s.Y2_SystemPause()
+            yield! s.Y3_SystemState()
 
             if RuntimeDS.Package.IsPackagePLC() then
                 yield! s.E1_PLCNotFunc()

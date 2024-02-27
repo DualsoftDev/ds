@@ -37,7 +37,7 @@ type DsSystem with
                 | DuAutoLamp      -> s._autoState.Expr   
                 | DuManualLamp    -> s._manualState.Expr 
                 | DuDriveLamp     -> (s._driveState.Expr <&&> !!s._goingState.Expr ) <||> (s._goingState.Expr <&&> s._flicker1sec.Expr)
-                | DuErrorLamp      -> s._emgState.Expr <||> (s._stopErr.Expr <&&> s._flicker1sec.Expr)
+                | DuErrorLamp      -> s._emgState.Expr <||> (s._errorState.Expr <&&> s._flicker1sec.Expr)
                 | DuTestDriveLamp -> s._testState.Expr   
                 | DuReadyLamp     -> s._readyState.Expr 
                 | DuIdleLamp      -> (s._idleState.Expr <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)

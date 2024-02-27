@@ -106,7 +106,7 @@ module DBLoggerApi =
 
     let getInfoSystem (x:DsSystem) : InfoSystem = 
         let infoSys = InfoSystem.Create(x)
-        updateInfoBase (infoSys, x.QualifiedName, SystemTag.driveState|>int,  SystemTag.sysStopError|>int, SystemTag.sysPause|>int)
+        updateInfoBase (infoSys, x.QualifiedName, SystemTag.driveState|>int,  SystemTag.errorState|>int, SystemTag.sysPause|>int)
         let infoFlows = x.Flows.Select(getInfoFlow)
         infoSys.InfoFlows.AddRange(infoFlows) |>ignore
         infoSys

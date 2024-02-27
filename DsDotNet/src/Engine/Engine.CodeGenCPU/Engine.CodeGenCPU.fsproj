@@ -18,7 +18,12 @@
         <Compile Include="TagManager/TagManager.Api.fs" />
         <Compile Include="TagManager/TagManager.Link.fs" />
         <Compile Include="Expression.Extension.fs" />
-        <Compile Include="Core.Extensions\Core.Extensions.fs" />
+        <Compile Include="Core.Extensions.Utils.fs" />
+        <Compile Include="Core.Extensions\ApiItem.fs" />
+        <Compile Include="Core.Extensions\HwSystemDef, TaskDev.fs" />
+        <Compile Include="Core.Extensions\DsSystem.fs" />
+        <Compile Include="Core.Extensions\Flow.fs" />
+        <Compile Include="Core.Extensions\Vertex, Call, Real.fs" />
         <Compile Include="Code.SpecUtil.fs" />
         <Compile Include="Code.ConvertUtil.fs" />
         <Compile Include="1.Api.fs" />

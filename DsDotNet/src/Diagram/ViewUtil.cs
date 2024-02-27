@@ -145,7 +145,7 @@ public static class ViewUtil
                 {
                     var vv = DicNode[ev.Target];
                     vv.IsError = (bool)ev.Tag.BoxedValue;
-                    vv.ErrorText = ConvertCodeCoreExt.errText(call);
+                    vv.ErrorText = ConvertCoreExtUtils.errText(call);
 
                     var ucView = UcViews.FirstOrDefault(w => w.MasterNode == vv.FlowNode);
                     if (ucView != null)

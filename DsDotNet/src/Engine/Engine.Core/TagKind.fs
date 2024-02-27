@@ -52,7 +52,6 @@ module TagKindList =
     ///systxErrTimetag             
     | timeout                  = 0027
 
-    | sysStopError             = 0030
     | sysPause                 = 0031
 
     | autoState                = 0032

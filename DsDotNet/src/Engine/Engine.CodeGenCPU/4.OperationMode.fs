@@ -33,14 +33,13 @@ type Flow with
         let set = f.emg_btn.Expr <||> f.HWBtnEmgExpr
         let rst = f.clear_btn.Expr
 
-        (set, rst) ==| (f.eop, getFuncName())
+        (set, rst) ==| (f.emg, getFuncName())
 
     member f.O5_StopOperationState() =
-        let setEmg = f.emg_btn.Expr <||> f.HWBtnEmgExpr
         let setDeviceError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
                                 |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
         let setConditionError = f.stopConditionErr.Expr <&&> !!f._sim.Expr
-        let set = setEmg <||> setDeviceError<||> setConditionError
+        let set =  setDeviceError<||> setConditionError
         let rst = f.clear_btn.Expr
            
         (set, rst) ==| (f.eop, getFuncName())

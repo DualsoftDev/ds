@@ -295,43 +295,43 @@ public partial class UcView : UserControl
                 else
                 {
                     nNode.Attr.Shape = Shape.Box;
-                    if (viewNode.LampType.Value == LampType.DuAutoLamp)
+                    if (viewNode.LampType.Value == LampType.DuAutoModeLamp)
                     {
                         nNode.Attr.FillColor = Color.DodgerBlue;
                     }
 
-                    if (viewNode.LampType.Value == LampType.DuManualLamp)
+                    if (viewNode.LampType.Value == LampType.DuManualModeLamp)
                     {
                         nNode.Attr.FillColor = Color.DarkSlateBlue;
                     }
 
-                    if (viewNode.LampType.Value == LampType.DuDriveLamp)
+                    if (viewNode.LampType.Value == LampType.DuDriveStateLamp)
                     {
                         nNode.Attr.FillColor = Color.DarkGoldenrod;
                     }
 
-                    if (viewNode.LampType.Value == LampType.DuErrorLamp)
+                    if (viewNode.LampType.Value == LampType.DuErrorStateLamp)
                     {
                         nNode.Attr.FillColor = Color.Firebrick;
                     }
 
               
 
-                    if (viewNode.LampType.Value == LampType.DuTestDriveLamp)
+                    if (viewNode.LampType.Value == LampType.DuTestDriveStateLamp)
                     {
                         nNode.Attr.FillColor = Color.CadetBlue;
                     }
 
-                    if (viewNode.LampType.Value == LampType.DuReadyLamp)
+                    if (viewNode.LampType.Value == LampType.DuReadyStateLamp)
                     {
                         nNode.Attr.FillColor = Color.Green;
                     }
 
-                    if (viewNode.LampType.Value == LampType.DuIdleLamp)
+                    if (viewNode.LampType.Value == LampType.DuIdleModeLamp)
                     {
                         nNode.Attr.FillColor = Color.DarkGray;
                     }
-                    if (viewNode.LampType.Value == LampType.DuOriginLamp)
+                    if (viewNode.LampType.Value == LampType.DuOriginStateLamp)
                     {
                         nNode.Attr.FillColor = Color.DarkGreen;
                     }

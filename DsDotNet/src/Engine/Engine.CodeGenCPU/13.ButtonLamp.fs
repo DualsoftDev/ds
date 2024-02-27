@@ -34,14 +34,14 @@ type DsSystem with
         for sysLamp in s.HWLamps.Filter(fun f-> f.IsGlobalSystemHw) do
             let modeBit =
                 match sysLamp.LampType with
-                | DuAutoLamp      -> s._autoState.Expr   
-                | DuManualLamp    -> s._manualState.Expr 
-                | DuDriveLamp     -> (s._driveState.Expr <&&> !!s._goingState.Expr ) <||> (s._goingState.Expr <&&> s._flicker1sec.Expr)
-                | DuErrorLamp      -> s._emgState.Expr <||> (s._errorState.Expr <&&> s._flicker1sec.Expr)
-                | DuTestDriveLamp -> s._testState.Expr   
-                | DuReadyLamp     -> s._readyState.Expr 
-                | DuIdleLamp      -> (s._idleState.Expr <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
-                | DuOriginLamp    -> s._originState.Expr <||> (s._homingState.Expr <&&> s._flicker200msec.Expr)
+                | DuAutoModeLamp      -> s._autoMonitor.Expr   
+                | DuManualModeLamp    -> s._manualMonitor.Expr 
+                | DuDriveStateLamp     -> (s._driveMonitor.Expr <&&> !!s._goingMonitor.Expr ) <||> (s._goingMonitor.Expr <&&> s._flicker1sec.Expr)
+                | DuErrorStateLamp      -> s._emgState.Expr <||> (s._errorMonitor.Expr <&&> s._flicker1sec.Expr)
+                | DuTestDriveStateLamp -> s._testMonitor.Expr   
+                | DuReadyStateLamp     -> s._readyMonitor.Expr 
+                | DuIdleModeLamp      -> (s._idleMonitor.Expr <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
+                | DuOriginStateLamp    -> s._originMonitor.Expr <||> (s._homingMonitor.Expr <&&> s._flicker200msec.Expr)
                 
             let sets = if sysLamp.InTag.IsNull()
                        then modeBit  
@@ -56,14 +56,14 @@ type DsSystem with
             let modeBit =
                 let f = lamp.SettingFlows.Head()   //램프는 하나의 Flow에 타입별로 하나씩  
                 match lamp.LampType with
-                | DuAutoLamp      -> f.aop
-                | DuManualLamp    -> f.mop
-                | DuDriveLamp     -> f.dop
-                | DuErrorLamp     -> f.eop
-                | DuTestDriveLamp -> f.top
-                | DuReadyLamp     -> f.rop
-                | DuIdleLamp      -> f.iop
-                | DuOriginLamp    -> f.oop
+                | DuIdleModeLamp      -> f.iop
+                | DuAutoModeLamp      -> f.aop
+                | DuManualModeLamp    -> f.mop
+                | DuDriveStateLamp     -> f.d_st
+                | DuErrorStateLamp     -> f.e_st
+                | DuTestDriveStateLamp -> f.t_st
+                | DuReadyStateLamp     -> f.r_st
+                | DuOriginStateLamp    -> f.o_st
 
 
             let sets = if lamp.InTag.IsNull()

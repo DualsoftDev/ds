@@ -24,29 +24,25 @@ module ConvertCpuFlow =
 
     type Flow with
 
-        /// READY operation mode
-        member f.rop    = getFM(f).GetFlowTag(FlowTag.ready_mode    )
+        
+        /// IDLE operation mode
+        member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_mode)
         /// AUTO operation mode
         member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_mode     )
         /// MANUAL operation mode
         member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_mode   )
-        /// DRIVE operation mode
-        member f.dop    = getFM(f).GetFlowTag(FlowTag.drive_mode    )
-        /// TEST  operation mode (시운전)
-        member f.top    = getFM(f).GetFlowTag(FlowTag.test_mode     )
-        /// Error State
-        member f.eop    = getFM(f).GetFlowTag(FlowTag.error_mode)
-        /// IDLE state
-        member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_mode)
-        /// origin state
-        member f.oop    = getFM(f).GetFlowTag(FlowTag.origin_mode)
-        /// hoiming state
-        member f.hop    = getFM(f).GetFlowTag(FlowTag.homing_mode)
-        /// going state
-        member f.gop    = getFM(f).GetFlowTag(FlowTag.going_mode)
-        /// emergency state
-        member f.emg    = getFM(f).GetFlowTag(FlowTag.emg_mode)
-        
+
+
+
+        member f.d_st    = getFM(f).GetFlowTag(FlowTag.drive_state    )
+        member f.t_st    = getFM(f).GetFlowTag(FlowTag.test_state     )
+        member f.e_st    = getFM(f).GetFlowTag(FlowTag.error_state)
+        member f.emg_st    = getFM(f).GetFlowTag(FlowTag.emergency_state)
+        member f.r_st    = getFM(f).GetFlowTag(FlowTag.ready_state    )
+        member f.o_st    = getFM(f).GetFlowTag(FlowTag.origin_state)
+        member f.h_st    = getFM(f).GetFlowTag(FlowTag.homing_state)
+        member f.g_st    = getFM(f).GetFlowTag(FlowTag.going_state)
+  
         member f.auto_btn   = getFM(f).GetFlowTag(FlowTag.auto_btn    )
         member f.manual_btn = getFM(f).GetFlowTag(FlowTag.manual_btn  )
         member f.drive_btn  = getFM(f).GetFlowTag(FlowTag.drive_btn   )

@@ -158,14 +158,14 @@ module ImportIOTable =
                         | XlsClearBTN -> updateBtn (row, BtnType.DuClearBTN, tableIO, page)
                         | XlsHomeBTN -> updateBtn (row, BtnType.DuHomeBTN, tableIO, page)
 
-                        | XlsAutoLamp -> updateLamp (row, LampType.DuAutoLamp, tableIO, page)
-                        | XlsManualLamp -> updateLamp (row, LampType.DuManualLamp, tableIO, page)
-                        | XlsDriveLamp -> updateLamp (row, LampType.DuDriveLamp, tableIO, page)
-                        | XlsErrorLamp -> updateLamp (row, LampType.DuErrorLamp, tableIO, page)
-                        | XlsTestLamp -> updateLamp (row, LampType.DuTestDriveLamp, tableIO, page)
-                        | XlsReadyLamp -> updateLamp (row, LampType.DuReadyLamp, tableIO, page)
-                        | XlsIdleLamp -> updateLamp (row, LampType.DuIdleLamp, tableIO, page)
-                        | XlsHomingLamp -> updateLamp (row, LampType.DuOriginLamp, tableIO, page)
+                        | XlsAutoLamp -> updateLamp (row, LampType.DuAutoModeLamp, tableIO, page)
+                        | XlsManualLamp -> updateLamp (row, LampType.DuManualModeLamp, tableIO, page)
+                        | XlsDriveLamp -> updateLamp (row, LampType.DuDriveStateLamp, tableIO, page)
+                        | XlsErrorLamp -> updateLamp (row, LampType.DuErrorStateLamp, tableIO, page)
+                        | XlsTestLamp -> updateLamp (row, LampType.DuTestDriveStateLamp, tableIO, page)
+                        | XlsReadyLamp -> updateLamp (row, LampType.DuReadyStateLamp, tableIO, page)
+                        | XlsIdleLamp -> updateLamp (row, LampType.DuIdleModeLamp, tableIO, page)
+                        | XlsHomingLamp -> updateLamp (row, LampType.DuOriginStateLamp, tableIO, page)
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
 

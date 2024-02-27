@@ -59,7 +59,7 @@ type ApiItemManager with
         [
             for coin in coins do
                 let rstNormal = coin._off.Expr
-                let rop = coin.Parent.GetFlow().rop.Expr
+                let rop = coin.Parent.GetFlow().r_st.Expr
                 for td in coin.TaskDevs do
                     let api = td.ApiItem
                     if api.TXs.any() && td.OutAddress <> TextSkip

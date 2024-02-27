@@ -32,14 +32,17 @@ module DsType =
 
     /// Represents different mode types
     type LampType =
-        | DuAutoLamp      // Automatic button lamp
-        | DuManualLamp    // Manual button lamp
-        | DuDriveLamp     // Drive lamp
-        | DuErrorLamp     // Error lamp
-        | DuTestDriveLamp // Test Drive lamp
-        | DuReadyLamp     // Ready lamp
-        | DuIdleLamp      // Idle lamp
-        | DuOriginLamp    // Homing lamp
+        | DuIdleModeLamp      // Idle mode lamp
+        | DuAutoModeLamp      // Automatic mode  lamp
+        | DuManualModeLamp    // Manual mode  lamp
+
+        | DuDriveStateLamp     // Drive lamp
+        | DuTestDriveStateLamp // Test Drive lamp
+        | DuErrorStateLamp     // Error lamp
+        | DuEmergencyStateLamp     // emergency_state lamp
+        | DuReadyStateLamp     // ready_state lamp
+        | DuOriginStateLamp    // origin_state lamp
+        
 
     /// Represents different condition types
     type ConditionType =

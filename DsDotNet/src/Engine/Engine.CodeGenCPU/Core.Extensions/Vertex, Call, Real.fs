@@ -98,7 +98,7 @@ module ConvertCpuVertex =
                 if initOnCalls.Contains(c)
                     then 
                         let homeManuAct = f.mop.Expr <&&> f.home_btn.Expr
-                        let homeAutoAct = f.dop.Expr <&&> rv.RO.Expr
+                        let homeAutoAct = f.d_st.Expr <&&> rv.RO.Expr
                         let homeAct =  homeManuAct <||> homeAutoAct
                         homeAct <&&> (!!c.EndAction <&&> !!c.System._sim.Expr)    
                                      <||>

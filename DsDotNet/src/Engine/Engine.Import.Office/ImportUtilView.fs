@@ -108,28 +108,28 @@ module ImportViewModule =
         let newNode = ViewNode("Lamps", VLAMP)
 
         system.AutoHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuAutoLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuAutoModeLamp)) |> ignore)
 
         system.ManualHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuManualLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuManualModeLamp)) |> ignore)
 
         system.DriveHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveStateLamp)) |> ignore)
 
         system.ErrorHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuErrorLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuErrorStateLamp)) |> ignore)
 
         system.TestHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuTestDriveLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuTestDriveStateLamp)) |> ignore)
 
         system.ReadyHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuReadyLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuReadyStateLamp)) |> ignore)
 
         system.IdleHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuIdleLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuIdleModeLamp)) |> ignore)
 
         system.OriginHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuOriginLamp)) |> ignore)
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuOriginStateLamp)) |> ignore)
 
         if newNode.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore

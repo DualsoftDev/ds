@@ -27,9 +27,10 @@
         <Compile Include="Code.SpecUtil.fs" />
         <Compile Include="Code.ConvertUtil.fs" />
         <Compile Include="1.Api.fs" />
+        <Compile Include="2.FlowOperationMode.fs" />
+        <Compile Include="3.FlowState.fs" />
         <Compile Include="2.Flow.fs" />
         <Compile Include="3.Status.fs" />
-        <Compile Include="4.OperationMode.fs" />
         <Compile Include="5.Monitor.fs" />
         <Compile Include="6.Real.fs" />
         <Compile Include="7.Call.fs" />

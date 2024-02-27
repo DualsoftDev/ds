@@ -98,8 +98,8 @@ module ConvertCodeCoreExt =
         member s._testState   = s.GetPv<bool>(SystemTag.testState   )
         member s._readyState  = s.GetPv<bool>(SystemTag.readyState  )
         member s._idleState   = s.GetPv<bool>(SystemTag.idleState  )
+        member s._originState = s.GetPv<bool>(SystemTag.originState  )
         member s._homingState = s.GetPv<bool>(SystemTag.homingState  )
-
 
         member s._tout        = s.GetPv<uint16>(SystemTag.timeout)
         member s._flicker200msec = s.GetPv<bool>(SystemTag.flicker200ms)
@@ -225,9 +225,10 @@ module ConvertCodeCoreExt =
         member f.eop    = getFM(f).GetFlowTag(FlowTag.emg_mode)
         /// IDLE state
         member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_mode)
-        /// Homing state
+        /// origin state
+        member f.oop    = getFM(f).GetFlowTag(FlowTag.origin_mode)
+        /// hoiming state
         member f.hop    = getFM(f).GetFlowTag(FlowTag.homing_mode)
-
         
         member f.auto_btn   = getFM(f).GetFlowTag(FlowTag.auto_btn    )
         member f.manual_btn = getFM(f).GetFlowTag(FlowTag.manual_btn  )

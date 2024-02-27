@@ -35,12 +35,13 @@ type DsSystem with
             (s.Flows.Select(fun f->f.aop).ToAndElseOff(), s._off.Expr) --| (s._autoState   , getFuncName())
             (s.Flows.Select(fun f->f.mop).ToAndElseOff(), s._off.Expr) --| (s._manualState , getFuncName())
             (s.Flows.Select(fun f->f.dop).ToAndElseOff(), s._off.Expr) --| (s._driveState  , getFuncName())
-            (s.Flows.Select(fun f->f.sop).ToAndElseOff(), s._off.Expr) --| (s._stopState   , getFuncName())
-            (s.Flows.Select(fun f->f.eop).ToAndElseOff(), s._off.Expr) --| (s._emgState    , getFuncName())
+            (s.Flows.Select(fun f->f.sop).ToOrElseOff(), s._off.Expr)  --| (s._stopState   , getFuncName())
+            (s.Flows.Select(fun f->f.eop).ToOrElseOff(), s._off.Expr)  --| (s._emgState    , getFuncName())
             (s.Flows.Select(fun f->f.top).ToAndElseOff(), s._off.Expr) --| (s._testState   , getFuncName())
             (s.Flows.Select(fun f->f.rop).ToAndElseOff(), s._off.Expr) --| (s._readyState  , getFuncName())
             (s.Flows.Select(fun f->f.iop).ToAndElseOff(), s._off.Expr) --| (s._idleState   , getFuncName())
-            (s.Flows.Select(fun f->f.hop).ToAndElseOff(), s._off.Expr) --| (s._homingState , getFuncName())
+            (s.Flows.Select(fun f->f.oop).ToAndElseOff(), s._off.Expr) --| (s._originState , getFuncName())
+            (s.Flows.Select(fun f->f.hop).ToOrElseOff() , s._off.Expr) --| (s._homingState , getFuncName())
         ]
 
     

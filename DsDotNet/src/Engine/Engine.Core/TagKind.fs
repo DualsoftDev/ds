@@ -63,7 +63,8 @@ module TagKindList =
     | testState                = 0037
     | readyState               = 0038
     | idleState                = 0039
-    | homingState              = 0040
+    | originState              = 0040
+    | homingState              = 0041
     
 
  
@@ -87,7 +88,8 @@ module TagKindList =
     |stop_mode                 = 10005
     |emg_mode                  = 10006
     |idle_mode                 = 10007
-    |homing_mode               = 10008
+    |origin_mode               = 10008
+    |homing_mode               = 10009
 
     |auto_btn                  = 10011
     |manual_btn                = 10012

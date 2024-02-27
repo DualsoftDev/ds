@@ -239,7 +239,7 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("e", system.EmergencyHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("r", system.ReadyHWLamps.Cast<HwSystemDef>())
-                yield HwSystemToDs("h", system.HomingHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("o", system.OriginHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("i", system.IdleHWLamps.Cast<HwSystemDef>())
 
                 yield $"{tab}{rb}"

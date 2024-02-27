@@ -121,7 +121,7 @@ module EtcListenerModule =
                         | :? TestBlockContext -> DuTestDriveLamp
                         | :? ReadyBlockContext -> DuReadyLamp
                         | :? IdleBlockContext -> DuIdleLamp
-                        | :? HomeBlockContext -> DuHomingLamp
+                        | :? OriginBlockContext -> DuOriginLamp
                         | _ -> failwith $"lamp type error {fstType}"
 
                     let lampDefs = first.Descendants<HwSysItemDefContext>().ToArray()

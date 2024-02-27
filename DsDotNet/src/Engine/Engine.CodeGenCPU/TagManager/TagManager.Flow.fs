@@ -20,8 +20,9 @@ module FlowManagerModule =
         let f_dop        = cpv $"DOP_{fn}"     FlowTag.drive_mode              // Drive Operation Mode
         let f_top        = cpv $"TOP_{fn}"     FlowTag.test_mode         // Test  Operation Mode (시운전)
         let f_iop        = cpv $"IOP_{fn}"     FlowTag.idle_mode              // Idle  Operation Mode
+        let f_oop        = cpv $"OOP_{fn}"     FlowTag.origin_mode              // origin   Operation Mode
         let f_hop        = cpv $"HOP_{fn}"     FlowTag.homing_mode              // homing   Operation Mode
-
+        
         //let f_readycondi = cpv $"SCR_{fn}"     FlowTag.readycondi_btn             //system condition ready
         //let f_drivecondi = cpv $"SCD_{fn}"     FlowTag.drivecondi_btn           //system condition drive
         let f_auto_btn       = cpv $"auto_btn_{fn}"    FlowTag.auto_btn       
@@ -64,6 +65,7 @@ module FlowManagerModule =
                 | FlowTag.stop_mode         -> f_sop
                 | FlowTag.emg_mode          -> f_eop
                 | FlowTag.idle_mode         -> f_iop
+                | FlowTag.origin_mode       -> f_oop
                 | FlowTag.homing_mode       -> f_hop
                 
 

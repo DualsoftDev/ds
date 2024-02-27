@@ -84,6 +84,7 @@ module SystemManagerModule =
         let sysTestState    = dsSysBit "sysTestState"   true  sys   SystemTag.testState   
         let sysReadyState   = dsSysBit "sysReadyState"  true  sys   SystemTag.readyState  
         let sysIdleState    = dsSysBit "sysIdleState"   true  sys   SystemTag.idleState  
+        let sysOriginState  = dsSysBit "sysOriginState" true  sys   SystemTag.originState  
         let sysHomingState  = dsSysBit "sysHomingState" true  sys   SystemTag.homingState  
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
@@ -152,6 +153,7 @@ module SystemManagerModule =
             | SystemTag.testState          ->    sysTestState   
             | SystemTag.readyState         ->    sysReadyState  
             | SystemTag.idleState         ->     sysIdleState
+            | SystemTag.originState       ->     sysOriginState
             | SystemTag.homingState       ->     sysHomingState
 
 

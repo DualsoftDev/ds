@@ -63,7 +63,14 @@ type Flow with
 
         (set, rst) --| (f.iop, getFuncName())
 
-    member f.O9_homingOperationMode() =
+    member f.O9_originOperationMode() =
+        let set = f.Graph.Vertices.OfType<Real>().Select(getVM)
+                   .Select(fun r-> r.OG).ToAndElseOn()
+        let rst = f._off.Expr
+
+        (set, rst) --| (f.oop, getFuncName())   
+
+    member f.O10_homingOperationMode() =
         let set = f.home_btn.Expr <||> f.HWBtnHomeExpr
         let rst = f._off.Expr
 

@@ -40,7 +40,7 @@ module DsType =
         | DuTestDriveLamp // Test Drive lamp
         | DuReadyLamp     // Ready lamp
         | DuIdleLamp      // Idle lamp
-        | DuHomingLamp      // Homing lamp
+        | DuOriginLamp      // Homing lamp
 
     /// Represents different condition types
     type ConditionType =

@@ -42,7 +42,7 @@ type DsSystem with
                 | DuTestDriveLamp -> s._testState.Expr   
                 | DuReadyLamp     -> s._readyState.Expr 
                 | DuIdleLamp      -> s._idleState.Expr 
-                | DuHomingLamp    -> s._homingState.Expr 
+                | DuOriginLamp    -> s._originState.Expr <||> (s._homingState.Expr <&&> s._flicker200msec.Expr)
                 
             let sets = if sysLamp.InTag.IsNull()
                        then modeBit  
@@ -55,7 +55,7 @@ type DsSystem with
 
         for lamp in s.HWLamps.Filter(fun f-> not(f.IsGlobalSystemHw)) do
             let modeBit =
-                let f = lamp.SettingFlows.Head()   //램프는 하나의 Flow에 타입별로 하나씩   Engine.Parser.FS 예외체크중   
+                let f = lamp.SettingFlows.Head()   //램프는 하나의 Flow에 타입별로 하나씩  
                 match lamp.LampType with
                 | DuAutoLamp      -> f.aop
                 | DuManualLamp    -> f.mop
@@ -65,7 +65,7 @@ type DsSystem with
                 | DuTestDriveLamp -> f.top
                 | DuReadyLamp     -> f.rop
                 | DuIdleLamp      -> f.iop
-                | DuHomingLamp    -> f.hop
+                | DuOriginLamp    -> f.oop
 
 
             let sets = if lamp.InTag.IsNull()

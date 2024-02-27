@@ -53,6 +53,8 @@ R_IN: 'r_in';
 R: 'r';
 I_IN: 'i_in';
 I: 'i';
+O_IN: 'o_in';
+O: 'o';
 VARIABLES: 'variables';
 COMMANDS: 'commands';
 OBSERVES: 'observes';
@@ -305,7 +307,7 @@ interfaceBlock
     linkPhrase: identifier12;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
-categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBlock|testBlock|homeBlock|readyBlock|idleBlock;
+categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBlock|testBlock|homeBlock|readyBlock|idleBlock|originBlock;
     autoBlock      :'[' ('a_in'|'a') ']' EQ categoryBlock;
     manualBlock    :'[' ('m_in'|'m') ']' EQ categoryBlock;
     driveBlock     :'[' ('d_in'|'d') ']' EQ categoryBlock;
@@ -316,7 +318,8 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBl
     homeBlock      :'[' ('h_in'|'h') ']' EQ categoryBlock;
     readyBlock     :'[' ('r_in'|'r') ']' EQ categoryBlock;
     idleBlock      :'[' ('i_in'|'i') ']' EQ categoryBlock;
-
+    originBlock    :'[' ('o_in'|'o') ']' EQ categoryBlock;
+    
     categoryBlock: LBRACE (() | (hwSysItemDef|funcSet)*) RBRACE;
 
     hwSysItemDef: hwSysItemNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;

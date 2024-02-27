@@ -334,7 +334,7 @@ public partial class UcView : UserControl
                     {
                         nNode.Attr.FillColor = Color.DarkGray;
                     }
-                    if (viewNode.LampType.Value == LampType.DuHomingLamp)
+                    if (viewNode.LampType.Value == LampType.DuOriginLamp)
                     {
                         nNode.Attr.FillColor = Color.DarkGreen;
                     }

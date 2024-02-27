@@ -116,11 +116,8 @@ module ImportViewModule =
         system.DriveHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveLamp)) |> ignore)
 
-        system.StopHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuStopLamp)) |> ignore)
-
-        system.EmergencyHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuEmergencyLamp)) |> ignore)
+        system.ErrorHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuErrorLamp)) |> ignore)
 
         system.TestHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuTestDriveLamp)) |> ignore)
@@ -150,8 +147,8 @@ module ImportViewModule =
         system.DriveHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveBTN)) |> ignore)
 
-        system.StopHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuStopBTN)) |> ignore)
+        system.PauseHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuPauseBTN)) |> ignore)
 
         system.ClearHWButtons.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuClearBTN)) |> ignore)

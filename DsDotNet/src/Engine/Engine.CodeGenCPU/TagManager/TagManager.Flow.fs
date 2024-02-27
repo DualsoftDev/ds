@@ -15,8 +15,7 @@ module FlowManagerModule =
         let f_rop        = cpv $"ROP_{fn}"     FlowTag.ready_mode             // Ready Operation State
         let f_aop        = cpv $"AOP_{fn}"     FlowTag.auto_mode              // Auto Operation State
         let f_mop        = cpv $"MOP_{fn}"     FlowTag.manual_mode            // Manual Operation State
-        let f_sop        = cpv $"SOP_{fn}"     FlowTag.stop_mode             // Stop Operation State
-        let f_eop        = cpv $"EOP_{fn}"     FlowTag.emg_mode              // Emergency Operation State
+        let f_eop        = cpv $"EOP_{fn}"     FlowTag.error_mode             // error Operation State
         let f_dop        = cpv $"DOP_{fn}"     FlowTag.drive_mode              // Drive Operation Mode
         let f_top        = cpv $"TOP_{fn}"     FlowTag.test_mode         // Test  Operation Mode (시운전)
         let f_iop        = cpv $"IOP_{fn}"     FlowTag.idle_mode              // Idle  Operation Mode
@@ -24,12 +23,16 @@ module FlowManagerModule =
         let f_hop        = cpv $"HOP_{fn}"     FlowTag.homing_mode              // homing   Operation Mode
         let f_gop        = cpv $"GOP_{fn}"     FlowTag.going_mode              // going   Operation Mode
         
+
+        let f_emg        = cpv $"EOP_{fn}"     FlowTag.emg_mode             // Emergency Operation State
+
+
         //let f_readycondi = cpv $"SCR_{fn}"     FlowTag.readycondi_btn             //system condition ready
         //let f_drivecondi = cpv $"SCD_{fn}"     FlowTag.drivecondi_btn           //system condition drive
         let f_auto_btn       = cpv $"auto_btn_{fn}"    FlowTag.auto_btn       
         let f_manual_btn     = cpv $"manual_btn_{fn}"  FlowTag.manual_btn     
         let f_drive_btn      = cpv $"drive_btn_{fn}"   FlowTag.drive_btn
-        let f_stop_btn       = cpv $"stop_btn_{fn}"    FlowTag.stop_btn
+        let f_pause_btn       = cpv $"pause_btn_{fn}"    FlowTag.pause_btn
         let f_ready_btn      = cpv $"ready_btn_{fn}"   FlowTag.ready_btn
         let f_clear_btn      = cpv $"clear_btn_{fn}"   FlowTag.clear_btn
         let f_emg_btn        = cpv $"emg_btn_{fn}"     FlowTag.emg_btn
@@ -39,7 +42,7 @@ module FlowManagerModule =
         let f_auto_lamp      = cpv $"auto_lamp_{fn}"    FlowTag.auto_lamp       
         let f_manual_lamp    = cpv $"manual_lamp_{fn}"  FlowTag.manual_lamp     
         let f_drive_lamp     = cpv $"drive_lamp_{fn}"   FlowTag.drive_lamp
-        let f_stop_lamp      = cpv $"stop_lamp_{fn}"    FlowTag.stop_lamp
+        let f_pause_lamp      = cpv $"pause_lamp_{fn}"    FlowTag.pause_lamp
         let f_ready_lamp     = cpv $"ready_lamp_{fn}"   FlowTag.ready_lamp
         let f_clear_lamp     = cpv $"clear_lamp_{fn}"   FlowTag.clear_lamp
         let f_emg_lamp       = cpv $"emg_lamp_{fn}"     FlowTag.emg_lamp
@@ -63,18 +66,18 @@ module FlowManagerModule =
                 | FlowTag.manual_mode       -> f_mop
                 | FlowTag.drive_mode        -> f_dop
                 | FlowTag.test_mode         -> f_top
-                | FlowTag.stop_mode         -> f_sop
-                | FlowTag.emg_mode          -> f_eop
+                | FlowTag.error_mode        -> f_eop
                 | FlowTag.idle_mode         -> f_iop
                 | FlowTag.origin_mode       -> f_oop
                 | FlowTag.homing_mode       -> f_hop
                 | FlowTag.going_mode        -> f_gop
+                | FlowTag.emg_mode          -> f_emg
                 
-
+                
                 | FlowTag.auto_btn        -> f_auto_btn
                 | FlowTag.manual_btn      -> f_manual_btn
                 | FlowTag.drive_btn       -> f_drive_btn
-                | FlowTag.stop_btn        -> f_stop_btn
+                | FlowTag.pause_btn       -> f_pause_btn
                 | FlowTag.ready_btn       -> f_ready_btn
                 | FlowTag.clear_btn       -> f_clear_btn
                 | FlowTag.emg_btn         -> f_emg_btn
@@ -84,7 +87,7 @@ module FlowManagerModule =
                 | FlowTag.auto_lamp        -> f_auto_lamp
                 | FlowTag.manual_lamp      -> f_manual_lamp
                 | FlowTag.drive_lamp       -> f_drive_lamp
-                | FlowTag.stop_lamp        -> f_stop_lamp
+                | FlowTag.pause_lamp       -> f_pause_lamp
                 | FlowTag.ready_lamp       -> f_ready_lamp
                 | FlowTag.clear_lamp       -> f_clear_lamp
                 | FlowTag.emg_lamp         -> f_emg_lamp

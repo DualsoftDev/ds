@@ -102,17 +102,18 @@ module HmiPackageModule =
         Name    : string
         AutoManualSelectLampMode : HMISelectLampMode      
         DrivePushLampMode        : HMIPushLampMode     
-        StopPushLampMode         : HMIPushLampMode      
         EmergencyPushLampMode    : HMIPushLampMode 
         TestPushLampMode         : HMIPushLampMode      
         ReadyPushLampMode        : HMIPushLampMode  
 
         ClearPushLamp            : HMIPushLamp     
         HomePushLamp             : HMIPushLamp    
+        PausePushLamp            : HMIPushLamp 
         
         IdleLampMode             : HMILamp 
-        OriginLampMode            : HMILamp 
-        
+        OriginLampMode           : HMILamp 
+        ErrorLampMode            : HMILamp 
+
         Reals            : HMIReal array      
     } with
         member x.CollectTags () =
@@ -120,14 +121,15 @@ module HmiPackageModule =
                 yield! getPushLampModeTags (fst x.AutoManualSelectLampMode)
                 yield! getPushLampModeTags (snd x.AutoManualSelectLampMode)
                 yield! getPushLampModeTags x.DrivePushLampMode
-                yield! getPushLampModeTags x.StopPushLampMode
                 yield! getPushLampModeTags x.EmergencyPushLampMode
                 yield! getPushLampModeTags x.TestPushLampMode
                 yield! getPushLampModeTags x.ReadyPushLampMode
                 yield! getPushLampTags x.ClearPushLamp
                 yield! getPushLampTags x.HomePushLamp
+                yield! getPushLampTags x.PausePushLamp
                 yield x.IdleLampMode
                 yield x.OriginLampMode
+                yield x.ErrorLampMode
 
                 yield! x.Reals |> Seq.collect (fun r->r.CollectTags())
             }
@@ -138,7 +140,7 @@ module HmiPackageModule =
         Name : string
         AutoManualSelectLamp  : HMISelectLamp      
         DrivePushLamp         : HMIPushLamp     
-        StopPushLamp          : HMIPushLamp      
+        PausePushLamp         : HMIPushLamp      
         ClearPushLamp         : HMIPushLamp     
         EmergencyPushLamp     : HMIPushLamp 
         TestPushLamp          : HMIPushLamp      
@@ -152,7 +154,7 @@ module HmiPackageModule =
                 yield! getPushLampTags (fst x.AutoManualSelectLamp)
                 yield! getPushLampTags (snd x.AutoManualSelectLamp)
                 yield! getPushLampTags x.DrivePushLamp
-                yield! getPushLampTags x.StopPushLamp
+                yield! getPushLampTags x.PausePushLamp
                 yield! getPushLampTags x.ClearPushLamp
                 yield! getPushLampTags x.EmergencyPushLamp
                 yield! getPushLampTags x.TestPushLamp

@@ -42,11 +42,11 @@ type DsSystem with
                     yield (set, flow.manual_btn.Expr) ==| (flow.auto_btn, getFuncName())
                     yield (set, rst) --| (flow.drive_btn, getFuncName())
 
-            for btn in s.StopHWButtons do
+            for btn in s.PauseHWButtons do
                 let set = btn.ActionINFunc
                 for flow in btn.SettingFlows do
                     yield (set <||> flow.home_btn.Expr, flow.clear_btn.Expr <&&> !!flow.home_btn.Expr) ==| (flow.manual_btn, getFuncName())
-                    yield (set, rst) --| (flow.stop_btn, getFuncName())
+                    yield (set, rst) --| (flow.pause_btn, getFuncName())
 
             for btn in s.ClearHWButtons do
                 let set = btn.ActionINFunc

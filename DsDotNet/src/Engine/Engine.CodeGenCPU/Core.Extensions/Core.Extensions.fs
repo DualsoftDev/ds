@@ -62,7 +62,7 @@ module ConvertCodeCoreExt =
         member s._auto_btn    = s.GetPv<bool>(SystemTag.auto_btn)
         member s._manual_btn  = s.GetPv<bool>(SystemTag.manual_btn)
         member s._drive_btn   = s.GetPv<bool>(SystemTag.drive_btn)
-        member s._stop_btn    = s.GetPv<bool>(SystemTag.stop_btn)
+        member s._pause_btn   = s.GetPv<bool>(SystemTag.pause_btn)
         member s._emg_btn     = s.GetPv<bool>(SystemTag.emg_btn)
         member s._test_btn    = s.GetPv<bool>(SystemTag.test_btn )
         member s._ready_btn   = s.GetPv<bool>(SystemTag.ready_btn)
@@ -72,7 +72,7 @@ module ConvertCodeCoreExt =
         member s._auto_lamp    = s.GetPv<bool>(SystemTag.auto_lamp)
         member s._manual_lamp  = s.GetPv<bool>(SystemTag.manual_lamp)
         member s._drive_lamp   = s.GetPv<bool>(SystemTag.drive_lamp)
-        member s._stop_lamp    = s.GetPv<bool>(SystemTag.stop_lamp)
+        member s._pause_lamp   = s.GetPv<bool>(SystemTag.pause_lamp)
         member s._emg_lamp     = s.GetPv<bool>(SystemTag.emg_lamp)
         member s._test_lamp    = s.GetPv<bool>(SystemTag.test_lamp )
         member s._ready_lamp   = s.GetPv<bool>(SystemTag.ready_lamp)
@@ -93,7 +93,7 @@ module ConvertCodeCoreExt =
         member s._autoState   = s.GetPv<bool>(SystemTag.autoState   )
         member s._manualState = s.GetPv<bool>(SystemTag.manualState )
         member s._driveState  = s.GetPv<bool>(SystemTag.driveState  )
-        member s._stopState   = s.GetPv<bool>(SystemTag.stopState   )
+        member s._errorState  = s.GetPv<bool>(SystemTag.errorState   )
         member s._emgState    = s.GetPv<bool>(SystemTag.emgState    )
         member s._testState   = s.GetPv<bool>(SystemTag.testState   )
         member s._readyState  = s.GetPv<bool>(SystemTag.readyState  )
@@ -179,7 +179,7 @@ module ConvertCodeCoreExt =
                     SystemTag.auto_btn
                     SystemTag.manual_btn
                     SystemTag.drive_btn
-                    SystemTag.stop_btn
+                    SystemTag.pause_btn
                     SystemTag.emg_btn
                     SystemTag.test_btn
                     SystemTag.ready_btn
@@ -220,10 +220,8 @@ module ConvertCodeCoreExt =
         member f.dop    = getFM(f).GetFlowTag(FlowTag.drive_mode    )
         /// TEST  operation mode (시운전)
         member f.top    = getFM(f).GetFlowTag(FlowTag.test_mode     )
-        /// STOP state
-        member f.sop    = getFM(f).GetFlowTag(FlowTag.stop_mode     )
-        /// EMERGENCY State
-        member f.eop    = getFM(f).GetFlowTag(FlowTag.emg_mode)
+        /// Error State
+        member f.eop    = getFM(f).GetFlowTag(FlowTag.error_mode)
         /// IDLE state
         member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_mode)
         /// origin state
@@ -232,11 +230,13 @@ module ConvertCodeCoreExt =
         member f.hop    = getFM(f).GetFlowTag(FlowTag.homing_mode)
         /// going state
         member f.gop    = getFM(f).GetFlowTag(FlowTag.going_mode)
+        /// emergency state
+        member f.emg    = getFM(f).GetFlowTag(FlowTag.emg_mode)
         
         member f.auto_btn   = getFM(f).GetFlowTag(FlowTag.auto_btn    )
         member f.manual_btn = getFM(f).GetFlowTag(FlowTag.manual_btn  )
         member f.drive_btn  = getFM(f).GetFlowTag(FlowTag.drive_btn   )
-        member f.stop_btn   = getFM(f).GetFlowTag(FlowTag.stop_btn    )
+        member f.pause_btn  = getFM(f).GetFlowTag(FlowTag.pause_btn    )
         member f.ready_btn  = getFM(f).GetFlowTag(FlowTag.ready_btn   )
         member f.clear_btn  = getFM(f).GetFlowTag(FlowTag.clear_btn   )
         member f.emg_btn    = getFM(f).GetFlowTag(FlowTag.emg_btn     )
@@ -246,7 +246,7 @@ module ConvertCodeCoreExt =
         member f.auto_lamp   = getFM(f).GetFlowTag(FlowTag.auto_lamp    )
         member f.manual_lamp = getFM(f).GetFlowTag(FlowTag.manual_lamp  )
         member f.drive_lamp  = getFM(f).GetFlowTag(FlowTag.drive_lamp   )
-        member f.stop_lamp   = getFM(f).GetFlowTag(FlowTag.stop_lamp    )
+        member f.pause_lamp  = getFM(f).GetFlowTag(FlowTag.pause_lamp    )
         member f.ready_lamp  = getFM(f).GetFlowTag(FlowTag.ready_lamp   )
         member f.clear_lamp  = getFM(f).GetFlowTag(FlowTag.clear_lamp   )
         member f.emg_lamp    = getFM(f).GetFlowTag(FlowTag.emg_lamp     )
@@ -268,7 +268,7 @@ module ConvertCodeCoreExt =
 
         //push 버튼은 없을경우 항상 _off
         member f.HWBtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) (*<||> f._sim.Expr*)
-        member f.HWBtnStopExpr  = getButtonExpr(f, f.System.StopHWButtons     )
+        member f.HWBtnPauseExpr = getButtonExpr(f, f.System.PauseHWButtons     )
         member f.HWBtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
         member f.HWBtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
         member f.HWBtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) (*<||> f._sim.Expr*)
@@ -300,7 +300,7 @@ module ConvertCodeCoreExt =
                 [   FlowTag.auto_btn
                     FlowTag.manual_btn
                     FlowTag.drive_btn
-                    FlowTag.stop_btn
+                    FlowTag.pause_btn
                     FlowTag.ready_btn
                     FlowTag.clear_btn
                     FlowTag.emg_btn

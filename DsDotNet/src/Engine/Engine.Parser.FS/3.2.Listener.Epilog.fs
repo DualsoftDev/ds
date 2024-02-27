@@ -52,9 +52,9 @@ module EtcListenerModule =
                         | :? AutoBlockContext -> DuAutoBTN
                         | :? ManualBlockContext -> DuManualBTN
                         | :? DriveBlockContext -> DuDriveBTN
-                        | :? StopBlockContext -> DuStopBTN
+                        | :? PauseBlockContext -> DuPauseBTN
                         | :? ClearBlockContext -> DuClearBTN
-                        | :? EmergencyBlockContext -> DuEmergencyBTN
+                        | :? ErrorOrEmgBlockContext -> DuEmergencyBTN
                         | :? TestBlockContext -> DuTestBTN
                         | :? HomeBlockContext -> DuHomeBTN
                         | :? ReadyBlockContext -> DuReadyBTN
@@ -116,8 +116,7 @@ module EtcListenerModule =
                         | :? AutoBlockContext -> DuAutoLamp
                         | :? ManualBlockContext -> DuManualLamp
                         | :? DriveBlockContext -> DuDriveLamp
-                        | :? StopBlockContext -> DuStopLamp
-                        | :? EmergencyBlockContext -> DuEmergencyLamp
+                        | :? ErrorOrEmgBlockContext -> DuErrorLamp
                         | :? TestBlockContext -> DuTestDriveLamp
                         | :? ReadyBlockContext -> DuReadyLamp
                         | :? IdleBlockContext -> DuIdleLamp

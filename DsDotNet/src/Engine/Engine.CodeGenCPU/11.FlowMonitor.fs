@@ -23,6 +23,6 @@ type Flow with
 
     
     member f.F3_FlowPause() =
-        let set = f.stop_btn.Expr <||> f.HWBtnStopExpr
+        let set = f.pause_btn.Expr <||> f.HWBtnPauseExpr
         let rst = f.clear_btn.Expr
         (set, rst) ==| (f.pause, getFuncName())

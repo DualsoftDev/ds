@@ -11,7 +11,7 @@ type Flow with
 
     member f.O1_ReadyOperationState() =
         let set = f.ready_btn.Expr <||> f.HWBtnReadyExpr 
-        let rst = (f.eop.Expr <||> f.sop.Expr) <||> (f.stopConditionErr.Expr <&&> !!f._sim.Expr)
+        let rst = (f.eop.Expr <||> f.emg.Expr) <||> (f.stopConditionErr.Expr <&&> !!f._sim.Expr)
 
         (set, rst) ==| (f.rop, getFuncName())
 
@@ -43,7 +43,7 @@ type Flow with
         let set = setEmg <||> setDeviceError<||> setConditionError
         let rst = f.clear_btn.Expr
            
-        (set, rst) ==| (f.sop, getFuncName())
+        (set, rst) ==| (f.eop, getFuncName())
 
     member f.O6_DriveOperationMode () =
         let set = f.drive_btn.Expr <||> f.HWBtnDriveExpr    

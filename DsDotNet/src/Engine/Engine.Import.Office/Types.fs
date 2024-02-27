@@ -59,7 +59,7 @@ module InterfaceClass =
         | XlsAutoBTN //자동 버튼
         | XlsManualBTN //수동 버튼
         | XlsDriveBTN //운전 버튼
-        | XlsStopBTN //정지 버튼
+        | XlsPauseBTN //일시정지 버튼
         | XlsClearBTN //해지 버튼
         | XlsEmergencyBTN //비상 버튼
         | XlsTestBTN //시운전 시작 버튼
@@ -68,14 +68,12 @@ module InterfaceClass =
         | XlsAutoLamp //자동 램프
         | XlsManualLamp //수동 램프
         | XlsDriveLamp //운전 램프
-        | XlsStopLamp //정지 램프
-        | XlsEmergencyLamp //비상 램프
+        | XlsErrorLamp //이상 램프
         | XlsReadyLamp //준비 램프
         | XlsIdleLamp //대기 램프
         | XlsHomingLamp //원위치중 램프
         | XlsTestLamp //시운전 램프
         | XlsConditionReady //준비 램프
-        | XlsConditionDrive //운전 램프
 
         member x.ToText() =
             match x with
@@ -84,7 +82,7 @@ module InterfaceClass =
             | XlsAutoBTN -> TextXlsAutoBTN
             | XlsManualBTN -> TextXlsManualBTN
             | XlsDriveBTN -> TextXlsDriveBTN
-            | XlsStopBTN -> TextXlsStopBTN
+            | XlsPauseBTN -> TextXlsPauseBTN
             | XlsClearBTN -> TextXlsClearBTN
             | XlsEmergencyBTN -> TextXlsEmergencyBTN
             | XlsTestBTN -> TextXlsTestBTN
@@ -93,14 +91,12 @@ module InterfaceClass =
             | XlsAutoLamp -> TextXlsAutoLamp
             | XlsManualLamp -> TextXlsManualLamp
             | XlsDriveLamp -> TextXlsDriveLamp
-            | XlsStopLamp -> TextXlsStopLamp
-            | XlsEmergencyLamp -> TextXlsEmergencyLamp
+            | XlsErrorLamp -> TextXlsErrorLamp
             | XlsTestLamp -> TextXlsTestLamp
             | XlsReadyLamp -> TextXlsReadyLamp
             | XlsIdleLamp -> TextXlsIdleLamp
             | XlsHomingLamp -> TextXlsHomingLamp
             | XlsConditionReady -> TextXlsConditionReady
-            | XlsConditionDrive -> TextXlsConditionDrive
 
     let TextToXlsType (txt: string) =
         match txt.ToLower() with
@@ -109,7 +105,7 @@ module InterfaceClass =
         | TextXlsAutoBTN -> XlsAutoBTN
         | TextXlsManualBTN -> XlsManualBTN
         | TextXlsEmergencyBTN -> XlsEmergencyBTN
-        | TextXlsStopBTN -> XlsStopBTN
+        | TextXlsPauseBTN -> XlsPauseBTN
         | TextXlsDriveBTN -> XlsDriveBTN
         | TextXlsTestBTN -> XlsTestBTN
         | TextXlsClearBTN -> XlsClearBTN
@@ -119,14 +115,12 @@ module InterfaceClass =
         | TextXlsManualLamp -> XlsManualLamp
         | TextXlsDriveLamp -> XlsDriveLamp
         | TextXlsTestLamp -> XlsTestLamp
-        | TextXlsStopLamp -> XlsStopLamp
-        | TextXlsEmergencyLamp -> XlsEmergencyLamp
+        | TextXlsErrorLamp -> XlsErrorLamp
         | TextXlsReadyLamp -> XlsReadyLamp
         | TextXlsIdleLamp -> XlsIdleLamp
         | TextXlsHomingLamp -> XlsHomingLamp
         
         | TextXlsConditionReady -> XlsConditionReady
-        | TextXlsConditionDrive -> XlsConditionDrive
 
 
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

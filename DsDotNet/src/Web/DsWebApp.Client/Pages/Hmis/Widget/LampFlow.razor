@@ -20,7 +20,7 @@
     string _text;
     bool _loading = true;
     IDisposable _subscription;
-    TagWeb _drive, _stop, _emStop, _test, _ready, _idle, _origin;
+    TagWeb _drive, _error, _emStop, _test, _ready, _idle, _origin;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -32,12 +32,12 @@
         _guid = Guid.NewGuid().ToString();
 
         _drive = Flow.DrivePushLampMode.Item2;
-        _stop = Flow.StopPushLampMode.Item2;
         _emStop = Flow.EmergencyPushLampMode.Item2;
         _test = Flow.TestPushLampMode.Item2;
         _ready = Flow.ReadyPushLampMode.Item2;
         _idle = Flow.IdleLampMode;
         _origin = Flow.OriginLampMode;
+        _error = Flow.ErrorLampMode;
         
         _text = getText();
         _loading = false;
@@ -47,8 +47,8 @@
     {
         if ((bool)_emStop.Value)
             return "EMStop";
-        else if ((bool)_stop.Value)
-            return "Stop";
+        else if ((bool)_error.Value)
+            return "Error";
         else if ((bool)_drive.Value)
             return "Drive";
         else if ((bool)_ready.Value)
@@ -72,7 +72,7 @@
     }
     void onTagWebChanged(TagWeb tag)
     {
-        TagWeb[] lampTags = [_drive, _stop, _emStop, _test, _ready, _idle];
+        TagWeb[] lampTags = [_drive, _error, _emStop, _test, _ready, _idle];
 
         if (lampTags.Any(t => t.IsEqual(tag)))
         {

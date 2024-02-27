@@ -253,7 +253,7 @@ public partial class UcView : UserControl
                         nNode.Attr.FillColor = Color.DarkGoldenrod;
                     }
 
-                    if (viewNode.BtnType.Value == BtnType.DuStopBTN)
+                    if (viewNode.BtnType.Value == BtnType.DuPauseBTN)
                     {
                         nNode.Attr.FillColor = Color.Firebrick;
                     }
@@ -310,15 +310,12 @@ public partial class UcView : UserControl
                         nNode.Attr.FillColor = Color.DarkGoldenrod;
                     }
 
-                    if (viewNode.LampType.Value == LampType.DuStopLamp)
+                    if (viewNode.LampType.Value == LampType.DuErrorLamp)
                     {
                         nNode.Attr.FillColor = Color.Firebrick;
                     }
 
-                    if (viewNode.LampType.Value == LampType.DuEmergencyLamp)
-                    {
-                        nNode.Attr.FillColor = Color.MediumVioletRed;
-                    }
+              
 
                     if (viewNode.LampType.Value == LampType.DuTestDriveLamp)
                     {

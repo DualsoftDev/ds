@@ -55,6 +55,8 @@ I_IN: 'i_in';
 I: 'i';
 O_IN: 'o_in';
 O: 'o';
+P_IN: 'p_in';
+P: 'p';
 VARIABLES: 'variables';
 COMMANDS: 'commands';
 OBSERVES: 'observes';
@@ -307,13 +309,13 @@ interfaceBlock
     linkPhrase: identifier12;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
-categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|stopBlock|emergencyBlock|testBlock|homeBlock|readyBlock|idleBlock|originBlock;
+categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmgBlock|testBlock|homeBlock|readyBlock|idleBlock|originBlock;
     autoBlock      :'[' ('a_in'|'a') ']' EQ categoryBlock;
     manualBlock    :'[' ('m_in'|'m') ']' EQ categoryBlock;
     driveBlock     :'[' ('d_in'|'d') ']' EQ categoryBlock;
-    stopBlock      :'[' ('s_in'|'s') ']' EQ categoryBlock;
+    errorOrEmgBlock:'[' ('e_in'|'e') ']' EQ categoryBlock;
+    pauseBlock     :'[' ('p_in'|'p') ']' EQ categoryBlock;
     clearBlock     :'[' ('c_in'|'c') ']' EQ categoryBlock;
-    emergencyBlock :'[' ('e_in'|'e') ']' EQ categoryBlock;
     testBlock      :'[' ('t_in'|'t') ']' EQ categoryBlock;
     homeBlock      :'[' ('h_in'|'h') ']' EQ categoryBlock;
     readyBlock     :'[' ('r_in'|'r') ']' EQ categoryBlock;

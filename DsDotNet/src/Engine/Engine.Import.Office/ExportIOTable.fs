@@ -101,7 +101,7 @@ module ExportIOTable =
         toBtnText (sys.AutoHWButtons, ExcelCase.XlsAutoBTN)
         toBtnText (sys.ManualHWButtons, ExcelCase.XlsManualBTN)
         toBtnText (sys.DriveHWButtons, ExcelCase.XlsDriveBTN)
-        toBtnText (sys.StopHWButtons, ExcelCase.XlsStopBTN)
+        toBtnText (sys.PauseHWButtons, ExcelCase.XlsPauseBTN)
         toBtnText (sys.EmergencyHWButtons, ExcelCase.XlsEmergencyBTN)
         toBtnText (sys.TestHWButtons, ExcelCase.XlsTestBTN)
         toBtnText (sys.ReadyHWButtons, ExcelCase.XlsReadyBTN)
@@ -114,8 +114,7 @@ module ExportIOTable =
         toLampText (sys.AutoHWLamps, ExcelCase.XlsAutoLamp)
         toLampText (sys.ManualHWLamps, ExcelCase.XlsManualLamp)
         toLampText (sys.DriveHWLamps, ExcelCase.XlsDriveLamp)
-        toLampText (sys.StopHWLamps, ExcelCase.XlsStopLamp)
-        toLampText (sys.EmergencyHWLamps, ExcelCase.XlsEmergencyLamp)
+        toLampText (sys.ErrorHWLamps, ExcelCase.XlsErrorLamp)
         toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
         toLampText (sys.ReadyHWLamps, ExcelCase.XlsReadyLamp)
         toLampText (sys.IdleHWLamps, ExcelCase.XlsIdleLamp)
@@ -125,7 +124,6 @@ module ExportIOTable =
         emptyLine ()
 
         toCondiText (sys.ReadyConditions, ExcelCase.XlsConditionReady)
-        toCondiText (sys.DriveConditions, ExcelCase.XlsConditionDrive)
 
         dt.Rows.Add(TextXlsVariable, "", "", "", "", "", "") |> ignore
         emptyLine ()

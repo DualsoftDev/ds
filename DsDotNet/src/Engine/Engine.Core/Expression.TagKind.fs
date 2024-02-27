@@ -160,7 +160,7 @@ type TagKindExt =
                                                       SystemTag.autoState     
                                                     , SystemTag.manualState   
                                                     , SystemTag.driveState    
-                                                    , SystemTag.stopState     
+                                                    , SystemTag.errorState     
                                                     , SystemTag.emgState      
                                                     , SystemTag.testState     
                                                     , SystemTag.readyState    

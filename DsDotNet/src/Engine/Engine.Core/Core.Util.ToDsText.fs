@@ -183,7 +183,7 @@ module internal ToDsTextModule =
                     system.AutoHWButtons;
                     system.ManualHWButtons;
                     system.DriveHWButtons;
-                    system.StopHWButtons;
+                    system.PauseHWButtons;
                     system.ClearHWButtons;
                     system.EmergencyHWButtons;
                     system.TestHWButtons;
@@ -221,7 +221,7 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("a", system.AutoHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("m", system.ManualHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("d", system.DriveHWButtons.Cast<HwSystemDef>())
-                yield HwSystemToDs("s", system.StopHWButtons.Cast<HwSystemDef>())
+                yield HwSystemToDs("p", system.PauseHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("e", system.EmergencyHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("r", system.ReadyHWButtons.Cast<HwSystemDef>())
@@ -235,8 +235,7 @@ module internal ToDsTextModule =
                 yield HwSystemToDs("a", system.AutoHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("m", system.ManualHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("d", system.DriveHWLamps.Cast<HwSystemDef>())
-                yield HwSystemToDs("s", system.StopHWLamps.Cast<HwSystemDef>())
-                yield HwSystemToDs("e", system.EmergencyHWLamps.Cast<HwSystemDef>())
+                yield HwSystemToDs("e", system.ErrorHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("t", system.TestHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("r", system.ReadyHWLamps.Cast<HwSystemDef>())
                 yield HwSystemToDs("o", system.OriginHWLamps.Cast<HwSystemDef>())

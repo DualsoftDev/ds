@@ -26,7 +26,7 @@ else
             <AutoManualModeSelectorColumn Caption="Auto/Manual" SelectorGetter="@((dataItem) =>((HMIFlow)dataItem).AutoManualSelectLampMode)" />
 
             <ButtonLampModeColumn    Caption="Drive"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).DrivePushLampMode)" />
-            <ButtonLampModeColumn    Caption="Stop"    CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).StopPushLampMode)" />
+            <ButtonLampColumn        Caption="Pause"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).PausePushLamp)" />
             <ButtonLampColumn        Caption="Clear"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).ClearPushLamp)" />
             <ButtonLampModeColumn    Caption="Em.Stop" CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPushLampMode)"/>
             <ButtonLampModeColumn    Caption="Test"    CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).TestPushLampMode)" />

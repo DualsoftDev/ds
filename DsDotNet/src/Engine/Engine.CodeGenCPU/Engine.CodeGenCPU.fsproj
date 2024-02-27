@@ -18,7 +18,7 @@
         <Compile Include="TagManager/TagManager.Api.fs" />
         <Compile Include="TagManager/TagManager.Link.fs" />
         <Compile Include="Expression.Extension.fs" />
-        <Compile Include="Core.Extensions.fs" />
+        <Compile Include="Core.Extensions\Core.Extensions.fs" />
         <Compile Include="Code.SpecUtil.fs" />
         <Compile Include="Code.ConvertUtil.fs" />
         <Compile Include="1.Api.fs" />

@@ -15,7 +15,7 @@ module DsType =
         | Homing
 
     type BtnType =
-    | DuAutoBTN | DuManualBTN | DuDriveBTN | DuTestBTN | DuStopBTN
+    | DuAutoBTN | DuManualBTN | DuDriveBTN | DuTestBTN | DuPauseBTN
     | DuEmergencyBTN | DuClearBTN | DuHomeBTN | DuReadyBTN
         override x.ToString() =
             match x with
@@ -23,24 +23,23 @@ module DsType =
             | DuManualBTN    -> "Manual"
             | DuDriveBTN     -> "Drive"
             | DuTestBTN      -> "Test"
-            | DuStopBTN      -> "Stop"
+            | DuPauseBTN     -> "Pause"
             | DuEmergencyBTN -> "Emergency"
             | DuClearBTN     -> "Clear"
             | DuHomeBTN      -> "Home"
             | DuReadyBTN     -> "Ready"
 
 
-    /// Represents different lamp types
+    /// Represents different mode types
     type LampType =
         | DuAutoLamp      // Automatic button lamp
         | DuManualLamp    // Manual button lamp
         | DuDriveLamp     // Drive lamp
-        | DuStopLamp      // Stop lamp
-        | DuEmergencyLamp // Emergency lamp
+        | DuErrorLamp     // Error lamp
         | DuTestDriveLamp // Test Drive lamp
         | DuReadyLamp     // Ready lamp
         | DuIdleLamp      // Idle lamp
-        | DuOriginLamp      // Homing lamp
+        | DuOriginLamp    // Homing lamp
 
     /// Represents different condition types
     type ConditionType =

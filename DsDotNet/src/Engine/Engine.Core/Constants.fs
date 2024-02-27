@@ -260,7 +260,7 @@ module DsTextExport =
     let [<Literal>] TextXlsAutoBTN           = "자동셀렉트"
     let [<Literal>] TextXlsManualBTN         = "수동셀렉트"
     let [<Literal>] TextXlsDriveBTN          = "운전푸쉬버튼"
-    let [<Literal>] TextXlsStopBTN           = "정지푸쉬버튼"
+    let [<Literal>] TextXlsPauseBTN          = "정지푸쉬버튼"
     let [<Literal>] TextXlsClearBTN          = "해지푸쉬버튼"
     let [<Literal>] TextXlsEmergencyBTN      = "비상푸쉬버튼"
     let [<Literal>] TextXlsTestBTN           = "시운전푸쉬버튼"
@@ -270,14 +270,13 @@ module DsTextExport =
     let [<Literal>] TextXlsAutoLamp          = "자동모드램프"
     let [<Literal>] TextXlsManualLamp        = "수동모드램프"
     let [<Literal>] TextXlsDriveLamp         = "운전모드램프"
-    let [<Literal>] TextXlsStopLamp          = "정지모드램프"
+    let [<Literal>] TextXlsErrorLamp         = "이상모드램프"
     let [<Literal>] TextXlsEmergencyLamp     = "비상모드램프"
     let [<Literal>] TextXlsTestLamp          = "시운전모드램프"
     let [<Literal>] TextXlsReadyLamp         = "준비모드램프"
     let [<Literal>] TextXlsIdleLamp          = "대기모드램프"
     let [<Literal>] TextXlsHomingLamp        = "원위치중램프"
     let [<Literal>] TextXlsConditionReady    = "준비조건"
-    let [<Literal>] TextXlsConditionDrive    = "운전조건"
 
 [<AutoOpen>]
 module DsTextProperty =
@@ -289,7 +288,7 @@ module DsTextProperty =
     let [<Literal>] TextAlias   = "alias"
     let [<Literal>] TextLayout  = "layouts"
     let [<Literal>] TextJobs    = "jobs"
-    let [<Literal>] TextDevice    = "device"
+    let [<Literal>] TextDevice  = "device"
 
 
 [<AutoOpen>]

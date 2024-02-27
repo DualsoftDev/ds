@@ -38,7 +38,7 @@ module SystemManagerModule =
         let auto_btn     = dsSysBit   "sysauto_btn"       true  sys  SystemTag.auto_btn
         let manual_btn   = dsSysBit   "sysmanual_btn"     true  sys  SystemTag.manual_btn
         let drive_btn    = dsSysBit   "sysdrive_btn"      true  sys  SystemTag.drive_btn
-        let stop_btn     = dsSysBit   "sysstop_btn"       true  sys  SystemTag.stop_btn
+        let pause_btn     = dsSysBit   "syspause_btn"     true  sys  SystemTag.pause_btn
         let emg_btn      = dsSysBit   "sysemg_btn"        true  sys  SystemTag.emg_btn
         let test_btn     = dsSysBit   "systest_btn"       true  sys  SystemTag.test_btn
         let ready_btn    = dsSysBit   "sysready_btn"      true  sys  SystemTag.ready_btn
@@ -48,7 +48,7 @@ module SystemManagerModule =
         let auto_lamp     = dsSysBit   "sysauto_lamp"       true  sys  SystemTag.auto_lamp
         let manual_lamp   = dsSysBit   "sysmanual_lamp"     true  sys  SystemTag.manual_lamp
         let drive_lamp    = dsSysBit   "sysdrive_lamp"      true  sys  SystemTag.drive_lamp
-        let stop_lamp     = dsSysBit   "sysstop_lamp"       true  sys  SystemTag.stop_lamp
+        let pause_lamp     = dsSysBit   "syspause_lamp"     true  sys  SystemTag.pause_lamp
         let emg_lamp      = dsSysBit   "sysemg_lamp"        true  sys  SystemTag.emg_lamp
         let test_lamp     = dsSysBit   "systest_lamp"       true  sys  SystemTag.test_lamp
         let ready_lamp    = dsSysBit   "sysready_lamp"      true  sys  SystemTag.ready_lamp
@@ -79,7 +79,7 @@ module SystemManagerModule =
         let sysAutoState    = dsSysBit "sysAutoState"   true  sys   SystemTag.autoState   
         let sysManualState  = dsSysBit "sysManualState" true  sys   SystemTag.manualState 
         let sysDriveState   = dsSysBit "sysDriveState"  true  sys   SystemTag.driveState  
-        let sysStopState    = dsSysBit "sysStopState"   true  sys   SystemTag.stopState   
+        let sysErrorState   = dsSysBit "sysErrorState"   true  sys   SystemTag.errorState   
         let sysEmgState     = dsSysBit "sysEmgState"    true  sys   SystemTag.emgState    
         let sysTestState    = dsSysBit "sysTestState"   true  sys   SystemTag.testState   
         let sysReadyState   = dsSysBit "sysReadyState"  true  sys   SystemTag.readyState  
@@ -117,7 +117,7 @@ module SystemManagerModule =
             | SystemTag.auto_btn   ->    auto_btn
             | SystemTag.manual_btn ->    manual_btn
             | SystemTag.drive_btn  ->    drive_btn
-            | SystemTag.stop_btn   ->    stop_btn
+            | SystemTag.pause_btn   ->   pause_btn
             | SystemTag.emg_btn    ->    emg_btn
             | SystemTag.test_btn   ->    test_btn
             | SystemTag.ready_btn  ->    ready_btn
@@ -128,7 +128,7 @@ module SystemManagerModule =
             | SystemTag.auto_lamp   ->    auto_lamp
             | SystemTag.manual_lamp ->    manual_lamp
             | SystemTag.drive_lamp  ->    drive_lamp
-            | SystemTag.stop_lamp   ->    stop_lamp
+            | SystemTag.pause_lamp  ->    pause_lamp
             | SystemTag.emg_lamp    ->    emg_lamp
             | SystemTag.test_lamp   ->    test_lamp
             | SystemTag.ready_lamp  ->    ready_lamp
@@ -149,7 +149,7 @@ module SystemManagerModule =
             | SystemTag.autoState          ->    sysAutoState   
             | SystemTag.manualState        ->    sysManualState 
             | SystemTag.driveState         ->    sysDriveState  
-            | SystemTag.stopState          ->    sysStopState   
+            | SystemTag.errorState         ->    sysErrorState   
             | SystemTag.emgState           ->    sysEmgState    
             | SystemTag.testState          ->    sysTestState   
             | SystemTag.readyState         ->    sysReadyState  

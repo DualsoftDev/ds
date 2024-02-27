@@ -20,7 +20,7 @@ type DsSystem with
                 yield (s._auto_btn.Expr  , s._off.Expr) --| (s._auto_lamp  , getFuncName())
                 yield (s._manual_btn.Expr, s._off.Expr) --| (s._manual_lamp, getFuncName())
                 yield (s._drive_btn.Expr , s._off.Expr) --| (s._drive_lamp , getFuncName())
-                yield (s._stop_btn.Expr  , s._off.Expr) --| (s._stop_lamp  , getFuncName())
+                yield (s._pause_btn.Expr , s._off.Expr) --| (s._pause_lamp  , getFuncName())
                 yield (s._emg_btn.Expr   , s._off.Expr) --| (s._emg_lamp   , getFuncName())
                 yield (s._test_btn.Expr  , s._off.Expr) --| (s._test_lamp  , getFuncName())
                 yield (s._clear_btn.Expr , s._off.Expr) --| (s._clear_lamp , getFuncName())
@@ -37,8 +37,7 @@ type DsSystem with
                 | DuAutoLamp      -> s._autoState.Expr   
                 | DuManualLamp    -> s._manualState.Expr 
                 | DuDriveLamp     -> (s._driveState.Expr <&&> !!s._goingState.Expr ) <||> (s._goingState.Expr <&&> s._flicker1sec.Expr)
-                | DuStopLamp      -> s._emgState.Expr <||> (s._stopErr.Expr <&&> s._flicker1sec.Expr)
-                | DuEmergencyLamp -> s._emgState.Expr   
+                | DuErrorLamp      -> s._emgState.Expr <||> (s._stopErr.Expr <&&> s._flicker1sec.Expr)
                 | DuTestDriveLamp -> s._testState.Expr   
                 | DuReadyLamp     -> s._readyState.Expr 
                 | DuIdleLamp      -> (s._idleState.Expr <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
@@ -60,8 +59,7 @@ type DsSystem with
                 | DuAutoLamp      -> f.aop
                 | DuManualLamp    -> f.mop
                 | DuDriveLamp     -> f.dop
-                | DuStopLamp      -> f.sop
-                | DuEmergencyLamp -> f.eop
+                | DuErrorLamp     -> f.eop
                 | DuTestDriveLamp -> f.top
                 | DuReadyLamp     -> f.rop
                 | DuIdleLamp      -> f.iop
@@ -81,7 +79,7 @@ type DsSystem with
             yield (f.auto_btn.Expr  , s._off.Expr) --| (f.auto_lamp  , getFuncName())
             yield (f.manual_btn.Expr, s._off.Expr) --| (f.manual_lamp, getFuncName())
             yield (f.drive_btn.Expr , s._off.Expr) --| (f.drive_lamp , getFuncName())
-            yield (f.stop_btn.Expr  , s._off.Expr) --| (f.stop_lamp  , getFuncName())
+            yield (f.pause_btn.Expr , s._off.Expr) --| (f.pause_lamp , getFuncName())
             yield (f.emg_btn.Expr   , s._off.Expr) --| (f.emg_lamp   , getFuncName())
             yield (f.test_btn.Expr  , s._off.Expr) --| (f.test_lamp  , getFuncName())
             yield (f.clear_btn.Expr , s._off.Expr) --| (f.clear_lamp , getFuncName())

@@ -64,19 +64,19 @@ module Util =
         | "A" -> BtnType.DuAutoBTN
         | "M" -> BtnType.DuManualBTN
         | "D" -> BtnType.DuDriveBTN
-        | "S" -> BtnType.DuStopBTN
+        | "P" -> BtnType.DuPauseBTN
         | "E" -> BtnType.DuEmergencyBTN
         | "T" -> BtnType.DuTestBTN
         | "R" -> BtnType.DuReadyBTN
         | "H" -> BtnType.DuHomeBTN
         | "C" -> BtnType.DuClearBTN
         | _ -> if key = ""
-                then failwith $"버튼은 [타입]이름 형식으로 작성해야 합니다.\nEx)[S]stopStation1"
+                then failwith $"버튼은 [타입]이름 형식으로 작성해야 합니다.\nEx)[P]PauseStation1"
                 else failwith $"{key}은 버튼 타입이 아님니다. 가능타입 리스트
                         \n[A]AutoBTN
                         \n[M]ManualBTN
                         \n[D]DriveBTN
-                        \n[S]StopBTN
+                        \n[P]PauseBTN
                         \n[E]EmergencyBTN
                         \n[T]TestBTN
                         \n[R]ReadyBTN
@@ -90,20 +90,18 @@ module Util =
         | "A" -> LampType.DuAutoLamp
         | "M" -> LampType.DuManualLamp
         | "D" -> LampType.DuDriveLamp
-        | "S" -> LampType.DuStopLamp
-        | "E" -> LampType.DuEmergencyLamp
+        | "E" -> LampType.DuErrorLamp
         | "T" -> LampType.DuTestDriveLamp
         | "R" -> LampType.DuReadyLamp
         | "I" -> LampType.DuIdleLamp
         | "O" -> LampType.DuOriginLamp
         | _ -> if key = ""
-                then failwith $"램프는 '[타입]이름' 형식으로 작성해야 합니다.\nEx)[S]stopStation1~3"
+                then failwith $"램프는 '[타입]이름' 형식으로 작성해야 합니다.\nEx)[S]stopErrStation1~3"
                 else failwith $"{key}은 램프 타입이 아님니다. 가능타입 리스트
                         \n[A]AutoLamp
                         \n[M]ManualLamp
                         \n[D]DriveLamp
-                        \n[S]StopLamp
-                        \n[E]EmergencyLamp
+                        \n[E]ErrorLamp
                         \n[T]TestDriveLamp
                         \n[R]ReadyLamp
                         \n[O]OriginLamp

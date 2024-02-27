@@ -109,17 +109,17 @@ module ConvertHMI =
                 Name = x.Name
                 AutoManualSelectLampMode = getSelectLampMode tm (FlowTag.auto_btn  |>int) (FlowTag.auto_lamp  |>int)  (FlowTag.auto_mode  |>int) (FlowTag.manual_btn |>int) (FlowTag.manual_lamp |>int) (FlowTag.manual_mode |>int)
                 DrivePushLampMode        = getPushLampMode   tm (FlowTag.drive_btn |>int) (FlowTag.drive_lamp |>int)  (FlowTag.drive_mode |>int)
-                StopPushLampMode         = getPushLampMode   tm (FlowTag.stop_btn  |>int) (FlowTag.stop_lamp  |>int)  (FlowTag.stop_mode  |>int)
                 EmergencyPushLampMode    = getPushLampMode   tm (FlowTag.emg_btn   |>int) (FlowTag.emg_lamp   |>int)  (FlowTag.emg_mode   |>int)
                 TestPushLampMode         = getPushLampMode   tm (FlowTag.test_btn  |>int) (FlowTag.test_lamp  |>int)  (FlowTag.test_mode  |>int)
                 ReadyPushLampMode        = getPushLampMode   tm (FlowTag.ready_btn |>int) (FlowTag.ready_lamp |>int)  (FlowTag.ready_mode |>int)
                 ClearPushLamp            = getPushLamp       tm (FlowTag.clear_btn |>int) (FlowTag.clear_lamp |>int)
                 HomePushLamp             = getPushLamp       tm (FlowTag.home_btn  |>int) (FlowTag.home_lamp  |>int)
-                                             
+                PausePushLamp            = getPushLamp       tm (FlowTag.pause_btn |>int) (FlowTag.pause_lamp  |>int)  
           
-                IdleLampMode         = getLamp   tm (FlowTag.idle_mode    |>int)
-                OriginLampMode        = getLamp   tm (FlowTag.origin_mode    |>int)
-
+                IdleLampMode        = getLamp   tm (FlowTag.idle_mode    |>int)
+                OriginLampMode      = getLamp   tm (FlowTag.origin_mode    |>int)
+                ErrorLampMode       = getLamp   tm (FlowTag.error_mode    |>int)
+                
                 Reals            = x.Graph.Vertices.OfType<Real>().Select(fun r->r.GetHMI()).ToArray()
             }
 
@@ -131,7 +131,7 @@ module ConvertHMI =
                 Name  = x.Name
                 AutoManualSelectLamp =  getSelectLamp tm (SystemTag.auto_btn  |>int) (SystemTag.auto_lamp  |>int) (SystemTag.manual_btn|>int) (SystemTag.manual_lamp|>int)
                 DrivePushLamp        =  getPushLamp   tm (SystemTag.drive_btn |>int) (SystemTag.drive_lamp |>int)
-                StopPushLamp         =  getPushLamp   tm (SystemTag.stop_btn  |>int) (SystemTag.stop_lamp  |>int)
+                PausePushLamp        =  getPushLamp   tm (SystemTag.pause_btn |>int) (SystemTag.pause_lamp  |>int)
                 ClearPushLamp        =  getPushLamp   tm (SystemTag.clear_btn |>int) (SystemTag.clear_lamp |>int)
                 EmergencyPushLamp    =  getPushLamp   tm (SystemTag.emg_btn   |>int) (SystemTag.emg_lamp   |>int)
                 TestPushLamp         =  getPushLamp   tm (SystemTag.test_btn  |>int) (SystemTag.test_lamp  |>int)

@@ -159,8 +159,8 @@ namespace Engine
             StartBTN_FF(_, _) = { F2; }
             StartBTN1(_, _) = { F1; }
         }
-        [s] = {
-            StopBTN(_, _) = { F1;F2;F5; }
+        [p] = {
+            PauseBTN(_, _) = { F1;F2;F5; }
         }
         [e] = {
             EMGBTN3(_, _) = { F3; }

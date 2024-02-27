@@ -36,10 +36,9 @@ module DsType =
         | DuAutoModeLamp      // Automatic mode  lamp
         | DuManualModeLamp    // Manual mode  lamp
 
-        | DuDriveStateLamp     // Drive lamp
-        | DuTestDriveStateLamp // Test Drive lamp
-        | DuErrorStateLamp     // Error lamp
-        | DuEmergencyStateLamp     // emergency_state lamp
+        | DuDriveStateLamp     // Drive state lamp
+        | DuTestDriveStateLamp // Test Drive state lamp
+        | DuErrorStateLamp     // Error  state lamp
         | DuReadyStateLamp     // ready_state lamp
         | DuOriginStateLamp    // origin_state lamp
         

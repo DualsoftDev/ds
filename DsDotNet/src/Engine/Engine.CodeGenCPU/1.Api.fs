@@ -26,10 +26,14 @@ type ApiItemManager with
 
         let input = coins.First().GetEndAction(a.ApiItem)
         
-        let sets = 
-            coins.Select(fun c->c.SyncExpr).ToOrElseOff()
-            <&&>  
-            (input <&&> !!a.PE.Expr <&&> !!a.SL2.Expr)
+        let sets =
+            if input.IsSome
+            then
+                coins.Select(fun c->c.SyncExpr).ToOrElseOff()
+                <&&>  
+                (input.Value <&&> !!a.PE.Expr <&&> !!a.SL2.Expr)
+            else 
+                (activeSys._off.Expr)
 
         (sets, activeSys._off.Expr) --| (a.SL1, getFuncName())
 
@@ -37,12 +41,16 @@ type ApiItemManager with
 
         let input = coins.First().GetEndAction(a.ApiItem)
         let sets = 
-            coins.Select(fun c->c.SyncExpr).ToOrElseOff()
-            <&&>( 
-                      (  input <&&> a.PE.Expr)
-                 <||> (!!input <&&> !!a.PE.Expr)
-                 <||> activeSys._sim.Expr
-                 )
+            if input.IsSome
+            then
+                coins.Select(fun c->c.SyncExpr).ToOrElseOff()
+                <&&>( 
+                          (  input.Value <&&> a.PE.Expr)
+                     <||> (!!input.Value <&&> !!a.PE.Expr)
+                     <||> activeSys._sim.Expr
+                     )
+            else 
+                (activeSys._on.Expr)
 
         (sets, activeSys._off.Expr) ==| (a.SL2, getFuncName())
 

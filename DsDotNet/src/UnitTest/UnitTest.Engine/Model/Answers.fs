@@ -355,9 +355,6 @@ module ModelComponentAnswers =
             StartBTN_FF(_, _) = { F2; }
             StartBTN1(_, _) = { F1; }
         }
-        [p] = {
-            PauseBTN(_, _) = { F1;F2;F5; }
-        }
         [e] = {
             EMGBTN3(_, _) = { F3; }
             EMGBTN(_, _) = { F1;F2;F4;F5; }
@@ -365,18 +362,20 @@ module ModelComponentAnswers =
         [t] = {
             StartTestBTN(_, _) = { F5; }
         }
+        [p] = {
+            PauseBTN(_, _) = { F1;F2;F5; }
+        }
+        [c] = {
+            ClearBTN(_, _) = { F1;F2;F3;F5; }
+        }
         [h] = {
             HomeBTN(_, _) = { F1;F2;F3;F5; }
             HomeBTN.func = {
                 $t 2000;
             }
         }
-        [c] = {
-            ClearBTN(_, _) = { F1;F2;F3;F5; }
-        }
     }
 }
-//DS Language Version = [0.9.2.16]
 """
 
     let answerTaskLinkorDevice = """

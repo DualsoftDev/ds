@@ -64,7 +64,7 @@ module ConvertHMI =
 
     type Job with
         member private x.GetHMI()   =
-            let actionInTags  = x.DeviceDefs.Select(fun d->d.InTag) //todo  ActionINFunc func $not 적용 검토     
+            let actionInTags  = x.DeviceDefs.Where(fun d->d.InTag.IsNonNull()).Select(fun d->d.InTag) //todo  ActionINFunc func $not 적용 검토     
             let apiTagManager = x.DeviceDefs.First().ApiItem.TagManager :?> ApiItemManager
             {
                 Name = x.Name

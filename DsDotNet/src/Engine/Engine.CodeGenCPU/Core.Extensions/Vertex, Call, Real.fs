@@ -48,9 +48,14 @@ module ConvertCpuVertex =
 
 
         member c.GetEndAction(x:ApiItem) =
-            let inTag = c.TaskDevs.First(fun d->d.ApiItem = x).InTag :?> Tag<bool>
-            if c.UsingNot  then !!inTag.Expr
-                           else inTag.Expr
+            let td = c.TaskDevs.First(fun d->d.ApiItem = x) 
+            if td.InAddress <> TextSkip
+            then 
+                let inTag = td.InTag :?> Tag<bool>
+                if c.UsingNot  then !!inTag.Expr|>Some
+                               else inTag.Expr  |>Some
+            else 
+                None
       
         member c.SyncExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal

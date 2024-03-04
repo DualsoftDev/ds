@@ -59,7 +59,7 @@ module ConvertCpuVertex =
       
         member c.SyncExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
-                 !!rv.SYNC.Expr  <&&> rv.G.Expr 
+                 !!rv.SYNC.Expr <&&> (rv.G.Expr <||> rv.Flow.home_btn.Expr)
 
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.Func.Value.GetDelayTime()

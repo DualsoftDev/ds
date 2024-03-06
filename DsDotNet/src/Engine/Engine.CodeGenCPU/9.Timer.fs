@@ -20,11 +20,11 @@ type DsSystem with
       
         [
             for call in calls do
-                let sets = call.V.ST.Expr <&&>  call.EndAction
+                let sets = call.V.ST.Expr <&&>  call.InTags.ToAndElseOn() 
                 yield (sets) --@ (call.VC.TDON, call.PresetTime, getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.GetPureCall().Value
-                let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.EndAction
+                let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.InTags.ToAndElseOn() 
                 yield (sets) --@ (alias.VC.TDON, call.PresetTime, getFuncName())
         ]

@@ -158,7 +158,7 @@ module ConvertCPU =
 
         checkErrNullAddress(sys)
         checkErrHWItem(sys)
-
+        checkErrApi(sys)
 
 
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출

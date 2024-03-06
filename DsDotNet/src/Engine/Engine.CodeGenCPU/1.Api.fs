@@ -67,8 +67,8 @@ type ApiItemManager with
                         let sets = api.PE.Expr <&&> api.PS.Expr 
                         if coin.TargetJob.ActionType = JobActionType.Push 
                         then 
-                             let rstPush = coin.MutualResetCalls.Select(fun c->c.VC.MM)
-                                                                .ToOrElseOff()
+                             let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
+                             let rstPush = rstMemos.ToOr()
                         
                              yield (sets, rstPush   <||> !!rop) ==| (td.AO, getFuncName())
                         else 

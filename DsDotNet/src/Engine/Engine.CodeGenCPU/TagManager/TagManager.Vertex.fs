@@ -73,6 +73,7 @@ module TagManagerModule =
             member x.Target = v
             member x.Storages = s
 
+       
 
         member _.Name   = v.QualifiedName
         member _.Vertex = v
@@ -224,9 +225,16 @@ module TagManagerModule =
         let rxErrOpenOff     = createTag "rxErrOpenOff"       VertexTag.rxErrOpenOff    
         let rxErrOpenRising  = createTag "rxErrOpenRising"    VertexTag.rxErrOpenRising 
         let rxErrOpenTemp    = createTag "rxErrOpenTemp"      VertexTag.rxErrOpenTemp   
-        let timerTimeOutBit = timer  s "TOUT" sys 
+        let timerTimeOutBit  = timer  s "TOUT" sys 
         
-        
+        do
+            match v with
+            | :? Call as call ->
+                this.SF.Address <-  getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                call.ManualTag <- this.SF :> IStorage
+            | _->()
+            
+
         ///Ring Counter
         member _.CTR     = counterBit
         ///Timer on delay

@@ -10,10 +10,14 @@ open System
 module ConvertCpuVertex =
 
 
-    let getSafetyExpr(xs:Call seq, sys:DsSystem) =        
-        (xs.Select(fun f->f.EndAction).ToAndElseOn() <&&> !!sys._sim.Expr)
-        <||> 
-        (xs.Select(fun f->f.EndPlan).ToAndElseOn() <&&> sys._sim.Expr)
+    let getSafetyExpr(xs:Call seq, sys:DsSystem) =    
+        if xs.any()
+        then
+            (xs.Select(fun f->f.EndAction).ToAndElseOn() <&&> !!sys._sim.Expr)
+            <||> 
+            (xs.Select(fun f->f.EndPlan).ToAndElseOn() <&&> sys._sim.Expr)
+        else 
+            sys._on.Expr
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
@@ -34,7 +38,7 @@ module ConvertCpuVertex =
         member c.UsingNot  = c.TargetJob.Func |> hasNot
         member c.UsingMove = c.TargetJob.Func |> hasMove
       
-        member c.EndPlan = c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAndElseOff()
+        member c.EndPlan = c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
         member c.EndAction = 
                 if c.UsingMove   then c._on.Expr  //todo : Move 처리 완료시 End
                 elif c.UsingCtr  then c.VC.CTR.DN.Expr 
@@ -44,8 +48,8 @@ module ConvertCpuVertex =
                                  then !!c.InTags.ToOrElseOff() 
                                  else failwithf $"'Not function' requires an InTag. {c.Name} input error"   
 
-                else c.InTags.ToAndElseOn() 
-
+                elif c.InTags.any() then c.InTags.ToAnd() 
+                                    else c.EndPlan
 
         member c.GetEndAction(x:ApiItem) =
             let td = c.TaskDevs.First(fun d->d.ApiItem = x) 

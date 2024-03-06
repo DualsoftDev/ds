@@ -65,7 +65,7 @@ module ImportUtilForLib =
                 mySys.GetLoadedSys(loadedName).Value.ReferenceSystem
 
 
-        let apiPureName = GetBracketsRemoveName(apiName)
+        let apiPureName = GetBracketsRemoveName(apiName).Trim()
 
         let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
             let devOrg= addOrGetExistSystem loadedSys newloadedName

@@ -8,7 +8,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module ConvertErrorCheck =
-    
+  
     let checkErrHWItem(sys:DsSystem) = 
         let hwManuFlows = sys.ManualHWButtons |>Seq.collect(fun f->f.SettingFlows)
         let hwAutoFlows = sys.AutoHWButtons |>Seq.collect(fun f->f.SettingFlows)
@@ -21,6 +21,19 @@ module ConvertErrorCheck =
             for flow in btn.SettingFlows do
                 if not(hwAutoFlows.Contains flow)
                 then failwithf $"{flow.Name} auto btn not exist"
+
+    let checkErrApi(sys:DsSystem) = 
+
+          for coin in sys.GetVerticesOfCoins() do
+                for td in coin.TaskDevs do
+                    let api = td.ApiItem
+                    if api.TXs.any() && td.OutAddress <> TextSkip && coin.TargetJob.ActionType = JobActionType.Push 
+                    then 
+                        if coin.MutualResetCalls.Select(fun c->c.VC.MM).isEmpty()
+                        then 
+                            failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
+                             
+
 
     let checkErrLightPLC(sys:DsSystem) = 
         let hwManuFlows = sys.ManualHWButtons |>Seq.collect(fun f->f.SettingFlows)

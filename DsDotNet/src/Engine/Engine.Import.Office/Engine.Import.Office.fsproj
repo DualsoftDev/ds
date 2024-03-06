@@ -23,7 +23,6 @@
         <Compile Include="GraphView.fs" />
         <Compile Include="ImportDocCheck.fs" />
         <Compile Include="ImportUtilView.fs" />
-        <Compile Include="ImportIOUtil.fs" />
         <Compile Include="ImportIOTable.fs" />
         <Compile Include="ExportExcel.fs" />
         <Compile Include="ExportLayoutTable.fs" />

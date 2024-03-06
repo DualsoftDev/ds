@@ -82,15 +82,13 @@ module internal XgiSymbolsModule =
             then
                 t.Address <- allocator ()
 
-    let getDataType (dsType:string) : PLCHwModel.DataType= 
-        match dsType with
-        | DsDataType.BOOL ->  DataType.Bit
-        | DsDataType.UINT8 ->  DataType.Byte
-        | DsDataType.UINT16 ->  DataType.Word
-        | DsDataType.UINT32 ->  DataType.DWord
-        | DsDataType.UINT64 ->  DataType.LWord
-        | _ ->
-            failwith $"Invalid tag DataType {dsType}"
+    let getXGITagInfo (address:string) (name:string) =
+        match tryParseXGITag address with
+        | Some tag -> address, tag.Device.ToString()
+        | _ -> 
+            if address = TextAddrEmpty 
+            then  "", ""
+            else  failwith $"Invalid tag address {address} for {name}"
         
 
     let xgiSymbolToSymbolInfo (prjParams: XgiProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
@@ -99,23 +97,8 @@ module internal XgiSymbolsModule =
             let name = t.Name
 
             autoAllocatorAdress t prjParams
-            let address, device, dataType =
-                match tryParseXGITag t.Address with
-                | Some tag -> t.Address, tag.Device.ToString(), tag.DataType
-                | _ -> 
-                    if t.Address = TextAddrEmpty 
-                    then  "", "", t.DataType.Name |> getDataType
-                    else  failwith $"Invalid tag address {t.Address} for {name}"
-
-            let plcType =
-                match dataType with
-                | PLCHwModel.DataType.Bit -> "BOOL"
-                | PLCHwModel.DataType.Byte -> "BYTE"
-                | PLCHwModel.DataType.Word -> "WORD"
-                | PLCHwModel.DataType.DWord -> "DWORD"
-                | PLCHwModel.DataType.LWord -> "LWORD"
-                | _ -> failwithlog "ERROR"
-
+            let address, device = getXGITagInfo t.Address t.Name 
+            let plcType = systemTypeToXgiTypeName t.DataType
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
 
@@ -134,15 +117,16 @@ module internal XgiSymbolsModule =
              
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
-
+               
                 autoAllocatorAdress t prjParams
+                let address, device = getXGITagInfo t.Address t.Name 
 
                 { defaultSymbolInfo with
                     Name = t.Name
                     Comment = comment
                     Type = plcType
-                    Device = ""
-                    Address = ""
+                    Device = device
+                    Address = address
                     InitValue = t.BoxedValue
                     Kind = kindVar }
 

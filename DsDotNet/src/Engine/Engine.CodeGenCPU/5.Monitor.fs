@@ -60,6 +60,7 @@ type VertexManager with
         let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.clear_btn.Expr
         [
+            let using      = if call.InTags.any() then v._on.Expr else  v._off.Expr 
             let input      = call.EndAction
             let offSet     = callV.RXErrOpenOff
             let offRising  = callV.RXErrOpenRising
@@ -69,8 +70,8 @@ type VertexManager with
             let onRising   = callV.RXErrShortRising
             let onTenmp    = callV.RXErrShortTemp
 
-            yield! (input  , v.ErrShort.Expr)  --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
-            yield! (!!input, v.ErrOpen.Expr)   --^ (offRising, offSet, offTemp, "RXErrOpenOff")
+            yield! (using <&&> input  , v.ErrShort.Expr)  --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
+            yield! (using <&&> !!input, v.ErrOpen.Expr)   --^ (offRising, offSet, offTemp, "RXErrOpenOff")
 
             yield (dop <&&> real.V.G.Expr <&&> onRising.Expr  <&&> call.RXs.Select(fun f -> f.V.R).ToAndElseOff() , rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
             yield (dop <&&> real.V.G.Expr <&&> offRising.Expr <&&> call.RXs.Select(fun f -> f.V.F).ToAndElseOff() , rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())

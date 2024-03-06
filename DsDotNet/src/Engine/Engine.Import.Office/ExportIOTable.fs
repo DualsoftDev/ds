@@ -33,17 +33,16 @@ module ExportIOTable =
                     if job.Value.Func.IsSome then job.Value.Func.Value.ToDsText() else ""
                 else
                     "↑"
-
             [ TextXlsAddress
               dev.ApiName
               "bool"
-              getValidAddress(dev.InAddress,  dev.QualifiedName, dev.ApiItem.RXs.Count = 0, true)
-              getValidAddress(dev.OutAddress, dev.QualifiedName, dev.ApiItem.TXs.Count = 0, false)
+              getValidAddress(dev.InAddress,  dev.QualifiedName, dev.ApiItem.RXs.Count = 0, IOType.In)
+              getValidAddress(dev.OutAddress, dev.QualifiedName, dev.ApiItem.TXs.Count = 0, IOType.Out)
               funcs ]
 
         let rows =
-            let jobs = selectFlows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>()
-                                                       .Select(fun c->c.TargetJob))
+            let calls = selectFlows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
+            let jobs = calls.Select(fun c->c.TargetJob)
             seq {
                 for job in sys.Jobs |> Seq.sortBy (fun f -> f.Name) do
                     if jobs.Contains job
@@ -171,7 +170,7 @@ module ExportIOTable =
         [<Extension>]
         static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
             let dataTables = [|ToIOListDataSet system|]
-            createSpreadsheet filePath dataTables 40.0
+            createSpreadsheet filePath dataTables 25.0
         [<Extension>]
         static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =
             let dataTable = ToTable system (system.Flows.Where(fun f->flowNames.Contains(f.Name))) conatinSys

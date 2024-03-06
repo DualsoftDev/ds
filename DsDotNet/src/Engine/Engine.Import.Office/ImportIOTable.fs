@@ -50,6 +50,9 @@ module ImportIOTable =
                 |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiName, j))
                 |> dict
 
+            let calls = sys.GetVerticesOfCoins()
+
+
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = $"{row.[(int) IOColumn.Name]}"
 
@@ -60,12 +63,13 @@ module ImportIOTable =
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim() |>emptyToSkipAddress
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
               
-                dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, dev.ApiItem.RXs.Count = 0, true)
-                dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, dev.ApiItem.TXs.Count = 0, false)
-                
-                let func = $"{row.[(int) IOColumn.Func]}"
+                dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, dev.ApiItem.RXs.Count = 0, IOType.In)
+                dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, dev.ApiItem.TXs.Count = 0, IOType.Out)
+
 
                 let job = dicJob[devName]
+            
+                let func = $"{row.[(int) IOColumn.Func]}"
                 let func = getFunction (job.Name, func, tableIO, true, page)
                 if func.IsSome
                 then 

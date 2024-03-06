@@ -24,23 +24,21 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Output}", typeof<string>) |> ignore
-        dt.Columns.Add($"{IOColumn.Job}", typeof<string>)   |> ignore
         dt.Columns.Add($"{IOColumn.Func}", typeof<string>)  |> ignore
 
       
         let rowItems (dev: TaskDev, job: Job option) =
-            let jobName, funcs =
+            let funcs =
                 if job.IsSome then
-                    job.Value.Name, if job.Value.Func.IsSome then job.Value.Func.Value.ToDsText() else ""
+                    if job.Value.Func.IsSome then job.Value.Func.Value.ToDsText() else ""
                 else
-                    "↑", "↑"
+                    "↑"
 
             [ TextXlsAddress
               dev.ApiName
               "bool"
               getValidAddress(dev.InAddress,  dev.QualifiedName, dev.ApiItem.RXs.Count = 0, true)
               getValidAddress(dev.OutAddress, dev.QualifiedName, dev.ApiItem.TXs.Count = 0, false)
-              jobName
               funcs ]
 
         let rows =
@@ -75,7 +73,7 @@ module ExportIOTable =
                 if containSys then
                     let func =  if btn.Func.IsSome then btn.Func.Value.ToDsText() else ""
                     let i, o = getValidBtnAddress(btn)
-                    dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool",  i, o , "", func)
+                    dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool",  i, o ,func)
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
@@ -84,7 +82,7 @@ module ExportIOTable =
                     let func =  if lamp.Func.IsSome then lamp.Func.Value.ToDsText() else ""
 
                     let i, o = getValidLampAddress(lamp)
-                    dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool",   i, o, "", func)
+                    dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool",   i, o, func)
                     |> ignore
 
         let toCondiText (conds: ConditionDef seq, xlsCase: ExcelCase) =
@@ -92,7 +90,7 @@ module ExportIOTable =
                 if containSys then
                     let func =  if cond.Func.IsSome then cond.Func.Value.ToDsText() else ""
                     let i, o = getValidCondiAddress(cond)
-                    dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool",i, o  ,  "", func)
+                    dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool",i, o  ,  func)
                     |> ignore
 
         emptyLine ()
@@ -124,15 +122,14 @@ module ExportIOTable =
         emptyLine ()
 
         toCondiText (sys.ReadyConditions, ExcelCase.XlsConditionReady)
-
-        dt.Rows.Add(TextXlsVariable, "", "", "", "", "", "") |> ignore
+        
+        dt.Rows.Add(TextXlsVariable) |> ignore
         emptyLine ()
         dt
 
     let ToIOListDataSet (system: DsSystem)  = 
         let table = ToTable system system.Flows true
         table.Columns.Remove($"{IOColumn.Case}")
-        table.Columns.Remove($"{IOColumn.Job}")
         table.Columns.Remove($"{IOColumn.Func}")
         table
 

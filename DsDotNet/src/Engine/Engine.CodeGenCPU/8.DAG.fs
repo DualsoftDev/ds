@@ -42,8 +42,10 @@ type VertexManager with
                 let coin = child :?> VertexMCoin
                 let call = coin.GetPure().V.Vertex :?> Call
                 let setEnd =
-                  
-                    (call.EndAction <||> coin._sim.Expr) <&&> call.PEs.ToAndElseOn() 
+                    if call.UsingTon then 
+                        call.PEs.ToAndElseOn()  <&&> call.EndAction                       
+                    else 
+                        call.PEs.ToAndElseOn() <&&> (call.EndAction <||> coin._sim.Expr)
 
                 let sets = coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr
                 let rsts = coin.RT.Expr

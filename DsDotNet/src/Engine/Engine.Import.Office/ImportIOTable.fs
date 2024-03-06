@@ -17,8 +17,8 @@ module ImportIOTable =
         | DataType = 2
         | Input = 3
         | Output = 4
-        | Job = 5
-        | Func = 6
+        | Func = 5
+
 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
@@ -38,46 +38,39 @@ module ImportIOTable =
                         funcs.Add(Func(funName, parms)) |> ignore)
                 if funcs.any() then Some (funcs.Head()) else None
 
-            let dicJob =
+            let dicDev =
                 sys.Jobs
                 |> Seq.collect (fun f -> f.DeviceDefs)
                 |> Seq.map (fun j -> j.ApiName, j)
                 |> dict
 
-            //let chageParserText newAddr =  newAddr//if newAddr= TextSkip then TextAddrEmpty else newAddr
-            ////let chageParserText newAddr = if newAddr= TextSkip then TextAddrEmpty else newAddr
-            //let changeValidAddress (address:string)  =
-            //        let address = address.Trim() 
-            //        address |> chageParserText
+            let dicJob =
+                sys.Jobs
+                |> Seq.map (fun j -> j.DeviceDefs , j)
+                |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiName, j))
+                |> dict
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = $"{row.[(int) IOColumn.Name]}"
 
-                if not <| dicJob.ContainsKey(devName) then
+                if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
 
-                let dev = dicJob.[devName]
+                let dev = dicDev.[devName]
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim() |>emptyToSkipAddress
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
               
                 dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, dev.ApiItem.RXs.Count = 0, true)
                 dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, dev.ApiItem.TXs.Count = 0, false)
-
-                let jobName = $"{row.[(int) IOColumn.Job]}"
+                
                 let func = $"{row.[(int) IOColumn.Func]}"
 
-                match sys.Jobs.TryFind(fun f -> f.Name = jobName) with
-                | Some job ->
-                    let func = getFunction (job.Name, func, tableIO, true, page)
-                    if func.IsSome
-                    then 
-                        job.Func <- func
-                | None ->
-                    if
-                        "↑" <> jobName //이름이 위와 같지 않은 경우
-                    then
-                        Office.ErrorPPT(ErrorCase.Name, ErrID._1004, $"오류 이름 {jobName}.", page, 0u)
-
+                let job = dicJob[devName]
+                let func = getFunction (job.Name, func, tableIO, true, page)
+                if func.IsSome
+                then 
+                    job.Func <- func
+             
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let dataType = $"{row.[(int) IOColumn.DataType]}" |> textToDataType

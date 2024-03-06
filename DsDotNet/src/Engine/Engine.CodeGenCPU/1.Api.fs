@@ -18,7 +18,7 @@ type ApiItemManager with
     member a.A2_PlanReceive(activeSys:DsSystem) =
 
         let sets =  a.ApiItem.RxETs
-                     .ToAndElseOn() 
+                     .ToAnd() 
 
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 

@@ -27,11 +27,24 @@ module ConvertErrorCheck =
           for coin in sys.GetVerticesOfCoins() do
                 for td in coin.TaskDevs do
                     let api = td.ApiItem
+                    if api.RXs.IsEmpty() then
+                        failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
+                    if api.TXs.IsEmpty() then
+                        failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
+
                     if api.TXs.any() && td.OutAddress <> TextSkip && coin.TargetJob.ActionType = JobActionType.Push 
                     then 
                         if coin.MutualResetCalls.Select(fun c->c.VC.MM).isEmpty()
                         then 
                             failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
+                             
+
+    let checkErrRealResetExist(sys:DsSystem) = 
+
+          for real in sys.GetVertices().OfType<Real>() do
+            if CodeConvertUtilExt.GetResetRootEdges(real.V).isEmpty()
+            then 
+                failwithf $"Work는 Reset 모델링이 반드시 필요합니다.\n(flow:{real.Flow.Name}, name:{real.Name})"
                              
 
 

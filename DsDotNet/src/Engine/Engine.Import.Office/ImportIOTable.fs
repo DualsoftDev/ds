@@ -133,7 +133,7 @@ module ImportIOTable =
             dts
             |> Seq.iter (fun (page, dt) ->
                 let tableIO = dt
-
+              
                 for row in tableIO.Rows do
                     let case = $"{row.[(int) IOColumn.Case]}"
 

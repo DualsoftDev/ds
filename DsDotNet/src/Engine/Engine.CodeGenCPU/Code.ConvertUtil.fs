@@ -150,3 +150,10 @@ module CodeConvertUtil =
         static member GetStrongResetRootAndCausals  (v:VertexManager) =
             let tags = getResetStrongEdgeSources(v).GetResetCausals()
             tags.ToAndElseOff()
+
+
+        [<Extension>]
+        static member GetResetRootEdges (v:VertexManager) =
+            let es = getResetStrongEdgeSources(v)
+            let ew = getResetWeakEdgeSources(v)
+            es @ ew

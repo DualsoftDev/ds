@@ -635,10 +635,14 @@ module PPTUtil =
                     |> Seq.iter (fun row ->
                         let cells = row.Descendants<DocumentFormat.OpenXml.Drawing.TableCell>()
 
-                        if cells.Count() = colCnt then
+                        if cells.Count() = colCnt
+                        then
                             let rowTemp = dt.NewRow()
                             rowTemp.ItemArray <- cells.Select(fun c -> c.InnerText) |> Seq.cast<obj> |> Seq.toArray
-                            rowTemp |> dt.Rows.Add |> ignore)
+                            rowTemp |> dt.Rows.Add |> ignore
+                        else 
+                            Office.ErrorPPT(ErrorCase.Name, ErrID._1004, "", pageIndex, 0u)
+                            )
 
                     pageIndex + 1, dt)
 

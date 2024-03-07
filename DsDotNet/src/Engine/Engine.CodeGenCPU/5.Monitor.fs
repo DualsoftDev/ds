@@ -42,7 +42,7 @@ type VertexManager with
         let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.clear_btn.Expr
         [
-            let running = v.MM.Expr <&&> !!call.EndAction <&&> dop
+            let running = v.MM.Expr <&&> !!call.EndActionOnlyIO <&&> dop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
 
             match RuntimeDS.Package with 
@@ -61,7 +61,7 @@ type VertexManager with
         let rst = v.Flow.clear_btn.Expr
         [
             let using      = if call.InTags.any() then v._on.Expr else  v._off.Expr 
-            let input      = call.EndAction
+            let input      = call.EndActionOnlyIO
             let offSet     = callV.RXErrOpenOff
             let offRising  = callV.RXErrOpenRising
             let offTemp    = callV.RXErrOpenTemp

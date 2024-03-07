@@ -43,7 +43,7 @@ type VertexManager with
                 let call = coin.GetPure().V.Vertex :?> Call
                 let setEnd =
                     if call.UsingTon then 
-                        call.PEs.ToAndElseOn() <&&> call.EndAction                       
+                        call.PEs.ToAndElseOn() <&&> coin.TDON.DN.Expr
                     else 
                         call.PEs.ToAndElseOn() <&&> (call.EndAction <||> coin._sim.Expr)
 

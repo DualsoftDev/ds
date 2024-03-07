@@ -20,7 +20,7 @@ type DsSystem with
         let ends (call:Call) = 
             (call.EndPlan  <&&> call.VC._sim.Expr)
             <||>
-            (call.InTags.ToAndElseOn() <&&> !!call.VC._sim.Expr)
+            (call.EndActionOnlyIO <&&> !!call.VC._sim.Expr)
 
         [
             for call in calls do

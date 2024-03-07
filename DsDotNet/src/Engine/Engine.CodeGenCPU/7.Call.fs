@@ -8,7 +8,14 @@ open Dual.Common.Core.FS
 
 type VertexManager with
     member v.C1_CallMemo() =
-        let v, call  = v :?> VertexMCoin, v.Vertex :?> Call 
+        let v = v :?> VertexMCoin
+        let call = 
+            match v.Vertex with
+            | :? Call as c->  c
+            | :? Alias as al->  al.TargetWrapper.CallTarget().Value
+            |_ -> failwithf "error coin Type"
+
+
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
         
         let sets = 
@@ -22,11 +29,13 @@ type VertexManager with
             //!!call.MutualResetCalls.Select(fun c-> c.EndAction).ToOrElseOff()  //들뜨면 RX 에러 발생해서 잡음
             
         let rsts =
-            (call.EndPlan <&&> v._sim.Expr)
-            <||>
-            (call.EndAction <&&> !!v._sim.Expr)
+            (
+            if call.UsingTon 
+            then v.TDON.DN.Expr 
+            else (call.EndPlan <&&> v._sim.Expr) <||> call.EndAction 
+            )
             <||>
             (call.V.Flow.pause.Expr)
 
-        (sets, rsts) ==| (call.VC.MM, getFuncName())
+        (sets, rsts) ==| (v.MM, getFuncName())
 

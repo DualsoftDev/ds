@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 
 type ApiItemManager with
 
-    member a.A1_PlanSend(activeSys:DsSystem, coins:Call seq) =
+    member a.A1_PlanSend(activeSys:DsSystem, coins:Vertex seq) =
 
         let sets = coins.Select(fun c->c.VC.MM)
                         .ToOrElseOff()

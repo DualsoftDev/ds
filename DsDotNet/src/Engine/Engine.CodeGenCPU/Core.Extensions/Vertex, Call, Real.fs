@@ -13,7 +13,7 @@ module ConvertCpuVertex =
     let getSafetyExpr(xs:Call seq, sys:DsSystem) =    
         if xs.any()
         then
-            (xs.Select(fun f->f.EndAction).ToAndElseOn() <&&> !!sys._sim.Expr)
+            (xs.Select(fun f->f.EndActionOnlyIO).ToAndElseOn() <&&> !!sys._sim.Expr)
             <||> 
             (xs.Select(fun f->f.EndPlan).ToAndElseOn() <&&> sys._sim.Expr)
         else 
@@ -39,17 +39,22 @@ module ConvertCpuVertex =
         member c.UsingMove = c.TargetJob.Func |> hasMove
       
         member c.EndPlan = c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
+        member c.EndActionOnlyIO = 
+                if c.UsingNot 
+                    then 
+                        if c.InTags.any() 
+                        then !!c.InTags.ToOrElseOff() 
+                        else failwithf $"'Not function' requires an InTag. {c.Name} input error"   
+
+                elif c.InTags.any()
+                    then c.InTags.ToAnd() 
+                    else c.EndPlan
+
         member c.EndAction = 
                 if c.UsingMove   then c._on.Expr  //todo : Move 처리 완료시 End
                 elif c.UsingCtr  then c.VC.CTR.DN.Expr 
                 elif c.UsingTon  then c.VC.TDON.DN.Expr
-                elif c.UsingNot  then 
-                                 if c.InTags.any() 
-                                 then !!c.InTags.ToOrElseOff() 
-                                 else failwithf $"'Not function' requires an InTag. {c.Name} input error"   
-
-                elif c.InTags.any() then c.InTags.ToAnd() 
-                                    else c.EndPlan
+                else c.EndActionOnlyIO
 
         member c.GetEndAction(x:ApiItem) =
             let td = c.TaskDevs.First(fun d->d.ApiItem = x) 
@@ -104,9 +109,9 @@ module ConvertCpuVertex =
                         let homeManuAct = f.mop.Expr <&&> f.home_btn.Expr
                         let homeAutoAct = f.d_st.Expr <&&> rv.RO.Expr
                         let homeAct =  homeManuAct <||> homeAutoAct
-                        homeAct <&&> (!!c.EndAction <&&> !!c.System._sim.Expr)    
+                        homeAct <&&> ((!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
                                      <||>
-                                     (!!c.EndPlan <&&> c.System._sim.Expr)     
+                                     (!!c.EndPlan <&&> c.System._sim.Expr)  )   
 
                     else c._off.Expr
             | _ ->  

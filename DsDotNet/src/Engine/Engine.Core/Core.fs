@@ -241,7 +241,10 @@ module CoreModule =
         member _.TargetJob = target
         member _.TaskDevs = target.DeviceDefs
         member val ManualTag = getNull<IStorage>() with get, set
-        member val ManualAddress= getNull<string>() with get, set
+        member val ErrorSensorOn = getNull<IStorage>() with get, set
+        member val ErrorSensorOff = getNull<IStorage>() with get, set
+        member val ErrorTimeOver = getNull<IStorage>() with get, set
+        member val ErrorTrendOut = getNull<IStorage>() with get, set
         member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()

@@ -230,8 +230,12 @@ module TagManagerModule =
         do
             match v with
             | :? Call as call ->
-                this.SF.Address <-  getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
-                call.ManualTag <- this.SF :> IStorage
+                this.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                call.ManualTag  <- this.SF :> IStorage
+                call.ErrorSensorOn   <- this.ErrOpen :> IStorage
+                call.ErrorSensorOff  <- this.ErrShort :> IStorage
+                call.ErrorTimeOver   <- this.ErrTimeOver :> IStorage
+                call.ErrorTrendOut   <- this.ErrTrendOut :> IStorage
             | _->()
             
 

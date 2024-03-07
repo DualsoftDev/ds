@@ -24,8 +24,8 @@ type VertexManager with
         let rsts =
             (call.EndPlan <&&> v._sim.Expr)
             <||>
-            //(call.EndAction <&&> !!v._sim.Expr)
-            //<||>
+            (call.EndAction <&&> !!v._sim.Expr)
+            <||>
             (call.V.Flow.pause.Expr)
 
         (sets, rsts) ==| (call.VC.MM, getFuncName())

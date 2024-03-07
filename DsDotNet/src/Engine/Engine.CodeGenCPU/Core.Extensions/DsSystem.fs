@@ -84,13 +84,14 @@ module ConvertCpuDsSystem =
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationCallManualMemory()  = 
-            for call in x.GetVerticesOfCoins().OfType<Call>() do
+            for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
                 cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 call.ManualTag  <- cv.SF :> IStorage
+                                    
 
         member private x.GenerationCallAlarmMemory()  = 
-            for call in x.GetVerticesOfCoins().OfType<Call>() do
+            for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
                 cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 cv.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)

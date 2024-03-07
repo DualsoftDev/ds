@@ -68,8 +68,8 @@ module DsAddressModule =
 
   
     let private getValidBtnHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) =
-        let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, IOType.In)
-        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, IOType.Out)
+        let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, IOType.Memory)
+        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, IOType.Memory)
         inAddr, outAddr
 
     let getValidBtnAddress (btn: ButtonDef)       = getValidBtnHwItem btn  false false

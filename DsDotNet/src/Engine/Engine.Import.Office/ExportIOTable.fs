@@ -32,7 +32,7 @@ module ExportIOTable =
                 if job.IsSome then
                     if job.Value.Func.IsSome then job.Value.Func.Value.ToDsText() else ""
                 else
-                    "↑"
+                    "NotUse"
             [ TextXlsAddress
               dev.ApiName
               "bool"
@@ -44,16 +44,17 @@ module ExportIOTable =
             let calls = selectFlows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
             let jobs = calls.Select(fun c->c.TargetJob)
             seq {
-                for job in sys.Jobs |> Seq.sortBy (fun f -> f.Name) do
+
+                let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
+
+                for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
                     if jobs.Contains job
                     then 
                         let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
-
-                        for dev in sortedDeviceDefs do
-                            if sortedDeviceDefs.Head() = dev then
-                                yield rowItems (dev, Some job) //첫 TaskDev만 만듬
-                            else
-                                yield rowItems (dev, None)
+                        if sortedDeviceDefs.Head() = dev then
+                            yield rowItems (dev, Some job) //첫 TaskDev만 만듬
+                        else
+                            yield rowItems (dev, None)
             }
 
         rows
@@ -130,7 +131,7 @@ module ExportIOTable =
 
         let dt = new System.Data.DataTable($"{sys.Name}_ManualTable")
         dt.Columns.Add($"{ManualColumn.Name}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn.Mamual}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.Manual}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Output}", typeof<string>) |> ignore
 
@@ -146,10 +147,10 @@ module ExportIOTable =
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
             seq {
-                for call in calls do
-                    let sortedDeviceDefs = call.TargetJob.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
-                    for dev in sortedDeviceDefs do
-                            yield rowItems (dev, call) 
+                let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
+                                      |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
+                for (dev, call) in devCallSet  do
+                    yield rowItems (dev, call) 
             }
 
         rows
@@ -182,11 +183,11 @@ module ExportIOTable =
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
             seq {
-                for call in calls do
-                    yield rowItems ($"{call.Name}_ErrorSensorOn", call.ErrorSensorOn.Address)
-                    yield rowItems ($"{call.Name}_ErrorSensorOff", call.ErrorSensorOff.Address)
-                    yield rowItems ($"{call.Name}_ErrorTimeOver", call.ErrorTimeOver.Address)
-                    yield rowItems ($"{call.Name}_ErrorTrendOut", call.ErrorTrendOut.Address)
+                for call in calls |> Seq.sortBy (fun c -> c.Name) do
+                    yield rowItems ($"{call.Name}_센서쇼트이상", call.ErrorSensorOn.Address)
+                    yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
+                    yield rowItems ($"{call.Name}_시간지연이상", call.ErrorTimeOver.Address)
+                    yield rowItems ($"{call.Name}_시간추세이상", call.ErrorTrendOut.Address)
             }
 
         rows

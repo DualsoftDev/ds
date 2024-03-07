@@ -261,6 +261,13 @@ module ImportU =
             mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "", "", None, None)
             mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "", "", None, None)
 
+            mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "", "", None, None)
+
+
         //MakeButtons 리스트 만들기
         [<Extension>]
         static member MakeButtons(doc: pptDoc, mySys: DsSystem) =

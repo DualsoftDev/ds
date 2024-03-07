@@ -29,7 +29,7 @@ module ImportIOTable =
         | Name = 1
         | Input = 2
         | Output = 3
-        | Mamual = 4
+        | Manual = 4
 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
@@ -37,7 +37,7 @@ module ImportIOTable =
             
             let getFunction (name, funcText, tableIO: Data.DataTable, isJob: bool, page) =
                 let funcs = HashSet<Func>()
-                if not <| ((trimSpace funcText) = "" || funcText = TextSkip || funcText = "↑") then
+                if not <| ((trimSpace funcText) = "" || funcText = TextSkip || funcText = "NotUse") then
                     let funTexts = getFunctions (funcText)
                     if funTexts.length() > 1 then 
                         Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{name}", page, 0u)
@@ -61,8 +61,6 @@ module ImportIOTable =
                 |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiName, j))
                 |> dict
 
-            let calls = sys.GetVerticesOfCoins()
-
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = $"{row.[(int) IOColumn.Name]}"
@@ -84,7 +82,12 @@ module ImportIOTable =
                 let func = getFunction (job.Name, func, tableIO, true, page)
                 if func.IsSome
                 then 
-                    job.Func <- func
+                    if job.Func.IsSome 
+                    then
+                        Office.ErrorPPT(ErrorCase.Group, ErrID._1009, $"{devName}", page, 0u)
+                    else 
+                        job.Func <- func
+                        
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"

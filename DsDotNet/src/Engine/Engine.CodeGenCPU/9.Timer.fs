@@ -17,14 +17,18 @@ type DsSystem with
         let aliasCalls = allVertices.GetAliasTypeCalls()
                           .Where(fun f -> f.TargetWrapper.CallTarget().Value.UsingTon)
 
-      
+        let ends (call:Call) = 
+            (call.EndPlan  <&&> call.VC._sim.Expr)
+            <||>
+            (call.InTags.ToAndElseOn() <&&> !!call.VC._sim.Expr)
+
         [
             for call in calls do
-                let sets = call.V.ST.Expr <&&>  call.InTags.ToAndElseOn() 
+                let sets = call.V.ST.Expr <&&>  ends(call)
                 yield (sets) --@ (call.VC.TDON, call.PresetTime, getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.GetPureCall().Value
-                let sets = alias.V.ST.Expr <&&> alias.TargetWrapper.CallTarget().Value.InTags.ToAndElseOn() 
+                let sets = alias.V.ST.Expr <&&> ends(call)
                 yield (sets) --@ (alias.VC.TDON, call.PresetTime, getFuncName())
         ]

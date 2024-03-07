@@ -250,7 +250,7 @@ public partial class UcView : UserControl
 
                     if (viewNode.BtnType.Value == BtnType.DuDriveBTN)
                     {
-                        nNode.Attr.FillColor = Color.DarkGoldenrod;
+                        nNode.Attr.FillColor = Color.DarkOliveGreen;
                     }
 
                     if (viewNode.BtnType.Value == BtnType.DuPauseBTN)
@@ -280,7 +280,7 @@ public partial class UcView : UserControl
 
                     if (viewNode.BtnType.Value == BtnType.DuClearBTN)
                     {
-                        nNode.Attr.FillColor = Color.DarkOliveGreen;
+                        nNode.Attr.FillColor = Color.DarkGoldenrod;
                     }
                 }
             }

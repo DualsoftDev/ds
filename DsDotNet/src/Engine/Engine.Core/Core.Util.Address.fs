@@ -15,7 +15,7 @@ module DsAddressModule =
     let blockOutHead = blockOutText.Substring(0, 1);
     let mutable inCnt = RuntimeDS.HwStartInDINT * blockInSize - 1
     let mutable outCnt = RuntimeDS.HwStartOutDINT * blockOutSize - 1
-    let mutable memoryCnt = RuntimeDS.HwStartMemoryDINT - 1
+    let mutable memoryCnt = RuntimeDS.HwStartMemoryDINT-1u
     type IOType = | In | Out | Memory 
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
@@ -37,7 +37,7 @@ module DsAddressModule =
                     match ioType with 
                     |In -> inCnt <- inCnt + 1; inCnt
                     |Out -> outCnt <- outCnt + 1; outCnt
-                    |Memory -> memoryCnt <- memoryCnt + 1; memoryCnt
+                    |Memory -> memoryCnt <- memoryCnt + 1u; memoryCnt|>int
 
                 if RuntimeDS.Package.IsPackagePC() 
                 then

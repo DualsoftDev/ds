@@ -66,7 +66,7 @@ module RuntimeGeneratorModule =
         static member val HwBlockSizeOut = DataType.DuUINT64 with get, set
         static member val HwStartInDINT = 1   with get, set
         static member val HwStartOutDINT = 1  with get, set
-        static member val HwStartMemoryDINT = 10000  with get, set
+        static member val HwStartMemoryDINT = 1000u  with get, set
         static member val IP = "192.168.9.100" with get, set
 
         static member TimeoutCall = callTimeout

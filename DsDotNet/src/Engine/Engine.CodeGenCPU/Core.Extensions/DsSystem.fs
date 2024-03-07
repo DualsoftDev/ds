@@ -83,6 +83,25 @@ module ConvertCpuDsSystem =
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
+        member private x.GenerationCallManualMemory()  = 
+            for call in x.GetVerticesOfCoins().OfType<Call>() do
+                let cv =  call.TagManager :?> VertexMCoin
+                cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                call.ManualTag  <- cv.SF :> IStorage
+
+        member private x.GenerationCallAlarmMemory()  = 
+            for call in x.GetVerticesOfCoins().OfType<Call>() do
+                let cv =  call.TagManager :?> VertexMCoin
+                cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                cv.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                cv.ErrTrendOut.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                call.ErrorSensorOn   <- cv.ErrOpen :> IStorage
+                call.ErrorSensorOff  <- cv.ErrShort :> IStorage
+                call.ErrorTimeOver   <- cv.ErrTimeOver :> IStorage
+                call.ErrorTrendOut   <- cv.ErrTrendOut :> IStorage
+
+
         member private x.GenerationTaskDevIO() =
             let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
             for b in TaskDevices do
@@ -106,7 +125,9 @@ module ConvertCpuDsSystem =
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
-
+            x.GenerationCallManualMemory()
+            x.GenerationCallAlarmMemory()
+            
         member x.GenerationOrigins() =
             let getOriginInfos(sys:DsSystem) =
                 let reals = sys.GetVertices().OfType<Real>()

@@ -227,16 +227,20 @@ module TagManagerModule =
         let rxErrOpenTemp    = createTag "rxErrOpenTemp"      VertexTag.rxErrOpenTemp   
         let timerTimeOutBit  = timer  s "TOUT" sys 
         
-        do
-            match v with
-            | :? Call as call ->
-                this.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
-                call.ManualTag  <- this.SF :> IStorage
-                call.ErrorSensorOn   <- this.ErrOpen :> IStorage
-                call.ErrorSensorOff  <- this.ErrShort :> IStorage
-                call.ErrorTimeOver   <- this.ErrTimeOver :> IStorage
-                call.ErrorTrendOut   <- this.ErrTrendOut :> IStorage
-            | _->()
+        //do
+        //    match v with
+        //    | :? Call as call ->
+        //        this.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+        //        this.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+        //        this.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+        //        this.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+        //        this.ErrTrendOut.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+        //        call.ManualTag  <- this.SF :> IStorage
+        //        call.ErrorSensorOn   <- this.ErrOpen :> IStorage
+        //        call.ErrorSensorOff  <- this.ErrShort :> IStorage
+        //        call.ErrorTimeOver   <- this.ErrTimeOver :> IStorage
+        //        call.ErrorTrendOut   <- this.ErrTrendOut :> IStorage
+        //    | _->()
             
 
         ///Ring Counter

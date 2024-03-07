@@ -248,6 +248,19 @@ module ImportU =
 
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
 
+
+         //RuntimePackage.LightPC 를 위한 버튼 램프 만들기
+        [<Extension>]
+        static member MakeAutoGenBtnLamp(doc: pptDoc, mySys: DsSystem) =
+            let dicFlow = doc.DicFlow
+            dicFlow.Iter(fun flow ->
+                mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "", flow.Value, None)
+                mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "", flow.Value, None)
+                mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "", flow.Value, None)
+                )
+            mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "", "", None, None)
+
         //MakeButtons 리스트 만들기
         [<Extension>]
         static member MakeButtons(doc: pptDoc, mySys: DsSystem) =
@@ -704,8 +717,14 @@ module ImportU =
             
             doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
-            doc.MakeButtons(sys)
-            doc.MakeLamps(sys)
+
+
+            //자동생성
+            doc.MakeAutoGenBtnLamp(sys)
+            //수동생성
+            //doc.MakeButtons(sys)
+            //doc.MakeLamps(sys)
+
             doc.MakeConditions(sys)
             //segment 리스트 만들기
             doc.MakeSegment(sys)

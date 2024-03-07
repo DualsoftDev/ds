@@ -19,6 +19,17 @@ module ImportIOTable =
         | Output = 4
         | Func = 5
 
+    [<Flags>]
+    type AlramColumn =
+        | Name = 1
+        | ErrorAddress = 2
+
+    [<Flags>]
+    type ManualColumn =
+        | Name = 1
+        | Input = 2
+        | Output = 3
+        | Mamual = 4
 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 

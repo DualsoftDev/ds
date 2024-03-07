@@ -125,6 +125,85 @@ module ExportIOTable =
         dt.Rows.Add(TextXlsVariable) |> ignore
         emptyLine ()
         dt
+    
+    let ToManualTable (sys: DsSystem)  : DataTable =
+
+        let dt = new System.Data.DataTable($"{sys.Name}_ManualTable")
+        dt.Columns.Add($"{ManualColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.Mamual}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.Input}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.Output}", typeof<string>) |> ignore
+
+      
+        let rowItems (dev: TaskDev, call:Call) =
+            [ 
+              dev.ApiName
+              call.ManualTag.Address
+              dev.InAddress
+              dev.OutAddress
+               ]
+
+        let rows =
+            let calls = sys.GetVerticesOfCoins().OfType<Call>()
+            seq {
+                for call in calls do
+                    let sortedDeviceDefs = call.TargetJob.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
+                    for dev in sortedDeviceDefs do
+                            yield rowItems (dev, call) 
+            }
+
+        rows
+        |> Seq.iter (fun row ->
+            let rowTemp = dt.NewRow()
+            rowTemp.ItemArray <- (row |> Seq.cast<obj> |> Seq.toArray)
+            dt.Rows.Add(rowTemp) |> ignore)
+
+        let emptyLine () =
+            let row = dt.NewRow()
+            row.ItemArray <- Enum.GetNames(typedefof<ManualColumn>).Select(fun f -> "" |> box).ToArray()
+            row |> dt.Rows.Add |> ignore
+
+     
+        emptyLine ()
+        dt
+
+    let ToAlramTable (sys: DsSystem)  : DataTable =
+
+        let dt = new System.Data.DataTable($"{sys.Name}_AlramTable")
+        dt.Columns.Add($"{AlramColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{AlramColumn.ErrorAddress}", typeof<string>) |> ignore
+
+        let rowItems (name:string, address :string) =
+            [ 
+              name
+              address
+               ]
+
+        let rows =
+            let calls = sys.GetVerticesOfCoins().OfType<Call>()
+            seq {
+                for call in calls do
+                    yield rowItems ($"{call.Name}_ErrorSensorOn", call.ErrorSensorOn.Address)
+                    yield rowItems ($"{call.Name}_ErrorSensorOff", call.ErrorSensorOff.Address)
+                    yield rowItems ($"{call.Name}_ErrorTimeOver", call.ErrorTimeOver.Address)
+                    yield rowItems ($"{call.Name}_ErrorTrendOut", call.ErrorTrendOut.Address)
+            }
+
+        rows
+        |> Seq.iter (fun row ->
+            let rowTemp = dt.NewRow()
+            rowTemp.ItemArray <- (row |> Seq.cast<obj> |> Seq.toArray)
+            dt.Rows.Add(rowTemp) |> ignore)
+
+        let emptyLine () =
+            let row = dt.NewRow()
+            row.ItemArray <- Enum.GetNames(typedefof<AlramColumn>).Select(fun f -> "" |> box).ToArray()
+            row |> dt.Rows.Add |> ignore
+
+     
+        emptyLine ()
+        dt
+
 
     let ToIOListDataSet (system: DsSystem)  = 
         let table = ToTable system system.Flows true
@@ -169,7 +248,7 @@ module ExportIOTable =
     type OfficeExcelExt =
         [<Extension>]
         static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
-            let dataTables = [|ToIOListDataSet system|]
+            let dataTables = [|ToIOListDataSet system;ToAlramTable system;ToManualTable system|]
             createSpreadsheet filePath dataTables 25.0
         [<Extension>]
         static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =

@@ -94,3 +94,5 @@ type VertexManager with
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())
+
+

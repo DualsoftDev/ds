@@ -131,14 +131,16 @@ module ExportIOTable =
 
         let dt = new System.Data.DataTable($"{sys.Name}_ManualTable")
         dt.Columns.Add($"{ManualColumn.Name}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn.Manual}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Output}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.Manual}", typeof<string>) |> ignore
 
       
         let rowItems (dev: TaskDev, call:Call) =
             [ 
               dev.ApiName
+              "bool"
               call.ManualTag.Address
               dev.InAddress
               dev.OutAddress
@@ -188,6 +190,11 @@ module ExportIOTable =
                     yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
                     yield rowItems ($"{call.Name}_시간지연이상", call.ErrorTimeOver.Address)
                     yield rowItems ($"{call.Name}_시간추세이상", call.ErrorTrendOut.Address)
+
+                for condi in sys.HWConditions do
+                    yield rowItems ($"{condi.Name}_조건이상", condi.ErrorCondition.Address)
+                  
+                    
             }
 
         rows

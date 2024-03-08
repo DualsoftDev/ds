@@ -183,6 +183,7 @@ module CoreModule =
     and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, func: Func option) =
         inherit HwSystemDef(name,  system,flows, inAddress, outAddress, func) // outAddress condition check bit
         member x.ConditionType = conditionType
+        member val ErrorCondition = getNull<IStorage>() with get, set
 
 
     and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, mnemonics: string []) =

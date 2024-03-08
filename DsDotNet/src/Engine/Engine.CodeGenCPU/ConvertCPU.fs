@@ -85,7 +85,8 @@ module ConvertCPU =
             
             yield s.Y2_SystemPause()
             yield! s.Y3_SystemState()
-
+            yield! s.Y4_SystemConditionError()
+            
             if RuntimeDS.Package.IsPackagePLC() then
                 yield! s.E1_PLCNotFunc()
                 yield! s.E2_LightPLCOnly()

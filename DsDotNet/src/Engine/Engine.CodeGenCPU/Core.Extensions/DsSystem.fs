@@ -87,13 +87,20 @@ module ConvertCpuDsSystem =
     
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
-        member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))   
+        member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))  
+        
+
         member private x.GenerationCallManualMemory()  = 
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
                 cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 call.ManualTag  <- cv.SF :> IStorage
-                                    
+
+
+        member private x.GenerationCallConditionMemory()  = 
+            for condi in x.HWConditions do
+                condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL false condi (int FlowTag.flowStopConditionErrLamp) x
+                condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty, condi.Name, false, IOType.Memory)
 
         member private x.GenerationCallAlarmMemory()  = 
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
@@ -106,6 +113,10 @@ module ConvertCpuDsSystem =
                 call.ErrorSensorOff  <- cv.ErrShort :> IStorage
                 call.ErrorTimeOver   <- cv.ErrTimeOver :> IStorage
                 call.ErrorTrendOut   <- cv.ErrTrendOut :> IStorage
+
+
+
+                
 
 
         member private x.GenerationTaskDevIO() =
@@ -128,6 +139,7 @@ module ConvertCpuDsSystem =
             x.GenerationTaskDevIO()
             x.GenerationCallManualMemory()
             x.GenerationCallAlarmMemory()
+            x.GenerationCallConditionMemory()
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()

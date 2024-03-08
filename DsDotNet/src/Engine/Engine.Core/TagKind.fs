@@ -99,7 +99,9 @@ module TagKindList =
     
     | flowStopError            = 10040
     | flowStopConditionErr     = 10041
-    | flowPause                = 10042
+    | flowStopConditionErrLamp = 10042
+    | flowPause                = 10043
+
 
       //복수 mode  존재 불가
     |idle_mode                 = 10100

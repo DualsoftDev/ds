@@ -27,9 +27,10 @@ module ImportIOTable =
     [<Flags>]
     type ManualColumn =
         | Name = 1
-        | Input = 2
-        | Output = 3
-        | Manual = 4
+        | DataType = 2
+        | Manual = 3
+        | Input = 4
+        | Output = 5
 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 

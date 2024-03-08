@@ -17,3 +17,8 @@ module ConvertCpuTaskDev =
             let inTag = (s.InTag :?> Tag<bool>).Expr
             if hasNot (s.Func)
             then !!inTag else inTag  
+
+    //type ConditionDef with
+    //    member s.ErrorConditionTag = s.ErrorCondition
+
+        

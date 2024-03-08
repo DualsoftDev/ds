@@ -83,19 +83,15 @@ module ConvertCPU =
             yield! s.B1_HWButtonOutput()
             yield! s.B3_HWModeLamp()
             
-            if RuntimeDS.Package <> RuntimePackage.LightPLC 
-            then
-                yield! s.B2_SWButtonOutput()
-                yield! s.B4_SWModeLamp()
-
             yield s.Y2_SystemPause()
             yield! s.Y3_SystemState()
 
             if RuntimeDS.Package.IsPackagePLC() then
                 yield! s.E1_PLCNotFunc()
-            if RuntimeDS.Package = RuntimePackage.LightPLC then
                 yield! s.E2_LightPLCOnly()
-
+            else  
+                yield! s.B2_SWButtonOutput()
+                yield! s.B4_SWModeLamp()
         ]
 
 
@@ -178,7 +174,7 @@ module ConvertCPU =
             then 
                 yield! applySystemSpec sys
 
-            if RuntimeDS.Package <> RuntimePackage.LightPLC 
+            if not(RuntimeDS.Package.IsPackagePLC())
             then
                 yield! sys.Y1_SystemBitSetFlow()
 

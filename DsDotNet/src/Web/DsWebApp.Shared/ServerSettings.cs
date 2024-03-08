@@ -45,8 +45,6 @@ public static class ServerSettingsExtensions
         {
                 RuntimePackageCs.StandardPC => RuntimePackage.StandardPC,
                 RuntimePackageCs.StandardPLC => RuntimePackage.StandardPLC,
-                RuntimePackageCs.LightPC => RuntimePackage.LightPC,
-                RuntimePackageCs.LightPLC => RuntimePackage.LightPLC,
                 RuntimePackageCs.Simulation => RuntimePackage.Simulation,
                 RuntimePackageCs.SimulationDubug => RuntimePackage.SimulationDubug,
                 _ => RuntimePackage.StandardPC,
@@ -57,10 +55,6 @@ public static class ServerSettingsExtensions
             return RuntimePackageCs.StandardPC;
         else if (runtimePackage == RuntimePackage.StandardPLC)
             return RuntimePackageCs.StandardPLC;
-        else if (runtimePackage == RuntimePackage.LightPC)
-            return RuntimePackageCs.LightPC;
-        else if (runtimePackage == RuntimePackage.LightPLC)
-            return RuntimePackageCs.LightPLC;
         else if (runtimePackage == RuntimePackage.Simulation)
             return RuntimePackageCs.Simulation;
         else if (runtimePackage == RuntimePackage.SimulationDubug)

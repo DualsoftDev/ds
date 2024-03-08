@@ -657,7 +657,7 @@ module ImportU =
         [<Extension>]
         static member UpdateActionIO(doc: pptDoc, sys: DsSystem) =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
-            if RuntimeDS.Package = LightPLC 
+            if RuntimeDS.Package <> Simulation 
             && activeSys.IsSome && activeSys.Value = sys
             && pageTables.isEmpty()
             then  failwithf "IO Table이 없습니다. Add IO Table을 수행하세요"

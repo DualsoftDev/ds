@@ -16,19 +16,17 @@ module RuntimeGeneratorModule =
     type RuntimePackage = 
         | StandardPC 
         | StandardPLC 
-        | LightPC 
-        | LightPLC
         | Simulation 
         | SimulationDubug 
     with
         member x.IsPackagePC() =
             match x with
-            | StandardPC | LightPC -> true
+            | StandardPC  -> true
             | _ -> false
 
         member x.IsPackagePLC() =
             match x with
-            | StandardPLC | LightPLC -> true
+            | StandardPLC  -> true
             | _ -> false
 
         member x.IsPackageSIM() =
@@ -36,14 +34,12 @@ module RuntimeGeneratorModule =
             | Simulation | SimulationDubug -> true
             | _ -> false
 
-    let RuntimePackageList = [ StandardPC; StandardPLC; LightPC; LightPLC; Simulation; SimulationDubug]
+    let RuntimePackageList = [ StandardPC; StandardPLC;  Simulation; SimulationDubug]
 
     let ToRuntimePackage s =
         match s with
         | "StandardPC" -> StandardPC
         | "StandardPLC" -> StandardPLC
-        | "LightPC" -> LightPC
-        | "LightPLC" -> LightPLC
         | "Simulation" -> Simulation
         | "SimulationDubug" -> SimulationDubug
         | _ -> failwithlogf $"Error {getFuncName()}"

@@ -77,11 +77,11 @@ module ConvertCpuFlow =
         member f.HwManuExpr = getButtonExpr(f, f.System.ManualHWButtons)
 
         //push 버튼은 없을경우 항상 _off
-        member f.HWBtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) (*<||> f._sim.Expr*)
+        member f.HWBtnDriveExpr = getButtonExpr(f, f.System.DriveHWButtons    ) 
         member f.HWBtnPauseExpr = getButtonExpr(f, f.System.PauseHWButtons     )
         member f.HWBtnEmgExpr   = getButtonExpr(f, f.System.EmergencyHWButtons)
         member f.HWBtnTestExpr  = getButtonExpr(f, f.System.TestHWButtons     )
-        member f.HWBtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) (*<||> f._sim.Expr*)
+        member f.HWBtnReadyExpr = getButtonExpr(f, f.System.ReadyHWButtons    ) 
         member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
@@ -91,14 +91,14 @@ module ConvertCpuFlow =
                 let hmiAuto = f.auto_btn.Expr <&&> !!f.manual_btn.Expr
                 let hwAuto  = f.HwAutoExpr <&&> !!f.HwManuExpr
                 if f.HwAutoSelects.any() //반드시 a/m 쌍으로 존재함  checkErrHWItem 체크중
-                then hwAuto <&&> hmiAuto //HW, HMI Select and 처리
+                then (hwAuto <||> f._sim.Expr) <&&> hmiAuto //HW, HMI Select and 처리
                 else hmiAuto
 
         member f.ManuExpr   =  
                 let hmiManu = !!f.auto_btn.Expr <&&> f.manual_btn.Expr
                 let hwManu  = !!f.HwAutoExpr <&&> f.HwManuExpr
                 if f.HwManuSelects.any() 
-                then hwManu <||> hmiManu //HW, HMI Select or 처리
+                then (hwManu <||> f._sim.Expr) <||> hmiManu //HW, HMI Select or 처리
                 else hmiManu
 
         member f.GetReadAbleTags() =

@@ -180,6 +180,9 @@ module ImportPPTModule =
             let sysName = getSystemName filePath
             let mySys = DsSystem(sysName)
 
+            if mySys.Name <> TextLibrary
+            then  activeSys <- Some mySys
+
             let paras =
                 getParams (filePath, sysName + ".pptx", mySys.Name, mySys, DuNone, sRepo)
 

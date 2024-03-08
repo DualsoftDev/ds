@@ -646,7 +646,7 @@ module PPTUtil =
 
                     pageIndex + 1, dt)
 
-            tablesWithPageNumbers
+            tablesWithPageNumbers |> Seq.where(fun (f,t) -> t.Rows.Count > 0)
 
         [<Extension>]
         static member GetLayoutPages(doc: PresentationDocument) =

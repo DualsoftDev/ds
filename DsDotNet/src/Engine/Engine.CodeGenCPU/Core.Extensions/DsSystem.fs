@@ -126,11 +126,12 @@ module ConvertCpuDsSystem =
         member x.GenerationIO() =
 
             x.GenerationTaskDevIO()
+            x.GenerationCallManualMemory()
+            x.GenerationCallAlarmMemory()
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
-            x.GenerationCallManualMemory()
-            x.GenerationCallAlarmMemory()
+         
             
         member x.GenerationOrigins() =
             let getOriginInfos(sys:DsSystem) =

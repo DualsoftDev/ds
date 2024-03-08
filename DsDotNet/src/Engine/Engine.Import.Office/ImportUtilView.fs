@@ -104,34 +104,24 @@ module ImportViewModule =
 
         newNode
 
+
     let UpdateLampNodes (system: DsSystem, flow: Flow, node: ViewNode) =
         let newNode = ViewNode("Lamps", VLAMP)
+        let addLamps (lamps: seq<LampDef>) (lampType:LampType) =
+            lamps 
+            |> Seq.filter (fun w -> w.SettingFlows.Contains(flow) || w.SettingFlows.IsEmpty())
+            |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, lampType)) |> ignore)
 
-        system.AutoHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuAutoModeLamp)) |> ignore)
+        addLamps system.AutoHWLamps DuAutoModeLamp
+        addLamps system.ManualHWLamps DuManualModeLamp
+        addLamps system.DriveHWLamps DuDriveStateLamp
+        addLamps system.ErrorHWLamps DuErrorStateLamp
+        addLamps system.TestHWLamps DuTestDriveStateLamp
+        addLamps system.ReadyHWLamps DuReadyStateLamp
+        addLamps system.IdleHWLamps DuIdleModeLamp
+        addLamps system.OriginHWLamps DuOriginStateLamp
 
-        system.ManualHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuManualModeLamp)) |> ignore)
-
-        system.DriveHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveStateLamp)) |> ignore)
-
-        system.ErrorHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuErrorStateLamp)) |> ignore)
-
-        system.TestHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuTestDriveStateLamp)) |> ignore)
-
-        system.ReadyHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuReadyStateLamp)) |> ignore)
-
-        system.IdleHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuIdleModeLamp)) |> ignore)
-
-        system.OriginHWLamps.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuOriginStateLamp)) |> ignore)
-
-        if newNode.GetSingles().Count() > 0 then
+        if node.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore
 
     let UpdateBtnNodes (system: DsSystem, flow: Flow, node: ViewNode) =

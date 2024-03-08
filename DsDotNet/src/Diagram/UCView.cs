@@ -84,7 +84,8 @@ public partial class UcView : UserControl
 
         SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
-        viewNode.GetSingles().ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
+        viewNode.GetSingles().Where(w=> !(w.ViewType == ViewType.VBUTTON || w.ViewType == ViewType.VLAMP))
+                             .ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
         viewNode.GetEdges().ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
         viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));

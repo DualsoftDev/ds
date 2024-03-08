@@ -254,21 +254,22 @@ module ImportU =
         static member MakeAutoGenBtnLamp(doc: pptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
             dicFlow.Iter(fun flow ->
-                mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "", flow.Value, None)
-                mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "", flow.Value, None)
-                mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "", flow.Value, None)
-                mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "", flow.Value, None)
-                mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "", flow.Value, None)
-                mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBTN", "", "", flow.Value, None)
+                mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow.Value, None)
+                mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow.Value, None)
+                mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow.Value, None)
+                mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow.Value, None)
+                mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow.Value, None)
+                mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBTN", "", "-", flow.Value, None)
                 )
-            mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "", "", None, None)
-            mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "", "", None, None)
 
-            mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "", "", None, None)
             mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "", "", None, None)
             mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "", "", None, None)
+
             mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "", "", None, None)
             mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "", "", None, None)
+            mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "", "", None, None)
 
 
         //MakeButtons 리스트 만들기

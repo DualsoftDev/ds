@@ -110,7 +110,7 @@ module ConvertCPU =
             yield f.ST2_homingState()
             yield f.ST3_goingState()
             yield f.ST4_EmergencyState()
-            yield f.ST5_StopState()
+            yield f.ST5_ErrorState()
             yield f.ST6_DriveState()
             yield f.ST7_TestState()
             yield f.ST8_ReadyState()
@@ -178,10 +178,8 @@ module ConvertCPU =
             then 
                 yield! applySystemSpec sys
 
-            if RuntimeDS.Package = RuntimePackage.LightPLC 
+            if RuntimeDS.Package <> RuntimePackage.LightPLC 
             then
-                checkErrLightPLC(sys)
-            else
                 yield! sys.Y1_SystemBitSetFlow()
 
                 //Flow 적용

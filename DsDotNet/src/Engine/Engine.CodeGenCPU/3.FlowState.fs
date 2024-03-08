@@ -17,7 +17,7 @@ type Flow with
         (set, rst) --| (f.o_st, getFuncName())   
 
     member f.ST2_homingState() =
-        let set = f.home_btn.Expr <||> f.HWBtnHomeExpr
+        let set =(f.home_btn.Expr <||> f.HWBtnHomeExpr ) <&&> f.mop.Expr
         let rst = f._off.Expr
 
         (set, rst) --| (f.h_st, getFuncName())
@@ -37,7 +37,7 @@ type Flow with
 
         (set, rst) --| (f.emg_st, getFuncName())
 
-    member f.ST5_StopState() =
+    member f.ST5_ErrorState() =
         let setDeviceError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
                                 |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
         let setConditionError = f.stopConditionErr.Expr <&&> !!f._sim.Expr

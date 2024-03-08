@@ -48,11 +48,6 @@ module ConvertErrorCheck =
                              
 
 
-    let checkErrLightPLC(sys:DsSystem) = 
-        let hwManuFlows = sys.ManualHWButtons |>Seq.collect(fun f->f.SettingFlows)
-        let hwAutoFlows = sys.AutoHWButtons |>Seq.collect(fun f->f.SettingFlows)
-        if hwAutoFlows.any() ||hwManuFlows.any()
-        then failwithf $"Cannot create auto/manual button \nwhen Light PLC mode"
 
     let checkErrNullAddress(sys:DsSystem) = 
         let nullTagJobs = sys.Jobs

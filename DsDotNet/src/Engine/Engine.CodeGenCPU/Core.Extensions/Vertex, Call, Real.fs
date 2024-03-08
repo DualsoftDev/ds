@@ -68,7 +68,7 @@ module ConvertCpuVertex =
       
         member c.SyncExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
-                 !!rv.SYNC.Expr <&&> (rv.G.Expr <||> rv.Flow.home_btn.Expr)
+                 !!rv.SYNC.Expr <&&> (rv.G.Expr <||> rv.Flow.h_st.Expr)
 
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.Func.Value.GetDelayTime()
@@ -106,7 +106,7 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        let homeManuAct = f.mop.Expr <&&> f.home_btn.Expr
+                        let homeManuAct = f.h_st.Expr // h_st 수동일때만 가능
                         let homeAutoAct = f.d_st.Expr <&&> rv.RO.Expr
                         let homeAct =  homeManuAct <||> homeAutoAct
                         homeAct <&&> ((!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    

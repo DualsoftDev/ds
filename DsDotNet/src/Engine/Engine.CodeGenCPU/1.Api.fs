@@ -62,7 +62,7 @@ type ApiItemManager with
                 let rop = coin.Parent.GetFlow().r_st.Expr
                 for td in coin.TaskDevs do
                     let api = td.ApiItem
-                    if api.TXs.any() && td.OutAddress <> TextSkip
+                    if td.OutAddress <> TextSkip
                     then 
                         let sets = api.PE.Expr <&&> api.PS.Expr 
                         if coin.TargetJob.ActionType = JobActionType.Push 

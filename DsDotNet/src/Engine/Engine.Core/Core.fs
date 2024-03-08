@@ -297,9 +297,6 @@ module CoreModule =
         member _.System = system
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
-        //member val Xywh:Xywh = null with get, set
-        ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
-        //member val Channels = HashSet<string>()
 
 
     /// API 의 reset 정보:  "+" <||> "-";

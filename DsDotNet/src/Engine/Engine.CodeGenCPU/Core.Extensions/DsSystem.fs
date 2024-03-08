@@ -9,7 +9,10 @@ open ConvertCoreExtUtils
 
 [<AutoOpen>]
 module ConvertCpuDsSystem =
-
+    let emptyAddressCheck(address:string) (name:string) = 
+        if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip
+            then
+                failwithf $"{name} 해당 주소가 없습니다."
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -73,10 +76,12 @@ module ConvertCpuDsSystem =
 
 
         member s.GetTempTag(x:TaskDev) = 
+            emptyAddressCheck x.InAddress x.Name
             let name = x.InAddress.Replace("%", "_").Replace(".", "_")
             getSM(s).GetTempBoolTag(name, x.InAddress, x)
 
         member s.GetTempTimer(x:HwSystemDef) = 
+            emptyAddressCheck x.InAddress x.Name
             let name = x.InAddress.Replace("%", "_").Replace(".", "_")
             getSM(s).GetTempTimerTag(name)
     
@@ -106,8 +111,6 @@ module ConvertCpuDsSystem =
         member private x.GenerationTaskDevIO() =
             let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
             for b in TaskDevices do
-                if b.ApiItem.RXs.length() = 0 && b.ApiItem.TXs.length() = 0
-                then failwith $"Error {getFuncName()}"
 
                 if  b.InAddress <> TextSkip then
                     let inT = createBridgeTag(x.Storages, b.ApiName, b.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , b).Value

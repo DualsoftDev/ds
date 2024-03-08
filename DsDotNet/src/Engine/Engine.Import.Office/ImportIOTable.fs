@@ -72,8 +72,8 @@ module ImportIOTable =
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim() |>emptyToSkipAddress
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
               
-                dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, dev.ApiItem.RXs.Count = 0, IOType.In)
-                dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, dev.ApiItem.TXs.Count = 0, IOType.Out)
+                dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In)
+                dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out)
 
 
                 let job = dicJob[devName]

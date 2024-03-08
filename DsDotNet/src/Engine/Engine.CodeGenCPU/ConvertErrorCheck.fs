@@ -32,7 +32,7 @@ module ConvertErrorCheck =
                     if api.TXs.IsEmpty() then
                         failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
-                    if api.TXs.any() && td.OutAddress <> TextSkip && coin.TargetJob.ActionType = JobActionType.Push 
+                    if td.OutAddress <> TextSkip && coin.TargetJob.ActionType = JobActionType.Push 
                     then 
                         if coin.MutualResetCalls.Select(fun c->c.VC.MM).isEmpty()
                         then 
@@ -57,8 +57,8 @@ module ConvertErrorCheck =
     let checkErrNullAddress(sys:DsSystem) = 
         let nullTagJobs = sys.Jobs
                              .Where(fun j-> j.DeviceDefs.Where(fun f-> 
-                                            f.InTag.IsNull() && f.ApiItem.RXs.any() && f.InAddress <> TextSkip
-                                            ||f.OutTag.IsNull() && f.ApiItem.TXs.any()  && f.OutAddress <> TextSkip
+                                            f.InTag.IsNull() && f.InAddress <> TextSkip
+                                            ||f.OutTag.IsNull() &&  f.OutAddress <> TextSkip
                                             ).any())
                       
         if nullTagJobs.any()

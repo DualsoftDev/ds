@@ -176,10 +176,8 @@ module CoreExtensionModule =
                     x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)
                            |> Seq.collect(fun d-> 
                                   [  
-                                     if d.ApiItem.RXs.any()
-                                     then yield d, "INPUT",d.InAddress
-                                     if d.ApiItem.TXs.any()
-                                     then yield d, "OUTPUT",d.OutAddress
+                                     yield d, "INPUT",d.InAddress
+                                     yield d, "OUTPUT",d.OutAddress
                                   ])
                            |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
                            |> Seq.map(fun (d, inout, _) -> $"{d.QualifiedName} <-{inout}") 

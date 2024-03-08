@@ -106,14 +106,14 @@ module ConvertCPU =
             yield f.O1_IdleOperationMode()
             yield f.O2_AutoOperationMode()
             yield f.O3_ManualOperationMode()
-            yield f.O4_EmergencyOperationState()
-            yield f.O5_StopOperationState()
-            yield f.O6_DriveOperationMode()
-            yield f.O7_TestOperationMode()
-            yield f.O8_ReadyOperationState()
-            yield f.O9_originOperationMode()
-            yield f.O10_homingOperationMode()
-            yield f.O11_goingOperationMode()
+            yield f.ST1_originState()
+            yield f.ST2_homingState()
+            yield f.ST3_goingState()
+            yield f.ST4_EmergencyState()
+            yield f.ST5_StopState()
+            yield f.ST6_DriveState()
+            yield f.ST7_TestState()
+            yield f.ST8_ReadyState()
         ]
 
     let private applyFlowMonitorSpec(f:Flow) =

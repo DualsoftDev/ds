@@ -36,8 +36,8 @@ module ExportIOTable =
             [ TextXlsAddress
               dev.ApiName
               "bool"
-              getValidAddress(dev.InAddress,  dev.QualifiedName, dev.ApiItem.RXs.Count = 0, IOType.In)
-              getValidAddress(dev.OutAddress, dev.QualifiedName, dev.ApiItem.TXs.Count = 0, IOType.Out)
+              getValidAddress(dev.InAddress,  dev.QualifiedName, false, IOType.In)
+              getValidAddress(dev.OutAddress, dev.QualifiedName, false, IOType.Out)
               funcs ]
 
         let rows =

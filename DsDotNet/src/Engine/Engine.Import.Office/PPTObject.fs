@@ -162,9 +162,11 @@ module PPTObjectModule =
         | _ ->
             match single, tailArrow, dashLine with
             | true, true, false -> StartEdge, isChangeHead
-            | false, true, false -> StartPush, isChangeHead
+            //| false, true, false -> StartPush, isChangeHead //강연결 사용안함 24/03.08
+            | false, true, false -> StartEdge, isChangeHead 
             | true, true, true -> ResetEdge, isChangeHead
-            | false, true, true -> ResetPush, isChangeHead
+            //| false, true, true -> ResetPush, isChangeHead   //강연결 사용안함 24/03.08
+            | false, true, true -> ResetEdge, isChangeHead
             | _ -> conn.ErrorConnect(ErrID._3, startName, endName, iPage)
 
     let GetAliasNumber (names: string seq) =

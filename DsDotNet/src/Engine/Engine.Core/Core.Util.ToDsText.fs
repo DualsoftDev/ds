@@ -198,7 +198,7 @@ module internal ToDsTextModule =
                     if hws.length() > 0 then
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
-                            let flows = (hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine()) |> String.concat ";")
+                            let flows = (hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand()) |> String.concat ";")
                             let flowTexts =
                                 if flows.Count() > 0 then
                                     flows + ";"
@@ -298,7 +298,7 @@ module internal ToDsTextModule =
 
             let layoutPointDic = layoutList
                                  |> Seq.map (fun f-> f, system.LoadedSystems 
-                                                        |> Seq.collect (fun dev-> dev.ChannelPoints.Select(fun kv-> dev.Name, kv.Key, kv.Value))
+                                                        |> Seq.collect (fun dev-> dev.ChannelPoints.Select(fun kv-> dev.Name.QuoteOnDemand(), kv.Key, kv.Value))
                                                         |> Seq.filter (fun (_, ch, _)-> ch = f)
                                                         )
                                  |> dict

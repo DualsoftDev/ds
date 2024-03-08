@@ -578,7 +578,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                 for positionDef in listPositionDefCtx do
                     let nameCtx = positionDef.TryFindFirstChild<Identifier12Context>() |> Option.get
-                    let name = getText nameCtx
+                    let name = getText nameCtx |> deQuoteOnDemand
                     let xywh = positionDef.TryFindFirstChild<XywhContext>() |> Option.get |> genXywh
                     let nameCompo = collectNameComponents nameCtx
 

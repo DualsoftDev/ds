@@ -75,8 +75,6 @@ module ConvertCPU =
             if IsSpec (v, VertexAll, AliasNotCare) then
                 yield vm.M2_PauseMonitor()
                 yield! vm.S1_RGFH()
-       
-
         ]
 
     let private applySystemSpec(s:DsSystem) =
@@ -122,7 +120,7 @@ module ConvertCPU =
             
         ]
 
-    let private callPlanAction(s:DsSystem) =
+    let private apiPlanSync(s:DsSystem) =
         [
             let apis = s.GetDistinctApis()
             let coinAll = s.GetVerticesOfCoins()  
@@ -144,9 +142,6 @@ module ConvertCPU =
                     yield am.A1_PlanSend(s, coins)
                     yield am.A3_SensorLinking(s, coins.OfType<Call>())
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
-
-         
-
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =
@@ -172,27 +167,28 @@ module ConvertCPU =
 
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()
+
+
         [
                 //Active 시스템 적용  //test ahn loaded는 제외 성능 고려해서 다시 구현
             if isActive
             then 
                 yield! applySystemSpec sys
 
-            if not(RuntimeDS.Package.IsPackagePLC())
+            if RuntimeDS.Package.IsPackagePC()
             then
                 yield! sys.Y1_SystemBitSetFlow()
 
-                //Flow 적용
+            //Flow 적용
             for f in sys.Flows do
                 yield! applyOperationModeSpec f
                 yield! applyFlowMonitorSpec f
 
-
-                //Vertex 적용
+            //Vertex 적용
             for v in sys.GetVertices() do
                 yield! applyVertexSpec v
 
-            yield! callPlanAction sys
+            yield! apiPlanSync sys
 
             yield! applyTimerCounterSpec sys
         ]

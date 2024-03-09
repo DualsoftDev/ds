@@ -735,7 +735,9 @@ module ImportU =
 
 
             //자동생성
-            doc.MakeAutoGenBtnLamp(sys)
+            if activeSys.IsSome && activeSys.Value = sys
+            then 
+                doc.MakeAutoGenBtnLamp(sys)
             //수동생성
             //doc.MakeButtons(sys)
             //doc.MakeLamps(sys)

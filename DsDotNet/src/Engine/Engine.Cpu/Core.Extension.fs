@@ -30,8 +30,6 @@ module CoreExtensionsModule =
      
         member x.GetTargetStorages() =
             match x with
-            | DuAssign (_expr, (:? RisingCoil as rc))  -> [ rc.Storage]
-            | DuAssign (_expr, (:? FallingCoil as fc)) -> [ fc.Storage]
             | DuAssign (_expr, target) -> [ target ]
             | DuVarDecl (_expr, var) -> [ var ]
             | DuTimer timerStatement -> [timerStatement.Timer.DN ]

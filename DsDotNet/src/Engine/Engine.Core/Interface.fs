@@ -29,6 +29,7 @@ module Interface =
         inherit IValue
         inherit INamed
         inherit IText
+        inherit IComparable
         abstract Address: string with get, set
         abstract DsSystem: ISystem
         abstract Target: IQualifiedNamed option

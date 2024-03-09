@@ -173,59 +173,9 @@ module ExpressionModule =
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
 
-    /// Pulse coil '-(P)-' 생성 및 평가를 위한 구조
-    type HistoryFlag() =
-        member val LastValue = false with get, set
-
+   
     let private unsupported() = failwithlog "ERROR: not supported"
-    type RisingCoil = {
-        Storage:IStorage
-        HistoryFlag:HistoryFlag
-        System:ISystem
-    } with
-        interface IStorage with
-
-            member x.DsSystem = x.System
-            member x.Target = None
-            member x.TagKind = skipValueChangedForTagKind
-            member x.TagChanged  with get() = failwithlog "ERROR" and set(_) = failwithlog "ERROR"
-            member x.Name with get() = $"RisingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
-            member _.Address with get() = unsupported() and set(_v) = unsupported()
-            member _.DataType = typedefof<RisingCoil>
-            member x.IsGlobal with get() = x.Storage.IsGlobal and set(v) = x.Storage.IsGlobal <- v
-            member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"
-            member x.BoxedValue with get() = x.Storage.BoxedValue
-                                and set(v) = x.Storage.BoxedValue <- v
-            member x.ObjValue = x.Storage.BoxedValue
-
-            member x.ToText() = $"ppulse(${x.Storage.Name})"    // positive pulse
-            member _.ToBoxedExpression() = failwithlog "ERROR: not supported"
-
-    /// Negative Pulse Coil '-(N)-' 생성 및 평가를 위한 구조
-    type FallingCoil = {
-        Storage:IStorage
-        HistoryFlag:HistoryFlag
-        System:ISystem
-    } with
-        interface IStorage with
-
-            member x.DsSystem = x.System
-            member x.Target = None
-            member x.TagKind = skipValueChangedForTagKind
-            member x.TagChanged  with get() = failwithlog "ERROR" and set(_) = failwithlog "ERROR"
-            member x.Name with get() = $"FallingCoil.{x.Storage.Name}" and set(_v) = failwithlog "ERROR"
-            member _.Address with get() = unsupported() and set(_v) = unsupported()
-            member _.DataType = typedefof<FallingCoil>
-            member x.IsGlobal with get() = x.Storage.IsGlobal and set(v) = x.Storage.IsGlobal <- v
-            member _.Comment with get() = "" and set(_v) = failwithlog "ERROR"
-            member x.BoxedValue with get() = x.Storage.BoxedValue
-                                and set(v) = x.Storage.BoxedValue <- v
-
-            member x.ObjValue = x.Storage.BoxedValue
-            member x.ToText() = $"npulse(${x.Storage.Name})"    // negative pulse
-            member _.ToBoxedExpression() = failwithlog "ERROR: not supported"
-
-
+    
     type FunctionParameters = {
         FunctionName:string
         Arguments:Arguments
@@ -277,25 +227,9 @@ module ExpressionModule =
         CommentedStatement(append, statement)
 
 
-    let pulseDo(expr:IExpression, storage:IStorage, historyFlag:HistoryFlag, isRising:bool) =
-        if expr.BoxedEvaluatedValue <> historyFlag.LastValue //평가값 변경시
-        then
-            historyFlag.LastValue <- (expr.BoxedEvaluatedValue |> unbox)
-            if historyFlag.LastValue |> unbox = isRising //rising 경우 TRUE 변경시점 처리
-            then
-                storage.BoxedValue <- true
-                storage.BoxedValue <- false
-                //single 스켄방식이면 펄스조건 사용된 모든 Rung 처리후 Off
-
     type Statement with
         member x.Do() =
             match x with
-            | DuAssign (expr, (:? RisingCoil as rc)) ->
-                pulseDo (expr, rc.Storage, rc.HistoryFlag, true)
-
-            | DuAssign (expr, (:? FallingCoil as fc)) ->
-                pulseDo (expr, fc.Storage, fc.HistoryFlag, false)
-
             | DuAssign (expr, target) ->
                 assert(target.DataType = expr.DataType)
                 target.BoxedValue <- expr.BoxedEvaluatedValue

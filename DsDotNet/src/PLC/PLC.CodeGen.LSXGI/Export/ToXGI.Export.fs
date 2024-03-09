@@ -62,8 +62,6 @@ module XgiExportModule =
         let simpleRung (expr: IExpression) (target: IStorage) =
             let coil =
                 match target with
-                | :? RisingCoil as rc -> COMPulseCoil(rc.Storage :?> INamedExpressionizableTerminal)
-                | :? FallingCoil as fc -> COMNPulseCoil(fc.Storage :?> INamedExpressionizableTerminal)
                 | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
 
             let flatExpr = expr.Flatten() :?> FlatExpression

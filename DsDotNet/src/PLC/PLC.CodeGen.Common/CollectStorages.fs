@@ -42,11 +42,8 @@ module CollectStoragesModule =
             [ match x with
               | DuAssign(exp, tgt) ->
                   yield! exp.CollectStorages()
-
-                  match tgt with
-                  | :? RisingCoil as rc -> yield rc.Storage
-                  | :? FallingCoil as fc -> yield fc.Storage
-                  | _ -> yield tgt
+                  yield tgt
+                 
               /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
               | DuVarDecl(exp, var) ->
                   yield! exp.CollectStorages()

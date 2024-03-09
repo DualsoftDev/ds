@@ -62,7 +62,7 @@ public partial class UcView : UserControl
         //sub 그래프 가능
         viewer.Graph = new Graph();
         Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings layoutSetting = new();
-        //var layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
+        //layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
 
         if (bSmallGap)
         {
@@ -450,7 +450,7 @@ public partial class UcView : UserControl
         Node node = findNode(viewNode);
         if (node != null)
         {
-            UpdateLineColor(viewNode.Status4, node);
+            UpdateBackColor(viewNode.Status4, node);
             if (vRefresh) RefreshGraph();
         }
     }
@@ -483,7 +483,7 @@ public partial class UcView : UserControl
         }
     }
 
-    private void UpdateLineColor(Status4 newStatus, Node node)
+    private void UpdateBackColor(Status4 newStatus, Node node)
     {
         if (newStatus == Status4.Ready)
         {

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices.ComTypes;
+using System.Threading.Tasks;
 using static Engine.CodeGenCPU.ApiTagManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;

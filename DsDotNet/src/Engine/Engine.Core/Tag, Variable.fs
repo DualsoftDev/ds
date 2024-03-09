@@ -2,6 +2,7 @@ namespace Engine.Core
 
 open System.Diagnostics
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module TagVariableModule =
@@ -64,7 +65,8 @@ module TagVariableModule =
             /// null 인 경우, memory 주소를 할당하지 않는다.   "" 인 경우, memory 주소를 할당한다.   다른 정상 문자열이 있으면 그대로 둔다.
             member x.Address with get() = x.Address and set(v) = x.Address <- v
             member x.ToBoxedExpression() = x.ToBoxedExpression()
-
+            member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name) 
+                        
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v
 

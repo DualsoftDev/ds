@@ -54,23 +54,3 @@ type ApiItemManager with
 
         (sets, activeSys._off.Expr) ==| (a.SL2, getFuncName())
 
-
-    member a.A5_ActionOut(coins:Call seq) =
-        [
-            for coin in coins do
-                let rstNormal = coin._off.Expr
-                let rop = coin.Parent.GetFlow().r_st.Expr
-                for td in coin.TaskDevs do
-                    let api = td.ApiItem
-                    if td.OutAddress <> TextSkip
-                    then 
-                        let sets = api.PE.Expr <&&> api.PS.Expr 
-                        if coin.TargetJob.ActionType = JobActionType.Push 
-                        then 
-                             let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
-                             let rstPush = rstMemos.ToOr()
-                        
-                             yield (sets, rstPush   <||> !!rop) ==| (td.AO, getFuncName())
-                        else 
-                             yield (sets, rstNormal <||> !!rop) --| (td.AO, getFuncName())
-        ]

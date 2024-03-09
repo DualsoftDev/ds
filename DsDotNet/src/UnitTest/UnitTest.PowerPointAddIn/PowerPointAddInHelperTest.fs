@@ -17,7 +17,7 @@ module MSG_TEST =
         MSG_CHECK.Do(testPath, false) |> Assert.True
     [<Fact>]
     let ``MSG_EXPORT`` () =
-        MSG_EXPORT.Do(testPath, false)|> Assert.True
+        MSG_EXPORTTEXT.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENIOLIST`` () =
         MSG_GENIOLIST.Do(testPath, false)|> Assert.True

@@ -304,20 +304,6 @@ module rec ExpressionParser =
                     createExpression storages (getFirstChildExpressionContext ctx)
 
                 match assignCtx.children.ToFSharpList() with
-                //| [ (:? RisingAssignContext as ctx) ] ->
-                //    let risingCoil: RisingCoil =
-                //        { Storage = storage
-                //          HistoryFlag = HistoryFlag()
-                //          System = RuntimeDS.System }
-
-                //    Some <| DuAssign(createExp ctx, risingCoil)
-                //| [ (:? FallingAssignContext as ctx) ] ->
-                //    let fallingCoil: FallingCoil =
-                //        { Storage = storage
-                //          HistoryFlag = HistoryFlag()
-                //          System = RuntimeDS.System }
-
-                //    Some <| DuAssign(createExp ctx, fallingCoil)
                 | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(createExp ctx, storage)
                 | _ -> failwithlog "ERROR"
 

@@ -52,7 +52,7 @@ public partial class UcView : UserControl
         return lstDummy.Any(w => w.Members.Contains(vertex));
     }
 
-    public void SetGraph(ViewNode viewNode, Flow flow, bool bSmallGap)
+    public void SetGraph(ViewNode viewNode, Flow flow)
     {
         Flow = flow;
         MasterNode = viewNode;
@@ -63,8 +63,8 @@ public partial class UcView : UserControl
         viewer.Graph = new Graph();
         Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings layoutSetting = new();
         //layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
-
-        if (bSmallGap)
+        
+        if (viewNode.UsedViewNodes.Count() > 30)
         {
             layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
             layoutSetting.NodeSeparation = 2;

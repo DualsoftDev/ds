@@ -67,7 +67,8 @@ module ConvertCPU =
                 yield! vm.M3_CallErrorTXMonitor() 
                 yield! vm.M4_CallErrorRXMonitor() 
                 yield vm.M6_CallErrorTotalMonitor() 
-                
+                yield! vm.C2_ActionOut()
+
             if IsSpec (v, CallInReal , AliasNotCare) then
                 yield vm.C1_CallMemo() 
 
@@ -143,7 +144,9 @@ module ConvertCPU =
                     yield am.A1_PlanSend(s, coins)
                     yield am.A3_SensorLinking(s, coins.OfType<Call>())
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
-                    yield! am.A5_ActionOut(coins.OfType<Call>())
+
+         
+
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =

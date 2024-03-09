@@ -27,12 +27,27 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Func}", typeof<string>)  |> ignore
 
       
+        let  addHeaderLine() =
+            let  rowHeaderItems =
+                [
+                    $"{IOColumn.Case}"
+                    $"{IOColumn.Name}"
+                    $"{IOColumn.DataType}"
+                    $"{IOColumn.Input}"
+                    $"{IOColumn.Output}" 
+                    $"{IOColumn.Func}"
+                ]
+            let row = dt.NewRow()
+            row.ItemArray <- rowHeaderItems.Select(fun f -> f |> box).ToArray()
+            row |> dt.Rows.Add |> ignore
+
+
         let rowItems (dev: TaskDev, job: Job option) =
             let funcs =
                 if job.IsSome then
                     if job.Value.Func.IsSome then job.Value.Func.Value.ToDsText() else ""
                 else
-                    "NotUse"
+                    TextFuncNotUsed
             [ TextXlsAddress
               dev.ApiName
               "bool"
@@ -94,8 +109,10 @@ module ExportIOTable =
                     |> ignore
 
         emptyLine ()
-        emptyLine ()
+        toCondiText (sys.ReadyConditions, ExcelCase.XlsConditionReady)
 
+
+        addHeaderLine()
         toBtnText (sys.AutoHWButtons, ExcelCase.XlsAutoBTN)
         toBtnText (sys.ManualHWButtons, ExcelCase.XlsManualBTN)
         toBtnText (sys.DriveHWButtons, ExcelCase.XlsDriveBTN)
@@ -105,10 +122,7 @@ module ExportIOTable =
         toBtnText (sys.HomeHWButtons, ExcelCase.XlsHomeBTN)
         toBtnText (sys.TestHWButtons, ExcelCase.XlsTestBTN)
         toBtnText (sys.ReadyHWButtons, ExcelCase.XlsReadyBTN)
-
         emptyLine ()
-        emptyLine ()
-
         toLampText (sys.AutoHWLamps, ExcelCase.XlsAutoLamp)
         toLampText (sys.ManualHWLamps, ExcelCase.XlsManualLamp)
         toLampText (sys.IdleHWLamps, ExcelCase.XlsIdleLamp)
@@ -119,12 +133,9 @@ module ExportIOTable =
         toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
 
         emptyLine ()
-        emptyLine ()
-
-        toCondiText (sys.ReadyConditions, ExcelCase.XlsConditionReady)
-        
         dt.Rows.Add(TextXlsVariable) |> ignore
         emptyLine ()
+
         dt
     
     let ToManualTable (sys: DsSystem)  : DataTable =
@@ -132,9 +143,9 @@ module ExportIOTable =
         let dt = new System.Data.DataTable($"{sys.Name}_ManualTable")
         dt.Columns.Add($"{ManualColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.DataType}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.Manual}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Output}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn.Manual}", typeof<string>) |> ignore
 
       
         let rowItems (dev: TaskDev, call:Call) =

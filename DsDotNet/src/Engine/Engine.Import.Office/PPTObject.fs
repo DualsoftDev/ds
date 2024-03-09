@@ -344,8 +344,8 @@ module PPTObjectModule =
             name.Split('[').Where(fun w -> w <> "")
             |> Seq.map (fun f ->
                 match GetSquareBrackets("[" + f, true) with
-                | Some item -> GetBracketsRemoveName("[" + f), item
-                | None -> GetBracketsRemoveName("[" + f), "")
+                | Some item -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), item
+                | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
 
         do
 

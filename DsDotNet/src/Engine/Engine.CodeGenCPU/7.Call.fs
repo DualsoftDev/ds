@@ -39,3 +39,24 @@ type VertexManager with
 
         (sets, rsts) ==| (v.MM, getFuncName())
 
+    
+    member v.C2_ActionOut() =
+        let v = v :?> VertexMCoin
+        let coin = v.Vertex :?> Call
+        [
+                let rstNormal = coin._off.Expr
+                let rop = coin.Parent.GetFlow().r_st.Expr
+                for td in coin.TaskDevs do
+                    let api = td.ApiItem
+                    if td.OutAddress <> TextSkip
+                    then 
+                        let sets = api.PE.Expr <&&> api.PS.Expr 
+                        if coin.TargetJob.ActionType = JobActionType.Push 
+                        then 
+                             let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
+                             let rstPush = rstMemos.ToOr()
+                        
+                             yield (sets, rstPush   <||> !!rop) ==| (td.AO, getFuncName())
+                        else 
+                             yield (sets, rstNormal <||> !!rop) --| (td.AO, getFuncName())
+        ]

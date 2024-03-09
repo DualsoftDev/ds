@@ -38,7 +38,7 @@ module ImportIOTable =
             
             let getFunction (name, funcText, tableIO: Data.DataTable, isJob: bool, page) =
                 let funcs = HashSet<Func>()
-                if not <| ((trimSpace funcText) = "" || funcText = TextSkip || funcText = "NotUse") then
+                if not <| ((trimSpace funcText) = "" || funcText = TextSkip || funcText = TextFuncNotUsed) then
                     let funTexts = getFunctions (funcText)
                     if funTexts.length() > 1 then 
                         Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{name}", page, 0u)

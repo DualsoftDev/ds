@@ -18,7 +18,7 @@ type VertexManager with
                 let safety = coin.GetPureCall().Value.SafetyExpr
                 let coin = coin :?> VertexMCoin
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety
-                let rsts = coin.ET.Expr <||>coin.RT.Expr 
+                let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, getFuncName())
         ]
 
@@ -30,7 +30,7 @@ type VertexManager with
                 let safety = coin.GetPureCall().Value.SafetyExpr
                 let coin = coin :?> VertexMCoin
                 let sets = coin.GetWeakStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety
-                let rsts = coin.ET.Expr <||>coin.RT.Expr 
+                let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]
         
@@ -59,7 +59,7 @@ type VertexManager with
         [
             for child in children do
                 let child = child :?> VertexMCoin
-                let sets = real.V.RT.Expr
+                let sets = real.V.RT.Expr <&&> !!real.V.G.Expr
                 let rsts = child.R.Expr
                 yield (sets, rsts) ==| (child.RT, getFuncName() )
         ]

@@ -543,7 +543,7 @@ module internal rec Command =
 
                   // 좌측 vertical lines
                   if x >= 1 then
-                      yield! vlineDownN (x - 1, y) (spanY - 1)
+                      yield! vlineDownN (x - 1, y) (blockedExprXmls.First().TotalSpanY)
 
                   // ```OR variable length 역삼각형 test```
                   let lowestY =

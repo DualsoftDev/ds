@@ -57,7 +57,7 @@ type VertexManager with
                              let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
                              let rstPush = rstMemos.ToOr()
                         
-                             yield (sets, rstPush   <||> !!rop <||> t_st) ==| (td.AO, getFuncName())
+                             yield (sets, rstPush   <||> !!rop ) ==| (td.AO, getFuncName())
                         else 
-                             yield (sets, rstNormal <||> !!rop <||> t_st) --| (td.AO, getFuncName())
+                             yield (sets, rstNormal <||> !!rop ) --| (td.AO, getFuncName())
         ]

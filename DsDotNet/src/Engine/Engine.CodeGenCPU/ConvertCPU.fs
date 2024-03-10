@@ -86,7 +86,7 @@ module ConvertCPU =
             yield! s.Y3_SystemState()
             yield! s.Y4_SystemConditionError()
             
-            if RuntimeDS.Package.IsPackagePLC() then
+            if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageEmulationDevice() then
                 yield! s.E1_PLCNotFunc()
                 yield! s.E2_LightPLCOnly()
             else  
@@ -147,10 +147,10 @@ module ConvertCPU =
         ]
 
     let private emulationDevice(s:DsSystem) =
-        let devTasks = s.Jobs.SelectMany(fun j->j.DeviceDefs)
         [
+            let devTasks = s.Jobs.SelectMany(fun j->j.DeviceDefs)
             for dt in devTasks do
-                yield dt.SensorEmulation(s)
+                    yield dt.SensorEmulation(s)
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =
@@ -199,7 +199,9 @@ module ConvertCPU =
                 yield! applyVertexSpec v
 
             yield! apiPlanSync sys
-            yield! emulationDevice sys
+
+            if RuntimeDS.Package.IsPackageEmulationDevice()  
+            then yield! emulationDevice sys
 
             yield! applyTimerCounterSpec sys
         ]

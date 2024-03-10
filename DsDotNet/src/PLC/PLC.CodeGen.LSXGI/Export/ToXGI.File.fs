@@ -16,6 +16,10 @@ module internal XgiFile =
         let yy = y * 1024 + 1
         $"\t<Rung BlockMask=\"0\"><Element ElementType=\"{int ElementType.RungCommentMode}\" Coordinate=\"{yy}\">{cmt}</Element></Rung>"
 
+    let getLableXml y cmt =
+        let yy = y * 1024 + 1
+        $"\t<Rung BlockMask=\"0\"><Element ElementType=\"{int ElementType.LabelMode}\" Coordinate=\"{yy}\">{cmt}</Element></Rung>"
+
 
     /// Program 마지막 부분에 END 추가
     let generateEndXml y =

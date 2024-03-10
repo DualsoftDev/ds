@@ -23,7 +23,10 @@ module MSG_TEST =
         MSG_GENIOLIST.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLC`` () =
-        MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
+        MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True    
+    [<Fact>]
+    let ``MSG_GENLSPLCEMULATION`` () =
+        MSG_GENLSPLCEMULATION.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_GENWINPC`` () =
         MSG_GENWINPC.Do(testPath,"",  false)|> Assert.True

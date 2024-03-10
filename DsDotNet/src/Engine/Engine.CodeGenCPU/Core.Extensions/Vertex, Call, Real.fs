@@ -112,7 +112,7 @@ module ConvertCpuVertex =
                         homeAct <&&> (
                                      (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
                                      <||>
-                                     (!!c.EndPlan <&&> ( c.System._sim.Expr <||> !!f.t_st.Expr))
+                                     (!!c.EndPlan <&&>  c.System._sim.Expr )
                                      )   
 
                     else c._off.Expr

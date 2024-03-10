@@ -14,5 +14,3 @@ type TaskDev with
         let rst = sys._off.Expr
 
         (set, rst) --| (d.InTag, getFuncName())
-
-

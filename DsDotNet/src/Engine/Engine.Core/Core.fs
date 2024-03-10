@@ -295,7 +295,7 @@ module CoreModule =
         interface INamedVertex
 
         member _.Name = name
-        member _.System = system
+        member _.ApiSystem = system
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
 

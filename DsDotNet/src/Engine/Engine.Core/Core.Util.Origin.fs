@@ -45,7 +45,7 @@ module OriginModule =
         |> Seq.map (fun x ->
             let call = x.GetPure() :?> Call
             let mutualCoins =
-                let resets = coinNapi.[call].System.GetMutualResetApis(coinNapi.[call])
+                let resets = coinNapi.[call].ApiSystem.GetMutualResetApis(coinNapi.[call])
                 resets |> Seq.collect (fun api -> findCoins api)
             x, mutualCoins)
         |> dict

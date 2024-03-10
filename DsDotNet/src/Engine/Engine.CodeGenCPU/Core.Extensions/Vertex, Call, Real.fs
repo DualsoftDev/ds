@@ -109,9 +109,11 @@ module ConvertCpuVertex =
                         let homeManuAct = f.h_st.Expr // h_st 수동일때만 가능
                         let homeAutoAct = f.d_st.Expr <&&> rv.RO.Expr
                         let homeAct =  homeManuAct <||> homeAutoAct
-                        homeAct <&&> ((!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
+                        homeAct <&&> (
+                                     (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
                                      <||>
-                                     (!!c.EndPlan <&&> c.System._sim.Expr)  )   
+                                     (!!c.EndPlan <&&> ( c.System._sim.Expr <||> !!f.t_st.Expr))
+                                     )   
 
                     else c._off.Expr
             | _ ->  

@@ -119,19 +119,21 @@ module ConvertCPU =
             yield f.F3_FlowPause()
             
         ]
-
+        
     let private apiPlanSync(s:DsSystem) =
         [
             let apis = s.GetDistinctApis()
             let coinAll = s.GetVerticesOfCoins()  
-            let apiCoinsSet = apis.Select(fun a-> a, 
-                                                    coinAll.Where(fun f->
-                                                    match f with
-                                                    | :? Call as c->  c.TargetJob.ApiDefs.Contains(a)
-                                                    | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.ApiDefs.Contains(a)
-                                                    |_ -> false
-                                                    )
-                                                    )
+            let apiCoinsSet =
+                apis.Select(fun a->
+                    a, 
+                        coinAll.Where(fun f->
+                        match f with
+                        | :? Call as c->  c.TargetJob.ApiDefs.Contains(a)
+                        | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.ApiDefs.Contains(a)
+                        |_ -> false
+                    )
+                )
             
             for (api, coins) in apiCoinsSet do
                 let am = api.TagManager :?> ApiItemManager
@@ -142,6 +144,13 @@ module ConvertCPU =
                     yield am.A1_PlanSend(s, coins)
                     yield am.A3_SensorLinking(s, coins.OfType<Call>())
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
+        ]
+
+    let private emulationDevice(s:DsSystem) =
+        let devTasks = s.Jobs.SelectMany(fun j->j.DeviceDefs)
+        [
+            for dt in devTasks do
+                yield dt.SensorEmulation(s)
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =
@@ -155,7 +164,9 @@ module ConvertCPU =
         RuntimeDS.System <- sys
 
         //시뮬레이션 주소 자동할당
-        if RuntimeDS.Package.IsPackageSIM()  then setSimulationAddress(sys)
+        if RuntimeDS.Package.IsPackageSIM()  
+        then setSimulationAddress(sys)
+
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
 
@@ -168,14 +179,13 @@ module ConvertCPU =
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()
 
-
         [
                 //Active 시스템 적용  //test ahn loaded는 제외 성능 고려해서 다시 구현
             if isActive
             then 
                 yield! applySystemSpec sys
 
-            if RuntimeDS.Package.IsPackagePC()
+            if RuntimeDS.Package.IsPackageSIM()
             then
                 yield! sys.Y1_SystemBitSetFlow()
 
@@ -189,6 +199,7 @@ module ConvertCPU =
                 yield! applyVertexSpec v
 
             yield! apiPlanSync sys
+            yield! emulationDevice sys
 
             yield! applyTimerCounterSpec sys
         ]

@@ -36,7 +36,18 @@ type DsSystem with
                 match sysLamp.LampType with
                 | DuAutoModeLamp      -> s._autoMonitor.Expr   
                 | DuManualModeLamp    -> s._manualMonitor.Expr 
-                | DuDriveStateLamp     -> (s._driveMonitor.Expr <&&> !!s._goingMonitor.Expr ) <||> (s._goingMonitor.Expr <&&> s._flicker1sec.Expr)
+                | DuDriveStateLamp     -> 
+                                    let drive = s._driveMonitor.Expr 
+                                    let test = s._testMonitor.Expr 
+                                    let going = s._goingMonitor.Expr 
+
+                                    (drive <&&> !!going) 
+                                    <||> 
+                                    (drive <&&> s._goingMonitor.Expr <&&> s._flicker1sec.Expr)
+                                    <||> 
+                                    (test  <&&> s._flicker100msec.Expr)
+                                    
+
                 | DuErrorStateLamp      -> s._emgState.Expr <||> (s._errorMonitor.Expr <&&> s._flicker1sec.Expr)
                 | DuTestDriveStateLamp -> s._testMonitor.Expr   
                 | DuReadyStateLamp     -> (s._readyMonitor.Expr  <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)

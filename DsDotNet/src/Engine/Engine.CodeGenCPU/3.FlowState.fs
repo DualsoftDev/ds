@@ -26,7 +26,7 @@ type Flow with
     member f.ST3_goingState() =
         let set = f.Graph.Vertices.OfType<Real>().Select(getVM)
                    .Select(fun r-> r.G).ToOrElseOn()  <&&> f.d_st.Expr
-        let rst = f._off.Expr
+        let rst = f.pause.Expr
 
         (set, rst) --| (f.g_st, getFuncName())
 
@@ -48,13 +48,13 @@ type Flow with
 
     member f.ST6_DriveState () =
         let set = f.drive_btn.Expr <||> f.HWBtnDriveExpr    
-        let rst = !!f.aop.Expr <||> f.t_st.Expr <||> f.clear_btn.Expr
+        let rst = !!f.aop.Expr <||> f.t_st.Expr  <||> f.pause.Expr
 
         (set, rst) ==| (f.d_st, getFuncName())
 
     member f.ST7_TestState () =
         let set = f.test_btn.Expr <||> f.HWBtnTestExpr
-        let rst = !!f.aop.Expr <||> f.d_st.Expr  <||> f.clear_btn.Expr
+        let rst = !!f.aop.Expr  <||> f.pause.Expr
 
         (set, rst) ==| (f.t_st, getFuncName())
 

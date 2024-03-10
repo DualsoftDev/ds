@@ -8,12 +8,12 @@ open System
 module ApiTagManagerModule =
     /// ApiItem Manager Manager : ApiItem Tag  를 관리하는 컨테이어
     type ApiItemManager (apiItem:ApiItem)  =
-        let stg = apiItem.System.TagManager.Storages
+        let stg = apiItem.ApiSystem.TagManager.Storages
 
         let cpv (apiItemTag:ApiItemTag) =
             let n = Enum.GetName(typeof<ApiItemTag>, apiItemTag)
-            let name = $"{apiItem.System.Name}_{apiItem.Name}_{n}"
-            let pv:IStorage = createPlanVar stg name DuBOOL true apiItem (int apiItemTag) apiItem.System 
+            let name = $"{apiItem.ApiSystem.Name}_{apiItem.Name}_{n}"
+            let pv:IStorage = createPlanVar stg name DuBOOL true apiItem (int apiItemTag) apiItem.ApiSystem 
             pv :?> PlanVar<bool>
             
         let ps = cpv ApiItemTag.planSet

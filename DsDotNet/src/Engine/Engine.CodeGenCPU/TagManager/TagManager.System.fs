@@ -87,7 +87,9 @@ module SystemManagerModule =
         let goingMonitor      = dsSysBit "goingMonitor"     true  sys   SystemTag.goingMonitor  
         
         let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
-        let flicker200msec  = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
+        let flicker20msec  = dsSysBit "_T20MS" true  sys   SystemTag.flicker20ms
+        let flicker100msec = dsSysBit "_T100MS" true  sys   SystemTag.flicker100ms
+        let flicker200msec = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
         let flicker1sec    = dsSysBit "_T1S"   true  sys   SystemTag.flicker1s
         let flicker2sec    = dsSysBit "_T2S"   true  sys   SystemTag.flicker2s
         do 
@@ -156,6 +158,8 @@ module SystemManagerModule =
             | SystemTag.goingMonitor         ->    goingMonitor    
             
             
+            | SystemTag.flicker20ms     -> flicker20msec
+            | SystemTag.flicker100ms    -> flicker100msec
             | SystemTag.flicker200ms    -> flicker200msec
             | SystemTag.flicker1s       -> flicker1sec
             | SystemTag.flicker2s       -> flicker2sec

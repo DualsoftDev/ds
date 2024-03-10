@@ -41,6 +41,7 @@
         <Compile Include="12.System.fs" />
         <Compile Include="13.ButtonLamp.fs" />
         <Compile Include="14.Extension.fs" />
+        <Compile Include="15.Emulation.fs" />
         <Compile Include="ConvertErrorCheck.fs" />
         <Compile Include="ConvertCPU.fs" />
         <Compile Include="Loader.fs" />

@@ -114,8 +114,8 @@ type TagKindExt =
         |EventSystem (_, obj, _) -> obj
         |EventFlow   (_, obj, _) -> obj.System
         |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
-        |EventApiItem(_, obj, _) -> obj.System
-        |EventAction (_, obj, _) -> obj.ApiItem.System
+        |EventApiItem(_, obj, _) -> obj.ApiSystem           //active system이 아니고 loaded 시스템
+        |EventAction (_, obj, _) -> obj.ApiItem.ApiSystem   //active system이 아니고 loaded 시스템
         |EventHwSys  (_, obj, _) -> obj.System
         |EventVariable  (_, obj, _) -> obj
         

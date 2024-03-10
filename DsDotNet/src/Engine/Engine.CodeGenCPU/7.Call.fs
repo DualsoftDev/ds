@@ -46,6 +46,7 @@ type VertexManager with
         [
                 let rstNormal = coin._off.Expr
                 let rop = coin.Parent.GetFlow().r_st.Expr
+                let t_st = coin.Parent.GetFlow().t_st.Expr
                 for td in coin.TaskDevs do
                     let api = td.ApiItem
                     if td.OutAddress <> TextSkip
@@ -56,7 +57,7 @@ type VertexManager with
                              let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
                              let rstPush = rstMemos.ToOr()
                         
-                             yield (sets, rstPush   <||> !!rop) ==| (td.AO, getFuncName())
+                             yield (sets, rstPush   <||> !!rop <||> t_st) ==| (td.AO, getFuncName())
                         else 
-                             yield (sets, rstNormal <||> !!rop) --| (td.AO, getFuncName())
+                             yield (sets, rstNormal <||> !!rop <||> t_st) --| (td.AO, getFuncName())
         ]

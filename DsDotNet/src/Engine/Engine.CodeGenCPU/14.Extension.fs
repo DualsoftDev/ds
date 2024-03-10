@@ -47,7 +47,10 @@ type DsSystem with
 
             for btn in s.DriveHWButtons do
                 let set = btn.ActionINFunc
+                let tm = s.GetTempTimer(btn)
                 for flow in btn.SettingFlows do
+                    yield set --@ (tm, 2000us, getFuncName())
+                    yield (tm.DN.Expr , rst) --| (flow.test_btn, getFuncName())
                     yield (set, rst) --| (flow.drive_btn, getFuncName())
 
             for btn in s.PauseHWButtons do

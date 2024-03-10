@@ -58,7 +58,7 @@ module ConvertHMI =
             {
                 Name        = x.Name
                 Calls    = containerCalls
-                                .Where(fun c->c.TargetJob.DeviceDefs.any(fun d->d.ApiItem.System = x.ReferenceSystem))
+                                .Where(fun c->c.TargetJob.DeviceDefs.any(fun d->d.ApiItem.ApiSystem = x.ReferenceSystem))
                                 .Select(fun c->c.GetHMI()).ToArray()
             }
 
@@ -74,7 +74,7 @@ module ConvertHMI =
     type Real with
         member private x.GetHMI()   =
 
-            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.System.Name).Value
+            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.ApiSystem.Name).Value
             let calls = x.Graph.Vertices.OfType<Call>()
             let tm = x.TagManager :?> VertexManager
             {

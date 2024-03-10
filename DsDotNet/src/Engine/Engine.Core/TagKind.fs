@@ -66,9 +66,11 @@ module TagKindList =
     | goingMonitor               = 0042
 
     ///flicker
-    | flicker200ms              = 0100
-    | flicker1s                 = 0101
-    | flicker2s                 = 0102
+    | flicker20ms               = 0100
+    | flicker100ms              = 0101
+    | flicker200ms              = 0102
+    | flicker1s                 = 0103
+    | flicker2s                 = 0104
 
     ///temp (not logic 정의를 위한 plc 임시변수)
     | temp                     = 9998

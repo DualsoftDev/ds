@@ -539,6 +539,7 @@ module ImportU =
                 let tgtNode = dic.Key
                 let tgtEdges = dic.Value
 
+
                 tgtEdges
                     .GroupBy(fun g-> g.Causal)
                     .Select(fun group -> group.Key, group.Select(id))
@@ -554,7 +555,7 @@ module ImportU =
                                 if (dummys.IsMember(edge.StartNode)) then
                                     dummys.GetMembers(edge.StartNode) |> getVertexs
                                 else
-                                    edges.Select(fun e -> dicVertex[e.StartNode.Key])
+                                    [dicVertex[edge.StartNode.Key]]
 
                             let tgts =
                                 if (dummys.IsMember(edge.EndNode)) then

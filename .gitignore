@@ -65,3 +65,4 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip
 /DsDotNet/src/IOHub/ThirdParty/LS/IOClient.Xgi/zmqhw.json
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.state
+/DsDotNet/*.lnk

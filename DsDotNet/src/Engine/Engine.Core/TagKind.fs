@@ -71,6 +71,7 @@ module TagKindList =
     | flicker200ms              = 0102
     | flicker1s                 = 0103
     | flicker2s                 = 0104
+    | scanFirstOne              = 0110
     ///emulation
     | emulation                 = 9997
     ///simulation

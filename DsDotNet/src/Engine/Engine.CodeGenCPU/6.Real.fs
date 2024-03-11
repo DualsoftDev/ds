@@ -17,7 +17,13 @@ type VertexMReal with
     member v.R2_RealJobComplete(): CommentedStatement seq=
         let real = v.Vertex :?> Real
         let setCoins = real.CoinRelays.ToAndElseOn()
-        let set = (v.GG.Expr <&&> setCoins) <||> v.ON.Expr 
+        let set = 
+            if v.IsFinished && (RuntimeDS.Package.IsPackageEmulation())   // _scanFirstOne xgSim에서 작동안함 
+            then
+                (v.GG.Expr <&&> setCoins) <||> v.ON.Expr <||> v._scanFirstOne.Expr
+            else                          
+                (v.GG.Expr <&&> setCoins) <||> v.ON.Expr  
+
         let rst = v.H.Expr <||> v.OFF.Expr
         [   
             //수식 순서 중요 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
@@ -47,6 +53,8 @@ type VertexMReal with
     member v.R5_RealDataMove() =
         let set = v.RD.ToExpression() 
         (set) --* (v.RD, getFuncName())
+
+
 
 type VertexManager with
     member v.R1_RealInitialStart() = (v :?> VertexMReal).R1_RealInitialStart()

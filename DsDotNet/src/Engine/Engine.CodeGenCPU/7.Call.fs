@@ -46,7 +46,6 @@ type VertexManager with
         [
                 let rstNormal = coin._off.Expr
                 let rop = coin.Parent.GetFlow().r_st.Expr
-                let t_st = coin.Parent.GetFlow().t_st.Expr
                 for td in coin.TaskDevs do
                     let api = td.ApiItem
                     if td.OutAddress <> TextSkip

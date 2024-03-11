@@ -49,3 +49,9 @@ type DsSystem with
                 yield (!!condi.ActionINFunc , s._off.Expr) --| (condi.ErrorCondition,   getFuncName())
         ]
         
+    member s.Y5_SystemEmgAlramError() =
+        [
+            for emg in s.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
+                yield (emg.ActionINFunc , s._off.Expr) --| (emg.ErrorEmergency,   getFuncName())
+        ]
+        

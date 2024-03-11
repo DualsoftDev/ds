@@ -110,6 +110,9 @@ module ConvertCpuDsSystem =
                 emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL false emg (int FlowTag.flowStopEmergencyErrLamp) x
                 emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, emg.Name, false, IOType.Memory)
 
+        member private x.GenerationEmulationMemory()  = 
+            x._emulation.Address <- getValidAddress(TextAddrEmpty, x._emulation.Name, false, IOType.Memory)
+
          
         member private x.GenerationCallAlarmMemory()  = 
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
@@ -148,11 +151,15 @@ module ConvertCpuDsSystem =
 
 
         member x.GenerationMemory() =
+
+            x.GenerationEmulationMemory()
             x.GenerationCallManualMemory()
             x.GenerationCallAlarmMemory()
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
-            
+                                    
+    
+         
         member x.GenerationOrigins() =
             let getOriginInfos(sys:DsSystem) =
                 let reals = sys.GetVertices().OfType<Real>()

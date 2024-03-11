@@ -67,7 +67,9 @@ module ConvertCPU =
                 yield! vm.M3_CallErrorTXMonitor() 
                 yield! vm.M4_CallErrorRXMonitor() 
                 yield vm.M6_CallErrorTotalMonitor() 
-                yield! vm.C2_ActionOut()
+
+                if not(RuntimeDS.Package.IsPackageEmulation()) then
+                    yield! vm.C2_ActionOut()
 
             if IsSpec (v, CallInReal , AliasNotCare) then
                 yield vm.C1_CallMemo() 
@@ -85,13 +87,14 @@ module ConvertCPU =
             yield s.Y2_SystemPause()
             yield! s.Y3_SystemState()
             yield! s.Y4_SystemConditionError()
+            yield! s.Y5_SystemEmgAlramError()
             
             if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageEmulation() then
                 yield! s.E1_PLCNotFunc()
                 yield! s.E2_LightPLCOnly()
             else  
                 yield! s.B2_SWButtonOutput()
-                yield! s.B4_SWModeLamp()
+                yield! s.B4_SWModeLamp() 
         ]
 
 
@@ -150,8 +153,9 @@ module ConvertCPU =
         [
             yield s.SetFlagForEmulation()
 
-            let devTasks = s.Jobs.SelectMany(fun j->j.DeviceDefs)
-            for dt in devTasks do
+            let coins = s.GetVerticesOfCoins()  
+            let coinTasks = coins.OfType<Call>().SelectMany(fun c->c.TargetJob.DeviceDefs).Distinct()
+            for dt in coinTasks do
                     yield dt.SensorEmulation(s)
         ]
      
@@ -164,24 +168,30 @@ module ConvertCPU =
 
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
-        //DsSystem 물리 IO 생성
-        sys.GenerationIO()
-        sys.GenerationMemory()
-        
-        checkErrNullAddress(sys)
-        checkErrHWItem(sys)
-        checkErrApi(sys)
+
+  
       
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()
+             sys.GenerationMemory()
+              //DsSystem 물리 IO 생성
+             sys.GenerationIO()
+ 
+                       
+             checkErrNullAddress(sys)
+             checkErrHWItem(sys)
+             checkErrApi(sys)
+
+
         else checkErrRealResetExist(sys)
+       
 
         [
             match   RuntimeDS.Package with
             | PC ->  ()
             | PLC ->  ()
             | Emulation ->  
-                            setEmulationFlagAddress(sys)
+                           
                             yield! emulationDevice sys
             | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당
                             yield! sys.Y1_SystemBitSetFlow()

@@ -14,41 +14,41 @@ module RuntimeGeneratorModule =
         | MELSEC
 
     type RuntimePackage = 
-        | StandardPC 
-        | StandardPLC 
-        | EmulationDevice 
+        | PC 
+        | PLC 
+        | Emulation 
         | Simulation 
-        | SimulationDubug 
+        | Developer 
     with
         member x.IsPackagePC() =
             match x with
-            | StandardPC  -> true
+            | PC  -> true
             | _ -> false
 
         member x.IsPackagePLC() =
             match x with
-            | StandardPLC  -> true
+            | PLC  -> true
             | _ -> false
 
-        member x.IsPackageEmulationDevice() =
+        member x.IsPackageEmulation() =
             match x with
-            | EmulationDevice  -> true
+            | Emulation  -> true
             | _ -> false
 
         member x.IsPackageSIM() =
             match x with
-            | Simulation | SimulationDubug -> true
+            | Simulation | Developer -> true
             | _ -> false
 
-    let RuntimePackageList = [ StandardPC; StandardPLC; EmulationDevice;  Simulation; SimulationDubug]
+    let RuntimePackageList = [ PC; PLC; Emulation;  Simulation; Developer]
 
     let ToRuntimePackage s =
         match s with
-        | "StandardPC" -> StandardPC
-        | "StandardPLC" -> StandardPLC
-        | "EmulationDevice" -> EmulationDevice
+        | "PC" -> PC
+        | "PLC" -> PLC
+        | "Emulation" -> Emulation
         | "Simulation" -> Simulation
-        | "SimulationDubug" -> SimulationDubug
+        | "Developer" -> Developer
         | _ -> failwithlogf $"Error {getFuncName()}"
 
     type RuntimeDS() =

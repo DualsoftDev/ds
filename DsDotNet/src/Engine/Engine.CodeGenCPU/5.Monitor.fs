@@ -46,7 +46,7 @@ type VertexManager with
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
 
             match RuntimeDS.Package with 
-            | SimulationDubug ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrTimeOver , getFuncName())
+            | Developer ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrTimeOver , getFuncName())
             | Simulation ->   yield (call._off.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
             | _ ->         yield (v.TOUT.DN.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
          

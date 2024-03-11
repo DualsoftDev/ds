@@ -7,7 +7,7 @@ module testMain =
 
     [<EntryPoint>]
     let main _ = 
-        RuntimeDS.Package <- RuntimePackage.StandardPC
+        RuntimeDS.Package <- RuntimePackage.PC
         
         //test me ds.zip 
         let testFile = @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip"

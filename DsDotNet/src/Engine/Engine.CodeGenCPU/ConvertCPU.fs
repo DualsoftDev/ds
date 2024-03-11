@@ -86,7 +86,7 @@ module ConvertCPU =
             yield! s.Y3_SystemState()
             yield! s.Y4_SystemConditionError()
             
-            if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageEmulationDevice() then
+            if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageEmulation() then
                 yield! s.E1_PLCNotFunc()
                 yield! s.E2_LightPLCOnly()
             else  
@@ -200,7 +200,7 @@ module ConvertCPU =
 
             yield! apiPlanSync sys
 
-            if RuntimeDS.Package.IsPackageEmulationDevice()  
+            if RuntimeDS.Package.IsPackageEmulation()  
             then yield! emulationDevice sys
 
             yield! applyTimerCounterSpec sys

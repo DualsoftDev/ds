@@ -48,7 +48,7 @@ module DsAddressModule =
 
                 elif RuntimeDS.Package.IsPackagePLC()
                      || RuntimeDS.Package.IsPackageSIM()    
-                     || RuntimeDS.Package.IsPackageEmulationDevice()    //시뮬레이션도 PLC 주소규격으로 일단
+                     || RuntimeDS.Package.IsPackageEmulation()    //시뮬레이션도 PLC 주소규격으로 일단
                 then
                     match ioType with 
                     |In ->  if RuntimeDS.HwBlockSizeIn = DuUINT64

@@ -19,9 +19,9 @@ namespace Engine.TestSimulator
                 , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip");
 
 
-            //Web test 시에 RuntimePackage.StandardPC 설정 (flow auto drive ready web에서 시작조건 켜야함)
+            //Web test 시에 RuntimePackage.PC 설정 (flow auto drive ready web에서 시작조건 켜야함)
             RuntimeDS.Package = RuntimePackage.Simulation;
-           // RuntimeDS.Package = RuntimePackage.StandardPC; 
+           // RuntimeDS.Package = RuntimePackage.PC; 
             RuntimeModel runModel = new(testFile);
 
             DsSystem[] systems = new DsSystem[] { runModel.System };

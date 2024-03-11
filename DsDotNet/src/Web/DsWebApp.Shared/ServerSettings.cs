@@ -23,12 +23,12 @@ public class ServerSettings
 /// </summary>
 public enum RuntimePackageCs
 {
-    StandardPC,
-    StandardPLC,
+    PC,
+    PLC,
     LightPC,
     LightPLC,
     Simulation,
-    SimulationDubug,
+    Developer,
 }
 
 
@@ -43,21 +43,21 @@ public static class ServerSettingsExtensions
     public static RuntimePackage ToRuntimePackage(this RuntimePackageCs runtimePackageCs) =>
         runtimePackageCs switch
         {
-                RuntimePackageCs.StandardPC => RuntimePackage.StandardPC,
-                RuntimePackageCs.StandardPLC => RuntimePackage.StandardPLC,
+                RuntimePackageCs.PC => RuntimePackage.PC,
+                RuntimePackageCs.PLC => RuntimePackage.PLC,
                 RuntimePackageCs.Simulation => RuntimePackage.Simulation,
-                RuntimePackageCs.SimulationDubug => RuntimePackage.SimulationDubug,
-                _ => RuntimePackage.StandardPC,
+                RuntimePackageCs.Developer => RuntimePackage.Developer,
+                _ => RuntimePackage.PC,
         };
     public static RuntimePackageCs ToRuntimePackageCs(this RuntimePackage runtimePackage)
     {
-        if (runtimePackage == RuntimePackage.StandardPC)
-            return RuntimePackageCs.StandardPC;
-        else if (runtimePackage == RuntimePackage.StandardPLC)
-            return RuntimePackageCs.StandardPLC;
+        if (runtimePackage == RuntimePackage.PC)
+            return RuntimePackageCs.PC;
+        else if (runtimePackage == RuntimePackage.PLC)
+            return RuntimePackageCs.PLC;
         else if (runtimePackage == RuntimePackage.Simulation)
             return RuntimePackageCs.Simulation;
-        else if (runtimePackage == RuntimePackage.SimulationDubug)
+        else if (runtimePackage == RuntimePackage.Developer)
             return RuntimePackageCs.Simulation;
         else
             throw new NotImplementedException();        

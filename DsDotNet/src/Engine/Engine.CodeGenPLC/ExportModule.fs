@@ -109,6 +109,22 @@ module ExportModule =
         let globalStorage = new Storages()
         let localStorage = new Storages()
         let result = CpuLoaderExt.LoadStatements(system, globalStorage)
+        // Create a list to hold commented statements
+        let mutable css = []
+
+        // Add commented statements from each CPU
+        for cpu in result do
+            css <- css @ cpu.CommentedStatements() |> List.ofSeq
+
+        let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
+        globalStorage.Iter(fun tagKV-> 
+
+            if not (usedTagNames.ContainsKey(tagKV.Key)) 
+               && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림
+               && TagKindExt.GetVariableTagKind(tagKV.Value).IsNone //VariableTag 살림
+            then globalStorage.Remove(tagKV.Key)|>ignore
+            )
+
         let xml = generateXmlXGI system globalStorage localStorage result existingLSISprj
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)

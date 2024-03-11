@@ -14,8 +14,6 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ExportIOTable =
 
-    //let applyIfBtnLampSkip addr:string  = if addr = TextAddrEmpty then TextSkip else addr
-
     let ToTable (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) : DataTable =
 
         let dt = new System.Data.DataTable($"{sys.Name}")

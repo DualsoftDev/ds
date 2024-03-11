@@ -52,14 +52,14 @@ module ConvertErrorCheck =
     let checkErrNullAddress(sys:DsSystem) = 
         let nullTagJobs = sys.Jobs
                              .Where(fun j-> j.DeviceDefs.Where(fun f-> 
-                                            f.InTag.IsNull() && f.InAddress <> TextSkip
-                                            ||f.OutTag.IsNull() &&  f.OutAddress <> TextSkip
+                                               f.InAddress = TextAddrEmpty
+                                            && f.OutAddress = TextAddrEmpty
                                             ).any())
                       
         if nullTagJobs.any()
         then 
             let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
-            failwithlogf $"Device 주소가 없습니다. \n{errJobs}"
+            failwithlogf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
         let nullBtns = sys.HWButtons.Where(fun b-> 
                                     b.InTag.IsNull() 
                                     ||b.OutTag.IsNull() && b.OutAddress <> TextSkip)

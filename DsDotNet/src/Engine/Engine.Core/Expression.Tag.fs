@@ -1,6 +1,8 @@
 namespace Engine.Core
 
 open Dual.Common.Core.FS
+open System.Linq
+open System.Reactive.Linq
 
 [<AutoOpen>]
 module TagModule =
@@ -55,3 +57,61 @@ module TagModule =
         | UINT8  -> new Variable<uint8>  (createParam())
         | _  -> failwithlog "ERROR"
 
+    type Statement with
+     
+        member x.GetTargetStorages() =
+            match x with
+            | DuAssign (_expr, target) -> [ target ]
+            | DuVarDecl (_expr, var) -> [ var ]
+            | DuTimer timerStatement -> [timerStatement.Timer.DN ]
+            | DuCounter counterStatement -> [counterStatement.Counter.DN ]
+            | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
+            | DuAugmentedPLCFunction _ -> []
+
+        member x.GetSourceStorages() =
+            match x with
+            | DuAssign (expr, _target) -> expr.CollectStorages()
+            | DuVarDecl (expr, _var) -> expr.CollectStorages()
+            | DuTimer timerStatement -> 
+                [ for s in timerStatement.Timer.InputEvaluateStatements do
+                    yield! s.GetSourceStorages() ]
+            | DuCounter counterStatement ->
+                [ for s in counterStatement.Counter.InputEvaluateStatements do
+                    yield! s.GetSourceStorages() ]
+            | DuAction (DuCopy (condition, _source, _target)) -> condition.CollectStorages()
+            | DuAugmentedPLCFunction _ -> []
+
+      
+
+    let getTargetStorages (x:Statement) = x.GetTargetStorages() |> List.toSeq
+    let getSourceStorages (x:Statement) = x.GetSourceStorages() |> List.toSeq
+
+    let getTotalTags(statements:Statement seq) =
+        [ for s in statements do
+            yield! s.GetSourceStorages()
+            yield! s.GetTargetStorages()
+        ].Distinct()
+
+    let getRungMap (statements: Statement seq) =
+        let totalTags = getTotalTags statements
+
+        // Dictionary를 사용하여 소스를 태그별로 그룹화
+        let dicSource =
+            statements
+            |> Seq.collect (fun s -> s.GetSourceStorages() |> Seq.map (fun source -> source, s))
+            |> Seq.groupBy fst
+            |> Map.ofSeq
+
+        // 태그별로 관련된 문장을 추출하여 맵에 추가
+        let map =
+            totalTags
+            |> Seq.map (fun tag ->
+                let statementsWithTag =
+                    match dicSource.TryFind tag with
+                    | Some sts -> sts |> Seq.map snd
+                    | None -> Seq.empty
+                tag, statementsWithTag)
+            |> Map.ofSeq
+
+        map
+        

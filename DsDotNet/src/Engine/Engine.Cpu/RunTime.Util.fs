@@ -30,11 +30,7 @@ module internal RunTimeUtil =
         
 
 
-    let getTotalTags(statements:Statement seq) =
-        [ for s in statements do
-            yield! s.GetSourceStorages()
-            yield! s.GetTargetStorages()
-        ].Distinct()
+
 
     //let getRungMap(statements:Statement seq) =
 
@@ -51,28 +47,28 @@ module internal RunTimeUtil =
     //        )
     //    map |> dict
 
-    let getRungMap (statements: Statement seq) =
-        let totalTags = getTotalTags statements
+    //let getRungMap (statements: Statement seq) =
+    //    let totalTags = getTotalTags statements
 
-        // Dictionary를 사용하여 소스를 태그별로 그룹화
-        let dicSource =
-            statements
-            |> Seq.collect (fun s -> s.GetSourceStorages() |> Seq.map (fun source -> source, s))
-            |> Seq.groupBy fst
-            |> Map.ofSeq
+    //    // Dictionary를 사용하여 소스를 태그별로 그룹화
+    //    let dicSource =
+    //        statements
+    //        |> Seq.collect (fun s -> s.GetSourceStorages() |> Seq.map (fun source -> source, s))
+    //        |> Seq.groupBy fst
+    //        |> Map.ofSeq
 
-        // 태그별로 관련된 문장을 추출하여 맵에 추가
-        let map =
-            totalTags
-            |> Seq.map (fun tag ->
-                let statementsWithTag =
-                    match dicSource.TryFind tag with
-                    | Some sts -> sts |> Seq.map snd
-                    | None -> Seq.empty
-                tag, statementsWithTag)
-            |> Map.ofSeq
+    //    // 태그별로 관련된 문장을 추출하여 맵에 추가
+    //    let map =
+    //        totalTags
+    //        |> Seq.map (fun tag ->
+    //            let statementsWithTag =
+    //                match dicSource.TryFind tag with
+    //                | Some sts -> sts |> Seq.map snd
+    //                | None -> Seq.empty
+    //            tag, statementsWithTag)
+    //        |> Map.ofSeq
 
-        map
+    //    map
         
     ///사용자 autoStartTags HMI 대신 눌러주기
     let preAction(sys:DsSystem, on:bool) =

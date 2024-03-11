@@ -667,7 +667,7 @@ module ImportU =
             if RuntimeDS.Package <> Simulation 
             && activeSys.IsSome && activeSys.Value = sys
             && pageTables.isEmpty()
-            then  failwithf "IO Table이 없습니다. Add IO Table을 수행하세요"
+            then  failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
 
             pageTables
             |> Seq.collect (fun (pageIndex, table) ->

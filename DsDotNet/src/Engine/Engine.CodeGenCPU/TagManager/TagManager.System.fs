@@ -86,12 +86,13 @@ module SystemManagerModule =
         let homingMonitor     = dsSysBit "homingMonitor"    true  sys   SystemTag.homingMonitor  
         let goingMonitor      = dsSysBit "goingMonitor"     true  sys   SystemTag.goingMonitor  
         
-        let sim    = dsSysBit "syssim"   true  sys   SystemTag.sim
         let flicker20msec  = dsSysBit "_T20MS" true  sys   SystemTag.flicker20ms
-        let flicker100msec = dsSysBit "_T100MS" true  sys   SystemTag.flicker100ms
-        let flicker200msec = dsSysBit "_T200MS" true  sys   SystemTag.flicker200ms
+        let flicker100msec = dsSysBit "_T100MS" true  sys  SystemTag.flicker100ms
+        let flicker200msec = dsSysBit "_T200MS" true  sys  SystemTag.flicker200ms
         let flicker1sec    = dsSysBit "_T1S"   true  sys   SystemTag.flicker1s
         let flicker2sec    = dsSysBit "_T2S"   true  sys   SystemTag.flicker2s
+        let sim            = dsSysBit "syssim"   true  sys SystemTag.sim
+        let emulation      = dsSysBit "sysemulation"  true  sys   SystemTag.emulation
         do 
  
             on.Value <- true
@@ -163,6 +164,8 @@ module SystemManagerModule =
             | SystemTag.flicker200ms    -> flicker200msec
             | SystemTag.flicker1s       -> flicker1sec
             | SystemTag.flicker2s       -> flicker2sec
+            
+            | SystemTag.emulation       -> emulation
             | SystemTag.sim             ->    sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"
 

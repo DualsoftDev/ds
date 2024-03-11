@@ -71,11 +71,13 @@ module TagKindList =
     | flicker200ms              = 0102
     | flicker1s                 = 0103
     | flicker2s                 = 0104
-
-    ///temp (not logic 정의를 위한 plc 임시변수)
-    | temp                     = 9998
+    ///emulation
+    | emulation                 = 9997
     ///simulation
-    | sim                      = 9999
+    | sim                       = 9998
+    ///temp (not logic 정의를 위한 plc 임시변수)
+    | temp                      = 9999
+
     /// 10000 ~ 10999
     [<Flags>]
     type FlowTag    =  
@@ -99,10 +101,11 @@ module TagKindList =
     |test_lamp                 = 10028
     |home_lamp                 = 10029
     
-    | flowStopError            = 10040
-    | flowStopConditionErr     = 10041
-    | flowStopConditionErrLamp = 10042
-    | flowPause                = 10043
+    | flowPause                = 10040
+    | flowStopError            = 10041
+    | flowStopConditionErr     = 10042
+    | flowStopConditionErrLamp = 10043
+    | flowStopEmergencyErrLamp = 10044
 
 
       //복수 mode  존재 불가

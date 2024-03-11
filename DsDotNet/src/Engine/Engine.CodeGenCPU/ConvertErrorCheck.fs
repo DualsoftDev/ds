@@ -89,5 +89,9 @@ module ConvertErrorCheck =
         sys.HWButtons.ForEach(fun b->                                         
                          if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextAddrEmpty
                          if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextAddrEmpty
-                        )
-    
+                        )   
+                        
+    let setEmulationFlagAddress(sys:DsSystem) = 
+        sys._emulation.Address <- getValidAddress(TextAddrEmpty, sys._emulation.Name, false, IOType.Memory)
+
+         

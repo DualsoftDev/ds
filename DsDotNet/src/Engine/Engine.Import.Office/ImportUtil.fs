@@ -259,7 +259,7 @@ module ImportU =
                 mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow.Value, None)
                 mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow.Value, None)
                 mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow.Value, None)
-                mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBTN", "", "-", flow.Value, None)
+                mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow.Value, None)
                 )
 
             mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "", "", None, None)

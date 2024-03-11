@@ -137,11 +137,9 @@ module ImportIOTable =
                 match conds.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some cond ->
                     cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
-                    cond.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
-                    let inaddr, outaddr =  getValidCondiAddress (cond)
+                    let inaddr =  getValidCondiAddress (cond)
                     cond.InAddress  <-inaddr.Trim() 
-                    cond.OutAddress <-outaddr.Trim()  
                     cond.Func <- getFunction (cond.Name, func, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 

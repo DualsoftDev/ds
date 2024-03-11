@@ -148,6 +148,8 @@ module ConvertCPU =
 
     let private emulationDevice(s:DsSystem) =
         [
+            yield s.SetFlagForEmulation()
+
             let devTasks = s.Jobs.SelectMany(fun j->j.DeviceDefs)
             for dt in devTasks do
                     yield dt.SensorEmulation(s)
@@ -162,32 +164,34 @@ module ConvertCPU =
 
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
-
-        //시뮬레이션 주소 자동할당
-        if RuntimeDS.Package.IsPackageSIM()  
-        then setSimulationAddress(sys)
-
         //DsSystem 물리 IO 생성
         sys.GenerationIO()
-
+        sys.GenerationMemory()
+        
         checkErrNullAddress(sys)
         checkErrHWItem(sys)
         checkErrApi(sys)
-        if not(isActive)
-            then checkErrRealResetExist(sys)
-
+      
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then sys.GenerationOrigins()
+        else checkErrRealResetExist(sys)
 
         [
-                //Active 시스템 적용  //test ahn loaded는 제외 성능 고려해서 다시 구현
-            if isActive
-            then 
-                yield! applySystemSpec sys
+            match   RuntimeDS.Package with
+            | PC ->  ()
+            | PLC ->  ()
+            | Emulation ->  
+                            setEmulationFlagAddress(sys)
+                            yield! emulationDevice sys
+            | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당
+                            yield! sys.Y1_SystemBitSetFlow()
+            | Developer ->  ()
 
-            if RuntimeDS.Package.IsPackageSIM()
-            then
-                yield! sys.Y1_SystemBitSetFlow()
+
+            //Active 시스템 적용 
+            if isActive
+            then   //test ahn loaded는 제외 성능 고려해서 다시 구현
+                yield! applySystemSpec sys
 
             //Flow 적용
             for f in sys.Flows do
@@ -198,10 +202,9 @@ module ConvertCPU =
             for v in sys.GetVertices() do
                 yield! applyVertexSpec v
 
+            //Api 적용 
             yield! apiPlanSync sys
 
-            if RuntimeDS.Package.IsPackageEmulation()  
-            then yield! emulationDevice sys
-
+            //Timer Count 적용 
             yield! applyTimerCounterSpec sys
         ]

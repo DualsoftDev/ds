@@ -76,4 +76,5 @@ module DsAddressModule =
 
     let getValidBtnAddress (btn: ButtonDef)       = getValidBtnHwItem btn  false false
     let getValidLampAddress (lamp: LampDef)       = getValidBtnHwItem lamp true false 
-    let getValidCondiAddress (cond: ConditionDef) = getValidBtnHwItem cond false true 
+    let getValidCondiAddress (cond: ConditionDef) = getValidAddress(cond.InAddress, cond.Name, false, IOType.In)
+

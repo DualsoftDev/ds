@@ -175,6 +175,7 @@ module CoreModule =
     and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, func: Func option) =
         inherit HwSystemDef(name, system,flows, inAddress, outAddress, func)
         member x.ButtonType = btnType
+        member val ErrorEmergency = getNull<IStorage>() with get, set
 
     and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress,  flows: HashSet<Flow>, func: Func option) =
         inherit HwSystemDef(name, system, flows, inAddress, outAddress, func) //inAddress lamp check bit

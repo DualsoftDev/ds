@@ -17,9 +17,11 @@ module ConvertCpuDsSystem =
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
             getSM(s).GetSystemTag(st) :?> PlanVar<'T>
+
         member s._on          = s.GetPv<bool>(SystemTag.on)
         member s._off         = s.GetPv<bool>(SystemTag.off)
         member s._sim         = s.GetPv<bool>(SystemTag.sim)
+        member s._emulation   = s.GetPv<bool>(SystemTag.emulation)
         member s._auto_btn    = s.GetPv<bool>(SystemTag.auto_btn)
         member s._manual_btn  = s.GetPv<bool>(SystemTag.manual_btn)
         member s._drive_btn   = s.GetPv<bool>(SystemTag.drive_btn)
@@ -98,12 +100,17 @@ module ConvertCpuDsSystem =
                 cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 call.ManualTag  <- cv.SF :> IStorage
 
-
         member private x.GenerationCallConditionMemory()  = 
             for condi in x.HWConditions do
                 condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL false condi (int FlowTag.flowStopConditionErrLamp) x
                 condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty, condi.Name, false, IOType.Memory)
 
+        member private x.GenerationButtonEmergencyMemory()  = 
+            for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
+                emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL false emg (int FlowTag.flowStopEmergencyErrLamp) x
+                emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, emg.Name, false, IOType.Memory)
+
+         
         member private x.GenerationCallAlarmMemory()  = 
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
@@ -115,10 +122,6 @@ module ConvertCpuDsSystem =
                 call.ErrorSensorOff  <- cv.ErrShort :> IStorage
                 call.ErrorTimeOver   <- cv.ErrTimeOver :> IStorage
                 call.ErrorTrendOut   <- cv.ErrTrendOut :> IStorage
-
-
-
-                
 
 
         member private x.GenerationTaskDevIO() =
@@ -139,13 +142,16 @@ module ConvertCpuDsSystem =
         member x.GenerationIO() =
 
             x.GenerationTaskDevIO()
-            x.GenerationCallManualMemory()
-            x.GenerationCallAlarmMemory()
-            x.GenerationCallConditionMemory()
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
-         
+
+
+        member x.GenerationMemory() =
+            x.GenerationCallManualMemory()
+            x.GenerationCallAlarmMemory()
+            x.GenerationButtonEmergencyMemory()
+            x.GenerationCallConditionMemory()
             
         member x.GenerationOrigins() =
             let getOriginInfos(sys:DsSystem) =

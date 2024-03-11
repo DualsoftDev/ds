@@ -104,8 +104,8 @@ module ExportIOTable =
             for cond in conds do
                 if containSys then
                     let func =  if cond.Func.IsSome then cond.Func.Value.ToDsText() else ""
-                    let i, o = getValidCondiAddress(cond)
-                    dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool",i, o  ,  func)
+                    let i= getValidCondiAddress(cond)
+                    dt.Rows.Add(xlsCase.ToText(), cond.Name, "bool",i, TextSkip  ,  func)
                     |> ignore
 
         emptyLine ()
@@ -196,16 +196,20 @@ module ExportIOTable =
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
             seq {
+                //1. call 부터
                 for call in calls |> Seq.sortBy (fun c -> c.Name) do
                     yield rowItems ($"{call.Name}_센서쇼트이상", call.ErrorSensorOn.Address)
                     yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
                     yield rowItems ($"{call.Name}_시간지연이상", call.ErrorTimeOver.Address)
                     yield rowItems ($"{call.Name}_시간추세이상", call.ErrorTrendOut.Address)
 
+                //2. emg step
+                for emg in sys.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
+                    yield rowItems ($"{emg.Name}_버튼눌림", emg.ErrorEmergency.Address)
+
+                //3 . HWConditions step
                 for condi in sys.HWConditions do
                     yield rowItems ($"{condi.Name}_조건이상", condi.ErrorCondition.Address)
-                  
-                    
             }
 
         rows

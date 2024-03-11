@@ -14,3 +14,12 @@ type TaskDev with
         let rst = sys._off.Expr
 
         (set, rst) --| (d.InTag, getFuncName())
+
+type DsSystem with
+
+    member s.SetFlagForEmulation() =
+
+        let set = s._on.Expr
+        let rst = s._off.Expr
+
+        (set, rst) --| (s._emulation, getFuncName())

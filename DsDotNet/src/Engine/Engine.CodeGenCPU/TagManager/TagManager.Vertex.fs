@@ -84,7 +84,6 @@ module TagManagerModule =
         member _._on           = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.on)   :?> PlanVar<bool>
         member _._off          = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.off)  :?> PlanVar<bool>
         member _._sim          = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
-        member _._scanFirstOne = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.scanFirstOne)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member _.ST         = startTagBit
@@ -180,12 +179,10 @@ module TagManagerModule =
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag name = this.CreateTag name
 
-        let relayGoingBit     = createTag "GG" VertexTag.goingRealy
-        let relayRealBit      = createTag "RR" VertexTag.relayReal
-        let realOriginAction  = createTag "RO" VertexTag.realOriginAction
-        let realSync          = createTag "Sync" VertexTag.realSync
-
-
+        let relayGoingBit     = createTag "GG"         VertexTag.goingRealy
+        let relayRealBit      = createTag "RR"         VertexTag.relayReal
+        let realOriginAction  = createTag "RO"         VertexTag.realOriginAction
+        let realSync          = createTag "Sync"       VertexTag.realSync
         
         let realData  = 
             let vertexTag = VertexTag.realData |> int
@@ -206,7 +203,8 @@ module TagManagerModule =
         ///Real Data
         member _.RD         = realData
         ///Synchronized with physical sensors
-        member _.SYNC         = realSync
+        member _.SYNC       = realSync
+
         member _.IsFinished = (v :?> Real).Finished
 
     and VertexMCoin(v:Vertex)as this =

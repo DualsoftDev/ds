@@ -507,6 +507,9 @@ module ImportU =
                 |> Seq.map (fun endNode -> endNode, edges.Where(fun e -> e.EndNode = endNode))
                 |> dict
 
+
+
+
             //dummy edge 연결정보 업데이트
             edges
             |> Seq.iter (fun edge ->
@@ -521,7 +524,8 @@ module ImportU =
                             tgtDummy.Value.DummyNodeKey
 
                     srcDummy.Value.AddOutEdge(edge.Causal, tgt)
-                else if (tgtDummy.IsSome) then
+
+                if (tgtDummy.IsSome) then
                     let src =
                         if srcDummy.IsNone then
                             edge.StartNode.Key
@@ -529,50 +533,51 @@ module ImportU =
                             srcDummy.Value.DummyNodeKey
 
                     tgtDummy.Value.AddInEdge(edge.Causal, src))
-
+        
             dicEdges
             |> Seq.iter (fun dic ->
                 let tgtNode = dic.Key
                 let tgtEdges = dic.Value
 
-                let edgesTypes =
-                    dic.Value |> Seq.distinctBy (fun e -> e.Causal) |> Seq.map (fun f -> f.Causal)
+                tgtEdges
+                    .GroupBy(fun g-> g.Causal)
+                    .Select(fun group -> group.Key, group.Select(id))
+                    .Iter(fun (causal, edges) ->
+                        edges.Iter(fun edge ->
+                            
+                            let flow = dicFlow.[edge.PageNum]
 
-                edgesTypes
-                    .Select(fun e -> tgtEdges.Where(fun w -> w.Causal = e))
-                    .Iter(fun es ->
-                        let edge = es.First() //동일 타겟이므로 아무거나 상관없음
-                        let flow = dicFlow.[edge.PageNum]
+                            let getVertexs (pptNodes: pptNode seq) =
+                                pptNodes.Select(fun s -> dicVertex.[s.Key])
 
-                        let getVertexs (pptNodes: pptNode seq) =
-                            pptNodes.Select(fun s -> dicVertex.[s.Key])
+                            let srcs =
+                                if (dummys.IsMember(edge.StartNode)) then
+                                    dummys.GetMembers(edge.StartNode) |> getVertexs
+                                else
+                                    edges.Select(fun e -> dicVertex[e.StartNode.Key])
 
-                        let srcs =
-                            if (dummys.IsMember(edge.StartNode)) then
-                                dummys.GetMembers(edge.StartNode) |> getVertexs
-                            else
-                                es.Select(fun e -> dicVertex[e.StartNode.Key])
+                            let tgts =
+                                if (dummys.IsMember(edge.EndNode)) then
+                                    dummys.GetMembers(edge.EndNode) |> getVertexs
+                                else
+                                    [ dicVertex.[edge.EndNode.Key] ]
 
-                        let tgts =
-                            if (dummys.IsMember(edge.EndNode)) then
-                                dummys.GetMembers(edge.EndNode) |> getVertexs
-                            else
-                                [ dicVertex.[edge.EndNode.Key] ]
+                            try
+                                convertEdge (edge, flow, srcs, tgts) |> ignore
+                            with ex ->
+                                if
+                                    (ex.Source = "Dual.Common.Core.FS") //관리되는 예외 failwithf 사용 : 추후 예외 타입 작성
+                                then
+                                    raise ex
+                                else
+                                    edge.ConnectionShape.ErrorConnect(
+                                        ex.Message,
+                                        srcs.First().Name,
+                                        tgts.First().Name,
+                                        edge.PageNum
+                                    )))
 
-                        try
-                            convertEdge (edge, flow, srcs, tgts) |> ignore
-                        with ex ->
-                            if
-                                (ex.Source = "Dual.Common.Core.FS") //관리되는 예외 failwithf 사용 : 추후 예외 타입 작성
-                            then
-                                raise ex
-                            else
-                                edge.ConnectionShape.ErrorConnect(
-                                    ex.Message,
-                                    srcs.First().Name,
-                                    tgts.First().Name,
-                                    edge.PageNum
-                                )))
+                                )
 
 
         //Safety 만들기

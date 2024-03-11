@@ -238,15 +238,14 @@ module PPTDocModule =
 
             connections
             |> Seq.filter (fun (slide, _) -> slide.GetPage() <> pptHeadPage)
-            |> Seq.iter (fun (slide, conns) ->
-                conns
-                |> Seq.iter (fun (conn, Id, startId, endId) ->
+            |> Seq.iter (fun (slide, conns) -> 
+           
+                conns |> Seq.iter (fun (conn, Id, startId, endId) ->
                     let iPage = pages.[slide].PageNum
-
 
                     if (startId = 0u && endId = 0u) then
                         conn.ErrorConnect(ErrID._4, "", "", iPage)
-
+                         
                     if (startId = 0u) then
                         conn.ErrorConnect(ErrID._15, "", $"{nodes.[Objkey(iPage, endId)].Name}", iPage)
 

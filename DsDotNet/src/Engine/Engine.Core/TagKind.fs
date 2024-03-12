@@ -156,7 +156,7 @@ module TagKindList =
     |realSync                  = 11027
     |callMemo                  = 11028
 
-    |txErrTrendOut             = 11033
+    |txErrTimeShortage         = 11033
     |txErrTimeOver             = 11034
     |rxErrShort                = 11035
     |rxErrShortOn              = 11036

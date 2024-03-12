@@ -138,7 +138,7 @@ type TagKindExt =
                                                     , VertexTag.rxErrOpen
                                                     , VertexTag.rxErrShort
                                                     , VertexTag.txErrTimeOver
-                                                    , VertexTag.txErrTrendOut
+                                                    , VertexTag.txErrTimeShortage
                                                     )
         |_->false
 
@@ -182,7 +182,7 @@ type TagKindExt =
                                         , VertexTag.rxErrOpen
                                         , VertexTag.rxErrShort
                                         , VertexTag.txErrTimeOver
-                                        , VertexTag.txErrTrendOut
+                                        , VertexTag.txErrTimeShortage
                                         
                                         )
                                           

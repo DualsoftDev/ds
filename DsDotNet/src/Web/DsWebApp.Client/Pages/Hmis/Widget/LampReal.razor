@@ -41,8 +41,8 @@
             return "ErrorShort";
         else if ((bool)Real.ErrTimeOver.Value)
             return "ErrTimeOver";
-        else if ((bool)Real.ErrTrendOut.Value)
-            return "ErrTrendOut";
+        else if ((bool)Real.ErrTimeShortage.Value)
+            return "ErrTimeShortage";
         else if ((bool)Real.ReadyLamp.Value)
             return "Ready";
         else if ((bool)Real.GoingLamp.Value)
@@ -74,7 +74,7 @@
             Real.ErrorOpen,
             Real.ErrorShort,
             Real.ErrTimeOver,
-            Real.ErrTrendOut,
+            Real.ErrTimeShortage,
             Real.ReadyLamp,
             Real.GoingLamp,
             Real.FinishLamp,

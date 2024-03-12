@@ -45,7 +45,7 @@ module ConvertHMI =
             let tm = x.TagManager :?> VertexMCoin
             {
                 Name = x.Name
-                TrendOutErrorLamp  = getLamp  tm (VertexTag.txErrTrendOut |>int)
+                TimeShortageErrorLamp  = getLamp  tm (VertexTag.txErrTimeShortage |>int)
                 TimeOverErrorLamp  = getLamp  tm (VertexTag.txErrTimeOver |>int)
                 ShortErrorLamp     = getLamp  tm (VertexTag.rxErrShort |>int)
                 OpenErrorLamp      = getLamp  tm (VertexTag.rxErrOpen |>int)
@@ -92,7 +92,7 @@ module ConvertHMI =
                 ErrorOpen    = getLamp  tm (VertexTag.rxErrOpen |>int)  
                 ErrorShort   = getLamp  tm (VertexTag.rxErrShort |>int)  
                 ErrTimeOver  = getLamp  tm (VertexTag.txErrTimeOver |>int)  
-                ErrTrendOut  = getLamp  tm (VertexTag.txErrTrendOut |>int)  
+                ErrTimeShortage  = getLamp  tm (VertexTag.txErrTimeShortage |>int)  
                 
                 Devices      = calls.SelectMany(fun c->
                                       c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()

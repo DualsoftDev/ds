@@ -119,11 +119,11 @@ module ConvertCpuDsSystem =
                 cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 cv.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
-                cv.ErrTrendOut.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
-                call.ErrorSensorOn   <- cv.ErrOpen :> IStorage
-                call.ErrorSensorOff  <- cv.ErrShort :> IStorage
+                cv.ErrTimeShortage.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                call.ErrorSensorOn   <- cv.ErrShort:> IStorage
+                call.ErrorSensorOff  <- cv.ErrOpen  :> IStorage
                 call.ErrorTimeOver   <- cv.ErrTimeOver :> IStorage
-                call.ErrorTrendOut   <- cv.ErrTrendOut :> IStorage
+                call.ErrorTimeShortage   <- cv.ErrTimeShortage :> IStorage
 
 
         member private x.GenerationTaskDevIO() =

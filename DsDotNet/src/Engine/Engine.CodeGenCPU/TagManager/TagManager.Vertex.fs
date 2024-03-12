@@ -55,7 +55,7 @@ module TagManagerModule =
         let forceOffBit    = createTag "OFF"  VertexTag.forceOff
 
 
-        let txErrTrendOut    = createTag "txErrTrendOut"      VertexTag.txErrTrendOut   
+        let txErrTimeShortage    = createTag "txErrTimeShortage"      VertexTag.txErrTimeShortage   
         let txErrTimeOver    = createTag "txErrTimeOver"      VertexTag.txErrTimeOver   
         let rxErrShort       = createTag "rxErrShort"         VertexTag.rxErrShort      
         let rxErrOpen        = createTag "rxErrOpen"          VertexTag.rxErrOpen    
@@ -63,8 +63,8 @@ module TagManagerModule =
         let errorErrTRXBit = createTag "ErrTRX"    VertexTag.errorTRx
 
         let errors = 
-            let err1 = if txErrTrendOut.Value   then "동작편차" else ""
-            let err2 = if txErrTimeOver.Value   then "동작시간" else ""
+            let err1 = if txErrTimeShortage.Value   then "시간부족" else ""
+            let err2 = if txErrTimeOver.Value   then "시간초과" else ""
             let err3 = if rxErrShort.Value      then "센서감지" else ""
             let err4 = if rxErrOpen.Value       then "센서오프" else ""
             [err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
@@ -118,7 +118,7 @@ module TagManagerModule =
         ///PAuse Monitor
         member _.PA         =  pauseBit
 
-        member _.ErrTrendOut   = txErrTrendOut 
+        member _.ErrTimeShortage   = txErrTimeShortage 
         member _.ErrTimeOver   =  txErrTimeOver 
         member _.ErrShort       = rxErrShort    
         member _.ErrOpen       =  rxErrOpen     
@@ -139,7 +139,7 @@ module TagManagerModule =
             | VertexTag.origin              -> originBit           :> IStorage
             | VertexTag.pause               -> pauseBit            :> IStorage
 
-            | VertexTag.txErrTrendOut       -> txErrTrendOut   :> IStorage
+            | VertexTag.txErrTimeShortage       -> txErrTimeShortage   :> IStorage
             | VertexTag.txErrTimeOver       -> txErrTimeOver   :> IStorage
             | VertexTag.rxErrShort          -> rxErrShort      :> IStorage
             | VertexTag.rxErrOpen           -> rxErrOpen       :> IStorage

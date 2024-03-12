@@ -15,7 +15,7 @@ module HmiPackageModule =
     type HMICall = {
         Name : string
         
-        TrendOutErrorLamp : HMILamp        
+        TimeShortageErrorLamp : HMILamp        
         TimeOverErrorLamp : HMILamp        
         ShortErrorLamp    : HMILamp        
         OpenErrorLamp     : HMILamp        
@@ -23,7 +23,7 @@ module HmiPackageModule =
     } with
         member x.CollectTags () =
             seq {
-                yield x.TrendOutErrorLamp        
+                yield x.TimeShortageErrorLamp        
                 yield x.TimeOverErrorLamp        
                 yield x.ShortErrorLamp           
                 yield x.OpenErrorLamp          
@@ -70,7 +70,7 @@ module HmiPackageModule =
         ErrorOpen        : HMILamp 
         ErrorShort       : HMILamp
         ErrTimeOver      : HMILamp 
-        ErrTrendOut      : HMILamp
+        ErrTimeShortage      : HMILamp
 
         Devices          : HMIDevice array //loaded system
         Jobs             : HMIJob array      
@@ -90,7 +90,7 @@ module HmiPackageModule =
                 yield x.PauseLamp   
                 yield x.ErrorOpen 
                 yield x.ErrorShort
-                yield x.ErrTrendOut
+                yield x.ErrTimeShortage
                 yield x.ErrTimeOver  
                         //yield! x.Devices |> Seq.collect (fun d -> d.CollectTags())  필요시 HMIPackage Devices : string array 이름으로 별도로 찾아야함 
                 yield! x.Jobs |> Seq.collect (fun j -> j.CollectTags())

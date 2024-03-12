@@ -246,7 +246,7 @@ module CoreModule =
         member val ErrorSensorOn = getNull<IStorage>() with get, set
         member val ErrorSensorOff = getNull<IStorage>() with get, set
         member val ErrorTimeOver = getNull<IStorage>() with get, set
-        member val ErrorTrendOut = getNull<IStorage>() with get, set
+        member val ErrorTimeShortage = getNull<IStorage>() with get, set
         member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()

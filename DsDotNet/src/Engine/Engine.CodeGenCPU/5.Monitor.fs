@@ -47,9 +47,9 @@ type VertexManager with
 
             match RuntimeDS.Package with 
             | Developer ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrTimeOver , getFuncName())
-            | Simulation ->   yield (call._off.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
-            | _ ->         yield (v.TOUT.DN.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
-         
+            | Simulation -> yield (call._off.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
+            | _ ->          yield (v.TOUT.DN.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
+               
         ]
 
     member v.M4_CallErrorRXMonitor() =
@@ -62,6 +62,7 @@ type VertexManager with
         [
             let using      = if call.InTags.any() then v._on.Expr else  v._off.Expr 
             let input      = call.EndActionOnlyIO
+
             let offSet     = callV.RXErrOpenOff
             let offRising  = callV.RXErrOpenRising
             let offTemp    = callV.RXErrOpenTemp
@@ -70,11 +71,15 @@ type VertexManager with
             let onRising   = callV.RXErrShortRising
             let onTenmp    = callV.RXErrShortTemp
 
+            let RxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
+            let RxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
+       
             yield! (using <&&> input  , v.ErrShort.Expr)  --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
             yield! (using <&&> !!input, v.ErrOpen.Expr)   --^ (offRising, offSet, offTemp, "RXErrOpenOff")
 
-            yield (dop <&&> real.V.G.Expr <&&> onRising.Expr  <&&> call.RXs.Select(fun f -> f.V.R).ToAndElseOff() , rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
-            yield (dop <&&> real.V.G.Expr <&&> offRising.Expr <&&> call.RXs.Select(fun f -> f.V.F).ToAndElseOff() , rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
+            yield (dop <&&> real.V.G.Expr <&&>   call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrTimeShortage, getFuncName())
+            yield (dop <&&> real.V.G.Expr <&&> !!call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
+            yield (dop <&&> real.V.G.Expr <&&>                     offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
         ]
         
 
@@ -84,7 +89,7 @@ type VertexManager with
         [
             (real.ErrOpens.ToOrElseOff(), rst)  --| (v.ErrOpen, getFuncName())
             (real.ErrShorts.ToOrElseOff(), rst) --| (v.ErrShort, getFuncName())
-            (real.ErrTrendOuts.ToOrElseOff(), rst) --| (v.ErrTrendOut, getFuncName())
+            (real.ErrTimeShortages.ToOrElseOff(), rst) --| (v.ErrTimeShortage, getFuncName())
             (real.ErrTimeOvers.ToOrElseOff(), rst) --| (v.ErrTimeOver, getFuncName())
             (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
         ]

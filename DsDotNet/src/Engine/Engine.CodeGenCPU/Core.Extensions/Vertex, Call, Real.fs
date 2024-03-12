@@ -85,7 +85,7 @@ module ConvertCpuVertex =
         member c.Errors       = 
                                 [
                                     getVMCoin(c).ErrTimeOver
-                                    getVMCoin(c).ErrTrendOut 
+                                    getVMCoin(c).ErrTimeShortage 
                                     getVMCoin(c).ErrShort 
                                     getVMCoin(c).ErrOpen 
                                 ]
@@ -124,10 +124,10 @@ module ConvertCpuVertex =
         member r.V = r.TagManager :?> VertexMReal
         member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
         member r.ErrTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeOver) 
-        member r.ErrTrendOuts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTrendOut) 
+        member r.ErrTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeShortage) 
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrShort) 
-        member r.Errors     = r.ErrTimeOvers @ r.ErrTrendOuts @ r.ErrOpens @ r.ErrShorts 
+        member r.Errors     = r.ErrTimeOvers @ r.ErrTimeShortages @ r.ErrOpens @ r.ErrShorts 
         member r.SafetyExpr = getSafetyExpr(r.SafetyConditions.Choose(fun f->f.GetSafetyCall()), r.Parent.GetSystem())
 
 

@@ -198,8 +198,8 @@ module ExportIOTable =
                 for call in calls |> Seq.sortBy (fun c -> c.Name) do
                     yield rowItems ($"{call.Name}_센서쇼트이상", call.ErrorSensorOn.Address)
                     yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
-                    yield rowItems ($"{call.Name}_시간지연이상", call.ErrorTimeOver.Address)
-                    yield rowItems ($"{call.Name}_시간추세이상", call.ErrorTrendOut.Address)
+                    yield rowItems ($"{call.Name}_시간초과이상", call.ErrorTimeOver.Address)
+                    yield rowItems ($"{call.Name}_시간부족이상", call.ErrorTimeShortage.Address)
 
                 //2. emg step
                 for emg in sys.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do

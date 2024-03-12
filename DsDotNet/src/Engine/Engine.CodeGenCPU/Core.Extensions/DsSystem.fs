@@ -116,8 +116,8 @@ module ConvertCpuDsSystem =
         member private x.GenerationCallAlarmMemory()  = 
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
-                cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 cv.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
+                cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 cv.ErrTimeShortage.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 call.ErrorSensorOn   <- cv.ErrShort:> IStorage

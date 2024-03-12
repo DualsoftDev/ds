@@ -50,7 +50,11 @@ type VertexManager with
                     let api = td.ApiItem
                     if td.OutAddress <> TextSkip
                     then 
-                        let sets = api.PE.Expr <&&> api.PS.Expr 
+                        let sets =
+                            if RuntimeDS.Package.IsPackageEmulation()
+                            then api.PE.Expr <&&> api.PS.Expr <&&> coin._off.Expr
+                            else api.PE.Expr <&&> api.PS.Expr 
+
                         if coin.TargetJob.ActionType = JobActionType.Push 
                         then 
                              let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)

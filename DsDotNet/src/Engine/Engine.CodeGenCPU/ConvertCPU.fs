@@ -68,8 +68,7 @@ module ConvertCPU =
                 yield! vm.M4_CallErrorRXMonitor() 
                 yield vm.M6_CallErrorTotalMonitor() 
 
-                if not(RuntimeDS.Package.IsPackageEmulation()) then
-                    yield! vm.C2_ActionOut()
+                yield! vm.C2_ActionOut()
 
             if IsSpec (v, CallInReal , AliasNotCare) then
                 yield vm.C1_CallMemo() 
@@ -154,9 +153,11 @@ module ConvertCPU =
             yield s.SetFlagForEmulation()
 
             let coins = s.GetVerticesOfCoins()  
-            let coinTasks = coins.OfType<Call>().SelectMany(fun c->c.TargetJob.DeviceDefs).Distinct()
-            for dt in coinTasks do
-                    yield dt.SensorEmulation(s)
+            let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
+            for (notFunc, dts) in jobs.Select(fun j-> (j.Func |> hasNot), j.DeviceDefs) do
+                for dt in dts do
+                if dt.InTag.IsNonNull() then 
+                    yield dt.SensorEmulation(s, notFunc)
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =

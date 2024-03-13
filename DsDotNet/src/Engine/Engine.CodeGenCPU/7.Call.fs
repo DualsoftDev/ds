@@ -29,13 +29,16 @@ type VertexManager with
             //!!call.MutualResetCalls.Select(fun c-> c.EndAction).ToOrElseOff()  //들뜨면 RX 에러 발생해서 잡음
             
         let rsts =
-            (
             if call.UsingTon 
             then v.TDON.DN.Expr 
-            else (call.EndPlan <&&> v._sim.Expr) <||> call.EndAction 
-            )
-            <||>
-            (call.V.Flow.pause.Expr)
+            else
+                (
+                    (call.EndPlan <&&> v._sim.Expr)
+                                <||>
+                    (call.EndAction <&&> !!v._sim.Expr)
+                                <||>
+                    call.V.Flow.pause.Expr
+                )
 
         (sets, rsts) ==| (v.MM, getFuncName())
 

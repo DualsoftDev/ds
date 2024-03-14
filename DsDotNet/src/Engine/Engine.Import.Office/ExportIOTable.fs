@@ -14,6 +14,19 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ExportIOTable =
 
+
+    let addRows rows (dt:DataTable) = 
+        rows
+        |> Seq.iter (fun row ->
+            let rowTemp = dt.NewRow()
+            rowTemp.ItemArray <- (row |> Seq.cast<obj> |> Seq.toArray)
+            dt.Rows.Add(rowTemp) |> ignore)
+
+    let emptyRow (cols:string array) (dt:DataTable) =
+        let row = dt.NewRow()
+        row.ItemArray <- cols.Select(fun f -> "" |> box).ToArray()
+        row |> dt.Rows.Add |> ignore
+
     let ToTable (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) : DataTable =
 
         let dt = new System.Data.DataTable($"{sys.Name}")
@@ -69,17 +82,8 @@ module ExportIOTable =
                         else
                             yield rowItems (dev, None)
             }
-
-        rows
-        |> Seq.iter (fun row ->
-            let rowTemp = dt.NewRow()
-            rowTemp.ItemArray <- (row |> Seq.cast<obj> |> Seq.toArray)
-            dt.Rows.Add(rowTemp) |> ignore)
-
-        let emptyLine () =
-            let row = dt.NewRow()
-            row.ItemArray <- Enum.GetNames(typedefof<IOColumn>).Select(fun f -> "" |> box).ToArray()
-            row |> dt.Rows.Add |> ignore
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
@@ -135,10 +139,39 @@ module ExportIOTable =
         emptyLine ()
 
         dt
-    
+
+    let ToDevicesTable (sys: DsSystem)  : DataTable =
+
+        let dt = new System.Data.DataTable($"{sys.Name}_Devices")
+        dt.Columns.Add($"{DeviceColumn.No}", typeof<string>) |> ignore
+        dt.Columns.Add($"{DeviceColumn.Name}", typeof<string>) |> ignore
+      
+        let rowItems (no:int, dev: TaskDev) =
+            [ 
+              $"Dev{no+1}"
+              dev.DeviceName
+               ]
+
+        let rows =
+            let calls = sys.GetVerticesOfCoins().OfType<Call>()
+            let devs  = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev))
+                                    |> Seq.sortBy (fun dev -> dev.Name) 
+                                    |> distinct
+            devs
+                |> Seq.mapi (fun i dev ->
+                                    rowItems (i, dev) 
+                            )
+
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<DeviceColumn>)) dt
+     
+        emptyLine ()
+        dt
+
     let ToManualTable (sys: DsSystem)  : DataTable =
 
         let dt = new System.Data.DataTable($"{sys.Name}_ManualTable")
+        dt.Columns.Add($"{ManualColumn.No}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Manual}", typeof<string>) |> ignore
@@ -146,47 +179,43 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn.Output}", typeof<string>) |> ignore
 
       
-        let rowItems (dev: TaskDev, call:Call) =
+        let rowItems (no:int, dev: TaskDev, call:Call) =
             [ 
+              $"Manual{no+1}"
               dev.ApiName
               "bool"
               call.ManualTag.Address
               dev.InAddress
-              dev.OutAddress
+              if dev.OutAddress = TextSkip then "%HX0" else dev.OutAddress
                ]
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
-            seq {
-                let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
-                                      |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
-                for (dev, call) in devCallSet  do
-                    yield rowItems (dev, call) 
-            }
+            let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
+                                    |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
+            devCallSet
+                |> Seq.mapi (fun i (dev, call) ->
+                                    rowItems (i, dev, call) 
+                            )
 
-        rows
-        |> Seq.iter (fun row ->
-            let rowTemp = dt.NewRow()
-            rowTemp.ItemArray <- (row |> Seq.cast<obj> |> Seq.toArray)
-            dt.Rows.Add(rowTemp) |> ignore)
-
-        let emptyLine () =
-            let row = dt.NewRow()
-            row.ItemArray <- Enum.GetNames(typedefof<ManualColumn>).Select(fun f -> "" |> box).ToArray()
-            row |> dt.Rows.Add |> ignore
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
 
      
         emptyLine ()
         dt
 
     let ToAlramTable (sys: DsSystem)  : DataTable =
-
+        let mutable no = 0
         let dt = new System.Data.DataTable($"{sys.Name}_AlramTable")
+        dt.Columns.Add($"{AlramColumn.No}", typeof<string>) |> ignore
         dt.Columns.Add($"{AlramColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{AlramColumn.ErrorAddress}", typeof<string>) |> ignore
 
         let rowItems (name:string, address :string) =
+            no <- no+1
             [ 
+              $"Alram{no}"
               name
               address
                ]
@@ -210,17 +239,9 @@ module ExportIOTable =
                     yield rowItems ($"{condi.Name}_조건이상", condi.ErrorCondition.Address)
             }
 
-        rows
-        |> Seq.iter (fun row ->
-            let rowTemp = dt.NewRow()
-            rowTemp.ItemArray <- (row |> Seq.cast<obj> |> Seq.toArray)
-            dt.Rows.Add(rowTemp) |> ignore)
+        addRows rows dt
 
-        let emptyLine () =
-            let row = dt.NewRow()
-            row.ItemArray <- Enum.GetNames(typedefof<AlramColumn>).Select(fun f -> "" |> box).ToArray()
-            row |> dt.Rows.Add |> ignore
-
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<AlramColumn>)) dt
      
         emptyLine ()
         dt
@@ -262,14 +283,11 @@ module ExportIOTable =
         tempFilePath
 
 
-
-   
-
     [<Extension>]
     type OfficeExcelExt =
         [<Extension>]
         static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
-            let dataTables = [|ToIOListDataSet system;ToAlramTable system;ToManualTable system|]
+            let dataTables = [|ToIOListDataSet system;ToAlramTable system;ToManualTable system; ToDevicesTable system|]
             createSpreadsheet filePath dataTables 25.0
         [<Extension>]
         static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =

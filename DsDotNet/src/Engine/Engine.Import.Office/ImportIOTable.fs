@@ -21,11 +21,18 @@ module ImportIOTable =
 
     [<Flags>]
     type AlramColumn =
+        | No = 0
         | Name = 1
         | ErrorAddress = 2
 
     [<Flags>]
+    type DeviceColumn =
+        | No = 0
+        | Name = 1
+
+    [<Flags>]
     type ManualColumn =
+        | No = 0
         | Name = 1
         | DataType = 2
         | Manual = 3

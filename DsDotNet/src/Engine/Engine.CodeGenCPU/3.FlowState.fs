@@ -61,6 +61,8 @@ type Flow with
     member f.ST8_ReadyState() =
         let set = f.ready_btn.Expr <||> f.HWBtnReadyExpr 
         ///시뮬레이션 때문에 e_st 사용 안하고  stopError/ stopConditionErr 구분해서사용
-        let rst = (f.stopError.Expr <||> f.emg_st.Expr) <||> (f.stopConditionErr.Expr <&&> !!f._sim.Expr)
+        let rst = (f.stopError.Expr <||> f.emg_st.Expr)
+                  <||> (f.stopConditionErr.Expr <&&> !!f._sim.Expr)
+                  <||> (f.pause.Expr)
 
         (set, rst) ==| (f.r_st, getFuncName())

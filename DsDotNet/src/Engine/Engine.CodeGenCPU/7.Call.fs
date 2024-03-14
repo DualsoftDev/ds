@@ -37,7 +37,7 @@ type VertexManager with
                                 <||>
                     (call.EndAction <&&> !!v._sim.Expr)
                                 <||>
-                    call.V.Flow.pause.Expr
+                    !!call.V.Flow.r_st.Expr
                 )
 
         (sets, rsts) ==| (v.MM, getFuncName())

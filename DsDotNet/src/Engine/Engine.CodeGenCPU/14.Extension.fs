@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 
 type DsSystem with
 
-    member s.E1_PLCNotFunc() =
+    member s.E1_PLCNotFunc(skipRung:bool) =
         let rsts = s._off.Expr
          (* device not func 로직 처리*)
         [
@@ -23,10 +23,12 @@ type DsSystem with
                     then (orgList.First().InTag :?> Tag<bool>).Expr 
                     else (s.GetTempTag(revDev)  :?> Tag<bool>).Expr 
                     
+
             for revDev in reverseInputs do
-                yield (orgInTag(revDev), rsts) --| (revDev.InTag, getFuncName()) //그대로 복사
+                if not(skipRung)
+                then yield (orgInTag(revDev), rsts) --| (revDev.InTag, getFuncName()) //그대로 복사
+
                 revDev.InTag.Address <- TextAddrEmpty
-                
         ]
 
 

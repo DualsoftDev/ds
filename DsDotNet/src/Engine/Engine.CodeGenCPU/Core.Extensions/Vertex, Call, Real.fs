@@ -48,7 +48,7 @@ module ConvertCpuVertex =
 
                 elif c.InTags.any()
                     then c.InTags.ToAnd() 
-                    else c.EndPlan
+                else c.EndPlan
 
         member c.EndAction = 
                 if c.UsingMove   then c._on.Expr  //todo : Move 처리 완료시 End
@@ -106,9 +106,9 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        let homeManuAct = f.h_st.Expr // h_st 수동일때만 가능
-                        let homeAutoAct = f.d_st.Expr <&&> rv.RO.Expr
-                        let homeAct =  homeManuAct <||> homeAutoAct
+                        let homeManuAct = f.h_st.Expr //  
+                        //let homeAutoAct = f.d_st.Expr <&&> rv.RO.Expr  수동일때만 가능
+                        let homeAct =  homeManuAct //<||> homeAutoAct
                         homeAct <&&> (
                                      (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
                                      <||>

@@ -88,8 +88,9 @@ module ConvertCPU =
             yield! s.Y4_SystemConditionError()
             yield! s.Y5_SystemEmgAlramError()
             
+
             if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageEmulation() then
-                yield! s.E1_PLCNotFunc()
+                yield! s.E1_PLCNotFunc(RuntimeDS.Package.IsPackageEmulation())
                 yield! s.E2_LightPLCOnly()
             else  
                 yield! s.B2_SWButtonOutput()
@@ -156,7 +157,7 @@ module ConvertCPU =
             let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
             for (notFunc, dts) in jobs.Select(fun j-> (j.Func |> hasNot), j.DeviceDefs) do
                 for dt in dts do
-                if dt.InTag.IsNonNull() then 
+                if dt.InTag.IsNonNull() then  
                     yield dt.SensorEmulation(s, notFunc)
         ]
      

@@ -25,12 +25,13 @@ type VertexManager with
                 <||> (mop <&&> v.SF.Expr)
             )
             <&&> call.SafetyExpr
-            //<&&> 
-            //!!call.MutualResetCalls.Select(fun c-> c.EndAction).ToOrElseOff()  //들뜨면 RX 에러 발생해서 잡음
             
         let rsts =
             if call.UsingTon 
-            then v.TDON.DN.Expr 
+            then
+                (v.TDON.DN.Expr  <&&> dop)
+                <||>
+                (call.EndActionOnlyIO <&&> mop)
             else
                 (
                     (call.EndPlan <&&> v._sim.Expr)

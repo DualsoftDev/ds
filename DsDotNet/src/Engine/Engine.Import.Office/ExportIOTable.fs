@@ -146,17 +146,18 @@ module ExportIOTable =
         dt.Columns.Add($"{DeviceColumn.No}", typeof<string>) |> ignore
         dt.Columns.Add($"{DeviceColumn.Name}", typeof<string>) |> ignore
       
-        let rowItems (no:int, dev: TaskDev) =
+        let rowItems (no:int, dev: string) =
             [ 
               $"Dev{no+1}"
-              dev.DeviceName
+              dev
                ]
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
             let devs  = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev))
-                                    |> Seq.sortBy (fun dev -> dev.Name) 
+                                    |> Seq.map (fun dev -> dev.DeviceName) 
                                     |> distinct
+                                    |> Seq.sortBy (id) 
             devs
                 |> Seq.mapi (fun i dev ->
                                     rowItems (i, dev) 

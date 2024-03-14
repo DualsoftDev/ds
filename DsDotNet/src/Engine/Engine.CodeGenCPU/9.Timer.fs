@@ -21,14 +21,14 @@ type DsSystem with
             (call.EndPlan  <&&> call.VC._sim.Expr)
             <||>
             (call.EndActionOnlyIO <&&> !!call.VC._sim.Expr)
-
+            
         [
             for call in calls do
-                let sets = call.V.ST.Expr <&&>  ends(call)
+                let sets = call.V.ST.Expr <||>  call.V.SF.Expr <&&>  ends(call)
                 yield (sets) --@ (call.VC.TDON, call.PresetTime, getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.GetPureCall().Value
-                let sets = alias.V.ST.Expr <&&> ends(call)
+                let sets = alias.V.ST.Expr<||>  alias.V.SF.Expr  <&&> ends(call)
                 yield (sets) --@ (alias.VC.TDON, call.PresetTime, getFuncName())
         ]

@@ -26,21 +26,18 @@ type VertexManager with
             )
             <&&> call.SafetyExpr
             
-        let rsts =
+        let rst =
             if call.UsingTon 
             then
                 (v.TDON.DN.Expr  <&&> dop)
                 <||>
                 (call.EndActionOnlyIO <&&> mop)
             else
-                (
-                    (call.EndPlan <&&> v._sim.Expr)
-                                <||>
-                    (call.EndAction <&&> !!v._sim.Expr)
-                                <||>
-                    !!call.V.Flow.r_st.Expr
-                )
+                (call.EndPlan <&&> v._sim.Expr)
+                            <||>
+                (call.EndAction <&&> !!v._sim.Expr)
 
+        let rsts = rst <||> !!call.V.Flow.r_st.Expr
         (sets, rsts) ==| (v.MM, getFuncName())
 
     
@@ -49,7 +46,6 @@ type VertexManager with
         let coin = v.Vertex :?> Call
         [
                 let rstNormal = coin._off.Expr
-                let rop = coin.Parent.GetFlow().r_st.Expr
                 for td in coin.TaskDevs do
                     let api = td.ApiItem
                     if td.OutAddress <> TextSkip
@@ -64,7 +60,7 @@ type VertexManager with
                              let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
                              let rstPush = rstMemos.ToOr()
                         
-                             yield (sets, rstPush   <||> !!rop ) ==| (td.AO, getFuncName())
+                             yield (sets, rstPush  ) ==| (td.AO, getFuncName())
                         else 
-                             yield (sets, rstNormal <||> !!rop ) --| (td.AO, getFuncName())
+                             yield (sets, rstNormal) --| (td.AO, getFuncName())
         ]

@@ -83,18 +83,7 @@ module PPTObjectModule =
     let GetCausal (conn: ConnectionShape, iPage, startName, endName) =
         let shapeProperties = conn.Descendants<ShapeProperties>().FirstOrDefault()
         let outline = shapeProperties.Descendants<Outline>().FirstOrDefault()
-
-        let tempHead =
-            if (outline.Descendants<HeadEnd>().FirstOrDefault() = null) then
-                LineEndValues.None
-            else
-                outline.Descendants<HeadEnd>().FirstOrDefault().Type.Value
-
-        let tempTail =
-            if (outline.Descendants<TailEnd>().FirstOrDefault() = null) then
-                LineEndValues.None
-            else
-                outline.Descendants<TailEnd>().FirstOrDefault().Type.Value
+        let tempHead, tempTail = outline.getConnectionHeadTail()
 
         let isChangeHead =
             (tempHead = LineEndValues.None |> not) && (tempTail = LineEndValues.None)

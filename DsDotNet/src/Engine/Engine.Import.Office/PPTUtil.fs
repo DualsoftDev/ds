@@ -118,6 +118,24 @@ module PPTUtil =
                 outline.Descendants<Drawing.NoFill>().Any() |> not
 
         [<Extension>]
+        static member getConnectionHeadTail(outline: #Drawing.Outline) =
+            let head =
+                let headEnd = outline.Descendants<HeadEnd>().FirstOrDefault()
+                if (headEnd = null || headEnd.Type = null) then
+                    LineEndValues.None
+                else
+                    outline.Descendants<HeadEnd>().FirstOrDefault().Type.Value
+
+            let tail =
+                let tailEnd = outline.Descendants<TailEnd>().FirstOrDefault()
+                if (tailEnd = null || tailEnd.Type = null) then
+                    LineEndValues.None
+                else
+                    outline.Descendants<TailEnd>().FirstOrDefault().Type.Value
+
+            head, tail
+
+        [<Extension>]
         static member IsNonDirectional(shape: #ConnectionShape) =
             let outline =
                 shape
@@ -129,17 +147,7 @@ module PPTUtil =
             if (outline = null) then
                 true
             else
-                let head =
-                    if (outline.Descendants<HeadEnd>().FirstOrDefault() = null) then
-                        LineEndValues.None
-                    else
-                        outline.Descendants<HeadEnd>().FirstOrDefault().Type.Value
-
-                let tail =
-                    if (outline.Descendants<TailEnd>().FirstOrDefault() = null) then
-                        LineEndValues.None
-                    else
-                        outline.Descendants<TailEnd>().FirstOrDefault().Type.Value
+                let head, tail = outline.getConnectionHeadTail()
 
                 head = LineEndValues.None && tail = LineEndValues.None
 
@@ -644,7 +652,7 @@ module PPTUtil =
                             Office.ErrorPPT(ErrorCase.Name, ErrID._1004, "", pageIndex, 0u)
                             )
 
-                    pageIndex + 1, dt)
+                    pageIndex, dt)
 
             tablesWithPageNumbers |> Seq.where(fun (f,t) -> t.Rows.Count > 0)
 

@@ -30,7 +30,6 @@ type Flow with
 
         (set, rst) --| (f.g_st, getFuncName())
 
-
     member f.ST4_EmergencyState() =
         let set = f.emg_btn.Expr <||> f.HWBtnEmgExpr
         let rst = f.clear_btn.Expr
@@ -47,9 +46,9 @@ type Flow with
         (set, rst) ==| (f.e_st, getFuncName())
 
     member f.ST6_DriveState () =
-        let set = f.drive_btn.Expr <||> f.HWBtnDriveExpr    
+        let set = (f.drive_btn.Expr <||> f.HWBtnDriveExpr) <&&> f.System._originMonitor.Expr
         let rst = !!f.aop.Expr <||> f.t_st.Expr  <||> f.pause.Expr
-
+         
         (set, rst) ==| (f.d_st, getFuncName())
 
     member f.ST7_TestState () =

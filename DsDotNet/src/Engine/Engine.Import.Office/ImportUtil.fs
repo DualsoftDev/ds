@@ -598,7 +598,10 @@ module ImportU =
                     |> dict
 
                 let safeName (safety: string) =
-                    $"{flow.Name}_{safety.Split('.')[0]}_{safety.Split('.')[1]}"
+                    let dev = (safety.Split('.')[0]).Trim()
+                    let api = (safety.Split('.')[1]).Trim()
+
+                    $"{flow.Name}_{dev}_{api}"
 
                 let safeties = node.Safeties |> map safeName |> toArray
 

@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    </PropertyGroup>
+
+    <ItemGroup>
+		<Content Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+	</ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FreeSpire.Presentation" Version="7.8.0" />
+      <PackageReference Include="System.Reactive.Linq" Version="6.0.0" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\src\Engine\Engine.Parser\Engine.Parser.csproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
+    </ItemGroup>
+
+   
+
+
+
+    <ItemGroup>
+        <Compile Update="Properties\Settings.Designer.cs">
+            <DesignTimeSharedInput>True</DesignTimeSharedInput>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Settings.settings</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Properties\Settings.settings">
+            <Generator>SettingsSingleFileGenerator</Generator>
+            <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+        </None>
+    </ItemGroup>
+
+
+
+</Project>

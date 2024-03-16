@@ -1,55 +1,131 @@
 using System;
-using Spire.Presentation;
 using System.Collections.Generic;
-using Engine.CodeGenCPU;
-using static Engine.Core.CoreModule;
+using System.Drawing;
 using System.IO;
-using System.Globalization;
+using Dual.Common.Core;
+using Spire.Presentation;
+using Spire.Presentation.Drawing;
+using static Engine.Core.CoreModule;
 
 namespace Engine.Export.Office
 {
     public static class GenerationPPT
     {
-        public static string ExportPPT(DsSystem sys, string templateFile)
+        private static float _ShapeWidth = 110, _ShapeHeight = 40;
+
+        /// <summary>
+        /// 주어진 시스템의 플로우를 기반으로 PPTX 파일을 생성합니다.
+        /// </summary>
+        /// <param name="sys">시스템 객체</param>
+        /// <param name="templateFile">템플릿 파일 경로</param>
+        /// <param name="targetFile">대상 파일 경로</param>
+        /// <returns>생성된 PPTX 파일 경로</returns>
+        public static string ExportPPT(DsSystem sys, string templateFile, string targetFile)
         {
-            string datetime = DateTime.Now.ToString("yyMMdd HH-mm-ss", CultureInfo.InvariantCulture);
-            string destinationFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), $"temp/dualsoft/{datetime}");
+            // 템플릿 파일을 대상 파일로 복사
+            File.Copy(templateFile, targetFile, true);
 
-            // Ensure the destination folder exists, create if not.
-            if (!Directory.Exists(destinationFolder))
-            {
-                Directory.CreateDirectory(destinationFolder);
-            }
-            // Define the destination path
-            string destinationFilePath = Path.Combine(destinationFolder, $"{sys.Name}.pptx");
-            // Copy the file to the destination folder
-            File.Copy(templateFile, destinationFilePath, true);
+            // 슬라이드 추가
+            AddSlidesWithNames(targetFile, sys.Flows);
 
-            // 기존 프레젠테이션(템플릿) 복사
-            System.IO.File.Copy(templateFile, destinationFilePath, overwrite: true);
-
-            AddSlidesWithNames(destinationFilePath, new List<string>() { "F1", "F2", "F3" });
-
-            return destinationFilePath;
+            return targetFile;
         }
 
-        public static void AddSlidesWithNames(string filePath, List<string> slideNames)
+        /// <summary>
+        /// 파일에 플로우 이름을 갖는 슬라이드를 추가합니다.
+        /// </summary>
+        /// <param name="filePath">파일 경로</param>
+        /// <param name="flows">플로우 컬렉션</param>
+        public static void AddSlidesWithNames(string filePath, HashSet<Flow> flows)
         {
+            ShapeType GetShapeType(Vertex v)
+            {
+                if (v is Real) return ShapeType.Rectangle;
+                if (v is Alias a) return a.TargetWrapper.IsDuAliasTargetReal ? ShapeType.Rectangle : ShapeType.Ellipse;
+                return ShapeType.Ellipse;
+            }
+
+            string GetName(Vertex v)
+            {
+                if (v is Real || v is Call) return v.Name;
+                if (v is Alias a) return a.TargetWrapper.GetTarget().Name;
+                throw new Exception("Vertex GetName error");
+            }
+
             using (Presentation ppt = new Presentation())
             {
                 ppt.LoadFromFile(filePath);
 
-                foreach (var name in slideNames)
+                foreach (var flow in flows)
                 {
-                    // 새 슬라이드 추가 (제목만 있는 레이아웃 사용)
+                    // 제목만 있는 레이아웃을 사용하여 새 슬라이드 추가
                     ISlide slide = ppt.Slides.Append(SlideLayoutType.TitleOnly);
 
-                    // 제목 자리 표시자에 텍스트 설정
+                    // 제목 자리 표시자에 플로우 이름 설정
                     IAutoShape titleShape = slide.Shapes[0] as IAutoShape;
                     if (titleShape != null && titleShape.TextFrame != null)
-                        titleShape.TextFrame.Text = name;
+                        titleShape.TextFrame.Text = flow.Name;
                     else
                         throw new Exception("TitleOnly error");
+
+                    // 각 플로우의 실제 이름을 슬라이드에 추가
+                    float yPos = 100;
+                    float maxXPos = 0; // 슬라이드에서 가장 오른쪽에 위치한 도형의 X 좌표
+                    foreach (var fv in flow.Graph.Vertices)
+                    {
+                        // 도형의 X 좌표
+                        float xPos = 1;
+
+                        // 각 Vertex마다 높이를 조정하여 겹치지 않도록 함
+                        IAutoShape fShape = slide.Shapes.AppendShape(GetShapeType(fv), new RectangleF(xPos, yPos, _ShapeWidth, _ShapeHeight));
+                        var fTextFrame = fShape.TextFrame;
+                        fTextFrame.Paragraphs[0].Text = GetName(fv);
+                        fTextFrame.TextRange.FontHeight = 11;
+
+                        // 가장 오른쪽에 위치한 도형의 X 좌표 업데이트
+                        maxXPos = Math.Max(maxXPos, xPos + _ShapeWidth);
+
+                        // yPos 업데이트
+                        yPos += 50;
+
+                        if (fv is Real r)
+                        {
+                            foreach (var cv in r.Graph.Vertices)
+                            {
+                                // 각 Vertex마다 높이를 조정하여 겹치지 않도록 함
+                                xPos += _ShapeWidth + 20; // 도형이 겹치지 않도록 간격 추가
+
+                                // 도형이 슬라이드 너비를 넘어가면 아래로 이동
+                                if (xPos + _ShapeWidth > ppt.SlideSize.Size.Width)
+                                {
+                                    xPos = 1; // 왼쪽 끝으로 이동
+                                    yPos += _ShapeHeight + 20; // 아래로 이동
+                                }
+
+                                // 도형 추가
+                                IAutoShape rShape = slide.Shapes.AppendShape(GetShapeType(cv), new RectangleF(xPos, yPos, _ShapeWidth, _ShapeHeight));
+                                var rTextFrame = rShape.TextFrame;
+                                rTextFrame.Paragraphs[0].Text = GetName(cv);
+                                rTextFrame.TextRange.FontHeight = 11;
+                                // 도형의 채우기 색상 설정
+                                rShape.Fill.FillType = FillFormatType.Solid;
+                                rShape.Fill.SolidColor.Color = Color.Blue; // PpColorSchemeIndex.ppAccent2 대신 색상을 직접 지정
+                                rShape.Line.FillType = FillFormatType.Solid;
+                                rShape.Line.SolidFillColor.Color = Color.Black;
+
+
+                                // 가장 오른쪽에 위치한 도형의 X 좌표 업데이트
+                                maxXPos = Math.Max(maxXPos, xPos + _ShapeWidth);
+                            }
+                        }
+                    }
+
+                    // 슬라이드 너비를 넘어가는 경우 아래쪽으로 이동
+                    if (maxXPos > ppt.SlideSize.Size.Width)
+                        yPos += _ShapeHeight + 20;
+
+                    // 슬라이드 높이를 조정하여 도형이 잘 보이도록 함
+                    ppt.SlideSize.Size = new SizeF(ppt.SlideSize.Size.Width, yPos + _ShapeHeight + 100);
                 }
 
                 // 변경사항 저장

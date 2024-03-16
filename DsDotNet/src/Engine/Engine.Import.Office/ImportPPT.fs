@@ -256,14 +256,10 @@ module ImportPPTModule =
 
     [<Extension>]
     type ImportPPT =
-
-    
         [<Extension>]
-        static member GetDSFromPPTWithLib(fullName: string) =
+        static member ExportLibarayDS(exportDir:string) =
             pptRepo.Clear()
             do
-                // library 파일을 먼저 로딩해서 DS 파일로 변환한다.
-
                 let textLibPptx = $"{TextLibrary}.pptx" |> DsFile
                 // 파일 loadingfromPPTs 시 DS_Library.ds 만드는 용도
                 let libSys =
@@ -278,10 +274,19 @@ module ImportPPTModule =
 
                 let loadedlibFilePath =
                     //let validPath  = PathManager.convertValidFile (fullName)
-                    PathManager.getFullPath textLibPptx (PathManager.getFolderOfPath (fullName))
+                    PathManager.getFullPath textLibPptx (exportDir|>DsDirectory)
 
                 libSys.pptxToExportDS loadedlibFilePath |> ignore
 
+
+    
+        [<Extension>]
+        static member GetDSFromPPTWithLib(fullName: string) =
+            pptRepo.Clear()
+            do
+                // library 파일을 먼저 로딩해서 DS 파일로 변환한다.
+                let pathDir = PathManager.getFolderOfPath (fullName)
+                ImportPPT.ExportLibarayDS(pathDir.ToValidPath());
 
 
             let exportPath =

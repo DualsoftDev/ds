@@ -729,5 +729,17 @@ module PPTUtil =
             imgs
 
 
+        [<Extension>]
+        static member getFirstSlideNote(path: string) =
+            let doc = Office.Open(path) 
+            
+            let firstSlidePart = 
+                doc.PresentationPart.SlideParts 
+                |> Seq.sortBy(fun f->Office.GetPage (f))
+                |> Seq.tryHead
 
-    
+            match firstSlidePart with
+            |Some (page) -> 
+                page.NotesSlidePart.NotesSlide.InnerText
+            |None ->
+                Office.ErrorPPT(ErrorCase.Page, ErrID._69, "", 0, 0u)

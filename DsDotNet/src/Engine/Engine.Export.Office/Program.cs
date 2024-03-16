@@ -18,7 +18,7 @@ namespace Engine.Export.Office
         {
             string testFile = @$"F:\/HelloDS_new.pptx";
             string templateFile = @$"F:\/DSExport_Template.pptx";
-            GenerationPPT.ExportPPT(new DsSystem("testSYS"), templateFile);
+            //GenerationPPT.ExportPPT(new DsSystem("testSYS"), templateFile);
             //Console.ReadKey();  
         }
     }

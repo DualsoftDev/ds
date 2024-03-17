@@ -477,7 +477,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                               match apiItem with
                               | Some apiItem -> yield apiItem
-                              | _ -> failwithlog "ERROR"
+                              | _ -> failwithlog $"device({device}) api({api}) is not exist"
 
                           | _ -> failwithlog "ERROR" ]
 

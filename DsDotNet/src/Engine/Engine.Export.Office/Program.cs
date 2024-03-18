@@ -3,6 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Diagnostics;
 using DocumentFormat.OpenXml.Packaging;
+using Engine.Export.Office;
+using DocumentFormat.OpenXml.Presentation;
 
 namespace PresentationUtility
 {
@@ -10,7 +12,7 @@ namespace PresentationUtility
     {
         public static void Main(string[] args)
         {
-            var samplePath = @"E:\DSTemplate.pptx";
+            var samplePath = @"C:\ds\DsDotNet\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\DSTemplate.pptx";
             var systemName = "testsysA";
 
             string datetime = DateTime.Now.ToString("yyMMdd HH-mm-ss", CultureInfo.InvariantCulture);
@@ -24,10 +26,10 @@ namespace PresentationUtility
             using (PresentationDocument doc = PresentationDocument.Open(destinationFilePath, true))
             {
                 PageManager.UpdateFirstPageTitle(doc, systemName);
-
                 for (int i = 0; i < 7; i++)
                 {
-                        PageManager.InsertNewSlideWithTitleOnly(doc, $"page{i}");
+                    Slide slide = new Slide(new CommonSlideData(new ShapeTree()));
+                    PageManager.InsertNewSlideWithTitleOnly(doc, slide, $"page{i}");
                 }
 
                 doc.Save();
@@ -35,7 +37,5 @@ namespace PresentationUtility
 
             Process.Start(new ProcessStartInfo { FileName = destinationFilePath, UseShellExecute = true });
         }
-
-      
     }
 }

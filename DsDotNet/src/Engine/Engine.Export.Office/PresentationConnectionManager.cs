@@ -6,9 +6,9 @@ using System;
 using DocumentFormat.OpenXml.Office.LongProperties;
 using DocumentFormat.OpenXml;
 
-namespace PresentationUtility
+namespace Engine.Export.Office
 {
-    public static class PresentationConnectionManager
+    public static class ConnectionManager
     {
         public static ConnectionShape CreateConnectionShape(Slide slide, Shape startShape, Shape endShape)
         {

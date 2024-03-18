@@ -7,22 +7,24 @@ using System.IO;
 using System.Linq;
 using Drawing = DocumentFormat.OpenXml.Drawing;
 
-namespace PresentationUtility
+namespace Engine.Export.Office
 {
     public class PageManager
     {
         public static void UpdateFirstPageTitle(PresentationDocument presentationDocument, string slideTitle)
         {
             SlidePart firstSlidePart = presentationDocument.PresentationPart.SlideParts.First();
-            Shape firstShape = firstSlidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>().First();
+            Shape titleShape = firstSlidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
+                                .First(s=>s.NonVisualShapeProperties.ApplicationNonVisualDrawingProperties.PlaceholderShape.Type == PlaceholderValues.CenteredTitle);
 
-            TextBody textBody = firstShape.Descendants<TextBody>().FirstOrDefault();
+            TextBody textBody = titleShape.Descendants<TextBody>().FirstOrDefault();
             Drawing.Paragraph paragraph = textBody.Descendants<Drawing.Paragraph>().FirstOrDefault();
+            
             Drawing.Run run = paragraph.Descendants<Drawing.Run>().FirstOrDefault();
             run.Text = new Drawing.Text(slideTitle);
         }
 
-        public static void InsertNewSlideWithTitleOnly(PresentationDocument presentationDocument, string slideTitle)
+        public static SlidePart InsertNewSlideWithTitleOnly(PresentationDocument presentationDocument, Slide slide ,  string slideTitle)
         {
             PresentationPart presentationPart = presentationDocument.PresentationPart;
 
@@ -31,7 +33,6 @@ namespace PresentationUtility
                 throw new InvalidOperationException("The presentation document is empty.");
             }
 
-            Slide slide = new Slide(new CommonSlideData(new ShapeTree()));
             uint drawingObjectId = 1;
 
             CommonSlideData commonSlideData = slide.CommonSlideData ?? slide.AppendChild(new CommonSlideData());
@@ -81,9 +82,7 @@ namespace PresentationUtility
             newSlideId.Id = lastSlideId.Id + 1;
             newSlideId.RelationshipId = presentationPart.GetIdOfPart(slidePart);
 
-            ShapeManager.AddShape(slide, 3);
-            //slide.Save(slidePart);
-            slide.Save(slidePart);
+            return slidePart;
         }
     }
 }

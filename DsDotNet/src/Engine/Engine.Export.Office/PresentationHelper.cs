@@ -10,8 +10,9 @@ using DocumentFormat.OpenXml.Validation;
 using D = DocumentFormat.OpenXml.Drawing;
 using D10 = DocumentFormat.OpenXml.Office2010.Drawing;
 
-namespace PresentationUtility
+namespace Engine.Export.Office
 {
+    [Obsolete]
     public static class PowerpointHelper
     {
 

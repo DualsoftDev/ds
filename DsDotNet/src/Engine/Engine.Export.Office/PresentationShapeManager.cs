@@ -25,7 +25,7 @@ namespace PresentationUtility
                 uint drawingObjectId = GetNextShapeId(slide);
                 long offsetX = 2000000 * i; // X 좌표 (2인치 = 914400 EMUs)
                 long offsetY = 2000000; // Y 좌표 고정
-                var shape = CreateNormalShape($"Shape{i + 1}", drawingObjectId, offsetX, offsetY);
+                var shape = CreateNormalShape($"Shape{i + 1}", drawingObjectId, Drawing.ShapeTypeValues.Rectangle, offsetX, offsetY);
                 shapeTree.AppendChild(shape);
 
                 // 마지막 두 도형 ID 저장
@@ -65,7 +65,7 @@ namespace PresentationUtility
                     new Drawing.ListStyle(),
                     new Drawing.Paragraph(new Drawing.Run(new Drawing.Text(shapeName)))));
         }
-        public static Shape CreateNormalShape(string shapeName, uint drawingObjectId, long offsetX, long offsetY)
+        public static Shape CreateNormalShape(string shapeName, uint drawingObjectId, Drawing.ShapeTypeValues shapeTypeValue, long offsetX, long offsetY)
         {
             // 도형의 크기 설정
             long width = Convert.ToInt64(3.5 * 360000); // 폭 3.5cm
@@ -81,7 +81,7 @@ namespace PresentationUtility
                     new Drawing.Transform2D(
                         new Drawing.Offset() { X = offsetX, Y = offsetY },
                         new Drawing.Extents() { Cx = width, Cy = height }),
-                    new Drawing.PresetGeometry(new Drawing.AdjustValueList()) { Preset = Drawing.ShapeTypeValues.Rectangle }, // 직사각형 형태 지정
+                    new Drawing.PresetGeometry(new Drawing.AdjustValueList()) { Preset = shapeTypeValue }, // 직사각형 형태 지정
                     new Drawing.SolidFill(new Drawing.SchemeColor() { Val = Drawing.SchemeColorValues.Accent1 }),
                     new Drawing.Outline(new Drawing.SolidFill(new Drawing.SchemeColor() { Val = Drawing.SchemeColorValues.Dark1 }))
                     {

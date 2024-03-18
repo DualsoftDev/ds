@@ -15,31 +15,18 @@ namespace PresentationUtility
 
             uint id = GetNextShapeId(slide);
             string typeName = "Connector";
+            bool isStartRect = IsRectShape(startShape);
+            var isLeftToRight = get2DPoint(startShape).Offset.Y == get2DPoint(endShape).Offset.Y;
 
-            // startShape 및 endShape로부터 Transform2D 정보 추출
-            var startTransform2D = startShape.Descendants<ShapeProperties>()
-                                              .FirstOrDefault()
-                                              ?.Descendants<D.Transform2D>()
-                                              .FirstOrDefault();
-            var endTransform2D = endShape.Descendants<ShapeProperties>()
-                                          .FirstOrDefault()
-                                          ?.Descendants<D.Transform2D>()
-                                          .FirstOrDefault();
-
-            // Transform2D에서 Offset 정보 추출
-            var startX = Convert.ToInt32(startTransform2D?.Offset?.X.Value ?? 0); // 기본값으로 0 설정
-            var startY = Convert.ToInt32(startTransform2D?.Offset?.Y.Value ?? 0); // 기본값으로 0 설정
-            var endX = Convert.ToInt32(endTransform2D?.Offset?.X.Value ?? 0); // 기본값으로 0 설정
-            var endY = Convert.ToInt32(endTransform2D?.Offset?.Y.Value ?? 0); // 기본값으로 0 설정
-
-            // 시작점과 종료점을 Tuple<int, int>로 설정
-            Tuple<int, int> startPoint = Tuple.Create(startX, startY);
-            Tuple<int, int> endPoint = Tuple.Create(endX, endY);
-
+            Tuple<long, long> startPoint, endPoint;
+            if (isLeftToRight)
+                setPointLeftToRight(startShape, endShape, out startPoint, out endPoint);
+            else
+                setPointTopToBottom(startShape, endShape, out startPoint, out endPoint);
 
             var connectionShape = new ConnectionShape()
             {
-                NonVisualConnectionShapeProperties = CreateNonVisualConnectionShapeProperties(id, typeName, startShape, endShape),
+                NonVisualConnectionShapeProperties = CreateNonVisualConnectionShapeProperties(id, typeName, startShape, endShape, isStartRect, isLeftToRight),
                 ShapeProperties = CreateShapeProperties(startPoint, endPoint),
                 ShapeStyle = CreateShapeStyle()
             };
@@ -47,8 +34,52 @@ namespace PresentationUtility
             return connectionShape;
         }
 
-   
-        private static bool DetermineVerticalFlip(Tuple<int, int> startPoint, Tuple<int, int> endPoint)
+        private static bool IsRectShape(Shape startShape)
+        {
+            return startShape
+                                .Descendants<ShapeProperties>()
+                                .First()
+                                .Descendants<D.PresetGeometry>()
+                                .FirstOrDefault().Preset.Value == D.ShapeTypeValues.Rectangle;
+        }
+        private static void setPointLeftToRight(Shape startShape, Shape endShape, out Tuple<long, long> startPoint, out Tuple<long, long> endPoint)
+        {
+            D.Transform2D startTransform2D = get2DPoint(startShape);
+            D.Transform2D endTransform2D = get2DPoint(endShape);
+
+            var startX = startTransform2D.Offset.X.Value + startTransform2D.Extents.Cx;
+            var startY = startTransform2D.Offset.Y.Value + startTransform2D.Extents.Cy / 2;
+            var endX = endTransform2D.Offset.X.Value;
+            var endY = endTransform2D.Offset.Y.Value + endTransform2D.Extents.Cy / 2;
+
+            // 시작점과 종료점을 Tuple<int, int>로 설정
+            startPoint = Tuple.Create(startX, startY);
+            endPoint = Tuple.Create(endX, endY);
+        }
+        private static void setPointTopToBottom(Shape startShape, Shape endShape, out Tuple<long, long> startPoint, out Tuple<long, long> endPoint)
+        {
+            D.Transform2D startTransform2D = get2DPoint(startShape);
+            D.Transform2D endTransform2D = get2DPoint(endShape);
+
+            var startX = startTransform2D.Offset.X.Value + startTransform2D.Extents.Cx / 2;
+            var startY = startTransform2D.Offset.Y.Value + startTransform2D.Extents.Cy;
+            var endX = endTransform2D.Offset.X.Value + startTransform2D.Extents.Cx / 2;
+            var endY = endTransform2D.Offset.Y.Value;
+
+            // 시작점과 종료점을 Tuple<int, int>로 설정
+            startPoint = Tuple.Create(startX, startY);
+            endPoint = Tuple.Create(endX, endY);
+        }
+
+        private static D.Transform2D get2DPoint(Shape startShape)
+        {
+            // startShape 및 endShape로부터 Transform2D 정보 추출
+            return startShape.Descendants<ShapeProperties>()
+                                              .FirstOrDefault()
+                                              ?.Descendants<D.Transform2D>()
+                                              .FirstOrDefault();
+        }
+        private static bool DetermineVerticalFlip(Tuple<long, long> startPoint, Tuple<long, long> endPoint)
         {
             // XOR to determine if the line needs to be vertically flipped for aesthetic reasons.
             return (endPoint.Item1 > startPoint.Item1) ^ (endPoint.Item2 > startPoint.Item2);
@@ -89,21 +120,34 @@ namespace PresentationUtility
         }
 
 
-        private static NonVisualConnectionShapeProperties CreateNonVisualConnectionShapeProperties(uint id, string typeName, Shape startShape, Shape endShape)
+        private static NonVisualConnectionShapeProperties CreateNonVisualConnectionShapeProperties(uint id, string typeName, Shape startShape, Shape endShape, bool isRect, bool isLeftToRight)
         {
-            return new NonVisualConnectionShapeProperties
+
+            var startConnectionPoint = isRect
+                                      ? isLeftToRight ? 3u : 2u
+                                      : isLeftToRight ? 6u : 4u;
+
+
+            var endConnectionPoint = isRect
+                                      ? isLeftToRight ? 1u : 0u
+                                      : isLeftToRight ? 2u : 0u;
+
+
+            var ret = new NonVisualConnectionShapeProperties
             {
                 NonVisualDrawingProperties = new NonVisualDrawingProperties { Id = id, Name = $"{typeName} {id}" },
                 NonVisualConnectorShapeDrawingProperties = new NonVisualConnectorShapeDrawingProperties
                 {
-                    StartConnection = new D.StartConnection { Id = startShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = 3 },
-                    EndConnection = new D.EndConnection { Id = endShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = 1 }
+
+                    StartConnection = new D.StartConnection { Id = startShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = startConnectionPoint },
+                    EndConnection = new D.EndConnection { Id = endShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = endConnectionPoint }
                 },
                 ApplicationNonVisualDrawingProperties = new ApplicationNonVisualDrawingProperties()
             };
+            return ret;
         }
 
-        private static ShapeProperties CreateShapeProperties(Tuple<int, int> startPoint, Tuple<int, int> endPoint)
+        private static ShapeProperties CreateShapeProperties(Tuple<long, long> startPoint, Tuple<long, long> endPoint)
         {
             var shapeProperties = new ShapeProperties();
             bool verticalFlip = DetermineVerticalFlip(startPoint, endPoint);

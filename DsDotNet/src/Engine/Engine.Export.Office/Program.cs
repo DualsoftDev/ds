@@ -1,25 +1,41 @@
-using Engine.Core;
-using Engine.Export.Office;
-using Engine.Info;
-using Engine.Runtime;
-using Engine.TestSimulator;
 using System;
-using System.Drawing;
+using System.Globalization;
 using System.IO;
-using static Engine.Core.CoreModule;
-using static Engine.Core.RuntimeGeneratorModule;
+using System.Diagnostics;
+using DocumentFormat.OpenXml.Packaging;
 
-namespace Engine.Export.Office
+namespace PresentationUtility
 {
-    internal class Program
+    public class PresentationManagerDemo
     {
-        [STAThread]
-        private static void Main()
+        public static void Main(string[] args)
         {
-            string testFile = @$"F:\/HelloDS_new.pptx";
-            string templateFile = @$"F:\/DSExport_Template.pptx";
-            //GenerationPPT.ExportPPT(new DsSystem("testSYS"), templateFile);
-            //Console.ReadKey();  
+            var samplePath = @"E:\DSTemplate.pptx";
+            var systemName = "testsysA";
+
+            string datetime = DateTime.Now.ToString("yyMMdd HH-mm-ss", CultureInfo.InvariantCulture);
+            string destinationFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), $"temp/dualsoft/{datetime}");
+
+            if (!Directory.Exists(destinationFolder))
+                Directory.CreateDirectory(destinationFolder);
+
+            string destinationFilePath = Path.Combine(destinationFolder, $"{systemName}.pptx");
+            File.Copy(samplePath, destinationFilePath, true);
+            using (PresentationDocument doc = PresentationDocument.Open(destinationFilePath, true))
+            {
+                PageManager.UpdateFirstPageTitle(doc, systemName);
+
+                for (int i = 0; i < 7; i++)
+                {
+                        PageManager.InsertNewSlideWithTitleOnly(doc, $"page{i}");
+                }
+
+                doc.Save();
+            }
+
+            Process.Start(new ProcessStartInfo { FileName = destinationFilePath, UseShellExecute = true });
         }
+
+      
     }
 }

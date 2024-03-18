@@ -9,11 +9,19 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="GenerationPPT.csx" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="GenerationPPT.csx" />
+    </ItemGroup>
+
+    <ItemGroup>
 		<Content Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
 	</ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FreeSpire.Presentation" Version="7.8.0" />
+      <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.0" />
       <PackageReference Include="System.Reactive.Linq" Version="6.0.0" />
     </ItemGroup>
 

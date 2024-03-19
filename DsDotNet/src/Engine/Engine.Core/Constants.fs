@@ -56,6 +56,18 @@ module DsText =
         member val Sources = sources.ToFSharpList()
         member val Targets = targets.ToFSharpList()
         member val EdgeSymbol = edgeSymbol
+        member x.EdgeRevSymbol =  match edgeSymbol with
+                                    | TextStartEdge       ->    TextStartEdgeRev
+                                    | TextStartPush       ->    TextStartPushRev
+                                    | TextResetEdge       ->    TextResetEdgeRev
+                                    | TextResetPush       ->    TextResetPushRev
+                                    | TextStartReset      ->    TextStartResetRev
+                                    |  TextStartEdgeRev      ->    TextStartEdge 
+                                    |  TextStartPushRev      ->    TextStartPush 
+                                    |  TextResetEdgeRev      ->    TextResetEdge 
+                                    |  TextResetPushRev      ->    TextResetPush 
+                                    |  TextStartResetRev     ->   TextStartReset 
+                                    |_ -> failwith $"{edgeSymbol} symbol is directionless"
 
     /// source 와 target 을 edge operator 에 따라서 확장 생성
     let expandModelingEdge (modelingEdgeInfo:ModelingEdgeInfo<'v>) : ('v * EdgeType * 'v) list =

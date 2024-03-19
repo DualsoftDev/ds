@@ -739,10 +739,11 @@ module PPTUtil =
                 |> Seq.tryHead
 
             match firstSlidePart with
-            |Some (page) -> 
+            |Some (page) when  page.NotesSlidePart <> null -> 
+
                 page.NotesSlidePart.NotesSlide.InnerText
                     .Replace("&nbsp", "")
                     .Replace("\u00A0", "")
                     .TrimEnd('1') //첫페이지 NotesSlide 끝에 붙는데 1 이붙는데 페이지 번호임
-            |None ->
+            |_ ->
                 Office.ErrorPPT(ErrorCase.Page, ErrID._69, "", 0, 0u)

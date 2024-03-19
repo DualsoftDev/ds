@@ -1,18 +1,23 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
-using D = DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Office.LongProperties;
+using DocumentFormat.OpenXml.Drawing.Wordprocessing;
+using DocumentFormat.OpenXml;
+
+using Drawing = DocumentFormat.OpenXml.Drawing;
+
 using System.Linq;
 using System;
-using DocumentFormat.OpenXml.Office.LongProperties;
-using DocumentFormat.OpenXml;
+
+using static Engine.Core.DsText;
+using static Engine.Core.CoreModule;
 
 namespace Engine.Export.Office
 {
     public static class ConnectionManager
     {
-        public static ConnectionShape CreateConnectionShape(Slide slide, Shape startShape, Shape endShape)
+        public static ConnectionShape CreateConnectionShape(Slide slide, Shape startShape, Shape endShape, ModelingEdgeType edgeType, bool bRev)
         {
-
             uint id = GetNextShapeId(slide);
             string typeName = "Connector";
             bool isStartRect = IsRectShape(startShape);
@@ -27,10 +32,11 @@ namespace Engine.Export.Office
             var connectionShape = new ConnectionShape()
             {
                 NonVisualConnectionShapeProperties = CreateNonVisualConnectionShapeProperties(id, typeName, startShape, endShape, isStartRect, isLeftToRight),
-                ShapeProperties = CreateShapeProperties(startPoint, endPoint),
+                ShapeProperties = CreateShapeProperties(startPoint, endPoint, edgeType, bRev),
                 ShapeStyle = CreateShapeStyle()
             };
 
+            slide.CommonSlideData.ShapeTree.AppendChild(connectionShape);
             return connectionShape;
         }
 
@@ -39,13 +45,13 @@ namespace Engine.Export.Office
             return startShape
                                 .Descendants<ShapeProperties>()
                                 .First()
-                                .Descendants<D.PresetGeometry>()
-                                .FirstOrDefault().Preset.Value == D.ShapeTypeValues.Rectangle;
+                                .Descendants<Drawing.PresetGeometry>()
+                                .FirstOrDefault().Preset.Value == Drawing.ShapeTypeValues.Rectangle;
         }
         private static void setPointLeftToRight(Shape startShape, Shape endShape, out Tuple<long, long> startPoint, out Tuple<long, long> endPoint)
         {
-            D.Transform2D startTransform2D = get2DPoint(startShape);
-            D.Transform2D endTransform2D = get2DPoint(endShape);
+            Drawing.Transform2D startTransform2D = get2DPoint(startShape);
+            Drawing.Transform2D endTransform2D = get2DPoint(endShape);
 
             var startX = startTransform2D.Offset.X.Value + startTransform2D.Extents.Cx;
             var startY = startTransform2D.Offset.Y.Value + startTransform2D.Extents.Cy / 2;
@@ -58,8 +64,8 @@ namespace Engine.Export.Office
         }
         private static void setPointTopToBottom(Shape startShape, Shape endShape, out Tuple<long, long> startPoint, out Tuple<long, long> endPoint)
         {
-            D.Transform2D startTransform2D = get2DPoint(startShape);
-            D.Transform2D endTransform2D = get2DPoint(endShape);
+            Drawing.Transform2D startTransform2D = get2DPoint(startShape);
+            Drawing.Transform2D endTransform2D = get2DPoint(endShape);
 
             var startX = startTransform2D.Offset.X.Value + startTransform2D.Extents.Cx / 2;
             var startY = startTransform2D.Offset.Y.Value + startTransform2D.Extents.Cy;
@@ -71,12 +77,12 @@ namespace Engine.Export.Office
             endPoint = Tuple.Create(endX, endY);
         }
 
-        private static D.Transform2D get2DPoint(Shape startShape)
+        private static Drawing.Transform2D get2DPoint(Shape startShape)
         {
             // startShape 및 endShape로부터 Transform2D 정보 추출
             return startShape.Descendants<ShapeProperties>()
                                               .FirstOrDefault()
-                                              ?.Descendants<D.Transform2D>()
+                                              ?.Descendants<Drawing.Transform2D>()
                                               .FirstOrDefault();
         }
         private static bool DetermineVerticalFlip(Tuple<long, long> startPoint, Tuple<long, long> endPoint)
@@ -88,27 +94,27 @@ namespace Engine.Export.Office
         private static ShapeStyle CreateShapeStyle()
         {
             ShapeStyle shapeStyle1 = new ShapeStyle();
-            D.LineReference lineReference1 = new D.LineReference() { Index = (UInt32Value)2U };
+            Drawing.LineReference lineReference1 = new Drawing.LineReference() { Index = (UInt32Value)2U };
 
-            D.SchemeColor schemeColor1 = new D.SchemeColor() { Val = D.SchemeColorValues.Accent1 };
-            D.Shade shade1 = new D.Shade() { Val = 50000 };
+            Drawing.SchemeColor schemeColor1 = new Drawing.SchemeColor() { Val = Drawing.SchemeColorValues.Accent1 };
+            Drawing.Shade shade1 = new Drawing.Shade() { Val = 50000 };
 
             schemeColor1.Append(shade1);
 
             lineReference1.Append(schemeColor1);
 
-            D.FillReference fillReference1 = new D.FillReference() { Index = (UInt32Value)1U };
-            D.SchemeColor schemeColor2 = new D.SchemeColor() { Val = D.SchemeColorValues.Accent1 };
+            Drawing.FillReference fillReference1 = new Drawing.FillReference() { Index = (UInt32Value)1U };
+            Drawing.SchemeColor schemeColor2 = new Drawing.SchemeColor() { Val = Drawing.SchemeColorValues.Accent1 };
 
             fillReference1.Append(schemeColor2);
 
-            D.EffectReference effectReference1 = new D.EffectReference() { Index = (UInt32Value)0U };
-            D.SchemeColor schemeColor3 = new D.SchemeColor() { Val = D.SchemeColorValues.Accent1 };
+            Drawing.EffectReference effectReference1 = new Drawing.EffectReference() { Index = (UInt32Value)0U };
+            Drawing.SchemeColor schemeColor3 = new Drawing.SchemeColor() { Val = Drawing.SchemeColorValues.Accent1 };
 
             effectReference1.Append(schemeColor3);
 
-            D.FontReference fontReference1 = new D.FontReference() { Index = D.FontCollectionIndexValues.Minor };
-            D.SchemeColor schemeColor4 = new D.SchemeColor() { Val = D.SchemeColorValues.Light1 };
+            Drawing.FontReference fontReference1 = new Drawing.FontReference() { Index = Drawing.FontCollectionIndexValues.Minor };
+            Drawing.SchemeColor schemeColor4 = new Drawing.SchemeColor() { Val = Drawing.SchemeColorValues.Light1 };
 
             fontReference1.Append(schemeColor4);
 
@@ -139,57 +145,68 @@ namespace Engine.Export.Office
                 NonVisualConnectorShapeDrawingProperties = new NonVisualConnectorShapeDrawingProperties
                 {
 
-                    StartConnection = new D.StartConnection { Id = startShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = startConnectionPoint },
-                    EndConnection = new D.EndConnection { Id = endShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = endConnectionPoint }
+                    StartConnection = new Drawing.StartConnection { Id = startShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = startConnectionPoint },
+                    EndConnection = new Drawing.EndConnection { Id = endShape.NonVisualShapeProperties.NonVisualDrawingProperties.Id, Index = endConnectionPoint }
                 },
                 ApplicationNonVisualDrawingProperties = new ApplicationNonVisualDrawingProperties()
             };
             return ret;
         }
 
-        private static ShapeProperties CreateShapeProperties(Tuple<long, long> startPoint, Tuple<long, long> endPoint)
+        private static ShapeProperties CreateShapeProperties(Tuple<long, long> startPoint, Tuple<long, long> endPoint, ModelingEdgeType edgeType, bool bRev)
         {
             var shapeProperties = new ShapeProperties();
             bool verticalFlip = DetermineVerticalFlip(startPoint, endPoint);
 
             // Transform 설정
-            var transform2D = new D.Transform2D
+            var transform2D = new Drawing.Transform2D
             {
                 VerticalFlip = verticalFlip,
-                Offset = new D.Offset { X = Math.Min(startPoint.Item1, endPoint.Item1), Y = Math.Min(startPoint.Item2, endPoint.Item2) },
-                Extents = new D.Extents { Cx = Math.Abs(endPoint.Item1 - startPoint.Item1), Cy = Math.Abs(endPoint.Item2 - startPoint.Item2) }
+                Offset = new Drawing.Offset { X = Math.Min(startPoint.Item1, endPoint.Item1), Y = Math.Min(startPoint.Item2, endPoint.Item2) },
+                Extents = new Drawing.Extents { Cx = Math.Abs(endPoint.Item1 - startPoint.Item1), Cy = Math.Abs(endPoint.Item2 - startPoint.Item2) }
             };
             shapeProperties.Append(transform2D);
             // PresetGeometry 설정: 연결선 형태 정의
-            var presetGeometry = new D.PresetGeometry { Preset = D.ShapeTypeValues.BentConnector2 };
-            presetGeometry.Append(new D.AdjustValueList());
+            var presetGeometry = new Drawing.PresetGeometry { Preset = Drawing.ShapeTypeValues.BentConnector2 };
+            presetGeometry.Append(new Drawing.AdjustValueList());
             shapeProperties.Append(presetGeometry);
 
             // Outline 설정: 선 두께와 색상 지정
-            var outline = new D.Outline
+            var outline = new Drawing.Outline
             {
                 Width = 12700 * 3, // 선 두께를 3pt로 설정
-                CapType = D.LineCapValues.Flat,
+                CapType = Drawing.LineCapValues.Flat,
             };
-            var solidFill = new D.SolidFill(new D.RgbColorModelHex { Val = "909090" }); // 선 색상을 검정으로 설정
+            var solidFill = new Drawing.SolidFill(new Drawing.RgbColorModelHex { Val = "909090" }); // 선 색상을 검정으로 설정
             outline.Append(solidFill);
             shapeProperties.Append(outline);
 
-            var tailEnd = new D.TailEnd
-            {
-                Type = D.LineEndValues.Arrow,
-                Width = D.LineEndWidthValues.Medium,
-                Length = D.LineEndLengthValues.Medium
-            }; 
-            var headEnd = new D.HeadEnd
-            {
-                Type = D.LineEndValues.Diamond,
-                Width = D.LineEndWidthValues.Medium,
-                Length = D.LineEndLengthValues.Medium
-            };
 
-            outline.AddChild(tailEnd);
+
+            var head = Drawing.LineEndValues.None;
+            var tail = Drawing.LineEndValues.Arrow;
+            var lineType = Drawing.PresetLineDashValues.Solid;
+
+            if (edgeType.IsStartEdge || edgeType.IsStartPush) { };
+            if (edgeType.IsResetEdge || edgeType.IsResetPush) { lineType = Drawing.PresetLineDashValues.Dash; }
+            if (edgeType.IsInterlockWeak || edgeType.IsInterlock) { lineType = Drawing.PresetLineDashValues.Dash; head = Drawing.LineEndValues.Arrow; }
+            if (edgeType.IsStartReset) { head = Drawing.LineEndValues.Diamond; }
+
+            if (bRev)
+            {
+                var tailTemp = tail;
+                tail = head;
+                head = tailTemp;
+            }
+
+            outline.Append(new Drawing.PresetDash() { Val = lineType });
+
+           
+            var headEnd= new Drawing.HeadEnd { Type = head, Width = Drawing.LineEndWidthValues.Medium, Length = Drawing.LineEndLengthValues.Medium };
+            var tailEnd = new Drawing.TailEnd { Type = tail, Width = Drawing.LineEndWidthValues.Medium, Length = Drawing.LineEndLengthValues.Medium };
+
             outline.AddChild(headEnd);
+            outline.AddChild(tailEnd);
 
             return shapeProperties;
         }

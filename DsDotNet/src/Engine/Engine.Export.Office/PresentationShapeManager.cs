@@ -15,9 +15,10 @@ namespace Engine.Export.Office
         // 도형의 크기 설정
         internal static int Width = 35;  //mm 
         internal static int Height = 12; //mm
-        internal static long Emu = 30000; // (단위: EMU, 예: 30000 EMU ≈ 1pt)
-        static long _width = Convert.ToInt64(Width * Emu); // 폭 3.5cm
-        static long _height = Convert.ToInt64(Height * Emu); // 높이 1.2cm
+        internal static long Emu = 36000; // 1mm는 360000 EMU(Enhanced Metafile Unit)에 해당
+
+        static long _width = Width * Emu; // 폭 3.5cm
+        static long _height =Height * Emu; // 높이 1.2cm
 
         internal static Shape AddSlideShape(Slide slide, string shapeName, Drawing.ShapeTypeValues shapeTypeValues, int x, int y)
         {
@@ -30,34 +31,7 @@ namespace Engine.Export.Office
             return shape;
         }
 
-        public static void AddShape(Slide slide, int count)
-        {
-            // SlidePart를 사용하여 ShapeTree에 접근
-            var shapeTree = slide.CommonSlideData.ShapeTree;
-
-            Shape lastShape = null; 
-            Shape secondLastShape = null;
-
-            for (int i = 0; i < count; i++)
-            {
-                uint drawingObjectId = GetNextShapeId(slide);
-                long offsetX = 2000000 * i; // X 좌표 (2인치 = 914400 EMUs)
-                long offsetY = 2000000; // Y 좌표 고정
-                var shape = CreateNormalShape($"Shape{i + 1}", drawingObjectId, Drawing.ShapeTypeValues.Rectangle, offsetX, offsetY);
-                shapeTree.AppendChild(shape);
-
-                // 마지막 두 도형 ID 저장
-                if (i == count - 2) secondLastShape = shape;
-                if (i == count - 1) lastShape = shape;
-            }
-
-            // 도형이 두 개 이상 있을 때만 연결선 추가
-            if (count > 1)
-            {
-                var conn = ConnectionManager.CreateConnectionShape(slide, secondLastShape, lastShape);
-                shapeTree.AppendChild(conn);
-            }
-        }
+      
 
         // 다음 사용 가능한 Shape ID를 가져오는 메서드
         private static uint GetNextShapeId(Slide slide)

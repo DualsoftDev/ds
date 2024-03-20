@@ -32,13 +32,13 @@ module EdgeModule =
     let createFlowEdge(flow:Flow) (modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modelingEdgeInfo
         validateParentOfEdgeVertices mei flow
-        flow.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
+        flow.ModelingEdges.Add(mei) |> verifyM $"중복 edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
         createEdge flow.Graph mei
 
     let createChildEdge(segment:Real) (modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modelingEdgeInfo
         validateParentOfEdgeVertices mei segment
-        segment.ModelingEdges.Add(mei) |> verifyM $"Duplicated edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
+        segment.ModelingEdges.Add(mei) |> verifyM $"중복 edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
         validateChildrenVertexType mei
 
         createEdge segment.Graph modelingEdgeInfo

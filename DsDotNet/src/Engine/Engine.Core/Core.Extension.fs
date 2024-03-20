@@ -89,10 +89,10 @@ module CoreExtensionModule =
             then failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
-            | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"Duplicated Button [flow:{flow.Name} name:{btnName}]"
+            | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
                       x.HWButtons.Add(ButtonDef(btnName,x, btnType, inAddress, outAddress, HashSet[|flow|], func))
-                      |> verifyM $"Duplicated ButtonDef [flow:{flow.Name} name:{btnName}]"
+                      |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
                       HwSystemItem.CreateHWApi(btnName, x) |> ignore
 
 
@@ -105,7 +105,7 @@ module CoreExtensionModule =
             | None -> 
                       let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
                       x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, flows , func))
-                      |> verifyM $"Duplicated LampDef [name:{lmpName}]"
+                      |> verifyM $"중복 LampDef [name:{lmpName}]"
                       HwSystemItem.CreateHWApi(lmpName, x) |> ignore
 
 
@@ -113,10 +113,10 @@ module CoreExtensionModule =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
-            | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"Duplicated Condtion [flow:{flow.Name} name:{condiName}]"
+            | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None -> 
                       x.HWConditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], func))
-                      |> verifyM $"Duplicated ConditionDef [flow:{flow.Name} name:{condiName}]"
+                      |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
                       HwSystemItem.CreateHWApi(condiName, x) |> ignore
 
 

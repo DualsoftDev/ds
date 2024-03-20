@@ -67,7 +67,7 @@ module ValidateMoudle =
             if(parentJob.Count() > 1)
             then 
                 let jobNames = StringExt.JoinWith(parentJob.Select(fun j->j.Name), ", ")
-                failwithf $"{a.QualifiedName} is duplicated assigned ({jobNames})"
+                failwithf $"{a.QualifiedName} is 중복 assigned ({jobNames})"
         )
 
     type DsSystem with

@@ -79,7 +79,11 @@ type VertexManager with
 
             yield (dop <&&> real.V.G.Expr <&&>   call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrTimeShortage, getFuncName())
             yield (dop <&&> real.V.G.Expr <&&> !!call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
-            yield (dop <&&> real.V.G.Expr <&&>                     offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
+            if call.UsingTon
+            then //단락 에레는 시간적용한 감지시 채터링 이슈로 Call Going 시 제외시키고 부모 Going일때만 체크
+                yield (dop <&&> real.V.G.Expr <&&>  !!call.V.G.Expr <&&>  offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
+            else 
+                yield (dop <&&> real.V.G.Expr <&&>                      offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
         ]
         
 

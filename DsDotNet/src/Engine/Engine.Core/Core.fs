@@ -312,7 +312,7 @@ module CoreModule =
             sprintf "%s %s %s"  src (operator.ToText()) tgt  //"+" <||> "-"
         static member Create(system:DsSystem, operand1, operator, operand2) =
             let ri = ApiResetInfo(operand1, operator, operand2)
-            system.ApiResetInfos.Add(ri) |> verifyM $"Duplicated interface ResetInfo [{ri.ToDsText()}]"
+            system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]"
             ri
 
     (* Abbreviations *)
@@ -325,7 +325,7 @@ module CoreModule =
 
         static member Create(graph:Graph<_,_>, source, target, edgeType:EdgeType) =
             let edge = Edge(source, target, edgeType)
-            graph.AddEdge(edge) |> verifyM $"Duplicated edge [{source.Name}{edgeType.ToText()}{target.Name}]"
+            graph.AddEdge(edge) |> verifyM $"중복 edge [{source.Name}{edgeType.ToText()}{target.Name}]"
             edge
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
@@ -412,7 +412,7 @@ module CoreModule =
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let real = Real(name, flow)
-            flow.Graph.AddVertex(real) |> verifyM $"Duplicated segment name [{name}]"
+            flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
             real
 
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
@@ -428,7 +428,7 @@ module CoreModule =
         static member Create(otherFlowReal:Real, parent:ParentWrapper) =
             let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
             let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            parent.GetGraph().AddVertex(ofr) |> verifyM $"Duplicated other flow real call [{ofn}.{ofrn}]"
+            parent.GetGraph().AddVertex(ofr) |> verifyM $"중복 other flow real call [{ofn}.{ofrn}]"
             ofr
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
@@ -437,7 +437,7 @@ module CoreModule =
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target, parent)
-            parent.GetGraph().AddVertex(call) |> verifyM $"Duplicated call name [{target.Name}]"
+            parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{target.Name}]"
             call
 
         member x.GetAliasTargetToDs() =
@@ -472,7 +472,7 @@ module CoreModule =
                 (target.RealTarget().IsNone && target.RealExFlowTarget().IsNone)
                 |> verifyM $"Vertex {name} children type error"
 
-            parent.GetGraph().AddVertex(alias) |> verifyM $"Duplicated alias name [{name}]"
+            parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{name}]"
             alias
 
     type ApiItem with
@@ -480,7 +480,7 @@ module CoreModule =
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiItem(name, system)
-            system.ApiItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =
             let ai4e = ApiItem.Create(name, system)
@@ -491,6 +491,6 @@ module CoreModule =
     type HwSystemItem with
         static member CreateHWApi(name, system) =
             let cp = HwSystemItem(name, system)
-            system.HWSystemItems.Add(cp) |> verifyM $"Duplicated interface prototype name [{name}]"
+            system.HWSystemItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
             cp
      

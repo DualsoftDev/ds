@@ -67,7 +67,7 @@ module ExportModule =
                     |> String.concat Environment.NewLine
 
                 failwithlog
-                    $"Total {duplicatedAddresses.Length} Duplicated address items:{Environment.NewLine}{dupItems}"
+                    $"Total {duplicatedAddresses.Length} 중복주소 items:{Environment.NewLine}{dupItems}"
 
             let autoMemoryAllocationTags =
                 system.TagManager.Storages.Values

@@ -64,7 +64,7 @@ module EtcListenerModule =
                     let key = (system, category)
 
                     if x.ButtonCategories.Contains(key) then
-                        failwith $"Duplicated button category {category} near {ctx.GetText()}"
+                        failwith $"중복 button category {category} near {ctx.GetText()}"
                     else
                         x.ButtonCategories.Add(key) |> ignore
 
@@ -268,7 +268,7 @@ module EtcListenerModule =
 
                     safetyConditions.Iter(fun sc ->
                         holder.SafetyConditions.Add(sc)
-                        |> verifyM $"Duplicated safety condition[{(sc.Core :?> INamed).Name}]")
+                        |> verifyM $"중복 safety condition[{(sc.Core :?> INamed).Name}]")
                 }
                 |> ignore
 

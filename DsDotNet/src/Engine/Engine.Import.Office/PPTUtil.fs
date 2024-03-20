@@ -746,4 +746,4 @@ module PPTUtil =
                     .Replace("\u00A0", "")
                     .TrimEnd('1') //첫페이지 NotesSlide 끝에 붙는데 1 이붙는데 페이지 번호임
             |_ ->
-                Office.ErrorPPT(ErrorCase.Page, ErrID._69, "", 0, 0u)
+                Office.ErrorPPT(ErrorCase.Page, ErrID._69, $"path:{path}", 0, 0u)

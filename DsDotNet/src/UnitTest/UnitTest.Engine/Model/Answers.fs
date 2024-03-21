@@ -5,7 +5,7 @@ module ModelAnswers =
     let answerCylinderText = """
 [sys] Cylinder = {
     [flow] F = {
-        Vp <||> Vm |> Pp |> Sm;
+        Vp <|> Vm |> Pp |> Sm;
         Vp |> Pm |> Sp;
         Vm > Pm > Sm;
         Vp > Pp > Sp;
@@ -13,7 +13,7 @@ module ModelAnswers =
     [interfaces] = {
         "+" = { F.Vp ~ F.Sp }
         "-" = { F.Vm ~ F.Sm }
-        "+" <||> "-";
+        "+" <|> "-";
     }
 }
 """
@@ -96,20 +96,20 @@ module ModelAnswers =
     let answerSplittedMRIEdgesText = """
 [sys] A = {
     [flow] F = {
-        a3 <||> a4;
-        a1 <||> a2 ||> a3 ||> a2;
+        a1 <|> a2;
+        a3 ||> a2 ||> a3 <|> a4;
         a1 > a2 > a3 > a4;
     }
     [interfaces] = {
         I1 = { F.a1 ~ F.a2 }
         I2 = { F.a2 ~ F.a3 }
         I3 = { F.a3 ~ F.a1 }
-        I1 <||> I2;
-        I1 <||> I3;
-        I1 <||> I4;
-        I2 <||> I3;
-        I2 <||> I4;
-        I3 <||> I4;
+        I1 <|> I2;
+        I1 <|> I3;
+        I1 <|> I4;
+        I2 <|> I3;
+        I2 <|> I4;
+        I3 <|> I4;
     }
 }
 """
@@ -381,7 +381,7 @@ module ModelComponentAnswers =
     let answerTaskLinkorDevice = """
     [sys] Control = {
     [flow] F = {
-        Main <||> Reset;
+        Main <|> Reset;
         FWD <| Main |> BWD;
         FWD > BWD > Main |> FWD2 |> BWD2;
         Main = {
@@ -401,7 +401,7 @@ module ModelComponentAnswers =
     [interfaces] = {
         G = { F.Main ~ F.Main }
         R = { F.Reset ~ F.Reset }
-        G <||> R;
+        G <|> R;
     }
     [device file="cylinder.ds"] A;
     [external file="systemRH.ds"] sysR;
@@ -461,7 +461,7 @@ module ModelComponentAnswers =
     [flow] F = {
 		Main = { mv1up, mv2dn > mv1dn, mv2up; }
 		FWD > BWD > Main;
-		Main <||> Reset;
+		Main <|> Reset;
 		
 		[aliases] = {
 			FWD = { FWD2; }
@@ -471,7 +471,7 @@ module ModelComponentAnswers =
     [interfaces] = {
         G = { F.Main ~ F.Main }
         R = { F.Reset ~ F.Reset }
-        G <||> R;
+        G <|> R;
     }
 	[jobs] = {
 		mv1up = { M1.Up(%I300, %Q300); }

@@ -17,12 +17,12 @@ module Program =
 
         Vp |> Pm |> Sp;
         Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        Vp <|> Vm;
     }
     [interfaces] = {
         "+" = { F.Vp ~ F.Sp }
         "-" = { F.Vm ~ F.Sm }
-        "+" <||> "-";
+        "+" <|> "-";
     }
 }
 """
@@ -357,20 +357,20 @@ C4 > C5;
         """
 [sys] A = {
     [flow] F = {
-        //a1 <||> a2 <||> a3 <||> a4;
-
-        a1 <||> a2;
-        a2 ||> a3;  a3 ||> a2;
-        a3 <||> a4;
-
+        a3 <|> a4;
+        a1 <|> a2 ||> a3 ||> a2;
         a1 > a2 > a3 > a4;
     }
     [interfaces] = {
         I1 = { F.a1 ~ F.a2 }
         I2 = { F.a2 ~ F.a3 }
         I3 = { F.a3 ~ F.a1 }
-        // 정보로서의 상호 리셋
-        I1 <||> I2 <||> I3 <||> I4;
+        I1 <|> I2;
+        I1 <|> I3;
+        I1 <|> I4;
+        I2 <|> I3;
+        I2 <|> I4;
+        I3 <|> I4;
     }
 }
 """
@@ -379,9 +379,9 @@ C4 > C5;
         """
 [sys] SIDE_QTR_Handling = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
     [interfaces] = {
         "SIDE_QTR_Handling.LOADING1" = { _ ~ _ }
@@ -394,7 +394,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+        "UP [Vp ~ Sp]" <|> "DOWN[Vm ~ Sm]";
     }
 }
 [sys] MY = {
@@ -489,7 +489,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+        "UP [Vp ~ Sp]" <|> "DOWN[Vm ~ Sm]";
     }
 }
 [sys] SIDE_MAIN_REINF_Pin = {
@@ -498,7 +498,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+        "UP [Vp ~ Sp]" <|> "DOWN[Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_MAIN_REINF_Pin.UP" = { _ ~ _ }
@@ -511,14 +511,14 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
 }
 [sys] SIDE_REINF_Weld = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
     [interfaces] = {
         "SIDE_REINF_Weld.WELDING" = { _ ~ _ }
@@ -526,9 +526,9 @@ C4 > C5;
 }
 [sys] SIDE_MAIN_Handling = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
     [interfaces] = {
         "SIDE_MAIN_Handling.LOADING2" = { _ ~ _ }
@@ -541,7 +541,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+        "ADV [Vp ~ Sp]" <|> "RET[Vm ~ Sm]";
     }
 }
 [sys] SIDE_REINF_REINF2_Clamp = {
@@ -550,7 +550,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_REINF_REINF2_Clamp.CLAMP" = { _ ~ _ }
@@ -559,9 +559,9 @@ C4 > C5;
 }
 [sys] SIDE_REINF_Handling = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
     [interfaces] = {
         "SIDE_REINF_Handling.LOADING2" = { _ ~ _ }
@@ -574,7 +574,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_MAIN_REINF1_Clamp.CLAMP" = { _ ~ _ }
@@ -587,7 +587,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_QTR_REINF1_Clamp.CLAMP" = { _ ~ _ }
@@ -600,7 +600,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+        "LATCH[Vp ~ Sp]" <|> "UNLATCH [Vm ~ Sm]";
     }
 }
 [sys] S101_DASH_U111_1 = {
@@ -609,7 +609,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+        "LATCH[Vp ~ Sp]" <|> "UNLATCH [Vm ~ Sm]";
     }
 }
 [sys] Shift = {
@@ -618,7 +618,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+        "ADV [Vp ~ Sp]" <|> "RET[Vm ~ Sm]";
     }
 }
 [sys] SIDE_QTR_REINF_Shift = {
@@ -627,7 +627,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+        "ADV [Vp ~ Sp]" <|> "RET[Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_QTR_REINF_Shift.ADV" = { _ ~ _ }
@@ -640,14 +640,14 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+        "UP [Vp ~ Sp]" <|> "DOWN[Vm ~ Sm]";
     }
 }
 [sys] Robot = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
 }
 [sys] SIDE_MAIN_REINF2_Clamp = {
@@ -656,7 +656,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_MAIN_REINF2_Clamp.CLAMP" = { _ ~ _ }
@@ -669,7 +669,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
 }
 [sys] S101_DASH_U115 = {
@@ -678,7 +678,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+        "LATCH[Vp ~ Sp]" <|> "UNLATCH [Vm ~ Sm]";
     }
 }
 [sys] S101_DASH_P112 = {
@@ -687,14 +687,14 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+        "UP [Vp ~ Sp]" <|> "DOWN[Vm ~ Sm]";
     }
 }
 [sys] S101_Handling = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
 }
 [sys] SIDE_QTR_REINF_Pin = {
@@ -703,7 +703,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+        "UP [Vp ~ Sp]" <|> "DOWN[Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_QTR_REINF_Pin.UP" = { _ ~ _ }
@@ -716,7 +716,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+        "ADV [Vp ~ Sp]" <|> "RET[Vm ~ Sm]";
     }
 }
 [sys] SIDE_REINF_REINF_Shift = {
@@ -725,7 +725,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+        "ADV [Vp ~ Sp]" <|> "RET[Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_REINF_REINF_Shift.ADV" = { _ ~ _ }
@@ -734,9 +734,9 @@ C4 > C5;
 }
 [sys] SIDE_QTR_Weld = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
     [interfaces] = {
         "SIDE_QTR_Weld.WELDING" = { _ ~ _ }
@@ -748,7 +748,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "LATCH[Vp ~ Sp]" <||> "UNLATCH [Vm ~ Sm]";
+        "LATCH[Vp ~ Sp]" <|> "UNLATCH [Vm ~ Sm]";
     }
 }
 [sys] SIDE_REINF_REINF_Pin = {
@@ -757,7 +757,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "UP [Vp ~ Sp]" <||> "DOWN[Vm ~ Sm]";
+        "UP [Vp ~ Sp]" <|> "DOWN[Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_REINF_REINF_Pin.UP" = { _ ~ _ }
@@ -766,9 +766,9 @@ C4 > C5;
 }
 [sys] SIDE_MAIN_Weld = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
     [interfaces] = {
         "SIDE_MAIN_Weld.WELDING" = { _ ~ _ }
@@ -780,7 +780,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vm |> Sp;
         Vp |> Sm;
-        "ADV [Vp ~ Sp]" <||> "RET[Vm ~ Sm]";
+        "ADV [Vp ~ Sp]" <|> "RET[Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_MAIN_REINF_Shift.ADV" = { _ ~ _ }
@@ -793,14 +793,14 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
 }
 [sys] S101_Weld = {
     [flow] exflow = {
-        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <||> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
-        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <||> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
-        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <||> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
+        "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]" <|> "WELDING [Robot_진입OK3 ~ Robot_작업완료3]";
+        "LOADING1 [Robot_진입OK1 ~ Robot_작업완료1]" <|> "LOADING2 [Robot_진입OK2 ~ Robot_작업완료2]";
+        "WELDING [Robot_진입OK3 ~ Robot_작업완료3]" <|> "UNLOADING [Robot_진입OK4 ~ Robot_작업완료4]";
     }
 }
 [sys] SIDE_REINF_REINF1_Clamp = {
@@ -809,7 +809,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_REINF_REINF1_Clamp.CLAMP" = { _ ~ _ }
@@ -822,7 +822,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
     [interfaces] = {
         "SIDE_QTR_REINF2_Clamp.CLAMP" = { _ ~ _ }
@@ -835,7 +835,7 @@ C4 > C5;
         Vp > Pp > Sp;
         Vp |> Sm;
         Vm |> Sp;
-        "CLAMP [Vp ~ Sp]" <||> "UNCLAMP [Vm ~ Sm]";
+        "CLAMP [Vp ~ Sp]" <|> "UNCLAMP [Vm ~ Sm]";
     }
 }
 """

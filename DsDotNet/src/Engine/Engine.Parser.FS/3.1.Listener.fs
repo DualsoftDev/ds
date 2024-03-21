@@ -134,7 +134,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         system.ApiItems.Add(api) |> ignore
 
     override x.EnterInterfaceResetDef(ctx: InterfaceResetDefContext) =
-        // I1 <||> I2 <||> I3;  ==> [| I1; <||>; I2; <||>; I3; |]
+        // I1 <|> I2 <|> I3;  ==> [| I1; <|>; I2; <|>; I3; |]
         let terms =
             let pred =
                 fun (tree: IParseTree) -> tree :? Identifier1Context || tree :? CausalOperatorResetContext
@@ -143,13 +143,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                    des.GetText() |]
 
         // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
-        let apis = terms.Where(fun f->f <> "<||>")
+        let apis = terms.Where(fun f->f <> "<|>")
         let resets = apis.AllPairs(apis)
                          .Where(fun (l, r)-> l <> r) 
                          .DistinctBy(fun (l, r)->  [l;r].Order().JoinWith(";")) 
         for tuple in resets do
             let left, right = tuple
-            let opnd1, op, opnd2 = left, "<||>", right
+            let opnd1, op, opnd2 = left, "<|>", right
             ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2) |> ignore
 
     member private x.GetFilePath(fileSpecCtx: FileSpecContext) =

@@ -10,8 +10,7 @@ type VertexManager with
 
     member v.F1_RootStart() =
         let real = v.Vertex :?> Real
-        let wsDirect =  v.GetWeakStartRootAndCausals()
-        let ssDirect =  v.GetStrongStartRootAndCausals()
+        let startCausals =  v.GetWeakStartRootAndCausals()
         let plans = v.System.GetPSs(real).ToOrElseOff()
         let actionLinks = v.System.GetASs(real).ToOrElseOff()
         
@@ -21,7 +20,7 @@ type VertexManager with
             then shareds.Select(fun s -> s.GetWeakStartRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
-        let sets = (wsDirect <||> wsShareds <||> v.SF.Expr <||> ssDirect <||> plans <||> actionLinks)
+        let sets = (startCausals <||> wsShareds <||> v.SF.Expr <||>  plans <||> actionLinks)
                    <&&> real.SafetyExpr
 
         let rsts  = real.V.RT.Expr <||> real.V.F.Expr
@@ -30,8 +29,7 @@ type VertexManager with
 
     member v.F2_RootReset()  =
         let real = v.GetPureReal()
-        let wrDirect =  v.GetWeakResetRootAndCausals()
-        let srDirect =  v.GetStrongResetRootAndCausals()
+        let resetCausals =  v.GetWeakResetRootAndCausals()
 
         let shareds = v.GetSharedReal().Select(getVM)
         let wsShareds =
@@ -40,7 +38,7 @@ type VertexManager with
             else v._off.Expr
 
         let sets =  (
-                    (wrDirect <||> wsShareds <||> srDirect ) <&&> real.V.ET.Expr
+                    (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr
                     ) 
                     <||> 
                     (

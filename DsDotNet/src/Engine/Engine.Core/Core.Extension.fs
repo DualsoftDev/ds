@@ -217,22 +217,6 @@ type SystemExt =
                 if inValidHwSystemTag.Any() then
                     failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
 
-                //let addrEmpty = TextAddrEmpty
-                //x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)
-                //       |> Seq.iter(fun d->  
-
-                //                    if d.InAddress  = TextSkip then d.InAddress <- addrEmpty                                       
-                //                    if d.OutAddress  = TextSkip then d.OutAddress <- addrEmpty
-                //        )
-
-                //x.HWSystemDefs  
-                //        |> Seq.iter(fun h -> 
-                //                    match h with
-                //                    | :? ButtonDef
-                //                    | :? ConditionDef -> if h.InAddress  = TextSkip then h.InAddress <- addrEmpty
-                //                    | :? LampDef ->      if h.OutAddress  = TextSkip then h.OutAddress <- addrEmpty
-                //                    | _  -> failwith $"inValidHwSystemTag error {h.Name}"
-                //                )
 
 
     [<Extension>]

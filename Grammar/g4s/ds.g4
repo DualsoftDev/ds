@@ -154,7 +154,7 @@ OabOab: '<<';
 
 PipeCab: '|>';
 CabPipe: '<|';
-OabPipePipeCab: '<||>';
+OabPipePipeCab: '<|>';
 CabOabPipe: '><|';
 EqualCab: '=>';
 CabPipeCab: '>|>';
@@ -164,7 +164,7 @@ OabPipeOab: '<|<';
 PipeCabOab: '|><';
 PipePipeOab: '||>';
 CabPipePipe: '<||';
-OabOabPipePipeCabCab: '<<||>>';
+OabOabPipePipeCabCab: '<||>';
 
 QUESTION: '?';
 
@@ -356,8 +356,8 @@ causal: causalPhrase SEIMCOLON;
         | '|>'  // CAUSAL_RESET_FWD
         | '<||'  // CAUSAL_RESET_BWD_STRONG
         | '<|'  // CAUSAL_RESET_BWD
-        | '<<||>>'        // CAUSAL_RESET_FB_STRONG
-        | '<||>'        // CAUSAL_RESET_FB
+        | '<||>'        // CAUSAL_RESET_FB_STRONG
+        | '<|>'        // CAUSAL_RESET_FB
         ;
 
     lexerTokenIdentifierCandidate:

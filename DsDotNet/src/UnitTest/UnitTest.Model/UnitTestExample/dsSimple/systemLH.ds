@@ -3,7 +3,7 @@
         RUN = { F.Work ~ F.Done };
         ADV = { F.Vp ~ F.Sp };
         RET = { F.Vm ~ F.Sm };
-        ADV <||> RET;
+        ADV <|> RET;
     }
     
     [flow] F = {

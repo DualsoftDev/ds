@@ -197,7 +197,7 @@ public partial class UcView : UserControl
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
         }
 
-        else if (et == ModelingEdgeType.Interlock)
+        else if (et == ModelingEdgeType.InterlockWeak)
         {
             gEdge.Attr.AddStyle(Style.Dashed);
             gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;

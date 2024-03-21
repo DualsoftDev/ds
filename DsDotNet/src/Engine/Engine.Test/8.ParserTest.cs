@@ -268,15 +268,15 @@ namespace Engine
         R1 > R2;
         R2 |> R1;
         R2 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C4;
         }
         R1 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C2;
             C1 > C3;
             C2, C3 > C4;
-            C3 <||> C2;
+            C3 <|> C2;
         }
         C1     = {EX.F1_C1.TX    ~    EX.F1_C1.RX}
         C4     = {EX.F1_C4.TX    ~    EX.F1_C4.RX}
@@ -288,14 +288,14 @@ namespace Engine
         R1 > R2;
         R2 |> R1;
         R1 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C2;
             C1 > C3;
             C2, C3 > C4;
-            C3 <||> C2;
+            C3 <|> C2;
         }
         R2 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C4;
         }
         C1     = {EX.F2_C1.TX    ~    EX.F2_C1.RX}
@@ -308,14 +308,14 @@ namespace Engine
         R1 > R2;
         R2 |> R1;
         R1 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C2;
             C1 > C3;
             C2, C3 > C4;
-            C3 <||> C2;
+            C3 <|> C2;
         }
         R2 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C4;
         }
         C1     = {EX.F3_C1.TX    ~    EX.F3_C1.RX}
@@ -328,15 +328,15 @@ namespace Engine
         R1 > R2;
         R2 |> R1;
         R2 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C4;
         }
         R1 = {
-            C1 <||> C4;
+            C1 <|> C4;
             C1 > C2;
             C1 > C3;
             C2, C3 > C4;
-            C3 <||> C2;
+            C3 <|> C2;
         }
         C1     = {EX.F5_C1.TX    ~    EX.F5_C1.RX}
         C4     = {EX.F5_C4.TX1, EX.F5_C4.TX2, EX.F5_C4.TX3, EX.F5_C4.TX4, EX.F5_C4.TX5    ~    EX.F5_C4.RX1, EX.F5_C4.RX2, EX.F5_C4.RX3, EX.F5_C4.RX4, EX.F5_C4.RX5, EX.F5_C4.RX6}
@@ -350,7 +350,7 @@ namespace Engine
         RR1 |> ""F3.R2"";
         RR1 |> ""F1.R2"";
         RR1 = {
-            CC1 <||> CC2;
+            CC1 <|> CC2;
             CC1 > CC2;
         }
         CC1     = {EX.FF_CC1.TX    ~    EX.FF_CC1.RX}
@@ -398,7 +398,7 @@ namespace Engine
         제품공급 = {
             Rear_Con_W > Rear_Pos_Sen;
             Rear_Cyl_Push_ADV > Rear_Cyl_Push_RET;
-            Rear_Cyl_Push_RET <||> Rear_Cyl_Push_ADV;
+            Rear_Cyl_Push_RET <|> Rear_Cyl_Push_ADV;
             Rear_Pos_Sen > Rear_Cyl_Push_ADV;
         }
         Rear_Cyl_Push_ADV = {EX.Rear_Rear_Cyl_Push_ADV.TX    ~    EX.Rear_Rear_Cyl_Push_ADV.RX}
@@ -408,12 +408,12 @@ namespace Engine
     }
     [flow] Work = {
         작업공정 = {
-            Front_1Stopper_Adv <||> Front_1Stopper_RET;
+            Front_1Stopper_Adv <|> Front_1Stopper_RET;
             Front_1Stopper_Adv > Front_1pos_Sen;
             Front_1pos_Sen > Front_Usb_Cyl_ADV;
             Front_Con_W > Front_1Stopper_Adv;
             Front_Pos_Sen > Front_Con_W;
-            Front_Usb_Cyl_ADV <||> Front_Usb_Cyl_RET;
+            Front_Usb_Cyl_ADV <|> Front_Usb_Cyl_RET;
             Front_Usb_Cyl_ADV > EX.Work_Work.TR;
             Front_Usb_Cyl_RET > Front_1Stopper_RET;
             EX.Work_Work.TR > Front_Usb_Cyl_RET;
@@ -533,7 +533,7 @@ namespace Engine
         public static string TaskLinkorDevice = @"
     [sys] Control = {
     [flow] F = {
-        FWD > BWD > Main <||> Reset;		// FWD(CallSys)> BWD(CallSys) > Main(Real) <||> Reset(Real);
+        FWD > BWD > Main <|> Reset;		// FWD(CallSys)> BWD(CallSys) > Main(Real) <|> Reset(Real);
         Main = {
             mv1up > mv1dn;		// mv1up(Call)> mv1dn(Call);
         }
@@ -545,7 +545,7 @@ namespace Engine
     [interfaces] = {
         G = { F.Main ~ F.Main }
         R = { F.Reset ~ F.Reset }
-        G <||> R;
+        G <|> R;
     }
     [device file=""cylinder.ds""] A; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
     [external file=""systemRH.ds""] sysR; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemRH.ds
@@ -607,7 +607,7 @@ namespace Engine
         Main = {
             // AVp1 |> Am1;
             // 정보로서의 Call 상호 리셋
-            //Ap1 <||> Am1;
+            //Ap1 <|> Am1;
             Ap > Am; 
         }
         [aliases] = {
@@ -629,7 +629,7 @@ namespace Engine
         Main = {
             // AVp1 |> Am1;
             // 정보로서의 Call 상호 리셋
-            //Ap1 <||> Am1;
+            //Ap1 <|> Am1;
             Ap > Am; 
         }
         [aliases] = {
@@ -652,8 +652,8 @@ namespace Engine
     [flow] F = {
         Main = {
             // 정보로서의 Call 상호 리셋
-            Ap <||> Am;
-            Bp <||> Bm;
+            Ap <|> Am;
+            Bp <|> Bm;
             Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;
         }
         Ap = {A.F.Vp ~ A.F.Sp}

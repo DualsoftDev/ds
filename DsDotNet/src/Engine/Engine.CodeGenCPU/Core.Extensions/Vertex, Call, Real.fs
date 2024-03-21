@@ -30,7 +30,7 @@ module ConvertCpuVertex =
         member c._on     = c.System._on
         member c._off     = c.System._off
 
-        member c.InTags  = c.TaskDevs.Where(fun d-> d.InAddress <> TextSkip)
+        member c.InTags  = c.TaskDevs.Where(fun d-> d.InAddress <> TextSkip && d.InAddress <> TextAddrEmpty)
                                                  .Select(fun d->d.InTag :?> Tag<bool>)
 
         member c.UsingTon  = c.TargetJob.Func |> hasTime
@@ -58,7 +58,7 @@ module ConvertCpuVertex =
 
         member c.GetEndAction(x:ApiItem) =
             let td = c.TaskDevs.First(fun d->d.ApiItem = x) 
-            if td.InAddress <> TextSkip
+            if td.InAddress <> TextSkip && td.InAddress <> TextAddrEmpty
             then 
                 let inTag = td.InTag :?> Tag<bool>
                 if c.UsingNot  then !!inTag.Expr|>Some

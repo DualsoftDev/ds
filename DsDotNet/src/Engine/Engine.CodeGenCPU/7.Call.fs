@@ -48,7 +48,7 @@ type VertexManager with
                 let rstNormal = coin._off.Expr
                 for td in coin.TaskDevs do
                     let api = td.ApiItem
-                    if td.OutAddress <> TextSkip
+                    if td.OutAddress <> TextSkip && td.OutAddress <> TextAddrEmpty
                     then 
                         let sets =
                             if RuntimeDS.Package.IsPackageEmulation()

@@ -21,7 +21,7 @@ module DsText =
     let [<Literal>] TextResetPush         = "||>"
     let [<Literal>] TextStartReset        = "=>"
     let [<Literal>] TextInterlockWeak     = "<|>"
-    let [<Literal>] TextInterlock         = "<||>"
+    let [<Literal>] TextInterlockStrong   = "<||>"
     let [<Literal>] TextStartEdgeRev      = "<"
     let [<Literal>] TextStartPushRev      = "<<"
     let [<Literal>] TextResetEdgeRev      = "<|"
@@ -37,7 +37,7 @@ module DsText =
         | ResetPush          (*  "||>"  *)
         | StartReset         (*  "=>"   *)
         | InterlockWeak      (*  "<|>"  *)
-        | Interlock          (*  "<||>" *)
+        | InterlockStrong    (*  "<||>" *)
 
     /// Runtime Edge Types
     [<Flags>]
@@ -85,7 +85,7 @@ module DsText =
 
                     | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
                     | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
-                    | (* "<||>" *) TextInterlock     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
+                    | (* "<||>" *) TextInterlockStrong     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
                     | (* "<"    *) TextStartEdgeRev  -> [(t, RET.Start, s)]
                     | (* "<<"   *) TextStartPushRev  -> [(t, RET.Start ||| RET.Strong, s)]
                     | (* "<|"   *) TextResetEdgeRev  -> [(t, RET.Reset, s)]
@@ -117,7 +117,7 @@ type ModelingEdgeExt =
         | ResetPush       ->    TextResetPush
         | StartReset      ->    TextStartReset
         | InterlockWeak   ->    TextInterlockWeak
-        | Interlock       ->    TextInterlock
+        | Interlock       ->    TextInterlockStrong
 
     [<Extension>]
     static member ToModelEdge(edgeText:string) =
@@ -128,7 +128,7 @@ type ModelingEdgeExt =
         | TextResetPush       ->    ResetPush
         | TextStartReset      ->    StartReset
         | TextInterlockWeak   ->    InterlockWeak
-        | TextInterlock       ->    Interlock
+        | TextInterlockStrong ->    InterlockStrong
         |_ -> failwithf $"'{edgeText}' is not modelEdgeType"
 
     /// 뒤집힌 edge 판정.  뒤집혀 있으면 source target 을 반대로 하고 edge 를 다시 뒤집을 것.

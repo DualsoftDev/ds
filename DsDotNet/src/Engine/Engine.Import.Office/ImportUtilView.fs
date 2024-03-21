@@ -214,7 +214,7 @@ module ImportViewModule =
                         resetAddings.Add(f.Name) |> ignore
 
                         newNode.AddEdge(
-                            ModelingEdgeInfo<ViewNode>(flowApiNodes[api.Name], TextInterlock, flowApiNodes[f.Name])
+                            ModelingEdgeInfo<ViewNode>(flowApiNodes[api.Name], TextInterlockStrong, flowApiNodes[f.Name])
                         )
                         |> ignore)
 

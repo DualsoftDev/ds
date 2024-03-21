@@ -5,11 +5,11 @@
 
         Vp |> Pm |> Sp;
         Vm |> Pp |> Sm;
-        Vp <||> Vm;
+        Vp <|> Vm;
     }
     [interfaces] = {
         "+" = { F.Vp ~ F.Sp }
         "-" = { F.Vm ~ F.Sm }
-        "+" <||> "-";
+        "+" <|> "-";
     }
 }

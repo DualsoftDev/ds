@@ -141,7 +141,7 @@ module PPTObjectModule =
 
         //인과 타입과 <START, END> 역전여부
         match existHead, existTail, dashLine with
-        | true, true, true -> Interlock, false
+        | true, true, true -> InterlockWeak, false
         | true, true, false ->
             if (not headArrow && tailArrow) then
                 StartReset, false

@@ -189,7 +189,7 @@ namespace Engine.Export.Office
 
             if (edgeType.IsStartEdge || edgeType.IsStartPush) { };
             if (edgeType.IsResetEdge || edgeType.IsResetPush) { lineType = Drawing.PresetLineDashValues.Dash; }
-            if (edgeType.IsInterlockWeak || edgeType.IsInterlock) { lineType = Drawing.PresetLineDashValues.Dash; head = Drawing.LineEndValues.Arrow; }
+            if (edgeType.IsInterlockWeak || edgeType.IsInterlockStrong) { lineType = Drawing.PresetLineDashValues.Dash; head = Drawing.LineEndValues.Arrow; }
             if (edgeType.IsStartReset) { head = Drawing.LineEndValues.Diamond; }
 
             if (bRev)

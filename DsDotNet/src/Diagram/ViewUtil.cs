@@ -1,3 +1,5 @@
+using Diagram.View.MSAGL;
+using DocumentFormat.OpenXml.Presentation;
 using Dual.Common.Core;
 using Engine.CodeGenCPU;
 using Engine.Core;
@@ -5,174 +7,215 @@ using Microsoft.Msagl.GraphViewerGdi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Runtime.InteropServices.ComTypes;
-using System.Threading.Tasks;
 using static Engine.CodeGenCPU.ApiTagManagerModule;
+using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
-using static Engine.Core.EdgeExt;
 using static Engine.Core.Interface;
+using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Core.TagKindList;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagKindModule.TagDS;
+using static Engine.Import.Office.ImportViewModule;
 using static Engine.Import.Office.ViewModule;
-using Tuple = System.Tuple;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
-namespace Diagram.View.MSAGL;
-
-public static class ViewUtil
+namespace Diagram.View.MSAGL
 {
-    public static Dictionary<Vertex, ViewVertex> DicNode = new();
-    public static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
-
-    private static ViewVertex CreateViewVertex(ViewNode fv, Vertex v, IEnumerable<ViewNode> viewNodes,
-        List<TaskDev> tasks)
+    public static class ViewUtil
     {
-        var nodes = new ViewVertex
+        public static List<UcView> UcViews { get; set; } = new();
+        public static Subject<TagDS> VertexChangeSubject = new();
+        public static Dictionary<Vertex, ViewVertex> DicNode = new();
+
+        static IDisposable _Disposable;
+        static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
+        static Dictionary<IStorage, List<ViewVertex>> DicMenoryTag = new();
+
+        public static List<ViewNode> CreateViewNodes(DsSystem sys)
         {
-            Vertex = v,
-            FlowNode = fv,
-            Status = Status4.Homing,
-            TaskDevs = tasks
-        };
-       
+            var flowViewNodes = ImportViewUtil.GetViewNodesLoadingsNThis(sys).ToList();
 
-        if(v.GetPure() is Call)
-        {
-            if(v.Parent.IsDuParentFlow)
-                nodes.SetViewNodes(viewNodes);
-            else 
-                nodes.SetViewNodes(viewNodes.Where(w=> w.CoreVertex.Value == v));
-        }
-        else
-            nodes.SetViewNodes(viewNodes);
+            ViewChangeSubject();
 
-        return nodes;
-    }
+            DicNode.Clear();
+            DicActionTag.Clear();
+            DicMenoryTag.Clear();
 
-    public static void ViewInit(DsSystem system, IEnumerable<ViewNode> flowViews_)
-    {
-        DicNode.Clear();
-        DicActionTag.Clear();
+            var flowViews = flowViewNodes.ToArray();
+            var nodes = flowViews
+                .SelectMany(view => view.UsedViewNodes.Where(node => node.CoreVertex != null)).ToArray();
 
-        var flowViews = flowViews_.ToArray();
-        var nodes = flowViews
-            .SelectMany(view => view.UsedViewNodes.Where(node => node.CoreVertex != null)).ToArray();
+            var dicViewNodes = nodes
+                .GroupBy(d => d.CoreVertex.Value)
+                .Select(g => g.First())
+                .ToDictionary(
+                    node => node.CoreVertex.Value,
+                    node => nodes.Where(w => w.PureVertex.Value == node.CoreVertex.Value || w.CoreVertex.Value == node.CoreVertex.Value)
+                );
 
-        var dicViewNodes = nodes
-            .GroupBy(d => d.CoreVertex.Value) // 중복된 항목을 그룹화
-            .Select(g => g.First()) // 각 그룹에서 첫 번째 항목 선택
-            .ToDictionary(
-                node => node.CoreVertex.Value,
-                node => nodes.Where(w => w.PureVertex.Value == node.CoreVertex.Value
-                                         || w.CoreVertex.Value == node.CoreVertex.Value)
-            );
-
-        flowViews.Iter(fv =>
-        {
-            foreach (Vertex v in fv.Flow.Value.GetVerticesOfFlow())
+            flowViews.Iter(fv =>
             {
-                var tasks = (v.GetPure() is Call c)
-                    ? c.TargetJob.DeviceDefs.Cast<TaskDev>().ToList()
-                    : new List<TaskDev>();
-                var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);
-                DicNode[v] = viewVertex;
-
-                viewVertex.TaskDevs.Cast<TaskDev>().Iter(t =>
+                foreach (Vertex v in fv.Flow.Value.GetVerticesOfFlow())
                 {
-                    if (t.InTag != null)
-                    {
-                        if (!DicActionTag.ContainsKey(t.InTag))
-                            DicActionTag.Add(t.InTag, new List<ViewVertex>());
-                        DicActionTag[t.InTag].Add(viewVertex);
-                    }
+                    var tasks = (v.GetPure() is Call c)
+                        ? c.TargetJob.DeviceDefs.Cast<TaskDev>().ToList()
+                        : new List<TaskDev>();
+                    var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);
+                    DicNode[v] = viewVertex;
 
-                    if (t.OutTag != null)
+                    viewVertex.TaskDevs.Cast<TaskDev>().Iter(t =>
                     {
-                        if (!DicActionTag.ContainsKey(t.OutTag))
-                            DicActionTag.Add(t.OutTag, new List<ViewVertex>());
-                        DicActionTag[t.OutTag].Add(viewVertex);
+                        UpdateDicActionTag(t.InTag, viewVertex);
+                        UpdateDicActionTag(t.OutTag, viewVertex);
+                        UpdateDicApiTag(t.ApiItem, viewVertex);
+                    });
+
+                    if (v.GetPure() is Real real)
+                    {
+                        var og = (real.TagManager as VertexManager).OG;
+                        UpdateOriginVertexTag(og, viewVertex);
+                    }
+                }
+            });
+
+            return flowViewNodes;
+
+            ViewVertex CreateViewVertex(ViewNode fv, Vertex v, IEnumerable<ViewNode> viewNodes, List<TaskDev> tasks)
+            {
+                var nodes = new ViewVertex
+                {
+                    Vertex = v,
+                    FlowNode = fv,
+                    Status = Status4.Homing,
+                    TaskDevs = tasks
+                };
+
+                if (v.GetPure() is Call)
+                {
+                    if (v.Parent.IsDuParentFlow)
+                        nodes.SetViewNodes(viewNodes);
+                    else
+                        nodes.SetViewNodes(viewNodes.Where(w => w.CoreVertex.Value == v));
+                }
+                else
+                    nodes.SetViewNodes(viewNodes);
+
+                return nodes;
+            }
+
+            void UpdateDicActionTag(IStorage tag, ViewVertex viewVertex)
+            {
+                if (tag != null)
+                {
+                    if (!DicActionTag.ContainsKey(tag))
+                        DicActionTag.Add(tag, new List<ViewVertex>());
+                    DicActionTag[tag].Add(viewVertex);
+                }
+            }
+            void UpdateDicApiTag(ApiItem api, ViewVertex viewVertex)
+            {
+                var planTag = (api.TagManager as ApiItemManager).PE;
+
+                if (!DicMenoryTag.ContainsKey(planTag))
+                    DicMenoryTag.Add(planTag, new List<ViewVertex>());
+                DicMenoryTag[planTag].Add(viewVertex);
+            }
+            void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
+            {
+                if (!DicMenoryTag.ContainsKey(tag))
+                    DicMenoryTag.Add(tag, new List<ViewVertex>());
+                DicMenoryTag[tag].Add(viewVertex);
+            }
+
+            
+            void ViewChangeSubject()
+            {
+                _Disposable?.Dispose();
+                _Disposable = VertexChangeSubject.Subscribe(rx =>
+                {
+                    if (rx.IsEventVertex)
+                    {
+                        HandleVertexEvent(rx as EventVertex);
+                    }
+                    else if (rx.IsEventAction)
+                    {
+                        HandleActionEvent(rx as EventAction);
+                    }
+                    else if (rx.IsEventApiItem)
+                    {
+                        HandleApiItemEvent(rx as EventApiItem);
                     }
                 });
             }
-        });
-    }
-
-    private static IEnumerable<Vertex> GetVerties(DsSystem system)
-    {
-        var systems = system.GetRecursiveLoadedSystems().ToList();
-        systems.Add(system);
-
-        return systems.SelectMany(s => s.GetVertices().OfType<Vertex>());
-    }
-
-    public static List<UcView> UcViews { get; set; } = new();
-    public static Subject<TagDS> VertexChangeSubject = new();
-    private static IDisposable _Disposable;
-
-    public static void ViewChangeSubject()
-    {
-        _Disposable?.Dispose();
-        _Disposable = VertexChangeSubject.Subscribe(rx =>
+        }
+        private static void HandleVertexEvent(EventVertex ev)
         {
-            if (rx.IsEventVertex)
+            if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue) 
             {
-                EventVertex ev = rx as EventVertex;
-                if (!DicNode.ContainsKey(ev.Target)) return;
-
-                if (rx.IsStatusTag())
+                Status4 status = ev.TagKind switch
                 {
-                    Status4 status = ev.TagKind switch
-                    {
-                        VertexTag.ready => Status4.Ready,
-                        VertexTag.going => Status4.Going,
-                        VertexTag.finish => Status4.Finish,
-                        VertexTag.homing => Status4.Homing,
-                        _ => Status4.Homing
-                    };
+                    VertexTag.ready => Status4.Ready,
+                    VertexTag.going => Status4.Going,
+                    VertexTag.finish => Status4.Finish,
+                    VertexTag.homing => Status4.Homing,
+                    _ => Status4.Homing
+                };
 
-                    var vv = DicNode[ev.Target];
-                    vv.Nodes.Iter(node =>
-                    {
-                        node.Status4 = status;
-                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == DicNode[node.CoreVertex.Value].FlowNode);
-                        if (ucView != null) ucView.UpdateStatus(node);
-                    });
-                }
-
-                if (rx.IsVertexErrTag() && ev.Target is Call call)
+                var vv = DicNode[ev.Target];
+                vv.Nodes.Iter(node =>
                 {
-                    var vv = DicNode[ev.Target];
-                    vv.IsError = (bool)ev.Tag.BoxedValue;
-                    vv.ErrorText = ConvertCoreExtUtils.errText(call);
-
-                    var ucView = UcViews.FirstOrDefault(w => w.MasterNode == vv.FlowNode);
-                    if (ucView != null)
-                    {
-                        vv.DisplayNodes.Iter(node => { ucView.UpdateError(node, vv.IsError, vv.ErrorText); });
-                    }
-                }
+                    node.Status4 = status;
+                    var ucView = UcViews.FirstOrDefault(w => w.MasterNode == DicNode[node.CoreVertex.Value].FlowNode);
+                    if (ucView != null) ucView.UpdateStatus(node);
+                });
             }
 
-            if (rx.IsEventAction)
+            if (ev.IsVertexErrTag() && ev.Target is Call call)
             {
-                EventAction ea = rx as EventAction;
-                if (!DicActionTag.ContainsKey(ea.Tag)) return;
+                var vv = DicNode[ev.Target];
+                vv.IsError = (bool)ev.Tag.BoxedValue;
+                vv.ErrorText = ConvertCoreExtUtils.errText(call);
 
-                var viewNodes = DicActionTag[ea.Tag];
+                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == vv.FlowNode);
+                if (ucView != null)
+                {
+                    vv.DisplayNodes.Iter(node => { ucView.UpdateError(node, vv.IsError, vv.ErrorText); });
+                }
+            }
+            if (ev.IsVertexOriginTag())// && ev.Target.GetPure() is Real real)
+            {
+                var viewNodes = DicMenoryTag[ev.Tag];
                 var ucView = UcViews
                     .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
                 viewNodes.Iter(n =>
                 {
                     n.DisplayNodes.Iter(node =>
                     {
-                        var tags = n.TaskDevs.Cast<TaskDev>();
+                        var on = Convert.ToBoolean(ev.Tag.BoxedValue);
+                        n.LampOrigin= on;
+                        ucView?.UpdateOriginValue(node, on);
+                    });
+                });
+            }
+        }
 
-                        switch (ea.Tag.TagKind)
-                        {
-                            case (int)ActionTag.ActionIn:
+        private static void HandleActionEvent(EventAction ea)
+        {
+            if (!DicActionTag.ContainsKey(ea.Tag)) return;
+
+            var viewNodes = DicActionTag[ea.Tag];
+            var ucView = UcViews.FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
+            viewNodes.Iter(n =>
+            {
+                n.DisplayNodes.Iter(node =>
+                {
+                    var tags = n.TaskDevs.Cast<TaskDev>();
+
+                    switch (ea.Tag.TagKind)
+                    {
+                        case (int)ActionTag.ActionIn:
                             {
                                 var off = tags
                                     .Select(s => Convert.ToUInt64(s.InTag.BoxedValue)).Any(w => w == 0);
@@ -180,7 +223,7 @@ public static class ViewUtil
                                 ucView?.UpdateInValue(node, !off);
                                 break;
                             }
-                            case (int)ActionTag.ActionOut:
+                        case (int)ActionTag.ActionOut:
                             {
                                 var on = tags
                                     .Select(s => Convert.ToUInt64(s.OutTag.BoxedValue)).Any(w => w != 0);
@@ -188,10 +231,38 @@ public static class ViewUtil
                                 ucView?.UpdateOutValue(node, on);
                                 break;
                             }
-                        }
-                    });
+                    }
                 });
-            }
-        });
+            });
+        }
+
+        private static void HandleApiItemEvent(EventApiItem api)
+        {
+            if (!DicMenoryTag.ContainsKey(api.Tag)) return;
+            var viewNodes = DicMenoryTag[api.Tag];
+            var ucView = UcViews
+                .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
+            viewNodes.Iter(n =>
+            {
+                n.DisplayNodes.Iter(node =>
+                {
+                    var tags = n.TaskDevs.Cast<TaskDev>().Select(w => w.ApiItem.TagManager).Cast<ApiItemManager>().Select(s => s.PE);
+
+                    switch (api.Tag.TagKind)
+                    {
+                        case (int)ApiItemTag.planEnd:
+                            {
+                                var off = tags
+                                    .Select(s => Convert.ToUInt64(s.Value)).Any(w => w == 0);
+                                n.LampPlanEnd = !off;
+                                ucView?.UpdatePlanEndValue(node, !off);
+                                break;
+                            }
+                    }
+                });
+            });
+        }
+
     }
 }
+    

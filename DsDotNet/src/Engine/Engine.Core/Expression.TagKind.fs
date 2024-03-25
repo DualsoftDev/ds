@@ -129,7 +129,13 @@ type TagKindExt =
                         , VertexTag.homing)
         |_ -> false
 
-   
+    [<Extension>]
+    static member IsVertexOriginTag(x:TagDS) =
+        match x with
+        |EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.origin
+                                                    )
+        |_->false
+
 
     [<Extension>]
     static member IsVertexErrTag(x:TagDS) =

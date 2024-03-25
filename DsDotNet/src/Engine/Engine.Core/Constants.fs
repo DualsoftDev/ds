@@ -117,7 +117,7 @@ type ModelingEdgeExt =
         | ResetPush       ->    TextResetPush
         | StartReset      ->    TextStartReset
         | InterlockWeak   ->    TextInterlockWeak
-        | Interlock       ->    TextInterlockStrong
+        | InterlockStrong ->    TextInterlockStrong
 
     [<Extension>]
     static member ToModelEdge(edgeText:string) =

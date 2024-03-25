@@ -31,7 +31,7 @@ namespace Diagram.View.MSAGL
 
         static IDisposable _Disposable;
         static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
-        static Dictionary<IStorage, List<ViewVertex>> DicMenoryTag = new();
+        static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
 
         public static List<ViewNode> CreateViewNodes(DsSystem sys)
         {
@@ -41,7 +41,7 @@ namespace Diagram.View.MSAGL
 
             DicNode.Clear();
             DicActionTag.Clear();
-            DicMenoryTag.Clear();
+            DicMemoryTag.Clear();
 
             var flowViews = flowViewNodes.ToArray();
             var nodes = flowViews
@@ -118,15 +118,15 @@ namespace Diagram.View.MSAGL
             {
                 var planTag = (api.TagManager as ApiItemManager).PE;
 
-                if (!DicMenoryTag.ContainsKey(planTag))
-                    DicMenoryTag.Add(planTag, new List<ViewVertex>());
-                DicMenoryTag[planTag].Add(viewVertex);
+                if (!DicMemoryTag.ContainsKey(planTag))
+                    DicMemoryTag.Add(planTag, new List<ViewVertex>());
+                DicMemoryTag[planTag].Add(viewVertex);
             }
             void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
             {
-                if (!DicMenoryTag.ContainsKey(tag))
-                    DicMenoryTag.Add(tag, new List<ViewVertex>());
-                DicMenoryTag[tag].Add(viewVertex);
+                if (!DicMemoryTag.ContainsKey(tag))
+                    DicMemoryTag.Add(tag, new List<ViewVertex>());
+                DicMemoryTag[tag].Add(viewVertex);
             }
 
             
@@ -184,9 +184,9 @@ namespace Diagram.View.MSAGL
                     vv.DisplayNodes.Iter(node => { ucView.UpdateError(node, vv.IsError, vv.ErrorText); });
                 }
             }
-            if (ev.IsVertexOriginTag())// && ev.Target.GetPure() is Real real)
+            if (ev.IsVertexOriginTag())
             {
-                var viewNodes = DicMenoryTag[ev.Tag];
+                var viewNodes = DicMemoryTag[ev.Tag];
                 var ucView = UcViews
                     .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
                 viewNodes.Iter(n =>
@@ -238,8 +238,8 @@ namespace Diagram.View.MSAGL
 
         private static void HandleApiItemEvent(EventApiItem api)
         {
-            if (!DicMenoryTag.ContainsKey(api.Tag)) return;
-            var viewNodes = DicMenoryTag[api.Tag];
+            if (!DicMemoryTag.ContainsKey(api.Tag)) return;
+            var viewNodes = DicMemoryTag[api.Tag];
             var ucView = UcViews
                 .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
             viewNodes.Iter(n =>

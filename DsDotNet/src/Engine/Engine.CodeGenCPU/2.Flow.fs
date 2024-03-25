@@ -23,7 +23,7 @@ type VertexManager with
         let sets = (startCausals <||> wsShareds <||> v.SF.Expr <||>  plans <||> actionLinks)
                    <&&> real.SafetyExpr
 
-        let rsts  = real.V.RT.Expr <||> real.V.F.Expr
+        let rsts  = (real.V.RT.Expr <&&> !!real.CoinsStartEndReset.ToOrElseOff()) <||> real.V.F.Expr
         [ (sets, rsts) ==| (v.ST, getFuncName()) ]//조건에 의한 릴레이
 
 
@@ -42,7 +42,7 @@ type VertexManager with
                     ) 
                     <||> 
                     (
-                    v.RF.Expr <||> (real.Flow.mop.Expr <&&> real.Flow.h_st.Expr)
+                    v.RF.Expr <||> real.Flow.h_st.Expr
                     )
 
         let rsts  = real.V.R.Expr

@@ -30,14 +30,16 @@ type VertexManager with
             if call.UsingTon 
             then
                 (v.TDON.DN.Expr  <&&> dop)
-                <||>
+                            <||>
                 (call.EndActionOnlyIO <&&> mop)
             else
                 (call.EndPlan <&&> v._sim.Expr)
                             <||>
                 (call.EndAction <&&> !!v._sim.Expr)
 
-        let rsts = rst <||> !!call.V.Flow.r_st.Expr
+
+        let parentReal = call.Parent.GetCore() :?> Vertex
+        let rsts = rst <||> !!call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
         (sets, rsts) ==| (v.MM, getFuncName())
 
     

@@ -25,7 +25,7 @@ type VertexMReal with
                 else                          
                     (v.GG.Expr <&&> setCoins) <||> v.ON.Expr  
 
-            let rst = v.H.Expr <||> v.OFF.Expr
+            let rst = (v.RT.Expr <||> v.OFF.Expr) <&&> !!real.CoinsStartEndReset.ToOrElseOff()
             //수식 순서 중요
             // 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
 

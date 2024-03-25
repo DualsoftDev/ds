@@ -59,7 +59,7 @@ type VertexManager with
         [
             for child in children do
                 let child = child :?> VertexMCoin
-                let sets = real.V.RT.Expr <&&> !!real.V.G.Expr
+                let sets = real.V.RT.Expr // <&&> !!real.V.G.Expr
                 let rsts = child.R.Expr
                 yield (sets, rsts) ==| (child.RT, getFuncName() )
         ]

@@ -106,7 +106,7 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        f.h_st.Expr <&&> (// 수동일때만 h_st 가능 //시뮬레이션은 자동수동 둘다가능
+                        f.h_st.Expr <&&> (// 실제에서는 수동일때만 h_st 가능 ,시뮬레이션은 자동수동 둘다가능
                                      (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
                                      <||>
                                      (!!c.EndPlan <&&>  c.System._sim.Expr )
@@ -120,6 +120,7 @@ module ConvertCpuVertex =
     type Real with
         member r.V = r.TagManager :?> VertexMReal
         member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
+        member r.CoinsStartEndReset = r.Graph.Vertices.Select(getVMCoin) |> Seq.collect(fun f-> [f.ST;f.ET;f.RT])
         member r.ErrTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeOver) 
         member r.ErrTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeShortage) 
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 

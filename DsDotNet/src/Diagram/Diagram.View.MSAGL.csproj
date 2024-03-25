@@ -1,12 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFrameworks>net7.0-windows</TargetFrameworks>
         <UseWindowsForms>true</UseWindowsForms>
         <LangVersion>11.0</LangVersion>
-        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
     </PropertyGroup>
+
+    <ItemGroup>
+		<Compile Include="..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />

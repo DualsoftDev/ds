@@ -33,7 +33,7 @@ namespace Diagram.View.MSAGL
         static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
 
-        public static List<ViewNode> CreateViewNodes(DsSystem sys)
+        public static List<ViewNode> CreateViews(DsSystem sys)
         {
             var flowViewNodes = ImportViewUtil.GetViewNodesLoadingsNThis(sys).ToList();
 

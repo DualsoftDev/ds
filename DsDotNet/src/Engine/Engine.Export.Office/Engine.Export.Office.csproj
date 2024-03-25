@@ -1,15 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Library</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
-        <OutputPath>$(SolutionDir)\bin\</OutputPath>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-    </PropertyGroup>
 
-    <ItemGroup>
-		<Content Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+
+	<PropertyGroup>
+		<TargetFrameworks>net7.0</TargetFrameworks>
+		<LangVersion>11.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<AssemblyName>Engine.Export.Office</AssemblyName>
+	</PropertyGroup>
+
+
+
+	<ItemGroup>
+	  <Compile Include="..\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
 	</ItemGroup>
 
     <ItemGroup>
@@ -18,25 +23,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-    </ItemGroup>
-
-   
-
-
-
-    <ItemGroup>
-        <Compile Update="Properties\Settings.Designer.cs">
-            <DesignTimeSharedInput>True</DesignTimeSharedInput>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Settings.settings</DependentUpon>
-        </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Update="Properties\Settings.settings">
-            <Generator>SettingsSingleFileGenerator</Generator>
-            <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-        </None>
     </ItemGroup>
 
 

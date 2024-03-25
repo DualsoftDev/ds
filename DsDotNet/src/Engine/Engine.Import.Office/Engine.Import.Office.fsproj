@@ -8,7 +8,8 @@
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <AssemblyName>Engine.Import.Office</AssemblyName>
 		<ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	</PropertyGroup>
 
 
     <ItemGroup>

@@ -21,6 +21,8 @@ public class ViewVertex
     public Status4 Status { get; set; }
     public List<TaskDev> TaskDevs { get; set; }
     public bool IsError { get; set; }
+    public bool LampOrigin { get; set; }
+    public bool LampPlanEnd { get; set; }
     public bool LampInput { get; set; }
     public bool LampOutput { get; set; }
     public string ErrorText { get; set; }

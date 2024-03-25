@@ -63,7 +63,7 @@ public partial class UcView : UserControl
         viewer.Graph = new Graph();
         Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings layoutSetting = new();
         //layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
-        
+
         if (viewNode.UsedViewNodes.Count() > 30)
         {
             layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
@@ -84,7 +84,7 @@ public partial class UcView : UserControl
 
         SetBackColor(System.Drawing.Color.FromArgb(33, 33, 33));
 
-        viewNode.GetSingles().Where(w=> !(w.ViewType == ViewType.VBUTTON || w.ViewType == ViewType.VLAMP))
+        viewNode.GetSingles().Where(w => !(w.ViewType == ViewType.VBUTTON || w.ViewType == ViewType.VLAMP))
                              .ForEach(f => DrawSeg(viewer.Graph.RootSubgraph, f));
         viewNode.GetEdges().ForEach(f => DrawMEdge(viewer.Graph.RootSubgraph, f));
 
@@ -316,7 +316,7 @@ public partial class UcView : UserControl
                         nNode.Attr.FillColor = Color.Firebrick;
                     }
 
-              
+
 
                     if (viewNode.LampType.Value == LampType.DuTestDriveStateLamp)
                     {
@@ -417,28 +417,47 @@ public partial class UcView : UserControl
     public void UpdateInValue(ViewNode viewNode, object item2, bool vRefresh = true)
     {
         Node node = findNode(viewNode);
-        if (node != null)
-        {
-            bool dataExist = Convert.ToDouble(item2) != 0;
-            UpdateFillColor(dataExist, node);
-            if (vRefresh) RefreshGraph();
-        }
+        if (node == null) return;
+        bool dataExist = Convert.ToDouble(item2) != 0;
+        UpdateFillColor(dataExist, node, Color.DarkBlue);
+        if (vRefresh) RefreshGraph();
     }
+    public void UpdatePlanEndValue(ViewNode viewNode, object item2, bool vRefresh = true)
+    {
+        Node node = findNode(viewNode);
+        if (node == null) return;
+        bool dataExist = Convert.ToDouble(item2) != 0;
+        UpdateFillColor(dataExist, node, Color.CornflowerBlue);
+
+        if (vRefresh) RefreshGraph();
+    }
+
+    public void UpdateOriginValue(ViewNode viewNode, object item2, bool vRefresh = true)
+    {
+        Node node = findNode(viewNode);
+        if (node == null) return;
+        bool on = Convert.ToBoolean(item2);
+        UpdateFillColor(on, node, Color.Gold);
+        if (vRefresh) RefreshGraph();
+    }
+
+
 
     public void UpdateOutValue(ViewNode viewNode, object item2, bool vRefresh = true)
     {
         Node node = findNode(viewNode);
-        if (node != null)
-        {
-            bool dataExist = Convert.ToDouble(item2) != 0;
-            UpdateLineWidth(dataExist, node);
-            if (vRefresh) RefreshGraph();
-        }
+        if (node == null) return;
+        bool dataExist = Convert.ToDouble(item2) != 0;
+        UpdateLineWidth(dataExist, node);
+        if (vRefresh) RefreshGraph();
     }
 
     public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh = true)
     {
         UpdateStatus(viewNode, vRefresh);
+        UpdatePlanEndValue(viewNode, vv.LampPlanEnd, vRefresh);
+        UpdateOriginValue(viewNode, vv.LampOrigin, vRefresh);
+
         UpdateInValue(viewNode, vv.LampInput, vRefresh);
         UpdateOutValue(viewNode, vv.LampOutput, vRefresh);
         UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
@@ -504,9 +523,9 @@ public partial class UcView : UserControl
     }
 
 
-    private void UpdateFillColor(bool dataExist, Node node)
+    private void UpdateFillColor(bool dataExist, Node node, Color color)
     {
-        node.Attr.Color = dataExist ? Color.PeachPuff : Color.Black;
+        node.Attr.Color = dataExist ? color : Color.Black;
     }
 
     private void UpdateLineWidth(bool dataExist, Node node)

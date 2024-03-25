@@ -18,7 +18,7 @@ module HMIPackageTEST =
         
         let dsPPT = ImportPPT.GetDSFromPPTWithLib testPath    
         RuntimeDS.Package <- RuntimePackage.PC
-        let dsCPU, hmiPackage = DsCpuExt.GetDsCPU(dsPPT.System);
+        let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU(dsPPT.System);
 
         hmiPackage.Devices.Length > 0  |> Assert.True
   

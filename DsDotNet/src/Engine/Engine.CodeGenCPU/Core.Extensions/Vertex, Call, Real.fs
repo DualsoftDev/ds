@@ -106,10 +106,7 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        let homeManuAct = f.h_st.Expr //  
-                        //let homeAutoAct = f.d_st.Expr <&&> rv.RO.Expr  수동일때만 가능
-                        let homeAct =  homeManuAct //<||> homeAutoAct
-                        homeAct <&&> (
+                        f.h_st.Expr <&&> (// 수동일때만 h_st 가능 //시뮬레이션은 자동수동 둘다가능
                                      (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
                                      <||>
                                      (!!c.EndPlan <&&>  c.System._sim.Expr )

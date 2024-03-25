@@ -177,7 +177,7 @@ module RunTime =
     type DsCpuExt  =
         //Job 만들기
         [<Extension>]
-        static member GetDsCPU (dsSys:DsSystem) : DsCPU*HMIPackage =
+        static member GetDsCPU (dsSys:DsSystem) : DsCPU*HMIPackage*(PouGen seq) =
             let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
             // Initialize storages and load CPU statements
@@ -193,5 +193,5 @@ module RunTime =
             let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys)   
             let hmiPackageTags = ConvertHMIExt.GetHMIPackageTags(hmiPackage)   
             // Create and return a DsCPU object
-            new DsCPU(css, dsSys, loadedSystems, hmiPackageTags), hmiPackage
+            new DsCPU(css, dsSys, loadedSystems, hmiPackageTags), hmiPackage, pous
 

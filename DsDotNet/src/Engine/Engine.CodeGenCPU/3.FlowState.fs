@@ -17,7 +17,7 @@ type Flow with
         (set, rst) --| (f.o_st, getFuncName())   
 
     member f.ST2_homingState() =
-        let set =(f.home_btn.Expr <||> f.HWBtnHomeExpr ) <&&> f.mop.Expr
+        let set =(f.home_btn.Expr <||> f.HWBtnHomeExpr ) <&&> (f.mop.Expr <||> f._sim.Expr)
         let rst = f._off.Expr
 
         (set, rst) --| (f.h_st, getFuncName())

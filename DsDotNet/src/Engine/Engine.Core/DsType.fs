@@ -51,9 +51,11 @@ module DsType =
     
     type JobActionType = 
         | Normal  ///RXs(ActionIn) 인터페이스가 관찰될때까지 ON
+        | NoneRx  //인터페이스 관찰 없는 타입
+        | NoneTx  //인터페이스 지시 없는 타입
+        | NoneTRx //인터페이스 지시관찰 없는 타입
         | Inverse ///구현대기 : 항시ON RXs(ActionIn) 인터페이스가 관찰될때까지 OFF
         | Push    // reset 인터페이스(Plan Out) 관찰될때까지 ON 
-        | Rising  ///구현대기 : TXs(ActionOut) Rising Pulse
         | MultiAction  of  int // 동시동작 개수 받기
 
     [<Flags>]    
@@ -76,9 +78,11 @@ module DsType =
 
         match endContents with
         | Some "-" -> JobActionType.Normal
+        | Some "XX" -> JobActionType.NoneTRx
+        | Some "XT" -> JobActionType.NoneTx
+        | Some "XR" -> JobActionType.NoneRx
         | Some "I" -> JobActionType.Inverse
         | Some "P" -> JobActionType.Push
-        | Some "R" -> JobActionType.Rising
         | Some s when isStringDigit s -> JobActionType.MultiAction (int s)  // 숫자일 경우 MultiAction으로 변환
         | Some t -> failwithf "Unknown ApiActionType: %s" t
         | None -> JobActionType.Normal

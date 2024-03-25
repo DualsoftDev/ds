@@ -53,17 +53,26 @@ module ExportIOTable =
             row |> dt.Rows.Add |> ignore
 
 
-        let rowItems (dev: TaskDev, job: Job option) =
+        let rowItems (dev: TaskDev, job: Job, firstJobRow :bool) =
             let funcs =
-                if job.IsSome then
-                    if job.Value.Func.IsSome then job.Value.Func.Value.ToDsText() else ""
+                if firstJobRow then
+                    if job.Func.IsSome then job.Func.Value.ToDsText() else ""
                 else
                     TextFuncNotUsed
+
+            let inSkip, outSkip =
+                match job.ActionType with
+                |NoneRx -> true,false
+                |NoneTx -> false,true
+                |NoneTRx -> true,true
+                |_ ->  false,false
+
+
             [ TextXlsAddress
               dev.ApiName
               "bool"
-              getValidAddress(dev.InAddress,  dev.QualifiedName, false, IOType.In)
-              getValidAddress(dev.OutAddress, dev.QualifiedName, false, IOType.Out)
+              getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In)
+              getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
               funcs ]
 
         let rows =
@@ -78,9 +87,9 @@ module ExportIOTable =
                     then 
                         let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
                         if sortedDeviceDefs.Head() = dev then
-                            yield rowItems (dev, Some job) //첫 TaskDev만 만듬
+                            yield rowItems (dev, job, true) //첫 TaskDev만 만듬
                         else
-                            yield rowItems (dev, None)
+                            yield rowItems (dev, job, false)
             }
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt

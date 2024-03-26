@@ -9,14 +9,10 @@ open System.Reflection
 [<AutoOpen>]
 module DsAddressModule =
    
-    let blockInSize, blockInText = RuntimeDS.HwBlockSizeIn.ToBlockSizeNText()
-    let blockOutSize, blockOutText = RuntimeDS.HwBlockSizeOut.ToBlockSizeNText()
-    let blockInHead = blockInText.Substring(0, 1);
-    let blockOutHead = blockOutText.Substring(0, 1);
-    let mutable inCnt = RuntimeDS.HwStartInDINT * blockInSize - 1
-    let mutable outCnt = RuntimeDS.HwStartOutDINT * blockOutSize - 1
-    let mutable memoryCnt = RuntimeDS.HwStartMemoryDINT-1u
-    type IOType = | In | Out | Memory 
+ 
+    let mutable inCnt = RuntimeDS.HwStartInBit-1
+    let mutable outCnt = RuntimeDS.HwStartOutBit-1
+    let mutable memoryCnt = RuntimeDS.HwStartMemoryBit-1
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType) =
@@ -30,6 +26,9 @@ module DsAddressModule =
                             addr
 
         let addr =  addr.Trim().ToUpper()
+
+     
+
         let newAddr =
             if addr = TextAddrEmpty && not(isSkip)
             then
@@ -37,28 +36,59 @@ module DsAddressModule =
                     match ioType with 
                     |In -> inCnt <- inCnt + 1; inCnt
                     |Out -> outCnt <- outCnt + 1; outCnt
-                    |Memory -> memoryCnt <- memoryCnt + 1u; memoryCnt|>int
+                    |Memory -> memoryCnt <- memoryCnt + 1; memoryCnt|>int
+                    |NotUsed -> failwithf $"{ioType} not support"
+
+
+                let getSlotInfo(settingType: IOType) =
+                    let curr =
+                        match settingType with 
+                        | In -> inCnt
+                        | Out -> outCnt
+                        | Memory -> failwithf $"{settingType} not supported"
+                        | NotUsed -> failwithf $"{settingType} not supported"
+
+                    let assigned(currIndex: int) =
+                        let sameTypeSlots = RuntimeDS.HwSlotDataTypes 
+                                            |> Seq.filter(fun (_, ioType, _) -> ioType = settingType)
+                                            |> Seq.filter(fun (i, _, _) -> i <= currIndex)
+
+                        if sameTypeSlots.IsEmpty() then 0
+                        else 
+                            sameTypeSlots
+                            |> Seq.sumBy(fun (_, _, data) -> (data.ToBlockSizeNText() |> fst))
+
+                    let slotSpares = RuntimeDS.HwSlotDataTypes 
+                                        |> Seq.filter(fun (_, ioType, _) -> ioType = settingType)
+                                        |> Seq.filter(fun (i, _, _) -> curr < assigned i)
+
+                    match Seq.tryHead slotSpares with
+                    | Some (i, _, _) -> (i, assigned (i - 1))
+                    | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다."
+
 
                 if RuntimeDS.Package.IsPackagePC() 
-                then
+                then 
                     match ioType with 
-                    |In ->  $"I{blockInHead}{cnt / blockInSize}.{cnt % blockInSize}" 
-                    |Out -> $"O{blockOutHead}{cnt / blockOutSize}.{cnt % blockOutSize}" 
+                    |In ->  $"IB{cnt / 8}.{cnt % 8}" 
+                    |Out -> $"OB{cnt / 8}.{cnt % 8}" 
                     |Memory -> $"M{memoryCnt}"
+                    |NotUsed -> failwithf $"{ioType} not support"
 
                 elif RuntimeDS.Package.IsPackagePLC()
                      || RuntimeDS.Package.IsPackageSIM()    
                      || RuntimeDS.Package.IsPackageEmulation()    //시뮬레이션도 PLC 주소규격으로 일단
                 then
+                    
                     match ioType with 
-                    |In ->  if RuntimeDS.HwBlockSizeIn = DuUINT64
-                            then $"%%IX0.{cnt / 64}.{cnt % 64}" 
-                            else $"%%I{blockInHead}{cnt / blockInSize}.{cnt % blockInSize}" 
+                    |In ->  let iSlot, sumBit  =  getSlotInfo(ioType)
+                            $"%%IX0.{iSlot}.{(inCnt-sumBit) % 64}" 
+                            
+                    |Out -> let iSlot ,sumBit =  getSlotInfo(ioType)
+                            $"%%QX0.{iSlot}.{(outCnt-sumBit) % 64}" 
 
-                    |Out -> if RuntimeDS.HwBlockSizeIn = DuUINT64
-                            then $"%%QX0.{cnt / 64}.{cnt % 64}" 
-                            else $"%%Q{blockOutHead}{cnt / blockOutSize}.{cnt % blockOutSize}" 
                     |Memory -> $"%%MX{cnt}" 
+                    |NotUsed -> failwithf $"{ioType} not support"
 
                 else TextAddrEmpty
 

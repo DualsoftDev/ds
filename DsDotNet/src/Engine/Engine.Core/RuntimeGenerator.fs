@@ -2,6 +2,7 @@ namespace Engine.Core
 
 open System.Reactive.Subjects
 open Dual.Common.Core.FS
+open System.Collections.Generic
 
 [<AutoOpen>]
 module RuntimeGeneratorModule =
@@ -57,7 +58,7 @@ module RuntimeGeneratorModule =
         static let targetChangedSubject = new Subject<RuntimeTargetType>()
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
-        static let mutable callTimeout = 10000us
+        static let mutable callTimeout = 15000us
 
         static member Target
             with get() = runtimeTarget
@@ -65,14 +66,13 @@ module RuntimeGeneratorModule =
                 runtimeTarget <- v
                 targetChangedSubject.OnNext(v)
 
-        static member val HwBlockSizeIn  = DataType.DuUINT64 with get, set
-        static member val HwBlockSizeOut = DataType.DuUINT64 with get, set
-        static member val HwStartInDINT = 1   with get, set
-        static member val HwStartOutDINT = 1  with get, set
-        static member val HwStartMemoryDINT = 1000u  with get, set
+        static member val HwSlotDataTypes  =  ResizeArray<SlotDataType>() with get, set
+        static member val HwStartInBit = 0   with get, set
+        static member val HwStartOutBit = 0  with get, set
+        static member val HwStartMemoryBit = 1000  with get, set
         static member val IP = "192.168.9.100" with get, set
 
-        static member TimeoutCall = callTimeout
+        static member val TimeoutCall = callTimeout  with get, set
         static member TargetChangedSubject = targetChangedSubject
 
         static member Package

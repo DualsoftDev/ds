@@ -236,6 +236,10 @@ module DsDataType =
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
+    type IOType = | In | Out | Memory | NotUsed
+
+    type SlotDataType = int *IOType * DataType
+
     let getBlockType(blockSlottype:string) =
         match blockSlottype.ToLower() with
         | "byte"  -> DuUINT8

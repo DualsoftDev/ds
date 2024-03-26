@@ -97,6 +97,8 @@ module ExportExcelModule =
 
     //    // Save the changes to the workbook
     //    workbookPart.Workbook.Save()
+
+
     let createSpreadsheet (filepath:string) (tables:DataTable seq) (colWidth:float) (showColumnHead:bool) =
         let seenNames = System.Collections.Generic.HashSet<string>()
         for dt in tables do
@@ -108,17 +110,19 @@ module ExportExcelModule =
                 let sheetData = new SheetData()
 
                 // Conditionally add column headers based on the showColumnHead parameter
-                if showColumnHead then
-                    let headerRow = new Row()
-                    for col in dt.Columns do
-                        let cell = new Cell()
-                        cell.DataType <- CellValues.String
-                        cell.CellValue <- new CellValue(col.ColumnName)
-                        headerRow.AppendChild(cell :> OpenXmlElement) |> ignore
-                    sheetData.AppendChild(headerRow :> OpenXmlElement) |> ignore
+                let headerRow = new Row()
+                for col in dt.Columns do
+                    let cell = new Cell()
+                    cell.DataType <- CellValues.String
+                    cell.CellValue <-new CellValue(col.ColumnName) 
+                                  
+                    if showColumnHead 
+                    then headerRow.AppendChild(cell :> OpenXmlElement) |> ignore
+                sheetData.AppendChild(headerRow :> OpenXmlElement) |> ignore
 
+                let totalRowCnt = dt.Rows.Count - 2
                 // Populate the sheet data with data from the DataTable
-                for rowIndex in 0 .. dt.Rows.Count - 1 do
+                for rowIndex in 0 .. totalRowCnt do
                     let dataRow = new Row()
                     for colIndex in 0 .. dt.Columns.Count - 1 do
                         let cell = new Cell()

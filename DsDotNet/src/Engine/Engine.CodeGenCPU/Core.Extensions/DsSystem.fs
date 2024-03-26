@@ -94,6 +94,8 @@ module ConvertCpuDsSystem =
         
 
         member private x.GenerationCallManualMemory()  = 
+            DsAddressModule.memoryCnt <- RuntimeDS.HwStartMemoryBit + 1000
+            
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
                 cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
@@ -152,10 +154,10 @@ module ConvertCpuDsSystem =
         member x.GenerationMemory() =
 
             x.GenerationEmulationMemory()
-            x.GenerationCallManualMemory()
             x.GenerationCallAlarmMemory()
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
+            x.GenerationCallManualMemory()
                                     
     
          

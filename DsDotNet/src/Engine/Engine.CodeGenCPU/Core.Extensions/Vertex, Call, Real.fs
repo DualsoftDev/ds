@@ -119,8 +119,13 @@ module ConvertCpuVertex =
 
     type Real with
         member r.V = r.TagManager :?> VertexMReal
-        member r.CoinRelays = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
-        member r.CoinsStartEndReset = r.Graph.Vertices.Select(getVMCoin) |> Seq.collect(fun f-> [f.ST;f.ET;f.RT])
+
+        member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ST)
+        member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.RT)
+        member r.CoinETContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
+
+        member r.CoinAlloffExpr = !!r.V.CoinAnyOnST.Expr <&&> !!r.V.CoinAnyOnRT.Expr <&&> !!r.V.CoinAnyOnET.Expr
+
         member r.ErrTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeOver) 
         member r.ErrTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeShortage) 
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 

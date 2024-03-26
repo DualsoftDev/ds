@@ -49,6 +49,7 @@ module ConvertCPU =
                 yield! vm.R2_RealJobComplete()
                 yield vm.R3_RealStartPoint()
                 yield vm.R4_RealSync() 
+                yield! vm.R5_DummyDAGCoils() 
                 //yield vm.R5_RealDataMove() 
                 
                 yield! vm.D1_DAGHeadStart()

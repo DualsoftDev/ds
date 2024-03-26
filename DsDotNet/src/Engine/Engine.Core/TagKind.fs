@@ -167,6 +167,9 @@ module TagKindList =
     |rxErrOpenRising           = 11041
     |rxErrOpenTemp             = 11042
 
+    |dummyCoinSTs              = 11050
+    |dummyCoinRTs              = 11051
+    |dummyCoinETs              = 11052
 
     /// 12000 ~ 12999
     [<Flags>]

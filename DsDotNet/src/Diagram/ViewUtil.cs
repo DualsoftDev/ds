@@ -186,6 +186,7 @@ namespace Diagram.View.MSAGL
             }
             if (ev.IsVertexOriginTag())
             {
+                if (!DicMemoryTag.ContainsKey(ev.Tag)) return;
                 var viewNodes = DicMemoryTag[ev.Tag];
                 var ucView = UcViews
                     .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));

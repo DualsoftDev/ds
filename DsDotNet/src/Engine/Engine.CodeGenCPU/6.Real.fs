@@ -16,16 +16,16 @@ type VertexMReal with
 
     member v.R2_RealJobComplete(): CommentedStatement seq=
         let real = v.Vertex :?> Real
-        let setCoins = real.CoinRelays.ToAndElseOn()
         [   
             let set = 
                 if v.IsFinished && (RuntimeDS.Package.IsPackageEmulation())
                 then
-                    (v.GG.Expr <&&> setCoins) <||> v.ON.Expr <||> !!v.SYNC.Expr
+                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !!v.SYNC.Expr
                 else                          
-                    (v.GG.Expr <&&> setCoins) <||> v.ON.Expr  
+                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr  
 
-            let rst = (v.RT.Expr <||> v.OFF.Expr) <&&> !!real.CoinsStartEndReset.ToOrElseOff()
+            let rst = (v.RT.Expr <||> v.OFF.Expr)
+                        <&&> real.CoinAlloffExpr
             //수식 순서 중요
             // 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
 
@@ -51,8 +51,16 @@ type VertexMReal with
         let rst = v._off.Expr
         (set, rst) --| (v.SYNC, getFuncName())
       
-        //test ahn 인과 시작조건으로 변경
-    member v.R5_RealDataMove() =
+    member v.R5_DummyDAGCoils() =
+        let real = v.Vertex :?> Real
+        let rst = v._off.Expr
+        [
+            (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, getFuncName())
+            (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, getFuncName())
+            (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, getFuncName())
+        ]
+
+    member v.R6_RealDataMove() =
         let set = v.RD.ToExpression() 
         (set) --* (v.RD, getFuncName())
 
@@ -63,4 +71,5 @@ type VertexManager with
     member v.R2_RealJobComplete() : CommentedStatement seq = (v :?> VertexMReal).R2_RealJobComplete()
     member v.R3_RealStartPoint()  = (v :?> VertexMReal).R3_RealStartPoint()
     member v.R4_RealSync()  = (v :?> VertexMReal).R4_RealSync()
-    member v.R5_RealDataMove()  = (v :?> VertexMReal).R5_RealDataMove()
+    member v.R5_DummyDAGCoils()  = (v :?> VertexMReal).R5_DummyDAGCoils()
+    member v.R6_RealDataMove()  = (v :?> VertexMReal).R6_RealDataMove()

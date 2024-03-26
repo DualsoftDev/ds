@@ -183,6 +183,9 @@ module TagManagerModule =
         let relayRealBit      = createTag "RR"         VertexTag.relayReal
         let realOriginAction  = createTag "RO"         VertexTag.realOriginAction
         let realSync          = createTag "Sync"       VertexTag.realSync
+        let dummyCoinSTs      = createTag "CoinAnyOnST"        VertexTag.dummyCoinSTs
+        let dummyCoinRTs      = createTag "CoinAnyOnRT"        VertexTag.dummyCoinRTs
+        let dummyCoinETs      = createTag "CoinAnyOnET"        VertexTag.dummyCoinETs
         
         let realData  = 
             let vertexTag = VertexTag.realData |> int
@@ -204,6 +207,13 @@ module TagManagerModule =
         member _.RD         = realData
         ///Synchronized with physical sensors
         member _.SYNC       = realSync
+
+        ///DAG Coin Start Coil
+        member _.CoinAnyOnST         = dummyCoinSTs
+        ///DAG Coin Reset Coil
+        member _.CoinAnyOnRT         = dummyCoinRTs
+        ///DAG Coin End Coil
+        member _.CoinAnyOnET         = dummyCoinETs
 
         member _.IsFinished = (v :?> Real).Finished
 

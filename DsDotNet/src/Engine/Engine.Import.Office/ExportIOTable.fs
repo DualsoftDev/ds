@@ -301,9 +301,15 @@ module ExportIOTable =
     [<Extension>]
     type OfficeExcelExt =
         [<Extension>]
-        static member ExportDataTableToExcel (system: DsSystem) (filePath: string) =
-            let dataTables = [|ToIOListDataSet system;ToAlramTable system;ToManualTable system; ToDevicesTable system|]
+        static member ExportIOListToExcel (system: DsSystem) (filePath: string) =
+            let dataTables = [|ToIOListDataSet system|]
             createSpreadsheet filePath dataTables 25.0
+
+        [<Extension>]
+        static member ExportHMITableToExcel (system: DsSystem) (filePath: string) =
+            let dataTables = [|ToManualTable system; ToDevicesTable system;ToAlramTable system|]
+            createSpreadsheet filePath dataTables 25.0
+
         [<Extension>]
         static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =
             let dataTable = ToTable system (system.Flows.Where(fun f->flowNames.Contains(f.Name))) conatinSys

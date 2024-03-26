@@ -163,6 +163,8 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                           .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
+                    
             let devs  = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev))
                                     |> Seq.map (fun dev -> dev.DeviceName) 
                                     |> distinct
@@ -195,12 +197,13 @@ module ExportIOTable =
               dev.ApiName
               "bool"
               call.ManualTag.Address
-              dev.InAddress
+              if dev.InAddress = TextSkip then "%HX0" else dev.InAddress
               if dev.OutAddress = TextSkip then "%HX0" else dev.OutAddress
                ]
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
             let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
             devCallSet
@@ -232,6 +235,8 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
+                        
             seq {
                 //1. call 부터
                 for call in calls |> Seq.sortBy (fun c -> c.Name) do

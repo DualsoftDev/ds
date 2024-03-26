@@ -40,7 +40,7 @@ public partial class UcView : UserControl
     }
 
     int node_attr_linewidthH = 8;
-    int node_attr_linewidthL = 3;
+    int node_attr_linewidthL = 2;
     int edge_attr_linewidthWeek = 1;
     int edge_attr_linewidthStrong = 2;
     int nnode_label_fontsize = 6;

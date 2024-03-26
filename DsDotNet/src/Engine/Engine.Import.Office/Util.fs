@@ -35,31 +35,6 @@ module Util =
             name, 0
 
 
-    let GetHeadBracketRemoveName (name: string) =
-        let patternHead = "^\[[^]]*]" // 첫 대괄호 제거
-
-        let replaceName =
-            System.Text.RegularExpressions.Regex.Replace(name, patternHead, "")
-
-        replaceName
-
-    let GetLastBracketRelaceName (name: string, replaceName: string) =
-        let patternTail = "\[[^]]*]$" // 끝 대괄호 제거
-
-        let replaceName =
-            System.Text.RegularExpressions.Regex.Replace(name, patternTail, replaceName)
-
-        replaceName
-
-
-
-    // 특수 대괄호 제거 후 순수 이름 추출
-    // [yy]xx[xxx]Name[1,3] => xx[xxx]Name
-    // 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
-    let GetBracketsRemoveName (name: string) =
-        GetLastBracketRelaceName((name |> GetHeadBracketRemoveName), "")
-
-
     let getBtnType (key: string) =
         match key.Trim().ToUpper() with
         | "A" -> BtnType.DuAutoBTN

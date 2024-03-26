@@ -37,5 +37,6 @@
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
 		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
+		<Exec Command="xcopy /s /e /y $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\dsLib\*.* $(TargetDir)dsLib\" />
 	</Target>
 </Project>

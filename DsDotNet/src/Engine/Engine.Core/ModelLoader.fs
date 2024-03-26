@@ -6,6 +6,17 @@ open Newtonsoft.Json
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 
+[<AutoOpen>]
+module ModelLoaderModule =
+    type ModelConfig = {
+        DsFilePath: string 
+        HWIP: string 
+    }
+    type Model = {
+        Config: ModelConfig
+        System : DsSystem 
+        LoadingPaths : string list
+    }
 
 
 [<AutoOpen>]

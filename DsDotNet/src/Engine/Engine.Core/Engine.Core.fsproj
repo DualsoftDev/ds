@@ -57,8 +57,8 @@
         <Compile Include="Expression.TagKind.fs" />
         <Compile Include="Expression.Tag.fs" />
         <Compile Include="EntryPoint.fs" />
-        <Compile Include="Model.fs" />
         <Compile Include="ModelLoader.fs" />
+        <Compile Include="LibraryLoader.fs" />
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Info\Expression.TagWeb.fs" />
         <Compile Include="Info\HmiPackage.fs" />

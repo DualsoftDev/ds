@@ -107,6 +107,7 @@
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="copy $(SolutionDir)Apps\OfficeAddIn\PowerPointAddInHelper\Utils\DS_Library.pptx $(TargetDir)DS_Library.pptx" />
+		<Exec Command="xcopy /s /e /y $(SolutionDir)Apps\OfficeAddIn\PowerPointAddInHelper\dsLib\*.* $(TargetDir)dsLib\" />
 	</Target>
 
 

@@ -56,12 +56,36 @@ module DsType =
         | NoneTRx //인터페이스 지시관찰 없는 타입
         | Inverse ///구현대기 : 항시ON RXs(ActionIn) 인터페이스가 관찰될때까지 OFF
         | Push    // reset 인터페이스(Plan Out) 관찰될때까지 ON 
-        | MultiAction  of  int // 동시동작 개수 받기
+        | MultiAction  of string*int // 동시동작 개수 받기
 
     [<Flags>]    
     type ScreenType =
         | CCTV = 0
         | IMAGE  = 1
+
+    
+    let GetHeadBracketRemoveName (name: string) =
+        let patternHead = "^\[[^]]*]" // 첫 대괄호 제거
+
+        let replaceName =
+            System.Text.RegularExpressions.Regex.Replace(name, patternHead, "")
+
+        replaceName
+
+    let GetLastBracketRelaceName (name: string, replaceName: string) =
+        let patternTail = "\[[^]]*]$" // 끝 대괄호 제거
+
+        let replaceName =
+            System.Text.RegularExpressions.Regex.Replace(name, patternTail, replaceName)
+
+        replaceName
+
+    // 특수 대괄호 제거 후 순수 이름 추출
+    // [yy]xx[xxx]Name[1,3] => xx[xxx]Name
+    // 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
+    let GetBracketsRemoveName (name: string) =
+        GetLastBracketRelaceName((name |> GetHeadBracketRemoveName), "")
+
 
     let GetSquareBrackets (name: string, bHead: bool): string option =
         let pattern = "(?<=\[).*?(?=\])"  // 대괄호 안에 내용은 무조건 가져온다
@@ -73,6 +97,7 @@ module DsType =
 
 
     let getJobActionType (name: string) =
+        let nameContents = GetBracketsRemoveName(name)
         let endContents = GetSquareBrackets(name, false)
         let isStringDigit (str: string) = str |> Seq.forall System.Char.IsDigit
 
@@ -83,7 +108,7 @@ module DsType =
         | Some "XR" -> JobActionType.NoneRx
         | Some "I" -> JobActionType.Inverse
         | Some "P" -> JobActionType.Push
-        | Some s when isStringDigit s -> JobActionType.MultiAction (int s)  // 숫자일 경우 MultiAction으로 변환
+        | Some s when isStringDigit s -> JobActionType.MultiAction (nameContents, (int s)) // 숫자일 경우 MultiAction으로 변환
         | Some t -> failwithf "Unknown ApiActionType: %s" t
         | None -> JobActionType.Normal
 

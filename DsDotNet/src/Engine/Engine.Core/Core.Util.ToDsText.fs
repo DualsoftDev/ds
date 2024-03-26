@@ -393,7 +393,9 @@ module internal ToDsTextModule =
                 yield code
 
             yield rb
-            yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetName().Version}]"
+            yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}]"
+            yield $"//DS Library Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}]"
+            yield $"//DS Engine Version = [{Assembly.GetExecutingAssembly().GetName().Version}]"
 
         ] |> combineLines
 

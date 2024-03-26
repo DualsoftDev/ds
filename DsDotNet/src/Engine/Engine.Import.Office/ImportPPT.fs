@@ -58,7 +58,7 @@ module ImportPPTModule =
         let private sRepo = ShareableSystemRepository()
 
 
-        let rec private loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters) =
+        let rec private loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters, isLib) =
             pathStack.Push(paras.AbsoluteFilePath)
             LoadingPPTNotify.Trigger(paras.AbsoluteFilePath)
             
@@ -112,7 +112,7 @@ module ImportPPTModule =
                 let addNewLoadedSys (newSys: DsSystem, bExtSys: bool, bOPEN_EXSYS_LINK: bool) =
 
                     loadedParentStack.Push(newSys)
-                    loadSystem (pptReop, newSys, paras) |> ignore
+                    loadSystem (pptReop, newSys, paras, isLib) |> ignore
                     currentFileName <- pathStack.Peek()
 
                     let parents = loadedParentStack.ToHashSet().Skip(1).Reverse() //자신 제외
@@ -161,7 +161,7 @@ module ImportPPTModule =
             doc.MakeInterfaces(theSys)
 
             if paras.LoadingType = DuNone || paras.LoadingType = DuDevice then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
-                doc.BuildSystem(theSys)
+                doc.BuildSystem(theSys, isLib)
 
             if paras.LoadingType = DuNone then
                 doc.UpdateActionIO(theSys)
@@ -172,9 +172,9 @@ module ImportPPTModule =
             pptReop.Add(theSys, doc)
             theSys, doc
 
-        let internal GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string) =
+        let internal GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string, isLib) =
             //active는 시스템이름으로 ppt 파일 이름을 사용
-            let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile)
+            let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile) 
             activeSysDir <- fileDirectory
             currentFileName <- filePath
             let sysName = getSystemName filePath
@@ -191,19 +191,18 @@ module ImportPPTModule =
             layoutImgPaths.Clear()
 
             loadedParentStack.Push mySys
-            loadSystem (pptReop, mySys, paras)
+            loadSystem (pptReop, mySys, paras, isLib)
 
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 
-    let loadingfromPPTs (path: string ) =
+    let private loadingfromPPTs (path: string ) isLib =
         try
             try
                 let cfg = { DsFilePath = path
                             HWIP =  RuntimeDS.IP
                     }
 
-                let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path)
-                        
+                let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib)
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
@@ -212,7 +211,7 @@ module ImportPPTModule =
                         let dsSystem = dic.Key
                         let pptDoc = dic.Value
                         pathStack.Push(pptDoc.Path)
-                        pptDoc.BuildSystem(dsSystem)
+                        pptDoc.BuildSystem(dsSystem, isLib)
                         pathStack.Pop() |> ignore)
 
                 // 그룹으로 정의한 디바이스와 일반디바이스가 이름이 중첩되는지 확인  //DevA_G1, DevA_G2,... => DevA 있으면 안됨
@@ -224,7 +223,6 @@ module ImportPPTModule =
                                     | Some s ->  failwithf $"디바이스 {s.Name}은 그룹디바이스 정의되서 사용중입니다. \nAction 이름 뒤에 그룹구성숫자 [Num] 입력필요"
                                     | None -> ()
                                   )
-
 
                 { Config = cfg
                   System = sys
@@ -257,42 +255,41 @@ module ImportPPTModule =
 
     [<Extension>]
     type ImportPPT =
-        [<Extension>]
-        static member ExportLibarayDS(exportDir:string) =
-            pptRepo.Clear()
-            do
-                let textLibPptx = $"{TextLibrary}.pptx" |> DsFile
-                // 파일 loadingfromPPTs 시 DS_Library.ds 만드는 용도
-                let libSys =
-                    let libFilePath =
-                        let runDir: DsPath =
-                            System.Reflection.Assembly.GetEntryAssembly().Location |> getFolderOfPath
+        //[<Extension>]
+        //static member ExportLibarayDS(exportDir:string) =
+        //    pptRepo.Clear()
+        //    do
+        //        let textLibPptx = $"{TextLibrary}.pptx" |> DsFile
+        //        // 파일 loadingfromPPTs 시 DS_Library.ds 만드는 용도
+        //        let libSys =
+        //            let libFilePath =
+        //                let runDir: DsPath =
+        //                    System.Reflection.Assembly.GetEntryAssembly().Location |> getFolderOfPath
 
-                        PathManager.getFullPath textLibPptx runDir
+        //                PathManager.getFullPath textLibPptx runDir
 
-                    let libModel: Model = loadingfromPPTs  libFilePath  |> Tuple.first
-                    libModel.System
+        //            let libModel: Model = loadingfromPPTs  libFilePath true  |> Tuple.first
+        //            libModel.System
 
-                let loadedlibFilePath =
-                    //let validPath  = PathManager.convertValidFile (fullName)
-                    PathManager.getFullPath textLibPptx (exportDir|>DsDirectory)
+        //        let loadedlibFilePath =
+        //            //let validPath  = PathManager.convertValidFile (fullName)
+        //            PathManager.getFullPath textLibPptx (exportDir|>DsDirectory)
 
-                libSys.pptxToExportDS loadedlibFilePath |> ignore
+        //        libSys.pptxToExportDS loadedlibFilePath |> ignore
 
 
     
         [<Extension>]
-        static member GetDSFromPPTWithLib(fullName: string) =
+        static member GetDSFromPPTWithLib(fullName: string, isLib:bool) =
             pptRepo.Clear()
-            do
-                // library 파일을 먼저 로딩해서 DS 파일로 변환한다.
-                let pathDir = PathManager.getFolderOfPath (fullName)
-                ImportPPT.ExportLibarayDS(pathDir.ToValidPath());
-
+            //do
+            //    // library 파일을 먼저 로딩해서 DS 파일로 변환한다.
+            //    let pathDir = PathManager.getFolderOfPath (fullName)
+            //    ImportPPT.ExportLibarayDS(pathDir.ToValidPath());
 
             let exportPath =
                 let sys =
-                    let model: Model = loadingfromPPTs  fullName  |> Tuple.first
+                    let model: Model = loadingfromPPTs  fullName isLib |> Tuple.first
                     model.System
 
                 sys.pptxToExportDS fullName
@@ -308,6 +305,6 @@ module ImportPPTModule =
 
         [<Extension>]
         static member GetRuntimeZipFromPPT(fullName: string)=
-            let ret = ImportPPT.GetDSFromPPTWithLib(fullName)
+            let ret = ImportPPT.GetDSFromPPTWithLib(fullName, false)
             ModelLoaderExt.saveModelZip(ret.LoadingPaths , ret.ActivePath, ret.LayoutImgPaths)
 

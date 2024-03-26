@@ -16,7 +16,7 @@ module HMIPackageTEST =
     [<Fact>]
     let ``HMIPackage Create Test`` () = 
         
-        let dsPPT = ImportPPT.GetDSFromPPTWithLib testPath    
+        let dsPPT = ImportPPT.GetDSFromPPTWithLib (testPath, false)
         RuntimeDS.Package <- RuntimePackage.PC
         let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU(dsPPT.System);
 

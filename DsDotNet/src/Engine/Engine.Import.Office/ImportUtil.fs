@@ -11,7 +11,10 @@ open Engine.Import.Office
 open Engine.Core
 open System.Runtime.CompilerServices
 open System
+open System.IO
 open System.Data
+open LibraryLoaderModule
+open System.Reflection
 
 [<AutoOpen>]
 module ImportU =
@@ -63,8 +66,17 @@ module ImportU =
                 let apiName = node.CallApiName
                 let loadedName = node.CallName
 
-                addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
+                //addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
 
+                let apiNameForLib = 
+                    match getJobActionType apiName with
+                    | MultiAction (name, cnt) ->  name
+                    | _-> apiName
+
+                let libAbsolutePath = getLibraryPath apiNameForLib
+                //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
+                addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentFlow, parentReal, node)
+                
 
         dicSeg.Add(node.Key, call)
 
@@ -358,7 +370,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.iter (fun node ->
                 match getJobActionType node.CallApiName with
-                | MultiAction cnt -> 
+                | MultiAction (_,cnt) -> 
                     for i in [1..cnt] do 
                         let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = (getDummyDeviceName node.CallName i))
                         addChannelPoints dev node
@@ -736,14 +748,13 @@ module ImportU =
 
 
         [<Extension>]
-        static member BuildSystem(doc: pptDoc, sys: DsSystem) =
+        static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =
             
             doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
 
-
             //자동생성
-            if activeSys.IsSome && activeSys.Value = sys
+            if activeSys.IsSome && activeSys.Value = sys && not(isLib)
             then 
                 doc.MakeAutoGenBtnLamp(sys)
             //수동생성

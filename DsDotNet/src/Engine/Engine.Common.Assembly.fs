@@ -15,7 +15,12 @@ open System.Reflection
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyTitle("Dualsoft Engine packages")>]
 [<assembly: AssemblyProduct("DS Engine")>]
-[<assembly: AssemblyVersion($"0.9.6.9")>]
 
+///DS Language Version (Language Parser 수정시만 변경 Ver : 1.0.0.1)
+[<assembly: AssemblyFileVersion($"1.0.0.1")>]
+///DS Library Version (Library File 수정시만 변경 Ver : 년.월.시.0)
+[<assembly: AssemblyInformationalVersion($"24.3.26.0")>]
+///DS Engine Version
+[<assembly: AssemblyVersion($"0.9.6.10")>]
 
 do ()

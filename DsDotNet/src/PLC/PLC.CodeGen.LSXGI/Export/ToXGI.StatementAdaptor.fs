@@ -397,12 +397,14 @@ module XgiExpressionConvertorModule =
                     let built, building = z
                     let spanX = e.Flatten() :?> FlatExpression |> precalculateSpan |> fst
 
-                    if partSpanX + spanX > maxX then
-                        partSpanX <- spanX
-                        built +++ building, [ e ]
-                    else
-                        partSpanX <- partSpanX + spanX
-                        built, building @ [ e ]
+                    let max, remaining =
+                        if partSpanX + spanX > maxX then
+                            partSpanX <- spanX
+                            built +++ building, [ e ]
+                        else
+                            partSpanX <- partSpanX + spanX
+                            built, building @ [ e ]
+                    max |> filter List.any, remaining
 
                 let maxs, remaining = (exp.FunctionArguments |> List.fold folder ([], []))
 

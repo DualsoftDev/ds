@@ -68,4 +68,6 @@ Grammar/CsParser/bin/
 /DsDotNet/*.lnk
 *.xgwx_bkx0
 *.bak0
+*.bak1
+*.bak2
 *.osts

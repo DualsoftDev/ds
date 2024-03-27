@@ -67,3 +67,5 @@ Grammar/CsParser/bin/
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.state
 /DsDotNet/*.lnk
 *.xgwx_bkx0
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS_HMI_Temp.bak0
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS_HMI_Temp.osts

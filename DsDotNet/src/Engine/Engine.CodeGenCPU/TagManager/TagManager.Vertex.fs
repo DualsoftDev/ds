@@ -186,6 +186,8 @@ module TagManagerModule =
         let dummyCoinSTs      = createTag "CoinAnyOnST"        VertexTag.dummyCoinSTs
         let dummyCoinRTs      = createTag "CoinAnyOnRT"        VertexTag.dummyCoinRTs
         let dummyCoinETs      = createTag "CoinAnyOnET"        VertexTag.dummyCoinETs
+        let originGoingErr      = createTag "OriginGoingErr"        VertexTag.OriginGoingErr
+        //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
         
         let realData  = 
             let vertexTag = VertexTag.realData |> int
@@ -207,6 +209,8 @@ module TagManagerModule =
         member _.RD         = realData
         ///Synchronized with physical sensors
         member _.SYNC       = realSync
+        ///GoingOriginErr
+        member _.ErrGoingOrigin         = originGoingErr
 
         ///DAG Coin Start Coil
         member _.CoinAnyOnST         = dummyCoinSTs

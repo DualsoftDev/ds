@@ -116,7 +116,10 @@ module ConvertCpuDsSystem =
 
          
         member private x.GenerationCallAlarmMemory()  = 
-            for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
+            for call in x.GetVerticesOfCoins().OfType<Call>() 
+                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
+                            |> Seq.sortBy (fun c -> c.Name) do
+
                 let cv =  call.TagManager :?> VertexMCoin
                 cv.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
                 cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory)
@@ -126,6 +129,12 @@ module ConvertCpuDsSystem =
                 call.ErrorSensorOff  <- cv.ErrOpen  :> IStorage
                 call.ErrorTimeOver   <- cv.ErrTimeOver :> IStorage
                 call.ErrorTimeShortage   <- cv.ErrTimeShortage :> IStorage
+
+        member private x.GenerationRealAlarmMemory()  = 
+            for real in x.GetVertices().OfType<Real>() |> Seq.sortBy (fun c -> c.Name) do
+                let rm =  real.TagManager :?> VertexMReal
+                rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty, rm.Name, false, IOType.Memory)
+                real.ErrGoingOrigin   <- rm.ErrGoingOrigin:> IStorage
 
 
         member private x.GenerationTaskDevIO() =
@@ -155,6 +164,8 @@ module ConvertCpuDsSystem =
 
             x.GenerationEmulationMemory()
             x.GenerationCallAlarmMemory()
+            x.GenerationRealAlarmMemory()
+            
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
             x.GenerationCallManualMemory()

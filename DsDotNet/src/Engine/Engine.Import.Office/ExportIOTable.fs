@@ -165,12 +165,15 @@ module ExportIOTable =
                             .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
                         
             seq {
-                //1. call 부터
+                //1. call, real 부터
                 for call in calls |> Seq.sortBy (fun c -> c.Name) do
                     yield rowItems ($"{call.Name}_센서쇼트이상", call.ErrorSensorOn.Address)
                     yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
                     yield rowItems ($"{call.Name}_시간초과이상", call.ErrorTimeOver.Address)
                     yield rowItems ($"{call.Name}_시간부족이상", call.ErrorTimeShortage.Address)
+
+                for real in sys.GetVertices().OfType<Real>() |> Seq.sortBy (fun r -> r.Name) do
+                    yield rowItems ($"{real.Name}_작업원위치이상", real.ErrGoingOrigin.Address)
 
                 //2. emg step
                 for emg in sys.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do

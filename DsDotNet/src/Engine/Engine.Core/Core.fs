@@ -223,6 +223,7 @@ module CoreModule =
 
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
+        member val ErrGoingOrigin = getNull<IStorage>() with get, set
         
         member _.Flow = flow
         interface ISafetyConditoinHolder with

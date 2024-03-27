@@ -61,11 +61,33 @@ type VertexMReal with
             (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, getFuncName())
         ]
 
+
+
     member v.R6_RealDataMove() =
         let set = v.RD.ToExpression() 
         (set) --* (v.RD, getFuncName())
 
-
+    member v.R7_RealGoingOriginError() =
+        let dop = v.Flow.d_st.Expr
+        let rst = v.Flow.clear_btn.Expr
+        [
+            if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
+            then 
+                let checking = v.G.Expr <&&> !!v.OG.Expr <&&> !!v.RR.Expr <&&> dop
+                yield (checking, rst) ==| (v.ErrGoingOrigin , getFuncName())
+        ]
+        
+    //member v.R7_RealOriginTimeOut() =
+    //    let real = v.Vertex :?> Real
+    //    let dop = v.Flow.d_st.Expr
+    //    let rst = v.Flow.clear_btn.Expr
+    //    [
+    //        if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
+    //        then 
+    //            let running = v.G.Expr <&&> !!v.RR.Expr <&&> dop
+    //            yield running --@ (v.TOUTOrigin, v.System._tout.Value, getFuncName())
+    //            yield (v.TOUTOrigin.DN.Expr, rst) ==| (v.TOUTOriginErr , getFuncName())
+    //    ]
 
 type VertexManager with
     member v.R1_RealInitialStart() = (v :?> VertexMReal).R1_RealInitialStart()
@@ -74,3 +96,4 @@ type VertexManager with
     member v.R4_RealSync()  = (v :?> VertexMReal).R4_RealSync()
     member v.R5_DummyDAGCoils()  = (v :?> VertexMReal).R5_DummyDAGCoils()
     member v.R6_RealDataMove()  = (v :?> VertexMReal).R6_RealDataMove()
+    member v.R7_RealGoingOriginError()  = (v :?> VertexMReal).R7_RealGoingOriginError()

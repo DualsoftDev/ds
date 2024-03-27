@@ -20,15 +20,22 @@ module ImportIOTable =
         | Func = 5
 
     [<Flags>]
-    type AlramColumn =
+    type ErrorColumn =
         | No = 0
         | Name = 1
         | ErrorAddress = 2
 
     [<Flags>]
-    type DeviceColumn =
-        | No = 0
-        | Name = 1
+    type TextColumn =
+        | Name = 0
+        | Empty1 = 1
+        | Empty2 = 2
+        | Empty3 = 3
+        | Color = 4
+        | Ltalic = 5
+        | UnderLine = 6
+        | StrikeOut = 7
+        | Bold = 8
 
     [<Flags>]
     type ManualColumn_I =

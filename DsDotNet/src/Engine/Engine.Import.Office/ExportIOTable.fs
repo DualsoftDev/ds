@@ -149,16 +149,118 @@ module ExportIOTable =
 
         dt
 
+    let getErrorRows(sys:DsSystem) =
+        
+        let mutable no = 0
+        let rowItems (name:string, address :string) =
+            no <- no+1
+            [ 
+              $"Alram{no}"
+              name
+              address
+               ]
+
+        let rows =
+            let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
+                        
+            seq {
+                //1. call 부터
+                for call in calls |> Seq.sortBy (fun c -> c.Name) do
+                    yield rowItems ($"{call.Name}_센서쇼트이상", call.ErrorSensorOn.Address)
+                    yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
+                    yield rowItems ($"{call.Name}_시간초과이상", call.ErrorTimeOver.Address)
+                    yield rowItems ($"{call.Name}_시간부족이상", call.ErrorTimeShortage.Address)
+
+                //2. emg step
+                for emg in sys.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
+                    yield rowItems ($"{emg.Name}_버튼눌림", emg.ErrorEmergency.Address)
+
+                //3 . HWConditions step
+                for condi in sys.HWConditions do
+                    yield rowItems ($"{condi.Name}_조건이상", condi.ErrorCondition.Address)
+            }
+        rows
+
+    let ToErrorTable (sys: DsSystem)  : DataTable =
+        let dt = new System.Data.DataTable($"AlramTable")
+        dt.Columns.Add($"{ErrorColumn.No}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ErrorColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ErrorColumn.ErrorAddress}", typeof<string>) |> ignore
+
+        let rows = getErrorRows(sys)
+
+        addRows rows dt
+
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ErrorColumn>)) dt
+     
+        emptyLine ()
+        dt
+
+    let ToAlramTable (sys: DsSystem)  : DataTable =
+
+        let dt = new System.Data.DataTable($"알람 리스트")
+        dt.Columns.Add($"{TextColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Empty1}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Empty2}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Empty3}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Color}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Ltalic}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.UnderLine}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.StrikeOut}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Bold}", typeof<string>) |> ignore
+      
+        let rowItems (name: string) =
+            [ 
+              name
+              ""
+              ""
+              ""
+              "0"
+              "Off"
+              "Off"
+              "Off"
+              "On"
+               ]
+
+
+        let alramList = getErrorRows(sys)
+        let rows= 
+            alramList
+            |> Seq.map (fun err ->
+                                rowItems (err[ErrorColumn.Name|>int]) 
+                        )
+
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
+     
+        emptyLine ()
+        dt
+
     let ToDevicesTable (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"{sys.Name}_Devices")
-        dt.Columns.Add($"{DeviceColumn.No}", typeof<string>) |> ignore
-        dt.Columns.Add($"{DeviceColumn.Name}", typeof<string>) |> ignore
+        let dt = new System.Data.DataTable($"디바이스이름")
+        dt.Columns.Add($"{TextColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Empty1}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Empty2}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Empty3}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Color}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Ltalic}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.UnderLine}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.StrikeOut}", typeof<string>) |> ignore
+        dt.Columns.Add($"{TextColumn.Bold}", typeof<string>) |> ignore
       
         let rowItems (no:int, dev: string) =
             [ 
-              $"Dev{no+1}"
               dev
+              ""
+              ""
+              ""
+              "16777215"
+              "Off"
+              "Off"
+              "Off"
+              "On"
                ]
 
         let rows =
@@ -175,14 +277,14 @@ module ExportIOTable =
                             )
 
         addRows rows dt
-        let emptyLine () = emptyRow (Enum.GetNames(typedefof<DeviceColumn>)) dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
      
         emptyLine ()
         dt
 
     let ToManualTable_IN (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"{sys.Name}_디바이스 센서")
+        let dt = new System.Data.DataTable($"디바이스 센서(I)")
         dt.Columns.Add($"{ManualColumn_I.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_I.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_I.Input}", typeof<string>) |> ignore
@@ -213,7 +315,7 @@ module ExportIOTable =
 
     let ToManualTable_OUT (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"{sys.Name}_디바이스 출력(Q)")
+        let dt = new System.Data.DataTable($"디바이스 출력(Q)")
         dt.Columns.Add($"{ManualColumn_O.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_O.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_O.Output}", typeof<string>) |> ignore
@@ -245,7 +347,7 @@ module ExportIOTable =
 
     let ToManualTable_Memory (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"{sys.Name}_디바이스 명령(M)")
+        let dt = new System.Data.DataTable($"디바이스 명령(M)")
         dt.Columns.Add($"{ManualColumn_M.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_M.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_M.Manual}", typeof<string>) |> ignore
@@ -271,52 +373,6 @@ module ExportIOTable =
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
 
-     
-        emptyLine ()
-        dt
-
-
-
-
-    let ToAlramTable (sys: DsSystem)  : DataTable =
-        let mutable no = 0
-        let dt = new System.Data.DataTable($"{sys.Name}_AlramTable")
-        dt.Columns.Add($"{AlramColumn.No}", typeof<string>) |> ignore
-        dt.Columns.Add($"{AlramColumn.Name}", typeof<string>) |> ignore
-        dt.Columns.Add($"{AlramColumn.ErrorAddress}", typeof<string>) |> ignore
-
-        let rowItems (name:string, address :string) =
-            no <- no+1
-            [ 
-              $"Alram{no}"
-              name
-              address
-               ]
-
-        let rows =
-            let calls = sys.GetVerticesOfCoins().OfType<Call>()
-                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
-                        
-            seq {
-                //1. call 부터
-                for call in calls |> Seq.sortBy (fun c -> c.Name) do
-                    yield rowItems ($"{call.Name}_센서쇼트이상", call.ErrorSensorOn.Address)
-                    yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
-                    yield rowItems ($"{call.Name}_시간초과이상", call.ErrorTimeOver.Address)
-                    yield rowItems ($"{call.Name}_시간부족이상", call.ErrorTimeShortage.Address)
-
-                //2. emg step
-                for emg in sys.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
-                    yield rowItems ($"{emg.Name}_버튼눌림", emg.ErrorEmergency.Address)
-
-                //3 . HWConditions step
-                for condi in sys.HWConditions do
-                    yield rowItems ($"{condi.Name}_조건이상", condi.ErrorCondition.Address)
-            }
-
-        addRows rows dt
-
-        let emptyLine () = emptyRow (Enum.GetNames(typedefof<AlramColumn>)) dt
      
         emptyLine ()
         dt
@@ -362,12 +418,12 @@ module ExportIOTable =
     type OfficeExcelExt =
         [<Extension>]
         static member ExportIOListToExcel (system: DsSystem) (filePath: string) =
-            let dataTables = [|ToIOListDataSet system|]
+            let dataTables = [|ToIOListDataSet system; ToErrorTable system|]
             createSpreadsheet filePath dataTables 25.0 true
 
         [<Extension>]
         static member ExportHMITableToExcel (system: DsSystem) (filePath: string) =
-            let dataTables = [|ToManualTable_IN system;ToManualTable_OUT system;ToManualTable_Memory system; ToDevicesTable system;ToAlramTable system|]
+            let dataTables = [|ToManualTable_Memory system; ToManualTable_IN system;ToManualTable_OUT system;ToDevicesTable system;ToAlramTable system|]
             createSpreadsheet filePath dataTables 25.0 false
 
         [<Extension>]

@@ -68,15 +68,10 @@ module ImportU =
 
                 //addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
 
-                let apiNameForLib = 
-                    match getJobActionType apiName with
-                    | MultiAction (name, cnt) ->  name
-                    | _-> apiName
-
+                let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
                 let libAbsolutePath = getLibraryPath apiNameForLib
                 //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
                 addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentFlow, parentReal, node)
-                
 
         dicSeg.Add(node.Key, call)
 

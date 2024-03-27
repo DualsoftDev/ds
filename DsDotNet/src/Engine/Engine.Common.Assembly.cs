@@ -17,4 +17,4 @@ using System.Reflection;
 ///DS Library Version (Library File 수정시만 변경 Ver : 년.월.시.0)
 [assembly: AssemblyInformationalVersion("24.3.26.0")]
 ///DS Engine Version
-[assembly: AssemblyVersion("0.9.6.13")]
+[assembly: AssemblyVersion("0.9.6.14")]

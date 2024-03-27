@@ -46,7 +46,7 @@ type Flow with
         (set, rst) ==| (f.e_st, getFuncName())
 
     member f.ST6_DriveState () =
-        let set = (f.drive_btn.Expr <||> f.HWBtnDriveExpr) <&&> f.System._originMonitor.Expr
+        let set = (f.drive_btn.Expr <||> f.HWBtnDriveExpr)
         let rst = !!f.aop.Expr <||> f.t_st.Expr  <||> f.pause.Expr
          
         (set, rst) ==| (f.d_st, getFuncName())

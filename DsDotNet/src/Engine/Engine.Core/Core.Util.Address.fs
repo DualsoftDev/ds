@@ -18,7 +18,7 @@ module DsAddressModule =
     let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType) =
 
         let addr = if addr.IsNullOrEmpty()
-                    then failwithf $"Empty address {name}"
+                    then failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  
                     else
                         if isSkip then 
                             emptyToSkipAddress  addr

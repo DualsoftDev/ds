@@ -123,6 +123,7 @@ module ConvertCpuVertex =
         member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ST)
         member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.RT)
         member r.CoinETContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
+        member r.CoinAllContacts = r.Graph.Vertices.Select(getVMCoin)|>Seq.collect(fun f->[f.ST;f.RT;f.ET])
 
         member r.CoinAlloffExpr = !!r.V.CoinAnyOnST.Expr <&&> !!r.V.CoinAnyOnRT.Expr <&&> !!r.V.CoinAnyOnET.Expr
 

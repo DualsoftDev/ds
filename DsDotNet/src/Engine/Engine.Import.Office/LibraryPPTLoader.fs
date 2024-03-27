@@ -11,6 +11,7 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System.Reflection
 open LibraryLoaderModule
+open Engine.Core
 
 [<AutoOpen>]
 [<Extension>]
@@ -29,7 +30,11 @@ type LibraryPPTLoaderExt =
                     let relPath = Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
                     let relPathAddLibDirPath = Path.Combine("dsLib", relPath)
                     for item in sys.ApiItems do
-                        infos.Add(item.Name, relPathAddLibDirPath)
+                        if infos.ContainsKey item.Name
+                        then 
+                            failwithf $"{sys.Name}에 해당하는 [{item.Name}] 인터페이스 이름은 중복({infos[item.Name]}) 됩니다."
+                        else 
+                            infos.Add(item.Name, PathManager.getValidFile relPathAddLibDirPath)
         
             { Version = informationalVersion; LibraryInfos = infos } 
             |> SaveLibraryConfig configPath

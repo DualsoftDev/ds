@@ -25,7 +25,7 @@ type LibraryPPTLoaderExt =
             let configPath = Path.Combine(directoryPath, "Library.config");
 
             for file in files do
-                if not (file.Contains("~$")) then //pptx 사용중 임시파일 무시
+                if not (file.Contains("~$")) then //pptx 사용중 임시파일 무시 ~$HelloDS.pptx
                     let sys = ImportPPT.GetDSFromPPTWithLib(file, true).System
                     let relPath = Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
                     let relPathAddLibDirPath = Path.Combine("dsLib", relPath)

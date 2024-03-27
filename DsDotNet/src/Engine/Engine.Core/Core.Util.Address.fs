@@ -108,3 +108,24 @@ module DsAddressModule =
     let getValidLampAddress (lamp: LampDef)       = getValidBtnHwItem lamp true false 
     let getValidCondiAddress (cond: ConditionDef) = getValidAddress(cond.InAddress, cond.Name, false, IOType.In)
 
+
+    let assignAutoAddress (sys: DsSystem) =
+
+        let calls = sys.Flows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
+        let jobs = calls.Select(fun c->c.TargetJob)
+        let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
+
+        for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
+            if jobs.Contains job
+            then 
+
+                let inSkip, outSkip =
+                    match job.ActionType with
+                    |NoneRx -> true,false
+                    |NoneTx -> false,true
+                    |NoneTRx -> true,true
+                    |_ ->  false,false
+
+                dev.InAddress <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In)
+                dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
+           

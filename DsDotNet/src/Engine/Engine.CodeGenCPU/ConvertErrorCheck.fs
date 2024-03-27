@@ -22,6 +22,17 @@ module ConvertErrorCheck =
                 if not(hwAutoFlows.Contains flow)
                 then failwithf $"{flow.Name} auto btn not exist"
 
+
+        for btn in sys.HWButtons do
+            if btn.InAddress = TextAddrEmpty ||btn.InAddress = TextSkip
+                then failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."
+
+
+        for lamp in sys.HWLamps do
+            if lamp.OutAddress = TextAddrEmpty ||lamp.OutAddress = TextSkip
+                then failwithf $"HW Lamp : {lamp.Name} OutAddress 값이 없습니다."
+
+
     let checkErrApi(sys:DsSystem) = 
 
           for coin in sys.GetVerticesOfCoinCalls() do

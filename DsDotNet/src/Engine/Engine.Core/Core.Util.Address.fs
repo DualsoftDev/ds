@@ -13,6 +13,7 @@ module DsAddressModule =
     let mutable inCnt = RuntimeDS.HwStartInBit-1
     let mutable outCnt = RuntimeDS.HwStartOutBit-1
     let mutable memoryCnt = RuntimeDS.HwStartMemoryBit-1
+    let setMemoryIndex(index:int) = memoryCnt <- index;
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType) =

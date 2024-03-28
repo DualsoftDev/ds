@@ -30,23 +30,22 @@ module ImportU =
     let createGenBtnLamp(mySys: DsSystem) =
         let flows = mySys.Flows
         flows.Iter(fun flow ->
-            
-            if mySys.AutoHWButtons.IsEmpty() then mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow, None)
-            if mySys.ManualHWButtons.IsEmpty() then  mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow, None)
-            if mySys.DriveHWButtons.IsEmpty() then  mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow, None)
-            if mySys.PauseHWButtons.IsEmpty() then  mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow, None)
-            if mySys.ClearHWButtons.IsEmpty() then  mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow, None)
-            if mySys.EmergencyHWButtons.IsEmpty() then  mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow, None)
+                    mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow, None)
+                    mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow, None)
+                    mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow, None)
+                    mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow, None)
+                    mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow, None)
+                    mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow, None)
             )
 
-        if mySys.AutoHWLamps.IsEmpty() then mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "", "", None, None)
-        if mySys.ManualHWLamps.IsEmpty() then mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "", "", None, None)
-        if mySys.IdleHWLamps.IsEmpty() then mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "", "", None, None)
+        mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "", "", None, None)
+        mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "", "", None, None)
+        mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "", "", None, None)
 
-        if mySys.ReadyHWLamps.IsEmpty() then mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "", "", None, None)
-        if mySys.DriveHWLamps.IsEmpty() then mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "", "", None, None)
-        if mySys.OriginHWLamps.IsEmpty() then mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "", "", None, None)
-        if mySys.ErrorHWLamps.IsEmpty() then mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "", "", None, None)
+        mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "", "", None, None)
+        mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "", "", None, None)
+        mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "", "", None, None)
+        mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "", "", None, None)
 
 
     let private createCallVertex
@@ -278,7 +277,11 @@ module ImportU =
 
          //RuntimePackage.LightPC 를 위한 버튼 램프 만들기
         [<Extension>]
-        static member MakeAutoGenBtnLamp(doc: pptDoc, mySys: DsSystem) =  createGenBtnLamp(mySys)
+        static member MakeAutoGenBtnLamp(doc: pptDoc, mySys: DsSystem) = 
+            
+            if mySys.HWButtons.IsEmpty() && mySys.HWLamps.IsEmpty()
+            then
+                createGenBtnLamp(mySys)
             
             //let dicFlow = doc.DicFlow
             //dicFlow.Iter(fun flow ->

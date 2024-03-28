@@ -110,7 +110,21 @@ module DsAddressModule =
 
 
     let assignAutoAddress (sys: DsSystem) =
+        
+        for b in sys.HWButtons do
+            b.InAddress <- TextAddrEmpty
+            b.OutAddress <- TextSkip
+            b.InAddress <- getValidBtnAddress b |> fst
 
+        for l in sys.HWLamps do
+            l.InAddress <- TextSkip
+            l.OutAddress <- TextAddrEmpty
+            l.OutAddress <- getValidLampAddress l |> snd
+
+        for c in sys.HWConditions do
+            c.InAddress <- TextAddrEmpty
+            c.InAddress <- getValidCondiAddress c 
+            
         let calls = sys.Flows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
         let jobs = calls.Select(fun c->c.TargetJob)
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))

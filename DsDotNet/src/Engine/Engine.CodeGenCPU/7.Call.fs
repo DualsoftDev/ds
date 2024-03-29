@@ -52,14 +52,14 @@ type VertexManager with
                     let api = td.ApiItem
                     if td.OutAddress <> TextSkip && td.OutAddress <> TextAddrEmpty
                     then 
+                        let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
                         let sets =
                             if RuntimeDS.Package.IsPackageEmulation()
                             then api.PE.Expr <&&> api.PS.Expr <&&> coin._off.Expr
-                            else api.PE.Expr <&&> api.PS.Expr 
+                            else api.PE.Expr <&&> api.PS.Expr <&&> !!rstMemos.ToOrElseOff()
 
                         if coin.TargetJob.ActionType = JobActionType.Push 
                         then 
-                             let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
                              let rstPush = rstMemos.ToOr()
                         
                              yield (sets, rstPush  ) ==| (td.AO, getFuncName())

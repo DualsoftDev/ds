@@ -255,12 +255,12 @@ flowBlock
         // | safetyBlock
         )* RBRACE     // |flowTask|callDef
     ;
-    parentingBlock: identifier1 EQ LBRACE (causal|identifier12Listing)* RBRACE;
+    parentingBlock: identifier1 EQ LBRACE (identifier12Listing|causal)* RBRACE;
 
     identifier12Listing: (identifier1Listing | identifier2Listing);
         identifier1Listing: identifier1 SEIMCOLON;     // A;
-        identifier2Listing: identifier2 SEIMCOLON;     // A;
-
+        identifier2Listing: (identifier1 (COMMA identifier1)*)?  SEIMCOLON;     // A;
+        
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
     aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;

@@ -178,10 +178,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     override x.EnterLoadDeviceBlock(ctx: LoadDeviceBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
-        let loadedName = ctx.CollectNameComponents().Combine()
-
-        x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)
-        |> ignore
+        let devs = ctx.TryFindFirstChild<DeviceNameListContext>().Value.Descendants<DeviceNameContext>()
+        devs.Iter(fun dev->
+            let loadedName = dev.CollectNameComponents().Combine()
+            x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)
+            |> ignore
+        )   
+       
 
     override x.EnterLoadExternalSystemBlock(ctx: LoadExternalSystemBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value

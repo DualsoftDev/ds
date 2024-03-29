@@ -204,8 +204,9 @@ system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     systemName:identifier1;
 
 
-//[device file="c:\my.ds"] B;
-loadDeviceBlock: '[' 'device' fileSpec ']' deviceName SEIMCOLON;
+//[device file="c:\my.ds"] A, B, C;
+loadDeviceBlock: '[' 'device' fileSpec ']' deviceNameList SEIMCOLON;
+    deviceNameList: deviceName (COMMA deviceName)*;
     deviceName:identifier1;
     fileSpec: 'file' '=' filePath;
         etcName1: IDENTIFIER1;

@@ -250,16 +250,15 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disabl
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
-        causal | parentingBlock | identifier12Listing
+        causal | parentingBlock | identifier1Listing | identifier1sListing 
         | aliasBlock
         // | safetyBlock
         )* RBRACE     // |flowTask|callDef
     ;
-    parentingBlock: identifier1 EQ LBRACE (identifier12Listing|causal)* RBRACE;
+    parentingBlock: identifier1 EQ LBRACE (identifier1Listing | identifier1sListing | causal)* RBRACE;
 
-    identifier12Listing: (identifier1Listing | identifier2Listing);
-        identifier1Listing: identifier1 SEIMCOLON;     // A;
-        identifier2Listing: (identifier1 (COMMA identifier1)*)?  SEIMCOLON;     // A;
+    identifier1Listing: identifier1  SEIMCOLON;     // A;
+    identifier1sListing: (identifier1 (COMMA identifier1)*)?  SEIMCOLON;     // A, B, C;
         
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}

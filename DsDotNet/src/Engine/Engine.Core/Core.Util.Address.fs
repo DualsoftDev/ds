@@ -10,10 +10,11 @@ open System.Reflection
 module DsAddressModule =
    
  
-    let mutable inCnt = RuntimeDS.HwStartInBit-1
-    let mutable outCnt = RuntimeDS.HwStartOutBit-1
-    let mutable memoryCnt = RuntimeDS.HwStartMemoryBit-1
+    let mutable inCnt = RuntimeDS.HwStartInBit
+    let mutable outCnt = RuntimeDS.HwStartOutBit
+    let mutable memoryCnt = RuntimeDS.HwStartMemoryBit
     let setMemoryIndex(index:int) = memoryCnt <- index;
+    let InitializeMemoryIndex () = memoryCnt <- RuntimeGeneratorModule.InitStartMemory
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType) =
@@ -35,9 +36,12 @@ module DsAddressModule =
             then
                 let cnt =
                     match ioType with 
-                    |In -> inCnt <- inCnt + 1; inCnt
-                    |Out -> outCnt <- outCnt + 1; outCnt
-                    |Memory -> memoryCnt <- memoryCnt + 1; memoryCnt|>int
+                    |In -> let _inCnt = inCnt
+                           inCnt <- inCnt + 1; _inCnt
+                    |Out -> let _outCnt = outCnt
+                            outCnt <- outCnt + 1; _outCnt
+                    |Memory -> let _memoryCnt = memoryCnt
+                               memoryCnt <- memoryCnt + 1; _memoryCnt
                     |NotUsed -> failwithf $"{ioType} not support"
 
 
@@ -130,7 +134,7 @@ module DsAddressModule =
         let jobs = calls.Select(fun c->c.TargetJob)
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
 
-        for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
+        for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,_) ->dev.ApiName) do
             if jobs.Contains job
             then 
 

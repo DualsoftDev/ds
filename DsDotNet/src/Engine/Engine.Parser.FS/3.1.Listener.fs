@@ -329,8 +329,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let tokenCreator (cycle: int) =
             let candidateCtxs: ParserRuleContext list =
-                [ yield! sysctx.Descendants<Identifier12ListingContext>().Cast<ParserRuleContext>()
-                  yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() ]
+                [ 
+                    let multictx = sysctx.TryFindFirstChild<Identifier1sListingContext>()
+                    if multictx.IsSome
+                    then 
+                        yield! multictx.Value.Descendants<Identifier1Context>().Cast<ParserRuleContext>()
+                    else
+                        yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
+                        
+
+                    yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
+                ]
+
 
             let isCallName (pw: ParentWrapper, Fqdn(vetexPath)) =
                 let flow = pw.GetFlow()

@@ -29,6 +29,10 @@ module FileManager =
     // Write the provided file content to the specified path
     let fileWriteAllText (path: string, fileContent: string) =
         let path = path |> getValidFile
+        let dir = getDirectoryName (path|>DsFile)
+        if not (Directory.Exists dir)
+        then Directory.CreateDirectory dir |> ignore
+        
         File.WriteAllText(path, fileContent)
 
     // Ensure that the directory of the specified path exists; create it if not

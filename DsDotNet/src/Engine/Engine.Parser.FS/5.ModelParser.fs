@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
+open System
 
 module ModelParser =
     let Walk (parser: dsParser, options: ParserOptions) =
@@ -67,7 +68,8 @@ module ModelParser =
 
         let loadSystemFromDsFile (param: DeviceLoadParameters) =
             let (dsFilePath, loadedName) = param.AbsoluteFilePath, param.LoadedName
-            let text = File.ReadAllText(dsFilePath)
+
+          
             let dir = Path.GetDirectoryName(dsFilePath)
 
             let option =
@@ -82,18 +84,24 @@ module ModelParser =
             let option =
                 { option with
                     LoadedSystemName = Option.ofObj loadedName }
+            
+            //경로 또는 시스템dsLib에 파일이 없으면 자동생성
+            let sysDsLibPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\'), param.RelativeFilePath)
 
-            let system = ParseFromString(text, option)
-            system
+            match Path.Exists(dsFilePath), Path.Exists(sysDsLibPath) with
+            | true, _ -> ParseFromString(File.ReadAllText(dsFilePath), option), false
+            | false, true -> ParseFromString(File.ReadAllText(sysDsLibPath), option), false
+            | false, false -> createDsSystem(loadedName), true
+
 
         let loadDevice (param: DeviceLoadParameters) =
-            let device = loadSystemFromDsFile param
+            let device, autoGenFromParentSys = loadSystemFromDsFile param
             device.Name <- param.LoadedName
-            Device(device, param)
+            Device(device, param, autoGenFromParentSys)
 
         let loadExternalSystem (param: DeviceLoadParameters) =
-            let system = loadSystemFromDsFile { param with LoadedName = null }
-            ExternalSystem(system, param)
+            let system, autoGenFromParentSys = loadSystemFromDsFile { param with LoadedName = null }
+            ExternalSystem(system, param, autoGenFromParentSys)
 
         fwdLoadDevice <- loadDevice
         fwdLoadExternalSystem <- loadExternalSystem

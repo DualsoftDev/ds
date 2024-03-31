@@ -52,7 +52,7 @@ module CoreModule =
     }
 
     [<AbstractClass>]
-    type LoadedSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
+    type LoadedSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
         inherit FqdnObject(param.LoadedName, param.ContainerSystem)
         let mutable loadedName = param.LoadedName // 로딩 주체에 따라 런타임에 변경
         do  
@@ -64,12 +64,10 @@ module CoreModule =
         interface ISystem 
      
         member _.LoadedName with get() = loadedName and set(value) = loadedName <- value
-
-        //member val Xywh:Xywh = null with get, set
+        member _.AutoGenFromParentSystem  = autoGenFromParentSystem
+        
         ///CCTV 경로 및 배경 이미지 경로 복수의 경로에 배치가능
         member val ChannelPoints = Dictionary<string, Xywh>()
-        
-
 
         /// 다른 장치를 로딩하려는 시스템에서 로딩된 시스템을 참조합니다.
         member _.ReferenceSystem = loadedSystem
@@ -79,16 +77,16 @@ module CoreModule =
         member _.LoadingType: ParserLoadingType = param.LoadingType
 
     /// *.ds 파일을 읽어 새로운 인스턴스를 만들어 삽입하는 구조입니다.
-    and Device (loadedDevice: DsSystem, param: DeviceLoadParameters) =
-        inherit LoadedSystem(loadedDevice, param)
+    and Device (loadedDevice: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
+        inherit LoadedSystem(loadedDevice, param, autoGenFromParentSystem)
         static let mutable id = 0
         do
             id <- id + 1
         member val Id = id with get
 
     /// 공유 인스턴스. *.ds 파일의 절대 경로를 기준으로 하나의 인스턴스만 생성하고 이를 참조하는 개념입니다.
-    and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters) =
-        inherit LoadedSystem(loadedSystem, param)
+    and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
+        inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
     type DsSystem (name: string) =
         inherit FqdnObject(name, createFqdnObject([||]))

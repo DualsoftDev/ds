@@ -53,12 +53,31 @@ module ConvertErrorCheck =
 
     let checkErrRealResetExist(sys:DsSystem) = 
 
-          for real in sys.GetVertices().OfType<Real>() do
-            if CodeConvertUtilExt.GetResetRootEdges(real.V).isEmpty()
+
+        let vs= sys.GetVertices()
+        let checkReals = vs.OfType<Real>()
+        let realAlias = vs.GetAliasTypeReals()
+        let realExs = vs.OfType<RealExF>()
+        let realExAlias = vs.GetAliasTypeRealExs()
+        for real in checkReals do
+
+            let realAlias_ = realAlias.Where(fun f->f.GetPure() = real).OfType<Vertex>()
+            let realExs_ = realExs.Where(fun f->f.GetPure() = real).OfType<Vertex>()
+            let realExAlias_ = realExAlias.Where(fun f->f.GetPure() = real).OfType<Vertex>()
+
+            let checks = ([real:>Vertex] @ realAlias_ @ realExs_@ realExAlias_).Select(fun f->CodeConvertUtilExt.GetResetRootEdges(f.V))
+            if checks.IsEmpty()
             then 
                 failwithf $"Work는 Reset 모델링이 반드시 필요합니다.\n(flow:{real.Flow.Name}, name:{real.Name})"
-                             
+                          
 
+        //let realAlias = (vs.GetAliasTypeRealExs()@vs.GetAliasTypeReals()).Select(fun s->s.GetPure()).OfType<Real>()
+        //let pureReals = (vs.OfType<Real>() @ realAlias).Distinct()
+        //for real in pureReals do
+        //    if CodeConvertUtilExt.GetResetRootEdges(real.V).isEmpty()
+        //    then 
+        //        failwithf $"Work는 Reset 모델링이 반드시 필요합니다.\n(flow:{real.Flow.Name}, name:{real.Name})"
+                             
 
 
     let checkErrNullAddress(sys:DsSystem) = 

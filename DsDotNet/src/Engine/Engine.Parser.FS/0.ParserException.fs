@@ -36,4 +36,4 @@ type ParserException(message: string) =
 
     new(message: string, ctx: RuleContext) = ParserException($"{message} on {CreatePositionInfo(ctx)}")
     new(message: string, errorNode: IErrorNode) = ParserException($"{message} on {CreatePositionInfo(errorNode)}")
-    new(message: string, line: int, column: int) = ParserException($"{message} on {line}:{column}")
+    new(message: string, line: int, column: int) = ParserException($"{message} \nCheck\n line:{line} column:{column}")

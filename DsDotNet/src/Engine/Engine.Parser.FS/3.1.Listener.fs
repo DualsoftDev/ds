@@ -152,19 +152,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let opnd1, op, opnd2 = left, "<|>", right
             ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2) |> ignore
 
-    member private x.GetFilePath(fileSpecCtx: FileSpecContext) =
-        let relativeFilePath =
-            fileSpecCtx
-                .TryFindFirstChild<FilePathContext>()
-                .Value.GetText()
-                .DeQuoteOnDemand()
-            |> PathManager.getValidFile
+    member x.GetValidFile(fileSpecCtx: FileSpecContext) =
+          fileSpecCtx
+                    .TryFindFirstChild<FilePathContext>()
+                    .Value.GetText()
+                    .DeQuoteOnDemand()
+                |> PathManager.getValidFile
 
+    member private x.GetFilePath(relativeFilePath: string) =
         let absoluteFilePath =
             let fullPath =
                 PathManager.getFullPath (relativeFilePath.ToFile()) (x.ParserOptions.ReferencePath.ToDirectory())
 
-            fullPath |> FileManager.fileExistChecker
+            fullPath
 
         absoluteFilePath, relativeFilePath
 
@@ -177,18 +177,21 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     override x.EnterLoadDeviceBlock(ctx: LoadDeviceBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
-        let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
+        let file = x.GetValidFile fileSpecCtx
+
+        let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
         let devs = ctx.TryFindFirstChild<DeviceNameListContext>().Value.Descendants<DeviceNameContext>()
-        devs.Iter(fun dev->
-            let loadedName = dev.CollectNameComponents().Combine()
-            x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)
-            |> ignore
-        )   
        
+        devs.Iter(fun dev->
+             let loadedName = dev.CollectNameComponents().Combine()
+             x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)    |> ignore
+            )
+     
 
     override x.EnterLoadExternalSystemBlock(ctx: LoadExternalSystemBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
-        let absoluteFilePath, simpleFilePath = x.GetFilePath(fileSpecCtx)
+        let file = x.GetValidFile fileSpecCtx
+        let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
         let loadedName = ctx.CollectNameComponents().Combine()
 
        
@@ -490,7 +493,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                               match apiItem with
                               | Some apiItem -> yield apiItem
-                              | _ -> failwithlog $"device({device}) api({api}) is not exist"
+                              | _ -> 
+                                    match tryFindLoadedSystem system device with
+                                    |Some dev-> yield createTaskDevUsingApiName dev.ReferenceSystem device api
+                                    |None -> failwithlog $"device({device}) api({api}) is not exist"
 
                           | _ -> failwithlog "ERROR" ]
 
@@ -660,6 +666,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         for ctx in sysctx.Descendants<PropsBlockContext>() do
             fillProperties x ctx
 
+        apiAutoGenUpdateSystem system
         guardedValidateSystem system
 
 
@@ -704,7 +711,7 @@ module ParserLoadApiModule =
                       LoadingType = DuExternal }
 
                 match systemRepo.TryFind(absoluteFilePath) with
-                | Some existing -> ExternalSystem(existing, param) // 기존 loading 된 system share
+                | Some existing -> ExternalSystem(existing, param, false) // 기존 loading 된 system share
                 | None ->
                     let exSystem = fwdLoadExternalSystem param
                     assert (systemRepo.ContainsKey(absoluteFilePath))

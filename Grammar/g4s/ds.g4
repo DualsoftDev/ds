@@ -200,7 +200,7 @@ system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
                     | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
                     | codeBlock | variableBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
-          ;
+          (SEIMCOLON)?;
     systemName:identifier1;
 
 
@@ -253,7 +253,7 @@ flowBlock
         causal | parentingBlock | identifier1Listing | identifier1sListing 
         | aliasBlock
         // | safetyBlock
-        )* RBRACE     // |flowTask|callDef
+        )* RBRACE  (SEIMCOLON)?   // |flowTask|callDef
     ;
     parentingBlock: identifier1 EQ LBRACE (identifier1Listing | identifier1sListing | causal)* RBRACE;
 
@@ -282,7 +282,7 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing|funcSet)* RBRACE;
     callListing:
-        jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE;
+        jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE (SEIMCOLON)?;
     linkListing:
         jobName '=' interfaceLink SEIMCOLON;
     jobName: etcName1;

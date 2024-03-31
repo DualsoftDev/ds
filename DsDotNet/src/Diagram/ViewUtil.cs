@@ -152,7 +152,7 @@ namespace Diagram.View.MSAGL
         }
         private static void HandleVertexEvent(EventVertex ev)
         {
-            if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue) 
+            if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue && DicNode.ContainsKey(ev.Target)) 
             {
                 Status4 status = ev.TagKind switch
                 {

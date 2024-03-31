@@ -30,16 +30,16 @@
             <Visitor>true</Visitor>
             <Package>Engine.Parser</Package>
         </Antlr4>
-        <Antlr4 Include="g4s/fqdn.g4" Link="g4s/fqdn.g4"/>
-        <Antlr4 Include="g4s/expr.g4" Link="g4s/expr.g4"/>
+        <Antlr4 Include="g4s/fqdn.g4" Link="g4s/fqdn.g4" />
+        <Antlr4 Include="g4s/expr.g4" Link="g4s/expr.g4" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1"/>
-        <PackageReference Include="Antlr4BuildTasks" Version="12.2.0" PrivateAssets="all"/>
+        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+        <PackageReference Include="Antlr4BuildTasks" Version="12.2.0" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Obsolete\"/>
+        <Folder Include="Obsolete\" />
     </ItemGroup>
 
     <ItemGroup>
@@ -49,11 +49,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs"/>
+        <Compile Include="..\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj"/>
+      <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

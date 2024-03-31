@@ -120,13 +120,13 @@ module ImportPPTModule =
                     let newLoad =
                         if bExtSys then
                             let skipCnt = if bOPEN_EXSYS_LINK then 2 else 1 //LINK 이면 형제 관계
-                            let exSys = ExternalSystem(newSys, paras)
+                            let exSys = ExternalSystem(newSys, paras, false)
 
                             let key = getHashKeys (skipCnt, paras.AbsoluteFilePath)
                             sRepo.Add(key, exSys.ReferenceSystem)
                             exSys :> LoadedSystem
                         else
-                            Device(newSys, paras) :> LoadedSystem
+                            Device(newSys, paras, false) :> LoadedSystem
 
 
                     loadedParentStack.Pop() |> ignore
@@ -138,7 +138,7 @@ module ImportPPTModule =
 
                     let exSys =
                         if sRepo.ContainsKey(key) then
-                            ExternalSystem(sRepo[key], paras) :> LoadedSystem
+                            ExternalSystem(sRepo[key], paras, false) :> LoadedSystem
                         else
                             let newSys = DsSystem(paras.LoadedName)
                             addNewLoadedSys (newSys, true, node.NodeType = OPEN_EXSYS_LINK)

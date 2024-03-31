@@ -66,9 +66,12 @@ module internal ModelFindModule =
     let rec tryFindExportApiItem(system:DsSystem) (Fqdn(apiPath)) =
         let _sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems.TryFindWithName(apiKey)
+
     and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
         let findedLoadedSystem = tryFindLoadedSystem system targetSystemName
-        if findedLoadedSystem.IsNone then failwithf $"해당 디바이스를 Loading 해야 합니다. \n [device file= ""path""] {targetSystemName}"
+
+        if findedLoadedSystem.IsNone 
+        then failwithf $"해당 디바이스를 Loading 해야 합니다. \n [device file= path] {targetSystemName}"
 
         let targetSystem = findedLoadedSystem.Value.ReferenceSystem
         system.ApiUsages.TryFind(nameComponentsEq [targetSystem.Name; targetApiName])

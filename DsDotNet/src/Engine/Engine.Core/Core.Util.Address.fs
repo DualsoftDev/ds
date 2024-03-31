@@ -130,21 +130,17 @@ module DsAddressModule =
             c.InAddress <- TextAddrEmpty
             c.InAddress <- getValidCondiAddress c 
             
-        let calls = sys.Flows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
-        let jobs = calls.Select(fun c->c.TargetJob)
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
+                            |> Seq.sortBy (fun (dev,_) ->dev.ApiName)
+        for (dev, job) in devJobSet  do
 
-        for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,_) ->dev.ApiName) do
-            if jobs.Contains job
-            then 
+            let inSkip, outSkip =
+                match job.ActionType with
+                |NoneRx -> true,false
+                |NoneTx -> false,true
+                |NoneTRx -> true,true
+                |_ ->  false,false
 
-                let inSkip, outSkip =
-                    match job.ActionType with
-                    |NoneRx -> true,false
-                    |NoneTx -> false,true
-                    |NoneTRx -> true,true
-                    |_ ->  false,false
-
-                dev.InAddress <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In)
-                dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
+            dev.InAddress <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In)
+            dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
            

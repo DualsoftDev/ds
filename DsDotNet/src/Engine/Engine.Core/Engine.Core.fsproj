@@ -54,6 +54,7 @@
         <Compile Include="Core.Util.Origin.fs" />
         <Compile Include="Core.Util.ToDsText.fs" />
         <Compile Include="Core.Util.Address.fs" />
+        <Compile Include="Core.Create.fs" />
         <Compile Include="Expression.TagKind.fs" />
         <Compile Include="Expression.Tag.fs" />
         <Compile Include="EntryPoint.fs" />

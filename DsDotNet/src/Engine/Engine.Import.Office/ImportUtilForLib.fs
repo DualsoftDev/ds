@@ -146,7 +146,7 @@ module ImportUtilForLib =
 
         let addOrGetExistSystem loadedSys loadedName = 
             if not (mySys.LoadedSysExist(loadedName)) then
-                mySys.AddLoadedSystem(Device(loadedSys, paras loadedName))
+                mySys.AddLoadedSystem(Device(loadedSys, paras loadedName, false))
                 loadedSys
             else 
                 mySys.GetLoadedSys(loadedName).Value.ReferenceSystem

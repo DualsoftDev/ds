@@ -39,8 +39,8 @@ public partial class UcView : UserControl
         Controls.Add(viewer);
     }
 
-    int node_attr_linewidthH = 8;
-    int node_attr_linewidthL = 2;
+    int node_attr_linewidthH = 4;
+    int node_attr_linewidthL = 1;
     int edge_attr_linewidthWeek = 1;
     int edge_attr_linewidthStrong = 2;
     int nnode_label_fontsize = 6;

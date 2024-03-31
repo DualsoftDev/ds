@@ -333,10 +333,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let tokenCreator (cycle: int) =
             let candidateCtxs: ParserRuleContext list =
                 [ 
-                    let multictx = sysctx.TryFindFirstChild<Identifier1sListingContext>()
-                    if multictx.IsSome
+                    let multictx = sysctx.TryFindChildren<Identifier1sListingContext>()
+                    if multictx.any()
                     then 
-                        yield! multictx.Value.Descendants<Identifier1Context>().Cast<ParserRuleContext>()
+                        yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
                     else
                         yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
                         
@@ -370,14 +370,17 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     match existing with
                     | Some v -> debugfn $"{v.Name} already exists.  Skip creating it."
                     | None ->
+                        let name = ctxInfo.Names.CombineQuoteOnDemand()
                         match cycle, ctxInfo.Names with
                         | 0, [ r ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
-                            let flow = parent.GetCore() :?> Flow
+                            match parent.GetCore()  with
+                            | :? Flow as flow->
+                                if not <| isCallName (parent, ctxInfo.Names) then
+                                    Real.Create(r, flow) |> ignore
+                            |_ ->
+                                failwithf $"{name} needs Job define"
 
-                            if not <| isCallName (parent, ctxInfo.Names) then
-                                Real.Create(r, flow) |> ignore
-
-                        | 1, [ c ] when not <| (isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand())) ->
+                        | 1, [ c ] when not <| (isAliasMnemonic (parent, name)) ->
                             let job = tryFindJob system c |> Option.get
 
                             if job.DeviceDefs.any () then
@@ -385,13 +388,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                             
                         | 1, realorFlow :: [ cr ] when
-                            not <| isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand())
+                            not <| isAliasMnemonic (parent, name)
                             ->
                             let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
                             RealOtherFlow.Create(otherFlowReal, parent) |> ignore
                             debugfn $"{realorFlow}.{cr} should already have been created."
 
-                        | 2, [ q ] when isAliasMnemonic (parent, ctxInfo.Names.CombineQuoteOnDemand()) ->
+                        | 2, [ q ] when isAliasMnemonic (parent, name) ->
                             let flow = parent.GetFlow()
                             let aliasDef = tryFindAliasDefWithMnemonic flow (q.QuoteOnDemand()) |> Option.get
                             Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
@@ -481,14 +484,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                               let apiItem =
                                   option {
                                       let! apiPoint = tryFindCallingApiItem system device api
-                                      let! addressCtx = apiDefCtx.TryFindFirstChild<AddressInOutContext>()
-                                      let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()
-                                      let! rxAddressCtx = addressCtx.TryFindFirstChild<InAddrContext>()
-                                      let tx = getAddress (txAddressCtx)
-                                      let rx = getAddress (rxAddressCtx)
+                                      match apiDefCtx.TryFindFirstChild<AddressInOutContext>() with
+                                      |Some addressCtx -> 
+                                          let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()
+                                          let! rxAddressCtx = addressCtx.TryFindFirstChild<InAddrContext>()
+                                          let tx = getAddress (txAddressCtx)
+                                          let rx = getAddress (rxAddressCtx)
 
-                                      debugfn $"TX={tx} RX={rx}"
-                                      return TaskDev(apiPoint, rx, tx, device)
+                                          debugfn $"TX={tx} RX={rx}"
+                                          return TaskDev(apiPoint, rx, tx, device)
+                                      |None ->
+                                          return TaskDev(apiPoint, TextAddrEmpty, TextAddrEmpty, device)
+                                        
                                   }
 
                               match apiItem with

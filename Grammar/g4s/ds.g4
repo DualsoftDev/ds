@@ -255,7 +255,7 @@ flowBlock
         // | safetyBlock
         )* RBRACE  (SEIMCOLON)?   // |flowTask|callDef
     ;
-    parentingBlock: identifier1 EQ LBRACE (identifier1Listing | identifier1sListing | causal)* RBRACE;
+    parentingBlock: identifier1 EQ LBRACE (identifier1sListing | causal)* RBRACE;
 
     identifier1Listing: identifier1  SEIMCOLON;     // A;
     identifier1sListing: (identifier1 (COMMA identifier1)*)?  SEIMCOLON;     // A, B, C;
@@ -286,7 +286,7 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing|funcSet)* RBRACE;
     linkListing:
         jobName '=' interfaceLink SEIMCOLON;
     jobName: etcName1;
-    callApiDef: interfaceCall addressInOut;
+    callApiDef: (interfaceCall addressInOut|interfaceCall);
     interfaceCall: identifier12;
     interfaceLink: identifier12;
 

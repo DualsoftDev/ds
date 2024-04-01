@@ -71,3 +71,4 @@ Grammar/CsParser/bin/
 *.bak1
 *.bak2
 *.osts
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/SetupRelease/data/Data.msi

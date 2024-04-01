@@ -45,11 +45,11 @@ module DsAddressModule =
                     |NotUsed -> failwithf $"{ioType} not support"
 
 
-                let getSlotInfo(settingType: IOType) =
+                let getSlotInfo(settingType: IOType, newCnt:int) =
                     let curr =
                         match settingType with 
-                        | In -> inCnt
-                        | Out -> outCnt
+                        | In -> newCnt
+                        | Out -> newCnt
                         | Memory -> failwithf $"{settingType} not supported"
                         | NotUsed -> failwithf $"{settingType} not supported"
 
@@ -86,11 +86,11 @@ module DsAddressModule =
                 then
                     
                     match ioType with 
-                    |In ->  let iSlot, sumBit  =  getSlotInfo(ioType)
-                            $"%%IX0.{iSlot}.{(inCnt-sumBit) % 64}" 
+                    |In ->  let iSlot, sumBit  =  getSlotInfo(ioType, cnt)
+                            $"%%IX0.{iSlot}.{(cnt-sumBit) % 64}" 
                             
-                    |Out -> let iSlot ,sumBit =  getSlotInfo(ioType)
-                            $"%%QX0.{iSlot}.{(outCnt-sumBit) % 64}" 
+                    |Out -> let iSlot ,sumBit =  getSlotInfo(ioType, cnt)
+                            $"%%QX0.{iSlot}.{(cnt-sumBit) % 64}" 
 
                     |Memory -> $"%%MX{cnt}" 
                     |NotUsed -> failwithf $"{ioType} not support"

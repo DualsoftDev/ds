@@ -296,11 +296,11 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn_I.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_I.Input}", typeof<string>) |> ignore
       
-        let rowItems (no:int, dev: TaskDev, call:Call) =
+        let rowItems (dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
               "bool"
-              if dev.InAddress = TextSkip then "%HX0" else dev.InAddress
+              addr 
                ]
 
         let rows =
@@ -309,9 +309,15 @@ module ExportIOTable =
             let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
             devCallSet
-                |> Seq.mapi (fun i (dev, call) ->
-                                    rowItems (i, dev, call) 
-                            )
+                |> Seq.collect (fun (dev, call) ->
+                    [
+                        yield rowItems (dev, if dev.InAddress = TextSkip then "%HX0" else dev.InAddress) 
+                        if dev.ApiItem.ApiSystem.ApiItems.Count = 1
+                            then 
+                                yield rowItems (dev, "%HX0") 
+
+                    ]
+            )
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_I>)) dt
@@ -328,11 +334,11 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn_O.Output}", typeof<string>) |> ignore
 
       
-        let rowItems (no:int, dev: TaskDev, call:Call) =
+        let rowItems (dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
               "bool"
-              if dev.OutAddress = TextSkip then "%HX0" else dev.OutAddress
+              addr
                ]
 
         let rows =
@@ -341,9 +347,18 @@ module ExportIOTable =
             let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
             devCallSet
-                |> Seq.mapi (fun i (dev, call) ->
-                                    rowItems (i, dev, call) 
-                            )
+                |> Seq.collect (fun  (dev, call) ->
+                            [
+                                yield rowItems (dev, if dev.OutAddress = TextSkip then "%HX0" else dev.OutAddress) 
+                                
+                                if dev.ApiItem.ApiSystem.ApiItems.Count = 1
+                                then 
+                                    yield rowItems (dev, "%HX0") 
+                            ]
+                )
+
+
+
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_O>)) dt
@@ -360,11 +375,11 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn_M.Manual}", typeof<string>) |> ignore
 
       
-        let rowItems (no:int, dev: TaskDev, call:Call) =
+        let rowItems ( dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
               "bool"
-              call.ManualTag.Address
+              addr
                ]
 
         let rows =
@@ -373,9 +388,16 @@ module ExportIOTable =
             let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
             devCallSet
-                |> Seq.mapi (fun i (dev, call) ->
-                                    rowItems (i, dev, call) 
-                            )
+                |> Seq.collect (fun (dev, call) ->
+                    [   
+                        yield rowItems (dev, call.ManualTag.Address)
+
+                        if dev.ApiItem.ApiSystem.ApiItems.Count = 1
+                        then 
+                            yield rowItems (dev, "%HX0") 
+
+                    ]
+                ) 
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt

@@ -505,7 +505,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     |Some dev-> yield createTaskDevUsingApiName dev.ReferenceSystem device api
                                     |None -> failwithlog $"device({device}) api({api}) is not exist"
 
-                          | _ -> failwithlog "ERROR" ]
+                          | _ -> 
+                                    let errText = String.Join(", ", apiPath.ToArray())
+                                    failwithlog $"device loading type error ({errText})"
+                          ]
 
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 let func = if funcSet.any() then Some (funcSet.First()) else None 

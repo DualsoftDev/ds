@@ -275,14 +275,7 @@ module ImportU =
 
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
 
-         //RuntimePackage.LightPC 를 위한 버튼 램프 만들기
-        [<Extension>]
-        static member MakeAutoGenBtnLamp(doc: pptDoc, mySys: DsSystem) = 
-            
-            if mySys.HWButtons.IsEmpty() && mySys.HWLamps.IsEmpty()
-            then
-                createGenBtnLamp(mySys)
-            
+
 
         //MakeButtons 리스트 만들기
         [<Extension>]
@@ -756,7 +749,11 @@ module ImportU =
             //자동생성
             if activeSys.IsSome && activeSys.Value = sys && not(isLib)
             then 
-                doc.MakeAutoGenBtnLamp(sys)
+                            
+                if sys.HWButtons.IsEmpty() && sys.HWLamps.IsEmpty()
+                then
+                    createGenBtnLamp(sys)
+
             //수동생성
             //doc.MakeButtons(sys)
             //doc.MakeLamps(sys)

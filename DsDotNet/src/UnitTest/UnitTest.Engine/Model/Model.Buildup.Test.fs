@@ -155,8 +155,7 @@ module ModelBuildupTests1 =
             let answer = """
 [sys] My = {
     [flow] F = {
-            Main; // island
-            Main2; // island
+            Main, Main2; // island
     }
     [jobs] = {
         Ap = { A.ADV(%I1, %Q1); }

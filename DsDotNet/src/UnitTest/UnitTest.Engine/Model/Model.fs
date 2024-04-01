@@ -35,11 +35,11 @@ module ModelTests1 =
         member __.``0 Any temporary test`` () =
             logInfo "=== 0 Any test"
             let input = """
+
+
 [sys] EX = {
     [flow] F = {
-        TX;
-        "R.X";
-        "NameWith\"Quote";
+        TX, "R.X", "NameWith\"Quote"; // island
     }
     //[interfaces] = {
     //    "이상한. Api" = { F.TX ~ F."R.X" }

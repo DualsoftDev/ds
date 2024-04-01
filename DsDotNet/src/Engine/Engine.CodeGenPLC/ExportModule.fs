@@ -135,6 +135,6 @@ module ExportModule =
     [<Extension>]
     type ExportModuleExt =
         [<Extension>]
-        static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml) =
-            exportXMLforXGI (system, path, if tempLSISxml <> null then Some(tempLSISxml) else None)
+        static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string) =
+            exportXMLforXGI (system, path, if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None)
 

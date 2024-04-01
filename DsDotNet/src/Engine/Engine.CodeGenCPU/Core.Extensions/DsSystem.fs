@@ -94,7 +94,7 @@ module ConvertCpuDsSystem =
         
 
         member private x.GenerationCallManualMemory()  = 
-            DsAddressModule.memoryCnt <- RuntimeDS.HwStartMemoryBit + 1000
+            DsAddressModule.setMemoryIndex(DsAddressModule.memoryCnt + BufferAlramSize)
             
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
@@ -139,18 +139,22 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationTaskDevIO() =
             let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
-            for b in TaskDevices do
-
-                if  b.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, b.ApiName, b.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , b).Value
-                    b.InTag <- inT
-                    //b.InAddress <- inT.Address
+            let calls = x.GetVerticesOfCoinCalls()
+            for dev in TaskDevices do
+                if calls.Where(fun f->f.TaskDevs.Contains(dev)).any() //외부입력 전용 확인
+                then
+                    if  dev.InAddress <> TextSkip then
+                        let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev).Value
+                        dev.InTag <- inT  ; dev.InAddress <- inT.Address
                       
-                if  b.OutAddress <> TextSkip then
-                    let outT = createBridgeTag(x.Storages, b.ApiName, b.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , b).Value
-                    b.OutTag <- outT
-                    //b.OutAddress <- outT.Address
-
+                    if  dev.OutAddress <> TextSkip then
+                        let outT = createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev).Value
+                        dev.OutTag <- outT; dev.OutAddress <- outT.Address
+                else 
+                    if  dev.InAddress <> TextSkip then
+                        let inT = createBridgeTag(x.Storages, dev.ApiName, ExternalTempMemory, (int)ActionTag.ActionIn , BridgeType.Device, x , dev).Value
+                        dev.InTag <- inT  ; dev.InAddress <- inT.Address
+                      
 
         member x.GenerationIO() =
 

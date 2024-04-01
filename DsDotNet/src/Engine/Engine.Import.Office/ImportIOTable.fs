@@ -55,6 +55,12 @@ module ImportIOTable =
         | DataType = 1
         | Manual = 2
 
+    [<Flags>]
+    type ManualColumn_ControlPanel =
+        | Name = 0
+        | DataType = 1
+        | Manual = 2
+
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try

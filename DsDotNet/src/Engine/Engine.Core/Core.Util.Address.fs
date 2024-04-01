@@ -12,9 +12,9 @@ module DsAddressModule =
  
     let mutable inCnt = RuntimeDS.HwStartInBit
     let mutable outCnt = RuntimeDS.HwStartOutBit
-    let mutable memoryCnt = RuntimeDS.HwStartMemoryBit
+    let mutable memoryCnt = InitStartMemory
     let setMemoryIndex(index:int) = memoryCnt <- index;
-    let InitializeMemoryIndex () = memoryCnt <- RuntimeGeneratorModule.InitStartMemory
+    let InitializeMemoryIndex () = memoryCnt <- InitStartMemory
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType) =
@@ -114,8 +114,10 @@ module DsAddressModule =
     let getValidCondiAddress (cond: ConditionDef) = getValidAddress(cond.InAddress, cond.Name, false, IOType.In)
 
 
-    let assignAutoAddress (sys: DsSystem) =
+    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) =
         
+        setMemoryIndex(startMemory);
+
         for b in sys.HWButtons do
             b.InAddress <- TextAddrEmpty
             b.OutAddress <- TextSkip
@@ -143,4 +145,6 @@ module DsAddressModule =
 
             dev.InAddress <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In)
             dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
+
+        setMemoryIndex(startMemory + offsetOpModeLampBtn);
            

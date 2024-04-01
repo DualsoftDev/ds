@@ -53,7 +53,9 @@ module RuntimeGeneratorModule =
         | _ -> failwithlogf $"Error {getFuncName()}"
 
     let InitStartMemory = 1000
-
+    let BufferAlramSize = 1000
+    let ExternalTempMemory =  "%MX0"
+   
     type RuntimeDS() =
         static let mutable runtimeTarget = WINDOWS
         static let mutable runtimePackage = Simulation
@@ -71,7 +73,6 @@ module RuntimeGeneratorModule =
         static member val HwSlotDataTypes  =  ResizeArray<SlotDataType>() with get, set
         static member val HwStartInBit = 0   with get, set
         static member val HwStartOutBit = 0  with get, set
-        static member val HwStartMemoryBit = InitStartMemory  with get, set
         static member val IP = "192.168.9.100" with get, set
 
         static member val TimeoutCall = callTimeout  with get, set

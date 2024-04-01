@@ -71,9 +71,11 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
-            let comment  = if pCooment then "// island"  else ""
-            for island in notMentioned do
-                yield $"{getTab (indent+1)}{island.Name.QuoteOnDemand()}; {comment}"
+            if notMentioned.any() 
+            then 
+                let comment  = if pCooment then "// island"  else ""
+                let isLandCommas =  notMentioned.Select(fun i -> i.Name.QuoteOnDemand()).JoinWith(", ")
+                yield $"{getTab (indent)}{isLandCommas}; {comment}"
         ]
 
     let flowToDs (flow:Flow) (indent:int) =

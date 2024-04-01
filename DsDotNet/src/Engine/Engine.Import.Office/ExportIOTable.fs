@@ -77,19 +77,23 @@ module ExportIOTable =
 
         let rows =
             let calls = selectFlows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
+            let coins = sys.GetVerticesOfCoinCalls()
             let jobs = calls.Select(fun c->c.TargetJob)
             seq {
 
                 let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
 
                 for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
-                    if jobs.Contains job
-                    then 
-                        let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
-                        if sortedDeviceDefs.Head() = dev then
-                            yield rowItems (dev, job, true) //첫 TaskDev만 만듬
-                        else
-                            yield rowItems (dev, job, false)
+                    if not(coins.Where(fun c->c.TaskDevs.Contains(dev)).any())
+                    then
+                        dev.InAddress <- ExternalTempMemory
+                        dev.OutAddress <- TextSkip
+                        
+                    let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
+                    if sortedDeviceDefs.Head() = dev then
+                        yield rowItems (dev, job, true) //첫 TaskDev만 만듬
+                    else
+                        yield rowItems (dev, job, false)
             }
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
@@ -287,7 +291,7 @@ module ExportIOTable =
 
     let ToManualTable_IN (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"디바이스 센서(I)")
+        let dt = new System.Data.DataTable($"센서(I)")
         dt.Columns.Add($"{ManualColumn_I.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_I.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_I.Input}", typeof<string>) |> ignore
@@ -318,7 +322,7 @@ module ExportIOTable =
 
     let ToManualTable_OUT (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"디바이스 출력(Q)")
+        let dt = new System.Data.DataTable($"출력(Q)")
         dt.Columns.Add($"{ManualColumn_O.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_O.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_O.Output}", typeof<string>) |> ignore
@@ -350,7 +354,7 @@ module ExportIOTable =
 
     let ToManualTable_Memory (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"디바이스 명령(M)")
+        let dt = new System.Data.DataTable($"명령(M)")
         dt.Columns.Add($"{ManualColumn_M.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_M.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_M.Manual}", typeof<string>) |> ignore
@@ -372,6 +376,36 @@ module ExportIOTable =
                 |> Seq.mapi (fun i (dev, call) ->
                                     rowItems (i, dev, call) 
                             )
+
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
+
+     
+        emptyLine ()
+        dt
+
+    let ToManualTable_BtnLamp (sys: DsSystem)  : DataTable =
+
+        let dt = new System.Data.DataTable($"조작반(M)")
+        dt.Columns.Add($"{ManualColumn_ControlPanel.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn_ControlPanel.DataType}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn_ControlPanel.Manual}", typeof<string>) |> ignore
+      
+        let rowItems (name  : string, address :string) =
+            [ 
+              name
+              "bool"
+              address
+               ]
+
+        let rows =
+            let hws = sys.HWSystemDefs.Where(fun f->f :? ButtonDef || f :? LampDef )
+                                      .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
+                                      .OrderBy(fun (name, addr) -> addr)
+            hws
+                |> Seq.map (fun (name, addr)  -> 
+                    rowItems (name, addr)
+                    )
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
@@ -426,7 +460,14 @@ module ExportIOTable =
 
         [<Extension>]
         static member ExportHMITableToExcel (system: DsSystem) (filePath: string) =
-            let dataTables = [|ToManualTable_Memory system; ToManualTable_IN system;ToManualTable_OUT system;ToDevicesTable system;ToAlramTable system|]
+            let dataTables = [|
+                                ToManualTable_Memory system;
+                                ToManualTable_IN system;
+                                ToManualTable_OUT system;
+                                ToManualTable_BtnLamp system;
+                                ToDevicesTable system;
+                                ToAlramTable system
+                                |]
             createSpreadsheet filePath dataTables 25.0 false
 
         [<Extension>]

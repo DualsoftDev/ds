@@ -175,12 +175,15 @@ module IECAddressModule =
 
     /// IEC address 를 표준화한다.  e.g "%i3" => "%IX3" ; "m34" => "%MX34"
     let standardizeAddress (address: string) =
-        let addr = if address.StartsWith("%") 
-                   then  address.ToUpper() 
-                   else  "%"+address.ToUpper() 
+        match address with
+        | "_" -> "_"
+        | _ ->
+            let addr = if address.StartsWith("%") 
+                       then  address.ToUpper() 
+                       else  "%"+address.ToUpper() 
 
-        match addr with
-        | RegexPattern @"^%([IQUMLKFNRAW])(\d+)$" [ m; _ ]
-        | RegexPattern @"^%([IQUMLKFNRAW])(\d+\.\d+)$" [ m; _ ]
-        | RegexPattern @"^%([IQUMLKFNRAW])(\d+\.\d+\.\d+)$" [ m; _ ] -> Regex.Replace(addr, m, m + "X")
-        | _ -> addr
+            match addr with
+            | RegexPattern @"^%([IQUMLKFNRAW])(\d+)$" [ m; _ ]
+            | RegexPattern @"^%([IQUMLKFNRAW])(\d+\.\d+)$" [ m; _ ]
+            | RegexPattern @"^%([IQUMLKFNRAW])(\d+\.\d+\.\d+)$" [ m; _ ] -> Regex.Replace(addr, m, m + "X")
+            | _ -> addr

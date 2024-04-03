@@ -130,9 +130,7 @@
 				</VariableComment>
 			</GlobalVariables>
 			<Tasks>
-				<Task Version="257" Type="0" Attribute="2" Kind="0" Priority="0" TaskIndex="0"
-					Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">스캔
-	프로그램</Task>
+				<Task Version="257" Attribute="2">Scan Program</Task>
 			</Tasks>
 			<POU>
 				<Programs>

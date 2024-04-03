@@ -406,10 +406,12 @@ module XgiExportModule =
                 let xnGlobalVar =
                     xdoc.SelectSingleNode $"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}"
 
-                if RuntimeDS.Target = XGI then
-                    xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
-
                 let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+                let xnCountConainer =
+                    match RuntimeDS.Target with
+                    | XGI -> xnGlobalVar
+                    | XGK -> xnGlobalVarSymbols
+                xnCountConainer.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
 
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)

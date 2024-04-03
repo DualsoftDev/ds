@@ -114,19 +114,27 @@ module XGITag = //IEC61131Tag =
 
         /// Symbol 관련 XML tag attributes 생성
         member private x.GetXmlArgs() =
-            [ $"Name=\"{x.Name}\""
-              $"Kind=\"{x.Kind}\""
-              if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
-                  $"Type=\"{x.Type}\""
+            [   $"Name=\"{x.Name}\""
+                $"Comment=\"{x.Comment}\""
+                match RuntimeDS.Target with
+                | XGI ->
+                    $"Device=\"{x.Device}\""
+                    $"Kind=\"{x.Kind}\""
+                    if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
+                        $"Type=\"{x.Type}\""
 
-                  if x.InitValue <> null then
-                      $"InitValue=\"{x.ToXgiLiteral()}\""
+                        if x.InitValue <> null then
+                            $"InitValue=\"{x.ToXgiLiteral()}\""
 
-                  $"Address=\"{x.Address}\""
-              $"Comment=\"{x.Comment}\""
-              $"Device=\"{x.Device}\""
-              $"State=\"{x.State}\"" ]
-            |> String.concat " "
+                        $"Address=\"{x.Address}\""
+                    $"State=\"{x.State}\""
+                | XGK ->
+                    // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
+                    $"Device=\"{x.Device}\""
+                    $"Type=\"{x.Type}\""
+                    $"DevicePos=\"{x.Address}\""
+                | _ -> failwithlog "Not supported plc type"
+            ] |> String.concat " "
 
         /// Symbol 관련 XML tag 생성
         member x.ToText() = $"<Symbol {x.GetXmlArgs()}/>"
@@ -134,10 +142,10 @@ module XGITag = //IEC61131Tag =
 
         member x.GenerateXml() =
             [ yield $"\t<Symbol {x.GetXmlArgs()}>"
-              // 사용되지 않지만, 필요한 XML children element 생성
-              yield!
-                  [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
-                  |> Seq.map (sprintf "\t\t<Member%s/>")
+              //// 사용되지 않지만, 필요한 XML children element 생성
+              //yield!
+              //    [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
+              //    |> Seq.map (sprintf "\t\t<Member%s/>")
               yield "\t</Symbol>" ]
             |> String.concat "\r\n"
 

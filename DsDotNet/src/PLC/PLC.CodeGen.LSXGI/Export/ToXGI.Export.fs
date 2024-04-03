@@ -159,7 +159,7 @@ module XgiExportModule =
 
     /// [S] -> [XS]
     let internal commentedStatementsToCommentedXgiStatements
-        (prjParam: XgiProjectParams)
+        (prjParam: XgxProjectParams)
         (localStorages: IStorage seq)
         (commentedStatements: CommentedStatement list)
         : IStorage list * CommentedXgiStatements list =
@@ -183,11 +183,11 @@ module XgiExportModule =
         newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
         
-    type XgiPOUParams with
+    type XgxPOUParams with
 
-        member x.GenerateXmlString(prjParam: XgiProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
+        member x.GenerateXmlString(prjParam: XgxProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
 
-        member x.GenerateXmlNode(prjParam: XgiProjectParams, scanName:string option) : XmlNode =
+        member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
             let { TaskName = taskName
                   POUName = pouName
                   Comment = comment
@@ -265,7 +265,7 @@ module XgiExportModule =
             programTemplate
 
 
-    and XgiProjectParams with
+    and XgxProjectParams with
 
         member private x.GetTemplateXmlDoc() =
             x.ExistingLSISprj |> Option.map XmlDocument.loadFromFile

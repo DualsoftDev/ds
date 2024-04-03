@@ -40,7 +40,7 @@ type IQMapperTest() =
             }
 
         let prjParams = {
-            defaultXgiProjectParams with
+            defaultXgxProjectParams with
                 ProjectName = "Dummy IQ Map test"
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]

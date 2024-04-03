@@ -191,10 +191,11 @@ module rec TimerModule =
         member _.TT:VariableBase<bool> = tt
         member _.Type = typ
 
+        [<Obsolete("XGK 테스트 코드 삭제하거나 확실히..")>]
         static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
             let en, tt, dn, pre, acc, res =
                 match RuntimeDS.Target with
-                | ( XGI | WINDOWS ) -> "IN", "_TT", "Q", "PT", "ET", "RST"
+                | ( XGK | XGI | WINDOWS ) -> "IN", "_TT", "Q", "PT", "ET", "RST"
                 | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
                 | _ -> failwithlog "NOT yet supported"
 

@@ -12,6 +12,7 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
+    [<Obsolete("getBytes 이거 수정 필요!!!!")>]
     let generateXmlXGX (plcType:RuntimeTargetType) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
         let projName = system.Name
         
@@ -36,6 +37,7 @@ module ExportModule =
                 | XGI -> tryParseXGITag
                 | XGK -> tryParseXGKTag
                 | _ -> failwithlog "Not supported plc type"
+
             let getBytes addr = 
                 [  
                     match tryParseXgxTag addr with
@@ -45,7 +47,9 @@ module ExportModule =
                             yield tag.ByteOffset
                         else 
                             yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
-                    |None ->  failwithlog "ERROR"
+                    |None ->
+                        yield -1        // todo: 이거 삭제하고 아래 fail uncomment
+                        //failwithlog "ERROR"
                 ]
             
            
@@ -138,10 +142,15 @@ module ExportModule =
 
     let exportTextforDS () = ()
 
+[<Extension>]
+type ExportModuleExt =
     [<Extension>]
-    type ExportModuleExt =
-        [<Extension>]
-        static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string) =
-            let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-            exportXMLforLSPLC (XGI, system, path, existingLSISprj)
+    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string) =
+        let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
+        exportXMLforLSPLC (XGI, system, path, existingLSISprj)
+
+    [<Extension>]
+    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string) =
+        let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
+        exportXMLforLSPLC (XGK, system, path, existingLSISprj)
 

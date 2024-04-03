@@ -126,14 +126,14 @@ module XgiGenerationTestModule =
 """
 
     let codeForBitsHuge = codeForBits31 + """
-        bool x32 = createTag("%IX0.0.2", false);
-        bool x33 = createTag("%IX0.0.3", false);
-        bool x34 = createTag("%IX0.0.4", false);
-        bool x35 = createTag("%IX0.0.5", false);
-        bool x36 = createTag("%IX0.0.6", false);
-        bool x37 = createTag("%IX0.0.7", false);
-        bool x38 = createTag("%IX0.0.7", false);
-        bool x39 = createTag("%IX0.0.7", false);
+        bool x32 = createTag("%IX0.2.2", false);
+        bool x33 = createTag("%IX0.2.3", false);
+        bool x34 = createTag("%IX0.2.4", false);
+        bool x35 = createTag("%IX0.2.5", false);
+        bool x36 = createTag("%IX0.2.6", false);
+        bool x37 = createTag("%IX0.2.7", false);
+        bool x38 = createTag("%IX0.2.8", false);
+        bool x39 = createTag("%IX0.2.9", false);
 
         int nn1 = 1;
         int nn2 = 2;

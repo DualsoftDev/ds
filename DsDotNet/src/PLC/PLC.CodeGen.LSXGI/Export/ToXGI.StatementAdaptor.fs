@@ -526,7 +526,7 @@ module XgiExpressionConvertorModule =
 
     /// S -> [XS]
     let internal commentedStatement2CommentedXgiStatements
-        (prjParam: XgiProjectParams)
+        (prjParam: XgxProjectParams)
         (newLocalStorages: XgiStorage)
         (CommentedStatement(comment, statement))
         : CommentedXgiStatements =

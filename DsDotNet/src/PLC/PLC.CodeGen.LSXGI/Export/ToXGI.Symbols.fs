@@ -42,7 +42,7 @@ module internal XgiSymbolsModule =
                       Some(s, XgiSymbol.DuStorage s) ]
         |> List.choose id
 
-    let autoAllocatorAdress (t:IStorage) (prjParams: XgiProjectParams) = 
+    let autoAllocatorAdress (t:IStorage) (prjParams: XgxProjectParams) = 
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
         if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
@@ -91,7 +91,7 @@ module internal XgiSymbolsModule =
             else  failwith $"Invalid tag address {address} for {name}"
         
 
-    let xgiSymbolToSymbolInfo (prjParams: XgiProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
+    let xgiSymbolToSymbolInfo (prjParams: XgxProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
@@ -179,20 +179,20 @@ module internal XgiSymbolsModule =
                 Kind = kindVar }
 
     let private xgiSymbolsToSymbolInfos
-        (prjParams: XgiProjectParams)
+        (prjParams: XgxProjectParams)
         (kindVar: int)
         (xgiSymbols: XgiSymbol seq)
         : SymbolInfo list =
         xgiSymbols |> map (xgiSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq
 
 
-    let private storagesToSymbolInfos (prjParams: XgiProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
+    let private storagesToSymbolInfos (prjParams: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
         storagesToXgiSymbol >> map snd >> xgiSymbolsToSymbolInfos prjParams kindVar
 
     /// <LocalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
     let storagesToLocalXml
-        (prjParams: XgiProjectParams)
+        (prjParams: XgxProjectParams)
         (localStorages: IStorage seq)
         (globalStoragesRefereces: IStorage seq)
         =
@@ -204,7 +204,7 @@ module internal XgiSymbolsModule =
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
-    let storagesToGlobalXml (prjParams: XgiProjectParams) (globalStorages: IStorage seq) =
+    let storagesToGlobalXml (prjParams: XgxProjectParams) (globalStorages: IStorage seq) =
         //storagesToXml false globalStorages
         let symbolInfos =
             storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages

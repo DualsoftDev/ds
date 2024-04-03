@@ -12,11 +12,11 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
-    let generateXmlXGI (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
+    let generateXmlXGX (plcType:RuntimeTargetType) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
         let projName = system.Name
         
-        let getXgiPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
-            let pouParams: XgiPOUParams =
+        let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
+            let pouParams: XgxPOUParams =
                 {
                   /// POU name.  "DsLogic"
                   POUName = pouName
@@ -31,9 +31,14 @@ module ExportModule =
             pouParams
 
         let usedByteIndices =
+            let tryParseXgxTag =
+                match plcType with
+                | XGI -> tryParseXGITag
+                | XGK -> tryParseXGKTag
+                | _ -> failwithlog "Not supported plc type"
             let getBytes addr = 
                 [  
-                    match tryParseXGITag addr with
+                    match tryParseXgxTag addr with
                     |Some tag -> 
                         if tag.DataType = PLCHwModel.DataType.Bit 
                         then 
@@ -89,23 +94,24 @@ module ExportModule =
 
         logDebug "Used byte indices: %A" usedByteIndices
 
-        let projParams: XgiProjectParams =
-            { defaultXgiProjectParams with
+        let projParams: XgxProjectParams =
+            { defaultXgxProjectParams with
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
                 AppendExpressionTextToRungComment = false
                 MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) usedByteIndices) // 640K M memory 영역
                 POUs =
-                    [ yield pous.Where(fun f -> f.IsActive) |> getXgiPOUParams "Active" "Active"
-                      yield pous.Where(fun f -> f.IsDevice) |> getXgiPOUParams "Devices" "Devices"
+                    [ yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
+                      yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices" "Devices"
                       for p in pous.Where(fun f -> f.IsExternal) do
-                          yield getXgiPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ] ] }
+                          yield getXgxPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ] ] }
 
         projParams.GenerateXmlString()
 
-    let exportXMLforXGI (system: DsSystem, path: string, existingLSISprj) =
-        RuntimeDS.Target <- XGI
+    let exportXMLforLSPLC (plcType:RuntimeTargetType, system: DsSystem, path: string, existingLSISprj) =
+        assert(plcType.IsOneOf(XGI, XGK))
+        RuntimeDS.Target <- plcType
         let globalStorage = new Storages()
         let localStorage = new Storages()
         let result = CpuLoaderExt.LoadStatements(system, globalStorage)
@@ -125,7 +131,7 @@ module ExportModule =
             then globalStorage.Remove(tagKV.Key)|>ignore
             )
 
-        let xml = generateXmlXGI system globalStorage localStorage result existingLSISprj
+        let xml = generateXmlXGX plcType system globalStorage localStorage result existingLSISprj
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)
 
@@ -136,5 +142,6 @@ module ExportModule =
     type ExportModuleExt =
         [<Extension>]
         static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string) =
-            exportXMLforXGI (system, path, if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None)
+            let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
+            exportXMLforLSPLC (XGI, system, path, existingLSISprj)
 

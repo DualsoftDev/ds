@@ -5,6 +5,8 @@ using Engine.TestSimulator;
 using System;
 using System.Drawing;
 using System.IO;
+using System.Threading.Tasks;
+
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
 
@@ -13,7 +15,7 @@ namespace Engine.TestSimulator
     internal class Program
     {
         [STAThread]
-        private static void Main()
+        private static async Task Main()
         {
             string testFile = Path.Combine(AppContext.BaseDirectory
                 , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip");
@@ -28,7 +30,7 @@ namespace Engine.TestSimulator
             DSCommonAppSettings commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
 
             ModelCompileInfo mci = new(runModel.JsonPath, runModel.JsonPath);
-            _ = DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci);
+            _ = await DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci);
             _ = DsSimulator.Do(runModel.Cpu, 10000);
             Console.ReadKey();  
         }

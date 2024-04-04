@@ -16,7 +16,7 @@ module SystemManagerModule =
             else
                 let systemTag = systemTag |> int
                 match dt with
-                | (DuBOOL | DuUINT16 | DuUINT8) ->
+                | (DuBOOL | DuUINT8 | DuUINT16 | DuUINT32) ->
                     createSystemPlanVar stg  name  dt  autoAddr target systemTag sys
                 | _ -> failwithlog $"not support system TagType {dt}"
 
@@ -25,6 +25,7 @@ module SystemManagerModule =
         let dsSysBit    name autoAddr target (t:SystemTag) = (dsSysTag DuBOOL   name  autoAddr target t) :?> PlanVar<bool>
         let dsSysUint8  name autoAddr target (t:SystemTag) = (dsSysTag DuUINT8  name  autoAddr target t) :?> PlanVar<uint8>
         let dsSysUint16 name autoAddr target (t:SystemTag) = (dsSysTag DuUINT16 name  autoAddr target t) :?> PlanVar<uint16>
+        let dsSysUint32 name autoAddr target (t:SystemTag) = (dsSysTag DuUINT32 name  autoAddr target t) :?> PlanVar<uint32>
 
 
         let mutualCalls = getMutualInfo (sys.GetVertices().OfType<Call>().Cast<Vertex>())
@@ -68,7 +69,7 @@ module SystemManagerModule =
         //let dtimeyk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[년대]
 
         let tout     =
-            let tout = dsSysUint16  "systout" true sys SystemTag.timeout 
+            let tout = dsSysUint32  "systout" true sys SystemTag.timeout 
             //type CountUnitType = uint16  => 32bit (msec 단위 필요) //test ahn
             tout.Value <- RuntimeDS.TimeoutCall
             tout

@@ -11,7 +11,6 @@ open Engine.CodeGenCPU
 [<AutoOpen>]
 module DBLoggerApi =
     let private random = Random()
-    [<Obsolete("Remove random test data....")>]
     let private updateInfoBase (x:InfoBase, fqdn:string, kindDrive:int,  kindError:int,  kindPause:int) = 
 
         if DBLoggerImpl.logSet.IsNull() then

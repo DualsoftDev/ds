@@ -26,7 +26,7 @@ module ZmqTestClient =
         let eventIO = IOClient.Xgi.IoEventXGIImpl.IoEventXGI(hwConnStr, iospec.Vendors, client)
 
         scanIO.DoScan()
-        Console.ReadKey()
+        Console.ReadKey() |> ignore
         0  
 
 

@@ -21,9 +21,9 @@ module rec TimerModule =
     // https://stackoverflow.com/questions/8771937/f-rx-using-a-timer
 
     /// Timer / Counter 의 number data type
-    type CountUnitType = uint16
+    type CountUnitType = uint32
 
-    let [<Literal>] MinTickInterval = 20us    //<ms>
+    let [<Literal>] MinTickInterval = 20u    //<ms>
 
     /// 20ms timer: 최소 주기.  Windows 상에서의 더 짧은 주기는 시스템에 무리가 있음!!!!
     let the20msTimer = Observable.Timer(TimeSpan.FromSeconds(0.0), TimeSpan.FromMilliseconds(int MinTickInterval))//.Timestamp()
@@ -80,7 +80,7 @@ module rec TimerModule =
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (timerStruct:>IStorage).DsSystem)
                 .Where(fun (_system, storage, _newValue) -> storage = timerStruct.EN)
                 .Subscribe(fun (_system, _storage, newValue) ->
-                    if ts.ACC.Value < 0us || ts.PRE.Value < 0us then failwithlog "ERROR"
+                    if ts.ACC.Value < 0u || ts.PRE.Value < 0u then failwithlog "ERROR"
                     let rungInCondition = newValue :?> bool
                     //debugfn "%A rung-condition-in=%b with DN=%b" tt rungInCondition ts.DN.Value
                     match tt, rungInCondition with
@@ -98,7 +98,7 @@ module rec TimerModule =
                         ts.EN.Value <- true
                         ts.TT.Value <- false     // spec 상충함 : // https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 와 https://edisciplinas.usp.br/pluginfile.php/184942/mod_resource/content/1/Logix5000%20-%20Manual%20de%20Referencias.pdf 설명이 다름
                         ts.DN.Value <- true
-                        ts.ACC.Value <- 0us
+                        ts.ACC.Value <- 0u
 
                     | TMR, true ->
                         if ts.DN.Value then
@@ -116,7 +116,7 @@ module rec TimerModule =
                 .Subscribe(fun (_system, _storage, newValue) ->
                     let resetCondition = newValue :?> bool
                     if resetCondition then
-                        ts.ACC.Value <- 0us
+                        ts.ACC.Value <- 0u
                         ts.DN.Value <- false
                 ) |> disposables.Add
 
@@ -166,7 +166,7 @@ module rec TimerModule =
             clearVarBoolsOnDemand( [x.DN; x.LD;] )
             clearBool(x.LD)
             if x.ACC |> isItNull |> not then
-                x.ACC.Value <- 0us
+                x.ACC.Value <- 0u
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
         for t in ts do
@@ -175,6 +175,9 @@ module rec TimerModule =
 
     let createUShortTagKind name iniValue tagKind = fwdCreateUShortMemberVariable name iniValue tagKind
     let createUShort name iniValue  = createUShortTagKind name iniValue -1
+
+    let createUInt32TagKind name iniValue tagKind = fwdCreateUInt32MemberVariable name iniValue tagKind
+    let createUInt32 name iniValue  = createUInt32TagKind name iniValue -1
 
     let createBoolWithTagKind name iniValue tagKind = fwdCreateBoolMemberVariable name iniValue tagKind
     let createBool name iniValue  = createBoolWithTagKind name iniValue -1
@@ -198,8 +201,8 @@ module rec TimerModule =
             let en  = createBool              $"{name}.{en }" false
             let tt  = createBool              $"{name}.{tt }" false
             let dn  = createBoolWithTagKind   $"{name}.{dn }" false (VariableTag.PcSysVariable|>int) // Done
-            let pre = createUShort            $"{name}.{pre}" preset
-            let acc = createUShort            $"{name}.{acc}" accum
+            let pre = createUInt32            $"{name}.{pre}" preset
+            let acc = createUInt32            $"{name}.{acc}" accum
             let res = createBool              $"{name}.{res}" false
             
             storages.Add(en.Name, en)
@@ -220,7 +223,7 @@ module rec TimerModule =
         override x.ResetStruct() =
             base.ResetStruct()
             x.ClearBits()
-            x.ACC.Value <- 0us
+            x.ACC.Value <- 0u
             // x.PRE.Value <- 0us       // preset 도 clear 해야 하는가?
             ()
 

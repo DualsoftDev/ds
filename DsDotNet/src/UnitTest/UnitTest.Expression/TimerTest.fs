@@ -24,7 +24,7 @@ module TimerTestModule =
             let storages = Storages()
             let t1 = createTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTon"; Preset=200us; RungInCondition=condition; FunctionName="createWinTON"}
+            let tcParam = {Storages=storages; Name="myTon"; Preset=200u; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
@@ -120,7 +120,7 @@ module TimerTestModule =
             let storages = Storages()
             let t1 = createTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTOF"}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=200u; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
@@ -133,7 +133,7 @@ module TimerTestModule =
             let storages = Storages()
             let t1 = createTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTON"}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=200u; RungInCondition=condition; FunctionName="createWinTON"}
             let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
@@ -146,7 +146,7 @@ module TimerTestModule =
             let storages = Storages()
             let t1 = createTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myTof"; Preset=200us; RungInCondition=condition; FunctionName="createWinTOF"}
+            let tcParam = {Storages=storages; Name="myTof"; Preset=200u; RungInCondition=condition; FunctionName="createWinTOF"}
             let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
@@ -156,7 +156,7 @@ module TimerTestModule =
             timer.TT.Value === true
             timer.DN.Value === true
             timer.PRE.Value === 200us
-            (0us <= timer.ACC.Value && timer.ACC.Value <= 100us) === true
+            (0u <= timer.ACC.Value && timer.ACC.Value <= 100u) === true
 
             t1.Value <- true
             evaluateRungInputs timer
@@ -184,7 +184,7 @@ module TimerTestModule =
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
-            timer.ACC.Value <= 100us === true
+            timer.ACC.Value <= 100u === true
 
 
         [<Test>]
@@ -194,14 +194,14 @@ module TimerTestModule =
             let resetTag = createTag("my_timer_reset_tag", "%M1.1", false)
             let condition = var2expr rungConditionInTag
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myTmr"; Preset=100us; RungInCondition=condition; FunctionName="createWinTMR"}
+            let tcParam = {Storages=storages; Name="myTmr"; Preset=100u; RungInCondition=condition; FunctionName="createWinTMR"}
             let timer = TimerStatement.CreateTMR(tcParam, reset) |> toTimer       // 1000ms = 1sec
 
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
             timer.PRE.Value === 100us
-            timer.ACC.Value <= 50us === true
+            timer.ACC.Value <= 50u === true
             timer.RES.Value === false
 
             // rung 입력 조건이 false : Pause
@@ -210,7 +210,7 @@ module TimerTestModule =
             timer.EN.Value === false
             timer.TT.Value === false
             System.Threading.Thread.Sleep(120)
-            timer.ACC.Value < 100us === true
+            timer.ACC.Value < 100u === true
             timer.DN.Value === false
 
             // rung 입력 조건이 false

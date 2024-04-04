@@ -47,7 +47,7 @@ module TimerStatementModule =
         generateTimerStatement (ts, tParams)
 
     let private createTimerStatement (storages:Storages) (tParams:TimerCreateParams)  : Statement =
-        let ts = TimerStruct.Create(tParams.Type, storages, tParams.Name, tParams.Preset, 0us, RuntimeDS.System)
+        let ts = TimerStruct.Create(tParams.Type, storages, tParams.Name, tParams.Preset, 0u, RuntimeDS.System)
         generateTimerStatement (ts, tParams)
 
 

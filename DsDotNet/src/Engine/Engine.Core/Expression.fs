@@ -275,7 +275,7 @@ module ExpressionModule =
                     match cs.UpCondition    with | Some c -> c.ToText(false) | None -> ()
                     match cs.DownCondition  with | Some c -> c.ToText(false) | None -> ()
                     match cs.ResetCondition with | Some c -> c.ToText(false) | None -> ()
-                    if c.ACC.Value <> 0us then
+                    if c.ACC.Value <> 0u then
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"

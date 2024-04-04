@@ -56,7 +56,7 @@ module CounterStatementModule =
         DuCounter counterStatement
 
     let (*private*) createCounterStatement (storages:Storages) (cParams:CounterCreateParams) : Statement =
-        let accum = 0us
+        let accum = 0u
         let cs =    // counter structure
             let typ = cParams.Type
             let name = cParams.Name
@@ -87,7 +87,7 @@ module CounterStatementModule =
     let defaultCounterCreateParam = {
         Type=CTU
         Name=""
-        Preset=0us
+        Preset=0u
         CountUpCondition=None
         CountDownCondition=None
         ResetCondition=None

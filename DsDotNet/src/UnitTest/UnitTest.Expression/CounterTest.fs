@@ -31,7 +31,7 @@ open PLC.CodeGen.LSXGI
             let storages = Storages()
             let t1 = createTag("my_counter_control_tag", "%M1.1", false)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTU"}
             let ctu = CounterStatement.CreateAbCTU(tcParam) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
@@ -87,7 +87,7 @@ open PLC.CodeGen.LSXGI
             let downCondition = var2expr t2
             let resetCondition = var2expr t3
 
-            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=upCondition; FunctionName="createWinCTUD"}
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=upCondition; FunctionName="createWinCTUD"}
             let ctu = CounterStatement.CreateAbCTUD(tcParam, downCondition, resetCondition) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
@@ -121,7 +121,7 @@ open PLC.CodeGen.LSXGI
             let resetTag = createTag("my_counter_reset_tag", "%M1.1", false)
             let condition = var2expr t1
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTU"}
             let ctu = CounterStatement.CreateCTU(tcParam, reset) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
@@ -161,7 +161,7 @@ open PLC.CodeGen.LSXGI
             let resetTag = createTag("my_counter_reset_tag", "%M1.1", false)
             let condition = var2expr t1
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myCTR"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTR"}
+            let tcParam = {Storages=storages; Name="myCTR"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTR"}
             let ctr = CounterStatement.CreateXgiCTR(tcParam, reset) |> toCounter
             ctr.OV.Value === false
             ctr.UN.Value === false

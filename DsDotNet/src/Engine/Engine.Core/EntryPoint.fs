@@ -19,3 +19,9 @@ module ModuleInitializer =
             createUShortTag
 
 
+        fwdCreateUInt32MemberVariable <-
+            let createUInt32Tag name value tagKind  =
+                let param = {defaultStorageCreationParams(value) tagKind  with Name=name; }
+                MemberVariable<uint32>(param) :> VariableBase<uint32>
+            createUInt32Tag
+

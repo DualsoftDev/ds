@@ -39,7 +39,7 @@ module ExportToPdfModule =
             table.Style.HeaderStyle.BackgroundBrush <- PdfBrushes.Gray
             table.Style.HeaderStyle.TextBrush <- PdfBrushes.White
             table.Style.HeaderStyle.StringFormat <- new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle)
-            table.Style.DefaultStyle.Font <- new PdfTrueTypeFont("¸¼Àº °íµñ", 10f, PdfFontStyle.Regular, true )
+            table.Style.DefaultStyle.Font <- new PdfTrueTypeFont("¸¼Àº °íµñ", 9f, PdfFontStyle.Regular, true )
 
             // Set text alignment for the rest of the cells
             for i in 0 .. table.Columns.Count - 1 do

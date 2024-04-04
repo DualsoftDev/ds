@@ -476,20 +476,23 @@ module ExportIOTable =
               name
               "bool"
               address
-               ]
+            ]
 
         let rows =
             let hws = sys.HWSystemDefs.Where(fun f->f :? ButtonDef || f :? LampDef )
                                       .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
                                       .OrderBy(fun (name, addr) -> addr)
             hws
-                |> Seq.map (fun (name, addr)  -> 
+                |> Seq.map (fun (name, addr) -> 
                     rowItems (name, addr)
                     )
 
-        addRows rows dt
-        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
 
+        addRows rows dt
+
+        addRows [[ "simulationLamp"; "bool"; RuntimeDS.EmulationAddress]] dt
+
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
      
         emptyLine ()
         dt

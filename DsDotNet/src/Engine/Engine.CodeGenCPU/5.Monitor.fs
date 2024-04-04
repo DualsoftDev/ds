@@ -39,10 +39,10 @@ type VertexManager with
         let v= v :?> VertexMCoin
         let call= v.Vertex.GetPure() :?> Call
         let real= call.Parent.GetCore() :?> Real
-        let dop = call.V.Flow.d_st.Expr
+        let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.clear_btn.Expr
         [
-            let running = v.MM.Expr <&&> !!call.EndActionOnlyIO <&&> dop
+            let running = v.MM.Expr <&&> !!call.EndActionOnlyIO <&&> !!iop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
 
             match RuntimeDS.Package with 

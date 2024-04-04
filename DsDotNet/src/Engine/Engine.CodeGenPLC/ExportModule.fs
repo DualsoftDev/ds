@@ -118,12 +118,12 @@ module ExportModule =
         RuntimeDS.Target <- plcType
         let globalStorage = new Storages()
         let localStorage = new Storages()
-        let result = CpuLoaderExt.LoadStatements(system, globalStorage)
-        // Create a list to hold commented statements
+        let pous = CpuLoaderExt.LoadStatements(system, globalStorage)
+        // Create a list to hold <C>ommented <S>tatement<S>
         let mutable css = []
 
         // Add commented statements from each CPU
-        for cpu in result do
+        for cpu in pous do
             css <- css @ cpu.CommentedStatements() |> List.ofSeq
 
         let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
@@ -135,7 +135,7 @@ module ExportModule =
             then globalStorage.Remove(tagKV.Key)|>ignore
             )
 
-        let xml = generateXmlXGX plcType system globalStorage localStorage result existingLSISprj
+        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)
 

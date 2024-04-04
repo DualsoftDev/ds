@@ -13,12 +13,14 @@ module ConvertCpuFlow =
     
     let getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool>  =
         let tags = btns.Where(fun b -> b.SettingFlows.Contains(flow))
+                       .Where(fun b ->b.InTag.IsNonNull())
                        .Select(fun b ->b.ActionINFunc)
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
     let getConditionsError(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
         let tags = condis
                     .Where(fun c -> c.SettingFlows.Contains(flow))
+                    .Where(fun c ->c.InTag.IsNonNull())
                     .Select(fun c -> !!c.ActionINFunc)
         if tags.any() then tags.ToOrElseOff() else flow.System._off.Expr
 

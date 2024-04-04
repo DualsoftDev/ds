@@ -42,6 +42,7 @@ public partial class UcView : UserControl
     int node_attr_linewidthH = 4;
     int node_attr_linewidthL = 1;
     int edge_attr_linewidthWeek = 1;
+    int edge_attr_HeadSize = 5;
     int edge_attr_linewidthStrong = 2;
     int nnode_label_fontsize = 6;
 
@@ -178,6 +179,7 @@ public partial class UcView : UserControl
         {
             gEdge.Attr.AddStyle(Style.Solid);
             gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
+            gEdge.Attr.ArrowheadLength = edge_attr_HeadSize;
         }
         else if (et == ModelingEdgeType.StartPush)
         {
@@ -200,6 +202,13 @@ public partial class UcView : UserControl
         else if (et == ModelingEdgeType.InterlockWeak)
         {
             gEdge.Attr.AddStyle(Style.Dashed);
+            gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+        }
+        else if (et == ModelingEdgeType.InterlockStrong)
+        {
+            gEdge.Attr.AddStyle(Style.Dashed);
+            gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
             gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
         }

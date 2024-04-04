@@ -63,6 +63,7 @@ module RuntimeGeneratorModule =
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
         static let mutable callTimeout = 15000us
+        static let mutable emulationAddress = ""
 
         static member Target
             with get() = runtimeTarget
@@ -76,6 +77,7 @@ module RuntimeGeneratorModule =
         static member val IP = "192.168.9.100" with get, set
 
         static member val TimeoutCall = callTimeout  with get, set
+        static member val EmulationAddress = emulationAddress  with get, set
         static member TargetChangedSubject = targetChangedSubject
 
         static member Package

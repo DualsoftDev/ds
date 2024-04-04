@@ -113,7 +113,8 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationEmulationMemory()  = 
             x._emulation.Address <- getValidAddress(TextAddrEmpty, x._emulation.Name, false, IOType.Memory)
-
+            RuntimeDS.EmulationAddress <- x._emulation.Address 
+            
          
         member private x.GenerationCallAlarmMemory()  = 
             for call in x.GetVerticesOfCoins().OfType<Call>() 
@@ -152,7 +153,7 @@ module ConvertCpuDsSystem =
                         dev.OutTag <- outT; dev.OutAddress <- outT.Address
                 else 
                     if  dev.InAddress <> TextSkip then
-                        let inT = createBridgeTag(x.Storages, dev.ApiName, ExternalTempMemory, (int)ActionTag.ActionIn , BridgeType.Device, x , dev).Value
+                        let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev).Value
                         dev.InTag <- inT  ; dev.InAddress <- inT.Address
                       
 

@@ -20,7 +20,7 @@ type LibraryPPTLoaderExt =
     [<Extension>] 
         static member saveLibraryConfig(directoryPath:string) =
             let files = Directory.GetFiles(directoryPath, "*.pptx", SearchOption.AllDirectories)
-            let informationalVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+            let informationalLib = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyDescriptionAttribute>().Description
             let infos = Dictionary<string, string>()
             let configPath = Path.Combine(directoryPath, "Library.config");
 
@@ -36,7 +36,7 @@ type LibraryPPTLoaderExt =
                         else 
                             infos.Add(item.Name, PathManager.getValidFile relPathAddLibDirPath)
         
-            { Version = informationalVersion; LibraryInfos = infos } 
+            { Version = informationalLib; LibraryInfos = infos } 
             |> SaveLibraryConfig configPath
 
 

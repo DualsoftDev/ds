@@ -507,7 +507,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                           | _ -> 
                                     let errText = String.Join(", ", apiPath.ToArray())
-                                    failwithlog $"device loading type error ({errText})"
+                                    failwithlog $"loading type error ({errText})device"
                           ]
 
                 let funcSet = commonFunctionSetter jobName jobFuncs

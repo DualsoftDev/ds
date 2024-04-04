@@ -14,6 +14,8 @@ module ConvertCpuTaskDev =
 
     type HwSystemDef with
         member s.ActionINFunc = 
-            let inTag = (s.InTag :?> Tag<bool>).Expr
-            if hasNot (s.Func)
-            then !!inTag else inTag  
+            match  s.InTag with
+            | :? Tag<bool> as inTag -> 
+                if hasNot (s.Func)
+                then !!inTag.Expr else inTag.Expr
+            | _ -> failwithf $"{s.Name} input address is empty."

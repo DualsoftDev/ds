@@ -566,14 +566,14 @@ module ExportIOTable =
 
             
         [<Extension>]
-        static member ExportHMITableToExcel (system: DsSystem) (filePath: string) =
+        static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) =
             let dataTables = [|
-                                ToManualTable_Memory system;
-                                ToManualTable_IN system;
-                                ToManualTable_OUT system;
-                                ToManualTable_BtnLamp system;
-                                ToDevicesTable system;
-                                ToAlramTable system
+                                ToManualTable_Memory sys
+                                ToManualTable_IN sys
+                                ToManualTable_OUT sys
+                                ToManualTable_BtnLamp sys
+                                ToAlramTable sys
+                                ToDevicesTable sys
                                 |]
             createSpreadsheet filePath dataTables 25.0 false
 

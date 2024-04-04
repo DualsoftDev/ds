@@ -43,6 +43,8 @@ module CounterStatementModule =
 
         match cParams.LoadCondition with
         | Some load ->
+            failwith <| "Load condition is not supported for XGK compatibility"
+
             let statement = DuAssign (load, cs.LD)
             statement.Do()
             statements.Add statement

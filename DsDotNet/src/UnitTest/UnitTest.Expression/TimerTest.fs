@@ -29,8 +29,8 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 0us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 0u
 
             (* Timer struct 의 내부 tag 들이 생성되고, 등록되었는지 확인 *)
             let internalTags =
@@ -60,8 +60,8 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 200us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 200u
 
 
             // rung 입력 조건이 false
@@ -70,8 +70,8 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.DN.Value === false
             timer.EN.Value === false
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 0us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 0u
 
         [<Test>]
         member x.``TON creation with text test`` () =
@@ -80,14 +80,14 @@ module TimerTestModule =
             let storages = Storages()
             storages.Add(t1.Name, t1)
 
-            let statement:Statement = "ton myTon = createWinTON(200us, $my_timer_control_tag)" |> tryParseStatement storages |> Option.get
+            let statement:Statement = "ton myTon = createWinTON(200u, $my_timer_control_tag)" |> tryParseStatement storages |> Option.get
             let timer = toTimer statement
 
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 0us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 0u
 
             // rung 입력 조건이 true
             t1.Value <- true
@@ -102,8 +102,8 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.DN.Value === true
             timer.EN.Value === true
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 200us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 200u
 
 
             // rung 입력 조건이 false
@@ -112,8 +112,8 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.DN.Value === false
             timer.EN.Value === false
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 0us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 0u
 
         [<Test>]
         member __.``TOF creation with initial TRUE test`` () =
@@ -125,8 +125,8 @@ module TimerTestModule =
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 0us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 0u
 
         [<Test>]
         member __.``TOF creation with initial FALSE test`` () =
@@ -138,8 +138,8 @@ module TimerTestModule =
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
-            timer.PRE.Value === 200us
-            timer.ACC.Value === 0us
+            timer.PRE.Value === 200u
+            timer.ACC.Value === 0u
 
         [<Test>]
         member __.``TOF creation with t -> f -> t -> F -> t test`` () =
@@ -155,7 +155,7 @@ module TimerTestModule =
             timer.EN.Value === false
             timer.TT.Value === true
             timer.DN.Value === true
-            timer.PRE.Value === 200us
+            timer.PRE.Value === 200u
             (0u <= timer.ACC.Value && timer.ACC.Value <= 100u) === true
 
             t1.Value <- true
@@ -176,7 +176,7 @@ module TimerTestModule =
             timer.EN.Value === false
             timer.TT.Value === false
             timer.DN.Value === false
-            timer.ACC.Value === 200us
+            timer.ACC.Value === 200u
 
             t1.Value <- true
             evaluateRungInputs timer
@@ -200,7 +200,7 @@ module TimerTestModule =
             timer.EN.Value === true
             timer.TT.Value === true
             timer.DN.Value === false
-            timer.PRE.Value === 100us
+            timer.PRE.Value === 100u
             timer.ACC.Value <= 50u === true
             timer.RES.Value === false
 
@@ -221,14 +221,14 @@ module TimerTestModule =
             timer.DN.Value === false
             System.Threading.Thread.Sleep(120)
             timer.DN.Value === true
-            timer.ACC.Value === 100us
+            timer.ACC.Value === 100u
 
 
             // reset 입력 조건이 true
             resetTag.Value <- true
             evaluateRungInputs timer
             timer.EN.Value === true
-            timer.ACC.Value === 0us
+            timer.ACC.Value === 0u
 
 
 
@@ -238,7 +238,7 @@ module TimerTestModule =
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
-                ton myTon = createWinTON(200us, $x0);
+                ton myTon = createWinTON(200u, $x0);
 """
 
             let statement = parseCode storages code
@@ -252,7 +252,7 @@ module TimerTestModule =
                 let storages = Storages()
                 let code = """
                     bool x0 = createTag("%MX0.0.0", false);
-                    ton myTon = createXgiTON(200us, $x0);
+                    ton myTon = createXgiTON(200u, $x0);
     """
 
                 let statement = parseCode storages code

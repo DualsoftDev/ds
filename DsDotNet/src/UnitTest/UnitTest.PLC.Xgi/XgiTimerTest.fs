@@ -25,7 +25,7 @@ type XgiTimerTest() =
             bool x2 = createTag("%IX0.0.2", false);
 
             bool x7 = createTag("%IX0.0.7", false);
-            ton myTon = createXgiTON(2000us, $myQBit0);
+            ton myTon = createXgiTON(2000u, $myQBit0);
             $x7 := ($x0 || $x1) && $x2;
 """
         let statements = parseCode storages code
@@ -40,7 +40,7 @@ type XgiTimerTest() =
     member __.``TIMER= Many1 AND RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            ton myTon = createXgiTON(2000us,
+            ton myTon = createXgiTON(2000u,
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
                 && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
 """
@@ -53,7 +53,7 @@ type XgiTimerTest() =
     member __.``TIMER= Many2 AND RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            ton myTon = createXgiTON(2000us,
+            ton myTon = createXgiTON(2000u,
                 // 산전 limit : 가로로 31개
                 //let coilCellX = 31
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
@@ -79,7 +79,7 @@ type XgiTimerTest() =
     member __.``TIMER= Many1 OR RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            ton myTon = createXgiTON(2000us,
+            ton myTon = createXgiTON(2000u,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
 """
@@ -93,7 +93,7 @@ type XgiTimerTest() =
     member __.``TIMER= Many2 OR RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            ton myTon = createXgiTON(2000us,
+            ton myTon = createXgiTON(2000u,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
 
@@ -115,7 +115,7 @@ type XgiTimerTest() =
     member __.``TIMER= Many And, OR RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
-            ton myTon = createXgiTON(2000us,
+            ton myTon = createXgiTON(2000u,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 &&
@@ -139,7 +139,7 @@ type XgiTimerTest() =
     member __.``TIMER= Many And, OR RungIn Condition test2`` () =
         let storages = Storages()
         let code = codeForBits + """
-            ton myTon = createXgiTON(2000us,
+            ton myTon = createXgiTON(2000u,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 && $x00 &&

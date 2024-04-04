@@ -22,7 +22,7 @@ type XgiCounterTest() =
         let code = """
             bool cu = createTag("%IX0.0.0", false);
             bool res = createTag("%IX0.0.1", false);
-            ctu myCTU = createXgiCTU(2000us, $cu, $res);
+            ctu myCTU = createXgiCTU(2000u, $cu, $res);
 """
         let statements = parseCode storages code
         let f = getFuncName()
@@ -36,7 +36,7 @@ type XgiCounterTest() =
         let code = """
             bool cd = createTag("%IX0.0.0", false);
             bool load = createTag("%IX0.0.1", false);
-            ctd myCTD = createXgiCTD(2000us, $cd, $load);
+            ctd myCTD = createXgiCTD(2000u, $cd, $load);
 """
         let statements = parseCode storages code
         let f = getFuncName()
@@ -51,7 +51,7 @@ type XgiCounterTest() =
             bool cd = createTag("%IX0.0.1", false);
             bool r  = createTag("%IX0.0.2", false);
             bool ld = createTag("%IX0.0.3", false);
-            ctud myCTUD = createXgiCTUD(2000us, $cu, $cd, $r, $ld);
+            ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
 """
         let statements = parseCode storages code
         let f = getFuncName()
@@ -64,7 +64,7 @@ type XgiCounterTest() =
         let code = """
             bool cd = createTag("%IX0.0.0", false);
             bool res = createTag("%IX0.0.1", false);
-            ctr myCTR = createXgiCTR(2000us, $cd, $res);
+            ctr myCTR = createXgiCTR(2000u, $cd, $res);
             //int x7 = createTag("%QX0.1", 0);
             //$x7 := $myCTR.CV;
             $myCTR.RST := $cd;
@@ -87,7 +87,7 @@ type XgiCounterTest() =
             bool res2 = false;
 
             bool xx7 = false;
-            ctu myCTU = createXgiCTU(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
+            ctu myCTU = createXgiCTU(2000u, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
@@ -107,7 +107,7 @@ type XgiCounterTest() =
             bool res2 = false;
 
             bool xx7 = false;
-            ctd myCTD = createXgiCTD(2000us, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
+            ctd myCTD = createXgiCTD(2000u, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
         let statements = parseCode storages code
@@ -127,7 +127,7 @@ type XgiCounterTest() =
             bool res2 = false;
 
             bool xx7 = false;
-            ctr myCTR = createXgiCTR(2000us, ($cd1 && $cd2) || $cd3, ($res0 || $res1) && $res2 );
+            ctr myCTR = createXgiCTR(2000u, ($cd1 && $cd2) || $cd3, ($res0 || $res1) && $res2 );
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
@@ -148,7 +148,7 @@ type XgiCounterTest() =
             bool res2 = false;
 
             bool xx7 = false;
-            ctr myCTR = createXgiCTR(2000us, ($cd1 && $cd2 || $cd3 || $cd4) && $cd3, ($res0 || $res1) && $res2 );
+            ctr myCTR = createXgiCTR(2000u, ($cd1 && $cd2 || $cd3 || $cd4) && $cd3, ($res0 || $res1) && $res2 );
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
         let statements = parseCode storages code
@@ -179,7 +179,7 @@ type XgiCounterTest() =
             bool xx7 = false;
             ctud myCTUD =
                 createXgiCTUD(
-                    2000us
+                    2000u
                     , ($cu1 && $cu2) || $cu3 || $cu4
                     , $cd1 || $cd2 || $cd3 && $cd4
                     , $res0 || $res1 && $res2

@@ -109,10 +109,10 @@ module internal rec Command =
     let private obe2e (obe: IExpression<bool> option) : IExpression = obe.Value :> IExpression
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
-    // <timer>
-    let drawFunctionBlockTimer (x, y) (timerStatement: TimerStatement) : BlockSummarizedXmlElements =
+    // <timer> for XGI
+    let private drawFunctionBlockTimer (x, y) (timerStatement: TimerStatement) : BlockSummarizedXmlElements =
         let ts = timerStatement
-        let typ = ts.Timer.Type
+        let typ = ts.Timer.Type     // TON, TOF, TMR
         let time: int = int ts.Timer.PRE.Value
 
         let inputParameters =
@@ -130,7 +130,7 @@ module internal rec Command =
 
         blockXml
 
-    let drawFunctionBlockCounter (x, y) (counterStatement: CounterStatement) : BlockSummarizedXmlElements =
+    let private drawFunctionBlockCounter (x, y) (counterStatement: CounterStatement) : BlockSummarizedXmlElements =
 
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -162,6 +162,7 @@ module internal rec Command =
             createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters
 
         blockXml
+
 
     type System.Type with
 
@@ -224,173 +225,173 @@ module internal rec Command =
             createBoxXmls (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
 
     let createFunctionBlockInstanceXmls
-        (rungStartX, rungStartY)
-        (cmd: CommandTypes)
-        (namedInputParameters: (string * IExpression) list)
-        (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
+            (rungStartX, rungStartY)
+            (cmd: CommandTypes)
+            (namedInputParameters: (string * IExpression) list)
+            (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
         : BlockSummarizedXmlElements =
-        let func = cmd.VarType.ToString()
-        let instanceName = cmd.InstanceName
-        createBoxXmls (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName
+            let func = cmd.VarType.ToString()
+            let instanceName = cmd.InstanceName
+            createBoxXmls (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName
 
     /// cmd 인자로 주어진 function block 의 type 과
     /// namedInputParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
     /// function block rung 을 그린다.
     let createBoxXmls
-        (rungStartX, rungStartY)
-        (functionName: string)
-        (namedInputParameters: (string * IExpression) list)
-        (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
-        (instanceName: string)
+            (rungStartX, rungStartY)
+            (functionName: string)
+            (namedInputParameters: (string * IExpression) list)
+            (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
+            (instanceName: string)
         : BlockSummarizedXmlElements =
-        let iDic = namedInputParameters |> dict
-        let oDic = namedOutputParameters |> Tuple.toDictionary
+            let iDic = namedInputParameters |> dict
+            let oDic = namedOutputParameters |> Tuple.toDictionary
 
-        let systemTypeToXgiType (typ: System.Type) =
-            systemTypeToXgiTypeName typ |> DU.tryParseEnum<CheckType> |> Option.get
+            let systemTypeToXgiType (typ: System.Type) =
+                systemTypeToXgiTypeName typ |> DU.tryParseEnum<CheckType> |> Option.get
 
-        /// 입력 인자들을 function 의 입력 순서 맞게 재배열
-        let alignedInputParameters =
-            /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
-            let inputSpecs = getFunctionInputSpecs functionName |> Array.ofSeq
+            /// 입력 인자들을 function 의 입력 순서 맞게 재배열
+            let alignedInputParameters =
+                /// e.g ["CD, 0x00200001, , 0"; "LD, 0x00200001, , 0"; "PV, 0x00200040, , 0"]
+                let inputSpecs = getFunctionInputSpecs functionName |> Array.ofSeq
 
-            namedInputParameters.Length = inputSpecs.Length
-            |> verifyM "ERROR: Function input parameter mismatch."
+                namedInputParameters.Length = inputSpecs.Length
+                |> verifyM "ERROR: Function input parameter mismatch."
 
-            [| for s in inputSpecs do
-                   let exp = iDic[s.Name]
-                   let exprDataType = systemTypeToXgiType exp.DataType
+                [| for s in inputSpecs do
+                       let exp = iDic[s.Name]
+                       let exprDataType = systemTypeToXgiType exp.DataType
 
-                   let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ]
+                       let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ]
 
-                   if (typeCheckExcludes.Any(fun ex -> functionName = ex || functionName.StartsWith($"{ex}_"))) then
-                       () // xxx: timer, counter 에 대해서는 일단, type check skip
-                   else
-                       s.CheckType.HasFlag(exprDataType) |> verify
+                       if (typeCheckExcludes.Any(fun ex -> functionName = ex || functionName.StartsWith($"{ex}_"))) then
+                           () // xxx: timer, counter 에 대해서는 일단, type check skip
+                       else
+                           s.CheckType.HasFlag(exprDataType) |> verify
 
-                   s.Name, exp, s.CheckType |]
+                       s.Name, exp, s.CheckType |]
 
-        /// 출력 인자들을 function 의 출력 순서 맞게 재배열
-        let alignedOutputParameters =
-            /// e.g ["ENO, 0x00200001, , 0"; "OUT, 0x00200001, , 0";]
-            let outputSpecs = getFunctionOutputSpecs functionName |> Array.ofSeq
+            /// 출력 인자들을 function 의 출력 순서 맞게 재배열
+            let alignedOutputParameters =
+                /// e.g ["ENO, 0x00200001, , 0"; "OUT, 0x00200001, , 0";]
+                let outputSpecs = getFunctionOutputSpecs functionName |> Array.ofSeq
 
-            [ for (i, s) in outputSpecs.Indexed() do
-                  option {
-                      let! terminal = oDic.TryFind(s.Name)
+                [ for (i, s) in outputSpecs.Indexed() do
+                      option {
+                          let! terminal = oDic.TryFind(s.Name)
 
-                      match terminal with
-                      | :? IStorage as storage -> s.CheckType.HasFlag(systemTypeToXgiType storage.DataType) |> verify
-                      | _ -> ()
+                          match terminal with
+                          | :? IStorage as storage -> s.CheckType.HasFlag(systemTypeToXgiType storage.DataType) |> verify
+                          | _ -> ()
 
-                      return s.Name, i, terminal, s.CheckType
-                  } ]
-            |> List.choose id
+                          return s.Name, i, terminal, s.CheckType
+                      } ]
+                |> List.choose id
 
-        let (x, y) = (rungStartX, rungStartY)
+            let (x, y) = (rungStartX, rungStartY)
 
-        /// y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
-        let reservedLiteralInputParam = ResizeArray<int * IExpression>()
-        let mutable sy = 0
+            /// y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
+            let reservedLiteralInputParam = ResizeArray<int * IExpression>()
+            let mutable sy = 0
 
-        let inputBlockXmls =
-            [ for (portOffset, (_name, exp, checkType)) in alignedInputParameters.Indexed() do
-                  if portOffset > 0 && exp.Terminal.IsSome then
-                      (y + portOffset, exp) |> reservedLiteralInputParam.Add
-                      sy <- sy + 1
-                  else
-                      checkType.HasFlag CheckType.BOOL
-                      |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
+            let inputBlockXmls =
+                [ for (portOffset, (_name, exp, checkType)) in alignedInputParameters.Indexed() do
+                      if portOffset > 0 && exp.Terminal.IsSome then
+                          (y + portOffset, exp) |> reservedLiteralInputParam.Add
+                          sy <- sy + 1
+                      else
+                          checkType.HasFlag CheckType.BOOL
+                          |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
 
-                      let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
-                      portOffset, blockXml
-                      sy <- sy + blockXml.TotalSpanY ]
+                          let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
+                          portOffset, blockXml
+                          sy <- sy + blockXml.TotalSpanY ]
 
-        /// 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요
-        let plusHorizontalPadding = inputBlockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
+            /// 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요
+            let plusHorizontalPadding = inputBlockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
 
-        /// function start X
-        let fsx = inputBlockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
+            /// function start X
+            let fsx = inputBlockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
 
-        let outputCellXmls =
-            [ for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
-                  createFBParameterXml (fsx + 1, y + yoffset) terminal.StorageName ]
+            let outputCellXmls =
+                [ for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
+                      createFBParameterXml (fsx + 1, y + yoffset) terminal.StorageName ]
 
-        /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
-        let tentacleXmls =
-            [ for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
-                  let i = inputBlockIndex
-                  let bex = b.X + b.TotalSpanX // block end X
-                  let bey = b.Y
-                  let c = coord (bex, bey)
-                  let spanX = (fsx - bex)
+            /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
+            let tentacleXmls =
+                [ for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
+                      let i = inputBlockIndex
+                      let bex = b.X + b.TotalSpanX // block end X
+                      let bey = b.Y
+                      let c = coord (bex, bey)
+                      let spanX = (fsx - bex)
 
-                  if b.TotalSpanX > 1 then
-                      /// 'S' shape 의 하단부 수평선 끝점 x 좌표
-                      let hEndX = if i = 0 then fsx - 1 else bex + i - 1
+                      if b.TotalSpanX > 1 then
+                          /// 'S' shape 의 하단부 수평선 끝점 x 좌표
+                          let hEndX = if i = 0 then fsx - 1 else bex + i - 1
 
-                      yield!
-                          tryHlineTo (bex, bey) (hEndX)
-                          |> map (fun xml ->
-                              tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
-
-                              { Coordinate = c
-                                Xml = xml
-                                SpanX = spanX
-                                SpanY = 1 })
-
-                      if i > 0 then
-                          let bexi = bex + i
-                          let yi = y + portOffset
-                          tracefn $"V: ({bexi - 1}, {bey}) -> [({bexi - 1}, {yi})]"
-                          // 'S' shape 의 세로선 그리기
-                          yield! vlineUpTo (bexi - 1, bey) yi
-
-                          // 'S' shape 의 상단부 수평선 그리기
                           yield!
-                              tryHlineTo (bexi, yi) (fsx - 1)
+                              tryHlineTo (bex, bey) (hEndX)
                               |> map (fun xml ->
-                                  tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
+                                  tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
 
                                   { Coordinate = c
                                     Xml = xml
                                     SpanX = spanX
-                                    SpanY = 1 }) ]
+                                    SpanY = 1 })
 
-        let allXmls =
-            [
-              (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
-              for (ry, rexp) in reservedLiteralInputParam do
-                  let literal =
-                      match rexp.Terminal with
-                      | Some terminal ->
-                          match terminal.Literal, terminal.Variable with
-                          | Some(:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
-                          | Some literal, None -> literal.ToText()
-                          | None, Some variable -> variable.Name
+                          if i > 0 then
+                              let bexi = bex + i
+                              let yi = y + portOffset
+                              tracefn $"V: ({bexi - 1}, {bey}) -> [({bexi - 1}, {yi})]"
+                              // 'S' shape 의 세로선 그리기
+                              yield! vlineUpTo (bexi - 1, bey) yi
+
+                              // 'S' shape 의 상단부 수평선 그리기
+                              yield!
+                                  tryHlineTo (bexi, yi) (fsx - 1)
+                                  |> map (fun xml ->
+                                      tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
+
+                                      { Coordinate = c
+                                        Xml = xml
+                                        SpanX = spanX
+                                        SpanY = 1 }) ]
+
+            let allXmls =
+                [
+                  (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
+                  for (ry, rexp) in reservedLiteralInputParam do
+                      let literal =
+                          match rexp.Terminal with
+                          | Some terminal ->
+                              match terminal.Literal, terminal.Variable with
+                              | Some(:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
+                              | Some literal, None -> literal.ToText()
+                              | None, Some variable -> variable.Name
+                              | _ -> failwithlog "ERROR"
                           | _ -> failwithlog "ERROR"
-                      | _ -> failwithlog "ERROR"
 
-                  createFBParameterXml (x + fsx - 1, ry) literal
+                      createFBParameterXml (x + fsx - 1, ry) literal
 
-              yield! inputBlockXmls |> bind (fun (_, bx) -> bx.XmlElements)
-              yield! outputCellXmls
-              yield! tentacleXmls
-              let x, y = rungStartX, rungStartY
+                  yield! inputBlockXmls |> bind (fun (_, bx) -> bx.XmlElements)
+                  yield! outputCellXmls
+                  yield! tentacleXmls
+                  let x, y = rungStartX, rungStartY
 
-              //Command 결과출력
-              createFunctionXmlAt (functionName, functionName) instanceName (x + fsx, y) ]
+                  //Command 결과출력
+                  createFunctionXmlAt (functionName, functionName) instanceName (x + fsx, y) ]
 
 
-        { X = x
-          Y = y
-          TotalSpanX = fsx + 3
-          TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
-          XmlElements = allXmls |> List.sortBy (fun x -> x.Coordinate) }
+            { X = x
+              Y = y
+              TotalSpanX = fsx + 3
+              TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
+              XmlElements = allXmls |> List.sortBy (fun x -> x.Coordinate) }
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let drawCommand (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
+    let drawCommandXgi (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
         match cmd with
         | PredicateCmd(pc) -> drawPredicate (x, y) pc
         | FunctionCmd(fc) -> drawFunction (x, y) fc
@@ -400,6 +401,13 @@ module internal rec Command =
             | TimerMode(timerStatement) -> drawFunctionBlockTimer (x, y) timerStatement
             | CounterMode(counterStatement) -> drawFunctionBlockCounter (x, y) counterStatement
         | _ -> failwithlog "Unknown CommandType"
+
+    [<Obsolete("Fill me")>]
+    let drawCommandXgk (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
+        match cmd with
+        | FunctionBlockCmd(fbc) -> drawFBCommandXgk (x, y) fbc
+        | _ -> failwithlog "Unknown CommandType"
+
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
     let drawCoil (x, y) (cmdExp: CommandTypes) : BlockSummarizedXmlElements =
@@ -428,6 +436,51 @@ module internal rec Command =
           TotalSpanX = 31
           TotalSpanY = 1
           XmlElements = xmls }
+
+    [<Obsolete("Fill me")>]
+    let drawFBCommandXgk (x, y) (fbc: FunctionBlock) : BlockSummarizedXmlElements =
+        let xmls =
+            let spanX =
+                let cmdWidth = 3
+                (coilCellX - x - cmdWidth)
+
+            let cmdParam = 
+                match fbc with
+                | TimerMode ts ->
+                    let typ = ts.Timer.Type.ToString()
+                    let var = $"""T{0x0.ToString("D4")}"""
+                    let value = ts.Timer.PRE.Value
+                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : "Param="TON,T0000,1000"
+                | CounterMode cs ->
+                    let typ = cs.Counter.Type.ToString()
+                    let var = $"""C{0x0.ToString("D4")}"""
+                    let value = cs.Counter.PRE.Value
+                    $"Param={dq}{typ},{var},{value}{dq}"
+
+            [ let c = coord (x, y)
+              let xml =
+                let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+
+              { Coordinate = c
+                Xml = xml
+                SpanX = spanX
+                SpanY = 1 }
+
+              let c = coord (coilCellX, y)
+              let xml = elementFull (int ElementType.FBMode) c cmdParam ""
+
+              { Coordinate = c
+                Xml = xml
+                SpanX = 1
+                SpanY = 1 } ]
+
+        { X = x
+          Y = y
+          TotalSpanX = 31
+          TotalSpanY = 1
+          XmlElements = xmls }
+
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
     let drawFunctionInputLadderBlock (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =
@@ -576,56 +629,76 @@ module internal rec Command =
     /// expr 이 None 이면 그리지 않는다.
     /// cmdExp 이 None 이면 command 를 그리지 않는다.
     let rung (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : CoordinatedXmlElement =
+        let expr =
+            if RuntimeDS.Target = XGI || expr.IsSome || cmdExp.IsNone then
+                expr
+            else
+                match cmdExp.Value with
+                | FunctionBlockCmd(fbc) ->
+                    match fbc with
+                    | TimerMode(timerStatement) -> timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression |> Some
+                    | CounterMode(counterStatement) -> counterStatement.DownCondition.Value.Flatten() :?> FlatExpression |> Some
+                //| PredicateCmd _
+                //| FunctionCmd _
+                //| ActionCmd _ 
+                //    -> expr
+                | _ -> failwithlog "Unknown CommandType"
 
-        let exprSpanX, exprSpanY, exprXmls =
-            match expr with
-            | Some expr ->
-                let exprBlockXmlElement = drawLadderBlock (x, y) expr
-                let ex = exprBlockXmlElement
-                ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
-            | _ -> 0, 0, []
+        let rungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : CoordinatedXmlElement =
+            let exprSpanX, exprSpanY, exprXmls =
+                match expr with
+                | Some expr ->
+                    let exprBlockXmlElement = drawLadderBlock (x, y) expr
+                    let ex = exprBlockXmlElement
+                    ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
+                | _ -> 0, 0, []
 
-        let cmdSpanX, cmdSpanY, cmdXmls =
-            match cmdExp with
-            | Some cmdExp ->
-                let nx = x + exprSpanX
+            let cmdSpanX, cmdSpanY, cmdXmls =
+                match cmdExp with
+                | Some cmdExp ->
+                    let nx = x + exprSpanX
 
-                let cmdXmls =
-                    match cmdExp with
-                    | CoilCmd _cc -> drawCoil (nx - 1, y) cmdExp
-                    | PredicateCmd _pc -> drawCommand (nx, y) cmdExp // todo : 수정 필요
-                    | (FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _) -> drawCommand (nx, y) cmdExp
+                    let cmdXmls =
+                        match cmdExp with
+                        | CoilCmd _cc -> drawCoil (nx - 1, y) cmdExp
+                        | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
+                            let drawCommand =
+                                match RuntimeDS.Target with
+                                | XGI -> drawCommandXgi
+                                | XGK -> drawCommandXgk
+                            drawCommand (nx, y) cmdExp
 
-                let cmdXmls =
-                    { cmdXmls with
-                        XmlElements = cmdXmls.XmlElements |> List.distinct } // dirty hack!
+                    let cmdXmls =
+                        { cmdXmls with
+                            XmlElements = cmdXmls.XmlElements |> List.distinct } // dirty hack!
 
-                let spanX = exprSpanX + cmdXmls.TotalSpanX
-                let spanY = max exprSpanY cmdXmls.TotalSpanY
-                spanX, spanY, cmdXmls
-            | None ->
-                0,
-                0,
-                { X = x
-                  Y = y
-                  TotalSpanX = 0
-                  TotalSpanY = 0
-                  XmlElements = [] }
-
-
+                    let spanX = exprSpanX + cmdXmls.TotalSpanX
+                    let spanY = max exprSpanY cmdXmls.TotalSpanY
+                    spanX, spanY, cmdXmls
+                | None ->
+                    0,
+                    0,
+                    { X = x
+                      Y = y
+                      TotalSpanX = 0
+                      TotalSpanY = 0
+                      XmlElements = [] }
 
 
-        let xml =
-            exprXmls @ cmdXmls.XmlElements
-            |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
-            |> Seq.map (fun ri -> ri.Xml) //snd
-            |> String.concat "\r\n"
 
-        let spanX = exprSpanX + cmdSpanX
-        let spanY = max exprSpanY cmdSpanY
-        let c = coord (x, spanY + y)
 
-        { Xml = xml
-          Coordinate = c
-          SpanX = spanX
-          SpanY = spanY }
+            let xml =
+                exprXmls @ cmdXmls.XmlElements
+                |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
+                |> Seq.map (fun ri -> ri.Xml) //snd
+                |> String.concat "\r\n"
+
+            let spanX = exprSpanX + cmdSpanX
+            let spanY = max exprSpanY cmdSpanY
+            let c = coord (x, spanY + y)
+
+            { Xml = xml
+              Coordinate = c
+              SpanX = spanX
+              SpanY = spanY }
+        rungImpl (x, y) expr cmdExp

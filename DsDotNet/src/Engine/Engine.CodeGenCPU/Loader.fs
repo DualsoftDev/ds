@@ -98,7 +98,7 @@ module CpuLoader =
             UniqueName.resetAll()
             applyTagManager (system, storages)
           
-            let result =
+            let pous =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
                 let systems = system.GetRecursiveLoadeds() 
                 systems
@@ -112,5 +112,5 @@ module CpuLoader =
                 //자신(Acitve) system을  CPU 변환
                 |>Seq.append [ActivePou (system, convertSystem(system, true))]
 
-            result
+            pous
 

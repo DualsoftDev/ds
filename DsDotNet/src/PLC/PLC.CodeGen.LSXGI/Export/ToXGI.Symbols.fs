@@ -13,14 +13,14 @@ open PLC.CodeGen.LSXGI
 
 [<AutoOpen>]
 module internal XgiSymbolsModule =
-    type XgiSymbol =
-        | DuXgiVar of IXgiVar
+    type XgxSymbol =
+        | DuXgiVar of IXgxVar
         | DuTimer of TimerStruct
         | DuCounter of CounterBaseStruct
         | DuStorage of IStorage
 
 
-    let storagesToXgiSymbol (storages: IStorage seq) : (IStorage * XgiSymbol) list =
+    let storagesToXgiSymbol (storages: IStorage seq) : (IStorage * XgxSymbol) list =
         let timerOrCountersNames =
             storages
                 .Filter(fun s -> s :? TimerCounterBaseStruct)
@@ -29,9 +29,9 @@ module internal XgiSymbolsModule =
 
         [ for s in storages do
               match s with
-              | :? IXgiVar as xgi -> Some(s, XgiSymbol.DuXgiVar xgi)
-              | :? TimerStruct as ts -> Some(s, XgiSymbol.DuTimer ts)
-              | :? CounterBaseStruct as cs -> Some(s, XgiSymbol.DuCounter cs)
+              | :? IXgxVar as xgi -> Some(s, XgxSymbol.DuXgiVar xgi)
+              | :? TimerStruct as ts -> Some(s, XgxSymbol.DuTimer ts)
+              | :? CounterBaseStruct as cs -> Some(s, XgxSymbol.DuCounter cs)
               | _ ->
                   let name = (s :> INamed).Name
 
@@ -39,7 +39,7 @@ module internal XgiSymbolsModule =
                       // skip timer/counter structure member : timer 나 counter 명 + "." + field name
                       None
                   else
-                      Some(s, XgiSymbol.DuStorage s) ]
+                      Some(s, XgxSymbol.DuStorage s) ]
         |> List.choose id
 
     let autoAllocatorAdress (t:IStorage) (prjParams: XgxProjectParams) = 
@@ -91,7 +91,7 @@ module internal XgiSymbolsModule =
             else  failwith $"Invalid tag address {address} for {name}"
         
 
-    let xgiSymbolToSymbolInfo (prjParams: XgxProjectParams) (kindVar: int) (xgiSymbol: XgiSymbol) : SymbolInfo =
+    let xgiSymbolToSymbolInfo (prjParams: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
@@ -181,7 +181,7 @@ module internal XgiSymbolsModule =
     let private xgiSymbolsToSymbolInfos
         (prjParams: XgxProjectParams)
         (kindVar: int)
-        (xgiSymbols: XgiSymbol seq)
+        (xgiSymbols: XgxSymbol seq)
         : SymbolInfo list =
         xgiSymbols |> map (xgiSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq
 

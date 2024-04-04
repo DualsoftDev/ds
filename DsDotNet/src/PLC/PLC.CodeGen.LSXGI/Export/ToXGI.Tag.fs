@@ -102,6 +102,9 @@ module XGITag = //IEC61131Tag =
             State = 0 }
 
 
+    let pCounterGenerator = counterGenerator 0
+    let mCounterGenerator = counterGenerator 0
+    let xCounterGenerator = counterGenerator 0
     type SymbolInfo with
 
         member private x.ToXgiLiteral() =
@@ -112,6 +115,7 @@ module XGITag = //IEC61131Tag =
                 | false -> "false"
             | _ -> $"{x.InitValue}"
 
+        [<Obsolete("임시 코드 fix")>]
         /// Symbol 관련 XML tag attributes 생성
         member private x.GetXmlArgs() =
             [   $"Name=\"{x.Name}\""
@@ -130,9 +134,20 @@ module XGITag = //IEC61131Tag =
                     $"State=\"{x.State}\""
                 | XGK ->
                     // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
-                    $"Device=\"{x.Device}\""
-                    $"Type=\"{x.Type}\""
-                    $"DevicePos=\"{x.Address}\""
+                    // 임시 코드
+                    let xxx = x
+                    let device, address =
+                        match x.Device with
+                        | "I" | "Q" -> "P", pCounterGenerator()
+                        | "" | "M" -> "M", mCounterGenerator()
+                        | _  -> x.Device, xCounterGenerator()
+                    let typ =
+                        match x.Type with
+                        | "BOOL" -> "BIT"
+                        | _ -> x.Type
+                    $"Device=\"{device}\""
+                    $"Type=\"{typ}\""
+                    $"DevicePos=\"{address}\""
                 | _ -> failwithlog "Not supported plc type"
             ] |> String.concat " "
 

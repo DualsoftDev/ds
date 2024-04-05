@@ -9,7 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 [<AutoOpen>]
-module XgiXmlGeneratorModule =
+module XgxXmlGeneratorModule =
     /// Program 부분 Xml string 반환: <Program Task="taskName" ..>pouName
     let createXmlStringProgram taskName pouName (mainScan:string option) =
         sprintf

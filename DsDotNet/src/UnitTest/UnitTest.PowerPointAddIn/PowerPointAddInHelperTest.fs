@@ -22,11 +22,17 @@ module MSG_TEST =
     let ``MSG_GENIOLIST`` () =
         MSG_GENIOLIST.Do(testPath, false)|> Assert.True
     [<Fact>]
-    let ``MSG_GENLSPLC`` () =
-        MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True    
+    let ``MSG_GENLSPLC XGI`` () =
+        MSG_GENLSPLC.Do(testPath, "", PLCGenType.LSXGI, false)|> Assert.True    
     [<Fact>]
-    let ``MSG_GENLSPLCEMULATION`` () =
-        MSG_GENLSPLCEMULATION.Do(testPath, "", false)|> Assert.True
+    let ``MSG_GENLSPLCEMULATION XGI`` () =
+        MSG_GENLSPLCEMULATION.Do(testPath, "", PLCGenType.LSXGI, false)|> Assert.True  
+    [<Fact>]
+    let ``MSG_GENLSPLC XGK`` () =
+        MSG_GENLSPLC.Do(testPath, "", PLCGenType.LSXGK, false)|> Assert.True    
+    [<Fact>]
+    let ``MSG_GENLSPLCEMULATION XGK`` () =
+        MSG_GENLSPLCEMULATION.Do(testPath, "", PLCGenType.LSXGK, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENWINPC`` () =
         MSG_GENWINPC.Do(testPath,"",  false)|> Assert.True
@@ -38,7 +44,7 @@ module MSG_TEST =
         MSG_HWSETTING.Do("192.168.9.100", false)|> Assert.True
     [<Fact>]
     let ``MSG_SIMULATION`` () =
-        MSG_SIMULATION.Do(testPath, MSGUtils.SimViewEnum.FromPPTPage,   false)|> Assert.True
+        MSG_SIMULATION.Do(testPath, SimViewEnum.FromPPTPage,   false)|> Assert.True
     [<Fact>]
     let ``MSG_ANIMATION`` () =
         MSG_ANIMATION.Do(testPath, false)|> Assert.True

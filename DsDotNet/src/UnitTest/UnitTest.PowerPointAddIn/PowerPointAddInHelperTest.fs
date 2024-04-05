@@ -10,8 +10,8 @@ open System.IO
 
 module MSG_TEST = 
     
-    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
-    
+    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
+
     [<Fact>]
     let ``MSG_CHECK`` () =
         MSG_CHECK.Do(testPath, false) |> Assert.True

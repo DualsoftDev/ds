@@ -1,4 +1,4 @@
-namespace Engine.Core
+ï»¿namespace Engine.Core
 
 open Dual.Common.Core.FS
 
@@ -44,7 +44,7 @@ module CounterStatementModule =
         match cParams.LoadCondition with
         | Some load ->
             if not (isInUnitTest()) then
-                // unit test ¿¡ ÇÑÇØ, reset condition Çã¿ë
+                // unit test ì— í•œí•´, reset condition í—ˆìš©
                 failwith <| "Load condition is not supported for XGK compatibility"
 
             let statement = DuAssign (load, cs.LD)

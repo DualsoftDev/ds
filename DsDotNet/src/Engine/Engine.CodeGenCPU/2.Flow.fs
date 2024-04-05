@@ -1,4 +1,4 @@
-[<AutoOpen>]
+ï»¿[<AutoOpen>]
 module Engine.CodeGenCPU.ConvertFlow
 
 open System.Linq
@@ -24,7 +24,7 @@ type VertexManager with
                    <&&> real.SafetyExpr
 
         let rsts  = (real.V.RT.Expr <&&> real.CoinAlloffExpr )<||> real.V.F.Expr
-        [ (sets, rsts) ==| (v.ST, getFuncName()) ]//Á¶°Ç¿¡ ÀÇÇÑ ¸±·¹ÀÌ
+        [ (sets, rsts) ==| (v.ST, getFuncName()) ]//ì¡°ê±´ì— ì˜í•œ ë¦´ë ˆì´
 
 
     member v.F2_RootReset()  =
@@ -46,7 +46,7 @@ type VertexManager with
                     )
 
         let rsts  = real.V.R.Expr
-        [(sets, rsts) ==| (v.RT, getFuncName())]//Á¶°Ç¿¡ ÀÇÇÑ ¸±·¹ÀÌ
+        [(sets, rsts) ==| (v.RT, getFuncName())]//ì¡°ê±´ì— ì˜í•œ ë¦´ë ˆì´
 
 
     member v.F3_VertexEndWithOutReal() =

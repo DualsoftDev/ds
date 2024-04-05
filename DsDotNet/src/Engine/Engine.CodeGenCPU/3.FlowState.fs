@@ -1,4 +1,4 @@
-[<AutoOpen>]
+ï»¿[<AutoOpen>]
 module Engine.CodeGenCPU.ConvertFlowState
 
 open System.Linq
@@ -59,7 +59,7 @@ type Flow with
 
     member f.ST8_ReadyState() =
         let set = f.ready_btn.Expr <||> f.HWBtnReadyExpr 
-        ///½Ã¹Ä·¹ÀÌ¼Ç ¶§¹®¿¡ e_st »ç¿ë ¾ÈÇÏ°í  stopError/ stopConditionErr ±¸ºĞÇØ¼­»ç¿ë
+        ///ì‹œë®¬ë ˆì´ì…˜ ë•Œë¬¸ì— e_st ì‚¬ìš© ì•ˆí•˜ê³   stopError/ stopConditionErr êµ¬ë¶„í•´ì„œì‚¬ìš©
         let rst = (f.stopError.Expr <||> f.emg_st.Expr)
                   <||> (f.stopConditionErr.Expr <&&> !!f._sim.Expr)
                   <||> (f.pause.Expr)

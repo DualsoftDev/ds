@@ -1,4 +1,4 @@
-namespace Engine.Core
+ï»¿namespace Engine.Core
 
 open Dual.Common.Core.FS
 
@@ -31,13 +31,13 @@ module TimerStatementModule =
         match tParams.ResetCondition with
         | Some cond ->
             if not (isInUnitTest()) then
-                // unit test ¿¡ ÇÑÇØ, reset condition Çã¿ë
+                // unit test ì— í•œí•´, reset condition í—ˆìš©
                 failwith <| "Reset condition is not supported for XGK compatibility"
 
             (*
-             * XGK ¿¡¼­µµ reset condition À» »ç¿ëÇÒ ¼ö ÀÖµµ·Ï ÇÏ·Á¸é ¾Æ·¡ ÄÚµå »ç¿ëÇÏ°í,
-             * PLC »ı¼º ºÎºĞ¿¡¼­ reset condition rising ½Ã¿¡ Timer reset ÇÏµµ·Ï ÀÛ¼ºÇØ¾ß ÇÔ.
-             * ÇöÀç ±¸ÇöÀº »óÀ§ ·ÎÁ÷¿¡¼­ reset condition À» »ç¿ëÇÏÁö ¾Êµµ·Ï ÇÏ°í ÀÖÀ½.
+             * XGK ì—ì„œë„ reset condition ì„ ì‚¬ìš©í•  ìˆ˜ ìˆë„ë¡ í•˜ë ¤ë©´ ì•„ë˜ ì½”ë“œ ì‚¬ìš©í•˜ê³ ,
+             * PLC ìƒì„± ë¶€ë¶„ì—ì„œ reset condition rising ì‹œì— Timer reset í•˜ë„ë¡ ì‘ì„±í•´ì•¼ í•¨.
+             * í˜„ì¬ êµ¬í˜„ì€ ìƒìœ„ ë¡œì§ì—ì„œ reset condition ì„ ì‚¬ìš©í•˜ì§€ ì•Šë„ë¡ í•˜ê³  ìˆìŒ.
              *)
 
             let resetStatement = DuAssign (cond, ts.RES)

@@ -1,4 +1,4 @@
-// Copyright (c) Dual Inc.  All Rights Reserved.
+ï»¿// Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Import.Office
 
 open System.Linq
@@ -25,14 +25,14 @@ type LibraryPPTLoaderExt =
             let configPath = Path.Combine(directoryPath, "Library.config");
 
             for file in files do
-                if not (file.Contains("~$")) then //pptx »ç¿ëÁß ÀÓ½ÃÆÄÀÏ ¹«½Ã ~$HelloDS.pptx
+                if not (file.Contains("~$")) then //pptx ì‚¬ìš©ì¤‘ ì„ì‹œíŒŒì¼ ë¬´ì‹œ ~$HelloDS.pptx
                     let sys = ImportPPT.GetDSFromPPTWithLib(file, true).System
                     let relPath = Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
                     let relPathAddLibDirPath = Path.Combine("dsLib", relPath)
                     for item in sys.ApiItems do
                         if infos.ContainsKey item.Name
                         then 
-                            failwithf $"{sys.Name}¿¡ ÇØ´çÇÏ´Â [{item.Name}] ÀÎÅÍÆäÀÌ½º ÀÌ¸§Àº Áßº¹({infos[item.Name]}) µË´Ï´Ù."
+                            failwithf $"{sys.Name}ì— í•´ë‹¹í•˜ëŠ” [{item.Name}] ì¸í„°í˜ì´ìŠ¤ ì´ë¦„ì€ ì¤‘ë³µ({infos[item.Name]}) ë©ë‹ˆë‹¤."
                         else 
                             infos.Add(item.Name, PathManager.getValidFile relPathAddLibDirPath)
         
@@ -48,5 +48,5 @@ type LibraryPPTLoaderExt =
                 if libraryConfig.LibraryInfos.ContainsKey(apiName)
                 then libraryConfig.LibraryInfos[apiName]
                 else 
-                    failwithf $"{apiName}¿¡ ÇØ´çÇÏ´Â Library fileÀº Á¸Àç ÇÏÁö ¾Ê½À´Ï´Ù."
+                    failwithf $"{apiName}ì— í•´ë‹¹í•˜ëŠ” Library fileì€ ì¡´ì¬ í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤."
            

@@ -1,4 +1,4 @@
-namespace Engine.Core
+ï»¿namespace Engine.Core
 
 open Dual.Common.Core.FS
 open System
@@ -114,8 +114,8 @@ type TagKindExt =
         |EventSystem (_, obj, _) -> obj
         |EventFlow   (_, obj, _) -> obj.System
         |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
-        |EventApiItem(_, obj, _) -> obj.ApiSystem           //active systemÀÌ ¾Æ´Ï°í loaded ½Ã½ºÅÛ
-        |EventAction (_, obj, _) -> obj.ApiItem.ApiSystem   //active systemÀÌ ¾Æ´Ï°í loaded ½Ã½ºÅÛ
+        |EventApiItem(_, obj, _) -> obj.ApiSystem           //active systemì´ ì•„ë‹ˆê³  loaded ì‹œìŠ¤í…œ
+        |EventAction (_, obj, _) -> obj.ApiItem.ApiSystem   //active systemì´ ì•„ë‹ˆê³  loaded ì‹œìŠ¤í…œ
         |EventHwSys  (_, obj, _) -> obj.System
         |EventVariable  (_, obj, _) -> obj
         

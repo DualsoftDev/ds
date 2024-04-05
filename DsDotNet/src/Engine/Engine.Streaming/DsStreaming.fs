@@ -1,4 +1,4 @@
-module DsStreamingModule
+ï»¿module DsStreamingModule
 
 open System.Collections.Generic
 open System
@@ -109,7 +109,7 @@ type DsStreaming(dsSystem:DsSystem, runtimeDir:string) =
                             let byteArray = _webStreamSet.[viewKey]
                             do! webSocket.SendAsync(new ArraySegment<byte>(byteArray), WebSocketMessageType.Binary, true, CancellationToken.None) |> Async.AwaitTask
                         
-                        do! Async.Sleep(_delayFps) //ÃÊ´ç 15Àå Å¸°Ù
+                        do! Async.Sleep(_delayFps) //ì´ˆë‹¹ 15ìž¥ íƒ€ê²Ÿ
                 with
                 | ex -> 
                     Console.WriteLine($"Error in image streaming: {ex.Message}")

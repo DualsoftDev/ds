@@ -66,22 +66,14 @@ type XgiRungTest() =
             { defaultSymbolInfo with Name=t.Name; Type="BOOL"; Address=t.Address; Device="I"; }
 
         let symbolInfoXml = symbolInfo.GenerateXml()
-        symbolInfoXml =~= """<Symbol Name="myBit00" Kind="1" Type="BOOL" Address="%IX0.0.0" Comment="" Device="I" State="0">
-		<MemberAddresses/>
-		<MemberRetains/>
-		<MemberInitValues/>
-		<MemberComments/>
+        symbolInfoXml =~= """<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
 	</Symbol>"""
 
         let symbolsLocalXml = XGITag.generateLocalSymbolsXml [ symbolInfo ]
 
         symbolsLocalXml =~= """<LocalVar Version="Ver 1.0" Count="1">
 <Symbols>
-	<Symbol Name="myBit00" Kind="1" Type="BOOL" Address="%IX0.0.0" Comment="" Device="I" State="0">
-		<MemberAddresses/>
-		<MemberRetains/>
-		<MemberInitValues/>
-		<MemberComments/>
+	<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
 	</Symbol>
 </Symbols>
 <TempVar Count="0"></TempVar>

@@ -664,6 +664,7 @@ module internal rec Command =
                                 match RuntimeDS.Target with
                                 | XGI -> drawCommandXgi
                                 | XGK -> drawCommandXgk
+                                | _ -> failwithlog $"Unknown Target: {RuntimeDS.Target}"
                             drawCommand (nx, y) cmdExp
 
                     let cmdXmls =

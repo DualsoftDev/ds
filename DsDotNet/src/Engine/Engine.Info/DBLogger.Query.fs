@@ -31,7 +31,6 @@ module internal DBLoggerQueryImpl =
     let isOff = isOn >> not
 
     type Summary with
-        [<Obsolete("duplicate check 임시 막은 것 풀 것.")>]
         // logs: id 순
         member x.Build(FList(logs: Log list)) =
             let mutable count = 0

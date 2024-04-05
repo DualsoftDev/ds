@@ -411,6 +411,7 @@ module XgiExportModule =
                     match RuntimeDS.Target with
                     | XGI -> xnGlobalVar
                     | XGK -> xnGlobalVarSymbols
+                    | _ -> failwithlog $"Unknown Target: {RuntimeDS.Target}"
                 xnCountConainer.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
 
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()

@@ -203,7 +203,7 @@ module ConvertCPU =
             | PC ->  ()
             | PLC ->  ()
             | Emulation ->  
-                            yield! emulationDevice sys
+                           if isActive  then  yield! emulationDevice sys
             | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당
                             yield! sys.Y1_SystemBitSetFlow()
             | Developer ->  ()

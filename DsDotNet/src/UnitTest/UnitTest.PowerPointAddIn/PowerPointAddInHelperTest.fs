@@ -23,16 +23,16 @@ module MSG_TEST =
         MSG_GENIOLIST.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLC XGI`` () =
-        MSG_GENLSPLC.Do(testPath, "", PLCGenType.LSXGI, false)|> Assert.True    
+        MSG_GENLSPLC.Do(testPath, "", false  ,PLCGenType.LSXGI)|> Assert.True    
     [<Fact>]
     let ``MSG_GENLSPLCEMULATION XGI`` () =
-        MSG_GENLSPLCEMULATION.Do(testPath, "", PLCGenType.LSXGI, false)|> Assert.True  
+        MSG_GENLSPLCEMULATION.Do(testPath, "", false, PLCGenType.LSXGI)|> Assert.True  
     [<Fact>]
     let ``MSG_GENLSPLC XGK`` () =
-        MSG_GENLSPLC.Do(testPath, "", PLCGenType.LSXGK, false)|> Assert.True    
+        MSG_GENLSPLC.Do(testPath, "", false, PLCGenType.LSXGK)|> Assert.True    
     [<Fact>]
     let ``MSG_GENLSPLCEMULATION XGK`` () =
-        MSG_GENLSPLCEMULATION.Do(testPath, "", PLCGenType.LSXGK, false)|> Assert.True
+        MSG_GENLSPLCEMULATION.Do(testPath, "",false,  PLCGenType.LSXGK )|> Assert.True
     [<Fact>]
     let ``MSG_GENWINPC`` () =
         MSG_GENWINPC.Do(testPath,"",  false)|> Assert.True

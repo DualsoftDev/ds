@@ -63,17 +63,17 @@ module rec CounterModule =
         | (WINDOWS | XGI), CTU ->
             cu  <- createBool     $"{name}.CU" false  // Count up enable bit
             res <- createBool     $"{name}.R" false
-            pre <- createUShort   $"{name}.PV" preset
+            pre <- createUInt32   $"{name}.PV" preset
             dn  <- createBoolWithTagKind     $"{name}.Q" false  (VariableTag.PcSysVariable|>int) // Done
-            acc <- createUShort   $"{name}.CV" accum
+            acc <- createUInt32   $"{name}.CV" accum
             add [cu; res; pre; dn; acc]
 
         | (WINDOWS | XGI), CTD ->
             cd  <- createBool     $"{name}.CD" false   // Count down enable bit
             ld  <- createBool     $"{name}.LD" false   // Load
-            pre <- createUShort   $"{name}.PV" preset
+            pre <- createUInt32   $"{name}.PV" preset
             dn  <- createBoolWithTagKind     $"{name}.Q" false  (VariableTag.PcSysVariable|>int) // Done
-            acc <- createUShort   $"{name}.CV" accum
+            acc <- createUInt32   $"{name}.CV" accum
             add [cd; res; ld; pre; dn; acc]
 
         | (WINDOWS | XGI), CTUD ->
@@ -81,18 +81,18 @@ module rec CounterModule =
             cd  <- createBool     $"{name}.CD" false  // Count down enable bit
             res <- createBool     $"{name}.R" false
             ld  <- createBool     $"{name}.LD" false  // Load
-            pre <- createUShort   $"{name}.PV" preset
+            pre <- createUInt32   $"{name}.PV" preset
             dn  <- createBoolWithTagKind     $"{name}.QU" false   (VariableTag.PcSysVariable|>int) // Done
             dnDown  <- createBoolWithTagKind $"{name}.QD" false   (VariableTag.PcSysVariable|>int) // Done
-            acc <- createUShort   $"{name}.CV" accum
+            acc <- createUInt32   $"{name}.CV" accum
             add [cu; cd; res; ld; pre; dn; dnDown; acc]
 
         | (WINDOWS | XGI), CTR ->
             cd  <- createBool     $"{name}.CD" false   // Count down enable bit
-            pre <- createUShort   $"{name}.PV" preset
+            pre <- createUInt32   $"{name}.PV" preset
             res <- createBool     $"{name}.RST" false
             dn  <- createBoolWithTagKind     $"{name}.Q" false    (VariableTag.PcSysVariable|>int) // Done
-            acc <- createUShort   $"{name}.CV" accum
+            acc <- createUInt32   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
 
         | _ ->
@@ -113,8 +113,8 @@ module rec CounterModule =
             un  <- createBool     $"{name}.UN" false   // Underflow
             ld  <- createBool     $"{name}.LD" false   // XGI: Load
             dn  <- createBoolWithTagKind     $"{name}.DN" false  (VariableTag.PcSysVariable|>int) // Done
-            pre <- createUShort   $"{name}.PRE" preset
-            acc <- createUShort   $"{name}.ACC" accum
+            pre <- createUInt32   $"{name}.PRE" preset
+            acc <- createUInt32   $"{name}.ACC" accum
             res <- createBool     $"{name}.RES" false
             add [ov; un; dn; pre; acc; res;]
 
@@ -250,8 +250,8 @@ module rec CounterModule =
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
                 .Where(fun (_system, storage, _newValue) -> storage = csu.CU && csu.CU.Value)
                 .Subscribe(fun (_system, _storage, _newValue) ->
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
-                    cs.ACC.Value <- cs.ACC.Value + 1us
+                    if cs.ACC.Value < 0u || cs.PRE.Value < 0u then failwithlog "ERROR"
+                    cs.ACC.Value <- cs.ACC.Value + 1u
                     if cs.ACC.Value >= cs.PRE.Value then
                         debugfn "Counter accumulator value reached"
                         cs.DN.Value <- true
@@ -262,8 +262,8 @@ module rec CounterModule =
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
                 .Where(fun (_system, storage, _newValue) -> storage = csd.CD && csd.CD.Value)
                 .Subscribe(fun (_system, _storage, _newValue) ->
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
-                    cs.ACC.Value <- cs.ACC.Value - 1us
+                    if cs.ACC.Value < 0u || cs.PRE.Value < 0u then failwithlog "ERROR"
+                    cs.ACC.Value <- cs.ACC.Value - 1u
                     if cs.ACC.Value <= cs.PRE.Value then
                         debugfn "Counter accumulator value reached"
                         cs.DN.Value <- true
@@ -274,13 +274,13 @@ module rec CounterModule =
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
                 .Where(fun (_system, storage, _newValue) -> storage = csr.CD && csr.CD.Value)
                 .Subscribe(fun (_system, _storage, _newValue) ->
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then failwithlog "ERROR"
-                    cs.ACC.Value <- cs.ACC.Value + 1us
+                    if cs.ACC.Value < 0u || cs.PRE.Value < 0u then failwithlog "ERROR"
+                    cs.ACC.Value <- cs.ACC.Value + 1u
                     if cs.ACC.Value = cs.PRE.Value then
                         debugfn "Counter accumulator value reached"
                         cs.DN.Value <- true
                     if cs.ACC.Value > cs.PRE.Value then
-                        cs.ACC.Value <- 1us
+                        cs.ACC.Value <- 1u
                         cs.DN.Value <- false
             ) |> disposables.Add
 
@@ -290,9 +290,9 @@ module rec CounterModule =
                 .Where(fun (_system, storage, _newValue) -> storage = cs.RES && cs.RES.Value)
                 .Subscribe(fun (_system, _storage, _newValue) ->
                     debugfn "Counter reset requested"
-                    if cs.ACC.Value < 0us || cs.PRE.Value < 0us then
+                    if cs.ACC.Value < 0u || cs.PRE.Value < 0u then
                         failwithlog "ERROR"
-                    cs.ACC.Value <- 0us
+                    cs.ACC.Value <- 0u
                     clearVarBoolsOnDemand( [cs.DN; cs.CU; cs.CD; cs.OV; cs.UN;] )
             ) |> disposables.Add
 

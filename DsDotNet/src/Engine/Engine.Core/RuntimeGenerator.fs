@@ -62,7 +62,7 @@ module RuntimeGeneratorModule =
         static let targetChangedSubject = new Subject<RuntimeTargetType>()
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
-        static let mutable callTimeout = 15000us
+        static let mutable callTimeout = 15000u
         static let mutable emulationAddress = ""
 
         static member Target

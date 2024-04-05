@@ -127,6 +127,7 @@ module ExpressionPrologModule =
 
     let mutable fwdCreateBoolMemberVariable   = let dummy (_tagName:string) (_initValue:bool)  (_tagKind:int)  : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
     let mutable fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) (_tagKind:int) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
+    let mutable fwdCreateUInt32MemberVariable = let dummy (_tagName:string) (_initValue:uint32) (_tagKind:int) : VariableBase<uint32> = failwithlog "Should be reimplemented." in dummy
     let mutable fwdFlattenExpression          = let dummy (_expr:IExpression)                   : IFlatExpression      = failwithlog "Should be reimplemented." in dummy
 
     let clearVarBoolsOnDemand(varbools:VariableBase<bool> seq) =

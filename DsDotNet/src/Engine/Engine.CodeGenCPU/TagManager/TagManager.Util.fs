@@ -57,12 +57,12 @@ module TagManagerUtil =
 
     let timer  (storages:Storages)  name sys =
         let name = getPlcTagAbleName name storages
-        let ts = TimerStruct.Create(TimerType.TON, storages, name, 0us, 0us, sys)
+        let ts = TimerStruct.Create(TimerType.TON, storages, name, 0u, 0u, sys)
         ts
 
     let counter (storages:Storages) name sys =
         let name = getPlcTagAbleName name storages
-        let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0us, 0us, sys)
+        let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0u, 0u, sys)
         cs
 
     let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) (sys:ISystem) =

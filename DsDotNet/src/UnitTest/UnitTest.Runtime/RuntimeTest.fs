@@ -21,6 +21,7 @@ module RuntimeTest =
     let runtimeModel = new RuntimeModel(zipPath)
 
    
+    [<Obsolete("테트스 성공/실패가 random 임.  수정 필요")>]
     [<Fact>]
     let ``Runtime Running Test`` () = 
 
@@ -28,7 +29,7 @@ module RuntimeTest =
         let systems = [| runtimeModel.System|]
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
         let mci = ModelCompileInfo(runtimeModel.JsonPath, runtimeModel.JsonPath)
-        DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci) |> ignore
+        DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci).Wait()
         DsSimulator.Do(runtimeModel.Cpu) |> Assert.True //값변경있으면서 구동하면 true
 
 
@@ -39,8 +40,6 @@ module RuntimeTest =
         let json = JsonSerializer.Serialize(info, options)
         let data = JsonSerializer.Deserialize(json, options)      
         info.Name = runtimeModel.System.Name |> Assert.True
-
-
 
         
   

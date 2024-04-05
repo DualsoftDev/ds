@@ -31,13 +31,13 @@ open PLC.CodeGen.LSXGI
             let storages = Storages()
             let t1 = createTag("my_counter_control_tag", "%M1.1", false)
             let condition = var2expr t1
-            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTU"}
             let ctu = CounterStatement.CreateAbCTU(tcParam) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
-            ctu.PRE.Value === 100us
-            ctu.ACC.Value === 0us
+            ctu.PRE.Value === 100u
+            ctu.ACC.Value === 0u
 
 
             (* Counter struct 의 내부 tag 들이 생성되고, 등록되었는지 확인 *)
@@ -60,20 +60,20 @@ open PLC.CodeGen.LSXGI
             for i in [1..50] do
                 t1.Value <- true
                 evaluateRungInputs ctu
-                ctu.ACC.Value === uint16 i
+                ctu.ACC.Value === uint32 i
                 t1.Value <- false
                 evaluateRungInputs ctu
                 ctu.DN.Value === false
 
-            ctu.ACC.Value === 50us
+            ctu.ACC.Value === 50u
             ctu.DN.Value === false
             for i in [51..100] do
                 t1.Value <- true
                 evaluateRungInputs ctu
-                ctu.ACC.Value === uint16 i
+                ctu.ACC.Value === uint32 i
                 t1.Value <- false
                 evaluateRungInputs ctu
-            ctu.ACC.Value === 100us
+            ctu.ACC.Value === 100u
             ctu.DN.Value === true
 
         [<Test>]
@@ -87,13 +87,13 @@ open PLC.CodeGen.LSXGI
             let downCondition = var2expr t2
             let resetCondition = var2expr t3
 
-            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=upCondition; FunctionName="createWinCTUD"}
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=upCondition; FunctionName="createWinCTUD"}
             let ctu = CounterStatement.CreateAbCTUD(tcParam, downCondition, resetCondition) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
-            ctu.PRE.Value === 100us
-            ctu.ACC.Value === 0us
+            ctu.PRE.Value === 100u
+            ctu.ACC.Value === 0u
 
 
             (* Counter struct 의 내부 tag 들이 생성되고, 등록되었는지 확인 *)
@@ -121,25 +121,25 @@ open PLC.CodeGen.LSXGI
             let resetTag = createTag("my_counter_reset_tag", "%M1.1", false)
             let condition = var2expr t1
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myCTU"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTU"}
+            let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTU"}
             let ctu = CounterStatement.CreateCTU(tcParam, reset) |> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
             ctu.RES.Value === false
-            ctu.PRE.Value === 100us
-            ctu.ACC.Value === 0us
+            ctu.PRE.Value === 100u
+            ctu.ACC.Value === 0u
 
 
             for i in [1..50] do
                 t1.Value <- true
                 evaluateRungInputs ctu
-                ctu.ACC.Value === uint16 i
+                ctu.ACC.Value === uint32 i
                 t1.Value <- false
                 evaluateRungInputs ctu
                 ctu.DN.Value === false
 
-            ctu.ACC.Value === 50us
+            ctu.ACC.Value === 50u
             ctu.DN.Value === false
 
             // counter reset
@@ -149,8 +149,8 @@ open PLC.CodeGen.LSXGI
             ctu.UN.Value === false
             ctu.DN.Value === false
             ctu.RES.Value === true
-            ctu.PRE.Value === 100us
-            ctu.ACC.Value === 0us
+            ctu.PRE.Value === 100u
+            ctu.ACC.Value === 0u
 
 
         [<Test>]
@@ -161,40 +161,40 @@ open PLC.CodeGen.LSXGI
             let resetTag = createTag("my_counter_reset_tag", "%M1.1", false)
             let condition = var2expr t1
             let reset = var2expr resetTag
-            let tcParam = {Storages=storages; Name="myCTR"; Preset=100us; RungInCondition=condition; FunctionName="createWinCTR"}
+            let tcParam = {Storages=storages; Name="myCTR"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTR"}
             let ctr = CounterStatement.CreateXgiCTR(tcParam, reset) |> toCounter
             ctr.OV.Value === false
             ctr.UN.Value === false
             ctr.DN.Value === false
             ctr.RES.Value === false
-            ctr.PRE.Value === 100us
-            ctr.ACC.Value === 0us
+            ctr.PRE.Value === 100u
+            ctr.ACC.Value === 0u
 
 
             for i in [1..50] do
                 t1.Value <- true
                 evaluateRungInputs ctr
-                ctr.ACC.Value === uint16 i
+                ctr.ACC.Value === uint32 i
                 t1.Value <- false
                 evaluateRungInputs ctr
                 ctr.DN.Value === false
-            ctr.ACC.Value === 50us
+            ctr.ACC.Value === 50u
             ctr.DN.Value === false
 
             for i in [51..99] do
                 t1.Value <- true
                 evaluateRungInputs ctr
-                ctr.ACC.Value === uint16 i
+                ctr.ACC.Value === uint32 i
                 t1.Value <- false
                 evaluateRungInputs ctr
                 ctr.DN.Value === false
 
-            ctr.ACC.Value === 99us
+            ctr.ACC.Value === 99u
             ctr.DN.Value === false
 
             t1.Value <- true        // last straw that broken ...
             evaluateRungInputs ctr
-            ctr.ACC.Value === 100us
+            ctr.ACC.Value === 100u
             ctr.DN.Value === true
 
             // counter preset + 1 : ring counter : auto reset
@@ -202,7 +202,7 @@ open PLC.CodeGen.LSXGI
             evaluateRungInputs ctr
             t1.Value <- true
             evaluateRungInputs ctr
-            ctr.ACC.Value === 1us
+            ctr.ACC.Value === 1u
             ctr.DN.Value === false
 
 
@@ -215,8 +215,8 @@ open PLC.CodeGen.LSXGI
             ctr.UN.Value === false
             ctr.DN.Value === false
             ctr.RES.Value === true
-            ctr.PRE.Value === 100us
-            ctr.ACC.Value === 0us
+            ctr.PRE.Value === 100u
+            ctr.ACC.Value === 0u
 
 
 
@@ -228,7 +228,7 @@ open PLC.CodeGen.LSXGI
             let storages = Storages()
             let code = """
                 bool x0 = createTag("%MX0.0.0", false);
-                ctu myCTU = createAbCTU(2000us, $x0);
+                ctu myCTU = createAbCTU(2000u, $x0);
 """
 
             let statement = parseCode storages code
@@ -242,7 +242,7 @@ open PLC.CodeGen.LSXGI
             let code = """
                 bool cu = createTag("%MX0.0.0", false);
                 bool r  = createTag("%MX0.0.1", false);
-                ctu myCTU = createXgiCTU(2000us, $cu, $r);
+                ctu myCTU = createXgiCTU(2000u, $cu, $r);
 """
 
             let statement = parseCode storages code
@@ -256,7 +256,7 @@ open PLC.CodeGen.LSXGI
             let code = """
                 bool cd = true;
                 bool ld = false;
-                ctd myCTD = createWinCTD(2000us, $cd, $ld);
+                ctd myCTD = createWinCTD(2000u, $cd, $ld);
 """
 
             let statement = parseCode storages code
@@ -270,7 +270,7 @@ open PLC.CodeGen.LSXGI
             let code = """
                 bool cd = createTag("%MX0.0.0", false);
                 bool ld = createTag("%MX0.0.1", false);
-                ctd myCTD = createXgiCTD(2000us, $cd, $ld);
+                ctd myCTD = createXgiCTD(2000u, $cd, $ld);
 """
 
             let statement = parseCode storages code
@@ -288,7 +288,7 @@ open PLC.CodeGen.LSXGI
                     bool cd = false;
                     bool r__ = false; // 'r'
                     bool ld = false;
-                    ctud myCTUD = createWinCTUD(2000us, $cu, $cd, $r__, $ld);
+                    ctud myCTUD = createWinCTUD(2000u, $cu, $cd, $r__, $ld);
     """
 
                 let statement = parseCode storages code
@@ -304,7 +304,7 @@ open PLC.CodeGen.LSXGI
                 bool cd = createTag("%MX0.0.1", false);
                 bool r  = createTag("%MX0.0.2", false);
                 bool ld = createTag("%MX0.0.3", false);
-                ctud myCTUD = createXgiCTUD(2000us, $cu, $cd, $r, $ld);
+                ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
 """
 
             let statement = parseCode storages code
@@ -321,7 +321,7 @@ open PLC.CodeGen.LSXGI
             let code = """
                 bool cd = createTag("%MX0.0.0", false);
                 bool ld = createTag("%MX0.0.0", false);
-                ctr myCTR = createWinCTR(2000us, $cd, $ld);
+                ctr myCTR = createWinCTR(2000u, $cd, $ld);
 """
 
             let statement = parseCode storages code
@@ -336,7 +336,7 @@ open PLC.CodeGen.LSXGI
                 let code = """
                     bool cd = createTag("%MX0.0.0", false);
                     bool rst = createTag("%MX0.0.1", false);
-                    ctr myCTR = createXgiCTR(2000us, $cd, $rst);
+                    ctr myCTR = createXgiCTR(2000u, $cd, $rst);
     """
 
                 let statement = parseCode storages code

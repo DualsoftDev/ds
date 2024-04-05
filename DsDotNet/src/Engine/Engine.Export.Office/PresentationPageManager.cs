@@ -1,4 +1,4 @@
-using DocumentFormat.OpenXml;
+ï»¿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
 using System;
@@ -66,13 +66,13 @@ namespace Engine.Export.Office
             SlideLayoutPart slideLayoutPart = slideMasterPart.SlideLayoutParts.FirstOrDefault(
                 slp => slp.SlideLayout.Type.InnerText == "titleOnly");
 
-            // Æ¯Á¤ ·¹ÀÌ¾Æ¿ôÀ» Ã£Áö ¸øÇÑ °æ¿ì ¿¹¿Ü Ã³¸®
+            // íŠ¹ì • ë ˆì´ì•„ì›ƒì„ ì°¾ì§€ ëª»í•œ ê²½ìš° ì˜ˆì™¸ ì²˜ë¦¬
             if (slideLayoutPart == null)
             {
                 throw new InvalidOperationException("Required slide layout 'Title Slide' was not found.");
             }
 
-            // »õ ½½¶óÀÌµå ÆÄÆ® »ı¼º ¹× ±âÁ¸ ·¹ÀÌ¾Æ¿ô ÆÄÆ®¸¦ Ãß°¡
+            // ìƒˆ ìŠ¬ë¼ì´ë“œ íŒŒíŠ¸ ìƒì„± ë° ê¸°ì¡´ ë ˆì´ì•„ì›ƒ íŒŒíŠ¸ë¥¼ ì¶”ê°€
             SlidePart slidePart = presentationPart.AddNewPart<SlidePart>();
             slidePart.AddPart(slideLayoutPart);
 

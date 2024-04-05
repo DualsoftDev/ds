@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -26,20 +26,20 @@ namespace Engine.Export.Office
 
         public static string ExportPPT(DsSystem sys, string templateFile, string targetFile)
         {
-            // ÅÛÇÃ¸´ ÆÄÀÏÀ» ´ë»ó ÆÄÀÏ·Î º¹»ç
+            // í…œí”Œë¦¿ íŒŒì¼ì„ ëŒ€ìƒ íŒŒì¼ë¡œ ë³µì‚¬
             File.Copy(templateFile, targetFile, true);
 
             using (PresentationDocument doc = PresentationDocument.Open(targetFile, true))
             {
-                //Ã¹ÆäÀÌÁö ÀÌ¸§À» ½Ã½ºÅÛÀÌ¸§À¸·Î º¯°æ 
+                //ì²«í˜ì´ì§€ ì´ë¦„ì„ ì‹œìŠ¤í…œì´ë¦„ìœ¼ë¡œ ë³€ê²½ 
                 PageManager.UpdateFirstPageTitle(doc, sys.Name);
-                // ½½¶óÀÌµå Ãß°¡
+                // ìŠ¬ë¼ì´ë“œ ì¶”ê°€
                 foreach (var flow in sys.Flows)
                 {
                     AddSlidesWithFlow(doc, flow);
                 }
 
-                // º¯°æ»çÇ× ÀúÀå
+                // ë³€ê²½ì‚¬í•­ ì €ì¥
                 doc.Save();
             }
 
@@ -85,11 +85,11 @@ namespace Engine.Export.Office
             var slidePart = PageManager.InsertNewSlideWithTitleOnly(doc, slide, flow.Name);
             var slideWidth = doc.PresentationPart.Presentation.SlideSize.Cx / ShapeManager.Emu;
 
-            // °¢ ÇÃ·Î¿ìÀÇ ½ÇÁ¦ ÀÌ¸§À» ½½¶óÀÌµå¿¡ Ãß°¡
-            // µµÇüÀÇ X ÁÂÇ¥
+            // ê° í”Œë¡œìš°ì˜ ì‹¤ì œ ì´ë¦„ì„ ìŠ¬ë¼ì´ë“œì— ì¶”ê°€
+            // ë„í˜•ì˜ X ì¢Œí‘œ
             int xPos = _startXPos;
             int yPos = _startYPos;
-            int maxXPos = 0; // ½½¶óÀÌµå¿¡¼­ °¡Àå ¿À¸¥ÂÊ¿¡ À§Ä¡ÇÑ µµÇüÀÇ X ÁÂÇ¥
+            int maxXPos = 0; // ìŠ¬ë¼ì´ë“œì—ì„œ ê°€ì¥ ì˜¤ë¥¸ìª½ì— ìœ„ì¹˜í•œ ë„í˜•ì˜ X ì¢Œí‘œ
             //foreach (var fEdge in flow.Graph.Islands)
             foreach (var fEdge in flow.ModelingEdges)
             {
@@ -99,13 +99,13 @@ namespace Engine.Export.Office
             foreach (var fv in flow.Graph.Vertices)
             {
                 continue;
-                // °¢ Vertex¸¶´Ù ³ôÀÌ¸¦ Á¶Á¤ÇÏ¿© °ãÄ¡Áö ¾Êµµ·Ï ÇÔ
+                // ê° Vertexë§ˆë‹¤ ë†’ì´ë¥¼ ì¡°ì •í•˜ì—¬ ê²¹ì¹˜ì§€ ì•Šë„ë¡ í•¨
                 Shape fShape = ShapeManager.AddSlideShape(slide, GetName(fv), GetShapeType(fv), xPos, yPos);
 
-                // °¡Àå ¿À¸¥ÂÊ¿¡ À§Ä¡ÇÑ µµÇüÀÇ X ÁÂÇ¥ ¾÷µ¥ÀÌÆ®
+                // ê°€ì¥ ì˜¤ë¥¸ìª½ì— ìœ„ì¹˜í•œ ë„í˜•ì˜ X ì¢Œí‘œ ì—…ë°ì´íŠ¸
                 maxXPos = Math.Max(maxXPos, xPos + ShapeManager.Width);
 
-                // xPos ¾÷µ¥ÀÌÆ®
+                // xPos ì—…ë°ì´íŠ¸
                 xPos += 50;
                 updatePosition(slideWidth, ref xPos, ref yPos);
 
@@ -114,13 +114,13 @@ namespace Engine.Export.Office
                 {
                     foreach (var cv in r.Graph.Vertices)
                     {
-                        // °¢ Vertex¸¶´Ù ³ôÀÌ¸¦ Á¶Á¤ÇÏ¿© °ãÄ¡Áö ¾Êµµ·Ï ÇÔ
-                        xPos += ShapeManager.Width + 15; // µµÇüÀÌ °ãÄ¡Áö ¾Êµµ·Ï °£°İ Ãß°¡
+                        // ê° Vertexë§ˆë‹¤ ë†’ì´ë¥¼ ì¡°ì •í•˜ì—¬ ê²¹ì¹˜ì§€ ì•Šë„ë¡ í•¨
+                        xPos += ShapeManager.Width + 15; // ë„í˜•ì´ ê²¹ì¹˜ì§€ ì•Šë„ë¡ ê°„ê²© ì¶”ê°€
                         updatePosition(slideWidth, ref xPos, ref yPos);
 
                         Shape rShape = ShapeManager.AddSlideShape(slide, GetName(cv), GetShapeType(cv), xPos, yPos);
                         groupItems.Add(rShape);
-                        // °¡Àå ¿À¸¥ÂÊ¿¡ À§Ä¡ÇÑ µµÇüÀÇ X ÁÂÇ¥ ¾÷µ¥ÀÌÆ®
+                        // ê°€ì¥ ì˜¤ë¥¸ìª½ì— ìœ„ì¹˜í•œ ë„í˜•ì˜ X ì¢Œí‘œ ì—…ë°ì´íŠ¸
                         maxXPos = Math.Max(maxXPos, xPos + ShapeManager.Width);
                     }
                 }
@@ -136,13 +136,13 @@ namespace Engine.Export.Office
         }
         private static void updatePosition(long slideWidth, ref int xPos, ref int yPos)
         {
-            // xPos ¾÷µ¥ÀÌÆ®
+            // xPos ì—…ë°ì´íŠ¸
             xPos += 50;
-            // µµÇüÀÌ ½½¶óÀÌµå ³Êºñ¸¦ ³Ñ¾î°¡¸é ¾Æ·¡·Î ÀÌµ¿
+            // ë„í˜•ì´ ìŠ¬ë¼ì´ë“œ ë„ˆë¹„ë¥¼ ë„˜ì–´ê°€ë©´ ì•„ë˜ë¡œ ì´ë™
             if (xPos + ShapeManager.Width > slideWidth)
             {
-                xPos = _startXPos; // ¿ŞÂÊ ³¡À¸·Î ÀÌµ¿
-                yPos += ShapeManager.Height + 10; // ¾Æ·¡·Î ÀÌµ¿
+                xPos = _startXPos; // ì™¼ìª½ ëìœ¼ë¡œ ì´ë™
+                yPos += ShapeManager.Height + 10; // ì•„ë˜ë¡œ ì´ë™
             }
         }
         private static void AddEdge(Slide slide, long slideWidth, ModelingEdgeInfo<Vertex> fEdge, ref int xPos, ref int yPos)

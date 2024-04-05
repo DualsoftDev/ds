@@ -6,7 +6,7 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
@@ -15,7 +15,7 @@ type XgiPOUTest() =
 
     do
         (* base class 초기화 이전에 let 구문들이 실행되어 오류 발생하는 것을 막기 위해 강제 do 구문 수행 *)
-        PLC.CodeGen.LSXGI.ModuleInitializer.Initialize()
+        PLC.CodeGen.LS.ModuleInitializer.Initialize()
         setRuntimeTarget XGI |> ignore
 
     let globalStorages = Storages()
@@ -72,8 +72,8 @@ type XgiPOUTest() =
         }
     )
 
-    let createProjectParams(projName):XgiProjectParams = {
-        defaultXgiProjectParams with
+    let createProjectParams(projName):XgxProjectParams = {
+        defaultXgxProjectParams with
             ProjectName = projName
             POUs = [pou11.Value; pou12.Value; pou21.Value]
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 유닛테스트 연속호출시 누적되므로 새로 호출
@@ -129,7 +129,7 @@ type XgiPOUTest() =
          * 새로 선언되는 자동 할당 변수들이 미리 선언된 메모리 영역을 피해서 생성되는지 검사한다.
          *)
 
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
         let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         usedMemoryByteIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
@@ -181,7 +181,7 @@ type XgiPOUTest() =
          * 새로 선언되는 자동 할당 변수 이름이 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
          *)
 
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
         let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
@@ -213,7 +213,7 @@ type XgiPOUTest() =
          * 새로 선언되는 자동 할당 변수 이름이 대소문자를 가리지 않고 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
          *)
 
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
         let xdoc = XmlDocument.loadFromFile myTemplate
         let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
@@ -241,7 +241,7 @@ type XgiPOUTest() =
 
     [<Test>]
     member __.``Validation= Existing project duplicated POU name test`` () =
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
         let collidingPou = {
             pou11.Value with
                 TaskName = "스캔 프로그램"

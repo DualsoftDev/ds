@@ -5,7 +5,7 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
@@ -40,7 +40,7 @@ type IQMapperTest() =
             }
 
         let prjParams = {
-            defaultXgiProjectParams with
+            defaultXgxProjectParams with
                 ProjectName = "Dummy IQ Map test"
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]

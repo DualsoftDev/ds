@@ -5,7 +5,7 @@ open NUnit.Framework
 
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 
 
 type XgiExistingXmlProjectAnalTest() =
@@ -14,7 +14,7 @@ type XgiExistingXmlProjectAnalTest() =
 
     [<Test>]
     member __.``Xml project read global variable test`` () =
-        let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LSXGI/Documents/XmlSamples/multiProgramSample.xml"
+        let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
 
         let usedMAddresses =
             XmlDocument.loadFromFile xmlPrj

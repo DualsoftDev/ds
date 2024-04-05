@@ -5,7 +5,7 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
@@ -40,7 +40,7 @@ type AutoMemoryAllocTest() =
 
         let usedByteIndices = [0..9] @ [25..31] @[39;42] @ [120..130]
         let prjParams = {
-            defaultXgiProjectParams with
+            defaultXgxProjectParams with
                 ProjectName = "Dummy IQ Map test"
                 GlobalStorages = globalStorages
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedByteIndices)    // 640K M memory 영역

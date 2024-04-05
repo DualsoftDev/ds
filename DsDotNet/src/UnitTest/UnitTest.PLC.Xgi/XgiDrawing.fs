@@ -3,8 +3,8 @@ namespace T
 open Dual.UnitTest.Common.FS
 open NUnit.Framework
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
-open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine.ElementType
+open PLC.CodeGen.LS
+open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 open Engine.Core
 
 type XgiDrawingTest() =

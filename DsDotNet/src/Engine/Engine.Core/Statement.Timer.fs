@@ -1,4 +1,4 @@
-namespace Engine.Core
+﻿namespace Engine.Core
 
 open Dual.Common.Core.FS
 
@@ -30,6 +30,16 @@ module TimerStatementModule =
 
         match tParams.ResetCondition with
         | Some cond ->
+            if not (isInUnitTest()) then
+                // unit test 에 한해, reset condition 허용
+                failwith <| "Reset condition is not supported for XGK compatibility"
+
+            (*
+             * XGK 에서도 reset condition 을 사용할 수 있도록 하려면 아래 코드 사용하고,
+             * PLC 생성 부분에서 reset condition rising 시에 Timer reset 하도록 작성해야 함.
+             * 현재 구현은 상위 로직에서 reset condition 을 사용하지 않도록 하고 있음.
+             *)
+
             let resetStatement = DuAssign (cond, ts.RES)
             resetStatement.Do()
             statements.Add resetStatement

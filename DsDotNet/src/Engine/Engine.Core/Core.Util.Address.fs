@@ -5,6 +5,7 @@ open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Reflection     
+open System
 
 [<AutoOpen>]
 module DsAddressModule =
@@ -147,4 +148,20 @@ module DsAddressModule =
             dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
-           
+
+
+
+    let getStartPointXGK(index:int) =
+        RuntimeDS.HwSlotDataTypes
+            |> Seq.filter(fun (i, _, _) -> i < index)
+            |> Seq.map(fun (_, dtype, dSzie) ->
+                match dtype with
+                | NotUsed | Memory ->  16 //기본 더미 Size
+                | In | Out ->  
+                    match dSzie with
+                    | DuUINT8 | DuUINT16  -> 16 //기본 더미 Size
+                    | DuUINT32  -> 32
+                    | DuUINT64  -> 64
+                    | _   -> failwithf $"{dSzie} not support"
+            ) |>  Seq.sum
+

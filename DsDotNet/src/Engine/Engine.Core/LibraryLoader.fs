@@ -1,4 +1,4 @@
-namespace rec Engine.Core
+ï»¿namespace rec Engine.Core
 
 open System.IO
 open System.Linq
@@ -12,9 +12,9 @@ module LibraryLoaderModule =
     
    
     type LibraryConfig = {
-        ///parent ½Ã½ºÅÛ¿¡¼­ »ç¿ëÇÑ Lib¹öÀü°ú ÇöÀç ¼³Ä¡µÈ Lib ¹öÀüÀº Ç×»ó °°¾Æ¾ß ÇÑ´Ù
+        ///parent ì‹œìŠ¤í…œì—ì„œ ì‚¬ìš©í•œ Libë²„ì „ê³¼ í˜„ì¬ ì„¤ì¹˜ëœ Lib ë²„ì „ì€ í•­ìƒ ê°™ì•„ì•¼ í•œë‹¤
         Version: string         
-        ///Api ÀÌ¸§ Áßº¹À» ¸·±âÀ§ÇØ Dictionary Ã³¸®
+        ///Api ì´ë¦„ ì¤‘ë³µì„ ë§‰ê¸°ìœ„í•´ Dictionary ì²˜ë¦¬
         LibraryInfos: Dictionary<string, string> //Api, filePath 
     }
 

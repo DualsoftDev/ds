@@ -31,7 +31,6 @@ module internal DBLoggerQueryImpl =
     let isOff = isOn >> not
 
     type Summary with
-        [<Obsolete("duplicate check 임시 막은 것 풀 것.")>]
         // logs: id 순
         member x.Build(FList(logs: Log list)) =
             let mutable count = 0
@@ -62,19 +61,16 @@ module internal DBLoggerQueryImpl =
             x.LastLog <- logs.TryLast()
             ()
 
-        [<Obsolete("duplicate check 임시 막은 것 풀 것.")>]
         member x.BuildIncremental(FList(newLogs: Log list)) =
             let helper (last: Log) =
                 if x.LastLog.IsNone then
                     if isOff (last) then
-                        //failwithlogf $"ERROR.  Invalid value starts: OFF(false)."
-                        logWarn $"ERROR.  Invalid value starts: OFF(false)."
+                        logWarn $"Warning: Invalid value starts: OFF(false)."
                 else
                     let prev = x.LastLog.Value
 
                     if isOn (prev) = isOn (last) then
-                        //failwithlogf $"ERROR.  duplicated consecutive values detected."
-                        logWarn  $"ERROR.  duplicated consecutive values detected."
+                        logWarn  $"Warning: Duplicated consecutive values detected."
 
                     if isOff (last) then
                         x.Count <- x.Count + 1

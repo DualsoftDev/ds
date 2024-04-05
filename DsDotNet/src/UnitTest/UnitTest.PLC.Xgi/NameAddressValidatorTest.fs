@@ -3,7 +3,7 @@ open Dual.UnitTest.Common.FS
 
 open NUnit.Framework
 
-open PLC.CodeGen.LSXGI.XgiPrologModule
+open PLC.CodeGen.LS.XgiPrologModule
 open PLC.CodeGen.Common.IECAddressModule
 
 type NameAddressValidatorTest() =

@@ -8,7 +8,7 @@ open Engine.Core
 open T.Expression
 open Dual.Common.Core.FS
 open Engine.Parser.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 
 
 //[<AutoOpen>]

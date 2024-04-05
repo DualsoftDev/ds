@@ -10,7 +10,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open Engine.CodeGenPLC
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open System
 open Engine.Import.Office
 
@@ -44,7 +44,7 @@ type TestAllCase() =
     member __.``Test All Case`` () =
         let t = CpuTestSample()
         let f = getFuncName()
-        let result = exportXMLforXGI(t.Sys, myTemplate f, None)
+        let result = exportXMLforLSPLC(XGI, t.Sys, myTemplate f, None)
         //추후 정답과 비교 필요
         result === result
 
@@ -68,12 +68,12 @@ type TestAllCase() =
     member __.``Allocate existing global Memory`` () =
         let t = CpuTestSample()
 
-        let result = exportXMLforXGI(t.Sys, myTemplate "Allocate existing global Memory", None)
+        let result = exportXMLforLSPLC(XGI, t.Sys, myTemplate "Allocate existing global Memory", None)
         result === result
 
 
     [<Test>]
     member __.``Allocate existing global IO`` () =
         let t = CpuTestSample()
-        (fun () -> exportXMLforXGI(t.Sys, myTemplate "Allocate existing global IO", Some myExistIO))  |> ShouldFail
+        (fun () -> exportXMLforLSPLC(XGI, t.Sys, myTemplate "Allocate existing global IO", Some myExistIO))  |> ShouldFail
 

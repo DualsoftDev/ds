@@ -1,4 +1,4 @@
-[<AutoOpen>]
+ï»¿[<AutoOpen>]
 module Engine.CodeGenCPU.ConvertMonitor
 
 open System.Linq
@@ -80,7 +80,7 @@ type VertexManager with
             yield (dop <&&> real.V.G.Expr <&&>   call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrTimeShortage, getFuncName())
             yield (dop <&&> real.V.G.Expr <&&> !!call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
             if call.UsingTon
-            then //´Ü¶ô ¿¡·¹´Â ½Ã°£Àû¿ëÇÑ °¨Áö½Ã Ã¤ÅÍ¸µ ÀÌ½´·Î Call Going ½Ã Á¦¿Ü½ÃÅ°°í ºÎ¸ğ GoingÀÏ¶§¸¸ Ã¼Å©
+            then //ë‹¨ë½ ì—ë ˆëŠ” ì‹œê°„ì ìš©í•œ ê°ì§€ì‹œ ì±„í„°ë§ ì´ìŠˆë¡œ Call Going ì‹œ ì œì™¸ì‹œí‚¤ê³  ë¶€ëª¨ Goingì¼ë•Œë§Œ ì²´í¬
                 yield (dop <&&> real.V.G.Expr <&&>  !!call.V.G.Expr <&&>  offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
             else 
                 yield (dop <&&> real.V.G.Expr <&&>                      offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())

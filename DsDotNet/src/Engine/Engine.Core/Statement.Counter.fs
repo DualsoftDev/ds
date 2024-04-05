@@ -43,6 +43,10 @@ module CounterStatementModule =
 
         match cParams.LoadCondition with
         | Some load ->
+            if not (isInUnitTest()) then
+                // unit test 에 한해, reset condition 허용
+                failwith <| "Load condition is not supported for XGK compatibility"
+
             let statement = DuAssign (load, cs.LD)
             statement.Do()
             statements.Add statement

@@ -159,7 +159,7 @@ module XgiExportModule =
 
     /// [S] -> [XS]
     let internal commentedStatementsToCommentedXgiStatements
-        (prjParam: XgiProjectParams)
+        (prjParam: XgxProjectParams)
         (localStorages: IStorage seq)
         (commentedStatements: CommentedStatement list)
         : IStorage list * CommentedXgiStatements list =
@@ -183,11 +183,11 @@ module XgiExportModule =
         newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
         
-    type XgiPOUParams with
+    type XgxPOUParams with
 
-        member x.GenerateXmlString(prjParam: XgiProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
+        member x.GenerateXmlString(prjParam: XgxProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
 
-        member x.GenerateXmlNode(prjParam: XgiProjectParams, scanName:string option) : XmlNode =
+        member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
             let { TaskName = taskName
                   POUName = pouName
                   Comment = comment
@@ -265,11 +265,11 @@ module XgiExportModule =
             programTemplate
 
 
-    and XgiProjectParams with
+    and XgxProjectParams with
 
         member private x.GetTemplateXmlDoc() =
             x.ExistingLSISprj |> Option.map XmlDocument.loadFromFile
-            |? getTemplateXgiXmlDoc ()
+            |? getTemplateXgxXmlDoc ()
 
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
 
@@ -339,9 +339,15 @@ module XgiExportModule =
 
             (* Global variables 삽입 *)
             do
+                let xnXGlobalVariable =
+                    match RuntimeDS.Target with
+                    | XGI -> "GlobalVariable"
+                    | XGK -> "VariableComment"
+                    | _ -> failwithlog "Not supported plc type"
+
                 let xnGlobalSymbols =
                     xdoc.SelectMultipleNodes
-                        "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol"
+                        $"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}/Symbols/Symbol"
                     |> List.ofSeq
 
                 let countExistingGlobal = xnGlobalSymbols.Length
@@ -398,10 +404,14 @@ module XgiExportModule =
                 // timer, counter 등을 고려했을 때는 numNewGlobals <> globalStorages.Count 일 수 있다.
 
                 let xnGlobalVar =
-                    xdoc.SelectSingleNode "//Configurations/Configuration/GlobalVariables/GlobalVariable"
+                    xdoc.SelectSingleNode $"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}"
 
-                xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
                 let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+                let xnCountConainer =
+                    match RuntimeDS.Target with
+                    | XGI -> xnGlobalVar
+                    | XGK -> xnGlobalVarSymbols
+                xnCountConainer.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
 
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)

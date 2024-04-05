@@ -67,6 +67,7 @@ namespace XGTComm
         public CommObjectFactory20 Factory { get; private set; }
         public DeviceInfo CreateDevice(char device, char memType, int size, int offset) => CreateDeviceWapper( device,  memType,  size,  offset);
 
+#pragma warning disable CA1416 // This call site is reachable on all platforms. 'Type.GetTypeFromCLSID(Guid)' is only supported on: 'windows'.
         private const int longSize = 8; // 8 bytes
         private const int MAX_RANDOM_READ_POINTS = 64;
         private const int MAX_RANDOM_WRITE_POINTS = 64;

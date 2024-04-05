@@ -39,7 +39,7 @@ let main argv =
     let dsPath = sampleDirectory + "/s_car.ds"
     let txt= File.ReadAllText(dsPath);
     let sys = loadSampleSystem(txt)
-    let result = exportXMLforXGI(sys, "XXXXXXXXX", None)
+    let result = exportXMLforLSPLC(XGI, sys, "XXXXXXXXX", None)
 
     0 // return an integer exit code
 

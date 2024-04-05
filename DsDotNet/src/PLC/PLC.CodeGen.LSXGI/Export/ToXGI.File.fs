@@ -5,6 +5,7 @@ open System.Reflection
 open Dual.Common.Core.FS
 open PLC.CodeGen.LSXGI
 open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open Engine.Core
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -38,20 +39,22 @@ module internal XgiFile =
 
 
     /// Template XGI XML 문자열을 반환
-    let getTemplateXgiXmlWithVersion version =
+    let getResource filename =
         let assembly = Assembly.GetExecutingAssembly()
-        let filename = sprintf "xgi-%s.template.xml" version
         EmbeddedResource.readFile assembly filename
     //  static member CPUs      = [|"XGI-CPUE"; "XGI-CPUH"; "XGI-CPUS"; "XGI-CPUS/P"; "XGI-CPUU"; "XGI-CPUU/D"; "XGI-CPUUN" |]
     //static member CPUsID    = [|"106"     ; "102"     ; "104"     ; "110"       ; "100"     ; "107"       ; "111"       |]
     /// Template XGI XML 문자열을 반환
-    let getTemplateXgiXml () =
-        match getTemplateXgiXmlWithVersion "4.5.2" with
-        | Some(xml) -> xml
-        | None -> failwithlogf "INTERNAL ERROR: failed to read resource template"
+    let getTemplateXgxXml () =
+        match RuntimeDS.Target with
+        | XGI -> "xgi-4.5.2.template.xml"
+        | XGK -> "XGK-CPUUN-4.77.99.1.template.xml"
+        | _ -> failwithlog "Not supported plc type"
+        |> getResource
+        |> Option.get
 
     /// Template XGI XML 문서 (XDocument) 반환
-    let getTemplateXgiXmlDoc = getTemplateXgiXml >> XmlDocument.fromString
+    let getTemplateXgxXmlDoc = getTemplateXgxXml >> XmlDocument.fromString
 
 
     /// rung 및 local var 에 대한 문자열 xml 을 전체 xml project file 에 embedding 시켜 outputPath 파일에 저장한다.
@@ -63,7 +66,7 @@ module internal XgiFile =
     let wrapWithXml (rungs: XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj: string option) =
         let xdoc =
             existingLSISprj |> Option.map XmlDocument.loadFromFile
-            |? getTemplateXgiXmlDoc ()
+            |? getTemplateXgxXmlDoc ()
 
         let pouName = "DsLogic"
 

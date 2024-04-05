@@ -6,7 +6,7 @@ open PLC.CodeGen.Common
 [<AutoOpen>]
 module POUParametersModule =
 
-    type XgiPOUParams =
+    type XgxPOUParams =
         {
             /// POU name.  "DsLogic"
             POUName: string
@@ -20,18 +20,18 @@ module POUParametersModule =
             CommentedStatements: CommentedStatement list
         }
 
-    type XgiProjectParams =
+    type XgxProjectParams =
         { ProjectName: string
           ProjectComment: string
           GlobalStorages: Storages
           ExistingLSISprj: string option
-          POUs: XgiPOUParams list
+          POUs: XgxPOUParams list
           MemoryAllocatorSpec: PLCMemoryAllocatorSpec
 
           EnableXmlComment: bool
           AppendExpressionTextToRungComment: bool }
 
-    let defaultXgiProjectParams =
+    let defaultXgxProjectParams =
         { ProjectName = ""
           ProjectComment = ""
           GlobalStorages = Storages()

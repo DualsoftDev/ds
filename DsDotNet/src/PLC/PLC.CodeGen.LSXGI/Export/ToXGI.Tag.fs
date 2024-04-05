@@ -102,6 +102,9 @@ module XGITag = //IEC61131Tag =
             State = 0 }
 
 
+    let pCounterGenerator = counterGenerator 0
+    let mCounterGenerator = counterGenerator 0
+    let xCounterGenerator = counterGenerator 0
     type SymbolInfo with
 
         member private x.ToXgiLiteral() =
@@ -112,21 +115,40 @@ module XGITag = //IEC61131Tag =
                 | false -> "false"
             | _ -> $"{x.InitValue}"
 
+        [<Obsolete("임시 코드 fix")>]
         /// Symbol 관련 XML tag attributes 생성
         member private x.GetXmlArgs() =
-            [ $"Name=\"{x.Name}\""
-              $"Kind=\"{x.Kind}\""
-              if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
-                  $"Type=\"{x.Type}\""
+            [   $"Name=\"{x.Name}\""
+                $"Comment=\"{x.Comment}\""
+                match RuntimeDS.Target with
+                | XGI ->
+                    $"Device=\"{x.Device}\""
+                    $"Kind=\"{x.Kind}\""
+                    if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
+                        $"Type=\"{x.Type}\""
 
-                  if x.InitValue <> null then
-                      $"InitValue=\"{x.ToXgiLiteral()}\""
+                        if x.InitValue <> null then
+                            $"InitValue=\"{x.ToXgiLiteral()}\""
 
-                  $"Address=\"{x.Address}\""
-              $"Comment=\"{x.Comment}\""
-              $"Device=\"{x.Device}\""
-              $"State=\"{x.State}\"" ]
-            |> String.concat " "
+                        $"Address=\"{x.Address}\""
+                    $"State=\"{x.State}\""
+                | XGK ->
+                    // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
+                    // 임시 코드
+                    let device, address =
+                        match x.Device with
+                        | "I" | "Q" -> "P", pCounterGenerator()     // 임시코드...
+                        | "" | "M" -> "M", mCounterGenerator()
+                        | _  -> x.Device, xCounterGenerator()
+                    let typ =
+                        match x.Type with
+                        | "BOOL" -> "BIT"
+                        | _ -> x.Type
+                    $"Device=\"{device}\""
+                    $"Type=\"{typ}\""
+                    $"DevicePos=\"{address}\""
+                | _ -> failwithlog "Not supported plc type"
+            ] |> String.concat " "
 
         /// Symbol 관련 XML tag 생성
         member x.ToText() = $"<Symbol {x.GetXmlArgs()}/>"
@@ -134,10 +156,10 @@ module XGITag = //IEC61131Tag =
 
         member x.GenerateXml() =
             [ yield $"\t<Symbol {x.GetXmlArgs()}>"
-              // 사용되지 않지만, 필요한 XML children element 생성
-              yield!
-                  [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
-                  |> Seq.map (sprintf "\t\t<Member%s/>")
+              //// 사용되지 않지만, 필요한 XML children element 생성
+              //yield!
+              //    [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
+              //    |> Seq.map (sprintf "\t\t<Member%s/>")
               yield "\t</Symbol>" ]
             |> String.concat "\r\n"
 

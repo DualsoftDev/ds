@@ -43,11 +43,11 @@ module XgiFixtures =
     let generateXmlForTest projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         verify (RuntimeDS.Target = XGI)
 
-        let prjParams = defaultXgiProjectParams
+        let prjParams = defaultXgxProjectParams
         let globalStorages = storages
         let localStorages = Storages()
 
-        let pouParams:XgiPOUParams = {
+        let pouParams:XgxPOUParams = {
             /// POU name.  "DsLogic"
             POUName = "DsLogic"
             /// POU container task name
@@ -58,8 +58,8 @@ module XgiFixtures =
             GlobalStorages = globalStorages
             CommentedStatements = commentedStatements
         }
-        let projParams:XgiProjectParams = {
-            defaultXgiProjectParams with
+        let projParams:XgxProjectParams = {
+            defaultXgxProjectParams with
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 POUs = [pouParams]

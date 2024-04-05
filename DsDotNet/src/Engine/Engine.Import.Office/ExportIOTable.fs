@@ -490,7 +490,7 @@ module ExportIOTable =
 
         addRows rows dt
 
-        addRows [[ "simulationLamp"; "bool"; RuntimeDS.EmulationAddress]] dt
+        addRows [[ "SimulationLamp"; "bool"; RuntimeDS.EmulationAddress]] dt
 
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
      

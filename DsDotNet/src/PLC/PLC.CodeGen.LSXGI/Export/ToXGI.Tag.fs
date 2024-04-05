@@ -135,10 +135,9 @@ module XGITag = //IEC61131Tag =
                 | XGK ->
                     // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
                     // 임시 코드
-                    let xxx = x
                     let device, address =
                         match x.Device with
-                        | "I" | "Q" -> "P", pCounterGenerator()
+                        | "I" | "Q" -> "P", pCounterGenerator()     // 임시코드...
                         | "" | "M" -> "M", mCounterGenerator()
                         | _  -> x.Device, xCounterGenerator()
                     let typ =

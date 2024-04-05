@@ -402,7 +402,6 @@ module internal rec Command =
             | CounterMode(counterStatement) -> drawFunctionBlockCounter (x, y) counterStatement
         | _ -> failwithlog "Unknown CommandType"
 
-    [<Obsolete("Fill me")>]
     let drawCommandXgk (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
         match cmd with
         | FunctionBlockCmd(fbc) -> drawFBCommandXgk (x, y) fbc
@@ -437,7 +436,6 @@ module internal rec Command =
           TotalSpanY = 1
           XmlElements = xmls }
 
-    [<Obsolete("Fill me")>]
     let drawFBCommandXgk (x, y) (fbc: FunctionBlock) : BlockSummarizedXmlElements =
         let xmls =
             let spanX =

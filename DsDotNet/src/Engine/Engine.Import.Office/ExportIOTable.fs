@@ -170,10 +170,15 @@ module ExportIOTable =
                 for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
                     if not(coins.Where(fun c->c.TaskDevs.Contains(dev)).any())
                     then
-                        dev.InAddress <- ExternalTempMemory
-                        dev.OutAddress <- TextSkip
+
+                        if dev.InAddress = TextAddrEmpty || dev.InAddress = TextSkip
+                        then  dev.InAddress <- ExternalTempMemory
+
+                        if dev.OutAddress = TextAddrEmpty 
+                        then  dev.OutAddress <- TextSkip
+
                         let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
-                        if sortedDeviceDefs.Head() = dev then
+                        if sortedDeviceDefs.Head() = dev then 
                             yield rowIOItems (dev, job, true) //첫 TaskDev만 만듬
                         else
                             yield rowIOItems (dev, job, false)

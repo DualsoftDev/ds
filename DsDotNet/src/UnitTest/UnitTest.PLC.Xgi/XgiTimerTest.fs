@@ -158,3 +158,43 @@ type XgiTimerTest() =
         let f = getFuncName()
         let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
+
+
+    [<Test>]
+    member __.``TIMER= Not Condition test`` () =
+        let storages = Storages()
+        let code = """
+            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
+            bool Clamp1_RET_I = createTag("%IX1.0.1", false);
+            bool Clamp2_RET_I = createTag("%IX1.0.2", false);
+            bool Clamp3_RET_I = createTag("%IX1.0.3", false);
+            bool Clamp4_RET_I = createTag("%IX1.0.4", false);
+            bool IOP_ClampOperation = createTag("%IX1.0.5", false);
+
+            ton myTon = createXgiTON(15000u,
+                $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo
+                    && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
+                );
+"""
+        let statements = parseCode storages code
+        let f = getFuncName()
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        saveTestResult f xml
+
+    [<Test>]
+    member __.``TIMER= Not Condition test 2`` () =
+        let storages = Storages()
+        let code = """
+            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
+            bool Clamp1_RET_I = createTag("%IX1.0.1", false);
+            bool Clamp2_RET_I = createTag("%IX1.0.2", false);
+            bool Clamp3_RET_I = createTag("%IX1.0.3", false);
+            bool Clamp4_RET_I = createTag("%IX1.0.4", false);
+            bool IOP_ClampOperation = createTag("%IX1.0.5", false);
+
+            ton TOUT3 = createWinTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
+"""
+        let statements = parseCode storages code
+        let f = getFuncName()
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        saveTestResult f xml

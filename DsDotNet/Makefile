@@ -1,5 +1,13 @@
+.ONESHELL
+
 dotnet-restore:
 	@dotnet restore
+
+# powerpoint addin unittest 실패시 임시 대처
+tmp-link:
+	@cd ./src/UnitTest/UnitTest.PowerPointAddIn/bin/Debug/net7.0-windows
+	ln -s ../../../../UnitTest.Engine/bin/Debug/net7.0/dsLib
+
 
 clean:
 	@echo "Removing all subdriectory named [bin] or [obj] or [.vs] on [`pwd`].."

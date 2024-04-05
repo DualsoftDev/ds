@@ -12,6 +12,8 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
+    let private isAddRungComment = IsDebugVersion
+
     [<Obsolete("getBytes 이거 수정 필요!!!!")>]
     let generateXmlXGX (plcType:RuntimeTargetType) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
         let projName = system.Name
@@ -103,7 +105,7 @@ module ExportModule =
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
-                AppendExpressionTextToRungComment = false
+                AppendExpressionTextToRungComment = isAddRungComment
                 MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) usedByteIndices) // 640K M memory 영역
                 POUs =
                     [ yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"

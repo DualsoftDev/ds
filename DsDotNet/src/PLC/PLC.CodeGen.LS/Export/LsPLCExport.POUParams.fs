@@ -40,4 +40,4 @@ module POUParametersModule =
           MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 640K M memory 영역
           //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
           EnableXmlComment = false
-          AppendExpressionTextToRungComment = true }
+          AppendExpressionTextToRungComment = IsDebugVersion }

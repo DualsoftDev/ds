@@ -5,6 +5,15 @@ open System.IO
 open Newtonsoft.Json
 open Dual.Common.Core.FS
 
+[<AutoOpen>]
+module CommonAppSettings =
+    #if DEBUG
+        let IsDebugVersion = true
+    #else
+        let IsDebugVersion = false
+    #endif
+
+
 type LoggerDBSettings() = 
     member x.ConnectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, x.ConnectionPath)}"
     member val ConnectionPath = "" with get, set

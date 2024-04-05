@@ -52,7 +52,7 @@ module TimerStatementModule =
     let private createTONStatement (ts :TimerStruct, rungInCondition, resetCondition)  : Statement =
 
         let tParams ={ Type=ts.Type; Name=ts.Name; Preset=ts.PRE.Value;
-                       RungConditionIn=rungInCondition; ResetCondition=resetCondition; FunctionName="createWinTON"}
+                       RungConditionIn=rungInCondition; ResetCondition=resetCondition; FunctionName="createXgiTON"}     // createWinTON
 
         generateTimerStatement (ts, tParams)
 

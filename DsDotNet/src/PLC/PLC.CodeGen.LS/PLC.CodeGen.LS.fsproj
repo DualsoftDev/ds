@@ -3,7 +3,7 @@
     <PropertyGroup>
         <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
         <TargetFramework>net7.0</TargetFramework>
-        <RootNamespace>PLC.CodeGen.LSXGI</RootNamespace>
+        <RootNamespace>PLC.CodeGen.LS</RootNamespace>
         <LangVersion>8.0</LangVersion>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
@@ -39,23 +39,23 @@
         <None Include="Documents\사용설명서_XGI_XGR_XEC_명령어집_V2.7.pdf"/>
         <Compile Include="AssemblyInfo.fs"/>
         <Compile Include="Address.Convert.fs"/>
-        <Compile Include="ToXGI.Spec.FBText.fs"/>
-        <Compile Include="ToXGI.Spec.fs"/>
+        <Compile Include="LsPLC.Spec.FBText.fs"/>
+        <Compile Include="LsPLC.Spec.fs"/>
         <EmbeddedResource Include="XgI-4.5.2.template.xml"/>
         <EmbeddedResource Include="XGK-CPUUN-4.77.99.1.template.xml"/>
-		<Compile Include="ToXGI.Prolog.fs"/>
+		<Compile Include="LsPLC.Prolog.fs"/>
         <None Include="Import\XGConfigReader.fsx"/>
         <None Include="Import\XGLDRoutineReader.fsx"/>
         <None Include="Import\XGFileRead.fsx"/>
-        <Compile Include="Export\ToXGI.Common.fs"/>
-        <Compile Include="Export\ToXGI.POUParams.fs"/>
-        <Compile Include="Export\ToXGI.StatementAdaptor.fs"/>
-        <Compile Include="Export\ToXGI.Command.fs"/>
-        <Compile Include="Export\ToXGI.Tag.fs"/>
-        <Compile Include="Export\ToXGI.File.fs"/>
-        <Compile Include="Export\ToXGI.Symbols.fs"/>
-        <Compile Include="Export\ToXGI.XmlProjectAnalyzer.fs"/>
-        <Compile Include="Export\ToXGI.Export.fs"/>
+        <Compile Include="Export\LsPLCExport.Common.fs"/>
+        <Compile Include="Export\LsPLCExport.POUParams.fs"/>
+        <Compile Include="Export\LsPLCExport.StatementAdaptor.fs"/>
+        <Compile Include="Export\LsPLCExport.Command.fs"/>
+        <Compile Include="Export\LsPLCExport.Tag.fs"/>
+        <Compile Include="Export\LsPLCExport.File.fs"/>
+        <Compile Include="Export\LsPLCExport.Symbols.fs"/>
+        <Compile Include="Export\LsPLCExport.XmlProjectAnalyzer.fs"/>
+        <Compile Include="Export\LsPLCExport.Export.fs"/>
         <None Include="Scripts\Script1.fsx"/>
         <Compile Include="EntryPoint.fs"/>
     </ItemGroup>

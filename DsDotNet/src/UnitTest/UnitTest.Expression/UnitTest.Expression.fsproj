@@ -48,7 +48,7 @@
 
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-        <ProjectReference Include="..\..\PLC\PLC.CodeGen.LSXGI\PLC.CodeGen.LSXGI.fsproj" />
+        <ProjectReference Include="..\..\PLC\PLC.CodeGen.LS\PLC.CodeGen.LS.fsproj" />
 
         <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
     </ItemGroup>

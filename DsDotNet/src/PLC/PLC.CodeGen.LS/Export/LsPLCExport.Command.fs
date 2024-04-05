@@ -1,10 +1,10 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 
 open System
 open System.Linq
 
 open PLC.CodeGen.Common
-open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open Dual.Common.Core.FS
 open Engine.Core
 open FB

@@ -1,10 +1,10 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 
 open System.Reflection
 
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
-open PLC.CodeGen.LSXGI.Config.POU.Program.LDRoutine
+open PLC.CodeGen.LS
+open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open Engine.Core
 
 [<AutoOpen>]

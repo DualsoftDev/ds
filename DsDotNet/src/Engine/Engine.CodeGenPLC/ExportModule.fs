@@ -5,7 +5,7 @@ open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open System
 open Engine.CodeGenCPU

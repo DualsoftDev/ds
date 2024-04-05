@@ -1,11 +1,11 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 
 open System.Linq
 open System.Xml
 
 open Dual.Common.Core.FS
 open Engine.Core
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 [<AutoOpen>]

@@ -12,7 +12,7 @@ open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open System
 open Engine.Import.Office
 open Engine.Parser.FS

@@ -5,7 +5,7 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 

@@ -1,4 +1,4 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 
 open System
 
@@ -8,7 +8,7 @@ open System.Security
 open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.Common
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 
 
 [<AutoOpen>]

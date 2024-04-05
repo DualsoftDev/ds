@@ -1,4 +1,4 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 
 module internal FBText =
     //산전 보안자료로 외부유출 금지 코드안에 구성

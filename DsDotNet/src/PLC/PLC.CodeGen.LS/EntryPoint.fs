@@ -1,11 +1,11 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 
 open Engine.Core
 
 
 module ModuleInitializer =
     let Initialize() =
-        printfn "PLC.CodeGen.LSXGI Module is being initialized..."
+        printfn "PLC.CodeGen.LS Module is being initialized..."
 
         fwdCreateSymbolInfo <- XGITag.createSymbolInfo
 

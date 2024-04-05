@@ -1,9 +1,9 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 
 open System.Xml
 
 open Dual.Common.Core.FS
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Engine.Core
 

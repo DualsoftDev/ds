@@ -1,4 +1,4 @@
-namespace PLC.CodeGen.LSXGI
+namespace PLC.CodeGen.LS
 open System
 open System.Linq
 open System.Collections.Generic

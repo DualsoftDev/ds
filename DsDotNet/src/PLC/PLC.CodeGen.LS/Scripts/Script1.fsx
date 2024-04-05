@@ -7,7 +7,7 @@
 
 #r "Dual.Core.FS.dll"
 #r "Dual.Common.FS.dll"
-#r "PLC.CodeGen.LSXGI.dll"
+#r "PLC.CodeGen.LS.dll"
 
 // #load @"F:\solutions\GammaTest\soft\Gamma\Ds.Beta.UnitTest.FS\OnlyOnce.fs"
 // #load loads script file
@@ -15,7 +15,7 @@
 
 open System
 open System.IO
-open PLC.CodeGen.LSXGI
+open PLC.CodeGen.LS
 open Dual.Core.Prelude
 open IEC61131
 

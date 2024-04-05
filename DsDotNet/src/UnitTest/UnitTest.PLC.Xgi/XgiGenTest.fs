@@ -128,6 +128,28 @@ type XgiGenerationTest() =
             let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
+
+    [<Test>]
+    member x.``And Huge test 3`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code = codeForBitsHuge + """
+                $x15 :=
+                    ($x00 || $x01 || $x02 || $x03) && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                    ($x10 && $x11 || $x12 && $x13) && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                    $x30 && $x31 &&
+                    ($x32 || $x33 && $x34 || $x35) && $x36 && $x37 && $x38 && $x39 &&
+                    ($x00 || $x01 || $x02 || $x03) && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                    ($x10 && $x11 || $x12 && $x13) && $x14 && $x15 && $x16 && $x17 && $x18 && $x19
+                    ;
+"""
+            let statements = parseCode storages code
+            let f = getFuncName()
+            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            saveTestResult f xml
+        )
     [<Test>]
     member __.``OR Many test`` () =
         let storages = Storages()

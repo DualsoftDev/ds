@@ -255,14 +255,14 @@ module XgiExpressionConvertorModule =
         let rec helper (exp: IExpression) =
             [   match exp.FunctionName with
                 | Some funcName ->
-                    if RuntimeDS.Target <> XGI then 
-                        failwithlog $"Inline function only supported on XGI"
-
                     let newArgs = exp.FunctionArguments |> bind helper
 
                     match funcName with
                     | ("&&" | "||" | "!") -> exp.WithNewFunctionArguments newArgs
                     | (">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/") as op ->
+                        if RuntimeDS.Target <> XGI then 
+                            failwithlog $"Inline function only supported on XGI"
+
                         let out = createTypedXgiAutoVariable "out" exp.BoxedEvaluatedValue $"{op} output"
                         xgiLocalVars.Add out
 

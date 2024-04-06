@@ -177,7 +177,7 @@ module XgiExportModule =
             let xgxCmtStmts =
                 commentedStatement2CommentedXgxStatements prjParam newLocalStorages cmtSt
 
-            let (CommentAndXgxStatements(comment_, xgxStatements)) = xgxCmtStmts
+            let (CommentAndXgxStatements(_comment, xgxStatements)) = xgxCmtStmts
 
             if xgxStatements.Any() then
                 newCommentedStatements.Add xgxCmtStmts

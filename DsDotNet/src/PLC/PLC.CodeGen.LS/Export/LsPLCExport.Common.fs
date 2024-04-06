@@ -148,7 +148,7 @@ module internal Common =
 
 
     /// x y 위치에서 수직선 한개를 긋는다
-    let vlineAt (x, y) =
+    let vlineAt (x, y) : CoordinatedXmlElement =
         verify (x >= 0)
         let c = coord (x, y) + 2
 
@@ -160,7 +160,7 @@ module internal Common =
     let mutable EnableXmlComment = false
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
-    let vlineDownN (x, y) n =
+    let vlineDownN (x, y) n : CoordinatedXmlElement list =
         [ if EnableXmlComment then
               xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
@@ -193,7 +193,7 @@ module internal Common =
           SpanY = getFunctionHeight detailedFunctionName }
 
     /// 함수 파라메터 그리기
-    let createFBParameterXml (x, y) tag =
+    let createFBParameterXml (x, y) tag : CoordinatedXmlElement =
         let c = coord (x, y)
         let xml = elementFull (int ElementType.VariableMode) c "" tag
 

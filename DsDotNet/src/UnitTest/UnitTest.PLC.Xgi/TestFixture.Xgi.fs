@@ -41,6 +41,9 @@ module XgiFixtures =
         disposable { RuntimeDS.Target <- runtimeTargetBackup }
 
     let generateXmlForTest projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+        tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
+
+
         verify (RuntimeDS.Target = XGI)
 
         let prjParams = defaultXgxProjectParams
@@ -63,6 +66,7 @@ module XgiFixtures =
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 POUs = [pouParams]
+                RungCounter = counterGenerator 0 |> Some
         }
 
         projParams.GenerateXmlString()

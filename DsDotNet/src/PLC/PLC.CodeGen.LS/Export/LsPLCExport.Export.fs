@@ -44,7 +44,7 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 module XgiExportModule =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let internal generateRungs (prologComment: string) (commentedStatements: CommentedXgiStatements seq) : XmlOutput =
+    let internal generateRungs (prologComment: string) (prjParam: XgxProjectParams) (commentedStatements: CommentedXgiStatements seq) : XmlOutput =
         let xmlRung (expr: FlatExpression option) xgiCommand y : RungGenerationInfo =
             let { Coordinate = c; Xml = xml } = rung (0, y) expr xgiCommand
             let yy = c / 1024
@@ -77,7 +77,9 @@ module XgiExportModule =
 
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
-                let xml = getCommentRungXml rgi.Y cmt
+                let xml =
+                    let rungCounter = prjParam.RungCounter.Value()
+                    getCommentRungXml rgi.Y $"[{rungCounter}] {cmt}"
                 rgi <- rgi.Add(xml)
 
             for stmt in stmts do
@@ -190,7 +192,7 @@ module XgiExportModule =
         member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
             let { TaskName = taskName
                   POUName = pouName
-                  Comment = comment
+                  Comment = prologComment
                   GlobalStorages = globalStorages
                   LocalStorages = localStorages
                   CommentedStatements = commentedStatements } =
@@ -237,7 +239,7 @@ module XgiExportModule =
             let localStoragesXml =
                 storagesToLocalXml prjParam newLocalStorages globalStoragesRefereces
 
-            let rungsXml = generateRungs comment commentedXgiStatements
+            let rungsXml = generateRungs prologComment prjParam commentedXgiStatements
 
             /// POU/Programs/Program
             let programTemplate = createXmlStringProgram taskName pouName scanName |> XmlNode.ofString

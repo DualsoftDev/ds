@@ -2,6 +2,7 @@ namespace PLC.CodeGen.LS
 
 open Engine.Core
 open PLC.CodeGen.Common
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module POUParametersModule =
@@ -29,7 +30,9 @@ module POUParametersModule =
           MemoryAllocatorSpec: PLCMemoryAllocatorSpec
 
           EnableXmlComment: bool
-          AppendExpressionTextToRungComment: bool }
+          AppendDebugInfoToRungComment: bool
+          RungCounter : (unit -> int) option
+        }
 
     let defaultXgxProjectParams =
         { ProjectName = ""
@@ -40,4 +43,6 @@ module POUParametersModule =
           MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 640K M memory 영역
           //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
           EnableXmlComment = false
-          AppendExpressionTextToRungComment = IsDebugVersion }
+          AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
+          RungCounter = None
+        }

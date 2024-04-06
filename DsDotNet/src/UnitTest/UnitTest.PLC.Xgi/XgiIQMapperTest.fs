@@ -44,6 +44,7 @@ type IQMapperTest() =
                 ProjectName = "Dummy IQ Map test"
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]
+                RungCounter = counterGenerator 0 |> Some
         }
 
         let xml = prjParams.GenerateXmlString()

@@ -542,17 +542,16 @@ module XgiExpressionConvertorModule =
         (prjParam: XgxProjectParams)
         (newLocalStorages: XgiStorage)
         (CommentedStatement(comment, statement))
-        : CommentedXgiStatements =
+      : CommentedXgiStatements =
         let xgiStatements = statement2XgiStatements newLocalStorages statement
 
         let rungComment =
             let statementComment = statement.ToText()
-
-            match comment.NonNullAny(), prjParam.AppendExpressionTextToRungComment with
-            | true, true -> $"{comment}\r\n{statementComment}"
-            | true, false -> comment
-            | false, true -> statementComment
-            | false, false -> ""
+            [
+                comment
+                if prjParam.AppendDebugInfoToRungComment then
+                    statementComment
+            ] |> ofNotNullAny |> String.concat "\r\n"
             |> escapeXml
 
         CommentedXgiStatements(rungComment, xgiStatements)

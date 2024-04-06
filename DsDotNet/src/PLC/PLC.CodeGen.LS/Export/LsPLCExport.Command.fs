@@ -573,34 +573,38 @@ module internal rec Command =
             let exprXmls = blockedExprXmls |> List.collect (fun x -> x.XmlElements)
 
             let xmls =
-                [ yield! exprXmls
+                [   yield! exprXmls
 
-                  let auxLineXmls =
-                      [ for ri in blockedExprXmls do
-                            if ri.TotalSpanX < spanX then
-                                let span = (spanX - ri.TotalSpanX - 1)
-                                let param = $"Param={dq}{span * 3}{dq}"
-                                let mode = int ElementType.MultiHorzLineMode
-                                let c = coord (x + ri.TotalSpanX, ri.Y)
-                                let xml = elementFull mode c param ""
+                    let auxLineXmls =
+                        [ for ri in blockedExprXmls do
+                              if ri.TotalSpanX < spanX then
+                                  let span = (spanX - ri.TotalSpanX - 1)
+                                  let param = $"Param={dq}{span * 3}{dq}"
+                                  let mode = int ElementType.MultiHorzLineMode
+                                  let c = coord (x + ri.TotalSpanX, ri.Y)
+                                  let xml = elementFull mode c param ""
 
-                                { Coordinate = c
-                                  Xml = xml
-                                  SpanX = span
-                                  SpanY = 1 } ]
+                                  { Coordinate = c
+                                    Xml = xml
+                                    SpanX = span
+                                    SpanY = 1 } ]
 
-                  yield! auxLineXmls
+                    yield! auxLineXmls
 
 
-                  // 좌측 vertical lines
-                  if x >= 1 then
-                      yield! vlineDownN (x - 1, y) (blockedExprXmls.First().TotalSpanY)
+                    // 좌측 vertical lines
+                    if x >= 1 then
+                        let dy =
+                            blockedExprXmls
+                            |> List.take(blockedExprXmls.Length - 1)
+                            |> List.sumBy(fun e -> e.TotalSpanY)
+                        yield! vlineDownN (x - 1, y) dy
 
-                  // ```OR variable length 역삼각형 test```
-                  let lowestY =
-                      blockedExprXmls.Where(fun sri -> sri.TotalSpanX <= spanX).Max(fun sri -> sri.Y)
-                  // 우측 vertical lines
-                  yield! vlineDownN (x + spanX - 1, y) (lowestY - y) ]
+                    // ```OR variable length 역삼각형 test```
+                    let lowestY =
+                        blockedExprXmls.Where(fun sri -> sri.TotalSpanX <= spanX).Max(fun sri -> sri.Y)
+                    // 우측 vertical lines
+                    yield! vlineDownN (x + spanX - 1, y) (lowestY - y) ]
 
             let xmls = xmls |> List.distinct // dirty hacking!
 

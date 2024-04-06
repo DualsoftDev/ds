@@ -231,6 +231,42 @@ type XgiGenerationTest() =
         saveTestResult f xml
 
     [<Test>]
+    member __.``OR Block test`` () =
+        let storages = Storages()
+        let code = codeForBits + """
+            $x15 :=
+                $x01 && ($x02 || ($x03 && ($x04 || $x05 || $x06 || $x07) && $x08 && ($x09 || $x10))) 
+                ;
+"""
+        let statements = parseCode storages code
+        let f = getFuncName()
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        saveTestResult f xml
+
+
+    [<Test>]
+    member __.``OR Block test2`` () =
+        let storages = Storages()
+        let code = codeForBits31 + """
+            $x31 :=
+                $x02
+                && ($x03 || $x04 || $x05)
+                && ($x06 || $x07)
+                && $x08
+                && ($x09
+                      || ($x10 && ( $x11
+                                    || $x12
+                                    || ($x13 && $x14 && $x15)
+                                    || !($x16 && $x17 && $x18))
+                               && $x19) )
+                ;
+"""
+        let statements = parseCode storages code
+        let f = getFuncName()
+        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        saveTestResult f xml
+
+    [<Test>]
     member __.``OR variable length test`` () =
         let storages = Storages()
         let code = codeForBits + """

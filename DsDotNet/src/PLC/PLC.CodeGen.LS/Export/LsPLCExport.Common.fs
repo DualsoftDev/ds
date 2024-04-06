@@ -29,13 +29,10 @@ module internal Common =
           TotalSpanY: int
           XmlElements: CoordinatedXmlElement list }
 
-    type RungInfosWithSpan =
-        { RungInfos: CoordinatedXmlElement list
-          X: int
-          Y: int
-          SpanX: int
-          SpanY: int }
 
+    /// Rung 을 생성하기 위한 정보
+    ///
+    /// - Xmls: 생성된 xml string 의 list
     type RungGenerationInfo =
         { Xmls: XmlOutput list // Rung 별 누적 xml.  역순으로 추가.  꺼낼 때 뒤집어야..
           Y: int }

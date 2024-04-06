@@ -1,7 +1,5 @@
 namespace PLC.CodeGen.LS
 
-open System
-
 open System.Linq
 open System.Collections.Generic
 open System.Security
@@ -51,7 +49,8 @@ module internal XgiSymbolsModule =
             && t.Address.IsNonNull() 
             && t.Address <> TextAddrEmpty 
             && not(t.Address.StartsWith("%"))
-        then t.Address <- $"%%{t.Address}"
+        then
+            t.Address <- $"%%{t.Address}"
 
         if t.Address = TextAddrEmpty then
             let allocatorFunctions =
@@ -78,20 +77,20 @@ module internal XgiSymbolsModule =
             if t.Name.StartsWith("_") then
                 logWarn $"Something fish: trying to generate auto M address for {t.Name}"
 
-            if t.Address <> TextAddrEmpty 
-            then
+            if t.Address <> TextAddrEmpty then
                 t.Address <- allocator ()
 
     let getXGITagInfo (address:string) (name:string) =
         match tryParseXGITag address with
         | Some tag -> address, tag.Device.ToString()
         | _ -> 
-            if address = TextAddrEmpty 
-            then  "", ""
-            else  failwith $"Invalid tag address {address} for {name}"
+            if address = TextAddrEmpty then
+                "", ""
+            else
+                failwith $"Invalid tag address {address} for {name}"
         
 
-    let xgiSymbolToSymbolInfo (prjParams: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
+    let xgxSymbolToSymbolInfo (prjParams: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
@@ -178,16 +177,16 @@ module internal XgiSymbolsModule =
                 Device = device
                 Kind = kindVar }
 
-    let private xgiSymbolsToSymbolInfos
+    let private xgxSymbolsToSymbolInfos
         (prjParams: XgxProjectParams)
         (kindVar: int)
         (xgiSymbols: XgxSymbol seq)
-        : SymbolInfo list =
-        xgiSymbols |> map (xgiSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq
+      : SymbolInfo list =
+        xgiSymbols |> map (xgxSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq
 
 
     let private storagesToSymbolInfos (prjParams: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
-        storagesToXgiSymbol >> map snd >> xgiSymbolsToSymbolInfos prjParams kindVar
+        storagesToXgiSymbol >> map snd >> xgxSymbolsToSymbolInfos prjParams kindVar
 
     /// <LocalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
@@ -195,7 +194,7 @@ module internal XgiSymbolsModule =
         (prjParams: XgxProjectParams)
         (localStorages: IStorage seq)
         (globalStoragesRefereces: IStorage seq)
-        =
+      : string =
         let symbolInfos =
             [ yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR) localStorages
               yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]

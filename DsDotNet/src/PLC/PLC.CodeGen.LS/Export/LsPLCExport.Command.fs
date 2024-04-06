@@ -94,7 +94,7 @@ module internal rec Command =
 
     /// '_ON' 에 대한 expression
     let fakeAlwaysOnExpression: Expression<bool> =
-        let on = createXgiVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
+        let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
         DuTerminal(DuVariable on)
 
     //type FuctionParameterShape =
@@ -623,9 +623,12 @@ module internal rec Command =
 
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
-    /// xml 및 다음 y 좌표 반환
-    /// expr 이 None 이면 그리지 않는다.
-    /// cmdExp 이 None 이면 command 를 그리지 않는다.
+    ///
+    /// - xml 및 다음 y 좌표 반환
+    ///
+    /// - expr 이 None 이면 그리지 않는다.
+    ///
+    /// - cmdExp 이 None 이면 command 를 그리지 않는다.
     let rung (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : CoordinatedXmlElement =
         let expr =
             if RuntimeDS.Target = XGI || expr.IsSome || cmdExp.IsNone then

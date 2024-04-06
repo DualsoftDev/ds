@@ -150,6 +150,41 @@ type XgiGenerationTest() =
             let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
+
+    [<Test>]
+    member x.``X And Huge test 4`` () =
+        lock x.Locker (fun () ->
+            autoVariableCounter <- 0
+            let storages = Storages()
+            let code =
+                let vars = ["_OFF"; "R";
+                                "c1"; "c2"; "c3"; "c4"; "c5"; "c6"; "c7"; "c8"; "c9";
+                                "c10"; "c11"; "c12"; "c13"; "c14"; "c15"; "c16"; "c17";
+                                "c18"; "c19"; "c20"; "c21"; "c22"; "c23"; "c24"; "c25"; 
+                                "c26"; "c27"; "c28"; "c29"; "c30"; "c31"; "c32"; "c33";
+                                "c34"; "_ON"; "c35";
+                                "c36"; "c37"; "c38"; "c39";
+                                "c40"] |> distinct
+
+                let counter = counterGenerator 0
+                let varDecls = vars |> map (fun v -> $"""bool {v} = createTag("%%MX{counter()}", false);""") |> String.concat "\n"
+                varDecls + """
+                $R := 
+                    (($_OFF || &&($c1, $c2, $c3, $c4, $c5, $c6, $c7, $c8, $c9,
+                                  $c10, $c11, $c12, $c13, $c14, $c15, $c16, $c17,
+                                  $c18, $c19, $c20, $c21, $c22, $c23, $c24, $c25,
+                                  $c26, $c27, $c28, $c29, $c30, $c31, $c32, $c33)
+
+                            || $c34 || $_OFF || $_OFF) && $_ON || $c35)
+                      && !($c36 && !($c37) && !($c38) && !($c39)
+                      || $c40);
+                """
+            let statements = parseCode storages code
+            let f = getFuncName()
+            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            saveTestResult f xml
+        )
+
     [<Test>]
     member __.``OR Many test`` () =
         let storages = Storages()

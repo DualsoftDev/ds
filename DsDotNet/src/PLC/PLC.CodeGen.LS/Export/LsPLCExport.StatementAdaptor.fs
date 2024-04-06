@@ -123,15 +123,13 @@ module rec TypeConvertorModule =
         interface
         end
 
-    type CommentedXgiStatements = CommentedXgiStatements of comment: string * statements: Statement list
+    type CommentedXgxStatements = CommentedXgiStatements of comment: string * statements: Statement list
 
-    let (|CommentAndXgiStatements|) =
-        function
-        | CommentedXgiStatements(x, ys) -> x, ys
+    let (|CommentAndXgxStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
 
-    let commentAndXgiStatement = (|CommentAndXgiStatements|)
+    let commentAndXgxStatement = (|CommentAndXgxStatements|)
 
-    let createXgiVariable (name: string) (initValue: obj) comment : IXgxVar =
+    let createXgxVariable (name: string) (initValue: obj) comment : IXgxVar =
         (*
             "n0" is an incorrect variable.
             The folling characters are allowed:
@@ -176,7 +174,7 @@ module rec TypeConvertorModule =
     let createTypedXgiAutoVariable (nameHint: string) (initValue: obj) comment : IXgxVar =
         autoVariableCounter <- autoVariableCounter + 1
         let name = $"_tmp{nameHint}{autoVariableCounter}"
-        createXgiVariable name initValue comment
+        createXgxVariable name initValue comment
 
 
     let internal createXgiAutoVariableT (nameHint: string) comment (initValue: 'T) =
@@ -251,31 +249,34 @@ module XgiExpressionConvertorModule =
         { Storage = newLocalStorages
           ExpandFunctionStatements = expandFunctionStatements
           Exp = exp }
-        : IExpression =
+      : IExpression =
         let xgiLocalVars = ResizeArray<IXgxVar>()
 
         let rec helper (exp: IExpression) =
-            [ match exp.FunctionName with
-              | Some funcName ->
-                  let newArgs = exp.FunctionArguments |> bind helper
+            [   match exp.FunctionName with
+                | Some funcName ->
+                    if RuntimeDS.Target <> XGI then 
+                        failwithlog $"Inline function only supported on XGI"
 
-                  match funcName with
-                  | ("&&" | "||" | "!") -> exp.WithNewFunctionArguments newArgs
-                  | (">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/") as op ->
-                      let out = createTypedXgiAutoVariable "out" exp.BoxedEvaluatedValue $"{op} output"
-                      xgiLocalVars.Add out
+                    let newArgs = exp.FunctionArguments |> bind helper
 
-                      expandFunctionStatements.Add
-                      <| DuAugmentedPLCFunction
-                          { FunctionName = op
-                            Arguments = newArgs
-                            Output = out }
+                    match funcName with
+                    | ("&&" | "||" | "!") -> exp.WithNewFunctionArguments newArgs
+                    | (">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/") as op ->
+                        let out = createTypedXgiAutoVariable "out" exp.BoxedEvaluatedValue $"{op} output"
+                        xgiLocalVars.Add out
 
-                      out.ToExpression()
+                        expandFunctionStatements.Add
+                        <| DuAugmentedPLCFunction
+                            { FunctionName = op
+                              Arguments = newArgs
+                              Output = out }
 
-                  | (FunctionNameRising | FunctionNameFalling) -> exp
-                  | _ -> failwithlog "ERROR"
-              | _ -> exp ]
+                        out.ToExpression()
+
+                    | (FunctionNameRising | FunctionNameFalling) -> exp
+                    | _ -> failwithlog "ERROR"
+                | _ -> exp ]
 
         let newExp = helper exp |> List.exactlyOne
         xgiLocalVars.Cast<IStorage>() |> newLocalStorages.AddRange // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
@@ -285,7 +286,7 @@ module XgiExpressionConvertorModule =
         (augmentParams: AugmentedConvertorParams)
         (operatorsToChange: string list)
         (currentOp: string)
-        : IExpression list =
+      : IExpression list =
         let { Storage = storage
               ExpandFunctionStatements = augmentedStatementsStorage
               Exp = exp } =
@@ -340,7 +341,7 @@ module XgiExpressionConvertorModule =
     let private mergeArithmaticOperator
         (augmentParams: AugmentedConvertorParams)
         (outputStore: IStorage option)
-        : MergeArithmaticResult =
+      : MergeArithmaticResult =
         let { Storage = newLocalStorages
               ExpandFunctionStatements = augmentedStatementsStorage
               Exp = exp } =
@@ -511,12 +512,12 @@ module XgiExpressionConvertorModule =
                     let initValue = exp.BoxedEvaluatedValue
 
                     let _typ = initValue.GetType()
-                    let var = createXgiVariable decl.Name initValue comment
+                    let var = createXgxVariable decl.Name initValue comment
                     newLocalStorages.Add var
 
                 | (:? IVariable | :? ITag) when decl.IsGlobal -> newLocalStorages.Add decl
                 | (:? IVariable | :? ITag) ->
-                    let var = createXgiVariable decl.Name decl.BoxedValue decl.Comment
+                    let var = createXgxVariable decl.Name decl.BoxedValue decl.Comment
                     newLocalStorages.Add var
 
                 | _ -> failwithlog "ERROR"
@@ -538,11 +539,11 @@ module XgiExpressionConvertorModule =
         augmentedStatements @ newStatements |> List.ofSeq
 
     /// S -> [XS]
-    let internal commentedStatement2CommentedXgiStatements
+    let internal commentedStatement2CommentedXgxStatements
         (prjParam: XgxProjectParams)
         (newLocalStorages: XgiStorage)
         (CommentedStatement(comment, statement))
-      : CommentedXgiStatements =
+      : CommentedXgxStatements =
         let xgiStatements = statement2XgiStatements newLocalStorages statement
 
         let rungComment =

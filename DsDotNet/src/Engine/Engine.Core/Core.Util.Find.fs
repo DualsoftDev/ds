@@ -67,15 +67,16 @@ module internal ModelFindModule =
         let _sysName, apiKey = apiPath[0], apiPath[1]
         system.ApiItems.TryFindWithName(apiKey)
 
-    and tryFindCallingApiItem (system:DsSystem) targetSystemName targetApiName =
+    and tryFindCallingApiItem (system: DsSystem) (targetSystemName: string) (targetApiName: string) (allowAutoGenDevice: bool) =
         let findedLoadedSystem = tryFindLoadedSystem system targetSystemName
 
-        if findedLoadedSystem.IsNone 
-        then failwithf $"해당 디바이스를 Loading 해야 합니다. \n [device file= path] {targetSystemName}"
-
-        let targetSystem = findedLoadedSystem.Value.ReferenceSystem
-        system.ApiUsages.TryFind(nameComponentsEq [targetSystem.Name; targetApiName])
-
+        match findedLoadedSystem with
+        | Some loadedSystem ->
+            let targetSystem = loadedSystem.ReferenceSystem
+            system.ApiUsages.TryFind(nameComponentsEq [targetSystem.Name; targetApiName])
+        | None ->
+            if allowAutoGenDevice then None
+            else  failwithf $"해당 디바이스를 Loading 해야 합니다. \n [device file= path] {targetSystemName}"
 
     //jobs 에 등록 안되있으면 Real로 처리 한다.
     let tryFindCall (system:DsSystem) (Fqdn(callPath))=

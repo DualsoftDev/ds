@@ -78,7 +78,8 @@ module ModelParser =
                     dir,
                     "ActiveCpuName",
                     Some param.AbsoluteFilePath,
-                    param.LoadingType
+                    param.LoadingType,
+                    false
                 )
 
             let option =

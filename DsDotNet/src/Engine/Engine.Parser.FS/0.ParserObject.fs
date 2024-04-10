@@ -13,6 +13,7 @@ module ParserOptionModule =
             ActiveCpuName: string
             IsSimulationMode: bool
             AllowSkipExternalSegment: bool
+            AllowAutoGenDevice: bool
             Storages: Storages
             /// [device or external system] 정의에서의 file path 속성값
             ReferencePath: string
@@ -27,10 +28,11 @@ module ParserOptionModule =
 
     type ParserOptions with
 
-        static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) =
+        static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, autoGenDevice) =
             { ActiveCpuName = activeCpuName
               IsSimulationMode = false
               AllowSkipExternalSegment = false
+              AllowAutoGenDevice = autoGenDevice
               Storages = Storages()
               ReferencePath = referencePath
               LoadedSystemName = None
@@ -40,7 +42,13 @@ module ParserOptionModule =
 
         static member Create4Simulation(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) =
             let runtime =
-                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType)
+                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, false)
+
+            { runtime with IsSimulationMode = true }
+
+        static member Create4ChatGpt(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) =
+            let runtime =
+                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, true)
 
             { runtime with IsSimulationMode = true }
 

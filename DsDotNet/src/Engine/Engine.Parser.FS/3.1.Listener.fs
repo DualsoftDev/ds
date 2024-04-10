@@ -168,6 +168,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         absoluteFilePath, relativeFilePath
 
+        
+    member private x.CreateLoadedDeivce(loadedName:string) =
+        let file = $"./dsLib/AutoGen/{loadedName}.ds"
+
+        let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
+        x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)    |> ignore
+
 
     member private x.GetLayoutPath(fileSpecCtx: FileSpecContext) =
         fileSpecCtx
@@ -483,7 +490,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                           | device :: [ api ] ->
                               let apiItem =
                                   option {
-                                      let! apiPoint = tryFindCallingApiItem system device api
+                                      let! apiPoint =
+                                            let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice 
+                                            match tryFindCallingApiItem system device api allowAutoGenDevice with
+                                            | Some api -> Some api
+                                            | None ->  
+                                                      if allowAutoGenDevice &&
+                                                         x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
+                                                      then x.CreateLoadedDeivce(device)
+                                                      None
+
                                       match apiDefCtx.TryFindFirstChild<AddressInOutContext>() with
                                       |Some addressCtx -> 
                                           let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()

@@ -189,6 +189,7 @@ module XgiExportModule =
 
         member x.GenerateXmlString(prjParam: XgxProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
 
+        /// POU 단위로 xml rung 생성
         member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
             let { TaskName = taskName
                   POUName = pouName
@@ -436,6 +437,9 @@ module XgiExportModule =
 
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
                     let mainScan =   if i = 0 then Some(mainScanName) else None
-                    pou.GenerateXmlNode(x, mainScan) |> xnPrograms.AdoptChild |> ignore
+                    // POU 단위로 xml rung 생성
+                    pou.GenerateXmlNode(x, mainScan)
+                    |> xnPrograms.AdoptChild
+                    |> ignore
 
             xdoc

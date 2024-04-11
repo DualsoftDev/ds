@@ -339,6 +339,7 @@ module XgxExpressionConvertorModule =
     ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성
     /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
     let private mergeArithmaticOperator
+        (prjParam: XgxProjectParams)
         (augmentParams: AugmentedConvertorParams)
         (outputStore: IStorage option)
       : MergeArithmaticResult =
@@ -389,13 +390,13 @@ module XgxExpressionConvertorModule =
             NotApplied(exp.WithNewFunctionArguments newArgs)
         | _ -> NotApplied(exp)
 
-    let private splitWideExpression (augmentParams: AugmentedConvertorParams) : IExpression =
+    let private splitWideExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
         let { Storage = newLocalStorages
               ExpandFunctionStatements = expandFunctionStatements }: AugmentedConvertorParams =
             augmentParams
 
         let exp =
-            match mergeArithmaticOperator augmentParams None with
+            match mergeArithmaticOperator prjParam augmentParams None with
             | AlreadyApplied exp -> exp
             | NotApplied exp -> exp
 
@@ -449,16 +450,16 @@ module XgxExpressionConvertorModule =
         else
             exp
 
-    let private collectExpandedExpression (augmentParams: AugmentedConvertorParams) : IExpression =
+    let private collectExpandedExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
         let newExp =
             replaceInnerArithmaticOrComparisionToXgiFunctionStatements augmentParams
 
-        let newExp = splitWideExpression { augmentParams with Exp = newExp }
+        let newExp = splitWideExpression  prjParam { augmentParams with Exp = newExp }
         newExp
 
 
-
-    let private statement2XgxStatements (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
+    /// Statement 확장
+    let private statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
         let augmentedStatements = ResizeArray<Statement>() // DuAugmentedPLCFunction case
 
         let newStatements =
@@ -468,27 +469,26 @@ module XgxExpressionConvertorModule =
                 match exp.FunctionName with
                 | Some("+" | "-" | "*" | "/" as op) ->
 
-                    let augStmtsStorage = ResizeArray<Statement>()
-
+                    let augArithmaticAssignStatements = ResizeArray<Statement>()
                     match
-                        mergeArithmaticOperator
+                        mergeArithmaticOperator prjParam
                             { Storage = newLocalStorages
-                              ExpandFunctionStatements = augStmtsStorage
+                              ExpandFunctionStatements = augArithmaticAssignStatements
                               Exp = exp }
                             (Some target)
                     with
-                    | AlreadyApplied _exp -> augStmtsStorage.ToFSharpList()
+                    | AlreadyApplied _exp -> augArithmaticAssignStatements.ToFSharpList()
                     | NotApplied exp ->
                         let tgt = target :?> INamedExpressionizableTerminal
 
-                        augStmtsStorage.ToFSharpList()
+                        augArithmaticAssignStatements.ToFSharpList()
                         @ [ DuAugmentedPLCFunction
                                 { FunctionName = op
                                   Arguments = exp.FunctionArguments
                                   Output = tgt } ]
                 | _ ->
                     let newExp =
-                        collectExpandedExpression
+                        collectExpandedExpression prjParam
                             { Storage = newLocalStorages
                               ExpandFunctionStatements = augmentedStatements
                               Exp = exp }
@@ -497,7 +497,7 @@ module XgxExpressionConvertorModule =
 
             | DuVarDecl(exp, decl) ->
                 let _newExp =
-                    collectExpandedExpression
+                    collectExpandedExpression prjParam
                         { Storage = newLocalStorages
                           ExpandFunctionStatements = augmentedStatements
                           Exp = exp }
@@ -523,6 +523,7 @@ module XgxExpressionConvertorModule =
                 | _ -> failwithlog "ERROR"
 
                 []
+
             | (DuTimer _ | DuCounter _) -> [ statement ]
 
             | DuAction(DuCopy(condition, source, target)) ->
@@ -544,13 +545,13 @@ module XgxExpressionConvertorModule =
         (newLocalStorages: XgxStorage)
         (CommentedStatement(comment, statement))
       : CommentedXgxStatements =
-        let xgiStatements = statement2XgxStatements newLocalStorages statement
+        let xgiStatements = statement2XgxStatements prjParam newLocalStorages statement
 
         let rungComment =
-            let statementComment = statement.ToText()
             [
                 comment
                 if prjParam.AppendDebugInfoToRungComment then
+                    let statementComment = statement.ToText()
                     statementComment
             ] |> ofNotNullAny |> String.concat "\r\n"
             |> escapeXml

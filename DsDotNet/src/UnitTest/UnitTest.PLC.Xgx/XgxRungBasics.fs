@@ -9,7 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 open Engine.Parser.FS
 
-type XgiRungTest() =
+type XgxRungTest() =
     inherit XgxTestBaseClass()
 
     [<Test>]

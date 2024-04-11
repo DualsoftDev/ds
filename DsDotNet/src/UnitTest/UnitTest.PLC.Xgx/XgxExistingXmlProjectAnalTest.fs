@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
 
-type XgiExistingXmlProjectAnalTest() =
+type XgxExistingXmlProjectAnalTest() =
     inherit XgxTestBaseClass()
 
 

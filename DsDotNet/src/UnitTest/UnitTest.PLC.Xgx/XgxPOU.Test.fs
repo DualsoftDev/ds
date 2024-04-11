@@ -10,7 +10,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
-type XgiPOUTest() =
+type XgxPOUTest() =
     inherit XgxTestBaseClass()
 
     do

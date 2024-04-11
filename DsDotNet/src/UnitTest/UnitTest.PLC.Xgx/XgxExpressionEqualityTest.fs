@@ -11,8 +11,8 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
 
-[<Collection("SerialXgiExpEqualityTest")>]
-type XgiExpEqualityTest() =
+[<Collection("SerialXgxExpEqualityTest")>]
+type XgxExpEqualityTest() =
     inherit XgxTestBaseClass()
 
     [<Test>]

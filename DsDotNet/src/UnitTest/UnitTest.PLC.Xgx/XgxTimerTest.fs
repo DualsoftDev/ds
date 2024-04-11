@@ -11,7 +11,7 @@ open PLC.CodeGen.LS
 
 
 
-type XgiTimerTest() =
+type XgxTimerTest() =
     inherit XgxTestBaseClass()
 
 

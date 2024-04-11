@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
 
-type XgiRisingFallingTest() =
+type XgxRisingFallingTest() =
     inherit XgxTestBaseClass()
 
     [<Test>]

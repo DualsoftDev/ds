@@ -12,8 +12,8 @@ open PLC.CodeGen.LS
 
 
 
-[<Collection("XgiCounterTest")>]
-type XgiCounterTest() =
+[<Collection("XgxCounterTest")>]
+type XgxCounterTest() =
     inherit XgxTestBaseClass()
 
     [<Test>]
@@ -192,8 +192,8 @@ type XgiCounterTest() =
         let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
-[<Collection("SerialXgiFunctionTest")>]
-type XgiFunctionTest() =
+[<Collection("SerialXgxFunctionTest")>]
+type XgxFunctionTest() =
     inherit XgxTestBaseClass()
 
     [<Test>]

@@ -23,21 +23,21 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="TestFixture.Xgi.fs" />
-        <Compile Include="XgiLadderElementsTest.fs" />
-        <Compile Include="XgiTestCommon.fs" />
-        <Compile Include="XgiDrawing.fs" />
-        <Compile Include="XgiRungBasics.fs" />
-        <Compile Include="XgiGenTest.fs" />
-        <Compile Include="XgiTimerTest.fs" />
-        <Compile Include="XgiCounterTest.fs" />
-        <Compile Include="XgiExpressionEqualityTest.fs" />
-        <Compile Include="XgiPOU.Test.fs" />
-        <Compile Include="XgiExistingXmlProjectAnalTest.fs" />
-        <Compile Include="RisingFallingTest.fs" />
+        <Compile Include="TestFixture.Xgx.fs" />
+        <Compile Include="XgxLadderElementsTest.fs" />
+        <Compile Include="XgxTestCommon.fs" />
+        <Compile Include="XgxDrawing.fs" />
+        <Compile Include="XgxRungBasics.fs" />
+        <Compile Include="XgxGenTest.fs" />
+        <Compile Include="XgxTimerTest.fs" />
+        <Compile Include="XgxCounterTest.fs" />
+        <Compile Include="XgxExpressionEqualityTest.fs" />
+        <Compile Include="XgxPOU.Test.fs" />
+        <Compile Include="XgxExistingXmlProjectAnalTest.fs" />
+        <Compile Include="XgxRisingFallingTest.fs" />
         <Compile Include="AddressAllocatorTest.fs" />
-        <Compile Include="XgiIQMapperTest.fs" />
-        <Compile Include="XgiAutoMemoryAllocTest.fs" />
+        <Compile Include="XgxIQMapperTest.fs" />
+        <Compile Include="XgxAutoMemoryAllocTest.fs" />
         <Compile Include="NameAddressValidatorTest.fs" />
         <None Include="App.config" />
         <Compile Include="Main.fs" />

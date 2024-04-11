@@ -9,7 +9,7 @@ open PLC.CodeGen.LS
 
 
 type XgiExistingXmlProjectAnalTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
 
     [<Test>]

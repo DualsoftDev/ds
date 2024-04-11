@@ -5,7 +5,7 @@ open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 
 
 [<AutoOpen>]
-module XgiTestCommonModule =
+module XgxTestCommonModule =
     let emptySymbolsLocalXml = """<LocalVar Version="Ver 1.0" Count="16"></LocalVar>"""
 
     let emptySymbolsGlobalXml =

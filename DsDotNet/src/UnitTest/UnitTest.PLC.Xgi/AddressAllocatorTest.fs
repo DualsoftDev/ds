@@ -6,7 +6,7 @@ open NUnit.Framework
 open PLC.CodeGen.Common
 
 type AddressAllocatorTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
     [<Test>]
     member __.``Allocate address beyond limit test`` () =

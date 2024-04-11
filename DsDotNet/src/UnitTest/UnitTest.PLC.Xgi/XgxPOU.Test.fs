@@ -11,7 +11,7 @@ open PLC.CodeGen.Common
 
 
 type XgiPOUTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
     do
         (* base class 초기화 이전에 let 구문들이 실행되어 오류 발생하는 것을 막기 위해 강제 do 구문 수행 *)

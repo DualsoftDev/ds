@@ -11,10 +11,10 @@ open Engine.Core
 open PLC.CodeGen.LS
 
 [<AutoOpen>]
-module XgiFixtures =
+module XgxFixtures =
     let TestRuntimeTargetType = XGI
     [<AbstractClass>]
-    type XgiTestBaseClass() =
+    type XgxTestBaseClass() =
         inherit TestBaseClass("EngineLogger")
         do
             //Engine.CodeGenCPU.ModuleInitializer.Initialize()
@@ -74,7 +74,7 @@ module XgiFixtures =
 
 
 [<AutoOpen>]
-module XgiGenerationTestModule =
+module XgxGenerationTestModule =
     let projectDir =
         let src = __SOURCE_DIRECTORY__
         let key = "UnitTest.PLC.Xgi"

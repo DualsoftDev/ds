@@ -13,7 +13,7 @@ open PLC.CodeGen.LS
 
 [<Collection("SerialXgiExpEqualityTest")>]
 type XgiExpEqualityTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
     [<Test>]
     member x.``Comparision, Arithmatic, OR test`` () =
@@ -36,7 +36,7 @@ type XgiExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -62,7 +62,7 @@ type XgiExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -138,7 +138,7 @@ type XgiExpEqualityTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
 
@@ -155,7 +155,7 @@ type XgiExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 

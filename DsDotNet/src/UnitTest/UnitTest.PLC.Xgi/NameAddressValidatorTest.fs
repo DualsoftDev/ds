@@ -7,7 +7,7 @@ open PLC.CodeGen.LS.XgiPrologModule
 open PLC.CodeGen.Common.IECAddressModule
 
 type NameAddressValidatorTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
     [<Test>]
     member __.``Validation= Variable name test`` () =

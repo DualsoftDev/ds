@@ -10,7 +10,7 @@ open Engine.Parser.FS
 open Dual.UnitTest.Common.FS
 
 type XgiLadderElementTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
     let span width = width*3
 
@@ -69,7 +69,7 @@ type XgiLadderElementTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -80,7 +80,7 @@ type XgiLadderElementTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        (fun () ->  XgiFixtures.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
+        (fun () ->  XgxFixtures.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
 
 
 
@@ -97,5 +97,5 @@ type XgiLadderElementTest() =
         storages["mybool"].Comment <- "mybool comment"
         storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml

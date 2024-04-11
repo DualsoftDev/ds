@@ -12,7 +12,7 @@ open PLC.CodeGen.Common.FlatExpressionModule
 
 [<Collection("SerialXgiGenerationTest")>]
 type XgiGenerationTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
     [<Test>]
     member __.``OR simple test`` () =
@@ -30,7 +30,7 @@ type XgiGenerationTest() =
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -50,7 +50,7 @@ type XgiGenerationTest() =
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
 
@@ -65,7 +65,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -84,7 +84,7 @@ type XgiGenerationTest() =
 """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
     [<Test>]
@@ -104,7 +104,7 @@ type XgiGenerationTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -125,7 +125,7 @@ type XgiGenerationTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -147,7 +147,7 @@ type XgiGenerationTest() =
 """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -181,7 +181,7 @@ type XgiGenerationTest() =
                 """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
             saveTestResult f xml
         )
 
@@ -196,7 +196,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -213,7 +213,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -227,7 +227,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -240,7 +240,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
 
@@ -263,7 +263,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -320,7 +320,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
 
@@ -339,7 +339,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
         ()
 
@@ -396,7 +396,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -415,7 +415,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
         ()
 
@@ -436,7 +436,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
     [<Test>]
@@ -458,7 +458,7 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
 
@@ -476,6 +476,6 @@ type XgiGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 

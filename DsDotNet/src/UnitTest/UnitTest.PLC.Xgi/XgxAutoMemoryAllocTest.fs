@@ -10,7 +10,7 @@ open PLC.CodeGen.Common
 
 
 type AutoMemoryAllocTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
 
     [<Test>]

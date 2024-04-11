@@ -10,7 +10,7 @@ open PLC.CodeGen.LS
 
 
 type XgiRisingFallingTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
     [<Test>]
     member __.``Normal, Negation, Rising, Falling contact test`` () =
@@ -26,7 +26,7 @@ type XgiRisingFallingTest() =
         statements[0].ToText() === "$qx := $ix && !($ix) && rising($ix) && falling($ix)"
 
         let f = getFuncName()
-        let xml = XgiFixtures.generateXmlForTest f storages (map withNoComment statements)
+        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
         saveTestResult f xml
 
    

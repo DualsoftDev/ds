@@ -10,7 +10,7 @@ open PLC.CodeGen.Common
 
 
 type IQMapperTest() =
-    inherit XgiTestBaseClass()
+    inherit XgxTestBaseClass()
 
 
     [<Test>]

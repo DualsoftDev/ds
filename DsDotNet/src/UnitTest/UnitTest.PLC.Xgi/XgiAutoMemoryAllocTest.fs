@@ -39,8 +39,9 @@ type AutoMemoryAllocTest() =
             }
 
         let usedByteIndices = [0..9] @ [25..31] @[39;42] @ [120..130]
-        let prjParams = {
+        let prjParam = {
             defaultXgxProjectParams with
+                TargetType = TestRuntimeTargetType
                 ProjectName = "Dummy IQ Map test"
                 GlobalStorages = globalStorages
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedByteIndices)    // 640K M memory 영역
@@ -48,6 +49,6 @@ type AutoMemoryAllocTest() =
                 RungCounter = counterGenerator 0 |> Some
         }
 
-        let xml = prjParams.GenerateXmlString()
+        let xml = prjParam.GenerateXmlString()
         let f = getFuncName()
         saveTestResult f xml

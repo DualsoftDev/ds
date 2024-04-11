@@ -74,6 +74,7 @@ type XgiPOUTest() =
 
     let createProjectParams(projName):XgxProjectParams = {
         defaultXgxProjectParams with
+            TargetType = TestRuntimeTargetType
             ProjectName = projName
             RungCounter = counterGenerator 0 |> Some
             POUs = [pou11.Value; pou12.Value; pou21.Value]

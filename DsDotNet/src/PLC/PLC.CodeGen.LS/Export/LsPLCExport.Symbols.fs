@@ -40,12 +40,12 @@ module internal XgiSymbolsModule =
                       Some(s, XgxSymbol.DuStorage s) ]
         |> List.choose id
 
-    let autoAllocatorAdress (t:IStorage) (prjParams: XgxProjectParams) = 
+    let autoAllocatorAdress (t:IStorage) (prjParam: XgxProjectParams) = 
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
         if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
 
-        if prjParams.TargetType = XGI 
+        if prjParam.TargetType = XGI 
             && t.Address.IsNonNull() 
             && t.Address <> TextAddrEmpty 
             && not(t.Address.StartsWith("%"))
@@ -54,7 +54,7 @@ module internal XgiSymbolsModule =
 
         if t.Address = TextAddrEmpty then
             let allocatorFunctions =
-                match prjParams.MemoryAllocatorSpec with
+                match prjParam.MemoryAllocatorSpec with
                 | RangeSpec _ -> failwithlog "ERROR.  Should have already been converted to allocator functions."
                 | AllocatorFunctions functions -> functions
 
@@ -90,12 +90,12 @@ module internal XgiSymbolsModule =
                 failwith $"Invalid tag address {address} for {name}"
         
 
-    let xgxSymbolToSymbolInfo (prjParams: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
+    let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
 
-            autoAllocatorAdress t prjParams
+            autoAllocatorAdress t prjParam
             let address, device = getXGITagInfo t.Address t.Name 
             let plcType = systemTypeToXgiTypeName t.DataType
             let comment = ""
@@ -117,7 +117,7 @@ module internal XgiSymbolsModule =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
                
-                autoAllocatorAdress t prjParams
+                autoAllocatorAdress t prjParam
                 let address, device = getXGITagInfo t.Address t.Name 
 
                 { defaultSymbolInfo with
@@ -178,35 +178,35 @@ module internal XgiSymbolsModule =
                 Kind = kindVar }
 
     let private xgxSymbolsToSymbolInfos
-        (prjParams: XgxProjectParams)
+        (prjParam: XgxProjectParams)
         (kindVar: int)
         (xgiSymbols: XgxSymbol seq)
       : SymbolInfo list =
-        xgiSymbols |> map (xgxSymbolToSymbolInfo prjParams kindVar) |> List.ofSeq
+        xgiSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
 
 
-    let private storagesToSymbolInfos (prjParams: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
-        storagesToXgiSymbol >> map snd >> xgxSymbolsToSymbolInfos prjParams kindVar
+    let private storagesToSymbolInfos (prjParam: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
+        storagesToXgiSymbol >> map snd >> xgxSymbolsToSymbolInfos prjParam kindVar
 
     /// <LocalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
     let storagesToLocalXml
-        (prjParams: XgxProjectParams)
+        (prjParam: XgxProjectParams)
         (localStorages: IStorage seq)
         (globalStoragesRefereces: IStorage seq)
       : string =
         let symbolInfos =
-            [ yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR) localStorages
-              yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
+            [ yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR) localStorages
+              yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
 
-        XGITag.generateLocalSymbolsXml prjParams.TargetType symbolInfos
+        XGITag.generateLocalSymbolsXml prjParam.TargetType symbolInfos
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
-    let storagesToGlobalXml (prjParams: XgxProjectParams) (globalStorages: IStorage seq) =
+    let storagesToGlobalXml (prjParam: XgxProjectParams) (globalStorages: IStorage seq) =
         //storagesToXml false globalStorages
         let symbolInfos =
-            storagesToSymbolInfos prjParams (int Variable.Kind.VAR_GLOBAL) globalStorages
+            storagesToSymbolInfos prjParam (int Variable.Kind.VAR_GLOBAL) globalStorages
 
         (* check any error *)
         do
@@ -220,4 +220,4 @@ module internal XgiSymbolsModule =
             | Some(Error err) -> failwith err
             | _ -> ()
 
-        XGITag.generateGlobalSymbolsXml prjParams.TargetType symbolInfos
+        XGITag.generateGlobalSymbolsXml prjParam.TargetType symbolInfos

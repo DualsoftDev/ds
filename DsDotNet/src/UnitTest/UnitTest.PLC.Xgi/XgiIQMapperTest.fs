@@ -39,14 +39,15 @@ type IQMapperTest() =
                 CommentedStatements = statements
             }
 
-        let prjParams = {
+        let prjParam = {
             defaultXgxProjectParams with
+                TargetType = TestRuntimeTargetType
                 ProjectName = "Dummy IQ Map test"
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]
                 RungCounter = counterGenerator 0 |> Some
         }
 
-        let xml = prjParams.GenerateXmlString()
+        let xml = prjParam.GenerateXmlString()
         let f = getFuncName()
         saveTestResult f xml

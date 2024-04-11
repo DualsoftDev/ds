@@ -98,7 +98,7 @@ module ExportModule =
 
         logDebug "Used byte indices: %A" usedByteIndices
 
-        let projParams: XgxProjectParams =
+        let prjParam: XgxProjectParams =
             let isAddRungComment = IsDebugVersion || isInUnitTest()
             tracefn $"------------------- isAddRungComment: {isAddRungComment}"
             { defaultXgxProjectParams with
@@ -115,7 +115,7 @@ module ExportModule =
                       for p in pous.Where(fun f -> f.IsExternal) do
                           yield getXgxPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ] ] }
 
-        projParams.GenerateXmlString()
+        prjParam.GenerateXmlString()
 
     let exportXMLforLSPLC (plcType:RuntimeTargetType, system: DsSystem, path: string, existingLSISprj) =
         assert(plcType.IsOneOf(XGI, XGK))

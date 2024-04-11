@@ -12,6 +12,7 @@ open PLC.CodeGen.LS
 
 [<AutoOpen>]
 module XgiFixtures =
+    let TestRuntimeTargetType = XGI
     [<AbstractClass>]
     type XgiTestBaseClass() =
         inherit TestBaseClass("EngineLogger")
@@ -33,7 +34,7 @@ module XgiFixtures =
 
         abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
 
-        override x.GetCurrentRuntimeTarget() = XGI
+        override x.GetCurrentRuntimeTarget() = TestRuntimeTargetType
 
     let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
         let runtimeTargetBackup = RuntimeDS.Target
@@ -44,9 +45,9 @@ module XgiFixtures =
         tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
 
 
-        verify (RuntimeDS.Target = XGI)
+        verify (RuntimeDS.Target = TestRuntimeTargetType)
 
-        let prjParams = defaultXgxProjectParams
+        let prjParam = defaultXgxProjectParams
         let globalStorages = storages
         let localStorages = Storages()
 
@@ -63,7 +64,7 @@ module XgiFixtures =
         }
         let projParams:XgxProjectParams = {
             defaultXgxProjectParams with
-                TargetType = XGI    // xxx
+                TargetType = TestRuntimeTargetType    // xxx
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 POUs = [pouParams]

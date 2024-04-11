@@ -17,8 +17,8 @@ open Engine.Import.Office
 type TestAllCase() =
     inherit EngineTestBaseClass()
 
-    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/{testName}.xml")
-    let myExistIO  = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgi/XgiXmls/Templates/myTemplateExistIO.xml")
+    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/XgiXmls/{testName}.xml")
+    let myExistIO  = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/XgiXmls/Templates/myTemplateExistIO.xml")
 
     let testAddressSetting (sys:DsSystem) =
         let mutable index = 0

@@ -62,7 +62,7 @@ let main argv =
     //let testDir = @$"{__SOURCE_DIRECTORY__}/../UnitTest.Model/ImportOfficeExample/sample"
 
     //let sampleDirectory = testDir
-    //let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../UnitTest.PLC.Xgi/XgiXmls/{testName}.xml")
+    //let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../UnitTest.PLC.Xgx/XgiXmls/{testName}.xml")
     //let pptPath = sampleDirectory + "/s_car.pptx"
     //let model = ImportPPT.GetModel [ pptPath ]
     //model.Systems.ForEach(testAddressSetting)

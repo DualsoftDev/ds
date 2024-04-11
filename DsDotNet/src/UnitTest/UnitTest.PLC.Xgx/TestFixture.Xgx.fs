@@ -77,7 +77,7 @@ module XgxFixtures =
 module XgxGenerationTestModule =
     let projectDir =
         let src = __SOURCE_DIRECTORY__
-        let key = "UnitTest.PLC.Xgi"
+        let key = "UnitTest.PLC.Xgx"
         let index = src.LastIndexOf key
         src.Substring(0, index + key.Length)
     let xmlDir = Path.Combine(projectDir, "XgiXmls")

@@ -47,7 +47,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.Common", "src\Unit
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.Expression", "src\UnitTest\UnitTest.Expression\UnitTest.Expression.fsproj", "{AF8CEE2A-5EBB-4B0F-931C-68E2D4B38DF9}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.PLC.Xgi", "src\UnitTest\UnitTest.PLC.Xgi\UnitTest.PLC.Xgi.fsproj", "{E2B0F4A5-3270-457E-9BDE-C0131370CF77}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "UnitTest.PLC.Xgx", "src\UnitTest\UnitTest.PLC.Xgx\UnitTest.PLC.Xgx.fsproj", "{E2B0F4A5-3270-457E-9BDE-C0131370CF77}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{56DE9AF3-F21C-4709-8328-7CE174EBA969}"
 	ProjectSection(SolutionItems) = preProject

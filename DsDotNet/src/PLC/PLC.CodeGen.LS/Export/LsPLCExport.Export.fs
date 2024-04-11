@@ -175,7 +175,7 @@ module XgiExportModule =
 
         for cmtSt in commentedStatements do
             let xgxCmtStmts =
-                commentedStatement2CommentedXgxStatements prjParam newLocalStorages cmtSt
+                statement2Statements prjParam newLocalStorages cmtSt
 
             let (CommentAndXgxStatements(_comment, xgxStatements)) = xgxCmtStmts
 

@@ -11,53 +11,54 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <EmbeddedResource Remove="Documents\XmlSample\**"/>
+        <EmbeddedResource Remove="Documents\XmlSample\**" />
     </ItemGroup>
 
 
     <ItemGroup>
-        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
-        <Content Include="Documents\Function, FB.txt"/>
-        <Content Include="Documents\IEC-61131-3.summary.txt"/>
-        <Folder Include="Documents\XmlSamples\"/>
+        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Content Include="Documents\WideExpression.txt" />
+        <Content Include="Documents\Function, FB.txt" />
+        <Content Include="Documents\IEC-61131-3.summary.txt" />
+        <Folder Include="Documents\XmlSamples\" />
 
-        <None Include="Documents\XmlSamples\empty.xml"/>
-        <None Include="Documents\XmlSamples\minimal.xml"/>
-        <None Include="Documents\XmlSamples\multiProgramSample.xml"/>
-        <None Include="Documents\XmlSamples\POU.xml"/>
+        <None Include="Documents\XmlSamples\empty.xml" />
+        <None Include="Documents\XmlSamples\minimal.xml" />
+        <None Include="Documents\XmlSamples\multiProgramSample.xml" />
+        <None Include="Documents\XmlSamples\POU.xml" />
 
-        <None Include="Documents\XmlSamples\POU.xml"/>
-        <None Include="Documents\XmlSamples\POU.xml"/>
-        <None Include="Documents\XmlSamples\FunctionBlockSample.xml"/>
-        <None Include="Documents\XmlSamples\FunctionBlockUsageSample.xml"/>
+        <None Include="Documents\XmlSamples\POU.xml" />
+        <None Include="Documents\XmlSamples\POU.xml" />
+        <None Include="Documents\XmlSamples\FunctionBlockSample.xml" />
+        <None Include="Documents\XmlSamples\FunctionBlockUsageSample.xml" />
 
-        <None Include="Documents\XG5000 - 패키지 SW 설계.docx"/>
-        <None Include="Documents\XgiLadder.pptx"/>
-        <None Include="Documents\XGI_초급(V18).pdf"/>
-        <None Include="Documents\XGK_XGI 변환 검토.docx"/>
-        <None Include="Documents\XGLib Details - with .NET Examples.docx"/>
-        <None Include="Documents\사용설명서_XGI_XGR_XEC_명령어집_V2.7.pdf"/>
-        <Compile Include="AssemblyInfo.fs"/>
-        <Compile Include="Address.Convert.fs"/>
-        <Compile Include="LsPLC.Spec.FBText.fs"/>
-        <Compile Include="LsPLC.Spec.fs"/>
-        <EmbeddedResource Include="XgI-4.5.2.template.xml"/>
-        <EmbeddedResource Include="XGK-CPUUN-4.77.99.1.template.xml"/>
-		<Compile Include="LsPLC.Prolog.fs"/>
-        <None Include="Import\XGConfigReader.fsx"/>
-        <None Include="Import\XGLDRoutineReader.fsx"/>
-        <None Include="Import\XGFileRead.fsx"/>
-        <Compile Include="Export\LsPLCExport.Common.fs"/>
-        <Compile Include="Export\LsPLCExport.POUParams.fs"/>
-        <Compile Include="Export\LsPLCExport.StatementAdaptor.fs"/>
-        <Compile Include="Export\LsPLCExport.Command.fs"/>
-        <Compile Include="Export\LsPLCExport.Tag.fs"/>
-        <Compile Include="Export\LsPLCExport.File.fs"/>
-        <Compile Include="Export\LsPLCExport.Symbols.fs"/>
-        <Compile Include="Export\LsPLCExport.XmlProjectAnalyzer.fs"/>
-        <Compile Include="Export\LsPLCExport.Export.fs"/>
-        <None Include="Scripts\Script1.fsx"/>
-        <Compile Include="EntryPoint.fs"/>
+        <None Include="Documents\XG5000 - 패키지 SW 설계.docx" />
+        <None Include="Documents\XgiLadder.pptx" />
+        <None Include="Documents\XGI_초급(V18).pdf" />
+        <None Include="Documents\XGK_XGI 변환 검토.docx" />
+        <None Include="Documents\XGLib Details - with .NET Examples.docx" />
+        <None Include="Documents\사용설명서_XGI_XGR_XEC_명령어집_V2.7.pdf" />
+        <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="Address.Convert.fs" />
+        <Compile Include="LsPLC.Spec.FBText.fs" />
+        <Compile Include="LsPLC.Spec.fs" />
+        <EmbeddedResource Include="XgI-4.5.2.template.xml" />
+        <EmbeddedResource Include="XGK-CPUUN-4.77.99.1.template.xml" />
+		<Compile Include="LsPLC.Prolog.fs" />
+        <None Include="Import\XGConfigReader.fsx" />
+        <None Include="Import\XGLDRoutineReader.fsx" />
+        <None Include="Import\XGFileRead.fsx" />
+        <Compile Include="Export\LsPLCExport.Common.fs" />
+        <Compile Include="Export\LsPLCExport.POUParams.fs" />
+        <Compile Include="Export\LsPLCExport.StatementAdaptor.fs" />
+        <Compile Include="Export\LsPLCExport.Command.fs" />
+        <Compile Include="Export\LsPLCExport.Tag.fs" />
+        <Compile Include="Export\LsPLCExport.File.fs" />
+        <Compile Include="Export\LsPLCExport.Symbols.fs" />
+        <Compile Include="Export\LsPLCExport.XmlProjectAnalyzer.fs" />
+        <Compile Include="Export\LsPLCExport.Export.fs" />
+        <None Include="Scripts\Script1.fsx" />
+        <Compile Include="EntryPoint.fs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -72,8 +73,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj"/>
-        <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj"/>
+        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+        <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
     </ItemGroup>
 
 

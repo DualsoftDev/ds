@@ -17,7 +17,7 @@ open PLC.CodeGen.Common
 
     - 임의의 rung 에 사칙연산 함수가 포함되면, 해당 부분만 잘라서 임시 변수에 저장하고 그 값을 이용해야 한다.
       * e.g $result := ($t1 + $t2) > 3
-            . $tmp = $t1 + $t2
+            . $tmp := $t1 + $t2
             . $result := $tmp > 3
 
     - Timer 나 Counter 의 Rung In Condition 은 복수개이더라도 전원선 연결이 가능하다.
@@ -222,8 +222,8 @@ module rec TypeConvertorModule =
 //let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
 
 [<AutoOpen>]
-module XgiExpressionConvertorModule =
-    type XgiStorage = ResizeArray<IStorage>
+module XgxExpressionConvertorModule =
+    type XgxStorage = ResizeArray<IStorage>
 
     let operatorToXgiFunctionName =
         function
@@ -240,7 +240,7 @@ module XgiExpressionConvertorModule =
         | _ -> failwithlog "ERROR"
 
     type private AugmentedConvertorParams =
-        { Storage: XgiStorage
+        { Storage: XgxStorage
           ExpandFunctionStatements: ResizeArray<Statement>
           Exp: IExpression }
 
@@ -418,9 +418,9 @@ module XgiExpressionConvertorModule =
                         else
                             partSpanX <- partSpanX + spanX
                             built, building @ [ e ]
-                    max |> filter List.any, remaining
+                    (max |> filter List.any), remaining
 
-                let maxs, remaining = (exp.FunctionArguments |> List.fold folder ([], []))
+                let maxs, remaining = List.fold folder ([], []) exp.FunctionArguments
 
                 let subSums =
                     [ for max in maxs do
@@ -458,7 +458,7 @@ module XgiExpressionConvertorModule =
 
 
 
-    let private statement2XgiStatements (newLocalStorages: XgiStorage) (statement: Statement) : Statement list =
+    let private statement2XgxStatements (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
         let augmentedStatements = ResizeArray<Statement>() // DuAugmentedPLCFunction case
 
         let newStatements =
@@ -539,12 +539,12 @@ module XgiExpressionConvertorModule =
         augmentedStatements @ newStatements |> List.ofSeq
 
     /// S -> [XS]
-    let internal commentedStatement2CommentedXgxStatements
+    let internal statement2Statements
         (prjParam: XgxProjectParams)
-        (newLocalStorages: XgiStorage)
+        (newLocalStorages: XgxStorage)
         (CommentedStatement(comment, statement))
       : CommentedXgxStatements =
-        let xgiStatements = statement2XgiStatements newLocalStorages statement
+        let xgiStatements = statement2XgxStatements newLocalStorages statement
 
         let rungComment =
             let statementComment = statement.ToText()

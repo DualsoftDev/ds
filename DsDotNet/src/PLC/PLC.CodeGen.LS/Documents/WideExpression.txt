@@ -1,0 +1,8 @@
+﻿XgxProjectParams.GenerateXmlDocument
+    XgxPOUParams.GenerateXmlNode
+        commentedStatementsToCommentedXgxStatements
+            statement2Statements
+                statement2XgxStatements
+                    collectExpandedExpression
+                        splitWideExpression
+                            let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan

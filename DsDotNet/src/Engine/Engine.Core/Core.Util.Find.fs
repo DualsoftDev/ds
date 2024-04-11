@@ -117,30 +117,80 @@ module internal ModelFindModule =
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonics.Contains(aliasMnemonic))
 
+    let ofAliasForCallVertex (xs:Vertex seq) =
+        xs.OfType<Alias>()
+        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)
+
+    let ofAliasForRealVertex (xs:Vertex seq) =
+        xs.OfType<Alias>()
+        |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
+
+    let ofAliasForRealExVertex (xs:Vertex seq) =
+        xs.OfType<Alias>()
+        |> Seq.filter(fun a -> a.TargetWrapper.RealExFlowTarget().IsSome)
+
+
+    
+    let getVerticesOfSystem(system:DsSystem) =
+        let realVertices = system.Flows.SelectMany(fun f ->
+                                    f.Graph.Vertices.OfType<Real>()
+                                        .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>()))
+
+        let flowVertices = system.Flows.SelectMany(fun f -> f.Graph.Vertices.Cast<Vertex>())
+        realVertices @ flowVertices
+
+    let getVerticesOfFlow(flow:Flow) =
+        let realVertices =
+            flow.Graph.Vertices.OfType<Real>()
+                .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>())
+
+        let flowVertices =  flow.Graph.Vertices.Cast<Vertex>()
+        realVertices @ flowVertices
+
+    let getDevicesOfFlow(flow:Flow) =
+        let devNames = getVerticesOfFlow(flow).OfType<Call>()   
+                             .SelectMany(fun c->c.TargetJob.DeviceDefs.Select(fun d->d.DeviceName))
+
+        flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
+
+    let getDistinctApis(x:DsSystem) =
+        getVerticesOfSystem(x).OfType<Call>()   
+                            .SelectMany(fun c-> c.TargetJob.ApiDefs)
+                            .Distinct()
+
     let getVertexSharedReal(real:Real) =
+        let vs = real.Flow.System |> getVerticesOfSystem
         let sharedAlias =
-            real.Flow.Graph.Vertices
-                .GetAliasTypeReals()
-                .Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
+            let reals = (real.Flow.Graph.Vertices |> ofAliasForRealVertex)
+            let realExs = (real.Flow.Graph.Vertices |> ofAliasForRealExVertex)
+            (reals@realExs).Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
                 .Cast<Vertex>()
 
         let sharedRealExFlow =
-            real.Flow.System.GetVertices()
-                .OfType<RealExF>()
-                .Where(fun w-> w.Real = real)
-                .Cast<Vertex>()
+                vs
+                 .OfType<RealExF>()
+                 .Where(fun w-> w.Real = real)
+                 .Cast<Vertex>()
 
         sharedAlias @ sharedRealExFlow
 
     let getVertexSharedCall(call:Call) =
         let sharedAlias =
-            call.Parent.GetFlow().GetVerticesOfFlow()
-              .GetAliasTypeCalls()
+            (call.Parent.GetFlow() |> getVerticesOfFlow |> ofAliasForCallVertex)
               .Where(fun a -> a.TargetWrapper.CallTarget().Value = call)
               .Cast<Vertex>()
 
         sharedAlias
 
+    ///Real 자신을 공용으로 사용하는 Vertex들
+    let getSharedReal(v:Vertex) : Vertex seq =
+            (v :?> Real) |> getVertexSharedReal
+
+        ///Call 자신을 공용으로 사용하는 Vertex들
+    let getSharedCall(v:Vertex) : Vertex seq =
+            (v :?> Call) |> getVertexSharedCall
+
+ 
 
     type DsSystem with
         member x.TryFindGraphVertex(Fqdn(fqdn)) = tryFindGraphVertex x fqdn
@@ -165,8 +215,33 @@ type FindExtension =
     [<Extension>] static member TryFindGraphVertex  (x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertex x fqdn
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
     [<Extension>] static member TryFindRealVertex (x:DsSystem, flowName, realName) =  tryFindReal x [ flowName; realName ]
-    [<Extension>] static member GetVertexSharedReal (x:Real) = getVertexSharedReal x
-    [<Extension>] static member GetVertexSharedCall (x:Call) = getVertexSharedCall x
+    [<Extension>] static member GetSharedReal (x:Real) = getVertexSharedReal x
+    [<Extension>] static member GetSharedCall (x:Call) = getVertexSharedCall x
+    
+    [<Extension>] static member GetPureReal  (v:Vertex) = v |> getPureReal
+    [<Extension>] static member GetPureCall  (v:Vertex) = v |> getPureCall
     [<Extension>] static member GetPure (x:Vertex) = getPure x
-                                 
+      
+    [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
+    [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
+    [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
+
+
+    [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
+    [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
+    [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
+    [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 
+                    let vs = x.GetVertices()
+                    let calls = vs.OfType<Call>().Cast<Vertex>()
+                    let aliases = vs.OfType<Alias>().Cast<Vertex>()
+                    (calls@aliases)
+                        .Where(fun c->c.Parent.GetCore() :? Real)     
+
+    [<Extension>] static member GetVerticesOfCoinCalls(x:DsSystem) = 
+                    x.GetVertices().OfType<Call>().Where(fun c->c.Parent.GetCore() :? Real)    
+    [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
+    [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
+
+    [<Extension>] static member GetSharedReal(v:Vertex) = v |> getSharedReal
+    [<Extension>] static member GetSharedCall(v:Vertex) = v |> getSharedCall
 

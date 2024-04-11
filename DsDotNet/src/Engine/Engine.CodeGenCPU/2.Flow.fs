@@ -10,14 +10,14 @@ type VertexManager with
 
     member v.F1_RootStart() =
         let real = v.Vertex :?> Real
-        let startCausals =  v.GetWeakStartRootAndCausals()
+        let startCausals =  v.Vertex.GetWeakStartRootAndCausals()
         let plans = v.System.GetPSs(real).ToOrElseOff()
         let actionLinks = v.System.GetASs(real).ToOrElseOff()
         
-        let shareds = v.GetSharedReal().Select(getVM)
+        let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
             if shareds.any()
-            then shareds.Select(fun s -> s.GetWeakStartRootAndCausals()).ToOrElseOn()
+            then shareds.Select(fun s -> s.Vertex.GetWeakStartRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
         let sets = (startCausals <||> wsShareds <||> v.SF.Expr <||>  plans <||> actionLinks)
@@ -28,13 +28,13 @@ type VertexManager with
 
 
     member v.F2_RootReset()  =
-        let real = v.GetPureReal()
-        let resetCausals =  v.GetWeakResetRootAndCausals()
+        let real = v.Vertex.GetPureReal()
+        let resetCausals =  v.Vertex.GetWeakResetRootAndCausals()
 
-        let shareds = v.GetSharedReal().Select(getVM)
+        let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
             if shareds.any()
-            then shareds.Select(fun s -> s.GetWeakResetRootAndCausals()).ToOrElseOn()
+            then shareds.Select(fun s -> s.Vertex.GetWeakResetRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
         let sets =  (
@@ -52,8 +52,8 @@ type VertexManager with
     member v.F3_VertexEndWithOutReal() =
         let sets =
             match v.Vertex  with
-            | :? Alias   as rf -> rf.V.GetPure().V.ET.Expr
-            | :? RealExF as rf -> rf.V.GetPure().V.ET.Expr
+            | :? Alias   as rf -> rf.V.Vertex.GetPure().V.ET.Expr
+            | :? RealExF as rf -> rf.V.Vertex.GetPure().V.ET.Expr
             | :? Call as call ->
                 if call.Parent.GetCore() :? Flow
                 then call.EndAction 

@@ -8,6 +8,67 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module EdgeModule =
+
+    
+
+    /// Edge source 검색 결과 정보 : target 으로 들어오는 source vertices list 와 그것들이 약연결로 들어오는지, 강연결로 들어오는지 정보
+    type EdgeSourcesWithStrength =
+        | DuEssWeak of Vertex list
+        | DuEssStrong of Vertex list
+        | DuEssNone
+
+    /// returns [week] * [strong] incoming edges
+    let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
+        let edges = graph.GetIncomingEdges(target) |> List.ofSeq
+        let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
+
+        let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
+        let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask ||| EdgeType.Strong))
+
+        match srcsWeek.Any(), srcsStrong.Any() with
+        | true, true -> failwithlog "인터락 리셋과 후행리셋은 동시에 연결불가능 합니다."
+        | true, false -> srcsWeek   |> map (fun e->e.Source) |> DuEssWeak
+        | false, true -> srcsStrong |> map (fun e->e.Source) |> DuEssStrong
+        | false, false -> DuEssNone
+
+     /// returns Weak outgoing edges
+    let private getWeakEdgeTargets(graph:DsGraph, source:Vertex, bStartEdge:bool) =
+        let edges = graph.GetOutgoingEdges(source) |> List.ofSeq
+        let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
+
+        let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
+        srcsWeek |> map (fun e->e.Target)
+
+    /// returns [weak] start incoming/outgoing edges for target
+    let getStartWeakEdgeSources(target:Vertex) =
+        match getEdgeSources (target.Parent.GetGraph(), target, true) with
+        | DuEssWeak ws when ws.Any() -> ws
+        | _ -> []
+    /// returns [strong] start incoming/outgoing edges for target
+    let getStartStrongEdgeSources(target:Vertex) =
+        match getEdgeSources (target.Parent.GetGraph(), target, true) with
+        | DuEssStrong ss when ss.Any() -> ss
+        | _ -> []
+    /// returns [weak] reset incoming/outgoing edges for target
+    let getResetWeakEdgeSources(target:Vertex) =
+        match getEdgeSources (target.Parent.GetGraph(), target, false) with
+        | DuEssWeak wr when wr.Any() -> wr
+        | _ -> []
+    /// returns [strong] reset incoming/outgoing edges for target
+    let getResetStrongEdgeSources(target:Vertex) =
+        match getEdgeSources (target.Parent.GetGraph(), target, false) with
+        | DuEssStrong sr when sr.Any() -> sr
+        | _ -> []
+
+    /// returns  reset outgoing edges for target
+    let getResetWeakEdgeTargets(source:Vertex) =
+        getWeakEdgeTargets (source.Parent.GetGraph(), source, false) 
+    /// returns  Start outgoing edges for target
+    let getStartWeakEdgeTargets(source:Vertex) =
+        getWeakEdgeTargets (source.Parent.GetGraph(), source, true) 
+
+
+
     let private createEdge (graph:DsGraph) (modelingEdgeInfo:ModelingEdgeInfo<'v>) =
          [|
             for src, op, tgt in expandModelingEdge modelingEdgeInfo do
@@ -61,17 +122,7 @@ module EdgeModule =
             edges.Except(ofResetEdge edges)
 
 
-    let ofAliasForCallVertex (xs:Vertex seq) =
-        xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)
 
-    let ofAliasForRealVertex (xs:Vertex seq) =
-        xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
-
-    let ofAliasForRealExVertex (xs:Vertex seq) =
-        xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.RealExFlowTarget().IsSome)
 
 
     /// 상호 reset 정보(Mutual Reset Info) 확장
@@ -126,36 +177,40 @@ module EdgeModule =
     let createMRIEdgesTransitiveClosure4System(system:DsSystem) =
         for f in system.Flows do
             createMRIEdgesTransitiveClosure f
-
     
+    let getResetRootEdges (v:Vertex) =
+        let es = getResetStrongEdgeSources(v)
+        let ew = getResetWeakEdgeSources(v)
+        es @ ew   
 
-    let getVerticesOfSystem(system:DsSystem) =
-        let realVertices = system.Flows.SelectMany(fun f ->
-                                    f.Graph.Vertices.OfType<Real>()
-                                        .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>()))
+    let getStartRootEdges (v:Vertex) =
+        let es = getStartStrongEdgeSources(v)
+        let ew = getStartWeakEdgeSources(v)
+        es @ ew
+            
+    
+    let checkRealEdgeErrExist (sys:DsSystem) (bStart:bool)  =
+        let vs = sys.GetVertices()
+        let checkReals = vs.OfType<Real>()
+        let realAlias = vs.GetAliasTypeReals()
+        let realExs = vs.OfType<RealExF>()
+        let realExAlias = vs.GetAliasTypeRealExs()
+        let errors = System.Collections.Generic.List<Real>()
 
-        let flowVertices = system.Flows.SelectMany(fun f -> f.Graph.Vertices.Cast<Vertex>())
-        realVertices @ flowVertices
+        for real in checkReals do
+            let realAlias_ = realAlias.Where(fun f -> f.GetPure() = real).OfType<Vertex>()
+            let realExs_ = realExs.Where(fun f -> f.GetPure() = real).OfType<Vertex>()
+            let realExAlias_ = realExAlias.Where(fun f -> f.GetPure() = real).OfType<Vertex>()
+            let checkList = ([real:>Vertex] @ realAlias_ @ realExs_ @ realExAlias_)
 
-    let getVerticesOfFlow(flow:Flow) =
-        let realVertices =
-            flow.Graph.Vertices.OfType<Real>()
-                .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>())
+            let checks = if bStart then checkList |> Seq.collect(fun f -> getStartRootEdges(f))
+                                    else checkList |> Seq.collect(fun f -> getResetRootEdges(f))
+            if checks.IsEmpty() then
+                errors.Add(real)
 
-        let flowVertices =  flow.Graph.Vertices.Cast<Vertex>()
-        realVertices @ flowVertices
+        errors
 
-    let getDevicesOfFlow(flow:Flow) =
-        let devNames = getVerticesOfFlow(flow).OfType<Call>()   
-                             .SelectMany(fun c->c.TargetJob.DeviceDefs.Select(fun d->d.DeviceName))
-
-        flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
-
-    let getDistinctApis(x:DsSystem) =
-        getVerticesOfSystem(x).OfType<Call>()   
-                            .SelectMany(fun c-> c.TargetJob.ApiDefs)
-                            .Distinct()
-
+   
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
                                    
@@ -167,28 +222,11 @@ module EdgeModule =
         member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
             createChildEdge x modelingEdgeInfo
 
+
 [<Extension>]
 type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
-    [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
-    [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
-    [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
-    [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 
-                    let vs = x.GetVertices()
-                    let calls = vs.OfType<Call>().Cast<Vertex>()
-                    let aliases = vs.OfType<Alias>().Cast<Vertex>()
-                    (calls@aliases)
-                        .Where(fun c->c.Parent.GetCore() :? Real)     
-
-    [<Extension>] static member GetVerticesOfCoinCalls(x:DsSystem) = 
-                    x.GetVertices().OfType<Call>().Where(fun c->c.Parent.GetCore() :? Real)    
-    [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
-    [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
     
-    [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
-    [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
-    [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
-
     [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
     [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
     [<Extension>] static member OfResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofResetEdge edges

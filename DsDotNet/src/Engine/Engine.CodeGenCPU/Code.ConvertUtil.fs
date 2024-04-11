@@ -8,13 +8,6 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module CodeConvertUtil =
 
-        ///Real 자신을 공용으로 사용하는 Vertex들
-    let getSharedReal(v:VertexManager) : Vertex seq =
-            (v.Vertex :?> Real).GetVertexSharedReal()
-
-        ///Call 자신을 공용으로 사용하는 Vertex들
-    let getSharedCall(v:VertexManager) : Vertex seq =
-            (v.Vertex :?> Call).GetVertexSharedCall()
 
     let private getOriginCalls(vr:VertexMReal, initialType:InitialType) =
         let origins = vr.OriginInfo.CallInitials
@@ -29,80 +22,10 @@ module CodeConvertUtil =
         getOriginCalls(vr, initialType).Select(fun c-> c.EndPlan)
 
    
-
-    /// Edge source 검색 결과 정보 : target 으로 들어오는 source vertices list 와 그것들이 약연결로 들어오는지, 강연결로 들어오는지 정보
-    type EdgeSourcesWithStrength =
-        | DuEssWeak of Vertex list
-        | DuEssStrong of Vertex list
-        | DuEssNone
-
-    /// returns [week] * [strong] incoming edges
-    let private getEdgeSources(graph:DsGraph, target:Vertex, bStartEdge:bool) =
-        let edges = graph.GetIncomingEdges(target) |> List.ofSeq
-        let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
-
-        let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
-        let srcsStrong = edges |> filter(fun e -> e.EdgeType = (mask ||| EdgeType.Strong))
-
-        match srcsWeek.Any(), srcsStrong.Any() with
-        | true, true -> failwithlog "인터락 리셋과 후행리셋은 동시에 연결불가능 합니다."
-        | true, false -> srcsWeek   |> map (fun e->e.Source) |> DuEssWeak
-        | false, true -> srcsStrong |> map (fun e->e.Source) |> DuEssStrong
-        | false, false -> DuEssNone
-
-     /// returns Weak outgoing edges
-    let private getWeakEdgeTargets(graph:DsGraph, source:Vertex, bStartEdge:bool) =
-        let edges = graph.GetOutgoingEdges(source) |> List.ofSeq
-        let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
-
-        let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
-        srcsWeek |> map (fun e->e.Target)
-
-    /// returns [weak] start incoming/outgoing edges for target
-    let getStartWeakEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true) with
-        | DuEssWeak ws when ws.Any() -> ws
-        | _ -> []
-    /// returns [strong] start incoming/outgoing edges for target
-    let getStartStrongEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, true) with
-        | DuEssStrong ss when ss.Any() -> ss
-        | _ -> []
-    /// returns [weak] reset incoming/outgoing edges for target
-    let getResetWeakEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false) with
-        | DuEssWeak wr when wr.Any() -> wr
-        | _ -> []
-    /// returns [strong] reset incoming/outgoing edges for target
-    let getResetStrongEdgeSources(target:VertexManager) =
-        match getEdgeSources (target.Vertex.Parent.GetGraph(), target.Vertex, false) with
-        | DuEssStrong sr when sr.Any() -> sr
-        | _ -> []
-
-    /// returns  reset outgoing edges for target
-    let getResetWeakEdgeTargets(source:VertexManager) =
-        getWeakEdgeTargets (source.Vertex.Parent.GetGraph(), source.Vertex, false) 
-    /// returns  Start outgoing edges for target
-    let getStartWeakEdgeTargets(source:VertexManager) =
-        getWeakEdgeTargets (source.Vertex.Parent.GetGraph(), source.Vertex, true) 
-
-    
-
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =
-        [<Extension>] static member STs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.ST)
-        [<Extension>] static member SFs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.SF)
-        [<Extension>] static member RTs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.RT)
-        [<Extension>] static member ETs (FList(vms:VertexManager list)): PlanVar<bool> list = vms |> map (fun vm -> vm.ET)
 
-
-        [<Extension>] static member GetSharedReal(v:VertexManager) = v |> getSharedReal
-        [<Extension>] static member GetSharedCall(v:VertexManager) = v |> getSharedCall
-        ///Real 자신이거나 RealEx Target Real
-        [<Extension>] static member GetPureReal  (v:VertexManager) = v.Vertex |> getPureReal
-        [<Extension>] static member GetPureCall  (v:VertexManager) = v.Vertex |> getPureCall
-        [<Extension>] static member GetPure      (v:VertexManager) = v.Vertex |> getPure
 
         [<Extension>]
         static member GetStartCausals(xs:Vertex seq, usingRoot:bool) =
@@ -125,35 +48,28 @@ module CodeConvertUtil =
                 ).Distinct()
    
 
-
         [<Extension>]
-        static member GetWeakStartRootAndCausals  (v:VertexManager) =
+        static member GetWeakStartRootAndCausals  (v:Vertex) =
             let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
             tags.ToAndElseOff()
 
         [<Extension>]
-        static member GetWeakStartDAGAndCausals  (v:VertexManager) =
+        static member GetWeakStartDAGAndCausals  (v:Vertex) =
             let tags = getStartWeakEdgeSources(v).GetStartCausals(false)
             tags.ToAndElseOff()
 
         [<Extension>]
-        static member GetWeakResetRootAndCausals  (v:VertexManager) =
+        static member GetWeakResetRootAndCausals  (v:Vertex) =
             let tags = getResetWeakEdgeSources(v).GetResetCausals()
             tags.ToAndElseOff()
 
         [<Extension>]
-        static member GetStrongStartRootAndCausals  (v:VertexManager) =
+        static member GetStrongStartRootAndCausals  (v:Vertex) =
             let tags = getStartStrongEdgeSources(v).GetStartCausals(true)
             tags.ToAndElseOff()
 
         [<Extension>]
-        static member GetStrongResetRootAndCausals  (v:VertexManager) =
+        static member GetStrongResetRootAndCausals  (v:Vertex) =
             let tags = getResetStrongEdgeSources(v).GetResetCausals()
             tags.ToAndElseOff()
 
-
-        [<Extension>]
-        static member GetResetRootEdges (v:VertexManager) =
-            let es = getResetStrongEdgeSources(v)
-            let ew = getResetWeakEdgeSources(v)
-            es @ ew

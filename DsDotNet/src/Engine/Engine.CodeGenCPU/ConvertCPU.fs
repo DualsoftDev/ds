@@ -185,9 +185,12 @@ module ConvertCPU =
 
              // Package 타입별 에러체크
              match   RuntimeDS.Package with
-             | PC
-             | PLC ->  checkErrNullAddress(sys)
-             | Emulation ->  ()
+             | PC  -> ()
+             | PLC 
+             | Emulation ->  
+                        checkErrNullAddress(sys)
+                        checkErrExternalStartRealExist(sys)
+
              | Simulation -> () 
              | Developer ->  ()      
              

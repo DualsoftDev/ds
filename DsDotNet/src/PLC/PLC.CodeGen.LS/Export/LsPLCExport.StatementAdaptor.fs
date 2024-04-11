@@ -244,7 +244,15 @@ module XgxExpressionConvertorModule =
           ExpandFunctionStatements: ResizeArray<Statement>
           Exp: IExpression }
 
-    /// expression 내부의 비교 및 사칙 연산을 xgi function 으로 대체
+    /// expression 내부의 비교 및 사칙 연산을 xgi/xgk function 으로 대체
+    ///
+    /// - 인자로 받은 {exp, expandFunctionStatements, newLocalStorages} 를 이용해서,
+    ///
+    ///   * 추가되는 statement 는 expandFunctionStatements 에 추가하고,
+    ///
+    ///   * 추가되는 local variable 은 newLocalStorages 에 추가한다.
+    ///
+    ///   * 새로 생성되는 expression 을 반환한다.
     let private replaceInnerArithmaticOrComparisionToXgiFunctionStatements
         { Storage = newLocalStorages
           ExpandFunctionStatements = expandFunctionStatements
@@ -276,7 +284,8 @@ module XgxExpressionConvertorModule =
 
                     | (FunctionNameRising | FunctionNameFalling) -> exp
                     | _ -> failwithlog "ERROR"
-                | _ -> exp ]
+                | _ -> exp
+            ]
 
         let newExp = helper exp |> List.exactlyOne
         xgiLocalVars.Cast<IStorage>() |> newLocalStorages.AddRange // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
@@ -335,7 +344,7 @@ module XgxExpressionConvertorModule =
 
     (* see ``ADD 3 items test`` *)
     /// 사칙 연산 처리
-    /// - a + b + c => + [a; b; c] 로 변환
+    /// - a + b + c => + [a; b; c] 로 변환 (flat 처리)
     ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성
     /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
     let private mergeArithmaticOperator
@@ -384,32 +393,39 @@ module XgxExpressionConvertorModule =
                         chunkBy8 [ outexp ] argsRemaining
 
                 AlreadyApplied(chunkBy8 [] newArgs)
-            | _ -> NotApplied(exp.WithNewFunctionArguments newArgs)
+            | _ ->
+                NotApplied(exp.WithNewFunctionArguments newArgs)
+
         | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "&&" | "||" as op) ->
             let newArgs = binaryToNary { augmentParams with Exp = exp } [ op ] op
             NotApplied(exp.WithNewFunctionArguments newArgs)
-        | _ -> NotApplied(exp)
 
-    let private splitWideExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
+        | _ ->
+            NotApplied(exp)
+
+    let rec private zipAndExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) (allowCallback:bool) : IExpression =
         let { Storage = newLocalStorages
-              ExpandFunctionStatements = expandFunctionStatements }: AugmentedConvertorParams =
+              ExpandFunctionStatements = expandFunctionStatements
+              Exp = exp
+              }: AugmentedConvertorParams =
             augmentParams
 
-        let exp =
-            match mergeArithmaticOperator prjParam augmentParams None with
-            | AlreadyApplied exp -> exp
-            | NotApplied exp -> exp
-
-        let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
+        let flatExpression = exp.Flatten() :?> FlatExpression
+        let w, _h = flatExpression |> precalculateSpan
 
         if w > maxNumHorizontalContact then
+            let exp = if allowCallback then zipVisitor prjParam augmentParams else exp
+
             match exp.FunctionName with
-            | Some "&&" ->
+            | Some op when op.IsOneOf("||") ->
+                zipVisitor prjParam { augmentParams with Exp = exp }
+            | Some op when op = "&&" ->
                 let mutable partSpanX = 0
                 let maxX = maxNumHorizontalContact
 
                 let folder (z: IExpression list list * IExpression list) (e: IExpression) =
                     let built, building = z
+                    let flatExp = e.Flatten() :?> FlatExpression
                     let spanX = e.Flatten() :?> FlatExpression |> precalculateSpan |> fst
 
                     let max, remaining =
@@ -425,22 +441,22 @@ module XgxExpressionConvertorModule =
 
                 let subSums =
                     [ for max in maxs do
-                          let out = createXgiAutoVariableT "_temp_internal_" "&& split output" false
+                          let out = createXgiAutoVariableT "_temp_internal_"  ($"{op} split output") false
                           newLocalStorages.Add out
 
                           DuAugmentedPLCFunction
-                              { FunctionName = "&&"
+                              { FunctionName = op
                                 Arguments = max
                                 Output = out }
                           |> expandFunctionStatements.Add
 
                           var2expr out :> IExpression ]
 
-                let grandTotal = createXgiAutoVariableT "_temp_internal_" "&& split output" false
+                let grandTotal = createXgiAutoVariableT "_temp_internal_" ($"{op} split output") false
                 newLocalStorages.Add grandTotal
 
                 DuAugmentedPLCFunction
-                    { FunctionName = "&&"
+                    { FunctionName = op
                       Arguments = subSums @ remaining
                       Output = grandTotal }
                 |> expandFunctionStatements.Add
@@ -450,11 +466,42 @@ module XgxExpressionConvertorModule =
         else
             exp
 
+    and private zipVisitor (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
+        let exp =
+            match mergeArithmaticOperator prjParam augmentParams None with
+            | AlreadyApplied exp -> exp
+            | NotApplied exp -> exp
+
+
+        let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
+
+        if w > maxNumHorizontalContact && exp.FunctionName.IsSome && exp.FunctionName.Value.IsOneOf("&&", "||") then
+            if exp.FunctionArguments.Any(fun e -> e.Flatten() :?> FlatExpression |> precalculateSpan |> fst >= 20 ) then
+                let args = [
+                    for arg in exp.FunctionArguments do
+                        zipAndExpression prjParam {augmentParams with Exp = arg } true
+                ]
+                let psedoFunction (_args: Args) : bool =
+                    failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+                DuFunction { FunctionBody = psedoFunction;  Name = exp.FunctionName.Value; Arguments = args }
+            else
+                let allowCallback = false
+                zipAndExpression prjParam {augmentParams with Exp = exp } allowCallback
+
+
+            //match exp.FunctionName with
+            //| Some "&&" ->
+            //    zipAndExpression prjParam {augmentParams with Exp = exp }
+            //| _ ->
+            //    exp
+        else
+            exp
+
     let private collectExpandedExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
         let newExp =
             replaceInnerArithmaticOrComparisionToXgiFunctionStatements augmentParams
 
-        let newExp = splitWideExpression  prjParam { augmentParams with Exp = newExp }
+        let newExp = zipVisitor  prjParam { augmentParams with Exp = newExp }
         newExp
 
 

@@ -9,13 +9,12 @@ open Engine.Core
 open Engine.Parser.FS
 open Dual.UnitTest.Common.FS
 
-type XgxLadderElementTest() =
-    inherit XgxTestBaseClass()
+type XgxLadderElementTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
     let span width = width*3
 
-    [<Test>]
-    member __.``Local var test``() =
+    member x.``Local var test``() =
         let testSymbolTypes = [
             typedefof<bool>
             typedefof<single>
@@ -46,12 +45,11 @@ type XgxLadderElementTest() =
         let rungsXml = ""   //generateRungs prologComments commentedStatements
         let symbolsGlobalXml = """<GlobalVariable Version="Ver 1.0" Count="0"/>"""
         let xml = wrapWithXml TestRuntimeTargetType rungsXml symbolsLocalXml symbolsGlobalXml None
-        saveTestResult (getFuncName()) xml
+        x.saveTestResult (getFuncName()) xml
 
 
 
-    [<Test>]
-    member __.``Local var with init test`` () =
+    member x.``Local var with init test`` () =
         let storages = Storages()
         let code = """
             bool    mybool   = false;
@@ -69,23 +67,21 @@ type XgxLadderElementTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Local var with init string err test`` () =
+    member x.``Local var with init string err test`` () =
         let storages = Storages()
         let code = """
             string  mystring = "hello";     // not working for string
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        (fun () ->  XgxFixtures.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
+        (fun () ->  x.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
 
 
 
-    [<Test>]
-    member __.``Local var with comment and init test`` () =
+    member x.``Local var with comment and init test`` () =
         let storages = Storages()
         let code = """
             bool    mybool   = false;
@@ -97,5 +93,21 @@ type XgxLadderElementTest() =
         storages["mybool"].Comment <- "mybool comment"
         storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
+type XgiLadderElementTest() =
+    inherit XgxLadderElementTest(XGI)
+
+    [<Test>]
+    member x.``Local var test``() = base.``Local var test``()
+
+    [<Test>]
+    member x.``Local var with init test`` () = base.``Local var with init test``()
+
+    [<Test>]
+    member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
+
+    [<Test>]
+    member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()

@@ -10,12 +10,10 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common.FlatExpressionModule
 
-[<Collection("SerialXgxGenerationTest")>]
-type XgxGenerationTest() =
-    inherit XgxTestBaseClass()
+type XgxGenerationTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-    [<Test>]
-    member __.``OR simple test`` () =
+    member x.``OR simple test`` () =
         let storages = Storages()
         let code = """
             bool x0 = createTag("%IX0.0.0", false);
@@ -30,11 +28,10 @@ type XgxGenerationTest() =
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``AndOr simple test`` () =
+    member x.``AndOr simple test`` () =
         let storages = Storages()
         let code = """
             bool x0 = createTag("%IX0.0.0", false);
@@ -50,12 +47,11 @@ type XgxGenerationTest() =
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``And Many test`` () =
+    member x.``And Many test`` () =
         let storages = Storages()
         let code = codeForBits + """
             $x15 :=
@@ -65,10 +61,9 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
     member x.``And Huge simple test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -84,10 +79,9 @@ type XgxGenerationTest() =
 """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
-    [<Test>]
     member x.``And Huge test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -104,11 +98,10 @@ type XgxGenerationTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
 
-    [<Test>]
     member x.``And Huge test2`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -125,11 +118,10 @@ type XgxGenerationTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
 
-    [<Test>]
     member x.``And Huge test 3`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -147,11 +139,10 @@ type XgxGenerationTest() =
 """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
 
-    [<Test>]
     member x.``And Huge test 4`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -181,12 +172,11 @@ type XgxGenerationTest() =
                 """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
 
-    [<Test>]
-    member __.``OR Many test`` () =
+    member x.``OR Many test`` () =
         let storages = Storages()
         let code = codeForBits + """
             $x15 :=
@@ -196,11 +186,10 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``OR Huge test`` () =
+    member x.``OR Huge test`` () =
         let storages = Storages()
         let code = codeForBits31 + """
             $x15 :=
@@ -213,11 +202,10 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``OR variable length 역삼각형 test`` () =
+    member x.``OR variable length 역삼각형 test`` () =
         let storages = Storages()
         let code = codeForBits + """
             $x15 :=
@@ -227,11 +215,10 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``OR Block test`` () =
+    member x.``OR Block test`` () =
         let storages = Storages()
         let code = codeForBits + """
             $x15 :=
@@ -240,12 +227,11 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``OR Block test2`` () =
+    member x.``OR Block test2`` () =
         let storages = Storages()
         let code = codeForBits31 + """
             $x31 :=
@@ -263,11 +249,10 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``OR variable length test`` () =
+    member x.``OR variable length test`` () =
         let storages = Storages()
         let code = codeForBits + """
             $x07 :=    (($x00 || $x01) && $x02)
@@ -320,12 +305,11 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``AndOr2 test`` () =
+    member x.``AndOr2 test`` () =
         let storages = Storages()
         let code = codeForBits + """
             $x07 :=    (($x00 || $x01) && $x02)
@@ -339,11 +323,10 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
         ()
 
-    [<Test>]
     member __.``Atomic Negation test`` () =
         let myTagA = createTag("tag0", "%IX0.0.0", false)
         let myTagB = createTag("tag1", "%IX0.0.1", false)
@@ -385,8 +368,7 @@ type XgxGenerationTest() =
 
         ()
 
-    [<Test>]
-    member __.``Negation1 test`` () =
+    member x.``Negation1 test`` () =
         let storages = Storages()
         let code = """
             bool x00 = createTag("%IX0.0.0", false);
@@ -396,11 +378,10 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Negation2 test`` () =
+    member x.``Negation2 test`` () =
         let storages = Storages()
         let code = """
             bool x00 = createTag("%IX0.0.0", false);
@@ -415,13 +396,12 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
         ()
 
 
-    [<Test>]
-    member __.``Negation3 test`` () =
+    member x.``Negation3 test`` () =
         let storages = Storages()
         let code = """
             bool x00 = createTag("%IX0.0.0", false);
@@ -436,11 +416,10 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Add test`` () =
+    member x.``Add test`` () =
         let storages = Storages()
 
         let code = """
@@ -458,13 +437,12 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
 
-    [<Test>]
-    member __.``COPY test`` () =
+    member x.``COPY test`` () =
         let storages = Storages()
 
         let code = """
@@ -476,6 +454,81 @@ type XgxGenerationTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
+
+
+
+[<Collection("SerialXgxGenerationTest")>]
+type XgiGenerationTest() =
+    inherit XgxGenerationTest(XGI)
+
+    [<Test>]
+    member x.``OR simple test`` () = base.``OR simple test`` ()
+
+    [<Test>]
+    member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
+
+
+    [<Test>]
+    member x.``And Many test`` () = base.``And Many test`` ()
+
+    [<Test>]
+    member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
+
+    [<Test>]
+    member x.``And Huge test`` () = base.``And Huge test`` ()
+
+    [<Test>]
+    member x.``And Huge test2`` () = base.``And Huge test2`` ()
+
+    [<Test>]
+    member x.``And Huge test 3`` () = base.``And Huge test 3`` ()
+
+    [<Test>]
+    member x.``And Huge test 4`` () = base.``And Huge test 4`` ()
+
+    [<Test>]
+    member x.``OR Many test`` () = base.``OR Many test`` ()
+
+    [<Test>]
+    member x.``OR Huge test`` () = base.``OR Huge test`` ()
+
+    [<Test>]
+    member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
+
+    [<Test>]
+    member x.``OR Block test`` () = base.``OR Block test`` ()
+
+    [<Test>]
+    member x.``OR Block test2`` () = base.``OR Block test2`` ()
+
+    [<Test>]
+    member x.``OR variable length test`` () = base.``OR variable length test`` ()
+
+
+    [<Test>]
+    member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+
+    [<Test>]
+    member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
+
+    [<Test>]
+    member x.``Negation1 test`` () = base.``Negation1 test`` ()
+
+    [<Test>]
+    member x.``Negation2 test`` () = base.``Negation2 test`` ()
+
+
+    [<Test>]
+    member x.``Negation3 test`` () = base.``Negation3 test`` ()
+
+    [<Test>]
+    member x.``Add test`` () =  base.``Add test`` ()
+
+
+    [<Test>]
+    member x.``COPY test`` () = base.``COPY test`` ()
 

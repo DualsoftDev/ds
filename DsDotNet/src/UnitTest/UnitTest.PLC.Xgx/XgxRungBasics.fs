@@ -9,29 +9,25 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 open Engine.Parser.FS
 
-type XgxRungTest() =
-    inherit XgxTestBaseClass()
+type XgxRungTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-    [<Test>]
-    member __.``Prolog comment test``() =
+    member x.``Prolog comment test``() =
         let rungsXml = $"""<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>"""
         let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
-    [<Test>]
-    member __.``Generate simplest program test``() =
+    member x.``Generate simplest program test``() =
         let xml = wrapWithXml XGI simplestProgramXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
 
-    [<Test>]
-    member __.``Generate simplest with local variables test``() =
+    member x.``Generate simplest with local variables test``() =
         let xml = wrapWithXml XGI simplestProgramXml simpleSymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
 
-    [<Test>]
-    member __.``Generate simplest with local, global variables test``() =
+    member x.``Generate simplest with local, global variables test``() =
         let symbolsGlobalXml =
             """
 <GlobalVariable Version="Ver 1.0" Count="2">
@@ -54,11 +50,10 @@ type XgxRungTest() =
 """
 
         let xml = wrapWithXml XGI simplestProgramXml simpleSymbolsLocalXml symbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
         ()
 
 
-    [<Test>]
     member __.``Generate local variables test``() =
         let t = createTag("myBit00", "%IX0.0.0", false)
         // name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
@@ -96,7 +91,6 @@ type XgxRungTest() =
         iTags, q, localSymbolsXml
 
 
-    [<Test>]
     member x.``Generate ANDsMax(=31) variables test``() =
         let iTags, q, localSymbolsXml = x.PrepareWithSymbols(31)
 
@@ -130,10 +124,9 @@ type XgxRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
 
-    [<Test>]
     member x.``Generate ANDs30 variables test``() =
         let iTags, q, localSymbolsXml = x.PrepareWithSymbols(30)
 
@@ -167,10 +160,9 @@ type XgxRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
 
-    [<Test>]
     member x.``Generate ANDs29 variables test``() =
         let iTags, q, localSymbolsXml = x.PrepareWithSymbols(29)
 
@@ -204,11 +196,10 @@ type XgxRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
 
 
-    [<Test>]
     member x.``Generate OR2 variables test``() =
         let iTags, q, localSymbolsXml = x.PrepareWithSymbols(2)
 
@@ -247,9 +238,8 @@ type XgxRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
-    [<Test>]
     member x.``Generate ORs variables test``() =
         let iTags, q, localSymbolsXml = x.PrepareWithSymbols(31)
 
@@ -285,4 +275,44 @@ type XgxRungTest() =
             ] |> String.concat "\r\n"
 
         let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
+
+
+
+
+type XgiRungTest() =
+    inherit XgxRungTest(XGI)
+
+    [<Test>]
+    member x.``Prolog comment test``() = base.``Prolog comment test``()
+
+    [<Test>]
+    member x.``Generate simplest program test``() = base.``Generate simplest program test``()
+
+
+    [<Test>]
+    member x.``Generate simplest with local variables test``() = base.``Generate simplest with local variables test``()
+
+    [<Test>]
+    member x.``Generate simplest with local, global variables test``() = base.``Generate simplest with local, global variables test``()
+
+    [<Test>]
+    member __.``Generate local variables test``() = base.``Generate local variables test``()
+
+    [<Test>]
+    member x.``Generate ANDsMax(=31) variables test``() = base.``Generate ANDsMax(=31) variables test``()
+
+
+    [<Test>]
+    member x.``Generate ANDs30 variables test``() = base.``Generate ANDs30 variables test``()
+
+
+    [<Test>]
+    member x.``Generate ANDs29 variables test``() = base.``Generate ANDs29 variables test``()
+
+
+    [<Test>]
+    member x.``Generate OR2 variables test``() = base.``Generate OR2 variables test``()
+
+    [<Test>]
+    member x.``Generate ORs variables test``() = base.``Generate ORs variables test``()

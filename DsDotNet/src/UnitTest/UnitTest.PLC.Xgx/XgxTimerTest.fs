@@ -11,12 +11,11 @@ open PLC.CodeGen.LS
 
 
 
-type XgxTimerTest() =
-    inherit XgxTestBaseClass()
+type XgxTimerTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
 
-    [<Test>]
-    member __.``Timer test`` () =
+    member x.``Timer test`` () =
         let storages = Storages()
         let code = """
             bool myQBit0 = createTag("%QX0.1.0", false);
@@ -33,11 +32,10 @@ type XgxTimerTest() =
         //statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``TIMER= Many1 AND RungIn Condition test`` () =
+    member x.``TIMER= Many1 AND RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000u,
@@ -46,11 +44,10 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``TIMER= Many2 AND RungIn Condition test`` () =
+    member x.``TIMER= Many2 AND RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000u,
@@ -71,12 +68,11 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``TIMER= Many1 OR RungIn Condition test`` () =
+    member x.``TIMER= Many1 OR RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000u,
@@ -85,12 +81,11 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``TIMER= Many2 OR RungIn Condition test`` () =
+    member x.``TIMER= Many2 OR RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000u,
@@ -107,12 +102,11 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``TIMER= Many And, OR RungIn Condition test`` () =
+    member x.``TIMER= Many And, OR RungIn Condition test`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000u,
@@ -132,11 +126,10 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``TIMER= Many And, OR RungIn Condition test2`` () =
+    member x.``TIMER= Many And, OR RungIn Condition test2`` () =
         let storages = Storages()
         let code = codeForBits + """
             ton myTon = createXgiTON(2000u,
@@ -156,12 +149,11 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``TIMER= Not Condition test`` () =
+    member x.``TIMER= Not Condition test`` () =
         let storages = Storages()
         let code = """
             bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
@@ -178,11 +170,10 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``TIMER= Not Condition test 2`` () =
+    member x.``TIMER= Not Condition test 2`` () =
         let storages = Storages()
         let code = """
             bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
@@ -196,5 +187,44 @@ type XgxTimerTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
+
+
+
+type XgiTimerTest() =
+    inherit XgxTimerTest(XGI)
+
+
+    [<Test>]
+    member x.``Timer test`` () = base.``Timer test``()
+
+    [<Test>]
+    member x.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
+
+
+    [<Test>]
+    member x.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
+
+    [<Test>]
+    member x.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
+
+
+    [<Test>]
+    member x.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
+
+
+    [<Test>]
+    member x.``TIMER= Many And, OR RungIn Condition test`` () = base.``TIMER= Many And, OR RungIn Condition test``()
+
+    [<Test>]
+    member x.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
+
+
+    [<Test>]
+    member x.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
+
+    [<Test>]
+    member x.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()

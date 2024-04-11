@@ -253,7 +253,7 @@ module XgxExpressionConvertorModule =
     ///   * 추가되는 local variable 은 newLocalStorages 에 추가한다.
     ///
     ///   * 새로 생성되는 expression 을 반환한다.
-    let private replaceInnerArithmaticOrComparisionToXgiFunctionStatements
+    let private replaceInnerArithmaticOrComparisionToXgiFunctionStatements (prjParam: XgxProjectParams)
         { Storage = newLocalStorages
           ExpandFunctionStatements = expandFunctionStatements
           Exp = exp }
@@ -268,7 +268,7 @@ module XgxExpressionConvertorModule =
                     match funcName with
                     | ("&&" | "||" | "!") -> exp.WithNewFunctionArguments newArgs
                     | (">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/") as op ->
-                        if RuntimeDS.Target <> XGI then 
+                        if prjParam.TargetType <> XGI then 
                             failwithlog $"Inline function only supported on XGI"
 
                         let out = createTypedXgiAutoVariable "out" exp.BoxedEvaluatedValue $"{op} output"
@@ -499,7 +499,7 @@ module XgxExpressionConvertorModule =
 
     let private collectExpandedExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
         let newExp =
-            replaceInnerArithmaticOrComparisionToXgiFunctionStatements augmentParams
+            replaceInnerArithmaticOrComparisionToXgiFunctionStatements prjParam augmentParams
 
         let newExp = zipVisitor  prjParam { augmentParams with Exp = newExp }
         newExp

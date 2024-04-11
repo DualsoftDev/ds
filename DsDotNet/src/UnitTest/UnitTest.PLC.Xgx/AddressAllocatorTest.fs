@@ -4,9 +4,10 @@ open Dual.UnitTest.Common.FS
 open NUnit.Framework
 
 open PLC.CodeGen.Common
+open Engine.Core
 
 type AddressAllocatorTest() =
-    inherit XgxTestBaseClass()
+    inherit XgxTestBaseClass(XGI)
 
     [<Test>]
     member __.``Allocate address beyond limit test`` () =

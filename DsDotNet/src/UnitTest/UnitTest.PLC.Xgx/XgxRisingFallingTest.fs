@@ -9,11 +9,10 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
 
-type XgxRisingFallingTest() =
-    inherit XgxTestBaseClass()
+type XgxRisingFallingTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-    [<Test>]
-    member __.``Normal, Negation, Rising, Falling contact test`` () =
+    member x.``Normal, Negation, Rising, Falling contact test`` () =
         let storages = Storages()
         let code = """
             bool ix = createTag("%IX0.0.0", false);
@@ -26,7 +25,14 @@ type XgxRisingFallingTest() =
         statements[0].ToText() === "$qx := $ix && !($ix) && rising($ix) && falling($ix)"
 
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-   
+ 
+type XgiRisingFallingTest() =
+    inherit XgxRisingFallingTest(XGI)
+
+    [<Test>]
+    member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
+
+     

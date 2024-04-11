@@ -10,68 +10,6 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.LS
 
-[<AutoOpen>]
-module XgxFixtures =
-    let TestRuntimeTargetType = XGI
-    [<AbstractClass>]
-    type XgxTestBaseClass() =
-        inherit TestBaseClass("EngineLogger")
-        do
-            //Engine.CodeGenCPU.ModuleInitializer.Initialize()
-            autoVariableCounter <- 0
-
-        let mutable runtimeTarget = RuntimeDS.Target
-        let sys = DsSystem("testSys")
-        [<SetUp>]
-        member x.Setup () =
-            RuntimeDS.Target <- x.GetCurrentRuntimeTarget()
-            RuntimeDS.System <- sys
-
-        [<TearDown>]
-        member __.TearDown () =
-            RuntimeDS.Target <- runtimeTarget
-            RuntimeDS.System <- sys
-
-        abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
-
-        override x.GetCurrentRuntimeTarget() = TestRuntimeTargetType
-
-    let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
-        let runtimeTargetBackup = RuntimeDS.Target
-        RuntimeDS.Target <- runtimeTarget
-        disposable { RuntimeDS.Target <- runtimeTargetBackup }
-
-    let generateXmlForTest projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
-        tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
-
-        verify (RuntimeDS.Target = TestRuntimeTargetType)
-
-        let globalStorages = storages
-        let localStorages = Storages()
-
-        let pouParams:XgxPOUParams = {
-            /// POU name.  "DsLogic"
-            POUName = "DsLogic"
-            /// POU container task name
-            TaskName = "Scan Program"
-            /// POU ladder 최상단의 comment
-            Comment = "DS Logic for XGI"
-            LocalStorages = localStorages
-            GlobalStorages = globalStorages
-            CommentedStatements = commentedStatements
-        }
-        let prjParam:XgxProjectParams = {
-            defaultXgxProjectParams with
-                TargetType = TestRuntimeTargetType    // xxx
-                ProjectName = projName
-                GlobalStorages = globalStorages
-                POUs = [pouParams]
-                RungCounter = counterGenerator 0 |> Some
-        }
-
-        prjParam.GenerateXmlString()
-
-
 
 [<AutoOpen>]
 module XgxGenerationTestModule =
@@ -80,14 +18,6 @@ module XgxGenerationTestModule =
         let key = "UnitTest.PLC.Xgx"
         let index = src.LastIndexOf key
         src.Substring(0, index + key.Length)
-    let xmlDir = Path.Combine(projectDir, "XgiXmls")
-    let xmlAnswerDir = Path.Combine(xmlDir, "Answers")
-
-    let saveTestResult testFunctionName (xml:string) =
-        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", crlfXml)
-        let answerXml = File.ReadAllText($"{xmlAnswerDir}/{testFunctionName}.xml")
-        System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
 
     let codeForBits = """
         bool x00 = createTag("%IX0.0.0", false);
@@ -150,3 +80,98 @@ module XgxGenerationTestModule =
         int nn9 = 9;
 """
 
+module XgiGenerationTestModule =
+    let private xmlDir = Path.Combine(projectDir, "Xgi/Xmls")
+    let private xmlAnswerDir = Path.Combine(xmlDir, "Answers")
+
+    let saveTestResult testFunctionName (xml:string) =
+        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
+        File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", crlfXml)
+        let answerXml = File.ReadAllText($"{xmlAnswerDir}/{testFunctionName}.xml")
+        System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
+
+
+module XgkGenerationTestModule =
+    let private xmlDir = Path.Combine(projectDir, "Xgk/Xmls")
+    let private xmlAnswerDir = Path.Combine(xmlDir, "Answers")
+
+    let saveTestResult testFunctionName (xml:string) =
+        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
+        File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", crlfXml)
+        let answerXml = File.ReadAllText($"{xmlAnswerDir}/{testFunctionName}.xml")
+        System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
+
+
+
+[<AutoOpen>]
+module XgxFixtures =
+    let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
+        let runtimeTargetBackup = RuntimeDS.Target
+        RuntimeDS.Target <- runtimeTarget
+        disposable { RuntimeDS.Target <- runtimeTargetBackup }
+
+    let private generateXmlForTest (xgx:RuntimeTargetType) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+        tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
+
+        //verify (RuntimeDS.Target = xgx)
+
+        let globalStorages = storages
+        let localStorages = Storages()
+
+        let pouParams:XgxPOUParams = {
+            /// POU name.  "DsLogic"
+            POUName = "DsLogic"
+            /// POU container task name
+            TaskName = "Scan Program"
+            /// POU ladder 최상단의 comment
+            Comment = "DS Logic for XGI"
+            LocalStorages = localStorages
+            GlobalStorages = globalStorages
+            CommentedStatements = commentedStatements
+        }
+        let prjParam:XgxProjectParams = {
+            defaultXgxProjectParams with
+                TargetType = xgx
+                ProjectName = projName
+                GlobalStorages = globalStorages
+                POUs = [pouParams]
+                RungCounter = counterGenerator 0 |> Some
+        }
+
+        prjParam.GenerateXmlString()
+
+    let TestRuntimeTargetType = XGI
+    [<AbstractClass>]
+    type XgxTestBaseClass(xgx:RuntimeTargetType) =
+        inherit TestBaseClass("EngineLogger")
+        do
+            //Engine.CodeGenCPU.ModuleInitializer.Initialize()
+            autoVariableCounter <- 0
+
+        //let mutable runtimeTarget = RuntimeDS.Target
+        let sys = DsSystem("testSys")
+        [<SetUp>]
+        member x.Setup () =
+            //RuntimeDS.Target <- x.GetCurrentRuntimeTarget()
+            RuntimeDS.System <- sys
+
+        [<TearDown>]
+        member __.TearDown () =
+            //RuntimeDS.Target <- runtimeTarget
+            RuntimeDS.System <- sys
+
+        //abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
+
+        //override x.GetCurrentRuntimeTarget() = TestRuntimeTargetType
+
+        member __.saveTestResult testFunctionName (xml:string) =
+            match xgx with
+            | XGI -> XgiGenerationTestModule.saveTestResult testFunctionName xml
+            | XGK -> XgkGenerationTestModule.saveTestResult testFunctionName xml
+            | _ -> failwith "Not supported runtime target"
+
+        member __.generateXmlForTest =
+            match xgx with
+            | XGI -> generateXmlForTest XGI
+            | XGK -> generateXmlForTest XGK
+            | _ -> failwith "Not supported runtime target"

@@ -5,9 +5,10 @@ open NUnit.Framework
 
 open PLC.CodeGen.LS.XgiPrologModule
 open PLC.CodeGen.Common.IECAddressModule
+open Engine.Core
 
 type NameAddressValidatorTest() =
-    inherit XgxTestBaseClass()
+    inherit XgxTestBaseClass(XGI)
 
     [<Test>]
     member __.``Validation= Variable name test`` () =

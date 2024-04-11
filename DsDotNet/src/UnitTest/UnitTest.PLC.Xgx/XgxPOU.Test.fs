@@ -10,8 +10,8 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
-type XgxPOUTest() =
-    inherit XgxTestBaseClass()
+type XgxPOUTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
     do
         (* base class 초기화 이전에 let 구문들이 실행되어 오류 발생하는 것을 막기 위해 강제 do 구문 수행 *)
@@ -80,22 +80,20 @@ type XgxPOUTest() =
             POUs = [pou11.Value; pou12.Value; pou21.Value]
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 유닛테스트 연속호출시 누적되므로 새로 호출
     }
-    [<Test>]
-    member __.``POU1 test`` () =
+
+    member x.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
         let xml = pou11.Value.GenerateXmlString(dummyPrjParams, None)
-        saveTestResult (getFuncName()) xml
+        x.saveTestResult (getFuncName()) xml
 
-    [<Test>]
-    member __.``Project test`` () =
+    member x.``Project test`` () =
         let f = getFuncName()
         let projComment = "This is project comment."
         let xml = { createProjectParams(f) with ProjectComment=projComment}.GenerateXmlString()
-        saveTestResult f xml
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``Project with global test`` () =
+    member x.``Project with global test`` () =
         let globalStorages = Storages()
         let code = """
             bool gg0 = createTag("%IX0.0.1", false);
@@ -105,12 +103,11 @@ type XgxPOUTest() =
         parseCode globalStorages code |> ignore
         let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages }
         let xml = projectParams.GenerateXmlString()
-        saveTestResult f xml
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``Project with existing project test`` () =
-        let myTemplate = $"{__SOURCE_DIRECTORY__}/XgiXmls/Templates/myTemplate.xml"
+    member x.``Project with existing project test`` () =
+        let myTemplate = $"{__SOURCE_DIRECTORY__}/Xgi/Xmls/Templates/myTemplate.xml"
 
 
         let globalStorages = Storages()
@@ -122,11 +119,10 @@ type XgxPOUTest() =
         parseCode globalStorages code |> ignore
         let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
         let xml = projectParams.GenerateXmlString()
-        saveTestResult f xml
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``Validation= Existing project global variable memory test`` () =
+    member x.``Validation= Existing project global variable memory test`` () =
         (* existing project 에 이미 global 변수들이 선언되어 있고,
          * 새로 선언되는 자동 할당 변수들이 미리 선언된 메모리 영역을 피해서 생성되는지 검사한다.
          *)
@@ -174,11 +170,10 @@ type XgxPOUTest() =
         globalStorages["gg1"].Address === "_"
         globalStorages["xm0"].Address === "_"
 
-        saveTestResult f xml
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``Validation= Existing project global variable name collide exactly test`` () =
+    member x.``Validation= Existing project global variable name collide exactly test`` () =
         (* existing project 에 이미 global 변수들이 선언되어 있고,
          * 새로 선언되는 자동 할당 변수 이름이 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
          *)
@@ -206,11 +201,10 @@ type XgxPOUTest() =
         }
         ( fun () ->
             let xml = projectParams.GenerateXmlString()
-            saveTestResult f xml
+            x.saveTestResult f xml
         ) |> ShouldFailWithSubstringT "ERROR: Duplicated global variable name : MMX0"
 
-    [<Test>]
-    member __.``Validation= Existing project global variable name collide ignoring case test`` () =
+    member x.``Validation= Existing project global variable name collide ignoring case test`` () =
         (* existing project 에 이미 global 변수들이 선언되어 있고,
          * 새로 선언되는 자동 할당 변수 이름이 대소문자를 가리지 않고 미리 선언된 gloal 변수와 동일할 때 fail 해야 한다..
          *)
@@ -238,11 +232,10 @@ type XgxPOUTest() =
         }
         ( fun () ->
             let xml = projectParams.GenerateXmlString()
-            saveTestResult f xml
+            x.saveTestResult f xml
         ) |> ShouldFailWithSubstringT "ERROR: Duplicated global variable name : MMX1"
 
-    [<Test>]
-    member __.``Validation= Existing project duplicated POU name test`` () =
+    member x.``Validation= Existing project duplicated POU name test`` () =
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
         let collidingPou = {
             pou11.Value with
@@ -259,3 +252,33 @@ type XgxPOUTest() =
             let _xml = projectParams.GenerateXmlString()
             ()
         ) |> ShouldFailWithSubstringT "ERROR: Duplicated POU name"
+
+
+
+
+type XgiPOUTest() =
+    inherit XgxPOUTest(XGI)
+
+    [<Test>]
+    member x.``POU1 test`` () = base.``POU1 test``()
+
+    [<Test>]
+    member x.``Project test`` () = base.``Project test``()
+
+    [<Test>]
+    member x.``Project with global test`` () = base.``Project with global test``()
+
+    [<Test>]
+    member x.``Project with existing project test`` () = base.``Project with existing project test``()
+
+    [<Test>]
+    member x.``Validation= Existing project global variable memory test`` () = base.``Validation= Existing project global variable memory test``()
+
+    [<Test>]
+    member x.``Validation= Existing project global variable name collide exactly test`` () = base.``Validation= Existing project global variable name collide exactly test``()
+
+    [<Test>]
+    member x.``Validation= Existing project global variable name collide ignoring case test`` () = base.``Validation= Existing project global variable name collide ignoring case test``()
+
+    [<Test>]
+    member x.``Validation= Existing project duplicated POU name test`` () = base.``Validation= Existing project duplicated POU name test``()

@@ -1,6 +1,4 @@
 namespace T
-
-
 open Xunit
 open NUnit.Framework
 
@@ -9,15 +7,10 @@ open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
+type XgxCounterTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-
-
-[<Collection("XgxCounterTest")>]
-type XgxCounterTest() =
-    inherit XgxTestBaseClass()
-
-    [<Test>]
-    member __.``Counter CTU simple test`` () =
+    member x.``Counter CTU simple test`` () =
         let storages = Storages()
         let code = """
             bool cu = createTag("%IX0.0.0", false);
@@ -26,11 +19,10 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Counter CTD simple test`` () =
+    member x.``Counter CTD simple test`` () =
         use _ = setRuntimeTarget XGI
         let storages = Storages()
         let code = """
@@ -40,11 +32,10 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Counter CTUD simple test`` () =
+    member x.``Counter CTUD simple test`` () =
         let storages = Storages()
         let code = """
             bool cu = createTag("%IX0.0.0", false);
@@ -55,11 +46,10 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Counter CTR simple test`` () =
+    member x.``Counter CTR simple test`` () =
         let storages = Storages()
         let code = """
             bool cd = createTag("%IX0.0.0", false);
@@ -71,12 +61,11 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``Counter CTU with conditional test`` () =
+    member x.``Counter CTU with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1  = false;
@@ -92,11 +81,10 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Counter CTD with conditional test`` () =
+    member x.``Counter CTD with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1  = true;
@@ -112,11 +100,10 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Counter CTR with conditional test`` () =
+    member x.``Counter CTR with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cd1  = false;
@@ -132,11 +119,10 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Counter CTR with conditional test2`` () =
+    member x.``Counter CTR with conditional test2`` () =
         let storages = Storages()
         let code = """
             bool cd1  = false;
@@ -153,11 +139,10 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``Counter CTUD with conditional test`` () =
+    member x.``Counter CTUD with conditional test`` () =
         let storages = Storages()
         let code = """
             bool cu1  = false;
@@ -189,15 +174,13 @@ type XgxCounterTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-[<Collection("SerialXgxFunctionTest")>]
-type XgxFunctionTest() =
-    inherit XgxTestBaseClass()
+type XgxFunctionTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-    [<Test>]
-    member __.``ADD simple test`` () =
+    member x.``ADD simple test`` () =
         let storages = Storages()
         let code = """
             int16 nn1 = 1s;
@@ -207,11 +190,10 @@ type XgxFunctionTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``ADD int32 test`` () =
+    member x.``ADD int32 test`` () =
         let storages = Storages()
         let code = """
             int nn1 = 1;
@@ -221,11 +203,10 @@ type XgxFunctionTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``ADD int64 test`` () =
+    member x.``ADD int64 test`` () =
         let storages = Storages()
         let code = """
             int64 nn1 = 1L;
@@ -235,11 +216,10 @@ type XgxFunctionTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``ADD double test`` () =
+    member x.``ADD double test`` () =
         let storages = Storages()
         let code = """
             double nn1 = 1.1;
@@ -249,12 +229,11 @@ type XgxFunctionTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
-    member __.``ADD 3 items test`` () =
+    member x.``ADD 3 items test`` () =
         let storages = Storages()
         let code = """
             int16 nn1 = 1s;
@@ -265,11 +244,10 @@ type XgxFunctionTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``ADD 7 items test`` () =
+    member x.``ADD 7 items test`` () =
         let storages = Storages()
         let code = """
             int16 nn1 = 1s;
@@ -286,11 +264,10 @@ type XgxFunctionTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
-    member __.``ADD 8 items test`` () =
+    member x.``ADD 8 items test`` () =
         let storages = Storages()
         let code = """
             int16 nn1 = 1s;
@@ -307,10 +284,9 @@ type XgxFunctionTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
-    [<Test>]
     member x.``ADD 10 items test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -332,10 +308,9 @@ type XgxFunctionTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml )
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml )
 
-    [<Test>]
     member x.``DIV 3 items test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -350,9 +325,8 @@ type XgxFunctionTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml )
-    [<Test>]
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml )
     member x.``ADD MUL 3 items test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -371,11 +345,10 @@ type XgxFunctionTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
 
-    [<Test>]
     member x.``Comparision, Arithmatic, AND test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -396,6 +369,86 @@ type XgxFunctionTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
+
+
+
+
+
+
+
+[<Collection("XgxCounterTest")>]
+type XgiCounterTest() =
+    inherit XgxCounterTest(XGI)
+
+    [<Test>]
+    member x.``Counter CTU simple test`` () = base.``Counter CTU simple test``()
+
+    [<Test>]
+    member x.``Counter CTD simple test`` () = base.``Counter CTD simple test``()
+
+    [<Test>]
+    member x.``Counter CTUD simple test`` () = base.``Counter CTUD simple test``()
+
+    [<Test>]
+    member x.``Counter CTR simple test`` () = base.``Counter CTR simple test``()
+
+
+    [<Test>]
+    member x.``Counter CTU with conditional test`` () = base.``Counter CTU with conditional test``()
+
+    [<Test>]
+    member x.``Counter CTD with conditional test`` () = base.``Counter CTD with conditional test``()
+
+    [<Test>]
+    member x.``Counter CTR with conditional test`` () = base.``Counter CTR with conditional test``()
+
+    [<Test>]
+    member x.``Counter CTR with conditional test2`` () = base.``Counter CTR with conditional test2``()
+
+    [<Test>]
+    member x.``Counter CTUD with conditional test`` () = base.``Counter CTUD with conditional test``()
+
+[<Collection("SerialXgxFunctionTest")>]
+type XgiFunctionTest() =
+    inherit XgxFunctionTest(XGI)
+
+    [<Test>]
+    member x.``ADD simple test`` () = base.``ADD simple test``()
+
+    [<Test>]
+    member x.``ADD int32 test`` () = base.``ADD int32 test``()
+
+    [<Test>]
+    member x.``ADD int64 test`` () = base.``ADD int64 test``()
+
+    [<Test>]
+    member x.``ADD double test`` () = base.``ADD double test``()
+
+    [<Test>]
+    member x.``ADD 3 items test`` () = base.``ADD 3 items test``()
+
+    [<Test>]
+    member x.``ADD 7 items test`` () = base.``ADD 7 items test``()
+
+    [<Test>]
+    member x.``ADD 8 items test`` () = base.``ADD 8 items test``()
+
+    [<Test>]
+    member x.``ADD 10 items test`` () = base.``ADD 10 items test``()
+
+    [<Test>]
+    member x.``DIV 3 items test`` () = base.``DIV 3 items test``()
+
+    [<Test>]
+    member x.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
+
+    [<Test>]
+    member x.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
+
+
+
+
+

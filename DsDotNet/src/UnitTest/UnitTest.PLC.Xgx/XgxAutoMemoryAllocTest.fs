@@ -9,12 +9,10 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
-type AutoMemoryAllocTest() =
-    inherit XgxTestBaseClass()
+type AutoMemoryAllocTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-
-    [<Test>]
-    member __.``Auto memory allocation test`` () =
+    member x.``Auto memory allocation test`` () =
         let globalStorages = Storages()
         let pouIQMap =
             let code =
@@ -51,4 +49,10 @@ type AutoMemoryAllocTest() =
 
         let xml = prjParam.GenerateXmlString()
         let f = getFuncName()
-        saveTestResult f xml
+        x.saveTestResult f xml
+
+
+type XgiAutoMemoryAllocTest() =
+    inherit AutoMemoryAllocTest(XGI)
+    [<Test>]
+    member x.``Auto memory allocation test`` () = base.``Auto memory allocation test``()

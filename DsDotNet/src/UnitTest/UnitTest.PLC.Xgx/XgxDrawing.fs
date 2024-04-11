@@ -7,13 +7,12 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 open Engine.Core
 
-type XgxDrawingTest() =
-    inherit XgxTestBaseClass()
+type XgxDrawingTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
     let span width = width*3
 
-    [<Test>]
-    member __.``Box drawing test``() =
+    member x.``Box drawing test``() =
         let rungsXml = $"""
 <Rung BlockMask="0">
     <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 0)}">Test boxes</Element>
@@ -59,11 +58,10 @@ type XgxDrawingTest() =
 
 """
         let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
 
-    [<Test>]
-    member __.``Vertical line drawing test``() =
+    member x.``Vertical line drawing test``() =
         let rungsXml =
             [
                 let x, y = 1, 1
@@ -88,9 +86,8 @@ type XgxDrawingTest() =
 
 
         let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
 
-    [<Test>]
     member __.``ADD function details test``() =
         (* Function/FunctionBlock 정보 :
             - function 의 가로 너비 : COL_PROP
@@ -156,8 +153,7 @@ type XgxDrawingTest() =
         ()
 
 
-    [<Test>]
-    member __.``ADD function drawing test``() =
+    member x.``ADD function drawing test``() =
         let { Coordinate = c; Xml = elementAddXml } = createFunctionXmlAt ("ADD2_INT", "ADD") "" (3, 2)
         (* '&#xA' = '&#10' = '\n' 의 HTML encoding *)
         let originalElementAddXml_ = "FNAME: ADD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 71&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"
@@ -193,5 +189,24 @@ type XgxDrawingTest() =
 
 
         let xml = wrapWithXml XGI rungsXml symbolsLocalXml emptySymbolsGlobalXml None
-        saveTestResult (getFuncName ()) xml
+        x.saveTestResult (getFuncName ()) xml
+
+
+
+type XgiDrawingTest() =
+    inherit XgxDrawingTest(XGI)
+
+    [<Test>]
+    member x.``Box drawing test``() = base.``Box drawing test``()
+
+    [<Test>]
+    member x.``Vertical line drawing test``() = base.``Vertical line drawing test``()
+
+    [<Test>]
+    member __.``ADD function details test``() = base.``ADD function details test``()
+
+    [<Test>]
+    member x.``ADD function drawing test``() = base.``ADD function drawing test``()
+
+
 

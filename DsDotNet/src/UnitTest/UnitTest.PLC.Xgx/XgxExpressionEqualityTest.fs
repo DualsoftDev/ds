@@ -11,11 +11,9 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
 
-[<Collection("SerialXgxExpEqualityTest")>]
-type XgxExpEqualityTest() =
-    inherit XgxTestBaseClass()
+type XgxExpEqualityTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-    [<Test>]
     member x.``Comparision, Arithmatic, OR test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -36,11 +34,10 @@ type XgxExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
 
-    [<Test>]
     member x.``Comparision, Arithmatic, OR test2`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -62,12 +59,11 @@ type XgxExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
 
 
-    [<Test>]
     member __.``Expression equality test`` () =
         let storages = Storages()
         let code = """
@@ -91,8 +87,7 @@ type XgxExpEqualityTest() =
 
 
 
-    [<Test>]
-    member __.``Expression equality generation test`` () =
+    member x.``Expression equality generation test`` () =
         let storages = Storages()
         let code = codeForBits + """
             bool result1 = false;
@@ -138,11 +133,10 @@ type XgxExpEqualityTest() =
 """
         let statements = parseCode storages code
         let f = getFuncName()
-        let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-        saveTestResult f xml
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
-    [<Test>]
     member x.``XOR test`` () =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
@@ -155,9 +149,35 @@ type XgxExpEqualityTest() =
     """
             let statements = parseCode storages code
             let f = getFuncName()
-            let xml = XgxFixtures.generateXmlForTest f storages (map withNoComment statements)
-            saveTestResult f xml
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
         )
+
+
+
+
+[<Collection("SerialXgxExpEqualityTest")>]
+type XgiExpEqualityTest() =
+    inherit XgxExpEqualityTest(XGI)
+
+    [<Test>]
+    member x.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
+
+    [<Test>]
+    member x.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
+
+
+    [<Test>]
+    member __.``Expression equality test`` () = base.``Expression equality test``()
+
+
+    [<Test>]
+    member x.``Expression equality generation test`` () = base.``Expression equality generation test``()
+
+
+    [<Test>]
+    member x.``XOR test`` () = base.``XOR test``()
+
 
 
 

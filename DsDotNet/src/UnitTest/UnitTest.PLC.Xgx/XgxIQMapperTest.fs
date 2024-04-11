@@ -9,12 +9,10 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
-type IQMapperTest() =
-    inherit XgxTestBaseClass()
+type IQMapperTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-
-    [<Test>]
-    member __.``Dummy IQ Map test`` () =
+    member x.``Dummy IQ Map test`` () =
         let globalStorages = Storages()
         let pouIQMap =
             let code = """
@@ -41,7 +39,7 @@ type IQMapperTest() =
 
         let prjParam = {
             defaultXgxProjectParams with
-                TargetType = TestRuntimeTargetType
+                TargetType = xgx
                 ProjectName = "Dummy IQ Map test"
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]
@@ -50,4 +48,18 @@ type IQMapperTest() =
 
         let xml = prjParam.GenerateXmlString()
         let f = getFuncName()
-        saveTestResult f xml
+        x.saveTestResult f xml
+
+
+type XgiIQMapperTest() =
+    inherit IQMapperTest(XGI)
+
+    [<Test>]
+    member x.``Dummy IQ Map test`` () = base.``Dummy IQ Map test``()
+
+
+type XgkIQMapperTest() =
+    inherit IQMapperTest(XGK)
+
+    [<Test>]
+    member x.``Dummy IQ Map test`` () = base.``Dummy IQ Map test``()

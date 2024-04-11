@@ -117,10 +117,10 @@ module XGITag = //IEC61131Tag =
 
         [<Obsolete("임시 코드 fix")>]
         /// Symbol 관련 XML tag attributes 생성
-        member private x.GetXmlArgs() =
+        member private x.GetXmlArgs (targetType: RuntimeTargetType) =
             [   $"Name=\"{x.Name}\""
                 $"Comment=\"{x.Comment}\""
-                match RuntimeDS.Target with
+                match targetType with
                 | XGI ->
                     $"Device=\"{x.Device}\""
                     $"Kind=\"{x.Kind}\""
@@ -151,11 +151,11 @@ module XGITag = //IEC61131Tag =
             ] |> String.concat " "
 
         /// Symbol 관련 XML tag 생성
-        member x.ToText() = $"<Symbol {x.GetXmlArgs()}/>"
+        member x.ToText(targetType: RuntimeTargetType) = $"<Symbol {x.GetXmlArgs targetType}/>"
         //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
 
-        member x.GenerateXml() =
-            [ yield $"\t<Symbol {x.GetXmlArgs()}>"
+        member x.GenerateXml (targetType: RuntimeTargetType) =
+            [ yield $"\t<Symbol {x.GetXmlArgs targetType}>"
               //// 사용되지 않지만, 필요한 XML children element 생성
               //yield!
               //    [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
@@ -164,19 +164,19 @@ module XGITag = //IEC61131Tag =
             |> String.concat "\r\n"
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
-    let private generateSymbolVarDefinitionXml (varType: string) (FList(symbols: SymbolInfo list)) =
+    let private generateSymbolVarDefinitionXml (targetType: RuntimeTargetType) (varType: string) (FList(symbols: SymbolInfo list)) =
         let symbols = symbols |> List.sortBy (fun s -> s.Name)
 
         [ yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
           yield "<Symbols>"
-          yield! symbols |> map (fun s -> s.GenerateXml())
+          yield! symbols |> map (fun s -> s.GenerateXml targetType)
           yield "</Symbols>"
           yield "<TempVar Count=\"0\"></TempVar>"
           yield $"</{varType}>" ]
         |> String.concat "\r\n"
 
-    let generateLocalSymbolsXml symbols =
-        generateSymbolVarDefinitionXml "LocalVar" symbols
+    let generateLocalSymbolsXml (targetType: RuntimeTargetType) symbols =
+        generateSymbolVarDefinitionXml targetType "LocalVar" symbols
 
-    let generateGlobalSymbolsXml symbols =
-        generateSymbolVarDefinitionXml "GlobalVariable" symbols
+    let generateGlobalSymbolsXml (targetType: RuntimeTargetType) symbols =
+        generateSymbolVarDefinitionXml targetType "GlobalVariable" symbols

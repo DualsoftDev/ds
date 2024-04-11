@@ -633,9 +633,9 @@ module internal rec Command =
     /// - expr 이 None 이면 그리지 않는다.
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rung (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : CoordinatedXmlElement =
+    let rung (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : CoordinatedXmlElement =
         let expr =
-            if RuntimeDS.Target = XGI || expr.IsSome || cmdExp.IsNone then
+            if prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone then
                 expr
             else
                 match cmdExp.Value with
@@ -668,10 +668,10 @@ module internal rec Command =
                         | CoilCmd _cc -> drawCoil (nx - 1, y) cmdExp
                         | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
                             let drawCommand =
-                                match RuntimeDS.Target with
+                                match prjParam.TargetType with
                                 | XGI -> drawCommandXgi
                                 | XGK -> drawCommandXgk
-                                | _ -> failwithlog $"Unknown Target: {RuntimeDS.Target}"
+                                | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
                             drawCommand (nx, y) cmdExp
 
                     let cmdXmls =

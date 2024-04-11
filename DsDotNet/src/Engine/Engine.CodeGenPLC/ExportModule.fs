@@ -102,6 +102,7 @@ module ExportModule =
             let isAddRungComment = IsDebugVersion || isInUnitTest()
             tracefn $"------------------- isAddRungComment: {isAddRungComment}"
             { defaultXgxProjectParams with
+                TargetType = plcType
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
@@ -118,7 +119,7 @@ module ExportModule =
 
     let exportXMLforLSPLC (plcType:RuntimeTargetType, system: DsSystem, path: string, existingLSISprj) =
         assert(plcType.IsOneOf(XGI, XGK))
-        RuntimeDS.Target <- plcType
+        // RuntimeDS.Target <- plcType  // xxx 
         let globalStorage = new Storages()
         let localStorage = new Storages()
         let pous = CpuLoaderExt.LoadStatements(system, globalStorage)

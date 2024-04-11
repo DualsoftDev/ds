@@ -46,7 +46,7 @@ module XgiExportModule =
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let internal generateRungs (prologComment: string) (prjParam: XgxProjectParams) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
         let xmlRung (expr: FlatExpression option) xgiCommand y : RungGenerationInfo =
-            let { Coordinate = c; Xml = xml } = rung (0, y) expr xgiCommand
+            let { Coordinate = c; Xml = xml } = rung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
 
             { Xmls = [ $"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>" ]
@@ -274,12 +274,13 @@ module XgiExportModule =
 
         member private x.GetTemplateXmlDoc() =
             x.ExistingLSISprj |> Option.map XmlDocument.loadFromFile
-            |? getTemplateXgxXmlDoc ()
+            |? getTemplateXgxXmlDoc x.TargetType
 
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
 
         member x.GenerateXmlDocument() : XmlDocument =
             let { ProjectName = projName
+                  TargetType = targetType
                   ProjectComment = projComment
                   GlobalStorages = globalStorages
                   EnableXmlComment = enableXmlComment
@@ -345,7 +346,7 @@ module XgiExportModule =
             (* Global variables 삽입 *)
             do
                 let xnXGlobalVariable =
-                    match RuntimeDS.Target with
+                    match targetType with
                     | XGI -> "GlobalVariable"
                     | XGK -> "VariableComment"
                     | _ -> failwithlog "Not supported plc type"
@@ -413,10 +414,10 @@ module XgiExportModule =
 
                 let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
                 let xnCountConainer =
-                    match RuntimeDS.Target with
+                    match targetType with
                     | XGI -> xnGlobalVar
                     | XGK -> xnGlobalVarSymbols
-                    | _ -> failwithlog $"Unknown Target: {RuntimeDS.Target}"
+                    | _ -> failwithlog $"Unknown Target: {targetType}"
                 xnCountConainer.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
 
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()

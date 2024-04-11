@@ -45,7 +45,7 @@ module internal XgiSymbolsModule =
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
         if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
 
-        if RuntimeDS.Target = XGI 
+        if prjParams.TargetType = XGI 
             && t.Address.IsNonNull() 
             && t.Address <> TextAddrEmpty 
             && not(t.Address.StartsWith("%"))
@@ -199,7 +199,7 @@ module internal XgiSymbolsModule =
             [ yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR) localStorages
               yield! storagesToSymbolInfos prjParams (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
 
-        XGITag.generateLocalSymbolsXml symbolInfos
+        XGITag.generateLocalSymbolsXml prjParams.TargetType symbolInfos
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
@@ -220,4 +220,4 @@ module internal XgiSymbolsModule =
             | Some(Error err) -> failwith err
             | _ -> ()
 
-        XGITag.generateGlobalSymbolsXml symbolInfos
+        XGITag.generateGlobalSymbolsXml prjParams.TargetType symbolInfos

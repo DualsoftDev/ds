@@ -21,28 +21,30 @@ module POUParametersModule =
             CommentedStatements: CommentedStatement list
         }
 
-    type XgxProjectParams =
-        { ProjectName: string
-          ProjectComment: string
-          GlobalStorages: Storages
-          ExistingLSISprj: string option
-          POUs: XgxPOUParams list
-          MemoryAllocatorSpec: PLCMemoryAllocatorSpec
+    type XgxProjectParams = {
+        TargetType: RuntimeTargetType
+        ProjectName: string
+        ProjectComment: string
+        GlobalStorages: Storages
+        ExistingLSISprj: string option
+        POUs: XgxPOUParams list
+        MemoryAllocatorSpec: PLCMemoryAllocatorSpec
 
-          EnableXmlComment: bool
-          AppendDebugInfoToRungComment: bool
-          RungCounter : (unit -> int) option
-        }
+        EnableXmlComment: bool
+        AppendDebugInfoToRungComment: bool
+        RungCounter : (unit -> int) option
+    }
 
-    let defaultXgxProjectParams =
-        { ProjectName = ""
-          ProjectComment = ""
-          GlobalStorages = Storages()
-          ExistingLSISprj = None
-          POUs = []
-          MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 640K M memory 영역
-          //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
-          EnableXmlComment = false
-          AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
-          RungCounter = None
-        }
+    let defaultXgxProjectParams = {
+        TargetType = XGI
+        ProjectName = ""
+        ProjectComment = ""
+        GlobalStorages = Storages()
+        ExistingLSISprj = None
+        POUs = []
+        MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 640K M memory 영역
+        //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
+        EnableXmlComment = false
+        AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
+        RungCounter = None
+    }

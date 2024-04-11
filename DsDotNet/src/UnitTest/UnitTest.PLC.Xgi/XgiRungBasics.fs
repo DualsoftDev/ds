@@ -15,18 +15,18 @@ type XgiRungTest() =
     [<Test>]
     member __.``Prolog comment test``() =
         let rungsXml = $"""<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>"""
-        let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
     [<Test>]
     member __.``Generate simplest program test``() =
-        let xml = wrapWithXml simplestProgramXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI simplestProgramXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
 
     [<Test>]
     member __.``Generate simplest with local variables test``() =
-        let xml = wrapWithXml simplestProgramXml simpleSymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI simplestProgramXml simpleSymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
 
@@ -53,7 +53,7 @@ type XgiRungTest() =
 </GlobalVariable>
 """
 
-        let xml = wrapWithXml simplestProgramXml simpleSymbolsLocalXml symbolsGlobalXml None
+        let xml = wrapWithXml XGI simplestProgramXml simpleSymbolsLocalXml symbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
         ()
 
@@ -65,11 +65,11 @@ type XgiRungTest() =
         let symbolInfo: SymbolInfo =
             { defaultSymbolInfo with Name=t.Name; Type="BOOL"; Address=t.Address; Device="I"; }
 
-        let symbolInfoXml = symbolInfo.GenerateXml()
+        let symbolInfoXml = symbolInfo.GenerateXml XGI
         symbolInfoXml =~= """<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
 	</Symbol>"""
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml [ symbolInfo ]
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml XGI [ symbolInfo ]
 
         symbolsLocalXml =~= """<LocalVar Version="Ver 1.0" Count="1">
 <Symbols>
@@ -92,7 +92,7 @@ type XgiRungTest() =
 
                 { defaultSymbolInfo with Name=q.Name; Type=plcType; Address=q.Address; Device="Q"; Kind=kindVar; }
             ]
-        let localSymbolsXml = XGITag.generateLocalSymbolsXml symbolInfos
+        let localSymbolsXml = XGITag.generateLocalSymbolsXml XGI symbolInfos
         iTags, q, localSymbolsXml
 
 
@@ -129,7 +129,7 @@ type XgiRungTest() =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
 
@@ -166,7 +166,7 @@ type XgiRungTest() =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
 
@@ -203,7 +203,7 @@ type XgiRungTest() =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
 
@@ -246,7 +246,7 @@ type XgiRungTest() =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
     [<Test>]
@@ -284,5 +284,5 @@ type XgiRungTest() =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml

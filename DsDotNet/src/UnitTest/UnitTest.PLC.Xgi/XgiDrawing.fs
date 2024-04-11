@@ -58,7 +58,7 @@ type XgiDrawingTest() =
 </Rung>
 
 """
-        let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
 
@@ -87,7 +87,7 @@ type XgiDrawingTest() =
             ] |> String.concat "\r\n"
 
 
-        let xml = wrapWithXml rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 
     [<Test>]
@@ -189,9 +189,9 @@ type XgiDrawingTest() =
             XGITag.createSymbolInfo "Q"   "Q"   "INT"  kind intInitValue
         ]
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml symbolInfos
+        let symbolsLocalXml = XGITag.generateLocalSymbolsXml XGI symbolInfos
 
 
-        let xml = wrapWithXml rungsXml symbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml XGI rungsXml symbolsLocalXml emptySymbolsGlobalXml None
         saveTestResult (getFuncName ()) xml
 

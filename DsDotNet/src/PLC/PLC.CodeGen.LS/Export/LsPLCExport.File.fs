@@ -45,8 +45,8 @@ module internal XgiFile =
     //  static member CPUs      = [|"XGI-CPUE"; "XGI-CPUH"; "XGI-CPUS"; "XGI-CPUS/P"; "XGI-CPUU"; "XGI-CPUU/D"; "XGI-CPUUN" |]
     //static member CPUsID    = [|"106"     ; "102"     ; "104"     ; "110"       ; "100"     ; "107"       ; "111"       |]
     /// Template XGI XML 문자열을 반환
-    let getTemplateXgxXml () =
-        match RuntimeDS.Target with
+    let getTemplateXgxXml (targetType: RuntimeTargetType) =
+        match targetType with
         | XGI -> "xgi-4.5.2.template.xml"
         | XGK -> "XGK-CPUUN-4.77.99.1.template.xml"
         | _ -> failwithlog "Not supported plc type"
@@ -63,10 +63,10 @@ module internal XgiFile =
          symbolsLocal =        "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
-    let wrapWithXml (rungs: XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj: string option) =
+    let wrapWithXml (targetType: RuntimeTargetType) (rungs: XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj: string option) =
         let xdoc =
             existingLSISprj |> Option.map XmlDocument.loadFromFile
-            |? getTemplateXgxXmlDoc ()
+            |? getTemplateXgxXmlDoc targetType
 
         let pouName = "DsLogic"
 

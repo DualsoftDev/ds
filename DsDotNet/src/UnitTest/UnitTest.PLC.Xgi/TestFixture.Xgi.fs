@@ -63,6 +63,7 @@ module XgiFixtures =
         }
         let projParams:XgxProjectParams = {
             defaultXgxProjectParams with
+                TargetType = XGI    // xxx
                 ProjectName = projName
                 GlobalStorages = globalStorages
                 POUs = [pouParams]

@@ -348,7 +348,7 @@ module XgxExpressionConvertorModule =
     ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성
     /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
     let private mergeArithmaticOperator
-        (prjParam: XgxProjectParams)
+        (_prjParam: XgxProjectParams)
         (augmentParams: AugmentedConvertorParams)
         (outputStore: IStorage option)
       : MergeArithmaticResult =
@@ -425,7 +425,7 @@ module XgxExpressionConvertorModule =
 
                 let folder (z: IExpression list list * IExpression list) (e: IExpression) =
                     let built, building = z
-                    let flatExp = e.Flatten() :?> FlatExpression
+                    let _flatExp = e.Flatten() :?> FlatExpression
                     let spanX = e.Flatten() :?> FlatExpression |> precalculateSpan |> fst
 
                     let max, remaining =

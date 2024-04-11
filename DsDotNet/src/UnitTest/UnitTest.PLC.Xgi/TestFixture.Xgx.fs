@@ -44,10 +44,8 @@ module XgiFixtures =
     let generateXmlForTest projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
 
-
         verify (RuntimeDS.Target = TestRuntimeTargetType)
 
-        let prjParam = defaultXgxProjectParams
         let globalStorages = storages
         let localStorages = Storages()
 
@@ -62,7 +60,7 @@ module XgiFixtures =
             GlobalStorages = globalStorages
             CommentedStatements = commentedStatements
         }
-        let projParams:XgxProjectParams = {
+        let prjParam:XgxProjectParams = {
             defaultXgxProjectParams with
                 TargetType = TestRuntimeTargetType    // xxx
                 ProjectName = projName
@@ -71,7 +69,7 @@ module XgiFixtures =
                 RungCounter = counterGenerator 0 |> Some
         }
 
-        projParams.GenerateXmlString()
+        prjParam.GenerateXmlString()
 
 
 

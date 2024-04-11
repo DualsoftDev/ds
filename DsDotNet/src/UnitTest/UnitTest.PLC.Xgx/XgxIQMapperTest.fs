@@ -53,13 +53,9 @@ type IQMapperTest(xgx:RuntimeTargetType) =
 
 type XgiIQMapperTest() =
     inherit IQMapperTest(XGI)
-
-    [<Test>]
-    member x.``Dummy IQ Map test`` () = base.``Dummy IQ Map test``()
+    [<Test>] member __.``Dummy IQ Map test`` () = base.``Dummy IQ Map test``()
 
 
 type XgkIQMapperTest() =
     inherit IQMapperTest(XGK)
-
-    [<Test>]
-    member x.``Dummy IQ Map test`` () = base.``Dummy IQ Map test``()
+    [<Test>] member __.``Dummy IQ Map test`` () = base.``Dummy IQ Map test``()

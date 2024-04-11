@@ -283,36 +283,13 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 type XgiRungTest() =
     inherit XgxRungTest(XGI)
 
-    [<Test>]
-    member x.``Prolog comment test``() = base.``Prolog comment test``()
-
-    [<Test>]
-    member x.``Generate simplest program test``() = base.``Generate simplest program test``()
-
-
-    [<Test>]
-    member x.``Generate simplest with local variables test``() = base.``Generate simplest with local variables test``()
-
-    [<Test>]
-    member x.``Generate simplest with local, global variables test``() = base.``Generate simplest with local, global variables test``()
-
-    [<Test>]
-    member __.``Generate local variables test``() = base.``Generate local variables test``()
-
-    [<Test>]
-    member x.``Generate ANDsMax(=31) variables test``() = base.``Generate ANDsMax(=31) variables test``()
-
-
-    [<Test>]
-    member x.``Generate ANDs30 variables test``() = base.``Generate ANDs30 variables test``()
-
-
-    [<Test>]
-    member x.``Generate ANDs29 variables test``() = base.``Generate ANDs29 variables test``()
-
-
-    [<Test>]
-    member x.``Generate OR2 variables test``() = base.``Generate OR2 variables test``()
-
-    [<Test>]
-    member x.``Generate ORs variables test``() = base.``Generate ORs variables test``()
+    [<Test>] member __.``Prolog comment test``() = base.``Prolog comment test``()
+    [<Test>] member __.``Generate simplest program test``() = base.``Generate simplest program test``()
+    [<Test>] member __.``Generate simplest with local variables test``() = base.``Generate simplest with local variables test``()
+    [<Test>] member __.``Generate simplest with local, global variables test``() = base.``Generate simplest with local, global variables test``()
+    [<Test>] member __.``Generate local variables test``() = base.``Generate local variables test``()
+    [<Test>] member __.``Generate ANDsMax(=31) variables test``() = base.``Generate ANDsMax(=31) variables test``()
+    [<Test>] member __.``Generate ANDs30 variables test``() = base.``Generate ANDs30 variables test``()
+    [<Test>] member __.``Generate ANDs29 variables test``() = base.``Generate ANDs29 variables test``()
+    [<Test>] member __.``Generate OR2 variables test``() = base.``Generate OR2 variables test``()
+    [<Test>] member __.``Generate ORs variables test``() = base.``Generate ORs variables test``()

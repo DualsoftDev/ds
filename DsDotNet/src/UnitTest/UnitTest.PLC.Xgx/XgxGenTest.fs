@@ -461,74 +461,29 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
 
 
-[<Collection("SerialXgxGenerationTest")>]
+//[<Collection("SerialXgxGenerationTest")>]
 type XgiGenerationTest() =
     inherit XgxGenerationTest(XGI)
 
-    [<Test>]
-    member x.``OR simple test`` () = base.``OR simple test`` ()
-
-    [<Test>]
-    member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
-
-
-    [<Test>]
-    member x.``And Many test`` () = base.``And Many test`` ()
-
-    [<Test>]
-    member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
-
-    [<Test>]
-    member x.``And Huge test`` () = base.``And Huge test`` ()
-
-    [<Test>]
-    member x.``And Huge test2`` () = base.``And Huge test2`` ()
-
-    [<Test>]
-    member x.``And Huge test 3`` () = base.``And Huge test 3`` ()
-
-    [<Test>]
-    member x.``And Huge test 4`` () = base.``And Huge test 4`` ()
-
-    [<Test>]
-    member x.``OR Many test`` () = base.``OR Many test`` ()
-
-    [<Test>]
-    member x.``OR Huge test`` () = base.``OR Huge test`` ()
-
-    [<Test>]
-    member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
-
-    [<Test>]
-    member x.``OR Block test`` () = base.``OR Block test`` ()
-
-    [<Test>]
-    member x.``OR Block test2`` () = base.``OR Block test2`` ()
-
-    [<Test>]
-    member x.``OR variable length test`` () = base.``OR variable length test`` ()
-
-
-    [<Test>]
-    member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
-
-    [<Test>]
-    member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
-
-    [<Test>]
-    member x.``Negation1 test`` () = base.``Negation1 test`` ()
-
-    [<Test>]
-    member x.``Negation2 test`` () = base.``Negation2 test`` ()
-
-
-    [<Test>]
-    member x.``Negation3 test`` () = base.``Negation3 test`` ()
-
-    [<Test>]
-    member x.``Add test`` () =  base.``Add test`` ()
-
-
-    [<Test>]
-    member x.``COPY test`` () = base.``COPY test`` ()
+    [<Test>] member x.``OR simple test`` () = base.``OR simple test`` ()
+    [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
+    [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
+    [<Test>] member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
+    [<Test>] member x.``And Huge test`` () = base.``And Huge test`` ()
+    [<Test>] member x.``And Huge test2`` () = base.``And Huge test2`` ()
+    [<Test>] member x.``And Huge test 3`` () = base.``And Huge test 3`` ()
+    [<Test>] member x.``And Huge test 4`` () = base.``And Huge test 4`` ()
+    [<Test>] member x.``OR Many test`` () = base.``OR Many test`` ()
+    [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
+    [<Test>] member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
+    [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
+    [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
+    [<Test>] member x.``OR variable length test`` () = base.``OR variable length test`` ()
+    [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
+    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
+    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
+    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
+    [<Test>] member x.``Add test`` () =  base.``Add test`` ()
+    [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
 

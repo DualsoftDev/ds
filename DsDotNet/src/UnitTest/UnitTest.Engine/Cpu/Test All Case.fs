@@ -2,23 +2,18 @@ namespace T.CPU
 open Dual.UnitTest.Common.FS
 
 open System.IO
-open System.Linq
 open NUnit.Framework
 
 open T
 open Engine.Core
 open Dual.Common.Core.FS
-open Engine.CodeGenCPU
 open Engine.CodeGenPLC
-open PLC.CodeGen.LS
-open System
-open Engine.Import.Office
 
 type TestAllCase() =
     inherit EngineTestBaseClass()
 
-    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/XgiXmls/{testName}.xml")
-    let myExistIO  = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/XgiXmls/Templates/myTemplateExistIO.xml")
+    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/Xgi/Xmls/{testName}.xml")
+    let myExistIO  = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/Xgi/Xmls/Templates/myTemplateExistIO.xml")
 
     let testAddressSetting (sys:DsSystem) =
         let mutable index = 0

@@ -198,33 +198,12 @@ type XgiTimerTest() =
     inherit XgxTimerTest(XGI)
 
 
-    [<Test>]
-    member x.``Timer test`` () = base.``Timer test``()
-
-    [<Test>]
-    member x.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
-
-
-    [<Test>]
-    member x.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
-
-    [<Test>]
-    member x.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
-
-
-    [<Test>]
-    member x.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
-
-
-    [<Test>]
-    member x.``TIMER= Many And, OR RungIn Condition test`` () = base.``TIMER= Many And, OR RungIn Condition test``()
-
-    [<Test>]
-    member x.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
-
-
-    [<Test>]
-    member x.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
-
-    [<Test>]
-    member x.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()
+    [<Test>] member __.``Timer test`` () = base.``Timer test``()
+    [<Test>] member __.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many And, OR RungIn Condition test`` () = base.``TIMER= Many And, OR RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
+    [<Test>] member __.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
+    [<Test>] member __.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()

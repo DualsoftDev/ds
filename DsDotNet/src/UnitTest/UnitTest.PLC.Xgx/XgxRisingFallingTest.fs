@@ -31,8 +31,6 @@ type XgxRisingFallingTest(xgx:RuntimeTargetType) =
  
 type XgiRisingFallingTest() =
     inherit XgxRisingFallingTest(XGI)
-
-    [<Test>]
-    member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
+    [<Test>] member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
 
      

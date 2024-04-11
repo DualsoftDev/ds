@@ -195,18 +195,10 @@ type XgxDrawingTest(xgx:RuntimeTargetType) =
 
 type XgiDrawingTest() =
     inherit XgxDrawingTest(XGI)
-
-    [<Test>]
-    member x.``Box drawing test``() = base.``Box drawing test``()
-
-    [<Test>]
-    member x.``Vertical line drawing test``() = base.``Vertical line drawing test``()
-
-    [<Test>]
-    member __.``ADD function details test``() = base.``ADD function details test``()
-
-    [<Test>]
-    member x.``ADD function drawing test``() = base.``ADD function drawing test``()
+    [<Test>] member x.``Box drawing test``() = base.``Box drawing test``()
+    [<Test>] member x.``Vertical line drawing test``() = base.``Vertical line drawing test``()
+    [<Test>] member __.``ADD function details test``() = base.``ADD function details test``()
+    [<Test>] member x.``ADD function drawing test``() = base.``ADD function drawing test``()
 
 
 

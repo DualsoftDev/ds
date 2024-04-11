@@ -100,14 +100,7 @@ type XgxLadderElementTest(xgx:RuntimeTargetType) =
 type XgiLadderElementTest() =
     inherit XgxLadderElementTest(XGI)
 
-    [<Test>]
-    member x.``Local var test``() = base.``Local var test``()
-
-    [<Test>]
-    member x.``Local var with init test`` () = base.``Local var with init test``()
-
-    [<Test>]
-    member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
-
-    [<Test>]
-    member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()
+    [<Test>] member x.``Local var test``() = base.``Local var test``()
+    [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
+    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
+    [<Test>] member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()

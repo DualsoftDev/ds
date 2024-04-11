@@ -259,26 +259,11 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
 type XgiPOUTest() =
     inherit XgxPOUTest(XGI)
 
-    [<Test>]
-    member x.``POU1 test`` () = base.``POU1 test``()
-
-    [<Test>]
-    member x.``Project test`` () = base.``Project test``()
-
-    [<Test>]
-    member x.``Project with global test`` () = base.``Project with global test``()
-
-    [<Test>]
-    member x.``Project with existing project test`` () = base.``Project with existing project test``()
-
-    [<Test>]
-    member x.``Validation= Existing project global variable memory test`` () = base.``Validation= Existing project global variable memory test``()
-
-    [<Test>]
-    member x.``Validation= Existing project global variable name collide exactly test`` () = base.``Validation= Existing project global variable name collide exactly test``()
-
-    [<Test>]
-    member x.``Validation= Existing project global variable name collide ignoring case test`` () = base.``Validation= Existing project global variable name collide ignoring case test``()
-
-    [<Test>]
-    member x.``Validation= Existing project duplicated POU name test`` () = base.``Validation= Existing project duplicated POU name test``()
+    [<Test>] member __.``POU1 test`` () = base.``POU1 test``()
+    [<Test>] member __.``Project test`` () = base.``Project test``()
+    [<Test>] member __.``Project with global test`` () = base.``Project with global test``()
+    [<Test>] member __.``Project with existing project test`` () = base.``Project with existing project test``()
+    [<Test>] member __.``Validation= Existing project global variable memory test`` () = base.``Validation= Existing project global variable memory test``()
+    [<Test>] member __.``Validation= Existing project global variable name collide exactly test`` () = base.``Validation= Existing project global variable name collide exactly test``()
+    [<Test>] member __.``Validation= Existing project global variable name collide ignoring case test`` () = base.``Validation= Existing project global variable name collide ignoring case test``()
+    [<Test>] member __.``Validation= Existing project duplicated POU name test`` () = base.``Validation= Existing project duplicated POU name test``()

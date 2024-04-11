@@ -14,16 +14,16 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 
     member x.``Prolog comment test``() =
         let rungsXml = $"""<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>"""
-        let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member x.``Generate simplest program test``() =
-        let xml = wrapWithXml XGI simplestProgramXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx simplestProgramXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
     member x.``Generate simplest with local variables test``() =
-        let xml = wrapWithXml XGI simplestProgramXml simpleSymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx simplestProgramXml simpleSymbolsLocalXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -49,7 +49,7 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </GlobalVariable>
 """
 
-        let xml = wrapWithXml XGI simplestProgramXml simpleSymbolsLocalXml symbolsGlobalXml None
+        let xml = wrapWithXml xgx simplestProgramXml simpleSymbolsLocalXml symbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
         ()
 
@@ -123,7 +123,7 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungs localSymbolsXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -159,7 +159,7 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungs localSymbolsXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -195,7 +195,7 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungs localSymbolsXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -237,7 +237,7 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungs localSymbolsXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member x.``Generate ORs variables test``() =
@@ -274,7 +274,7 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml XGI rungs localSymbolsXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungs localSymbolsXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -282,7 +282,20 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 
 type XgiRungTest() =
     inherit XgxRungTest(XGI)
+    [<Test>] member __.``Prolog comment test``() = base.``Prolog comment test``()
+    [<Test>] member __.``Generate simplest program test``() = base.``Generate simplest program test``()
+    [<Test>] member __.``Generate simplest with local variables test``() = base.``Generate simplest with local variables test``()
+    [<Test>] member __.``Generate simplest with local, global variables test``() = base.``Generate simplest with local, global variables test``()
+    [<Test>] member __.``Generate local variables test``() = base.``Generate local variables test``()
+    [<Test>] member __.``Generate ANDsMax(=31) variables test``() = base.``Generate ANDsMax(=31) variables test``()
+    [<Test>] member __.``Generate ANDs30 variables test``() = base.``Generate ANDs30 variables test``()
+    [<Test>] member __.``Generate ANDs29 variables test``() = base.``Generate ANDs29 variables test``()
+    [<Test>] member __.``Generate OR2 variables test``() = base.``Generate OR2 variables test``()
+    [<Test>] member __.``Generate ORs variables test``() = base.``Generate ORs variables test``()
 
+
+type XgkRungTest() =
+    inherit XgxRungTest(XGK)
     [<Test>] member __.``Prolog comment test``() = base.``Prolog comment test``()
     [<Test>] member __.``Generate simplest program test``() = base.``Generate simplest program test``()
     [<Test>] member __.``Generate simplest with local variables test``() = base.``Generate simplest with local variables test``()

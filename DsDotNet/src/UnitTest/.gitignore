@@ -1,1 +1,4 @@
 UnitTest.Model/ImportOfficeExample/**/*.ds
+**/*.state
+UnitTest.PLC.Xgx/Xgi/Xmls/*.xml
+UnitTest.PLC.Xgx/Xgk/Xmls/*.xml

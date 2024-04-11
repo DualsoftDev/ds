@@ -57,7 +57,7 @@ type XgxDrawingTest(xgx:RuntimeTargetType) =
 </Rung>
 
 """
-        let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -85,7 +85,7 @@ type XgxDrawingTest(xgx:RuntimeTargetType) =
             ] |> String.concat "\r\n"
 
 
-        let xml = wrapWithXml XGI rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungsXml emptySymbolsLocalXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member __.``ADD function details test``() =
@@ -188,7 +188,7 @@ type XgxDrawingTest(xgx:RuntimeTargetType) =
         let symbolsLocalXml = XGITag.generateLocalSymbolsXml XGI symbolInfos
 
 
-        let xml = wrapWithXml XGI rungsXml symbolsLocalXml emptySymbolsGlobalXml None
+        let xml = wrapWithXml xgx rungsXml symbolsLocalXml emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 

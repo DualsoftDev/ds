@@ -130,18 +130,30 @@ module internal XgiFile =
          * Global variables 삽입
          *)
         let xnGlobalVar =
-            xdoc.SelectSingleNode("//Configurations/Configuration/GlobalVariables/GlobalVariable")
+            let xnXGlobalVariable =
+                match targetType with
+                | XGI -> "GlobalVariable"
+                | XGK -> "VariableComment"
+                | _ -> failwithlog "Not supported plc type"
+
+            xdoc.SelectSingleNode($"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}")
+
+        let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+        let xnCountConainer =
+            match targetType with
+            | XGI -> xnGlobalVar
+            | XGK -> xnGlobalVarSymbols
+            | _ -> failwithlog $"Unknown Target: {targetType}"
 
         let countExistingGlobal =
-            xnGlobalVar.Attributes.["Count"].Value |> System.Int32.Parse
+            xnCountConainer.Attributes.["Count"].Value |> System.Int32.Parse
 
         let _globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
             let neoGlobals = symbolsGlobal |> XmlNode.ofString
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
 
-            xnGlobalVar.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
-            let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+            xnCountConainer.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
 
             neoGlobals.SelectNodes(".//Symbols/Symbol").ToEnumerables()
             |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)

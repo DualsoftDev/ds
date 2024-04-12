@@ -2,6 +2,7 @@ namespace T
 
 open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
+open Engine.Core.RuntimeGeneratorModule
 
 
 [<AutoOpen>]
@@ -10,6 +11,7 @@ module XgxTestCommonModule =
 
     let emptySymbolsGlobalXml =
         """<GlobalVariable Version="Ver 1.0" Count="16"></GlobalVariable>"""
+
     (*
         ElementType : HorzLineMode = 1, MultiHorzLineMode = 2, ContactMode = 6, CoilMode = 14
         Coordinate :
@@ -35,25 +37,15 @@ module XgxTestCommonModule =
             <Element ElementType="{FBMode}" Coordinate="{coord(31, 2)}" Param="END">END</Element>
         </Rung>
 """
-
-    let simpleSymbolsLocalXml =
-        """
-<LocalVar Version="Ver 1.0" Count="2">
-<Symbols>
-    <Symbol Name="myBit00" Kind="1" Type="BOOL" Comment="FAKECOMMENT" Device="I" Address="%IX0.0.0" State="0">
-        <MemberAddresses/>
-        <MemberRetains/>
-        <MemberInitValues/>
-        <MemberComments/>
-    </Symbol>
-    <Symbol Name="myBit01" Kind="1" Type="BOOL" Comment="FAKECOMMENT" Device="I" Address="%IX0.0.1" State="0">
-        <MemberAddresses/>
-        <MemberRetains/>
-        <MemberInitValues/>
-        <MemberComments/>
-    </Symbol>
-</Symbols>
-<TempVar Count="0"></TempVar>
-</LocalVar>
-"""
+    
+    let getSimpleLocalSymbolInfos(xgx:RuntimeTargetType): SymbolInfo list =
+        let device =
+            match xgx with
+            | XGI -> "I"
+            | XGK -> "P"
+            | _ -> failwith "Not supported plc type"
+        [
+            { Name="myBit00"; Kind=1; Type="BOOL"; Comment="FAKECOMMENT"; Device=device; Address="%IX0.0.0"; AddressIEC="%IX0.0.0"; InitValue=null; State=0; DevicePos=0 }
+            { Name="myBit01"; Kind=1; Type="BOOL"; Comment="FAKECOMMENT"; Device=device; Address="%IX0.0.1"; AddressIEC="%IX0.0.1"; InitValue=null; State=0; DevicePos=1 }
+        ]
 

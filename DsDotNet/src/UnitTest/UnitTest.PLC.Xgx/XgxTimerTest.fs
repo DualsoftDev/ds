@@ -7,6 +7,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
+open Xunit
 
 
 
@@ -194,6 +195,7 @@ type XgxTimerTest(xgx:RuntimeTargetType) =
 
 
 
+[<Collection("SeparatedTestGroup")>]
 type XgiTimerTest() =
     inherit XgxTimerTest(XGI)
     [<Test>] member __.``Timer test`` () = base.``Timer test``()
@@ -206,6 +208,7 @@ type XgiTimerTest() =
     [<Test>] member __.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
     [<Test>] member __.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()
 
+[<Collection("SeparatedTestGroup")>]
 type XgkTimerTest() =
     inherit XgxTimerTest(XGK)
     [<Test>] member __.``Timer test`` () = base.``Timer test``()

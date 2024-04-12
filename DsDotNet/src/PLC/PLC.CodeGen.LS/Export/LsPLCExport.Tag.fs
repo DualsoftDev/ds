@@ -165,7 +165,7 @@ module XGITag = //IEC61131Tag =
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
     let private generateSymbolVarDefinitionXml (targetType: RuntimeTargetType) (varType: string) (FList(symbols: SymbolInfo list)) =
-        let symbols = symbols |> List.sortBy (fun s -> s.Name)
+        let symbols:SymbolInfo list = symbols |> List.sortBy (fun s -> s.Name)
 
         [ yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
           yield "<Symbols>"

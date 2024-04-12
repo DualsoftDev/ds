@@ -40,11 +40,9 @@ type XgxLadderElementTest(xgx:RuntimeTargetType) =
                 XGITag.createSymbolInfo name comment plcType (int Variable.Kind.VAR)  initValueHolder
         ]
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml TestRuntimeTargetType symbolInfos
-
         let rungsXml = ""   //generateRungs prologComments commentedStatements
         let symbolsGlobalXml = """<GlobalVariable Version="Ver 1.0" Count="0"/>"""
-        let xml = wrapWithXml TestRuntimeTargetType rungsXml symbolsLocalXml symbolsGlobalXml None
+        let xml = wrapWithXml TestRuntimeTargetType rungsXml symbolInfos symbolsGlobalXml None
         x.saveTestResult (getFuncName()) xml
 
 

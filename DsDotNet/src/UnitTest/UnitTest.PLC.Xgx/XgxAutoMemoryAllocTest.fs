@@ -55,3 +55,8 @@ type AutoMemoryAllocTest(xgx:RuntimeTargetType) =
 type XgiAutoMemoryAllocTest() =
     inherit AutoMemoryAllocTest(XGI)
     [<Test>] member __.``Auto memory allocation test`` () = base.``Auto memory allocation test``()
+
+type XgkAutoMemoryAllocTest() =
+    inherit AutoMemoryAllocTest(XGK)
+    [<Test>] member __.``Auto memory allocation test`` () = base.``Auto memory allocation test``()
+

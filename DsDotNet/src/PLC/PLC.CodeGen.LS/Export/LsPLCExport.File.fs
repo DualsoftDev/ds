@@ -63,7 +63,7 @@ module internal XgiFile =
          symbolsLocal =        "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
-    let wrapWithXml (targetType: RuntimeTargetType) (rungs: XmlOutput) symbolsLocal symbolsGlobal (existingLSISprj: string option) =
+    let wrapWithXml (targetType: RuntimeTargetType) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
         let xdoc =
             existingLSISprj |> Option.map XmlDocument.loadFromFile
             |? getTemplateXgxXmlDoc targetType
@@ -120,13 +120,6 @@ module internal XgiFile =
             onlineUploadData.InsertBefore r |> ignore
 
         (*
-         * Local variables 삽입
-         *)
-        let programBody = xnLdRoutine.ParentNode
-        let localSymbols = symbolsLocal |> XmlNode.ofString
-        programBody.InsertAfter localSymbols |> ignore
-
-        (*
          * Global variables 삽입
          *)
         let xnGlobalVar =
@@ -138,7 +131,26 @@ module internal XgiFile =
 
             xdoc.SelectSingleNode($"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}")
 
-        let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+        let xnGlobalVarSymbols =
+            let globalSymbols = xnGlobalVar.GetXmlNode "Symbols"
+            if targetType = XGI then
+                (*
+                 * Local variables 삽입
+                 *)
+                let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml targetType |> XmlNode.ofString
+                let programBody = xnLdRoutine.ParentNode
+                programBody.InsertAfter localSymbols |> ignore
+
+                globalSymbols
+            else
+                for l in localSymbolInfos do
+                    let lxml = l.GenerateXml targetType |> XmlNode.ofString
+                    globalSymbols.AdoptChild(lxml) |> ignore
+                globalSymbols
+
+        //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+
+
         let xnCountConainer =
             match targetType with
             | XGI -> xnGlobalVar

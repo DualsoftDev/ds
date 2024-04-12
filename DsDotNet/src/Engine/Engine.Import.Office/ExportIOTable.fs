@@ -148,8 +148,8 @@ module ExportIOTable =
         let dts = 
             totalRows 
             |> Seq.chunkBySize(IOchunkBySize)
-            |> Seq.map(fun rows->
-                let dt = new System.Data.DataTable($"{sys.Name} Device IO LIST")
+            |> Seq.mapi(fun i rows->
+                let dt = new System.Data.DataTable($"{sys.Name} Device IO LIST {i+1}")
                 addIOColumn dt
                 addRows rows dt
                 dt

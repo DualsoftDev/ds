@@ -54,7 +54,7 @@ module internal XgiFile =
         |> Option.get
 
     /// Template XGI XML 문서 (XDocument) 반환
-    let getTemplateXgxXmlDoc = getTemplateXgxXml >> XmlDocument.fromString
+    let getTemplateXgxXmlDoc = getTemplateXgxXml >> DualXmlDocument.fromString
 
 
     /// rung 및 local var 에 대한 문자열 xml 을 전체 xml project file 에 embedding 시켜 outputPath 파일에 저장한다.
@@ -63,9 +63,11 @@ module internal XgiFile =
          symbolsLocal =        "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
-    let wrapWithXml (targetType: RuntimeTargetType) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
+    let wrapWithXml (prjParam: XgxProjectParams) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
+        assert isInUnitTest()
+        let targetType = prjParam.TargetType
         let xdoc =
-            existingLSISprj |> Option.map XmlDocument.loadFromFile
+            existingLSISprj |> Option.map DualXmlDocument.loadFromFile
             |? getTemplateXgxXmlDoc targetType
 
         let pouName = "DsLogic"
@@ -100,7 +102,7 @@ module internal XgiFile =
 			    </Program>"""
                 taskName
                 pouName
-            |> XmlNode.ofString
+            |> DualXmlNode.ofString
 
 
 
@@ -114,7 +116,7 @@ module internal XgiFile =
         (*
          * Rung 삽입
          *)
-        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> XmlNode.ofString
+        let rungsXml = $"<Rungs>{rungs}</Rungs>" |> DualXmlNode.ofString
 
         for r in rungsXml.GetChildrenNodes() do
             onlineUploadData.InsertBefore r |> ignore
@@ -135,16 +137,16 @@ module internal XgiFile =
             let globalSymbols = xnGlobalVar.GetXmlNode "Symbols"
             if targetType = XGI then
                 (*
-                 * Local variables 삽입
+                 * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
                  *)
-                let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml targetType |> XmlNode.ofString
+                let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml prjParam |> DualXmlNode.ofString
                 let programBody = xnLdRoutine.ParentNode
                 programBody.InsertAfter localSymbols |> ignore
 
                 globalSymbols
             else
                 for l in localSymbolInfos do
-                    let lxml = l.GenerateXml targetType |> XmlNode.ofString
+                    let lxml = l.GenerateXml prjParam |> DualXmlNode.ofString
                     globalSymbols.AdoptChild(lxml) |> ignore
                 globalSymbols
 
@@ -162,7 +164,7 @@ module internal XgiFile =
 
         let _globalSymbolXmls =
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
-            let neoGlobals = symbolsGlobal |> XmlNode.ofString
+            let neoGlobals = symbolsGlobal |> DualXmlNode.ofString
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
 
             xnCountConainer.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)

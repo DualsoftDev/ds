@@ -74,7 +74,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
 
     let createProjectParams(projName):XgxProjectParams = {
         defaultXgxProjectParams with
-            TargetType = TestRuntimeTargetType
+            TargetType = xgx
             ProjectName = projName
             RungCounter = counterGenerator 0 |> Some
             POUs = [pou11.Value; pou12.Value; pou21.Value]
@@ -128,7 +128,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
          *)
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
-        let xdoc = XmlDocument.loadFromFile myTemplate
+        let xdoc = DualXmlDocument.loadFromFile myTemplate
         let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         usedMemoryByteIndices |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
 
@@ -179,7 +179,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
          *)
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
-        let xdoc = XmlDocument.loadFromFile myTemplate
+        let xdoc = DualXmlDocument.loadFromFile myTemplate
         let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
 
@@ -210,7 +210,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
          *)
 
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
-        let xdoc = XmlDocument.loadFromFile myTemplate
+        let xdoc = DualXmlDocument.loadFromFile myTemplate
         let usedMemoryByteIndices = collectUsedMermoryByteIndicesInGlobalSymbols xdoc
         let existingGlobals = collectGlobalSymbols xdoc |> map name
 

@@ -42,7 +42,9 @@ type XgxLadderElementTest(xgx:RuntimeTargetType) =
 
         let rungsXml = ""   //generateRungs prologComments commentedStatements
         let symbolsGlobalXml = """<GlobalVariable Version="Ver 1.0" Count="0"/>"""
-        let xml = wrapWithXml TestRuntimeTargetType rungsXml symbolInfos symbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungsXml symbolInfos symbolsGlobalXml None
         x.saveTestResult (getFuncName()) xml
 
 

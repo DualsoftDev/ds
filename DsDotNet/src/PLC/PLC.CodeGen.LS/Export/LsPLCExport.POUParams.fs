@@ -34,9 +34,6 @@ module POUParametersModule =
         AppendDebugInfoToRungComment: bool
         /// Rung counter 생성기
         RungCounter : (unit -> int) option
-
-        /// 임시 메모리 할당을 위한 counter 생성기
-        MxCounter : (unit -> int) option
     }
 
     let defaultXgxProjectParams = {
@@ -51,5 +48,7 @@ module POUParametersModule =
         EnableXmlComment = false
         AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
         RungCounter = None
-        MxCounter = None
     }
+
+    let getXgxProjectParams (targetType:RuntimeTargetType) (projectName:string) =
+        { defaultXgxProjectParams with ProjectName = projectName; TargetType = targetType }

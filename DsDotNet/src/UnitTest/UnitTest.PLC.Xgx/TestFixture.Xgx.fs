@@ -136,7 +136,6 @@ module XgxFixtures =
                 GlobalStorages = globalStorages
                 POUs = [pouParams]
                 RungCounter = counterGenerator 0 |> Some
-                MxCounter = counterGenerator 0 |> Some
         }
 
         prjParam.GenerateXmlString()

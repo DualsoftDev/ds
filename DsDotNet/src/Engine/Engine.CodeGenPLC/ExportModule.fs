@@ -81,7 +81,7 @@ module ExportModule =
             let autoMemoryAllocationTags =
                 system.TagManager.Storages.Values
                 |> Seq.filter (fun f -> not <| (f :? TimerCounterBaseStruct))
-                |> Seq.filter (fun f -> not <| String.IsNullOrEmpty(f.Address) && f.Address.StartsWith("%M"))
+                |> Seq.filter (fun f -> f.Address.NonNullAny() && f.Address.StartsWith("%M"))
                 |> Array.ofSeq
 
             autoMemoryAllocationTags

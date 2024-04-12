@@ -39,8 +39,8 @@ type AutoMemoryAllocTest(xgx:RuntimeTargetType) =
         let usedByteIndices = [0..9] @ [25..31] @[39;42] @ [120..130]
         let prjParam = {
             defaultXgxProjectParams with
-                TargetType = TestRuntimeTargetType
-                ProjectName = "Dummy IQ Map test"
+                TargetType = xgx
+                ProjectName = getFuncName()
                 GlobalStorages = globalStorages
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedByteIndices)    // 640K M memory 영역
                 POUs = [pouIQMap]

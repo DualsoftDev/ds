@@ -32,6 +32,9 @@ module TagVariableModule =
     [<AbstractClass>]
     [<DebuggerDisplay("{Name}({Value})")>]
     type TypedValueStorage<'T when 'T:equality>(param:StorageCreationParams<'T>) =
+        do
+            ()  // just for debug breakpoint
+
         let {Name=name; Value=initValue; Address=address; Comment=comment; IsGlobal=isGlobal } = param
         let mutable address = if address.IsSome then address.Value else TextAddrEmpty
         let mutable value = initValue

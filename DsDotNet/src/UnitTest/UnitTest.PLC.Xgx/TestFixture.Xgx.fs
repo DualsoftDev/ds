@@ -127,8 +127,4 @@ module XgxFixtures =
             | XGK -> XgkGenerationTestModule.saveTestResult testFunctionName xml
             | _ -> failwith "Not supported runtime target"
 
-        member __.generateXmlForTest =
-            match xgx with
-            | XGI -> generateXmlForTest XGI
-            | XGK -> generateXmlForTest XGK
-            | _ -> failwith "Not supported runtime target"
+        member __.generateXmlForTest = generateXmlForTest xgx

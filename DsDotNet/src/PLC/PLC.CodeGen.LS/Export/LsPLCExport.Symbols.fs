@@ -44,7 +44,8 @@ module internal XgiSymbolsModule =
     let autoAllocatorAdress (t:IStorage) (prjParam: XgxProjectParams) = 
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
-        if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
+        if t.Address = "" then
+            failwithlog $"ERROR. {t.Name} address empty."
 
         if prjParam.TargetType = XGI 
             && t.Address.IsNonNull() 
@@ -53,7 +54,7 @@ module internal XgiSymbolsModule =
         then
             t.Address <- $"%%{t.Address}"
 
-        if t.Address = TextAddrEmpty then
+        else if t.Address = TextAddrEmpty then
             let allocatorFunctions =
                 match prjParam.MemoryAllocatorSpec with
                 | RangeSpec _ -> failwithlog "ERROR.  Should have already been converted to allocator functions."
@@ -79,7 +80,8 @@ module internal XgiSymbolsModule =
                 logWarn $"Something fish: trying to generate auto R address for {t.Name}"
 
             if t.Address = TextAddrEmpty || t.Address = TextSkip then
-                t.Address <- allocator ()
+                let addr:string = allocator()
+                t.Address <- addr
 
     let getXGXTagInfo (address:string) (name:string) targetType =
         let tag = 
@@ -90,9 +92,13 @@ module internal XgiSymbolsModule =
                 failwith $"Invalid tag  targetType {targetType}"
 
         match tag with
-        | Some tag -> address, tag.Device.ToString(), 
-                      if tag.DataType = PLCHwModel.DataType.Bit 
-                      then tag.BitOffset else tag.ByteOffset
+        | Some tag ->
+            let offset = 
+                if tag.DataType = PLCHwModel.DataType.Bit then
+                    tag.BitOffset
+                else
+                    tag.ByteOffset
+            address, tag.Device.ToString(), offset
         | _ -> 
             if address = TextAddrEmpty then
                 "", "", -1
@@ -100,10 +106,10 @@ module internal XgiSymbolsModule =
                 failwith $"Invalid tag address {address} for {name}"
         
 
-    let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
+    let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo =
 
 
-        match xgiSymbol with
+        match xgxSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
             autoAllocatorAdress t prjParam
@@ -133,6 +139,14 @@ module internal XgiSymbolsModule =
                
                 autoAllocatorAdress t prjParam
                 let address, device, devPos = getXGXTagInfo t.Address t.Name  prjParam.TargetType
+
+#if DEBUG
+                if device = "M" then
+                    if t.Name.StartsWith "f" then
+                        ()
+                    if address.StartsWith("%M") then
+                        ()
+#endif
 
                 { defaultSymbolInfo with
                     Name = t.Name
@@ -213,6 +227,19 @@ module internal XgiSymbolsModule =
         (kindVar: int)
         (xgxSymbols: XgxSymbol seq)
       : SymbolInfo list =
+#if DEBUG
+        let xxx =
+            xgxSymbols
+            |> filter (fun x ->
+                match x with
+                | DuXgiVar(v) -> v.Name.StartsWith "f"
+                | DuStorage(s) -> s.Name.StartsWith "f"
+                | _ -> false)
+            |> Seq.toList
+        let xxxSymbolInfos = [
+            for x in xxx do
+                xgxSymbolToSymbolInfo prjParam kindVar x ]
+#endif
         xgxSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
 
 

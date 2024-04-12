@@ -96,6 +96,7 @@ module ExportModule =
 
     let exportXMLforLSPLC (plcType:RuntimeTargetType, system: DsSystem, path: string, existingLSISprj) =
         assert(plcType.IsOneOf(XGI, XGK))
+        use _ = logTraceEnabler()
         // RuntimeDS.Target <- plcType  // xxx 
         let globalStorage = new Storages()
         let localStorage = new Storages()

@@ -80,23 +80,27 @@ module internal XgiSymbolsModule =
             if t.Address <> TextAddrEmpty then
                 t.Address <- allocator ()
 
-    let getXGITagInfo (address:string) (name:string) =
-        match tryParseXGITag address with
-        | Some tag -> address, tag.Device.ToString()
-        | _ -> 
-            if address = TextAddrEmpty then
-                "", ""
-            else
-                failwith $"Invalid tag address {address} for {name}"
-        
+    let getXgxTagInfo (prjParam: XgxProjectParams) (address:string) (name:string) =
+        if address = TextAddrEmpty then
+            "", ""
+        else
+            let tagParser =
+                match prjParam.TargetType with
+                | XGI -> tryParseXGITag
+                | XGK -> tryParseXGKTag
+                | _ -> failwith $"Invalid target type {prjParam.TargetType}"
 
-    let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
-        match xgiSymbol with
+            match tagParser address with
+            | Some tag -> address, tag.Device.ToString()
+            | _ ->  failwith $"Invalid tag address {address} for {name}"
+
+    let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo =
+        match xgxSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
 
             autoAllocateAddress t prjParam
-            let address, device = getXGITagInfo t.Address t.Name 
+            let address, device = getXgxTagInfo prjParam t.Address t.Name 
             let plcType = systemTypeToXgiTypeName t.DataType
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
@@ -118,7 +122,7 @@ module internal XgiSymbolsModule =
                 let comment = SecurityElement.Escape t.Comment
                
                 autoAllocateAddress t prjParam
-                let address, device = getXGITagInfo t.Address t.Name 
+                let address, device = getXgxTagInfo prjParam t.Address t.Name 
 
                 { defaultSymbolInfo with
                     Name = t.Name
@@ -180,9 +184,9 @@ module internal XgiSymbolsModule =
     let private xgxSymbolsToSymbolInfos
         (prjParam: XgxProjectParams)
         (kindVar: int)
-        (xgiSymbols: XgxSymbol seq)
+        (xgxSymbols: XgxSymbol seq)
       : SymbolInfo list =
-        xgiSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
+        xgxSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
 
 
     let private storagesToSymbolInfos (prjParam: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =

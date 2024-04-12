@@ -88,7 +88,8 @@ let (|LsTagXGIPattern|_|) ((modelId: int option), (tag: string)) =
         else None
 
     | _ -> 
-        logWarn $"Failed to XGI parse tag : {tag}"; None
+        logWarn $"Failed to parse XGI tag : {tag}"
+        None
 
 
 
@@ -135,7 +136,8 @@ let (|LsTagXGKPattern|_|) ((modelId: int option), (tag: string)) =
         createTagInfo (tag, device, DataType.Word , totalBitOffset, modelId)
     
     | _ -> 
-        logWarn $"Failed to XGK parse tag : {tag}"; None
+        logWarn $"Failed to parse XGK tag : {tag}"
+        None
 
 
 let tryParseXGITag tag = (|LsTagXGIPattern|_|) (None, tag)

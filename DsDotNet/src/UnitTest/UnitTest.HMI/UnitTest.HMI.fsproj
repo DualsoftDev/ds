@@ -34,7 +34,5 @@
       <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
     </ItemGroup>
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
-	</Target>
+
 </Project>

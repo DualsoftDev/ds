@@ -102,9 +102,6 @@ module ImportIOTable =
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim() |>emptyToSkipAddress
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
 
-                if(devName.Contains("외부시작"))
-                then ()
-
 
                 dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In)
                 dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out)

@@ -10,9 +10,7 @@ open Engine.Cpu
 open Engine.Core
 
 module HMIPackageTEST = 
-    let directoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-    let testPath = @$"{directoryPath}/HelloDS.pptx"
-    
+    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
     [<Fact>]
     let ``HMIPackage Create Test`` () = 
         

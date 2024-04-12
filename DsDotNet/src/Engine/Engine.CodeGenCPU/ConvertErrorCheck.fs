@@ -5,6 +5,7 @@ open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Linq
 open System.Collections.Generic
+open System
 
 [<AutoOpen>]
 module ConvertErrorCheck =
@@ -51,33 +52,23 @@ module ConvertErrorCheck =
                             failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
                              
 
-    let checkErrRealResetExist(sys:DsSystem) = 
 
+    let checkErrExternalStartRealExist (sys:DsSystem) = 
+        let flowEdges = (sys.Flows |> Seq.collect(fun f-> f.Graph.Edges))
+        
+        
+        let exEdges = flowEdges
+                        .Where(fun e -> e.Source.GetPureCall().IsSome
+                                       || e.Target.GetPureCall().IsSome)  
 
-        let vs= sys.GetVertices()
-        let checkReals = vs.OfType<Real>()
-        let realAlias = vs.GetAliasTypeReals()
-        let realExs = vs.OfType<RealExF>()
-        let realExAlias = vs.GetAliasTypeRealExs()
-        for real in checkReals do
+        if not(exEdges.any()) then
+            failwithf $"PLC 시스템은 외부 연결이 모델이 시작 불가 입니다."
 
-            let realAlias_ = realAlias.Where(fun f->f.GetPure() = real).OfType<Vertex>()
-            let realExs_ = realExs.Where(fun f->f.GetPure() = real).OfType<Vertex>()
-            let realExAlias_ = realExAlias.Where(fun f->f.GetPure() = real).OfType<Vertex>()
-
-            let checks = ([real:>Vertex] @ realAlias_ @ realExs_@ realExAlias_).Select(fun f->CodeConvertUtilExt.GetResetRootEdges(f.V))
-            if checks.IsEmpty()
-            then 
-                failwithf $"Work는 Reset 모델링이 반드시 필요합니다.\n(flow:{real.Flow.Name}, name:{real.Name})"
-                          
-
-        //let realAlias = (vs.GetAliasTypeRealExs()@vs.GetAliasTypeReals()).Select(fun s->s.GetPure()).OfType<Real>()
-        //let pureReals = (vs.OfType<Real>() @ realAlias).Distinct()
-        //for real in pureReals do
-        //    if CodeConvertUtilExt.GetResetRootEdges(real.V).isEmpty()
-        //    then 
-        //        failwithf $"Work는 Reset 모델링이 반드시 필요합니다.\n(flow:{real.Flow.Name}, name:{real.Name})"
-                             
+    let checkErrRealResetExist (sys:DsSystem) =
+        let errors = checkRealEdgeErrExist sys false
+        if errors.Count > 0 then
+            let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Flow.Name}.{e.Name}"))
+            failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
 
 
     let checkErrNullAddress(sys:DsSystem) = 

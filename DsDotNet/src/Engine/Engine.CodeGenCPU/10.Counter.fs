@@ -23,7 +23,7 @@ type DsSystem with
                 yield (sets) --% (call.VC.CTR, call.PresetCounter,  getFuncName())
 
             for alias in aliasCalls do
-                let call = alias.V.GetPureCall().Value
+                let call = alias.V.Vertex.GetPureCall().Value
                 let sets = alias.V.F.Expr
                 yield (sets) --% (alias.VC.CTR, call.PresetCounter, getFuncName())
         ]

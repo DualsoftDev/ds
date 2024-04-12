@@ -49,8 +49,8 @@
         <Compile Include="Core.fs" />
         <Compile Include="Core.Extension.fs" />
         <Compile Include="Core.Validation.fs" />
-        <Compile Include="Core.Util.Edge.fs" />
         <Compile Include="Core.Util.Find.fs" />
+        <Compile Include="Core.Util.Edge.fs" />
         <Compile Include="Core.Util.Origin.fs" />
         <Compile Include="Core.Util.ToDsText.fs" />
         <Compile Include="Core.Util.Address.fs" />

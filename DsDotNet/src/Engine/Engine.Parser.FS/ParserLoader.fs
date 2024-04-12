@@ -14,17 +14,17 @@ open PathManager
 [<RequireQualifiedAccess>]
 module ParserLoader =
 
-    let private loadSystemFromDsFile (systemRepo: ShareableSystemRepository) (dsFilePath) =
+    let private loadSystemFromDsFile (systemRepo: ShareableSystemRepository) (dsFilePath) autoGenDevice =
         let text = File.ReadAllText(dsFilePath)
         let dir = Path.GetDirectoryName(dsFilePath)
 
         let option =
-            ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone)
+            ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice)
 
         let system = ModelParser.ParseFromString(text, option)
         system
 
-    let loadingDS (loadingConfigDir: string) (dsFile: string ) =
+    let loadingDS (loadingConfigDir: string) (dsFile: string )  autoGenDevice =
         let systemRepo = ShareableSystemRepository()
 
         let sysPath =
@@ -34,7 +34,7 @@ module ParserLoader =
                 PathManager.getFullPath (dsFile.ToFile()) (loadingConfigDir |> DsDirectory)
                 |> FileManager.fileExistChecker 
 
-        let system = loadSystemFromDsFile  systemRepo sysPath
+        let system = loadSystemFromDsFile  systemRepo sysPath autoGenDevice
 
         let loadings =
                 system.GetRecursiveLoadeds().Map(fun s -> s.AbsoluteFilePath)
@@ -52,7 +52,7 @@ module ParserLoader =
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
         let dir = PathManager.getDirectoryName (configPath.ToFile())
-        let system, loadings = loadingDS dir cfg.DsFilePath
+        let system, loadings = loadingDS dir cfg.DsFilePath false 
 
         { Config = cfg
           System = system
@@ -60,4 +60,8 @@ module ParserLoader =
 
     let LoadFromActivePath (activePath: string) =
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir   activePath 
+        loadingDS dir   activePath  false 
+
+    let LoadFromChatGptPath (activePath: string) =
+        let dir = PathManager.getDirectoryName (activePath.ToFile())
+        loadingDS dir   activePath  true 

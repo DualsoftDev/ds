@@ -185,9 +185,12 @@ module ConvertCPU =
 
              // Package 타입별 에러체크
              match   RuntimeDS.Package with
-             | PC
-             | PLC ->  checkErrNullAddress(sys)
-             | Emulation ->  ()
+             | PC  -> ()
+             | PLC 
+             | Emulation ->  
+                        checkErrNullAddress(sys)
+                        checkErrExternalStartRealExist(sys)
+
              | Simulation -> () 
              | Developer ->  ()      
              
@@ -203,7 +206,7 @@ module ConvertCPU =
             | PC ->  ()
             | PLC ->  ()
             | Emulation ->  
-                            yield! emulationDevice sys
+                           if isActive  then  yield! emulationDevice sys
             | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당
                             yield! sys.Y1_SystemBitSetFlow()
             | Developer ->  ()

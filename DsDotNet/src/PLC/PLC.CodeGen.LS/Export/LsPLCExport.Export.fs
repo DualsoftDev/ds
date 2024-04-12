@@ -348,16 +348,9 @@ module XgiExportModule =
 
             (* Global variables 삽입 *)
             do
-                let xnXGlobalVariable =
-                    match targetType with
-                    | XGI -> "GlobalVariable"
-                    | XGK -> "VariableComment"
-                    | _ -> failwithlog "Not supported plc type"
-
-                let xnGlobalSymbols =
-                    xdoc.SelectMultipleNodes
-                        $"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}/Symbols/Symbol"
-                    |> List.ofSeq
+                let xnGlobalVar = xdoc.GetXmlNodeTheGlobalVariable(targetType)
+                let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+                let xnGlobalSymbols = xnGlobalVarSymbols.SelectMultipleNodes("Symbol") |> List.ofSeq
 
                 let countExistingGlobal = xnGlobalSymbols.Length
 
@@ -412,10 +405,6 @@ module XgiExportModule =
                     globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse
                 // timer, counter 등을 고려했을 때는 numNewGlobals <> globalStorages.Count 일 수 있다.
 
-                let xnGlobalVar =
-                    xdoc.SelectSingleNode $"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}"
-
-                let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
                 let xnCountConainer =
                     match targetType with
                     | XGI -> xnGlobalVar

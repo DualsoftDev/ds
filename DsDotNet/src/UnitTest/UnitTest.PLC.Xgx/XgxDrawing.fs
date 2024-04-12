@@ -57,7 +57,9 @@ type XgxDrawingTest(xgx:RuntimeTargetType) =
 </Rung>
 
 """
-        let xml = wrapWithXml xgx rungsXml [] emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -85,7 +87,9 @@ type XgxDrawingTest(xgx:RuntimeTargetType) =
             ] |> String.concat "\r\n"
 
 
-        let xml = wrapWithXml xgx rungsXml [] emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member __.``ADD function details test``() =
@@ -185,7 +189,9 @@ type XgxDrawingTest(xgx:RuntimeTargetType) =
             XGITag.createSymbolInfo "Q"   "Q"   "INT"  kind intInitValue
         ]
 
-        let xml = wrapWithXml xgx rungsXml symbolInfos emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungsXml symbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 

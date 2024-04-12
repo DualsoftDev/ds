@@ -332,7 +332,7 @@ module XgiExportModule =
                 let pous = pous |> List.distinctBy (fun pou -> pou.TaskName)
 
                 for i, pou in pous.Indexed() do
-                    let index = if i <= 1 then 0 else i - 1
+                    let index = max (i - 1) 0
                     let kind = if i = 0 then 0 else 2 //0:스캔프로그램Task 2:user Task
                     let priority = kind
                     let device = if kind =0 then 0 else 10  //정주기 10msec 디바이스항목으로 저장
@@ -428,11 +428,12 @@ module XgiExportModule =
             (* POU program 삽입 *)
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
-                let mainScanName = if existingTaskPous.any()
-                                   then existingTaskPous.First() |> fst
-                                   else 
-                                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
-                                        task.FirstChild.OuterXml 
+                let mainScanName =
+                    if existingTaskPous.any() then
+                        existingTaskPous.First() |> fst
+                    else 
+                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
+                        task.FirstChild.OuterXml 
 
 
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램

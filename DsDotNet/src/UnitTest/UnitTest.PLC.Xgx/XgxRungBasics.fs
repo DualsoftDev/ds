@@ -14,12 +14,16 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 
     member x.``Prolog comment test``() =
         let rungsXml = $"""<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>"""
-        let xml = wrapWithXml xgx rungsXml [] emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
     member x.``Generate simplest with local variables test``() =
-        let xml = wrapWithXml xgx simplestProgramXml (getSimpleLocalSymbolInfos(xgx)) emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam simplestProgramXml (getSimpleLocalSymbolInfos(xgx)) emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -45,7 +49,9 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </GlobalVariable>
 """
 
-        let xml = wrapWithXml xgx simplestProgramXml (getSimpleLocalSymbolInfos(xgx)) symbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam simplestProgramXml (getSimpleLocalSymbolInfos(xgx)) symbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
         ()
 
@@ -56,11 +62,15 @@ type XgxRungTest(xgx:RuntimeTargetType) =
         let symbolInfo: SymbolInfo =
             { defaultSymbolInfo with Name=t.Name; Type="BOOL"; Address=t.Address; Device="I"; }
 
-        let symbolInfoXml = symbolInfo.GenerateXml XGI
+        let symbolInfoXml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            symbolInfo.GenerateXml prjParam
         symbolInfoXml =~= """<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
 	</Symbol>"""
 
-        let symbolsLocalXml = XGITag.generateLocalSymbolsXml XGI [ symbolInfo ]
+        let symbolsLocalXml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            XGITag.generateLocalSymbolsXml prjParam [ symbolInfo ]
 
         symbolsLocalXml =~= """<LocalVar Version="Ver 1.0" Count="1">
 <Symbols>
@@ -125,7 +135,9 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml xgx rungs localSymbolInfos emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -161,7 +173,9 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml xgx rungs localSymbolInfos emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -197,7 +211,9 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml xgx rungs localSymbolInfos emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 
@@ -239,7 +255,9 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml xgx rungs localSymbolInfos emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member x.``Generate ORs variables test``() =
@@ -276,7 +294,9 @@ type XgxRungTest(xgx:RuntimeTargetType) =
 </Rung>"""
             ] |> String.concat "\r\n"
 
-        let xml = wrapWithXml xgx rungs localSymbolInfos emptySymbolsGlobalXml None
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
 

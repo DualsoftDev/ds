@@ -40,7 +40,7 @@ type IQMapperTest(xgx:RuntimeTargetType) =
         let prjParam = {
             defaultXgxProjectParams with
                 TargetType = xgx
-                ProjectName = "Dummy IQ Map test"
+                ProjectName = getFuncName()
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]
                 RungCounter = counterGenerator 0 |> Some

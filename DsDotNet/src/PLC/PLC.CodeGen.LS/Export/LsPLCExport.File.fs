@@ -63,7 +63,8 @@ module internal XgiFile =
          symbolsLocal =        "<LocalVar Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </LocalVar>
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
-    let wrapWithXml (targetType: RuntimeTargetType) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
+    let wrapWithXml (prjParam: XgxProjectParams) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
+        let targetType = prjParam.TargetType
         let xdoc =
             existingLSISprj |> Option.map XmlDocument.loadFromFile
             |? getTemplateXgxXmlDoc targetType
@@ -137,14 +138,14 @@ module internal XgiFile =
                 (*
                  * Local variables 삽입
                  *)
-                let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml targetType |> XmlNode.ofString
+                let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml prjParam |> XmlNode.ofString
                 let programBody = xnLdRoutine.ParentNode
                 programBody.InsertAfter localSymbols |> ignore
 
                 globalSymbols
             else
                 for l in localSymbolInfos do
-                    let lxml = l.GenerateXml targetType |> XmlNode.ofString
+                    let lxml = l.GenerateXml prjParam |> XmlNode.ofString
                     globalSymbols.AdoptChild(lxml) |> ignore
                 globalSymbols
 

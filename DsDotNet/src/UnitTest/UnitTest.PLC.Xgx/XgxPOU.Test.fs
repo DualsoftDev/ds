@@ -74,7 +74,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
 
     let createProjectParams(projName):XgxProjectParams = {
         defaultXgxProjectParams with
-            TargetType = TestRuntimeTargetType
+            TargetType = xgx
             ProjectName = projName
             RungCounter = counterGenerator 0 |> Some
             POUs = [pou11.Value; pou12.Value; pou21.Value]

@@ -40,7 +40,7 @@ module internal XgiSymbolsModule =
                       Some(s, XgxSymbol.DuStorage s) ]
         |> List.choose id
 
-    let autoAllocatorAdress (t:IStorage) (prjParam: XgxProjectParams) = 
+    let autoAllocateAddress (t:IStorage) (prjParam: XgxProjectParams) = 
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
         if t.Address = "" then  failwithlog $"ERROR. {t.Name} address empty."
@@ -95,7 +95,7 @@ module internal XgiSymbolsModule =
         | DuStorage(:? ITag as t) ->
             let name = t.Name
 
-            autoAllocatorAdress t prjParam
+            autoAllocateAddress t prjParam
             let address, device = getXGITagInfo t.Address t.Name 
             let plcType = systemTypeToXgiTypeName t.DataType
             let comment = ""
@@ -117,7 +117,7 @@ module internal XgiSymbolsModule =
                 let plcType = systemTypeToXgiTypeName t.DataType
                 let comment = SecurityElement.Escape t.Comment
                
-                autoAllocatorAdress t prjParam
+                autoAllocateAddress t prjParam
                 let address, device = getXGITagInfo t.Address t.Name 
 
                 { defaultSymbolInfo with
@@ -199,7 +199,7 @@ module internal XgiSymbolsModule =
             [ yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR) localStorages
               yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
 
-        XGITag.generateLocalSymbolsXml prjParam.TargetType symbolInfos
+        XGITag.generateLocalSymbolsXml prjParam symbolInfos
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
@@ -220,4 +220,4 @@ module internal XgiSymbolsModule =
             | Some(Error err) -> failwith err
             | _ -> ()
 
-        XGITag.generateGlobalSymbolsXml prjParam.TargetType symbolInfos
+        XGITag.generateGlobalSymbolsXml prjParam symbolInfos

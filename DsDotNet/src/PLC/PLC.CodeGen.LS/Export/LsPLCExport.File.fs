@@ -74,6 +74,7 @@ module internal XgiFile =
     let getTemplateXgxXmlDoc = getTemplateXgxXml >> DualXmlDocument.fromString
 
 
+
     /// rung 및 local var 에 대한 문자열 xml 을 전체 xml project file 에 embedding 시켜 outputPath 파일에 저장한다.
     /// Template file (EmptyLSISProject.xml) 에서 marking 된 위치를 참고로 하여 rung 및 local var 위치 파악함.
     (*

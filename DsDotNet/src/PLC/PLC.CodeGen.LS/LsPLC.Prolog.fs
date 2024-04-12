@@ -43,9 +43,10 @@ module XgiPrologModule =
         member x.Validate() =
             result {
                 let! _ = validateVariableName x.Name
-                let! _ = if  x.Address.IsNullOrEmpty() && x.Device = ""  //빈주소 자동 변수로 허용
-                         then Ok true 
-                         else  validateAddress x.Address
+                let! _ = if  x.Address.IsNullOrEmpty() && x.Device = "" then //빈주소 자동 변수로 허용
+                            Ok true 
+                         else
+                            validateAddress x.Address
                 return! Ok()
             }
 

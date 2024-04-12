@@ -6,6 +6,23 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open Engine.Core
+open System.Runtime.CompilerServices
+open System.Xml
+
+[<Extension>]
+type XgxXmlExtension =
+    [<Extension>]
+    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:RuntimeTargetType) : XmlNode =
+        let xnGlobalVar =
+            let xnXGlobalVariable =
+                match xgx with
+                | XGI -> "GlobalVariable"
+                | XGK -> "VariableComment"
+                | _ -> failwithlog "Not supported plc type"
+
+            xdoc.SelectSingleNode($"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}")
+        xnGlobalVar
+
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -124,14 +141,7 @@ module internal XgiFile =
         (*
          * Global variables 삽입
          *)
-        let xnGlobalVar =
-            let xnXGlobalVariable =
-                match targetType with
-                | XGI -> "GlobalVariable"
-                | XGK -> "VariableComment"
-                | _ -> failwithlog "Not supported plc type"
-
-            xdoc.SelectSingleNode($"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}")
+        let xnGlobalVar = xdoc.GetXmlNodeTheGlobalVariable(targetType)
 
         let xnGlobalVarSymbols =
             let globalSymbols = xnGlobalVar.GetXmlNode "Symbols"

@@ -38,7 +38,7 @@ type XgxTimerTest(xgx:RuntimeTargetType) =
 
     member x.``TIMER= Many1 AND RungIn Condition test`` () =
         let storages = Storages()
-        let code = codeForBits + """
+        let code = generateBitVariableDeclarations xgx 0 16 + """
             ton myTon = createXgiTON(2000u,
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
                 && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
@@ -50,7 +50,7 @@ type XgxTimerTest(xgx:RuntimeTargetType) =
 
     member x.``TIMER= Many2 AND RungIn Condition test`` () =
         let storages = Storages()
-        let code = codeForBits + """
+        let code = generateBitVariableDeclarations xgx 0 16 + """
             ton myTon = createXgiTON(2000u,
                 // 산전 limit : 가로로 31개
                 //let coilCellX = 31
@@ -75,7 +75,7 @@ type XgxTimerTest(xgx:RuntimeTargetType) =
 
     member x.``TIMER= Many1 OR RungIn Condition test`` () =
         let storages = Storages()
-        let code = codeForBits + """
+        let code = generateBitVariableDeclarations xgx 0 16 + """
             ton myTon = createXgiTON(2000u,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
@@ -88,7 +88,7 @@ type XgxTimerTest(xgx:RuntimeTargetType) =
 
     member x.``TIMER= Many2 OR RungIn Condition test`` () =
         let storages = Storages()
-        let code = codeForBits + """
+        let code = generateBitVariableDeclarations xgx 0 16 + """
             ton myTon = createXgiTON(2000u,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
@@ -109,7 +109,7 @@ type XgxTimerTest(xgx:RuntimeTargetType) =
 
     member x.``TIMER= Many And, OR RungIn Condition test`` () =
         let storages = Storages()
-        let code = codeForBits + """
+        let code = generateBitVariableDeclarations xgx 0 16 + """
             ton myTon = createXgiTON(2000u,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
@@ -132,7 +132,7 @@ type XgxTimerTest(xgx:RuntimeTargetType) =
 
     member x.``TIMER= Many And, OR RungIn Condition test2`` () =
         let storages = Storages()
-        let code = codeForBits + """
+        let code = generateBitVariableDeclarations xgx 0 16 + """
             ton myTon = createXgiTON(2000u,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)

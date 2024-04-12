@@ -85,8 +85,8 @@ module ConvertCpuDsSystem =
 
         member s.GetTempTimer(x:HwSystemDef) = 
             emptyAddressCheck x.InAddress x.Name
-            let name = x.InAddress.Replace("%", "_").Replace(".", "_")
-            getSM(s).GetTempTimerTag(name)
+            //let name = x.InAddress.Replace("%", "_").Replace(".", "_")
+            getSM(s).GetTempTimerTag(x.Name)
     
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   

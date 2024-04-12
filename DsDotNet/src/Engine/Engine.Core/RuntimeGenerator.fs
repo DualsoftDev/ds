@@ -52,6 +52,8 @@ module RuntimeGeneratorModule =
         | "Developer" -> Developer
         | _ -> failwithlogf $"Error {getFuncName()}"
 
+
+
     let InitStartMemory = 1000
     let BufferAlramSize = 1000
     let ExternalTempMemory =  "M0.0"
@@ -91,3 +93,17 @@ module RuntimeGeneratorModule =
         static member System
             with get() = dsSystem.Value
             and set v = dsSystem <- Some v
+
+
+    let clearNFullSlotHwSlotDataTypes() =
+        let hw = 
+            [0 .. 11]
+            |> List.map (fun i ->
+                if i % 2 = 0 then
+                    (i, IOType.In, DataType.DuUINT64)
+                else
+                    (i, IOType.Out, DataType.DuUINT64))
+
+        // 기존의 리스트를 지우고 새로운 데이터로 대체합니다.
+        RuntimeDS.HwSlotDataTypes.Clear()
+        RuntimeDS.HwSlotDataTypes.AddRange(hw)

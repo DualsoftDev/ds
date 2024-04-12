@@ -13,9 +13,12 @@ module HMIPackageTEST =
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
     [<Fact>]
     let ``HMIPackage Create Test`` () = 
-        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = false}
+        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true}
         
+        clearNFullSlotHwSlotDataTypes()
         let dsPPT = ImportPPT.GetDSFromPPTWithLib (testPath, false, pptParms)
+        assignAutoAddress (dsPPT.System, 0 , 0)  WINDOWS
+
         RuntimeDS.Package <- RuntimePackage.PC
         let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU(dsPPT.System) pptParms.TargetType;
 

@@ -110,7 +110,7 @@ module internal rec Command =
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
     // <timer> for XGI
-    let private drawFunctionBlockTimer (x, y) (timerStatement: TimerStatement) : BlockSummarizedXmlElements =
+    let private drawFunctionBlockTimer (x, y) (timerStatement: TimerStatement)  target: BlockSummarizedXmlElements =
         let ts = timerStatement
         let typ = ts.Timer.Type     // TON, TOF, TMR
         let time: int = int ts.Timer.PRE.Value
@@ -126,11 +126,11 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(TimerMode(ts))
-            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters
+            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters target
 
         blockXml
 
-    let private drawFunctionBlockCounter (x, y) (counterStatement: CounterStatement) : BlockSummarizedXmlElements =
+    let private drawFunctionBlockCounter (x, y) (counterStatement: CounterStatement) target: BlockSummarizedXmlElements =
 
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -159,17 +159,17 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(CounterMode(cs))
-            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters
+            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters target
 
         blockXml
 
 
     type System.Type with
 
-        member x.SizeString = systemTypeToXgiTypeName x
+        member x.SizeString = systemTypeToXgxTypeName x
 
 
-    let drawPredicate (x, y) (predicate: Predicate) : BlockSummarizedXmlElements =
+    let drawPredicate (x, y) (predicate: Predicate) target: BlockSummarizedXmlElements =
         match predicate with
         | Compare(name, output, args) ->
             let namedInputParameters =
@@ -189,9 +189,9 @@ module internal rec Command =
                         $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ -> failwithlog "NOT YET"
 
-            createBoxXmls (x, y) func namedInputParameters outputParameters ""
+            createBoxXmls (x, y) func namedInputParameters outputParameters "" target
 
-    let drawFunction (x, y) (func: Function) : BlockSummarizedXmlElements =
+    let drawFunction (x, y) (func: Function) target: BlockSummarizedXmlElements =
         match func with
         | Arithmatic(name, output, args) ->
             let namedInputParameters =
@@ -202,7 +202,7 @@ module internal rec Command =
 
             let plcFuncType =
                 let outputType = getType output
-                systemTypeToXgiTypeName outputType
+                systemTypeToXgxTypeName outputType
 
             let func =
                 // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
@@ -213,26 +213,27 @@ module internal rec Command =
                 | ("SUB" | "DIV") -> name // DIV 는 DIV, DIV2 만 존재함
                 | _ -> failwithlog "NOT YET"
 
-            createBoxXmls (x, y) func namedInputParameters outputParameters ""
+            createBoxXmls (x, y) func namedInputParameters outputParameters "" target
 
-    let drawAction (x, y) (func: PLCAction) : BlockSummarizedXmlElements =
+    let drawAction (x, y) (func: PLCAction) targetPLC: BlockSummarizedXmlElements =
         match func with
         | Move(condition, source, target) ->
             let namedInputParameters = [ "EN", condition :> IExpression; "IN", source ]
 
             let output = target :?> INamedExpressionizableTerminal
             let outputParameters = [ "OUT", output ]
-            createBoxXmls (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
+            createBoxXmls (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters "" targetPLC
 
     let createFunctionBlockInstanceXmls
             (rungStartX, rungStartY)
             (cmd: CommandTypes)
             (namedInputParameters: (string * IExpression) list)
             (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
+            target
         : BlockSummarizedXmlElements =
             let func = cmd.VarType.ToString()
             let instanceName = cmd.InstanceName
-            createBoxXmls (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName
+            createBoxXmls (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName target
 
     /// cmd 인자로 주어진 function block 의 type 과
     /// namedInputParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
@@ -243,12 +244,13 @@ module internal rec Command =
             (namedInputParameters: (string * IExpression) list)
             (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
             (instanceName: string)
+            (targetType : RuntimeTargetType)
         : BlockSummarizedXmlElements =
             let iDic = namedInputParameters |> dict
             let oDic = namedOutputParameters |> Tuple.toDictionary
 
-            let systemTypeToXgiType (typ: System.Type) =
-                systemTypeToXgiTypeName typ |> DU.tryParseEnum<CheckType> |> Option.get
+            let systemTypeToXgxType (typ: System.Type) =
+                systemTypeToXgxTypeName typ  targetType|> DU.tryParseEnum<CheckType> |> Option.get
 
             /// 입력 인자들을 function 의 입력 순서 맞게 재배열
             let alignedInputParameters =
@@ -260,7 +262,7 @@ module internal rec Command =
 
                 [| for s in inputSpecs do
                        let exp = iDic[s.Name]
-                       let exprDataType = systemTypeToXgiType exp.DataType
+                       let exprDataType = systemTypeToXgxType exp.DataType
 
                        let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ]
 
@@ -281,7 +283,7 @@ module internal rec Command =
                           let! terminal = oDic.TryFind(s.Name)
 
                           match terminal with
-                          | :? IStorage as storage -> s.CheckType.HasFlag(systemTypeToXgiType storage.DataType) |> verify
+                          | :? IStorage as storage -> s.CheckType.HasFlag(systemTypeToXgxType storage.DataType) |> verify
                           | _ -> ()
 
                           return s.Name, i, terminal, s.CheckType
@@ -393,13 +395,13 @@ module internal rec Command =
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
     let drawCommandXgi (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
         match cmd with
-        | PredicateCmd(pc) -> drawPredicate (x, y) pc
-        | FunctionCmd(fc) -> drawFunction (x, y) fc
-        | ActionCmd(ac) -> drawAction (x, y) ac
+        | PredicateCmd(pc) -> drawPredicate (x, y) pc XGI
+        | FunctionCmd(fc) -> drawFunction (x, y) fc XGI
+        | ActionCmd(ac) -> drawAction (x, y) ac XGI
         | FunctionBlockCmd(fbc) ->
             match fbc with
-            | TimerMode(timerStatement) -> drawFunctionBlockTimer (x, y) timerStatement
-            | CounterMode(counterStatement) -> drawFunctionBlockCounter (x, y) counterStatement
+            | TimerMode(timerStatement) -> drawFunctionBlockTimer (x, y) timerStatement XGI
+            | CounterMode(counterStatement) -> drawFunctionBlockCounter (x, y) counterStatement XGI
         | _ -> failwithlog "Unknown CommandType"
 
     let drawCommandXgk (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
@@ -446,13 +448,13 @@ module internal rec Command =
                 match fbc with
                 | TimerMode ts ->
                     let typ = ts.Timer.Type.ToString()
-                    let var = $"""T{0x0.ToString("D4")}"""
-                    let value = ts.Timer.PRE.Value
+                    let var = ts.Timer.Name
+                    let value = ts.Timer.PRE.Value /100u  // 2000 mec = 20  // 100msec timer
                     $"Param={dq}{typ},{var},{value}{dq}"        // e.g : "Param="TON,T0000,1000"
                 | CounterMode cs ->
                     let typ = cs.Counter.Type.ToString()
-                    let var = $"""C{0x0.ToString("D4")}"""
-                    let value = cs.Counter.PRE.Value
+                    let var = cs.Counter.Name
+                    let value = cs.Counter.PRE.Value 
                     $"Param={dq}{typ},{var},{value}{dq}"
 
             [ let c = coord (x, y)
@@ -521,7 +523,11 @@ module internal rec Command =
 
             let terminalText =
                 match terminal with
-                | :? IStorage as storage -> storage.Name
+                | :? IStorage as storage -> 
+                     if storage.Name.Contains (xgkTimerCounterContactMarking) 
+                     then storage.Name.Replace (xgkTimerCounterContactMarking, "")
+                     else storage.Name
+                     
                 | :? LiteralHolder<bool> as onoff -> if onoff.Value then "_ON" else "_OFF"
                 | _ -> terminal.ToText()
 

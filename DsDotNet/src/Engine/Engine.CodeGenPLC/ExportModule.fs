@@ -53,30 +53,7 @@ module ExportModule =
                 ]
             
            
-            let usedAddresses =
-                system.TagManager.Storages.Values
-                |> Seq.filter (fun f -> not <| (f :? TimerCounterBaseStruct))
-                |> Seq.filter (fun f -> f.Address <> null && f.Address <> "")
-                |> Array.ofSeq
-
-            //check if there is any duplicated address
-            let duplicatedAddresses =
-                usedAddresses
-                |> Array.filter (fun f -> f.Address <> TextAddrEmpty)
-                |> Array.groupBy (fun f -> f.Address)
-                |> Array.filter (fun (_, vs) -> vs.Length > 1)
-
-            // prints duplications
-            if duplicatedAddresses.Length > 0 then
-                let dupItems =
-                    duplicatedAddresses
-                    |> map (fun (address, vs) ->
-                        let names = vs |> map (fun var -> var.Name) |> String.concat ", "
-                        $"  {address}: {names}")
-                    |> String.concat Environment.NewLine
-
-                failwithlog
-                    $"Total {duplicatedAddresses.Length} 중복주소 items:{Environment.NewLine}{dupItems}"
+  
 
             let autoMemoryAllocationTags =
                 system.TagManager.Storages.Values
@@ -107,7 +84,7 @@ module ExportModule =
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
                 AppendDebugInfoToRungComment = isAddRungComment
-                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) usedByteIndices) // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "R" (0, 640 * 1024) usedByteIndices  plcType) // 640K R memory 영역
                 RungCounter = counterGenerator 0 |> Some
                 POUs =
                     [ yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"

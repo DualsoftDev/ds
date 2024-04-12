@@ -192,7 +192,7 @@ module TagManagerModule =
         let realData  = 
             let vertexTag = VertexTag.realData |> int
             let name = $"{v.QualifiedName}_RD"
-            createPlanVar  s name DuUINT8 true v vertexTag sys  
+            createPlanVar  s name DuUINT16 true v vertexTag sys  
             
 
         member x.OriginInfo

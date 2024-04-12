@@ -137,20 +137,18 @@ module XGITag = //IEC61131Tag =
                     $"State=\"{x.State}\""
                 | XGK ->
                     // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
-                    // 임시 코드
-                    let device, address =
-                        match x.Device with
-                        | "I" | "Q" -> "P", pCounterGenerator()     // 임시코드...
-                        | "" | "M" -> "M", mCounterGenerator()
-                        | "T"  -> "T", tCounterGenerator()
-                        | _  -> x.Device, xCounterGenerator()
                     let typ =
                         match x.Type with
-                        | "BOOL" -> "BIT"
-                        | _ -> x.Type
-                    $"Device=\"{device}\""
+                        | "BIT" -> "BIT"
+                        | "WORD" -> "WORD"
+                        | "TON" -> "BIT/WORD"
+                        | "CTR" -> "BIT/WORD"
+                        | _ -> 
+                            failwithlog $"Not supported data type {x.Type}"
+
+                    $"Device=\"{x.Device}\""
+                    $"DevicePos=\"{x.DevicePos}\""
                     $"Type=\"{typ}\""
-                    $"DevicePos=\"{address}\""
                 | _ -> failwithlog "Not supported plc type"
             ] |> String.concat " "
 
@@ -169,7 +167,9 @@ module XGITag = //IEC61131Tag =
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
     let private generateSymbolVarDefinitionXml (prjParam: XgxProjectParams) (varType: string) (FList(symbols: SymbolInfo list)) =
-        let symbols:SymbolInfo list = symbols |> List.sortBy (fun s -> s.Name)
+        let symbols:SymbolInfo list = symbols 
+                                        |> List.filter (fun s -> not(s.Name.Contains(xgkTimerCounterContactMarking)))
+                                        |> List.sortBy (fun s -> s.Name)
 
         [ yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
           yield "<Symbols>"

@@ -181,7 +181,7 @@ module rec TimerModule =
 
     let createBoolWithTagKind name iniValue tagKind = fwdCreateBoolMemberVariable name iniValue tagKind
     let createBool name iniValue  = createBoolWithTagKind name iniValue -1
-
+    let xgkTimerCounterContactMarking = "$ON"
     type TimerStruct private(typ:TimerType, name, en, tt, dn, pre, acc, res, sys) =
         inherit TimerCounterBaseStruct(name, dn, pre, acc, res, sys)
 
@@ -194,7 +194,7 @@ module rec TimerModule =
         static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys,  target:RuntimeTargetType) =
             let suffixes  = 
                 match target with
-                | XGK -> ["_IN"; "_TT"; "_ON"; "_PT"; "_ET"; "_RST"]
+                | XGK -> [".IN"; ".TT"; xgkTimerCounterContactMarking; ".PT"; ".ET"; ".RST"] // XGK 이름에 . 있으면 걸러짐 storagesToXgxSymbol
                 | XGI | WINDOWS -> [".IN"; "._TT"; ".Q"; ".PT"; ".ET"; ".RST"]
                 | AB -> [".EN"; ".TT"; ".DN"; ".PRE"; ".ACC"; ".RES"]
                 | _ -> failwith "NOT yet supported"

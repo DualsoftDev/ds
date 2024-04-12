@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.Common
 open PLC.CodeGen.LS
+open System
 
 
 [<AutoOpen>]
@@ -18,7 +19,7 @@ module internal XgiSymbolsModule =
         | DuStorage of IStorage
 
 
-    let storagesToXgiSymbol (storages: IStorage seq) : (IStorage * XgxSymbol) list =
+    let storagesToXgxSymbol (storages: IStorage seq) : (IStorage * XgxSymbol) list =
         let timerOrCountersNames =
             storages
                 .Filter(fun s -> s :? TimerCounterBaseStruct)
@@ -75,9 +76,9 @@ module internal XgiSymbolsModule =
                 | _ -> failwithlog "ERROR"
 
             if t.Name.StartsWith("_") then
-                logWarn $"Something fish: trying to generate auto M address for {t.Name}"
+                logWarn $"Something fish: trying to generate auto R address for {t.Name}"
 
-            if t.Address <> TextAddrEmpty then
+            if t.Address = TextAddrEmpty || t.Address = TextSkip then
                 t.Address <- allocator ()
 
     let getXGXTagInfo (address:string) (name:string) targetType =
@@ -89,43 +90,49 @@ module internal XgiSymbolsModule =
                 failwith $"Invalid tag  targetType {targetType}"
 
         match tag with
-        | Some tag -> address, tag.Device.ToString()
+        | Some tag -> address, tag.Device.ToString(), 
+                      if tag.DataType = PLCHwModel.DataType.Bit 
+                      then tag.BitOffset else tag.ByteOffset
         | _ -> 
             if address = TextAddrEmpty then
-                "", ""
+                "", "", -1
             else
                 failwith $"Invalid tag address {address} for {name}"
         
 
     let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgiSymbol: XgxSymbol) : SymbolInfo =
+
+
         match xgiSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
-
             autoAllocatorAdress t prjParam
-            let address, device = getXGXTagInfo t.Address t.Name (prjParam.TargetType)
-            let plcType = systemTypeToXgiTypeName t.DataType
+            let address, device, devPos = getXGXTagInfo t.Address t.Name (prjParam.TargetType)
+            let plcType = systemTypeToXgxTypeName  t.DataType (prjParam.TargetType)
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
+   
 
             { defaultSymbolInfo with
                 Name = name
                 Comment = comment
                 Type = plcType
                 Address = address
+                DevicePos = devPos
                 Device = device.ToString()
                 InitValue = initValue
                 Kind = kindVar }
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
+         
             let symbolInfo =
              
-                let plcType = systemTypeToXgiTypeName t.DataType
+                let plcType = systemTypeToXgxTypeName t.DataType (prjParam.TargetType)
                 let comment = SecurityElement.Escape t.Comment
                
                 autoAllocatorAdress t prjParam
-                let address, device = getXGXTagInfo t.Address t.Name  prjParam.TargetType
+                let address, device, devPos = getXGXTagInfo t.Address t.Name  prjParam.TargetType
 
                 { defaultSymbolInfo with
                     Name = t.Name
@@ -133,12 +140,14 @@ module internal XgiSymbolsModule =
                     Type = plcType
                     Device = device
                     Address = address
+                    DevicePos = devPos
                     InitValue = t.BoxedValue
                     Kind = kindVar }
 
             symbolInfo
 
         | DuXgiVar xgi ->
+
             if kindVar = int Variable.Kind.VAR_GLOBAL then
                 // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
                 { xgi.SymbolInfo with
@@ -148,14 +157,14 @@ module internal XgiSymbolsModule =
                 xgi.SymbolInfo
 
         | DuTimer timer ->
-            let device, addr =
+            let device, addr, devicePos  =
                 match prjParam.TargetType with
                 | XGK ->
-                    let formattedAddr = tCounterGenerator().ToString("0000")
-                    "T", $"T{formattedAddr}"
-                | _ -> "", ""   
-
-                   
+                    let offset = tCounterGenerator()
+                    let formattedAddr = offset.ToString("0000")
+                    "T", $"T{formattedAddr}", offset
+                | _ -> "", "", -1   
+      
             let plcType =
                 match timer.Type with
                 | TON
@@ -170,6 +179,7 @@ module internal XgiSymbolsModule =
                 Type = plcType
                 Address = addr
                 Device = device
+                DevicePos = devicePos
                 Kind = kindVar }
 
         | DuCounter counter ->
@@ -201,13 +211,13 @@ module internal XgiSymbolsModule =
     let private xgxSymbolsToSymbolInfos
         (prjParam: XgxProjectParams)
         (kindVar: int)
-        (xgiSymbols: XgxSymbol seq)
+        (xgxSymbols: XgxSymbol seq)
       : SymbolInfo list =
-        xgiSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
+        xgxSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
 
 
     let private storagesToSymbolInfos (prjParam: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
-        storagesToXgiSymbol >> map snd >> xgxSymbolsToSymbolInfos prjParam kindVar
+        storagesToXgxSymbol >> map snd >> xgxSymbolsToSymbolInfos prjParam kindVar
 
     /// <LocalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
@@ -220,7 +230,7 @@ module internal XgiSymbolsModule =
             [ yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR) localStorages
               yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
 
-        XGITag.generateLocalSymbolsXml prjParam.TargetType symbolInfos
+        XGITag.generateLocalSymbolsXml prjParam symbolInfos
 
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
@@ -241,4 +251,28 @@ module internal XgiSymbolsModule =
             | Some(Error err) -> failwith err
             | _ -> ()
 
-        XGITag.generateGlobalSymbolsXml prjParam.TargetType symbolInfos
+
+            let usedAddresses =
+                symbolInfos
+                |> Seq.filter (fun f -> f.Address <> null && f.Address <> "")
+                |> Array.ofSeq
+
+            //check if there is any duplicated address
+            let duplicatedAddresses =
+                usedAddresses
+                |> Array.groupBy (fun f -> f.Address)
+                |> Array.filter (fun (_, vs) -> vs.Length > 1)
+
+            // prints duplications
+            if duplicatedAddresses.Length > 0 then
+                let dupItems =
+                    duplicatedAddresses
+                    |> map (fun (address, vs) ->
+                        let names = vs |> map (fun var -> var.Name) |> String.concat ", "
+                        $"  {address}: {names}")
+                    |> String.concat Environment.NewLine
+
+                failwithlog
+                    $"Total {duplicatedAddresses.Length} 중복주소 items:{Environment.NewLine}{dupItems}"
+
+        XGITag.generateGlobalSymbolsXml prjParam symbolInfos

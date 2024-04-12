@@ -39,6 +39,7 @@ module MemoryAllocator =
         (typ: string)
         (availableByteRange: IntRange)
         (reservedBytes: int list)
+        (target: RuntimeTargetType)
       : PLCMemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
@@ -77,7 +78,13 @@ module MemoryAllocator =
                 if reservedBytes |> List.contains byteIndex then
                     getAddress reqMemType
                 else
-                    let address = $"%%{typ}{reqMemType}{bitIndex}"
+                    let address = 
+                        if target = XGI then
+                            $"%%{typ}{reqMemType}{bitIndex}"
+                        elif target = XGK then
+                            xgkIOMBit(typ, bitIndex)
+                        else
+                            failwithlog "ERROR"
                     logDebug "Address %s allocated" address
                     address
 
@@ -119,7 +126,18 @@ module MemoryAllocator =
                     //if reservedBytes |> List.contains byteIndex then
                     //    getAddress reqMemType
                     //else
-                    let address = $"%%{typ}{reqMemType}{byteIndex / byteSize}"
+
+
+
+                    let address = 
+                        
+                        if target = XGI then
+                            $"%%{typ}{reqMemType}{byteIndex / byteSize}"
+                        elif target = XGK then
+                            xgkIOMWord (typ, byteIndex)
+                        else
+                            failwithlog "ERROR"
+
                     logDebug "Address %s allocated" address
                     address
             | _ -> failwithlog "ERROR"

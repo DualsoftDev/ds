@@ -264,9 +264,11 @@ module XgiExportModule =
             (*
              * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
              *)
-            let programBody = posiLdRoutine.ParentNode
-            let localSymbols = localStoragesXml |> DualXmlNode.ofString
-            programBody.InsertAfter localSymbols |> ignore
+            if prjParam.TargetType = XGI
+            then
+                let programBody = posiLdRoutine.ParentNode
+                let localSymbols = localStoragesXml |> DualXmlNode.ofString
+                programBody.InsertAfter localSymbols |> ignore
 
             programTemplate
 

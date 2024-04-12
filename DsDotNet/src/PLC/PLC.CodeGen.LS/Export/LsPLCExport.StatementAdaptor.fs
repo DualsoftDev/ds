@@ -38,7 +38,7 @@ open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module ConvertorPrologModule =
-    let systemTypeToXgiTypeName (typ: System.Type) =
+    let private systemTypeToXgiTypeName (typ: System.Type) =
         match typ.Name with
         | BOOL -> "BOOL"
         | UINT8 -> "BYTE"
@@ -54,19 +54,19 @@ module ConvertorPrologModule =
         | (INT8 | CHAR) -> "BYTE"
         | _ -> failwithlog "ERROR"
 
-    //let private systemTypeToXgkTypeName (typ: System.Type) =
-    //    match typ.Name with
-    //    | BOOL -> "BIT"
-    //    | (INT8 | UINT8 | CHAR) -> "BYTE"
-    //    | (INT16 | UINT16) -> "WORD"
-    //    | (INT32 | UINT32) -> "DWORD"
-    //    | _ -> failwithlog "ERROR"
+    let private systemTypeToXgkTypeName (typ: System.Type) =
+        match typ.Name with
+        | BOOL -> "BIT"
+        | (INT8 | UINT8 | CHAR)
+        | (INT16 | UINT16) 
+        | (INT32 | UINT32) -> "WORD"
+        | _ -> failwithlog "ERROR"
 
-    //let systemTypeToXgxTypeName =
-    //    match RuntimeDS.Target with
-    //    | XGI -> systemTypeToXgiTypeName
-    //    | XGK -> systemTypeToXgkTypeName
-    //    | _ -> failwithlog "ERROR"
+    let systemTypeToXgxTypeName (typ: System.Type) (target) =
+        match target with
+        | XGI -> systemTypeToXgiTypeName typ 
+        | XGK -> systemTypeToXgkTypeName typ
+        | _ -> failwithlog "ERROR"
 
 
     let mutable internal autoVariableCounter = 0
@@ -603,4 +603,5 @@ module XgxExpressionConvertorModule =
             ] |> ofNotNullAny |> String.concat "\r\n"
             |> escapeXml
 
+       
         CommentedXgiStatements(rungComment, xgiStatements)

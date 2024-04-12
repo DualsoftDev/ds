@@ -160,21 +160,21 @@ type XgxExpEqualityTest(xgx:RuntimeTargetType) =
 type XgiExpEqualityTest() =
     inherit XgxExpEqualityTest(XGI)
 
-    [<Test>] member x.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
-    [<Test>] member x.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
+    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
+    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
-    [<Test>] member x.``Expression equality generation test`` () = base.``Expression equality generation test``()
-    [<Test>] member x.``XOR test`` () = base.``XOR test``()
+    [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
+    [<Test>] member __.``XOR test`` () = base.``XOR test``()
 
 
 type XgkExpEqualityTest() =
     inherit XgxExpEqualityTest(XGK)
 
-    [<Test>] member x.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
-    [<Test>] member x.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
+    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
+    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
-    [<Test>] member x.``Expression equality generation test`` () = base.``Expression equality generation test``()
-    [<Test>] member x.``XOR test`` () = base.``XOR test``()
+    [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
+    [<Test>] member __.``XOR test`` () = base.``XOR test``()
 
 
 

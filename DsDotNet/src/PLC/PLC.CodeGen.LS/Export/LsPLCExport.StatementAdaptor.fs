@@ -38,7 +38,7 @@ open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module ConvertorPrologModule =
-    let private systemTypeToXgiTypeName (typ: System.Type) =
+    let internal systemTypeToXgiTypeName (typ: System.Type) =
         match typ.Name with
         | BOOL -> "BOOL"
         | UINT8 -> "BYTE"

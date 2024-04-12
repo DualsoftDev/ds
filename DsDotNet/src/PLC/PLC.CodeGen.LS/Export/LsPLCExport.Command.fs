@@ -166,7 +166,7 @@ module internal rec Command =
 
     type System.Type with
 
-        member x.SizeString = systemTypeToXgxTypeName x
+        member x.GetSizeString(target:RuntimeTargetType) = systemTypeToXgxTypeName x target
 
 
     let drawPredicate (x, y) (predicate: Predicate) target: BlockSummarizedXmlElements =
@@ -181,7 +181,7 @@ module internal rec Command =
             let func =
                 match name with
                 | ("GT" | "GE" | "EQ" | "LE" | "LT" | "NE") ->
-                    let opCompType = args[0].DataType.SizeString
+                    let opCompType = args[0].DataType.GetSizeString(target)
 
                     if name = "NE" then
                         $"{name}_{opCompType}" // NE_BOOL
@@ -191,7 +191,7 @@ module internal rec Command =
 
             createBoxXmls (x, y) func namedInputParameters outputParameters "" target
 
-    let drawFunction (x, y) (func: Function) target: BlockSummarizedXmlElements =
+    let drawFunction (x, y) (func: Function) (target:RuntimeTargetType): BlockSummarizedXmlElements =
         match func with
         | Arithmatic(name, output, args) ->
             let namedInputParameters =
@@ -202,7 +202,7 @@ module internal rec Command =
 
             let plcFuncType =
                 let outputType = getType output
-                systemTypeToXgxTypeName outputType
+                systemTypeToXgxTypeName outputType target
 
             let func =
                 // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수

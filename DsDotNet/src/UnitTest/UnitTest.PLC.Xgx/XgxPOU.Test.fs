@@ -77,7 +77,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
             ProjectName = projName
             RungCounter = counterGenerator 0 |> Some
             POUs = [pou11.Value; pou12.Value; pou21.Value]
-            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) []) // 유닛테스트 연속호출시 누적되므로 새로 호출
+            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) [] xgx) // 유닛테스트 연속호출시 누적되므로 새로 호출
     }
 
     member x.``POU1 test`` () =
@@ -160,7 +160,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
-                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices)    // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
         let xml = projectParams.GenerateXmlString()
 
@@ -196,7 +196,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
-                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices)    // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
         ( fun () ->
             let xml = projectParams.GenerateXmlString()
@@ -227,7 +227,7 @@ type XgxPOUTest(xgx:RuntimeTargetType) =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
-                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices)    // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
         ( fun () ->
             let xml = projectParams.GenerateXmlString()

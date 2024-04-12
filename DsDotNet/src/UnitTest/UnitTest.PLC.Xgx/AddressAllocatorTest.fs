@@ -6,14 +6,13 @@ open NUnit.Framework
 open PLC.CodeGen.Common
 open Engine.Core
 
-type AddressAllocatorTest() =
-    inherit XgxTestBaseClass(XGI)
+type AddressAllocatorTest(xgx:RuntimeTargetType) =
+    inherit XgxTestBaseClass(xgx)
 
-    [<Test>]
     member __.``Allocate address beyond limit test`` () =
         let {
             BitAllocator  = x
-        } = MemoryAllocator.createMemoryAllocator "M" (0, 0) []
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 0) [] xgx
 
         for i = 0 to 7 do
             x() === $"%%MX{i}"   // %MX0 ~ %MX10
@@ -22,11 +21,10 @@ type AddressAllocatorTest() =
 
         let {
             WordAllocator = w
-        } = MemoryAllocator.createMemoryAllocator "M" (0, 0) []
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 0) [] xgx
 
         (fun () -> w() |> ignore) |> ShouldFailWithSubstringT "Limit exceeded."
 
-    [<Test>]
     member __.``Allocate address`` () =
         let {
             BitAllocator  = x
@@ -34,7 +32,7 @@ type AddressAllocatorTest() =
             WordAllocator = w
             DWordAllocator= d
             LWordAllocator= l
-        } = MemoryAllocator.createMemoryAllocator "M" (0, 100) []
+        } = MemoryAllocator.createMemoryAllocator "M" (0, 100) [] xgx
 
         for i = 0 to 10 do
             x() === $"%%MX{i}"   // %MX0 ~ %MX10
@@ -48,7 +46,6 @@ type AddressAllocatorTest() =
         w() === "%MW5"
         b() === "%MB9"
 
-    [<Test>]
     member __.``Allocate address test2`` () =
         let {
             BitAllocator  = x
@@ -56,7 +53,7 @@ type AddressAllocatorTest() =
             WordAllocator = w
             DWordAllocator= d
             LWordAllocator= l
-        } = MemoryAllocator.createMemoryAllocator "M" (20, 100) []
+        } = MemoryAllocator.createMemoryAllocator "M" (20, 100) [] xgx
 
         b() === "%MB20"
         b() === "%MB21"
@@ -69,3 +66,18 @@ type AddressAllocatorTest() =
             x() === $"%%MX{208+i}"
         d() === "%MD7"
         b() === "%MB32"
+
+
+type XgiAddressAllocatorTest() =
+    inherit AddressAllocatorTest(XGI)
+    [<Test>] member __.``Allocate address beyond limit test`` () = base.``Allocate address beyond limit test``()
+    [<Test>] member __.``Allocate address`` () = base.``Allocate address``()
+    [<Test>] member __.``Allocate address test2`` () = base.``Allocate address test2``()
+
+
+
+type XgkAddressAllocatorTest() =
+    inherit AddressAllocatorTest(XGK)
+    [<Test>] member __.``Allocate address beyond limit test`` () = base.``Allocate address beyond limit test``()
+    [<Test>] member __.``Allocate address`` () = base.``Allocate address``()
+    [<Test>] member __.``Allocate address test2`` () = base.``Allocate address test2``()

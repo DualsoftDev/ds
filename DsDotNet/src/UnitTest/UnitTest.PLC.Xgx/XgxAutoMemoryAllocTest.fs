@@ -42,7 +42,7 @@ type AutoMemoryAllocTest(xgx:RuntimeTargetType) =
                 TargetType = xgx
                 ProjectName = getFuncName()
                 GlobalStorages = globalStorages
-                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedByteIndices)    // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedByteIndices xgx)    // 640K M memory 영역
                 POUs = [pouIQMap]
                 RungCounter = counterGenerator 0 |> Some
         }

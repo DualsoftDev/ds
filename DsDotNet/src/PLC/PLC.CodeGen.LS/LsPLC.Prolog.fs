@@ -18,11 +18,13 @@ module XgiPrologModule =
         | _ ->
             Ok true
 
-    let validateAddress (address:string) = 
-        if address.IsXGIAddress() then
-            Ok true
-        else
-            Error $"Invalid address: '{address}'"
+    let validateAddress name (address:string) targetType = 
+        match targetType with       
+        |RuntimeTargetType.XGI  ->   if address.IsXGIAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
+        |RuntimeTargetType.XGK  ->   if address.IsXGKAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
+        |_->
+             Error $"Invalid targetType: '{targetType}'" 
+        
 
     /// Xml Symbol tag 가 가지는 속성
     type SymbolInfo = {
@@ -40,12 +42,12 @@ module XgiPrologModule =
         State:int
         AddressIEC : string //XGK 일경우 IEC 주소로 변환해서 가지고 있음
     } with
-        member x.Validate() =
+        member x.Validate(targetType) =
             result {
                 let! _ = validateVariableName x.Name
                 let! _ = if  x.Address.IsNullOrEmpty() && x.Device = ""  //빈주소 자동 변수로 허용
                          then Ok true 
-                         else  validateAddress x.Address
+                         else validateAddress x.Name x.Address targetType
                 return! Ok()
             }
 

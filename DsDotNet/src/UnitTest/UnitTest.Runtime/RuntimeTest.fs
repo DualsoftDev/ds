@@ -17,8 +17,10 @@ module RuntimeTest =
     let testPPT =  @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/testA/testMy/my.pptx"
     RuntimeDS.IP  <- "192.168.9.100"
     RuntimeDS.Package <- RuntimePackage.Simulation
-    let zipPath = ImportPPT.GetRuntimeZipFromPPT testPPT
-    let runtimeModel = new RuntimeModel(zipPath)
+    let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true}
+
+    let zipPath = ImportPPT.GetRuntimeZipFromPPT (testPPT, pptParms)
+    let runtimeModel = new RuntimeModel(zipPath, pptParms.TargetType)
 
    
     [<Obsolete("테트스 성공/실패가 random 임.  수정 필요")>]

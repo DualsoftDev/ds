@@ -80,8 +80,15 @@ module internal XgiSymbolsModule =
             if t.Address <> TextAddrEmpty then
                 t.Address <- allocator ()
 
-    let getXGITagInfo (address:string) (name:string) =
-        match tryParseXGITag address with
+    let getXGXTagInfo (address:string) (name:string) targetType =
+        let tag = 
+            match targetType with
+            | XGI -> tryParseXGITag address
+            | XGK -> tryParseXGKTag address
+            | _-> 
+                failwith $"Invalid tag  targetType {targetType}"
+
+        match tag with
         | Some tag -> address, tag.Device.ToString()
         | _ -> 
             if address = TextAddrEmpty then
@@ -96,7 +103,7 @@ module internal XgiSymbolsModule =
             let name = t.Name
 
             autoAllocatorAdress t prjParam
-            let address, device = getXGITagInfo t.Address t.Name 
+            let address, device = getXGXTagInfo t.Address t.Name (prjParam.TargetType)
             let plcType = systemTypeToXgiTypeName t.DataType
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
@@ -118,7 +125,7 @@ module internal XgiSymbolsModule =
                 let comment = SecurityElement.Escape t.Comment
                
                 autoAllocatorAdress t prjParam
-                let address, device = getXGITagInfo t.Address t.Name 
+                let address, device = getXGXTagInfo t.Address t.Name  prjParam.TargetType
 
                 { defaultSymbolInfo with
                     Name = t.Name
@@ -139,14 +146,21 @@ module internal XgiSymbolsModule =
                     Address = xgi.Address }
             else
                 xgi.SymbolInfo
-        | DuTimer timer ->
-            let device, addr = "", ""
 
+        | DuTimer timer ->
+            let device, addr =
+                match prjParam.TargetType with
+                | XGK ->
+                    let formattedAddr = tCounterGenerator().ToString("0000")
+                    "T", $"T{formattedAddr}"
+                | _ -> "", ""   
+
+                   
             let plcType =
                 match timer.Type with
                 | TON
                 | TOF
-                | TMR -> timer.Type.ToString()
+                | TMR -> timer.Type.ToString() 
 
             let name, comment = timer.Name, $"TIMER {timer.Name}"
 
@@ -157,8 +171,15 @@ module internal XgiSymbolsModule =
                 Address = addr
                 Device = device
                 Kind = kindVar }
+
         | DuCounter counter ->
-            let device, addr = "", ""
+            let device, addr =
+                match prjParam.TargetType with
+                | XGK ->
+                    let formattedAddr = cCounterGenerator().ToString("0000")
+                    "C", $"C{formattedAddr}"
+                | _ -> "", ""   
+
 
             let plcType =
                 match counter.Type with
@@ -212,7 +233,7 @@ module internal XgiSymbolsModule =
         do
             let optError =
                 symbolInfos
-                |> map (fun si -> si.Validate())
+                |> map (fun si -> si.Validate(prjParam.TargetType))
                 |> filter Result.isError
                 |> Seq.tryHead
 

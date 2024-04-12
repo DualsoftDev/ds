@@ -122,7 +122,7 @@ module ExportModule =
         // RuntimeDS.Target <- plcType  // xxx 
         let globalStorage = new Storages()
         let localStorage = new Storages()
-        let pous = CpuLoaderExt.LoadStatements(system, globalStorage)
+        let pous = CpuLoaderExt.LoadStatements(system, globalStorage, plcType)
         // Create a list to hold <C>ommented <S>tatement<S>
         let mutable css = []
 

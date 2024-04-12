@@ -54,7 +54,9 @@ module RuntimeGeneratorModule =
 
     let InitStartMemory = 1000
     let BufferAlramSize = 1000
-    let ExternalTempMemory =  "%MX0"
+    let ExternalTempMemory =  "M0.0"
+    let ExternalTempIECMemory =  "%MX0"
+    let ExternalTempNoIECMemory =  "M00000"
    
     type RuntimeDS() =
         static let mutable runtimeTarget = WINDOWS
@@ -72,8 +74,6 @@ module RuntimeGeneratorModule =
                 targetChangedSubject.OnNext(v)
 
         static member val HwSlotDataTypes  =  ResizeArray<SlotDataType>() with get, set
-        static member val HwStartInBit = 0   with get, set
-        static member val HwStartOutBit = 0  with get, set
         static member val IP = "192.168.9.100" with get, set
 
         static member val TimeoutCall = callTimeout  with get, set

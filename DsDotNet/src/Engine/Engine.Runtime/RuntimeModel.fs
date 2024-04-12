@@ -13,10 +13,10 @@ open DsStreamingModule
 type FilePath = string
 
 
-type RuntimeModel(zipDsPath:FilePath) =
+type RuntimeModel(zipDsPath:FilePath, target)  =
     let jsonPath = unZip zipDsPath
     let model:Model = ParserLoader.LoadFromConfig (jsonPath) 
-    let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU(model.System)
+    let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU model.System target
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
    
     let dsStreaming = DsStreaming(model.System, PathManager.getDirectoryName(jsonPath|>DsFile))

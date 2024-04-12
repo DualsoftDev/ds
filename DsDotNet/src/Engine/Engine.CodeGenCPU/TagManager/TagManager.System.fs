@@ -10,7 +10,7 @@ module SystemManagerModule =
 
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
-    type SystemManager (sys:DsSystem, stg:Storages)  =
+    type SystemManager (sys:DsSystem, stg:Storages, target:RuntimeTargetType)  =
         let dsSysTag (dt:DataType) name autoAddr target (systemTag:SystemTag) =
             if stg.ContainsKey(name) then stg[name]
             else
@@ -107,6 +107,7 @@ module SystemManagerModule =
             member x.Target = sys
             member x.Storages = stg
             
+        member s.TargetType = target 
         member s.MutualCalls = mutualCalls 
         member s.GetTempBoolTag(name:string, address:string, fqdn:IQualifiedNamed) : IStorage=
                 if stg.ContainsKey(name) then stg[name]
@@ -114,7 +115,7 @@ module SystemManagerModule =
                     createBridgeTag(stg, name, address, SystemTag.temp|>int, BridgeType.DummyTemp, sys, fqdn).Value
 
         member s.GetTempTimerTag(name:string) : TimerStruct =
-                timer stg name sys
+                timer stg name sys target
             
         member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with

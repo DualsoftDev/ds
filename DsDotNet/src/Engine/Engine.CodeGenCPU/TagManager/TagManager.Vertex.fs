@@ -225,10 +225,11 @@ module TagManagerModule =
         inherit VertexManager(v)
         let s    = this.Storages
         let sys = this.System
-        let createTag name = this.CreateTag name
+        let sysManager = sys.TagManager :?> SystemManager
+        let createTag name = this.CreateTag name 
 
         let counterBit    = counter  s "CTR"  sys
-        let timerOnDelayBit = timer  s "TON"  sys 
+        let timerOnDelayBit = timer  s $"{v.Name}_TON"  sys (sysManager.TargetType)
         let memo           = createTag "Memo" VertexTag.callMemo
 
    
@@ -238,7 +239,7 @@ module TagManagerModule =
         let rxErrOpenOff     = createTag "rxErrOpenOff"       VertexTag.rxErrOpenOff    
         let rxErrOpenRising  = createTag "rxErrOpenRising"    VertexTag.rxErrOpenRising 
         let rxErrOpenTemp    = createTag "rxErrOpenTemp"      VertexTag.rxErrOpenTemp   
-        let timerTimeOutBit  = timer  s "TOUT" sys 
+        let timerTimeOutBit  = timer  s $"{v.Name}_TOUT" sys (sysManager.TargetType)
        
 
         ///Ring Counter

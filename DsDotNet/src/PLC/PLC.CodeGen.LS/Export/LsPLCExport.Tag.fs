@@ -104,6 +104,8 @@ module XGITag = //IEC61131Tag =
 
     let pCounterGenerator = counterGenerator 0
     let mCounterGenerator = counterGenerator 0
+    let tCounterGenerator = counterGenerator 0
+    let cCounterGenerator = counterGenerator 0
     let xCounterGenerator = counterGenerator 0
     type SymbolInfo with
 
@@ -139,6 +141,7 @@ module XGITag = //IEC61131Tag =
                         match x.Device with
                         | "I" | "Q" -> "P", pCounterGenerator()     // 임시코드...
                         | "" | "M" -> "M", mCounterGenerator()
+                        | "T"  -> "T", tCounterGenerator()
                         | _  -> x.Device, xCounterGenerator()
                     let typ =
                         match x.Type with

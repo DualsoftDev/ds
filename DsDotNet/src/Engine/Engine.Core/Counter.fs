@@ -58,40 +58,46 @@ module rec CounterModule =
         let mutable acc = getNull<VariableBase<CountUnitType>>()
         let mutable res = nullB
         let add = addTagsToStorages storages
-        
+        let dnName = if RuntimeDS.Target = XGK
+                     then $"{name}"
+                     else 
+                        if typ = CTUD 
+                        then $"{name}.QU" 
+                        else $"{name}.Q" 
+                                
         match RuntimeDS.Target, typ with
-        | (WINDOWS | XGI), CTU ->
+        | (WINDOWS | XGI| XGK), CTU ->
             cu  <- createBool     $"{name}.CU" false  // Count up enable bit
             res <- createBool     $"{name}.R" false
             pre <- createUInt32   $"{name}.PV" preset
-            dn  <- createBoolWithTagKind     $"{name}.Q" false  (VariableTag.PcSysVariable|>int) // Done
+            dn  <- createBoolWithTagKind  dnName false  (VariableTag.PcSysVariable|>int) // Done
             acc <- createUInt32   $"{name}.CV" accum
             add [cu; res; pre; dn; acc]
 
-        | (WINDOWS | XGI), CTD ->
+        | (WINDOWS | XGI| XGK), CTD ->
             cd  <- createBool     $"{name}.CD" false   // Count down enable bit
             ld  <- createBool     $"{name}.LD" false   // Load
             pre <- createUInt32   $"{name}.PV" preset
-            dn  <- createBoolWithTagKind     $"{name}.Q" false  (VariableTag.PcSysVariable|>int) // Done
+            dn  <- createBoolWithTagKind    dnName false  (VariableTag.PcSysVariable|>int) // Done
             acc <- createUInt32   $"{name}.CV" accum
             add [cd; res; ld; pre; dn; acc]
 
-        | (WINDOWS | XGI), CTUD ->
+        | (WINDOWS | XGI| XGK), CTUD ->
             cu  <- createBool     $"{name}.CU" false  // Count up enable bit
             cd  <- createBool     $"{name}.CD" false  // Count down enable bit
             res <- createBool     $"{name}.R" false
             ld  <- createBool     $"{name}.LD" false  // Load
             pre <- createUInt32   $"{name}.PV" preset
-            dn  <- createBoolWithTagKind     $"{name}.QU" false   (VariableTag.PcSysVariable|>int) // Done
+            dn  <- createBoolWithTagKind     dnName false   (VariableTag.PcSysVariable|>int) // Done
             dnDown  <- createBoolWithTagKind $"{name}.QD" false   (VariableTag.PcSysVariable|>int) // Done
             acc <- createUInt32   $"{name}.CV" accum
             add [cu; cd; res; ld; pre; dn; dnDown; acc]
 
-        | (WINDOWS | XGI), CTR ->
+        | (WINDOWS | XGI| XGK), CTR ->
             cd  <- createBool     $"{name}.CD" false   // Count down enable bit
             pre <- createUInt32   $"{name}.PV" preset
             res <- createBool     $"{name}.RST" false
-            dn  <- createBoolWithTagKind     $"{name}.Q" false    (VariableTag.PcSysVariable|>int) // Done
+            dn  <- createBoolWithTagKind     dnName false    (VariableTag.PcSysVariable|>int) // Done
             acc <- createUInt32   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
 

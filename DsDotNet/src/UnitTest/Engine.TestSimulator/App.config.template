@@ -25,7 +25,7 @@
         <add key="TestFile"
              value="../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS\testA\testMy/my.pptx"/>
         <add key="TestWhat" value="MSG_EXPORT"/>
-        <!--MSG_CHECK;MSG_EXPORT;MSG_SIMULATION;MSG_IOCSV;MSG_KILLHELPER-->
+        <!--MSG_CHECK;MSG_EXPORT;MSG_SIMULATION;MSG_PLCIOCSV;MSG_KILLHELPER-->
     </appSettings>
     <log4net>
         <!--<log4net debug="true">-->

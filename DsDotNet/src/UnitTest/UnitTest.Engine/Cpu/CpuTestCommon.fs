@@ -23,7 +23,7 @@ module CpuTestUtil =
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- sys
             RuntimeDS.Package <- RuntimePackage.PLC
-            applyTagManager (sys, Storages())
+            applyTagManager (sys, Storages(), XGI)
             checkCausalModel sys
             sys
 

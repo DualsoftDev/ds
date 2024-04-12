@@ -25,7 +25,7 @@ module TimerTestModule =
             let t1 = createTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTon"; Preset=200u; RungInCondition=condition; FunctionName="createWinTON"}
-            let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
+            let timer = TimerStatement.CreateTON(tcParam) XGI |> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -121,7 +121,7 @@ module TimerTestModule =
             let t1 = createTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTof"; Preset=200u; RungInCondition=condition; FunctionName="createWinTOF"}
-            let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(tcParam) XGI|> toTimer       // 2000ms = 2sec
             timer.EN.Value === true
             timer.TT.Value === false
             timer.DN.Value === true
@@ -134,7 +134,7 @@ module TimerTestModule =
             let t1 = createTag("my_timer_control_tag", "%M1.1", false)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTof"; Preset=200u; RungInCondition=condition; FunctionName="createWinTON"}
-            let timer = TimerStatement.CreateTON(tcParam) |> toTimer       // 2000ms = 2sec
+            let timer = TimerStatement.CreateTON(tcParam) XGI|> toTimer       // 2000ms = 2sec
             timer.TT.Value === false
             timer.EN.Value === false
             timer.DN.Value === false
@@ -147,7 +147,7 @@ module TimerTestModule =
             let t1 = createTag("my_timer_control_tag", "%M1.1", true)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myTof"; Preset=200u; RungInCondition=condition; FunctionName="createWinTOF"}
-            let timer = TimerStatement.CreateTOF(tcParam) |> toTimer       // 2000ms = 2sec
+            let timer = TimerStatement.CreateTOF(tcParam) XGI|> toTimer       // 2000ms = 2sec
             // rung 입력 조건이 false
             t1.Value <- false
             evaluateRungInputs timer
@@ -195,7 +195,7 @@ module TimerTestModule =
             let condition = var2expr rungConditionInTag
             let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myTmr"; Preset=100u; RungInCondition=condition; FunctionName="createWinTMR"}
-            let timer = TimerStatement.CreateTMR(tcParam, reset) |> toTimer       // 1000ms = 1sec
+            let timer = TimerStatement.CreateTMR(tcParam, reset) XGI|> toTimer       // 1000ms = 1sec
 
             timer.EN.Value === true
             timer.TT.Value === true

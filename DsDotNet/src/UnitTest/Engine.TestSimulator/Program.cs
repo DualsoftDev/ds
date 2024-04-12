@@ -24,7 +24,7 @@ namespace Engine.TestSimulator
             //Web test 시에 RuntimePackage.PC 설정 (flow auto drive ready web에서 시작조건 켜야함)
             RuntimeDS.Package = RuntimePackage.Simulation;
            // RuntimeDS.Package = RuntimePackage.PC; 
-            RuntimeModel runModel = new(testFile);
+            RuntimeModel runModel = new(testFile, RuntimeTargetType.WINDOWS);
 
             DsSystem[] systems = new DsSystem[] { runModel.System };
             DSCommonAppSettings commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));

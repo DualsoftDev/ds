@@ -49,7 +49,6 @@ type VertexManager with
             | Developer ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrTimeOver , getFuncName())
             | Simulation -> yield (call._off.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
             | _ ->          yield (v.TOUT.DN.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
-               
         ]
 
     member v.M4_CallErrorRXMonitor() =

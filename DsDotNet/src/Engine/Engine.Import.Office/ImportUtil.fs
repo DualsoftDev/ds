@@ -670,9 +670,9 @@ module ImportU =
                 api.AddRXs(rxs) |> ignore)
 
         [<Extension>]
-        static member UpdateActionIO(doc: pptDoc, sys: DsSystem) =
+        static member UpdateActionIO(doc: pptDoc, sys: DsSystem, target, autoIO:bool) =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
-            if RuntimeDS.Package <> Simulation 
+            if not(autoIO)
             && activeSys.IsSome && activeSys.Value = sys
             && pageTables.isEmpty()
             then  failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
@@ -692,7 +692,7 @@ module ImportU =
                     // Handle the exception for duplicate names here
                     failwithf "Duplicate name: %s" name)
 
-            ApplyIO(sys, pageTables)
+            ApplyIO(sys, pageTables, target)
 
         [<Extension>]
         static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =

@@ -177,12 +177,12 @@ module RunTime =
     type DsCpuExt  =
         //Job 만들기
         [<Extension>]
-        static member GetDsCPU (dsSys:DsSystem) : DsCPU*HMIPackage*(PouGen seq) =
+        static member GetDsCPU (dsSys:DsSystem) (target) : DsCPU*HMIPackage*(PouGen seq) =
             let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
             // Initialize storages and load CPU statements
             let storages = Storages()
-            let pous = CpuLoaderExt.LoadStatements(dsSys, storages) |> Seq.toList
+            let pous = CpuLoaderExt.LoadStatements(dsSys, storages, target) |> Seq.toList
 
             // Create a list to hold commented statements
             let mutable css = []

@@ -11,7 +11,7 @@ module testMain =
         
         //test me ds.zip 
         let testFile = @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip"
-        let testRuntimeModel = new RuntimeModel(testFile)
+        let testRuntimeModel = new RuntimeModel(testFile, WINDOWS)
 
         //test me dualsoft.json 
         let testFile = @"C:\Users\안승훈\videos\dualsoft.json"

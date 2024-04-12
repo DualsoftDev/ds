@@ -22,6 +22,7 @@ module pptTestModule =
         let reGenerated = helper.TheSystem.ToDsText(true)
         reGenerated.Length =!= 0 //파싱 확인만 text 비교는 순서바뀌어서 불가능
     let testpptPath = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/ImportOfficeExample/ppt/"
+    let pptParms:PPTParams = {TargetType = XGK; AutoIOM = true}
 
     type PPTTest() =
         inherit EngineTestBaseClass()
@@ -29,14 +30,14 @@ module pptTestModule =
         do
             RuntimeDS.Package <- Simulation
 
-        [<Test>] member __.``System  test``    () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T1_System.pptx",false))
-        [<Test>] member __.``Flow  test``      () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T2_Flow.pptx",false))
-        [<Test>] member __.``Real  test``      () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T3_Real.pptx",false))
-        [<Test>] member __.``Api  test``       () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T4_Api.pptx",false))
-        [<Test>] member __.``Calltest``        () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T5_Call.pptx",false))
-        [<Test>] member __.``Alias  test``     () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T6_Alias.pptx",false))
-        [<Test>] member __.``CopySystem test`` () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T7_CopySystem.pptx",false))
-        [<Test>] member __.``Safety test``     () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T8_Safety.pptx",false))
-        [<Test>] member __.``Group test``      () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T9_Group.pptx",false))
-        [<Test>] member __.``Button test``     () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T10_Button.pptx",false))
-        [<Test>] member __.``SubLoading test`` () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T11_SubLoading.pptx",false))
+        [<Test>] member __.``System  test``    () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T1_System.pptx",false, pptParms))
+        [<Test>] member __.``Flow  test``      () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T2_Flow.pptx",false, pptParms))
+        [<Test>] member __.``Real  test``      () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T3_Real.pptx",false, pptParms))
+        [<Test>] member __.``Api  test``       () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T4_Api.pptx",false, pptParms))
+        [<Test>] member __.``Calltest``        () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T5_Call.pptx",false, pptParms))
+        [<Test>] member __.``Alias  test``     () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T6_Alias.pptx",false, pptParms))
+        [<Test>] member __.``CopySystem test`` () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T7_CopySystem.pptx",false, pptParms))
+        [<Test>] member __.``Safety test``     () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T8_Safety.pptx",false, pptParms))
+        [<Test>] member __.``Group test``      () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T9_Group.pptx",false, pptParms))
+        [<Test>] member __.``Button test``     () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T10_Button.pptx",false, pptParms))
+        [<Test>] member __.``SubLoading test`` () = check (ImportPPT.GetDSFromPPTWithLib ($"{testpptPath}/T11_SubLoading.pptx",false, pptParms))

@@ -52,7 +52,7 @@ module ExportIOTable =
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
-    let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) : DataTable =
+    let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable =
 
         let dt = new System.Data.DataTable($"{sys.Name} Panel IO LIST")
         addIOColumn dt
@@ -61,7 +61,7 @@ module ExportIOTable =
             for btn in btns do
                 if containSys then
                     let func =  if btn.Func.IsSome then btn.Func.Value.ToDsText() else ""
-                    let i, o = getValidBtnAddress(btn)
+                    let i, o = getValidBtnAddress(btn) target 
                     dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool",  i, o ,func)
                     |> ignore
 
@@ -70,7 +70,7 @@ module ExportIOTable =
                 if containSys then
                     let func =  if lamp.Func.IsSome then lamp.Func.Value.ToDsText() else ""
 
-                    let i, o = getValidLampAddress(lamp)
+                    let i, o = getValidLampAddress(lamp) target 
                     dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool",   i, o, func)
                     |> ignore
 
@@ -102,7 +102,7 @@ module ExportIOTable =
 
 
     
-    let rowIOItems (dev: TaskDev, job: Job, firstJobRow :bool) =
+    let rowIOItems (dev: TaskDev, job: Job, firstJobRow :bool) target =
             let funcs =
                 if firstJobRow then
                     if job.Func.IsSome then job.Func.Value.ToDsText() else ""
@@ -120,13 +120,13 @@ module ExportIOTable =
             [ TextXlsAddress
               dev.ApiName
               "bool"
-              getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In)
-              getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
+              getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target )
+              getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target )
               funcs ]
 
     let IOchunkBySize = 22
 
-    let ToDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) : DataTable seq =
+    let ToDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable seq =
   
         let totalRows =
             let calls = selectFlows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
@@ -140,9 +140,9 @@ module ExportIOTable =
                     then
                         let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
                         if sortedDeviceDefs.Head() = dev then
-                            yield rowIOItems (dev, job, true) //첫 TaskDev만 만듬
+                            yield rowIOItems (dev, job, true) target //첫 TaskDev만 만듬
                         else
-                            yield rowIOItems (dev, job, false)
+                            yield rowIOItems (dev, job, false) target
             }
 
         let dts = 
@@ -150,7 +150,7 @@ module ExportIOTable =
             |> Seq.chunkBySize(IOchunkBySize)
             |> Seq.mapi(fun i rows->
                 let dt = new System.Data.DataTable($"{sys.Name} Device IO LIST {i+1}")
-                addIOColumn dt
+                addIOColumn dt 
                 addRows rows dt
                 dt
             )
@@ -159,7 +159,7 @@ module ExportIOTable =
 
 
 
-    let ToConditionNExternalDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) : DataTable seq =
+    let ToConditionNExternalDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
   
         let conditionRows =
             let coins = sys.GetVerticesOfCoinCalls()
@@ -172,16 +172,20 @@ module ExportIOTable =
                     then
 
                         if dev.InAddress = TextAddrEmpty || dev.InAddress = TextSkip
-                        then  dev.InAddress <- ExternalTempMemory
+                        then  dev.InAddress <- 
+                                match target with   
+                                | RuntimeTargetType.XGK -> ExternalTempNoIECMemory
+                                | RuntimeTargetType.XGI -> ExternalTempIECMemory
+                                | _ -> ExternalTempMemory 
 
                         if dev.OutAddress = TextAddrEmpty 
                         then  dev.OutAddress <- TextSkip
 
                         let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
                         if sortedDeviceDefs.Head() = dev then 
-                            yield rowIOItems (dev, job, true) //첫 TaskDev만 만듬
+                            yield rowIOItems (dev, job, true) target//첫 TaskDev만 만듬
                         else
-                            yield rowIOItems (dev, job, false)
+                            yield rowIOItems (dev, job, false) target
             }
 
 
@@ -191,7 +195,7 @@ module ExportIOTable =
             conds |> Seq.map(fun cond ->
             
                 let func =  if cond.Func.IsSome then cond.Func.Value.ToDsText() else ""
-                let i= getValidCondiAddress(cond)
+                let i= getValidCondiAddress(cond) target
                 [
                     ExcelCase.XlsConditionReady.ToText()
                     cond.Name
@@ -204,7 +208,7 @@ module ExportIOTable =
 
 
         let dts = 
-            conditionRows @  getConditionDefListRows (sys.ReadyConditions)
+            conditionRows @  getConditionDefListRows (sys.ReadyConditions) 
             |> Seq.chunkBySize(IOchunkBySize)
             |> Seq.map(fun rows->
                 let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")
@@ -503,12 +507,12 @@ module ExportIOTable =
         dt
 
 
-    let ToIOListDataTables (system: DsSystem)  = 
+    let ToIOListDataTables (system: DsSystem) target = 
         let tableDeviceIOs = ToDeviceIOTables system system.Flows true
         let tablePanelIO = ToPanelIOTable system system.Flows true
         let tableExternalDeviceIOs = ToConditionNExternalDeviceIOTables system system.Flows true
 
-        let tables = tableDeviceIOs @ [tablePanelIO] @ tableExternalDeviceIOs
+        let tables = tableDeviceIOs target @ [tablePanelIO target] @ tableExternalDeviceIOs target
         //tables.Iter     (fun t->
         
         //        t.Columns.Remove($"{IOColumn.Case}")
@@ -560,13 +564,13 @@ module ExportIOTable =
     [<Extension>]
     type OfficeExcelExt =
         [<Extension>]
-        static member ExportIOListToExcel (system: DsSystem) (filePath: string) =
-            let dataTables =  ToIOListDataTables system  @  [|ToErrorTable system|]
+        static member ExportIOListToExcel (system: DsSystem) (filePath: string) target=
+            let dataTables =  ToIOListDataTables system  target@  [|ToErrorTable system|]
             createSpreadsheet filePath dataTables 25.0 true
 
         [<Extension>]
-        static member ExportIOListToPDF (system: DsSystem) (filePath: string) =
-            let dataTables =  ToIOListDataTables system  @  [|ToErrorTable system|]
+        static member ExportIOListToPDF (system: DsSystem) (filePath: string) target=
+            let dataTables =  ToIOListDataTables system  target@  [|ToErrorTable system|]
             convertDataSetToPdf filePath dataTables 
 
             
@@ -583,8 +587,8 @@ module ExportIOTable =
             createSpreadsheet filePath dataTables 25.0 false
 
         [<Extension>]
-        static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool)  =
-            let dataTables = ToIOListDataTables system 
+        static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool) target =
+            let dataTables = ToIOListDataTables system target
             toDataTablesToCSV dataTables "IOTABLE"
 
         [<Extension>]

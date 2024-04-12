@@ -68,12 +68,12 @@ module CpuLoader =
 
 
 
-    let applyTagManager(system:DsSystem, storages:Storages) =
+    let applyTagManager(system:DsSystem, storages:Storages, target) =
         let createTagM (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
             RuntimeDS.System <- sys
 
-            sys.TagManager <- SystemManager(sys, storages)
+            sys.TagManager <- SystemManager(sys, storages, target)
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
             sys.GetVertices().Iter(fun v->
@@ -94,9 +94,9 @@ module CpuLoader =
     [<Extension>]
     type CpuLoaderExt =
         [<Extension>]
-        static member LoadStatements (system:DsSystem, storages:Storages) =
+        static member LoadStatements (system:DsSystem, storages:Storages, targetType) =
             UniqueName.resetAll()
-            applyTagManager (system, storages)
+            applyTagManager (system, storages, targetType)
           
             let pous =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환

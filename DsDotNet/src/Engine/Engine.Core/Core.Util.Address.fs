@@ -11,14 +11,53 @@ open System
 module DsAddressModule =
    
  
-    let mutable inCnt = RuntimeDS.HwStartInBit
-    let mutable outCnt = RuntimeDS.HwStartOutBit
+    let mutable inCnt = 0
+    let mutable outCnt = 0
     let mutable memoryCnt = InitStartMemory
     let setMemoryIndex(index:int) = memoryCnt <- index;
-    let InitializeMemoryIndex () = memoryCnt <- InitStartMemory
+    let InitializeIOMemoryIndex () =
+                memoryCnt <- InitStartMemory
+                inCnt <- 0  
+                outCnt <- 0
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
-    let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType) =
+
+    let xgkIOM (device:string, offset: int) : string =
+        let word = offset / 16
+        let bit = offset % 16
+        device + sprintf "%04i%X" word bit
+
+    let getStartPointXGK(index:int) =
+        RuntimeDS.HwSlotDataTypes
+            |> Seq.filter(fun (i, _, _) -> i < index)
+            |> Seq.map(fun (_, dtype, dSzie) ->
+                
+                match dtype with
+                | NotUsed  ->  16 //기본 더미 Size
+                | In | Out ->  
+                    match dSzie with
+                    | DuUINT8 | DuUINT16  -> 16 //기본 더미 Size
+                    | DuUINT32  -> 32
+                    | DuUINT64  -> 64
+                    | _   -> failwithf $"{dSzie} not support"
+                | _   -> failwithf $"{dtype} not support"
+            ) |>  Seq.sum
+
+    let getUsedPointXGK(index:int, usedType:IOType) =
+        RuntimeDS.HwSlotDataTypes
+            |> Seq.filter(fun (i, dtype, _) -> i < index && usedType = dtype)
+            |> Seq.map(fun (_, _, dSzie) ->
+                    match dSzie with
+                    | DuUINT8   -> 8 
+                    | DuUINT16  -> 16 //기본 더미 Size
+                    | DuUINT32  -> 32
+                    | DuUINT64  -> 64
+                    | _   -> failwithf $"{dSzie} not support"
+            ) |>  Seq.sum
+
+
+    let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType, target:RuntimeTargetType) =
+        let iec = target = RuntimeTargetType.XGI
 
         let addr = if addr.IsNullOrEmpty()
                     then failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  
@@ -30,23 +69,49 @@ module DsAddressModule =
 
         let addr =  addr.Trim().ToUpper()
 
-     
-
         let newAddr =
             if addr = TextAddrEmpty && not(isSkip)
             then
                 let cnt =
                     match ioType with 
-                    |In -> let _inCnt = inCnt
-                           inCnt <- inCnt + 1; _inCnt
-                    |Out -> let _outCnt = outCnt
-                            outCnt <- outCnt + 1; _outCnt
+                    |In ->     let _inCnt = inCnt
+                               inCnt <- inCnt + 1; _inCnt
+
+                    |Out ->    let _outCnt = outCnt
+                               outCnt <- outCnt + 1; _outCnt
+
                     |Memory -> let _memoryCnt = memoryCnt
                                memoryCnt <- memoryCnt + 1; _memoryCnt
+
                     |NotUsed -> failwithf $"{ioType} not support"
 
 
-                let getSlotInfo(settingType: IOType, newCnt:int) =
+
+                let getSlotInfoNonIEC(settingType: IOType, newCnt: int) =
+                    let filterSlotsByType = 
+                        RuntimeDS.HwSlotDataTypes 
+                        |> Seq.filter(fun (_, ioType, _) -> ioType = settingType)
+
+                    let calculateAssignedUpToIndex currIndex =
+                        filterSlotsByType 
+                        |> Seq.filter(fun (i, _, _) -> i <= currIndex)
+                        |> Seq.fold (fun acc (_, _, data) -> acc + fst (data.ToBlockSizeNText())) 0
+
+                    let findAvailableSlots =
+                        filterSlotsByType 
+                        |> Seq.tryFind(fun (i, _, _) -> newCnt < calculateAssignedUpToIndex i)
+
+                    match findAvailableSlots with
+                    | Some (i, _, _) -> 
+                        let startPoint = getStartPointXGK (i)
+                        if i = 0 then newCnt
+                        else 
+                            let usedPoint = getUsedPointXGK (i-1, settingType)
+                            startPoint + (newCnt - usedPoint)
+                    | None -> failwithf "%AType 슬롯이 부족합니다." settingType
+
+
+                let getSlotInfoIEC(settingType: IOType, newCnt:int) =
                     let curr =
                         match settingType with 
                         | In -> newCnt
@@ -87,13 +152,27 @@ module DsAddressModule =
                 then
                     
                     match ioType with 
-                    |In ->  let iSlot, sumBit  =  getSlotInfo(ioType, cnt)
-                            $"%%IX0.{iSlot}.{(cnt-sumBit) % 64}" 
+                    |In ->  
+                            if iec
+                            then
+                                let iSlot, sumBit = getSlotInfoIEC(ioType, cnt)
+                                $"%%IX0.{iSlot}.{(cnt-sumBit) % 64}" 
+                            else 
+                                xgkIOM("P", getSlotInfoNonIEC(ioType, cnt)) 
                             
-                    |Out -> let iSlot ,sumBit =  getSlotInfo(ioType, cnt)
-                            $"%%QX0.{iSlot}.{(cnt-sumBit) % 64}" 
+                    |Out -> 
+                            if iec
+                            then
+                                let iSlot ,sumBit = getSlotInfoIEC(ioType, cnt)
+                                $"%%QX0.{iSlot}.{(cnt-sumBit) % 64}" 
+                            else 
+                                xgkIOM("P", getSlotInfoNonIEC(ioType, cnt)) 
 
-                    |Memory -> $"%%MX{cnt}" 
+                    |Memory -> if iec
+                                 then $"%%MX{cnt}" 
+                                 else  xgkIOM("M", cnt) 
+                                   
+
                     |NotUsed -> failwithf $"{ioType} not support"
 
                 else TextAddrEmpty
@@ -105,33 +184,33 @@ module DsAddressModule =
         newAddr
 
   
-    let private getValidBtnHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) =
-        let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, IOType.Memory)
-        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, IOType.Memory)
+    let private getValidBtnHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
+        let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, IOType.Memory, target)
+        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, IOType.Memory, target)
         inAddr, outAddr
 
-    let getValidBtnAddress (btn: ButtonDef)       = getValidBtnHwItem btn  false false
-    let getValidLampAddress (lamp: LampDef)       = getValidBtnHwItem lamp true false 
-    let getValidCondiAddress (cond: ConditionDef) = getValidAddress(cond.InAddress, cond.Name, false, IOType.In)
+    let getValidBtnAddress (btn: ButtonDef)  target     = getValidBtnHwItem btn  false false target
+    let getValidLampAddress (lamp: LampDef)  target     = getValidBtnHwItem lamp true false  target
+    let getValidCondiAddress (cond: ConditionDef) target = getValidAddress(cond.InAddress, cond.Name, false, IOType.In, target)
 
 
-    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) =
+    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) target =
         
         setMemoryIndex(startMemory);
 
         for b in sys.HWButtons do
             b.InAddress <- TextAddrEmpty
             b.OutAddress <- TextSkip
-            b.InAddress <- getValidBtnAddress b |> fst
+            b.InAddress <- getValidBtnAddress b target |> fst
 
         for l in sys.HWLamps do
             l.InAddress <- TextSkip
             l.OutAddress <- TextAddrEmpty
-            l.OutAddress <- getValidLampAddress l |> snd
+            l.OutAddress <- getValidLampAddress l target |> snd
 
         for c in sys.HWConditions do
             c.InAddress <- TextAddrEmpty
-            c.InAddress <- getValidCondiAddress c 
+            c.InAddress <- getValidCondiAddress c  target
             
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
                             |> Seq.sortBy (fun (dev,_) ->dev.ApiName)
@@ -144,24 +223,8 @@ module DsAddressModule =
                 |NoneTRx -> true,true
                 |_ ->  false,false
 
-            dev.InAddress <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In)
-            dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out)
+            dev.InAddress <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target)
+            dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target)
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
-
-
-
-    let getStartPointXGK(index:int) =
-        RuntimeDS.HwSlotDataTypes
-            |> Seq.filter(fun (i, _, _) -> i < index)
-            |> Seq.map(fun (_, dtype, dSzie) ->
-                match dtype with
-                | NotUsed | Memory ->  16 //기본 더미 Size
-                | In | Out ->  
-                    match dSzie with
-                    | DuUINT8 | DuUINT16  -> 16 //기본 더미 Size
-                    | DuUINT32  -> 32
-                    | DuUINT64  -> 64
-                    | _   -> failwithf $"{dSzie} not support"
-            ) |>  Seq.sum
 

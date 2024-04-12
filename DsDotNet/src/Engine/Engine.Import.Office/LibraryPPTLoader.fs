@@ -23,10 +23,12 @@ type LibraryPPTLoaderExt =
             let informationalLib = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyDescriptionAttribute>().Description
             let infos = Dictionary<string, string>()
             let configPath = Path.Combine(directoryPath, "Library.config");
+            let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true}
 
             for file in files do
                 if not (file.Contains("~$")) then //pptx 사용중 임시파일 무시 ~$HelloDS.pptx
-                    let sys = ImportPPT.GetDSFromPPTWithLib(file, true).System
+                    
+                    let sys = ImportPPT.GetDSFromPPTWithLib(file, true, pptParms).System
                     let relPath = Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
                     let relPathAddLibDirPath = Path.Combine("dsLib", relPath)
                     for item in sys.ApiItems do

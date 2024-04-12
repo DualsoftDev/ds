@@ -56,8 +56,8 @@ module TimerStatementModule =
 
         generateTimerStatement (ts, tParams)
 
-    let private createTimerStatement (storages:Storages) (tParams:TimerCreateParams)  : Statement =
-        let ts = TimerStruct.Create(tParams.Type, storages, tParams.Name, tParams.Preset, 0u, RuntimeDS.System)
+    let private createTimerStatement (storages:Storages) (target:RuntimeTargetType)  (tParams:TimerCreateParams)  : Statement =
+        let ts = TimerStruct.Create(tParams.Type, storages, tParams.Name, tParams.Preset, 0u, RuntimeDS.System, target)
         generateTimerStatement (ts, tParams)
 
 
@@ -73,29 +73,29 @@ module TimerStatementModule =
     }
 
     type TimerStatement =
-        static member CreateTON(tcParams:TCConstructionParams) =
+        static member CreateTON(tcParams:TCConstructionParams) (target:RuntimeTargetType)=
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             ({   Type=TON; Name=name; Preset=preset;
                 RungConditionIn=Some rungInCondition;
                 ResetCondition=None; FunctionName=functionName}:TimerCreateParams)
-            |> createTimerStatement storages
+            |> createTimerStatement storages target
 
         static member CreateTONUsingStructure(ts: TimerStruct, rungInCondition, resetCondition) =
             createTONStatement (ts, rungInCondition, resetCondition)
 
-        static member CreateTOF(tcParams:TCConstructionParams) =
+        static member CreateTOF(tcParams:TCConstructionParams) (target:RuntimeTargetType)=
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             ({   Type=TOF; Name=name; Preset=preset;
                 RungConditionIn=Some rungInCondition;
                 ResetCondition=None; FunctionName=functionName}:TimerCreateParams)
-            |> createTimerStatement storages
+            |> createTimerStatement storages target
 
-        static member CreateAbRTO(tcParams:TCConstructionParams) =
+        static member CreateAbRTO(tcParams:TCConstructionParams) (target:RuntimeTargetType)=
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             ({   Type=TMR; Name=name; Preset=preset;
                 RungConditionIn=Some rungInCondition;
                 ResetCondition=None; FunctionName=functionName }:TimerCreateParams)
-            |> createTimerStatement storages
+            |> createTimerStatement storages target
 
         //static member CreateTON(tcParams:TCConstructionParams, resetCondition) =
         //    let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition} = tcParams
@@ -111,12 +111,12 @@ module TimerStatementModule =
         //        ResetCondition=Some resetCondition; }
         //    |> createTimerStatement storages
 
-        static member CreateTMR(tcParams:TCConstructionParams, resetCondition) =
+        static member CreateTMR(tcParams:TCConstructionParams, resetCondition) (target:RuntimeTargetType)=
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=rungInCondition; FunctionName=functionName} = tcParams
             ({   Type=TMR; Name=name; Preset=preset;
                 RungConditionIn=Some rungInCondition;
                 ResetCondition=Some resetCondition; FunctionName=functionName}:TimerCreateParams)
-            |> createTimerStatement storages
+            |> createTimerStatement storages target
 
 
 

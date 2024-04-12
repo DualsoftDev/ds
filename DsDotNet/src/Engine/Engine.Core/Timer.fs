@@ -191,19 +191,26 @@ module rec TimerModule =
         member _.TT:VariableBase<bool> = tt
         member _.Type = typ
 
-        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let en, tt, dn, pre, acc, res =
-                match RuntimeDS.Target with
-                | ( XGK | XGI | WINDOWS ) -> "IN", "_TT", "Q", "PT", "ET", "RST"
-                | AB -> "EN", "TT", "DN", "PRE", "ACC", "RES"
-                | _ -> failwithlog "NOT yet supported"
+        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys,  target:RuntimeTargetType) =
+            let suffixes  = 
+                match target with
+                | XGK -> ["_IN"; "_TT"; "_ON"; "_PT"; "_ET"; "_RST"]
+                | XGI | WINDOWS -> [".IN"; "._TT"; ".Q"; ".PT"; ".ET"; ".RST"]
+                | AB -> [".EN"; ".TT"; ".DN"; ".PRE"; ".ACC"; ".RES"]
+                | _ -> failwith "NOT yet supported"
 
-            let en  = createBool              $"{name}.{en }" false
-            let tt  = createBool              $"{name}.{tt }" false
-            let dn  = createBoolWithTagKind   $"{name}.{dn }" false (VariableTag.PcSysVariable|>int) // Done
-            let pre = createUInt32            $"{name}.{pre}" preset
-            let acc = createUInt32            $"{name}.{acc}" accum
-            let res = createBool              $"{name}.{res}" false
+            let en, tt, dn, pre, acc, res =
+                let names = suffixes |> Seq.map (fun suffix -> $"{name}{suffix}") |> Seq.toList
+                match names with
+                | [en; tt; dn; pre; acc; res] -> en, tt, dn, pre, acc, res
+                | _ -> failwith "Unexpected number of suffixes"
+
+            let en  = createBool              $"{en }" false
+            let tt  = createBool              $"{tt }" false
+            let dn  = createBoolWithTagKind   $"{dn }" false (VariableTag.PcSysVariable|>int) // Done
+            let pre = createUInt32            $"{pre}" preset
+            let acc = createUInt32            $"{acc}" accum
+            let res = createBool              $"{res}" false
             
             storages.Add(en.Name, en)
             storages.Add(tt.Name, tt)

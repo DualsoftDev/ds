@@ -24,6 +24,7 @@
         <Compile Include="Core.Extensions\DsSystem.fs" />
         <Compile Include="Core.Extensions\Flow.fs" />
         <Compile Include="Core.Extensions\Vertex, Call, Real.fs" />
+        <Compile Include="Core.Extensions\Timer Counter.fs" />
         <Compile Include="Code.SpecUtil.fs" />
         <Compile Include="Code.ConvertUtil.fs" />
         <Compile Include="1.Api.fs" />

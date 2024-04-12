@@ -22,7 +22,7 @@ module CpuTestUtil =
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../UnitTest.Model"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- sys
-            applyTagManager (sys, Storages())
+            applyTagManager (sys, Storages(), WINDOWS)
             sys
 
         let sys               = LoadSampleSystem()

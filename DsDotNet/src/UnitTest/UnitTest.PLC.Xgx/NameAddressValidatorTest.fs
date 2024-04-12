@@ -38,7 +38,7 @@ type NameAddressValidatorTest() =
             "%MW2.1"
         ]
         for addr in validAddresses do
-            validateAddress addr |> Result.isOk === true
+            validateAddress "" addr XGI |> Result.isOk === true
 
         let invalidAddresses = [
             "%IX0A1"; "%MX0.1"; "%MX9.1"; "%MX1.1.1"; "%M0.1.2"       // MX 영역은 '.' 을 가지지 않는다.
@@ -49,7 +49,7 @@ type NameAddressValidatorTest() =
             "%M0ZZ"
         ]
         for xAddr in invalidAddresses do
-            validateAddress xAddr |> Result.isError === true
+            validateAddress "" xAddr XGI |> Result.isError === true
 
     [<Test>]
     member __.``Variable address standardize test`` () =

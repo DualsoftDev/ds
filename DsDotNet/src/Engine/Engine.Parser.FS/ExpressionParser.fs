@@ -247,12 +247,12 @@ module rec ExpressionParser =
 
                 match typ, functionName, args with
                 | TON, ("createWinTON" | "createXgiTON" | "createAbTON"), _ :: [ _ ] ->
-                    TimerStatement.CreateTON(tcParams)
+                    TimerStatement.CreateTON tcParams  RuntimeDS.Target
                 | TOF, ("createWinTOF" | "createXgiTOF" | "createAbTOF"), _ :: [ _ ] ->
-                    TimerStatement.CreateTOF(tcParams)
-                | TMR, ("createAbRTO"), _ :: [ _ ] -> TimerStatement.CreateAbRTO(tcParams)
+                    TimerStatement.CreateTOF tcParams  RuntimeDS.Target
+                | TMR, ("createAbRTO"), _ :: [ _ ] -> TimerStatement.CreateAbRTO tcParams  RuntimeDS.Target
                 | TMR, ("createXgiTMR" | "createWinTMR"), _ :: _ :: [ (BoolExp resetCondition) ] ->
-                    TimerStatement.CreateTMR(tcParams, resetCondition)
+                    TimerStatement.CreateTMR(tcParams, resetCondition) RuntimeDS.Target
                 | _ -> fail ()
             | _ -> fail ()
         | None -> fail ()

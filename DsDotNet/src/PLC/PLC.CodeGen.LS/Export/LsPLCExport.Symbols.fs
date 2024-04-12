@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.Common
 open PLC.CodeGen.LS
+open System
 
 
 [<AutoOpen>]
@@ -80,7 +81,8 @@ module internal XgiSymbolsModule =
             if t.Address <> TextAddrEmpty then
                 t.Address <- allocator ()
 
-    let getXgxTagInfo (prjParam: XgxProjectParams) (address:string) (name:string) =
+    /// address 와 device type 의 string * string 을 반환
+    let getXgxTagInfo (prjParam: XgxProjectParams) (address:string) (name:string) : string * string =
         if address = TextAddrEmpty then
             "", ""
         else

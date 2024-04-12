@@ -17,7 +17,7 @@ type XgxExistingXmlProjectAnalTest() =
         let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
 
         let usedMAddresses =
-            XmlDocument.loadFromFile xmlPrj
+            DualXmlDocument.loadFromFile xmlPrj
             |> (fun xdoc -> xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol") |> List.ofSeq
             |> map xmlSymbolNodeToSymbolInfo
             |> map address

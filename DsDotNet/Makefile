@@ -1,4 +1,4 @@
-.ONESHELL
+.ONESHELL:
 
 dotnet-restore:
 	@dotnet restore

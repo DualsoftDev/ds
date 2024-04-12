@@ -246,7 +246,7 @@ module XgiExportModule =
             let rungsXml = generateRungs prologComment prjParam commentedXgiStatements
 
             /// POU/Programs/Program
-            let programTemplate = createXmlStringProgram taskName pouName scanName |> XmlNode.ofString
+            let programTemplate = createXmlStringProgram taskName pouName scanName |> DualXmlNode.ofString
 
             //let programTemplate = DsXml.adoptChild programs programTemplate
 
@@ -256,7 +256,7 @@ module XgiExportModule =
             (*
              * Rung 삽입
              *)
-            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> XmlNode.ofString
+            let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> DualXmlNode.ofString
 
             for r in rungsXml.GetChildrenNodes() do
                 onlineUploadData.InsertBefore r |> ignore
@@ -265,7 +265,7 @@ module XgiExportModule =
              * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
              *)
             let programBody = posiLdRoutine.ParentNode
-            let localSymbols = localStoragesXml |> XmlNode.ofString
+            let localSymbols = localStoragesXml |> DualXmlNode.ofString
             programBody.InsertAfter localSymbols |> ignore
 
             programTemplate
@@ -274,7 +274,7 @@ module XgiExportModule =
     and XgxProjectParams with
 
         member private x.GetTemplateXmlDoc() =
-            x.ExistingLSISprj |> Option.map XmlDocument.loadFromFile
+            x.ExistingLSISprj |> Option.map DualXmlDocument.loadFromFile
             |? getTemplateXgxXmlDoc x.TargetType
 
         member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
@@ -339,7 +339,7 @@ module XgiExportModule =
                     if kind = 2 //user task 만 삽입 (스캔프로그램Task는 template에 항상 있음)
                     then
                         createXmlStringTask pou.TaskName kind priority index device
-                        |> XmlNode.ofString
+                        |> DualXmlNode.ofString
                         |> xnTasks.AdoptChild
                         |> ignore
              
@@ -404,7 +404,7 @@ module XgiExportModule =
                     |> Array.ofSeq
 
                 let globalStoragesXmlNode =
-                    storagesToGlobalXml x globalStoragesSortedByAllocSize |> XmlNode.ofString
+                    storagesToGlobalXml x globalStoragesSortedByAllocSize |> DualXmlNode.ofString
 
                 let numNewGlobals =
                     globalStoragesXmlNode.Attributes.["Count"].Value |> System.Int32.Parse

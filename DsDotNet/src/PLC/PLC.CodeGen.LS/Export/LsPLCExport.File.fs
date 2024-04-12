@@ -64,6 +64,7 @@ module internal XgiFile =
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
     let wrapWithXml (prjParam: XgxProjectParams) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
+        assert isInUnitTest()
         let targetType = prjParam.TargetType
         let xdoc =
             existingLSISprj |> Option.map XmlDocument.loadFromFile
@@ -136,7 +137,7 @@ module internal XgiFile =
             let globalSymbols = xnGlobalVar.GetXmlNode "Symbols"
             if targetType = XGI then
                 (*
-                 * Local variables 삽입
+                 * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
                  *)
                 let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml prjParam |> XmlNode.ofString
                 let programBody = xnLdRoutine.ParentNode

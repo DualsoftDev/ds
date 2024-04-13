@@ -199,12 +199,13 @@ module internal XgiSymbolsModule =
                 Kind = kindVar }
 
         | DuCounter counter ->
-            let device, addr =
+            let device, addr, devicePos  =
                 match prjParam.TargetType with
                 | XGK ->
-                    let formattedAddr = cCounterGenerator().ToString("0000")
-                    "C", $"C{formattedAddr}"
-                | _ -> "", ""   
+                    let offset = cCounterGenerator()
+                    let formattedAddr = offset.ToString("0000")
+                    "C", $"C{formattedAddr}", offset
+                | _ -> "", "", -1 
 
 
             let plcType =
@@ -222,6 +223,7 @@ module internal XgiSymbolsModule =
                 Type = plcType
                 Address = addr
                 Device = device
+                DevicePos = devicePos
                 Kind = kindVar }
 
     let private xgxSymbolsToSymbolInfos

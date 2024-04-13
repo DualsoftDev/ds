@@ -59,7 +59,7 @@ module rec CounterModule =
         let mutable res = nullB
         let add = addTagsToStorages storages
         let dnName = if target = XGK
-                     then $"{name}"
+                     then $"{name}{xgkTimerCounterContactMarking}"
                      else 
                         if typ = CTUD 
                         then $"{name}.QU" 

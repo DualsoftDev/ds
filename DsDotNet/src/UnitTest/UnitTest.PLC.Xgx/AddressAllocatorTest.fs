@@ -5,6 +5,7 @@ open NUnit.Framework
 
 open PLC.CodeGen.Common
 open Engine.Core
+open Dual.Common.Core.FS
 
 type AddressAllocatorTest(xgx:RuntimeTargetType) =
     inherit XgxTestBaseClass(xgx)
@@ -34,17 +35,34 @@ type AddressAllocatorTest(xgx:RuntimeTargetType) =
             LWordAllocator= l
         } = MemoryAllocator.createMemoryAllocator "M" (0, 100) [] xgx
 
-        for i = 0 to 10 do
-            x() === $"%%MX{i}"   // %MX0 ~ %MX10
-        b() === "%MB2"
-        x() === "%MX11"
-        b() === "%MB3"
-        w() === "%MW2"
-        w() === "%MW3"
-        x() === "%MX12"
-        b() === "%MB8"
-        w() === "%MW5"
-        b() === "%MB9"
+        match xgx with
+        | XGI ->
+            for i = 0 to 10 do
+                x() === $"%%MX{i}"   // %MX0 ~ %MX10
+            b() === "%MB2"
+            x() === "%MX11"
+            b() === "%MB3"
+            w() === "%MW2"
+            w() === "%MW3"
+            x() === "%MX12"
+            b() === "%MB8"
+            w() === "%MW5"
+            b() === "%MB9"
+        | XGK ->
+            for i = 0 to 10 do
+                x() === sprintf "M%05X" i   // M00000 ~ M0000A
+
+            b() === "M0001"
+            x() === "M0000B"
+            b() === "M0003"
+            //w() === "%MW2"
+            //w() === "%MW3"
+            //x() === "%MX12"
+            //b() === "%MB8"
+            //w() === "%MW5"
+            //b() === "%MB9"
+
+        | _ -> failwith "Not supported plc type"
 
     member __.``Allocate address test2`` () =
         let {

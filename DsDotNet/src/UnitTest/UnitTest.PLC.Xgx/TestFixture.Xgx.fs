@@ -20,6 +20,7 @@ module XgxGenerationTestModule =
         let index = src.LastIndexOf key
         src.Substring(0, index + key.Length)
 
+    /// bool x01 = createTag("%IX0.0", false); 등과 같은 항목을 반복 생성한다.
     let generateBitVariableDeclarations (xgx:RuntimeTargetType) (start: int) (count: int) =
         seq {
             for i in start .. start + count - 1 do

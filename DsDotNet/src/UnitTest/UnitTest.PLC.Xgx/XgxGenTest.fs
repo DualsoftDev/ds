@@ -53,7 +53,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``And Many test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 16 + """
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x15 :=
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 && $x10 &&
                 $x11 && $x12 && $x13 && $x14
@@ -178,7 +178,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``OR Many test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 16 + """
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x15 :=
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 ||
                 $x10 || $x11 || $x12 || $x13 || $x14
@@ -191,7 +191,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``OR Huge test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 32  + """
+        let code = generateBitTagVariableDeclarations xgx 0 32  + """
             $x15 :=
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 ||
                 $x10 || $x11 || $x12 || $x13 || $x14 || $x15 || $x16 || $x17 || $x18 || $x19 ||
@@ -207,7 +207,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``OR variable length 역삼각형 test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 16 + """
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x15 :=
                 $x00
                 || ( ( $x01 || $x02 ) && $x03 )
@@ -220,7 +220,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``OR Block test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 16 + """
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x15 :=
                 $x01 && ($x02 || ($x03 && ($x04 || $x05 || $x06 || $x07) && $x08 && ($x09 || $x10))) 
                 ;
@@ -233,7 +233,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``OR Block test2`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 32  + """
+        let code = generateBitTagVariableDeclarations xgx 0 32  + """
             $x31 :=
                 $x02
                 && ($x03 || $x04 || $x05)
@@ -254,7 +254,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``OR variable length test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 16 + """
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x07 :=    (($x00 || $x01) && $x02)
                         ||  $x03
                         || ($x04 && $x05 && $x06)
@@ -311,7 +311,7 @@ type XgxGenerationTest(xgx:RuntimeTargetType) =
 
     member x.``AndOr2 test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 16 + """
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x07 :=    (($x00 || $x01) && $x02)
                         ||  $x03
                         || ($x04 && $x05 && $x06)

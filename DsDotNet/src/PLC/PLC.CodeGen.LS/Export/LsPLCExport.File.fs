@@ -70,6 +70,7 @@ module internal XgiFile =
         let xdoc =
             existingLSISprj |> Option.map DualXmlDocument.loadFromFile
             |? getTemplateXgxXmlDoc targetType
+        xdoc.GetXmlNode("Project").FirstChild.InnerText <- prjParam.ProjectName
 
         let pouName = "DsLogic"
 
@@ -156,4 +157,6 @@ module internal XgiFile =
             neoGlobals.SelectNodes(".//Symbols/Symbol").ToEnumerables()
             |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
+        if targetType = XGK then
+            xdoc.MovePOULocalSymbolsToGlobal targetType
         xdoc.ToText()

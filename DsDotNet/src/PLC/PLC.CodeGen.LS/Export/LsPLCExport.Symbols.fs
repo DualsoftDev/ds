@@ -83,8 +83,8 @@ module internal XgiSymbolsModule =
                 let addr:string = allocator()
                 t.Address <- addr
 
-    [<Obsolete("임시 코드 삭제")>]
-    let getXGXTagInfo (address:string) (name:string) targetType =
+    //[<Obsolete("임시 코드 삭제")>]
+    let getXGXTagInfo (targetType:RuntimeTargetType) (address:string) (name:string) =
         let tag = 
             match targetType with
             | XGI -> tryParseXGITag address
@@ -104,7 +104,7 @@ module internal XgiSymbolsModule =
             if address = TextAddrEmpty then
                 "", "", -1
             else
-                //failwith $"Invalid tag address {address} for {name}"
+                failwith $"Invalid tag address {address} for {name}"
                 "", "", -1  // 임시
         
 
@@ -115,8 +115,8 @@ module internal XgiSymbolsModule =
         | DuStorage(:? ITag as t) ->
             let name = t.Name
             autoAllocatorAdress t prjParam
-            let address, device, devPos = getXGXTagInfo t.Address t.Name (prjParam.TargetType)
-            let plcType = systemTypeToXgxTypeName  t.DataType (prjParam.TargetType)
+            let address, device, devPos = getXGXTagInfo prjParam.TargetType t.Address t.Name
+            let plcType = systemTypeToXgxTypeName prjParam.TargetType t.DataType
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
    
@@ -136,11 +136,11 @@ module internal XgiSymbolsModule =
          
             let symbolInfo =
              
-                let plcType = systemTypeToXgxTypeName t.DataType (prjParam.TargetType)
+                let plcType = systemTypeToXgxTypeName prjParam.TargetType t.DataType
                 let comment = SecurityElement.Escape t.Comment
                
                 autoAllocatorAdress t prjParam
-                let address, device, devPos = getXGXTagInfo t.Address t.Name  prjParam.TargetType
+                let address, device, devPos = getXGXTagInfo prjParam.TargetType t.Address t.Name
 
 #if DEBUG
                 if device = "M" then

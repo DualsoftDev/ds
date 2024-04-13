@@ -89,7 +89,7 @@ type XgxRungTest(xgx:RuntimeTargetType) =
             | _ -> failwith "Not supported plc type"
 
         let output = createTag("myQ0", qx, false)
-        let statements_ = parseCode storages (generateBitVariableDeclarations xgx 0 32)
+        let statements_ = parseCode storages (generateBitTagVariableDeclarations xgx 0 32)
         let iTags = storages.Values.ToEnumerable<Tag<bool>>().Take(numTags).ToArray()
         let symbolInfos =
             let kindVar = int Variable.Kind.VAR

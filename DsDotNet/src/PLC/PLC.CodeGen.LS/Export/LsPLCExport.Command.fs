@@ -166,7 +166,7 @@ module internal rec Command =
 
     type System.Type with
 
-        member x.GetSizeString(target:RuntimeTargetType) = systemTypeToXgxTypeName x target
+        member x.GetSizeString(target:RuntimeTargetType) = systemTypeToXgxTypeName target x
 
 
     let drawPredicate (x, y) (predicate: Predicate) target: BlockSummarizedXmlElements =
@@ -202,7 +202,7 @@ module internal rec Command =
 
             let plcFuncType =
                 let outputType = getType output
-                systemTypeToXgxTypeName outputType target
+                systemTypeToXgxTypeName target outputType
 
             let func =
                 // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
@@ -250,7 +250,7 @@ module internal rec Command =
             let oDic = namedOutputParameters |> Tuple.toDictionary
 
             let systemTypeToXgxType (typ: System.Type) =
-                systemTypeToXgxTypeName typ  targetType|> DU.tryParseEnum<CheckType> |> Option.get
+                systemTypeToXgxTypeName targetType typ |> DU.tryParseEnum<CheckType> |> Option.get
 
             /// 입력 인자들을 function 의 입력 순서 맞게 재배열
             let alignedInputParameters =

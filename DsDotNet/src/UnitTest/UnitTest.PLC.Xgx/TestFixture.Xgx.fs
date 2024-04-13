@@ -20,8 +20,17 @@ module XgxGenerationTestModule =
         let index = src.LastIndexOf key
         src.Substring(0, index + key.Length)
 
+    let generateVariableDeclarationSeq (typ:string) (varNamePrefix:string) (initialValueSetter: int -> string) (start: int) (count: int) =
+        seq {
+            for i in start .. start + count - 1 do
+                yield sprintf "%s %s%d = %s;" typ varNamePrefix i (initialValueSetter i)   // e.g . "int16 n01 = 1s;"
+        }
+
+    let generateVariableDeclarations (typ:string) (varNamePrefix:string) (initialValueSetter: int -> string) (start: int) (count: int) =
+        generateVariableDeclarationSeq typ varNamePrefix initialValueSetter start count |> String.concat "\n"
+
     /// bool x01 = createTag("%IX0.0", false); 등과 같은 항목을 반복 생성한다.
-    let generateBitVariableDeclarations (xgx:RuntimeTargetType) (start: int) (count: int) =
+    let generateBitTagVariableDeclarationSeq (xgx:RuntimeTargetType) (start: int) (count: int) =
         seq {
             for i in start .. start + count - 1 do
                 let tag =
@@ -30,12 +39,19 @@ module XgxGenerationTestModule =
                     | XGK -> sprintf "P%05X" i
                     | _ -> failwith "Not supported runtime target"
                 yield sprintf "bool x%02d = createTag(\"%s\", false);" i tag
-        } |> String.concat "\n"
+        } 
+    let generateBitTagVariableDeclarations (xgx:RuntimeTargetType) (start: int) (count: int) =
+        generateBitTagVariableDeclarationSeq xgx start count |> String.concat "\n"
+
+    let generateInt16VariableDeclarations (start: int) (count: int) =
+        generateVariableDeclarations "int16" "nn" (fun i -> sprintf "%ds" i) start count
 
     let generateLargeVariableDeclarations (xgx:RuntimeTargetType) =
-        generateBitVariableDeclarations xgx 0 40 + "\n" + 
-            ([1..9] |> map (fun i -> $"int nn{i} = {i};") |> String.concat "\n")
-
+        seq {
+            yield! generateBitTagVariableDeclarationSeq xgx 0 40
+            yield! generateVariableDeclarationSeq "int" "nn" (fun i -> sprintf "%ds" i) 1 9
+        } |> String.concat "\n"
+        
 
 
 module XgiGenerationTestModule =

@@ -249,15 +249,8 @@ type XgxFunctionTest(xgx:RuntimeTargetType) =
 
     member x.``ADD 7 items test`` () =
         let storages = Storages()
-        let code = """
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-            int16 nn4 = 4s;
-            int16 nn5 = 5s;
-            int16 nn6 = 6s;
-            int16 nn7 = 7s;
-            int16 nn8 = 8s;
+        let code =
+            generateInt16VariableDeclarations 1 8 + """
 
             int16 sum = 0s;
             $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
@@ -269,16 +262,7 @@ type XgxFunctionTest(xgx:RuntimeTargetType) =
 
     member x.``ADD 8 items test`` () =
         let storages = Storages()
-        let code = """
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-            int16 nn4 = 4s;
-            int16 nn5 = 5s;
-            int16 nn6 = 6s;
-            int16 nn7 = 7s;
-            int16 nn8 = 8s;
-
+        let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
             $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
 """
@@ -291,17 +275,7 @@ type XgxFunctionTest(xgx:RuntimeTargetType) =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
             let storages = Storages()
-            let code = """
-                int16 nn1 = 1s;
-                int16 nn2 = 2s;
-                int16 nn3 = 3s;
-                int16 nn4 = 4s;
-                int16 nn5 = 5s;
-                int16 nn6 = 6s;
-                int16 nn7 = 7s;
-                int16 nn8 = 8s;
-                int16 nn9 = 9s;
-                int16 nn10 = 10s;
+            let code = generateInt16VariableDeclarations 1 10 + """
 
                 int16 sum = 0s;
                 $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
@@ -331,15 +305,7 @@ type XgxFunctionTest(xgx:RuntimeTargetType) =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
             let storages = Storages()
-            let code = """
-                int16 nn1 = 1s;
-                int16 nn2 = 2s;
-                int16 nn3 = 3s;
-                int16 nn4 = 4s;
-                int16 nn5 = 5s;
-                int16 nn6 = 6s;
-                int16 nn7 = 7s;
-                int16 nn8 = 8s;
+            let code = generateInt16VariableDeclarations 1 8 + """
                 int16 sum = 0s;
                 $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
     """
@@ -353,15 +319,7 @@ type XgxFunctionTest(xgx:RuntimeTargetType) =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
             let storages = Storages()
-            let code = """
-                int16 nn1 = 1s;
-                int16 nn2 = 2s;
-                int16 nn3 = 3s;
-                int16 nn4 = 4s;
-                int16 nn5 = 5s;
-                int16 nn6 = 6s;
-                int16 nn7 = 7s;
-                int16 nn8 = 8s;
+            let code = generateInt16VariableDeclarations 1 8 + """
                 int16 sum = 0s;
                 bool result = false;
 

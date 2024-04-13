@@ -18,15 +18,7 @@ type XgxExpEqualityTest(xgx:RuntimeTargetType) =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
             let storages = Storages()
-            let code = """
-                int16 nn1 = 1s;
-                int16 nn2 = 2s;
-                int16 nn3 = 3s;
-                int16 nn4 = 4s;
-                int16 nn5 = 5s;
-                int16 nn6 = 6s;
-                int16 nn7 = 7s;
-                int16 nn8 = 8s;
+            let code = generateInt16VariableDeclarations 1 8 + """
                 int16 sum = 0s;
                 bool result = false;
 
@@ -42,16 +34,8 @@ type XgxExpEqualityTest(xgx:RuntimeTargetType) =
         lock x.Locker (fun () ->
             autoVariableCounter <- 0
             let storages = Storages()
-            let code = """
+            let code = generateInt16VariableDeclarations 1 8 + """
                 bool cond1 = false;
-                int16 nn1 = 1s;
-                int16 nn2 = 2s;
-                int16 nn3 = 3s;
-                int16 nn4 = 4s;
-                int16 nn5 = 5s;
-                int16 nn6 = 6s;
-                int16 nn7 = 7s;
-                int16 nn8 = 8s;
                 int16 sum = 0s;
                 bool result = false;
 
@@ -66,16 +50,8 @@ type XgxExpEqualityTest(xgx:RuntimeTargetType) =
 
     member __.``Expression equality test`` () =
         let storages = Storages()
-        let code = """
+        let code = generateInt16VariableDeclarations 1 8 + """
             bool cond1 = false;
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-            int16 nn4 = 4s;
-            int16 nn5 = 5s;
-            int16 nn6 = 6s;
-            int16 nn7 = 7s;
-            int16 nn8 = 8s;
             int16 sum = 0s;
             bool result = false;
 """
@@ -89,7 +65,7 @@ type XgxExpEqualityTest(xgx:RuntimeTargetType) =
 
     member x.``Expression equality generation test`` () =
         let storages = Storages()
-        let code = generateBitVariableDeclarations xgx 0 16 + """
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
             bool result1 = false;
             bool result2 = false;
             bool result3 = false;

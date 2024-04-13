@@ -6,23 +6,6 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open Engine.Core
-open System.Runtime.CompilerServices
-open System.Xml
-
-[<Extension>]
-type XgxXmlExtension =
-    [<Extension>]
-    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:RuntimeTargetType) : XmlNode =
-        let xnGlobalVar =
-            let xnXGlobalVariable =
-                match xgx with
-                | XGI -> "GlobalVariable"
-                | XGK -> "VariableComment"
-                | _ -> failwithlog "Not supported plc type"
-
-            xdoc.SelectSingleNode($"//Configurations/Configuration/GlobalVariables/{xnXGlobalVariable}")
-        xnGlobalVar
-
 
 [<AutoOpen>]
 module internal XgiFile =
@@ -144,24 +127,14 @@ module internal XgiFile =
          *)
         let xnGlobalVar = xdoc.GetXmlNodeTheGlobalVariable(targetType)
 
-        let xnGlobalVarSymbols =
-            let globalSymbols = xnGlobalVar.GetXmlNode "Symbols"
-            if targetType = XGI then
-                (*
-                 * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
-                 *)
-                let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml prjParam |> DualXmlNode.ofString
-                let programBody = xnLdRoutine.ParentNode
-                programBody.InsertAfter localSymbols |> ignore
+        (*
+         * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
+         *)
+        let localSymbols = localSymbolInfos |> XGITag.generateLocalSymbolsXml prjParam |> DualXmlNode.ofString
+        let programBody = xnLdRoutine.ParentNode
+        programBody.InsertAfter localSymbols |> ignore
 
-                globalSymbols
-            else
-                for l in localSymbolInfos do
-                    let lxml = l.GenerateXml prjParam |> DualXmlNode.ofString
-                    globalSymbols.AdoptChild(lxml) |> ignore
-                globalSymbols
-
-        //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
+        let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
 
         let xnCountConainer =

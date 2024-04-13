@@ -139,7 +139,7 @@ module XGITag = //IEC61131Tag =
                     // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
                     let typ =
                         match x.Type with
-                        | "BIT" -> "BIT"
+                        | ("BIT"|"BOOL") -> "BIT"
                         | "WORD" -> "WORD"
                         | "TON" -> "BIT/WORD"
                         | "CTR" -> "BIT/WORD"

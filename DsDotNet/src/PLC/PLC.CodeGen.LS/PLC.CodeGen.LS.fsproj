@@ -53,6 +53,7 @@
         <Compile Include="Export\LsPLCExport.StatementAdaptor.fs" />
         <Compile Include="Export\LsPLCExport.Command.fs" />
         <Compile Include="Export\LsPLCExport.Tag.fs" />
+        <Compile Include="Export\LsPLCExport.XmlDoc.fs" />
         <Compile Include="Export\LsPLCExport.File.fs" />
         <Compile Include="Export\LsPLCExport.Symbols.fs" />
         <Compile Include="Export\LsPLCExport.XmlProjectAnalyzer.fs" />

@@ -166,7 +166,7 @@ module internal rec Command =
 
     type System.Type with
 
-        member x.GetSizeString(target:RuntimeTargetType) = systemTypeToXgxTypeName target x
+        member x.GetSizeString(target:PlatformTarget) = systemTypeToXgxTypeName target x
 
 
     let drawPredicate (x, y) (predicate: Predicate) target: BlockSummarizedXmlElements =
@@ -191,7 +191,7 @@ module internal rec Command =
 
             createBoxXmls (x, y) func namedInputParameters outputParameters "" target
 
-    let drawFunction (x, y) (func: Function) (target:RuntimeTargetType): BlockSummarizedXmlElements =
+    let drawFunction (x, y) (func: Function) (target:PlatformTarget): BlockSummarizedXmlElements =
         match func with
         | Arithmatic(name, output, args) ->
             let namedInputParameters =
@@ -244,7 +244,7 @@ module internal rec Command =
             (namedInputParameters: (string * IExpression) list)
             (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
             (instanceName: string)
-            (targetType : RuntimeTargetType)
+            (targetType : PlatformTarget)
         : BlockSummarizedXmlElements =
             let iDic = namedInputParameters |> dict
             let oDic = namedOutputParameters |> Tuple.toDictionary

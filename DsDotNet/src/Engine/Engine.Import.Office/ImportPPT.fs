@@ -26,7 +26,7 @@ module ImportPPTModule =
 
     
     type PPTParams = {
-        TargetType: RuntimeTargetType
+        TargetType: PlatformTarget
         AutoIOM: bool
     }
 
@@ -65,7 +65,7 @@ module ImportPPTModule =
         let private sRepo = ShareableSystemRepository()
 
 
-        let rec private loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters, isLib, pptParams:PPTParams) =
+        let rec private loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters, isLib, autoIOM) =
             pathStack.Push(paras.AbsoluteFilePath)
             LoadingPPTNotify.Trigger(paras.AbsoluteFilePath)
             
@@ -119,7 +119,7 @@ module ImportPPTModule =
                 let addNewLoadedSys (newSys: DsSystem, bExtSys: bool, bOPEN_EXSYS_LINK: bool) =
 
                     loadedParentStack.Push(newSys)
-                    loadSystem (pptReop, newSys, paras, isLib, pptParams) |> ignore
+                    loadSystem (pptReop, newSys, paras, isLib, autoIOM) |> ignore
                     currentFileName <- pathStack.Peek()
 
                     let parents = loadedParentStack.ToHashSet().Skip(1).Reverse() //자신 제외
@@ -171,7 +171,7 @@ module ImportPPTModule =
                 doc.BuildSystem(theSys, isLib)
 
             if paras.LoadingType = DuNone then
-                doc.UpdateActionIO(theSys, pptParams.TargetType, pptParams.AutoIOM) 
+                doc.UpdateActionIO(theSys, autoIOM) 
                 doc.UpdateLayouts(theSys)
                 layoutImgPaths.AddRange(doc.SaveSlideImage())|>ignore
             
@@ -179,7 +179,7 @@ module ImportPPTModule =
             pptReop.Add(theSys, doc)
             theSys, doc
 
-        let internal GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string, isLib, pptParams) =
+        let internal GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string, isLib, autoIOM) =
             //active는 시스템이름으로 ppt 파일 이름을 사용
             let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile) 
             activeSysDir <- fileDirectory
@@ -198,18 +198,18 @@ module ImportPPTModule =
             layoutImgPaths.Clear()
 
             loadedParentStack.Push mySys
-            loadSystem (pptReop, mySys, paras, isLib, pptParams)
+            loadSystem (pptReop, mySys, paras, isLib, autoIOM)
 
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 
-    let private loadingfromPPTs (path: string ) isLib pptParams=
+    let private loadingfromPPTs (path: string ) isLib autoIOM =
         try
             try
                 let cfg = { DsFilePath = path
                             HWIP =  RuntimeDS.IP
                     }
 
-                let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams)
+                let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, autoIOM)
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
@@ -266,16 +266,17 @@ module ImportPPTModule =
     
         [<Extension>]
         static member GetDSFromPPTWithLib(fullName: string, isLib:bool, pptParams) =
+            Util.runtimeTarget <- pptParams.TargetType
             pptRepo.Clear()
            
             let exportPath =
                 let sys =
-                    let model: Model = loadingfromPPTs  fullName isLib pptParams |> Tuple.first
+                    let model: Model = loadingfromPPTs  fullName isLib pptParams.AutoIOM |> Tuple.first
                     model.System
 
                 sys.pptxToExportDS fullName
 
-            let system, loadingPaths = ParserLoader.LoadFromActivePath exportPath
+            let system, loadingPaths = ParserLoader.LoadFromActivePath exportPath Util.runtimeTarget
             { 
                 System = system
                 ActivePath =  exportPath 

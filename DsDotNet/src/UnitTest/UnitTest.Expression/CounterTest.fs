@@ -32,7 +32,7 @@ open PLC.CodeGen.LS
             let t1 = createTag("my_counter_control_tag", "%M1.1", false)
             let condition = var2expr t1
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTU"}
-            let ctu = CounterStatement.CreateAbCTU(tcParam) |> toCounter
+            let ctu = CounterStatement.CreateAbCTU(tcParam) ExpressionFixtures.runtimeTarget|> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
@@ -88,7 +88,7 @@ open PLC.CodeGen.LS
             let resetCondition = var2expr t3
 
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=upCondition; FunctionName="createWinCTUD"}
-            let ctu = CounterStatement.CreateAbCTUD(tcParam, downCondition, resetCondition) |> toCounter
+            let ctu = CounterStatement.CreateAbCTUD(tcParam, downCondition, resetCondition) ExpressionFixtures.runtimeTarget|> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
@@ -122,7 +122,7 @@ open PLC.CodeGen.LS
             let condition = var2expr t1
             let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTU"}
-            let ctu = CounterStatement.CreateCTU(tcParam, reset) |> toCounter
+            let ctu = CounterStatement.CreateCTU(tcParam, reset) ExpressionFixtures.runtimeTarget|> toCounter
             ctu.OV.Value === false
             ctu.UN.Value === false
             ctu.DN.Value === false
@@ -162,7 +162,7 @@ open PLC.CodeGen.LS
             let condition = var2expr t1
             let reset = var2expr resetTag
             let tcParam = {Storages=storages; Name="myCTR"; Preset=100u; RungInCondition=condition; FunctionName="createWinCTR"}
-            let ctr = CounterStatement.CreateXgiCTR(tcParam, reset) |> toCounter
+            let ctr = CounterStatement.CreateXgiCTR(tcParam, reset) ExpressionFixtures.runtimeTarget |> toCounter
             ctr.OV.Value === false
             ctr.UN.Value === false
             ctr.DN.Value === false

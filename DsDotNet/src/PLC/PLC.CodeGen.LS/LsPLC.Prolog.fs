@@ -20,8 +20,8 @@ module XgiPrologModule =
 
     let validateAddress name (address:string) targetType = 
         match targetType with       
-        |RuntimeTargetType.XGI  ->   if address.IsXGIAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
-        |RuntimeTargetType.XGK  ->   if address.IsXGKAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
+        |PlatformTarget.XGI  ->   if address.IsXGIAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
+        |PlatformTarget.XGK  ->   if address.IsXGKAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
         |_->
              Error $"Invalid targetType: '{targetType}'" 
         

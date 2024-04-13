@@ -38,7 +38,7 @@ module XgxTestCommonModule =
         </Rung>
 """
     
-    let getSimpleLocalSymbolInfos(xgx:RuntimeTargetType): SymbolInfo list =
+    let getSimpleLocalSymbolInfos(xgx:PlatformTarget): SymbolInfo list =
         let device =
             match xgx with
             | XGI -> "I"

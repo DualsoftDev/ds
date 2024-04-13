@@ -7,7 +7,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 open Engine.Core
 
-type XgxDrawingTest(xgx:RuntimeTargetType) =
+type XgxDrawingTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     let span width = width*3

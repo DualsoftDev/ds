@@ -24,7 +24,8 @@ module ParserLoader =
         let system = ModelParser.ParseFromString(text, option)
         system
 
-    let loadingDS (loadingConfigDir: string) (dsFile: string )  autoGenDevice =
+    let loadingDS (loadingConfigDir: string) (dsFile: string )  autoGenDevice (target:PlatformTarget)=
+        ParserUtil.runtimeTarget  <- target
         let systemRepo = ShareableSystemRepository()
 
         let sysPath =
@@ -44,7 +45,7 @@ module ParserLoader =
         system, loadings
 
 
-    let LoadFromConfig (configPath: string) =
+    let LoadFromConfig (configPath: string) (target:PlatformTarget)=
         let jsonFileName =PathManager.getFileName (configPath.ToFile())
         if jsonFileName  <> TextDSJson
         then failwithf $"LoadFromConfig FileName must be {TextDSJson}: now {jsonFileName}"
@@ -52,16 +53,16 @@ module ParserLoader =
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
         let dir = PathManager.getDirectoryName (configPath.ToFile())
-        let system, loadings = loadingDS dir cfg.DsFilePath false 
+        let system, loadings = loadingDS dir cfg.DsFilePath false target
 
         { Config = cfg
           System = system
           LoadingPaths = loadings }
 
-    let LoadFromActivePath (activePath: string) =
+    let LoadFromActivePath (activePath: string) (target:PlatformTarget)=
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir   activePath  false 
+        loadingDS dir   activePath  false  target
 
-    let LoadFromChatGptPath (activePath: string) =
+    let LoadFromChatGptPath (activePath: string) (target:PlatformTarget)=
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir   activePath  true 
+        loadingDS dir   activePath  true  target

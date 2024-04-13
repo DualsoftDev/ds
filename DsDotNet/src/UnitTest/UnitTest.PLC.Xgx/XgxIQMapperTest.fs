@@ -9,7 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
-type IQMapperTest(xgx:RuntimeTargetType) =
+type IQMapperTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Dummy IQ Map test`` () =

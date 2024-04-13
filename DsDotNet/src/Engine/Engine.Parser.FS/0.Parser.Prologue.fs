@@ -16,3 +16,5 @@ module ParserUtil =
         let dummy (_text: string) : string list = failwithlog "Should be reimplemented." in dummy
 
     let getText (x: IParseTree) = x.GetText()
+
+    let mutable runtimeTarget = WINDOWS

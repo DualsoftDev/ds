@@ -10,7 +10,7 @@ module SystemManagerModule =
 
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
-    type SystemManager (sys:DsSystem, stg:Storages, target:RuntimeTargetType)  =
+    type SystemManager (sys:DsSystem, stg:Storages, target:PlatformTarget)  =
         let dsSysTag (dt:DataType) name autoAddr target (systemTag:SystemTag) =
             if stg.ContainsKey(name) then stg[name]
             else

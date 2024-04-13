@@ -10,7 +10,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common.FlatExpressionModule
 
-type XgxGenerationTest(xgx:RuntimeTargetType) =
+type XgxGenerationTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``OR simple test`` () =

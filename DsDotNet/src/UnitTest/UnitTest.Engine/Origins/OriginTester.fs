@@ -26,7 +26,7 @@ module OriginTestModule =
                 (filePath:string)
                 (answer:seq<KeyValuePair<string, InitialType>>) =
             genConfig(filePath)
-            let model = ParserLoader.LoadFromConfig(configFile)
+            let model = ParserLoader.LoadFromConfig(configFile) PlatformTarget.WINDOWS
             let originChecker = 
                 [
                         for f in model.System.Flows do

@@ -44,7 +44,7 @@ module rec CounterModule =
         ACC: VariableBase<CountUnitType>
     }
 
-    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType) =
+    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType,  target:PlatformTarget) =
         let nullB = getNull<VariableBase<bool>>()
         let mutable cu  = nullB  // Count up enable bit
         let mutable cd  = nullB  // Count down enable bit
@@ -58,14 +58,14 @@ module rec CounterModule =
         let mutable acc = getNull<VariableBase<CountUnitType>>()
         let mutable res = nullB
         let add = addTagsToStorages storages
-        let dnName = if RuntimeDS.Target = XGK
+        let dnName = if target = XGK
                      then $"{name}"
                      else 
                         if typ = CTUD 
                         then $"{name}.QU" 
                         else $"{name}.Q" 
                                 
-        match RuntimeDS.Target, typ with
+        match target, typ with
         | (WINDOWS | XGI| XGK), CTU ->
             cu  <- createBool     $"{name}.CU" false  // Count up enable bit
             res <- createBool     $"{name}.R" false
@@ -196,8 +196,8 @@ module rec CounterModule =
         member _.CU = base.CU
         interface ICTU with
             member x.CU = x.CU
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTUStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
@@ -208,8 +208,8 @@ module rec CounterModule =
         interface ICTD with
             member x.CD = x.CD
             member x.LD = x.LD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTDStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
@@ -222,8 +222,8 @@ module rec CounterModule =
             member x.CU = x.CU
             member x.CD = x.CD
             member x.LD = x.LD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTUDStruct(counterParams, sys)
             storages.Add(name, cs)
             cs
@@ -233,8 +233,8 @@ module rec CounterModule =
         member _.RES = base.RES
         interface ICTR with
             member x.CD = x.CD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys) =
-            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum)
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+            let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTRStruct(counterParams, sys)
             storages.Add(name, cs)
             cs

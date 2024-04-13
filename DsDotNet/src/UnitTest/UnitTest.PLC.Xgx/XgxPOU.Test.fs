@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
-type XgxPOUTest(xgx:RuntimeTargetType) =
+type XgxPOUTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     do

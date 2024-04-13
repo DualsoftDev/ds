@@ -13,7 +13,7 @@ open Engine.CodeGenCPU
 [<AutoOpen>]
 module ExportModule =
     [<Obsolete("getBytes 이거 수정 필요!!!!")>]
-    let generateXmlXGX (plcType:RuntimeTargetType) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
+    let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
         let projName = system.Name
         
         let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
@@ -94,7 +94,7 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (plcType:RuntimeTargetType, system: DsSystem, path: string, existingLSISprj) =
+    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj) =
         assert(plcType.IsOneOf(XGI, XGK))
         use _ = logTraceEnabler()
         // RuntimeDS.Target <- plcType  // xxx 

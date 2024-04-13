@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
 
-type XgxRisingFallingTest(xgx:RuntimeTargetType) =
+type XgxRisingFallingTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Normal, Negation, Rising, Falling contact test`` () =

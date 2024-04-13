@@ -12,7 +12,7 @@ open Xunit
 
 
 
-type XgxTimerTest(xgx:RuntimeTargetType) =
+type XgxTimerTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
 

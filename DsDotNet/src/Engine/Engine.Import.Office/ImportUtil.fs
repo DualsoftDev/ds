@@ -670,7 +670,7 @@ module ImportU =
                 api.AddRXs(rxs) |> ignore)
 
         [<Extension>]
-        static member UpdateActionIO(doc: pptDoc, sys: DsSystem, target, autoIO:bool) =
+        static member UpdateActionIO(doc: pptDoc, sys: DsSystem, autoIO:bool) =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
             if not(autoIO)
             && activeSys.IsSome && activeSys.Value = sys
@@ -692,7 +692,7 @@ module ImportU =
                     // Handle the exception for duplicate names here
                     failwithf "Duplicate name: %s" name)
 
-            ApplyIO(sys, pageTables, target)
+            ApplyIO(sys, pageTables)
 
         [<Extension>]
         static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =

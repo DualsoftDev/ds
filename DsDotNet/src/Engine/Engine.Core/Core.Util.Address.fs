@@ -65,8 +65,8 @@ module DsAddressModule =
             ) |>  Seq.sum
 
 
-    let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType, target:RuntimeTargetType) =
-        let iec = target = RuntimeTargetType.XGI
+    let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
+        let iec = target = PlatformTarget.XGI
 
         let addr = if addr.IsNullOrEmpty()
                     then failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  

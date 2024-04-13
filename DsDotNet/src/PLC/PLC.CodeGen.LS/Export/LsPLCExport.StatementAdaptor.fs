@@ -62,7 +62,7 @@ module ConvertorPrologModule =
         | (INT32 | UINT32) -> "WORD"
         | _ -> failwithlog "ERROR"
 
-    let systemTypeToXgxTypeName (target:RuntimeTargetType) (typ: System.Type) =
+    let systemTypeToXgxTypeName (target:PlatformTarget) (typ: System.Type) =
         match target with
         | XGI -> systemTypeToXgiTypeName typ 
         | XGK -> systemTypeToXgkTypeName typ

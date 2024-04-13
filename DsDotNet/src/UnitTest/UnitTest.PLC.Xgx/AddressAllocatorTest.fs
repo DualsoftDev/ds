@@ -7,7 +7,7 @@ open PLC.CodeGen.Common
 open Engine.Core
 open Dual.Common.Core.FS
 
-type AddressAllocatorTest(xgx:RuntimeTargetType) =
+type AddressAllocatorTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member __.``Allocate address beyond limit test`` () =

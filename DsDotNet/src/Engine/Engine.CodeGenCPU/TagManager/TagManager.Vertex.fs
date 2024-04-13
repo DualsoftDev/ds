@@ -228,7 +228,7 @@ module TagManagerModule =
         let sysManager = sys.TagManager :?> SystemManager
         let createTag name = this.CreateTag name 
 
-        let counterBit    = counter  s "CTR"  sys
+        let counterBit    = counter  s $"{v.Name}_CTR"  sys (sysManager.TargetType)
         let timerOnDelayBit = timer  s $"{v.Name}_TON"  sys (sysManager.TargetType)
         let memo           = createTag "Memo" VertexTag.callMemo
 

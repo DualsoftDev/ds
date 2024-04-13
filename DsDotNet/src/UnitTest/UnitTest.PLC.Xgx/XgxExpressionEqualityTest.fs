@@ -11,7 +11,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
 
-type XgxExpEqualityTest(xgx:RuntimeTargetType) =
+type XgxExpEqualityTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Comparision, Arithmatic, OR test`` () =

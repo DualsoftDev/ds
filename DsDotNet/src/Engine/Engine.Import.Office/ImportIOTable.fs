@@ -61,7 +61,7 @@ module ImportIOTable =
         | DataType = 1
         | Manual = 2
 
-    let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq, target) =
+    let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try
             
@@ -103,8 +103,8 @@ module ImportIOTable =
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
 
 
-                dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In, target)
-                dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, target)
+                dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget)
+                dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
 
 
                 let job = dicJob[devName]
@@ -133,7 +133,7 @@ module ImportIOTable =
                     btn.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
-                    let inaddr, outaddr =  getValidBtnAddress (btn) target
+                    let inaddr, outaddr =  getValidBtnAddress (btn)  Util.runtimeTarget
                     btn.InAddress  <-inaddr.Trim() 
                     btn.OutAddress <-outaddr.Trim() 
 
@@ -152,7 +152,7 @@ module ImportIOTable =
                     lamp.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
-                    let inaddr, outaddr =  getValidLampAddress (lamp) target
+                    let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
                     lamp.InAddress  <-inaddr.Trim() 
                     lamp.OutAddress <-outaddr.Trim() 
                     lamp.Func <- getFunction (lamp.Name, func,  tableIO, false, page)
@@ -168,7 +168,7 @@ module ImportIOTable =
                 | Some cond ->
                     cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     //ValidBtnAddress
-                    let inaddr =  getValidCondiAddress (cond) target
+                    let inaddr =  getValidCondiAddress (cond) Util.runtimeTarget
                     cond.InAddress  <-inaddr.Trim() 
                     cond.Func <- getFunction (cond.Name, func, tableIO, false, page)
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)

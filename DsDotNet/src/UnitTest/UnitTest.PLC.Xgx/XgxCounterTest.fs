@@ -7,7 +7,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 
-type XgxCounterTest(xgx:RuntimeTargetType) =
+type XgxCounterTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Counter CTU simple test`` () =
@@ -177,7 +177,7 @@ type XgxCounterTest(xgx:RuntimeTargetType) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-type XgxFunctionTest(xgx:RuntimeTargetType) =
+type XgxFunctionTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``ADD simple test`` () =

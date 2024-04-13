@@ -174,8 +174,8 @@ module ExportIOTable =
                         if dev.InAddress = TextAddrEmpty || dev.InAddress = TextSkip
                         then  dev.InAddress <- 
                                 match target with   
-                                | RuntimeTargetType.XGK -> ExternalTempNoIECMemory
-                                | RuntimeTargetType.XGI -> ExternalTempIECMemory
+                                | PlatformTarget.XGK -> ExternalTempNoIECMemory
+                                | PlatformTarget.XGI -> ExternalTempIECMemory
                                 | _ -> ExternalTempMemory 
 
                         if dev.OutAddress = TextAddrEmpty 

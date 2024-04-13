@@ -10,6 +10,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.LS
 open Engine.Cpu
+open Engine.Parser.FS
 
 
 [<AutoOpen>]
@@ -30,7 +31,7 @@ module XgxGenerationTestModule =
         generateVariableDeclarationSeq typ varNamePrefix initialValueSetter start count |> String.concat "\n"
 
     /// bool x01 = createTag("%IX0.0", false); 등과 같은 항목을 반복 생성한다.
-    let generateBitTagVariableDeclarationSeq (xgx:RuntimeTargetType) (start: int) (count: int) =
+    let generateBitTagVariableDeclarationSeq (xgx:PlatformTarget) (start: int) (count: int) =
         seq {
             for i in start .. start + count - 1 do
                 let tag =
@@ -40,13 +41,13 @@ module XgxGenerationTestModule =
                     | _ -> failwith "Not supported runtime target"
                 yield sprintf "bool x%02d = createTag(\"%s\", false);" i tag
         } 
-    let generateBitTagVariableDeclarations (xgx:RuntimeTargetType) (start: int) (count: int) =
+    let generateBitTagVariableDeclarations (xgx:PlatformTarget) (start: int) (count: int) =
         generateBitTagVariableDeclarationSeq xgx start count |> String.concat "\n"
 
     let generateInt16VariableDeclarations (start: int) (count: int) =
         generateVariableDeclarations "int16" "nn" (fun i -> sprintf "%ds" i) start count
 
-    let generateLargeVariableDeclarations (xgx:RuntimeTargetType) =
+    let generateLargeVariableDeclarations (xgx:PlatformTarget) =
         seq {
             yield! generateBitTagVariableDeclarationSeq xgx 0 40
             yield! generateVariableDeclarationSeq "int" "nn" (fun i -> sprintf "%ds" i) 1 9
@@ -79,12 +80,17 @@ module XgkGenerationTestModule =
 
 [<AutoOpen>]
 module XgxFixtures =
-    let setRuntimeTarget(runtimeTarget:RuntimeTargetType) =
-        let runtimeTargetBackup = RuntimeDS.Target
-        RuntimeDS.Target <- runtimeTarget
-        disposable { RuntimeDS.Target <- runtimeTargetBackup }
 
-    let private generateXmlForTest (xgx:RuntimeTargetType) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+    let mutable runtimeTarget = WINDOWS
+    let setRuntimeTarget(target:PlatformTarget) =
+        let runtimeTargetBackup = target
+        RuntimeDS.System <- sys
+        ParserUtil.runtimeTarget <-target
+        runtimeTarget <- target
+        disposable { runtimeTarget <- runtimeTargetBackup }
+
+
+    let private generateXmlForTest (xgx:PlatformTarget) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
 
         //verify (RuntimeDS.Target = xgx)
@@ -114,9 +120,9 @@ module XgxFixtures =
 
         prjParam.GenerateXmlString()
 
-    let TestRuntimeTargetType = XGI
+    let TestPlatformTarget = XGI
     [<AbstractClass>]
-    type XgxTestBaseClass(xgx:RuntimeTargetType) =
+    type XgxTestBaseClass(xgx:PlatformTarget) =
         inherit TestBaseClass("EngineLogger")
         do
             //Engine.CodeGenCPU.ModuleInitializer.Initialize()
@@ -134,9 +140,9 @@ module XgxFixtures =
             //RuntimeDS.Target <- runtimeTarget
             RuntimeDS.System <- sys
 
-        //abstract GetCurrentRuntimeTarget: unit -> RuntimeTargetType
+        //abstract GetCurrentRuntimeTarget: unit -> PlatformTarget
 
-        //override x.GetCurrentRuntimeTarget() = TestRuntimeTargetType
+        //override x.GetCurrentRuntimeTarget() = TestPlatformTarget
 
         member __.saveTestResult testFunctionName (xml:string) =
             match xgx with

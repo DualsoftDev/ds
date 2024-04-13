@@ -11,7 +11,7 @@ open System
 
 [<AutoOpen>]
 module internal XgxXmlExtensionImpl =
-    let getXPathGlobalVariable (xgx:RuntimeTargetType) =
+    let getXPathGlobalVariable (xgx:PlatformTarget) =
         let var =
             match xgx with
             | XGI -> "GlobalVariable"
@@ -24,11 +24,11 @@ module internal XgxXmlExtensionImpl =
 type XgxXmlExtension =
     /// XmlNode '//Configurations/Configuration/GlobalVariables/{GlobalVariable, VariableComment}' 반환
     [<Extension>]
-    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:RuntimeTargetType) : XmlNode = getXPathGlobalVariable xgx |> xdoc.SelectSingleNode 
+    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:PlatformTarget) : XmlNode = getXPathGlobalVariable xgx |> xdoc.SelectSingleNode 
 
     /// XGI 기준으로 LocalVar 에 정의한 symbol 들을 XGK 인 경우에 한해, GlobalVariable 로 이동시킨다.
     [<Extension>]
-    static member MovePOULocalSymbolsToGlobal (xdoc:XmlDocument, xgx:RuntimeTargetType) : unit =
+    static member MovePOULocalSymbolsToGlobal (xdoc:XmlDocument, xgx:PlatformTarget) : unit =
         if xgx = XGI then
             failwith "XGI type can hold local symbols.  Do not call me."
 
@@ -62,7 +62,7 @@ type XgxXmlExtension =
     /// - Symbol 의 DevicePos 가 음수인 Symbol 이 있는지 확인한다.
     [<Extension>]
     [<Obsolete("임시 코드 제거")>]
-    static member Check(xdoc:XmlDocument, xgx:RuntimeTargetType) =
+    static member Check(xdoc:XmlDocument, xgx:PlatformTarget) =
         let xPathGlobalVar = getXPathGlobalVariable xgx
         let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
         let localSymbolss:XmlNode[] = xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol").ToArray()

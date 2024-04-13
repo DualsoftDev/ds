@@ -39,7 +39,7 @@ module MemoryAllocator =
         (typ: string)
         (availableByteRange: IntRange)
         (reservedBytes: int list)
-        (target: RuntimeTargetType)
+        (target: PlatformTarget)
       : PLCMemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position

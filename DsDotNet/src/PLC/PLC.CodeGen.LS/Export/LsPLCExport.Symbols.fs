@@ -84,7 +84,7 @@ module internal XgiSymbolsModule =
                 t.Address <- addr
 
     //[<Obsolete("임시 코드 삭제")>]
-    let getXGXTagInfo (targetType:RuntimeTargetType) (address:string) (name:string) =
+    let getXGXTagInfo (targetType:PlatformTarget) (address:string) (name:string) =
         let tag = 
             match targetType with
             | XGI -> tryParseXGITag address

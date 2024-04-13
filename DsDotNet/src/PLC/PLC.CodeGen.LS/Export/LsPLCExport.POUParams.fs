@@ -22,7 +22,7 @@ module POUParametersModule =
         }
 
     type XgxProjectParams = {
-        TargetType: RuntimeTargetType
+        TargetType: PlatformTarget
         ProjectName: string
         ProjectComment: string
         GlobalStorages: Storages
@@ -50,5 +50,5 @@ module POUParametersModule =
         RungCounter = None
     }
 
-    let getXgxProjectParams (targetType:RuntimeTargetType) (projectName:string) =
+    let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
         { defaultXgxProjectParams with ProjectName = projectName; TargetType = targetType }

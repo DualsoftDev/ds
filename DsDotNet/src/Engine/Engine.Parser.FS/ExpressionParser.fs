@@ -191,24 +191,25 @@ module rec ExpressionParser =
                 (* args[0] 는 PV (Preset),
                    args[1] 이후부터 XGI 명령 입력 순서대로...
                 *)
+                let target = ParserUtil.runtimeTarget
                 match typ, functionName, args with
                 | CTU, ("createWinCTU" | "createXgiCTU"), _ :: _ :: [ (BoolExp resetCondition) ] ->
-                    CounterStatement.CreateCTU(tcParams, resetCondition)
-                | CTU, "createAbCTU", _ :: [ _ ] -> CounterStatement.CreateAbCTU(tcParams)
+                    CounterStatement.CreateCTU(tcParams, resetCondition)  target
+                | CTU, "createAbCTU", _ :: [ _ ] -> CounterStatement.CreateAbCTU(tcParams) target
 
                 | CTD, ("createWinCTD" | "createXgiCTD"), _ :: _ :: [ (BoolExp resetCondition) ] ->
-                    CounterStatement.CreateXgiCTD(tcParams, resetCondition)
-                | CTD, "createAbCTD", _ :: [ _ ] -> CounterStatement.CreateAbCTD(tcParams)
+                    CounterStatement.CreateXgiCTD(tcParams, resetCondition) target
+                | CTD, "createAbCTD", _ :: [ _ ] -> CounterStatement.CreateAbCTD(tcParams) target
 
                 | CTUD,
                   ("createWinCTUD" | "createXgiCTUD"),
                   _ :: _ :: (BoolExp countDownCondition) :: (BoolExp resetCondition) :: [ (BoolExp ldCondition) ] ->
-                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, ldCondition)
+                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, ldCondition) target
                 | CTUD, "createAbCTUD", _ :: _ :: (BoolExp countDownCondition) :: [ (BoolExp resetCondition) ] ->
-                    CounterStatement.CreateAbCTUD(tcParams, countDownCondition, resetCondition)
+                    CounterStatement.CreateAbCTUD(tcParams, countDownCondition, resetCondition) target
 
                 | CTR, ("createWinCTR" | "createXgiCTR"), _ :: _ :: [ (BoolExp resetCondition) ] ->
-                    CounterStatement.CreateXgiCTR(tcParams, resetCondition)
+                    CounterStatement.CreateXgiCTR(tcParams, resetCondition) target
                 | CTR, _, _ -> failwithlog "ERROR: CTR only supported for WINDOWS and XGI platform"
 
                 | _ -> fail ()
@@ -245,14 +246,15 @@ module rec ExpressionParser =
                       RungInCondition = rungInCondtion
                       FunctionName = functionName }
 
+                let target = ParserUtil.runtimeTarget
                 match typ, functionName, args with
                 | TON, ("createWinTON" | "createXgiTON" | "createAbTON"), _ :: [ _ ] ->
-                    TimerStatement.CreateTON tcParams  RuntimeDS.Target
+                    TimerStatement.CreateTON tcParams  target
                 | TOF, ("createWinTOF" | "createXgiTOF" | "createAbTOF"), _ :: [ _ ] ->
-                    TimerStatement.CreateTOF tcParams  RuntimeDS.Target
-                | TMR, ("createAbRTO"), _ :: [ _ ] -> TimerStatement.CreateAbRTO tcParams  RuntimeDS.Target
+                    TimerStatement.CreateTOF tcParams  target
+                | TMR, ("createAbRTO"), _ :: [ _ ] -> TimerStatement.CreateAbRTO tcParams  target
                 | TMR, ("createXgiTMR" | "createWinTMR"), _ :: _ :: [ (BoolExp resetCondition) ] ->
-                    TimerStatement.CreateTMR(tcParams, resetCondition) RuntimeDS.Target
+                    TimerStatement.CreateTMR(tcParams, resetCondition) target
                 | _ -> fail ()
             | _ -> fail ()
         | None -> fail ()

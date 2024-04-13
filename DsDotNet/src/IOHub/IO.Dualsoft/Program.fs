@@ -32,8 +32,9 @@ module ZmqTestClient =
         let testFile = Path.Combine(AppContext.BaseDirectory   , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip");
         let jsonPath = unZip testFile
         RuntimeDS.Package <- RuntimePackage.Simulation;
-        let model: Model = ParserLoader.LoadFromConfig(jsonPath)
-        let dsCPU, _, _ = DsCpuExt.GetDsCPU (model.System) WINDOWS
+        let target = WINDOWS
+        let model: Model = ParserLoader.LoadFromConfig(jsonPath) target
+        let dsCPU, _, _ = DsCpuExt.GetDsCPU (model.System) target
 
         let serverThread = server.Run()
         let client =  new Client($"{zmqHWInfo.ServerIP}:{zmqHWInfo.ServerPort}")

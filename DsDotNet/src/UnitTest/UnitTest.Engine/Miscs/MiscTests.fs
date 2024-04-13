@@ -101,7 +101,7 @@ module MiscTestModule =
         [<Test>]
         member __.``Generic test`` () =
             let sys = DsSystem("testSys")
-            RuntimeDS.Target <- XGI
+            //RuntimeDS.Target <- XGI
             RuntimeDS.System <- sys
 
             let anal(v:IValue<'T>) =

@@ -18,7 +18,7 @@ module Util =
     let mutable activeSys:DsSystem option= None
     let mutable activeSysDir = ""
     let mutable currentFileName = ""
-
+    let mutable runtimeTarget = WINDOWS
 
     let getDummyDeviceName (loadedName:string) index = $"{loadedName}_G{index}"
 

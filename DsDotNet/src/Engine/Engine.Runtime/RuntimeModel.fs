@@ -15,7 +15,7 @@ type FilePath = string
 
 type RuntimeModel(zipDsPath:FilePath, target)  =
     let jsonPath = unZip zipDsPath
-    let model:Model = ParserLoader.LoadFromConfig (jsonPath) 
+    let model:Model = ParserLoader.LoadFromConfig (jsonPath) target
     let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU model.System target
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
    

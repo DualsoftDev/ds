@@ -165,7 +165,7 @@ module ImportUtilForLib =
             let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
             TaskDev(api, "", "", newloadedName)
 
-        let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath
+        let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget
         if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
             node.Shape.ErrorName(ErrID._49, node.PageNum)
 
@@ -176,7 +176,7 @@ module ImportUtilForLib =
             | MultiAction (_, cnt) ->  
                 for i in [1..cnt] do
                     let devOrg = if i = 1 then devOrg
-                                    else ParserLoader.LoadFromActivePath libFilePath |> fst
+                                    else ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
 
                     let mutiName = getDummyDeviceName loadedName i
                     tasks.Add(getLoadedTasks devOrg mutiName)|>ignore

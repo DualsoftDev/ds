@@ -7,7 +7,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module RuntimeGeneratorModule =
 
-    type RuntimeTargetType = 
+    type PlatformTarget = 
         | WINDOWS 
         | XGI 
         | XGK 
@@ -61,26 +61,17 @@ module RuntimeGeneratorModule =
     let ExternalTempNoIECMemory =  "M00000"
    
     type RuntimeDS() =
-        static let mutable runtimeTarget = WINDOWS
         static let mutable runtimePackage = Simulation
-        static let targetChangedSubject = new Subject<RuntimeTargetType>()
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
         static let mutable callTimeout = 15000u
         static let mutable emulationAddress = ""
-
-        static member Target
-            with get() = runtimeTarget
-            and set v =
-                runtimeTarget <- v
-                targetChangedSubject.OnNext(v)
 
         static member val HwSlotDataTypes  =  ResizeArray<SlotDataType>() with get, set
         static member val IP = "192.168.9.100" with get, set
 
         static member val TimeoutCall = callTimeout  with get, set
         static member val EmulationAddress = emulationAddress  with get, set
-        static member TargetChangedSubject = targetChangedSubject
 
         static member Package
             with get() = runtimePackage

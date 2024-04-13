@@ -9,7 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 open Engine.Parser.FS
 
-type XgxRungTest(xgx:RuntimeTargetType) =
+type XgxRungTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Prolog comment test``() =

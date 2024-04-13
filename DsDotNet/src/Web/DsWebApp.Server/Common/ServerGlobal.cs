@@ -70,7 +70,7 @@ public class ServerGlobal
 
             RuntimeDS.Package = serverSettings.GetRuntimePackage();
 
-            RuntimeModel = new RuntimeModel(dsZipPath, RuntimeTargetType.WINDOWS);
+            RuntimeModel = new RuntimeModel(dsZipPath, PlatformTarget.WINDOWS);
 
             RuntimeModelChangedSubject.OnNext(RuntimeModel);
             return RuntimeModel;

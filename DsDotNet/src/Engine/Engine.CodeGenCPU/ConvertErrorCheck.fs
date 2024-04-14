@@ -23,13 +23,13 @@ module ConvertErrorCheck =
                 if not(hwAutoFlows.Contains flow)
                 then failwithf $"{flow.Name} auto btn not exist"
 
-        if not(RuntimeDS.Package.IsPackageSIM()) then
+        if RuntimeDS.Package.IsPackagePLC() then
             for btn in sys.HWButtons do
                 if btn.InAddress = TextAddrEmpty ||btn.InAddress = TextSkip
                     then failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."
 
 
-        if not(RuntimeDS.Package.IsPackageSIM()) then
+        if RuntimeDS.Package.IsPackagePLC() then
             for lamp in sys.HWLamps do
                 if lamp.OutAddress = TextAddrEmpty ||lamp.OutAddress = TextSkip
                     then failwithf $"HW Lamp : {lamp.Name} OutAddress 값이 없습니다."
@@ -62,7 +62,7 @@ module ConvertErrorCheck =
                                        || e.Target.GetPureCall().IsSome)  
 
         if not(exEdges.any()) then
-            failwithf $"PLC 시스템은 외부 연결이 모델이 시작 불가 입니다."
+            failwithf $"PLC 시스템은 외부시작 신호가 없으면 시작 불가 입니다. HelloDS 모델을 참고하세요"
 
     let checkErrRealResetExist (sys:DsSystem) =
         let errors = checkRealEdgeErrExist sys false

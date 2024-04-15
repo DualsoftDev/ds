@@ -194,6 +194,9 @@ module ExpressionModule =
 
         | DuAugmentedPLCFunction of FunctionParameters
 
+    /// 추가 가능한 Statement container
+    type StatementContainer = ResizeArray<Statement>
+
     type CommentedStatement =
         | CommentedStatement of comment:string * statement:Statement
         member x.Statement = match x with | CommentedStatement (_c, s) -> s

@@ -241,7 +241,7 @@ module XgxExpressionConvertorModule =
 
     type private AugmentedConvertorParams =
         { Storage: XgxStorage
-          ExpandFunctionStatements: ResizeArray<Statement>
+          ExpandFunctionStatements: StatementContainer
           Exp: IExpression }
 
     /// expression 내부의 비교 및 사칙 연산을 xgi/xgk function 으로 대체
@@ -504,19 +504,73 @@ module XgxExpressionConvertorModule =
         let newExp = zipVisitor  prjParam { augmentParams with Exp = newExp }
         newExp
 
+    /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.
+    /// 이 과정에서 추가할 필요가 있는 storate 는 newLocalStorages 에 추가한다.
+    /// 반환 : exp, 추가된 storage, 추가된 statement
+    ///
+    /// e.g: XGK 의 경우, 함수를 지원하지 않으므로,
+    ///     입력 exp: "2 + 3 > 4"
+    ///     추가 statement : "tmp1 := 2 + 3"
+    ///     추가 storage : tmp2
+    ///     최종 exp: "tmp1 > 4"
+    ///     반환 : exp, [tmp2], [tmp1 := 2 + 3]
+    let exp2exp (prjParam: XgxProjectParams) (exp: IExpression) (newLocalStorages: XgxStorage) (newStatements:StatementContainer) : IExpression =
+        let rec helper (nestLevel:int) (exp: IExpression) : IExpression * IStorage list * Statement list =
+            //let exprs2exprs (nestLevel:int) (exprs: IExpression list) =
+            //    let results =
+            //        [   for expr in exprs do
+            //              let newExp, newLocalStorages, newStatements = helper nestLevel expr
+            //              yield newExp, newLocalStorages, newStatements ]
+            //    let exprs, stgs, stmts = results |> List.unzip3
+            //    exprs, stgs |> List.concat, stmts |> List.concat
+
+            if exp.Terminal.IsSome || prjParam.TargetType = XGI then
+                exp, [], []
+            else
+                match exp.FunctionName, exp.FunctionArguments with
+                | Some fn, l::r::[] ->
+                    let lexpr, lstgs, lstmts = helper (nestLevel + 1) l
+                    let rexpr, rstgs, rstmts = helper (nestLevel + 1) r
+                    let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
+
+                    let tmpVar = createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{exp} store"
+                    let stg = tmpVar :> IStorage
+                    let varExp = tmpVar.ToExpression()
+                    match fn with
+                    | ("+" | "-" | "*" | "/")
+                    | (">" | ">=" | "<" | "<=" | "=" | "!=") ->
+                        let stmt = DuAssign(newExp, tmpVar)
+                        varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
+                    | _ ->
+                        if lstgs.any() || rstgs.any() then
+                            newExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts)
+                        else
+                            exp, [], []
+                | _ ->
+                    exp, [], []
+
+        let expr, stgs, stmts = helper 0 exp
+        newLocalStorages.AddRange stgs
+        newStatements.AddRange stmts
+        expr
+
+
 
     /// Statement 확장
     let private statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
-        let augmentedStatements = ResizeArray<Statement>() // DuAugmentedPLCFunction case
+        let augmentedStatements = StatementContainer() // DuAugmentedPLCFunction case
 
         let newStatements =
             match statement with
             | DuAssign(exp, target) ->
+                let exp = exp2exp prjParam exp newLocalStorages augmentedStatements
+
+
                 // todo : "sum := tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some("+" | "-" | "*" | "/" as op) ->
 
-                    let augArithmaticAssignStatements = ResizeArray<Statement>()
+                    let augArithmaticAssignStatements = StatementContainer()
                     match
                         mergeArithmaticOperator prjParam
                             { Storage = newLocalStorages

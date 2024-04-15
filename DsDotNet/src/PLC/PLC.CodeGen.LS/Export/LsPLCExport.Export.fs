@@ -44,7 +44,7 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 module XgiExportModule =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let internal generateRungs (prologComment: string) (prjParam: XgxProjectParams) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
+    let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
         let xmlRung (expr: FlatExpression option) xgiCommand y : RungGenerationInfo =
             let { Coordinate = c; Xml = xml } = rung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
@@ -243,7 +243,7 @@ module XgiExportModule =
             (*
              * Rung 생성
              *)
-            let rungsXml = generateRungs prologComment prjParam commentedXgiStatements
+            let rungsXml = generateRungs prjParam prologComment commentedXgiStatements
 
             /// POU/Programs/Program
             let programTemplate = createXmlStringProgram taskName pouName scanName |> DualXmlNode.ofString

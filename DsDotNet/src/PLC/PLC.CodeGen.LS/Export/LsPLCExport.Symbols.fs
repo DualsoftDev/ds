@@ -104,7 +104,6 @@ module internal XgiSymbolsModule =
                 "", "", -1
             else
                 failwith $"Invalid tag address {address} for {name}"
-                "", "", -1  // 임시
         
 
     let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo =

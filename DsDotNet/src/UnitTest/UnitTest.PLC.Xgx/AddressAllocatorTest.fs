@@ -15,8 +15,16 @@ type AddressAllocatorTest(xgx:PlatformTarget) =
             BitAllocator  = x
         } = MemoryAllocator.createMemoryAllocator "M" (0, 0) [] xgx
 
-        for i = 0 to 7 do
-            x() === $"%%MX{i}"   // %MX0 ~ %MX10
+        match xgx with
+        | XGI ->
+            for i = 0 to 7 do
+                x() === $"%%MX{i}"   // %MX0 ~ %MX7
+        | XGK ->
+            for i = 0 to 7 do
+                x() === sprintf "M%05d" i   // M00000 ~ M00007
+
+        | _ -> failwith "Not supported plc type"
+
         (fun () -> x() |> ignore) |> ShouldFailWithSubstringT "Limit exceeded."
 
 
@@ -73,17 +81,23 @@ type AddressAllocatorTest(xgx:PlatformTarget) =
             LWordAllocator= l
         } = MemoryAllocator.createMemoryAllocator "M" (20, 100) [] xgx
 
-        b() === "%MB20"
-        b() === "%MB21"
-        b() === "%MB22"
-        w() === "%MW12"
-        b() === "%MB23"
-        x() === "%MX208" // 26 * 8
-        b() === "%MB27"
-        for i = 1 to 7 do
-            x() === $"%%MX{208+i}"
-        d() === "%MD7"
-        b() === "%MB32"
+        match xgx with
+        | XGI ->
+            b() === "%MB20"
+            b() === "%MB21"
+            b() === "%MB22"
+            w() === "%MW12"
+            b() === "%MB23"
+            x() === "%MX208" // 26 * 8
+            b() === "%MB27"
+            for i = 1 to 7 do
+                x() === $"%%MX{208+i}"
+            d() === "%MD7"
+            b() === "%MB32"
+        | XGK ->
+            failwith "XGK 테스트 코드 수정 필요"
+
+        | _ -> failwith "Not supported plc type"
 
 
 type XgiAddressAllocatorTest() =

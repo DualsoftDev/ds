@@ -23,7 +23,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
             $x7 := ($x0 || $x1);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForTarget storages code XGI 
         storages.Count === 3
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
@@ -42,7 +42,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
             $x7 := ($x0 || $x1) && $x2;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForTarget storages code XGI 
         storages.Count === 4
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
@@ -59,7 +59,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                 $x11 && $x12 && $x13 && $x14
                 ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -77,7 +77,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                     $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
                     ;
 """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -96,7 +96,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                     $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
                     ;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -116,7 +116,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                     $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
                     ;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -137,7 +137,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                     ($x10 && $x11 || $x12 && $x13) && $x14 && $x15 && $x16 && $x17 && $x18 && $x19
                     ;
 """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -170,7 +170,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                     )
                     && ! ($c42 && !($c43) && !($c44) && !($c45) || $c46);
                 """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -184,7 +184,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                 $x10 || $x11 || $x12 || $x13 || $x14
                 ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -200,7 +200,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09
                 ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -213,7 +213,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                 || ( ( $x01 || $x02 ) && $x03 )
                 ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -225,7 +225,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                 $x01 && ($x02 || ($x03 && ($x04 || $x05 || $x06 || $x07) && $x08 && ($x09 || $x10))) 
                 ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -247,7 +247,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                                && $x19) )
                 ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -303,7 +303,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                 ;
 
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -321,7 +321,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                         && ($x12 || $x13 || $x14)
                         ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -376,7 +376,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
             $x01 := ! $x00;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -394,7 +394,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
             $x02 := ! ($x00 || $x01);
             $x05 := ! ($x03 && $x04);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -414,7 +414,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
             $x02 := ! (! $x00 || $x01);
             $x05 := ! ($x03 && ! $x04);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -435,7 +435,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
             //$qq := ($nn1 + $nn2) * 9s + $nn3 > 3s;
             $qq := true && (($nn1 + $nn2) * 9s + $nn3 > 3s);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -452,7 +452,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
             copyIf($cond, $src, $tgt);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml

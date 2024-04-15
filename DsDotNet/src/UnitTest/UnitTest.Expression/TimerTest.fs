@@ -237,11 +237,11 @@ module TimerTestModule =
             use _ = setRuntimeTarget AB
             let storages = Storages()
             let code = """
-                bool x0 = createTag("%MX0.0.0", false);
+                bool x0 = createTag("%MX0", false);
                 ton myTon = createWinTON(200u, $x0);
 """
 
-            let statement = parseCode storages code
+            let statement = parseCodeForTarget storages code AB
             [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
             [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)
 
@@ -251,10 +251,10 @@ module TimerTestModule =
                 use _ = setRuntimeTarget platform
                 let storages = Storages()
                 let code = """
-                    bool x0 = createTag("%MX0.0.0", false);
+                    bool x0 = createTag("%MX0", false);
                     ton myTon = createXgiTON(200u, $x0);
     """
 
-                let statement = parseCode storages code
+                let statement = parseCodeForWindows storages code
                 [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
                 [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)

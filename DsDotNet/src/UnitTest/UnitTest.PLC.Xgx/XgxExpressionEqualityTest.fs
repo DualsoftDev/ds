@@ -9,6 +9,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
+open System
 
 
 type XgxExpEqualityTest(xgx:PlatformTarget) =
@@ -24,7 +25,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 
                 $result := $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -41,7 +42,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 
                 $result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -56,7 +57,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool result = false;
 """
         let exprCode = "$result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;"
-        let statements_ = parseCode storages code
+        let statements_ = parseCodeForWindows storages code
         let expr1 = parseExpression storages exprCode :?> Expression<bool>
         let expr2 = parseExpression storages exprCode :?> Expression<bool>
         expr1.IsEqual expr2 |> ShouldBeTrue
@@ -107,7 +108,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
                 || $x00
                 ;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -123,7 +124,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
                 bool b3 = false;
                 $b3 := $b1 <> $b2;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -145,12 +146,14 @@ type XgiExpEqualityTest() =
 
 type XgkExpEqualityTest() =
     inherit XgxExpEqualityTest(XGK)
-
-    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
-    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
+    [<Obsolete("비교연산 XGK 구현 필요")>]
+    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()   //비교연산 XGK 구현 필요
+    [<Obsolete("비교연산 XGK 구현 필요")>]
+    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``() //비교연산 XGK 구현 필요
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
-    [<Test>] member __.``XOR test`` () = base.``XOR test``()
+    [<Obsolete("비교연산 XGK 구현 필요")>]
+    [<Test>] member __.``XOR test`` () = base.``XOR test``() 
 
 
 

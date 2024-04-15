@@ -110,9 +110,7 @@ module XgxFixtures =
             CommentedStatements = commentedStatements
         }
         let prjParam:XgxProjectParams = {
-            defaultXgxProjectParams with
-                TargetType = xgx
-                ProjectName = projName
+            getXgxProjectParams xgx projName with
                 GlobalStorages = globalStorages
                 POUs = [pouParams]
                 RungCounter = counterGenerator 0 |> Some

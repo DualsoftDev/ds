@@ -46,14 +46,14 @@ single mySingle = 0.0f;
 float64 myFloat64 = 0.0;
 double myDouble = 0.0;
 """
-            let statements = numericDeclarations |> parseCode storages;
+            let statements = numericDeclarations |> parseCodeForWindows storages;
             let numAddedVariables = numericDeclarations.Split([|'\r'; '\n'|], StringSplitOptions.RemoveEmptyEntries).Length
             storages.Count === numAddedVariables
 
             for KeyValue(k, v) in storages do
                 toFloat64 v.BoxedValue === 0.0
 
-            (fun () -> "int8 myInt8 = 0y;" |> parseCode storages |> ignore) |> ShouldFailWithSubstringT "Duplicated"
+            (fun () -> "int8 myInt8 = 0y;" |> parseCodeForWindows storages |> ignore) |> ShouldFailWithSubstringT "Duplicated"
             storages.Count === numAddedVariables
 
             let fails = [
@@ -88,7 +88,7 @@ int64 myInt64 = 32L;
 uint64 myUInt64 = 32UL;
 
 """
-            let statements = integers |> parseCode storages;
+            let statements = integers |> parseCodeForWindows storages;
             let numAddedVariables = integers.Split([|'\r'; '\n'|], StringSplitOptions.RemoveEmptyEntries).Length
             storages.Count === numAddedVariables
 
@@ -107,7 +107,7 @@ single mySingle = 3.14f;
 float64 myFloat64 = 3.14;
 double myDouble = 3.14;
 """
-            let statements = floats |> parseCode storages;
+            let statements = floats |> parseCodeForWindows storages;
             let numAddedVariables = floats.Split([|'\r'; '\n'|], StringSplitOptions.RemoveEmptyEntries).Length
             storages.Count === numAddedVariables
 
@@ -126,7 +126,7 @@ single mySingle = 3.14f + 3.14f;
 float64 myFloat64 = 3.14 + 3.14;
 double myDouble = 3.14 + 3.14;
 """
-            let statements = floats |> parseCode storages;
+            let statements = floats |> parseCodeForWindows storages;
             let numAddedVariables = floats.Split([|'\r'; '\n'|], StringSplitOptions.RemoveEmptyEntries).Length
             storages.Count === numAddedVariables
 

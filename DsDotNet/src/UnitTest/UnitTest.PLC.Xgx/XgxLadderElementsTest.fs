@@ -65,7 +65,7 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             int64   myint64  = 64L;
             uint64  myuint64 = 64UL;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -75,7 +75,7 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
         let code = """
             string  mystring = "hello";     // not working for string
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         (fun () ->  x.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
 
@@ -89,7 +89,7 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             int32   myint32  = 32;
             int64   myint64  = 64L;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         storages["mybool"].Comment <- "mybool comment"
         storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
         let f = getFuncName()

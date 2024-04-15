@@ -341,8 +341,9 @@ module rec ExpressionParser =
             failwith $"Failed to parse Statement: {text}\r\n{exn}"
 
 
-    let parseCode (storages: Storages) (text: string) : Statement list =
+    let parseCodeForTarget (storages: Storages) (text: string) (target:PlatformTarget): Statement list =
         try
+            ParserUtil.runtimeTarget  <- target
             let parser = createParser (text)
 
             let children = parser.toplevels().children
@@ -367,6 +368,8 @@ module rec ExpressionParser =
         with exn ->
             failwith $"Failed to parse code: {text}\r\n{exn}"
 
+    let parseCodeForWindows (storages: Storages) (text: string) : Statement list =
+        parseCodeForTarget storages text WINDOWS
 
     type System.Type with
 

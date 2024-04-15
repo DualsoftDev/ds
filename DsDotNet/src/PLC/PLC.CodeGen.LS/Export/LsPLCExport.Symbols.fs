@@ -83,7 +83,6 @@ module internal XgiSymbolsModule =
                 let addr:string = allocator()
                 t.Address <- addr
 
-    //[<Obsolete("임시 코드 삭제")>]
     let getXGXTagInfo (targetType:PlatformTarget) (address:string) (name:string) =
         let tag = 
             match targetType with
@@ -110,7 +109,6 @@ module internal XgiSymbolsModule =
 
     let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo =
 
-
         match xgxSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
@@ -133,22 +131,23 @@ module internal XgiSymbolsModule =
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
-         
             let symbolInfo =
              
                 let plcType = systemTypeToXgxTypeName prjParam.TargetType t.DataType
                 let comment = SecurityElement.Escape t.Comment
                
-                autoAllocatorAdress t prjParam
-                let address, device, devPos = getXGXTagInfo prjParam.TargetType t.Address t.Name
+                let address, device, devPos = 
+                    match prjParam.TargetType with
+                    | XGI ->
+                        let _ = t.BoxedValue.GetType().GetMemorySizePrefix() //size check 만 하고 auto 변수로 할당 ("", "", -1)
+                        "", "", -1
+                    | XGK ->
+                        autoAllocatorAdress t prjParam
+                        getXGXTagInfo prjParam.TargetType t.Address t.Name
 
-#if DEBUG
-                if device = "M" then
-                    if t.Name.StartsWith "f" then
-                        ()
-                    if address.StartsWith("%M") then
-                        ()
-#endif
+                    | _ ->
+                        failwithf "Invalid target type: %A" prjParam.TargetType
+
 
                 { defaultSymbolInfo with
                     Name = t.Name
@@ -163,7 +162,6 @@ module internal XgiSymbolsModule =
             symbolInfo
 
         | DuXgiVar xgi ->
-
             if kindVar = int Variable.Kind.VAR_GLOBAL then
                 // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
                 { xgi.SymbolInfo with
@@ -285,7 +283,7 @@ module internal XgiSymbolsModule =
 
             let usedAddresses =
                 symbolInfos
-                |> Seq.filter (fun f -> f.Address <> null && f.Address <> "")
+                |> Seq.filter (fun f -> not(f.Address.IsNullOrEmpty()))
                 |> Array.ofSeq
 
             //check if there is any duplicated address

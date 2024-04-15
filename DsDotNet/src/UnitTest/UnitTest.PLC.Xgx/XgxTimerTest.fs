@@ -8,6 +8,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open Xunit
+open System
 
 
 
@@ -15,10 +16,13 @@ open Xunit
 type XgxTimerTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
-
+    [<Obsolete("createXgkTON 구현 필요")>]
     member x.``Timer test`` () =
         let storages = Storages()
-        let code = """
+        let code =
+        
+            if xgx = XGI then
+                """
             bool myQBit0 = createTag("%QX0.1.0", false);
             bool x0 = createTag("%IX0.0.0", false);
             bool x1 = createTag("%IX0.0.1", false);
@@ -28,7 +32,22 @@ type XgxTimerTest(xgx:PlatformTarget) =
             ton myTon = createXgiTON(2000u, $myQBit0);
             $x7 := ($x0 || $x1) && $x2;
 """
-        let statements = parseCode storages code
+            elif xgx = XGK then
+                """
+            bool myQBit0 = createTag("P0001A", false);
+            bool x0 = createTag("P00001", false);
+            bool x1 = createTag("P00002", false);
+            bool x2 = createTag("P00003", false);
+
+            bool x7 = createTag("P00004", false);
+            ton myTon = createXgiTON(20u, $myQBit0);
+            $x7 := ($x0 || $x1) && $x2;
+"""
+            else
+                failwithf $"not support {xgx}"
+
+        
+        let statements = parseCodeForWindows storages code
         //storages.Count === 12
         //statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
@@ -43,7 +62,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
                 && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -67,7 +86,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
                 $x14    );
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -80,7 +99,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -101,7 +120,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
                 );
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -125,7 +144,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
                 );
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -148,7 +167,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
                 );
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -156,7 +175,9 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Not Condition test`` () =
         let storages = Storages()
-        let code = """
+        let code = 
+            if xgx = XGI then
+                """
             bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
             bool Clamp1_RET_I = createTag("%IX1.0.1", false);
             bool Clamp2_RET_I = createTag("%IX1.0.2", false);
@@ -169,14 +190,34 @@ type XgxTimerTest(xgx:PlatformTarget) =
                     && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
                 );
 """
-        let statements = parseCode storages code
+            elif xgx = XGK then
+                """
+            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("P0000A", false);
+            bool Clamp1_RET_I = createTag("P0000B", false);
+            bool Clamp2_RET_I = createTag("P0000C", false);
+            bool Clamp3_RET_I = createTag("P0000D", false);
+            bool Clamp4_RET_I = createTag("P0000E", false);
+            bool IOP_ClampOperation = createTag("P0000F", false);
+
+            ton myTon = createXgiTON(15000u,
+                $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo
+                    && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
+                );
+"""
+            else
+                failwithf $"not support {xgx}"
+
+
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
     member x.``TIMER= Not Condition test 2`` () =
         let storages = Storages()
-        let code = """
+        let code = 
+            if xgx = XGI then
+                """
             bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
             bool Clamp1_RET_I = createTag("%IX1.0.1", false);
             bool Clamp2_RET_I = createTag("%IX1.0.2", false);
@@ -186,7 +227,21 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
             ton TOUT3 = createWinTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
 """
-        let statements = parseCode storages code
+            elif xgx = XGK then
+                """
+            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("P0000A", false);
+            bool Clamp1_RET_I = createTag("P0000B", false);
+            bool Clamp2_RET_I = createTag("P0000C", false);
+            bool Clamp3_RET_I = createTag("P0000D", false);
+            bool Clamp4_RET_I = createTag("P0000E", false);
+            bool IOP_ClampOperation = createTag("P0000F", false);
+
+            ton TOUT3 = createWinTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
+"""
+            else
+                failwithf $"not support {xgx}"
+                
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml

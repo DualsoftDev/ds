@@ -391,9 +391,12 @@ module XgiExportModule =
                     globalStorages.Values
                     |> getGlobalTagSkipSysTag
                     |> Seq.sortByDescending (fun t ->
-                        if t :? TimerCounterBaseStruct || isNull t.Address || t.Address <> "" then
+                        if t :? TimerCounterBaseStruct 
+                            || isNull t.Address 
+                            || TextAddrEmpty <> t.Address
+                        then
                             0
-                        else // t.Address 가 "" 인 경우에만 자동으로 채운다. (null 은 아님)
+                        else // t.Address 가  "_"(TextAddrEmpty) 인 경우에만 자동으로 채운다. (null 은 아님)
                             t.DataType.GetBitSize())
                     |> Array.ofSeq
 

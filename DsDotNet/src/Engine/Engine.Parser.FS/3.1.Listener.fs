@@ -215,7 +215,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let code = ctx.GetOriginalText()
         x.TheSystem.OriginalCodeBlocks.Add code
         let pureCode = code.Substring(3, code.Length - 6) // 처음과 끝의 "<@{" 와 "}@>" 제외
-        let statements = pureCode |> parseCode options.Storages
+        let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
         x.TheSystem.Statements.AddRange statements
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등

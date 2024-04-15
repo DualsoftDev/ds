@@ -17,7 +17,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             bool res = createTag("%IX0.0.1", false);
             ctu myCTU = createXgiCTU(2000u, $cu, $res);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -30,7 +30,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             bool load = createTag("%IX0.0.1", false);
             ctd myCTD = createXgiCTD(2000u, $cd, $load);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -44,7 +44,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             bool ld = createTag("%IX0.0.3", false);
             ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -59,7 +59,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             //$x7 := $myCTR.CV;
             $myCTR.RST := $cd;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -79,7 +79,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             ctu myCTU = createXgiCTU(2000u, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -98,7 +98,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             ctd myCTD = createXgiCTD(2000u, ($cu1 && $cu2) || $cu3, ($res0 || $res1) && $res2 );
             $xx7 := (($cu1 && $cu2) || $cu3 || ($res0 || $res1) && $res2) && $cu1;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -117,7 +117,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             ctr myCTR = createXgiCTR(2000u, ($cd1 && $cd2) || $cd3, ($res0 || $res1) && $res2 );
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -137,7 +137,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
             ctr myCTR = createXgiCTR(2000u, ($cd1 && $cd2 || $cd3 || $cd4) && $cd3, ($res0 || $res1) && $res2 );
             $xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -172,7 +172,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
                     );
             //$xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -188,7 +188,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             $sum := $nn1 + $nn2;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -201,7 +201,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int sum = 0;
             $sum := $nn1 + $nn2;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -214,7 +214,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int64 sum = 0L;
             $sum := $nn1 + $nn2;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -227,7 +227,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             double sum = 0.0;
             $sum := $nn1 + $nn2;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -242,7 +242,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             $sum := $nn1 + $nn2 + $nn3;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -255,7 +255,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -266,7 +266,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
 """
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -280,7 +280,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
                 int16 sum = 0s;
                 $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml )
@@ -297,7 +297,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
                 int16 quotient = 0s;
                 $quotient := $nn1 / $nn2 / $nn3;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml )
@@ -309,7 +309,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
                 int16 sum = 0s;
                 $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -325,7 +325,7 @@ type XgxFunctionTest(xgx:PlatformTarget) =
 
                 $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
     """
-            let statements = parseCode storages code
+            let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml

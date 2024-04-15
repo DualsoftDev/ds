@@ -12,7 +12,6 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
-    [<Obsolete("getBytes 이거 수정 필요!!!!")>]
     let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
         let projName = system.Name
         
@@ -48,8 +47,8 @@ module ExportModule =
                         else 
                             yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
                     |None ->
-                        yield 0        // todo: 이거 삭제하고 아래 fail uncomment
-                        //failwithlog "ERROR"
+                       // yield 0        // todo: 이거 삭제하고 아래 fail uncomment
+                        failwithlog "ERROR"
                 ]
             
            
@@ -78,7 +77,8 @@ module ExportModule =
         let prjParam: XgxProjectParams =
             let isAddRungComment = IsDebugVersion || isInUnitTest()
             tracefn $"------------------- isAddRungComment: {isAddRungComment}"
-            { defaultXgxProjectParams with
+            let defaultProjectParams = if plcType = XGI then defaultXGIProjectParams else defaultXGKProjectParams       
+            { defaultProjectParams with
                 TargetType = plcType
                 ProjectName = projName
                 GlobalStorages = globalStorages

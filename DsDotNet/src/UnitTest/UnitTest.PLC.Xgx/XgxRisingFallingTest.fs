@@ -20,7 +20,7 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
             $qx := $ix && ! $ix && rising($ix) && falling($ix);
 """
 
-        let statements = parseCode storages code
+        let statements = parseCodeForWindows storages code
         statements.Length === 1
         statements[0].ToText() === "$qx := $ix && !($ix) && rising($ix) && falling($ix)"
 

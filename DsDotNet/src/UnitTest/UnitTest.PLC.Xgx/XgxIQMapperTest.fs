@@ -15,19 +15,26 @@ type IQMapperTest(xgx:PlatformTarget) =
     member x.``Dummy IQ Map test`` () =
         let globalStorages = Storages()
         let pouIQMap =
-            let code = """
+            let codes =
+                let code = """
                 bool qAvante = false;
                 bool qSonata = false;
-                bool QCar = createTag("%QX1", false);
+                
                 $QCar := $qAvante || $qSonata;
 
                 bool iSonata = false;
                 bool iAvante = false;
-                bool ICar = createTag("%IX1", false);
+                
                 $iAvante := $ICar;
                 $iSonata := $ICar;
-    """
-            let statements = parseCode globalStorages code |> map withNoComment
+                """
+                let iq = if xgx = XGI then """bool QCar = createTag("%QX1.0.1", false);bool ICar = createTag("%IX1.0.1", false);""" 
+                          elif xgx = XGK then """bool QCar = createTag("P0000F", false);bool ICar = createTag("P0010F", false);"""
+                          else failwithf $"not support {xgx}"
+
+                iq+code
+
+            let statements = parseCodeForTarget globalStorages codes xgx|> map withNoComment
             {
                 TaskName = "Scan Program"
                 POUName = "POU1"
@@ -38,9 +45,7 @@ type IQMapperTest(xgx:PlatformTarget) =
             }
 
         let prjParam = {
-            defaultXgxProjectParams with
-                TargetType = xgx
-                ProjectName = getFuncName()
+            getXgxProjectParams xgx (getFuncName()) with
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]
                 RungCounter = counterGenerator 0 |> Some

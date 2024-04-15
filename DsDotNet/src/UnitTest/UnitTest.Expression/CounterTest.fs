@@ -231,7 +231,7 @@ open PLC.CodeGen.LS
                 ctu myCTU = createAbCTU(2000u, $x0);
 """
 
-            let statement = parseCode storages code
+            let statement = parseCodeForTarget storages code AB
             [ "CU"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
             [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
 
@@ -240,12 +240,12 @@ open PLC.CodeGen.LS
             use _ = setRuntimeTarget XGI
             let storages = Storages()
             let code = """
-                bool cu = createTag("%MX0.0.0", false);
-                bool r  = createTag("%MX0.0.1", false);
+                bool cu = createTag("%MX0", false);
+                bool r  = createTag("%MX1", false);
                 ctu myCTU = createXgiCTU(2000u, $cu, $r);
 """
 
-            let statement = parseCode storages code
+            let statement = parseCodeForTarget storages code XGI
             [ "CU"; "Q"; "PV"; "CV"; "R"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
             [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
 
@@ -259,7 +259,7 @@ open PLC.CodeGen.LS
                 ctd myCTD = createWinCTD(2000u, $cd, $ld);
 """
 
-            let statement = parseCode storages code
+            let statement = parseCodeForWindows storages code
             [ "CD"; "LD"; "PV"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === true)
             [ "DN"; "OV"; "UN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === false)
 
@@ -268,12 +268,12 @@ open PLC.CodeGen.LS
             use _ = setRuntimeTarget XGI
             let storages = Storages()
             let code = """
-                bool cd = createTag("%MX0.0.0", false);
-                bool ld = createTag("%MX0.0.1", false);
+                bool cd = createTag("%MX0", false);
+                bool ld = createTag("%MX1", false);
                 ctd myCTD = createXgiCTD(2000u, $cd, $ld);
 """
 
-            let statement = parseCode storages code
+            let statement = parseCodeForTarget storages code XGI
             [ "CD"; "LD"; "PV"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === true)
             [ "DN"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTD.{n}") === false)
 
@@ -291,7 +291,7 @@ open PLC.CodeGen.LS
                     ctud myCTUD = createWinCTUD(2000u, $cu, $cd, $r__, $ld);
     """
 
-                let statement = parseCode storages code
+                let statement = parseCodeForWindows storages code
                 [ "CU"; "CD"; "R"; "LD"; "PV"; "QU"; "QD"; "CV";] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
                 [ "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
 
@@ -307,7 +307,7 @@ open PLC.CodeGen.LS
                 ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
 """
 
-            let statement = parseCode storages code
+            let statement = parseCodeForTarget storages code AB
             [ "CU"; "CD"; "OV"; "UN"; "DN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
             [ "R"; "LD"; "PV"; "QU"; "QD"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
 
@@ -324,7 +324,7 @@ open PLC.CodeGen.LS
                 ctr myCTR = createWinCTR(2000u, $cd, $ld);
 """
 
-            let statement = parseCode storages code
+            let statement = parseCodeForTarget storages code AB
             [ "CD"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
             [ "CU"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)
 
@@ -334,11 +334,11 @@ open PLC.CodeGen.LS
                 use _ = setRuntimeTarget platform
                 let storages = Storages()
                 let code = """
-                    bool cd = createTag("%MX0.0.0", false);
-                    bool rst = createTag("%MX0.0.1", false);
+                    bool cd = createTag("%IX0.0.0", false);
+                    bool rst = createTag("%QX0.0.1", false);
                     ctr myCTR = createXgiCTR(2000u, $cd, $rst);
     """
 
-                let statement = parseCode storages code
+                let statement = parseCodeForTarget storages code XGI
                 [ "CD"; "PV"; "RST"; "Q"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
                 [ "CU"; "DN"; "LD"; "PRE"; "ACC"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)

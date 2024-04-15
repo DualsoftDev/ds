@@ -172,7 +172,7 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>
 								</Symbol>
-								<Symbol Name="sum" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="0" Comment="[local var in code] no comment" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
+								<Symbol Name="sum" Kind="1" Type="SINT" State="0" Address="" Trigger="" InitValue="0" Comment="[local var in code] no comment" Device="A" DevicePos="104" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
 									<MemberRetains></MemberRetains>
 									<MemberInitValues></MemberInitValues>
 									<MemberComments></MemberComments>

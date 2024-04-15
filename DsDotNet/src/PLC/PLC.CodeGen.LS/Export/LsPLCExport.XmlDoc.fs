@@ -1,4 +1,4 @@
-﻿namespace PLC.CodeGen.LS
+namespace PLC.CodeGen.LS
 
 open Dual.Common.Core.FS
 open Engine.Core
@@ -66,23 +66,28 @@ type XgxXmlExtension =
         let xPathGlobalVar = getXPathGlobalVariable xgx
         let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
         let localSymbolss:XmlNode[] = xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol").ToArray()
-
-        for s in globalSymbols @ localSymbolss do
+        
+        let check (s:XmlNode) =
             let name = s.Attributes.["Name"].Value
             let devPos = s.Attributes["DevicePos"]
             if devPos <> null && devPos.Value.any() && int devPos.Value < 0  then
                 failwithlog $"Symbol {name} has Invalid DevicePos attribute {devPos.Value}."
 
-            let device = s.Attributes.["Device"].Value
-            match xgx, device with
-            | XGI, "R" ->
-                // { 임시
-                s.Attributes.["Device"].Value <- ""
-                if s.Attributes.["Address"] <> null then
-                    s.Attributes.["Address"].Value <- ""
-                // } 임시
+        for s in globalSymbols do
+            check s
+        for s in localSymbolss do
+            check s
 
-                //failwithlog $"Device {device} not supported in {xgx}."
-            | _ -> ()
+            //let device = s.Attributes.["Device"].Value
+            //match xgx, device with
+            //| XGI, "R" ->
+            //    // { 임시
+            //    s.Attributes.["Device"].Value <- ""
+            //    if s.Attributes.["Address"] <> null then
+            //        s.Attributes.["Address"].Value <- ""
+            //    // } 임시
+
+            //    //failwithlog $"Device {device} not supported in {xgx}."
+            //| _ -> ()
         xdoc
 

@@ -25,7 +25,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             bool xx1 = false;
             $xx1 := $xx0;
 """
-        let statements = parseCode localStorages code |> map withNoComment
+        let statements = parseCodeForWindows localStorages code |> map withNoComment
         {
             TaskName = "Scan Program"
             POUName = "POU1"
@@ -42,7 +42,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             bool yy1 = false;
             $yy1 := $yy0;
 """
-        let statements = parseCode storages code |> map withNoComment
+        let statements = parseCodeForWindows storages code|> map withNoComment
         {
             TaskName = "Scan Program"
             POUName = "POU2"
@@ -60,7 +60,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             bool zz1 = false;
             $zz1 := $zz0;
 """
-        let statements = parseCode storages code |> map withNoComment
+        let statements = parseCodeForWindows storages code|> map withNoComment
         {
             TaskName = "ZZ Program"
             POUName = "POU1"
@@ -72,14 +72,13 @@ type XgxPOUTest(xgx:PlatformTarget) =
     )
 
     let createProjectParams(projName):XgxProjectParams = {
-        defaultXgxProjectParams with
-            TargetType = xgx
-            ProjectName = projName
+        getXgxProjectParams xgx projName with
             RungCounter = counterGenerator 0 |> Some
             POUs = [pou11.Value; pou12.Value; pou21.Value]
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, 640 * 1024) [] xgx) // 유닛테스트 연속호출시 누적되므로 새로 호출
     }
 
+    //pou만으로는 xg5000에서 열수 없음
     member x.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
         let xml = pou11.Value.GenerateXmlString(dummyPrjParams, None)
@@ -99,7 +98,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             bool gg1 = false;
 """
         let f = getFuncName()
-        parseCode globalStorages code |> ignore
+        parseCodeForWindows globalStorages code |> ignore
         let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages }
         let xml = projectParams.GenerateXmlString()
         x.saveTestResult f xml
@@ -115,7 +114,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             bool gg1 = false;
 """
         let f = getFuncName()
-        parseCode globalStorages code |> ignore
+        parseCodeForWindows globalStorages code |> ignore
         let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
         let xml = projectParams.GenerateXmlString()
         x.saveTestResult f xml
@@ -152,7 +151,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             int nm3 = 0;
 """
         let f = getFuncName()
-        parseCode globalStorages code |> ignore
+        parseCodeForWindows globalStorages code |> ignore
         for n in ["xm0"; "xm1"; "xm2"; "xm3"; "y0"; "y1"; "y2"; "y3"; "nm0"; "nm1"; "nm2"; "nm3"] do
             globalStorages[n].Address <- TextAddrEmpty       // force to allocate Memory
 
@@ -189,7 +188,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             bool MMX0 = false;
 """
         let f = getFuncName()
-        parseCode globalStorages code |> ignore
+        parseCodeForWindows globalStorages code |> ignore
         globalStorages["MMX0"].Address <- ""       // force to allocate Memory
 
         let projectParams = {
@@ -220,7 +219,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             bool mmx1 = false;      // MMX1 과 대소문자를 구분하지 않아야 한다.
 """
         let f = getFuncName()
-        parseCode globalStorages code |> ignore
+        parseCodeForWindows globalStorages code |> ignore
         globalStorages["MMX1"].Address <- ""       // force to allocate Memory
 
         let projectParams = {

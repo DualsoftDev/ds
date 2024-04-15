@@ -21,6 +21,7 @@ module POUParametersModule =
             CommentedStatements: CommentedStatement list
         }
 
+        //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {
         TargetType: PlatformTarget
         ProjectName: string
@@ -29,26 +30,32 @@ module POUParametersModule =
         ExistingLSISprj: string option
         POUs: XgxPOUParams list
         MemoryAllocatorSpec: PLCMemoryAllocatorSpec
-
         EnableXmlComment: bool
         AppendDebugInfoToRungComment: bool
-        /// Rung counter 생성기
-        RungCounter : (unit -> int) option
+        RungCounter: (unit -> int) option
     }
 
-    let defaultXgxProjectParams = {
-        TargetType = XGI
-        ProjectName = ""
-        ProjectComment = ""
-        GlobalStorages = Storages()
-        ExistingLSISprj = None
-        POUs = []
-        MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "R" (0, 640 * 1024) [] XGI) // 640K R memory 영역
-        //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
-        EnableXmlComment = false
-        AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
-        RungCounter = None
-    }
+    let createDefaultProjectParams targetType memorySize =
+        {
+            TargetType = targetType
+            ProjectName = ""
+            ProjectComment = ""
+            GlobalStorages = Storages()
+            ExistingLSISprj = None
+            POUs = []
+            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "R" (0, memorySize) [] targetType) // 640K R memory 영역
+            EnableXmlComment = false
+            AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
+            RungCounter = None
+        }
+
+    let defaultXGIProjectParams = createDefaultProjectParams XGI (640 * 1024) // 640K R memory 영역
+    let defaultXGKProjectParams = createDefaultProjectParams XGK (640 * 1024) // 640K R memory 영역
 
     let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
-        { defaultXgxProjectParams with ProjectName = projectName; TargetType = targetType }
+        if targetType = XGI 
+        then { defaultXGIProjectParams with ProjectName = projectName; TargetType = targetType }
+        elif targetType = XGK 
+        then  { defaultXGKProjectParams with ProjectName = projectName; TargetType = targetType }
+        else
+            failwithf "Invalid target type: %A" targetType

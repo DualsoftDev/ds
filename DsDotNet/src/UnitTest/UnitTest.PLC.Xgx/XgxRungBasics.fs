@@ -29,25 +29,50 @@ type XgxRungTest(xgx:PlatformTarget) =
 
     member x.``Generate simplest with local, global variables test``() =
         let symbolsGlobalXml =
-            """
-<GlobalVariable Version="Ver 1.0" Count="2">
-<Symbols>
-    <Symbol Name="myBit00" Kind="6" Type="BOOL" Comment="FAKECOMMENT" Device="I" Address="%IX0.0.0" State="0">
-        <MemberAddresses/>
-        <MemberRetains/>
-        <MemberInitValues/>
-        <MemberComments/>
-    </Symbol>
-    <Symbol Name="myBit01" Kind="6" Type="BOOL" Comment="FAKECOMMENT" Device="I" Address="%IX0.0.1" State="0">
-        <MemberAddresses/>
-        <MemberRetains/>
-        <MemberInitValues/>
-        <MemberComments/>
-    </Symbol>
-</Symbols>
-<TempVar Count="0"></TempVar>
-</GlobalVariable>
-"""
+            
+            if xgx = XGI then  
+                """
+    <GlobalVariable Version="Ver 1.0" Count="2">
+    <Symbols>
+        <Symbol Name="myBit00" Kind="6" Type="BOOL" Comment="FAKECOMMENT" Device="I" Address="%IX0.0.0" State="0">
+            <MemberAddresses/>
+            <MemberRetains/>
+            <MemberInitValues/>
+            <MemberComments/>
+        </Symbol>
+        <Symbol Name="myBit01" Kind="6" Type="BOOL" Comment="FAKECOMMENT" Device="I" Address="%IX0.0.1" State="0">
+            <MemberAddresses/>
+            <MemberRetains/>
+            <MemberInitValues/>
+            <MemberComments/>
+        </Symbol>
+    </Symbols>
+    <TempVar Count="0"></TempVar>
+    </GlobalVariable>
+    """
+            elif xgx = XGK then 
+                """
+    <GlobalVariable Version="Ver 1.0" Count="2">
+    <Symbols>
+        <Symbol Name="myBit00" Kind="6" Type="Bit" Comment="FAKECOMMENT" Device="P" DevicePos="10" State="0">
+            <MemberAddresses/>
+            <MemberRetains/>
+            <MemberInitValues/>
+            <MemberComments/>
+        </Symbol>
+        <Symbol Name="myBit01" Kind="6" Type="Bit" Comment="FAKECOMMENT" Device="P" DevicePos="11" State="0">
+            <MemberAddresses/>
+            <MemberRetains/>
+            <MemberInitValues/>
+            <MemberComments/>
+        </Symbol>
+    </Symbols>
+    <TempVar Count="0"></TempVar>
+    </GlobalVariable>
+    """
+            else failwithf $"not support {xgx}"
+
+
 
         let xml =
             let prjParam = getXgxProjectParams xgx (getFuncName())
@@ -57,39 +82,65 @@ type XgxRungTest(xgx:PlatformTarget) =
 
 
     member __.``Generate local variables test``() =
-        let t = createTag("myBit00", "%IX0.0.0", false)
+        let devType, tAddress, devPos= 
+            if xgx = XGI then  "I", "%IX0.0.0", 0
+            elif xgx = XGK then "P", "P0000A", 10
+            else failwithf $"not support {xgx}"
+
+        let t =  createTag("myBit00", tAddress, false)
+          
         // name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
         let symbolInfo: SymbolInfo =
-            { defaultSymbolInfo with Name=t.Name; Type="BOOL"; Address=t.Address; Device="I"; }
+            { defaultSymbolInfo with Name=t.Name; Type="BOOL"; Address=t.Address; DevicePos=devPos; Device=devType; }
 
         let symbolInfoXml =
             let prjParam = getXgxProjectParams xgx (getFuncName())
             symbolInfo.GenerateXml prjParam
-        symbolInfoXml =~= """<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
+        symbolInfoXml =~= 
+        
+            if xgx = XGI then  """<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
 	</Symbol>"""
+            elif xgx = XGK then """<Symbol Name="myBit00" Comment="" Device="P" DevicePos="10" Type="BIT">
+	</Symbol>"""
+            else failwithf $"not support {xgx}"
+
 
         let symbolsLocalXml =
             let prjParam = getXgxProjectParams xgx (getFuncName())
             XGITag.generateLocalSymbolsXml prjParam [ symbolInfo ]
 
-        symbolsLocalXml =~= """<LocalVar Version="Ver 1.0" Count="1">
+        symbolsLocalXml =~=
+        
+            
+            if xgx = XGI then  """<LocalVar Version="Ver 1.0" Count="1">
 <Symbols>
 	<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
 	</Symbol>
 </Symbols>
 <TempVar Count="0"></TempVar>
 </LocalVar>"""
+            elif xgx = XGK then """<LocalVar Version="Ver 1.0" Count="1">
+<Symbols>
+	<Symbol Name="myBit00" Comment="" Device="P" DevicePos="10" Type="BIT">
+	</Symbol>
+</Symbols>
+<TempVar Count="0"></TempVar>
+</LocalVar>"""
+            else failwithf $"not support {xgx}"
+
+
+
 
     member __.PrepareWithSymbols(numTags:int) =
         let storages = Storages()
         let qx, i, q =
             match xgx with
             | XGI -> "%QX0.1.0", "I", "Q"
-            | XGK -> "%P00001", "P", "P"
+            | XGK -> "P00001", "P", "P"
             | _ -> failwith "Not supported plc type"
 
         let output = createTag("myQ0", qx, false)
-        let statements_ = parseCode storages (generateBitTagVariableDeclarations xgx 0 32)
+        let statements_ = parseCodeForWindows storages (generateBitTagVariableDeclarations xgx 0 32)
         let iTags = storages.Values.ToEnumerable<Tag<bool>>().Take(numTags).ToArray()
         let symbolInfos =
             let kindVar = int Variable.Kind.VAR

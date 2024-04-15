@@ -1,4 +1,4 @@
-using IO.Spec;
+ï»¿using IO.Spec;
 using System.ComponentModel.DataAnnotations;
 using XGTComm;
 
@@ -53,7 +53,7 @@ public class AddressInfoProviderLsXGI : IAddressInfoProvider
 
         static string getIODev(string mem, int offset, int sizeType, string dataType)
         {
-            var ioSlotCardType = 64; //test ahn Ä«µåÁ¤º¸ ¹Þ¾Æ¼­ ¼öÁ¤ ÇÊ¿ä
+            var ioSlotCardType = 64; //test ahn ì¹´ë“œì •ë³´ ë°›ì•„ì„œ ìˆ˜ì • í•„ìš”
             var ioSlotCont = 16;
             return $"%{mem}{dataType}{offset / ioSlotCardType / ioSlotCont}.{offset / ioSlotCardType % ioSlotCont}.{offset % ioSlotCardType}";
         }

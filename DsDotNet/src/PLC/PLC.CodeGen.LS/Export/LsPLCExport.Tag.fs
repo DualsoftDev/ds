@@ -91,7 +91,7 @@ module XGITag = //IEC61131Tag =
     let createSymbolInfo name comment plcType kind (initValue: BoxedObjectHolder) =
         { defaultSymbolInfo with
             Name = name
-            Comment = (*escapeXml*) comment
+            Comment = escapeXml comment
             Type = plcType
             Kind = kind
             InitValue = initValue.Object }
@@ -122,7 +122,7 @@ module XGITag = //IEC61131Tag =
         member private x.GetXmlArgs (prjParam: XgxProjectParams) =
             let targetType = prjParam.TargetType
             [   $"Name=\"{x.Name}\""
-                $"Comment=\"{x.Comment}\""
+                $"Comment=\"{escapeXml x.Comment}\""
                 match targetType with
                 | XGI ->
                     $"Device=\"{x.Device}\""

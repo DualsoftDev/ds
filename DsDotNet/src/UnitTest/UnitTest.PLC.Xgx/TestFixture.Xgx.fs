@@ -50,7 +50,7 @@ module XgxGenerationTestModule =
     let generateLargeVariableDeclarations (xgx:PlatformTarget) =
         seq {
             yield! generateBitTagVariableDeclarationSeq xgx 0 40
-            yield! generateVariableDeclarationSeq "int" "nn" (fun i -> sprintf "%ds" i) 1 9
+            yield! generateVariableDeclarationSeq "int" "nn" (fun i -> sprintf "%d" i) 1 9
         } |> String.concat "\n"
         
 

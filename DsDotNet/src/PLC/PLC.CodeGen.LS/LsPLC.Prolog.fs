@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.LS
 
+open System.Text.RegularExpressions
 open System.Security
 open Engine.Core
 open Dual.Common.Core.FS
@@ -7,7 +8,19 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module XgiPrologModule =
     /// XML 특수 문자 escape.  '&' 등
-    let escapeXml xml = SecurityElement.Escape xml
+    let escapeXml xml =
+        let removeXmlSpecialChars (input: string) : string =
+            let pattern = "&amp;|&lt;|&gt;|&quot;|&apos;"
+            Regex.Replace(input, pattern, "")
+        let containsXmlSpecialChars (input: string) : bool =
+            let removed = removeXmlSpecialChars input
+            //Regex.IsMatch(removed, @"[]<>&'")
+            Regex.IsMatch(removed, "[<>&\"']")
+
+        if containsXmlSpecialChars xml then
+            SecurityElement.Escape xml
+        else
+            xml
 
     let validateVariableName (name:string) =
         match name.ToUpper() with

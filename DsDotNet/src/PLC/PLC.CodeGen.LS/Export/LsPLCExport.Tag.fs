@@ -135,6 +135,8 @@ module XGITag = //IEC61131Tag =
                         $"Address=\"{x.Address}\""
                     $"State=\"{x.State}\""
                 | XGK ->
+                    if x.DevicePos = - 1
+                    then failwithf $"Invalid DevicePos for {x.Name}({x.Address})"
                     // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
                     let typ =
                         match x.Type with

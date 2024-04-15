@@ -63,9 +63,10 @@ type DsSystem with
             for btn in s.ClearHWButtons do
                 let set = btn.ActionINFunc
                 let tm = s.GetTempTimer(btn)
+                yield set --@ (tm, 2000u, getFuncName())
+
                 for flow in btn.SettingFlows do
                     //누름 2초 유지시 _home_btn 동시 동작
-                    yield set --@ (tm, 2000u, getFuncName())
                     yield (tm.DN.Expr , rst) --| (flow.home_btn, getFuncName())
                     yield (set, rst) --| (flow.ready_btn, getFuncName())
                     yield (set, rst) --| (flow.clear_btn, getFuncName())

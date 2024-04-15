@@ -208,17 +208,15 @@ module DsAddressModule =
         setMemoryIndex(startMemory);
 
         for b in sys.HWButtons do
-            b.InAddress <- TextAddrEmpty
             b.OutAddress <- TextSkip
             b.InAddress <- getValidBtnAddress b target |> fst
 
         for l in sys.HWLamps do
             l.InAddress <- TextSkip
-            l.OutAddress <- TextAddrEmpty
             l.OutAddress <- getValidLampAddress l target |> snd
 
         for c in sys.HWConditions do
-            c.InAddress <- TextAddrEmpty
+            c.OutAddress <- TextSkip
             c.InAddress <- getValidCondiAddress c  target
             
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))

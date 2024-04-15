@@ -47,8 +47,7 @@ module ExportModule =
                         else 
                             yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
                     |None ->
-                       // yield 0        // todo: 이거 삭제하고 아래 fail uncomment
-                        failwithlog "ERROR"
+                        failwithlog $"tryParse{plcType} {addr} error"
                 ]
             
            

@@ -100,11 +100,8 @@ module internal XgiSymbolsModule =
                     tag.ByteOffset
             address, tag.Device.ToString(), offset
         | _ -> 
-            if address = TextAddrEmpty then
-                "", "", -1
-            else
-                failwith $"Invalid tag address {address} for {name}"
-                "", "", -1  // 임시
+            failwithf $"Invalid tag address {address} for {name}"
+                
         
 
     let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo =
@@ -117,7 +114,6 @@ module internal XgiSymbolsModule =
             let plcType = systemTypeToXgxTypeName prjParam.TargetType t.DataType
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
-   
 
             { defaultSymbolInfo with
                 Name = name
@@ -132,7 +128,7 @@ module internal XgiSymbolsModule =
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
             let symbolInfo =
-             
+
                 let plcType = systemTypeToXgxTypeName prjParam.TargetType t.DataType
                 let comment = SecurityElement.Escape t.Comment
                
@@ -160,15 +156,30 @@ module internal XgiSymbolsModule =
                     Kind = kindVar }
 
             symbolInfo
-
-        | DuXgiVar xgi ->
-            if kindVar = int Variable.Kind.VAR_GLOBAL then
+        //DuXgxVar ?
+        | DuXgiVar xgx ->
+            match prjParam.TargetType with
+            | XGI ->
+                if kindVar = int Variable.Kind.VAR_GLOBAL then
                 // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
-                { xgi.SymbolInfo with
+                    { xgx.SymbolInfo with
+                        Kind = kindVar
+                        Address = xgx.Address }
+                else
+                     xgx.SymbolInfo
+            | XGK ->
+                autoAllocatorAdress xgx prjParam
+                let address, device, devPos = getXGXTagInfo prjParam.TargetType xgx.Address xgx.Name
+                { xgx.SymbolInfo with
                     Kind = kindVar
-                    Address = xgi.Address }
-            else
-                xgi.SymbolInfo
+                    Address = address
+                    Device = device
+                    DevicePos = devPos }
+            | _ ->
+                    failwithf "Invalid target type: %A" prjParam.TargetType
+
+
+
 
         | DuTimer timer ->
             let device, addr, devicePos  =

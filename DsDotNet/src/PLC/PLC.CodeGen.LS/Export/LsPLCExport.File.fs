@@ -159,4 +159,4 @@ module internal XgiFile =
         if targetType = XGK then
             xdoc.MovePOULocalSymbolsToGlobal targetType
 
-        xdoc.ToText()
+        xdoc.Beautify()

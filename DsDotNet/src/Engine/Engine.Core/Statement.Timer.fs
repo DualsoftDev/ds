@@ -20,7 +20,7 @@ module TimerStatementModule =
             failwith <| $"Timer Resolution Error: Preset value should be larger than %A{MinTickInterval}"
 
         let timer = new Timer(ts.Type, ts)
-        let statements = ResizeArray<Statement>()
+        let statements = StatementContainer()
         match tParams.RungConditionIn with
         | Some cond ->
             let rungInStatement = DuAssign (cond, ts.EN)

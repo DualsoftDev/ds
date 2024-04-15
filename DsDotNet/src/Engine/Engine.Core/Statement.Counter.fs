@@ -1,4 +1,4 @@
-﻿namespace Engine.Core
+namespace Engine.Core
 
 open Dual.Common.Core.FS
 
@@ -19,7 +19,7 @@ module CounterStatementModule =
     let generateCounterStatement (cs, cParams:CounterCreateParams) =
         let counter = new Counter   (cParams.Type, cs)
 
-        let statements = ResizeArray<Statement>()
+        let statements = StatementContainer()
         match cParams.CountUpCondition with
         | Some up->
             let statement = DuAssign (up, cs.CU)

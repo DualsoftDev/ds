@@ -43,6 +43,7 @@ module ExpressionFunctionModule =
 
     /// Expression<'T> 를 IExpression 으로 casting
     let internal iexpr any = (box any) :?> IExpression
+    let PsedoFunction<'T> (_args:Args):'T = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
 
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"

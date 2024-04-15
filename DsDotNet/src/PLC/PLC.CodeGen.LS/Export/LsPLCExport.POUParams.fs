@@ -43,14 +43,14 @@ module POUParametersModule =
             GlobalStorages = Storages()
             ExistingLSISprj = None
             POUs = []
-            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "R" (0, memorySize) [] targetType) // 640K R memory 영역
+            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, memorySize) [] targetType)
             EnableXmlComment = false
             AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
             RungCounter = None
         }
 
-    let defaultXGIProjectParams = createDefaultProjectParams XGI (640 * 1024) // 640K R memory 영역
-    let defaultXGKProjectParams = createDefaultProjectParams XGK (640 * 1024) // 640K R memory 영역
+    let defaultXGIProjectParams = createDefaultProjectParams XGI (640 * 1024)   // 640K "M" memory 영역
+    let defaultXGKProjectParams = createDefaultProjectParams XGK (640 * 1024) 
 
     let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
         if targetType = XGI 

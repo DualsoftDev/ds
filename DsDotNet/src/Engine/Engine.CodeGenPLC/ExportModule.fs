@@ -12,7 +12,7 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
-    let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj : string =
+    let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj startMemory : string =
         let projName = system.Name
         
         let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
@@ -83,7 +83,7 @@ module ExportModule =
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
                 AppendDebugInfoToRungComment = isAddRungComment
-                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "R" (0, 640 * 1024) usedByteIndices  plcType) // 640K R memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                 RungCounter = counterGenerator 0 |> Some
                 POUs =
                     [ yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
@@ -93,7 +93,7 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj) =
+    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startMemory) =
         assert(plcType.IsOneOf(XGI, XGK))
         use _ = logTraceEnabler()
         // RuntimeDS.Target <- plcType  // xxx 
@@ -116,7 +116,7 @@ module ExportModule =
             then globalStorage.Remove(tagKV.Key)|>ignore
             )
 
-        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj
+        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj startMemory
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)
 
@@ -126,12 +126,12 @@ module ExportModule =
 [<Extension>]
 type ExportModuleExt =
     [<Extension>]
-    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string) =
+    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startMemory) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj)
+        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startMemory)
 
     [<Extension>]
-    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string) =
+    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startMemory) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj)
+        exportXMLforLSPLC (XGK, system, path, existingLSISprj, startMemory)
 

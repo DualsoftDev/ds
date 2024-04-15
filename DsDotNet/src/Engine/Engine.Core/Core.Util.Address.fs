@@ -15,6 +15,7 @@ module DsAddressModule =
     let mutable outCnt = 0
     let mutable memoryCnt = InitStartMemory
     let setMemoryIndex(index:int) = memoryCnt <- index;
+    let getCurrentMemoryIndex() = memoryCnt;
     let InitializeIOMemoryIndex () =
                 memoryCnt <- InitStartMemory
                 inCnt <- 0  

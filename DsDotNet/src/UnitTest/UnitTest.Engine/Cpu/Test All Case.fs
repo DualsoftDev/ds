@@ -39,7 +39,7 @@ type TestAllCase() =
     member __.``Test All Case`` () =
         let t = CpuTestSample()
         let f = getFuncName()
-        let result = exportXMLforLSPLC(XGI, t.Sys, myTemplate f, None)
+        let result = exportXMLforLSPLC(XGI, t.Sys, myTemplate f, None, 0)
         //추후 정답과 비교 필요
         result === result
 
@@ -64,7 +64,7 @@ type TestAllCase() =
         let t = CpuTestSample()
 
         let myXml = getFuncName() |> myTemplate
-        let result = exportXMLforLSPLC(XGI, t.Sys, myXml, None)
+        let result = exportXMLforLSPLC(XGI, t.Sys, myXml, None, 0)
         result === result
 
 
@@ -72,5 +72,5 @@ type TestAllCase() =
     member __.``Allocate existing global IO`` () =
         let t = CpuTestSample()
         let myXml = getFuncName() |> myTemplate
-        (fun () -> exportXMLforLSPLC(XGI, t.Sys, myXml, Some myExistIO))  |> ShouldFail
+        (fun () -> exportXMLforLSPLC(XGI, t.Sys, myXml, Some myExistIO, 0))  |> ShouldFail
 

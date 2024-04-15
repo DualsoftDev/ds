@@ -17,4 +17,4 @@ using System.Reflection;
 ///DS Language Version (Language Parser 수정시만 변경 Ver : 1.0.0.1)
 [assembly: AssemblyFileVersion("1.0.0.1")]
 ///DS Engine Version
-[assembly: AssemblyVersion("0.9.7.9")]
+[assembly: AssemblyVersion("0.9.7.10")]

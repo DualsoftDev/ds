@@ -110,7 +110,7 @@ module internal rec Command =
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
     // <timer> for XGI
-    let private drawFunctionBlockTimer (x, y) (timerStatement: TimerStatement)  target: BlockSummarizedXmlElements =
+    let private drawFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement)  target: BlockSummarizedXmlElements =
         let ts = timerStatement
         let typ = ts.Timer.Type     // TON, TOF, TMR
         let time: int = int ts.Timer.PRE.Value
@@ -126,11 +126,11 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(TimerMode(ts))
-            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters target
+            createFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
 
         blockXml
 
-    let private drawFunctionBlockCounter (x, y) (counterStatement: CounterStatement) target: BlockSummarizedXmlElements =
+    let private drawFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) target: BlockSummarizedXmlElements =
 
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -159,7 +159,7 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(CounterMode(cs))
-            createFunctionBlockInstanceXmls (x, y) cmd inputParameters outputParameters target
+            createFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
 
         blockXml
 
@@ -169,7 +169,7 @@ module internal rec Command =
         member x.GetSizeString(target:PlatformTarget) = systemTypeToXgxTypeName target x
 
 
-    let drawPredicate (x, y) (predicate: Predicate) target: BlockSummarizedXmlElements =
+    let drawPredicate (prjParam: XgxProjectParams) (x, y) (predicate: Predicate) target: BlockSummarizedXmlElements =
         match predicate with
         | Compare(name, output, args) ->
             let namedInputParameters =
@@ -189,9 +189,9 @@ module internal rec Command =
                         $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ -> failwithlog "NOT YET"
 
-            createBoxXmls (x, y) func namedInputParameters outputParameters "" target
+            createBoxXmls prjParam (x, y) func namedInputParameters outputParameters "" target
 
-    let drawFunction (x, y) (func: Function) (target:PlatformTarget): BlockSummarizedXmlElements =
+    let drawFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockSummarizedXmlElements =
         match func with
         | Arithmatic(name, output, args) ->
             let namedInputParameters =
@@ -213,18 +213,19 @@ module internal rec Command =
                 | ("SUB" | "DIV") -> name // DIV 는 DIV, DIV2 만 존재함
                 | _ -> failwithlog "NOT YET"
 
-            createBoxXmls (x, y) func namedInputParameters outputParameters "" target
+            createBoxXmls prjParam (x, y) func namedInputParameters outputParameters "" target
 
-    let drawAction (x, y) (func: PLCAction) targetPLC: BlockSummarizedXmlElements =
+    let drawAction (prjParam: XgxProjectParams) (x, y) (func: PLCAction) targetPLC: BlockSummarizedXmlElements =
         match func with
         | Move(condition, source, target) ->
             let namedInputParameters = [ "EN", condition :> IExpression; "IN", source ]
 
             let output = target :?> INamedExpressionizableTerminal
             let outputParameters = [ "OUT", output ]
-            createBoxXmls (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters "" targetPLC
+            createBoxXmls prjParam (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters "" targetPLC
 
     let createFunctionBlockInstanceXmls
+            (prjParam: XgxProjectParams)
             (rungStartX, rungStartY)
             (cmd: CommandTypes)
             (namedInputParameters: (string * IExpression) list)
@@ -233,12 +234,13 @@ module internal rec Command =
         : BlockSummarizedXmlElements =
             let func = cmd.VarType.ToString()
             let instanceName = cmd.InstanceName
-            createBoxXmls (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName target
+            createBoxXmls prjParam (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName target
 
     /// cmd 인자로 주어진 function block 의 type 과
     /// namedInputParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
     /// function block rung 을 그린다.
     let createBoxXmls
+            (prjParam: XgxProjectParams)
             (rungStartX, rungStartY)
             (functionName: string)
             (namedInputParameters: (string * IExpression) list)
@@ -305,7 +307,7 @@ module internal rec Command =
                           checkType.HasFlag CheckType.BOOL
                           |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
 
-                          let blockXml = drawFunctionInputLadderBlock (x, y + sy) (flatten exp)
+                          let blockXml = drawFunctionInputLadderBlock prjParam (x, y + sy) (flatten exp)
                           portOffset, blockXml
                           sy <- sy + blockXml.TotalSpanY ]
 
@@ -393,22 +395,25 @@ module internal rec Command =
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let drawCommandXgi (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
-        match cmd with
-        | PredicateCmd(pc) -> drawPredicate (x, y) pc XGI
-        | FunctionCmd(fc) -> drawFunction (x, y) fc XGI
-        | ActionCmd(ac) -> drawAction (x, y) ac XGI
-        | FunctionBlockCmd(fbc) ->
-            match fbc with
-            | TimerMode(timerStatement) -> drawFunctionBlockTimer (x, y) timerStatement XGI
-            | CounterMode(counterStatement) -> drawFunctionBlockCounter (x, y) counterStatement XGI
-        | _ -> failwithlog "Unknown CommandType"
+    let drawCommand (prjParam: XgxProjectParams) (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
+        match prjParam.TargetType with
+        | XGI ->
+            match cmd with
+            | PredicateCmd(pc) -> drawPredicate prjParam (x, y) pc XGI
+            | FunctionCmd(fc) -> drawFunction prjParam (x, y) fc XGI
+            | ActionCmd(ac) -> drawAction prjParam (x, y) ac XGI
+            | FunctionBlockCmd(fbc) ->
+                match fbc with
+                | TimerMode(timerStatement) -> drawFunctionBlockTimer prjParam (x, y) timerStatement XGI
+                | CounterMode(counterStatement) -> drawFunctionBlockCounter prjParam (x, y) counterStatement XGI
+            | _ -> failwithlog "Unknown CommandType"
 
-    let drawCommandXgk (x, y) (cmd: CommandTypes) : BlockSummarizedXmlElements =
-        match cmd with
-        | FunctionBlockCmd(fbc) -> drawFBCommandXgk (x, y) fbc
-        | _ -> failwithlog "Unknown CommandType"
+        | XGK ->
+            match cmd with
+            | FunctionBlockCmd(fbc) -> drawFBCommandXgk (x, y) fbc
+            | _ -> failwithlog "Unknown CommandType"
 
+        | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
     let drawCoil (x, y) (cmdExp: CommandTypes) : BlockSummarizedXmlElements =
@@ -483,8 +488,8 @@ module internal rec Command =
 
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
-    let drawFunctionInputLadderBlock (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =
-        let blockXml = drawLadderBlock (x, y) expr
+    let drawFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =
+        let blockXml = drawLadderBlock prjParam (x, y) expr
 
         if isFunctionBlockConnectable expr then
             blockXml
@@ -508,7 +513,7 @@ module internal rec Command =
     /// x y 위치에서 expression 표현하기 위한 정보 반환
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
     /// - Xml : 좌표 * 결과 xml 문자열
-    let rec private drawLadderBlock (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =
+    let rec private drawLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =
         let c = coord (x, y)
 
         match expr with
@@ -550,7 +555,7 @@ module internal rec Command =
 
             let blockedExprXmls: BlockSummarizedXmlElements list =
                 [ for exp in exprs do
-                      let sub = drawLadderBlock (sx, y) exp
+                      let sub = drawLadderBlock prjParam (sx, y) exp
                       sx <- sx + sub.TotalSpanX
                       sub ]
 
@@ -570,7 +575,7 @@ module internal rec Command =
 
             let blockedExprXmls: BlockSummarizedXmlElements list =
                 [ for exp in exprs do
-                      let sub = drawLadderBlock (x, sy) exp
+                      let sub = drawLadderBlock prjParam (x, sy) exp
                       sy <- sy + sub.TotalSpanY
                       sub ]
 
@@ -624,10 +629,10 @@ module internal rec Command =
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         // terminal case
-        | FlatNary(OpUnit, inner :: []) -> drawLadderBlock (x, y) inner
+        | FlatNary(OpUnit, inner :: []) -> drawLadderBlock prjParam (x, y) inner
 
         // negation 없애기
-        | FlatNary(Neg, inner :: []) -> FlatNary(OpUnit, [ inner.Negate() ]) |> drawLadderBlock (x, y)
+        | FlatNary(Neg, inner :: []) -> FlatNary(OpUnit, [ inner.Negate() ]) |> drawLadderBlock prjParam (x, y)
 
         | _ -> failwithlog "Unknown FlatExpression case"
 
@@ -659,7 +664,7 @@ module internal rec Command =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
                 | Some expr ->
-                    let exprBlockXmlElement = drawLadderBlock (x, y) expr
+                    let exprBlockXmlElement = drawLadderBlock prjParam (x, y) expr
                     let ex = exprBlockXmlElement
                     ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
                 | _ -> 0, 0, []
@@ -673,12 +678,7 @@ module internal rec Command =
                         match cmdExp with
                         | CoilCmd _cc -> drawCoil (nx - 1, y) cmdExp
                         | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                            let drawCommand =
-                                match prjParam.TargetType with
-                                | XGI -> drawCommandXgi
-                                | XGK -> drawCommandXgk
-                                | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
-                            drawCommand (nx, y) cmdExp
+                            drawCommand prjParam (nx, y) cmdExp
 
                     let cmdXmls =
                         { cmdXmls with

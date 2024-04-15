@@ -139,7 +139,7 @@ module XGITag = //IEC61131Tag =
                     let typ =
                         match x.Type with
                         | ("BIT"|"BOOL") -> "BIT"
-                        | "WORD" -> "WORD"
+                        | ("SINT"|"WORD") -> "WORD"
                         | "TON"| "TOF"| "TMR"  -> "BIT/WORD"
                         | "CTU"| "CTD"| "CTUD"| "CTR" -> "BIT/WORD"
                         | _ -> 

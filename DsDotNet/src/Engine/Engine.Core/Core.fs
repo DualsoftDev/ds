@@ -122,7 +122,7 @@ module CoreModule =
         member val Jobs = ResizeArray<Job>()
         member val Flows = createNamedHashSet<Flow>()
         member val OriginalCodeBlocks = ResizeArray<string>()
-        member val Statements = ResizeArray<Statement>()
+        member val Statements = StatementContainer()
         member val Variables = ResizeArray<VariableData>()
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()

@@ -83,7 +83,7 @@ module internal XgiSymbolsModule =
                 let addr:string = allocator()
                 t.Address <- addr
 
-    //[<Obsolete("임시 코드 삭제")>]
+    [<Obsolete("임시 코드 삭제")>]
     let getXGXTagInfo (targetType:PlatformTarget) (address:string) (name:string) =
         let tag = 
             match targetType with
@@ -104,7 +104,7 @@ module internal XgiSymbolsModule =
             if address = TextAddrEmpty then
                 "", "", -1
             else
-                failwith $"Invalid tag address {address} for {name}"
+                //failwith $"Invalid tag address {address} for {name}"
                 "", "", -1  // 임시
         
 

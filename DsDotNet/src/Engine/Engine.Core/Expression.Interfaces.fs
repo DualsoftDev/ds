@@ -39,8 +39,12 @@ module ExpressionForwardDeclModule =
         abstract BoxedEvaluatedValue : obj
         abstract GetBoxedRawObject: unit -> obj
         abstract ToText : withParenthesis: bool -> string
+
         /// Function expression 인 경우 function name 반환.  terminal 이면 none
+        ///
+        /// e.g "+", "-", "*", "/", ">", ">=", "<", "<=", "=", "!=", "&&", "||", "!", "createTON", "createTOF", "createCounter", "createTimer"
         abstract FunctionName: string option
+
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
         abstract WithNewFunctionArguments: IExpression list -> IExpression

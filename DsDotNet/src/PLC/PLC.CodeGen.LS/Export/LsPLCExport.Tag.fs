@@ -117,7 +117,6 @@ module XGITag = //IEC61131Tag =
                 | false -> "false"
             | _ -> $"{x.InitValue}"
 
-        [<Obsolete("임시 코드 fix")>]
         /// Symbol 관련 XML tag attributes 생성
         member private x.GetXmlArgs (prjParam: XgxProjectParams) =
             let targetType = prjParam.TargetType

@@ -1,4 +1,4 @@
-namespace Engine.Core
+ï»¿namespace Engine.Core
 
 open System.Reactive.Subjects
 open Dual.Common.Core.FS
@@ -95,6 +95,6 @@ module RuntimeGeneratorModule =
                 else
                     (i, IOType.Out, DataType.DuUINT64))
 
-        // ±âÁ¸ÀÇ ¸®½ºÆ®¸¦ Áö¿ì°í »õ·Î¿î µ¥ÀÌÅÍ·Î ´ëÃ¼ÇÕ´Ï´Ù.
+        // ê¸°ì¡´ì˜ ë¦¬ìŠ¤íŠ¸ë¥¼ ì§€ìš°ê³  ìƒˆë¡œìš´ ë°ì´í„°ë¡œ ëŒ€ì²´í•©ë‹ˆë‹¤.
         RuntimeDS.HwSlotDataTypes.Clear()
         RuntimeDS.HwSlotDataTypes.AddRange(hw)

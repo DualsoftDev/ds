@@ -1,4 +1,4 @@
-namespace Engine.Import.Office
+Ôªønamespace Engine.Import.Office
 
 open System
 open System.Data
@@ -21,7 +21,7 @@ module ExportToPdfModule =
             let page = doc.Pages.Add(PdfPageSize.A4, new PdfMargins(40f))
 
             // Set title font
-            let titleFont =  new PdfTrueTypeFont("∏º¿∫ ∞ÌµÒ", 14f, PdfFontStyle.Regular, true )
+            let titleFont =  new PdfTrueTypeFont("ÎßëÏùÄ Í≥†Îîï", 14f, PdfFontStyle.Regular, true )
 
             // Draw the table title
             let title = if String.IsNullOrWhiteSpace(dataTable.TableName) then "Table" else dataTable.TableName
@@ -39,7 +39,7 @@ module ExportToPdfModule =
             table.Style.HeaderStyle.BackgroundBrush <- PdfBrushes.Gray
             table.Style.HeaderStyle.TextBrush <- PdfBrushes.White
             table.Style.HeaderStyle.StringFormat <- new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Middle)
-            table.Style.DefaultStyle.Font <- new PdfTrueTypeFont("∏º¿∫ ∞ÌµÒ", 9f, PdfFontStyle.Regular, true )
+            table.Style.DefaultStyle.Font <- new PdfTrueTypeFont("ÎßëÏùÄ Í≥†Îîï", 9f, PdfFontStyle.Regular, true )
 
             // Set text alignment for the rest of the cells
             for i in 0 .. table.Columns.Count - 1 do

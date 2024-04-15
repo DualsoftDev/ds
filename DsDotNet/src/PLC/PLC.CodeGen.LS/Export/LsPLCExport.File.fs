@@ -137,7 +137,6 @@ module internal XgiFile =
 
         let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
 
-
         let xnCountConainer =
             match targetType with
             | XGI -> xnGlobalVar

@@ -349,7 +349,7 @@ module XgiExportModule =
                 let xPathGlobalVar = getXPathGlobalVariable targetType
                 //let xnGlobalVar = xdoc.GetXmlNodeTheGlobalVariable(targetType)
                 //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
-                let xnGlobalSymbols = xdoc.GetXmlNodes($"xPathGlobalVar/Symbols/Symbol") |> List.ofSeq
+                let xnGlobalSymbols = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol") |> List.ofSeq
 
                 let countExistingGlobal = xnGlobalSymbols.Length
 

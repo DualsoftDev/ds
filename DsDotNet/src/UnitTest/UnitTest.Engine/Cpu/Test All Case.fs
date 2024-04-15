@@ -63,12 +63,14 @@ type TestAllCase() =
     member __.``Allocate existing global Memory`` () =
         let t = CpuTestSample()
 
-        let result = exportXMLforLSPLC(XGI, t.Sys, myTemplate "Allocate existing global Memory", None)
+        let myXml = getFuncName() |> myTemplate
+        let result = exportXMLforLSPLC(XGI, t.Sys, myXml, None)
         result === result
 
 
     [<Test>]
     member __.``Allocate existing global IO`` () =
         let t = CpuTestSample()
-        (fun () -> exportXMLforLSPLC(XGI, t.Sys, myTemplate "Allocate existing global IO", Some myExistIO))  |> ShouldFail
+        let myXml = getFuncName() |> myTemplate
+        (fun () -> exportXMLforLSPLC(XGI, t.Sys, myXml, Some myExistIO))  |> ShouldFail
 

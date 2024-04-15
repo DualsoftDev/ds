@@ -4,5 +4,5 @@
             statement2Statements
                 statement2XgxStatements
                     collectExpandedExpression
-                        splitWideExpression
+                        zipVisitor
                             let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan

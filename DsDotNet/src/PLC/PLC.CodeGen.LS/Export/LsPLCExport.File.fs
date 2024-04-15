@@ -147,7 +147,7 @@ module internal XgiFile =
         let countExistingGlobal =
             xnCountConainer.Attributes.["Count"].Value |> System.Int32.Parse
 
-        let _globalSymbolXmls =
+        let _globalSymbolXmls =     // 아래 side effect 를 위해 필요
             // symbolsGlobal = "<GlobalVariable Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol>
             let neoGlobals = symbolsGlobal |> DualXmlNode.ofString
             let numNewGlobals = neoGlobals.Attributes.["Count"].Value |> System.Int32.Parse
@@ -155,8 +155,9 @@ module internal XgiFile =
             xnCountConainer.Attributes.["Count"].Value <- sprintf "%d" (countExistingGlobal + numNewGlobals)
 
             neoGlobals.SelectNodes(".//Symbols/Symbol").ToEnumerables()
-            |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
+            |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)       // side effect
 
         if targetType = XGK then
             xdoc.MovePOULocalSymbolsToGlobal targetType
+
         xdoc.ToText()

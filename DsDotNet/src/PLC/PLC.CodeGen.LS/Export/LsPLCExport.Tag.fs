@@ -91,7 +91,7 @@ module XGITag = //IEC61131Tag =
     let createSymbolInfo name comment plcType kind (initValue: BoxedObjectHolder) =
         { defaultSymbolInfo with
             Name = name
-            Comment = escapeXml comment
+            Comment = (*escapeXml*) comment
             Type = plcType
             Kind = kind
             InitValue = initValue.Object }

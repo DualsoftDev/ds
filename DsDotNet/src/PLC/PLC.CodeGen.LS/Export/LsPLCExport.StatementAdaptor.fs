@@ -540,6 +540,7 @@ module XgxExpressionConvertorModule =
                             match fn with
                             | ("!=" | "<>") -> fLogicalOr([fLogicalAnd [l; nr]; fLogicalAnd [nl; r]])
                             | "=" -> fLogicalOr([fLogicalAnd [l; r]; fLogicalAnd [nl; nr]])
+                            | _ -> failwithlog "ERROR"
                         newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                     else
                         // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.

@@ -32,6 +32,8 @@ module POUParametersModule =
         MemoryAllocatorSpec: PLCMemoryAllocatorSpec
         EnableXmlComment: bool
         AppendDebugInfoToRungComment: bool
+        TimerCounterGenerator:Seq.counterGeneratorType
+        CounterCounterGenerator:Seq.counterGeneratorType
         RungCounter: (unit -> int) option
     }
 
@@ -46,6 +48,8 @@ module POUParametersModule =
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, memorySize) [] targetType)
             EnableXmlComment = false
             AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
+            TimerCounterGenerator = counterGenerator 0
+            CounterCounterGenerator = counterGenerator 0
             RungCounter = None
         }
 
@@ -53,9 +57,13 @@ module POUParametersModule =
     let defaultXGKProjectParams = createDefaultProjectParams XGK (640 * 1024) 
 
     let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
-        if targetType = XGI 
-        then { defaultXGIProjectParams with ProjectName = projectName; TargetType = targetType }
-        elif targetType = XGK 
-        then  { defaultXGKProjectParams with ProjectName = projectName; TargetType = targetType }
-        else
-            failwithf "Invalid target type: %A" targetType
+        let getProjectParams =
+            match targetType with
+            | XGI -> defaultXGIProjectParams
+            | XGK -> defaultXGKProjectParams
+            | _ -> failwithf "Invalid target type: %A" targetType
+        { getProjectParams with 
+            ProjectName = projectName; TargetType = targetType;
+            TimerCounterGenerator = counterGenerator 0
+            CounterCounterGenerator = counterGenerator 0 }
+

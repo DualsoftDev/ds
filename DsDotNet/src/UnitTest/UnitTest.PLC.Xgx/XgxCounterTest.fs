@@ -12,11 +12,18 @@ type XgxCounterTest(xgx:PlatformTarget) =
 
     member x.``Counter CTU simple test`` () =
         let storages = Storages()
-        let code = """
-            bool cu = createTag("%IX0.0.0", false);
-            bool res = createTag("%IX0.0.1", false);
-            ctu myCTU = createXgiCTU(2000u, $cu, $res);
-"""
+        let code =
+            match xgx with
+            | XGI -> """
+                bool cu = createTag("%IX0.0.0", false);
+                bool res = createTag("%IX0.0.1", false);
+                ctu myCTU = createXgiCTU(2000u, $cu, $res);
+                """
+            | XGK -> """
+                bool cu = createTag("P00000", false);
+                bool res = createTag("P00001", false);
+                ctu myCTU = createXgiCTU(2000u, $cu, $res);
+                """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
@@ -25,11 +32,20 @@ type XgxCounterTest(xgx:PlatformTarget) =
     member x.``Counter CTD simple test`` () =
         use _ = setRuntimeTarget XGI
         let storages = Storages()
-        let code = """
-            bool cd = createTag("%IX0.0.0", false);
-            bool load = createTag("%IX0.0.1", false);
-            ctd myCTD = createXgiCTD(2000u, $cd, $load);
-"""
+        let code =
+            match xgx with
+            | XGI -> """
+                bool cd = createTag("%IX0.0.0", false);
+                bool load = createTag("%IX0.0.1", false);
+                ctd myCTD = createXgiCTD(2000u, $cd, $load);
+                """
+            | XGK -> """
+                bool cd = createTag("P00000", false);
+                bool load = createTag("P00001", false);
+                ctd myCTD = createXgiCTD(2000u, $cd, $load);
+                """
+
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
@@ -351,6 +367,21 @@ type XgiCounterTest() =
     [<Test>] member __.``Counter CTR with conditional test2`` () = base.``Counter CTR with conditional test2``()
     [<Test>] member __.``Counter CTUD with conditional test`` () = base.``Counter CTUD with conditional test``()
 
+
+type XgkCounterTest() =
+    inherit XgxCounterTest(XGK)
+
+    [<Test>] member __.``Counter CTU simple test`` () = base.``Counter CTU simple test``()
+    [<Test>] member __.``Counter CTD simple test`` () = base.``Counter CTD simple test``()
+    [<Test>] member __.``Counter CTUD simple test`` () = base.``Counter CTUD simple test``()
+    [<Test>] member __.``Counter CTR simple test`` () = base.``Counter CTR simple test``()
+    [<Test>] member __.``Counter CTU with conditional test`` () = base.``Counter CTU with conditional test``()
+    [<Test>] member __.``Counter CTD with conditional test`` () = base.``Counter CTD with conditional test``()
+    [<Test>] member __.``Counter CTR with conditional test`` () = base.``Counter CTR with conditional test``()
+    [<Test>] member __.``Counter CTR with conditional test2`` () = base.``Counter CTR with conditional test2``()
+    [<Test>] member __.``Counter CTUD with conditional test`` () = base.``Counter CTUD with conditional test``()
+
+
 //[<Collection("SerialXgxFunctionTest")>]
 type XgiFunctionTest() =
     inherit XgxFunctionTest(XGI)
@@ -367,6 +398,20 @@ type XgiFunctionTest() =
     [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
     [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
 
+type XgkFunctionTest() =
+    inherit XgxFunctionTest(XGK)
+
+    [<Test>] member __.``ADD simple test`` () = base.``ADD simple test``()
+    [<Test>] member __.``ADD int32 test`` () = base.``ADD int32 test``()
+    [<Test>] member __.``ADD int64 test`` () = base.``ADD int64 test``()
+    [<Test>] member __.``ADD double test`` () = base.``ADD double test``()
+    [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
+    [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
+    [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()
+    [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
+    [<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
+    [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
+    [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
 
 
 

@@ -447,12 +447,12 @@ module internal rec Command =
                     let typ = ts.Timer.Type.ToString()
                     let var = ts.Timer.Name
                     let value = ts.Timer.PRE.Value /100u  // 2000 mec = 20  // 100msec timer
-                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : "Param="TON,T0000,1000"
+                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
                 | CounterMode cs ->
                     let typ = cs.Counter.Type.ToString()
                     let var = cs.Counter.Name
                     let value = cs.Counter.PRE.Value 
-                    $"Param={dq}{typ},{var},{value}{dq}"
+                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
 
             [ let c = coord (x, y)
               let xml =
@@ -681,7 +681,9 @@ module internal rec Command =
                 | FunctionBlockCmd(fbc) ->
                     match fbc with
                     | TimerMode(timerStatement) -> timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression |> Some
-                    | CounterMode(counterStatement) -> counterStatement.DownCondition.Value.Flatten() :?> FlatExpression |> Some
+                    | CounterMode(counterStatement) ->
+                        let upOrDownCondition = [counterStatement.DownCondition; counterStatement.UpCondition] |> List.choose id |> List.exactlyOne
+                        upOrDownCondition.Flatten() :?> FlatExpression |> Some
                 //| PredicateCmd _
                 //| FunctionCmd _
                 //| ActionCmd _ 

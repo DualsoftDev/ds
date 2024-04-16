@@ -102,11 +102,6 @@ module XGITag = //IEC61131Tag =
             State = 0 }
 
 
-    let pCounterGenerator = counterGenerator 0
-    let mCounterGenerator = counterGenerator 0
-    let tCounterGenerator = counterGenerator 0
-    let cCounterGenerator = counterGenerator 0
-    let xCounterGenerator = counterGenerator 0
     type SymbolInfo with
 
         member private x.ToXgiLiteral() =
@@ -135,15 +130,15 @@ module XGITag = //IEC61131Tag =
                         $"Address=\"{x.Address}\""
                     $"State=\"{x.State}\""
                 | XGK ->
-                    if x.DevicePos = - 1
-                    then failwithf $"Invalid DevicePos for {x.Name}({x.Address})"
+                    if x.DevicePos = - 1 then
+                        failwithf $"Invalid DevicePos for {x.Name}({x.Address})"
                     // <Symbol Name="autoMonitor" Device="P" DevicePos="0" Type="BIT" Comment="" ModuleInfo="" EIP="0" HMI="0"></Symbol>
                     let typ =
                         match x.Type with
                         | ("BIT"|"BOOL") -> "BIT"
                         | ("SINT"|"WORD") -> "WORD"
                         | "TON"| "TOF"| "TMR"  -> "BIT/WORD"
-                        | "CTU"| "CTD"| "CTUD"| "CTR" -> "BIT/WORD"
+                        | ("CTU"| "CTD"| "CTUD"| "CTR" | "CTD_INT" | "CTU_INT" ) -> "BIT/WORD"
                         | _ -> 
                             failwithlog $"Not supported data type {x.Type}"
 

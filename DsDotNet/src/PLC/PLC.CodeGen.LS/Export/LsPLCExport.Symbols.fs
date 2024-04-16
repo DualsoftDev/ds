@@ -185,7 +185,7 @@ module internal XgiSymbolsModule =
             let device, addr, devicePos  =
                 match prjParam.TargetType with
                 | XGK ->
-                    let offset = tCounterGenerator()
+                    let offset = prjParam.TimerCounterGenerator()
                     let formattedAddr = offset.ToString("0000")
                     "T", $"T{formattedAddr}", offset
                 | _ -> "", "", -1   
@@ -211,8 +211,9 @@ module internal XgiSymbolsModule =
             let device, addr, devicePos  =
                 match prjParam.TargetType with
                 | XGK ->
-                    let offset = cCounterGenerator()
+                    let offset = prjParam.CounterCounterGenerator()
                     let formattedAddr = offset.ToString("0000")
+                    tracefn $"xxx--------------------------------- Counter {counter.Name} offset: {offset}"
                     "C", $"C{formattedAddr}", offset
                 | _ -> "", "", -1 
 

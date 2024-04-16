@@ -239,6 +239,15 @@ module XgxExpressionConvertorModule =
         | "/" -> "DIV"
         | _ -> failwithlog "ERROR"
 
+    let operatorToXgkFunctionName op =
+        match op with
+        | "+" -> "ADD"
+        | "-" -> "SUB"
+        | "*" -> "MUL"
+        | "/" -> "DIV"
+        | (">" | ">=" | "<"  | "<="  | "=" | "!=" ) -> op
+        | _ -> failwithlog "ERROR"
+
     type private AugmentedConvertorParams =
         { Storage: XgxStorage
           ExpandFunctionStatements: StatementContainer

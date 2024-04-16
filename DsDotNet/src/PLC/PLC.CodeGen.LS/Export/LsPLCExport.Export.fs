@@ -60,17 +60,36 @@ module XgiExportModule =
             rgi <- rgi.Add(xml)
 
         let simpleRung (expr: IExpression) (target: IStorage) =
-            let coil =
-                match target with
-                | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
+            match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
+            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "!=") ->
+            
+                let op = operatorToXgkFunctionName funName |> escapeXml
+                let l, r = l.Terminal.Value.GetContact(), r.Terminal.Value.GetContact()
+                let drawXgkFb, paramFunc =
+                    if funName.IsOneOf("+", "-", "*", "/") then
+                        drawXgkFBLeft, $"Param={dq}{op},{l},{r}{dq}"
+                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "!=") then
+                        drawXgkFBRight, $"Param={dq}{op},{l},{r}, {target.Name}{dq}"
+                    else
+                        failwithlog $"ERROR: {funName}"
 
-            let flatExpr = expr.Flatten() :?> FlatExpression
-            let command = CoilCmd(coil)
-            let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.Y
-            //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
-            rgi <-
-                { Xmls = rgiSub.Xmls @ rgi.Xmls
-                  Y = rgiSub.Y }
+                let xmls = drawXgkFb (0, rgi.Y) paramFunc target.Name
+                rgi <-
+                    {   Xmls = [xmls] @ rgi.Xmls
+                        Y = rgi.Y + 1 }
+            | _ ->
+
+                let coil =
+                    match target with
+                    | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
+
+                let flatExpr = expr.Flatten() :?> FlatExpression
+                let command = CoilCmd(coil)
+                let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.Y
+                //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
+                rgi <-
+                    { Xmls = rgiSub.Xmls @ rgi.Xmls
+                      Y = rgiSub.Y }
 
         // Rung 별로 생성
         for CommentAndXgxStatements(cmt, stmts) in commentedStatements do
@@ -277,7 +296,7 @@ module XgiExportModule =
             x.ExistingLSISprj |> Option.map DualXmlDocument.loadFromFile
             |? getTemplateXgxXmlDoc x.TargetType
 
-        member x.GenerateXmlString() = x.GenerateXmlDocument().Beautify()
+        member x.GenerateXmlString() = x.GenerateXmlDocument().OuterXml
 
         member x.GenerateXmlDocument() : XmlDocument =
             let { ProjectName = projName

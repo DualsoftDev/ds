@@ -486,6 +486,43 @@ module internal rec Command =
           TotalSpanY = 1
           XmlElements = xmls }
 
+    /// 왼쪽에 FB (비교 연산 등) 를 그리고, 오른쪽에 coil 을 그린다.
+    let drawXgkFBLeft (x, y) (fbParam: string) (target: string) : XmlOutput =
+        assert (x = 0)
+        let inner =
+            [ 
+                let c = coord (x, y)
+                elementFull (int ElementType.FBMode) c fbParam ""
+
+                let c = coord (x + 3, y)
+                let spanX = coilCellX - 1
+                let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+
+                let c = coord (coilCellX, y)
+                let paramLength = $"Param={dq}{c}{dq}"
+                elementFull (int ElementType.CoilType_Start) c paramLength target
+            ] |> joinLines
+        $"\t<Rung BlockMask={dq}0{dq}>\r\n{inner}\t</Rung>"
+
+
+    /// 왼쪽에 _ON 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
+    let drawXgkFBRight (x, y) (fbParam: string) (target: string) : XmlOutput =
+        assert (x = 0)
+        let inner =
+            [ 
+                let c = coord (x, y)
+                elementFull (int ElementType.ContactMode) c "" "_ON"
+
+                let c = coord (x + 1, y)
+                let spanX = coilCellX - 4
+                let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+
+                let c = coord (coilCellX, y)
+                elementFull (int ElementType.FBMode) c fbParam ""
+            ] |> joinLines
+        $"\t<Rung BlockMask={dq}0{dq}>\r\n{inner}\t</Rung>"
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
     let drawFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =
@@ -690,11 +727,11 @@ module internal rec Command =
                 | None ->
                     0,
                     0,
-                    { X = x
-                      Y = y
-                      TotalSpanX = 0
-                      TotalSpanY = 0
-                      XmlElements = [] }
+                    {   X = x
+                        Y = y
+                        TotalSpanX = 0
+                        TotalSpanY = 0
+                        XmlElements = [] }
 
 
 
@@ -709,8 +746,8 @@ module internal rec Command =
             let spanY = max exprSpanY cmdSpanY
             let c = coord (x, spanY + y)
 
-            { Xml = xml
-              Coordinate = c
-              SpanX = spanX
-              SpanY = spanY }
+            {   Xml = xml
+                Coordinate = c
+                SpanX = spanX
+                SpanY = spanY }
         rungImpl (x, y) expr cmdExp

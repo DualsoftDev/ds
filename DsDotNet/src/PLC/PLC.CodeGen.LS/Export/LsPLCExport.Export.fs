@@ -59,16 +59,17 @@ module XgiExportModule =
             let xml = getCommentRungXml rgi.Y prologComment
             rgi <- rgi.Add(xml)
 
-        let getXgkTerminalString(exp:IExpression) =
-            match exp.Terminal with
-            | Some t ->
-                match t.Variable, t.Literal with
-                | Some v, None -> v.Name
-                | None, Some (:? ILiteralHolder as lh) -> lh.ToTextWithoutTypeSuffix()
-                | _ -> failwith "ERROR: Unknown terminal literal case."
-            | _ -> failwith "ERROR: Not a Terminal"
-
         let simpleRung (expr: IExpression) (target: IStorage) =
+
+            let getXgkTerminalString(terminalExp:IExpression) =
+                match terminalExp.Terminal with
+                | Some t ->
+                    match t.Variable, t.Literal with
+                    | Some v, None -> v.Name
+                    | None, Some (:? ILiteralHolder as lh) -> lh.ToTextWithoutTypeSuffix()
+                    | _ -> failwith "ERROR: Unknown terminal literal case."
+                | _ -> failwith "ERROR: Not a Terminal"
+
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "<>") ->
             

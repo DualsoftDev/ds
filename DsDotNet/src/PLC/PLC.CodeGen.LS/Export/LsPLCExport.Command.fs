@@ -97,14 +97,6 @@ module internal rec Command =
         let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
         DuTerminal(DuVariable on)
 
-    //type FuctionParameterShape =
-    //    /// Input parameter connection
-    //    | LineConnectFrom of x:int * y:int
-    //    /// Output parameter connection
-    //    | LineConnectTo of x:int * y:int
-    //    /// Input/Output 라인 연결없이 직접 write
-    //    | Value of value:IValue
-
     /// Option<IExpression<bool>> to IExpression
     let private obe2e (obe: IExpression<bool> option) : IExpression = obe.Value :> IExpression
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression

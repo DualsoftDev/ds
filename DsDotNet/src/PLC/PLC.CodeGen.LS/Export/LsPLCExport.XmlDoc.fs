@@ -61,7 +61,6 @@ type XgxXmlExtension =
     ///
     /// - Symbol 의 DevicePos 가 음수인 Symbol 이 있는지 확인한다.
     [<Extension>]
-    [<Obsolete("임시 코드 제거")>]
     static member Check(xdoc:XmlDocument, xgx:PlatformTarget) =
         let xPathGlobalVar = getXPathGlobalVariable xgx
         let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
@@ -77,17 +76,5 @@ type XgxXmlExtension =
             check s
         for s in localSymbolss do
             check s
-
-            //let device = s.Attributes.["Device"].Value
-            //match xgx, device with
-            //| XGI, "R" ->
-            //    // { 임시
-            //    s.Attributes.["Device"].Value <- ""
-            //    if s.Attributes.["Address"] <> null then
-            //        s.Attributes.["Address"].Value <- ""
-            //    // } 임시
-
-            //    //failwithlog $"Device {device} not supported in {xgx}."
-            //| _ -> ()
         xdoc
 

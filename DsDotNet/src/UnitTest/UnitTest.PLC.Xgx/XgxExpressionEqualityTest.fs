@@ -146,10 +146,8 @@ type XgiExpEqualityTest() =
 
 type XgkExpEqualityTest() =
     inherit XgxExpEqualityTest(XGK)
-    [<Obsolete("비교연산 XGK 구현 필요")>]
-    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()   //비교연산 XGK 구현 필요
-    [<Obsolete("비교연산 XGK 구현 필요")>]
-    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``() //비교연산 XGK 구현 필요
+    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
+    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Obsolete("비교연산 XGK 구현 필요")>]

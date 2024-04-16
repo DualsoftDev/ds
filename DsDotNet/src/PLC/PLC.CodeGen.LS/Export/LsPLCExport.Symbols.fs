@@ -240,19 +240,6 @@ module internal XgiSymbolsModule =
         (kindVar: int)
         (xgxSymbols: XgxSymbol seq)
       : SymbolInfo list =
-#if DEBUG
-        let xxx =
-            xgxSymbols
-            |> filter (fun x ->
-                match x with
-                | DuXgiVar(v) -> v.Name.StartsWith "f"
-                | DuStorage(s) -> s.Name.StartsWith "f"
-                | _ -> false)
-            |> Seq.toList
-        let xxxSymbolInfos = [
-            for x in xxx do
-                xgxSymbolToSymbolInfo prjParam kindVar x ]
-#endif
         xgxSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
 
 

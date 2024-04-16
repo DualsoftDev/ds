@@ -525,14 +525,6 @@ module XgxExpressionConvertorModule =
     ///     반환 : exp, [tmp2], [tmp1 := 2 + 3]
     let exp2exp (prjParam: XgxProjectParams) (exp: IExpression) (newLocalStorages: XgxStorage) (newStatements:StatementContainer) : IExpression =
         let rec helper (nestLevel:int) (exp: IExpression) : IExpression * IStorage list * Statement list =
-            //let exprs2exprs (nestLevel:int) (exprs: IExpression list) =
-            //    let results =
-            //        [   for expr in exprs do
-            //              let newExp, newLocalStorages, newStatements = helper nestLevel expr
-            //              yield newExp, newLocalStorages, newStatements ]
-            //    let exprs, stgs, stmts = results |> List.unzip3
-            //    exprs, stgs |> List.concat, stmts |> List.concat
-
             if exp.Terminal.IsSome || prjParam.TargetType = XGI then
                 exp, [], []
             else
@@ -540,21 +532,32 @@ module XgxExpressionConvertorModule =
                 | Some fn, l::r::[] ->
                     let lexpr, lstgs, lstmts = helper (nestLevel + 1) l
                     let rexpr, rstgs, rstmts = helper (nestLevel + 1) r
-                    let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
 
-                    let tmpVar = createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{exp} store"
-                    let stg = tmpVar :> IStorage
-                    let varExp = tmpVar.ToExpression()
-                    match fn with
-                    | ("+" | "-" | "*" | "/")
-                    | (">" | ">=" | "<" | "<=" | "=" | "!=") ->
-                        let stmt = DuAssign(newExp, tmpVar)
-                        varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
-                    | _ ->
-                        if lstgs.any() || rstgs.any() then
-                            newExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts)
-                        else
-                            exp, [], []
+                    if fn.IsOneOf("!=", "=", "<>") && lexpr.DataType = typeof<bool> then
+                        // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
+                        let l, r, nl, nr = lexpr, rexpr, fLogicalNot [lexpr], fLogicalNot [rexpr]
+                        let newExp =
+                            match fn with
+                            | ("!=" | "<>") -> fLogicalOr([fLogicalAnd [l; nr]; fLogicalAnd [nl; r]])
+                            | "=" -> fLogicalOr([fLogicalAnd [l; r]; fLogicalAnd [nl; nr]])
+                        newExp, (lstgs @ rstgs), (lstmts @ rstmts)
+                    else
+                        // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
+                        let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
+
+                        let tmpVar = createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{exp} store"
+                        let stg = tmpVar :> IStorage
+                        let varExp = tmpVar.ToExpression()
+                        match fn with
+                        | ("+" | "-" | "*" | "/")
+                        | (">" | ">=" | "<" | "<=" | "=" | "!=") ->
+                            let stmt = DuAssign(newExp, tmpVar)
+                            varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
+                        | _ ->
+                            if lstgs.any() || rstgs.any() then
+                                newExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts)
+                            else
+                                exp, [], []
                 | _ ->
                     exp, [], []
 

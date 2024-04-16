@@ -245,7 +245,7 @@ module XgxExpressionConvertorModule =
         | "-" -> "SUB"
         | "*" -> "MUL"
         | "/" -> "DIV"
-        | (">" | ">=" | "<"  | "<="  | "=" | "!=" ) -> op
+        | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
         | _ -> failwithlog "ERROR"
 
     type private AugmentedConvertorParams =

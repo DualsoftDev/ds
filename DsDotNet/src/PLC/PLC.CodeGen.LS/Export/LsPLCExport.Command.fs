@@ -500,14 +500,13 @@ module internal rec Command =
                 elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
                 let c = coord (coilCellX, y)
-                let paramLength = $"Param={dq}{c}{dq}"
-                elementFull (int ElementType.CoilType_Start) c paramLength target
+                elementBody (int ElementType.CoilMode) c target
             ] |> joinLines
         $"\t<Rung BlockMask={dq}0{dq}>\r\n{inner}\t</Rung>"
 
 
     /// 왼쪽에 _ON 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
-    let drawXgkFBRight (x, y) (fbParam: string) (target: string) : XmlOutput =
+    let drawXgkFBRight (x, y) (fbParam: string) (_target: string) : XmlOutput =
         assert (x = 0)
         let inner =
             [ 

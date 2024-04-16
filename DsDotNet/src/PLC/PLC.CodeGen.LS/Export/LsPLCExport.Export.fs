@@ -59,17 +59,26 @@ module XgiExportModule =
             let xml = getCommentRungXml rgi.Y prologComment
             rgi <- rgi.Add(xml)
 
+        let getXgkTerminalString(exp:IExpression) =
+            match exp.Terminal with
+            | Some t ->
+                match t.Variable, t.Literal with
+                | Some v, None -> v.Name
+                | None, Some (:? ILiteralHolder as lh) -> lh.ToTextWithoutTypeSuffix()
+                | _ -> failwith "ERROR: Unknown terminal literal case."
+            | _ -> failwith "ERROR: Not a Terminal"
+
         let simpleRung (expr: IExpression) (target: IStorage) =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "!=") ->
+            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "<>") ->
             
                 let op = operatorToXgkFunctionName funName |> escapeXml
-                let l, r = l.Terminal.Value.GetContact(), r.Terminal.Value.GetContact()
+                let ls, rs = getXgkTerminalString l, getXgkTerminalString r
                 let drawXgkFb, paramFunc =
                     if funName.IsOneOf("+", "-", "*", "/") then
-                        drawXgkFBLeft, $"Param={dq}{op},{l},{r}{dq}"
-                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "!=") then
-                        drawXgkFBRight, $"Param={dq}{op},{l},{r}, {target.Name}{dq}"
+                        drawXgkFBRight, $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
+                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "<>") then
+                        drawXgkFBLeft, $"Param={dq}{op},{ls},{rs}{dq}"
                     else
                         failwithlog $"ERROR: {funName}"
 

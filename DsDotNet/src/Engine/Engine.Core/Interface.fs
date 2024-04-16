@@ -60,3 +60,10 @@ module Interface =
 
     // Utilities
     let inline address x = ( ^T: (member Address: string) x )
+
+    type ITerminal with
+        member x.GetContact() =
+            match x.Variable, x.Literal with
+            | Some v, None -> v.Name
+            | None, Some literal -> literal.ToText()
+            | _ -> failwith "Invalid terminal"

@@ -16,7 +16,6 @@ open System
 type XgxTimerTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
-    [<Obsolete("createXgkTON 구현 필요")>]
     member x.``Timer test`` () =
         let storages = Storages()
         let code =
@@ -41,6 +40,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
                 ton myTon = createXgkTON(20u, $myQBit0);
                 $x7 := ($x0 || $x1) && $x2;
                 """
+            | _ -> failwith "Not supported plc type"
         
         let statements = parseCodeForWindows storages code
         //storages.Count === 12
@@ -204,6 +204,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
                         && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
                     );
                 """
+            | _ -> failwith "Not supported plc type"
 
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -234,6 +235,8 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
                 ton TOUT3 = createXgkTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
                 """                
+            | _ -> failwith "Not supported plc type"
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)

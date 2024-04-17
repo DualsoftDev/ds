@@ -24,6 +24,8 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 bool res = createTag("P00001", false);
                 ctu myCTU = createXgiCTU(2000u, $cu, $res);
                 """
+            | _ -> failwith "Not supported plc type"
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
@@ -44,6 +46,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 bool xload = createTag("P00001", false);       // XGK 에서는 'load' 라는 변수명을 사용할 수 없다.
                 ctd myCTD = createXgiCTD(2000u, $cd, $xload);
                 """
+            | _ -> failwith "Not supported plc type"
 
 
         let statements = parseCodeForWindows storages code
@@ -68,6 +71,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 bool r  = createTag("P00002", false);
                 ctud myCTUD = createXgkCTUD(2000u, $cu, $cd, $r);
                 """
+            | _ -> failwith "Not supported plc type"
 
 
         let statements = parseCodeForWindows storages code
@@ -95,6 +99,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 // XGK 에서는 다음 처럼 struct 변수를 접근하는 구문은 허용하지 않는다.
                 // $myCTR.RST := $cd;
                 """
+            | _ -> failwith "Not supported plc type"
 
 
         let statements = parseCodeForWindows storages code

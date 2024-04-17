@@ -24,6 +24,7 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
                 bool ix = createTag("P00000", false);
                 bool qx = createTag("P00001", false);
                 """
+            | _ -> failwith "Not supported plc type"
             + "$qx := $ix && ! $ix && rising($ix) && falling($ix);"
 
         let statements = parseCodeForWindows storages code

@@ -91,6 +91,8 @@ module XgiExportModule =
 
                 let coil =
                     match target with
+                    | :? XgkTimerCounterStructResetCoil as rc ->
+                        COMResetCoil(rc)
                     | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
 
                 let flatExpr = expr.Flatten() :?> FlatExpression
@@ -468,6 +470,7 @@ module XgiExportModule =
                     |> ignore
 
             if targetType = XGK then
-                xdoc.MovePOULocalSymbolsToGlobal(targetType)
+                xdoc.MovePOULocalSymbolsToGlobalForXgk()
+                xdoc.CheckInvalidVariableNameForXgk()
 
             xdoc.Check targetType

@@ -170,6 +170,12 @@ module ExpressionModule =
         FunctionName   : string
     }
 
+    type CounterStatement with
+        /// CounterStatement 의 UpCondition 또는 DownCondition 반환
+        member x.GetUpOrDownCondition() : IExpression<bool> = [x.DownCondition; x.UpCondition] |> List.choose id |> List.exactlyOne
+        member x.GetLoadOrResetCondition() : IExpression<bool> = [x.LoadCondition; x.ResetCondition] |> List.choose id |> List.exactlyOne
+
+
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
 

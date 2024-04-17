@@ -681,9 +681,8 @@ module internal rec Command =
                 | FunctionBlockCmd(fbc) ->
                     match fbc with
                     | TimerMode(timerStatement) -> timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression |> Some
-                    | CounterMode(counterStatement) ->
-                        let upOrDownCondition = [counterStatement.DownCondition; counterStatement.UpCondition] |> List.choose id |> List.exactlyOne
-                        upOrDownCondition.Flatten() :?> FlatExpression |> Some
+                    | CounterMode(counterStatement) ->                        
+                        counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression |> Some
                 //| PredicateCmd _
                 //| FunctionCmd _
                 //| ActionCmd _ 

@@ -157,6 +157,6 @@ module internal XgiFile =
             |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)       // side effect
 
         if targetType = XGK then
-            xdoc.MovePOULocalSymbolsToGlobal targetType
+            xdoc.MovePOULocalSymbolsToGlobalForXgk ()
 
         xdoc.ToText()

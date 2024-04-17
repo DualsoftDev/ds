@@ -54,12 +54,30 @@ type XgxCounterTest(xgx:PlatformTarget) =
     member x.``Counter CTUD simple test`` () =
         let storages = Storages()
         let code = """
-            bool cu = createTag("%IX0.0.0", false);
-            bool cd = createTag("%IX0.0.1", false);
-            bool r  = createTag("%IX0.0.2", false);
-            bool ld = createTag("%IX0.0.3", false);
-            ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
+                bool cu = createTag("%IX0.0.0", false);
+                bool cd = createTag("%IX0.0.1", false);
+                bool r  = createTag("%IX0.0.2", false);
+                bool ld = createTag("%IX0.0.3", false);
+                ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
 """
+        let code =
+            match xgx with
+            | XGI -> """
+                bool cu = createTag("%IX0.0.0", false);
+                bool cd = createTag("%IX0.0.1", false);
+                bool r  = createTag("%IX0.0.2", false);
+                bool ld = createTag("%IX0.0.3", false);
+                ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
+                """
+            | XGK -> """
+                bool cu = createTag("P00000", false);
+                bool cd = createTag("P00001", false);
+                bool r  = createTag("P00002", false);
+                bool ld = createTag("P00003", false);
+                ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
+                """
+
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
@@ -67,14 +85,26 @@ type XgxCounterTest(xgx:PlatformTarget) =
 
     member x.``Counter CTR simple test`` () =
         let storages = Storages()
-        let code = """
-            bool cd = createTag("%IX0.0.0", false);
-            bool res = createTag("%IX0.0.1", false);
-            ctr myCTR = createXgiCTR(2000u, $cd, $res);
-            //int x7 = createTag("%QX0.1", 0);
-            //$x7 := $myCTR.CV;
-            $myCTR.RST := $cd;
-"""
+        let code =
+            match xgx with
+            | XGI -> """
+                bool cd = createTag("%IX0.0.0", false);
+                bool res = createTag("%IX0.0.1", false);
+                ctr myCTR = createXgiCTR(2000u, $cd, $res);
+                //int x7 = createTag("%QX0.1", 0);
+                //$x7 := $myCTR.CV;
+                $myCTR.RST := $cd;
+                """
+            | XGK -> """
+                bool cd = createTag("P00000", false);
+                bool res = createTag("P00001", false);
+                ctr myCTR = createXgiCTR(2000u, $cd, $res);
+
+                // XGK 에서는 다음 처럼 struct 변수를 접근하는 구문은 허용하지 않는다.
+                // $myCTR.RST := $cd;
+                """
+
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)

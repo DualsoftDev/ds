@@ -546,7 +546,7 @@ module XgxExpressionConvertorModule =
                         // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
                         let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
 
-                        let tmpVar = createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{exp} store"
+                        let tmpVar = createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
                         let stg = tmpVar :> IStorage
                         let varExp = tmpVar.ToExpression()
                         match fn with

@@ -213,7 +213,6 @@ module internal XgiSymbolsModule =
                 | XGK ->
                     let offset = prjParam.CounterCounterGenerator()
                     let formattedAddr = offset.ToString("0000")
-                    tracefn $"xxx--------------------------------- Counter {counter.Name} offset: {offset}"
                     "C", $"C{formattedAddr}", offset
                 | _ -> "", "", -1 
 

@@ -38,6 +38,8 @@ module POUParametersModule =
     }
 
     let createDefaultProjectParams targetType memorySize =
+        let voidCounterGenerator : Seq.counterGeneratorType =
+            fun () -> failwith "Should be assigned with valid counter generator"
         {
             TargetType = targetType
             ProjectName = ""
@@ -48,8 +50,8 @@ module POUParametersModule =
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, memorySize) [] targetType)
             EnableXmlComment = false
             AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
-            TimerCounterGenerator = counterGenerator 0
-            CounterCounterGenerator = counterGenerator 0
+            TimerCounterGenerator = voidCounterGenerator
+            CounterCounterGenerator = voidCounterGenerator
             RungCounter = None
         }
 
@@ -57,6 +59,7 @@ module POUParametersModule =
     let defaultXGKProjectParams = createDefaultProjectParams XGK (640 * 1024) 
 
     let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
+        assert(isInUnitTest())
         let getProjectParams =
             match targetType with
             | XGI -> defaultXGIProjectParams

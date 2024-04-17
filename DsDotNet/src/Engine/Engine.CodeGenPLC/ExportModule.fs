@@ -12,6 +12,7 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
+    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 아래 todo 부분 치환")>]
     let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj startMemory : string =
         let projName = system.Name
         
@@ -75,7 +76,6 @@ module ExportModule =
 
         let prjParam: XgxProjectParams =
             let isAddRungComment = IsDebugVersion || isInUnitTest()
-            tracefn $"------------------- isAddRungComment: {isAddRungComment}"
             let defaultProjectParams = if plcType = XGI then defaultXGIProjectParams else defaultXGKProjectParams       
             { defaultProjectParams with
                 TargetType = plcType
@@ -85,6 +85,11 @@ module ExportModule =
                 AppendDebugInfoToRungComment = isAddRungComment
                 MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                 RungCounter = counterGenerator 0 |> Some
+
+                // todo : 전달 받은 TimerCounterGenerator, CounterCounterGenerator 값으로 설정
+                TimerCounterGenerator = counterGenerator 0
+                CounterCounterGenerator = counterGenerator 0
+
                 POUs =
                     [ yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
                       yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices" "Devices"
@@ -93,6 +98,7 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
+    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 generateXmlXGX 에 전달")>]
     let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startMemory) =
         assert(plcType.IsOneOf(XGI, XGK))
         use _ = logTraceEnabler()
@@ -126,10 +132,12 @@ module ExportModule =
 [<Extension>]
 type ExportModuleExt =
     [<Extension>]
+    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 exportXMLforLSPLC 에 전달")>]
     static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startMemory) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
         exportXMLforLSPLC (XGI, system, path, existingLSISprj, startMemory)
 
+    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 exportXMLforLSPLC 에 전달")>]
     [<Extension>]
     static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startMemory) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None

@@ -15,11 +15,11 @@ module internal XgiFile =
     /// text comment 를 xml wrapping 해서 반환
     let getCommentRungXml y cmt =
         let yy = y * 1024 + 1
-        $"\t<Rung BlockMask=\"0\"><Element ElementType=\"{int ElementType.RungCommentMode}\" Coordinate=\"{yy}\">{cmt}</Element></Rung>"
+        wrapWithRung $"<Element ElementType=\"{int ElementType.RungCommentMode}\" Coordinate=\"{yy}\">{cmt}</Element>"
 
     let getLableXml y cmt =
         let yy = y * 1024 + 1
-        $"\t<Rung BlockMask=\"0\"><Element ElementType=\"{int ElementType.LabelMode}\" Coordinate=\"{yy}\">{cmt}</Element></Rung>"
+        wrapWithRung $"<Element ElementType=\"{int ElementType.LabelMode}\" Coordinate=\"{yy}\">{cmt}</Element>"
 
 
     /// Program 마지막 부분에 END 추가
@@ -28,14 +28,14 @@ module internal XgiFile =
 
         sprintf
             """
-            <Rung BlockMask="0">
-                <Element ElementType="%d" Coordinate="%d" Param="90"></Element>
-			    <Element ElementType="%d" Coordinate="%d" Param="END">END</Element>
-			</Rung>"""
+            <Element ElementType="%d" Coordinate="%d" Param="90"></Element>
+			<Element ElementType="%d" Coordinate="%d" Param="END">END</Element>
+			"""
             (int ElementType.MultiHorzLineMode)
             yy
             (int ElementType.FBMode)
             (yy + 93)
+        |> wrapWithRung 
 
 
     /// Template XGI XML 문자열을 반환

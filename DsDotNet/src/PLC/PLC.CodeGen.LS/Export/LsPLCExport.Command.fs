@@ -494,7 +494,7 @@ module internal rec Command =
                 let c = coord (coilCellX, y)
                 elementBody (int ElementType.CoilMode) c target
             ] |> joinLines
-        $"\t<Rung BlockMask={dq}0{dq}>\r\n{inner}\t</Rung>"
+        wrapWithRung inner
 
 
     /// 왼쪽에 _ON 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
@@ -513,7 +513,7 @@ module internal rec Command =
                 let c = coord (coilCellX, y)
                 elementFull (int ElementType.FBMode) c fbParam ""
             ] |> joinLines
-        $"\t<Rung BlockMask={dq}0{dq}>\r\n{inner}\t</Rung>"
+        wrapWithRung inner
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
     let drawFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =

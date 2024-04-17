@@ -174,6 +174,8 @@ module internal Common =
     let vlineDownTo (x, y) endY = vlineDownN (x, y) (endY - y)
     let vlineUpTo (x, y) endY = vlineUpN (x, y) (y - endY)
 
+    /// xml 문자열을 <Rung> 으로 감싸기
+    let wrapWithRung xml = $"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"
 
     /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')
     let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst: string) (x, y) : CoordinatedXmlElement =

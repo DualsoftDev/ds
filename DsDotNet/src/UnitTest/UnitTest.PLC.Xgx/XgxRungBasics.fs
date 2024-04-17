@@ -13,7 +13,7 @@ type XgxRungTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Prolog comment test``() =
-        let rungsXml = $"""<Rung BlockMask="0"><Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element></Rung>"""
+        let rungsXml = wrapWithRung $"""<Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element>"""
         let xml =
             let prjParam = getXgxProjectParams xgx (getFuncName())
             wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None

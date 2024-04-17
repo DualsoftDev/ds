@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
+open Config.POU.Program.LDRoutine
 
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
@@ -49,7 +50,7 @@ module XgiExportModule =
             let { Coordinate = c; Xml = xml } = rung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
 
-            { Xmls = [ $"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>" ]
+            { Xmls = [ wrapWithRung xml ]
               Y = yy }
 
         let mutable rgi: RungGenerationInfo = { Xmls = []; Y = 0 }
@@ -59,7 +60,7 @@ module XgiExportModule =
             let xml = getCommentRungXml rgi.Y prologComment
             rgi <- rgi.Add(xml)
 
-        let simpleRung (expr: IExpression) (target: IStorage) =
+        let simpleRung (expr: IExpression) (target: IStorage) : unit =
 
             let getXgkTerminalString(terminalExp:IExpression) =
                 match terminalExp.Terminal with
@@ -85,7 +86,7 @@ module XgiExportModule =
 
                 let xmls = drawXgkFb (0, rgi.Y) paramFunc target.Name
                 rgi <-
-                    {   Xmls = [xmls] @ rgi.Xmls
+                    {   Xmls = xmls::rgi.Xmls
                         Y = rgi.Y + 1 }
             | _ ->
 
@@ -103,6 +104,32 @@ module XgiExportModule =
                     { Xmls = rgiSub.Xmls @ rgi.Xmls
                       Y = rgiSub.Y }
 
+        /// XGK 용 MOV : MOV,S,D
+        let moveRung (source: ITerminal) (destination: IStorage) : unit =
+            // test case : XGK "Add 10 items test"
+            if prjParam.TargetType <> XGK then
+                failwithlog "Something wrong!"
+
+            let xmls =
+                [
+                    let x, y = 0, rgi.Y
+                    let c = coord (x, y)
+                    elementBody (int ElementType.ContactMode) c "_ON"
+
+                    let c = coord (x + 1, y)
+                    let spanX = coilCellX - 3 - 1
+                    let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                    elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+
+                    let c = coord (coilCellX - 3, y)
+                    let param = $"Param={dq}MOV,{source.GetContact()},{destination.Name}{dq}"
+                    elementFull (int ElementType.FBMode) c param ""
+                ] |> joinLines |> wrapWithRung
+            rgi <-
+                {   Xmls = xmls::rgi.Xmls
+                    Y = rgi.Y + 1 }
+
+
         // Rung 별로 생성
         for CommentAndXgxStatements(cmt, stmts) in commentedStatements do
 
@@ -115,7 +142,13 @@ module XgiExportModule =
 
             for stmt in stmts do
                 match stmt with
-                | DuAssign(expr, target) -> simpleRung expr target
+                | DuAssign(expr, target) when expr.DataType <> typeof<bool> ->
+                    // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
+                    moveRung expr.Terminal.Value target
+
+                | DuAssign(expr, target) ->
+                    simpleRung expr target
+
                 | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as op
                                            Arguments = args
                                            Output = output }) ->

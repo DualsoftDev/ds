@@ -99,8 +99,15 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
 
 type XgiLadderElementTest() =
     inherit XgxLadderElementTest(XGI)
-
     [<Test>] member x.``Local var test``() = base.``Local var test``()
     [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
     [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
     [<Test>] member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()
+
+type XgkLadderElementTest() =
+    inherit XgxLadderElementTest(XGK)
+    [<Test>] member x.``Local var test``() = base.``Local var test``()
+    [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
+    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
+    [<Test>] member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()
+

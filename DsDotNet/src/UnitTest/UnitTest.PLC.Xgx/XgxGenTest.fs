@@ -15,13 +15,8 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``OR simple test`` () =
         let storages = Storages()
-        let code = """
-            bool x0 = createTag("%IX0.0.0", false);
-            bool x1 = createTag("%IX0.0.1", false);
-
-            bool x7 = createTag("%QX0.1.0", false);
-
-            $x7 := ($x0 || $x1);
+        let code = generateBitTagVariableDeclarations xgx 0 3 + """
+            $x02 := ($x00 || $x01);
 """
         let statements = parseCodeForTarget storages code XGI 
         storages.Count === 3
@@ -33,14 +28,8 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``AndOr simple test`` () =
         let storages = Storages()
-        let code = """
-            bool x0 = createTag("%IX0.0.0", false);
-            bool x1 = createTag("%IX0.0.1", false);
-            bool x2 = createTag("%IX0.0.2", false);
-
-            bool x7 = createTag("%QX0.1.0", false);
-
-            $x7 := ($x0 || $x1) && $x2;
+        let code = generateBitTagVariableDeclarations xgx 0 4 + """
+            $x03 := ($x00 || $x01) && $x02;
 """
         let statements = parseCodeForTarget storages code XGI 
         storages.Count === 4
@@ -370,10 +359,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``Negation1 test`` () =
         let storages = Storages()
-        let code = """
-            bool x00 = createTag("%IX0.0.0", false);
-            bool x01 = createTag("%IX0.0.1", false);
-
+        let code = generateBitTagVariableDeclarations xgx 0 2 + """
             $x01 := ! $x00;
 """
         let statements = parseCodeForWindows storages code
@@ -383,14 +369,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``Negation2 test`` () =
         let storages = Storages()
-        let code = """
-            bool x00 = createTag("%IX0.0.0", false);
-            bool x01 = createTag("%IX0.0.1", false);
-            bool x02 = createTag("%IX0.0.2", false);
-            bool x03 = createTag("%IX0.0.3", false);
-            bool x04 = createTag("%IX0.0.4", false);
-            bool x05 = createTag("%IX0.0.5", false);
-
+        let code = generateBitTagVariableDeclarations xgx 0 6 + """
             $x02 := ! ($x00 || $x01);
             $x05 := ! ($x03 && $x04);
 """
@@ -403,14 +382,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``Negation3 test`` () =
         let storages = Storages()
-        let code = """
-            bool x00 = createTag("%IX0.0.0", false);
-            bool x01 = createTag("%IX0.0.1", false);
-            bool x02 = createTag("%IX0.0.2", false);
-            bool x03 = createTag("%IX0.0.3", false);
-            bool x04 = createTag("%IX0.0.4", false);
-            bool x05 = createTag("%IX0.0.5", false);
-
+        let code = generateBitTagVariableDeclarations xgx 0 6 + """
             $x02 := ! (! $x00 || $x01);
             $x05 := ! ($x03 && ! $x04);
 """
@@ -421,15 +393,15 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``Add test`` () =
         let storages = Storages()
-
-        let code = """
+        let qAddress = if xgx = XGI then "%QX0.1.0" else "P00001"
+        let code = $"""
             int16 nn0 = 0s;
             int16 nn1 = 1s;
             int16 nn2 = 2s;
             int16 nn3 = 3s;
             int16 nn4 = 4s;
             int16 nn5 = 5s;
-            bool qq = createTag("%QX0.1.0", false);
+            bool qq = createTag({dq}{qAddress}{dq}, false);
 
             //$qq := add($nn1, $nn2) > 3s;
             //$qq := ($nn1 + $nn2) * 9s + $nn3 > 3s;
@@ -464,6 +436,31 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 //[<Collection("SerialXgxGenerationTest")>]
 type XgiGenerationTest() =
     inherit XgxGenerationTest(XGI)
+
+    [<Test>] member x.``OR simple test`` () = base.``OR simple test`` ()
+    [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
+    [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
+    [<Test>] member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
+    [<Test>] member x.``And Huge test`` () = base.``And Huge test`` ()
+    [<Test>] member x.``And Huge test2`` () = base.``And Huge test2`` ()
+    [<Test>] member x.``And Huge test 3`` () = base.``And Huge test 3`` ()
+    [<Test>] member x.``And Huge test 4`` () = base.``And Huge test 4`` ()
+    [<Test>] member x.``OR Many test`` () = base.``OR Many test`` ()
+    [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
+    [<Test>] member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
+    [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
+    [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
+    [<Test>] member x.``OR variable length test`` () = base.``OR variable length test`` ()
+    [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
+    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
+    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
+    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
+    [<Test>] member x.``Add test`` () =  base.``Add test`` ()
+    [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
+
+type XgkGenerationTest() =
+    inherit XgxGenerationTest(XGK)
 
     [<Test>] member x.``OR simple test`` () = base.``OR simple test`` ()
     [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()

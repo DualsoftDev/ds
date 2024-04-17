@@ -12,7 +12,7 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
-    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 아래 todo 부분 치환")>]
+    [<Obsolete("MemoryAllocatorSpec, TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 아래 todo 부분 치환")>]
     let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj startMemory : string =
         let projName = system.Name
         
@@ -83,10 +83,11 @@ module ExportModule =
                 GlobalStorages = globalStorages
                 ExistingLSISprj = existingLSISprj
                 AppendDebugInfoToRungComment = isAddRungComment
-                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
+
                 RungCounter = counterGenerator 0 |> Some
 
-                // todo : 전달 받은 TimerCounterGenerator, CounterCounterGenerator 값으로 설정
+                // todo : 전달 받은 MemoryAllocatorSpec, TimerCounterGenerator, CounterCounterGenerator 값으로 설정
+                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                 TimerCounterGenerator = counterGenerator 0
                 CounterCounterGenerator = counterGenerator 0
 

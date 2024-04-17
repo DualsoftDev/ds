@@ -30,7 +30,7 @@ module XgxGenerationTestModule =
     let generateVariableDeclarations (typ:string) (varNamePrefix:string) (initialValueSetter: int -> string) (start: int) (count: int) =
         generateVariableDeclarationSeq typ varNamePrefix initialValueSetter start count |> String.concat "\n"
 
-    /// bool x01 = createTag("%IX0.0", false); 등과 같은 항목을 반복 생성한다.
+    /// bool x00 = createTag("%IX0.0.0", false); 등과 같은 항목을 반복 생성한다.
     let generateBitTagVariableDeclarationSeq (xgx:PlatformTarget) (start: int) (count: int) =
         seq {
             for i in start .. start + count - 1 do

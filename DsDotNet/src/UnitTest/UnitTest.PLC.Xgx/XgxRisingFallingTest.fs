@@ -33,4 +33,8 @@ type XgiRisingFallingTest() =
     inherit XgxRisingFallingTest(XGI)
     [<Test>] member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
 
+type XgkRisingFallingTest() =
+    inherit XgxRisingFallingTest(XGK)
+    [<Test>] member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
+
      

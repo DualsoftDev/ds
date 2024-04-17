@@ -41,6 +41,7 @@ module MemoryAllocator =
         (reservedBytes: int list)
         (target: PlatformTarget)
       : PLCMemoryAllocator =
+        tracefn $"xxx-------------------------MemoryAllocator created!"
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
         let mutable ofBit: int option = None // Some (startByte * 8)

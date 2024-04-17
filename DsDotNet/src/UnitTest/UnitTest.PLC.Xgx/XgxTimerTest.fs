@@ -20,32 +20,27 @@ type XgxTimerTest(xgx:PlatformTarget) =
     member x.``Timer test`` () =
         let storages = Storages()
         let code =
-        
-            if xgx = XGI then
+            match xgx with
+            | XGI -> """
+                bool myQBit0 = createTag("%QX0.1.0", false);
+                bool x0 = createTag("%IX0.0.0", false);
+                bool x1 = createTag("%IX0.0.1", false);
+                bool x2 = createTag("%IX0.0.2", false);
+
+                bool x7 = createTag("%IX0.0.7", false);
+                ton myTon = createXgiTON(2000u, $myQBit0);
+                $x7 := ($x0 || $x1) && $x2;
                 """
-            bool myQBit0 = createTag("%QX0.1.0", false);
-            bool x0 = createTag("%IX0.0.0", false);
-            bool x1 = createTag("%IX0.0.1", false);
-            bool x2 = createTag("%IX0.0.2", false);
+            | XGK -> """
+                bool myQBit0 = createTag("P0001A", false);
+                bool x0 = createTag("P00001", false);
+                bool x1 = createTag("P00002", false);
+                bool x2 = createTag("P00003", false);
 
-            bool x7 = createTag("%IX0.0.7", false);
-            ton myTon = createXgiTON(2000u, $myQBit0);
-            $x7 := ($x0 || $x1) && $x2;
-"""
-            elif xgx = XGK then
+                bool x7 = createTag("P00004", false);
+                ton myTon = createXgkTON(20u, $myQBit0);
+                $x7 := ($x0 || $x1) && $x2;
                 """
-            bool myQBit0 = createTag("P0001A", false);
-            bool x0 = createTag("P00001", false);
-            bool x1 = createTag("P00002", false);
-            bool x2 = createTag("P00003", false);
-
-            bool x7 = createTag("P00004", false);
-            ton myTon = createXgiTON(20u, $myQBit0);
-            $x7 := ($x0 || $x1) && $x2;
-"""
-            else
-                failwithf $"not support {xgx}"
-
         
         let statements = parseCodeForWindows storages code
         //storages.Count === 12
@@ -57,8 +52,9 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Many1 AND RungIn Condition test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            ton myTon = createXgiTON(2000u,
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
                 && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
 """
@@ -69,8 +65,9 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Many2 AND RungIn Condition test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            ton myTon = createXgiTON(2000u,
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
                 // 산전 limit : 가로로 31개
                 //let coilCellX = 31
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
@@ -94,8 +91,9 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Many1 OR RungIn Condition test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            ton myTon = createXgiTON(2000u,
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
 """
@@ -107,8 +105,9 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Many2 OR RungIn Condition test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            ton myTon = createXgiTON(2000u,
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
                 $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
 
@@ -128,8 +127,9 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Many And, OR RungIn Condition test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            ton myTon = createXgiTON(2000u,
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 &&
@@ -151,8 +151,9 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Many And, OR RungIn Condition test2`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            ton myTon = createXgiTON(2000u,
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
                 ($x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
                 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14)
                 && $x00 &&
@@ -175,38 +176,34 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Not Condition test`` () =
         let storages = Storages()
-        let code = 
-            if xgx = XGI then
+        let code =
+            match xgx with
+            | XGI -> """
+                bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
+                bool Clamp1_RET_I = createTag("%IX1.0.1", false);
+                bool Clamp2_RET_I = createTag("%IX1.0.2", false);
+                bool Clamp3_RET_I = createTag("%IX1.0.3", false);
+                bool Clamp4_RET_I = createTag("%IX1.0.4", false);
+                bool IOP_ClampOperation = createTag("%IX1.0.5", false);
+
+                ton myTon = createXgiTON(15000u,
+                    $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo
+                        && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
+                    );
                 """
-            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
-            bool Clamp1_RET_I = createTag("%IX1.0.1", false);
-            bool Clamp2_RET_I = createTag("%IX1.0.2", false);
-            bool Clamp3_RET_I = createTag("%IX1.0.3", false);
-            bool Clamp4_RET_I = createTag("%IX1.0.4", false);
-            bool IOP_ClampOperation = createTag("%IX1.0.5", false);
+            | XGK -> """
+                bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("P0000A", false);
+                bool Clamp1_RET_I = createTag("P0000B", false);
+                bool Clamp2_RET_I = createTag("P0000C", false);
+                bool Clamp3_RET_I = createTag("P0000D", false);
+                bool Clamp4_RET_I = createTag("P0000E", false);
+                bool IOP_ClampOperation = createTag("P0000F", false);
 
-            ton myTon = createXgiTON(15000u,
-                $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo
-                    && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
-                );
-"""
-            elif xgx = XGK then
+                ton myTon = createXgkTON(15000u,
+                    $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo
+                        && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
+                    );
                 """
-            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("P0000A", false);
-            bool Clamp1_RET_I = createTag("P0000B", false);
-            bool Clamp2_RET_I = createTag("P0000C", false);
-            bool Clamp3_RET_I = createTag("P0000D", false);
-            bool Clamp4_RET_I = createTag("P0000E", false);
-            bool IOP_ClampOperation = createTag("P0000F", false);
-
-            ton myTon = createXgiTON(15000u,
-                $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo
-                    && (!$Clamp1_RET_I || !$Clamp2_RET_I || !$Clamp3_RET_I || !$Clamp4_RET_I) && !$IOP_ClampOperation
-                );
-"""
-            else
-                failwithf $"not support {xgx}"
-
 
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -215,32 +212,28 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
     member x.``TIMER= Not Condition test 2`` () =
         let storages = Storages()
-        let code = 
-            if xgx = XGI then
-                """
-            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
-            bool Clamp1_RET_I = createTag("%IX1.0.1", false);
-            bool Clamp2_RET_I = createTag("%IX1.0.2", false);
-            bool Clamp3_RET_I = createTag("%IX1.0.3", false);
-            bool Clamp4_RET_I = createTag("%IX1.0.4", false);
-            bool IOP_ClampOperation = createTag("%IX1.0.5", false);
+        let code =
+            match xgx with
+            | XGI -> """
+                bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("%IX1.0.0", false);
+                bool Clamp1_RET_I = createTag("%IX1.0.1", false);
+                bool Clamp2_RET_I = createTag("%IX1.0.2", false);
+                bool Clamp3_RET_I = createTag("%IX1.0.3", false);
+                bool Clamp4_RET_I = createTag("%IX1.0.4", false);
+                bool IOP_ClampOperation = createTag("%IX1.0.5", false);
 
-            ton TOUT3 = createWinTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
-"""
-            elif xgx = XGK then
+                ton TOUT3 = createXgiTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
                 """
-            bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("P0000A", false);
-            bool Clamp1_RET_I = createTag("P0000B", false);
-            bool Clamp2_RET_I = createTag("P0000C", false);
-            bool Clamp3_RET_I = createTag("P0000D", false);
-            bool Clamp4_RET_I = createTag("P0000E", false);
-            bool IOP_ClampOperation = createTag("P0000F", false);
+            | XGK -> """
+                bool ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo = createTag("P0000A", false);
+                bool Clamp1_RET_I = createTag("P0000B", false);
+                bool Clamp2_RET_I = createTag("P0000C", false);
+                bool Clamp3_RET_I = createTag("P0000D", false);
+                bool Clamp4_RET_I = createTag("P0000E", false);
+                bool IOP_ClampOperation = createTag("P0000F", false);
 
-            ton TOUT3 = createWinTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
-"""
-            else
-                failwithf $"not support {xgx}"
-                
+                ton TOUT3 = createXgkTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
+                """                
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)

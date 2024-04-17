@@ -161,11 +161,13 @@ module ExpressionFunctionModule =
           - evaluate 등은 수행해서는 안된다.
         *)
         | (   "createXgiCTU" | "createXgiCTD" | "createXgiCTUD" | "createXgiCTR"
+            | "createXgkCTU" | "createXgkCTD" | "createXgkCTUD" | "createXgkCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
                 let psedoFunction (_args:Args):Counter = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
                 DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
+            | "createXgkTON" | "createXgkTOF" | "createXgkCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
                 let psedoFunction (_args:Args):Timer = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"

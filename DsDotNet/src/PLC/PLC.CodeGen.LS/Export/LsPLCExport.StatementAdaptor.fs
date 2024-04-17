@@ -645,13 +645,19 @@ module XgxExpressionConvertorModule =
 
                 []
 
-            | DuTimer tmr when prjParam.TargetType = XGK ->
+            | DuTimer tmr when prjParam.TargetType = XGK && tmr.ResetCondition.IsSome ->
                 // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
                 let resetStatement = DuAssign(tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct))
                 [ statement; resetStatement ]
+
             | DuCounter ctr when prjParam.TargetType = XGK ->
                 // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                let resetStatement = DuAssign(ctr.GetLoadOrResetCondition(), new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct))
+                let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
+                let resetStatement =
+                    match ctr.Counter.Type with
+                    | CTD -> DuAssign(ctr.LoadCondition.Value, resetCoil)
+                    | CTUD when ctr.LoadCondition.IsSome -> failwith "XGK CTUD does not support LoadCondition"
+                    | (CTR|CTU|CTUD) -> DuAssign(ctr.ResetCondition.Value, resetCoil)
                 [ statement; resetStatement ]
 
             | (DuTimer _ | DuCounter _) -> [ statement ]

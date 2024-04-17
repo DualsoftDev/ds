@@ -26,10 +26,11 @@ type XgxXmlExtension =
     /// XGK 에서 사용할 수 없는 변수명 체크
     [<Extension>]
     static member CheckInvalidVariableNameForXgk (xdoc:XmlDocument) : unit =
-        (* "load" 의 경우, global 변수로 선언은 가능하지만, XML 로 Rung 생성시, 해당 변수 이름을 사용하지 못하고 대신 직접 변수로 메모리 주소를 적어야 한다.
+        (* "load" 의 경우, global 변수로 선언은 가능하지만, XML 로 Rung 생성시,
+         * 해당 변수 이름을 사용하지 못하고 대신 직접 변수로 메모리 주소를 적어야 한다.
          * 따라서 이러한 종류들은 원천적으로 사용하지 않는 것으로 한다.
          *)
-        let invalidNames = [|"load"|] |> HashSet
+        let invalidNames = [|"load"; "ld"|] |> HashSet
         let invalidSymbols =
             xdoc.GetXmlNodes($"//Symbol")
             |> map(fun x -> x.Attributes["Name"].Value)

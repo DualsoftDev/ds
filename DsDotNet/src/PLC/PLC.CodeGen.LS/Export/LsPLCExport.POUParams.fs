@@ -55,8 +55,9 @@ module POUParametersModule =
             RungCounter = None
         }
 
-    let defaultXGIProjectParams = createDefaultProjectParams XGI (640 * 1024)   // 640K "M" memory 영역
-    let defaultXGKProjectParams = createDefaultProjectParams XGK (640 * 1024) 
+    let defaultMemorySize = 640 * 1024
+    let defaultXGIProjectParams = createDefaultProjectParams XGI defaultMemorySize   // 640K "M" memory 영역
+    let defaultXGKProjectParams = createDefaultProjectParams XGK defaultMemorySize 
 
     let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
         assert(isInUnitTest())
@@ -67,6 +68,7 @@ module POUParametersModule =
             | _ -> failwithf "Invalid target type: %A" targetType
         { getProjectParams with 
             ProjectName = projectName; TargetType = targetType;
+            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
             TimerCounterGenerator = counterGenerator 0
             CounterCounterGenerator = counterGenerator 0 }
 

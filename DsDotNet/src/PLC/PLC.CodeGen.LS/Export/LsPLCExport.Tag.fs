@@ -138,7 +138,7 @@ module XGITag = //IEC61131Tag =
                         | ("BIT"|"BOOL") -> "BIT"
                         | ("SINT"|"WORD") -> "WORD"
                         | "TON"| "TOF"| "TMR"  -> "BIT/WORD"
-                        | ("CTU"| "CTD"| "CTUD"| "CTR" | "CTD_INT" | "CTU_INT" ) -> "BIT/WORD"
+                        | ("CTU"| "CTD"| "CTUD"| "CTR" | "CTD_INT" | "CTU_INT" | "CTUD_INT" ) -> "BIT/WORD"
                         | _ -> 
                             failwithlog $"Not supported data type {x.Type}"
 

@@ -124,13 +124,14 @@ module CounterStatementModule =
                 ResetCondition     = Some reset;  }
             |> createCounterStatement storages
 
-        static member CreateCTUD(tcParams:TCConstructionParams, countDownCondition, reset, ldCondition) =
+        // ldCondition (load) 는 XGK 에서는 사용할 수 없음.
+        static member CreateCTUD(tcParams:TCConstructionParams, countDownCondition:IExpression<bool>, reset:IExpression<bool>, ldCondition:IExpression<bool> option) =
             let {Storages=storages; Name=name; Preset=preset; RungInCondition=countUpCondition; FunctionName=functionName} = tcParams
             { //defaultCounterCreateParam with
                 Type=CTUD; Name=name; Preset=preset; FunctionName=functionName
                 CountUpCondition   = Some countUpCondition
                 CountDownCondition = Some countDownCondition
-                LoadCondition      = Some ldCondition
+                LoadCondition      = ldCondition
                 ResetCondition     = Some reset  }
             |> createCounterStatement storages
 

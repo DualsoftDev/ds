@@ -35,14 +35,14 @@ type XgxCounterTest(xgx:PlatformTarget) =
         let code =
             match xgx with
             | XGI -> """
-                bool cd = createTag("%IX0.0.0", false);
-                bool load = createTag("%IX0.0.1", false);
-                ctd myCTD = createXgiCTD(2000u, $cd, $load);
+                bool cd = createTag("%IX0.0.0", false);     // count down
+                bool xload = createTag("%IX0.0.1", false);
+                ctd myCTD = createXgiCTD(2000u, $cd, $xload);
                 """
             | XGK -> """
                 bool cd = createTag("P00000", false);
-                bool load = createTag("P00001", false);
-                ctd myCTD = createXgiCTD(2000u, $cd, $load);
+                bool xload = createTag("P00001", false);       // XGK 에서는 'load' 라는 변수명을 사용할 수 없다.
+                ctd myCTD = createXgiCTD(2000u, $cd, $xload);
                 """
 
 
@@ -53,13 +53,6 @@ type XgxCounterTest(xgx:PlatformTarget) =
 
     member x.``Counter CTUD simple test`` () =
         let storages = Storages()
-        let code = """
-                bool cu = createTag("%IX0.0.0", false);
-                bool cd = createTag("%IX0.0.1", false);
-                bool r  = createTag("%IX0.0.2", false);
-                bool ld = createTag("%IX0.0.3", false);
-                ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
-"""
         let code =
             match xgx with
             | XGI -> """
@@ -73,8 +66,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 bool cu = createTag("P00000", false);
                 bool cd = createTag("P00001", false);
                 bool r  = createTag("P00002", false);
-                bool ld = createTag("P00003", false);
-                ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
+                ctud myCTUD = createXgkCTUD(2000u, $cu, $cd, $r);
                 """
 
 

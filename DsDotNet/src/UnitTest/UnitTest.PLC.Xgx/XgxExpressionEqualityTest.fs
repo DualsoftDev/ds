@@ -17,7 +17,6 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 
     member x.``Comparision, Arithmatic, OR test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateInt16VariableDeclarations 1 8 + """
                 int16 sum = 0s;
@@ -33,7 +32,6 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 
     member x.``Comparision, Arithmatic, OR test2`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateInt16VariableDeclarations 1 8 + """
                 bool cond1 = false;
@@ -116,7 +114,6 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 
     member x.``XOR test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = """
                 bool b1 = false;

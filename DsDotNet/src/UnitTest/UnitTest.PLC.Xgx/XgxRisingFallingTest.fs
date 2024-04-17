@@ -14,11 +14,17 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
 
     member x.``Normal, Negation, Rising, Falling contact test`` () =
         let storages = Storages()
-        let code = """
-            bool ix = createTag("%IX0.0.0", false);
-            bool qx = createTag("%QX0.1.0", false);
-            $qx := $ix && ! $ix && rising($ix) && falling($ix);
-"""
+        let code =
+            match xgx with
+            | XGI -> """
+                bool ix = createTag("%IX0.0.0", false);
+                bool qx = createTag("%QX0.1.0", false);
+                """
+            | XGK -> """
+                bool ix = createTag("P00000", false);
+                bool qx = createTag("P00001", false);
+                """
+            + "$qx := $ix && ! $ix && rising($ix) && falling($ix);"
 
         let statements = parseCodeForWindows storages code
         statements.Length === 1

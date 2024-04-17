@@ -31,6 +31,7 @@ module DsAddressModule =
         else
             device + sprintf "%04i%X" word bit
 
+    [<Obsolete("테스트 케이스 실패: `Local var with init test` @XGK")>]
     let xgkIOMWord (device:string, offsetByte: int) : string =
         if device = "R"
         then device + sprintf "%05i" (offsetByte/2)

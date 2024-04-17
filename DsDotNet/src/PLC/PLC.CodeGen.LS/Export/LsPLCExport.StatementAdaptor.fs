@@ -60,7 +60,9 @@ module ConvertorPrologModule =
         | (INT8 | UINT8 | CHAR)
         | (INT16 | UINT16) 
         | (INT32 | UINT32) -> "WORD"
-        | FLOAT64 -> "WORD"     // xxx 이거 맞나?
+
+        | (STRING | FLOAT32 | FLOAT64 | INT64 | UINT64) -> "WORD"     // xxx 이거 맞나?
+
         | _ -> failwithlog "ERROR"
 
     let systemTypeToXgxTypeName (target:PlatformTarget) (typ: System.Type) =
@@ -68,9 +70,6 @@ module ConvertorPrologModule =
         | XGI -> systemTypeToXgiTypeName typ 
         | XGK -> systemTypeToXgkTypeName typ
         | _ -> failwithlog "ERROR"
-
-
-    let mutable internal autoVariableCounter = 0
 
     type IXgxVar =
         inherit IVariable
@@ -172,15 +171,15 @@ module rec TypeConvertorModule =
 
     let sys = DsSystem("")
 
-    let createTypedXgiAutoVariable (nameHint: string) (initValue: obj) comment : IXgxVar =
-        autoVariableCounter <- autoVariableCounter + 1
-        let name = $"_tmp{nameHint}{autoVariableCounter}"
+    let createTypedXgiAutoVariable (prjParam: XgxProjectParams) (nameHint: string) (initValue: obj) comment : IXgxVar =
+        let n = prjParam.AutoVariableCounter()
+        let name = $"_tmp{nameHint}{n}"
         createXgxVariable name initValue comment
 
 
-    let internal createXgiAutoVariableT (nameHint: string) comment (initValue: 'T) =
-        autoVariableCounter <- autoVariableCounter + 1
-        let name = $"_tmp{nameHint}{autoVariableCounter}"
+    let internal createXgiAutoVariableT (prjParam: XgxProjectParams) (nameHint: string) comment (initValue: 'T) =
+        let n = prjParam.AutoVariableCounter()
+        let name = $"_tmp{nameHint}{n}"
 
         let param =
             { defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
@@ -281,7 +280,7 @@ module XgxExpressionConvertorModule =
                         if prjParam.TargetType <> XGI then 
                             failwithlog $"Inline function only supported on XGI"
 
-                        let out = createTypedXgiAutoVariable "out" exp.BoxedEvaluatedValue $"{op} output"
+                        let out = createTypedXgiAutoVariable prjParam "out" exp.BoxedEvaluatedValue $"{op} output"
                         xgiLocalVars.Add out
 
                         expandFunctionStatements.Add
@@ -302,6 +301,7 @@ module XgxExpressionConvertorModule =
         newExp
 
     let rec private binaryToNary
+        (prjParam: XgxProjectParams)
         (augmentParams: AugmentedConvertorParams)
         (operatorsToChange: string list)
         (currentOp: string)
@@ -315,13 +315,13 @@ module XgxExpressionConvertorModule =
             let op = exp.FunctionName.Value
 
             let out =
-                createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
+                createTypedXgiAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
 
             storage.Add out
 
             let args =
                 exp.FunctionArguments
-                |> List.bind (fun arg -> binaryToNary { augmentParams with Exp = arg } operatorsToChange op)
+                |> List.bind (fun arg -> binaryToNary prjParam { augmentParams with Exp = arg } operatorsToChange op)
 
             DuAugmentedPLCFunction
                 { FunctionName = op
@@ -339,7 +339,7 @@ module XgxExpressionConvertorModule =
                           match arg.Terminal, arg.FunctionName with
                           | Some _, _ -> yield arg
                           | None, Some("-" | "/") -> yield withAugmentedPLCFunction arg
-                          | None, Some _fn -> yield! binaryToNary { augmentParams with Exp = arg } operatorsToChange op
+                          | None, Some _fn -> yield! binaryToNary prjParam { augmentParams with Exp = arg } operatorsToChange op
                           | _ -> failwithlog "ERROR" ]
 
                 args
@@ -358,7 +358,7 @@ module XgxExpressionConvertorModule =
     ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성
     /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
     let private mergeArithmaticOperator
-        (_prjParam: XgxProjectParams)
+        (prjParam: XgxProjectParams)
         (augmentParams: AugmentedConvertorParams)
         (outputStore: IStorage option)
       : MergeArithmaticResult =
@@ -370,7 +370,7 @@ module XgxExpressionConvertorModule =
         match exp.FunctionName with
         | Some("+" | "-" | "*" | "/" as op) ->
             let newArgs =
-                binaryToNary { augmentParams with Exp = exp } [ "+"; "-"; "*"; "/" ] op
+                binaryToNary prjParam { augmentParams with Exp = exp } [ "+"; "-"; "*"; "/" ] op
 
             match op with
             | "+"
@@ -385,7 +385,7 @@ module XgxExpressionConvertorModule =
                         if argsRemaining.IsEmpty then
                             outputStore.Value
                         else
-                            createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue "comment"
+                            createTypedXgiAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue "comment"
 
                     let outexp = out.ToExpression()
 
@@ -407,7 +407,7 @@ module XgxExpressionConvertorModule =
                 NotApplied(exp.WithNewFunctionArguments newArgs)
 
         | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "&&" | "||" as op) ->
-            let newArgs = binaryToNary { augmentParams with Exp = exp } [ op ] op
+            let newArgs = binaryToNary prjParam { augmentParams with Exp = exp } [ op ] op
             NotApplied(exp.WithNewFunctionArguments newArgs)
 
         | _ ->
@@ -451,7 +451,7 @@ module XgxExpressionConvertorModule =
 
                 let subSums =
                     [ for max in maxs do
-                          let out = createXgiAutoVariableT "_temp_internal_"  ($"{op} split output") false
+                          let out = createXgiAutoVariableT prjParam "_temp_internal_"  ($"{op} split output") false
                           newLocalStorages.Add out
 
                           DuAugmentedPLCFunction
@@ -462,7 +462,7 @@ module XgxExpressionConvertorModule =
 
                           var2expr out :> IExpression ]
 
-                let grandTotal = createXgiAutoVariableT "_temp_internal_" ($"{op} split output") false
+                let grandTotal = createXgiAutoVariableT prjParam "_temp_internal_" ($"{op} split output") false
                 newLocalStorages.Add grandTotal
 
                 DuAugmentedPLCFunction
@@ -546,17 +546,21 @@ module XgxExpressionConvertorModule =
                     else
                         // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
                         let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
+                        let createTmpStorage =
+                            fun () -> 
+                                let tmpVar = createTypedXgiAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
+                                tmpVar :> IStorage
 
-                        let tmpVar = createTypedXgiAutoVariable "_temp_internal_" exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
-                        let stg = tmpVar :> IStorage
-                        let varExp = tmpVar.ToExpression()
                         match fn with
                         | ("+" | "-" | "*" | "/")
                         | (">" | ">=" | "<" | "<=" | "=" | "!=") ->
-                            let stmt = DuAssign(newExp, tmpVar)
+                            let stg = createTmpStorage()
+                            let stmt = DuAssign(newExp, stg)
+                            let varExp = stg.ToExpression()
                             varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
                         | _ ->
                             if lstgs.any() || rstgs.any() then
+                                let stg = createTmpStorage()
                                 newExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts)
                             else
                                 exp, [], []

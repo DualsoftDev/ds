@@ -311,7 +311,6 @@ type XgxFunctionTest(xgx:PlatformTarget) =
 
     member x.``ADD 10 items test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateInt16VariableDeclarations 1 10 + """
 
@@ -325,7 +324,6 @@ type XgxFunctionTest(xgx:PlatformTarget) =
 
     member x.``DIV 3 items test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = """
                 int16 nn1 = 1s;
@@ -341,7 +339,6 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             x.saveTestResult f xml )
     member x.``ADD MUL 3 items test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateInt16VariableDeclarations 1 8 + """
                 int16 sum = 0s;
@@ -355,7 +352,6 @@ type XgxFunctionTest(xgx:PlatformTarget) =
 
     member x.``Comparision, Arithmatic, AND test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateInt16VariableDeclarations 1 8 + """
                 int16 sum = 0s;

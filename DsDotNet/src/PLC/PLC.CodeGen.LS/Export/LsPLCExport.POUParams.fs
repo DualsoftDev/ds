@@ -74,7 +74,7 @@ module POUParametersModule =
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
             TimerCounterGenerator = counterGenerator 0
             CounterCounterGenerator = counterGenerator 0
-            AutoVariableCounter = counterGenerator 0
+            AutoVariableCounter = counterGenerator 1
             RungCounter = counterGenerator 0
         }
 

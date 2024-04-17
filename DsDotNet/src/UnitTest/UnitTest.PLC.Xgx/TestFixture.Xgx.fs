@@ -89,7 +89,7 @@ module XgxFixtures =
         runtimeTarget <- target
         disposable { runtimeTarget <- runtimeTargetBackup }
 
-
+ 
     let private generateXmlForTest (xgx:PlatformTarget) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
 
@@ -121,25 +121,15 @@ module XgxFixtures =
     [<AbstractClass>]
     type XgxTestBaseClass(xgx:PlatformTarget) =
         inherit TestBaseClass("EngineLogger")
-        do
-            //Engine.CodeGenCPU.ModuleInitializer.Initialize()
-            autoVariableCounter <- 0
 
-        //let mutable runtimeTarget = RuntimeDS.Target
         let sys = DsSystem("testSys")
         [<SetUp>]
         member x.Setup () =
-            //RuntimeDS.Target <- x.GetCurrentRuntimeTarget()
             RuntimeDS.System <- sys
 
         [<TearDown>]
         member __.TearDown () =
-            //RuntimeDS.Target <- runtimeTarget
             RuntimeDS.System <- sys
-
-        //abstract GetCurrentRuntimeTarget: unit -> PlatformTarget
-
-        //override x.GetCurrentRuntimeTarget() = TestPlatformTarget
 
         member __.saveTestResult testFunctionName (xml:string) =
             match xgx with

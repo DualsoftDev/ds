@@ -55,7 +55,6 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``And Huge simple test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateLargeVariableDeclarations xgx + """
                 $x15 :=
@@ -73,7 +72,6 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         )
     member x.``And Huge test`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateLargeVariableDeclarations xgx + """
                 $x16 :=
@@ -93,7 +91,6 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``And Huge test2`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateLargeVariableDeclarations xgx + """
                 $x16 :=
@@ -113,7 +110,6 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``And Huge test 3`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
             let code = generateLargeVariableDeclarations xgx + """
                 $x15 :=
@@ -134,31 +130,21 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
     member x.``And Huge test 4`` () =
         lock x.Locker (fun () ->
-            autoVariableCounter <- 0
             let storages = Storages()
-            let code =
-                let vars =
-                    [
-                        yield! ["_OFF"; "_ON"; "R"]
-                        for i in [1..50] do
-                            yield $"c{i}"
-                    ] |> distinct
-
-                let counter = counterGenerator 0
-                let varDecls = vars |> map (fun v -> $"""bool {v} = createTag("%%MX{counter()}", false);""") |> String.concat "\n"
-                let c1_to_c38 = [1..38] |> map (fun i -> $"""$c{i}""") |> String.concat " && "
-                varDecls + $"""
-                $R := 
-                    (   (    $_OFF
-                          || ({c1_to_c38})
-                          || $c39
-                          || $c40
-                          || $_OFF )
-                        && $_ON
-                        || $c41
+            let x1_to_x38 = [1..38] |> map (fun i -> sprintf "$x%02d" i) |> String.concat " && "
+            let code = generateBitTagVariableDeclarations xgx 0 50 + $"""
+                $x49 := 
+                    (   (    false
+                          || ({x1_to_x38})
+                          || $x39
+                          || $x40
+                          || false )
+                        && true
+                        || $x41
                     )
-                    && ! ($c42 && !($c43) && !($c44) && !($c45) || $c46);
+                    && ! ($x42 && !($x43) && !($x44) && !($x45) || $x46);
                 """
+
             let statements = parseCodeForWindows storages code
             let f = getFuncName()
             let xml = x.generateXmlForTest f storages (map withNoComment statements)

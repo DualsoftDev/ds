@@ -32,12 +32,18 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
         ]
 
         let symbolInfos = [
+            let counter = counterGenerator 0
             for t in testSymbolTypes do
                 let plcType = systemTypeToXgiTypeName t
                 let comment = $"{plcType} <- {t.Name}"
                 let name = $"my{t.Name}"
                 let initValueHolder:BoxedObjectHolder = {Object=null}
-                XGITag.createSymbolInfo name comment plcType (int Variable.Kind.VAR)  initValueHolder
+                let symbolInfo = XGITag.createSymbolInfo name comment plcType (int Variable.Kind.VAR)  initValueHolder
+                match xgx with
+                | XGI -> symbolInfo
+                | XGK -> { symbolInfo with DevicePos = counter()}
+                | _ -> failwith "Not supported plc type"
+
         ]
 
         let rungsXml = ""   //generateRungs prologComments commentedStatements
@@ -45,7 +51,9 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
         let xml =
             let prjParam = getXgxProjectParams xgx (getFuncName())
             wrapWithXml prjParam rungsXml symbolInfos symbolsGlobalXml None
-        x.saveTestResult (getFuncName()) xml
+        match xgx with
+        | XGI -> x.saveTestResult (getFuncName()) xml
+        | _ -> ()
 
 
 

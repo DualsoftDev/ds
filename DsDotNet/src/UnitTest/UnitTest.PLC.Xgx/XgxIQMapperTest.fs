@@ -48,7 +48,6 @@ type IQMapperTest(xgx:PlatformTarget) =
             getXgxProjectParams xgx (getFuncName()) with
                 GlobalStorages = globalStorages
                 POUs = [pouIQMap]
-                RungCounter = counterGenerator 0 |> Some
         }
 
         let xml = prjParam.GenerateXmlString()

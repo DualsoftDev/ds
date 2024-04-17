@@ -34,7 +34,9 @@ module POUParametersModule =
         AppendDebugInfoToRungComment: bool
         TimerCounterGenerator:Seq.counterGeneratorType
         CounterCounterGenerator:Seq.counterGeneratorType
-        RungCounter: (unit -> int) option
+        RungCounter :Seq.counterGeneratorType
+        /// Auto 변수의 이름을 uniq 하게 짓기 위한 용도 "_tmp_temp_internal{n}
+        AutoVariableCounter: Seq.counterGeneratorType
     }
 
     let createDefaultProjectParams targetType memorySize =
@@ -52,7 +54,8 @@ module POUParametersModule =
             AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
             TimerCounterGenerator = voidCounterGenerator
             CounterCounterGenerator = voidCounterGenerator
-            RungCounter = None
+            RungCounter = voidCounterGenerator
+            AutoVariableCounter = voidCounterGenerator
         }
 
     let defaultMemorySize = 640 * 1024
@@ -70,5 +73,8 @@ module POUParametersModule =
             ProjectName = projectName; TargetType = targetType;
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
             TimerCounterGenerator = counterGenerator 0
-            CounterCounterGenerator = counterGenerator 0 }
+            CounterCounterGenerator = counterGenerator 0
+            AutoVariableCounter = counterGenerator 0
+            RungCounter = counterGenerator 0
+        }
 

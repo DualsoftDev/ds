@@ -136,7 +136,7 @@ module XgiExportModule =
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
                 let xml =
-                    let rungCounter = prjParam.RungCounter.Value()
+                    let rungCounter = prjParam.RungCounter()
                     getCommentRungXml rgi.Y $"[{rungCounter}] {cmt}"
                 rgi <- rgi.Add(xml)
 

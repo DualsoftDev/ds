@@ -54,7 +54,6 @@ type AutoMemoryAllocTest(xgx:PlatformTarget) =
                 GlobalStorages = globalStorages
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedByteIndices xgx)    // 640K M memory 영역
                 POUs = [pouIQMap]
-                RungCounter = counterGenerator 0 |> Some
         }
 
         let xml = prjParam.GenerateXmlString()

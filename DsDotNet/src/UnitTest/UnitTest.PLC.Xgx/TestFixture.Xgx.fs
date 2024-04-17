@@ -113,7 +113,6 @@ module XgxFixtures =
             getXgxProjectParams xgx projName with
                 GlobalStorages = globalStorages
                 POUs = [pouParams]
-                RungCounter = counterGenerator 0 |> Some
         }
 
         prjParam.GenerateXmlString()

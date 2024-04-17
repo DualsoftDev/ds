@@ -60,6 +60,7 @@ module ConvertorPrologModule =
         | (INT8 | UINT8 | CHAR)
         | (INT16 | UINT16) 
         | (INT32 | UINT32) -> "WORD"
+        | FLOAT64 -> "WORD"     // xxx 이거 맞나?
         | _ -> failwithlog "ERROR"
 
     let systemTypeToXgxTypeName (target:PlatformTarget) (typ: System.Type) =

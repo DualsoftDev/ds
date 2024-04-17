@@ -84,12 +84,13 @@ module ExportModule =
                 ExistingLSISprj = existingLSISprj
                 AppendDebugInfoToRungComment = isAddRungComment
 
-                RungCounter = counterGenerator 0 |> Some
+                RungCounter = counterGenerator 0
 
                 // todo : 전달 받은 MemoryAllocatorSpec, TimerCounterGenerator, CounterCounterGenerator 값으로 설정
                 MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                 TimerCounterGenerator = counterGenerator 0
                 CounterCounterGenerator = counterGenerator 0
+                AutoVariableCounter = counterGenerator 0
 
                 POUs =
                     [ yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"

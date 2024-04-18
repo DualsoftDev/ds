@@ -419,7 +419,10 @@ type XgkCounterTest() =
     [<Test>] member __.``Counter CTD with conditional test`` () = base.``Counter CTD with conditional test``()
     [<Test>] member __.``Counter CTR with conditional test`` () = base.``Counter CTR with conditional test``()
     [<Test>] member __.``Counter CTR with conditional test2`` () = base.``Counter CTR with conditional test2``()
-    [<Test>] member __.``Counter CTUD with conditional test`` () = base.``Counter CTUD with conditional test``()
+
+    /// TODO: XGK CTUD 에서 cu 나 cd 등의 조건이 단일 변수가 아닌 복합 expression 인 경우의 처리가 필요
+    /// 복합 expression 들을 별도의 auto 변수에 할당한 후, auto 변수를 사용하는 방법으로 처리할 수 있음.
+    [<Test>] member __.``X Counter CTUD with conditional test`` () = base.``Counter CTUD with conditional test``()
 
 
 //[<Collection("SerialXgxFunctionTest")>]

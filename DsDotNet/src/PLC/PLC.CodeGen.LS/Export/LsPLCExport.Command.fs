@@ -602,17 +602,12 @@ module internal rec Command =
 
             let str = elementBody mode c terminalText
 
-            let xml =
-                { Coordinate = c
-                  Xml = str
-                  SpanX = 1
-                  SpanY = 1 }
+            let xml = { Coordinate = c; Xml = str; SpanX = 1; SpanY = 1 }
 
-            { XmlElements = [ xml ]
-              X = x
-              Y = y
-              TotalSpanX = 1
-              TotalSpanY = 1 }
+            {   XmlElements = [ xml ]
+                X = x; Y = y
+                TotalSpanX = 1; TotalSpanY = 1
+            }
 
         | FlatNary(And, exprs) ->
             let mutable sx = x
@@ -659,10 +654,7 @@ module internal rec Command =
                                   let c = coord (x + ri.TotalSpanX, ri.Y)
                                   let xml = elementFull mode c param ""
 
-                                  { Coordinate = c
-                                    Xml = xml
-                                    SpanX = span
-                                    SpanY = 1 } ]
+                                  { Coordinate = c; Xml = xml; SpanX = span; SpanY = 1 } ]
 
                     yield! auxLineXmls
 
@@ -751,10 +743,7 @@ module internal rec Command =
             let spanY = max exprSpanY cmdSpanY
             let c = coord (x, spanY + y)
 
-            {   Xml = xml
-                Coordinate = c
-                SpanX = spanX
-                SpanY = spanY }
+            {   Xml = xml; Coordinate = c; SpanX = spanX; SpanY = spanY; }
 
         match prjParam.TargetType, cmdExp with
         | XGK, Some (ActionCmd(Move(condition, source, target))) when source.Terminal.IsSome ->
@@ -784,15 +773,18 @@ module internal rec Command =
                     let mutable spanY = 1
                     let xml =
                         [
-                            let { X = xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; XmlElements = xmls } : BlockXmlInfo =
+                            let { X = _xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; XmlElements = xmls } : BlockXmlInfo =
                                 rungInCondition.DrawLadderBlock(prjParam, (x, y))
                             xmls[0].Xml
+
                             hlineTo (totalSpanX, yy) (coilCellX - 5)
+
                             if totalSpanY > 1 then
                                 spanY <- totalSpanY
 
-                            let counterVariable = counter.CounterStruct.XgkStructVariableName
-                            let param = $"Param={dq}CTUD,{counterVariable},{up},{down},{pv}{dq}"
+                            let param =
+                                let counterVariable = counter.CounterStruct.XgkStructVariableName
+                                $"Param={dq}CTUD,{counterVariable},{up},{down},{pv}{dq}"
                             xgkFBAt param (coilCellX - 5 - 1, yy)
                         ] |> joinLines
 

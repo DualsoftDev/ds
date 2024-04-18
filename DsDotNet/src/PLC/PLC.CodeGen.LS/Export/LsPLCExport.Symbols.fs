@@ -194,12 +194,7 @@ module internal XgiSymbolsModule =
                     "T", timerAddress, offset
                 | _ -> "", "", -1   
       
-            let plcType =
-                match timer.Type with
-                | TON
-                | TOF
-                | TMR -> timer.Type.ToString() 
-
+            let plcType = timer.Type.ToString() 
             let name, comment = timer.Name, $"TIMER {timer.Name}"
 
             { defaultSymbolInfo with

@@ -25,11 +25,12 @@ module POUParametersModule =
     type counterGeneratorType = Seq.counterGeneratorType
 
     let counterGeneratorWithSkip start (skipList: int list) : counterGeneratorType =
-        let mutable counter = start
+        let counter = counterGenerator start
         fun () ->
-            while List.contains counter skipList do
-                counter <- counter + 1
-            counter
+            let mutable c = counter()
+            while skipList |> List.contains c  do
+                c <- counter()
+            c
 
         //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {

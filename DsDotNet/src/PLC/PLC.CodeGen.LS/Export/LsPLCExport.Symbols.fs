@@ -215,8 +215,8 @@ module internal XgiSymbolsModule =
                 match prjParam.TargetType with
                 | XGK ->
                     let offset = prjParam.CounterCounterGenerator()
-                    let formattedAddr = offset.ToString("0000")
-                    "C", $"C{formattedAddr}", offset
+                    let counterAddress = sprintf "C%04d" offset
+                    "C", counterAddress, offset
                 | _ -> "", "", -1 
 
 

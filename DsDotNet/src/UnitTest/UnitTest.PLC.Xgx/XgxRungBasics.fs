@@ -166,7 +166,7 @@ type XgxRungTest(xgx:PlatformTarget) =
                 let y = 1
                 let mutable x = 0
                 for t in iTags do
-                    contactAt t.Name x y     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
+                    contactAt t.Name (x, y)     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
                     x <- x + 1
 
                 (* 꽉 채운 경우에는 HorzLineMode 및 MultiHorzLineMode 가 들어갈 공간이 없으므로 사용하지 않는다. *)
@@ -204,7 +204,7 @@ type XgxRungTest(xgx:PlatformTarget) =
                 let y = 1
                 let mutable x = 0
                 for t in iTags.Take(30) do
-                    contactAt t.Name x y     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
+                    contactAt t.Name (x, y)     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
                     x <- x + 1
 
                 (* 꽉 채우고, 한 칸 빌 경우에는 HorzLineMode 만 사용한다. *)
@@ -242,7 +242,7 @@ type XgxRungTest(xgx:PlatformTarget) =
                 let y = 1
                 let mutable x = 0
                 for t in iTags.Take(29) do
-                    contactAt t.Name x y     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
+                    contactAt t.Name (x, y)     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
                     x <- x + 1
 
                 (* 꽉 채우고, 두 칸 이상 빌 경우에는 HorzLineMode 및 MultiHorzLineMode 를 모두 사용한다. *)
@@ -280,7 +280,7 @@ type XgxRungTest(xgx:PlatformTarget) =
 """
                 let mutable y = 1
                 for t in iTags do
-                    contactAt t.Name 0 y     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
+                    contactAt t.Name (0, y)     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
                     if y = 1 then
                         (* VertLineMode 로 시작하면 HorzLineMode 없이, 바로 MultiHorzLineMode 가 와야 한다. *)
                         let xy = coord(1, 1) - 1      // 1027
@@ -322,7 +322,7 @@ type XgxRungTest(xgx:PlatformTarget) =
 """
                 let mutable y = 1
                 for t in iTags do
-                    contactAt t.Name 0 y     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
+                    contactAt t.Name (0, y)     // <Element ElementType="{ContactMode}" Coordinate="1025">myBit00</Element>
                     if y < 31 then
                         (* VertLineMode 로 시작하면 HorzLineMode 없이, 바로 MultiHorzLineMode 가 와야 한다. *)
                         let xy = coord(1, y) - 1      // 1027

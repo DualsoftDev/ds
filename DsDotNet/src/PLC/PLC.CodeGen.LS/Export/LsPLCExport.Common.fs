@@ -107,7 +107,7 @@ module internal Common =
     let vline c =
         element (int ElementType.VertLineMode) c
 
-    let pointAt (elementType: ElementType) (tag: string) (x: int) (y: int) : XmlOutput =
+    let pointAt (elementType: ElementType) (tag: string) (x: int, y: int) : XmlOutput =
         let xx = x * 3 + 1
         let yy = y * 1024
         let coordi = xx + yy
@@ -124,11 +124,15 @@ module internal Common =
         elementFull nElementType coordi "" tag
 
     /// x, y 위치에 contact 생성하기 위한 xml 문자열 반환
-    let contactAt (tag: string) (x: int) (y: int) = pointAt ElementType.ContactMode tag x y
+    let contactAt (tag: string) (x: int, y: int) = pointAt ElementType.ContactMode tag (x, y)
 
     /// y line 에 coil 생성하기 위한 xml 문자열 반환
     let coilAt (tag: string) (y: int) =
-        pointAt ElementType.CoilMode tag coilCellX y // coilCellX = 31
+        pointAt ElementType.CoilMode tag (coilCellX, y) // coilCellX = 31
+
+    let xgkFBAt (fbParam:string) (x: int, y: int) =
+        let c = coord (x, y)
+        elementFull (int ElementType.FBMode) c fbParam ""
 
     module Unused =
         /// 조건이 9 이상이면 뒤로 증가

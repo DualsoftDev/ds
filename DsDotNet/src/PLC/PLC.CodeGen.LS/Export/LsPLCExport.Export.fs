@@ -106,17 +106,13 @@ module XgiExportModule =
             let xmls =
                 [
                     let x, y = 0, rgi.Y
-                    let c = coord (x, y)
-                    elementBody (int ElementType.ContactMode) c "_ON"
 
-                    let c = coord (x + 1, y)
-                    let spanX = coilCellX - 3 - 1
-                    let lengthParam = $"Param={dq}{3 * spanX}{dq}"
-                    elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+                    contactAt "_ON" (x, y)
 
-                    let c = coord (coilCellX - 3, y)
+                    hlineTo (x + 1, y) (coilCellX - 3)
+
                     let param = $"Param={dq}MOV,{source.GetContact()},{destination.Name}{dq}"
-                    elementFull (int ElementType.FBMode) c param ""
+                    xgkFBAt param (coilCellX - 3, y)
                 ] |> joinLines |> wrapWithRung
             rgi <-
                 {   Xmls = xmls::rgi.Xmls

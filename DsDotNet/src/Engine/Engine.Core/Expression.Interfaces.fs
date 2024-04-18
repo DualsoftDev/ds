@@ -50,6 +50,7 @@ module ExpressionForwardDeclModule =
         abstract WithNewFunctionArguments: IExpression list -> IExpression
         abstract Terminal: ITerminal option
         abstract CollectStorages: unit -> IStorage list
+        /// 실제 구현에서 PLC.CodeGen.Common.FlatExpression 을 반환하지만, FlatExpression 이 현 시점에서 visible 하지 않기 때문에 IFlatExpression 을 반환하는 것으로 처리
         abstract Flatten: unit -> IFlatExpression
         abstract IsEqual: IExpression -> bool
 

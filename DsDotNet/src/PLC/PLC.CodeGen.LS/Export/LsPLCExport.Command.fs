@@ -9,6 +9,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open FB
 open ConvertorPrologModule
+open Engine.Core.ExpressionModule
 
 [<AutoOpen>]
 module internal rec Command =
@@ -699,6 +700,8 @@ module internal rec Command =
 
         | _ -> failwithlog "Unknown FlatExpression case"
 
+    type FlatExpression with
+        member exp.DrawLadderBlock (prjParam: XgxProjectParams, (x, y)) = drawLadderBlock prjParam (x, y) exp
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     ///
@@ -760,14 +763,47 @@ module internal rec Command =
                 $"Param={dq}MOV,{s},{d}{dq}"
             drawXgkFB prjParam (x, y) condition (fbParam, 3)
         | _ ->
-            let expr =
-                match prjParam.TargetType, expr, cmdExp with
-                | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
-                    expr
-                | _, _, Some (FunctionBlockCmd(fbc)) ->
-                    match fbc with
-                    | TimerMode(timerStatement) -> timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression |> Some
-                    | CounterMode(counterStatement) -> counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression |> Some
+            match prjParam.TargetType, expr, cmdExp with
+            | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
+                rungImpl (x, y) expr cmdExp
+            | XGK, _, Some (FunctionBlockCmd(fbc)) ->
+                match fbc with
+                | CounterMode(counterStatement) when counterStatement.Counter.Type = CTUD ->
+                    // CTUD, C, U, D, N
+                    let up, down =      // reset 조건은 statement2statements 에서 counter 의 reset 조건을 따로 statement 로 추가하였으므로, 여기서는 무시한다.
+                        match counterStatement.UpCondition, counterStatement.DownCondition with
+                        | Some u, Some d -> u.GetTerminalString(prjParam), d.GetTerminalString(prjParam)
+                        | _ -> failwithlog "ERROR"
+                    let rungInCondition =
+                        match expr with
+                        | Some expr -> expr
+                        | _ -> (Expression.True :> IExpression).Flatten() :?> FlatExpression
+                    let pv = counterStatement.Counter.PRE.Value
+
+
+                    [
+                        let { X = x; Y = y; TotalSpanX = tx; TotalSpanY = ty; XmlElements = xmls } : BlockXmlInfo =
+                            rungInCondition.DrawLadderBlock(prjParam, (x, y))
+                        xmls[0].Xml
+                        hlineTo (tx, y) (coilCellX - 4)
+
+                        //let offset = prjParam.CounterCounterGenerator()
+                        //let counterAddress = sprintf "C%04d" offset
+                        //"C", counterAddress, offset
+
+                        //let counter = prjParam.CounterCounterGenerator()
+                        //let param = $"Param={dq}CTUD,{source.GetContact()},{destination.Name}{dq}"
+                        //xgkFBAt param (coilCellX - 3, y)
+                    ] |> ignore
+                    failwith "NOT yet"
+                    //rungImpl (x, y) exp cmdExp
                 | _ ->
-                    failwithlog "ERROR"
-            rungImpl (x, y) expr cmdExp
+                    let exp =
+                        match fbc with
+                        | CounterMode(counterStatement) ->
+                            counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression
+                        | TimerMode(timerStatement) ->
+                            timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
+                    rungImpl (x, y) (Some exp) cmdExp
+            | _ ->
+                failwithlog "ERROR"

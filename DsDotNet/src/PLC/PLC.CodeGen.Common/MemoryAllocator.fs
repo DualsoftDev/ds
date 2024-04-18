@@ -22,9 +22,13 @@ module MemoryAllocator =
         | RangeSpec of IntRange
         | AllocatorFunctions of PLCMemoryAllocator
 
-    let getByteSizeFromPrefix prefix =
+    let getByteSizeFromPrefix prefix target =
         match prefix with
-        | "B" -> 1
+        | "B" -> 
+            match target with
+            | XGI -> 1
+            | XGK -> 2
+            | _ -> failwithlog $"not support target {target} err"
         | "W" -> 2
         | "D" -> 4
         | "L" -> 8
@@ -91,7 +95,7 @@ module MemoryAllocator =
 
 
             | ("B" | "W" | "D" | "L") ->
-                let byteSize = getByteSizeFromPrefix reqMemType
+                let byteSize = getByteSizeFromPrefix reqMemType target
 
                 let byteIndex =
                     match ofByteRange with

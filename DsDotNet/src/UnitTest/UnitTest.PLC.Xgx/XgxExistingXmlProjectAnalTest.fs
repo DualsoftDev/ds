@@ -28,7 +28,7 @@ type XgxExistingXmlProjectAnalTest() =
 
         // used Memory Indices :
         usedMAddresses
-        |> collectByteIndices
+        |> collectByteIndices XGI
         |> SeqEq [ 0; 1; 2; 4; 8; 9; 10; 11; 12; 13; 14; 15; 17; ]
 
         ()

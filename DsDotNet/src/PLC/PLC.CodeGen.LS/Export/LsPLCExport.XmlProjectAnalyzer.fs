@@ -18,15 +18,15 @@ module XgiXmlProjectAnalyzerModule =
             Address = dic.TryFindIt("Address") |> Option.toString
             Kind = dic["Kind"] |> System.Int32.Parse }
 
-    let collectByteIndices (addresses: string seq) : int list =
+    let collectByteIndices target (addresses: string seq) : int list =
         [ for addr in addresses do
               match addr with
               | RegexPattern @"^%M([XBWDL])(\d+)$" [ m; Int32Pattern index ] ->
                   match m with
                   | "X" -> index / 8
                   | ("B" | "W" | "D" | "L") ->
-                      let byteSize = getByteSizeFromPrefix m
-                      let s = index * byteSize
+                      let byteSize = getByteSizeFromPrefix m target
+                      let s = index * byteSize 
                       let e = s + byteSize - 1
                       yield! [ s..e ]
                   | _ -> failwithlog "ERROR"
@@ -46,9 +46,9 @@ module XgiXmlProjectAnalyzerModule =
 
     let collectGlobalSymbolNames (xdoc: XmlDocument) = collectGlobalSymbols xdoc |> map name
 
-    let collectUsedMermoryByteIndicesInGlobalSymbols (xdoc: XmlDocument) =
+    let collectUsedMermoryByteIndicesInGlobalSymbols (xdoc: XmlDocument) xgx=
         collectGlobalSymbols xdoc
         |> map address
         |> filter notNullAny
         |> filter (fun addr -> addr.StartsWith("%M"))
-        |> collectByteIndices
+        |> collectByteIndices xgx

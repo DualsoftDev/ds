@@ -44,15 +44,8 @@ module internal XgiSymbolsModule =
     let autoAllocatorAdress (t:IStorage) (prjParam: XgxProjectParams) = 
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
         // null 또는 다른 값이 지정되어 있으면, 그대로 사용한다.
-        if t.Address = "" then
+        if t.Address.IsNullOrEmpty() then
             failwithlog $"ERROR. {t.Name} address empty."
-
-        if prjParam.TargetType = XGI 
-            && t.Address.IsNonNull() 
-            && t.Address <> TextAddrEmpty 
-            && not(t.Address.StartsWith("%"))
-        then
-            t.Address <- $"%%{t.Address}"
 
         else if t.Address = TextAddrEmpty then
             let allocatorFunctions =
@@ -77,7 +70,7 @@ module internal XgiSymbolsModule =
                 | _ -> failwithlog "ERROR"
 
             if t.Name.StartsWith("_") then
-                logWarn $"Something fish: trying to generate auto R address for {t.Name}"
+                logWarn $"Something fish: trying to generate auto M address for {t.Name}"
 
             if t.Address = TextAddrEmpty || t.Address = TextSkip then
                 let addr:string = allocator()
@@ -109,6 +102,13 @@ module internal XgiSymbolsModule =
         match xgxSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
+                    //전처리  XGI % 생략시 자동 붙히기
+            match prjParam.TargetType with
+                | XGI -> if t.Address <> TextAddrEmpty && not(t.Address.StartsWith("%"))
+                         then
+                            t.Address <- $"%%{t.Address}"
+                | _ ->   ()
+
             autoAllocatorAdress t prjParam
             let address, device, devPos = getXGXTagInfo prjParam.TargetType t.Address t.Name
             let plcType = systemTypeToXgxTypeName prjParam.TargetType t.DataType

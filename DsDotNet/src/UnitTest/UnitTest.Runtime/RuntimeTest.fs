@@ -23,7 +23,6 @@ module RuntimeTest =
     let runtimeModel = new RuntimeModel(zipPath, pptParms.TargetType)
 
    
-    [<Obsolete("테트스 성공/실패가 random 임.  수정 필요")>]
     [<Fact>]
     let ``Runtime Running Test`` () = 
 
@@ -32,7 +31,7 @@ module RuntimeTest =
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
         let mci = ModelCompileInfo(runtimeModel.JsonPath, runtimeModel.JsonPath)
         DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci).Wait()
-        DsSimulator.Do(runtimeModel.Cpu) |> Assert.True //값변경있으면서 구동하면 true
+        DsSimulator.Do(runtimeModel.Cpu, 3000) |> Assert.True //값변경있으면서 구동하면 true
 
 
         (*DB 로깅 구동 테스트*)

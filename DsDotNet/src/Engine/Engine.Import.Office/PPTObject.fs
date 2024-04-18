@@ -342,7 +342,7 @@ module PPTObjectModule =
 
             nodeType <-
                 let name = GetBracketsRemoveName(shape.InnerText)
-                if (shape.CheckFlowChartDecision()) then
+                if (shape.CheckFlowChartPreparation()) then
                     CALLRX
                 elif (shape.CheckRectangle()) then
                     if name.Contains(".") then REALExF

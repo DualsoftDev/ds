@@ -416,13 +416,21 @@ module PPTUtil =
                 let geometry = shape.GetGeometry()
                 geometry.Preset.Value = Drawing.ShapeTypeValues.NoSmoking
         
+        //[<Extension>]
+        //static member CheckFlowChartDecision(shape: Shape) =
+        //    if (Office.CheckShape(shape) |> not) then
+        //        false
+        //    else
+        //        let geometry = shape.GetGeometry()
+        //        geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartDecision
+
         [<Extension>]
-        static member CheckFlowChartDecision(shape: Shape) =
+        static member CheckFlowChartPreparation(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
                 let geometry = shape.GetGeometry()
-                geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartDecision
+                geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartPreparation
 
         [<Extension>]
         static member CheckBlockArc(shape: Shape) =
@@ -578,7 +586,7 @@ module PPTUtil =
              || shape.CheckFoldedCornerRound() //COPY_DEV
              || shape.CheckFoldedCornerPlate() //OPEN_EXSYS_LINK
              || shape.CheckHomePlate() //interface
-             || shape.CheckFlowChartDecision() //CallRX
+             || shape.CheckFlowChartPreparation() //CallRX
              || shape.CheckLayout())
 
         [<Extension>]

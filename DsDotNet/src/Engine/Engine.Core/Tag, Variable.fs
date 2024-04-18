@@ -104,6 +104,7 @@ module TagVariableModule =
         override x.ToText() = "$" + param.Name
 
     type ILiteralHolder =
+        abstract ToText : unit -> string
         abstract ToTextWithoutTypeSuffix: unit -> string
 
     type LiteralHolder<'T when 'T:equality> = { Value: 'T }
@@ -112,6 +113,7 @@ module TagVariableModule =
                 member x.ToText() = sprintf "%A" x.Value
             interface ILiteralHolder with
                 member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
+                member x.ToText() = sprintf "%A" x.Value
             interface IValue<'T> with
                 member x.Value with get() = x.Value and set(_v) = failwithlog "ERROR: unsupported."
                 member x.ObjValue = box x.Value

@@ -12,8 +12,7 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
-    [<Obsolete("MemoryAllocatorSpec, TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 아래 todo 부분 치환")>]
-    let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj startMemory : string =
+    let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj startMemory startTimer startCounter  : string =
         let projName = system.Name
         
         let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
@@ -32,26 +31,33 @@ module ExportModule =
             pouParams
 
         let usedByteIndices =
-            let tryParseXgxTag =
-                match plcType with
-                | XGI -> tryParseXGITag
-                | XGK -> tryParseXGKTag
-                | _ -> failwithlog "Not supported plc type"
-
             let getBytes addr = 
                 [  
-                    match tryParseXgxTag addr with
-                    |Some tag -> 
-                        if tag.DataType = PLCHwModel.DataType.Bit 
-                        then 
-                            yield tag.ByteOffset
-                        else 
-                            yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
-                    |None ->
-                        failwithlog $"tryParse{plcType} {addr} error"
+                    match plcType with
+                    | XGI ->
+                        match tryParseXGITag addr with
+                        |Some tag -> 
+                            if tag.DataType = PLCHwModel.DataType.Bit 
+                            then 
+                                yield tag.ByteOffset
+                            else 
+                                yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
+                        |None ->
+                            failwithlog $"tryParse{plcType} {addr} error"
+
+                    | XGK ->    
+                        match tryParseXGKTag addr with
+                            |Some tag -> 
+                                match tag.DataType with
+                                | PLCHwModel.DataType.Bit -> yield tag.ByteOffset
+                                | PLCHwModel.DataType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]   
+                                | _-> failwithlog $"XGK Not supported plc {plcType} type"
+                         
+                            |None ->
+                                failwithlog $"tryParse{plcType} {addr} error"
+
+                    | _ -> failwithlog $"Not supported plc {plcType} type"
                 ]
-            
-           
   
 
             let autoMemoryAllocationTags =
@@ -86,10 +92,9 @@ module ExportModule =
 
                 RungCounter = counterGenerator 0
 
-                // todo : 전달 받은 MemoryAllocatorSpec, TimerCounterGenerator, CounterCounterGenerator 값으로 설정
                 MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
-                TimerCounterGenerator = counterGenerator 0
-                CounterCounterGenerator = counterGenerator 0
+                TimerCounterGenerator = counterGeneratorWithSkip startTimer usedByteIndices
+                CounterCounterGenerator = counterGeneratorWithSkip startCounter usedByteIndices
                 AutoVariableCounter = counterGenerator 0
 
                 POUs =
@@ -100,8 +105,7 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 generateXmlXGX 에 전달")>]
-    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startMemory) =
+    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startMemory, startTimer, startCounter) =
         assert(plcType.IsOneOf(XGI, XGK))
         use _ = logTraceEnabler()
         // RuntimeDS.Target <- plcType  // xxx 
@@ -124,7 +128,7 @@ module ExportModule =
             then globalStorage.Remove(tagKV.Key)|>ignore
             )
 
-        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj startMemory
+        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)
 
@@ -134,14 +138,12 @@ module ExportModule =
 [<Extension>]
 type ExportModuleExt =
     [<Extension>]
-    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 exportXMLforLSPLC 에 전달")>]
-    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startMemory) =
+    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startMemory, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startMemory)
+        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startMemory, startTimer, startCounter)
 
-    [<Obsolete("TimerCounterGenerator 및 CounterCounterGenerator 값을 전달 받아서 exportXMLforLSPLC 에 전달")>]
     [<Extension>]
-    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startMemory) =
+    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startMemory, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj, startMemory)
+        exportXMLforLSPLC (XGK, system, path, existingLSISprj, startMemory, startTimer, startCounter)
 

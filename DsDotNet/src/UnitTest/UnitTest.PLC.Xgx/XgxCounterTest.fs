@@ -45,6 +45,8 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 bool cd = createTag("P00000", false);
                 bool xload = createTag("P00001", false);       // XGK 에서는 'load' 라는 변수명을 사용할 수 없다.
                 ctd myCTD = createXgiCTD(2000u, $cd, $xload);
+                ctd myCTD1 = createXgiCTD(2000u, $cd, $xload);
+                ctd myCTD2 = createXgiCTD(2000u, $cd, $xload);
                 """
             | _ -> failwith "Not supported plc type"
 

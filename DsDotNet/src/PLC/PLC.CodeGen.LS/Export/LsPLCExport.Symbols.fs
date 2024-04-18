@@ -76,25 +76,28 @@ module internal XgiSymbolsModule =
                 let addr:string = allocator()
                 t.Address <- addr
 
-    let getXGXTagInfo (targetType:PlatformTarget) (address:string) (name:string) =
-        let tag = 
-            match targetType with
-            | XGI -> tryParseXGITag address
-            | XGK -> tryParseXGKTag address
-            | _-> 
-                failwith $"Invalid tag  targetType {targetType}"
+    let getXGXTagInfo (targetType:PlatformTarget) (address:string) (name:string) =  
+        match targetType with
+        | XGI ->
+            match tryParseXGITag address with
+            |Some tag -> 
+                address, tag.Device.ToString()
+                , if tag.DataType = PLCHwModel.DataType.Bit then tag.BitOffset else tag.ByteOffset    
+            |None ->
+                failwithlog $"tryParse{targetType} {name} {address} error"
 
-        match tag with
-        | Some tag ->
-            let offset = 
-                if tag.DataType = PLCHwModel.DataType.Bit then
-                    tag.BitOffset
-                else
-                    tag.ByteOffset
-            address, tag.Device.ToString(), offset
-        | _ -> 
-            failwithf $"Invalid tag address {address} for {name}"
-                
+        | XGK ->    
+            match tryParseXGKTag address with
+            |Some tag -> 
+                match tag.DataType with
+                | PLCHwModel.DataType.Bit -> address, tag.Device.ToString(), tag.BitOffset
+                | PLCHwModel.DataType.Word -> address, tag.Device.ToString(), tag.ByteOffset / 2
+                | _-> failwithlog $"XGK Not supported plc {tag.DataType} type"
+                         
+            |None ->
+                failwithlog $"tryParse{targetType} {name} {address} error"
+
+        | _ -> failwithlog $"Not supported plc {targetType} type"
         
 
     let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo =
@@ -150,7 +153,7 @@ module internal XgiSymbolsModule =
                     Comment = comment
                     Type = plcType
                     Device = device
-                    Address = address
+                    Address = address // xgk address 는 xml에 저장 안됨 devPos 처리
                     DevicePos = devPos
                     InitValue = t.BoxedValue
                     Kind = kindVar }

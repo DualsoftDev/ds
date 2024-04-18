@@ -70,35 +70,70 @@ module ConvertErrorCheck =
             let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Flow.Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
 
+    let checkDuplicatesNNullAddress (sys: DsSystem) = 
+        // Check for null addresses in jobs
+        let nullTagJobs = 
+            sys.Jobs
+            |> Seq.filter (fun j -> 
+                j.DeviceDefs
+                |> Seq.exists (fun f -> f.InAddress = TextAddrEmpty && f.OutAddress = TextAddrEmpty))
+            |> Seq.toList
 
-    let checkErrNullAddress(sys:DsSystem) = 
-        let nullTagJobs = sys.Jobs
-                             .Where(fun j-> j.DeviceDefs.Where(fun f-> 
-                                               f.InAddress = TextAddrEmpty
-                                            && f.OutAddress = TextAddrEmpty
-                                            ).any())
-                      
-        if nullTagJobs.any()
-        then 
-            let errJobs = StringExt.JoinWith(nullTagJobs.Select(fun j -> j.Name), "\n")
-            failwithlogf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
-        let nullBtns = sys.HWButtons.Where(fun b-> 
-                                    b.InTag.IsNull() 
-                                    ||b.OutTag.IsNull() && b.OutAddress <> TextSkip)
-        if nullBtns.any()
-        then 
-            let errBtns = StringExt.JoinWith(
-                            nullBtns.Select(fun b -> 
-                                let inout = if b.InTag.IsNull() then "입력" else "출력"
-                                $"{b.ButtonType} 해당 {inout} 주소가 없습니다. [{b.Name}]"), "\n")
+        if nullTagJobs |> List.isEmpty |> not then 
+            let errJobs = nullTagJobs |> List.map (fun j -> j.Name) |> String.concat "\n"
+            failwithf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
 
-            failwithlogf $"버튼 주소가 없습니다. \n{errBtns}"
-                                      
-        let nullLamps = sys.HWLamps.Where(fun b-> b.OutTag.IsNull())
-        if nullLamps.any()
-        then 
-            let errLamps= StringExt.JoinWith(nullLamps.Select(fun j -> j.Name), "\n")
-            failwithlogf $"램프 주소가 없습니다. \n{errLamps}"
+        // Check for null buttons
+        let nullBtns = 
+            sys.HWButtons
+            |> Seq.filter (fun b -> b.InTag.IsNull() || (b.OutTag.IsNull() && b.OutAddress <> TextSkip))
+            |> Seq.toList
+
+        if nullBtns |> List.isEmpty |> not then 
+            let errBtns = nullBtns |> List.map (fun b -> 
+                let inout = if b.InTag.IsNull() then "입력" else "출력"
+                $"{b.ButtonType} 해당 {inout} 주소가 없습니다. [{b.Name}]") |> String.concat "\n"
+            
+            failwithf $"버튼 주소가 없습니다. \n{errBtns}"
+
+        // Check for null lamps
+        let nullLamps = 
+            sys.HWLamps
+            |> Seq.filter (fun l -> l.OutTag.IsNull())
+            |> Seq.toList
+
+        if nullLamps |> List.isEmpty |> not then 
+            let errLamps = nullLamps |> List.map (fun l -> l.Name) |> String.concat "\n"
+            failwithf $"램프 주소가 없습니다. \n{errLamps}"
+
+              // Aggregate all addresses to check for duplicates along with their API names
+        let allAddresses = 
+            [
+                yield! sys.Jobs |> Seq.collect (fun j -> 
+                    j.DeviceDefs |> Seq.collect (fun d -> [($"{d.ApiName}_IN", d.InAddress); ($"{d.ApiName}_OUT", d.OutAddress)]))
+                yield! sys.HWButtons |> Seq.collect (fun b -> [(b.Name, b.InAddress); (b.Name, b.OutAddress)])
+                yield! sys.HWLamps |> Seq.collect (fun l -> [(l.Name, l.OutAddress)])
+            ] |> Seq.filter (fun (_, addr) -> addr <> TextAddrEmpty && addr <> TextSkip) |> Seq.toList
+
+        // Helper to find duplicate elements and group them by API names
+        let findDuplicates list =
+            list 
+            |> Seq.groupBy snd
+            |> Seq.filter (fun (_, items) -> Seq.length items > 1)
+            |> Seq.map (fun (addr, items) -> addr, items |> Seq.map fst |> Seq.distinct |> Seq.toList)
+
+          // Find and handle duplicates
+        let duplicates = findDuplicates allAddresses
+
+        if not (Seq.isEmpty duplicates) then
+            let dupMsg = 
+                duplicates 
+                |> Seq.map (fun (addr, apis) -> 
+                    let apiList = apis |> String.concat "\n"
+                    $"\n해당주소:{addr}\n{apiList}")
+                |> String.concat "\n "
+             
+            failwithf $"중복 주소 발견: {dupMsg}"
 
     let setSimulationAddress(sys:DsSystem) = 
         sys.Jobs.ForEach(fun j->

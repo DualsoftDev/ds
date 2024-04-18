@@ -21,38 +21,38 @@ module POUParametersModule =
             CommentedStatements: CommentedStatement list
         }
 
-    type counterGeneratorWithSkipType = unit -> int
-    let counterGeneratorWithSkip start (skipList: int list) =
-        let mutable counter = start-1
+    /// (unit -> int) 함수를 반환하는 type
+    type counterGeneratorType = Seq.counterGeneratorType
+
+    let counterGeneratorWithSkip start (skipList: int list) : counterGeneratorType =
+        let mutable counter = start
         fun () ->
-            counter <- counter + 1
             while List.contains counter skipList do
                 counter <- counter + 1
             counter
 
         //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {
-        TargetType: PlatformTarget
-        ProjectName: string
-        ProjectComment: string
-        GlobalStorages: Storages
-        ExistingLSISprj: string option
-        POUs: XgxPOUParams list
+        TargetType         : PlatformTarget
+        ProjectName        : string
+        ProjectComment     : string
+        GlobalStorages     : Storages
+        ExistingLSISprj    : string option
+        POUs               : XgxPOUParams list
         MemoryAllocatorSpec: PLCMemoryAllocatorSpec
-        EnableXmlComment: bool
-        AppendDebugInfoToRungComment: bool
-        TimerCounterGenerator:counterGeneratorWithSkipType
-        CounterCounterGenerator:counterGeneratorWithSkipType
-        RungCounter :Seq.counterGeneratorType
+        EnableXmlComment   : bool
+        TimerCounterGenerator  : counterGeneratorType
+        CounterCounterGenerator: counterGeneratorType
+        RungCounter            : counterGeneratorType
         /// Auto 변수의 이름을 uniq 하게 짓기 위한 용도 "_tmp_temp_internal{n}
-        AutoVariableCounter: Seq.counterGeneratorType
+        AutoVariableCounter    : counterGeneratorType
+        AppendDebugInfoToRungComment: bool
     }
 
     let createDefaultProjectParams targetType memorySize =
-        let voidCounterGenerator : Seq.counterGeneratorType =
+        let voidCounterGenerator : counterGeneratorType =
             fun () -> failwith "Should be assigned with valid counter generator"
-        let voidCounterGeneratorWithSkip : counterGeneratorWithSkipType =
-            fun () -> failwith "Should be assigned with valid counter generator"
+
         {
             TargetType = targetType
             ProjectName = ""
@@ -63,10 +63,10 @@ module POUParametersModule =
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, memorySize) [] targetType)
             EnableXmlComment = false
             AppendDebugInfoToRungComment = IsDebugVersion || isInUnitTest()
-            TimerCounterGenerator = voidCounterGeneratorWithSkip
-            CounterCounterGenerator = voidCounterGeneratorWithSkip
-            RungCounter = voidCounterGenerator
-            AutoVariableCounter = voidCounterGenerator
+            TimerCounterGenerator   = voidCounterGenerator
+            CounterCounterGenerator = voidCounterGenerator
+            RungCounter             = voidCounterGenerator
+            AutoVariableCounter     = voidCounterGenerator
         }
 
     let defaultMemorySize = 640 * 1024
@@ -83,9 +83,9 @@ module POUParametersModule =
         { getProjectParams with 
             ProjectName = projectName; TargetType = targetType;
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
-            TimerCounterGenerator = counterGeneratorWithSkip 0 []
+            TimerCounterGenerator   = counterGeneratorWithSkip 0 []
             CounterCounterGenerator = counterGeneratorWithSkip  0 []
-            AutoVariableCounter = counterGenerator 1
-            RungCounter = counterGenerator 0
+            AutoVariableCounter     = counterGenerator 1
+            RungCounter             = counterGenerator 0
         }
 

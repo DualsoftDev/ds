@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LS
 open Engine.Core
 open PLC.CodeGen.Common
 open Dual.Common.Core.FS
+open System.Collections.Generic
 
 [<AutoOpen>]
 module POUParametersModule =
@@ -24,13 +25,18 @@ module POUParametersModule =
     /// (unit -> int) 함수를 반환하는 type
     type counterGeneratorType = Seq.counterGeneratorType
 
-    let counterGeneratorWithSkip start (skipList: int list) : counterGeneratorType =
-        let counter = counterGenerator start
+    /// 이미 존재하는 counterGenerator 함수를 사용하되, excludeList 에 있는 값은 제외하고 반환
+    let counterGeneratorWithExistingCounterGeneratorAndExclusionList (existingCounterGenerator: counterGeneratorType) (excludes: int seq) : counterGeneratorType =
+        let excludes = excludes |> HashSet
         fun () ->
-            let mutable c = counter()
-            while skipList |> List.contains c  do
-                c <- counter()
-            c
+            let mutable n = existingCounterGenerator()
+            while excludes.Contains n  do
+                n <- existingCounterGenerator()
+            n
+
+    /// start 값부터 출력하는 counterGenerator 함수를 반환하되, excludeList 에 있는 값은 제외하고 반환
+    let counterGeneratorWithExclusionList start (excludes: int list) : counterGeneratorType =
+        counterGeneratorWithExistingCounterGeneratorAndExclusionList (counterGenerator start) excludes
 
         //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {
@@ -84,8 +90,8 @@ module POUParametersModule =
         { getProjectParams with 
             ProjectName = projectName; TargetType = targetType;
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
-            TimerCounterGenerator   = counterGeneratorWithSkip 0 []
-            CounterCounterGenerator = counterGeneratorWithSkip  0 []
+            TimerCounterGenerator   = counterGeneratorWithExclusionList 0 []
+            CounterCounterGenerator = counterGeneratorWithExclusionList  0 []
             AutoVariableCounter     = counterGenerator 1
             RungCounter             = counterGenerator 0
         }

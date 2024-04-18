@@ -1,6 +1,7 @@
 namespace PLC.CodeGen.LS
 
 open System.Xml
+open System.Text.RegularExpressions
 
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
@@ -46,9 +47,30 @@ module XgiXmlProjectAnalyzerModule =
 
     let collectGlobalSymbolNames (xdoc: XmlDocument) = collectGlobalSymbols xdoc |> map name
 
-    let collectUsedMermoryByteIndicesInGlobalSymbols (xdoc: XmlDocument) xgx=
+    let private collectGlobalVariableAddresses (xdoc: XmlDocument) (prefix:string) =
         collectGlobalSymbols xdoc
         |> map address
         |> filter notNullAny
-        |> filter (fun addr -> addr.StartsWith("%M"))
+        |> filter (fun addr -> addr.StartsWith(prefix))
+
+    let collectUsedMermoryByteIndicesInGlobalSymbols (xdoc: XmlDocument) xgx=
+        collectGlobalVariableAddresses xdoc "%M"
         |> collectByteIndices xgx
+
+
+    let private extractNumber (address:string) =
+        let fail() = failwith $"Failed to parse address: {address}"
+        let pattern = @"\d+"
+        let regexMatch = Regex.Match(address, pattern)
+        if regexMatch.Success then
+            regexMatch.Value |> System.Int32.TryParse
+            |> function
+                | (true, number) -> number
+                | _ -> fail()
+        else
+            fail()
+
+    let collectCounterAddressXgk (xdoc: XmlDocument) =
+        collectGlobalVariableAddresses xdoc "C" |> map extractNumber
+    let collectTimerAddressXgk (xdoc: XmlDocument) =
+        collectGlobalVariableAddresses xdoc "T" |> map extractNumber

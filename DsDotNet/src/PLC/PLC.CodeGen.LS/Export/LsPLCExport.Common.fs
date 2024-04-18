@@ -10,8 +10,9 @@ module internal Common =
     type XmlOutput = string
     type EncodedXYCoordinate = int
 
-    type CoordinatedXmlElement =
-        { // old name : CoordinatedRungXml
+    /// Rung 단위 생성을 위한 정보
+    type RungXmlInfo =
+        {
             /// Xgi 출력시 순서 결정하기 위한 coordinate.
             Coordinate: EncodedXYCoordinate // int
             /// Xml element 문자열
@@ -20,19 +21,37 @@ module internal Common =
             SpanY: int
         }
 
-    type BlockSummarizedXmlElements =
+    /// Rung 구성 요소의 일부 block 에 관한 정보
+    type BlockXmlInfo =
         {
-          // Block 시작 좌상단 x, y 좌표
-          X: int
-          Y: int
-          TotalSpanX: int
-          TotalSpanY: int
-          XmlElements: CoordinatedXmlElement list }
+            /// Block 시작 좌상단 x 좌표
+            X: int
+            /// Block 시작 좌상단 y 좌표
+            Y: int
+            /// Block 이 사용하는 가로 span
+            TotalSpanX: int
+            /// Block 이 사용하는 세로 span
+            TotalSpanY: int
+            /// Block 을 구성하는 element 들의 xml 정보
+            XmlElements: RungXmlInfo list
+        }
 
-    type BlockSummarizedXmlElements with
+    type BlockXmlInfo with
         member x.GetXml():string =
             x.XmlElements |> List.map (fun e -> e.Xml) |> String.concat "\r\n"
 
+    let rungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
+        let xs = rungXmlInfos
+        let x = xs |> List.map (fun e -> e.Coordinate % 1024 / 3) |> List.min
+        let y = xs |> List.map (fun e -> e.Coordinate / 1024) |> List.min
+        let totalSpanX = xs |> List.map (fun e -> e.SpanX) |> List.sum
+        let totalSpanY = xs |> List.map (fun e -> e.SpanY) |> List.sum
+
+        { X = x
+          Y = y
+          TotalSpanX = totalSpanX
+          TotalSpanY = totalSpanY
+          XmlElements = xs }
 
     /// Rung 을 생성하기 위한 정보
     ///
@@ -152,7 +171,7 @@ module internal Common =
 
 
     /// x y 위치에서 수직선 한개를 긋는다
-    let vlineAt (x, y) : CoordinatedXmlElement =
+    let vlineAt (x, y) : RungXmlInfo =
         verify (x >= 0)
         let c = coord (x, y) + 2
 
@@ -164,7 +183,7 @@ module internal Common =
     let mutable EnableXmlComment = false
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
-    let vlineDownN (x, y) n : CoordinatedXmlElement list =
+    let vlineDownN (x, y) n : RungXmlInfo list =
         [ if EnableXmlComment then
               xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
@@ -182,7 +201,7 @@ module internal Common =
     let wrapWithRung xml = $"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"
 
     /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')
-    let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst: string) (x, y) : CoordinatedXmlElement =
+    let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst: string) (x, y) : RungXmlInfo =
         let tag = briefFunctionName
         let instFB = if inst = "" then "," else (inst + ",VAR")
         let c = coord (x, y)
@@ -199,7 +218,7 @@ module internal Common =
           SpanY = getFunctionHeight detailedFunctionName }
 
     /// 함수 파라메터 그리기
-    let createFBParameterXml (x, y) tag : CoordinatedXmlElement =
+    let createFBParameterXml (x, y) tag : RungXmlInfo =
         let c = coord (x, y)
         let xml = elementFull (int ElementType.VariableMode) c "" tag
 

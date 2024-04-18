@@ -128,12 +128,6 @@ module MemoryAllocator =
                 if x then
                     getAddress reqMemType
                 else
-                    //if reservedBytes |> List.contains byteIndex then
-                    //    getAddress reqMemType
-                    //else
-
-
-
                     let address = 
                         
                         if target = XGI then

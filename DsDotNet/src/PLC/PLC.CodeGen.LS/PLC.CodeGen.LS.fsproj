@@ -54,9 +54,9 @@
         <Compile Include="Export\LsPLCExport.Command.fs" />
         <Compile Include="Export\LsPLCExport.Tag.fs" />
         <Compile Include="Export\LsPLCExport.XmlDoc.fs" />
+        <Compile Include="Export\LsPLCExport.XmlProjectAnalyzer.fs" />
         <Compile Include="Export\LsPLCExport.File.fs" />
         <Compile Include="Export\LsPLCExport.Symbols.fs" />
-        <Compile Include="Export\LsPLCExport.XmlProjectAnalyzer.fs" />
         <Compile Include="Export\LsPLCExport.Export.fs" />
         <None Include="Scripts\Script1.fsx" />
         <Compile Include="EntryPoint.fs" />

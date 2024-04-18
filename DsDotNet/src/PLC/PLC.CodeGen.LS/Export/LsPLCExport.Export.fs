@@ -325,28 +325,44 @@ module XgiExportModule =
 
 
     and XgxProjectParams with
-
-        member private x.GetTemplateXmlDoc() =
-            x.ExistingLSISprj |> Option.map DualXmlDocument.loadFromFile
-            |? getTemplateXgxXmlDoc x.TargetType
-
         member x.GenerateXmlString() = x.GenerateXmlDocument().OuterXml
 
         member x.GenerateXmlDocument() : XmlDocument =
+            let xdoc, prjParam =
+                let prjParam = x
+                match prjParam.TargetType, prjParam.ExistingLSISprj with
+                | XGK, Some existing ->
+                    let doc = DualXmlDocument.loadFromFile existing
+                    let counters = collectCounterAddressXgk doc
+                    let timers = collectTimerAddressXgk doc
+                    let newPrjParam = {
+                        prjParam with
+                            CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
+                            TimerCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
+                    }
+                    doc, newPrjParam
+                | _, None ->
+                    let doc = getTemplateXgxXmlDoc prjParam.TargetType
+                    doc, prjParam
+                | _, Some existing ->
+                    let doc = DualXmlDocument.loadFromFile existing
+                    doc, prjParam
+
             let { ProjectName = projName
                   TargetType = targetType
                   ProjectComment = projComment
                   GlobalStorages = globalStorages
                   EnableXmlComment = enableXmlComment
                   POUs = pous } =
-                x
+                prjParam
 
             // todo : 사전에 처리 되었어야...
-            for g in globalStorages.Values do
+            for g in prjParam.GlobalStorages.Values do
                 g.IsGlobal <- true
 
             EnableXmlComment <- enableXmlComment
-            let xdoc = x.GetTemplateXmlDoc()
+
+
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
             
             let existingTaskPous =

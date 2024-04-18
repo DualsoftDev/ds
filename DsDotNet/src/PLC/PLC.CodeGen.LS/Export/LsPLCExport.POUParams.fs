@@ -26,7 +26,7 @@ module POUParametersModule =
     type counterGeneratorType = Seq.counterGeneratorType
 
     /// 이미 존재하는 counterGenerator 함수를 사용하되, excludeList 에 있는 값은 제외하고 반환
-    let counterGeneratorWithExistingCounterGeneratorAndExclusionList (existingCounterGenerator: counterGeneratorType) (excludes: int seq) : counterGeneratorType =
+    let counterGeneratorOverrideWithExclusionList (existingCounterGenerator: counterGeneratorType) (excludes: int seq) : counterGeneratorType =
         let excludes = excludes |> HashSet
         fun () ->
             let mutable n = existingCounterGenerator()
@@ -36,7 +36,7 @@ module POUParametersModule =
 
     /// start 값부터 출력하는 counterGenerator 함수를 반환하되, excludeList 에 있는 값은 제외하고 반환
     let counterGeneratorWithExclusionList start (excludes: int list) : counterGeneratorType =
-        counterGeneratorWithExistingCounterGeneratorAndExclusionList (counterGenerator start) excludes
+        counterGeneratorOverrideWithExclusionList (counterGenerator start) excludes
 
         //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {

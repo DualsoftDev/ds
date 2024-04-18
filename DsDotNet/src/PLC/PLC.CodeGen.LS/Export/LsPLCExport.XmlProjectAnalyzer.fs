@@ -17,7 +17,10 @@ module XgiXmlProjectAnalyzerModule =
             Name = dic["Name"]
             Comment = dic["Comment"]
             Address = dic.TryFindIt("Address") |> Option.toString
-            Kind = dic["Kind"] |> System.Int32.Parse }
+            Device = dic.TryFindIt("Device") |> Option.toString
+            DevicePos = dic.TryFindIt("DevicePos") |> Option.bind Parse.Int |> Option.defaultValue(-1)
+            Kind = dic.TryFindIt("Kind") |> Option.bind Parse.Int |> Option.defaultValue(-1)
+        }
 
     let collectByteIndices target (addresses: string seq) : int list =
         [ for addr in addresses do

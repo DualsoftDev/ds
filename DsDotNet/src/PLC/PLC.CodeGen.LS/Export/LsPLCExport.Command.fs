@@ -769,6 +769,7 @@ module internal rec Command =
             | XGK, _, Some (FunctionBlockCmd(fbc)) ->
                 match fbc with
                 | CounterMode(counterStatement) when counterStatement.Counter.Type = CTUD ->
+                    let counter = counterStatement.Counter
                     // CTUD, C, U, D, N
                     let up, down =      // reset 조건은 statement2statements 에서 counter 의 reset 조건을 따로 statement 로 추가하였으므로, 여기서는 무시한다.
                         match counterStatement.UpCondition, counterStatement.DownCondition with
@@ -778,25 +779,25 @@ module internal rec Command =
                         match expr with
                         | Some expr -> expr
                         | _ -> (Expression.True :> IExpression).Flatten() :?> FlatExpression
-                    let pv = counterStatement.Counter.PRE.Value
+                    let pv = counter.PRE.Value
 
+                    let mutable spanY = 1
+                    let xml =
+                        [
+                            let { X = xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; XmlElements = xmls } : BlockXmlInfo =
+                                rungInCondition.DrawLadderBlock(prjParam, (x, y))
+                            xmls[0].Xml
+                            hlineTo (totalSpanX, yy) (coilCellX - 5)
+                            if totalSpanY > 1 then
+                                spanY <- totalSpanY
 
-                    [
-                        let { X = x; Y = y; TotalSpanX = tx; TotalSpanY = ty; XmlElements = xmls } : BlockXmlInfo =
-                            rungInCondition.DrawLadderBlock(prjParam, (x, y))
-                        xmls[0].Xml
-                        hlineTo (tx, y) (coilCellX - 4)
+                            let counterVariable = counter.CounterStruct.XgkStructVariableName
+                            let param = $"Param={dq}CTUD,{counterVariable},{up},{down},{pv}{dq}"
+                            xgkFBAt param (coilCellX - 5 - 1, yy)
+                        ] |> joinLines
 
-                        //let offset = prjParam.CounterCounterGenerator()
-                        //let counterAddress = sprintf "C%04d" offset
-                        //"C", counterAddress, offset
+                    { Xml = xml; Coordinate = coord(0, y + spanY); SpanX = coilCellX; SpanY = spanY }
 
-                        //let counter = prjParam.CounterCounterGenerator()
-                        //let param = $"Param={dq}CTUD,{source.GetContact()},{destination.Name}{dq}"
-                        //xgkFBAt param (coilCellX - 3, y)
-                    ] |> ignore
-                    failwith "NOT yet"
-                    //rungImpl (x, y) exp cmdExp
                 | _ ->
                     let exp =
                         match fbc with

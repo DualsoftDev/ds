@@ -189,7 +189,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
 
     member x.``Counter CTUD with conditional test`` () =
         let storages = Storages()
-        let code = """
+        let vars = """
             bool cu1  = false;
             bool cu2  = false;
             bool cu3  = false;
@@ -207,16 +207,31 @@ type XgxCounterTest(xgx:PlatformTarget) =
             bool load4  = false;
 
             bool xx7 = false;
-            ctud myCTUD =
-                createXgiCTUD(
-                    2000u
-                    , ($cu1 && $cu2) || $cu3 || $cu4
-                    , $cd1 || $cd2 || $cd3 && $cd4
-                    , $res0 || $res1 && $res2
-                    , $load1 && $load2 ||$load3 || $load4
-                    );
-            //$xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
-"""
+        """
+        let code =
+            vars +
+                match xgx with
+                | XGI -> """
+                    ctud myCTUD =
+                        createXgiCTUD(
+                            2000u
+                            , ($cu1 && $cu2) || $cu3 || $cu4
+                            , $cd1 || $cd2 || $cd3 && $cd4
+                            , $res0 || $res1 && $res2
+                            , $load1 && $load2 ||$load3 || $load4
+                            );
+                    //$xx7 := (($cd1 && $cd2) || $cd3 || ($res0 || $res1) && $res2) && $cd1;
+                    """
+                | XGK -> """
+                    ctud myCTUD =
+                        createXgkCTUD(
+                            2000u
+                            , ($cu1 && $cu2) || $cu3 || $cu4
+                            , $cd1 || $cd2 || $cd3 && $cd4
+                            , $res0 || $res1 && $res2
+                            );
+                    """
+                | _ -> failwith "Not supported plc type"
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)

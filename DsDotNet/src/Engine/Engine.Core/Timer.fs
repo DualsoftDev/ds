@@ -167,6 +167,8 @@ module rec TimerModule =
             clearBool(x.LD)
             if x.ACC |> isItNull |> not then
                 x.ACC.Value <- 0u
+        /// XGK 에서 할당한 counter/timer 변수 이름 임시 저장 공간.  e.g "C0001"
+        member val XgkStructVariableName = "" with get, set
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
         for t in ts do

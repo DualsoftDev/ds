@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LS
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open FB
+open Dual.Common.Core.FS.StateBuilderModule.State
 
 [<AutoOpen>]
 module internal Common =
@@ -40,15 +41,36 @@ module internal Common =
         member x.GetXml():string =
             x.XmlElements |> List.map (fun e -> e.Xml) |> String.concat "\r\n"
 
+    /// 좌표 반환 : 1, 4, 7, 11, ...
+    /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
+    let coord (x, y) : EncodedXYCoordinate = x * 3 + y * 1024 + 1
+
+    /// coord(x, y) 에서 x, y 좌표 반환
+    let xyOfCoord coord =
+        let y = (coord - 1) / 1024
+        let xx = ((coord - 1) % 1024)
+        let x = xx / 3
+        let r = xx % 3
+        (x, y), r
+
+    /// coord(x, y) 에서 x 좌표 반환
+    let xOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> fst
+    /// coord(x, y) 에서 y 좌표 반환
+    let yOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> snd
+
     let rungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
         let xs = rungXmlInfos
-        let x = xs |> List.map (fun e -> e.Coordinate % 1024 / 3) |> List.min
-        let y = xs |> List.map (fun e -> e.Coordinate / 1024) |> List.min
-        let totalSpanX = xs |> List.map (fun e -> e.SpanX) |> List.sum
-        let totalSpanY = xs |> List.map (fun e -> e.SpanY) |> List.sum
+        let xys = xs |> List.map (fun e -> xyOfCoord e.Coordinate |> fst)
+        let minX = xys |> List.map fst |> List.min
+        let minY = xys |> List.map snd |> List.min
+        let maxX = xs |> List.map (fun e -> xOfCoord e.Coordinate + e.SpanX) |> List.max
+        let maxY = xs |> List.map (fun e -> yOfCoord e.Coordinate + e.SpanY) |> List.max
 
-        { X = x
-          Y = y
+        let totalSpanX = maxX - minX
+        let totalSpanY = maxY - minY
+
+        { X = minX
+          Y = minY
           TotalSpanX = totalSpanX
           TotalSpanY = totalSpanY
           XmlElements = xs }
@@ -84,17 +106,6 @@ module internal Common =
     /// 좌표 c 에서 시작하는 수직 line
     let vline c =
         element (int ElementType.VertLineMode) c
-
-    /// 좌표 반환 : 1, 4, 7, 11, ...
-    /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
-    let coord (x, y) : EncodedXYCoordinate = x * 3 + y * 1024 + 1
-
-    let rungXy coord =
-        let y = (coord - 1) / 1024
-        let xx = ((coord - 1) % 1024)
-        let x = xx / 3
-        let r = xx % 3
-        (x, y), r
 
     let pointAt (elementType: ElementType) (tag: string) (x: int) (y: int) : XmlOutput =
         let xx = x * 3 + 1

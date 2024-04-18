@@ -531,12 +531,18 @@ module internal rec Command =
         assert (x = 0)
         let conditionBlockXml = drawFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
         let cbx = conditionBlockXml
-        //let conditionBlockXml = drawLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
-        //let { X = cx; Y = cy; TotalSpanX = spanX; TotalSpanY = spanY; XmlElements = xmls } = conditionBlockXml
+        //let { X = cx; Y = cy; TotalSpanX = spanX; TotalSpanY = spanY; XmlElements = xmls } = cbx
 
         let xml =
-            let c = coord(coilCellX - fbWidth - cbx.TotalSpanX, y)
-            elementFull (int ElementType.FBMode) c fbParam ""
+            [
+                let c = coord (x + cbx.TotalSpanX, y)
+                let spanX = coilCellX - 4
+                let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+
+                let c = coord(coilCellX - fbWidth - cbx.TotalSpanX, y)
+                elementFull (int ElementType.FBMode) c fbParam ""
+            ] |> joinLines
 
         {
             Coordinate = coord(0, y + cbx.TotalSpanY)
@@ -753,10 +759,6 @@ module internal rec Command =
                 let s, d = source.GetTerminalString(prjParam), target.Name
                 $"Param={dq}MOV,{s},{d}{dq}"
             drawXgkFB prjParam (x, y) condition (fbParam, 3)
-            //drawLadderBlock prjParam (x, y) condition
-            //drawXgkFBLeft (x, y) fbParam target.Name |> Some
-            ////drawXgkFBRight (x, y) fbParam ac.CoilTerminalTag.StorageName |> Some)
-            //failwith "Not yet"
         | _ ->
             let expr =
                 match prjParam.TargetType, expr, cmdExp with

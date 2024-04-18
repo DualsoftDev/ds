@@ -61,30 +61,23 @@ module XgiExportModule =
             rgi <- rgi.Add(xml)
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
-
-            let getXgkTerminalString(terminalExp:IExpression) =
-                match terminalExp.Terminal with
-                | Some t ->
-                    match t.Variable, t.Literal with
-                    | Some v, None -> v.Name
-                    | None, Some (:? ILiteralHolder as lh) -> lh.ToTextWithoutTypeSuffix()
-                    | _ -> failwith "ERROR: Unknown terminal literal case."
-                | _ -> failwith "ERROR: Not a Terminal"
-
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "<>") ->
             
                 let op = operatorToXgkFunctionName funName |> escapeXml
-                let ls, rs = getXgkTerminalString l, getXgkTerminalString r
-                let drawXgkFb, paramFunc =
+                let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
+                let xmls:XmlOutput =
+                    let xy = (0, rgi.Y)
                     if funName.IsOneOf("+", "-", "*", "/") then
-                        drawXgkFBRight, $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
+                        let param = $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
+                        drawXgkFBRight xy param
                     elif funName.IsOneOf(">", ">=", "<", "<=", "=", "<>") then
-                        drawXgkFBLeft, $"Param={dq}{op},{ls},{rs}{dq}"
+                        let param = $"Param={dq}{op},{ls},{rs}{dq}"
+                        drawXgkFBLeft xy param target.Name
                     else
                         failwithlog $"ERROR: {funName}"
 
-                let xmls = drawXgkFb (0, rgi.Y) paramFunc target.Name
+
                 rgi <-
                     {   Xmls = xmls::rgi.Xmls
                         Y = rgi.Y + 1 }

@@ -101,7 +101,6 @@ module XGITag = //IEC61131Tag =
             Kind = int Variable.Kind.VAR_GLOBAL
             State = 0 }
 
-
     type SymbolInfo with
 
         member private x.ToXgiLiteral() =

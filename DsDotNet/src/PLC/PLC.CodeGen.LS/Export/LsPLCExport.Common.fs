@@ -29,6 +29,10 @@ module internal Common =
           TotalSpanY: int
           XmlElements: CoordinatedXmlElement list }
 
+    type BlockSummarizedXmlElements with
+        member x.GetXml():string =
+            x.XmlElements |> List.map (fun e -> e.Xml) |> String.concat "\r\n"
+
 
     /// Rung 을 생성하기 위한 정보
     ///

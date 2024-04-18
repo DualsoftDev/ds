@@ -81,6 +81,18 @@ module internal rec Command =
     //let createOutputPulse(tag)   = CoilCmd(CoilOutputMode.COMPulseCoil(tag))
     //let createOutputNPulse(tag)  = CoilCmd(CoilOutputMode.COMNPulseCoil(tag))
 
+    type IExpression with
+        member x.GetTerminalString (prjParam: XgxProjectParams) =
+            match x.Terminal with
+            | Some t ->
+                match t.Variable, t.Literal with
+                | Some v, None -> v.Name
+                | None, Some (:? ILiteralHolder as lh) ->
+                    match prjParam.TargetType with
+                    | XGK -> lh.ToTextWithoutTypeSuffix()
+                    | _ -> lh.ToText()
+                | _ -> failwith "ERROR: Unknown terminal literal case."
+            | _ -> failwith "ERROR: Not a Terminal"
 
     /// '_ON' 에 대한 flat expression
     let fakeAlwaysOnFlatExpression =
@@ -498,7 +510,7 @@ module internal rec Command =
 
 
     /// 왼쪽에 _ON 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
-    let drawXgkFBRight (x, y) (fbParam: string) (_target: string) : XmlOutput =
+    let drawXgkFBRight (x, y) (fbParam: string) : XmlOutput =
         assert (x = 0)
         let inner =
             [ 
@@ -514,6 +526,23 @@ module internal rec Command =
                 elementFull (int ElementType.FBMode) c fbParam ""
             ] |> joinLines
         wrapWithRung inner
+
+    let drawXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : CoordinatedXmlElement =
+        assert (x = 0)
+        let conditionBlockXml = drawFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
+        let cbx = conditionBlockXml
+        //let conditionBlockXml = drawLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
+        //let { X = cx; Y = cy; TotalSpanX = spanX; TotalSpanY = spanY; XmlElements = xmls } = conditionBlockXml
+
+        let xml =
+            let c = coord(coilCellX - fbWidth - cbx.TotalSpanX, y)
+            elementFull (int ElementType.FBMode) c fbParam ""
+
+        {
+            Coordinate = coord(0, y + cbx.TotalSpanY)
+            Xml = cbx.GetXml() + xml
+            SpanX = fbWidth; SpanY = 1
+        }
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
     let drawFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockSummarizedXmlElements =
@@ -673,22 +702,6 @@ module internal rec Command =
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
     let rung (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : CoordinatedXmlElement =
-        let expr =
-            if prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone then
-                expr
-            else
-                match cmdExp.Value with
-                | FunctionBlockCmd(fbc) ->
-                    match fbc with
-                    | TimerMode(timerStatement) -> timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression |> Some
-                    | CounterMode(counterStatement) ->                        
-                        counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression |> Some
-                //| PredicateCmd _
-                //| FunctionCmd _
-                //| ActionCmd _ 
-                //    -> expr
-                | _ -> failwithlog "Unknown CommandType"
-
         let rungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : CoordinatedXmlElement =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
@@ -717,16 +730,7 @@ module internal rec Command =
                     let spanY = max exprSpanY cmdXmls.TotalSpanY
                     spanX, spanY, cmdXmls
                 | None ->
-                    0,
-                    0,
-                    {   X = x
-                        Y = y
-                        TotalSpanX = 0
-                        TotalSpanY = 0
-                        XmlElements = [] }
-
-
-
+                    0, 0, { X = x; Y = y; TotalSpanX = 0; TotalSpanY = 0; XmlElements = [] }
 
             let xml =
                 exprXmls @ cmdXmls.XmlElements
@@ -742,4 +746,26 @@ module internal rec Command =
                 Coordinate = c
                 SpanX = spanX
                 SpanY = spanY }
-        rungImpl (x, y) expr cmdExp
+
+        match prjParam.TargetType, cmdExp with
+        | XGK, Some (ActionCmd(Move(condition, source, target))) when source.Terminal.IsSome ->
+            let fbParam =
+                let s, d = source.GetTerminalString(prjParam), target.Name
+                $"Param={dq}MOV,{s},{d}{dq}"
+            drawXgkFB prjParam (x, y) condition (fbParam, 3)
+            //drawLadderBlock prjParam (x, y) condition
+            //drawXgkFBLeft (x, y) fbParam target.Name |> Some
+            ////drawXgkFBRight (x, y) fbParam ac.CoilTerminalTag.StorageName |> Some)
+            //failwith "Not yet"
+        | _ ->
+            let expr =
+                match prjParam.TargetType, expr, cmdExp with
+                | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
+                    expr
+                | _, _, Some (FunctionBlockCmd(fbc)) ->
+                    match fbc with
+                    | TimerMode(timerStatement) -> timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression |> Some
+                    | CounterMode(counterStatement) -> counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression |> Some
+                | _ ->
+                    failwithlog "ERROR"
+            rungImpl (x, y) expr cmdExp

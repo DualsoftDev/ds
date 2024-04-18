@@ -229,6 +229,8 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
+        | CALLRX  -> () 
+        | CALLTX 
         | IF_DEVICE
         | IF_LINK
         | DUMMY
@@ -339,15 +341,16 @@ module PPTObjectModule =
         do
 
             nodeType <-
-                if (shape.CheckRectangle()) then
-                    let name = GetBracketsRemoveName(shape.InnerText)
+                let name = GetBracketsRemoveName(shape.InnerText)
+                if (shape.CheckFlowChartDecision()) then
+                    CALLRX
+                elif (shape.CheckRectangle()) then
                     if name.Contains(".") then REALExF
                     else REAL
                 elif (shape.CheckHomePlate()) then
                     match GetSquareBrackets(shape.InnerText, false) with
                     | Some text -> if text.Contains("~") then IF_DEVICE else IF_LINK
                     | None -> IF_LINK
-
 
                 elif (shape.CheckFoldedCornerPlate()) then
                     OPEN_EXSYS_CALL
@@ -357,7 +360,8 @@ module PPTObjectModule =
                 elif (shape.CheckFoldedCornerRound()) then
                     COPY_DEV
                 elif (shape.CheckEllipse()) then
-                    CALL
+                    if name.Contains(".") then CALL
+                    else CALLTX
                 elif (shape.CheckBevelShapePlate()) then
                     LAMP
                 elif (shape.CheckBevelShapeRound()) then
@@ -369,17 +373,25 @@ module PPTObjectModule =
                 else
                     shape.ErrorName(ErrID._1, iPage)
 
-            if nodeType = CALL 
+            if nodeType = CALL  || nodeType = CALLTX 
             then
-                let callName =  GetHeadBracketRemoveName(shape.InnerText)
+                let callName =  
+                    let onlyName =  GetHeadBracketRemoveName(shape.InnerText)
+                    if nodeType = CALLTX 
+                    then $"sys.{onlyName}"
+                    else onlyName
+
                 name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimNewLine
-            else
+
+
+            else 
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
 
             nameCheck (shape, nodeType, iPage)
 
 
             match nodeType with
+  
             | CALL
             | REAL ->
                 match GetSquareBrackets(shape.InnerText, true) with
@@ -414,6 +426,8 @@ module PPTObjectModule =
 
             | REALExF
             | LAYOUT
+            | CALLRX 
+            | CALLTX 
             | DUMMY -> ()
 
         member x.PageNum = iPage

@@ -96,6 +96,8 @@ module ExportIOTable =
 
         emptyLine (dt)
         dt.Rows.Add(TextXlsVariable) |> ignore
+        dt.Rows.Add(TextXlsCommand) |> ignore
+        
         emptyLine (dt)
 
         dt

@@ -206,6 +206,7 @@ module ImportIOTable =
                         | XlsReadyLamp -> updateLamp (row, LampType.DuReadyStateLamp, tableIO, page)
                         | XlsIdleLamp -> updateLamp (row, LampType.DuIdleModeLamp, tableIO, page)
                         | XlsHomingLamp -> updateLamp (row, LampType.DuOriginStateLamp, tableIO, page)
+                        | XlsCommand -> failwithf "XlsCommand is not supported"
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
 

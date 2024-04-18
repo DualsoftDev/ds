@@ -42,7 +42,7 @@ module CodeElements =
                 genTargetText name varType initValue
 
     let getFunctions (text:string) =
-        let text = text.Trim().ToLower()
+        let text = text.Trim()
         if not <| text.StartsWith "$"
         then failwithlog "function text start keyword is '$' ex)$m 100 R100"
         text.Split('$')
@@ -50,7 +50,7 @@ module CodeElements =
         |> Seq.map(fun line ->
             let line = line.Split(';')[0]  //줄바꿈 제거
             //function Name
-            line.Substring(0,1)
+            line.Substring(0,1).ToLower()
             //function Parameters
             , (line.Substring(1,line.Length-1).Trim().Split(' ') |> Seq.toArray )
             )

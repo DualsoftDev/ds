@@ -102,19 +102,20 @@ module ImportUtilForLib =
 
     //    Call.Create(jobForCall, parent)
          
+    let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
+    let curDir = currentFileName  |> Path.GetDirectoryName
+
+    let libraryConfigFileName = "Library.config"
+    let libConfigPath = Path.Combine(runDir, "dsLib", libraryConfigFileName)
+
+    let libPath  = if Path.Exists libConfigPath      
+                    then libConfigPath
+                    else Path.Combine(curDir, "dsLib", libraryConfigFileName)
+
+    let libConfig = LoadLibraryConfig(libPath)
 
     let getLibraryPath(apiName) =
-        let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
-        let curDir = currentFileName  |> Path.GetDirectoryName
-
-        let libraryConfigFileName = "Library.config"
-        let libConfigPath = Path.Combine(runDir, "dsLib", libraryConfigFileName)
-
-        let libPath  = if Path.Exists libConfigPath      
-                       then libConfigPath
-                       else Path.Combine(curDir, "dsLib", libraryConfigFileName)
-
-        let libConfig = LoadLibraryConfig(libPath)
+        
 
         let libPath = libConfig.LibraryInfos.[apiName]
         let libAbsolutePath = Path.Combine(curDir, libPath)

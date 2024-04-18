@@ -14,6 +14,8 @@ module InterfaceClass =
         | REAL //실제 나의 시스템 1 bit
         | REALExF //다른 Flow real
         | CALL //지시관찰
+        | CALLTX //지시전용
+        | CALLRX //관찰전용
         | IF_DEVICE //인터페이스
         | IF_LINK //인터페이스
         | COPY_DEV //시스템복사 deivce
@@ -26,7 +28,7 @@ module InterfaceClass =
         | CONDITION //READY조건
 
         member x.IsReal = x = REAL || x = REALExF
-        member x.IsCall = x = CALL
+        member x.IsCall = x = CALL || x = CALLTX || x = CALLRX
         member x.IsLoadSys = x = COPY_DEV || x = OPEN_EXSYS_LINK || x = OPEN_EXSYS_CALL
         member x.IsRealorCall = x.IsReal || x.IsCall
         member x.IsIF = x = IF_DEVICE || x = IF_LINK
@@ -56,6 +58,7 @@ module InterfaceClass =
     type ExcelCase =
         | XlsAddress //주소
         | XlsVariable //변수
+        | XlsCommand  //명령
         | XlsAutoBTN //자동 버튼
         | XlsManualBTN //수동 버튼
         | XlsDriveBTN //운전 버튼
@@ -79,6 +82,8 @@ module InterfaceClass =
             match x with
             | XlsAddress -> TextXlsAddress
             | XlsVariable -> TextXlsVariable
+            | XlsCommand -> TextXlsCommand
+            
             | XlsAutoBTN -> TextXlsAutoBTN
             | XlsManualBTN -> TextXlsManualBTN
             | XlsDriveBTN -> TextXlsDriveBTN
@@ -102,6 +107,7 @@ module InterfaceClass =
         match txt.ToLower() with
         | TextXlsAddress -> XlsAddress
         | TextXlsVariable -> XlsVariable
+        | TextXlsCommand -> XlsCommand
         | TextXlsAutoBTN -> XlsAutoBTN
         | TextXlsManualBTN -> XlsManualBTN
         | TextXlsEmergencyBTN -> XlsEmergencyBTN

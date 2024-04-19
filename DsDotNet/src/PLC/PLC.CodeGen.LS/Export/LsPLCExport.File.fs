@@ -65,7 +65,13 @@ module internal XgiFile =
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
     let wrapWithXml (prjParam: XgxProjectParams) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
+
+        (*
+         * Unit Test 전용 코드.
+         * 실제 코드는 LsPLCExport.Export.fs 의 XgxProjectParams extension method 참고. GenerateXmlDocument()
+         *)
         assert isInUnitTest()
+
         let targetType = prjParam.TargetType
         let xdoc, prjParam =
             match prjParam.TargetType, existingLSISprj with

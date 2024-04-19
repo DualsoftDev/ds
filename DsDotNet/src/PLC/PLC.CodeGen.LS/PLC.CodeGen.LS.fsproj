@@ -59,6 +59,7 @@
         <Compile Include="Export\LsPLCExport.Symbols.fs" />
         <Compile Include="Export\LsPLCExport.Export.fs" />
         <Content Include="Export\Note.txt" />
+        <Content Include="Export\XGK.txt" />
         <None Include="Scripts\Script1.fsx" />
         <Compile Include="EntryPoint.fs" />
     </ItemGroup>

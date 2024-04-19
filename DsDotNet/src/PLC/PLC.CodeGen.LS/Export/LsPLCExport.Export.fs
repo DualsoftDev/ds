@@ -237,7 +237,25 @@ module XgiExportModule =
 
         newLocalStorages.ToFSharpList(), newCommentedStatements.ToFSharpList()
 
-        
+    type XgxProjectParamsProperties with
+        /// Project XML 문서로부터 필요한 정보를 추출
+        member x.FillPropertiesFromXmlDocument(xdoc:XmlDocument) =
+            let dic = collectXgkBasicParameters xdoc
+            let readRange prefix =
+                let s = dic[$"{prefix}_START"]
+                let e = dic[$"{prefix}_END"]
+                (s, e)
+
+            [|
+                0.1, "T_100US_AREA_RANGE"
+                1.0, "T_001MS_AREA_RANGE"
+                10.0, "T_010MS_AREA_RANGE"
+                100.0, "T_100MS_AREA_RANGE"
+            |] |> map (fun (res, prefix) -> res, readRange prefix)
+               |> map XgkTimerResolutionSpec
+               |> x.XgxTimerResolutionSpec.AddRange
+            ()
+
     type XgxPOUParams with
 
         member x.GenerateXmlString(prjParam: XgxProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
@@ -347,6 +365,8 @@ module XgiExportModule =
                 | _, Some existing ->
                     let doc = DualXmlDocument.loadFromFile existing
                     doc, prjParam
+
+            prjParam.Properties.FillPropertiesFromXmlDocument(xdoc)
 
             let { ProjectName = projName
                   TargetType = targetType

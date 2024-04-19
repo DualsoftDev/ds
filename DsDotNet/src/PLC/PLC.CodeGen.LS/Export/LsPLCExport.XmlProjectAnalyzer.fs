@@ -7,6 +7,8 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Engine.Core
+open System.Collections.Generic
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module XgiXmlProjectAnalyzerModule =
@@ -77,3 +79,9 @@ module XgiXmlProjectAnalyzerModule =
         collectGlobalVariableAddresses xdoc "C" |> map extractNumber
     let collectTimerAddressXgk (xdoc: XmlDocument) =
         collectGlobalVariableAddresses xdoc "T" |> map extractNumber
+
+
+    let collectXgkBasicParameters (xdoc: XmlDocument) : Dictionary<string, int> =
+        xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGTBasicParam").GetAttributes()
+        |> map (fun (KeyValue(k, v)) -> k, int v)
+        |> Tuple.toDictionary

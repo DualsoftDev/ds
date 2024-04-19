@@ -191,6 +191,7 @@ module internal XgiSymbolsModule =
                     let offset = prjParam.TimerCounterGenerator()
                     let timerAddress = sprintf "T%04d" offset
                     timer.XgkStructVariableName <- timerAddress
+                    timer.XgkStructVariableDevicePos <- offset
                     "T", timerAddress, offset
                 | _ -> "", "", -1   
       

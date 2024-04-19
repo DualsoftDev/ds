@@ -151,6 +151,7 @@ module rec TimerModule =
         member _.Name:string = name
         /// Done bit
         member _.DN:VariableBase<bool> = dn
+        /// Preset value
         member _.PRE:VariableBase<CountUnitType> = pre
         member _.ACC:VariableBase<CountUnitType> = acc
         /// Reset bit.
@@ -169,6 +170,7 @@ module rec TimerModule =
                 x.ACC.Value <- 0u
         /// XGK 에서 할당한 counter/timer 변수 이름 임시 저장 공간.  e.g "C0001"
         member val XgkStructVariableName = "" with get, set
+        member val XgkStructVariableDevicePos = -1 with get, set
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
         for t in ts do

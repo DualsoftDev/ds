@@ -117,6 +117,11 @@ module ExpressionModule =
         member _.RES = timerStruct.RES
         member _.TimerStruct = timerStruct
 
+        ///// XGK 에서는 사용하는 timer 의 timer resolution 을 곱해서 실제 preset 값을 계산해야 한다.
+        //member val XgkTimerResolution = 1.0 with get, set
+        ///// XGK 에서 사전 설정된 timer resolution 을 고려해서 실제 preset 값을 계산
+        //member x.CalculateXgkTimerPreset() = int ( (float timerStruct.PRE.Value) / x.XgkTimerResolution)
+
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with
             member _.Dispose() = (accumulator :> IDisposable).Dispose()

@@ -38,6 +38,14 @@ module POUParametersModule =
     let counterGeneratorWithExclusionList start (excludes: int list) : counterGeneratorType =
         counterGeneratorOverrideWithExclusionList (counterGenerator start) excludes
 
+
+    type XgkTimerResolutionSpec(resolution:float, range:IntRange) =
+        member x.Resolution = resolution
+        member x.Range = range
+
+    type XgxProjectParamsProperties() =
+        member val XgxTimerResolutionSpec = ResizeArray<XgkTimerResolutionSpec>()
+
         //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {
         TargetType         : PlatformTarget
@@ -54,7 +62,19 @@ module POUParametersModule =
         /// Auto 변수의 이름을 uniq 하게 짓기 위한 용도 "_tmp_temp_internal{n}
         AutoVariableCounter    : counterGeneratorType
         AppendDebugInfoToRungComment: bool
+
+        /// Read/Write 가능한 속성들 집합
+        Properties: XgxProjectParamsProperties
     }
+    and XgxProjectParams with
+        member x.GetXgkTimerResolution(n:int) =
+            assert (x.TargetType = XGK)
+            let contains (range:int*int) needle = fst range <= needle && needle <= snd range
+            let rangeSpec =
+                x.Properties.XgxTimerResolutionSpec
+                |> filter (fun spec -> contains spec.Range n)
+                |> exactlyOne
+            rangeSpec.Resolution
 
     let createDefaultProjectParams targetType memorySize =
         let voidCounterGenerator : counterGeneratorType =
@@ -74,6 +94,7 @@ module POUParametersModule =
             CounterCounterGenerator = voidCounterGenerator
             RungCounter             = voidCounterGenerator
             AutoVariableCounter     = voidCounterGenerator
+            Properties = XgxProjectParamsProperties()
         }
 
     let defaultMemorySize = 640 * 1024

@@ -136,7 +136,7 @@ module internal rec Command =
         blockXml
 
     let private drawFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) target: BlockXmlInfo =
-
+        assert(prjParam.TargetType = XGI)
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
         let pv = int16 cs.Counter.PRE.Value
@@ -415,7 +415,7 @@ module internal rec Command =
 
         | XGK ->
             match cmd with
-            | FunctionBlockCmd(fbc) -> drawFBCommandXgk (x, y) fbc
+            | FunctionBlockCmd(fbc) -> drawFBCommandXgk prjParam (x, y) fbc
             | _ -> failwithlog "Unknown CommandType"
 
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
@@ -448,7 +448,7 @@ module internal rec Command =
           TotalSpanY = 1
           XmlElements = xmls }
 
-    let drawFBCommandXgk (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
+    let drawFBCommandXgk (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
         let xmls =
             let spanX =
                 let cmdWidth = 3
@@ -459,7 +459,9 @@ module internal rec Command =
                 | TimerMode ts ->
                     let typ = ts.Timer.Type.ToString()
                     let var = ts.Timer.Name
-                    let value = ts.Timer.PRE.Value /100u  // 2000 mec = 20  // 100msec timer
+                    let value =
+                        let res = prjParam.GetXgkTimerResolution(ts.Timer.TimerStruct.XgkStructVariableDevicePos)
+                        int <| (float ts.Timer.PRE.Value) / res
                     $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
                 | CounterMode cs ->
                     let typ = cs.Counter.Type.ToString()

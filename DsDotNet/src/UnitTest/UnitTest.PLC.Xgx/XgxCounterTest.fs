@@ -71,7 +71,8 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 bool cu = createTag("P00000", false);
                 bool cd = createTag("P00001", false);
                 bool r  = createTag("P00002", false);
-                ctud myCTUD = createXgkCTUD(2000u, $cu, $cd, $r);
+                bool xld = createTag("P00003", false);
+                ctud myCTUD = createXgkCTUD(2000u, $cu, $cd, $r, $xld);
                 """
             | _ -> failwith "Not supported plc type"
 
@@ -229,6 +230,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
                             , ($cu1 && $cu2) || $cu3 || $cu4
                             , $cd1 || $cd2 || $cd3 && $cd4
                             , $res0 || $res1 && $res2
+                            , $load1 && $load2 ||$load3 || $load4
                             );
                     """
                 | _ -> failwith "Not supported plc type"

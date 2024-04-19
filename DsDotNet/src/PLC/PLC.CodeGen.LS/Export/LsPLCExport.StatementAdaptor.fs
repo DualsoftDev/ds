@@ -143,7 +143,7 @@ module rec TypeConvertorModule =
         | _ -> failwith $"Invalid XGI variable name {name}.  Use longer name"
 
         match name with
-        | RegexPattern @"ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
+        | RegexPattern @"^ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
         | _ -> ()
 
         let createParam () =
@@ -171,13 +171,13 @@ module rec TypeConvertorModule =
 
     let sys = DsSystem("")
 
-    let createTypedXgiAutoVariable (prjParam: XgxProjectParams) (nameHint: string) (initValue: obj) comment : IXgxVar =
+    let createTypedXgxAutoVariable (prjParam: XgxProjectParams) (nameHint: string) (initValue: obj) comment : IXgxVar =
         let n = prjParam.AutoVariableCounter()
         let name = $"_tmp{nameHint}{n}"
         createXgxVariable name initValue comment
 
 
-    let internal createXgiAutoVariableT (prjParam: XgxProjectParams) (nameHint: string) comment (initValue: 'T) =
+    let internal createXgxAutoVariableT (prjParam: XgxProjectParams) (nameHint: string) comment (initValue: 'T) =
         let n = prjParam.AutoVariableCounter()
         let name = $"_tmp{nameHint}{n}"
 
@@ -280,7 +280,7 @@ module XgxExpressionConvertorModule =
                         if prjParam.TargetType <> XGI then 
                             failwithlog $"Inline function only supported on XGI"
 
-                        let out = createTypedXgiAutoVariable prjParam "out" exp.BoxedEvaluatedValue $"{op} output"
+                        let out = createTypedXgxAutoVariable prjParam "out" exp.BoxedEvaluatedValue $"{op} output"
                         xgiLocalVars.Add out
 
                         expandFunctionStatements.Add
@@ -315,7 +315,7 @@ module XgxExpressionConvertorModule =
             let op = exp.FunctionName.Value
 
             let out =
-                createTypedXgiAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
+                createTypedXgxAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
 
             storage.Add out
 
@@ -385,7 +385,7 @@ module XgxExpressionConvertorModule =
                         if argsRemaining.IsEmpty then
                             outputStore.Value
                         else
-                            createTypedXgiAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue "comment"
+                            createTypedXgxAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue "comment"
 
                     let outexp = out.ToExpression()
 
@@ -451,7 +451,7 @@ module XgxExpressionConvertorModule =
 
                 let subSums =
                     [ for max in maxs do
-                          let out = createXgiAutoVariableT prjParam "_temp_internal_"  ($"{op} split output") false
+                          let out = createXgxAutoVariableT prjParam "_temp_internal_"  ($"{op} split output") false
                           newLocalStorages.Add out
 
                           DuAugmentedPLCFunction
@@ -462,7 +462,7 @@ module XgxExpressionConvertorModule =
 
                           var2expr out :> IExpression ]
 
-                let grandTotal = createXgiAutoVariableT prjParam "_temp_internal_" ($"{op} split output") false
+                let grandTotal = createXgxAutoVariableT prjParam "_temp_internal_" ($"{op} split output") false
                 newLocalStorages.Add grandTotal
 
                 DuAugmentedPLCFunction
@@ -548,7 +548,7 @@ module XgxExpressionConvertorModule =
                         let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
                         let createTmpStorage =
                             fun () -> 
-                                let tmpVar = createTypedXgiAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
+                                let tmpVar = createTypedXgxAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
                                 tmpVar :> IStorage
 
                         match fn with
@@ -656,14 +656,27 @@ module XgxExpressionConvertorModule =
                 [ statement; resetStatement ]
 
             | DuCounter ctr when prjParam.TargetType = XGK ->
+                let statements = ResizeArray<Statement>([statement])
                 // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
                 let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
-                let resetStatement =
-                    match ctr.Counter.Type with
-                    | CTD -> DuAssign(ctr.LoadCondition.Value, resetCoil)
-                    | CTUD when ctr.LoadCondition.IsSome -> failwith "XGK CTUD does not support LoadCondition"
-                    | (CTR|CTU|CTUD) -> DuAssign(ctr.ResetCondition.Value, resetCoil)
-                [ statement; resetStatement ]
+                let typ = ctr.Counter.Type
+                match typ with
+                | CTD -> DuAssign(ctr.LoadCondition.Value, resetCoil) |> statements.Add
+                | (CTR|CTU|CTUD) -> DuAssign(ctr.ResetCondition.Value, resetCoil) |> statements.Add
+                let mutable newStatements = statement
+                if typ = CTUD then
+                    match ctr.LoadCondition with
+                    | Some ld when ld.Terminal.IsNone ->
+                        let ldVar = createTypedXgxAutoVariable prjParam "ld" false "LD condition"
+                        DuAssign(ld, ldVar) |> statements.Add
+
+                        let ldVarExp = ldVar.ToExpression() :?> IExpression<bool>
+                        newStatements <- DuCounter({ ctr with LoadCondition = Some ldVarExp })
+                        statements[0] <- newStatements
+                        ()
+                    | _ -> ()
+
+                statements.ToFSharpList()
 
             | (DuTimer _ | DuCounter _) -> [ statement ]
 

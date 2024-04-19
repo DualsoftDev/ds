@@ -362,6 +362,8 @@ module XgiExportModule =
 
             EnableXmlComment <- enableXmlComment
 
+            pous |> iter (fun pou -> pou.SanityCheck(prjParam))
+
 
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
             
@@ -509,6 +511,6 @@ module XgiExportModule =
 
             if targetType = XGK then
                 xdoc.MovePOULocalSymbolsToGlobalForXgk()
-                xdoc.CheckInvalidVariableNameForXgk()
+                xdoc.SanityCheckVariableNameForXgk()
 
             xdoc.Check targetType

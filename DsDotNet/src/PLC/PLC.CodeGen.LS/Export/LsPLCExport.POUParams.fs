@@ -96,3 +96,73 @@ module POUParametersModule =
             RungCounter             = counterGenerator 0
         }
 
+
+    type Statement with
+        member x.SanityCheck(prjParam: XgxProjectParams) =
+            let target = prjParam.TargetType
+            match x with
+            | DuAssign(expr, target) -> ()
+            | DuVarDecl(expr, variable) -> ()
+            | DuTimer(t:TimerStatement) -> ()
+            | DuCounter(c:CounterStatement) ->
+                let ctr = c.Counter
+                let up, down = c.UpCondition, c.DownCondition
+                let ld, rst = c.LoadCondition, c.ResetCondition
+                let cs, typ = ctr.CounterStruct, ctr.Type
+                let name = $"counter: {cs.Name}"
+
+                let isUpCounter, isDownCounter =
+                    match typ with
+                    | CTU -> true, false
+                    | CTD | CTR -> false, true
+                    | CTUD -> true, true
+
+                match typ with
+                | CTUD ->
+                    verifyM $"No up/down condition for {name}" (up.IsSome && down.IsSome)
+                    verifyM $"No ld/rst condition for {name}" (ld.IsSome && rst.IsSome)
+                | CTD ->
+                    verifyM $"No load condition for {name}" (down.IsSome && ld.IsSome)
+                    verifyM $"Invalid up/reset condition for {name}" (up.IsNone && rst.IsNone)
+                | CTR ->
+                    verifyM $"No load condition for {name}" (down.IsSome && rst.IsSome)
+                    verifyM $"Invalid up/reset condition for {name}" (up.IsNone && ld.IsNone)
+                | CTU ->
+                    verifyM $"No up/reset condition for {name}" (up.IsSome && rst.IsSome)
+                    verifyM $"Invalid down/load condition for {name}" (down.IsNone && ld.IsNone)
+
+                if isUpCounter then
+                    verifyM $"No reset condition for {name}" rst.IsSome
+
+                verifyM $"No up/down condition for {name}" (up.IsSome || down.IsSome)
+                verifyM $"No up condition for {name}" (isDownCounter || up.IsSome)
+                verifyM $"No down condition for {name}" (isUpCounter || down.IsSome)
+                verifyM $"No down condition for {name}" (typ <> CTUD || (up.IsSome && down.IsSome))
+
+
+                match rst, ld with
+                | Some _, Some _ when ctr.Type <> CTUD  -> failwith $"Both reset and load condition specified for {name}."
+                | None, None -> failwith $"No reset/load condition specified for {name}."
+                | _ -> ()
+
+
+                match typ with
+                | CTU ->
+                    verifyM "CTU condition error" (up.IsSome && down.IsNone)
+                | CTD ->
+                    verifyM "CTD condition error" (up.IsNone && down.IsSome)
+                | CTUD ->
+                    verifyM "CTUD condition error" (up.IsSome && down.IsSome)
+                | CTR ->
+                    verifyM "CTR condition error" (up.IsNone && down.IsSome)
+
+            | DuAction(a:ActionStatement) -> ()
+            | DuAugmentedPLCFunction(fbParam) -> ()
+
+            ()
+
+
+    type XgxPOUParams with
+        member x.SanityCheck(prjParam: XgxProjectParams) =
+            for CommentedStatement(_comment, stmt) in x.CommentedStatements do
+                stmt.SanityCheck prjParam

@@ -95,7 +95,7 @@ module ExpressionModule =
             failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 
     /// Tag<'T> or Variable<'T> 로부터 Expression<'T> 생성
-    let var2expr (t: TypedValueStorage<'T>):Expression<'T> = DuTerminal (DuVariable t)
+    let var2expr (t: TypedValueStorage<'T>): Expression<'T> = DuTerminal (DuVariable t)
 
     [<RequireQualifiedAccess>]
     module Expression =

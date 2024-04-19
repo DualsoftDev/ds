@@ -324,7 +324,7 @@ module internal rec Command =
 
             let outputCellXmls =
                 [ for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
-                      createFBParameterXml (fsx + 1, y + yoffset) terminal.StorageName ]
+                      rxiFBParameter (fsx + 1, y + yoffset) terminal.StorageName ]
 
             /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
             let tentacleXmls =
@@ -354,7 +354,7 @@ module internal rec Command =
                               let yi = y + portOffset
                               tracefn $"V: ({bexi - 1}, {bey}) -> [({bexi - 1}, {yi})]"
                               // 'S' shape 의 세로선 그리기
-                              yield! vlineUpTo (bexi - 1, bey) yi
+                              yield! rxisVLineUpTo (bexi - 1, bey) yi
 
                               // 'S' shape 의 상단부 수평선 그리기
                               yield!
@@ -381,7 +381,7 @@ module internal rec Command =
                               | _ -> failwithlog "ERROR"
                           | _ -> failwithlog "ERROR"
 
-                      createFBParameterXml (x + fsx - 1, ry) literal
+                      rxiFBParameter (x + fsx - 1, ry) literal
 
                   yield! inputBlockXmls |> bind (fun (_, bx) -> bx.XmlElements)
                   yield! outputCellXmls
@@ -389,7 +389,7 @@ module internal rec Command =
                   let x, y = rungStartX, rungStartY
 
                   //Command 결과출력
-                  createFunctionXmlAt (functionName, functionName) instanceName (x + fsx, y) ]
+                  rxiFunctionAt (functionName, functionName) instanceName (x + fsx, y) ]
 
 
             { X = x
@@ -530,7 +530,7 @@ module internal rec Command =
             ] |> joinLines
         wrapWithRung inner
 
-    let drawXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : RungXmlInfo =
+    let rxiXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : RungXmlInfo =
         assert (x = 0)
         let conditionBlockXml = drawFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
         let cbx = conditionBlockXml
@@ -667,13 +667,13 @@ module internal rec Command =
                             blockedExprXmls
                             |> List.take(blockedExprXmls.Length - 1)
                             |> List.sumBy(fun e -> e.TotalSpanY)
-                        yield! vlineDownN (x - 1, y) dy
+                        yield! rxisVLineDownN (x - 1, y) dy
 
                     // ```OR variable length 역삼각형 test```
                     let lowestY =
                         blockedExprXmls.Where(fun sri -> sri.TotalSpanX <= spanX).Max(fun sri -> sri.Y)
                     // 우측 vertical lines
-                    yield! vlineDownN (x + spanX - 1, y) (lowestY - y) ]
+                    yield! rxisVLineDownN (x + spanX - 1, y) (lowestY - y) ]
 
             let xmls = xmls |> List.distinct // dirty hacking!
 
@@ -704,8 +704,8 @@ module internal rec Command =
     /// - expr 이 None 이면 그리지 않는다.
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rung (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
-        let rungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
+    let rxiRung (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
+        let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
                 | Some expr ->
@@ -735,11 +735,7 @@ module internal rec Command =
                 | None ->
                     0, 0, { X = x; Y = y; TotalSpanX = 0; TotalSpanY = 0; XmlElements = [] }
 
-            let xml =
-                exprXmls @ cmdXmls.XmlElements
-                |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
-                |> Seq.map (fun ri -> ri.Xml) //snd
-                |> String.concat "\r\n"
+            let xml = (exprXmls @ cmdXmls.XmlElements).MergeXmls()
 
             let spanX = exprSpanX + cmdSpanX
             let spanY = max exprSpanY cmdSpanY
@@ -752,11 +748,11 @@ module internal rec Command =
             let fbParam =
                 let s, d = source.GetTerminalString(prjParam), target.Name
                 $"Param={dq}MOV,{s},{d}{dq}"
-            drawXgkFB prjParam (x, y) condition (fbParam, 3)
+            rxiXgkFB prjParam (x, y) condition (fbParam, 3)
         | _ ->
             match prjParam.TargetType, expr, cmdExp with
             | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
-                rungImpl (x, y) expr cmdExp
+                rxiRungImpl (x, y) expr cmdExp
             | XGK, _, Some (FunctionBlockCmd(fbc)) ->
                 match fbc with
                 | CounterMode(counterStatement) when counterStatement.Counter.Type = CTUD ->
@@ -799,6 +795,6 @@ module internal rec Command =
                             counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression
                         | TimerMode(timerStatement) ->
                             timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
-                    rungImpl (x, y) (Some exp) cmdExp
+                    rxiRungImpl (x, y) (Some exp) cmdExp
             | _ ->
                 failwithlog "ERROR"

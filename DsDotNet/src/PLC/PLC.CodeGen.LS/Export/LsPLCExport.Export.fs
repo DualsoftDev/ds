@@ -53,7 +53,7 @@ module XgiExportModule =
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
         let xmlRung (expr: FlatExpression option) xgiCommand y : RungGenerationInfo =
-            let { Coordinate = c; Xml = xml } = rung prjParam (0, y) expr xgiCommand
+            let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
 
             { Xmls = [ wrapWithRung xml ]

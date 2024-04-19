@@ -699,9 +699,10 @@ module XgxExpressionConvertorModule =
                         replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with DownCondition = Some ldVarExp }))
                     | _ -> ()
 
+                    (* XGK CTUD 에서 load : 별도의 statement 롭 분리: ldcondition --- MOV PV C0001  *)
                     match newCtr.LoadCondition with
-                    | Some cond when cond.Terminal.IsNone ->
-                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with LoadCondition = Some ldVarExp }))
+                    | Some cond ->
+                        DuAction(DuCopy(cond, literal2expr(ctr.Counter.PRE.Value), ctr.Counter.CounterStruct)) |> statements.Add
                     | _ -> ()
 
                 statements.ToFSharpList()

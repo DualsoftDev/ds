@@ -152,10 +152,10 @@ module POUParametersModule =
                     verifyM $"No up/reset condition for {name}" (up.IsSome && rst.IsSome)
                     verifyM $"Invalid down/load condition for {name}" (down.IsNone && ld.IsNone)
 
-                (* TODO : XGK CTUD 에서 load 지원하는지 확인 필요 *)
-                match target, typ, ld with
-                | XGK, CTUD, Some ld -> failwith $"Load condition is not supported in XGK CTUD : {ld.ToText(false)}"
-                | _ -> ()
+                //(* TODO : XGK CTUD 에서 load : 별도의 statement 롭 분리: ldcondition --- MOV PV C0001 *)
+                //match target, typ, ld with
+                //| XGK, CTUD, Some ld -> failwith $"Load condition is not supported in XGK CTUD : {ld.ToText(false)}"
+                //| _ -> ()
 
                 if isUpCounter then
                     verifyM $"No reset condition for {name}" rst.IsSome

@@ -8,6 +8,7 @@ open Engine.Core
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Config.POU.Program.LDRoutine
+open Command
 
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
@@ -43,6 +44,11 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 
 [<AutoOpen>]
 module XgiExportModule =
+    type ITerminal with
+        member x.ToTextWithoutTypeSuffix() =
+            match x.Literal with
+            | Some( :? ILiteralHolder as lh) -> lh.ToTextWithoutTypeSuffix()
+            | _ -> failwith "ERROR"
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
@@ -98,25 +104,32 @@ module XgiExportModule =
                       Y = rgiSub.Y }
 
         /// XGK 용 MOV : MOV,S,D
-        let moveRung (source: ITerminal) (destination: IStorage) : unit =
+        let moveCmdRungXgk (condition:IExpression) (source: ITerminal) (destination: IStorage) : unit =
             // test case : XGK "Add 10 items test"
             if prjParam.TargetType <> XGK then
                 failwithlog "Something wrong!"
 
+            let x, y = 0, rgi.Y
+
+            let flatCondition = condition.Flatten() :?> FlatExpression
+            let condBlockXml = flatCondition.DrawLadderBlock(prjParam, (x, y))
+            //contactAt "_ON" (x, y)
+
+            let hline = hlineTo (x + 1, y) (coilCellX - 3)
+
+            let moveXml =
+                let param = $"Param={dq}MOV,{source.ToTextWithoutTypeSuffix()},{destination.Name}{dq}"
+                xgkFBAt param (coilCellX - 3, y)
+
             let xmls =
                 [
-                    let x, y = 0, rgi.Y
-
-                    contactAt "_ON" (x, y)
-
-                    hlineTo (x + 1, y) (coilCellX - 3)
-
-                    let param = $"Param={dq}MOV,{source.GetContact()},{destination.Name}{dq}"
-                    xgkFBAt param (coilCellX - 3, y)
+                    condBlockXml.GetXml()
+                    hline
+                    moveXml
                 ] |> joinLines |> wrapWithRung
             rgi <-
                 {   Xmls = xmls::rgi.Xmls
-                    Y = rgi.Y + 1 }
+                    Y = rgi.Y + condBlockXml.TotalSpanY }
 
 
         // Rung 별로 생성
@@ -133,7 +146,7 @@ module XgiExportModule =
                 match stmt with
                 | DuAssign(expr, target) when expr.DataType <> typeof<bool> ->
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
-                    moveRung expr.Terminal.Value target
+                    moveCmdRungXgk Expression.True expr.Terminal.Value target
 
                 | DuAssign(expr, target) ->
                     simpleRung expr target
@@ -203,6 +216,8 @@ module XgiExportModule =
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           Y = 1 + rgiSub.Y }
+                | DuAction(DuCopy(condition, source, target)) when prjParam.TargetType = XGK ->
+                    moveCmdRungXgk condition source.Terminal.Value target
                 | _ -> failwithlog "Not yet"
 
         let rungEnd = generateEndXml (rgi.Y + 1)

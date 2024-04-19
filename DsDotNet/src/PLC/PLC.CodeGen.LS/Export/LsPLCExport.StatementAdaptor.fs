@@ -578,8 +578,14 @@ module XgxExpressionConvertorModule =
         interface INamedExpressionizableTerminal with
             member x.StorageName = tc.Name
 
+    type IExpression with
+        /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
+        member x.ToAssignStatementAndAuotVariable (prjParam: XgxProjectParams) : (Statement * IXgxVar) =
+            if x.Terminal.IsSome then
+                failwith "Terminal expression cannot be converted to statement"
 
-
+            let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText(false)}"
+            DuAssign(x, var), var
 
     /// Statement 확장
     let private statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
@@ -663,17 +669,39 @@ module XgxExpressionConvertorModule =
                 match typ with
                 | CTD -> DuAssign(ctr.LoadCondition.Value, resetCoil) |> statements.Add
                 | (CTR|CTU|CTUD) -> DuAssign(ctr.ResetCondition.Value, resetCoil) |> statements.Add
-                let mutable newStatements = statement
+
                 if typ = CTUD then
-                    match ctr.LoadCondition with
-                    | Some ld when ld.Terminal.IsNone ->
-                        let ldVar = createTypedXgxAutoVariable prjParam "ld" false "LD condition"
-                        DuAssign(ld, ldVar) |> statements.Add
+                    let mutable newStatement = statement
+                    let mutable newCtr = ctr
+
+                    // newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
+                    let replaceComplexCondition (ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
+                        let assignStatement, ldVar = cond.ToAssignStatementAndAuotVariable prjParam
+                        statements.Add assignStatement
+                        newLocalStorages.Add ldVar
 
                         let ldVarExp = ldVar.ToExpression() :?> IExpression<bool>
-                        newStatements <- DuCounter({ ctr with LoadCondition = Some ldVarExp })
-                        statements[0] <- newStatements
-                        ()
+                        newStatement <- newStatementGenerator(ldVarExp)
+                        match newStatement with
+                        | DuCounter ctr -> newCtr <- ctr
+                        | _ -> failwithlog "ERROR"
+
+                        statements[0] <- newStatement
+
+
+                    match newCtr.UpCondition with
+                    | Some cond when cond.Terminal.IsNone ->
+                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with UpCondition = Some ldVarExp }))
+                    | _ -> ()
+
+                    match newCtr.DownCondition with
+                    | Some cond when cond.Terminal.IsNone ->
+                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with DownCondition = Some ldVarExp }))
+                    | _ -> ()
+
+                    match newCtr.LoadCondition with
+                    | Some cond when cond.Terminal.IsNone ->
+                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with LoadCondition = Some ldVarExp }))
                     | _ -> ()
 
                 statements.ToFSharpList()

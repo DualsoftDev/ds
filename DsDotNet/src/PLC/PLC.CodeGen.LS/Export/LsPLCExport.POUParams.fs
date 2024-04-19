@@ -91,7 +91,7 @@ module POUParametersModule =
             ProjectName = projectName; TargetType = targetType;
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
             TimerCounterGenerator   = counterGeneratorWithExclusionList 0 []
-            CounterCounterGenerator = counterGeneratorWithExclusionList  0 []
+            CounterCounterGenerator = counterGeneratorWithExclusionList 0 []
             AutoVariableCounter     = counterGenerator 1
             RungCounter             = counterGenerator 0
         }
@@ -130,6 +130,11 @@ module POUParametersModule =
                 | CTU ->
                     verifyM $"No up/reset condition for {name}" (up.IsSome && rst.IsSome)
                     verifyM $"Invalid down/load condition for {name}" (down.IsNone && ld.IsNone)
+
+                (* TODO : XGK CTUD 에서 load 지원하는지 확인 필요 *)
+                match target, typ, ld with
+                | XGK, CTUD, Some ld -> failwith $"Load condition is not supported in XGK CTUD : {ld.ToText(false)}"
+                | _ -> ()
 
                 if isUpCounter then
                     verifyM $"No reset condition for {name}" rst.IsSome

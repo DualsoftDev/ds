@@ -122,26 +122,10 @@ module internal ToDsTextModule =
         let tab = getTab indent
         let tab2 = getTab 2
         let tab3 = getTab 3
-        let tab4 = getTab 4
-        let printFuncions (targetName:string) (funcs:Func seq) =
-            if funcs.length() > 1
-            then failwithf $"not support Multi Function : {targetName} {funcs.length()}"
-            [
-                $"{tab3}{targetName}.func = {lb}"
-                for func in funcs do
-                    let funcDefs =
-                        [
-                            $"{tab4}${func.Name}";
-                            String.concat "" [
-                                for param in func.Parameters do
-                                    $" {param}";
-                                ";";
-                            ];
-                        ]
-                    String.concat "" funcDefs
-                $"{tab3}{rb}";
-            ]
-        let addressPrint (addr:string) = if isNullOrEmpty  addr then "_" else addr
+        
+            
+
+        let addressPrint (addr:string) = if isNullOrEmpty  addr then TextAddrEmpty else addr
         [
             yield $"[sys] {system.Name.QuoteOnDemand()} = {lb}"
 
@@ -156,11 +140,13 @@ module internal ToDsTextModule =
                         let ais = c.DeviceDefs.Select(printDev).JoinWith("; ") + ";"
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
 
-                    if c.Func.IsSome then
-                        for funcString in printFuncions (c.Name.QuoteOnDemand()) [c.Func.Value] do
-                            yield funcString
                 yield $"{tab}{rb}"
 
+            if system.Functions.Any() then
+                yield $"{tab}[functions] = {lb}"
+                for func in system.Functions do
+                    yield $"{tab2}{func.Name} = {func.ToDsText()};"
+                yield $"{tab}{rb}"
 
             if system.ApiItems.Any() then
                 yield $"{tab}[interfaces] = {lb}"
@@ -209,9 +195,7 @@ module internal ToDsTextModule =
                             let inAddr =  addressPrint  hw.InAddress  
                             let outAddr = addressPrint  hw.OutAddress 
                             yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
-                            if hw.Func.IsSome then
-                                for funcString in printFuncions hw.Name [hw.Func.Value] do
-                                    yield funcString
+                          
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 

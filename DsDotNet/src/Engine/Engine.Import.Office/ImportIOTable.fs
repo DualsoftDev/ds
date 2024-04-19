@@ -66,18 +66,30 @@ module ImportIOTable =
         try
             
             let getFunction (name, funcText, tableIO: Data.DataTable, isJob: bool, page) =
-                let funcs = HashSet<Func>()
-                if not <| ((trimSpace funcText) = "" || funcText = TextSkip || funcText = TextFuncNotUsed) then
-                    let funTexts = getFunctions (funcText)
-                    if funTexts.length() > 1 then 
+                if ((trimSpace funcText) = "" || funcText = TextSkip || funcText = TextFuncNotUsed)
+                then
+                    None
+                else 
+                    if funcText.Contains(';') then 
                         Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{name}", page, 0u)
 
-                    funTexts |> Seq.iter (fun (funName, parms) ->
-                        if (not <| isJob) && funName <> "n" then
-                            Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funName}", page, 0u)
-
-                        funcs.Add(Func(funName, parms)) |> ignore)
-                if funcs.any() then Some (funcs.Head()) else None
+                    let funcType, parms = getFunction (funcText)
+                    if (not <| isJob) && funcType <> "n" then
+                        Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcType}", page, 0u)
+                        
+                    let paras =
+                        if parms.any()
+                        then 
+                            String.concat "" [
+                                        for param in parms do
+                                            $"_{param}";
+                                    ]
+                        else ""
+                    let funcName = $"{funcType.ToLower()}{paras}" 
+                    if sys.Functions.Where(fun f->f.Name = funcName).isEmpty() then
+                        Some (Func(funcName, funcType , parms))
+                    else 
+                        None
 
             let dicDev =
                 sys.Jobs
@@ -110,14 +122,9 @@ module ImportIOTable =
                 let job = dicJob[devName]
             
                 let func = $"{row.[(int) IOColumn.Func]}"
-                let func = getFunction (job.Name, func, tableIO, true, page)
-                if func.IsSome
-                then 
-                    if job.Func.IsSome 
-                    then
-                        Office.ErrorPPT(ErrorCase.Group, ErrID._1009, $"{devName}", page, 0u)
-                    else 
-                        job.Func <- func
+                match getFunction (job.Name, func, tableIO, true, page) with
+                |Some f ->  sys.Functions.Add f 
+                |_->()
                         
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
@@ -137,7 +144,11 @@ module ImportIOTable =
                     btn.InAddress  <-inaddr.Trim() 
                     btn.OutAddress <-outaddr.Trim() 
 
-                    btn.Func <- getFunction (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page)
+                    match getFunction (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page) with
+                    |Some f ->  sys.Functions.Add f 
+                    |_->()
+
+
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
 
 
@@ -155,7 +166,10 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
                     lamp.InAddress  <-inaddr.Trim() 
                     lamp.OutAddress <-outaddr.Trim() 
-                    lamp.Func <- getFunction (lamp.Name, func,  tableIO, false, page)
+                    match getFunction (lamp.Name, func,  tableIO, false, page) with
+                    |Some f ->  sys.Functions.Add f 
+                    |_->()
+
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
@@ -170,7 +184,11 @@ module ImportIOTable =
                     //ValidBtnAddress
                     let inaddr =  getValidCondiAddress (cond) Util.runtimeTarget
                     cond.InAddress  <-inaddr.Trim() 
-                    cond.Func <- getFunction (cond.Name, func, tableIO, false, page)
+
+                    match getFunction (cond.Name, func, tableIO, false, page) with
+                    |Some f ->  sys.Functions.Add f 
+                    |_->()
+
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 
             dts

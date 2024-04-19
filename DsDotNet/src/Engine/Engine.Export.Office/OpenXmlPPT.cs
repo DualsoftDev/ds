@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -98,7 +98,6 @@ namespace Engine.Export.Office
 
             foreach (var fv in flow.Graph.Vertices)
             {
-                continue;
                 // 각 Vertex마다 높이를 조정하여 겹치지 않도록 함
                 Shape fShape = ShapeManager.AddSlideShape(slide, GetName(fv), GetShapeType(fv), xPos, yPos);
 

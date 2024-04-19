@@ -40,7 +40,7 @@ module ListnerCommonFunctionGenerator =
                               .Select(fun argCtx -> argCtx.GetText())
                               .ToArray()
 
-                      return new Func(funcName.GetText(), parameters)
+                      return new Func(funcName.GetText(), funcName.GetText(), parameters)
                   }
                   |> Option.get ]
         else
@@ -217,6 +217,33 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let pureCode = code.Substring(3, code.Length - 6) // 처음과 끝의 "<@{" 와 "}@>" 제외
         let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
         x.TheSystem.Statements.AddRange statements
+
+    override x.EnterFunctionsBlock(ctx: FunctionsBlockContext) =
+        // FunctionsBlockContext에서 모든 FunctionDefContext를 추출
+        let functionDefs = ctx.functionDef()
+
+        functionDefs |> Seq.iter (fun fDef ->
+            // 함수 이름 추출
+            let funcName = fDef.functionName().GetText()
+
+            // 함수 호출과 관련된 매개변수 추출
+            let funcCall = fDef.functionCall()
+            let functionType = funcCall.functionType().GetText()
+            let args = 
+                let argsCtxs = fDef.Descendants<ArgumentContext>()
+                if argsCtxs.any() then   
+                    argsCtxs
+                    |> Seq.map (fun a -> a.GetText()) 
+                    |> Seq.toArray
+                else
+                    [||] // 매개변수가 없는 경우 빈 배열
+
+            // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
+            let newFunc = Func(funcName, functionType, args)
+            x.TheSystem.Functions.Add(newFunc)
+        )
+      
+
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등
     member x.GetContextInformation(parserRuleContext: ParserRuleContext) = // collectUpwardContextInformation
@@ -470,6 +497,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             }
             |> ignore
 
+
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
             let callListings = ctx.Descendants<CallListingContext>().ToArray()
             let jobFuncs = commonFunctionExtractor ctx
@@ -478,6 +506,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let getRawJobName = callList.TryFindFirstChild<EtcName1Context>().Value
                 let jobName = getRawJobName.GetText().DeQuoteOnDemand()
                 let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
+                let funcCallCtxs = callList.Descendants<FuncCallContext>().ToArray()
+                for funcCallCtx in funcCallCtxs do
+                    let funcCallName = funcCallCtx.funcCallName().GetText()
+                    Console.Write funcCallName  //test ahn
 
                 let getAddress (addressCtx: IParseTree) =
                     addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
@@ -525,6 +557,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     let errText = String.Join(", ", apiPath.ToArray())
                                     failwithlog $"loading type error ({errText})device"
                           ]
+
 
                 let funcSet = commonFunctionSetter jobName jobFuncs
                 let func = if funcSet.any() then Some (funcSet.First()) else None 

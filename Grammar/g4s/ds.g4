@@ -65,6 +65,7 @@ DWORDTYPE: 'dword';
 INTTYPE: 'int';
 FLOATTYPE: 'float';
 FUNC: 'func';
+FUNCTIONS : 'functions';
 
 
 WS: [ \t\r\n]+ -> skip;
@@ -108,6 +109,7 @@ TAG_ADDRESS: ValidTagStart ValidTagChar*;
         ('0' .. '9')(('0' .. '9'))* DOT | ('0' .. '9')
       ;
 
+
 SQUOTE: '\'';
 DQUOTE: '"';
 LBRACKET: '[';
@@ -117,7 +119,7 @@ RBRACE: '}';
 LPARENTHESIS: '(';
 RPARENTHESIS: ')';
 EQ: '=';
-SEIMCOLON: ';';
+SEMICOLON: ';';
 DOT: '.';
 TILDE: '~';
 COMMA: ',';
@@ -184,7 +186,7 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
     flowPath: identifier2;
 
-addressInOut: LPARENTHESIS inAddr COMMA outAddr RPARENTHESIS (SEIMCOLON)?;
+addressInOut: LPARENTHESIS inAddr COMMA outAddr RPARENTHESIS (SEMICOLON)?;
 inAddr: addressItem;
 outAddr: addressItem;
 addressItem: tagAddress | funAddress | '-';
@@ -196,16 +198,16 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (  flowBlock | jobBlock | loadDeviceBlock | loadExternalSystemBlock
+        : LBRACE (  flowBlock | jobBlock | functionsBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
                     | codeBlock | variableBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
-          (SEIMCOLON)?;
+          (SEMICOLON)?;
     systemName:identifier1;
 
 
 //[device file="c:\my.ds"] A, B, C;
-loadDeviceBlock: '[' 'device' fileSpec ']' deviceNameList SEIMCOLON;
+loadDeviceBlock: '[' 'device' fileSpec ']' deviceNameList SEMICOLON;
     deviceNameList: deviceName (COMMA deviceName)*;
     deviceName:identifier1;
     fileSpec: 'file' '=' filePath;
@@ -213,7 +215,7 @@ loadDeviceBlock: '[' 'device' fileSpec ']' deviceNameList SEIMCOLON;
         filePath: etcName1;
 
 //[external file="c:\my.ds"] B;
-loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEIMCOLON;
+loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEMICOLON;
     externalSystemName:identifier1;
 
 
@@ -231,34 +233,34 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disabl
         safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
             // Real|Call = { ((Real|Call);)* }
             safetyKey: identifier23;
-            safetyValues: identifier23 (SEIMCOLON identifier23)* (SEIMCOLON)?;
+            safetyValues: identifier23 (SEMICOLON identifier23)* (SEMICOLON)?;
 
     layoutBlock: '[' 'layouts' fileSpec? ']' '=' LBRACE (positionDef)* RBRACE;
         positionDef: deviceOrApiName '=' xywh;
             deviceOrApiName: identifier12;
-            xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
+            xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEMICOLON)?;
             x: INTEGER;
             y: INTEGER;
             w: INTEGER;
             h: INTEGER;
     finishBlock: '[' 'finish' ']' '=' LBRACE (finishListing)* RBRACE;
         finishTarget: identifier2;
-        finishListing: finishTarget (SEIMCOLON finishTarget)* (SEIMCOLON)?;
+        finishListing: finishTarget (SEMICOLON finishTarget)* (SEMICOLON)?;
     disableBlock: '[' 'disable' ']' '=' LBRACE (disableListing)* RBRACE;
         disableTarget: identifier23;
-        disableListing: disableTarget (SEIMCOLON disableTarget)* (SEIMCOLON)?;
+        disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
         causal | parentingBlock | identifier1Listing | identifier1sListing 
         | aliasBlock
         // | safetyBlock
-        )* RBRACE  (SEIMCOLON)?   // |flowTask|callDef
+        )* RBRACE  (SEMICOLON)?   // |flowTask|callDef
     ;
     parentingBlock: identifier1 EQ LBRACE (identifier1sListing | causal)* RBRACE;
 
-    identifier1Listing: identifier1  SEIMCOLON;     // A;
-    identifier1sListing: (identifier1 (COMMA identifier1)*)?  SEIMCOLON;     // A, B, C;
+    identifier1Listing: identifier1  SEMICOLON;     // A;
+    identifier1sListing: (identifier1 (COMMA identifier1)*)?  SEMICOLON;     // A, B, C;
         
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
@@ -280,19 +282,34 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     floatValue:FLOAT;
     varType: IDENTIFIER1;
 
-jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing|funcSet)* RBRACE;
+
+FUNCTIONS_KEY: '[functions]';
+functionsBlock: FUNCTIONS_KEY EQ LBRACE functionDef+ RBRACE;
+    functionDef: functionName EQ functionCall SEMICOLON;
+    functionName: identifier1;
+    functionCall:  '$' functionType (argument (argument)*)?;
+    functionType: identifier1;
+
+jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     callListing:
-        jobName '=' LBRACE (callApiDef)? ( ';' callApiDef)* (';')+ RBRACE (SEIMCOLON)?;
+        jobName '=' LBRACE (callApiDef|funcCall)? ( ';' callApiDef|funcCall)* (';')+ RBRACE (SEMICOLON)?;
     linkListing:
-        jobName '=' interfaceLink SEIMCOLON;
+        jobName '=' interfaceLink SEMICOLON;
     jobName: etcName1;
     callApiDef: (interfaceCall addressInOut|interfaceCall);
+    funcCall: '$'funcCallName;
+    funcCallName: identifier1;
+
     interfaceCall: identifier12;
     interfaceLink: identifier12;
 
-    funcSet: identifier12 '=' LBRACE (() | funcDef (SEIMCOLON funcDef)* (SEIMCOLON)?) RBRACE;
-    funcDef:  '$' funcName (argument (argument)*)?;
-    funcName: identifier1;
+
+
+
+
+funcSet: identifier12 '=' LBRACE (() | funcDef (SEMICOLON funcDef)* (SEMICOLON)?) RBRACE;
+funcDef:  '$' funcName (argument (argument)*)?;
+funcName: '$'identifier1;
 
 codeBlock: CODE_BLOCK;
 
@@ -305,7 +322,7 @@ interfaceBlock
     interfaceName: identifier1;
     serPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
         callComponents: identifier123CNF*;
-    //callDefs: (callDef SEIMCOLON)+ ;
+    //callDefs: (callDef SEMICOLON)+ ;
     linkPhrase: identifier12;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
@@ -324,7 +341,7 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmg
     
     categoryBlock: LBRACE (() | (hwSysItemDef|funcSet)*) RBRACE;
 
-    hwSysItemDef: hwSysItemNameAddr EQ LBRACE (() | flowName (SEIMCOLON flowName)* (SEIMCOLON)?) RBRACE;
+    hwSysItemDef: hwSysItemNameAddr EQ LBRACE (() | flowName (SEMICOLON flowName)* (SEMICOLON)?) RBRACE;
     hwSysItemNameAddr: hwSysItemName addressInOut;
     hwSysItemName: identifier12;
 
@@ -335,7 +352,7 @@ lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 conditionBlock: '[' 'conditions' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 
 // B.F1 > Set1F <| T.A21;
-causal: causalPhrase SEIMCOLON;
+causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF:  causalToken (',' causalToken)* ;
     causalToken: identifier12;
@@ -370,5 +387,5 @@ causal: causalPhrase SEIMCOLON;
         | C_IN | C | M_IN | M | S_IN | S
         | T_IN | T | H_IN | H | R_IN | R
         | WORDTYPE | DWORDTYPE | INTTYPE | FLOATTYPE
-        | FUNC
+        | FUNC | FUNCTIONS
         ;

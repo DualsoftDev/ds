@@ -120,6 +120,8 @@ module CoreModule =
       
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
+        member val Functions = ResizeArray<Func>()
+
         member val Flows = createNamedHashSet<Flow>()
         member val OriginalCodeBlocks = ResizeArray<string>()
         member val Statements = StatementContainer()
@@ -253,6 +255,8 @@ module CoreModule =
     and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
         inherit Indirect(name, parent)
         member _.TargetWrapper = target
+
+
 
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (name:string, tasks:TaskDev seq, func: Func option) =

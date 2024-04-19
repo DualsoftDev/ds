@@ -1,6 +1,7 @@
 namespace Engine.Core
 
 open System
+open System.Linq
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
 open Dual.Common.Core.FS
@@ -41,25 +42,39 @@ module CodeElements =
             else
                 genTargetText name varType initValue
 
-    let getFunctions (text:string) =
+    let getFunction (text:string) = 
         let text = text.Trim()
         if not <| text.StartsWith "$"
         then failwithlog "function text start keyword is '$' ex)$m 100 R100"
-        text.Split('$')
-        |> Seq.tail
-        |> Seq.map(fun line ->
-            let line = line.Split(';')[0]  //줄바꿈 제거
-            //function Name
-            line.Substring(0,1).ToLower()
-            //function Parameters
-            , (line.Substring(1,line.Length-1).Trim().Split(' ') |> Seq.toArray )
-            )
+        let line = text.TrimStart('$')
+        //function Name
+        let name = line.Substring(0,1).ToLower()
+        //function Parameters
+        let parameters = line.Substring(1,line.Length-1).Split(' ').Select(fun f->f.Trim())
+                          |> Seq.filter(fun f->f<>"")
+                          |> Seq.toArray
+        name, parameters
+
+    //let getFunctions (text:string) =
+    //    let text = text.Trim()
+    //    if not <| text.StartsWith "$"
+    //    then failwithlog "function text start keyword is '$' ex)$m 100 R100"
+    //    text.Split('$')
+    //    |> Seq.tail
+    //    |> Seq.map(fun line ->
+    //        let line = line.Split(';')[0]  //줄바꿈 제거
+    //        //function Name
+    //        line.Substring(0,1).ToLower()
+    //        //function Parameters
+    //        , (line.Substring(1,line.Length-1).Trim().Split(' ') |> Seq.toArray )
+    //        )
 
     type Parameters = string[]
-    type Func(name:string, parameters:Parameters) =
-        member x.Name = name.ToLower() //명령어 이름은 소문자로만 허용
+    type Func(name:string, typeName:string, parameters:Parameters) =
+        member x.Name = name
+        member x.TypeName = typeName.ToLower() //명령어 TypeName 은 소문자로만 허용
         member x.Parameters = parameters
-        member x.ToDsText() =  $"""${x.Name} {String.Join(" ", parameters)}"""
+        member x.ToDsText() =  $"""${x.TypeName} {String.Join(" ", parameters)}""".Trim()
 
     //type AdditionalFunc(name:string, parameters:Parameters) =
     //    inherit Func(name, parameters)

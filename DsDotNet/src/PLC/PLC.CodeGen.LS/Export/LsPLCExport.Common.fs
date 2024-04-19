@@ -59,7 +59,7 @@ module internal Common =
     /// coord(x, y) 에서 y 좌표 반환
     let yOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> snd
 
-    let rungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
+    let bxiRungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
         let xs = rungXmlInfos
         let xys = xs |> List.map (fun e -> xyOfCoord e.Coordinate |> fst)
         let minX = xys |> List.map fst |> List.min

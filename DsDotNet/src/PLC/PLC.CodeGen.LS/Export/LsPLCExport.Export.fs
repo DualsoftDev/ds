@@ -48,7 +48,7 @@ module XgiExportModule =
         member x.ToTextWithoutTypeSuffix() =
             match x.Literal with
             | Some( :? ILiteralHolder as lh) -> lh.ToTextWithoutTypeSuffix()
-            | _ -> failwith "ERROR"
+            | _ -> x.GetContact()
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
@@ -57,14 +57,14 @@ module XgiExportModule =
             let yy = c / 1024
 
             { Xmls = [ wrapWithRung xml ]
-              Y = yy }
+              NextRungY = yy }
 
-        let mutable rgi: RungGenerationInfo = { Xmls = []; Y = 0 }
+        let mutable rgi: RungGenerationInfo = { Xmls = []; NextRungY = 0 }
 
         // Prolog 설명문
         if prologComment.NonNullAny() then
-            let xml = getCommentRungXml rgi.Y prologComment
-            rgi <- rgi.Add(xml)
+            let xml = getCommentRungXml rgi.NextRungY prologComment
+            rgi <- rgi.AddSingleLineXml(xml)
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
@@ -73,7 +73,7 @@ module XgiExportModule =
                 let op = operatorToXgkFunctionName funName |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
-                    let xy = (0, rgi.Y)
+                    let xy = (0, rgi.NextRungY)
                     if funName.IsOneOf("+", "-", "*", "/") then
                         let param = $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
                         drawXgkFBRight xy param
@@ -86,7 +86,7 @@ module XgiExportModule =
 
                 rgi <-
                     {   Xmls = xmls::rgi.Xmls
-                        Y = rgi.Y + 1 }
+                        NextRungY = rgi.NextRungY + 1 }
             | _ ->
 
                 let coil =
@@ -97,11 +97,11 @@ module XgiExportModule =
 
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command = CoilCmd(coil)
-                let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.Y
+                let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.NextRungY
                 //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 rgi <-
                     { Xmls = rgiSub.Xmls @ rgi.Xmls
-                      Y = rgiSub.Y }
+                      NextRungY = rgiSub.NextRungY }
 
         /// XGK 용 MOV : MOV,S,D
         let moveCmdRungXgk (condition:IExpression) (source: ITerminal) (destination: IStorage) : unit =
@@ -109,7 +109,7 @@ module XgiExportModule =
             if prjParam.TargetType <> XGK then
                 failwithlog "Something wrong!"
 
-            let x, y = 0, rgi.Y
+            let x, y = 0, rgi.NextRungY
 
             let flatCondition = condition.Flatten() :?> FlatExpression
             let condBlockXml = flatCondition.DrawLadderBlock(prjParam, (x, y))
@@ -129,7 +129,7 @@ module XgiExportModule =
                 ] |> joinLines |> wrapWithRung
             rgi <-
                 {   Xmls = xmls::rgi.Xmls
-                    Y = rgi.Y + condBlockXml.TotalSpanY }
+                    NextRungY = rgi.NextRungY + condBlockXml.TotalSpanY }
 
 
         // Rung 별로 생성
@@ -139,8 +139,8 @@ module XgiExportModule =
             if cmt.NonNullAny() then
                 let xml =
                     let rungCounter = prjParam.RungCounter()
-                    getCommentRungXml rgi.Y $"[{rungCounter}] {cmt}"
-                rgi <- rgi.Add(xml)
+                    getCommentRungXml rgi.NextRungY $"[{rungCounter}] {cmt}"
+                rgi <- rgi.AddSingleLineXml(xml)
 
             for stmt in stmts do
                 match stmt with
@@ -169,41 +169,41 @@ module XgiExportModule =
                 // <kwak> <timer>
                 | Statement.DuTimer timerStatement ->
                     let command = FunctionBlockCmd(TimerMode(timerStatement))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          Y = 1 + rgiSub.Y }
+                          NextRungY = 1 + rgiSub.NextRungY }
 
                 | Statement.DuCounter counterStatement ->
                     let command = FunctionBlockCmd(CounterMode(counterStatement))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          Y = 1 + rgiSub.Y }
+                          NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuAugmentedPLCFunction({ FunctionName = (">" | ">=" | "<" | "<=" | "=" | "!=") as op
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, output, args))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          Y = 1 + rgiSub.Y }
+                          NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuAugmentedPLCFunction({ FunctionName = ("+" | "-" | "*" | "/") as op
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmatic(fn, output, args))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          Y = 1 + rgiSub.Y }
+                          NextRungY = 1 + rgiSub.NextRungY }
                 | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _func
                                            Arguments = args
                                            Output = output }) ->
@@ -211,17 +211,17 @@ module XgiExportModule =
                     let source = args[1]
                     let target = output :?> IStorage
                     let command = ActionCmd(Move(condition, source, target))
-                    let rgiSub = xmlRung None (Some command) rgi.Y
+                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          Y = 1 + rgiSub.Y }
+                          NextRungY = 1 + rgiSub.NextRungY }
                 | DuAction(DuCopy(condition, source, target)) when prjParam.TargetType = XGK ->
                     moveCmdRungXgk condition source.Terminal.Value target
                 | _ -> failwithlog "Not yet"
 
-        let rungEnd = generateEndXml (rgi.Y + 1)
-        rgi <- rgi.Add(rungEnd)
+        let rungEnd = generateEndXml (rgi.NextRungY + 1)
+        rgi <- rgi.AddSingleLineXml(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
     let internal getGlobalTagSkipSysTag(xs:IStorage seq) = 

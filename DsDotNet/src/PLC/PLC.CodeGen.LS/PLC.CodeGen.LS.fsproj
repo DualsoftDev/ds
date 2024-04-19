@@ -48,6 +48,7 @@
         <None Include="Import\XGConfigReader.fsx" />
         <None Include="Import\XGLDRoutineReader.fsx" />
         <None Include="Import\XGFileRead.fsx" />
+        <Compile Include="Export\LsPLCExport.RungXmlInfo.fs" />
         <Compile Include="Export\LsPLCExport.Common.fs" />
         <Compile Include="Export\LsPLCExport.POUParams.fs" />
         <Compile Include="Export\LsPLCExport.StatementAdaptor.fs" />

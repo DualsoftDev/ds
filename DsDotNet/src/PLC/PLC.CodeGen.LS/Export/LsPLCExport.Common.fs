@@ -74,9 +74,6 @@ module internal Common =
     let xgkFBAt (fbParam:string) (x: int, y: int) =
         let c = coord (x, y)
         elementFull (int ElementType.FBMode) c fbParam ""
-    let rxiXgkFBAt (fbParam:string) (x, y) (fbWidth:int) : RungXmlInfo =
-        let xml = xgkFBAt fbParam (x, y)
-        { Coordinate = coord (x, y); Xml = xml; SpanX = fbWidth; SpanY = 0 }
 
     module Unused =
         /// 조건이 9 이상이면 뒤로 증가
@@ -127,11 +124,6 @@ module internal Common =
             failwithlog $"endX startX [{endX} > {x}]"
 
         tryHlineTo (x, y) endX |> List.exactlyOne
-
-    let rxiHLineTo (x, y) endX : RungXmlInfo =
-        let xml = hlineTo (x, y) endX
-        { Coordinate = coord (x, y); Xml = xml; SpanX = endX - x; SpanY = 0 }
-
 
     /// x y 위치에서 수직선 한개를 긋는다
     let rxiVLineAt (x, y) : RungXmlInfo =

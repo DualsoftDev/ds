@@ -119,8 +119,7 @@ module POUParametersModule =
 
 
     type Statement with
-        member x.SanityCheck(prjParam: XgxProjectParams) =
-            let target = prjParam.TargetType
+        member x.SanityCheck(_prjParam: XgxProjectParams) =
             match x with
             | DuAssign(_expr, _target) -> ()
             | DuVarDecl(_expr, _variable) -> ()
@@ -152,10 +151,11 @@ module POUParametersModule =
                     verifyM $"No up/reset condition for {name}" (up.IsSome && rst.IsSome)
                     verifyM $"Invalid down/load condition for {name}" (down.IsNone && ld.IsNone)
 
-                //(* TODO : XGK CTUD 에서 load : 별도의 statement 롭 분리: ldcondition --- MOV PV C0001 *)
-                //match target, typ, ld with
-                //| XGK, CTUD, Some ld -> failwith $"Load condition is not supported in XGK CTUD : {ld.ToText(false)}"
-                //| _ -> ()
+                (*
+                 * XGK CTUD 에서 load 
+                 * - 별도의 statement 로 분리해서 구현 가능함: ldcondition --- MOV PV C0001
+                 * - statement2statements 에서 이미 새로운 Rung 으로 분리되어 있어야 한다.
+                 *)
 
                 if isUpCounter then
                     verifyM $"No reset condition for {name}" rst.IsSome
@@ -184,8 +184,6 @@ module POUParametersModule =
 
             | DuAction(_a:ActionStatement) -> ()
             | DuAugmentedPLCFunction(_fbParam) -> ()
-
-            ()
 
 
     type XgxPOUParams with

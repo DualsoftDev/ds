@@ -745,10 +745,10 @@ module internal rec Command =
 
         match prjParam.TargetType, cmdExp with
         | XGK, Some (ActionCmd(Move(condition, source, target))) when source.Terminal.IsSome ->
-            let fbParam =
+            let fbParam, fbWidth =
                 let s, d = source.GetTerminalString(prjParam), target.Name
-                $"Param={dq}MOV,{s},{d}{dq}"
-            rxiXgkFB prjParam (x, y) condition (fbParam, 3)
+                $"Param={dq}MOV,{s},{d}{dq}", 3
+            rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
         | _ ->
             match prjParam.TargetType, expr, cmdExp with
             | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone

@@ -9,6 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Config.POU.Program.LDRoutine
 open Command
+open System
 
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
@@ -111,47 +112,12 @@ module XgiExportModule =
 
             let x, y = 0, rgi.NextRungY
 
-            ////xmlRung 활용 필요
-            //let flatCondition = condition.Flatten() :?> FlatExpression
-            //let xxxRgi = rxiRung prjParam (x, y) (Some flatCondition) (Some (ActionCmd(Move(condition, source :?> IExpression, destination))))
-            //()
-
-            let xmlInfos =
-                [
-                    let flatCondition = condition.Flatten() :?> FlatExpression
-                    // condition Xmi
-                    flatCondition.BxiLadderBlock(prjParam, (x, y)) |> DuBlockXmlInfo
-                    // hline
-                    rxiHLineTo (x + 1, y) (coilCellX - 3) |> DuRungXmlInfo
-                    // move cmd
-                    let param = $"Param={dq}MOV,{source.ToTextWithoutTypeSuffix()},{destination.Name}{dq}"
-                    rxiXgkFBAt param (coilCellX - 3, y) 3 |> DuRungXmlInfo
-                ]
-            let xml, spanY = xmlInfos.MergeXmls()
-            let xml = wrapWithRung xml
+            //xmlRung 활용 필요
+            let flatCondition = condition.Flatten() :?> FlatExpression
+            let blockXml = rxiRung prjParam (x, y) (Some flatCondition) (Some (ActionCmd(Move(condition, source :?> IExpression, destination))))
+            let xml = wrapWithRung blockXml.Xml
             rgi <- {   Xmls = xml::rgi.Xmls
-                       NextRungY = rgi.NextRungY + spanY }
-
-
-            //let flatCondition = condition.Flatten() :?> FlatExpression
-            //let condBlockXml = flatCondition.DrawLadderBlock(prjParam, (x, y))
-
-            //let hline = hlineTo (x + 1, y) (coilCellX - 3)
-
-            //let moveXml =
-            //    let param = $"Param={dq}MOV,{source.ToTextWithoutTypeSuffix()},{destination.Name}{dq}"
-            //    xgkFBAt param (coilCellX - 3, y)
-
-            //let xmls =
-            //    [
-            //        condBlockXml.GetXml()
-            //        hline
-            //        moveXml
-            //    ] |> joinLines |> wrapWithRung
-            //rgi <-
-            //    {   Xmls = xmls::rgi.Xmls
-            //        NextRungY = rgi.NextRungY + condBlockXml.TotalSpanY }
-
+                       NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
 
         // Rung 별로 생성
         for CommentAndXgxStatements(cmt, stmts) in commentedStatements do

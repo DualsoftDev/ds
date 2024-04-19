@@ -39,6 +39,20 @@ module ExpressionModule =
         interface ITerminal with
             member x.Variable = match x with | DuVariable variable -> Some variable | _ -> None
             member x.Literal  = match x with | DuLiteral literal   -> Some literal  | _ -> None
+        interface IExpression with
+            member x.DataType = match x with | DuVariable v -> v.GetType() | DuLiteral l -> (l :> IExpression).DataType
+            //member x.EvaluatedValue = 
+            member x.BoxedEvaluatedValue = match x with | DuVariable v -> v.Value | DuLiteral l -> l.Value |> box
+            member x.GetBoxedRawObject() = (x :> IExpression).BoxedEvaluatedValue
+            member x.ToText(_withParenthesis) = match x with | DuVariable v -> v.ToText() | DuLiteral l -> l.Value.ToString()
+            member x.CollectStorages() = match x with | DuVariable v -> [v] | _ -> []
+            member x.Flatten() = fwdFlattenExpression x
+            member x.IsEqual y = match x with | DuVariable v -> v.Value = unbox y.BoxedEvaluatedValue | DuLiteral l -> l.Value = unbox y.BoxedEvaluatedValue
+
+            member x.FunctionName = None
+            member x.FunctionArguments = []
+            member x.WithNewFunctionArguments _args = failwithlog "ERROR"
+            member x.Terminal = Some x
 
     type IFunctionSpec =
         abstract Name: string

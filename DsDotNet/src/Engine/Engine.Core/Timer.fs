@@ -128,7 +128,7 @@ module rec TimerModule =
 
 
     [<AbstractClass>]
-    type TimerCounterBaseStruct (name, dn, pre, acc, res, sys) =
+    type TimerCounterBaseStruct (isTimer:bool option, name, dn, pre, acc, res, sys) =
         let unsupported() = failwithlog "ERROR: not supported"
         let mutable tagChanged = false
         interface IStorage with
@@ -169,7 +169,12 @@ module rec TimerModule =
             if x.ACC |> isItNull |> not then
                 x.ACC.Value <- 0u
         /// XGK 에서 할당한 counter/timer 변수 이름 임시 저장 공간.  e.g "C0001"
-        member val XgkStructVariableName = "" with get, set
+        member x.XgkStructVariableName =
+            match isTimer with
+            | Some true -> sprintf "T%04d" x.XgkStructVariableDevicePos
+            | Some false -> sprintf "C%04d" x.XgkStructVariableDevicePos
+            | _ -> failwith "ERROR"
+
         member val XgkStructVariableDevicePos = -1 with get, set
 
     let addTagsToStorages (storages:Storages) (ts:IStorage seq) =
@@ -187,7 +192,7 @@ module rec TimerModule =
     let createBool name iniValue  = createBoolWithTagKind name iniValue -1
     let xgkTimerCounterContactMarking = "$ON"
     type TimerStruct private(typ:TimerType, name, en, tt, dn, pre, acc, res, sys) =
-        inherit TimerCounterBaseStruct(name, dn, pre, acc, res, sys)
+        inherit TimerCounterBaseStruct(Some true, name, dn, pre, acc, res, sys)
 
         /// Enable
         member _.EN:VariableBase<bool> = en

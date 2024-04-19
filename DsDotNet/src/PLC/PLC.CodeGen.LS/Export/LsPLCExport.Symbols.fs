@@ -189,10 +189,8 @@ module internal XgiSymbolsModule =
                 match prjParam.TargetType with
                 | XGK ->
                     let offset = prjParam.TimerCounterGenerator()
-                    let timerAddress = sprintf "T%04d" offset
-                    timer.XgkStructVariableName <- timerAddress
                     timer.XgkStructVariableDevicePos <- offset
-                    "T", timerAddress, offset
+                    "T", timer.XgkStructVariableName, offset
                 | _ -> "", "", -1   
       
             let plcType = timer.Type.ToString() 
@@ -212,9 +210,8 @@ module internal XgiSymbolsModule =
                 match prjParam.TargetType with
                 | XGK ->
                     let offset = prjParam.CounterCounterGenerator()
-                    let counterAddress = sprintf "C%04d" offset
-                    counter.XgkStructVariableName <- counterAddress
-                    "C", counterAddress, offset
+                    counter.XgkStructVariableDevicePos <- offset
+                    "C", counter.XgkStructVariableName, offset
                 | _ -> "", "", -1 
 
 

@@ -159,7 +159,7 @@ module rec CounterModule =
 
     [<AbstractClass>]
     type CounterBaseStruct(cp:CounterParams, sys) =
-        inherit TimerCounterBaseStruct(cp.Name, cp.DN, cp.PRE, cp.ACC, cp.RES, sys)
+        inherit TimerCounterBaseStruct(Some false, cp.Name, cp.DN, cp.PRE, cp.ACC, cp.RES, sys)
 
         member _.CU:VariableBase<bool> = cp.CU  // Count up enable bit
         member _.CD:VariableBase<bool> = cp.CD  // Count down enable bit

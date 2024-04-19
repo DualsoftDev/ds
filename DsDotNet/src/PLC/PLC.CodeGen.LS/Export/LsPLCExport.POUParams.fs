@@ -44,7 +44,7 @@ module POUParametersModule =
         member x.Range = range
 
     type XgxProjectParamsProperties() =
-        member val XgxTimerResolutionSpec = ResizeArray<XgkTimerResolutionSpec>()
+        member val XgxTimerResolutionSpec:XgkTimerResolutionSpec list = [] with get, set
 
         //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {
@@ -122,9 +122,9 @@ module POUParametersModule =
         member x.SanityCheck(prjParam: XgxProjectParams) =
             let target = prjParam.TargetType
             match x with
-            | DuAssign(expr, target) -> ()
-            | DuVarDecl(expr, variable) -> ()
-            | DuTimer(t:TimerStatement) -> ()
+            | DuAssign(_expr, _target) -> ()
+            | DuVarDecl(_expr, _variable) -> ()
+            | DuTimer(_t:TimerStatement) -> ()
             | DuCounter(c:CounterStatement) ->
                 let ctr = c.Counter
                 let up, down = c.UpCondition, c.DownCondition
@@ -182,8 +182,8 @@ module POUParametersModule =
                 | CTR ->
                     verifyM "CTR condition error" (up.IsNone && down.IsSome)
 
-            | DuAction(a:ActionStatement) -> ()
-            | DuAugmentedPLCFunction(fbParam) -> ()
+            | DuAction(_a:ActionStatement) -> ()
+            | DuAugmentedPLCFunction(_fbParam) -> ()
 
             ()
 

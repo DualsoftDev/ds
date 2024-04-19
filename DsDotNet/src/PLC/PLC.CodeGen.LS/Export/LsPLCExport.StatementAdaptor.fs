@@ -574,7 +574,7 @@ module XgxExpressionConvertorModule =
 
 
     type XgkTimerCounterStructResetCoil(tc:TimerCounterBaseStruct) =
-        inherit TimerCounterBaseStruct(tc.Name, tc.DN, tc.PRE, tc.ACC, tc.RES, (tc :> IStorage).DsSystem)
+        inherit TimerCounterBaseStruct(None, tc.Name, tc.DN, tc.PRE, tc.ACC, tc.RES, (tc :> IStorage).DsSystem)
         interface INamedExpressionizableTerminal with
             member x.StorageName = tc.Name
 
@@ -675,7 +675,7 @@ module XgxExpressionConvertorModule =
                     let mutable newCtr = ctr
 
                     // newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
-                    let replaceComplexCondition (ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
+                    let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
                         let assignStatement, ldVar = cond.ToAssignStatementAndAuotVariable prjParam
                         statements.Add assignStatement
                         newLocalStorages.Add ldVar

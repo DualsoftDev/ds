@@ -239,7 +239,7 @@ module XgiExportModule =
 
     type XgxProjectParamsProperties with
         /// Project XML 문서로부터 필요한 정보를 추출
-        member x.FillPropertiesFromXmlDocument(prjParam: XgxProjectParams, xdoc:XmlDocument) =
+        member x.FillPropertiesFromXmlDocument(prjParam:XgxProjectParams, xdoc:XmlDocument) =
             match prjParam.TargetType with
             | XGK ->
                 let dic = collectXgkBasicParameters xdoc
@@ -248,16 +248,16 @@ module XgiExportModule =
                     let e = dic[$"{prefix}_END"]
                     (s, e)
 
-                [|
-                    0.1, "T_100US_AREA_RANGE"
-                    1.0, "T_001MS_AREA_RANGE"
-                    10.0, "T_010MS_AREA_RANGE"
-                    100.0, "T_100MS_AREA_RANGE"
-                |] |> map (fun (res, prefix) -> res, readRange prefix)
-                   |> map XgkTimerResolutionSpec
-                   |> x.XgxTimerResolutionSpec.AddRange
-                ()            | _ -> ()
-
+                let specs =
+                    [
+                        0.1,   "T_100US_AREA_RANGE"
+                        1.0,   "T_001MS_AREA_RANGE"
+                        10.0,  "T_010MS_AREA_RANGE"
+                        100.0, "T_100MS_AREA_RANGE"
+                    ] |> map (fun (res, prefix) -> res, readRange prefix)
+                      |> map XgkTimerResolutionSpec
+                x.XgxTimerResolutionSpec <- specs
+            | _ -> ()
 
     type XgxPOUParams with
 

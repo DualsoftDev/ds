@@ -695,7 +695,7 @@ module internal rec Command =
         | _ -> failwithlog "Unknown FlatExpression case"
 
     type FlatExpression with
-        member exp.DrawLadderBlock (prjParam: XgxProjectParams, (x, y)) = bxiLadderBlock prjParam (x, y) exp
+        member exp.BxiLadderBlock (prjParam: XgxProjectParams, (x, y)) = bxiLadderBlock prjParam (x, y) exp
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     ///
@@ -772,7 +772,7 @@ module internal rec Command =
                     let xml =
                         [
                             let { X = _xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; XmlElements = xmls } : BlockXmlInfo =
-                                rungInCondition.DrawLadderBlock(prjParam, (x, y))
+                                rungInCondition.BxiLadderBlock(prjParam, (x, y))
                             xmls[0].Xml
 
                             hlineTo (totalSpanX, yy) (coilCellX - 5)

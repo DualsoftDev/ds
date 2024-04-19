@@ -7,22 +7,6 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module internal Common =
-    /// 좌표 반환 : 1, 4, 7, 11, ...
-    /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
-    let coord (x, y) : EncodedXYCoordinate = x * 3 + y * 1024 + 1
-
-    /// coord(x, y) 에서 x, y 좌표 반환
-    let xyOfCoord coord =
-        let y = (coord - 1) / 1024
-        let xx = ((coord - 1) % 1024)
-        let x = xx / 3
-        let r = xx % 3
-        (x, y), r
-
-    /// coord(x, y) 에서 x 좌표 반환
-    let xOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> fst
-    /// coord(x, y) 에서 y 좌표 반환
-    let yOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> snd
 
     let bxiRungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
         let xs = rungXmlInfos
@@ -90,6 +74,9 @@ module internal Common =
     let xgkFBAt (fbParam:string) (x: int, y: int) =
         let c = coord (x, y)
         elementFull (int ElementType.FBMode) c fbParam ""
+    let rxiXgkFBAt (fbParam:string) (x, y) (fbWidth:int) : RungXmlInfo =
+        let xml = xgkFBAt fbParam (x, y)
+        { Coordinate = coord (x, y); Xml = xml; SpanX = fbWidth; SpanY = 0 }
 
     module Unused =
         /// 조건이 9 이상이면 뒤로 증가
@@ -141,16 +128,16 @@ module internal Common =
 
         tryHlineTo (x, y) endX |> List.exactlyOne
 
+    let rxiHLineTo (x, y) endX : RungXmlInfo =
+        let xml = hlineTo (x, y) endX
+        { Coordinate = coord (x, y); Xml = xml; SpanX = endX - x; SpanY = 0 }
+
 
     /// x y 위치에서 수직선 한개를 긋는다
     let rxiVLineAt (x, y) : RungXmlInfo =
         verify (x >= 0)
         let c = coord (x, y) + 2
-
-        { Coordinate = c
-          Xml = vline c
-          SpanX = 0
-          SpanY = 1 }
+        { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
     let mutable EnableXmlComment = false
 

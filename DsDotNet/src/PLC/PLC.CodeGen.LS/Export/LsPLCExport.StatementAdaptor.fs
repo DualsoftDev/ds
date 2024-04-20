@@ -171,15 +171,16 @@ module rec TypeConvertorModule =
 
     let sys = DsSystem("")
 
+    let private getTmpName (nameHint: string) (n:int) = $"_t{n}_{nameHint}"
     let createTypedXgxAutoVariable (prjParam: XgxProjectParams) (nameHint: string) (initValue: obj) comment : IXgxVar =
         let n = prjParam.AutoVariableCounter()
-        let name = $"_tmp{nameHint}{n}"
+        let name = getTmpName nameHint n
         createXgxVariable name initValue comment
 
 
     let internal createXgxAutoVariableT (prjParam: XgxProjectParams) (nameHint: string) comment (initValue: 'T) =
         let n = prjParam.AutoVariableCounter()
-        let name = $"_tmp{nameHint}{n}"
+        let name = getTmpName nameHint n
 
         let param =
             { defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
@@ -238,6 +239,18 @@ module XgxExpressionConvertorModule =
         | "*" -> "MUL"
         | "/" -> "DIV"
         | _ -> failwithlog "ERROR"
+
+    let operatorToMnemonic op =
+        try
+            operatorToXgiFunctionName op
+        with ex ->
+            match op with
+            | "||" -> "OR"
+            | "&&" -> "AND"
+            | "<>" -> "NE"
+            | _ -> failwithlog "ERROR"
+
+
 
     let operatorToXgkFunctionName op =
         match op with
@@ -315,7 +328,8 @@ module XgxExpressionConvertorModule =
             let op = exp.FunctionName.Value
 
             let out =
-                createTypedXgxAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{op} output"
+                let tmpNameHint = operatorToMnemonic op
+                createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{op} output"
 
             storage.Add out
 
@@ -385,7 +399,8 @@ module XgxExpressionConvertorModule =
                         if argsRemaining.IsEmpty then
                             outputStore.Value
                         else
-                            createTypedXgxAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue "comment"
+                            let tmpNameHint, comment = operatorToMnemonic op, exp.ToText(false)
+                            createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue comment
 
                     let outexp = out.ToExpression()
 
@@ -451,7 +466,7 @@ module XgxExpressionConvertorModule =
 
                 let subSums =
                     [ for max in maxs do
-                          let out = createXgxAutoVariableT prjParam "_temp_internal_"  ($"{op} split output") false
+                          let out = createXgxAutoVariableT prjParam "split"  ($"{op} split output") false
                           newLocalStorages.Add out
 
                           DuAugmentedPLCFunction
@@ -462,7 +477,7 @@ module XgxExpressionConvertorModule =
 
                           var2expr out :> IExpression ]
 
-                let grandTotal = createXgxAutoVariableT prjParam "_temp_internal_" ($"{op} split output") false
+                let grandTotal = createXgxAutoVariableT prjParam "split" ($"{op} split output") false
                 newLocalStorages.Add grandTotal
 
                 DuAugmentedPLCFunction
@@ -548,7 +563,8 @@ module XgxExpressionConvertorModule =
                         let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
                         let createTmpStorage =
                             fun () -> 
-                                let tmpVar = createTypedXgxAutoVariable prjParam "_temp_internal_" exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
+                                let tmpNameHint = operatorToMnemonic fn
+                                let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
                                 tmpVar :> IStorage
 
                         match fn with

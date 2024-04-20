@@ -2,14 +2,11 @@ namespace T
 open Dual.UnitTest.Common.FS
 
 
-open Xunit
 open NUnit.Framework
 
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LS
-open System
 
 
 type XgxExpEqualityTest(xgx:PlatformTarget) =
@@ -147,7 +144,6 @@ type XgkExpEqualityTest() =
     [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
-    [<Obsolete("비교연산 XGK 구현 필요")>]
     [<Test>] member __.``XOR test`` () = base.``XOR test``() 
 
 

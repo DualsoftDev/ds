@@ -70,10 +70,19 @@ module internal RungXmlInfoModule =
 
 
     let mergeXmls(xmls:RungXmlInfo seq) : string = 
-        xmls
-        |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
-        |> Seq.map (fun ri -> ri.Xml) //snd
-        |> String.concat "\r\n"
+        let xxx =
+            xmls
+            |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
+            |> toArray
+        let yyy =
+            xxx
+            |> Seq.map (fun ri -> ri.Xml) //snd
+            |> String.concat "\r\n"
+        yyy
+        //xmls
+        //|> Seq.sortBy (fun ri -> ri.Coordinate) // fst
+        //|> Seq.map (fun ri -> ri.Xml) //snd
+        //|> String.concat "\r\n"
 
     let blockXmlInfoToRungXmlInfo (block:BlockXmlInfo) : RungXmlInfo =
         let bx, by = block.X, block.Y

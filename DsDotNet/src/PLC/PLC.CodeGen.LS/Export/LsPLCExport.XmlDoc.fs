@@ -73,19 +73,46 @@ type XgxXmlExtension =
     /// - Symbol 의 DevicePos 가 음수인 Symbol 이 있는지 확인한다.
     [<Extension>]
     static member Check(xdoc:XmlDocument, xgx:PlatformTarget) =
-        let xPathGlobalVar = getXPathGlobalVariable xgx
-        let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
-        let localSymbolss:XmlNode[] = xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol").ToArray()
+        let checkSymbols() =
+            let xPathGlobalVar = getXPathGlobalVariable xgx
+            let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
+            let localSymbolss:XmlNode[] = xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol").ToArray()
         
-        let check (s:XmlNode) =
-            let name = s.Attributes.["Name"].Value
-            let devPos = s.Attributes["DevicePos"]
-            if devPos <> null && devPos.Value.any() && int devPos.Value < 0  then
-                failwithlog $"Symbol {name} has Invalid DevicePos attribute {devPos.Value}."
+            let check (s:XmlNode) =
+                let name = s.Attributes.["Name"].Value
+                let devPos = s.Attributes["DevicePos"]
+                if devPos <> null && devPos.Value.any() && int devPos.Value < 0  then
+                    failwith $"Symbol {name} has Invalid DevicePos attribute {devPos.Value}."
 
-        for s in globalSymbols do
-            check s
-        for s in localSymbolss do
-            check s
+            for s in globalSymbols @ localSymbolss do
+                check s
+
+        let checkRungs() =
+            let pous = xdoc.GetXmlNodes("//LDRoutine")
+            for pou in pous do
+                let rungs = pou.GetXmlNodes("Rung")
+                let mutable c = 0
+                let getCoordinate (e:XmlNode) = e.Attributes.["Coordinate"].Value |> Parse.Int |> Option.get
+                for r in rungs do
+                    let rungName =
+                        match r.Attributes.["Name"] with
+                        | null -> "이름없음"
+                        | n -> n.Value
+                    let elements = r.GetXmlNodes("Element") |> toList
+                    let maxCoord =
+                        match elements with
+                        | [] -> failwith $"Rung {rungName} has no elements."
+                        | e::[] when getCoordinate(e) <= c ->
+                            failwith $"Rung {rungName} has invalid coordinates."
+                        | _ ->
+                            let coordinates = elements |> map (fun x -> Parse.Int x.Attributes.["Coordinate"].Value |> Option.get) |> toArray
+                            let isOrdered = coordinates |> pairwise |> Seq.forall (fun (a, b) -> a < b)
+                            if not isOrdered then
+                                failwith $"Rung {rungName} has invalid coordinates."
+                            coordinates |> Seq.last
+                    c <- maxCoord
+        checkSymbols()
+        checkRungs()
+
         xdoc
 

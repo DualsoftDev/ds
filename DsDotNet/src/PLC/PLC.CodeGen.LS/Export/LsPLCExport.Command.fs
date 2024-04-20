@@ -362,7 +362,8 @@ module internal rec Command =
                                   |> map (fun xml ->
                                       tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
 
-                                      { Coordinate = c
+                                      let c2 = coord (bexi, yi)
+                                      { Coordinate = c2
                                         Xml = xml
                                         SpanX = spanX
                                         SpanY = 1 }) ]
@@ -422,25 +423,27 @@ module internal rec Command =
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
     let bxiCoil (x, y) (cmdExp: CommandTypes) : BlockXmlInfo =
-        let spanX = (coilCellX - x - 2)
-        let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+        let spanX = max 0 (coilCellX - x - 2)
 
         let xmls =
-            [ let c = coord (x + 1, y)
-              let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+            [
+                if spanX > 0 then
+                    let c = coord (x + 1, y)
+                    let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                    let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-              { Coordinate = c
-                Xml = xml
-                SpanX = spanX
-                SpanY = 1 }
+                    { Coordinate = c
+                      Xml = xml
+                      SpanX = spanX
+                      SpanY = 1 }
 
-              let c = coord (coilCellX, y)
-              let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
+                let c = coord (coilCellX, y)
+                let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
 
-              { Coordinate = c
-                Xml = xml
-                SpanX = 1
-                SpanY = 1 } ]
+                { Coordinate = c
+                  Xml = xml
+                  SpanX = 1
+                  SpanY = 1 } ]
 
         { X = x
           Y = y
@@ -534,12 +537,11 @@ module internal rec Command =
         assert (x = 0)
         let conditionBlockXml = bxiFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
         let cbx = conditionBlockXml
-        //let { X = cx; Y = cy; TotalSpanX = spanX; TotalSpanY = spanY; XmlElements = xmls } = cbx
 
+        let c = coord (x + cbx.TotalSpanX, y)
+        let spanX = coilCellX - 4
         let xml =
             [
-                let c = coord (x + cbx.TotalSpanX, y)
-                let spanX = coilCellX - 4
                 let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                 elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
@@ -547,9 +549,12 @@ module internal rec Command =
                 elementFull (int ElementType.FBMode) c fbParam ""
             ] |> joinLines
 
+        (* 좌측 expression 이 multiline 인 경우, 우측 FB 의 Coordinate 값이 expression 의 coordinate 중간에 삽입되는 형태로 정렬되어야 한다.  *)
+        let xmls = cbx.XmlElements @ [{ Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1}]
+
         {
             Coordinate = coord(0, y + cbx.TotalSpanY)
-            Xml = cbx.GetXml() + xml
+            Xml = mergeXmls xmls
             SpanX = fbWidth; SpanY = 1
         }
 
@@ -719,19 +724,19 @@ module internal rec Command =
                 | Some cmdExp ->
                     let nx = x + exprSpanX
 
-                    let cmdXmls =
+                    let cmdXmls1 =
                         match cmdExp with
                         | CoilCmd _cc -> bxiCoil (nx - 1, y) cmdExp
                         | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
                             bxiCommand prjParam (nx, y) cmdExp
 
-                    let cmdXmls =
-                        { cmdXmls with
-                            XmlElements = cmdXmls.XmlElements |> List.distinct } // dirty hack!
+                    let cmdXmls2 =
+                        { cmdXmls1 with
+                            XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
 
-                    let spanX = exprSpanX + cmdXmls.TotalSpanX
-                    let spanY = max exprSpanY cmdXmls.TotalSpanY
-                    spanX, spanY, cmdXmls
+                    let spanX = exprSpanX + cmdXmls2.TotalSpanX
+                    let spanY = max exprSpanY cmdXmls2.TotalSpanY
+                    spanX, spanY, cmdXmls2
                 | None ->
                     0, 0, { X = x; Y = y; TotalSpanX = 0; TotalSpanY = 0; XmlElements = [] }
 

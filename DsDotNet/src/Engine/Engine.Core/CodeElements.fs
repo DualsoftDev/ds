@@ -42,6 +42,28 @@ module CodeElements =
             else
                 genTargetText name varType initValue
 
+    type FunctionTypes =
+        | NoDefined
+        | M
+        | C
+        | T
+        | N
+        member x.ToText() =
+            match x  with
+            | NoDefined -> ""
+            | M -> "m"
+            | C -> "c"
+            | T -> "t"
+            | N -> "n"
+
+    let getFunctionType (text:string) = 
+        match text.ToLower()  with
+            | "m" -> M 
+            | "c" -> C 
+            | "t" -> T 
+            | "n" -> N 
+            | _ -> failwithlog $"error {text} is not functionType" 
+
     let getFunction (text:string) = 
         let text = text.Trim()
         if not <| text.StartsWith "$"
@@ -55,49 +77,21 @@ module CodeElements =
                           |> Seq.toArray
         name, parameters
 
-    //let getFunctions (text:string) =
-    //    let text = text.Trim()
-    //    if not <| text.StartsWith "$"
-    //    then failwithlog "function text start keyword is '$' ex)$m 100 R100"
-    //    text.Split('$')
-    //    |> Seq.tail
-    //    |> Seq.map(fun line ->
-    //        let line = line.Split(';')[0]  //줄바꿈 제거
-    //        //function Name
-    //        line.Substring(0,1).ToLower()
-    //        //function Parameters
-    //        , (line.Substring(1,line.Length-1).Trim().Split(' ') |> Seq.toArray )
-    //        )
 
-    type Parameters = string[]
-    type Func(name:string, typeName:string, parameters:Parameters) =
+    type Func(name:string) =
         member x.Name = name
-        member x.TypeName = typeName.ToLower() //명령어 TypeName 은 소문자로만 허용
-        member x.Parameters = parameters
-        member x.ToDsText() =  $"""${x.TypeName} {String.Join(" ", parameters)}""".Trim()
-
-    //type AdditionalFunc(name:string, parameters:Parameters) =
-    //    inherit Func(name, parameters)
-
-    //Job, ButtonDef, LampDef 에서 사용중  //todo ToDsText, parsing
-    //  [jobs] = {
-    //    Ap = { A1."+"(%I1, %Q1); A2."+"(%I22, %Q22); A3."+"(%I33, %Q33); }
-    //    Am = { A."-"(%I2, %Q2); }
-    //    Bp = { B."+"(%I3, %Q3); }
-    //    Bm = { B."-"(%I4, %Q4); }
-    //}
-    //  [emg] = {
-    //    STOP(%I1, %Q1) = { F; }
-    //    STOP2(%I1, %Q1) = { F2; }
-    //}
-    //  [emglamp] = {
-    //    EmgMode(%Q1) = { F3 }
-    //}
-
+        member val FunctionType = getNull<FunctionTypes>() with get, set
+        member val Parameters = ResizeArray<string>()
+        member x.ToDsText() = 
+            if x.FunctionType = FunctionTypes.NoDefined
+            then  ""
+            else  
+                $"""${x.FunctionType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
+           
     [<Extension>]
     type SystemFuncExt =
         [<Extension>] static member GetDelayTime (x:Func) =
-                        let presetTime = (x.Parameters |> Seq.head ).ToLower()
+                        let presetTime = x.Parameters.Head().ToLower()
                         let timetype = Regex.Replace(presetTime, @"\d", "");//문자 추출
                         let preset   = Regex.Replace(presetTime, @"\D", "");//숫자 추출
 

@@ -155,8 +155,8 @@ module internal ModelFindModule =
 
     let getDistinctApis(x:DsSystem) =
         getVerticesOfSystem(x).OfType<Call>()   
-                            .SelectMany(fun c-> c.TargetJob.ApiDefs)
-                            .Distinct()
+                             .SelectMany(fun c-> c.TargetJob.ApiDefs)
+                             .Distinct()
 
     let getVertexSharedReal(real:Real) =
         let vs = real.Flow.System |> getVerticesOfSystem

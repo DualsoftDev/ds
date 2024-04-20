@@ -99,7 +99,7 @@ module ConvertCpuDsSystem =
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCoin
                 cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
-                call.ManualTag  <- cv.SF :> IStorage
+                call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
 
         member private x.GenerationCallConditionMemory()  = 
             for condi in x.HWConditions do
@@ -126,23 +126,24 @@ module ConvertCpuDsSystem =
                 cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
                 cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
                 cv.ErrTimeShortage.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
-                call.ErrorSensorOn   <- cv.ErrShort:> IStorage
-                call.ErrorSensorOff  <- cv.ErrOpen  :> IStorage
-                call.ErrorTimeOver   <- cv.ErrTimeOver :> IStorage
-                call.ErrorTimeShortage   <- cv.ErrTimeShortage :> IStorage
+                call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorSensorOn, cv.ErrShort:> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorSensorOff, cv.ErrOpen  :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeOver, cv.ErrTimeOver :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrTimeShortage :> IStorage) |>ignore
 
         member private x.GenerationRealAlarmMemory()  = 
             for real in x.GetVertices().OfType<Real>() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> VertexMReal
                 rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty, rm.Name, false, IOType.Memory, getTarget(x))
-                real.ErrGoingOrigin   <- rm.ErrGoingOrigin:> IStorage
+                real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
 
         member private x.GenerationTaskDevIO() =
             let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
             let calls = x.GetVerticesOfCoinCalls()
             for dev in TaskDevices do
-                if calls.Where(fun f->f.TaskDevs.Contains(dev)).any() //외부입력 전용 확인
+                if calls.Where(fun f->f.TargetJob.DeviceDefs.Contains(dev)).any() //외부입력 전용 확인
                 then
                     if  dev.InAddress <> TextSkip then
                         let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev).Value

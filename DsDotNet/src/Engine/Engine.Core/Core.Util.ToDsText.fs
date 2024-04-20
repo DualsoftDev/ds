@@ -122,9 +122,8 @@ module internal ToDsTextModule =
         let tab = getTab indent
         let tab2 = getTab 2
         let tab3 = getTab 3
-        
-            
-
+       
+        let printFunc (func:Func) = $"${func.Name}"
         let addressPrint (addr:string) = if isNullOrEmpty  addr then TextAddrEmpty else addr
         [
             yield $"[sys] {system.Name.QuoteOnDemand()} = {lb}"
@@ -136,16 +135,25 @@ module internal ToDsTextModule =
                 let printDev (ai:TaskDev) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
-                    if c.DeviceDefs.any() then
-                        let ais = c.DeviceDefs.Select(printDev).JoinWith("; ") + ";"
-                        yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {ais} {rb}"
-
+                    let jobItems =
+                        c.DeviceDefs
+                        |> Seq.map printDev
+                        |> fun devs -> match c.Func with
+                                        | Some f -> devs @ [printFunc f]
+                                        | None -> devs
+                          
+                    let jobItemText =  jobItems.JoinWith("; ") + ";"
+                    yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
                 yield $"{tab}{rb}"
 
             if system.Functions.Any() then
                 yield $"{tab}[functions] = {lb}"
                 for func in system.Functions do
-                    yield $"{tab2}{func.Name} = {func.ToDsText()};"
+                    if func.FunctionType = NoDefined
+                    then 
+                        yield $"{tab2}{func.Name};"
+                    else 
+                        yield $"{tab2}{func.Name} = {func.ToDsText()};"
                 yield $"{tab}{rb}"
 
             if system.ApiItems.Any() then
@@ -186,15 +194,15 @@ module internal ToDsTextModule =
                     if hws.length() > 0 then
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
-                            let flows = (hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand()) |> String.concat ";")
-                            let flowTexts =
-                                if flows.Count() > 0 then
-                                    flows + ";"
-                                else
-                                    ""
+                            let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
+                            let items = 
+                                if hw.Func.IsSome 
+                                then [printFunc hw.Func.Value]  @ flows else flows
+                                
+                            let itemText = if items.any() then (items |> String.concat "; ") + ";" else ""
                             let inAddr =  addressPrint  hw.InAddress  
                             let outAddr = addressPrint  hw.OutAddress 
-                            yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {flowTexts} {rb}"
+                            yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
                           
                         yield $"{tab2}{rb}"
                 ] |> combineLines

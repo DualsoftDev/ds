@@ -136,8 +136,7 @@ module ImportUtilForLib =
             loadedName,
             apiName,
             mySys: DsSystem,
-            parentF: Flow option,
-            parentR: Real option,
+            parentWrapper:ParentWrapper,
             node: pptNode
         ) =
         let libRelPath =
@@ -145,11 +144,6 @@ module ImportUtilForLib =
 
         let paras loadedName =
             getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
-
-        let parent =
-            match parentR with
-            | Some parentR -> DuParentReal parentR
-            | None -> DuParentFlow(parentF.Value)
 
         let addOrGetExistSystem loadedSys loadedName = 
             if not (mySys.LoadedSysExist(loadedName)) then
@@ -191,5 +185,5 @@ module ImportUtilForLib =
             then mySys.Jobs.Add(job);job
             else tempJob
 
-        Call.Create(jobForCall, parent)
+        Call.Create(jobForCall, parentWrapper)
          

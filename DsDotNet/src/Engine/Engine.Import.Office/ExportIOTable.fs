@@ -95,10 +95,7 @@ module ExportIOTable =
         toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
 
         emptyLine (dt)
-        dt.Rows.Add(TextXlsVariable) |> ignore
-        dt.Rows.Add(TextXlsCommand) |> ignore
-        
-        emptyLine (dt)
+
 
         dt
 
@@ -138,7 +135,7 @@ module ExportIOTable =
                 let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
 
                 for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
-                    if coins.Where(fun c->c.TaskDevs.Contains(dev)).any()
+                    if coins.Where(fun c->c.TargetJob.DeviceDefs.Contains(dev)).any()
                     then
                         let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
                         if sortedDeviceDefs.Head() = dev then
@@ -161,7 +158,7 @@ module ExportIOTable =
 
 
 
-    let ToConditionNExternalDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
+    let ToFuncVariTableExternalIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
   
         let conditionRows =
             let coins = sys.GetVerticesOfCoinCalls()
@@ -170,7 +167,7 @@ module ExportIOTable =
                 let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
 
                 for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
-                    if not(coins.Where(fun c->c.TaskDevs.Contains(dev)).any())
+                    if not(coins.Where(fun c->c.TargetJob.DeviceDefs.Contains(dev)).any())
                     then
 
                         if dev.InAddress = TextAddrEmpty || dev.InAddress = TextSkip
@@ -208,9 +205,26 @@ module ExportIOTable =
                 ]
             )
 
-
+        let funcRows = sys.Functions.Map(fun func->
+                [ TextXlsCommand
+                  func.Name
+                  ""
+                  ""
+                  ""
+                  func.ToDsText() ]
+                  )
+        let variRows = sys.Variables.Map(fun vari->
+                [ TextXlsCommand
+                  vari.Name
+                  vari.Type.ToText()
+                  ""
+                  ""
+                  vari.ToDsText() ]
+                  )
+        let sampleFuncRows =  if funcRows.any() then [] else  [[TextXlsCommand;"";"";"";"";]]
+        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"";"";"";"";]]
         let dts = 
-            conditionRows @  getConditionDefListRows (sys.ReadyConditions) 
+            conditionRows @  getConditionDefListRows (sys.ReadyConditions)  @ funcRows @ sampleFuncRows @ sampleVariRows
             |> Seq.chunkBySize(IOchunkBySize)
             |> Seq.map(fun rows->
                 let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")
@@ -218,7 +232,6 @@ module ExportIOTable =
                 addRows rows dt
                 dt
             )
-
      
         dts
 
@@ -510,16 +523,12 @@ module ExportIOTable =
 
 
     let ToIOListDataTables (system: DsSystem) target = 
-        let tableDeviceIOs = ToDeviceIOTables system system.Flows true
-        let tablePanelIO = ToPanelIOTable system system.Flows true
-        let tableExternalDeviceIOs = ToConditionNExternalDeviceIOTables system system.Flows true
-
-        let tables = tableDeviceIOs target @ [tablePanelIO target] @ tableExternalDeviceIOs target
-        //tables.Iter     (fun t->
+        let tableDeviceIOs = ToDeviceIOTables system system.Flows true target
+        let tablePanelIO = ToPanelIOTable system system.Flows true target
+        let tabletableFuncVariExternal = ToFuncVariTableExternalIOTables system system.Flows true target
         
-        //        t.Columns.Remove($"{IOColumn.Case}")
-        //        t.Columns.Remove($"{IOColumn.Func}")
-        //    )
+        let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal
+     
         tables
     
     

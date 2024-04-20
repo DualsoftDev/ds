@@ -223,7 +223,7 @@ module CoreModule =
 
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-        member val ErrGoingOrigin = getNull<IStorage>() with get, set
+        member val ExternalTags = HashSet<ExternalTagSet>()
         
         member _.Flow = flow
         interface ISafetyConditoinHolder with
@@ -239,15 +239,45 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    type Call (target:Job, parent) =
-        inherit Indirect(target.Name, parent)
-        member _.TargetJob = target
-        member _.TaskDevs = target.DeviceDefs
-        member val ManualTag = getNull<IStorage>() with get, set
-        member val ErrorSensorOn = getNull<IStorage>() with get, set
-        member val ErrorSensorOff = getNull<IStorage>() with get, set
-        member val ErrorTimeOver = getNull<IStorage>() with get, set
-        member val ErrorTimeShortage = getNull<IStorage>() with get, set
+    type CallOptions =
+        | JobType of Job
+        | FuncType of Func
+        | JobFuncType of Job * Func
+
+    type Call(targetOption: CallOptions, parent) =
+        inherit Indirect(
+            (match targetOption with
+            | JobType job -> job.Name
+            | JobFuncType (job, _) -> job.Name
+            | FuncType func -> func.Name), parent)
+
+        let isJob = function
+            | JobType _ | JobFuncType _ -> true
+            | _ -> false
+
+        let isFunc = function
+            | FuncType _ | JobFuncType _ -> true
+            | _ -> false
+
+        member _.TargetJob =
+            match targetOption with
+            | JobType job -> job
+            | JobFuncType (job, _) -> job
+            | _ -> failwith "TargetJob is only available for JobType or JobFuncType."
+
+        member _.TargetFunc =
+            match targetOption with
+            | FuncType func -> func
+            | JobFuncType (_, func) -> func
+            | _ -> failwith "TargetFunc is only available for FuncType or JobFuncType."
+
+        /// Indicates if the target includes a job.
+        member _.TargetHasJob = isJob targetOption
+
+        /// Indicates if the target includes a function.
+        member _.TargetHasFunc = isFunc targetOption
+
+        member val ExternalTags = HashSet<ExternalTagSet>()
         member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
@@ -411,7 +441,7 @@ module CoreModule =
 
     type Real with
         static member Create(name: string, flow) =
-            if (name.Contains ".") (*&& not <| (name.StartsWith("\"") && name.EndsWith("\""))*) then
+            if (name.Contains ".")  then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
             let real = Real(name, flow)
@@ -424,7 +454,12 @@ module CoreModule =
                 else [| x.Name |]             //my    flow
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
-
+    type Func with
+        static member Create(name:string, typeName, (parameters:string array)) =
+            let func = Func(name)
+            func.FunctionType <- typeName 
+            func.Parameters.AddRange(parameters)
+            func
 
     type RealExF = RealOtherFlow
     type RealOtherFlow with
@@ -436,18 +471,29 @@ module CoreModule =
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
-    
+    let addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
-            let call = Call(target, parent)
-            parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{target.Name}]"
+            let call = Call(target|>JobType, parent)
+            addCallVertex parent call
             call
+
+        static member Create(func:Func, parent:ParentWrapper) =
+            let call = Call(func|>FuncType, parent)
+            addCallVertex parent call
+            call   
+
+        static member Create(target:Job, func:Func, parent:ParentWrapper) =
+            let call = Call((target, func)|>JobFuncType, parent)
+            addCallVertex parent call
+            call  
 
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
                 | :? Flow -> [x.Name].ToArray()
                 | :? Real -> x.ParentNPureNames
                 | _->failwithlog "Error"
+
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
 

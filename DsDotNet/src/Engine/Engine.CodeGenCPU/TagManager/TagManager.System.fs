@@ -70,7 +70,6 @@ module SystemManagerModule =
 
         let tout     =
             let tout = dsSysUint32  "systout" true sys SystemTag.timeout 
-            //type CountUnitType = uint16  => 32bit (msec 단위 필요) //test ahn
             tout.Value <- RuntimeDS.TimeoutCall
             tout
 

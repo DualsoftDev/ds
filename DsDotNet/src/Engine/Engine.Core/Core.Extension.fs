@@ -168,9 +168,18 @@ module CoreExtensionModule =
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (name:string) = x.LoadedSystems.TryFind(fun f-> f.Name = name)
+    
+    type Real with
+        member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd
+
 
     type Call with
         member x.System = x.Parent.GetSystem()
+        member x.ManualTag = x.ExternalTags.First(fun (t,_)-> t = ManualTag)|> snd
+        member x.ErrorSensorOn = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)|> snd
+        member x.ErrorSensorOff = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)|> snd
+        member x.ErrorTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorTimeOver)|> snd
+        member x.ErrorTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorTimeShortage)|> snd
 
     let inValidActionTags (x:DsSystem) = 
                     x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)

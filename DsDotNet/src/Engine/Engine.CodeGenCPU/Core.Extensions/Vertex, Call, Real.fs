@@ -30,7 +30,7 @@ module ConvertCpuVertex =
         member c._on     = c.System._on
         member c._off     = c.System._off
 
-        member c.InTags  = c.TaskDevs.Where(fun d-> d.InAddress <> TextSkip && d.InAddress <> TextAddrEmpty)
+        member c.InTags  = c.TargetJob.DeviceDefs.Where(fun d-> d.InAddress <> TextSkip && d.InAddress <> TextAddrEmpty)
                                                  .Select(fun d->d.InTag :?> Tag<bool>)
 
         member c.UsingTon  = c.TargetJob.Func |> hasTime
@@ -57,7 +57,7 @@ module ConvertCpuVertex =
                 else c.EndActionOnlyIO
 
         member c.GetEndAction(x:ApiItem) =
-            let td = c.TaskDevs.First(fun d->d.ApiItem = x) 
+            let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
             if td.InAddress <> TextSkip && td.InAddress <> TextAddrEmpty
             then 
                 let inTag = td.InTag :?> Tag<bool>
@@ -78,10 +78,10 @@ module ConvertCpuVertex =
                                  then c.TargetJob.Func.Value.GetRingCount()
                                  else failwith $"{c.Name} not use counter"
         
-        member c.PSs           = c.TaskDevs.Select(fun f->f.ApiItem.PS)
-        member c.PEs           = c.TaskDevs.Select(fun f->f.ApiItem.PE)
-        member c.TXs           = c.TaskDevs|>Seq.collect(fun j -> j.ApiItem.TXs)
-        member c.RXs           = c.TaskDevs|>Seq.collect(fun j -> j.ApiItem.RXs)
+        member c.PSs           = c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PS)
+        member c.PEs           = c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PE)
+        member c.TXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.TXs)
+        member c.RXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.RXs)
         member c.Errors       = 
                                 [
                                     getVMCoin(c).ErrTimeOver

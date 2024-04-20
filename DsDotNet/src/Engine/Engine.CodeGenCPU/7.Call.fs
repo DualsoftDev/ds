@@ -48,7 +48,7 @@ type VertexManager with
         let coin = v.Vertex :?> Call
         [
                 let rstNormal = coin._off.Expr
-                for td in coin.TaskDevs do
+                for td in coin.TargetJob.DeviceDefs do
                     let api = td.ApiItem
                     if td.OutAddress <> TextSkip && td.OutAddress <> TextAddrEmpty
                     then 

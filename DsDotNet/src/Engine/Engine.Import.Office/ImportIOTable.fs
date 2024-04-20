@@ -65,7 +65,7 @@ module ImportIOTable =
 
         try
             
-            let getFunction (name, funcText, tableIO: Data.DataTable, isJob: bool, page) =
+            let getFunctionNUpdate (name, funcText, tableIO: Data.DataTable, isJob: bool, page) =
                 if ((trimSpace funcText) = "" || funcText = TextSkip || funcText = TextFuncNotUsed)
                 then
                     None
@@ -86,10 +86,21 @@ module ImportIOTable =
                                     ]
                         else ""
                     let funcName = $"{funcType.ToLower()}{paras}" 
-                    if sys.Functions.Where(fun f->f.Name = funcName).isEmpty() then
-                        Some (Func(funcName, funcType , parms))
+                    let funcs = sys.Functions.Where(fun f->f.Name = funcName)
+                    let funcType = getFunctionType(funcType)
+                    if funcs.any() 
+                    then 
+                        let func = funcs.Head() 
+                        if func.FunctionType = NoDefined
+                        then 
+                            func.FunctionType <- funcType
+                            func.Parameters.AddRange(parms)
+
+                        func |> Some
                     else 
-                        None
+                        let func = Func.Create(funcName, funcType , parms)
+                        sys.Functions.Add func |> ignore  
+                        func |> Some
 
             let dicDev =
                 sys.Jobs
@@ -120,10 +131,10 @@ module ImportIOTable =
 
 
                 let job = dicJob[devName]
-            
+                
                 let func = $"{row.[(int) IOColumn.Func]}"
-                match getFunction (job.Name, func, tableIO, true, page) with
-                |Some f ->  sys.Functions.Add f 
+                match getFunctionNUpdate (job.Name, func, tableIO, true, page) with
+                |Some f ->   job.Func <- Some f
                 |_->()
                         
              
@@ -132,6 +143,11 @@ module ImportIOTable =
                 let dataType = $"{row.[(int) IOColumn.DataType]}" |> textToDataType
                 let variableData = VariableData(name, dataType, TextAddrEmpty)
                 sys.Variables.Add(variableData)
+
+            let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =
+                let name = $"{row.[(int) IOColumn.Name]}"
+                let func = $"{row.[(int) IOColumn.Func]}"
+                getFunctionNUpdate (name, func, tableIO, true, page) |> ignore
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
@@ -144,8 +160,8 @@ module ImportIOTable =
                     btn.InAddress  <-inaddr.Trim() 
                     btn.OutAddress <-outaddr.Trim() 
 
-                    match getFunction (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page) with
-                    |Some f ->  sys.Functions.Add f 
+                    match getFunctionNUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page) with
+                    |Some f -> btn.Func <- Some f
                     |_->()
 
 
@@ -166,8 +182,8 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
                     lamp.InAddress  <-inaddr.Trim() 
                     lamp.OutAddress <-outaddr.Trim() 
-                    match getFunction (lamp.Name, func,  tableIO, false, page) with
-                    |Some f ->  sys.Functions.Add f 
+                    match getFunctionNUpdate (lamp.Name, func,  tableIO, false, page) with
+                    |Some f ->    lamp.Func <- Some f
                     |_->()
 
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
@@ -185,8 +201,8 @@ module ImportIOTable =
                     let inaddr =  getValidCondiAddress (cond) Util.runtimeTarget
                     cond.InAddress  <-inaddr.Trim() 
 
-                    match getFunction (cond.Name, func, tableIO, false, page) with
-                    |Some f ->  sys.Functions.Add f 
+                    match getFunctionNUpdate (cond.Name, func, tableIO, false, page) with
+                    |Some f ->   cond.Func <- Some f
                     |_->()
 
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
@@ -224,7 +240,7 @@ module ImportIOTable =
                         | XlsReadyLamp -> updateLamp (row, LampType.DuReadyStateLamp, tableIO, page)
                         | XlsIdleLamp -> updateLamp (row, LampType.DuIdleModeLamp, tableIO, page)
                         | XlsHomingLamp -> updateLamp (row, LampType.DuOriginStateLamp, tableIO, page)
-                        | XlsCommand -> failwithf "XlsCommand is not supported"
+                        | XlsCommand -> updateCommand (row, tableIO, page) 
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
 

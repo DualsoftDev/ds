@@ -38,7 +38,7 @@ module ConvertErrorCheck =
     let checkErrApi(sys:DsSystem) = 
 
           for coin in sys.GetVerticesOfCoinCalls() do
-                for td in coin.TaskDevs do
+                for td in coin.TargetJob.DeviceDefs do
                     let api = td.ApiItem
                     if api.RXs.IsEmpty() then
                         failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"

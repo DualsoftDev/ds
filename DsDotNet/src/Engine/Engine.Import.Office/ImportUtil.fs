@@ -52,46 +52,49 @@ module ImportU =
         (
             mySys: DsSystem,
             node: pptNode,
-            parentReal: Real Option,
-            parentFlow: Flow Option,
+            parentWrapper:ParentWrapper,
             dicSeg: Dictionary<string, Vertex>,
             jobCallNames: string seq
         ) =
-        let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
         let call =
-            if jobCallNames.Contains sysName
-            then 
+            match node.NodeType with
+            | CALLFUNC  ->  
+                let funcName = $"{node.PageTitle}_{node.Name}"
+                let func =   
+                    match mySys.Functions |> Seq.tryFind(fun f->f.Name = funcName) with
+                    | Some f -> f
+                    | None -> 
+                        let newfunc = Func(funcName)
+                        mySys.Functions.Add(newfunc) |>ignore
+                        newfunc
 
+                Call.Create(func, parentWrapper)
+                
+            | CALL  ->
+                let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+                if jobCallNames.Contains sysName
+                then 
+                    let jobName = sysName + "_" + apiName
             
-                let jobName = sysName + "_" + apiName
+                    match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
+                    | Some job ->
+                        if job.DeviceDefs.any () then
+                            Call.Create(job, parentWrapper)
+                        else
+                            node.Shape.ErrorName(ErrID._52, node.PageNum)
+                    | None ->
+                            node.Shape.ErrorName(ErrID._48, node.PageNum)
+
+                else
+                    let apiName = node.CallApiName
+                    let loadedName = node.CallName
+                    let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
+                    let libAbsolutePath = getLibraryPath apiNameForLib
+                    //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
+                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node)
             
-                match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
-                | Some job ->
-                    if job.DeviceDefs.any () then
-                        let call =
-                            if (parentReal.IsSome) then
-                                Call.Create(job, DuParentReal(parentReal.Value))
-                            else
-                                Call.Create(job, DuParentFlow(parentFlow.Value))
-
-                        
-                        call
-                    else
-                        node.Shape.ErrorName(ErrID._52, node.PageNum)
-                | None ->
-                        node.Shape.ErrorName(ErrID._48, node.PageNum)
-
-            else
-                let apiName = node.CallApiName
-                let loadedName = node.CallName
-
-                //addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
-
-                let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
-                let libAbsolutePath = getLibraryPath apiNameForLib
-                //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentFlow, parentReal, node)
+            | _  -> failwithlog "error"
 
         dicSeg.Add(node.Key, call)
 
@@ -418,20 +421,11 @@ module ImportU =
             let createCall () =
                 calls
                 |> Seq.iter (fun node ->
-                    let parentReal =
                         if dicChildParent.ContainsKey(node) then
-                            Some(dicVertex.[dicChildParent.[node].Key] :?> Real)
+                            createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex, jobCallNames)
                         else
-                            None
-
-                    let parentFlow =
-                        if dicChildParent.ContainsKey(node) then
-                            None
-                        else
-                            Some(dicFlow.[node.PageNum])
-
-                    if parentReal.IsSome || parentFlow.IsSome then
-                        createCallVertex (mySys, node, parentReal, parentFlow, dicVertex, jobCallNames))
+                            createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex, jobCallNames)
+                            )
 
             let createAlias () =
                 pptNodes
@@ -599,6 +593,7 @@ module ImportU =
                 let dicQualifiedNameSegs =
                     dicVertex.Values
                         .OfType<Call>()
+                        .Where(fun call -> call.TargetHasJob)
                         .Select(fun call -> call.TargetJob.Name, call)
                     |> dict
 

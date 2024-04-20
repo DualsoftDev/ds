@@ -59,18 +59,18 @@ namespace Engine.Export.Office
             if (v is Call c)
             {
                 var flowName = c.Parent.GetFlow().Name;
-                var deviceName = c.TaskDevs.First().DeviceName;
+                var deviceName = c.TargetJob.DeviceDefs.First().DeviceName;
                 var callName = "";
                 // Find the index where flowName starts in deviceName
                 int startIndex = deviceName.IndexOf(flowName);
                 if (startIndex != -1) // If flowName is found in deviceName
-                    callName = $"{deviceName.Remove(startIndex, flowName.Length).TrimStart('_')}\n.{c.TaskDevs.First().ApiItem.Name}";
+                    callName = $"{deviceName.Remove(startIndex, flowName.Length).TrimStart('_')}\n.{c.TargetJob.DeviceDefs.First().ApiItem.Name}";
                 else
-                    callName = $"{deviceName}\n.{c.TaskDevs.First().ApiItem.Name}";
+                    callName = $"{deviceName}\n.{c.TargetJob.DeviceDefs.First().ApiItem.Name}";
 
 
                 if (c.TargetJob.ActionType.IsMultiAction)
-                    return $"{callName}[{c.TaskDevs.Count()}]";
+                    return $"{callName}[{c.TargetJob.DeviceDefs.Count()}]";
                 else
                     return callName;
             }

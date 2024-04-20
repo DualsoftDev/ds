@@ -29,7 +29,7 @@ module OriginModule =
             vertices
             |> Seq.choose (fun x ->
                 match x.GetPure() with
-                | :? Call as c ->
+                | :? Call as c  ->
                     let devs = c.TargetJob.DeviceDefs
                     Some (x, devs.First().ApiItem)
                 |_ -> None)
@@ -99,7 +99,8 @@ type OriginHelper =
     [<Extension>]
     static member GetOriginInfoByTaskName (real: Real) =
         getOriginInfo real
-        |> fun info -> info.CallInitials.SelectMany(fun (c, t) ->
+        |> fun info -> info.CallInitials
+                           .SelectMany(fun (c, t) ->
                             c.TargetJob.DeviceDefs |> Seq.map (fun d-> d.QualifiedName, t) 
                             )
 

@@ -48,7 +48,16 @@ module DsType =
         | DuReadyState
         | DuDriveState
 
-    
+    type ExternalTag = 
+        | ManualTag
+        | ErrorSensorOn 
+        | ErrorSensorOff 
+        | ErrorTimeOver 
+        | ErrorTimeShortage
+        | ErrGoingOrigin
+
+    type ExternalTagSet = ExternalTag * IStorage
+        
     type JobActionType = 
         | Normal  ///RXs(ActionIn) 인터페이스가 관찰될때까지 ON
         | NoneRx  //인터페이스 관찰 없는 타입

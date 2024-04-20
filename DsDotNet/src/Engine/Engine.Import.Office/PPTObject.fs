@@ -229,8 +229,7 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
-        | CALLRX  -> () 
-        | CALLTX 
+        | CALLFUNC 
         | IF_DEVICE
         | IF_LINK
         | DUMMY
@@ -343,7 +342,7 @@ module PPTObjectModule =
             nodeType <-
                 let name = GetBracketsRemoveName(shape.InnerText)
                 if (shape.CheckFlowChartPreparation()) then
-                    CALLRX
+                    CALLFUNC
                 elif (shape.CheckRectangle()) then
                     if name.Contains(".") then REALExF
                     else REAL
@@ -360,8 +359,7 @@ module PPTObjectModule =
                 elif (shape.CheckFoldedCornerRound()) then
                     COPY_DEV
                 elif (shape.CheckEllipse()) then
-                    if name.Contains(".") then CALL
-                    else CALLTX
+                    CALL
                 elif (shape.CheckBevelShapePlate()) then
                     LAMP
                 elif (shape.CheckBevelShapeRound()) then
@@ -373,16 +371,10 @@ module PPTObjectModule =
                 else
                     shape.ErrorName(ErrID._1, iPage)
 
-            if nodeType = CALL  || nodeType = CALLTX 
-            then
-                let callName =  
-                    let onlyName =  GetHeadBracketRemoveName(shape.InnerText)
-                    if nodeType = CALLTX 
-                    then $"sys.{onlyName}"
-                    else onlyName
-
+            if nodeType = CALL  
+            then 
+                let callName =  GetHeadBracketRemoveName(shape.InnerText)
                 name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimNewLine
-
 
             else 
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
@@ -426,8 +418,7 @@ module PPTObjectModule =
 
             | REALExF
             | LAYOUT
-            | CALLRX 
-            | CALLTX 
+            | CALLFUNC 
             | DUMMY -> ()
 
         member x.PageNum = iPage

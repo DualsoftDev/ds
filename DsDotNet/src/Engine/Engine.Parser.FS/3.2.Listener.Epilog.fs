@@ -69,8 +69,7 @@ module EtcListenerModule =
                         x.ButtonCategories.Add(key) |> ignore
 
                     let buttonDefs = first.Descendants<HwSysItemDefContext>().ToArray()
-                    let buttonFuncs = commonFunctionExtractor first
-
+               
                     let flowBtnInfo =
                         [ for bd in buttonDefs do
                               option {
@@ -86,10 +85,12 @@ module EtcListenerModule =
                                           .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
                                           .ToHashSet()
 
-                                  let funcSet = commonFunctionSetter btnName buttonFuncs
+                                  let funcCallCtxs = first.Descendants<FuncCallContext>().ToArray()
+                                  let buttonFuncs = commonFunctionExtractor funcCallCtxs btnName system
+      
 
                                   if flows.Count > 0 then
-                                      return targetBtnType, btnName, addrIn, addrOut, flows, (if funcSet.any() then Some (funcSet.First()) else None)
+                                      return targetBtnType, btnName, addrIn, addrOut, flows, buttonFuncs
                                   else
                                       failwithlog "There are no flows in button"
                               } ]
@@ -124,7 +125,6 @@ module EtcListenerModule =
                         | _ -> failwith $"lamp type error {fstType}"
 
                     let lampDefs = first.Descendants<HwSysItemDefContext>().ToArray()
-                    let lampFuncs = commonFunctionExtractor first
 
                     let flowLampInfo =
                         [ for ld in lampDefs do
@@ -137,8 +137,9 @@ module EtcListenerModule =
                                        let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
                                     
-                                  let funcSet = commonFunctionSetter lmpName lampFuncs
-                                  let func = if funcSet.any() then Some (funcSet.First()) else None
+                                  let funcCallCtxs = first.Descendants<FuncCallContext>().ToArray()
+                                  let func = commonFunctionExtractor funcCallCtxs lmpName system
+
                                   if flowNameCtxs.length() = 0
                                   then
                                        return targetLmpType, lmpName, addrIn, addrOut, None, func 
@@ -164,15 +165,14 @@ module EtcListenerModule =
                         | _ -> failwith $"condition type error {fstType}"
 
                     let conditionDefs = first.Descendants<HwSysItemDefContext>().ToArray()
-                    let conditionFuncs = commonFunctionExtractor first
 
                     let flowConditionInfo =
                         [ for cd in conditionDefs do
                               option {
 
                                   let cndName, addrIn, addrOut = getHwSysItem cd
-                                  let funcSet = commonFunctionSetter cndName conditionFuncs
-                                  let func = if funcSet.any() then Some (funcSet.First()) else None
+                                  let funcCallCtxs = first.Descendants<FuncCallContext>().ToArray()
+                                  let func = commonFunctionExtractor funcCallCtxs cndName system
                                   let flows =
                                       cd
                                           .Descendants<FlowNameContext>()

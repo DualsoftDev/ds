@@ -64,7 +64,6 @@ WORDTYPE: 'word';
 DWORDTYPE: 'dword';
 INTTYPE: 'int';
 FLOATTYPE: 'float';
-FUNC: 'func';
 FUNCTIONS : 'functions';
 
 
@@ -283,9 +282,9 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     varType: IDENTIFIER1;
 
 
-FUNCTIONS_KEY: '[functions]';
-functionsBlock: FUNCTIONS_KEY EQ LBRACE functionDef+ RBRACE;
+functionsBlock: '[' 'functions' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
     functionDef: functionName EQ functionCall SEMICOLON;
+    functionNameOnly: identifier1 SEMICOLON;
     functionName: identifier1;
     functionCall:  '$' functionType (argument (argument)*)?;
     functionType: identifier1;
@@ -297,19 +296,17 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
         jobName '=' interfaceLink SEMICOLON;
     jobName: etcName1;
     callApiDef: (interfaceCall addressInOut|interfaceCall);
-    funcCall: '$'funcCallName;
-    funcCallName: identifier1;
+
 
     interfaceCall: identifier12;
     interfaceLink: identifier12;
 
 
 
+funcCall: '$'funcCallName;
+funcCallName: identifier1;
 
 
-funcSet: identifier12 '=' LBRACE (() | funcDef (SEMICOLON funcDef)* (SEMICOLON)?) RBRACE;
-funcDef:  '$' funcName (argument (argument)*)?;
-funcName: '$'identifier1;
 
 codeBlock: CODE_BLOCK;
 
@@ -339,9 +336,10 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmg
     idleBlock      :'[' ('i_in'|'i') ']' EQ categoryBlock;
     originBlock    :'[' ('o_in'|'o') ']' EQ categoryBlock;
     
-    categoryBlock: LBRACE (() | (hwSysItemDef|funcSet)*) RBRACE;
-
-    hwSysItemDef: hwSysItemNameAddr EQ LBRACE (() | flowName (SEMICOLON flowName)* (SEMICOLON)?) RBRACE;
+    categoryBlock: LBRACE (() | (hwSysItemDef)*) RBRACE;
+  
+    hwSysItemDef:  hwSysItemNameAddr '=' LBRACE hwSysItems? RBRACE (SEMICOLON)?;
+    hwSysItems: (flowName|funcCall)? ( ';' flowName|funcCall)* (';')+; 
     hwSysItemNameAddr: hwSysItemName addressInOut;
     hwSysItemName: identifier12;
 
@@ -387,5 +385,5 @@ causal: causalPhrase SEMICOLON;
         | C_IN | C | M_IN | M | S_IN | S
         | T_IN | T | H_IN | H | R_IN | R
         | WORDTYPE | DWORDTYPE | INTTYPE | FLOATTYPE
-        | FUNC | FUNCTIONS
+        | FUNCTIONS
         ;

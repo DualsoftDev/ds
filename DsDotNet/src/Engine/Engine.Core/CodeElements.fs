@@ -80,7 +80,7 @@ module CodeElements =
 
     type Func(name:string) =
         member x.Name = name
-        member val FunctionType = getNull<FunctionTypes>() with get, set
+        member val FunctionType = FunctionTypes.NoDefined with get, set
         member val Parameters = ResizeArray<string>()
         member x.ToDsText() = 
             if x.FunctionType = FunctionTypes.NoDefined

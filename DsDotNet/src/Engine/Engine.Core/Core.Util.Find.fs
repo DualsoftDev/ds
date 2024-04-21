@@ -8,12 +8,8 @@ open System.Runtime.CompilerServices
 module internal ModelFindModule =
     let nameComponentsEq (Fqdn(ys)) (xs:IQualifiedNamed) = xs.NameComponents = ys
     let nameEq (name:string) (x:INamed) = x.Name = name
-    
-    //let tryFindInLoadedSystem (_device:LoadedSystem) (Fqdn(_fqdn)) =
-    //    failwithlog "Not yet implemented"
-    //    None
-
-    let rec tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
+   
+    let tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
         match xs with
         | [] -> Some system
         | f::xs1 when system.Flows.Any(nameEq f) ->
@@ -37,7 +33,8 @@ module internal ModelFindModule =
             let device = system.LoadedSystems.Find(nameEq dev)
             match xs with
             | [] -> Some device
-            | _ -> None//tryFindInLoadedSystem device (xs.ToArray())
+            | _ -> None
+        | [x] -> failwithlog $"tryFindSystemInner error : single fqdn {x}"
         | _ -> failwithlog "ERROR"
 
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj option =
@@ -45,7 +42,6 @@ module internal ModelFindModule =
         let fqdn = fqdn.ToFSharpList()
         match fqdn with
         | [] -> failwithlog "ERROR: name not given"
-        //| s::xs when s = system.Name -> tryFindSystemInner system xs
         | _ -> tryFindSystemInner system fqdn
 
     let tryFindGraphVertexT<'V when 'V :> IVertex>(system:DsSystem) (Fqdn(fqdn)) =
@@ -59,6 +55,7 @@ module internal ModelFindModule =
 
     let tryFindFlow(system:DsSystem) (name:string)    = system.Flows.TryFind(nameEq name)
     let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(nameEq name)
+    let tryFindFunc (system:DsSystem) name            = system.Functions.TryFind(fun s->s.Name = name)
     let tryFindExternalSystem (system:DsSystem) name  = system.ExternalSystems.TryFind(nameEq name)
     let tryFindLoadedSystem (system:DsSystem) name    = system.LoadedSystems.TryFind(fun s->s.LoadedName = name)
     let tryFindReferenceSystem (system:DsSystem) name = system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
@@ -80,14 +77,19 @@ module internal ModelFindModule =
 
     //jobs 에 등록 안되있으면 Real로 처리 한다.
     let tryFindCall (system:DsSystem) (Fqdn(callPath))=
-        if tryFindJob system (callPath.Last()) |> Option.isSome
-        then match tryFindGraphVertex system callPath with
-             |Some(v) ->
-                match v with
-                | :? Call -> Some(v)
-                | _ -> None
-             |None -> None
-        else None
+        //let job = tryFindJob system (callPath.Last())
+        //let func = tryFindFunc system (callPath.Last())
+        //if job.IsSome  || func.IsSome
+        //then
+        if callPath.Length = 1 then None
+        else 
+            match tryFindGraphVertex system callPath with
+                 |Some(v) ->
+                    match v with
+                    | :? Call -> Some(v)
+                    | _ -> None
+                 |_ -> None
+        //else None
 
     //let tryFindReal system flowName name =
     //    let flow = tryFindFlow system flowName |> Option.get

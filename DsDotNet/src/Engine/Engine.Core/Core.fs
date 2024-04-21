@@ -257,8 +257,12 @@ module CoreModule =
 
         let isFunc = function
             | FuncType _ | JobFuncType _ -> true
-            | _ -> false
+            | _ -> false        
 
+        let isFuncOnly = function
+            | FuncType _  -> true
+            | _ -> false
+            
         member _.TargetJob =
             match targetOption with
             | JobType job -> job
@@ -276,6 +280,7 @@ module CoreModule =
 
         /// Indicates if the target includes a function.
         member _.TargetHasFunc = isFunc targetOption
+        member _.TargetHasFuncOnly  = isFuncOnly targetOption
 
         member val ExternalTags = HashSet<ExternalTagSet>()
         member val Disabled:bool = false with get, set

@@ -357,8 +357,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
                     else
                         yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
-                        
 
+                    yield! sysctx.Descendants<CausalTokenFuncContext>().Cast<ParserRuleContext>() 
                     yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
                 ]
 
@@ -384,7 +384,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for (optParent, ctxInfo) in candidates do
                     let parent = optParent.Value
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-
+                    if  ctxInfo.ContextType = typeof<CausalTokenFuncContext>
+                    then
+                        let func = tryFindFunc system (ctxInfo.Names.CombineQuoteOnDemand()) |> Option.get
+                        if func.IsNonNull() then
+                            Call.Create(func, parent) |> ignore
+                    else
                     match existing with
                     | Some v -> debugfn $"{v.Name} already exists.  Skip creating it."
                     | None ->
@@ -393,17 +398,17 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         | 0, [ r ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
                             match parent.GetCore()  with
                             | :? Flow as flow->
-                                if not <| isCallName (parent, ctxInfo.Names) then
+                                if not <| isCallName (parent, ctxInfo.Names)  then
                                     Real.Create(r, flow) |> ignore
                             |_ ->
                                 failwithf $"{name} needs Job define"
 
                         | 1, [ c ] when not <| (isAliasMnemonic (parent, name)) ->
-                            let job = tryFindJob system c |> Option.get
-
-                            if job.DeviceDefs.any () then
-                                Call.Create(job, parent) |> ignore
-
+                            match tryFindJob system c with
+                            | Some job ->
+                                  if job.DeviceDefs.any () then
+                                    Call.Create(job, parent) |> ignore
+                            | None -> ()
                             
                         | 1, realorFlow :: [ cr ] when
                             not <| isAliasMnemonic (parent, name)

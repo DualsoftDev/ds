@@ -353,7 +353,8 @@ conditionBlock: '[' 'conditions' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF:  causalToken (',' causalToken)* ;
-    causalToken: identifier12;
+    causalToken: (identifier12| causalTokenFunc);
+    causalTokenFunc: '$'identifier12;
 
     causalOperator
         : '>'   // CAUSAL_FWD

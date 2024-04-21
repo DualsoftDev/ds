@@ -32,7 +32,11 @@ module internal ToDsTextModule =
 
         let es  = es |> Seq.sortBy(fun e -> e.EdgeSymbol.Count(fun ch -> ch = '|'))
         let ess = es |> Seq.fold folder []
-        let getName (v:Vertex) = getRawName v.PureNames true
+        let getName (v:Vertex) =
+            match v with    
+            | :? Call as c when c.TargetHasFuncOnly -> "$"+(getRawName v.PureNames true)
+            |_-> getRawName v.PureNames true    
+            
         let getNames (vs:Vertex seq) = vs.Select(getName).JoinWith(", ")
 
         [

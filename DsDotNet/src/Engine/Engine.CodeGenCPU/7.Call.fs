@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 
 type VertexManager with
     member v.C1_CallMemo() =
-        let v = v :?> VertexMCoin
+        let v = v :?> VertexMCall
         let call = 
             match v.Vertex with
             | :? Call as c->  c
@@ -44,7 +44,7 @@ type VertexManager with
 
     
     member v.C2_ActionOut() =
-        let v = v :?> VertexMCoin
+        let v = v :?> VertexMCall
         let coin = v.Vertex :?> Call
         [
                 let rstNormal = coin._off.Expr
@@ -65,4 +65,17 @@ type VertexManager with
                              yield (sets, rstPush  ) ==| (td.AO, getFuncName())
                         else 
                              yield (sets, rstNormal) --| (td.AO, getFuncName())
+        ]
+
+
+    member v.C3_FunctionOut() =
+        let v = v :?> VertexMCall
+        let coin = v.Vertex :?> Call
+        [
+            let set = v.PSFunc.Expr
+            match coin.CallFuncType with 
+            | DuFuncAdd -> yield set --+ (v.PSFunc, getFuncName())
+            | DuFuncSub -> yield set --- (v.PSFunc, getFuncName())
+            | DuFuncMove -> yield set --> (v.PSFunc, getFuncName())
+            | _-> failwithlog $"{v.Name} 함수 정의가 없습니다."
         ]

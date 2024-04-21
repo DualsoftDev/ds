@@ -74,8 +74,11 @@ module OriginModule =
 
     let getOriginInfo (real: Real) =  
         let graphOrder = real.Graph.BuildPairwiseComparer()
-        let pureCalls  = (real.Graph.Vertices.OfType<Call>()
-                         @(real.Graph.Vertices.OfType<Alias>() |> Seq.map (fun f -> f.GetPure():?>Call))
+        let pureCalls  = (real.Graph.Vertices.OfType<Call>().Where(fun c->c.TargetHasJob)
+                         @(real.Graph.Vertices.OfType<Alias>() 
+                            |> Seq.map (fun f -> f.GetPure():?>Call)
+                            |> Seq.filter (fun c -> c.TargetHasJob)
+                            )
                          ).Distinct().Cast<Vertex>()
         
         let mutualInfo = getMutualInfo pureCalls

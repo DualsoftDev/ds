@@ -153,7 +153,7 @@ module internal ToDsTextModule =
             if system.Functions.Any() then
                 yield $"{tab}[functions] = {lb}"
                 for func in system.Functions do
-                    if func.FunctionType = NoDefined
+                    if func.FunctionType = DuFuncUnDefined
                     then 
                         yield $"{tab2}{func.Name};"
                     else 

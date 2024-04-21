@@ -37,7 +37,7 @@ module ConvertErrorCheck =
 
     let checkErrApi(sys:DsSystem) = 
 
-          for coin in sys.GetVerticesOfCoinCalls() do
+          for coin in sys.GetVerticesOfJobCalls() do
                 for td in coin.TargetJob.DeviceDefs do
                     let api = td.ApiItem
                     if api.RXs.IsEmpty() then

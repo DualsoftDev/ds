@@ -155,6 +155,8 @@ module TagKindList =
     |realData                  = 11026
     |realSync                  = 11027
     |callMemo                  = 11028
+    |callFuncPlanSet           = 11029
+    |callFuncPlanEnd           = 11030
 
     |txErrTimeShortage         = 11033
     |txErrTimeOver             = 11034

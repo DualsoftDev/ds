@@ -25,7 +25,7 @@ module ListnerCommonFunctionGenerator =
 
         if funcCallCtxs.any() 
             then 
-                let funcName = funcCallCtxs.Head().funcCallName().GetText()
+                let funcName = funcCallCtxs.Head().GetText()
                 Some (system.Functions.First(fun f->f.Name = funcName))
             else None 
 
@@ -349,16 +349,26 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             parentWrapper, ci
 
         let tokenCreator (cycle: int) =
-            let candidateCtxs: ParserRuleContext list =
-                [ 
-                    let multictx = sysctx.TryFindChildren<Identifier1sListingContext>()
-                    if multictx.any()
-                    then 
-                        yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
-                    else
-                        yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
+           
 
-                    yield! sysctx.Descendants<CausalTokenFuncContext>().Cast<ParserRuleContext>() 
+            let candidateCtxs: ParserRuleContext list =
+                let funcsCausalContext =  
+                    let multiFuncsctx = sysctx.TryFindChildren<Identifier1FuncsContext>()
+                    [
+                        if multiFuncsctx.any()
+                            then yield! multiFuncsctx |> Seq.collect(fun f->f.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>())
+                            else yield! sysctx.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>() 
+                    ]
+                let normalCausalContext =  
+                    let multictx = sysctx.TryFindChildren<Identifier1sListingContext>()
+                    [
+                        if multictx.any()
+                            then yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
+                            else yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
+                    ]
+                [ 
+                    yield! normalCausalContext
+                    yield! funcsCausalContext
                     yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
                 ]
 
@@ -384,7 +394,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for (optParent, ctxInfo) in candidates do
                     let parent = optParent.Value
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-                    if  ctxInfo.ContextType = typeof<CausalTokenFuncContext>
+                    if  ctxInfo.ContextType = typeof<Identifier1FuncContext>  && existing.IsNone
                     then
                         let func = tryFindFunc system (ctxInfo.Names.CombineQuoteOnDemand()) |> Option.get
                         if func.IsNonNull() then

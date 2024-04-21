@@ -43,66 +43,85 @@ module CodeElements =
                 genTargetText name varType initValue
 
     type FunctionTypes =
-        | NoDefined
-        | M
-        | C
-        | T
-        | N
+        | DuFuncUnDefined
+        | DuFuncAdd
+        | DuFuncSub
+        | DuFuncMove
+        | DuFuncCompare
+        | DuFuncTimer
+        | DuFuncNot
         member x.ToText() =
             match x  with
-            | NoDefined -> ""
-            | M -> "m"
-            | C -> "c"
-            | T -> "t"
-            | N -> "n"
+            | DuFuncUnDefined -> ""
+            | DuFuncAdd -> "$add"
+            | DuFuncSub -> "$sub"
+            | DuFuncMove -> "$mov"
+            | DuFuncCompare -> "$c"
+            | DuFuncTimer -> "$t"
+            | DuFuncNot -> "$n"
+
+        member x.IsCommand() =
+            match x  with
+            | DuFuncAdd
+            | DuFuncSub
+            | DuFuncMove -> true
+            | DuFuncCompare 
+            | DuFuncTimer 
+            | DuFuncNot -> false
+            | _ -> failwithlog $"error Function UnDefined" 
 
     let getFunctionType (text:string) = 
         match text.ToLower()  with
-            | "m" -> M 
-            | "c" -> C 
-            | "t" -> T 
-            | "n" -> N 
+            | "$add" -> DuFuncAdd 
+            | "$sub" -> DuFuncSub 
+            | "$mov" -> DuFuncMove  
+            | "$c" -> DuFuncCompare 
+            | "$t" -> DuFuncTimer 
+            | "$n" -> DuFuncNot 
             | _ -> failwithlog $"error {text} is not functionType" 
 
     let getFunction (text:string) = 
         let text = text.Trim()
         if not <| text.StartsWith "$"
         then failwithlog "function text start keyword is '$' ex)$m 100 R100"
-        let line = text.TrimStart('$')
-        //function Name
-        let name = line.Substring(0,1).ToLower()
-        //function Parameters
-        let parameters = line.Substring(1,line.Length-1).Split(' ').Select(fun f->f.Trim())
-                          |> Seq.filter(fun f->f<>"")
-                          |> Seq.toArray
-        name, parameters
+        //function type parameters
+        let funcType, parameters =
+            let parts = text.Split(" ") |> List.ofArray
+            match parts with
+            | head :: xs -> head, xs.ToArray()
+            | [] -> failwith "Input line is empty or improperly formatted"
+
+        funcType, parameters
 
 
     type Func(name:string) =
         member x.Name = name
-        member val FunctionType = FunctionTypes.NoDefined with get, set
+        member val FunctionType = DuFuncUnDefined with get, set
         member val Parameters = ResizeArray<string>()
         member x.ToDsText() = 
-            if x.FunctionType = FunctionTypes.NoDefined
+            if x.FunctionType = DuFuncUnDefined
             then  ""
             else  
-                $"""${x.FunctionType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
+                $"""{x.FunctionType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
            
     [<Extension>]
     type SystemFuncExt =
-        [<Extension>] static member GetDelayTime (x:Func) =
-                        let presetTime = x.Parameters.Head().ToLower()
-                        let timetype = Regex.Replace(presetTime, @"\d", "");//문자 추출
-                        let preset   = Regex.Replace(presetTime, @"\D", "");//숫자 추출
+        [<Extension>] 
+        static member GetDelayTime (x:Func) =
+            let presetTime = x.Parameters.Head().ToLower()
+            let timetype = Regex.Replace(presetTime, @"\d", "");//문자 추출
+            let preset   = Regex.Replace(presetTime, @"\D", "");//숫자 추출
 
-                        match timetype with
-                        | ""  //단위 없으면 msec
-                        | "ms"| "msec"-> preset|> CountUnitType.Parse
-                        | "s" | "sec" -> let presetMsec = ((preset |> Convert.ToInt32) * 1000)
-                                         presetMsec.ToString() |> CountUnitType.Parse
+            match timetype with
+            | ""  //단위 없으면 msec
+            | "ms"| "msec"-> preset|> CountUnitType.Parse
+            | "s" | "sec" -> 
+                let presetMsec = ((preset |> Convert.ToInt32) * 1000)
+                presetMsec.ToString() |> CountUnitType.Parse
 
-                        | _-> failwithlog "timer format Error"
+            | _-> failwithlog "timer format Error"
 
 
-        [<Extension>] static member GetRingCount (x:Func) =
-                        x.Parameters |> Seq.head |> CountUnitType.Parse
+        [<Extension>] 
+        static member GetRingCount (x:Func) =
+            x.Parameters |> Seq.head |> CountUnitType.Parse

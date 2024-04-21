@@ -221,7 +221,7 @@ module TagManagerModule =
 
         member _.IsFinished = (v :?> Real).Finished
 
-    and VertexMCoin(v:Vertex)as this =
+    and VertexMCall(v:Vertex)as this =
         inherit VertexManager(v)
         let s    = this.Storages
         let sys = this.System
@@ -231,6 +231,9 @@ module TagManagerModule =
         let counterBit    = counter  s $"{v.Name}_CTR"  sys (sysManager.TargetType)
         let timerOnDelayBit = timer  s $"{v.Name}_TON"  sys (sysManager.TargetType)
         let memo           = createTag "Memo" VertexTag.callMemo
+        
+        let callFuncPS           = createTag "callFuncPS" VertexTag.callFuncPlanSet
+        let callFuncPE           = createTag "callFuncPE" VertexTag.callFuncPlanEnd
 
    
         let rxErrShortOn     = createTag "rxErrShortOn"       VertexTag.rxErrShortOn    
@@ -258,4 +261,6 @@ module TagManagerModule =
         member _.RXErrShortOn       = rxErrOpenOff    
         member _.RXErrShortRising   = rxErrOpenRising 
         member _.RXErrShortTemp     = rxErrOpenTemp   
+        member _.PSFunc           =  callFuncPS
+        member _.PEFunc           =  callFuncPE
 

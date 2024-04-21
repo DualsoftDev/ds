@@ -36,7 +36,7 @@ type VertexManager with
         (set, rst) --| (v.PA, getFuncName())
 
     member v.M3_CallErrorTXMonitor() =
-        let v= v :?> VertexMCoin
+        let v= v :?> VertexMCall
         let call= v.Vertex.GetPure() :?> Call
         let real= call.Parent.GetCore() :?> Real
         let iop = call.V.Flow.iop.Expr
@@ -52,7 +52,7 @@ type VertexManager with
         ]
 
     member v.M4_CallErrorRXMonitor() =
-        let callV = v :?> VertexMCoin
+        let callV = v :?> VertexMCall
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
         
@@ -99,7 +99,7 @@ type VertexManager with
 
    
     member v.M6_CallErrorTotalMonitor() =
-        let v= v :?> VertexMCoin
+        let v= v :?> VertexMCall
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())
 

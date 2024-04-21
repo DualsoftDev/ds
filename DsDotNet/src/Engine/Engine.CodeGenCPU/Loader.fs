@@ -80,8 +80,8 @@ module CpuLoader =
                 match v with
                 | :? Real
                     ->  v.TagManager <- VertexMReal(v)
-                | ( :? RealExF | :? Call | :? Alias)
-                    -> v.TagManager <-  VertexMCoin(v)
+                | (:? Call | :? RealExF | :? Alias)
+                    -> v.TagManager <-  VertexMCall(v)
                 | _ -> failwithlog (getFuncName()))
 
         createTagM system

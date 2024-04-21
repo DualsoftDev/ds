@@ -129,7 +129,7 @@ module ExportIOTable =
   
         let totalRows =
             let calls = selectFlows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
-            let coins = sys.GetVerticesOfCoinCalls()
+            let coins = sys.GetVerticesOfJobCalls()
             seq {
 
                 let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
@@ -159,36 +159,6 @@ module ExportIOTable =
 
 
     let ToFuncVariTableExternalIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
-  
-        let conditionRows =
-            let coins = sys.GetVerticesOfCoinCalls()
-            seq {
-
-                let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
-
-                for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
-                    if not(coins.Where(fun c->c.TargetJob.DeviceDefs.Contains(dev)).any())
-                    then
-
-                        if dev.InAddress = TextAddrEmpty || dev.InAddress = TextSkip
-                        then  dev.InAddress <- 
-                                match target with   
-                                | PlatformTarget.XGK -> ExternalTempNoIECMemory
-                                | PlatformTarget.XGI -> ExternalTempIECMemory
-                                | _ -> ExternalTempMemory 
-
-                        if dev.OutAddress = TextAddrEmpty 
-                        then  dev.OutAddress <- TextSkip
-
-                        let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
-                        if sortedDeviceDefs.Head() = dev then 
-                            yield rowIOItems (dev, job, true) target//첫 TaskDev만 만듬
-                        else
-                            yield rowIOItems (dev, job, false) target
-            }
-
-
-
 
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
@@ -224,7 +194,7 @@ module ExportIOTable =
         let sampleFuncRows =  if funcRows.any() then [] else  [[TextXlsCommand;"";"";"";"";]]
         let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"";"";"";"";]]
         let dts = 
-            conditionRows @  getConditionDefListRows (sys.ReadyConditions)  @ funcRows @ sampleFuncRows @ sampleVariRows
+            getConditionDefListRows (sys.ReadyConditions)  @ funcRows @ sampleFuncRows @ sampleVariRows
             |> Seq.chunkBySize(IOchunkBySize)
             |> Seq.map(fun rows->
                 let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")

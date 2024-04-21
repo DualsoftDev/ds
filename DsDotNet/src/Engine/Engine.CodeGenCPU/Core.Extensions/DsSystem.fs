@@ -97,7 +97,7 @@ module ConvertCpuDsSystem =
             DsAddressModule.setMemoryIndex(DsAddressModule.memoryCnt + BufferAlramSize)
             
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
-                let cv =  call.TagManager :?> VertexMCoin
+                let cv =  call.TagManager :?> VertexMCall
                 cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
                 call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
 
@@ -117,11 +117,11 @@ module ConvertCpuDsSystem =
             
          
         member private x.GenerationCallAlarmMemory()  = 
-            for call in x.GetVerticesOfCoins().OfType<Call>() 
+            for call in x.GetVerticesOfJobCalls()
                             .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
                             |> Seq.sortBy (fun c -> c.Name) do
 
-                let cv =  call.TagManager :?> VertexMCoin
+                let cv =  call.TagManager :?> VertexMCall
                 cv.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
                 cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
                 cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
@@ -141,7 +141,7 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationTaskDevIO() =
             let TaskDevices = x.Jobs |> Seq.collect(fun j -> j.DeviceDefs) |> Seq.sortBy(fun d-> d.QualifiedName) 
-            let calls = x.GetVerticesOfCoinCalls()
+            let calls = x.GetVerticesOfJobCalls()
             for dev in TaskDevices do
                 if calls.Where(fun f->f.TargetJob.DeviceDefs.Contains(dev)).any() //외부입력 전용 확인
                 then

@@ -21,7 +21,7 @@ module ConvertCpuVertex =
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
-        member r.VC = r.TagManager :?> VertexMCoin
+        member r.VC = r.TagManager :?> VertexMCall
         member r.VR = r.TagManager :?> VertexMReal
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
@@ -30,15 +30,26 @@ module ConvertCpuVertex =
         member c._on     = c.System._on
         member c._off     = c.System._off
 
-        member c.InTags  = c.TargetJob.DeviceDefs.Where(fun d-> d.InAddress <> TextSkip && d.InAddress <> TextAddrEmpty)
-                                                 .Select(fun d->d.InTag :?> Tag<bool>)
+        member c.InTags  = 
+                    if c.TargetHasJob
+                    then 
+                        c.TargetJob.DeviceDefs
+                                    .Where(fun d-> d.InAddress <> TextSkip && d.InAddress <> TextAddrEmpty)
+                                    .Select(fun d->d.InTag :?> Tag<bool>)
+                    else  []
+                       
 
-        member c.UsingTon  = c.TargetJob.Func |> hasTime
-        member c.UsingCtr  = c.TargetJob.Func |> hasCount
-        member c.UsingNot  = c.TargetJob.Func |> hasNot
-        member c.UsingMove = c.TargetJob.Func |> hasMove
-      
-        member c.EndPlan = c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
+        member c.UsingTon  = c.CallFuncType = DuFuncTimer
+        member c.UsingCompare  = c.CallFuncType = DuFuncCompare
+        member c.UsingNot  = c.CallFuncType = DuFuncNot
+        member c.UsingMove  = c.CallFuncType = DuFuncMove
+        member c.EndPlan =  
+                    if c.TargetHasFuncOnly
+                    then
+                        (c.TagManager :?> VertexMCall).PEFunc.Expr
+                    else 
+                        c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
+
         member c.EndActionOnlyIO = 
                 if c.UsingNot 
                     then 
@@ -51,9 +62,7 @@ module ConvertCpuVertex =
                 else c.EndPlan
 
         member c.EndAction = 
-                if c.UsingMove   then c._on.Expr  //todo : Move 처리 완료시 End
-                elif c.UsingCtr  then c.VC.CTR.DN.Expr 
-                elif c.UsingTon  then c.VC.TDON.DN.Expr
+                if c.UsingTon  then c.VC.TDON.DN.Expr
                 else c.EndActionOnlyIO
 
         member c.GetEndAction(x:ApiItem) =
@@ -74,14 +83,30 @@ module ConvertCpuVertex =
                                 then c.TargetJob.Func.Value.GetDelayTime()
                                 else failwith $"{c.Name} not use timer" 
 
-        member c.PresetCounter = if c.UsingCtr
-                                 then c.TargetJob.Func.Value.GetRingCount()
-                                 else failwith $"{c.Name} not use counter"
+        //member c.PresetCounter = if c.UsingCtr
+        //                         then c.TargetJob.Func.Value.GetRingCount()
+        //                         else failwith $"{c.Name} not use counter"
         
-        member c.PSs           = c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PS)
-        member c.PEs           = c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PE)
-        member c.TXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.TXs)
-        member c.RXs           = c.TargetJob.DeviceDefs|>Seq.collect(fun j -> j.ApiItem.RXs)
+        member c.PSs =
+            if c.TargetHasJob 
+            then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PS)
+            else [c.VC.PSFunc]
+
+        member c.PEs =
+            if c.TargetHasJob 
+            then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PE)
+            else [c.VC.PEFunc]
+
+        member c.TXs = 
+            if c.TargetHasJob
+            then c.TargetJob.DeviceDefs |>Seq.collect(fun j -> j.ApiItem.TXs)
+            else []
+
+        member c.RXs = 
+            if c.TargetHasJob
+            then c.TargetJob.DeviceDefs |>Seq.collect(fun j -> j.ApiItem.RXs)
+            else []
+
         member c.Errors       = 
                                 [
                                     getVMCoin(c).ErrTimeOver

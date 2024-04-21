@@ -16,7 +16,7 @@ type VertexManager with
         [
             for coin in coins do
                 let safety = coin.Vertex.GetPureCall().Value.SafetyExpr
-                let coin = coin :?> VertexMCoin
+                let coin = coin :?> VertexMCall
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, getFuncName())
@@ -28,7 +28,7 @@ type VertexManager with
         [
             for coin in coins do
                 let safety = coin.Vertex.GetPureCall().Value.SafetyExpr
-                let coin = coin :?> VertexMCoin
+                let coin = coin :?> VertexMCall
                 let sets = coin.Vertex.GetWeakStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
@@ -39,7 +39,7 @@ type VertexManager with
         let children = real.Graph.Vertices.Select(getVM)
         [
             for child in children do
-                let coin = child :?> VertexMCoin
+                let coin = child :?> VertexMCall
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
                 let setEnd =
                     if call.UsingTon then 
@@ -58,7 +58,7 @@ type VertexManager with
         let children = real.Graph.Vertices.Select(getVM)
         [
             for child in children do
-                let child = child :?> VertexMCoin
+                let child = child :?> VertexMCall
                 let sets = real.V.RT.Expr // <&&> !!real.V.G.Expr
                 let rsts = child.R.Expr
                 yield (sets, rsts) ==| (child.RT, getFuncName() )

@@ -74,9 +74,9 @@ module ImportIOTable =
                         Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{name}", page, 0u)
 
                     let funcType, parms = getFunction (funcText)
-                    if (not <| isJob) && funcType <> "n" then
+                    if (not <| isJob) && funcType <> "$n" then
                         Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcType}", page, 0u)
-                        
+               
                     let paras =
                         if parms.any()
                         then 
@@ -85,19 +85,20 @@ module ImportIOTable =
                                             $"_{param}";
                                     ]
                         else ""
-                    let funcName = $"{funcType.ToLower()}{paras}" 
-                    let funcs = sys.Functions.Where(fun f->f.Name = funcName)
+
+                    let funcs = sys.Functions.Where(fun f->f.Name = name)
                     let funcType = getFunctionType(funcType)
                     if funcs.any() 
                     then 
                         let func = funcs.Head() 
-                        if func.FunctionType = NoDefined
+                        if func.FunctionType = DuFuncUnDefined
                         then 
                             func.FunctionType <- funcType
                             func.Parameters.AddRange(parms)
 
                         func |> Some
                     else 
+                        let funcName = $"{funcType.ToText().TrimStart('$')}{paras}" 
                         let func = Func.Create(funcName, funcType , parms)
                         sys.Functions.Add func |> ignore  
                         func |> Some
@@ -147,6 +148,9 @@ module ImportIOTable =
             let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let func = $"{row.[(int) IOColumn.Func]}"
+                if func = "" then
+                    Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
+                        
                 getFunctionNUpdate (name, func, tableIO, true, page) |> ignore
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =

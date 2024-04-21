@@ -50,7 +50,7 @@ module ConvertCPU =
                 yield vm.R3_RealStartPoint()
                 yield vm.R4_RealSync() 
                 yield! vm.R5_DummyDAGCoils() 
-                //yield vm.R6_RealDataMove() 
+                yield vm.R6_RealDataMove() 
                 yield! vm.R7_RealGoingOriginError() 
                 
                 
@@ -70,10 +70,12 @@ module ConvertCPU =
                 yield! vm.M3_CallErrorTXMonitor() 
                 yield! vm.M4_CallErrorRXMonitor() 
                 yield vm.M6_CallErrorTotalMonitor() 
-
-                yield! vm.C2_ActionOut()
-
-            if IsSpec (v, CallInReal , AliasNotCare) then
+                
+                if (v :?> Call).TargetHasJob
+                then yield! vm.C2_ActionOut()
+                else yield! vm.C3_FunctionOut()
+                
+            if IsSpec (v, CallInReal, AliasNotCare) then
                 yield vm.C1_CallMemo() 
 
             if IsSpec (v, VertexAll, AliasNotCare) then
@@ -135,7 +137,7 @@ module ConvertCPU =
                     a, 
                         coinAll.Where(fun f->
                         match f with
-                        | :? Call as c->  c.TargetJob.ApiDefs.Contains(a)
+                        | :? Call as c when c.TargetHasJob ->  c.TargetJob.ApiDefs.Contains(a)
                         | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.ApiDefs.Contains(a)
                         |_ -> false
                     )
@@ -148,15 +150,28 @@ module ConvertCPU =
                 if coins.any()
                 then
                     yield am.A1_PlanSend(s, coins)
+                    yield am.A1_PlanSend(s, coins)
                     yield am.A3_SensorLinking(s, coins.OfType<Call>())
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
+        ]
+
+    let private funcCommandCall(s:DsSystem) =
+        let coinCommandFuncs =
+            s.GetVerticesOfCoins().OfType<Call>()
+                .Where(fun c->c.TargetHasFunc && c.CallFuncType.IsCommand())
+                .Select(fun c->c.TagManager :?> VertexMCall)
+
+        [
+            for coin in coinCommandFuncs do
+                yield coin.CallFunctionPS()
+                yield coin.CallFunctionPS()
         ]
 
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
 
-            let coins = s.GetVerticesOfCoins()  
+            let coins = s.GetVerticesOfJobCalls()  
             let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
             for (notFunc, dts) in jobs.Select(fun j-> (j.Func |> hasNot), j.DeviceDefs) do
                 for dt in dts do
@@ -228,7 +243,10 @@ module ConvertCPU =
 
             //Api 적용 
             yield! apiPlanSync sys
-
+            
+            //funcCall 적용 
+            yield! funcCommandCall sys
+            
             //Timer Count 적용 
             yield! applyTimerCounterSpec sys
         ]

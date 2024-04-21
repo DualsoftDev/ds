@@ -181,6 +181,7 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier23: (identifier2 | identifier3);
     identifier123: (identifier1 | identifier2 | identifier3);
 
+    identifier1Func: '$'identifier1;
     identifier123CNF: identifier123 (COMMA identifier123)*;
 
     flowPath: identifier2;
@@ -252,12 +253,13 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disabl
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
         causal | parentingBlock | identifier1Listing | identifier1sListing 
+        | identifier1Func | identifier1Funcs
         | aliasBlock
         // | safetyBlock
         )* RBRACE  (SEMICOLON)?   // |flowTask|callDef
     ;
     parentingBlock: identifier1 EQ LBRACE (identifier1sListing | causal)* RBRACE;
-
+    identifier1Funcs: (identifier1Func (COMMA identifier1Func)*)?  SEMICOLON; 
     identifier1Listing: identifier1  SEMICOLON;     // A;
     identifier1sListing: (identifier1 (COMMA identifier1)*)?  SEMICOLON;     // A, B, C;
         
@@ -286,8 +288,8 @@ functionsBlock: '[' 'functions' ']' EQ LBRACE (functionDef|functionNameOnly)+ RB
     functionDef: functionName EQ functionCall SEMICOLON;
     functionNameOnly: identifier1 SEMICOLON;
     functionName: identifier1;
-    functionCall:  '$' functionType (argument (argument)*)?;
-    functionType: identifier1;
+    functionCall: functionType (argument (argument)*)?;
+    functionType: '$'identifier1;
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     callListing:
@@ -303,8 +305,7 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
 
 
 
-funcCall: '$'funcCallName;
-funcCallName: identifier1;
+funcCall: identifier1Func;
 
 
 
@@ -352,9 +353,8 @@ conditionBlock: '[' 'conditions' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 // B.F1 > Set1F <| T.A21;
 causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
-    causalTokensCNF:  causalToken (',' causalToken)* ;
-    causalToken: (identifier12| causalTokenFunc);
-    causalTokenFunc: '$'identifier12;
+    causalTokensCNF: causalToken (',' causalToken)* ;
+    causalToken: identifier12|identifier1Func;
 
     causalOperator
         : '>'   // CAUSAL_FWD

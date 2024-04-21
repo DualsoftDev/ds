@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module Engine.CodeGenCPU.ConvertFlow
 
 open System.Linq
@@ -54,15 +54,11 @@ type VertexManager with
             match v.Vertex  with
             | :? Alias   as rf -> rf.V.Vertex.GetPure().V.ET.Expr
             | :? RealExF as rf -> rf.V.Vertex.GetPure().V.ET.Expr
-            | :? Call as call ->
-                if call.Parent.GetCore() :? Flow
-                then call.EndAction 
-                     <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
-                else failwithlog $"Error this call Parent is flow but real {call.QualifiedName}" 
+            | :? Call as call -> 
+                    call.EndAction  <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
             | _ ->
                 failwithlog "Error"
              
-
 
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())

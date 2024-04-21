@@ -28,7 +28,7 @@ module SystemManagerModule =
         let dsSysUint32 name autoAddr target (t:SystemTag) = (dsSysTag DuUINT32 name  autoAddr target t) :?> PlanVar<uint32>
 
 
-        let mutualCalls = getMutualInfo (sys.GetVertices().OfType<Call>().Cast<Vertex>())
+        let mutualCalls = getMutualInfo (sys.GetVerticesOfJobCalls().Cast<Vertex>())
 
 
         //let on     = let onBit = dsSysBit "_onalways"     false   sys   SystemTag.on

@@ -155,10 +155,13 @@ module internal ModelFindModule =
 
         flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
 
+    let getVerticesOfJobCalls x   =  
+        getVerticesOfSystem(x).OfType<Call>()
+                              .Where(fun c->c.TargetHasJob)    
+
     let getDistinctApis(x:DsSystem) =
-        getVerticesOfSystem(x).OfType<Call>()   
-                             .SelectMany(fun c-> c.TargetJob.ApiDefs)
-                             .Distinct()
+        getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.ApiDefs)
+                                .Distinct()
 
     let getVertexSharedReal(real:Real) =
         let vs = real.Flow.System |> getVerticesOfSystem
@@ -239,8 +242,11 @@ type FindExtension =
                     (calls@aliases)
                         .Where(fun c->c.Parent.GetCore() :? Real)     
 
+    [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
+
     [<Extension>] static member GetVerticesOfCoinCalls(x:DsSystem) = 
-                    x.GetVertices().OfType<Call>().Where(fun c->c.Parent.GetCore() :? Real)    
+                    x.GetVerticesOfJobCalls().Where(fun c->c.Parent.GetCore() :? Real) 
+
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
 

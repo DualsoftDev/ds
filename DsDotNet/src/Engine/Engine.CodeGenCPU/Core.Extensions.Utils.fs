@@ -9,14 +9,11 @@ open System
 [<AutoOpen>]
 module ConvertCoreExtUtils =
     
-    let hasTime (x:Func option) = x.IsSome && x.Value.FunctionType.ToText() = TextOnDelayTimer
-    let hasCount(x:Func option) = x.IsSome && x.Value.FunctionType.ToText() = TextRingCounter
-    let hasMove (x:Func option) = x.IsSome && x.Value.FunctionType.ToText() = TextMove
-    let hasNot  (x:Func option) = x.IsSome && x.Value.FunctionType.ToText() = TextNot 
+    let hasNot  (x:Func option) = x.IsSome && x.Value.FunctionType = DuFuncNot
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexManager
     let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
-    let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCoin
+    let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCall
 
     let getTarget (x:DsSystem) = (x.TagManager :?> SystemManager).TargetType
     let getSM (x:DsSystem) = x.TagManager :?> SystemManager

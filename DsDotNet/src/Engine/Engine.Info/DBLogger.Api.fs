@@ -41,7 +41,7 @@ module DBLoggerApi =
         then Enumerable.Empty<InfoDevice>()
         else 
             let sys  = (xs.First():>LoadedSystem).ContainerSystem
-            let calls = sys.GetVertices().OfType<Call>()
+            let calls = sys.GetVerticesOfJobCalls()
             xs.Select(fun x->
                 let info = InfoDevice.Create(x)
                 let callUseds = calls

@@ -90,7 +90,9 @@ module PPTDocModule =
         //group 에 사용된 real, call ID를 재귀적으로 모든 하위그룹까지 가져옴
         let rec getGroupMembers (subG: Presentation.GroupShape, shapeIds: HashSet<uint32>) =
             subG.Descendants<Presentation.Shape>()
-            |> Seq.filter (fun shape -> shape.CheckRectangle() || shape.CheckEllipse())
+            |> Seq.filter (fun shape -> shape.CheckRectangle() 
+                                        || shape.CheckEllipse() 
+                                        || shape.CheckFlowChartPreparation())
             |> Seq.iter (fun shape -> shapeIds.Add(shape.GetId().Value) |> ignore)
 
             subG.Descendants<Presentation.GroupShape>()

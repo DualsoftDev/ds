@@ -42,7 +42,7 @@ module ConvertHMI =
 
     type Call with
         member private x.GetHMI()   =
-            let tm = x.TagManager :?> VertexMCoin
+            let tm = x.TagManager :?> VertexMCall
             {
                 Name = x.Name
                 TimeShortageErrorLamp  = getLamp  tm (VertexTag.txErrTimeShortage |>int)
@@ -54,7 +54,7 @@ module ConvertHMI =
 
     type LoadedSystem with
         member private x.GetHMI()   =
-            let containerCalls = x.ContainerSystem.GetVertices().OfType<Call>()
+            let containerCalls = x.ContainerSystem.GetVerticesOfJobCalls()
             {
                 Name        = x.Name
                 Calls    = containerCalls
@@ -94,12 +94,16 @@ module ConvertHMI =
                 ErrTimeOver  = getLamp  tm (VertexTag.txErrTimeOver |>int)  
                 ErrTimeShortage  = getLamp  tm (VertexTag.txErrTimeShortage |>int)  
                 
-                Devices      = calls.SelectMany(fun c->
+                Devices      = calls
+                                    .Where(fun c->c.TargetHasJob)
+                                    .SelectMany(fun c->
                                       c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()
                                                             .Select(fun d->d.GetHMI())
                                        ).ToArray()
                                
-                Jobs         = calls.Select(fun c->c.TargetJob.GetHMI()).ToArray()
+                Jobs         = calls 
+                                    .Where(fun c->c.TargetHasJob)
+                                    .Select(fun c->c.TargetJob.GetHMI()).ToArray()
             }
 
     type Flow with

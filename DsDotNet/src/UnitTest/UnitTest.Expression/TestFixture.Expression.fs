@@ -1,5 +1,6 @@
 namespace T
 
+open System.IO
 open Dual.UnitTest.Common.FS
 open Dual.Common.Core.FS
 open Engine.Core
@@ -18,7 +19,7 @@ module ExpressionFixtures =
 
     [<AbstractClass>]
     type ExpressionTestBaseClass() =
-        inherit TestBaseClass("EngineLogger")
+        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "EngineLogger")
         do
             //Engine.CodeGenCPU.ModuleInitializer.Initialize()
             setRuntimeTarget XGI |> ignore

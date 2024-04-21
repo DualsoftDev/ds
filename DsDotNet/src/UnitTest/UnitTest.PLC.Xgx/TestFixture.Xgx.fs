@@ -118,9 +118,12 @@ module XgxFixtures =
         prjParam.GenerateXmlString()
 
     let TestPlatformTarget = XGI
+
+
+
     [<AbstractClass>]
     type XgxTestBaseClass(xgx:PlatformTarget) =
-        inherit TestBaseClass("EngineLogger")
+        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "EngineLogger")
 
         let sys = DsSystem("testSys")
         [<SetUp>]

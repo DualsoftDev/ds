@@ -3,11 +3,11 @@ namespace T.IOHub
 open Dual.UnitTest.Common.FS
 open NUnit.Framework
 open System
+open System.IO
 open System.Diagnostics
 open IO.Core
 open Xunit
 open Dual.Common.Core.FS
-open System.IO
 
 [<AutoOpen>]
 module TestLockModule =
@@ -37,7 +37,7 @@ module TestLockModule =
     [<Collection("ZmqTesting")>]
     [<TestFixture>]
     type TestLock() =
-        inherit TestBaseClass("IOHubLogger")
+        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "IOHubLogger")
 
 
         [<Test>]

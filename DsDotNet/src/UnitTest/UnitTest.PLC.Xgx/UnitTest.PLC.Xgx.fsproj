@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="formatXml.mjs" />
         <Compile Include="TestFixture.Xgx.fs" />
         <Compile Include="XgxLadderElementsTest.fs" />
         <Compile Include="XgxTestCommon.fs" />

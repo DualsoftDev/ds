@@ -365,5 +365,8 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
     interface IDisposable with
         member x.Dispose() =
             logDebug "Disposing hub IO server..."
-            streamManagers.Values |> iter (fun stream -> dispose stream.FileStream)
-            streamManagers.Clear()
+            lock streamManagers (
+                fun () ->
+                    streamManagers.Values |> iter (fun stream -> dispose stream.FileStream)
+                    streamManagers.Clear()
+            )

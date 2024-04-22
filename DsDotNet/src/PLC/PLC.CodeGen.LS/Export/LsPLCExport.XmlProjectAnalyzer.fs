@@ -80,8 +80,11 @@ module XgiXmlProjectAnalyzerModule =
     let collectTimerAddressXgk (xdoc: XmlDocument) =
         collectGlobalVariableAddresses xdoc "T" |> map extractNumber
 
-
     let collectXgkBasicParameters (xdoc: XmlDocument) : Dictionary<string, int> =
         xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGTBasicParam").GetAttributes()
-        |> map (fun (KeyValue(k, v)) -> k, int v)
+        |> map (fun (KeyValue(k, v)) ->
+            match Parse.Int v with
+            | Some v -> Some (k, v)
+            | None -> None)
+        |> choose id
         |> Tuple.toDictionary

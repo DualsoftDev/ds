@@ -2,9 +2,11 @@
 [<AutoOpen>]
 module LSEAddressPattern
 
+open System.Linq
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Globalization
+
 
 let subBitPattern (size: int) (str: string) =
     match System.Int32.TryParse(str) with
@@ -43,6 +45,30 @@ let regexXGK6 = @"^([U])(\d+)\.(\d+)\.([\da-fA-F])$"
 let regexXGK7 = @"^([S])(\d+)\.(\d+)$"
 let regexXGK8 = @"^([Z])(\d+)\$"
 
+let list5Digit = [ "L"; "N"; "D"; "R" ]
+let list4Digit = [ "P"; "M"; "K"; "F"; "T"; "C" ]
+
+let getXgkBitText (device:string, offset: int) : string =
+    let word = offset / 16
+    let bit = offset % 16
+    match device.ToUpper() with
+    | d when list5Digit |> List.contains d ->
+        device + sprintf "%05i.%X" word bit
+    | d when list4Digit |> List.contains d ->
+        device + sprintf "%04i%X" word bit
+    | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
+
+let getXgkWordText (device:string, offsetByte: int) : string =
+    if offsetByte % 2 = 1 then
+        failwithf $"XGK 주소는 Word 타입 지원하려면 offsetByte({offsetByte})가 2의 배수야 합니다."
+
+    let wordIndex = offsetByte / 2
+    match device.ToUpper() with
+    | d when list5Digit |> List.contains d ->
+        sprintf "%s%05i" d wordIndex
+    | d when list4Digit |> List.contains d ->
+        sprintf "%s%04i" d wordIndex
+    | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
 
 
 let createTagInfo = LsTagInfo.Create >> Some

@@ -36,7 +36,7 @@ module TagVariableModule =
             ()  // just for debug breakpoint
 
         let {Name=name; Value=initValue; Address=address; Comment=comment; IsGlobal=isGlobal } = param
-        let mutable address = if address.IsSome then address.Value else TextAddrEmpty
+        let mutable address = if address.IsSome then address.Value else ""
         let mutable value = initValue
         let mutable tagChanged = false
         let comment = comment |? ""

@@ -83,17 +83,21 @@ module ImportViewModule =
                 if src :? Real then
                     let r = src :?> Real
                     ConvertReal(r, dicV.[r], dummys) |> ignore)
+            edge.Targets
+            |> Seq.iter (fun tgt ->
+                if tgt :? Real then
+                    let r = tgt :?> Real
+                    ConvertReal(r, dicV.[r], dummys) |> ignore)
 
-            assert (edge.Targets.Count() = 1)
 
-            if edge.Targets[0] :? Real then
-                let r = edge.Targets[0] :?> Real
-                ConvertReal(r, dicV.[r], dummys) |> ignore
-
-            edge.Sources
+            edge.Targets
             |> Seq.iter (fun src ->
-                newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[edge.Targets[0]]))
-                |> ignore))
+                edge.Sources
+                |> Seq.iter (fun tgt ->
+                    newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[tgt]))
+                    )
+                |> ignore)
+                )
 
 
         let es = flow.GetDummyEdgeFlow(dummys, dicV, dicDummy)

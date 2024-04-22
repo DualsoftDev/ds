@@ -40,7 +40,7 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="11">
-                        <Symbol Name="cond1" Comment="" Device="M" DevicePos="144" Type="BIT"/>
+                        <Symbol Name="cond1" Comment="" Device="M" DevicePos="128" Type="BIT"/>
                         <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
                         <Symbol Name="nn2" Comment="" Device="M" DevicePos="1" Type="WORD"/>
                         <Symbol Name="nn3" Comment="" Device="M" DevicePos="2" Type="WORD"/>
@@ -49,18 +49,18 @@
                         <Symbol Name="nn6" Comment="" Device="M" DevicePos="5" Type="WORD"/>
                         <Symbol Name="nn7" Comment="" Device="M" DevicePos="6" Type="WORD"/>
                         <Symbol Name="nn8" Comment="" Device="M" DevicePos="7" Type="WORD"/>
-                        <Symbol Name="result" Comment="" Device="M" DevicePos="145" Type="BIT"/>
-                        <Symbol Name="sum" Comment="" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="_t10_OR" Comment="$cond1 &amp;&amp; $nn1 + $nn2 * $nn3 &gt; 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="149" Type="BIT"/>
+                        <Symbol Name="result" Comment="" Device="M" DevicePos="129" Type="BIT"/>
+                        <Symbol Name="sum" Comment="" Device="M" DevicePos="9" Type="WORD"/>
+                        <Symbol Name="_t10_OR" Comment="$cond1 &amp;&amp; $nn1 + $nn2 * $nn3 &gt; 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="133" Type="BIT"/>
                         <Symbol Name="_t1_MUL" Comment="$nn2 * $nn3" Device="M" DevicePos="10" Type="WORD"/>
                         <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2 * $nn3" Device="M" DevicePos="11" Type="WORD"/>
-                        <Symbol Name="_t3_GT" Comment="$nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="146" Type="BIT"/>
-                        <Symbol Name="_t4_AND" Comment="$cond1 &amp;&amp; $nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="147" Type="BIT"/>
+                        <Symbol Name="_t3_GT" Comment="$nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="130" Type="BIT"/>
+                        <Symbol Name="_t4_AND" Comment="$cond1 &amp;&amp; $nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="131" Type="BIT"/>
                         <Symbol Name="_t5_MUL" Comment="$nn5 * $nn6" Device="M" DevicePos="12" Type="WORD"/>
                         <Symbol Name="_t6_DIV" Comment="$nn5 * $nn6 / $nn7" Device="M" DevicePos="13" Type="WORD"/>
                         <Symbol Name="_t7_ADD" Comment="$nn4 + $nn5 * $nn6 / $nn7" Device="M" DevicePos="14" Type="WORD"/>
                         <Symbol Name="_t8_SUB" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8" Device="M" DevicePos="15" Type="WORD"/>
-                        <Symbol Name="_t9_GT" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="148" Type="BIT"/>
+                        <Symbol Name="_t9_GT" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="132" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

@@ -110,7 +110,7 @@ type AddressAllocatorTest(xgx:PlatformTarget) =
 
         | XGK ->
             for i = 0 to 10 do
-                x() === xgkIOMBit ("M", i)   // M00000 ~ M0000A
+                x() === getXgkBitText ("M", i)   // M00000 ~ M0000A
 
             x() === "M0000B"
             x() === "M0000C"
@@ -148,7 +148,7 @@ type AddressAllocatorTest(xgx:PlatformTarget) =
             b() === "%RB32"
         | XGK ->
             for i = 0 to 10 do
-                x() === xgkIOMBit ("R", i+(startWord*8)) 
+                x() === getXgkBitText ("R", i+(startWord*8)) 
 
             x() === "R00010.B"
             x() === "R00010.C"

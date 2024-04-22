@@ -1,4 +1,4 @@
-namespace Engine.Core
+namespace Engine.CodeGenCPU
 
 open System.Linq
 open Dual.Common.Core.FS
@@ -6,6 +6,7 @@ open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Reflection     
 open System
+open Engine.Core
 
 [<AutoOpen>]
 module DsAddressModule =
@@ -23,20 +24,7 @@ module DsAddressModule =
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
 
-    let xgkIOMBit (device:string, offset: int) : string =
-        let word = offset / 16
-        let bit = offset % 16
-        if device = "R"
-        then  device + sprintf "%05i.%X" word bit
-        else
-            device + sprintf "%04i%X" word bit
-
-    let xgkIOMWord (device:string, offsetByte: int) : string =
-        if device = "R"
-        then device + sprintf "%05i" (offsetByte/2)
-        else
-            device + sprintf "%04i" (offsetByte/2)
-
+   
     let getStartPointXGK(index:int) =
         RuntimeDS.HwSlotDataTypes
             |> Seq.filter(fun (i, _, _) -> i < index)
@@ -168,7 +156,7 @@ module DsAddressModule =
                                 let iSlot, sumBit = getSlotInfoIEC(ioType, cnt)
                                 $"%%IX0.{iSlot}.{(cnt-sumBit) % 64}" 
                             else 
-                                xgkIOMBit("P", getSlotInfoNonIEC(ioType, cnt)) 
+                                getXgkBitText("P", getSlotInfoNonIEC(ioType, cnt)) 
                             
                     |Out -> 
                             if iec
@@ -176,11 +164,11 @@ module DsAddressModule =
                                 let iSlot ,sumBit = getSlotInfoIEC(ioType, cnt)
                                 $"%%QX0.{iSlot}.{(cnt-sumBit) % 64}" 
                             else 
-                                xgkIOMBit("P", getSlotInfoNonIEC(ioType, cnt)) 
+                                getXgkBitText("P", getSlotInfoNonIEC(ioType, cnt)) 
 
                     |Memory -> if iec
                                  then $"%%MX{cnt}" 
-                                 else  xgkIOMBit("M", cnt) //PLC생성 외부 변수  M , PLC생성 내부 변수는 R
+                                 else  getXgkBitText("M", cnt) //PLC생성 외부 변수  M , PLC생성 내부 변수는 R
                                    
 
                     |NotUsed -> failwithf $"{ioType} not support"

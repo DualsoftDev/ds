@@ -7,6 +7,7 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
+open System
 
 
 type XgxExpEqualityTest(xgx:PlatformTarget) =
@@ -142,6 +143,7 @@ type XgkExpEqualityTest() =
     inherit XgxExpEqualityTest(XGK)
     [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
     [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
+    [<Obsolete("디버그 실행시 예외 확인 필요")>]
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``() 

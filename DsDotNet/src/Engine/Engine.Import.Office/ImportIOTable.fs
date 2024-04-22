@@ -66,17 +66,17 @@ module ImportIOTable =
 
         try
             
-            let getFunctionNUpdate (name, funcText, tableIO: Data.DataTable, isJob: bool, page) =
+            let getFunctionNUpdate (callName, funcDefine , funcText, tableIO: Data.DataTable, isJob: bool, page) =
                 if ((trimSpace funcText) = "" || funcText = TextSkip || funcText = TextFuncNotUsed)
                 then
                     None
                 else 
                     if funcText.Contains(';') then 
-                        Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{name}", page, 0u)
+                        Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{callName}", page, 0u)
 
-                    let funcType, parms = getFunction (funcText)
-                    if (not <| isJob) && funcType <> "$n" then
-                        Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcType}", page, 0u)
+                    let funcTypeText, parms = getFunction (funcText)
+                    if (not <| isJob) && funcTypeText <> "$n" then
+                        Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcTypeText}", page, 0u)
                
                     let paras =
                         if parms.any()
@@ -87,8 +87,13 @@ module ImportIOTable =
                                     ]
                         else ""
 
-                    let funcs = sys.Functions.Where(fun f->f.Name = name)
-                    let funcType = getFunctionType(funcType)
+                    let funcType = getFunctionType(funcTypeText)
+                    let funcName =
+                        if funcDefine = ""
+                        then $"{funcType.ToText().TrimStart('$')}{paras}" 
+                        else funcDefine
+
+                    let funcs = sys.Functions.Where(fun f->f.Name = funcName)
                     if funcs.any() 
                     then 
                         let func = funcs.Head() 
@@ -99,7 +104,6 @@ module ImportIOTable =
 
                         func |> Some
                     else 
-                        let funcName = $"{funcType.ToText().TrimStart('$')}{paras}" 
                         let func = Func.Create(funcName, funcType , parms)
                         sys.Functions.Add func |> ignore  
                         func |> Some
@@ -135,7 +139,7 @@ module ImportIOTable =
                 let job = dicJob[devName]
                 
                 let func = $"{row.[(int) IOColumn.Func]}"
-                match getFunctionNUpdate (job.Name, func, tableIO, true, page) with
+                match getFunctionNUpdate (job.Name, "", func, tableIO, true, page) with
                 |Some f ->   job.Func <- Some f
                 |_->()
                         
@@ -152,7 +156,7 @@ module ImportIOTable =
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
                         
-                getFunctionNUpdate (name, func, tableIO, true, page) |> ignore
+                getFunctionNUpdate (name, name, func, tableIO, true, page) |> ignore
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
@@ -165,7 +169,7 @@ module ImportIOTable =
                     btn.InAddress  <-inaddr.Trim() 
                     btn.OutAddress <-outaddr.Trim() 
 
-                    match getFunctionNUpdate (btn.Name, $"{row.[(int) IOColumn.Func]}", tableIO, false, page) with
+                    match getFunctionNUpdate (btn.Name, "", $"{row.[(int) IOColumn.Func]}", tableIO, false, page) with
                     |Some f -> btn.Func <- Some f
                     |_->()
 
@@ -187,7 +191,7 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
                     lamp.InAddress  <-inaddr.Trim() 
                     lamp.OutAddress <-outaddr.Trim() 
-                    match getFunctionNUpdate (lamp.Name, func,  tableIO, false, page) with
+                    match getFunctionNUpdate (lamp.Name, "", func,  tableIO, false, page) with
                     |Some f ->    lamp.Func <- Some f
                     |_->()
 
@@ -206,7 +210,7 @@ module ImportIOTable =
                     let inaddr =  getValidCondiAddress (cond) Util.runtimeTarget
                     cond.InAddress  <-inaddr.Trim() 
 
-                    match getFunctionNUpdate (cond.Name, func, tableIO, false, page) with
+                    match getFunctionNUpdate (cond.Name, "", func, tableIO, false, page) with
                     |Some f ->   cond.Func <- Some f
                     |_->()
 

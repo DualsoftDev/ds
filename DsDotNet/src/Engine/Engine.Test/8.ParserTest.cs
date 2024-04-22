@@ -131,137 +131,88 @@ namespace Engine
 ";
 
         public static string Buttons = @"
-[sys] My = {
-    [flow] F1 = {
-        A > B;		// A(Real)> B(Real);
+[sys] HelloDS_DATA = {
+    [flow] f1 = {
+        Work1 > Work2;
     }
-    [flow] F2 = {
-        A > B;		// A(Real)> B(Real);
+    [functions] = {
+        n = $n;
     }
-    [flow] F3 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [flow] F4 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [flow] F5 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [functions] ={
-        HomeBTN_func = {$t 2000};         
-    }
-
     [buttons] = {
         [a] = {
-            AutoBTN(%I1, %Q1) = { F2; }
-            AutoBTN2(%I2, %Q2) = { F1;F3;F5; }
+            AutoSelect(_, -) = { $n; f1; }
         }
         [m] = {
-            ManualBTN(_, _) = { F1;F5; }
+            ManualSelect(_, -) = { $n; f1; }
         }
         [d] = {
-            StartBTN_FF(_, _) = { F2; }
-            StartBTN1(_, _) = { F1; }
+            DrivePushBtn(_, -) = { $n; f1; }
         }
         [e] = {
-            EMGBTN3(_, _) = { F3; }
-            EMGBTN(_, _) = { F1;F2;F4;F5; }
-        }
-        [t] = {
-            StartTestBTN(_, _) = { F5; }
+            EmergencyBtn(_, -) = { f1; }
         }
         [p] = {
-            PauseBTN(_, _) = { F1;F2;F5; }
+            PausePushBtn(_, -) = { f1; }
         }
         [c] = {
-            ClearBTN(_, _) = { F1;F2;F3;F5; }
-        }
-        [h] = {
-            HomeBTN(_, _) = { F1;F2;F3;F5;$HomeBTN_func; }
-           
+            ClearPushBtn(_, -) = { f1; }
         }
     }
-}
+    }
+
 ";
 
         public static string Lamps = @"
-[sys] My = {
-    [flow] F1 = {
-        A > B;		// A(Real)> B(Real);
+[sys] HelloDS_DATA = {
+    [flow] f1 = {
+        Work1 > Work2;
     }
-    [flow] F2 = {
-        A > B;		// A(Real)> B(Real);
+    [functions] = {
+        n = $n;
     }
-    [flow] F3 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [flow] F4 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [flow] F5 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [functions] = 
-    {
-        ReadyMode_func = {$n;};
-    }
-    [lamps] = 
-    {
+
+    [lamps] = {
         [a] = {
-            AutoMode(_,%Q1) = { F1 }
+            AutoModeLamp(-, _) = { $n; }
         }
         [m] = {
-            ManualMode(_,%Q1) = { F2 }
+            ManualModeLamp(-, _) = { $n; }
         }
         [d] = {
-            RunMode(_,%Q1) = { F3  }
+            DriveLamp(-, _) = {  }
         }
         [e] = {
-            ErrorMode(_,%Q1) = { F3 }
-        }
-        [t] = {
-            TestMode(_,%Q1) = { F5 }
+            ErrorLamp(-, _) = {  }
         }
         [r] = {
-            ReadyMode(_,%Q1) = { F4;$ReadyMode_func }
+            ReadyStateLamp(-, _) = {  }
         }
         [i] = {
-            IdleLamp(_,%Q1) = { F5 }
+            IdleModeLamp(-, _) = { $n; }
+        }
+        [o] = {
+            OriginStateLamp(-, _) = {  }
         }
     }
 }
 ";
 
         public static string Conditions = @"
-[sys] My = {
-    [flow] F1 = {
-        A > B;		// A(Real)> B(Real);
+[sys] HelloDS_DATA = {
+    [flow] f1 = {
+        Work1 > Work2;
     }
-    [flow] F2 = {
-        A > B;		// A(Real)> B(Real);
+    [functions] = {
+        n = $n;
     }
-    [flow] F3 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [flow] F4 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [flow] F5 = {
-        A > B;		// A(Real)> B(Real);
-    }
-    [conditions] = 
-    {
-        [d] = {
-            AirOn1(%I1,_) = { F1;F2; }
-            AirOn2(%I2,_) = { F1; }
-        }
+
+	[conditions] = {
         [r] = {
-            LeakErr(%I3,_) = { F2; }
-            LeakErr.func = {
-                $t 2000;
-            }
+            f1_Condition1(_, _) = { $n; f1; }
+            f1_Condition2(_, _) = { $n; f1; }
         }
     }
+
 }
 ";
         public static string Ppt = @"
@@ -520,9 +471,6 @@ namespace Engine
     }
     [jobs] = {
         C1 = { B.""+""(%I1, %Q1); A.""+""(_, %Q999.2343); }
-        C1.func = {
-            $t 2000;
-        }
         C2 = { A.""-""(_, %Q3); B.""-""(%I1, _); }
     }
     [external file=""cylinder.ds""] A;

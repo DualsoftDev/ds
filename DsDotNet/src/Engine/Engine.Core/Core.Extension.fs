@@ -127,6 +127,13 @@ module CoreExtensionModule =
         member x.HWButtons            = x.HWButtons :> seq<_>
         member x.HWLamps              = x.HWLamps   :> seq<_>
 
+        member x.AutoNameGenFuncs  =
+                    x.Jobs.Choose(fun j-> j.Func)
+                    @ x.HWButtons.Choose(fun f-> f.Func)
+                    @ x.HWLamps.Choose(fun f-> f.Func)
+                    @ x.HWConditions.Choose(fun f-> f.Func)
+
+
         member x.AutoHWButtons        = getButtons(x, DuAutoBTN)
         member x.ManualHWButtons      = getButtons(x, DuManualBTN)
         member x.DriveHWButtons       = getButtons(x, DuDriveBTN)

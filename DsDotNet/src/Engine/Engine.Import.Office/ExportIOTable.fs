@@ -176,14 +176,17 @@ module ExportIOTable =
                 ]
             )
 
-        let funcRows = sys.Functions.Map(fun func->
-                [ TextXlsCommand
-                  func.Name
-                  ""
-                  ""
-                  ""
-                  func.ToDsText() ]
-                  )
+
+        let funcRows =
+            sys.Functions.Where(fun f->not(sys.AutoNameGenFuncs.Contains(f)))
+                                    .Map(fun func->
+                                    [ TextXlsCommand
+                                      func.Name
+                                      ""
+                                      ""
+                                      ""
+                                      func.ToDsText() ]
+                                      )
         let variRows = sys.Variables.Map(fun vari->
                 [ TextXlsCommand
                   vari.Name

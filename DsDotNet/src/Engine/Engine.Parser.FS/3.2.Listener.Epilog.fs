@@ -85,7 +85,7 @@ module EtcListenerModule =
                                           .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
                                           .ToHashSet()
 
-                                  let funcCallCtxs = first.Descendants<FuncCallContext>().ToArray()
+                                  let funcCallCtxs = bd.Descendants<FuncCallContext>().ToArray()
                                   let buttonFuncs = commonFunctionExtractor funcCallCtxs btnName system
       
 
@@ -137,7 +137,7 @@ module EtcListenerModule =
                                        let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
                                     
-                                  let funcCallCtxs = first.Descendants<FuncCallContext>().ToArray()
+                                  let funcCallCtxs = ld.Descendants<FuncCallContext>().ToArray()
                                   let func = commonFunctionExtractor funcCallCtxs lmpName system
 
                                   if flowNameCtxs.length() = 0
@@ -171,7 +171,7 @@ module EtcListenerModule =
                               option {
 
                                   let cndName, addrIn, addrOut = getHwSysItem cd
-                                  let funcCallCtxs = first.Descendants<FuncCallContext>().ToArray()
+                                  let funcCallCtxs = cd.Descendants<FuncCallContext>().ToArray()
                                   let func = commonFunctionExtractor funcCallCtxs cndName system
                                   let flows =
                                       cd

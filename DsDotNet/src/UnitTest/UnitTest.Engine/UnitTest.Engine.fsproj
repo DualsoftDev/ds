@@ -71,7 +71,6 @@
 		<Compile Include="Cpu\Call Statement.fs" />
 		<Compile Include="Cpu\DAG Statement.fs" />
 		<Compile Include="Cpu\Timmer Statement.fs" />
-		<Compile Include="Cpu\Counter Statement.fs" />
 		<Compile Include="Cpu\Link Statement.fs" />
 		<Compile Include="Cpu\System Statement.fs" />
 		<Compile Include="Cpu\ButtonLamp Statement.fs" />

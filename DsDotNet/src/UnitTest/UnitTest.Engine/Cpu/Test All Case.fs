@@ -44,21 +44,6 @@ type TestAllCase() =
         result === result
 
 
-    //[<Test>]  //ppt에서 CPU 불러오는거 없어지고 대신 *.ds에서 가져옴
-    //member __.``PPT Model Cpu test``    () =
-    //    let f = getFuncName()
-    //    let sampleDirectory = Path.Combine($"{__SOURCE_DIRECTORY__}", "../../UnitTest.Model/ImportOfficeExample/sample/");
-    //    let pptPath = sampleDirectory + "s.pptx"
-    //    let xlsPath = sampleDirectory + "s.xlsx"
-    //    let model = ImportPPT.GetModel [ pptPath ]
-    //    model.Systems.ForEach(testAddressSetting)
-
-    //    let result = exportXMLforXGI(model.Systems.First(), myTemplate f, None)
-    //    //추후 정답과 비교 필요
-    //    result === result
-
-
-
     [<Test>]
     member __.``Allocate existing global Memory`` () =
         let t = CpuTestSample()

@@ -6,7 +6,7 @@ open Dual.UnitTest.Common.FS
 module Fixtures =
     [<AbstractClass>]
     type EngineTestBaseClass() =
-        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "EngineLogger")
+        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
         do
             ()
             //Engine.CodeGenCPU.ModuleInitializer.Initialize()

@@ -108,7 +108,7 @@ module XgxFixtures =
 
     [<AbstractClass>]
     type XgxTestBaseClass(xgx:PlatformTarget) =
-        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "EngineLogger")
+        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
 
         let sys = DsSystem("testSys")
 

@@ -22,7 +22,7 @@ class Program
         //PrepareThreadPool();
         SimpleExceptionHandler.InstallExceptionHandler();
         //DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-        var logger = Log4NetLogger.PrepareLog4Net("EngineLogger");
+        var logger = Log4NetLogger.PrepareLog4Net("UnitTestLogger");
         Log4NetWrapper.SetLogger(logger);
 
         logger.Info("Sample Runner started.");

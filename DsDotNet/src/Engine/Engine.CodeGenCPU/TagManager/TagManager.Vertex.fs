@@ -25,42 +25,42 @@ module TagManagerModule =
     type VertexManager (v:Vertex)  =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
-        let createTag(mark) (vertexTag:VertexTag) =
+        let createTag(mark) autoAddr (vertexTag:VertexTag)  =
             let vertexTag = vertexTag |> int
             let name = $"{v.QualifiedName}_{mark}"
-            let t = createPlanVar  s name DuBOOL true v vertexTag sys
+            let t = createPlanVar  s name DuBOOL autoAddr v vertexTag sys
             t :?> PlanVar<bool>
 
-        let startTagBit   = createTag "ST"   VertexTag.startTag
-        let resetTagBit   = createTag "RT"   VertexTag.resetTag
+        let startTagBit   = createTag "ST" true  VertexTag.startTag
+        let resetTagBit   = createTag "RT" true  VertexTag.resetTag
         let endTagBit     =
-            let et = createTag "ET"   VertexTag.endTag
+            let et = createTag "ET" true  VertexTag.endTag
             if RuntimeDS.Package.IsPackageSIM()
             then 
                 if v :? Real && (v :?> Real).Finished
                 then et.Value <- true           
             et
 
-        let originBit      = createTag "OG"   VertexTag.origin
-        let pauseBit       = createTag "PA"   VertexTag.pause
+        let originBit      = createTag "OG" false  VertexTag.origin
+        let pauseBit       = createTag "PA" false  VertexTag.pause
 
-        let readyBit       = createTag "R"    VertexTag.ready
-        let goingBit       = createTag "G"    VertexTag.going
-        let finishBit      = createTag "F"    VertexTag.finish
-        let homingBit      = createTag "H"    VertexTag.homing
+        let readyBit       = createTag "R" true  VertexTag.ready
+        let goingBit       = createTag "G" true  VertexTag.going
+        let finishBit      = createTag "F" true  VertexTag.finish
+        let homingBit      = createTag "H" true  VertexTag.homing
                            
-        let forceStartBit  = createTag "SF"   VertexTag.forceStart
-        let forceResetBit  = createTag "RF"   VertexTag.forceReset
-        let forceOnBit     = createTag "ON"   VertexTag.forceOn
-        let forceOffBit    = createTag "OFF"  VertexTag.forceOff
+        let forceStartBit  = createTag "SF"  true VertexTag.forceStart
+        let forceResetBit  = createTag "RF"  true VertexTag.forceReset
+        let forceOnBit     = createTag "ON"  true VertexTag.forceOn
+        let forceOffBit    = createTag "OFF" true VertexTag.forceOff
 
 
-        let txErrTimeShortage    = createTag "txErrTimeShortage"      VertexTag.txErrTimeShortage   
-        let txErrTimeOver    = createTag "txErrTimeOver"      VertexTag.txErrTimeOver   
-        let rxErrShort       = createTag "rxErrShort"         VertexTag.rxErrShort      
-        let rxErrOpen        = createTag "rxErrOpen"          VertexTag.rxErrOpen    
+        let txErrTimeShortage    = createTag "txErrTimeShortage"  true    VertexTag.txErrTimeShortage   
+        let txErrTimeOver    = createTag "txErrTimeOver"  true    VertexTag.txErrTimeOver   
+        let rxErrShort       = createTag "rxErrShort"     true    VertexTag.rxErrShort      
+        let rxErrOpen        = createTag "rxErrOpen"      true    VertexTag.rxErrOpen    
 
-        let errorErrTRXBit = createTag "ErrTRX"    VertexTag.errorTRx
+        let errorErrTRXBit = createTag "ErrTRX" false   VertexTag.errorTRx
 
         let errors = 
             let err1 = if txErrTimeShortage.Value   then "시간부족" else ""
@@ -179,14 +179,14 @@ module TagManagerModule =
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag name = this.CreateTag name
 
-        let relayGoingBit     = createTag "GG"         VertexTag.goingRealy
-        let relayRealBit      = createTag "RR"         VertexTag.relayReal
-        let realOriginAction  = createTag "RO"         VertexTag.realOriginAction
-        let realSync          = createTag "Sync"       VertexTag.realSync
-        let dummyCoinSTs      = createTag "CoinAnyOnST"        VertexTag.dummyCoinSTs
-        let dummyCoinRTs      = createTag "CoinAnyOnRT"        VertexTag.dummyCoinRTs
-        let dummyCoinETs      = createTag "CoinAnyOnET"        VertexTag.dummyCoinETs
-        let originGoingErr      = createTag "OriginGoingErr"        VertexTag.OriginGoingErr
+        let relayGoingBit     = createTag "GG"                  false     VertexTag.goingRealy
+        let relayRealBit      = createTag "RR"                  false     VertexTag.relayReal
+        let realOriginAction  = createTag "RO"                  false     VertexTag.realOriginAction
+        let realSync          = createTag "Sync"                false     VertexTag.realSync
+        let dummyCoinSTs      = createTag "CoinAnyOnST"         false     VertexTag.dummyCoinSTs
+        let dummyCoinRTs      = createTag "CoinAnyOnRT"         false     VertexTag.dummyCoinRTs
+        let dummyCoinETs      = createTag "CoinAnyOnET"         false     VertexTag.dummyCoinETs
+        let originGoingErr      = createTag "OriginGoingErr"    false     VertexTag.OriginGoingErr
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
         
         let realData  = 
@@ -230,18 +230,18 @@ module TagManagerModule =
 
         let counterBit    = counter  s $"{v.Name}_CTR"  sys (sysManager.TargetType)
         let timerOnDelayBit = timer  s $"{v.Name}_TON"  sys (sysManager.TargetType)
-        let memo           = createTag "Memo" VertexTag.callMemo
+        let memo           = createTag "Memo" false VertexTag.callMemo
         
-        let callFuncPS           = createTag "callFuncPS" VertexTag.callFuncPlanSet
-        let callFuncPE           = createTag "callFuncPE" VertexTag.callFuncPlanEnd
+        let callFuncPS           = createTag "callFuncPS" false VertexTag.callFuncPlanSet
+        let callFuncPE           = createTag "callFuncPE" false VertexTag.callFuncPlanEnd
 
    
-        let rxErrShortOn     = createTag "rxErrShortOn"       VertexTag.rxErrShortOn    
-        let rxErrShortRising = createTag "rxErrShortRising"   VertexTag.rxErrShortRising
-        let rxErrShortTemp   = createTag "rxErrShortTemp"     VertexTag.rxErrShortTemp  
-        let rxErrOpenOff     = createTag "rxErrOpenOff"       VertexTag.rxErrOpenOff    
-        let rxErrOpenRising  = createTag "rxErrOpenRising"    VertexTag.rxErrOpenRising 
-        let rxErrOpenTemp    = createTag "rxErrOpenTemp"      VertexTag.rxErrOpenTemp   
+        let rxErrShortOn     = createTag "rxErrShortOn"      false VertexTag.rxErrShortOn    
+        let rxErrShortRising = createTag "rxErrShortRising"  false VertexTag.rxErrShortRising
+        let rxErrShortTemp   = createTag "rxErrShortTemp"    false VertexTag.rxErrShortTemp  
+        let rxErrOpenOff     = createTag "rxErrOpenOff"      false VertexTag.rxErrOpenOff    
+        let rxErrOpenRising  = createTag "rxErrOpenRising"   false VertexTag.rxErrOpenRising 
+        let rxErrOpenTemp    = createTag "rxErrOpenTemp"     false VertexTag.rxErrOpenTemp   
         let timerTimeOutBit  = timer  s $"{v.Name}_TOUT" sys (sysManager.TargetType)
        
 

@@ -147,6 +147,10 @@ namespace Engine
     [flow] F5 = {
         A > B;		// A(Real)> B(Real);
     }
+    [functions] ={
+        HomeBTN_func = {$t 2000};         
+    }
+
     [buttons] = {
         [a] = {
             AutoBTN(%I1, %Q1) = { F2; }
@@ -159,9 +163,6 @@ namespace Engine
             StartBTN_FF(_, _) = { F2; }
             StartBTN1(_, _) = { F1; }
         }
-        [p] = {
-            PauseBTN(_, _) = { F1;F2;F5; }
-        }
         [e] = {
             EMGBTN3(_, _) = { F3; }
             EMGBTN(_, _) = { F1;F2;F4;F5; }
@@ -169,18 +170,18 @@ namespace Engine
         [t] = {
             StartTestBTN(_, _) = { F5; }
         }
-        [h] = {
-            HomeBTN(_, _) = { F1;F2;F3;F5; }
-            HomeBTN.func = {
-                $t 2000;
-            }
+        [p] = {
+            PauseBTN(_, _) = { F1;F2;F5; }
         }
         [c] = {
             ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
+        [h] = {
+            HomeBTN(_, _) = { F1;F2;F3;F5;$HomeBTN_func; }
+           
+        }
     }
 }
-//DS Language Version = [0.9.2.16]
 ";
 
         public static string Lamps = @"
@@ -200,6 +201,10 @@ namespace Engine
     [flow] F5 = {
         A > B;		// A(Real)> B(Real);
     }
+    [functions] = 
+    {
+        ReadyMode_func = {$n;};
+    }
     [lamps] = 
     {
         [a] = {
@@ -218,10 +223,7 @@ namespace Engine
             TestMode(_,%Q1) = { F5 }
         }
         [r] = {
-            ReadyMode(_,%Q1) = { F4 }
-            ReadyMode.func = {
-                $t 2000;
-            }
+            ReadyMode(_,%Q1) = { F4;$ReadyMode_func }
         }
         [i] = {
             IdleLamp(_,%Q1) = { F5 }

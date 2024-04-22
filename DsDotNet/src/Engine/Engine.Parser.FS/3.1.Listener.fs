@@ -25,7 +25,7 @@ module ListnerCommonFunctionGenerator =
 
         if funcCallCtxs.any() 
             then 
-                let funcName = funcCallCtxs.Head().GetText()
+                let funcName = funcCallCtxs.Head().GetText().TrimStart('$')
                 Some (system.Functions.First(fun f->f.Name = funcName))
             else None 
 
@@ -342,35 +342,37 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let system = x.TheSystem
         let sysctx = x.AntlrParser.system ()
 
-        let getContainerChildPair (ctx: ParserRuleContext) : ParentWrapper option * NamedContextInformation =
+        let getContainerChildPair (ctx: ParserRuleContext) : (ParentWrapper  * NamedContextInformation) option =
             let ci = x.GetContextInformation(ctx)
             let system = x.TheSystem
             let parentWrapper = system.TryFindParentWrapper(ci)
-            parentWrapper, ci
+            if parentWrapper.IsSome then
+                (parentWrapper.Value, ci) |> Some
+            else
+                None
+
+        let candidateCtxs: ParserRuleContext list =
+            let funcsCausalContext =  
+                let multiFuncsctx = sysctx.TryFindChildren<Identifier1FuncsContext>()
+                [
+                    if multiFuncsctx.any()
+                        then yield! multiFuncsctx |> Seq.collect(fun f->f.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>())
+                        else yield! sysctx.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>() 
+                ]
+            let normalCausalContext =  
+                let multictx = sysctx.TryFindChildren<Identifier1sListingContext>()
+                [
+                    if multictx.any()
+                        then yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
+                        else yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
+                ]
+            [ 
+                yield! normalCausalContext
+                yield! funcsCausalContext
+                yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
+            ]
 
         let tokenCreator (cycle: int) =
-           
-
-            let candidateCtxs: ParserRuleContext list =
-                let funcsCausalContext =  
-                    let multiFuncsctx = sysctx.TryFindChildren<Identifier1FuncsContext>()
-                    [
-                        if multiFuncsctx.any()
-                            then yield! multiFuncsctx |> Seq.collect(fun f->f.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>())
-                            else yield! sysctx.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>() 
-                    ]
-                let normalCausalContext =  
-                    let multictx = sysctx.TryFindChildren<Identifier1sListingContext>()
-                    [
-                        if multictx.any()
-                            then yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
-                            else yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
-                    ]
-                [ 
-                    yield! normalCausalContext
-                    yield! funcsCausalContext
-                    yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
-                ]
 
 
             let isCallName (pw: ParentWrapper, Fqdn(vetexPath)) =
@@ -388,11 +390,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 isJobName (pw.GetFlow().System, vetexPath.Last())
                 || isAliasMnemonic (pw, vetexPath.CombineQuoteOnDemand())
 
-            let candidates = candidateCtxs.Select(getContainerChildPair)
+            let candidates = candidateCtxs.Choose(getContainerChildPair)
 
             let loop () =
                 for (optParent, ctxInfo) in candidates do
-                    let parent = optParent.Value
+                    let parent = optParent
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
                     if  ctxInfo.ContextType = typeof<Identifier1FuncContext>  && existing.IsNone
                     then

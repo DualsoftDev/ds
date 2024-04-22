@@ -297,30 +297,32 @@ module ModelComponentAnswers =
     [flow] F5 = {
         A > B;		// A(Real)> B(Real);
     }
-    [lamps] = {
+    [functions] = 
+    {
+        ReadyMode_func = {$n;};
+    }
+    [lamps] = 
+    {
         [a] = {
-            AutoMode(_, %Q1) = { F1; }
+            AutoMode(_,%Q1) = { F1 }
         }
         [m] = {
-            ManualMode(_, %Q1) = { F2; }
+            ManualMode(_,%Q1) = { F2 }
         }
         [d] = {
-            RunMode(_, %Q1) = { F3; }
+            RunMode(_,%Q1) = { F3  }
         }
         [e] = {
-            ErrorMode(_, %Q1) = { F3; }
+            ErrorMode(_,%Q1) = { F3 }
         }
         [t] = {
-            TestMode(_, %Q1) = { F5; }
+            TestMode(_,%Q1) = { F5 }
         }
         [r] = {
-            ReadyMode(_, %Q1) = { F4; }
-            ReadyMode.func = {
-                $t 2000;
-            }
+            ReadyMode(_,%Q1) = { F4;$ReadyMode_func }
         }
         [i] = {
-            IdleLamp(_, %Q1) = { F5; }
+            IdleLamp(_,%Q1) = { F5 }
         }
     }
 }
@@ -343,6 +345,10 @@ module ModelComponentAnswers =
     [flow] F5 = {
         A > B;		// A(Real)> B(Real);
     }
+    [functions] ={
+        HomeBTN_func = { $t 2000;}         
+        }
+
     [buttons] = {
         [a] = {
             AutoBTN(%I1, %Q1) = { F2; }
@@ -369,10 +375,8 @@ module ModelComponentAnswers =
             ClearBTN(_, _) = { F1;F2;F3;F5; }
         }
         [h] = {
-            HomeBTN(_, _) = { F1;F2;F3;F5; }
-            HomeBTN.func = {
-                $t 2000;
-            }
+            HomeBTN(_, _) = { F1;F2;F3;F5;$HomeBTN_func }
+           
         }
     }
 }

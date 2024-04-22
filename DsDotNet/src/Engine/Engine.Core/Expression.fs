@@ -39,6 +39,20 @@ module ExpressionModule =
         interface ITerminal with
             member x.Variable = match x with | DuVariable variable -> Some variable | _ -> None
             member x.Literal  = match x with | DuLiteral literal   -> Some literal  | _ -> None
+        interface IExpression with
+            member x.DataType = match x with | DuVariable v -> v.GetType() | DuLiteral l -> (l :> IExpression).DataType
+            //member x.EvaluatedValue = 
+            member x.BoxedEvaluatedValue = match x with | DuVariable v -> v.Value | DuLiteral l -> l.Value |> box
+            member x.GetBoxedRawObject() = (x :> IExpression).BoxedEvaluatedValue
+            member x.ToText(_withParenthesis) = match x with | DuVariable v -> v.ToText() | DuLiteral l -> l.Value.ToString()
+            member x.CollectStorages() = match x with | DuVariable v -> [v] | _ -> []
+            member x.Flatten() = fwdFlattenExpression x
+            member x.IsEqual y = match x with | DuVariable v -> v.Value = unbox y.BoxedEvaluatedValue | DuLiteral l -> l.Value = unbox y.BoxedEvaluatedValue
+
+            member x.FunctionName = None
+            member x.FunctionArguments = []
+            member x.WithNewFunctionArguments _args = failwithlog "ERROR"
+            member x.Terminal = Some x
 
     type IFunctionSpec =
         abstract Name: string
@@ -95,7 +109,7 @@ module ExpressionModule =
             failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 
     /// Tag<'T> or Variable<'T> 로부터 Expression<'T> 생성
-    let var2expr (t: TypedValueStorage<'T>):Expression<'T> = DuTerminal (DuVariable t)
+    let var2expr (t: TypedValueStorage<'T>): Expression<'T> = DuTerminal (DuVariable t)
 
     [<RequireQualifiedAccess>]
     module Expression =
@@ -116,6 +130,11 @@ module ExpressionModule =
         member _.ACC = timerStruct.ACC
         member _.RES = timerStruct.RES
         member _.TimerStruct = timerStruct
+
+        ///// XGK 에서는 사용하는 timer 의 timer resolution 을 곱해서 실제 preset 값을 계산해야 한다.
+        //member val XgkTimerResolution = 1.0 with get, set
+        ///// XGK 에서 사전 설정된 timer resolution 을 고려해서 실제 preset 값을 계산
+        //member x.CalculateXgkTimerPreset() = int ( (float timerStruct.PRE.Value) / x.XgkTimerResolution)
 
         member val InputEvaluateStatements:Statement list = [] with get, set
         interface IDisposable with

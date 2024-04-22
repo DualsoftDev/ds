@@ -36,7 +36,7 @@ module TagVariableModule =
             ()  // just for debug breakpoint
 
         let {Name=name; Value=initValue; Address=address; Comment=comment; IsGlobal=isGlobal } = param
-        let mutable address = if address.IsSome then address.Value else TextAddrEmpty
+        let mutable address = if address.IsSome then address.Value else ""
         let mutable value = initValue
         let mutable tagChanged = false
         let comment = comment |? ""
@@ -104,19 +104,34 @@ module TagVariableModule =
         override x.ToText() = "$" + param.Name
 
     type ILiteralHolder =
+        inherit IExpression
         abstract ToText : unit -> string
         abstract ToTextWithoutTypeSuffix: unit -> string
 
     type LiteralHolder<'T when 'T:equality> = { Value: 'T }
         with
+            member x.ToText() = sprintf "%A" x.Value
+
             interface IExpressionizableTerminal with
-                member x.ToText() = sprintf "%A" x.Value
+                member x.ToText() = x.ToText()// sprintf "%A" x.Value
             interface ILiteralHolder with
                 member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
-                member x.ToText() = sprintf "%A" x.Value
+                member x.ToText() = x.ToText()// sprintf "%A" x.Value
             interface IValue<'T> with
                 member x.Value with get() = x.Value and set(_v) = failwithlog "ERROR: unsupported."
                 member x.ObjValue = box x.Value
+            interface IExpression with
+                member x.DataType = typedefof<'T>
+                member x.BoxedEvaluatedValue = box x.Value
+                member x.GetBoxedRawObject() = box x.Value
+                member x.ToText(_withParenthesis:bool) = x.ToText()
+                member x.FunctionName = None
+                member x.FunctionArguments = []
+                member x.WithNewFunctionArguments(_args) = failwithlog "ERROR: unsupported."
+                member x.Terminal = None
+                member x.CollectStorages() = []
+                member x.Flatten() = failwithlog "ERROR: unsupported."
+                member x.IsEqual(other) = x.Value = (other.BoxedEvaluatedValue :?> 'T)
 
 
 [<AutoOpen>]

@@ -3,62 +3,12 @@ namespace PLC.CodeGen.LS
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open FB
-open Dual.Common.Core.FS.StateBuilderModule.State
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module internal Common =
-    /// XmlOutput = string
-    type XmlOutput = string
-    type EncodedXYCoordinate = int
 
-    /// Rung 단위 생성을 위한 정보
-    type RungXmlInfo =
-        {
-            /// Xgi 출력시 순서 결정하기 위한 coordinate.
-            Coordinate: EncodedXYCoordinate // int
-            /// Xml element 문자열
-            Xml: XmlOutput // string
-            SpanX: int
-            SpanY: int
-        }
-
-    /// Rung 구성 요소의 일부 block 에 관한 정보
-    type BlockXmlInfo =
-        {
-            /// Block 시작 좌상단 x 좌표
-            X: int
-            /// Block 시작 좌상단 y 좌표
-            Y: int
-            /// Block 이 사용하는 가로 span
-            TotalSpanX: int
-            /// Block 이 사용하는 세로 span
-            TotalSpanY: int
-            /// Block 을 구성하는 element 들의 xml 정보
-            XmlElements: RungXmlInfo list
-        }
-
-    type BlockXmlInfo with
-        member x.GetXml():string =
-            x.XmlElements |> List.map (fun e -> e.Xml) |> String.concat "\r\n"
-
-    /// 좌표 반환 : 1, 4, 7, 11, ...
-    /// 논리 좌표 x y 를 LS 산전 XGI 수치 좌표계로 반환
-    let coord (x, y) : EncodedXYCoordinate = x * 3 + y * 1024 + 1
-
-    /// coord(x, y) 에서 x, y 좌표 반환
-    let xyOfCoord coord =
-        let y = (coord - 1) / 1024
-        let xx = ((coord - 1) % 1024)
-        let x = xx / 3
-        let r = xx % 3
-        (x, y), r
-
-    /// coord(x, y) 에서 x 좌표 반환
-    let xOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> fst
-    /// coord(x, y) 에서 y 좌표 반환
-    let yOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> snd
-
-    let rungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
+    let bxiRungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
         let xs = rungXmlInfos
         let xys = xs |> List.map (fun e -> xyOfCoord e.Coordinate |> fst)
         let minX = xys |> List.map fst |> List.min
@@ -74,15 +24,6 @@ module internal Common =
           TotalSpanX = totalSpanX
           TotalSpanY = totalSpanY
           XmlElements = xs }
-
-    /// Rung 을 생성하기 위한 정보
-    ///
-    /// - Xmls: 생성된 xml string 의 list
-    type RungGenerationInfo =
-        { Xmls: XmlOutput list // Rung 별 누적 xml.  역순으로 추가.  꺼낼 때 뒤집어야..
-          Y: int }
-
-        member me.Add(xml) = { Xmls = xml :: me.Xmls; Y = me.Y + 1 }
 
     let dq = "\""
 
@@ -158,19 +99,19 @@ module internal Common =
         elementFull (int ElementType.HorzLineMode) (coord (x, y)) "" ""
 
     /// debugging 용 xml comment 생성
-    let xmlCommentAtCoordinate (c: EncodedXYCoordinate) (comment: string) =
+    let rxiCommentAtCoordinate (c: EncodedXYCoordinate) (comment: string) =
         { Coordinate = c
           Xml = $"<!-- {comment} -->"
           SpanX = maxNumHorizontalContact
           SpanY = 1 }
 
     /// debugging 용 xml comment 생성
-    let xmlCommentAt (x, y) comment =
-        xmlCommentAtCoordinate (coord (x, y)) comment
+    let rxiCommentAt (x, y) comment =
+        rxiCommentAtCoordinate (coord (x, y)) comment
 
 
     /// 마지막 수평으로 연결 정보: 그릴 수 없으면 [], 그릴 수 있으면 [singleton]
-    let tryHlineTo (x, y) endX =
+    let tryHlineTo (x, y) endX : XmlOutput list =
         if endX < x then
             []
         else
@@ -178,45 +119,40 @@ module internal Common =
             let c = coord (x, y)
             [ elementFull (int ElementType.MultiHorzLineMode) c lengthParam "" ]
 
-    let hlineTo (x, y) endX =
+    let hlineTo (x, y) endX : XmlOutput =
         if endX < x then
             failwithlog $"endX startX [{endX} > {x}]"
 
         tryHlineTo (x, y) endX |> List.exactlyOne
 
-
     /// x y 위치에서 수직선 한개를 긋는다
-    let vlineAt (x, y) : RungXmlInfo =
+    let rxiVLineAt (x, y) : RungXmlInfo =
         verify (x >= 0)
         let c = coord (x, y) + 2
-
-        { Coordinate = c
-          Xml = vline c
-          SpanX = 0
-          SpanY = 1 }
+        { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
 
     let mutable EnableXmlComment = false
 
     /// x y 위치에서 수직으로 n 개의 line 을 긋는다
-    let vlineDownN (x, y) n : RungXmlInfo list =
+    let rxisVLineDownN (x, y) n : RungXmlInfo list =
         [ if EnableXmlComment then
-              xmlCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
+              rxiCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
 
           if n > 0 then
               for i in [ 0 .. n - 1 ] do
-                  vlineAt (x, y + i) ]
+                  rxiVLineAt (x, y + i) ]
 
-    let vlineUpN (x, y) n = vlineDownN (x, y - n) n
+    let rxisVLineUpN (x, y) n = rxisVLineDownN (x, y - n) n
 
     /// x y 위치에서 수직으로 endY 까지 line 을 긋는다
-    let vlineDownTo (x, y) endY = vlineDownN (x, y) (endY - y)
-    let vlineUpTo (x, y) endY = vlineUpN (x, y) (y - endY)
+    let rxisVLineDownTo (x, y) endY = rxisVLineDownN (x, y) (endY - y)
+    let rxisVLineUpTo (x, y) endY = rxisVLineUpN (x, y) (y - endY)
 
     /// xml 문자열을 <Rung> 으로 감싸기
     let wrapWithRung xml = $"\t<Rung BlockMask={dq}0{dq}>\r\n{xml}\t</Rung>"
 
     /// 함수 그리기 (detailedFunctionName = 'ADD2_INT', briefFunctionName = 'ADD')
-    let createFunctionXmlAt (detailedFunctionName, briefFunctionName) (inst: string) (x, y) : RungXmlInfo =
+    let rxiFunctionAt (detailedFunctionName, briefFunctionName) (inst: string) (x, y) : RungXmlInfo =
         let tag = briefFunctionName
         let instFB = if inst = "" then "," else (inst + ",VAR")
         let c = coord (x, y)
@@ -233,7 +169,7 @@ module internal Common =
           SpanY = getFunctionHeight detailedFunctionName }
 
     /// 함수 파라메터 그리기
-    let createFBParameterXml (x, y) tag : RungXmlInfo =
+    let rxiFBParameter (x, y) tag : RungXmlInfo =
         let c = coord (x, y)
         let xml = elementFull (int ElementType.VariableMode) c "" tag
 

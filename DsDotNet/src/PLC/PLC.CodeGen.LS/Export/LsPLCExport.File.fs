@@ -65,11 +65,34 @@ module internal XgiFile =
          symbolsGlobal = "<GlobalVariable Version="Ver 1.0" Count="1493"> <Symbols> <Symbol> ... </Symbol> ... <Symbol> ... </Symbol> </Symbols> .. </GlobalVariable>
     *)
     let wrapWithXml (prjParam: XgxProjectParams) (rungs: XmlOutput) (localSymbolInfos:SymbolInfo list) (symbolsGlobal:string) (existingLSISprj: string option) =
+
+        (*
+         * Unit Test 전용 코드.
+         * 실제 코드는 LsPLCExport.Export.fs 의 XgxProjectParams extension method 참고. GenerateXmlDocument()
+         *)
         assert isInUnitTest()
+
         let targetType = prjParam.TargetType
-        let xdoc =
-            existingLSISprj |> Option.map DualXmlDocument.loadFromFile
-            |? getTemplateXgxXmlDoc targetType
+        let xdoc, prjParam =
+            match prjParam.TargetType, existingLSISprj with
+            | XGK, Some existing ->
+                let doc = DualXmlDocument.loadFromFile existing
+                let counters = collectCounterAddressXgk doc
+                let timers = collectTimerAddressXgk doc
+                let newPrjParam = {
+                    prjParam with
+                        CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
+                        TimerCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
+                }
+                doc, newPrjParam
+            | _, None ->
+                let doc = getTemplateXgxXmlDoc targetType
+                doc, prjParam
+            | _, Some existing ->
+                let doc = DualXmlDocument.loadFromFile existing
+                doc, prjParam
+
+
         xdoc.GetXmlNode("Project").FirstChild.InnerText <- prjParam.ProjectName
 
         let pouName = "DsLogic"

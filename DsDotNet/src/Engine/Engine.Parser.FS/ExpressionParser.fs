@@ -202,14 +202,9 @@ module rec ExpressionParser =
                 | CTD, "createAbCTD", _ :: [ _ ] -> CounterStatement.CreateAbCTD(tcParams) target
 
                 | CTUD,
-                  ("createWinCTUD" | "createXgiCTUD"),
+                  ("createWinCTUD" | "createXgiCTUD" | "createXgkCTUD"),
                   _ :: _ :: (BoolExp countDownCondition) :: (BoolExp resetCondition) :: [ (BoolExp ldCondition) ] ->
                     CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, Some ldCondition) target
-                | CTUD,
-                  ("createXgkCTUD"),
-                  _ :: _ :: (BoolExp countDownCondition) :: (BoolExp resetCondition) :: [] ->
-                    CounterStatement.CreateCTUD(tcParams, countDownCondition, resetCondition, None) target
-
 
                 | CTUD, "createAbCTUD", _ :: _ :: (BoolExp countDownCondition) :: [ (BoolExp resetCondition) ] ->
                     CounterStatement.CreateAbCTUD(tcParams, countDownCondition, resetCondition) target

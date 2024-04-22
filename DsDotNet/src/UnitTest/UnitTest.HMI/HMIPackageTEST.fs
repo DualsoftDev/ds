@@ -8,6 +8,7 @@ open Engine.Import.Office
 open Engine.CodeGenHMI
 open Engine.Cpu
 open Engine.Core
+open Engine.CodeGenCPU
 
 module HMIPackageTEST = 
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";

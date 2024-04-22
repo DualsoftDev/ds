@@ -53,12 +53,21 @@ module MemoryAllocator =
         let mutable ofByteRange: IntRange option = None
         let mutable byteCursor = startByte
 
+        ///XGK 16bit 최소, XGI 8bit 최소
+        let unitSize = if target = XGK then 16 else 8  
+        let getMemType(memType) =  
+                if target = XGK && memType = "B" 
+                then "W" //XGK는 byte 단위가 없어서 Word로 치환
+                else memType
+
         let rec getAddress (reqMemType: string) : string =
+            let reqMemType = getMemType reqMemType  
+
             match reqMemType with
             | "X" ->
                 let bitIndex =
                     match ofBit, ofByteRange with
-                    | Some bit, _ when bit % 8 = 7 -> // 마지막 fragment bit 을 쓰는 상황
+                    | Some bit, _ when bit % unitSize = unitSize-1 -> // 마지막 fragment bit 을 쓰는 상황
                         ofBit <- None
                         bit
                     | Some bit, _ -> // 마지막이 아닌 여유 fragment bit 을 쓰는 상황
@@ -72,7 +81,7 @@ module MemoryAllocator =
                     | None, None ->
                         let bit = byteCursor * 8
                         ofBit <- Some(bit + 1)
-                        byteCursor <- byteCursor + 1
+                        byteCursor <- byteCursor+unitSize/8
                         bit
 
                 let byteIndex = bitIndex / 8
@@ -87,7 +96,7 @@ module MemoryAllocator =
                         if target = XGI then
                             $"%%{typ}{reqMemType}{bitIndex}"
                         elif target = XGK then
-                            xgkIOMBit(typ, bitIndex)
+                            getXgkBitText(typ, bitIndex)
                         else
                             failwithlog "ERROR"
                     logDebug "Address %s allocated" address
@@ -133,7 +142,7 @@ module MemoryAllocator =
                         if target = XGI then
                             $"%%{typ}{reqMemType}{byteIndex / byteSize}"
                         elif target = XGK then
-                            xgkIOMWord (typ, byteIndex)
+                            getXgkWordText (typ, byteIndex)
                         else
                             failwithlog "ERROR"
 

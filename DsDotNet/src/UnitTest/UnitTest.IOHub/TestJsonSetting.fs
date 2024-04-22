@@ -1,8 +1,9 @@
 namespace T.IOHub
 
+open System
+open System.IO
 open Dual.UnitTest.Common.FS
 open NUnit.Framework
-open System
 open IO.Core
 open Xunit
 open Dual.Common.Core.FS.Prelude
@@ -14,7 +15,7 @@ module JSONSettingTestModule =
     [<Collection("ZmqTesting")>]
     [<TestFixture>]
     type JSONSettingTest() =
-        inherit TestBaseClass("IOHubLogger")
+        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "IOHubLogger")
 
         let checkOk x =
             match x with

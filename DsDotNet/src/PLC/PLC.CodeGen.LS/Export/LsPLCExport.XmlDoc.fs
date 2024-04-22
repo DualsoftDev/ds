@@ -25,7 +25,7 @@ type XgxXmlExtension =
 
     /// XGK 에서 사용할 수 없는 변수명 체크
     [<Extension>]
-    static member CheckInvalidVariableNameForXgk (xdoc:XmlDocument) : unit =
+    static member SanityCheckVariableNameForXgk (xdoc:XmlDocument) : unit =
         (* "load" 의 경우, global 변수로 선언은 가능하지만, XML 로 Rung 생성시,
          * 해당 변수 이름을 사용하지 못하고 대신 직접 변수로 메모리 주소를 적어야 한다.
          * 따라서 이러한 종류들은 원천적으로 사용하지 않는 것으로 한다.
@@ -73,19 +73,46 @@ type XgxXmlExtension =
     /// - Symbol 의 DevicePos 가 음수인 Symbol 이 있는지 확인한다.
     [<Extension>]
     static member Check(xdoc:XmlDocument, xgx:PlatformTarget) =
-        let xPathGlobalVar = getXPathGlobalVariable xgx
-        let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
-        let localSymbolss:XmlNode[] = xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol").ToArray()
+        let checkSymbols() =
+            let xPathGlobalVar = getXPathGlobalVariable xgx
+            let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
+            let localSymbolss:XmlNode[] = xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol").ToArray()
         
-        let check (s:XmlNode) =
-            let name = s.Attributes.["Name"].Value
-            let devPos = s.Attributes["DevicePos"]
-            if devPos <> null && devPos.Value.any() && int devPos.Value < 0  then
-                failwithlog $"Symbol {name} has Invalid DevicePos attribute {devPos.Value}."
+            let check (s:XmlNode) =
+                let name = s.Attributes.["Name"].Value
+                let devPos = s.Attributes["DevicePos"]
+                if devPos <> null && devPos.Value.any() && int devPos.Value < 0  then
+                    failwith $"Symbol {name} has Invalid DevicePos attribute {devPos.Value}."
 
-        for s in globalSymbols do
-            check s
-        for s in localSymbolss do
-            check s
+            for s in globalSymbols @ localSymbolss do
+                check s
+
+        let checkRungs() =
+            let pous = xdoc.GetXmlNodes("//LDRoutine")
+            for pou in pous do
+                let rungs = pou.GetXmlNodes("Rung")
+                let mutable c = 0
+                let getCoordinate (e:XmlNode) = e.Attributes.["Coordinate"].Value |> Parse.Int |> Option.get
+                for r in rungs do
+                    let rungName =
+                        match r.Attributes.["Name"] with
+                        | null -> "이름없음"
+                        | n -> n.Value
+                    let elements = r.GetXmlNodes("Element") |> toList
+                    let maxCoord =
+                        match elements with
+                        | [] -> failwith $"Rung {rungName} has no elements."
+                        | e::[] when getCoordinate(e) <= c ->
+                            failwith $"Rung {rungName} has invalid coordinates."
+                        | _ ->
+                            let coordinates = elements |> map (fun x -> Parse.Int x.Attributes.["Coordinate"].Value |> Option.get) |> toArray
+                            let isOrdered = coordinates |> pairwise |> Seq.forall (fun (a, b) -> a < b)
+                            if not isOrdered then
+                                failwith $"Rung {rungName} has invalid coordinates."
+                            coordinates |> Seq.last
+                    c <- maxCoord
+        checkSymbols()
+        checkRungs()
+
         xdoc
 

@@ -2,6 +2,8 @@ namespace T
 
 open Dual.UnitTest.Common.FS
 open System.IO
+open System.Diagnostics
+open System.Text
 open System.Globalization
 
 open NUnit.Framework
@@ -9,7 +11,6 @@ open NUnit.Framework
 open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.LS
-open Engine.Cpu
 open Engine.Parser.FS
 
 
@@ -53,29 +54,13 @@ module XgxGenerationTestModule =
             yield! generateVariableDeclarationSeq "int" "nn" (fun i -> sprintf "%d" i) 1 9
         } |> String.concat "\n"
         
-
-
-module XgiGenerationTestModule =
-    let private xmlDir = Path.Combine(projectDir, "Xgi/Xmls")
-    let private xmlAnswerDir = Path.Combine(xmlDir, "Answers")
-
-    let saveTestResult testFunctionName (xml:string) =
-        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", crlfXml)
+    let internal saveXgxTestResult (xgx:PlatformTarget) (testFunctionName:string) (xml:string) =
+        let xmlDir = Path.Combine(projectDir, $"{xgx}/Xmls")
+        let xmlAnswerDir = Path.Combine(xmlDir, "Answers")
+        File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", xml)
         let answerXml = File.ReadAllText($"{xmlAnswerDir}/{testFunctionName}.xml")
-        System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
-
-
-module XgkGenerationTestModule =
-    let private xmlDir = Path.Combine(projectDir, "Xgk/Xmls")
-    let private xmlAnswerDir = Path.Combine(xmlDir, "Answers")
-
-    let saveTestResult testFunctionName (xml:string) =
-        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", crlfXml)
-        let answerXml = File.ReadAllText($"{xmlAnswerDir}/{testFunctionName}.xml")
-        System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
-
+        //System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
+        answerXml === xml
 
 
 [<AutoOpen>]
@@ -118,11 +103,61 @@ module XgxFixtures =
         prjParam.GenerateXmlString()
 
     let TestPlatformTarget = XGI
+
+
+
     [<AbstractClass>]
     type XgxTestBaseClass(xgx:PlatformTarget) =
-        inherit TestBaseClass("EngineLogger")
+        inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
 
         let sys = DsSystem("testSys")
+
+        /// XML을 포맷팅하는 Node.js 스크립트를 실행한다.
+        /// Exception 발생 할 경우 조치방법
+        ///
+        /// - Node.js 설치 (동작 확인 버젼: v18.17.1) 
+        ///
+        /// - NPM package 설치
+        ///
+        ///   $ npm install xml-formatter
+        let formatXml (xml:string): string =
+            let cwd = __SOURCE_DIRECTORY__
+            // Node.js 실행 파일과 스크립트 경로를 설정
+            let nodePath = "node.exe"
+            let scriptPath = Path.Combine(cwd, "formatXml.mjs")
+
+            // 프로세스 시작 정보 설정
+            let psi = ProcessStartInfo(nodePath, $"\"{scriptPath}\"")
+            psi.WorkingDirectory <- cwd
+            psi.RedirectStandardInput <- true
+            psi.RedirectStandardOutput <- true
+            psi.RedirectStandardError <- true
+            psi.UseShellExecute <- false
+            psi.StandardOutputEncoding <- Encoding.UTF8  // 출력 인코딩을 UTF-8로 설정
+            psi.StandardErrorEncoding <- Encoding.UTF8   // 에러 인코딩을 UTF-8로 설정
+            psi.StandardInputEncoding <- Encoding.UTF8   // 입력 인코딩을 UTF-8로 설정
+
+            // 프로세스 시작
+            use proc = Process.Start(psi)
+
+            // XML 입력 전달
+            proc.StandardInput.WriteLine(xml)
+            proc.StandardInput.Close() // 입력 스트림 종료
+
+            // 출력과 에러 읽기
+            let output = proc.StandardOutput.ReadToEnd()
+            let errors = proc.StandardError.ReadToEnd()
+
+            // 프로세스 종료 대기
+            proc.WaitForExit()
+
+            // 에러가 있으면 예외 발생
+            if errors.NonNullAny() then
+                failwith $"ERROR while formatting xml: {errors}"
+
+            // 포맷된 XML 반환
+            output.Replace("\r\n", "\n").Replace("\n", "\r\n")
+
         [<SetUp>]
         member x.Setup () =
             RuntimeDS.System <- sys
@@ -131,10 +166,5 @@ module XgxFixtures =
         member __.TearDown () =
             RuntimeDS.System <- sys
 
-        member __.saveTestResult testFunctionName (xml:string) =
-            match xgx with
-            | XGI -> XgiGenerationTestModule.saveTestResult testFunctionName xml
-            | XGK -> XgkGenerationTestModule.saveTestResult testFunctionName xml
-            | _ -> failwith "Not supported runtime target"
-
+        member __.saveTestResult testFunctionName (xml:string) = saveXgxTestResult xgx testFunctionName (formatXml xml)
         member __.generateXmlForTest = generateXmlForTest xgx

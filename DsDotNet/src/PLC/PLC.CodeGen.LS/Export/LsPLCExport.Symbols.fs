@@ -138,9 +138,17 @@ module internal XgiSymbolsModule =
                 let address, device, devPos = 
                     match prjParam.TargetType with
                     | XGI ->
-                        let _ = t.BoxedValue.GetType().GetMemorySizePrefix() //size check 만 하고 auto 변수로 할당 ("", "", -1)
-                        "", "", -1
+                        let _ = t.BoxedValue.GetType().GetMemorySizePrefix()
+                        if t.Address = TextAddrEmpty then  //XGI 는 TextAddrEmpty 선언된 부분만 자동생성
+                            autoAllocatorAdress t prjParam
+                        elif t.Address = TextSkip then
+                            t.Address <- ""
+
+                        t.Address, "", -1
                     | XGK ->
+                        if t.Address = "" then  //XGK 는 무조건 address 가 있어야 한다.
+                            t.Address <- TextAddrEmpty
+                        
                         autoAllocatorAdress t prjParam
                         getXGXTagInfo prjParam.TargetType t.Address t.Name
 
@@ -171,6 +179,9 @@ module internal XgiSymbolsModule =
                 else
                      xgx.SymbolInfo
             | XGK ->
+                if xgx.Address = "" then  //XGK 는 무조건 address 가 있어야 한다.
+                    xgx.Address <- TextAddrEmpty
+
                 autoAllocatorAdress xgx prjParam
                 let address, device, devPos = getXGXTagInfo prjParam.TargetType xgx.Address xgx.Name
                 { xgx.SymbolInfo with
@@ -189,9 +200,8 @@ module internal XgiSymbolsModule =
                 match prjParam.TargetType with
                 | XGK ->
                     let offset = prjParam.TimerCounterGenerator()
-                    let timerAddress = sprintf "T%04d" offset
-                    timer.XgkStructVariableName <- timerAddress
-                    "T", timerAddress, offset
+                    timer.XgkStructVariableDevicePos <- offset
+                    "T", timer.XgkStructVariableName, offset
                 | _ -> "", "", -1   
       
             let plcType = timer.Type.ToString() 
@@ -211,9 +221,8 @@ module internal XgiSymbolsModule =
                 match prjParam.TargetType with
                 | XGK ->
                     let offset = prjParam.CounterCounterGenerator()
-                    let counterAddress = sprintf "C%04d" offset
-                    counter.XgkStructVariableName <- counterAddress
-                    "C", counterAddress, offset
+                    counter.XgkStructVariableDevicePos <- offset
+                    "C", counter.XgkStructVariableName, offset
                 | _ -> "", "", -1 
 
 

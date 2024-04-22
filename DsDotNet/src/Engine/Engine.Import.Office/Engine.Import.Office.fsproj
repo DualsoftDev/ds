@@ -42,6 +42,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
       <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
     </ItemGroup>
 

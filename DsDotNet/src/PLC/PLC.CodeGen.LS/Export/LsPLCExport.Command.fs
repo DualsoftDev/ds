@@ -115,7 +115,7 @@ module internal rec Command =
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
     // <timer> for XGI
-    let private drawFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement)  target: BlockXmlInfo =
+    let private bxiFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement)  target: BlockXmlInfo =
         let ts = timerStatement
         let typ = ts.Timer.Type     // TON, TOF, TMR
         let time: int = int ts.Timer.PRE.Value
@@ -131,12 +131,12 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(TimerMode(ts))
-            createFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
+            bxiFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
 
         blockXml
 
-    let private drawFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) target: BlockXmlInfo =
-
+    let private bxiFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) target: BlockXmlInfo =
+        assert(prjParam.TargetType = XGI)
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
         let pv = int16 cs.Counter.PRE.Value
@@ -164,7 +164,7 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(CounterMode(cs))
-            createFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
+            bxiFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
 
         blockXml
 
@@ -174,7 +174,7 @@ module internal rec Command =
         member x.GetSizeString(target:PlatformTarget) = systemTypeToXgxTypeName target x
 
 
-    let drawPredicate (prjParam: XgxProjectParams) (x, y) (predicate: Predicate) target: BlockXmlInfo =
+    let bxiPredicate (prjParam: XgxProjectParams) (x, y) (predicate: Predicate) target: BlockXmlInfo =
         match predicate with
         | Compare(name, output, args) ->
             let namedInputParameters =
@@ -194,9 +194,9 @@ module internal rec Command =
                         $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ -> failwithlog "NOT YET"
 
-            createBoxXmls prjParam (x, y) func namedInputParameters outputParameters "" target
+            bxiBox prjParam (x, y) func namedInputParameters outputParameters "" target
 
-    let drawFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockXmlInfo =
+    let bxiFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockXmlInfo =
         match func with
         | Arithmatic(name, output, args) ->
             let namedInputParameters =
@@ -218,18 +218,18 @@ module internal rec Command =
                 | ("SUB" | "DIV") -> name // DIV 는 DIV, DIV2 만 존재함
                 | _ -> failwithlog "NOT YET"
 
-            createBoxXmls prjParam (x, y) func namedInputParameters outputParameters "" target
+            bxiBox prjParam (x, y) func namedInputParameters outputParameters "" target
 
-    let drawAction (prjParam: XgxProjectParams) (x, y) (func: PLCAction) targetPLC: BlockXmlInfo =
+    let bxiAction (prjParam: XgxProjectParams) (x, y) (func: PLCAction) targetPLC: BlockXmlInfo =
         match func with
         | Move(condition, source, target) ->
             let namedInputParameters = [ "EN", condition :> IExpression; "IN", source ]
 
             let output = target :?> INamedExpressionizableTerminal
             let outputParameters = [ "OUT", output ]
-            createBoxXmls prjParam (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters "" targetPLC
+            bxiBox prjParam (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters "" targetPLC
 
-    let createFunctionBlockInstanceXmls
+    let bxiFunctionBlockInstanceXmls
             (prjParam: XgxProjectParams)
             (rungStartX, rungStartY)
             (cmd: CommandTypes)
@@ -239,12 +239,12 @@ module internal rec Command =
         : BlockXmlInfo =
             let func = cmd.VarType.ToString()
             let instanceName = cmd.InstanceName
-            createBoxXmls prjParam (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName target
+            bxiBox prjParam (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName target
 
     /// cmd 인자로 주어진 function block 의 type 과
     /// namedInputParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
     /// function block rung 을 그린다.
-    let createBoxXmls
+    let bxiBox
             (prjParam: XgxProjectParams)
             (rungStartX, rungStartY)
             (functionName: string)
@@ -312,7 +312,7 @@ module internal rec Command =
                           checkType.HasFlag CheckType.BOOL
                           |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
 
-                          let blockXml = drawFunctionInputLadderBlock prjParam (x, y + sy) (flatten exp)
+                          let blockXml = bxiFunctionInputLadderBlock prjParam (x, y + sy) (flatten exp)
                           portOffset, blockXml
                           sy <- sy + blockXml.TotalSpanY ]
 
@@ -324,7 +324,7 @@ module internal rec Command =
 
             let outputCellXmls =
                 [ for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
-                      createFBParameterXml (fsx + 1, y + yoffset) terminal.StorageName ]
+                      rxiFBParameter (fsx + 1, y + yoffset) terminal.StorageName ]
 
             /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
             let tentacleXmls =
@@ -354,7 +354,7 @@ module internal rec Command =
                               let yi = y + portOffset
                               tracefn $"V: ({bexi - 1}, {bey}) -> [({bexi - 1}, {yi})]"
                               // 'S' shape 의 세로선 그리기
-                              yield! vlineUpTo (bexi - 1, bey) yi
+                              yield! rxisVLineUpTo (bexi - 1, bey) yi
 
                               // 'S' shape 의 상단부 수평선 그리기
                               yield!
@@ -362,7 +362,8 @@ module internal rec Command =
                                   |> map (fun xml ->
                                       tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
 
-                                      { Coordinate = c
+                                      let c2 = coord (bexi, yi)
+                                      { Coordinate = c2
                                         Xml = xml
                                         SpanX = spanX
                                         SpanY = 1 }) ]
@@ -381,7 +382,7 @@ module internal rec Command =
                               | _ -> failwithlog "ERROR"
                           | _ -> failwithlog "ERROR"
 
-                      createFBParameterXml (x + fsx - 1, ry) literal
+                      rxiFBParameter (x + fsx - 1, ry) literal
 
                   yield! inputBlockXmls |> bind (fun (_, bx) -> bx.XmlElements)
                   yield! outputCellXmls
@@ -389,7 +390,7 @@ module internal rec Command =
                   let x, y = rungStartX, rungStartY
 
                   //Command 결과출력
-                  createFunctionXmlAt (functionName, functionName) instanceName (x + fsx, y) ]
+                  rxiFunctionAt (functionName, functionName) instanceName (x + fsx, y) ]
 
 
             { X = x
@@ -400,47 +401,49 @@ module internal rec Command =
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let drawCommand (prjParam: XgxProjectParams) (x, y) (cmd: CommandTypes) : BlockXmlInfo =
+    let bxiCommand (prjParam: XgxProjectParams) (x, y) (cmd: CommandTypes) : BlockXmlInfo =
         match prjParam.TargetType with
         | XGI ->
             match cmd with
-            | PredicateCmd(pc) -> drawPredicate prjParam (x, y) pc XGI
-            | FunctionCmd(fc) -> drawFunction prjParam (x, y) fc XGI
-            | ActionCmd(ac) -> drawAction prjParam (x, y) ac XGI
+            | PredicateCmd(pc) -> bxiPredicate prjParam (x, y) pc XGI
+            | FunctionCmd(fc) -> bxiFunction prjParam (x, y) fc XGI
+            | ActionCmd(ac) -> bxiAction prjParam (x, y) ac XGI
             | FunctionBlockCmd(fbc) ->
                 match fbc with
-                | TimerMode(timerStatement) -> drawFunctionBlockTimer prjParam (x, y) timerStatement XGI
-                | CounterMode(counterStatement) -> drawFunctionBlockCounter prjParam (x, y) counterStatement XGI
+                | TimerMode(timerStatement) -> bxiFunctionBlockTimer prjParam (x, y) timerStatement XGI
+                | CounterMode(counterStatement) -> bxiFunctionBlockCounter prjParam (x, y) counterStatement XGI
             | _ -> failwithlog "Unknown CommandType"
 
         | XGK ->
             match cmd with
-            | FunctionBlockCmd(fbc) -> drawFBCommandXgk (x, y) fbc
+            | FunctionBlockCmd(fbc) -> bxiFBCommandXgk prjParam (x, y) fbc
             | _ -> failwithlog "Unknown CommandType"
 
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
-    let drawCoil (x, y) (cmdExp: CommandTypes) : BlockXmlInfo =
-        let spanX = (coilCellX - x - 2)
-        let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+    let bxiCoil (x, y) (cmdExp: CommandTypes) : BlockXmlInfo =
+        let spanX = max 0 (coilCellX - x - 2)
 
         let xmls =
-            [ let c = coord (x + 1, y)
-              let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+            [
+                if spanX > 0 then
+                    let c = coord (x + 1, y)
+                    let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                    let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-              { Coordinate = c
-                Xml = xml
-                SpanX = spanX
-                SpanY = 1 }
+                    { Coordinate = c
+                      Xml = xml
+                      SpanX = spanX
+                      SpanY = 1 }
 
-              let c = coord (coilCellX, y)
-              let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
+                let c = coord (coilCellX, y)
+                let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
 
-              { Coordinate = c
-                Xml = xml
-                SpanX = 1
-                SpanY = 1 } ]
+                { Coordinate = c
+                  Xml = xml
+                  SpanX = 1
+                  SpanY = 1 } ]
 
         { X = x
           Y = y
@@ -448,7 +451,7 @@ module internal rec Command =
           TotalSpanY = 1
           XmlElements = xmls }
 
-    let drawFBCommandXgk (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
+    let bxiFBCommandXgk (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
         let xmls =
             let spanX =
                 let cmdWidth = 3
@@ -459,7 +462,9 @@ module internal rec Command =
                 | TimerMode ts ->
                     let typ = ts.Timer.Type.ToString()
                     let var = ts.Timer.Name
-                    let value = ts.Timer.PRE.Value /100u  // 2000 mec = 20  // 100msec timer
+                    let value =
+                        let res = prjParam.GetXgkTimerResolution(ts.Timer.TimerStruct.XgkStructVariableDevicePos)
+                        int <| (float ts.Timer.PRE.Value) / res
                     $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
                 | CounterMode cs ->
                     let typ = cs.Counter.Type.ToString()
@@ -528,16 +533,15 @@ module internal rec Command =
             ] |> joinLines
         wrapWithRung inner
 
-    let drawXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : RungXmlInfo =
+    let rxiXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : RungXmlInfo =
         assert (x = 0)
-        let conditionBlockXml = drawFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
+        let conditionBlockXml = bxiFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
         let cbx = conditionBlockXml
-        //let { X = cx; Y = cy; TotalSpanX = spanX; TotalSpanY = spanY; XmlElements = xmls } = cbx
 
+        let c = coord (x + cbx.TotalSpanX, y)
+        let spanX = coilCellX - 4
         let xml =
             [
-                let c = coord (x + cbx.TotalSpanX, y)
-                let spanX = coilCellX - 4
                 let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                 elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
@@ -545,15 +549,18 @@ module internal rec Command =
                 elementFull (int ElementType.FBMode) c fbParam ""
             ] |> joinLines
 
+        (* 좌측 expression 이 multiline 인 경우, 우측 FB 의 Coordinate 값이 expression 의 coordinate 중간에 삽입되는 형태로 정렬되어야 한다.  *)
+        let xmls = cbx.XmlElements @ [{ Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1}]
+
         {
             Coordinate = coord(0, y + cbx.TotalSpanY)
-            Xml = cbx.GetXml() + xml
+            Xml = mergeXmls xmls
             SpanX = fbWidth; SpanY = 1
         }
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
-    let drawFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
-        let blockXml = drawLadderBlock prjParam (x, y) expr
+    let bxiFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
+        let blockXml = bxiLadderBlock prjParam (x, y) expr
 
         if isFunctionBlockConnectable expr then
             blockXml
@@ -577,7 +584,7 @@ module internal rec Command =
     /// x y 위치에서 expression 표현하기 위한 정보 반환
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
     /// - Xml : 좌표 * 결과 xml 문자열
-    let rec private drawLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
+    let rec private bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
         let c = coord (x, y)
 
         match expr with
@@ -614,7 +621,7 @@ module internal rec Command =
 
             let blockedExprXmls: BlockXmlInfo list =
                 [ for exp in exprs do
-                      let sub = drawLadderBlock prjParam (sx, y) exp
+                      let sub = bxiLadderBlock prjParam (sx, y) exp
                       sx <- sx + sub.TotalSpanX
                       sub ]
 
@@ -634,7 +641,7 @@ module internal rec Command =
 
             let blockedExprXmls: BlockXmlInfo list =
                 [ for exp in exprs do
-                      let sub = drawLadderBlock prjParam (x, sy) exp
+                      let sub = bxiLadderBlock prjParam (x, sy) exp
                       sy <- sy + sub.TotalSpanY
                       sub ]
 
@@ -665,13 +672,13 @@ module internal rec Command =
                             blockedExprXmls
                             |> List.take(blockedExprXmls.Length - 1)
                             |> List.sumBy(fun e -> e.TotalSpanY)
-                        yield! vlineDownN (x - 1, y) dy
+                        yield! rxisVLineDownN (x - 1, y) dy
 
                     // ```OR variable length 역삼각형 test```
                     let lowestY =
                         blockedExprXmls.Where(fun sri -> sri.TotalSpanX <= spanX).Max(fun sri -> sri.Y)
                     // 우측 vertical lines
-                    yield! vlineDownN (x + spanX - 1, y) (lowestY - y) ]
+                    yield! rxisVLineDownN (x + spanX - 1, y) (lowestY - y) ]
 
             let xmls = xmls |> List.distinct // dirty hacking!
 
@@ -685,15 +692,15 @@ module internal rec Command =
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         // terminal case
-        | FlatNary(OpUnit, inner :: []) -> drawLadderBlock prjParam (x, y) inner
+        | FlatNary(OpUnit, inner :: []) -> bxiLadderBlock prjParam (x, y) inner
 
         // negation 없애기
-        | FlatNary(Neg, inner :: []) -> FlatNary(OpUnit, [ inner.Negate() ]) |> drawLadderBlock prjParam (x, y)
+        | FlatNary(Neg, inner :: []) -> FlatNary(OpUnit, [ inner.Negate() ]) |> bxiLadderBlock prjParam (x, y)
 
         | _ -> failwithlog "Unknown FlatExpression case"
 
     type FlatExpression with
-        member exp.DrawLadderBlock (prjParam: XgxProjectParams, (x, y)) = drawLadderBlock prjParam (x, y) exp
+        member exp.BxiLadderBlock (prjParam: XgxProjectParams, (x, y)) = bxiLadderBlock prjParam (x, y) exp
 
     /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     ///
@@ -702,12 +709,12 @@ module internal rec Command =
     /// - expr 이 None 이면 그리지 않는다.
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rung (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
-        let rungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
+    let rxiRung (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
+        let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
                 | Some expr ->
-                    let exprBlockXmlElement = drawLadderBlock prjParam (x, y) expr
+                    let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
                     let ex = exprBlockXmlElement
                     ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
                 | _ -> 0, 0, []
@@ -717,27 +724,23 @@ module internal rec Command =
                 | Some cmdExp ->
                     let nx = x + exprSpanX
 
-                    let cmdXmls =
+                    let cmdXmls1 =
                         match cmdExp with
-                        | CoilCmd _cc -> drawCoil (nx - 1, y) cmdExp
+                        | CoilCmd _cc -> bxiCoil (nx - 1, y) cmdExp
                         | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                            drawCommand prjParam (nx, y) cmdExp
+                            bxiCommand prjParam (nx, y) cmdExp
 
-                    let cmdXmls =
-                        { cmdXmls with
-                            XmlElements = cmdXmls.XmlElements |> List.distinct } // dirty hack!
+                    let cmdXmls2 =
+                        { cmdXmls1 with
+                            XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
 
-                    let spanX = exprSpanX + cmdXmls.TotalSpanX
-                    let spanY = max exprSpanY cmdXmls.TotalSpanY
-                    spanX, spanY, cmdXmls
+                    let spanX = exprSpanX + cmdXmls2.TotalSpanX
+                    let spanY = max exprSpanY cmdXmls2.TotalSpanY
+                    spanX, spanY, cmdXmls2
                 | None ->
                     0, 0, { X = x; Y = y; TotalSpanX = 0; TotalSpanY = 0; XmlElements = [] }
 
-            let xml =
-                exprXmls @ cmdXmls.XmlElements
-                |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
-                |> Seq.map (fun ri -> ri.Xml) //snd
-                |> String.concat "\r\n"
+            let xml = (exprXmls @ cmdXmls.XmlElements).MergeXmls()
 
             let spanX = exprSpanX + cmdSpanX
             let spanY = max exprSpanY cmdSpanY
@@ -747,14 +750,14 @@ module internal rec Command =
 
         match prjParam.TargetType, cmdExp with
         | XGK, Some (ActionCmd(Move(condition, source, target))) when source.Terminal.IsSome ->
-            let fbParam =
+            let fbParam, fbWidth =
                 let s, d = source.GetTerminalString(prjParam), target.Name
-                $"Param={dq}MOV,{s},{d}{dq}"
-            drawXgkFB prjParam (x, y) condition (fbParam, 3)
+                $"Param={dq}MOV,{s},{d}{dq}", 3
+            rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
         | _ ->
             match prjParam.TargetType, expr, cmdExp with
             | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
-                rungImpl (x, y) expr cmdExp
+                rxiRungImpl (x, y) expr cmdExp
             | XGK, _, Some (FunctionBlockCmd(fbc)) ->
                 match fbc with
                 | CounterMode(counterStatement) when counterStatement.Counter.Type = CTUD ->
@@ -774,7 +777,7 @@ module internal rec Command =
                     let xml =
                         [
                             let { X = _xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; XmlElements = xmls } : BlockXmlInfo =
-                                rungInCondition.DrawLadderBlock(prjParam, (x, y))
+                                rungInCondition.BxiLadderBlock(prjParam, (x, y))
                             xmls[0].Xml
 
                             hlineTo (totalSpanX, yy) (coilCellX - 5)
@@ -797,6 +800,6 @@ module internal rec Command =
                             counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression
                         | TimerMode(timerStatement) ->
                             timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
-                    rungImpl (x, y) (Some exp) cmdExp
+                    rxiRungImpl (x, y) (Some exp) cmdExp
             | _ ->
                 failwithlog "ERROR"

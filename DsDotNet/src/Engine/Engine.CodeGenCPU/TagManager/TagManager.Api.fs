@@ -13,7 +13,7 @@ module ApiTagManagerModule =
         let cpv (apiItemTag:ApiItemTag) =
             let n = Enum.GetName(typeof<ApiItemTag>, apiItemTag)
             let name = $"{apiItem.ApiSystem.Name}_{apiItem.Name}_{n}"
-            let pv:IStorage = createPlanVar stg name DuBOOL true apiItem (int apiItemTag) apiItem.ApiSystem 
+            let pv:IStorage = createPlanVar stg name DuBOOL false apiItem (int apiItemTag) apiItem.ApiSystem 
             pv :?> PlanVar<bool>
             
         let ps = cpv ApiItemTag.planSet

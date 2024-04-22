@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    Generate simplest with local, global variables test
+    Counter CTUD with conditional test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -39,19 +39,26 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="2">
-                        <Symbol Name="myBit00" Kind="6" Type="Bit" Comment="FAKECOMMENT" Device="P" DevicePos="10" State="0">
-                            <MemberAddresses/>
-                            <MemberRetains/>
-                            <MemberInitValues/>
-                            <MemberComments/>
-                        </Symbol>
-                        <Symbol Name="myBit01" Kind="6" Type="Bit" Comment="FAKECOMMENT" Device="P" DevicePos="11" State="0">
-                            <MemberAddresses/>
-                            <MemberRetains/>
-                            <MemberInitValues/>
-                            <MemberComments/>
-                        </Symbol>
+                    <Symbols Count="17">
+                        <Symbol Name="cd1" Comment="" Device="M" DevicePos="4" Type="BIT"/>
+                        <Symbol Name="cd2" Comment="" Device="M" DevicePos="5" Type="BIT"/>
+                        <Symbol Name="cd3" Comment="" Device="M" DevicePos="6" Type="BIT"/>
+                        <Symbol Name="cd4" Comment="" Device="M" DevicePos="7" Type="BIT"/>
+                        <Symbol Name="cu1" Comment="" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="cu2" Comment="" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="cu3" Comment="" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="cu4" Comment="" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="load1" Comment="" Device="M" DevicePos="11" Type="BIT"/>
+                        <Symbol Name="load2" Comment="" Device="M" DevicePos="12" Type="BIT"/>
+                        <Symbol Name="load3" Comment="" Device="M" DevicePos="13" Type="BIT"/>
+                        <Symbol Name="load4" Comment="" Device="M" DevicePos="14" Type="BIT"/>
+                        <Symbol Name="myCTUD" Comment="COUNTER myCTUD" Device="C" DevicePos="0" Type="BIT/WORD"/>
+                        <Symbol Name="res0" Comment="" Device="M" DevicePos="8" Type="BIT"/>
+                        <Symbol Name="res1" Comment="" Device="M" DevicePos="9" Type="BIT"/>
+                        <Symbol Name="res2" Comment="" Device="M" DevicePos="10" Type="BIT"/>
+                        <Symbol Name="xx7" Comment="" Device="M" DevicePos="15" Type="BIT"/>
+                        <Symbol Name="_t1__temp_internal" Comment="Temporary assignment for $cu1 &amp;&amp; $cu2 || $cu3 || $cu4" Device="M" DevicePos="16" Type="BIT"/>
+                        <Symbol Name="_t2__temp_internal" Comment="Temporary assignment for $cd1 || $cd2 || $cd3 &amp;&amp; $cd4" Device="M" DevicePos="17" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -74,24 +81,108 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="1025">
-                                        myBit00
-                                    </Element>
-                                    <Element ElementType="1" Coordinate="1028"/>
-                                    <Element ElementType="2" Coordinate="1031" Param="84"/>
-                                    <Element ElementType="14" Coordinate="1118">
-                                        myBit01
+                                    <Element ElementType="63" Coordinate="1025">
+                                        [0] ctud myCTUD = createXgkCTUD(2000u, $cu1 &amp;&amp; $cu2 || $cu3 || $cu4, $cd1 || $cd2 || $cd3 &amp;&amp; $cd4, $res0 || $res1 &amp;&amp; $res2)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="END">
+                                    <Element ElementType="6" Coordinate="2049">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2052" Param="75"/>
+                                    <Element ElementType="33" Coordinate="2124" Param="CTUD,C0001,_t1__temp_internal,_t2__temp_internal,2000"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="4097">
+                                        res0
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="4100" Param="0"/>
+                                    <Element ElementType="0" Coordinate="4102"/>
+                                    <Element ElementType="2" Coordinate="4103" Param="84"/>
+                                    <Element ElementType="17" Coordinate="4190">
+                                        myCTUD
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="5121">
+                                        res1
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="5124">
+                                        res2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="6145">
+                                        cu1
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="6148">
+                                        cu2
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="6150"/>
+                                    <Element ElementType="2" Coordinate="6151" Param="84"/>
+                                    <Element ElementType="14" Coordinate="6238">
+                                        _t1__temp_internal
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="7169">
+                                        cu3
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="7172" Param="0"/>
+                                    <Element ElementType="0" Coordinate="7174"/>
+                                    <Element ElementType="6" Coordinate="8193">
+                                        cu4
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="8196" Param="0"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="9217">
+                                        cd1
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="9219"/>
+                                    <Element ElementType="2" Coordinate="9220" Param="0"/>
+                                    <Element ElementType="0" Coordinate="9222"/>
+                                    <Element ElementType="2" Coordinate="9223" Param="84"/>
+                                    <Element ElementType="14" Coordinate="9310">
+                                        _t2__temp_internal
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="10241">
+                                        cd2
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="10246"/>
+                                    <Element ElementType="6" Coordinate="11265">
+                                        cd3
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="11268">
+                                        cd4
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="12289">
+                                        load1
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="12292">
+                                        load2
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="12294"/>
+                                    <Element ElementType="1" Coordinate="12295"/>
+                                    <Element ElementType="2" Coordinate="12298" Param="81"/>
+                                    <Element ElementType="33" Coordinate="12364" Param="MOV,2000,myCTUD"/>
+                                    <Element ElementType="6" Coordinate="13313">
+                                        load3
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="13316" Param="0"/>
+                                    <Element ElementType="0" Coordinate="13318"/>
+                                    <Element ElementType="6" Coordinate="14337">
+                                        load4
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="14340" Param="0"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="15361" Param="90"/>
+                                    <Element ElementType="33" Coordinate="15454" Param="END">
                                         END
                                     </Element>
                                 </Rung>
                                 <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">
                                     QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
-    XckU4UJCOYh5CA==
+XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>

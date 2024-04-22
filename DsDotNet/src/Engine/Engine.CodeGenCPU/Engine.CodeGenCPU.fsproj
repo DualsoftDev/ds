@@ -11,6 +11,7 @@
 
     <ItemGroup>
         <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="Core.Util.Address.fs" />
         <Compile Include="TagManager/TagManager.Util.fs" />
         <Compile Include="TagManager/TagManager.System.fs" />
         <Compile Include="TagManager/TagManager.Flow.fs" />
@@ -51,6 +52,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
         <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 

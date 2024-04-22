@@ -6,6 +6,7 @@ open System.Linq
 open Dual.Common.Core.FS
 open Engine.Core
 open System.Collections.Generic
+open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ImportIOTable =

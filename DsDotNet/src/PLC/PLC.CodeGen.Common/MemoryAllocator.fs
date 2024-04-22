@@ -96,7 +96,7 @@ module MemoryAllocator =
                         if target = XGI then
                             $"%%{typ}{reqMemType}{bitIndex}"
                         elif target = XGK then
-                            xgkIOMBit(typ, bitIndex)
+                            getXgkBitText(typ, bitIndex)
                         else
                             failwithlog "ERROR"
                     logDebug "Address %s allocated" address
@@ -142,7 +142,7 @@ module MemoryAllocator =
                         if target = XGI then
                             $"%%{typ}{reqMemType}{byteIndex / byteSize}"
                         elif target = XGK then
-                            xgkIOMWord (typ, byteIndex)
+                            getXgkWordText (typ, byteIndex)
                         else
                             failwithlog "ERROR"
 

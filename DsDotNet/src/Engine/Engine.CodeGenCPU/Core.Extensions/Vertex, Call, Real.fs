@@ -89,7 +89,6 @@ module ConvertCpuVertex =
                                     getVMCoin(c).ErrShort 
                                     getVMCoin(c).ErrOpen 
                                 ]
-    
                          
         member c.MutualResetCalls =  c.System.S.MutualCalls[c].Cast<Call>()
           

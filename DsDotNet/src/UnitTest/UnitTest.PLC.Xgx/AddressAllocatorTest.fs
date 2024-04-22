@@ -46,16 +46,29 @@ type AddressAllocatorTest(xgx:PlatformTarget) =
         match xgx with
         | XGI ->
             for i = 0 to 10 do
-                x() === $"%%MX{i}"   // %MX0 ~ %MX10
-            b() === "%MB2"
-            x() === "%MX11"
-            b() === "%MB3"
-            w() === "%MW2"
-            w() === "%MW3"
-            x() === "%MX12"
-            b() === "%MB8"
-            w() === "%MW5"
-            b() === "%MB9"
+                x() === $"%%MX{i}" // |xxxxxxxx|xx    // %MX0 ~ %MX10
+                                   // b0       b1       b2        b3      b4      b5       b6        b7       b8       b9       b10       b11     b12       b13     b14       b15     b16      b17      b18       b19     b20       b21     b22       b23     b24       b25     b26       b27     b28       b29     b30       b31     b32       b33     b34       b35     b36       b37     b38       b39     b40       b41     b42       b43     b44       b45     b46       b47     b48       b49     b50       b51     b52       b53     b54       b55     b56       b57     b58       b59     b60       b61     b62       b63     b64       b65     b66       b67     b68       b69     b70       b71     b72       b73     b74       b75     b76       b77     b78       b79     b80       b81     b82       b83     b84       b85     b86       b87     b88       b89     b90       b91     b92       b93     b94       b95     b96       b97     b98       b99     b100
+                                   // w0                w1                w2                w3                w4                w5                w6                w7                w8                w9                w10               w11               w12               w13               w14               w15               w16               w17               w18               w19               w20               w21               w22               w23               w24               w25               w26               w27               w28               w29               w30               w31               w32               w33               w34               w35               w36               w37               w38               w39               w40               w41               w42               w43               w44               w45               w46               w47               w48               w49               w50               w51               w52               w53               w54               w55               w56               w57               w58               w59               w60               w61               w62               w63               w64               w65               w66               w67               w68               w69               w70               w71               w72               w73               w74               w75               w76               w77               w78               w79               w80               w81               w82               w83               w84               w85               w86               w87               w88               w89               w90               w91               w92               w93               w94               w95               w96               w97               w98               w99               w100
+                                   // D0                                  D1                                  D2                                  D3                                  D4                                  D5                                  D6                                  D7                                  D8                                  D9                                  D10
+                                   // L0                                                                      L1                                                                      L2                                                                      L3                                                                      L4                                                                      L5                                                                      L6                                                                      L7                                                                      L8                                                                      L9                                                                      L10
+            b() === "%MB2"         // |xxxxxxxx|xx------|xxxxxxxx|
+            x() === "%MX11"        // |xxxxxxxx|xxx-----|xxxxxxxx|
+            b() === "%MB3"         // |xxxxxxxx|xxx-----|xxxxxxxx|xxxxxxxx|  
+            w() === "%MW2"         // |xxxxxxxx|xxx-----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|
+            w() === "%MW3"         // |xxxxxxxx|xxx-----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|
+            x() === "%MX12"        // |xxxxxxxx|xxxx----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|
+            b() === "%MB8"         // |xxxxxxxx|xxxx----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|
+            w() === "%MW5"         // |xxxxxxxx|xxxx----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|--------|xxxxxxxx|xxxxxxxx|
+            b() === "%MB9"         // |xxxxxxxx|xxxx----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|
+
+            d() === "%MD3"         // |xxxxxxxx|xxxx----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|
+            l() === "%ML2"         // |xxxxxxxx|xxxx----|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx
+            x() === "%MX13"        // |xxxxxxxx|xxxxx---|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx
+            b() === "%MB24"        // |xxxxxxxx|xxxxx---|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx
+            w() === "%MW13"        // |xxxxxxxx|xxxxx---|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|--------|xxxxxxxx|xxxxxxxx
+            b() === "%MB25"        // |xxxxxxxx|xxxxx---|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx
+            x() === "%MX14"        // |xxxxxxxx|xxxxxx--|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx|xxxxxxxx
+
         | XGK ->
             for i = 0 to 10 do
                 x() === xgkIOMBit ("M", i)   // M00000 ~ M0000A

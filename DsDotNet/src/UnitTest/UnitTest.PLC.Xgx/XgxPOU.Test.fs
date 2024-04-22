@@ -164,8 +164,8 @@ type XgxPOUTest(xgx:PlatformTarget) =
 
 
         //주소 없는 auto 변수 사용
-        globalStorages["gg1"].Address === "_"
-        globalStorages["xm0"].Address === "_"
+        globalStorages["gg1"].Address === ""
+        globalStorages["xm0"].Address === "%MX320"
 
         x.saveTestResult f xml
 

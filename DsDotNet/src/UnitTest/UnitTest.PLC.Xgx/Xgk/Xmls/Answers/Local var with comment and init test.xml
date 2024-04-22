@@ -40,10 +40,10 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="4">
-                        <Symbol Name="mybool" Comment="mybool comment" Device="M" DevicePos="112" Type="BIT"/>
-                        <Symbol Name="myint16" Comment="myint16 comment &lt;&gt; ! +-*/" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="myint64" Comment="" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="mybool" Comment="mybool comment" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="myint16" Comment="myint16 comment &lt;&gt; ! +-*/" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="myint64" Comment="" Device="M" DevicePos="4" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

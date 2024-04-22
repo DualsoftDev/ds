@@ -93,18 +93,18 @@
                         </Symbol>
                         <Symbol Name="gg0" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX1.0.1" State="0"/>
                         <Symbol Name="gg1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="nm0" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="nm1" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="nm2" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="nm3" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="xm0" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="xm1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="xm2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="xm3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="y0" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="y1" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="y2" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="y3" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="nm0" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="%MD5" State="0"/>
+                        <Symbol Name="nm1" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="%MD6" State="0"/>
+                        <Symbol Name="nm2" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="%MD7" State="0"/>
+                        <Symbol Name="nm3" Comment="" Device="" Kind="6" Type="DINT" InitValue="0" Address="%MD8" State="0"/>
+                        <Symbol Name="xm0" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="%MX320" State="0"/>
+                        <Symbol Name="xm1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="%MX321" State="0"/>
+                        <Symbol Name="xm2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="%MX322" State="0"/>
+                        <Symbol Name="xm3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="%MX323" State="0"/>
+                        <Symbol Name="y0" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB36" State="0"/>
+                        <Symbol Name="y1" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB37" State="0"/>
+                        <Symbol Name="y2" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB38" State="0"/>
+                        <Symbol Name="y3" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB39" State="0"/>
                     </Symbols>
                     <TempVar Count="0"></TempVar>
                     <HMIFlags></HMIFlags>

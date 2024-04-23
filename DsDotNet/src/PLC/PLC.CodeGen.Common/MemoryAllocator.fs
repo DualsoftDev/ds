@@ -125,7 +125,6 @@ module MemoryAllocator =
                                 ofByteRange <- Some(byteCursor, newPosition)
                                 byteCursor <- newPosition + byteSize
                                 newPosition
-                        //ofByte <- Some (byte + byteSize)
                         byte
 
                 if byteIndex + byteSize > endByte then

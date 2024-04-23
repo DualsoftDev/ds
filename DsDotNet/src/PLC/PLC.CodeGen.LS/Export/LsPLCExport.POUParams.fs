@@ -46,7 +46,6 @@ module POUParametersModule =
     type XgxProjectParamsProperties() =
         member val XgxTimerResolutionSpec:XgkTimerResolutionSpec list = [] with get, set
 
-        //MemoryAllocatorSpec = RangeSpec (0, 640*1024)   // 640K M memory 영역
     type XgxProjectParams = {
         TargetType         : PlatformTarget
         ProjectName        : string
@@ -67,6 +66,7 @@ module POUParametersModule =
         Properties: XgxProjectParamsProperties
     }
     and XgxProjectParams with
+        /// XGK timer 변수의 resolution 값을 반환.  e.g "T0001" 이면 n 의 값은 1
         member x.GetXgkTimerResolution(n:int) =
             assert (x.TargetType = XGK)
             let contains (range:int*int) needle = fst range <= needle && needle <= snd range

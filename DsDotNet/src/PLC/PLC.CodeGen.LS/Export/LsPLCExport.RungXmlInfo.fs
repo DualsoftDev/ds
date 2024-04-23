@@ -68,23 +68,14 @@ module internal RungXmlInfoModule =
     /// coord(x, y) 에서 y 좌표 반환
     let yOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> snd
 
-
+    /// RungXmlInfo list 로부터 coordinate 순으로 최종 xml 문자열 생성
     let mergeXmls(xmls:RungXmlInfo seq) : string = 
-        let xxx =
-            xmls
-            |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
-            |> toArray
-        let yyy =
-            xxx
-            |> Seq.map (fun ri -> ri.Xml) //snd
-            |> String.concat "\r\n"
-        yyy
-        //xmls
-        //|> Seq.sortBy (fun ri -> ri.Coordinate) // fst
-        //|> Seq.map (fun ri -> ri.Xml) //snd
-        //|> String.concat "\r\n"
+        xmls
+        |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
+        |> Seq.map (fun ri -> ri.Xml) //snd
+        |> String.concat "\r\n"
 
-    let blockXmlInfoToRungXmlInfo (block:BlockXmlInfo) : RungXmlInfo =
+    let rxiBlockXmlInfoToRungXmlInfo (block:BlockXmlInfo) : RungXmlInfo =
         let bx, by = block.X, block.Y
         let c = coord (bx, by)
         let tx, ty = block.TotalSpanX, block.TotalSpanY
@@ -107,7 +98,7 @@ type internal RungXmlExtension =
             xmls
             |> map (function
                 | DuRungXmlInfo rxi -> rxi
-                | DuBlockXmlInfo bxi -> blockXmlInfoToRungXmlInfo bxi)
+                | DuBlockXmlInfo bxi -> rxiBlockXmlInfoToRungXmlInfo bxi)
 
         let spanY = rxis |> Seq.map(fun rxi -> rxi.SpanY) |> Seq.max
         let xml = mergeXmls rxis

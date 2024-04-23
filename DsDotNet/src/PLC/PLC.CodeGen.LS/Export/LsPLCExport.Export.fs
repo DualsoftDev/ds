@@ -356,8 +356,8 @@ module XgiExportModule =
                 match prjParam.TargetType, prjParam.ExistingLSISprj with
                 | XGK, Some existing ->
                     let doc = DualXmlDocument.loadFromFile existing
-                    let counters = collectCounterAddressXgk doc
-                    let timers = collectTimerAddressXgk doc
+                    let counters = collectCounterAddressesXgk doc
+                    let timers = collectTimerAddressesXgk doc
                     let newPrjParam = {
                         prjParam with
                             CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters

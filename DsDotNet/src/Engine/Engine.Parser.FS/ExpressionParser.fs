@@ -50,7 +50,16 @@ module rec ExpressionParser =
                     let expr = helper exprCtx
                     createCustomFunctionExpression castName [ expr ]
 
-                | (:? BinaryExprMultiplicativeContext | :? BinaryExprAdditiveContext | :? BinaryExprBitwiseShiftContext | :? BinaryExprRelationalContext | :? BinaryExprEqualityContext | :? BinaryExprBitwiseAndContext | :? BinaryExprBitwiseXorContext | :? BinaryExprBitwiseOrContext | :? BinaryExprLogicalAndContext | :? BinaryExprLogicalOrContext) ->
+                | (   :? BinaryExprMultiplicativeContext
+                    | :? BinaryExprAdditiveContext
+                    | :? BinaryExprBitwiseShiftContext
+                    | :? BinaryExprRelationalContext
+                    | :? BinaryExprEqualityContext
+                    | :? BinaryExprBitwiseAndContext
+                    | :? BinaryExprBitwiseXorContext
+                    | :? BinaryExprBitwiseOrContext
+                    | :? BinaryExprLogicalAndContext
+                    | :? BinaryExprLogicalOrContext) ->
                     debugfn $"Binary: {text}"
 
                     match ctx.children.ToFSharpList() with
@@ -82,9 +91,9 @@ module rec ExpressionParser =
                         assert (exp.ChildCount = 1)
 
                         match exp.children[0] with
-                        | :? LiteralSbyteContext -> text.Replace("y", "") |> System.SByte.Parse |> literal2expr |> iexpr
-                        | :? LiteralByteContext -> text.Replace("uy", "") |> System.Byte.Parse |> literal2expr |> iexpr
-                        | :? LiteralInt16Context -> text.Replace("s", "") |> System.Int16.Parse |> literal2expr |> iexpr
+                        | :? LiteralSbyteContext -> text.Replace("y", "")  |> System.SByte.Parse |> literal2expr |> iexpr
+                        | :? LiteralByteContext  -> text.Replace("uy", "") |> System.Byte.Parse  |> literal2expr |> iexpr
+                        | :? LiteralInt16Context -> text.Replace("s", "")  |> System.Int16.Parse |> literal2expr |> iexpr
                         | :? LiteralUint16Context ->
                             text.Replace("us", "") |> System.UInt16.Parse |> literal2expr |> iexpr
                         | :? LiteralInt32Context -> text |> System.Int32.Parse |> literal2expr |> iexpr
@@ -95,9 +104,9 @@ module rec ExpressionParser =
                             text.Replace("UL", "") |> System.UInt64.Parse |> literal2expr |> iexpr
                         | :? LiteralSingleContext ->
                             text.Replace("f", "") |> System.Single.Parse |> literal2expr |> iexpr
-                        | :? LiteralDoubleContext -> text |> System.Double.Parse |> literal2expr |> iexpr
-                        | :? LiteralBoolContext -> text |> System.Boolean.Parse |> literal2expr |> iexpr
-                        | :? LiteralStringContext -> text |> deQuoteOnDemand |> literal2expr |> iexpr
+                        | :? LiteralDoubleContext -> text |> System.Double.Parse  |> literal2expr |> iexpr
+                        | :? LiteralBoolContext ->   text |> System.Boolean.Parse |> literal2expr |> iexpr
+                        | :? LiteralStringContext -> text |> deQuoteOnDemand      |> literal2expr |> iexpr
                         | :? LiteralCharContext ->
                             // text : "'a'" 의 형태
                             let dq, sq = "\"", "'"
@@ -139,7 +148,7 @@ module rec ExpressionParser =
 
         helper ctx
 
-    let parseExpression (storages: Storages) (text: string) =
+    let parseExpression (storages: Storages) (text: string) : IExpression =
         try
             let parser = createParser (text)
             let ctx = parser.expr ()
@@ -384,19 +393,19 @@ module rec ExpressionParser =
                     Address = Some address }
 
             match x.Name with
-            | BOOL -> new Tag<bool>(createParam ())
-            | CHAR -> new Tag<char>(createParam ())
+            | BOOL    -> new Tag<bool>  (createParam ())
+            | CHAR    -> new Tag<char>  (createParam ())
             | FLOAT32 -> new Tag<single>(createParam ())
             | FLOAT64 -> new Tag<double>(createParam ())
-            | INT16 -> new Tag<int16>(createParam ())
-            | INT32 -> new Tag<int32>(createParam ())
-            | INT64 -> new Tag<int64>(createParam ())
-            | INT8 -> new Tag<int8>(createParam ())
-            | STRING -> new Tag<string>(createParam ())
-            | UINT16 -> new Tag<uint16>(createParam ())
-            | UINT32 -> new Tag<uint32>(createParam ())
-            | UINT64 -> new Tag<uint64>(createParam ())
-            | UINT8 -> new Tag<uint8>(createParam ())
+            | INT16   -> new Tag<int16> (createParam ())
+            | INT32   -> new Tag<int32> (createParam ())
+            | INT64   -> new Tag<int64> (createParam ())
+            | INT8    -> new Tag<int8>  (createParam ())
+            | STRING  -> new Tag<string>(createParam ())
+            | UINT16  -> new Tag<uint16>(createParam ())
+            | UINT32  -> new Tag<uint32>(createParam ())
+            | UINT64  -> new Tag<uint64>(createParam ())
+            | UINT8   -> new Tag<uint8> (createParam ())
             | _ -> failwithlog "ERROR"
 
         member x.CreateBridgeTag(name: string, address: string) : ITag =

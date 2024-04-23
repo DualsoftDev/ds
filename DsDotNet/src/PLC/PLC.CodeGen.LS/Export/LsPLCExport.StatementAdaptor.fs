@@ -399,7 +399,7 @@ module XgxExpressionConvertorModule =
                         if argsRemaining.IsEmpty then
                             outputStore.Value
                         else
-                            let tmpNameHint, comment = operatorToMnemonic op, exp.ToText(false)
+                            let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
                             createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue comment
 
                     let outexp = out.ToExpression()
@@ -564,7 +564,7 @@ module XgxExpressionConvertorModule =
                         let createTmpStorage =
                             fun () -> 
                                 let tmpNameHint = operatorToMnemonic fn
-                                let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText(false)}"
+                                let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText()}"
                                 tmpVar :> IStorage
 
                         match fn with
@@ -600,7 +600,7 @@ module XgxExpressionConvertorModule =
             if x.Terminal.IsSome then
                 failwith "Terminal expression cannot be converted to statement"
 
-            let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText(false)}"
+            let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText()}"
             DuAssign(x, var), var
 
     /// Statement 확장

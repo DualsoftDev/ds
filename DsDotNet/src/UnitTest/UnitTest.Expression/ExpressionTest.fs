@@ -19,12 +19,12 @@ module Exp =
     /// Parse And Serialize
     let pns storages (text:string) =
         let expr = parseExpression storages text
-        expr.ToText(false)
+        expr.ToText()
     let pns2 (storages:Storages) (text:string) =
         let expr = parseExpression storages text
-        expr.ToText(false)
+        expr.ToText()
 
-    let toText (exp:IExpression) = exp.ToText(false)
+    let toText (exp:IExpression) = exp.ToText()
 
     let toTimer (timerStatement:Statement) :Timer =
         match timerStatement with
@@ -266,12 +266,12 @@ module Exp =
             let tt1 = t1 |> var2expr
             let tt2 = t2 |> var2expr
             let addTwoExpr = fAdd [ tt1; tt2 ]
-            addTwoExpr.ToText(false) === "$t1 + $t2"
+            addTwoExpr.ToText() === "$t1 + $t2"
 
             let sTag = createTag("address", "%M1.1", "value")
             sTag.ToText() === "$address"
             let exprTag = var2expr sTag
-            exprTag.ToText(false) === "$address"
+            exprTag.ToText() === "$address"
 
 
             let expr = fMul [v 2; v 3; v 4]

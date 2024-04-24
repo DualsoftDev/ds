@@ -612,7 +612,7 @@ module XgxExpressionConvertorModule =
             DuAssign(x, var), var
 
     /// Statement 확장
-    let private statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
+    let rec private statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
         let augmentedStatements = StatementContainer() // DuAugmentedPLCFunction case
 
         let newStatements =
@@ -644,6 +644,14 @@ module XgxExpressionConvertorModule =
                 | _ ->
                     let newExp = collectExpandedExpression prjParam defaultConvertorParams
                     [ DuAssign(newExp, target) ]
+
+            // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.  다음과 같이 2개의 문장으로 분리한다.
+            // bool b3;
+            // b3 := $nn1 > $nn2;
+            | DuVarDecl(exp, decl) when prjParam.TargetType = XGK && exp.Terminal.IsNone ->
+                newLocalStorages.Add decl
+                let stmt = DuAssign(exp, decl)
+                statement2XgxStatements prjParam newLocalStorages stmt
 
             | DuVarDecl(exp, decl) ->
                 let _newExp =

@@ -113,7 +113,6 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool b2 = false;
             bool b3 = false;
             $b3 := $b1 <> $b2;
-            //bool b4 = $b1 <> $b2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()

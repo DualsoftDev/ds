@@ -334,60 +334,54 @@ type XgxFunctionTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
     member x.``ADD 10 items test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateInt16VariableDeclarations 1 10 + """
+        let storages = Storages()
+        let code = generateInt16VariableDeclarations 1 10 + """
 
-                int16 sum = 0s;
-                $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml )
+            int16 sum = 0s;
+            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``DIV 3 items test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = """
-                int16 nn1 = 1s;
-                int16 nn2 = 2s;
-                int16 nn3 = 3s;
+        let storages = Storages()
+        let code = """
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 nn3 = 3s;
 
-                int16 quotient = 0s;
-                $quotient := $nn1 / $nn2 / $nn3;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml )
+            int16 quotient = 0s;
+            $quotient := $nn1 / $nn2 / $nn3;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
     member x.``ADD MUL 3 items test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateInt16VariableDeclarations 1 8 + """
-                int16 sum = 0s;
-                $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+        let storages = Storages()
+        let code = generateInt16VariableDeclarations 1 8 + """
+            int16 sum = 0s;
+            $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``Comparision, Arithmatic, AND test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateInt16VariableDeclarations 1 8 + """
-                int16 sum = 0s;
-                bool result = false;
+        let storages = Storages()
+        let code = generateInt16VariableDeclarations 1 8 + """
+            int16 sum = 0s;
+            bool result = false;
 
-                $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+            $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
 

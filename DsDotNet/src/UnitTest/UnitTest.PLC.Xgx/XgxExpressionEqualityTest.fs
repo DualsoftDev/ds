@@ -14,35 +14,31 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Comparision, Arithmatic, OR test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateInt16VariableDeclarations 1 8 + """
-                int16 sum = 0s;
-                bool result = false;
+        let storages = Storages()
+        let code = generateInt16VariableDeclarations 1 8 + """
+            int16 sum = 0s;
+            bool result = false;
 
-                $result := $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+            $result := $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``Comparision, Arithmatic, OR test2`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateInt16VariableDeclarations 1 8 + """
-                bool cond1 = false;
-                int16 sum = 0s;
-                bool result = false;
+        let storages = Storages()
+        let code = generateInt16VariableDeclarations 1 8 + """
+            bool cond1 = false;
+            int16 sum = 0s;
+            bool result = false;
 
-                $result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+            $result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
     member __.``Expression equality test`` () =
@@ -111,19 +107,17 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 
 
     member x.``XOR test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = """
-                bool b1 = false;
-                bool b2 = false;
-                bool b3 = false;
-                $b3 := $b1 <> $b2;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+        let storages = Storages()
+        let code = """
+            bool b1 = false;
+            bool b2 = false;
+            bool b3 = false;
+            $b3 := $b1 <> $b2;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
 

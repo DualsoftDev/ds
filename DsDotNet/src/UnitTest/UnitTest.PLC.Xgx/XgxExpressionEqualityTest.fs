@@ -113,13 +113,26 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool b2 = false;
             bool b3 = false;
             $b3 := $b1 <> $b2;
+            //bool b4 = $b1 <> $b2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-
+    member x.``Assignment test`` () =
+        let storages = Storages()
+        let code = generateInt16VariableDeclarations 1 8 + """
+            bool b1 = false;
+            bool b2 = true;
+            bool b3 = $nn1 > $nn2;
+            bool b4 = $b1 <> $b2;
+            int16 sum = $nn1 + $nn2;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
 //[<Collection("SerialXgxExpEqualityTest")>]
@@ -131,16 +144,17 @@ type XgiExpEqualityTest() =
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``()
+    [<Test>] member __.``Assignment test`` () = base.``Assignment test``()
 
 
 type XgkExpEqualityTest() =
     inherit XgxExpEqualityTest(XGK)
     [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
     [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
-    [<Obsolete("디버그 실행시 예외 확인 필요")>]
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``() 
+    [<Test>] member __.``Assignment test`` () = base.``Assignment test``()
 
 
 

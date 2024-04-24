@@ -264,7 +264,9 @@ module XgxExpressionConvertorModule =
     type private AugmentedConvertorParams =
         { Storage: XgxStorage
           ExpandFunctionStatements: StatementContainer
-          Exp: IExpression }
+          Exp: IExpression
+          /// Exp 을 평가한 결과를 저장하는 변수
+          ExpStore: IStorage option}
 
     /// expression 내부의 비교 및 사칙 연산을 xgi/xgk function 으로 대체
     ///
@@ -278,11 +280,12 @@ module XgxExpressionConvertorModule =
     let private replaceInnerArithmaticOrComparisionToXgiFunctionStatements (prjParam: XgxProjectParams)
         { Storage = newLocalStorages
           ExpandFunctionStatements = expandFunctionStatements
-          Exp = exp }
+          Exp = exp
+          ExpStore = expStore}
       : IExpression =
         let xgiLocalVars = ResizeArray<IXgxVar>()
 
-        let rec helper (exp: IExpression) =
+        let rec helper (exp: IExpression) : IExpression list =
             [   match exp.FunctionName with
                 | Some funcName ->
                     let newArgs = exp.FunctionArguments |> bind helper
@@ -293,8 +296,13 @@ module XgxExpressionConvertorModule =
                         if prjParam.TargetType <> XGI then 
                             failwithlog $"Inline function only supported on XGI"
 
-                        let out = createTypedXgxAutoVariable prjParam "out" exp.BoxedEvaluatedValue $"{op} output"
-                        xgiLocalVars.Add out
+                        let out =
+                            match expStore with
+                            | Some store -> store
+                            | _ ->
+                                let out2 = createTypedXgxAutoVariable prjParam "out" exp.BoxedEvaluatedValue $"{op} output"
+                                xgiLocalVars.Add out2
+                                out2
 
                         expandFunctionStatements.Add
                         <| DuAugmentedPLCFunction
@@ -407,7 +415,7 @@ module XgxExpressionConvertorModule =
                     DuAugmentedPLCFunction
                         { FunctionName = op
                           Arguments = args
-                          Output = out :?> INamedExpressionizableTerminal }
+                          Output = out }
                     |> augmentedStatementsStorage.Add
 
                     out |> newLocalStorages.Add
@@ -611,36 +619,30 @@ module XgxExpressionConvertorModule =
             match statement with
             | DuAssign(exp, target) ->
                 let exp = exp2exp prjParam exp newLocalStorages augmentedStatements
-
+                let defaultConvertorParams =
+                    {   Storage = newLocalStorages
+                        ExpandFunctionStatements = augmentedStatements
+                        Exp = exp
+                        ExpStore = None}
 
                 // todo : "sum := tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some("+" | "-" | "*" | "/" as op) ->
 
                     let augArithmaticAssignStatements = StatementContainer()
+                    let param = { defaultConvertorParams with ExpandFunctionStatements = augArithmaticAssignStatements }
                     match
-                        mergeArithmaticOperator prjParam
-                            { Storage = newLocalStorages
-                              ExpandFunctionStatements = augArithmaticAssignStatements
-                              Exp = exp }
-                            (Some target)
+                        mergeArithmaticOperator prjParam param (Some target)
                     with
                     | AlreadyApplied _exp -> augArithmaticAssignStatements.ToFSharpList()
                     | NotApplied exp ->
-                        let tgt = target :?> INamedExpressionizableTerminal
-
                         augArithmaticAssignStatements.ToFSharpList()
                         @ [ DuAugmentedPLCFunction
                                 { FunctionName = op
                                   Arguments = exp.FunctionArguments
-                                  Output = tgt } ]
+                                  Output = target } ]
                 | _ ->
-                    let newExp =
-                        collectExpandedExpression prjParam
-                            { Storage = newLocalStorages
-                              ExpandFunctionStatements = augmentedStatements
-                              Exp = exp }
-
+                    let newExp = collectExpandedExpression prjParam defaultConvertorParams
                     [ DuAssign(newExp, target) ]
 
             | DuVarDecl(exp, decl) ->
@@ -648,7 +650,8 @@ module XgxExpressionConvertorModule =
                     collectExpandedExpression prjParam
                         { Storage = newLocalStorages
                           ExpandFunctionStatements = augmentedStatements
-                          Exp = exp }
+                          Exp = exp
+                          ExpStore = Some decl}
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 newLocalStorages.Remove decl |> ignore
@@ -727,12 +730,10 @@ module XgxExpressionConvertorModule =
 
             | DuAction(DuCopy(condition, source, target)) ->
                 let funcName = XgiConstants.FunctionNameMove
-                let output = target :?> INamedExpressionizableTerminal
-
                 [ DuAugmentedPLCFunction
                       { FunctionName = funcName
                         Arguments = [ condition; source ]
-                        Output = output } ]
+                        Output = target } ]
 
             | DuAugmentedPLCFunction _ -> failwithlog "ERROR"
 

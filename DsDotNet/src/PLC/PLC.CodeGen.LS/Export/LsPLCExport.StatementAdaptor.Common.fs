@@ -275,10 +275,10 @@ module XgxExpressionConvertorModule =
       : IExpression =
         let xgiLocalVars = ResizeArray<IXgxVar>()
 
-        let rec helper (exp: IExpression) : IExpression list =
+        let rec helper (exp: IExpression, expStore:IStorage option) : IExpression list =
             [   match exp.FunctionName with
                 | Some funcName ->
-                    let newArgs = exp.FunctionArguments |> bind helper
+                    let newArgs = exp.FunctionArguments |> bind (fun ex -> helper (ex, None))
 
                     match funcName with
                     | ("&&" | "||" | "!") -> exp.WithNewFunctionArguments newArgs
@@ -307,7 +307,7 @@ module XgxExpressionConvertorModule =
                 | _ -> exp
             ]
 
-        let newExp = helper exp |> List.exactlyOne
+        let newExp = helper (exp, expStore) |> List.exactlyOne
         xgiLocalVars.Cast<IStorage>() |> newLocalStorages.AddRange // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
         newExp
 

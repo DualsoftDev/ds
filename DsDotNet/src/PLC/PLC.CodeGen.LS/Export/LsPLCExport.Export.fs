@@ -538,3 +538,12 @@ module XgiExportModule =
                 xdoc.SanityCheckVariableNameForXgk()
 
             xdoc.Check targetType
+
+
+
+    let IsXg5kXGT(xmlProjectFilePath:string) =
+        let xdoc = DualXmlDocument.loadFromFile xmlProjectFilePath
+        xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGTBasicParam") <> null
+    let IsXg5kXGI(xmlProjectFilePath:string) =
+        let xdoc = DualXmlDocument.loadFromFile xmlProjectFilePath
+        xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGIBasicParam") <> null

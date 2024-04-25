@@ -124,6 +124,7 @@ module TagVariableModule =
                 member x.DataType = typedefof<'T>
                 member x.BoxedEvaluatedValue = box x.Value
                 member x.GetBoxedRawObject() = box x.Value
+                member x.ToText() = x.ToText()
                 member x.ToText(_withParenthesis:bool) = x.ToText()
                 member x.FunctionName = None
                 member x.FunctionArguments = []

@@ -45,7 +45,6 @@
                         <Symbol Name="nn3" Comment="" Device="M" DevicePos="2" Type="WORD"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="3" Type="WORD"/>
                         <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2 + $nn3" Device="M" DevicePos="5" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -84,18 +83,11 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="3076" Param="81"/>
-                                    <Element ElementType="33" Coordinate="3166" Param="ADD,_t1_ADD,nn3,_t2_ADD"/>
+                                    <Element ElementType="33" Coordinate="3166" Param="ADD,_t1_ADD,nn3,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="4097">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="81"/>
-                                    <Element ElementType="33" Coordinate="4178" Param="MOV,_t2_ADD,sum"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="END">
+                                    <Element ElementType="2" Coordinate="5121" Param="90"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="END">
                                         END
                                     </Element>
                                 </Rung>

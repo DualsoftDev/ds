@@ -54,102 +54,93 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
     member x.``And Huge simple test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateLargeVariableDeclarations xgx + """
-                $x15 :=
-                    $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                    $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
-                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
-                    $x30 && $x31 &&
-                    $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
-                    ;
-"""
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
-    member x.``And Huge test`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateLargeVariableDeclarations xgx + """
-                $x16 :=
-                    ($nn1 > $nn2) &&
-                    $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                    $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
-                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
-                    $x30 && ($nn1 > $nn2) &&
-                    $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
-                    ;
+        let storages = Storages()
+        let code = generateLargeVariableDeclarations xgx + """
+            $x15 :=
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                $x30 && $x31 &&
+                $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                ;
     """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``And Huge test`` () =
+        let storages = Storages()
+        let code = generateLargeVariableDeclarations xgx + """
+            $x16 :=
+                ($nn1 > $nn2) &&
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                $x30 && ($nn1 > $nn2) &&
+                $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                ;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``And Huge test2`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateLargeVariableDeclarations xgx + """
-                $x16 :=
-                    (($nn1 + $nn2) > $nn3) && (($nn4 - $nn5 + $nn6) > $nn7) &&
-                    $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                    $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
-                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
-                    $x30 && ($nn1 > $nn2) &&
-                    $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
-                    ;
-    """
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+        let storages = Storages()
+        let code = generateLargeVariableDeclarations xgx + """
+            $x16 :=
+                (($nn1 + $nn2) > $nn3) && (($nn4 - $nn5 + $nn6) > $nn7) &&
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                $x30 && ($nn1 > $nn2) &&
+                $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                ;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``And Huge test 3`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let code = generateLargeVariableDeclarations xgx + """
-                $x15 :=
-                    ($x00 || $x01 || $x02 || $x03) && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                    ($x10 && $x11 || $x12 && $x13) && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
-                    $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
-                    $x30 && $x31 &&
-                    ($x32 || $x33 && $x34 || $x35) && $x36 && $x37 && $x38 && $x39 &&
-                    ($x00 || $x01 || $x02 || $x03) && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                    ($x10 && $x11 || $x12 && $x13) && $x14 && $x15 && $x16 && $x17 && $x18 && $x19
-                    ;
-"""
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+        let storages = Storages()
+        let code = generateLargeVariableDeclarations xgx + """
+            $x15 :=
+                ($x00 || $x01 || $x02 || $x03) && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                ($x10 && $x11 || $x12 && $x13) && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                $x30 && $x31 &&
+                ($x32 || $x33 && $x34 || $x35) && $x36 && $x37 && $x38 && $x39 &&
+                ($x00 || $x01 || $x02 || $x03) && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                ($x10 && $x11 || $x12 && $x13) && $x14 && $x15 && $x16 && $x17 && $x18 && $x19
+                ;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``And Huge test 4`` () =
-        lock x.Locker (fun () ->
-            let storages = Storages()
-            let x1_to_x38 = [1..38] |> map (fun i -> sprintf "$x%02d" i) |> String.concat " && "
-            let code = generateBitTagVariableDeclarations xgx 0 50 + $"""
-                $x49 := 
-                    (   (    false
-                          || ({x1_to_x38})
-                          || $x39
-                          || $x40
-                          || false )
-                        && true
-                        || $x41
-                    )
-                    && ! ($x42 && !($x43) && !($x44) && !($x45) || $x46);
-                """
+        let storages = Storages()
+        let x1_to_x38 = [1..38] |> map (fun i -> sprintf "$x%02d" i) |> String.concat " && "
+        let code = generateBitTagVariableDeclarations xgx 0 50 + $"""
+            $x49 := 
+                (   (    false
+                        || ({x1_to_x38})
+                        || $x39
+                        || $x40
+                        || false )
+                    && true
+                    || $x41
+                )
+                && ! ($x42 && !($x43) && !($x44) && !($x45) || $x46);
+            """
 
-            let statements = parseCodeForWindows storages code
-            let f = getFuncName()
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
-        )
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``OR Many test`` () =
         let storages = Storages()

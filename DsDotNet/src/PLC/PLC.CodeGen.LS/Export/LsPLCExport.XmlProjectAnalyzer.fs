@@ -8,7 +8,6 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Engine.Core
 open System.Collections.Generic
-open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module XgiXmlProjectAnalyzerModule =
@@ -40,7 +39,7 @@ module XgiXmlProjectAnalyzerModule =
         |> sort
         |> distinct
 
-    let collectGlobalSymbols (xdoc: XmlDocument) =
+    let internal collectGlobalSymbols (xdoc: XmlDocument) =
         xdoc.SelectMultipleNodes "//Configurations/Configuration/GlobalVariables/GlobalVariable/Symbols/Symbol"
         |> map xmlSymbolNodeToSymbolInfo
         |> List.ofSeq
@@ -52,17 +51,21 @@ module XgiXmlProjectAnalyzerModule =
 
     let collectGlobalSymbolNames (xdoc: XmlDocument) = collectGlobalSymbols xdoc |> map name
 
-    let private collectGlobalVariableAddresses (xdoc: XmlDocument) (prefix:string) =
+    /// Prefix 로 시작하는 global 변수들의 주소를 반환
+    let private collectGlobalVariableAddresses (xdoc: XmlDocument) (prefix:string) : string list =
         collectGlobalSymbols xdoc
         |> map address
         |> filter notNullAny
         |> filter (fun addr -> addr.StartsWith(prefix))
 
-    let collectUsedMermoryByteIndicesInGlobalSymbols (xdoc: XmlDocument) xgx=
+    let collectUsedMermoryByteIndicesInGlobalSymbols (xdoc: XmlDocument) xgx : int list =
         collectGlobalVariableAddresses xdoc "%M"
         |> collectByteIndices xgx
 
 
+    /// Counter/Timer 등의 주소에서 int 값을 추출
+    /// "C0001" -> 1
+    /// "T0003" -> 3
     let private extractNumber (address:string) =
         let fail() = failwith $"Failed to parse address: {address}"
         let pattern = @"\d+"
@@ -75,13 +78,22 @@ module XgiXmlProjectAnalyzerModule =
         else
             fail()
 
-    let collectCounterAddressXgk (xdoc: XmlDocument) =
+    /// XGK XG5000 XML 문서에서 global 변수 Counter 에 사용된 주소("C0001" -> 1)들을 추출
+    let collectCounterAddressesXgk (xdoc: XmlDocument) : int list =
         collectGlobalVariableAddresses xdoc "C" |> map extractNumber
-    let collectTimerAddressXgk (xdoc: XmlDocument) =
+
+    /// XGK XG5000 XML 문서에서 global 변수 Timer 에 사용된 주소("T0001" -> 1)들을 추출
+    let collectTimerAddressesXgk (xdoc: XmlDocument) : int list =
         collectGlobalVariableAddresses xdoc "T" |> map extractNumber
 
-
+    /// XGK XG5000 XML 문서에서 설정 관련 파라미터들을 추출해서 dictionary 로 반환
+    ///
+    /// XGK 의 Timer resoultion 관련 설정을 처리하기 위함
     let collectXgkBasicParameters (xdoc: XmlDocument) : Dictionary<string, int> =
         xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGTBasicParam").GetAttributes()
-        |> map (fun (KeyValue(k, v)) -> k, int v)
+        |> map (fun (KeyValue(k, v)) ->
+            match Parse.Int v with
+            | Some v -> Some (k, v)
+            | None -> None)
+        |> choose id
         |> Tuple.toDictionary

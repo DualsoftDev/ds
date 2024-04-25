@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    ADD simple test
+    Assignment test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -39,10 +39,25 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="3">
+                    <Symbols Count="17">
+                        <Symbol Name="b1" Comment="" Device="M" DevicePos="128" Type="BIT"/>
+                        <Symbol Name="b2" Comment="" Device="M" DevicePos="129" Type="BIT"/>
+                        <Symbol Name="b3" Comment="" Device="M" DevicePos="130" Type="BIT"/>
+                        <Symbol Name="b4" Comment="" Device="M" DevicePos="131" Type="BIT"/>
+                        <Symbol Name="b5" Comment="" Device="M" DevicePos="132" Type="BIT"/>
+                        <Symbol Name="b6" Comment="" Device="M" DevicePos="133" Type="BIT"/>
+                        <Symbol Name="b7" Comment="" Device="M" DevicePos="134" Type="BIT"/>
+                        <Symbol Name="b8" Comment="" Device="M" DevicePos="135" Type="BIT"/>
                         <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
                         <Symbol Name="nn2" Comment="" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="sum" Comment="" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="nn3" Comment="" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="nn4" Comment="" Device="M" DevicePos="3" Type="WORD"/>
+                        <Symbol Name="nn5" Comment="" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="nn6" Comment="" Device="M" DevicePos="5" Type="WORD"/>
+                        <Symbol Name="nn7" Comment="" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="nn8" Comment="" Device="M" DevicePos="7" Type="WORD"/>
+                        <Symbol Name="sum" Comment="" Device="M" DevicePos="9" Type="WORD"/>
+                        <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="10" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -66,19 +81,122 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $sum := $nn1 + $nn2
+                                        [0] bool b3 = $nn1 &gt; $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
+                                    <Element ElementType="33" Coordinate="2049" Param="&gt;,nn1,nn2"/>
+                                    <Element ElementType="2" Coordinate="2058" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        b3
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="3073">
+                                        [1] bool b4 = $b1 != $b2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="4097">
+                                        b1
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="4100">
+                                        b2
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="4102"/>
+                                    <Element ElementType="2" Coordinate="4103" Param="84"/>
+                                    <Element ElementType="14" Coordinate="4190">
+                                        b4
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="5121">
+                                        b1
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="5124">
+                                        b2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="6145">
+                                        [2] bool b5 = $b1 = $b2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="7169">
+                                        b1
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="7172">
+                                        b2
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="7174"/>
+                                    <Element ElementType="2" Coordinate="7175" Param="84"/>
+                                    <Element ElementType="14" Coordinate="7262">
+                                        b5
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="8193">
+                                        b1
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="8196">
+                                        b2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="9217">
+                                        [3] $b6 := $nn1 &gt; $nn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="10241" Param="&gt;,nn1,nn2"/>
+                                    <Element ElementType="2" Coordinate="10250" Param="90"/>
+                                    <Element ElementType="14" Coordinate="10334">
+                                        b6
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="11265">
+                                        [4] bool b7 = $nn1 &gt; 3s
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="12289" Param="&gt;,nn1,3"/>
+                                    <Element ElementType="2" Coordinate="12298" Param="90"/>
+                                    <Element ElementType="14" Coordinate="12382">
+                                        b7
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="13313">
+                                        [5] uint16 sum = $nn1 + $nn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="14337">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,sum"/>
+                                    <Element ElementType="2" Coordinate="14340" Param="81"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="ADD,nn1,nn2,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="4097" Param="90"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="END">
+                                    <Element ElementType="63" Coordinate="15361">
+                                        [6] bool b8 = $nn1 + $nn2 &gt; 3s
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="16385">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="16388" Param="81"/>
+                                    <Element ElementType="33" Coordinate="16478" Param="ADD,nn1,nn2,_t1_ADD"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="17409" Param="&gt;,_t1_ADD,3"/>
+                                    <Element ElementType="2" Coordinate="17418" Param="90"/>
+                                    <Element ElementType="14" Coordinate="17502">
+                                        b8
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="19457" Param="90"/>
+                                    <Element ElementType="33" Coordinate="19550" Param="END">
                                         END
                                     </Element>
                                 </Rung>

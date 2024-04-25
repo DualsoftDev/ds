@@ -56,45 +56,42 @@ module ImportU =
             dicSeg: Dictionary<string, Vertex>,
             jobCallNames: string seq
         ) =
+        let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
 
         let call =
-            match node.NodeType with
-            | CALLFUNC  ->  
-                let funcName = $"{node.PageTitle}_{node.Name}"
-                let func =   
-                    match mySys.Functions |> Seq.tryFind(fun f->f.Name = funcName) with
-                    | Some f -> f
-                    | None -> 
-                        let newfunc = Func(funcName)
-                        mySys.Functions.Add(newfunc) |>ignore
-                        newfunc
+            if jobCallNames.Contains sysName
+            then 
 
-                Call.Create(func, parentWrapper)
-                
-            | CALL  ->
-                let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-                if jobCallNames.Contains sysName
-                then 
-                    let jobName = sysName + "_" + apiName
             
-                    match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
-                    | Some job ->
-                        if job.DeviceDefs.any () then
-                            Call.Create(job, parentWrapper)
-                        else
-                            node.Shape.ErrorName(ErrID._52, node.PageNum)
-                    | None ->
-                            node.Shape.ErrorName(ErrID._48, node.PageNum)
+                let jobName = sysName + "_" + apiName
+            
+                match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
+                | Some job ->
+                    if job.DeviceDefs.any () then
+                        Call.Create(job, parentWrapper)
+                    else
+                        node.Shape.ErrorName(ErrID._52, node.PageNum)
+                | None ->
+                        node.Shape.ErrorName(ErrID._48, node.PageNum)
 
-                else
-                    let apiName = node.CallApiName
-                    let loadedName = node.CallName
-                    let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
-                    let libAbsolutePath = getLibraryPath apiNameForLib
-                    //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node)
-            
-            | _  -> failwithlog "error"
+            else
+                let apiName = node.CallApiName
+                let loadedName = node.CallName
+
+                //addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
+
+                let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
+                let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
+
+                let autoGenDevTask    =
+                    if autoGenSys.IsSome
+                        then
+                            createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName |> Some
+                        else 
+                            None
+
+                //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
+                addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask)
 
         dicSeg.Add(node.Key, call)
 
@@ -418,6 +415,7 @@ module ImportU =
                     pptNodes.Where(fun node -> node.NodeType.IsLoadSys)
                     |> Seq.collect (fun node -> node.JobCallNames)
                     
+
             let createCall () =
                 calls
                 |> Seq.iter (fun node ->
@@ -593,7 +591,6 @@ module ImportU =
                 let dicQualifiedNameSegs =
                     dicVertex.Values
                         .OfType<Call>()
-                        .Where(fun call -> call.TargetHasJob)
                         .Select(fun call -> call.TargetJob.Name, call)
                     |> dict
 

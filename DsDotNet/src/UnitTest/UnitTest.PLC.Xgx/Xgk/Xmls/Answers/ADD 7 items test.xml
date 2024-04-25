@@ -54,7 +54,6 @@
                         <Symbol Name="_t3_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4" Device="M" DevicePos="11" Type="WORD"/>
                         <Symbol Name="_t4_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5" Device="M" DevicePos="12" Type="WORD"/>
                         <Symbol Name="_t5_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6" Device="M" DevicePos="13" Type="WORD"/>
-                        <Symbol Name="_t6_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7" Device="M" DevicePos="14" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -121,18 +120,11 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="81"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="ADD,_t5_ADD,nn7,_t6_ADD"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="ADD,_t5_ADD,nn7,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="8193">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8274" Param="MOV,_t6_ADD,sum"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="11265" Param="90"/>
-                                    <Element ElementType="33" Coordinate="11358" Param="END">
+                                    <Element ElementType="2" Coordinate="9217" Param="90"/>
+                                    <Element ElementType="33" Coordinate="9310" Param="END">
                                         END
                                     </Element>
                                 </Rung>

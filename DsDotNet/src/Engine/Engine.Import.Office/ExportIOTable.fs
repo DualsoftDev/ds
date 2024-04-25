@@ -61,7 +61,7 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let func =  if btn.Func.IsSome then btn.Func.Value.ToDsText() else ""
+                    let func =  if btn.OperatorFunction.IsSome then btn.OperatorFunction.Value.ToDsText() else ""
                     let i, o = getValidBtnAddress(btn) target 
                     dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool",  i, o ,func)
                     |> ignore
@@ -69,7 +69,7 @@ module ExportIOTable =
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let func =  if lamp.Func.IsSome then lamp.Func.Value.ToDsText() else ""
+                    let func =  if lamp.OperatorFunction.IsSome then lamp.OperatorFunction.Value.ToDsText() else ""
 
                     let i, o = getValidLampAddress(lamp) target 
                     dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool",   i, o, func)
@@ -105,7 +105,7 @@ module ExportIOTable =
     let rowIOItems (dev: TaskDev, job: Job, firstJobRow :bool) target =
             let funcs =
                 if firstJobRow then
-                    if job.Func.IsSome then job.Func.Value.ToDsText() else ""
+                    if job.OperatorFunction.IsSome then job.OperatorFunction.Value.ToDsText() else ""
                 else
                     TextFuncNotUsed
 
@@ -164,7 +164,7 @@ module ExportIOTable =
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
             
-                let func =  if cond.Func.IsSome then cond.Func.Value.ToDsText() else ""
+                let func =  if cond.OperatorFunction.IsSome then cond.OperatorFunction.Value.ToDsText() else ""
                 let i= getValidCondiAddress(cond) target
                 [
                     ExcelCase.XlsConditionReady.ToText()
@@ -178,7 +178,7 @@ module ExportIOTable =
 
 
         let funcRows =
-            sys.Functions.Where(fun f->not(sys.AutoNameGenFuncs.Contains(f)))
+            sys.Functions.Where(fun f->not(sys.AutoNameGenFuncs.Cast<Func>().Contains(f)))
                                     .Map(fun func->
                                     [ TextXlsCommand
                                       func.Name

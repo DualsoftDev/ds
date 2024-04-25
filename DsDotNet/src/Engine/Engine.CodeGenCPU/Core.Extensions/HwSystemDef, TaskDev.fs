@@ -16,6 +16,6 @@ module ConvertCpuTaskDev =
         member s.ActionINFunc = 
             match  s.InTag with
             | :? Tag<bool> as inTag -> 
-                if hasNot (s.Func)
+                if hasNot (s.OperatorFunction)
                 then !!inTag.Expr else inTag.Expr
             | _ -> failwithf $"{s.Name} input address is empty."

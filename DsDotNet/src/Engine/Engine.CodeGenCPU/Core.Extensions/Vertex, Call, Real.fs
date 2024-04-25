@@ -39,10 +39,10 @@ module ConvertCpuVertex =
                     else  []
                        
 
-        member c.UsingTon  = c.CallFuncType = DuFuncTimer
-        member c.UsingCompare  = c.CallFuncType = DuFuncCompare
-        member c.UsingNot  = c.CallFuncType = DuFuncNot
-        member c.UsingMove  = c.CallFuncType = DuFuncMove
+        member c.UsingTon  = c.CallOperatorType = DuOPTimer
+        member c.UsingCompare  = c.CallOperatorType = DuOPCompare
+        member c.UsingNot  = c.CallOperatorType = DuOPNot
+        member c.UsingMove  = c.CallCommandType = DuCMDMove
         member c.EndPlan =  
                     if c.TargetHasFuncOnly
                     then
@@ -80,7 +80,7 @@ module ConvertCpuVertex =
                  !!rv.SYNC.Expr <&&> (rv.G.Expr <||> rv.Flow.h_st.Expr)
 
         member c.PresetTime =   if c.UsingTon
-                                then c.TargetJob.Func.Value.GetDelayTime()
+                                then c.TargetJob.OperatorFunction.Value.GetDelayTime()
                                 else failwith $"{c.Name} not use timer" 
 
         //member c.PresetCounter = if c.UsingCtr

@@ -55,7 +55,6 @@
                         <Symbol Name="_t4_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5" Device="M" DevicePos="12" Type="WORD"/>
                         <Symbol Name="_t5_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6" Device="M" DevicePos="13" Type="WORD"/>
                         <Symbol Name="_t6_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7" Device="M" DevicePos="14" Type="WORD"/>
-                        <Symbol Name="_t7_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8" Device="M" DevicePos="15" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -129,18 +128,11 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="ADD,_t6_ADD,nn8,_t7_ADD"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="ADD,_t6_ADD,nn8,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="9220" Param="81"/>
-                                    <Element ElementType="33" Coordinate="9298" Param="MOV,_t7_ADD,sum"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="12289" Param="90"/>
-                                    <Element ElementType="33" Coordinate="12382" Param="END">
+                                    <Element ElementType="2" Coordinate="10241" Param="90"/>
+                                    <Element ElementType="33" Coordinate="10334" Param="END">
                                         END
                                     </Element>
                                 </Rung>

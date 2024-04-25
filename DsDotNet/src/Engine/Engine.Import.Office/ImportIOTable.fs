@@ -65,6 +65,41 @@ module ImportIOTable =
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try
+
+            let handleFunctionCreationOrUpdate (sys:DsSystem) funcName funcTypeText parms =
+                match sys.Functions.TryFind(fun f -> f.Name = funcName) with
+                | Some func ->
+                    match func with
+                    | :? OperatorFunction as op when op.OperatorType = DuOPUnDefined ->
+                        match tryGetOperatorType(funcTypeText) with
+                        | Some opType -> 
+                            op.OperatorType <- opType
+                            op.Parameters.AddRange(parms)
+                            Some (op :> Func)
+                        | None -> failWithLog $"error {funcName} {funcTypeText} is not operatorType"
+
+                    | :? CommandFunction as cmd when cmd.CommandType = DuCMDUnDefined ->
+                        match tryGetCommandType(funcTypeText) with
+                        | Some cmdType -> 
+                            cmd.CommandType <- cmdType
+                            cmd.Parameters.AddRange(parms)
+                            Some (cmd :> Func)
+                        | None -> failWithLog $"error {funcName} {funcTypeText} is not commandType"
+
+                    | _ -> Some func
+
+                | None ->
+                    match tryGetOperatorType(funcTypeText), tryGetCommandType(funcTypeText) with
+                    | Some opType, Some cmdType -> failWithLog  $"error {funcTypeText} is multi functionType"
+                    | Some opType, None -> 
+                        let func = OperatorFunction.Create(funcName, opType, parms)
+                        sys.Functions.Add func |> ignore
+                        Some (func)
+                    | None,  Some cmdType -> 
+                        let func = CommandFunction.Create(funcName, cmdType, parms)
+                        sys.Functions.Add func |> ignore
+                        Some (func)
+                    | _ -> None
             
             let getFunctionNUpdate (callName, funcDefine , funcText, tableIO: Data.DataTable, isJob: bool, page) =
                 if ((trimSpace funcText) = "" || funcText = TextSkip || funcText = TextFuncNotUsed)
@@ -87,27 +122,21 @@ module ImportIOTable =
                                     ]
                         else ""
 
-                    let funcType = getFunctionType(funcTypeText)
                     let funcName =
                         if funcDefine = ""
-                        then $"{funcType.ToText().TrimStart('$')}{paras}" 
+                        then 
+                            match tryGetOperatorType(funcTypeText), tryGetCommandType(funcTypeText) with
+                            | Some op, None  -> 
+                                $"{op.ToText().TrimStart('$')}{paras}" 
+                            | None, Some cmd -> 
+                                $"{cmd.ToText().TrimStart('$')}{paras}" 
+                            | _ -> failwithf $"error {funcTypeText} is not functionType"
+                            
                         else funcDefine
 
-                    let funcs = sys.Functions.Where(fun f->f.Name = funcName)
-                    if funcs.any() 
-                    then 
-                        let func = funcs.Head() 
-                        if func.FunctionType = DuFuncUnDefined
-                        then 
-                            func.FunctionType <- funcType
-                            func.Parameters.AddRange(parms)
+                    handleFunctionCreationOrUpdate sys funcName funcTypeText parms
 
-                        func |> Some
-                    else 
-                        let func = Func.Create(funcName, funcType , parms)
-                        sys.Functions.Add func |> ignore  
-                        func |> Some
-
+                            
             let dicDev =
                 sys.Jobs
                 |> Seq.collect (fun f -> f.DeviceDefs)
@@ -120,6 +149,13 @@ module ImportIOTable =
                 |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiName, j))
                 |> dict
 
+
+            let getOperatorFuntion (f:Func) =
+                if  not(f :? OperatorFunction)
+                    then
+                        failWithLog $"error {f.Name} is not OperatorFunction"
+                    else 
+                        f :?> OperatorFunction
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = $"{row.[(int) IOColumn.Name]}"
@@ -140,7 +176,12 @@ module ImportIOTable =
                 
                 let func = $"{row.[(int) IOColumn.Func]}"
                 match getFunctionNUpdate (job.Name, "", func, tableIO, true, page) with
-                |Some f ->   job.Func <- Some f
+                |Some f ->  
+                        if  not(f :? OperatorFunction)
+                        then
+                            failWithLog $"error {f.Name} is not OperatorFunction"
+
+                        job.OperatorFunction <- getOperatorFuntion f |> Some 
                 |_->()
                         
              
@@ -170,7 +211,7 @@ module ImportIOTable =
                     btn.OutAddress <-outaddr.Trim() 
 
                     match getFunctionNUpdate (btn.Name, "", $"{row.[(int) IOColumn.Func]}", tableIO, false, page) with
-                    |Some f -> btn.Func <- Some f
+                    |Some f -> btn.OperatorFunction <-  getOperatorFuntion f |> Some 
                     |_->()
 
 
@@ -192,7 +233,7 @@ module ImportIOTable =
                     lamp.InAddress  <-inaddr.Trim() 
                     lamp.OutAddress <-outaddr.Trim() 
                     match getFunctionNUpdate (lamp.Name, "", func,  tableIO, false, page) with
-                    |Some f ->    lamp.Func <- Some f
+                    |Some f ->    lamp.OperatorFunction <- getOperatorFuntion f |> Some 
                     |_->()
 
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
@@ -211,7 +252,7 @@ module ImportIOTable =
                     cond.InAddress  <-inaddr.Trim() 
 
                     match getFunctionNUpdate (cond.Name, "", func, tableIO, false, page) with
-                    |Some f ->   cond.Func <- Some f
+                    |Some f ->   cond.OperatorFunction <- getOperatorFuntion f |> Some 
                     |_->()
 
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)

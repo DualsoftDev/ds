@@ -174,7 +174,7 @@ module XgiExportModule =
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command = PredicateCmd(Compare(fn, output, args))
+                    let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
@@ -185,7 +185,7 @@ module XgiExportModule =
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command = FunctionCmd(Arithmatic(fn, output, args))
+                    let command = FunctionCmd(Arithmatic(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
@@ -196,8 +196,7 @@ module XgiExportModule =
                                            Output = output }) ->
                     let condition = args[0] :?> IExpression<bool>
                     let source = args[1]
-                    let target = output :?> IStorage
-                    let command = ActionCmd(Move(condition, source, target))
+                    let command = ActionCmd(Move(condition, source, output))
                     let rgiSub = xmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
@@ -356,8 +355,8 @@ module XgiExportModule =
                 match prjParam.TargetType, prjParam.ExistingLSISprj with
                 | XGK, Some existing ->
                     let doc = DualXmlDocument.loadFromFile existing
-                    let counters = collectCounterAddressXgk doc
-                    let timers = collectTimerAddressXgk doc
+                    let counters = collectCounterAddressesXgk doc
+                    let timers = collectTimerAddressesXgk doc
                     let newPrjParam = {
                         prjParam with
                             CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters

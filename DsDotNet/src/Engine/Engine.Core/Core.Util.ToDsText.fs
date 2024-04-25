@@ -142,7 +142,7 @@ module internal ToDsTextModule =
                     let jobItems =
                         c.DeviceDefs
                         |> Seq.map printDev
-                        |> fun devs -> match c.Func with
+                        |> fun devs -> match c.OperatorFunction with
                                         | Some f -> devs @ [printFunc f]
                                         | None -> devs
                           
@@ -150,14 +150,28 @@ module internal ToDsTextModule =
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
                 yield $"{tab}{rb}"
 
-            if system.Functions.Any() then
-                yield $"{tab}[functions] = {lb}"
-                for func in system.Functions do
-                    if func.FunctionType = DuFuncUnDefined
+            let operators = system.Functions.OfType<OperatorFunction>()
+            if operators.Any() then
+                yield $"{tab}[operators] = {lb}"
+                for op in operators do
+                    if op.OperatorType = DuOPUnDefined
                     then 
-                        yield $"{tab2}{func.Name};"
+                        yield $"{tab2}{op.Name};"
                     else 
-                        yield $"{tab2}{func.Name} = {func.ToDsText()};"
+                        yield $"{tab2}{op.Name} = {op.ToDsText()};"
+
+                yield $"{tab}{rb}"
+
+            let commands = system.Functions.OfType<CommandFunction>()
+            if commands.Any() then
+                yield $"{tab}[commands] = {lb}"
+                for cmd in commands do
+                    if cmd.CommandType = DuCMDUnDefined
+                    then 
+                        yield $"{tab2}{cmd.Name};"
+                    else 
+                        yield $"{tab2}{cmd.Name} = {cmd.ToDsText()};"
+
                 yield $"{tab}{rb}"
 
             if system.ApiItems.Any() then
@@ -200,8 +214,8 @@ module internal ToDsTextModule =
                         for hw in hws do
                             let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
                             let items = 
-                                if hw.Func.IsSome 
-                                then [printFunc hw.Func.Value]  @ flows else flows
+                                if hw.OperatorFunction.IsSome 
+                                then [printFunc hw.OperatorFunction.Value]  @ flows else flows
                                 
                             let itemText = if items.any() then (items |> String.concat "; ") + ";" else ""
                             let inAddr =  addressPrint  hw.InAddress  

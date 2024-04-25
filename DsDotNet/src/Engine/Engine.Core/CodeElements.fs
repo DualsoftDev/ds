@@ -42,43 +42,45 @@ module CodeElements =
             else
                 genTargetText name varType initValue
 
-    type FunctionTypes =
-        | DuFuncUnDefined
-        | DuFuncAdd
-        | DuFuncSub
-        | DuFuncMove
-        | DuFuncCompare
-        | DuFuncTimer
-        | DuFuncNot
+    type CommandFunctionTypes =
+        | DuCMDUnDefined
+        | DuCMDAdd
+        | DuCMDSub
+        | DuCMDMove
+
         member x.ToText() =
             match x  with
-            | DuFuncUnDefined -> ""
-            | DuFuncAdd -> "$add"
-            | DuFuncSub -> "$sub"
-            | DuFuncMove -> "$mov"
-            | DuFuncCompare -> "$c"
-            | DuFuncTimer -> "$t"
-            | DuFuncNot -> "$n"
+            | DuCMDUnDefined -> ""
+            | DuCMDAdd -> "$add"
+            | DuCMDSub -> "$sub"
+            | DuCMDMove -> "$mov"
 
-        member x.IsCommand() =
-            match x  with
-            | DuFuncAdd
-            | DuFuncSub
-            | DuFuncMove -> true
-            | DuFuncCompare 
-            | DuFuncTimer 
-            | DuFuncNot -> false
-            | _ -> failwithlog $"error Function UnDefined" 
-
-    let getFunctionType (text:string) = 
+    let tryGetCommandType (text:string) = 
         match text.ToLower()  with
-            | "$add" -> DuFuncAdd 
-            | "$sub" -> DuFuncSub 
-            | "$mov" -> DuFuncMove  
-            | "$c" -> DuFuncCompare 
-            | "$t" -> DuFuncTimer 
-            | "$n" -> DuFuncNot 
-            | _ -> failwithlog $"error {text} is not functionType" 
+            | "$add" -> DuCMDAdd  |> Some   
+            | "$sub" -> DuCMDSub  |> Some   
+            | "$mov" -> DuCMDMove |> Some   
+            | _ -> None
+
+    
+    type OperatorFunctionTypes =
+        | DuOPUnDefined
+        | DuOPNot
+        | DuOPCompare
+        | DuOPTimer
+        member x.ToText() =
+            match x  with
+            | DuOPUnDefined -> ""
+            | DuOPCompare -> "$c"
+            | DuOPTimer -> "$t"
+            | DuOPNot -> "$n"
+     
+    let tryGetOperatorType (text:string) = 
+        match text.ToLower()  with
+            | "$n" -> DuOPNot       |> Some   
+            | "$c" -> DuOPCompare   |> Some   
+            | "$t" -> DuOPTimer     |> Some   
+            | _ -> None
 
     let getFunction (text:string) = 
         let text = text.Trim()
@@ -94,16 +96,33 @@ module CodeElements =
         funcType, parameters
 
 
+    [<AbstractClass>]
     type Func(name:string) =
         member x.Name = name
-        member val FunctionType = DuFuncUnDefined with get, set
         member val Parameters = ResizeArray<string>()
+        member x.ToDsText() =
+            match x with
+            | :? OperatorFunction as op -> op.ToDsText()
+            | :? CommandFunction as cmd -> cmd.ToDsText()
+            | _ -> failwith "Not Supported"
+
+    ///Comparison, Logical, ... Operators  (비교, 논리 연산자)
+    and OperatorFunction(name:string) =
+        inherit Func(name)
+        member val OperatorType = DuOPUnDefined with get, set
         member x.ToDsText() = 
-            if x.FunctionType = DuFuncUnDefined
-            then  ""
-            else  
-                $"""{x.FunctionType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
-           
+            if x.OperatorType <> DuOPUnDefined   // ToDsText  Operator 수정 필요
+            then $"""{x.OperatorType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
+            else ""
+    ///Copy, Assign, ... Commands (복사, 대입 명령)
+    and CommandFunction(name:string) =
+        inherit Func(name)
+        member val CommandType = DuCMDUnDefined with get, set
+        member x.ToDsText() = 
+            if x.CommandType <> DuCMDUnDefined
+            then $"""{x.CommandType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
+            else ""
+
     [<Extension>]
     type SystemFuncExt =
         [<Extension>] 

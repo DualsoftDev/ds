@@ -38,6 +38,7 @@ module ExpressionForwardDeclModule =
         abstract DataType : System.Type
         abstract BoxedEvaluatedValue : obj
         abstract GetBoxedRawObject: unit -> obj
+        abstract ToText : unit -> string
         abstract ToText : withParenthesis: bool -> string
 
         /// Function expression 인 경우 function name 반환.  terminal 이면 none

@@ -229,7 +229,8 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
-        | CALLFUNC 
+        | CALLOPFunc 
+        | CALLCMDFunc 
         | IF_DEVICE
         | IF_LINK
         | DUMMY
@@ -342,9 +343,10 @@ module PPTObjectModule =
             nodeType <-
                 let name = GetBracketsRemoveName(shape.InnerText)
                 if (shape.CheckFlowChartPreparation()) then
-                    CALLFUNC
+                    CALLOPFunc
                 elif (shape.CheckRectangle()) then
-                    if name.Contains(".") then REALExF
+                    if name.Contains(".")
+                    then REALExF
                     else REAL
                 elif (shape.CheckHomePlate()) then
                     match GetSquareBrackets(shape.InnerText, false) with
@@ -353,13 +355,12 @@ module PPTObjectModule =
 
                 elif (shape.CheckFoldedCornerPlate()) then
                     OPEN_EXSYS_CALL
-                //if shape.InnerText.Contains("/")
-                //then OPEN_EXSYS_CALL
-                //else OPEN_EXSYS_LINK //test ahn link 통신 처리 대응
                 elif (shape.CheckFoldedCornerRound()) then
                     COPY_DEV
                 elif (shape.CheckEllipse()) then
-                    CALL
+                    if name.Contains(".")
+                    then CALL
+                    else CALLCMDFunc
                 elif (shape.CheckBevelShapePlate()) then
                     LAMP
                 elif (shape.CheckBevelShapeRound()) then
@@ -418,7 +419,8 @@ module PPTObjectModule =
 
             | REALExF
             | LAYOUT
-            | CALLFUNC 
+            | CALLOPFunc 
+            | CALLCMDFunc 
             | DUMMY -> ()
 
         member x.PageNum = iPage

@@ -44,6 +44,7 @@ module ExpressionModule =
             //member x.EvaluatedValue = 
             member x.BoxedEvaluatedValue = match x with | DuVariable v -> v.Value | DuLiteral l -> l.Value |> box
             member x.GetBoxedRawObject() = (x :> IExpression).BoxedEvaluatedValue
+            member x.ToText() = (x :> IExpression).ToText(false)
             member x.ToText(_withParenthesis) = match x with | DuVariable v -> v.ToText() | DuLiteral l -> l.Value.ToString()
             member x.CollectStorages() = match x with | DuVariable v -> [v] | _ -> []
             member x.Flatten() = fwdFlattenExpression x
@@ -77,6 +78,7 @@ module ExpressionModule =
             member x.EvaluatedValue = x.Evaluate()
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
+            member x.ToText() = x.ToText(false)
             member x.ToText(withParenthesis) = x.ToText(withParenthesis)
             member x.CollectStorages() = x.CollectStorages()
             member x.Flatten() = fwdFlattenExpression x
@@ -96,7 +98,7 @@ module ExpressionModule =
         /// type 이 다르면 항상 false 반환
         member x.IsEqual (y:IExpression) =
             if x.GetType() = y.GetType() then
-                x.ToText(false) = y.ToText(false)
+                x.ToText() = y.ToText()
             else
                 false
 
@@ -204,7 +206,7 @@ module ExpressionModule =
         FunctionName:string
         Arguments:Arguments
         /// Function output store target
-        Output:INamedExpressionizableTerminal
+        Output:IStorage
     }
 
     type Statement =
@@ -280,16 +282,16 @@ module ExpressionModule =
 
         member x.ToText() =
             match x with
-            | DuAssign (expr, target) -> $"{target.ToText()} := {expr.ToText(false)}"
-            | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText(false)}"
+            | DuAssign (expr, target) -> $"{target.ToText()} := {expr.ToText()}"
+            | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()}"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
                 let functionName = ts.FunctionName  // e.g "createTON"
                 let args = [    // [preset; rung-in-condition; (reset-condition)]
                     sprintf "%A" t.PRE.Value
-                    match ts.RungInCondition with | Some c -> c.ToText(false) | None -> ()
-                    match ts.ResetCondition  with | Some c -> c.ToText(false) | None -> () ]
+                    match ts.RungInCondition with | Some c -> c.ToText() | None -> ()
+                    match ts.ResetCondition  with | Some c -> c.ToText() | None -> () ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {t.Name} = {functionName}({args})"
 
@@ -299,15 +301,15 @@ module ExpressionModule =
                 let functionName = cs.FunctionName  // e.g "createCTU"
                 let args = [    // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
                     sprintf "%A" c.PRE.Value
-                    match cs.UpCondition    with | Some c -> c.ToText(false) | None -> ()
-                    match cs.DownCondition  with | Some c -> c.ToText(false) | None -> ()
-                    match cs.ResetCondition with | Some c -> c.ToText(false) | None -> ()
+                    match cs.UpCondition    with | Some c -> c.ToText() | None -> ()
+                    match cs.DownCondition  with | Some c -> c.ToText() | None -> ()
+                    match cs.ResetCondition with | Some c -> c.ToText() | None -> ()
                     if c.ACC.Value <> 0u then
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
             | DuAction (DuCopy (condition, source, target)) ->
-                $"copyIf({condition.ToText(false)}, {source.ToText(false)}, {target.ToText()})"
+                $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
             | DuAugmentedPLCFunction _ ->
                 failwithlog "ERROR"
 

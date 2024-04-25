@@ -155,7 +155,7 @@ module CoreModule =
 
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inAddress: TagAddress, outAddress: TagAddress, func: Func option)=
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inAddress: TagAddress, outAddress: TagAddress, opFunc: OperatorFunction option)=
         inherit FqdnObject(name, system)
         member x.Name = name
         member val SettingFlows = flows with get, set
@@ -169,20 +169,20 @@ module CoreModule =
         member val InTag = getNull<ITag>() with get, set
         /// CPU 생성 시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
-        member val Func = func with get, set
+        member val OperatorFunction = opFunc with get, set
 
 
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, func: Func option) =
-        inherit HwSystemDef(name, system,flows, inAddress, outAddress, func)
+    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, opFunc: OperatorFunction  option) =
+        inherit HwSystemDef(name, system,flows, inAddress, outAddress, opFunc)
         member x.ButtonType = btnType
         member val ErrorEmergency = getNull<IStorage>() with get, set
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress,  flows: HashSet<Flow>, func: Func option) =
-        inherit HwSystemDef(name, system, flows, inAddress, outAddress, func) //inAddress lamp check bit
+    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress,  flows: HashSet<Flow>, opFunc: OperatorFunction  option) =
+        inherit HwSystemDef(name, system, flows, inAddress, outAddress, opFunc) //inAddress lamp check bit
         member x.LampType = lampType
 
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, func: Func option) =
-        inherit HwSystemDef(name,  system,flows, inAddress, outAddress, func) // outAddress condition check bit
+    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, opFunc: OperatorFunction  option) =
+        inherit HwSystemDef(name,  system,flows, inAddress, outAddress, opFunc) // outAddress condition check bit
         member x.ConditionType = conditionType
         member val ErrorCondition = getNull<IStorage>() with get, set
 
@@ -241,26 +241,29 @@ module CoreModule =
 
     type CallOptions =
         | JobType of Job
-        | FuncType of Func
-        | JobFuncType of Job * Func
+        | JobFuncType of Job * Func // Func = Command or Operator
+        | CommadFuncType of CommandFunction
+        | OperatorFuncType of OperatorFunction
 
     type Call(targetOption: CallOptions, parent) =
-        inherit Indirect(
+        inherit Indirect
             (match targetOption with
             | JobType job -> job.Name
             | JobFuncType (job, _) -> job.Name
-            | FuncType func -> func.Name), parent)
+            | CommadFuncType func -> func.Name
+            | OperatorFuncType func -> func.Name
+            , parent)
 
-        let isJob = function
+        let hasJob = function
             | JobType _ | JobFuncType _ -> true
             | _ -> false
 
-        let isFunc = function
-            | FuncType _ | JobFuncType _ -> true
+        let hasFunc = function
+            | CommadFuncType _ | OperatorFuncType _ | JobFuncType _ -> true
             | _ -> false        
 
         let isFuncOnly = function
-            | FuncType _  -> true
+            | CommadFuncType _ | OperatorFuncType _ -> true
             | _ -> false
             
         member _.TargetJob =
@@ -271,21 +274,30 @@ module CoreModule =
 
         member _.TargetFunc =
             match targetOption with
-            | FuncType func -> func
-            | JobFuncType (_, func) -> func
+            | CommadFuncType func -> func :> Func
+            | OperatorFuncType func -> func :> Func
+            | JobFuncType (_, func) -> func 
             | _ -> failwith "TargetFunc is only available for FuncType or JobFuncType."
 
         /// Indicates if the target includes a job.
-        member _.TargetHasJob = isJob targetOption
+        member _.TargetHasJob = hasJob targetOption
 
         /// Indicates if the target includes a function.
-        member _.TargetHasFunc = isFunc targetOption
+        member _.TargetHasFunc = hasFunc targetOption
         member _.TargetHasFuncOnly  = isFuncOnly targetOption
-        member _.CallFuncType  = 
+        member _.CallOperatorType  = 
             match targetOption with
-            | JobType _ -> DuFuncUnDefined
-            | JobFuncType (_, func) -> func.FunctionType
-            | FuncType func ->  func.FunctionType
+            | JobType _ -> DuOPUnDefined
+            | JobFuncType (_, func) -> if (func :? OperatorFunction) then (func :?> OperatorFunction).OperatorType else DuOPUnDefined
+            | CommadFuncType _ -> DuOPUnDefined
+            | OperatorFuncType func -> func.OperatorType
+
+        member _.CallCommandType  = 
+            match targetOption with
+            | JobType _ -> DuCMDUnDefined
+            | JobFuncType (_, func) -> if (func :? CommandFunction) then (func :?> CommandFunction).CommandType else DuCMDUnDefined
+            | CommadFuncType func -> func.CommandType
+            | OperatorFuncType _ -> DuCMDUnDefined
 
         member val ExternalTags = HashSet<ExternalTagSet>()
         member val Disabled:bool = false with get, set
@@ -299,13 +311,13 @@ module CoreModule =
 
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:TaskDev seq, func: Func option) =
+    type Job (name:string, tasks:TaskDev seq, opFunc: OperatorFunction  option) =
         inherit Named(name)
         member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
         //하나의 Job에는 하나의 Func만 지원 적용 
-        member val Func = func with get, set
+        member val OperatorFunction = opFunc with get, set
 
     type TagAddress = string
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
@@ -464,12 +476,19 @@ module CoreModule =
                 else [| x.Name |]             //my    flow
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
-    type Func with
-        static member Create(name:string, typeName, (parameters:string array)) =
-            let func = Func(name)
-            func.FunctionType <- typeName 
-            func.Parameters.AddRange(parameters)
-            func
+    type OperatorFunction with
+        static member Create(name:string, funcType, (parameters:string array)) =
+            let op = OperatorFunction(name)
+            op.OperatorType <- funcType 
+            op.Parameters.AddRange(parameters)
+            op   
+            
+    type CommandFunction with
+        static member Create(name:string, funcType, (parameters:string array)) =
+            let cmd = CommandFunction(name)
+            cmd.CommandType <- funcType 
+            cmd.Parameters.AddRange(parameters)
+            cmd 
 
     type RealExF = RealOtherFlow
     type RealOtherFlow with
@@ -489,7 +508,13 @@ module CoreModule =
             call
 
         static member Create(func:Func, parent:ParentWrapper) =
-            let call = Call(func|>FuncType, parent)
+            let callType = 
+                match func with
+                | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)
+                | :? OperatorFunction -> OperatorFuncType (func :?> OperatorFunction)
+                | _->failwithlog "Error"
+
+            let call = Call(callType, parent)
             addCallVertex parent call
             call   
 

@@ -19,9 +19,6 @@ open System.Reflection
 [<AutoOpen>]
 module ImportU =
 
-
-
-
     let private getApiItems (sys: DsSystem, refSys: string, apiName: string) =
         let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
         refSystem.TryFindExportApiItem([| refSystem.Name; apiName |]).Value
@@ -56,22 +53,33 @@ module ImportU =
             dicSeg: Dictionary<string, Vertex>,
             jobCallNames: string seq
         ) =
+        let getFunc() = 
+            let funcName = $"{node.PageTitle}_{node.Name}"
+            match mySys.Functions |> Seq.tryFind(fun f->f.Name = funcName) with
+            | Some f -> f
+            | None -> 
+                let newfunc = 
+                    match node.NodeType with
+                    | CALLOPFunc  ->  
+                        OperatorFunction(funcName) :> Func
+                    | CALLCMDFunc  ->  
+                        CommandFunction(funcName) :> Func
+
+                    | _ -> failwithlog "error"
+                mySys.Functions.Add(newfunc) |>ignore
+                newfunc
+
 
         let call =
             match node.NodeType with
-            | CALLFUNC  ->  
-                let funcName = $"{node.PageTitle}_{node.Name}"
-                let func =   
-                    match mySys.Functions |> Seq.tryFind(fun f->f.Name = funcName) with
-                    | Some f -> f
-                    | None -> 
-                        let newfunc = Func(funcName)
-                        mySys.Functions.Add(newfunc) |>ignore
-                        newfunc
+            | CALLOPFunc | CALLCMDFunc  ->  
+                Call.Create(getFunc(), parentWrapper)  
 
-                Call.Create(func, parentWrapper)
+            | CALL ->  
+
+                if parentWrapper.GetCore() :? Flow 
+                then failWithLog  $"Action 정의는 work 내부에만 존재 가능합니다. error {node.Name}."    
                 
-            | CALL  ->
                 let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
                 if jobCallNames.Contains sysName
                 then 
@@ -89,11 +97,22 @@ module ImportU =
                 else
                     let apiName = node.CallApiName
                     let loadedName = node.CallName
+
+                    //addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
+
                     let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
-                    let libAbsolutePath = getLibraryPath apiNameForLib
+                    let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
+
+                    let autoGenDevTask    =
+                        if autoGenSys.IsSome
+                            then
+                                createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName |> Some
+                            else 
+                                None
+
                     //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node)
-            
+                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask)
+
             | _  -> failwithlog "error"
 
         dicSeg.Add(node.Key, call)
@@ -418,6 +437,7 @@ module ImportU =
                     pptNodes.Where(fun node -> node.NodeType.IsLoadSys)
                     |> Seq.collect (fun node -> node.JobCallNames)
                     
+
             let createCall () =
                 calls
                 |> Seq.iter (fun node ->

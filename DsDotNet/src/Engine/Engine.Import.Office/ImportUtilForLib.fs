@@ -101,34 +101,65 @@ module ImportUtilForLib =
     //        else tempJob
 
     //    Call.Create(jobForCall, parent)
-         
-    let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
-    let curDir = currentFileName  |> Path.GetDirectoryName
 
-    let libraryConfigFileName = "Library.config"
-    let libConfigPath = Path.Combine(runDir, "dsLib", libraryConfigFileName)
-
-    let libPath  = if Path.Exists libConfigPath      
-                    then libConfigPath
-                    else Path.Combine(curDir, "dsLib", libraryConfigFileName)
-
-    let libConfig = LoadLibraryConfig(libPath)
-
-    let getLibraryPath(apiName) =
+    let createAutoGenDev(loadedName, (mySys: DsSystem)) =
         
+        match mySys.LoadedSystems.TryFind(fun f->f.Name = loadedName) with
+        | Some autoGenDev ->  autoGenDev
+        | None ->
+            let autoGenFile = $"./dsLib/AutoGen/{loadedName}.ds"
+            let autoSys = DsSystem("autoSys")
+            let libFilePath =
+                PathManager.getFullPath (autoGenFile |> DsFile) (activeSysDir |> DsDirectory)
+            let libRelPath =
+                PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
 
-        let libPath = libConfig.LibraryInfos.[apiName]
-        let libAbsolutePath = Path.Combine(curDir, libPath)
-        let curLibDir = Path.GetDirectoryName libAbsolutePath
+            let paras (loadedName) =
+                getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
+            let dev = Device(autoSys, paras loadedName, true)
+            mySys.AddLoadedSystem(dev)
+            dev
 
-        if not (File.Exists libAbsolutePath) then
-            if not (Directory.Exists curLibDir) then
-                Directory.CreateDirectory curLibDir |> ignore
 
-            let sourcePath = Path.Combine(runDir, libPath)
-            File.Copy(sourcePath, libAbsolutePath)
-        libAbsolutePath
-    
+    let getLibraryPath (mySys:DsSystem) loadedName apiName =
+        let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
+        let curDir = currentFileName  |> Path.GetDirectoryName
+
+        let libraryConfigFileName = "Library.config"
+        let libConfigPath = Path.Combine(runDir, "dsLib", libraryConfigFileName)
+
+        let libPath  = if Path.Exists libConfigPath      
+                       then libConfigPath
+                       else Path.Combine(curDir, "dsLib", libraryConfigFileName)
+
+
+        let libConfig = LoadLibraryConfig(libPath)
+        if libConfig.LibraryInfos.ContainsKey(apiName) 
+        then
+            let libPath =  libConfig.LibraryInfos.[apiName]
+                
+            let libAbsolutePath = Path.Combine(curDir, libPath)
+            let curLibDir = Path.GetDirectoryName libAbsolutePath
+            if not (File.Exists libAbsolutePath) then
+                if not (Directory.Exists curLibDir) then
+                    Directory.CreateDirectory curLibDir |> ignore
+
+                let sourcePath = Path.Combine(runDir, libPath)
+                File.Copy(sourcePath, libAbsolutePath)
+
+            libAbsolutePath, None
+        else 
+            let autoGenFile = $"./dsLib/AutoGen/{loadedName}.ds"
+            let autoGenAbsolutePath =
+                PathManager.getFullPath (autoGenFile |> DsFile) (activeSysDir |> DsDirectory)
+
+
+            match mySys.LoadedSystems.TryFind(fun f->f.Name = loadedName) with
+            | Some autoGenDev ->  autoGenAbsolutePath, Some autoGenDev
+            | None ->
+                let newLoadedDev = createAutoGenDev (loadedName, mySys)
+                autoGenAbsolutePath, Some newLoadedDev
+
 
     let addLibraryNCall
         (
@@ -137,47 +168,58 @@ module ImportUtilForLib =
             apiName,
             mySys: DsSystem,
             parentWrapper:ParentWrapper,
-            node: pptNode
+            node: pptNode,
+            autoTaskDev: TaskDev option
         ) =
-        let libRelPath =
-            PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
 
-        let paras loadedName =
-            getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
-
-        let addOrGetExistSystem loadedSys loadedName = 
-            if not (mySys.LoadedSysExist(loadedName)) then
-                mySys.AddLoadedSystem(Device(loadedSys, paras loadedName, false))
-                loadedSys
-            else 
-                mySys.GetLoadedSys(loadedName).Value.ReferenceSystem
-
-
-        let apiPureName = GetBracketsRemoveName(apiName).Trim()
-
-        let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
-            let devOrg= addOrGetExistSystem loadedSys newloadedName
-            let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-            TaskDev(api, "", "", newloadedName)
-
-        let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget
-        if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
-            node.Shape.ErrorName(ErrID._49, node.PageNum)
-
+        let parent =parentWrapper
 
         let job =
-            let tasks = HashSet<TaskDev>()
-            match getJobActionType apiName with
-            | MultiAction (_, cnt) ->  
-                for i in [1..cnt] do
-                    let devOrg = if i = 1 then devOrg
-                                    else ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
+            if autoTaskDev.IsSome
+            then
+                let tasks = HashSet<TaskDev>()
+                autoTaskDev.Value.InAddress <- ""
+                autoTaskDev.Value.OutAddress <- ""
+                tasks.Add(autoTaskDev.Value)|>ignore
+                Job(loadedName + "_" + apiName, tasks |> Seq.toList, None)
+            else 
+                let libRelPath =
+                    PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
 
-                    let mutiName = getDummyDeviceName loadedName i
-                    tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
-            | _->
-                tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
-            Job(loadedName + "_" + apiName, tasks |> Seq.toList, None)
+                let paras loadedName =
+                    getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
+
+                let addOrGetExistSystem loadedSys loadedName = 
+                    if not (mySys.LoadedSysExist(loadedName)) then
+                        mySys.AddLoadedSystem(Device(loadedSys, paras loadedName, false))
+                        loadedSys
+                    else 
+                        mySys.GetLoadedSys(loadedName).Value.ReferenceSystem
+
+
+                let apiPureName = GetBracketsRemoveName(apiName).Trim()
+
+                let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
+                    let devOrg= addOrGetExistSystem loadedSys newloadedName
+                    let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
+                    TaskDev(api, "", "", newloadedName)
+
+                let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget
+                if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
+                    node.Shape.ErrorName(ErrID._49, node.PageNum)
+
+                let tasks = HashSet<TaskDev>()
+                match getJobActionType apiName with
+                | MultiAction (_, cnt) ->  
+                    for i in [1..cnt] do
+                        let devOrg = if i = 1 then devOrg
+                                        else ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
+
+                        let mutiName = getDummyDeviceName loadedName i
+                        tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
+                | _->
+                    tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
+                Job(loadedName + "_" + apiName, tasks |> Seq.toList, None)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)
@@ -185,5 +227,5 @@ module ImportUtilForLib =
             then mySys.Jobs.Add(job);job
             else tempJob
 
-        Call.Create(jobForCall, parentWrapper)
+        Call.Create(jobForCall, parent)
          

@@ -86,7 +86,7 @@ module EtcListenerModule =
                                           .ToHashSet()
 
                                   let funcCallCtxs = bd.Descendants<FuncCallContext>().ToArray()
-                                  let buttonFuncs = commonFunctionExtractor funcCallCtxs btnName system
+                                  let buttonFuncs = commonOpFunctionExtractor funcCallCtxs btnName system
       
 
                                   if flows.Count > 0 then
@@ -138,7 +138,7 @@ module EtcListenerModule =
                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
                                     
                                   let funcCallCtxs = ld.Descendants<FuncCallContext>().ToArray()
-                                  let func = commonFunctionExtractor funcCallCtxs lmpName system
+                                  let func = commonOpFunctionExtractor funcCallCtxs lmpName system
 
                                   if flowNameCtxs.length() = 0
                                   then
@@ -172,7 +172,7 @@ module EtcListenerModule =
 
                                   let cndName, addrIn, addrOut = getHwSysItem cd
                                   let funcCallCtxs = cd.Descendants<FuncCallContext>().ToArray()
-                                  let func = commonFunctionExtractor funcCallCtxs cndName system
+                                  let func = commonOpFunctionExtractor funcCallCtxs cndName system
                                   let flows =
                                       cd
                                           .Descendants<FlowNameContext>()

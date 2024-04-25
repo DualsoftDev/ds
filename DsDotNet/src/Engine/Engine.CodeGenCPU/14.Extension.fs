@@ -12,7 +12,7 @@ type DsSystem with
         let rsts = s._off.Expr
          (* device not func 로직 처리*)
         [
-            let reverseInputs = s.Jobs.Where(fun j -> hasNot j.Func)
+            let reverseInputs = s.Jobs.Where(fun j -> hasNot j.OperatorFunction)
                                       .SelectMany(fun j->j.DeviceDefs)
 
             let devs = s.Jobs.SelectMany(fun j -> j.DeviceDefs)

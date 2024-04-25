@@ -62,7 +62,7 @@ module ConvertCPU =
                 yield! vm.F1_RootStart()
                 yield! vm.F2_RootReset()
 
-            if IsSpec (v, CallInFlow ||| RealExSystem ||| RealExFlow, AliasNotCare) then
+            if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
                 yield vm.F3_VertexEndWithOutReal()
 
             if IsSpec (v, CallInReal , AliasFalse) then
@@ -158,7 +158,7 @@ module ConvertCPU =
     let private funcCommandCall(s:DsSystem) =
         let coinCommandFuncs =
             s.GetVerticesOfCoins().OfType<Call>()
-                .Where(fun c->c.TargetHasFunc && c.CallFuncType.IsCommand())
+                .Where(fun c->c.TargetHasFunc && (c.TargetFunc :? CommandFunction))
                 .Select(fun c->c.TagManager :?> VertexMCall)
 
         [
@@ -173,7 +173,7 @@ module ConvertCPU =
 
             let coins = s.GetVerticesOfJobCalls()  
             let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
-            for (notFunc, dts) in jobs.Select(fun j-> (j.Func |> hasNot), j.DeviceDefs) do
+            for (notFunc, dts) in jobs.Select(fun j-> (j.OperatorFunction |> hasNot), j.DeviceDefs) do
                 for dt in dts do
                 if dt.InTag.IsNonNull() then  
                     yield dt.SensorEmulation(s, notFunc)

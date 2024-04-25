@@ -18,7 +18,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module ListnerCommonFunctionGenerator =
-    let commonFunctionExtractor (funcCallCtxs: FuncCallContext array) (callName:string) (system:DsSystem) =
+    let commonOpFunctionExtractor (funcCallCtxs: FuncCallContext array) (callName:string) (system:DsSystem) =
         if funcCallCtxs.Length > 1 
         then 
             failwithlog $"not support job multi function {callName}"
@@ -26,8 +26,21 @@ module ListnerCommonFunctionGenerator =
         if funcCallCtxs.any() 
             then 
                 let funcName = funcCallCtxs.Head().GetText().TrimStart('$')
-                Some (system.Functions.First(fun f->f.Name = funcName))
+                Some (system.Functions.Cast<OperatorFunction>().First(fun f->f.Name = funcName))
             else None 
+
+
+
+    let commonFuncArgsExtractor (fDef:FunctionDefContext) =
+        let args = 
+            let argsCtxs = fDef.Descendants<ArgumentContext>()
+            if argsCtxs.any() then   
+                argsCtxs
+                |> Seq.map (fun a -> a.GetText()) 
+                |> Seq.toArray
+            else
+                [||] // 매개변수가 없는 경우 빈 배열
+        args
 
 /// <summary>
 /// System, Flow, Parenting(껍데기만),
@@ -200,34 +213,47 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
         x.TheSystem.Statements.AddRange statements
 
-    override x.EnterFunctionsBlock(ctx: FunctionsBlockContext) =
+    override x.EnterCommandBlock(ctx: CommandBlockContext) =
         // FunctionsBlockContext에서 모든 FunctionDefContext를 추출
         let functionDefs = ctx.functionDef()
         let functionNameOnlys = ctx.functionNameOnly()
         
         functionNameOnlys |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
-            x.TheSystem.Functions.Add(Func(funcName)) )
+            x.TheSystem.Functions.Add(CommandFunction(funcName)) )
         functionDefs |> Seq.iter (fun fDef ->
             // 함수 이름 추출
             let funcName = fDef.functionName().GetText()
 
             // 함수 호출과 관련된 매개변수 추출
             let funcCall = fDef.functionCall()
-            let functionType =  funcCall.functionType().GetText() |> getFunctionType
-            let args = 
-                let argsCtxs = fDef.Descendants<ArgumentContext>()
-                if argsCtxs.any() then   
-                    argsCtxs
-                    |> Seq.map (fun a -> a.GetText()) 
-                    |> Seq.toArray
-                else
-                    [||] // 매개변수가 없는 경우 빈 배열
+            let functionType =  funcCall.functionType().GetText() |> tryGetCommandType |> Option.get
+            let args =  fDef |> commonFuncArgsExtractor 
 
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
-            let newFunc = Func.Create(funcName, functionType, args)
+            let newFunc = CommandFunction.Create(funcName, functionType, args)
             x.TheSystem.Functions.Add(newFunc) )
 
+    override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
+        // FunctionsBlockContext에서 모든 FunctionDefContext를 추출
+        let functionDefs = ctx.functionDef()
+        let functionNameOnlys = ctx.functionNameOnly()
+        
+        functionNameOnlys |> Seq.iter (fun fDef ->
+            let funcName = fDef.TryFindIdentifier1FromContext().Value
+            x.TheSystem.Functions.Add(OperatorFunction(funcName)))
+        functionDefs |> Seq.iter (fun fDef ->
+            // 함수 이름 추출
+            let funcName = fDef.functionName().GetText()
+
+            // 함수 호출과 관련된 매개변수 추출
+            let funcCall = fDef.functionCall()
+            let functionType =  funcCall.functionType().GetText() |> tryGetOperatorType  |> Option.get
+            let args =  fDef |> commonFuncArgsExtractor 
+
+            // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
+            let newFunc = OperatorFunction.Create(funcName, functionType, args)
+            x.TheSystem.Functions.Add(newFunc) )
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등
     member x.GetContextInformation(parserRuleContext: ParserRuleContext) = // collectUpwardContextInformation
@@ -557,7 +583,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                 assert (apiItems.Any())
                 let funcCallCtxs = callList.Descendants<FuncCallContext>().ToArray()
-                let jobFuncs = commonFunctionExtractor funcCallCtxs jobName system
+                let jobFuncs = commonOpFunctionExtractor funcCallCtxs jobName system
        
                 let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList, jobFuncs)
                 job |> system.Jobs.Add

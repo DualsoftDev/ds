@@ -9,7 +9,7 @@ open System
 [<AutoOpen>]
 module ConvertCoreExtUtils =
     
-    let hasNot  (x:Func option) = x.IsSome && x.Value.FunctionType = DuFuncNot
+    let hasNot  (x:OperatorFunction option) = x.IsSome && x.Value.OperatorType = DuOPNot
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexManager
     let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal

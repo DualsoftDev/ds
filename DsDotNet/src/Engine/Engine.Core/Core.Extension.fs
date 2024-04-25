@@ -79,7 +79,7 @@ module CoreExtensionModule =
 
     type DsSystem with
 
-        member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, func:Func option) =
+        member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, opFunc: OperatorFunction option) =
             checkSystem(x, flow, btnName)
           
             let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
@@ -91,12 +91,12 @@ module CoreExtensionModule =
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
-                      x.HWButtons.Add(ButtonDef(btnName,x, btnType, inAddress, outAddress, HashSet[|flow|], func))
+                      x.HWButtons.Add(ButtonDef(btnName,x, btnType, inAddress, outAddress, HashSet[|flow|], opFunc))
                       |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
                       HwSystemItem.CreateHWApi(btnName, x) |> ignore
 
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, inAddr:string, outAddr:string, flow:Flow option,  func:Func option) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, inAddr:string, outAddr:string, flow:Flow option,  opFunc: OperatorFunction option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
@@ -104,18 +104,18 @@ module CoreExtensionModule =
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
             | None -> 
                       let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
-                      x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, flows , func))
+                      x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, flows , opFunc))
                       |> verifyM $"중복 LampDef [name:{lmpName}]"
                       HwSystemItem.CreateHWApi(lmpName, x) |> ignore
 
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, outAddr:string, flow:Flow,  func:Func option) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, outAddr:string, flow:Flow,  opFunc: OperatorFunction option) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None -> 
-                      x.HWConditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], func))
+                      x.HWConditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], opFunc))
                       |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
                       HwSystemItem.CreateHWApi(condiName, x) |> ignore
 
@@ -128,10 +128,10 @@ module CoreExtensionModule =
         member x.HWLamps              = x.HWLamps   :> seq<_>
 
         member x.AutoNameGenFuncs  =
-                    x.Jobs.Choose(fun j-> j.Func)
-                    @ x.HWButtons.Choose(fun f-> f.Func)
-                    @ x.HWLamps.Choose(fun f-> f.Func)
-                    @ x.HWConditions.Choose(fun f-> f.Func)
+                    x.Jobs.Choose(fun j-> j.OperatorFunction)
+                    @ x.HWButtons.Choose(fun f-> f.OperatorFunction)
+                    @ x.HWLamps.Choose(fun f-> f.OperatorFunction)
+                    @ x.HWConditions.Choose(fun f-> f.OperatorFunction)
 
 
         member x.AutoHWButtons        = getButtons(x, DuAutoBTN)

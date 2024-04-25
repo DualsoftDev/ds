@@ -58,13 +58,13 @@ O: 'o';
 P_IN: 'p_in';
 P: 'p';
 VARIABLES: 'variables';
-COMMANDS: 'commands';
 OBSERVES: 'observes';
 WORDTYPE: 'word';
 DWORDTYPE: 'dword';
 INTTYPE: 'int';
 FLOATTYPE: 'float';
-FUNCTIONS : 'functions';
+COMMANDS: 'commands';
+OPERATORS : 'operators';
 
 
 WS: [ \t\r\n]+ -> skip;
@@ -198,7 +198,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (  flowBlock | jobBlock | functionsBlock | loadDeviceBlock | loadExternalSystemBlock
+        : LBRACE (  flowBlock | jobBlock | commandBlock | operatorBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
                     | codeBlock | variableBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
@@ -284,12 +284,16 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     varType: IDENTIFIER1;
 
 
-functionsBlock: '[' 'functions' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
-    functionDef: functionName EQ functionCall SEMICOLON;
-    functionNameOnly: identifier1 SEMICOLON;
-    functionName: identifier1;
-    functionCall: functionType (argument (argument)*)?;
-    functionType: '$'identifier1;
+commandBlock: '[' 'commands' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
+
+operatorBlock: '[' 'operators' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
+
+functionDef: functionName EQ functionCall SEMICOLON;
+functionNameOnly: identifier1 SEMICOLON;
+functionName: identifier1;
+functionCall: functionType (argument (argument)*)?;
+functionType: '$'identifier1;
+
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     callListing:
@@ -386,5 +390,5 @@ causal: causalPhrase SEMICOLON;
         | C_IN | C | M_IN | M | S_IN | S
         | T_IN | T | H_IN | H | R_IN | R
         | WORDTYPE | DWORDTYPE | INTTYPE | FLOATTYPE
-        | FUNCTIONS
+        | COMMANDS | OPERATORS
         ;

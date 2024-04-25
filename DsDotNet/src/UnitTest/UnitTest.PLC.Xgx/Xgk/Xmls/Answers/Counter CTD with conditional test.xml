@@ -71,79 +71,97 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctd myCTD = createXgiCTD(2000u, $cu1 &amp;&amp; $cu2 || $cu3, 4294967295u)
+                                        [0] bool cu3 = $cu1 || $cu2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
                                         cu1
                                     </Element>
-                                    <Element ElementType="6" Coordinate="2052">
-                                        cu2
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="2054"/>
-                                    <Element ElementType="2" Coordinate="2055" Param="78"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="CTD,myCTD,2000"/>
-                                    <Element ElementType="6" Coordinate="3073">
+                                    <Element ElementType="0" Coordinate="2051"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="14" Coordinate="2142">
                                         cu3
                                     </Element>
-                                    <Element ElementType="2" Coordinate="3076" Param="0"/>
+                                    <Element ElementType="6" Coordinate="3073">
+                                        cu2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="4097">
+                                        [1] ctd myCTD = createXgiCTD(2000u, $cu1 &amp;&amp; $cu2 || $cu3, 4294967295u)
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="5121">
-                                        res0
+                                        cu1
                                     </Element>
-                                    <Element ElementType="0" Coordinate="5123"/>
                                     <Element ElementType="6" Coordinate="5124">
-                                        res2
+                                        cu2
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5127" Param="84"/>
-                                    <Element ElementType="17" Coordinate="5214">
-                                        myCTD
-                                    </Element>
+                                    <Element ElementType="0" Coordinate="5126"/>
+                                    <Element ElementType="2" Coordinate="5127" Param="78"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="CTD,myCTD,2000"/>
                                     <Element ElementType="6" Coordinate="6145">
-                                        res1
+                                        cu3
                                     </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="7169">
-                                        [1] $xx7 := ($cu1 &amp;&amp; $cu2 || $cu3 || ($res0 || $res1) &amp;&amp; $res2) &amp;&amp; $cu1
-                                    </Element>
+                                    <Element ElementType="2" Coordinate="6148" Param="0"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="8193">
-                                        cu1
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8196">
-                                        cu2
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="8198"/>
-                                    <Element ElementType="6" Coordinate="8199">
-                                        cu1
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="8202" Param="81"/>
-                                    <Element ElementType="14" Coordinate="8286">
-                                        xx7
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="9217">
-                                        cu3
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="9220" Param="0"/>
-                                    <Element ElementType="0" Coordinate="9222"/>
-                                    <Element ElementType="6" Coordinate="10241">
                                         res0
                                     </Element>
-                                    <Element ElementType="0" Coordinate="10243"/>
-                                    <Element ElementType="6" Coordinate="10244">
+                                    <Element ElementType="0" Coordinate="8195"/>
+                                    <Element ElementType="6" Coordinate="8196">
                                         res2
                                     </Element>
-                                    <Element ElementType="6" Coordinate="11265">
+                                    <Element ElementType="2" Coordinate="8199" Param="84"/>
+                                    <Element ElementType="17" Coordinate="8286">
+                                        myCTD
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="9217">
                                         res1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="13313" Param="90"/>
-                                    <Element ElementType="33" Coordinate="13406" Param="END">
+                                    <Element ElementType="63" Coordinate="10241">
+                                        [2] $xx7 := ($cu1 &amp;&amp; $cu2 || $cu3 || ($res0 || $res1) &amp;&amp; $res2) &amp;&amp; $cu1
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="11265">
+                                        cu1
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="11268">
+                                        cu2
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="11270"/>
+                                    <Element ElementType="6" Coordinate="11271">
+                                        cu1
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="11274" Param="81"/>
+                                    <Element ElementType="14" Coordinate="11358">
+                                        xx7
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="12289">
+                                        cu3
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="12292" Param="0"/>
+                                    <Element ElementType="0" Coordinate="12294"/>
+                                    <Element ElementType="6" Coordinate="13313">
+                                        res0
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="13315"/>
+                                    <Element ElementType="6" Coordinate="13316">
+                                        res2
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="14337">
+                                        res1
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="16385" Param="90"/>
+                                    <Element ElementType="33" Coordinate="16478" Param="END">
                                         END
                                     </Element>
                                 </Rung>

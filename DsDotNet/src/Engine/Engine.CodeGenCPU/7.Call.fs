@@ -47,24 +47,24 @@ type VertexManager with
         let v = v :?> VertexMCall
         let coin = v.Vertex :?> Call
         [
-                let rstNormal = coin._off.Expr
-                for td in coin.TargetJob.DeviceDefs do
-                    let api = td.ApiItem
-                    if td.OutAddress <> TextSkip && td.OutAddress <> TextAddrEmpty
-                    then 
-                        let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
-                        let sets =
-                            if RuntimeDS.Package.IsPackageEmulation()
-                            then api.PE.Expr <&&> api.PS.Expr <&&> coin._off.Expr
-                            else api.PE.Expr <&&> api.PS.Expr <&&> !!rstMemos.ToOrElseOff()
+            let rstNormal = coin._off.Expr
+            for td in coin.TargetJob.DeviceDefs do
+                let api = td.ApiItem
+                if td.OutAddress <> TextSkip && td.OutAddress <> TextAddrEmpty
+                then 
+                    let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
+                    let sets =
+                        if RuntimeDS.Package.IsPackageEmulation()
+                        then api.PE.Expr <&&> api.PS.Expr <&&> coin._off.Expr
+                        else api.PE.Expr <&&> api.PS.Expr <&&> !!rstMemos.ToOrElseOff()
 
-                        if coin.TargetJob.ActionType = JobActionType.Push 
-                        then 
-                             let rstPush = rstMemos.ToOr()
+                    if coin.TargetJob.ActionType = JobActionType.Push 
+                    then 
+                            let rstPush = rstMemos.ToOr()
                         
-                             yield (sets, rstPush  ) ==| (td.AO, getFuncName())
-                        else 
-                             yield (sets, rstNormal) --| (td.AO, getFuncName())
+                            yield (sets, rstPush  ) ==| (td.AO, getFuncName())
+                    else 
+                            yield (sets, rstNormal) --| (td.AO, getFuncName())
         ]
 
 
@@ -73,9 +73,9 @@ type VertexManager with
         let coin = v.Vertex :?> Call
         [
             let set = v.PSFunc.Expr
-            match coin.CallFuncType with 
-            | DuFuncAdd -> yield set --+ (v.PSFunc, getFuncName())
-            | DuFuncSub -> yield set --- (v.PSFunc, getFuncName())
-            | DuFuncMove -> yield set --> (v.PSFunc, getFuncName())
+            match coin.CallCommandType with 
+            | DuCMDAdd -> yield set --+ (v.PSFunc, getFuncName())
+            | DuCMDSub -> yield set --- (v.PSFunc, getFuncName())
+            | DuCMDMove -> yield set --> (v.PSFunc, getFuncName())
             | _-> failwithlog $"{v.Name} 함수 정의가 없습니다."
         ]

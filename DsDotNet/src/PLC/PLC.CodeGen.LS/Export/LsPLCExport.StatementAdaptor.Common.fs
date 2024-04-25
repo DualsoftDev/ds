@@ -251,17 +251,7 @@ module XgxExpressionConvertorModule =
             | _ -> failwithlog "ERROR"
 
 
-
-    let operatorToXgkFunctionName op =
-        match op with
-        | "+" -> "ADD"
-        | "-" -> "SUB"
-        | "*" -> "MUL"
-        | "/" -> "DIV"
-        | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
-        | _ -> failwithlog "ERROR"
-
-    type private AugmentedConvertorParams =
+    type internal AugmentedConvertorParams =
         { Storage: XgxStorage
           ExpandFunctionStatements: StatementContainer
           Exp: IExpression
@@ -277,7 +267,7 @@ module XgxExpressionConvertorModule =
     ///   * 추가되는 local variable 은 newLocalStorages 에 추가한다.
     ///
     ///   * 새로 생성되는 expression 을 반환한다.
-    let private replaceInnerArithmaticOrComparisionToXgiFunctionStatements (prjParam: XgxProjectParams)
+    let internal replaceInnerArithmaticOrComparisionToXgiFunctionStatements (prjParam: XgxProjectParams)
         { Storage = newLocalStorages
           ExpandFunctionStatements = expandFunctionStatements
           Exp = exp
@@ -321,7 +311,7 @@ module XgxExpressionConvertorModule =
         xgiLocalVars.Cast<IStorage>() |> newLocalStorages.AddRange // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
         newExp
 
-    let rec private binaryToNary
+    let rec internal binaryToNary
         (prjParam: XgxProjectParams)
         (augmentParams: AugmentedConvertorParams)
         (operatorsToChange: string list)
@@ -369,7 +359,7 @@ module XgxExpressionConvertorModule =
                 [ withAugmentedPLCFunction exp ]
         | _ -> [ exp ]
 
-    type private MergeArithmaticResult =
+    type internal MergeArithmaticResult =
         /// arithmatic operator 를 적용해서, 결과 값을 이미 tag / variable 에 write 한 경우.  추후의 expression 과 혼합할 필요가 없다.
         | AlreadyApplied of IExpression
         | NotApplied of IExpression
@@ -379,7 +369,7 @@ module XgxExpressionConvertorModule =
     /// - a + b + c => + [a; b; c] 로 변환 (flat 처리)
     ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성
     /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
-    let private mergeArithmaticOperator
+    let internal mergeArithmaticOperator
         (prjParam: XgxProjectParams)
         (augmentParams: AugmentedConvertorParams)
         (outputStore: IStorage option)
@@ -530,7 +520,7 @@ module XgxExpressionConvertorModule =
         else
             exp
 
-    let private collectExpandedExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
+    let internal collectExpandedExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
         let newExp =
             replaceInnerArithmaticOrComparisionToXgiFunctionStatements prjParam augmentParams
 
@@ -597,11 +587,6 @@ module XgxExpressionConvertorModule =
         expr
 
 
-    type XgkTimerCounterStructResetCoil(tc:TimerCounterBaseStruct) =
-        inherit TimerCounterBaseStruct(None, tc.Name, tc.DN, tc.PRE, tc.ACC, tc.RES, (tc :> IStorage).DsSystem)
-        interface INamedExpressionizableTerminal with
-            member x.StorageName = tc.Name
-
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
         member x.ToAssignStatementAndAuotVariable (prjParam: XgxProjectParams) : (Statement * IXgxVar) =
@@ -611,8 +596,8 @@ module XgxExpressionConvertorModule =
             let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText()}"
             DuAssign(x, var), var
 
-    /// Statement 확장
-    let rec private statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
+    /// XGK/XGI 공용 Statement 확장
+    let internal statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
         let augmentedStatements = StatementContainer() // DuAugmentedPLCFunction case
 
         let newStatements =
@@ -645,14 +630,6 @@ module XgxExpressionConvertorModule =
                     let newExp = collectExpandedExpression prjParam defaultConvertorParams
                     [ DuAssign(newExp, target) ]
 
-            // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.  다음과 같이 2개의 문장으로 분리한다.
-            // bool b3;
-            // b3 := $nn1 > $nn2;
-            | DuVarDecl(exp, decl) when prjParam.TargetType = XGK && exp.Terminal.IsNone ->
-                newLocalStorages.Add decl
-                let stmt = DuAssign(exp, decl)
-                statement2XgxStatements prjParam newLocalStorages stmt
-
             | DuVarDecl(exp, decl) ->
                 let _newExp =
                     collectExpandedExpression prjParam
@@ -683,57 +660,6 @@ module XgxExpressionConvertorModule =
 
                 []
 
-            | DuTimer tmr when prjParam.TargetType = XGK && tmr.ResetCondition.IsSome ->
-                // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                let resetStatement = DuAssign(tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct))
-                [ statement; resetStatement ]
-
-            | DuCounter ctr when prjParam.TargetType = XGK ->
-                let statements = ResizeArray<Statement>([statement])
-                // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
-                let typ = ctr.Counter.Type
-                match typ with
-                | CTD -> DuAssign(ctr.LoadCondition.Value, resetCoil) |> statements.Add
-                | (CTR|CTU|CTUD) -> DuAssign(ctr.ResetCondition.Value, resetCoil) |> statements.Add
-
-                if typ = CTUD then
-                    let mutable newStatement = statement
-                    let mutable newCtr = ctr
-
-                    // newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
-                    let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
-                        let assignStatement, ldVar = cond.ToAssignStatementAndAuotVariable prjParam
-                        statements.Add assignStatement
-                        newLocalStorages.Add ldVar
-
-                        let ldVarExp = ldVar.ToExpression() :?> IExpression<bool>
-                        newStatement <- newStatementGenerator(ldVarExp)
-                        match newStatement with
-                        | DuCounter ctr -> newCtr <- ctr
-                        | _ -> failwithlog "ERROR"
-
-                        statements[0] <- newStatement
-
-
-                    match newCtr.UpCondition with
-                    | Some cond when cond.Terminal.IsNone ->
-                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with UpCondition = Some ldVarExp }))
-                    | _ -> ()
-
-                    match newCtr.DownCondition with
-                    | Some cond when cond.Terminal.IsNone ->
-                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with DownCondition = Some ldVarExp }))
-                    | _ -> ()
-
-                    (* XGK CTUD 에서 load : 별도의 statement 롭 분리: ldcondition --- MOV PV C0001  *)
-                    match newCtr.LoadCondition with
-                    | Some cond ->
-                        DuAction(DuCopy(cond, literal2expr(ctr.Counter.PRE.Value), ctr.Counter.CounterStruct)) |> statements.Add
-                    | _ -> ()
-
-                statements.ToFSharpList()
-
             | (DuTimer _ | DuCounter _) -> [ statement ]
 
             | DuAction(DuCopy(condition, source, target)) ->
@@ -746,23 +672,3 @@ module XgxExpressionConvertorModule =
             | DuAugmentedPLCFunction _ -> failwithlog "ERROR"
 
         augmentedStatements @ newStatements |> List.ofSeq
-
-    /// S -> [XS]
-    let internal statement2Statements
-        (prjParam: XgxProjectParams)
-        (newLocalStorages: XgxStorage)
-        (CommentedStatement(comment, statement))
-      : CommentedXgxStatements =
-        let xgiStatements = statement2XgxStatements prjParam newLocalStorages statement
-
-        let rungComment =
-            [
-                comment
-                if prjParam.AppendDebugInfoToRungComment then
-                    let statementComment = statement.ToText()
-                    statementComment
-            ] |> ofNotNullAny |> String.concat "\r\n"
-            |> escapeXml
-
-       
-        CommentedXgiStatements(rungComment, xgiStatements)

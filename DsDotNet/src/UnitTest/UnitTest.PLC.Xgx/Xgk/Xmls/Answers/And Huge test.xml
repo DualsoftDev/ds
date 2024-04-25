@@ -122,9 +122,8 @@
                         <Symbol Name="_t38_AND" Comment="$nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $nn1 &gt; $nn2 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35" Device="M" DevicePos="325" Type="BIT"/>
                         <Symbol Name="_t39_AND" Comment="$nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $nn1 &gt; $nn2 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36" Device="M" DevicePos="326" Type="BIT"/>
                         <Symbol Name="_t3_AND" Comment="$nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01" Device="M" DevicePos="290" Type="BIT"/>
-                        <Symbol Name="_t40_AND" Comment="$nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $nn1 &gt; $nn2 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36 &amp;&amp; $x37" Device="M" DevicePos="327" Type="BIT"/>
+                        <Symbol Name="_t40_split" Comment="&amp;&amp; split output" Device="M" DevicePos="327" Type="BIT"/>
                         <Symbol Name="_t41_split" Comment="&amp;&amp; split output" Device="M" DevicePos="328" Type="BIT"/>
-                        <Symbol Name="_t42_split" Comment="&amp;&amp; split output" Device="M" DevicePos="329" Type="BIT"/>
                         <Symbol Name="_t4_AND" Comment="$nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02" Device="M" DevicePos="291" Type="BIT"/>
                         <Symbol Name="_t5_AND" Comment="$nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03" Device="M" DevicePos="292" Type="BIT"/>
                         <Symbol Name="_t6_AND" Comment="$nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04" Device="M" DevicePos="293" Type="BIT"/>
@@ -266,12 +265,12 @@
                                         x29
                                     </Element>
                                     <Element ElementType="14" Coordinate="4190">
-                                        _t41_split
+                                        _t40_split
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="5121">
-                                        _t41_split
+                                        _t40_split
                                     </Element>
                                     <Element ElementType="6" Coordinate="5124">
                                         x30
@@ -299,12 +298,12 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="5148" Param="63"/>
                                     <Element ElementType="14" Coordinate="5214">
-                                        _t42_split
+                                        _t41_split
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="6145">
-                                        _t42_split
+                                        _t41_split
                                     </Element>
                                     <Element ElementType="2" Coordinate="6148" Param="87"/>
                                     <Element ElementType="14" Coordinate="6238">

@@ -164,7 +164,7 @@ type XgiExpEqualityTest() =
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``()
     [<Test>] member __.``Assignment test`` () = base.``Assignment test``()
-    [<Test>] member __.``X Assignment simple test`` () = base.``Assignment simple test``()
+    [<Test>] member __.``Assignment simple test`` () = base.``Assignment simple test``()
 
 
 type XgkExpEqualityTest() =
@@ -175,7 +175,7 @@ type XgkExpEqualityTest() =
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``() 
     [<Test>] member __.``Assignment test`` () = base.``Assignment test``()
-    [<Test>] member __.``X Assignment simple test`` () = base.``Assignment simple test``()
+    [<Test>] member __.``Assignment simple test`` () = base.``Assignment simple test``()
 
 
 

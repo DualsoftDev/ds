@@ -43,7 +43,6 @@
                         <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
                         <Symbol Name="nn2" Comment="" Device="M" DevicePos="1" Type="WORD"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="3" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -75,18 +74,11 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,_t1_ADD"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="3073">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="3076" Param="81"/>
-                                    <Element ElementType="33" Coordinate="3154" Param="MOV,_t1_ADD,sum"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="END">
+                                    <Element ElementType="2" Coordinate="4097" Param="90"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="END">
                                         END
                                     </Element>
                                 </Rung>

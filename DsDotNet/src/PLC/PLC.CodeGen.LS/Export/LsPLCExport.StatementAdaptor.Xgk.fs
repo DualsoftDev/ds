@@ -32,13 +32,13 @@ module XgkTypeConvertorModule =
     ///     추가 storage : tmp2
     ///     최종 exp: "tmp1 > 4"
     ///     반환 : exp, [tmp2], [tmp1 := 2 + 3]
-    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression) (newLocalStorages: XgxStorage) (newStatements:StatementContainer) : IExpression =
+    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) (newLocalStorages: XgxStorage) (newStatements:StatementContainer) : IExpression =
         assert (prjParam.TargetType = XGK)
-        let rec helper (nestLevel:int) (exp: IExpression) : IExpression * IStorage list * Statement list =
+        let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : IExpression * IStorage list * Statement list =
             match exp.FunctionName, exp.FunctionArguments with
             | Some fn, l::r::[] ->
-                let lexpr, lstgs, lstmts = helper (nestLevel + 1) l
-                let rexpr, rstgs, rstmts = helper (nestLevel + 1) r
+                let lexpr, lstgs, lstmts = helper (nestLevel + 1) (l, None)
+                let rexpr, rstgs, rstmts = helper (nestLevel + 1) (r, None)
 
                 if fn.IsOneOf("!=", "=", "<>") && lexpr.DataType = typeof<bool> then
                     // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
@@ -54,9 +54,12 @@ module XgkTypeConvertorModule =
                     let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
                     let createTmpStorage =
                         fun () -> 
-                            let tmpNameHint = operatorToMnemonic fn
-                            let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText()}"
-                            tmpVar :> IStorage
+                            match expStore with
+                            | Some stg -> stg
+                            | None ->
+                                let tmpNameHint = operatorToMnemonic fn
+                                let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText()}"
+                                tmpVar :> IStorage
 
                     match fn with
                     | ("+" | "-" | "*" | "/")
@@ -77,7 +80,7 @@ module XgkTypeConvertorModule =
         if exp.Terminal.IsSome then
             exp
         else
-            let expr, stgs, stmts = helper 0 exp
+            let expr, stgs, stmts = helper 0 (exp, expStore)
             newLocalStorages.AddRange stgs
             newStatements.AddRange stmts
             expr
@@ -89,9 +92,20 @@ module XgkTypeConvertorModule =
         let newStatements =
             match statement with
             | DuAssign(exp, target) ->
-                let exp = exp2expXgk prjParam exp newLocalStorages augmentedStatements
-                let newStatement = DuAssign(exp, target)
-                statement2XgxStatements prjParam newLocalStorages newStatement
+                let exp2 = exp2expXgk prjParam (exp, Some target) newLocalStorages augmentedStatements
+                let duplicated =
+                    option {
+                        let! terminal = exp2.Terminal
+                        let! variable = terminal.Variable
+                        return variable = target
+                    } |> Option.defaultValue false
+
+                if augmentedStatements.any() && (exp = exp2 || duplicated) then
+                    []
+                else
+                    let newStatement = DuAssign(exp2, target)
+                    statement2XgxStatements prjParam newLocalStorages newStatement
+
 
             // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.  다음과 같이 2개의 문장으로 분리한다.
             // bool b3;

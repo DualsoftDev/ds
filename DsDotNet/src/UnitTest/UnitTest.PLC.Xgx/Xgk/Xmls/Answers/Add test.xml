@@ -51,7 +51,6 @@
                         <Symbol Name="_t2_MUL" Comment="($nn1 + $nn2) * 9s" Device="M" DevicePos="7" Type="WORD"/>
                         <Symbol Name="_t3_ADD" Comment="($nn1 + $nn2) * 9s + $nn3" Device="M" DevicePos="8" Type="WORD"/>
                         <Symbol Name="_t4_GT" Comment="($nn1 + $nn2) * 9s + $nn3 &gt; 3s" Device="M" DevicePos="144" Type="BIT"/>
-                        <Symbol Name="_t5_AND" Comment="true &amp;&amp; ($nn1 + $nn2) * 9s + $nn3 &gt; 3s" Device="M" DevicePos="145" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

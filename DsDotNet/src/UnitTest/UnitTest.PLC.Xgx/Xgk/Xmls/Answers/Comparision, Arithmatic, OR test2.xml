@@ -51,7 +51,6 @@
                         <Symbol Name="nn8" Comment="" Device="M" DevicePos="7" Type="WORD"/>
                         <Symbol Name="result" Comment="" Device="M" DevicePos="129" Type="BIT"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="9" Type="WORD"/>
-                        <Symbol Name="_t10_OR" Comment="$cond1 &amp;&amp; $nn1 + $nn2 * $nn3 &gt; 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="133" Type="BIT"/>
                         <Symbol Name="_t1_MUL" Comment="$nn2 * $nn3" Device="M" DevicePos="10" Type="WORD"/>
                         <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2 * $nn3" Device="M" DevicePos="11" Type="WORD"/>
                         <Symbol Name="_t3_GT" Comment="$nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="130" Type="BIT"/>

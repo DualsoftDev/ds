@@ -89,9 +89,17 @@ module ImportU =
                 //addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
 
                 let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
-                let libAbsolutePath = getLibraryPath apiNameForLib
+                let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
+
+                let autoGenDevTask    =
+                    if autoGenSys.IsSome
+                        then
+                            createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName |> Some
+                        else 
+                            None
+
                 //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentFlow, parentReal, node)
+                addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentFlow, parentReal, node, autoGenDevTask)
 
         dicSeg.Add(node.Key, call)
 

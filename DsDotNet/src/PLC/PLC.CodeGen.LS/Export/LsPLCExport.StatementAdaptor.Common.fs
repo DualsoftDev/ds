@@ -527,65 +527,6 @@ module XgxExpressionConvertorModule =
         let newExp = zipVisitor  prjParam { augmentParams with Exp = newExp }
         newExp
 
-    /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.
-    /// 이 과정에서 추가할 필요가 있는 storate 는 newLocalStorages 에 추가한다.
-    /// 반환 : exp, 추가된 storage, 추가된 statement
-    ///
-    /// e.g: XGK 의 경우, 함수를 지원하지 않으므로,
-    ///     입력 exp: "2 + 3 > 4"
-    ///     추가 statement : "tmp1 := 2 + 3"
-    ///     추가 storage : tmp2
-    ///     최종 exp: "tmp1 > 4"
-    ///     반환 : exp, [tmp2], [tmp1 := 2 + 3]
-    let exp2exp (prjParam: XgxProjectParams) (exp: IExpression) (newLocalStorages: XgxStorage) (newStatements:StatementContainer) : IExpression =
-        let rec helper (nestLevel:int) (exp: IExpression) : IExpression * IStorage list * Statement list =
-            if exp.Terminal.IsSome || prjParam.TargetType = XGI then
-                exp, [], []
-            else
-                match exp.FunctionName, exp.FunctionArguments with
-                | Some fn, l::r::[] ->
-                    let lexpr, lstgs, lstmts = helper (nestLevel + 1) l
-                    let rexpr, rstgs, rstmts = helper (nestLevel + 1) r
-
-                    if fn.IsOneOf("!=", "=", "<>") && lexpr.DataType = typeof<bool> then
-                        // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
-                        let l, r, nl, nr = lexpr, rexpr, fLogicalNot [lexpr], fLogicalNot [rexpr]
-                        let newExp =
-                            match fn with
-                            | ("!=" | "<>") -> fLogicalOr([fLogicalAnd [l; nr]; fLogicalAnd [nl; r]])
-                            | "=" -> fLogicalOr([fLogicalAnd [l; r]; fLogicalAnd [nl; nr]])
-                            | _ -> failwithlog "ERROR"
-                        newExp, (lstgs @ rstgs), (lstmts @ rstmts)
-                    else
-                        // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
-                        let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
-                        let createTmpStorage =
-                            fun () -> 
-                                let tmpNameHint = operatorToMnemonic fn
-                                let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText()}"
-                                tmpVar :> IStorage
-
-                        match fn with
-                        | ("+" | "-" | "*" | "/")
-                        | (">" | ">=" | "<" | "<=" | "=" | "!=") ->
-                            let stg = createTmpStorage()
-                            let stmt = DuAssign(newExp, stg)
-                            let varExp = stg.ToExpression()
-                            varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
-                        | _ ->
-                            if lstgs.any() || rstgs.any() then
-                                let stg = createTmpStorage()
-                                newExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts)
-                            else
-                                exp, [], []
-                | _ ->
-                    exp, [], []
-
-        let expr, stgs, stmts = helper 0 exp
-        newLocalStorages.AddRange stgs
-        newStatements.AddRange stmts
-        expr
-
 
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
@@ -603,7 +544,6 @@ module XgxExpressionConvertorModule =
         let newStatements =
             match statement with
             | DuAssign(exp, target) ->
-                let exp = exp2exp prjParam exp newLocalStorages augmentedStatements
                 let defaultConvertorParams =
                     {   Storage = newLocalStorages
                         ExpandFunctionStatements = augmentedStatements

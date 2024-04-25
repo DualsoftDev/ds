@@ -51,6 +51,7 @@
         <Compile Include="Export\LsPLCExport.RungXmlInfo.fs" />
         <Compile Include="Export\LsPLCExport.Common.fs" />
         <Compile Include="Export\LsPLCExport.POUParams.fs" />
+        <Compile Include="Export\LsPLCExport.Expression.fs" />
         <Compile Include="Export\LsPLCExport.StatementAdaptor.Common.fs" />
         <Compile Include="Export\LsPLCExport.StatementAdaptor.Xgk.fs" />
         <Compile Include="Export\LsPLCExport.StatementAdaptor.Xgi.fs" />

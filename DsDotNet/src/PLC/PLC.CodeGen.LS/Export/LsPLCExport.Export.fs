@@ -150,7 +150,7 @@ module XgiExportModule =
                               Name = op
                               Arguments = args }
 
-                    simpleRung expr (output :?> IStorage)
+                    simpleRung expr output
 
 
                 // <kwak> <timer>

@@ -41,7 +41,7 @@ module LsPLCExportExpressionModule =
 
             let rec traverse (level:int) (exp:IExpression) =
                 match exp.Terminal, exp.FunctionName with
-                | Some terminal, None -> th (level, exp)
+                | Some _terminal, None -> th (level, exp)
                 | None, Some fn ->                     
                     let newArgs = [for a in exp.FunctionArguments do traverse (level + 1) a]
                     let newFn =

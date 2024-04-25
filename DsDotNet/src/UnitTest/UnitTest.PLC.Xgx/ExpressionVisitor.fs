@@ -26,10 +26,10 @@ type ExpressionVisitorTest() =
 
     [<Test>]
     member x.``Expression Visitor: Identity transform test`` () =
-        let storages = Storages()
-        let statements = parseCodeForWindows storages code
-        
-        let expr = statements |> last |> getExpression
+        let expr =
+            let storages = Storages()
+            let statements = parseCodeForWindows storages code
+            statements |> last |> getExpression
         let oldText = expr.ToTextFormat()
         oldText |> tracefn "%s\n" 
 
@@ -40,3 +40,40 @@ type ExpressionVisitorTest() =
         newText |> tracefn "%s\n" 
 
         oldText === newText
+
+    [<Test>]
+    member x.``Expression Visitor: XGK pre-transform test`` () =
+        let statements = StatementContainer()   // 새로이 생성될 statements
+        let storages = XgxStorage()     // 새로이 생성될 storages
+        let expr =
+            let storages = Storages()
+            let statements = parseCodeForWindows storages code
+            statements |> last |> getExpression
+
+        let prjParam = getXgxProjectParams XGI "UnitTestProject"
+
+
+        let funTransformer (level:int, fnExp:IExpression) =
+            match fnExp.FunctionName with
+            | Some("+" | "-" | "*" | "/" as op) ->
+                let var =
+                    let mnemonic = operatorToMnemonic op
+                    let initValue = 0//fnExp.BoxedEvaluatedValue
+                    let comment = "Temporary storage for XGK compatibility"
+                    createTypedXgxAutoVariable prjParam mnemonic initValue comment :?> XgxVar<int32>
+                    //createXgxAutoVariableT prjParam mnemonic  ($"{op} mnemonic") fnExp.FunctionArguments[0].BoxedEvaluatedValue
+                let augStatement =
+                    DuAssign(fnExp, var)
+                statements.Add augStatement
+                storages.Add var
+                DuTerminal(DuVariable var) :> IExpression
+            | _ ->
+                fnExp
+
+
+        let transformers = {TerminalHandler = snd; FunctionHandler = funTransformer}
+        let newExpression = expr.Transform(transformers)
+        let newText = newExpression.ToTextFormat()
+        newText |> tracefn "%s\n" 
+
+

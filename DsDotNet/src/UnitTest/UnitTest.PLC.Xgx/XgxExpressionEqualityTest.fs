@@ -126,7 +126,27 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool b2 = true;
             bool b3 = $nn1 > $nn2;
             bool b4 = $b1 <> $b2;
+            bool b5 = $b1 = $b2;
+            bool b6 = false;
+            $b6 := $nn1 > $nn2;
+            bool b7 = $nn1 > 3s;
+
             int16 sum = $nn1 + $nn2;
+            bool b8 = $nn1 + $nn2 > 3s;
+
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Assignment simple test`` () =
+        let storages = Storages()
+        let code = """
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 sum = $nn1 + $nn2;
+
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -144,6 +164,7 @@ type XgiExpEqualityTest() =
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``()
     [<Test>] member __.``Assignment test`` () = base.``Assignment test``()
+    [<Test>] member __.``X Assignment simple test`` () = base.``Assignment simple test``()
 
 
 type XgkExpEqualityTest() =
@@ -154,6 +175,7 @@ type XgkExpEqualityTest() =
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``() 
     [<Test>] member __.``Assignment test`` () = base.``Assignment test``()
+    [<Test>] member __.``X Assignment simple test`` () = base.``Assignment simple test``()
 
 
 

@@ -13,11 +13,11 @@ module ExpressionExtension =
     let inline unaryOp  f exp = f [exp]
     
     /// logical AND for expression 
-    let (<&&>) left right = binaryOp fLogicalAnd left right
+    let (<&&>) left right = binaryOp fbLogicalAnd left right
     /// logical OR for expression 
-    let (<||>) left right = binaryOp fLogicalOr left right
+    let (<||>) left right = binaryOp fbLogicalOr left right
     /// logical NOT for expression 
-    let (!!) exp = unaryOp fLogicalNot exp
+    let (!!) exp = unaryOp fbLogicalNot exp
     /// storage 에 expression assign 하는 statement 생성
     let (<==) storage exp  = DuAssign(exp, storage)
     /// storage 에 expression rising 값을 assign 하는 statement 생성
@@ -67,9 +67,9 @@ module ExpressionExtension =
 
 
     /// Tag<'T> (들)로부터 AND Expression<'T> 생성
-    let tryToAnd xs = tryTags2LogicalAndOrExpr fLogicalAnd xs
+    let tryToAnd xs = tryTags2LogicalAndOrExpr fbLogicalAnd xs
     /// Tag<'T> (들)로부터 OR  Expression<'T> 생성
-    let tryToOr xs  = tryTags2LogicalAndOrExpr fLogicalOr xs
+    let tryToOr xs  = tryTags2LogicalAndOrExpr fbLogicalOr xs
 
     /// Tag<'T> (들)로부터 AND Expression<'T> 생성
     let toAnd xs = tryToAnd xs |> Option.get

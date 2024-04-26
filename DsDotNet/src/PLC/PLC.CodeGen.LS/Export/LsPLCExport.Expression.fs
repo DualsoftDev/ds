@@ -38,8 +38,6 @@ module LsPLCExportExpressionModule =
         /// Expression 을 순환하면서, terminal 에 대해서는 TerminalHandler 를, function 에 대해서는 FunctionHandler 를 적용한다.
         member exp.Transform(tfs:ExpressionTransformers) : IExpression =
             let {TerminalHandler = th; FunctionHandler = fh} = tfs
-            let psedoFunction (_args: Args) : bool =
-                failwith "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
 
             let rec traverse (level:int) (exp:IExpression) =
                 match exp.Terminal, exp.FunctionName with
@@ -48,8 +46,8 @@ module LsPLCExportExpressionModule =
                     let args = exp.FunctionArguments
                     let newArgs = [for a in args do traverse (level + 1) a]
                     let newFn =
-                        //let functionBody = createBinaryExpression args[0] fn args[1]
-                        let newFn = DuFunction { FunctionBody=psedoFunction; Name=fn; Arguments=newArgs }
+                        let functionBody = getBinaryFunction fn
+                        let newFn = DuFunction { FunctionBody=functionBody; Name=fn; Arguments=newArgs }
                         fh (level, newFn)
                     newFn
                 | _ -> failwith "Invalid expression"

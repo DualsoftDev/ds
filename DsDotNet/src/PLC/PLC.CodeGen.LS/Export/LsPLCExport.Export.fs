@@ -141,12 +141,11 @@ module XgiExportModule =
                 | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as op
                                            Arguments = args
                                            Output = output }) ->
-                    let psedoFunction (_args: Args) : bool =
+                    let pseudoFunction (_args: Args) : bool =
                         failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-
                     let expr =
                         DuFunction
-                            { FunctionBody = psedoFunction
+                            { FunctionBody = pseudoFunction  // getBinaryFunction op
                               Name = op
                               Arguments = args }
 

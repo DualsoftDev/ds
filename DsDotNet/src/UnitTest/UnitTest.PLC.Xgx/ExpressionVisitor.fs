@@ -55,9 +55,11 @@ type ExpressionVisitorTest() =
             match functionExpression.FunctionName with
             | Some("+" | "-" | "*" | "/" as op) when level <> 0 ->
                 let var =
+                    let args = functionExpression.FunctionArguments
                     let mnemonic = operatorToMnemonic op
-                    let initValue = typeDefaultValue functionExpression.DataType
-                    let comment = functionExpression.FunctionArguments |> map (fun a -> a.ToText()) |> String.concat $" {op} "
+                    //let initValue = typeDefaultValue functionExpression.DataType
+                    let initValue = typeDefaultValue args[0].DataType
+                    let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
                     createTypedXgxAutoVariable prjParam mnemonic initValue comment
                 let augStatement = DuAssign(functionExpression, var)
                 statements.Add augStatement

@@ -42,16 +42,16 @@ module XgkTypeConvertorModule =
 
                 if fn.IsOneOf("!=", "=", "<>") && lexpr.DataType = typeof<bool> then
                     // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
-                    let l, r, nl, nr = lexpr, rexpr, fLogicalNot [lexpr], fLogicalNot [rexpr]
+                    let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
                     let newExp =
                         match fn with
-                        | ("!=" | "<>") -> fLogicalOr([fLogicalAnd [l; nr]; fLogicalAnd [nl; r]])
-                        | "=" -> fLogicalOr([fLogicalAnd [l; r]; fLogicalAnd [nl; nr]])
+                        | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
+                        | "=" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
                         | _ -> failwithlog "ERROR"
                     newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                 else
                     // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
-                    let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
+                    let newExp = DuFunction{FunctionBody = PseudoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
                     let createTmpStorage =
                         fun () -> 
                             match expStore with

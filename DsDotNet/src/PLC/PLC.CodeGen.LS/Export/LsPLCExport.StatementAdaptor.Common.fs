@@ -280,12 +280,10 @@ module XgxExpressionConvertorModule =
             | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/" as op) -> //when level <> 0 ->
                 let args = functionExpression.FunctionArguments
                 let var:IStorage =
-                    match expStore with
-                    | Some store -> store
-                    | _ ->
+                    expStore |> Option.defaultWith (fun () -> 
                         let initValue = functionExpression.BoxedEvaluatedValue
                         let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
-                        createTypedXgxAutoVariable prjParam "out" initValue $"{op} output"
+                        createTypedXgxAutoVariable prjParam "out" initValue comment )
 
                 expandFunctionStatements.Add
                 <| DuAugmentedPLCFunction

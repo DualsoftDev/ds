@@ -137,10 +137,10 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="11">
                             <Symbols>
-                                <Symbol Name="_t1_out" Comment="+ output" Device="" Kind="1" Type="SINT" InitValue="3" Address="" State="0"/>
-                                <Symbol Name="_t2_out" Comment="* output" Device="" Kind="1" Type="SINT" InitValue="27" Address="" State="0"/>
-                                <Symbol Name="_t3_out" Comment="+ output" Device="" Kind="1" Type="SINT" InitValue="30" Address="" State="0"/>
-                                <Symbol Name="_t4_out" Comment="&gt; output" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
+                                <Symbol Name="_t1_out" Comment="$nn1 + $nn2" Device="" Kind="1" Type="SINT" InitValue="3" Address="" State="0"/>
+                                <Symbol Name="_t2_out" Comment="$_t1_out * 9s" Device="" Kind="1" Type="SINT" InitValue="27" Address="" State="0"/>
+                                <Symbol Name="_t3_out" Comment="$_t2_out + $nn3" Device="" Kind="1" Type="SINT" InitValue="30" Address="" State="0"/>
+                                <Symbol Name="_t4_out" Comment="$_t3_out &gt; 3s" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
                                 <Symbol Name="nn0" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn2" Comment="" Device="" Kind="8" State="0"/>

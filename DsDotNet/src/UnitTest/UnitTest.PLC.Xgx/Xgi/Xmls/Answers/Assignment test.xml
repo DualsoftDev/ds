@@ -234,8 +234,8 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="19">
                             <Symbols>
-                                <Symbol Name="_t1_out" Comment="&gt; output" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="_t2_out" Comment="+ output" Device="" Kind="1" Type="SINT" InitValue="3" Address="" State="0"/>
+                                <Symbol Name="_t1_out" Comment="$nn1 &gt; $nn2" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="_t2_out" Comment="$nn1 + $nn2" Device="" Kind="1" Type="SINT" InitValue="3" Address="" State="0"/>
                                 <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b3" Comment="" Device="" Kind="8" State="0"/>

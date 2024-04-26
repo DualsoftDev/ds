@@ -1,13 +1,11 @@
 namespace T
-open Dual.UnitTest.Common.FS
-
 
 open NUnit.Framework
 
+open Dual.UnitTest.Common.FS
+open Dual.Common.Core.FS
 open Engine.Parser.FS
 open Engine.Core
-open Dual.Common.Core.FS
-open System
 open PLC.CodeGen.LS
 
 type ExpressionVisitorTest() =
@@ -53,27 +51,57 @@ type ExpressionVisitorTest() =
         let prjParam = getXgxProjectParams XGI "UnitTestProject"
 
 
-        let funTransformer (level:int, fnExp:IExpression) =
-            match fnExp.FunctionName with
-            | Some("+" | "-" | "*" | "/" as op) ->
+        let functionTransformer (level:int, functionExpression:IExpression) =
+            match functionExpression.FunctionName with
+            | Some("+" | "-" | "*" | "/" as op) when level <> 0 ->
                 let var =
                     let mnemonic = operatorToMnemonic op
-                    let initValue = 0//fnExp.BoxedEvaluatedValue
-                    let comment = "Temporary storage for XGK compatibility"
-                    createTypedXgxAutoVariable prjParam mnemonic initValue comment :?> XgxVar<int32>
-                    //createXgxAutoVariableT prjParam mnemonic  ($"{op} mnemonic") fnExp.FunctionArguments[0].BoxedEvaluatedValue
-                let augStatement =
-                    DuAssign(fnExp, var)
+                    let initValue = typeDefaultValue functionExpression.DataType
+                    let comment = functionExpression.FunctionArguments |> map (fun a -> a.ToText()) |> String.concat $" {op} "
+                    createTypedXgxAutoVariable prjParam mnemonic initValue comment
+                let augStatement = DuAssign(functionExpression, var)
                 statements.Add augStatement
                 storages.Add var
-                DuTerminal(DuVariable var) :> IExpression
+                var.ToExpression()
             | _ ->
-                fnExp
+                functionExpression
 
 
-        let transformers = {TerminalHandler = snd; FunctionHandler = funTransformer}
+        // Terminal Handler: (int*IExpression -> IExpression) type 의 handler 함수에서 snd 인 IExpression 만 반환하는 handler.  즉 기존 것 그대로 사용
+        // Function Handler: (int*IExpression -> IExpression) type 의 handler 함수에서 +, -, *, / 연산자를 만나면 새로운 변수를 생성하여 대입하는 handler
+        let transformers = {TerminalHandler = snd; FunctionHandler = functionTransformer}
         let newExpression = expr.Transform(transformers)
         let newText = newExpression.ToTextFormat()
         newText |> tracefn "%s\n" 
+        let statementsText = statements |> map (fun s -> s.ToText()) |> String.concat "\r\n"
+        tracefn "%s" statementsText
+
+        let storagesText = storages |> map (fun s -> $"{s.Name} = {s.Comment}") |> String.concat "\r\n"
+        tracefn "%s" storagesText
+
+        newText === """Function: ||
+    Function: &&
+        Storage: $cond1
+        Function: >
+            Storage: _t2_ADD
+            Literal: 2s
+    Function: >
+        Storage: _t6_SUB
+        Literal: 5s"""
+        
+        statementsText === """_t1_MUL := $nn2 * $nn3
+_t2_ADD := $nn1 + $_t1_MUL
+_t3_MUL := $nn5 * $nn6
+_t4_DIV := $_t3_MUL / $nn7
+_t5_ADD := $nn4 + $_t4_DIV
+_t6_SUB := $_t5_ADD - $nn8"""
+
+        storagesText === """_t1_MUL = $nn2 * $nn3
+_t2_ADD = $nn1 + $_t1_MUL
+_t3_MUL = $nn5 * $nn6
+_t4_DIV = $_t3_MUL / $nn7
+_t5_ADD = $nn4 + $_t4_DIV
+_t6_SUB = $_t5_ADD - $nn8"""
+        ()
 
 

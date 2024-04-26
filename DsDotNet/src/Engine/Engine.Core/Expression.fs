@@ -39,7 +39,7 @@ module ExpressionModule =
         interface ITerminal with
             member x.Variable = match x with | DuVariable variable -> Some variable | _ -> None
             member x.Literal  = match x with | DuLiteral literal   -> Some literal  | _ -> None
-        interface IExpression with
+        interface IExpression<'T> with
             member x.DataType = match x with | DuVariable v -> v.GetType() | DuLiteral l -> (l :> IExpression).DataType
             //member x.EvaluatedValue = 
             member x.BoxedEvaluatedValue = match x with | DuVariable v -> v.Value | DuLiteral l -> l.Value |> box
@@ -54,6 +54,7 @@ module ExpressionModule =
             member x.FunctionArguments = []
             member x.WithNewFunctionArguments _args = failwithlog "ERROR"
             member x.Terminal = Some x
+            member x.EvaluatedValue = x.Evaluate()
 
     type IFunctionSpec =
         abstract Name: string

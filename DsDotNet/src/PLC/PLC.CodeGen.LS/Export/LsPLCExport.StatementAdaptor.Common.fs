@@ -267,12 +267,13 @@ module XgxExpressionConvertorModule =
     ///   * 추가되는 local variable 은 newLocalStorages 에 추가한다.
     ///
     ///   * 새로 생성되는 expression 을 반환한다.
-    let internal replaceInnerArithmaticOrComparisionToXgiFunctionStatements (prjParam: XgxProjectParams)
-        { Storage = newLocalStorages
-          ExpandFunctionStatements = expandFunctionStatements
-          Exp = exp
-          ExpStore = expStore}
+    let internal replaceInnerArithmaticOrComparisionToXgiFunctionStatements
+        (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams)
       : IExpression =
+        let { Storage = newLocalStorages
+              ExpandFunctionStatements = expandFunctionStatements
+              Exp = exp
+              ExpStore = expStore} = augmentParams
         let xgiLocalVars = ResizeArray<IXgxVar>()
 
         let rec helper (exp: IExpression, expStore:IStorage option) : IExpression list =

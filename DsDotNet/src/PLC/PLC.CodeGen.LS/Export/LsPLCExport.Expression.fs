@@ -21,6 +21,7 @@ module LsPLCExportExpressionModule =
                     match terminal.Variable, terminal.Literal with
                     | Some storage, None -> $"{space}Storage: {storage.ToText()}"
                     | None, Some literal -> $"{space}Literal: {literal.ToText()}"
+                    | _ -> failwith "Invalid expression"
 
                 //| Some terminal, None-> $"{space}Terminal: { terminal.ToString() }"
                 | None, Some fn ->
@@ -29,6 +30,7 @@ module LsPLCExportExpressionModule =
                         for a in exp.FunctionArguments do
                             traverse (level + 1) a
                     ] |> String.concat "\r\n"
+                | _ -> failwith "Invalid expression"
             traverse 0 exp
 
 
@@ -42,10 +44,13 @@ module LsPLCExportExpressionModule =
             let rec traverse (level:int) (exp:IExpression) =
                 match exp.Terminal, exp.FunctionName with
                 | Some _terminal, None -> th (level, exp)
-                | None, Some fn ->                     
-                    let newArgs = [for a in exp.FunctionArguments do traverse (level + 1) a]
+                | None, Some fn ->
+                    let args = exp.FunctionArguments
+                    let newArgs = [for a in args do traverse (level + 1) a]
                     let newFn =
+                        //let functionBody = createBinaryExpression args[0] fn args[1]
                         let newFn = DuFunction { FunctionBody=psedoFunction; Name=fn; Arguments=newArgs }
                         fh (level, newFn)
                     newFn
+                | _ -> failwith "Invalid expression"
             traverse 0 exp

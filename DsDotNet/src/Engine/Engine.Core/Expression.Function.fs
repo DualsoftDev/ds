@@ -48,6 +48,31 @@ module ExpressionFunctionModule =
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
 
+    //let getBinaryFunction (op:string) =
+    //    match op with
+    //    | "+"  -> fAdd
+    //    | "-"  -> fSub
+    //    | "*"  -> fMul
+    //    | "/"  -> fDiv
+    //    | "%"  -> fMod
+
+    //    | ">"  -> fGt
+    //    | ">=" -> fGte
+    //    | "<"  -> fLt
+    //    | "<=" -> fLte
+    //    | "="  -> fEqual
+    //    | "!=" -> fNotEqual
+
+    //    | "&&" -> fLogicalAnd
+    //    | "||" -> fLogicalOr
+
+    //    | "&"  -> fBitwiseAnd
+    //    | "|"  -> fBitwiseOr
+    //    | "^"  -> fBitwiseXor
+    //    | "~"  -> fBitwiseNot
+
+    //    | _ -> failwith $"NOT Yet {op}"
+
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
         let t1 = opnd1.DataType
 

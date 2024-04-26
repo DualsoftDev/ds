@@ -335,6 +335,7 @@ module XgxExpressionConvertorModule =
                         <| DuAugmentedPLCFunction
                             { FunctionName = op
                               Arguments = newArgs
+                              OriginalExpression = exp
                               Output = out }
 
                         out.ToExpression()
@@ -375,6 +376,7 @@ module XgxExpressionConvertorModule =
             DuAugmentedPLCFunction
                 { FunctionName = op
                   Arguments = args
+                  OriginalExpression = exp
                   Output = out }
             |> augmentedStatementsStorage.Add
 
@@ -442,6 +444,7 @@ module XgxExpressionConvertorModule =
                     DuAugmentedPLCFunction
                         { FunctionName = op
                           Arguments = args
+                          OriginalExpression = exp
                           Output = out }
                     |> augmentedStatementsStorage.Add
 
@@ -507,6 +510,7 @@ module XgxExpressionConvertorModule =
                           DuAugmentedPLCFunction
                               { FunctionName = op
                                 Arguments = max
+                                OriginalExpression = exp
                                 Output = out }
                           |> expandFunctionStatements.Add
 
@@ -518,6 +522,7 @@ module XgxExpressionConvertorModule =
                 DuAugmentedPLCFunction
                     { FunctionName = op
                       Arguments = subSums @ remaining
+                      OriginalExpression = exp
                       Output = grandTotal }
                 |> expandFunctionStatements.Add
 
@@ -595,6 +600,7 @@ module XgxExpressionConvertorModule =
                         @ [ DuAugmentedPLCFunction
                                 { FunctionName = op
                                   Arguments = exp.FunctionArguments
+                                  OriginalExpression = exp
                                   Output = target } ]
                 | _ ->
                     let newExp = collectExpandedExpression prjParam defaultConvertorParams
@@ -637,6 +643,7 @@ module XgxExpressionConvertorModule =
                 [ DuAugmentedPLCFunction
                       { FunctionName = funcName
                         Arguments = [ condition; source ]
+                        OriginalExpression = condition
                         Output = target } ]
 
             | DuAugmentedPLCFunction _ -> failwithlog "ERROR"

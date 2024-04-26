@@ -206,6 +206,7 @@ module ExpressionModule =
     type FunctionParameters = {
         FunctionName:string
         Arguments:Arguments
+        OriginalExpression:IExpression
         /// Function output store target
         Output:IStorage
     }

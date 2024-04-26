@@ -49,8 +49,10 @@ module ExpressionFunctionModule =
     let [<Literal>] FunctionNameFalling = "falling"
 
     /// operator 별로, arguments 가 주어졌을 때, 이를 연산하여 IExpression 을 반환하는 함수를 반환하는 함수
-    let getBinaryFunction (op:string) : (Args -> IExpression) =
+    let getBinaryFunction (op:string) (opndType:Type) : (Args -> IExpression) =
         match op with
+        | "&&" | "||" when opndType <> typedefof<bool> -> failwith $"{op} expects bool.  Type mismatch"
+        | "+" when opndType = typeof<string> -> fConcat
         | "+"  -> fAdd
         | "-"  -> fSub
         | "*"  -> fMul
@@ -61,32 +63,30 @@ module ExpressionFunctionModule =
         | ">=" -> fGte
         | "<"  -> fLt
         | "<=" -> fLte
+        | "=" when opndType = typeof<string> -> fEqualString
         | "="  -> fEqual
-        | "!=" -> fNotEqual
-        | "<>" -> fNotEqual
+        | "!=" | "<>" -> fNotEqual
 
         | "&&" -> fLogicalAnd
         | "||" -> fLogicalOr
 
-        | "&"  -> fBitwiseAnd
-        | "|"  -> fBitwiseOr
-        | "^"  -> fBitwiseXor
-        | "~"  -> fBitwiseNot
+        | ">>" | ">>>" -> fShiftRight
+        | "<<" | "<<<" -> fShiftLeft
 
-        | _ -> failwith $"NOT Yet {op}"
+
+        | "&" | "&&&" -> fBitwiseAnd
+        | "|" | "|||" -> fBitwiseOr
+        | "^" | "^^^" -> fBitwiseXor
+        | "~" | "~~~" -> failwith "Not binary operation"
+
+        | _ -> failwith $"Undefined operator for getBinaryFunction({op})"
 
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
         let t1 = opnd1.DataType
 
-        verifyArgumentsTypes op [opnd1; opnd2]
-        match op with
-        | "&&" | "||" -> if t1 <> typedefof<bool> then failwith $"{op} expects bool.  Type mismatch"
-        | _ -> ()
-
-        let t = t1.Name
         let args = [opnd1; opnd2]
-
-        getBinaryFunction op args |> iexpr
+        verifyArgumentsTypes op args
+        getBinaryFunction op t1 args  |> iexpr
 
     let createUnaryExpression (op:string) (opnd:IExpression) : IExpression =
         (* unary operator 처리.
@@ -97,7 +97,7 @@ module ExpressionFunctionModule =
         | ("~" | "~~~" ) -> fBitwiseNot [opnd]
         | "!"  -> fbLogicalNot [opnd]
         | _ ->
-            failwith $"NOT Yet {op}"
+            failwith $"Undefined operator for createUnaryExpression({op})"
 
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
         verifyArgumentsTypes funName args
@@ -163,17 +163,14 @@ module ExpressionFunctionModule =
             | "createXgkCTU" | "createXgkCTD" | "createXgkCTUD" | "createXgkCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
-                let pseudoFunction (_args:Args):Counter = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                DuFunction { FunctionBody=pseudoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=PseudoFunction<Counter>; Name=funName; Arguments=args }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
             | "createXgkTON" | "createXgkTOF" | "createXgkCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
-                let pseudoFunction (_args:Args):Timer = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                DuFunction { FunctionBody=pseudoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=PseudoFunction<Timer>; Name=funName; Arguments=args }
         | "createTag" ->
-                let pseudoFunction (_args:Args):ITag = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                DuFunction { FunctionBody=pseudoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=PseudoFunction<ITag>; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
 

@@ -224,9 +224,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         functionDefs |> Seq.iter (fun fDef ->
             // 함수 이름 추출
             let funcName = fDef.functionName().GetText()
-
             // 함수 호출과 관련된 매개변수 추출
-            let excuteCode = fDef.functionCommand().GetText()
+            let excuteCode = fDef.functionCommand().functionCommandCode().GetText()
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
             let newFunc = CommandFunction.Create(funcName, DuCMDCode, excuteCode)
             x.TheSystem.Functions.Add(newFunc) )

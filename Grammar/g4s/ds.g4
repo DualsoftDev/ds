@@ -294,10 +294,11 @@ operatorBlock: '[' 'operators' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBR
     functionType: identifier1;
 
 
-commandBlock: '[' 'commands' ']' EQ LBRACE (functionCommandDef|functionNameOnly)* RBRACE;
-    functionCommandDef : functionName '=' LBRACE functionCommand RBRACE (SEMICOLON)?;
-    functionCommand: (argument (argument)*)?;
+commandBlock: '[' 'commands' ']' '=' '{' functionNameOnly* | functionCommandDef* '}' ;
+functionCommandDef :  functionName '=' functionCommand;
 
+functionCommand : '{' functionCommandCode '}'; 
+functionCommandCode :  .*? ; //  any character between braces
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     callListing:
@@ -307,10 +308,8 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     jobName: etcName1;
     callApiDef: (interfaceCall addressInOut|interfaceCall);
 
-
     interfaceCall: identifier12;
     interfaceLink: identifier12;
-
 
 
 funcCall: identifier1Func;

@@ -169,8 +169,16 @@ module internal ToDsTextModule =
                     if cmd.CommandType = DuCMDUnDefined
                     then 
                         yield $"{tab2}{cmd.Name}{lb}{tab}{rb};"
-                    else 
-                        yield $"{tab2}{cmd.Name} = {lb}{cmd.ToDsText()}{rb};"
+                    else
+                        let cmdArgs = cmd.ToDsText().Trim(';').Split(';')
+                        if cmdArgs.length() > 1
+                        then 
+                            yield $"{tab2}{cmd.Name} = {lb}"
+                            for arg in cmdArgs  
+                                do yield $"{tab3}{arg};"
+                            yield $"{tab2}{rb}"
+                        else 
+                            yield $"{tab2}{cmd.Name} = {lb}{cmd.ToDsText()}{rb};"
 
                 yield $"{tab}{rb}"
 

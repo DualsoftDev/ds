@@ -215,7 +215,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     override x.EnterCommandBlock(ctx: CommandBlockContext) =
         // FunctionsBlockContext에서 모든 FunctionDefContext를 추출
-        let functionDefs = ctx.functionDef()
+        let functionDefs = ctx.functionCommandDef()
         let functionNameOnlys = ctx.functionNameOnly()
         
         functionNameOnlys |> Seq.iter (fun fDef ->
@@ -226,12 +226,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let funcName = fDef.functionName().GetText()
 
             // 함수 호출과 관련된 매개변수 추출
-            let funcCall = fDef.functionCall()
-            let functionType =  funcCall.functionType().GetText() |> tryGetCommandType |> Option.get
-            let args =  fDef |> commonFuncArgsExtractor 
-
+            let excuteCode = fDef.functionCommand().GetText()
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
-            let newFunc = CommandFunction.Create(funcName, functionType, args)
+            let newFunc = CommandFunction.Create(funcName, DuCMDCode, excuteCode)
             x.TheSystem.Functions.Add(newFunc) )
 
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
@@ -247,7 +244,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let funcName = fDef.functionName().GetText()
 
             // 함수 호출과 관련된 매개변수 추출
-            let funcCall = fDef.functionCall()
+            let funcCall = fDef.functionOperator()
             let functionType =  funcCall.functionType().GetText() |> tryGetOperatorType  |> Option.get
             let args =  fDef |> commonFuncArgsExtractor 
 

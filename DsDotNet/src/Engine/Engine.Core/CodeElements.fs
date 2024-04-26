@@ -42,51 +42,27 @@ module CodeElements =
             else
                 genTargetText name varType initValue
 
-    type CommandFunctionTypes =
-        | DuCMDUnDefined
-        | DuCMDAdd
-        | DuCMDSub
-        | DuCMDMove
-
-        member x.ToText() =
-            match x  with
-            | DuCMDUnDefined -> ""
-            | DuCMDAdd -> "$add"
-            | DuCMDSub -> "$sub"
-            | DuCMDMove -> "$mov"
-
-    let tryGetCommandType (text:string) = 
-        match text.ToLower()  with
-            | "$add" -> DuCMDAdd  |> Some   
-            | "$sub" -> DuCMDSub  |> Some   
-            | "$mov" -> DuCMDMove |> Some   
-            | _ -> None
-
-    
     type OperatorFunctionTypes =
         | DuOPUnDefined
         | DuOPNot
-        | DuOPCompare
         | DuOPTimer
+        | DuOPCompare
         member x.ToText() =
             match x  with
             | DuOPUnDefined -> ""
-            | DuOPCompare -> "$c"
-            | DuOPTimer -> "$t"
-            | DuOPNot -> "$n"
+            | DuOPNot -> "not"
+            | DuOPTimer -> "time"
+            | DuOPCompare -> "if"
      
     let tryGetOperatorType (text:string) = 
         match text.ToLower()  with
-            | "$n" -> DuOPNot       |> Some   
-            | "$c" -> DuOPCompare   |> Some   
-            | "$t" -> DuOPTimer     |> Some   
+            | "not" -> DuOPNot       |> Some   
+            | "time" -> DuOPTimer     |> Some   
+            | "if" -> DuOPCompare   |> Some   
             | _ -> None
-
-    let getFunction (text:string) = 
+            
+    let getOperatorTypeNArgs (text:string) = 
         let text = text.Trim()
-        if not <| text.StartsWith "$"
-        then failwithlog "function text start keyword is '$' ex)$m 100 R100"
-        //function type parameters
         let funcType, parameters =
             let parts = text.Split(" ") |> List.ofArray
             match parts with
@@ -95,11 +71,24 @@ module CodeElements =
 
         funcType, parameters
 
+    type CommandFunctionTypes =
+        | DuCMDUnDefined
+        | DuCMDCode
+
+        member x.ToText() =
+            match x  with
+            | DuCMDUnDefined -> ""
+            | DuCMDCode -> "cmd"
+
+    let tryGetCommandType (text:string) = 
+        if text <> "" && tryGetOperatorType text = None  //operator type이 아닌 경우
+        then DuCMDCode  |> Some  
+        else None
+
 
     [<AbstractClass>]
     type Func(name:string) =
         member x.Name = name
-        member val Parameters = ResizeArray<string>()
         member x.ToDsText() =
             match x with
             | :? OperatorFunction as op -> op.ToDsText()
@@ -110,23 +99,23 @@ module CodeElements =
     and OperatorFunction(name:string) =
         inherit Func(name)
         member val OperatorType = DuOPUnDefined with get, set
+        member val Parameters = ResizeArray<string>()
         member x.ToDsText() = 
-            if x.OperatorType <> DuOPUnDefined   // ToDsText  Operator 수정 필요
+            if x.OperatorType <> DuOPUnDefined   
             then $"""{x.OperatorType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
             else ""
+
     ///Copy, Assign, ... Commands (복사, 대입 명령)
     and CommandFunction(name:string) =
         inherit Func(name)
         member val CommandType = DuCMDUnDefined with get, set
-        member x.ToDsText() = 
-            if x.CommandType <> DuCMDUnDefined
-            then $"""{x.CommandType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
-            else ""
+        member val CommandCode = "" with get, set
+        member x.ToDsText() = x.CommandCode
 
     [<Extension>]
     type SystemFuncExt =
         [<Extension>] 
-        static member GetDelayTime (x:Func) =
+        static member GetDelayTime (x:OperatorFunction) =
             let presetTime = x.Parameters.Head().ToLower()
             let timetype = Regex.Replace(presetTime, @"\d", "");//문자 추출
             let preset   = Regex.Replace(presetTime, @"\D", "");//숫자 추출
@@ -142,5 +131,5 @@ module CodeElements =
 
 
         [<Extension>] 
-        static member GetRingCount (x:Func) =
+        static member GetRingCount (x:OperatorFunction) =
             x.Parameters |> Seq.head |> CountUnitType.Parse

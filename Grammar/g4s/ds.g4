@@ -284,15 +284,19 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     varType: IDENTIFIER1;
 
 
-commandBlock: '[' 'commands' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
 
-operatorBlock: '[' 'operators' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
 
-functionDef: functionName EQ functionCall SEMICOLON;
 functionNameOnly: identifier1 SEMICOLON;
-functionName: identifier1;
-functionCall: functionType (argument (argument)*)?;
-functionType: '$'identifier1;
+operatorBlock: '[' 'operators' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
+    functionDef: functionName EQ functionOperator SEMICOLON;
+    functionName: identifier1;
+    functionOperator: functionType (argument (argument)*)?;
+    functionType: identifier1;
+
+
+commandBlock: '[' 'commands' ']' EQ LBRACE (functionCommandDef|functionNameOnly)* RBRACE;
+    functionCommandDef : functionName '=' LBRACE functionCommand RBRACE (SEMICOLON)?;
+    functionCommand: (argument (argument)*)?;
 
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;

@@ -168,9 +168,9 @@ module internal ToDsTextModule =
                 for cmd in commands do
                     if cmd.CommandType = DuCMDUnDefined
                     then 
-                        yield $"{tab2}{cmd.Name};"
+                        yield $"{tab2}{cmd.Name}{lb}{tab}{rb};"
                     else 
-                        yield $"{tab2}{cmd.Name} = {cmd.ToDsText()};"
+                        yield $"{tab2}{cmd.Name} = {lb}{cmd.ToDsText()}{rb};"
 
                 yield $"{tab}{rb}"
 

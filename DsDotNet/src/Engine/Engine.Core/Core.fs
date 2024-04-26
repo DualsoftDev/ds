@@ -484,10 +484,10 @@ module CoreModule =
             op   
             
     type CommandFunction with
-        static member Create(name:string, funcType, (parameters:string array)) =
+        static member Create(name:string, funcType, (excuteCode:string)) =
             let cmd = CommandFunction(name)
             cmd.CommandType <- funcType 
-            cmd.Parameters.AddRange(parameters)
+            cmd.CommandCode <- excuteCode
             cmd 
 
     type RealExF = RealOtherFlow

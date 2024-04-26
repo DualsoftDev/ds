@@ -66,76 +66,82 @@ module ImportIOTable =
 
         try
 
-            let handleFunctionCreationOrUpdate (sys:DsSystem) funcName funcTypeText parms =
+            let handleFunctionCreationOrUpdate (sys:DsSystem) funcName funcBodyText  =
                 match sys.Functions.TryFind(fun f -> f.Name = funcName) with
                 | Some func ->
                     match func with
                     | :? OperatorFunction as op when op.OperatorType = DuOPUnDefined ->
-                        match tryGetOperatorType(funcTypeText) with
+                        match tryGetOperatorType(funcBodyText) with
                         | Some opType -> 
+                            let _, parms= getOperatorTypeNArgs (funcBodyText)
                             op.OperatorType <- opType
                             op.Parameters.AddRange(parms)
                             Some (op :> Func)
-                        | None -> failWithLog $"error {funcName} {funcTypeText} is not operatorType"
+                        | None -> failWithLog $"error {funcName} {funcBodyText} is not operatorType"
 
                     | :? CommandFunction as cmd when cmd.CommandType = DuCMDUnDefined ->
-                        match tryGetCommandType(funcTypeText) with
+                        match tryGetCommandType(funcBodyText) with
                         | Some cmdType -> 
                             cmd.CommandType <- cmdType
-                            cmd.Parameters.AddRange(parms)
+                            cmd.CommandCode <- funcBodyText
                             Some (cmd :> Func)
-                        | None -> failWithLog $"error {funcName} {funcTypeText} is not commandType"
+                        | None -> failWithLog $"error {funcName} {funcBodyText} is not commandType"
 
                     | _ -> Some func
 
                 | None ->
-                    match tryGetOperatorType(funcTypeText), tryGetCommandType(funcTypeText) with
-                    | Some opType, Some cmdType -> failWithLog  $"error {funcTypeText} is multi functionType"
+                    match tryGetOperatorType(funcBodyText), tryGetCommandType(funcBodyText) with
+                    | Some opType, Some cmdType -> failWithLog  $"error {funcBodyText} is multi functionType"
                     | Some opType, None -> 
+                        let _, parms= getOperatorTypeNArgs (funcBodyText)
                         let func = OperatorFunction.Create(funcName, opType, parms)
                         sys.Functions.Add func |> ignore
                         Some (func)
                     | None,  Some cmdType -> 
-                        let func = CommandFunction.Create(funcName, cmdType, parms)
+                        let func = CommandFunction.Create(funcName, cmdType, funcBodyText)
                         sys.Functions.Add func |> ignore
                         Some (func)
                     | _ -> None
             
-            let getFunctionNUpdate (callName, funcDefine , funcText, tableIO: Data.DataTable, isJob: bool, page) =
-                if ((trimSpace funcText) = "" || funcText = TextSkip || funcText = TextFuncNotUsed)
+            let getFunctionNUpdate (callName, funcDefine , funcBodyText, tableIO: Data.DataTable, isJob: bool, page) =
+                if ((trimSpace funcBodyText) = "" || funcBodyText = TextSkip || funcBodyText = TextFuncNotUsed)
                 then
                     None
                 else 
-                    if funcText.Contains(';') then 
-                        Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{callName}", page, 0u)
+                    let funcTypeText, parms = 
+                        match tryGetOperatorType funcBodyText with
+                        | Some _ -> 
+                            if funcBodyText.Contains(';') 
+                            then 
+                                Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{callName}", page, 0u)
+                            
+                            getOperatorTypeNArgs (funcBodyText)
+                        | None ->  funcDefine, [|funcBodyText|]
 
-                    let funcTypeText, parms = getFunction (funcText)
                     if (not <| isJob) && funcTypeText <> "$n" then
                         Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcTypeText}", page, 0u)
                
-                    let paras =
-                        if parms.any()
-                        then 
-                            String.concat "" [
-                                        for param in parms do
-                                            $"_{param}";
-                                    ]
-                        else ""
+  
 
                     let funcName =
                         if funcDefine = ""
                         then 
-                            match tryGetOperatorType(funcTypeText), tryGetCommandType(funcTypeText) with
-                            | Some op, None  -> 
+                            match tryGetOperatorType(funcTypeText) with
+                            | Some op  -> 
+                                let paras =
+                                    if parms.any()
+                                    then 
+                                        String.concat "" [
+                                                    for param in parms do
+                                                        $"_{param}";
+                                                ]
+                                    else ""
                                 $"{op.ToText().TrimStart('$')}{paras}" 
-                            | None, Some cmd -> 
-                                $"{cmd.ToText().TrimStart('$')}{paras}" 
                             | _ -> failwithf $"error {funcTypeText} is not functionType"
                             
                         else funcDefine
 
-                    handleFunctionCreationOrUpdate sys funcName funcTypeText parms
-
+                    handleFunctionCreationOrUpdate sys funcName funcBodyText
                             
             let dicDev =
                 sys.Jobs
@@ -148,7 +154,6 @@ module ImportIOTable =
                 |> Seq.map (fun j -> j.DeviceDefs , j)
                 |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiName, j))
                 |> dict
-
 
             let getOperatorFuntion (f:Func) =
                 if  not(f :? OperatorFunction)
@@ -167,10 +172,8 @@ module ImportIOTable =
                 let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim() |>emptyToSkipAddress
                 let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
 
-
                 dev.InAddress  <-  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget)
                 dev.OutAddress <-  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
-
 
                 let job = dicJob[devName]
                 

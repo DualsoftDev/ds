@@ -74,8 +74,6 @@ type VertexManager with
         [
             let set = v.PSFunc.Expr
             match coin.CallCommandType with 
-            | DuCMDAdd -> yield set --+ (v.PSFunc, getFuncName())
-            | DuCMDSub -> yield set --- (v.PSFunc, getFuncName())
-            | DuCMDMove -> yield set --> (v.PSFunc, getFuncName())
+            | DuCMDCode -> yield set --> (v.PSFunc, getFuncName())
             | _-> failwithlog $"{v.Name} 함수 정의가 없습니다."
         ]

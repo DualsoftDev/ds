@@ -65,6 +65,8 @@ type ExpressionVisitorTest() =
                 var.ToExpression()
             | _ ->
                 functionExpression
+        let oldText = expr.ToTextFormat()
+        tracefn "%s" oldText
 
 
         // Terminal Handler: (int*IExpression -> IExpression) type 의 handler 함수에서 snd 인 IExpression 만 반환하는 handler.  즉 기존 것 그대로 사용
@@ -78,6 +80,29 @@ type ExpressionVisitorTest() =
 
         let storagesText = storages |> map (fun s -> $"{s.Name} = {s.Comment}") |> String.concat "\r\n"
         tracefn "%s" storagesText
+
+
+        oldText === """Function: ||
+    Function: &&
+        Storage: $cond1
+        Function: >
+            Function: +
+                Storage: $nn1
+                Function: *
+                    Storage: $nn2
+                    Storage: $nn3
+            Literal: 2s
+    Function: >
+        Function: -
+            Function: +
+                Storage: $nn4
+                Function: /
+                    Function: *
+                        Storage: $nn5
+                        Storage: $nn6
+                    Storage: $nn7
+            Storage: $nn8
+        Literal: 5s"""
 
         newText === """Function: ||
     Function: &&

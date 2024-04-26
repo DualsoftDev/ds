@@ -229,7 +229,7 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
-        | CALLOPFunc 
+        | CALLOPFunc -> ()
         | CALLCMDFunc 
         | IF_DEVICE
         | IF_LINK
@@ -264,6 +264,8 @@ module PPTObjectModule =
 
         let mutable name = ""
         let mutable ifName = ""
+        let mutable opFunc = ""
+        let mutable cmdFunc = ""
         let mutable ifTXs = HashSet<string>()
         let mutable ifRXs = HashSet<string>()
         let mutable nodeType: NodeType = NodeType.REAL
@@ -377,6 +379,9 @@ module PPTObjectModule =
                 let callName =  GetHeadBracketRemoveName(shape.InnerText)
                 name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimNewLine
 
+            elif nodeType = CALLOPFunc && shape.InnerText.Contains(".")
+            then
+                name <- shape.InnerText.Replace(".", "_")
             else 
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
 
@@ -419,8 +424,13 @@ module PPTObjectModule =
 
             | REALExF
             | LAYOUT
-            | CALLOPFunc 
+            | CALLOPFunc -> 
+                if shape.InnerText.Contains(".")
+                then
+                    opFunc <- $"if {shape.InnerText} == true"
             | CALLCMDFunc 
+                -> 
+                    cmdFunc <- "non"
             | DUMMY -> ()
 
         member x.PageNum = iPage
@@ -431,6 +441,8 @@ module PPTObjectModule =
         member x.RealFinished = shape.IsUnderlined()
 
         member x.Safeties = safeties
+        member x.OperatorFunc = opFunc
+        member x.CommandFunc = cmdFunc
         member x.IfName = ifName
         member x.IfTXs = ifTXs
         member x.IfRXs = ifRXs

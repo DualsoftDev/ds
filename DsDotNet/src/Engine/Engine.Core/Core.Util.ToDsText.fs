@@ -168,7 +168,7 @@ module internal ToDsTextModule =
                 for cmd in commands do
                     if cmd.CommandType = DuCMDUnDefined
                     then 
-                        yield $"{tab2}{cmd.Name}{lb}{tab}{rb};"
+                        yield $"{tab2}{cmd.Name};"
                     else
                         let cmdArgs = cmd.ToDsText().Trim(';').Split(';')
                         if cmdArgs.length() > 1

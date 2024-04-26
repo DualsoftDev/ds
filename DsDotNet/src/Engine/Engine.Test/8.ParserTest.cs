@@ -135,18 +135,18 @@ namespace Engine
     [flow] f1 = {
         Work1 > Work2;
     }
-    [functions] = {
-        n = $n;
+    [operators] = {
+        opNot = not;
     }
     [buttons] = {
         [a] = {
-            AutoSelect(_, -) = { $n; f1; }
+            AutoSelect(_, -) = { $opNot; f1; }
         }
         [m] = {
-            ManualSelect(_, -) = { $n; f1; }
+            ManualSelect(_, -) = { $opNot; f1; }
         }
         [d] = {
-            DrivePushBtn(_, -) = { $n; f1; }
+            DrivePushBtn(_, -) = { $opNot; f1; }
         }
         [e] = {
             EmergencyBtn(_, -) = { f1; }
@@ -167,16 +167,16 @@ namespace Engine
     [flow] f1 = {
         Work1 > Work2;
     }
-    [functions] = {
-        n = $n;
+    [operators] = {
+        opNot = not;
     }
 
     [lamps] = {
         [a] = {
-            AutoModeLamp(-, _) = { $n; }
+            AutoModeLamp(-, _) = { $opNot; }
         }
         [m] = {
-            ManualModeLamp(-, _) = { $n; }
+            ManualModeLamp(-, _) = { $opNot; }
         }
         [d] = {
             DriveLamp(-, _) = {  }
@@ -188,7 +188,7 @@ namespace Engine
             ReadyStateLamp(-, _) = {  }
         }
         [i] = {
-            IdleModeLamp(-, _) = { $n; }
+            IdleModeLamp(-, _) = { $opNot; }
         }
         [o] = {
             OriginStateLamp(-, _) = {  }
@@ -202,14 +202,14 @@ namespace Engine
     [flow] f1 = {
         Work1 > Work2;
     }
-    [functions] = {
-        n = $n;
+    [operators] = {
+        opNot = not;
     }
 
 	[conditions] = {
         [r] = {
-            f1_Condition1(_, _) = { $n; f1; }
-            f1_Condition2(_, _) = { $n; f1; }
+            f1_Condition1(_, _) = { $opNot; f1; }
+            f1_Condition2(_, _) = { $opNot; f1; }
         }
     }
 

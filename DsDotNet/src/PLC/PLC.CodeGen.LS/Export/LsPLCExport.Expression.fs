@@ -7,7 +7,7 @@ open Engine.Core
 module LsPLCExportExpressionModule =
     type ExpressionTransformers = {
         TerminalHandler: int*IExpression -> IExpression
-        FunctionHandler: int*IExpression -> IExpression
+        FunctionHandler: int*IExpression*IStorage option -> IExpression     // (level, expression, resultStore) -> new expression
     }
 
     type IExpression with
@@ -36,18 +36,18 @@ module LsPLCExportExpressionModule =
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.
         /// Expression 을 순환하면서, terminal 에 대해서는 TerminalHandler 를, function 에 대해서는 FunctionHandler 를 적용한다.
-        member exp.Transform(tfs:ExpressionTransformers) : IExpression =
+        member exp.Transform(tfs:ExpressionTransformers, resultStore:IStorage option) : IExpression =
             let {TerminalHandler = th; FunctionHandler = fh} = tfs
 
-            let rec traverse (level:int) (exp:IExpression) =
+            let rec traverse (level:int) (exp:IExpression) (resultStore:IStorage option) =
                 match exp.Terminal, exp.FunctionName with
                 | Some _terminal, None -> th (level, exp)
                 | None, Some _fn ->
                     let args = exp.FunctionArguments
-                    let newArgs = [for a in args do traverse (level + 1) a]
+                    let newArgs = [for a in args do traverse (level + 1) a None]
                     let newFn =
                         let f = exp.WithNewFunctionArguments newArgs
-                        fh (level, f)
+                        fh (level, f, resultStore)
                     newFn
                 | _ -> failwith "Invalid expression"
-            traverse 0 exp
+            traverse 0 exp resultStore

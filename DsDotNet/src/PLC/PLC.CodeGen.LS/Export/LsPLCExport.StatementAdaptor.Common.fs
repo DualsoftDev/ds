@@ -275,79 +275,34 @@ module XgxExpressionConvertorModule =
               Exp = exp
               ExpStore = expStore} = augmentParams
 
-        //// [pseudoFunction]
-        //let functionTransformer (level:int, functionExpression:IExpression) =
-        //    match functionExpression.FunctionName with
-        //    | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/" as op) when level <> 0 ->
-        //        let args = functionExpression.FunctionArguments
-        //        let var:IXgxVar =
-        //            match expStore with
-        //            | Some store -> store :?> IXgxVar
-        //            | _ ->
-        //                let initValue = functionExpression.BoxedEvaluatedValue
-        //                let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
-        //                createTypedXgxAutoVariable prjParam "out" initValue $"{op} output"
+        let functionTransformer (level:int, functionExpression:IExpression, expStore:IStorage option) =
+            match functionExpression.FunctionName with
+            | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/" as op) -> //when level <> 0 ->
+                let args = functionExpression.FunctionArguments
+                let var:IStorage =
+                    match expStore with
+                    | Some store -> store
+                    | _ ->
+                        let initValue = functionExpression.BoxedEvaluatedValue
+                        let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
+                        createTypedXgxAutoVariable prjParam "out" initValue $"{op} output"
 
-        //        expandFunctionStatements.Add
-        //        <| DuAugmentedPLCFunction
-        //            {   FunctionName = op
-        //                Arguments = args
-        //                OriginalExpression = functionExpression
-        //                Output = var }
+                expandFunctionStatements.Add
+                <| DuAugmentedPLCFunction
+                    {   FunctionName = op
+                        Arguments = args
+                        OriginalExpression = functionExpression
+                        Output = var }
 
-        //        //let augStatement = DuAssign(functionExpression, var)
-        //        //expandFunctionStatements.Add augStatement
-        //        newLocalStorages.Add var
-        //        var.ToExpression()
-        //    | _ ->
-        //        functionExpression
+                newLocalStorages.Add var
+                var.ToExpression()
+            | _ ->
+                functionExpression
 
-        //let transformers = {TerminalHandler = snd; FunctionHandler = functionTransformer}
-        //let newExpression = exp.Transform(transformers)
-        //newExpression
+        let transformers = {TerminalHandler = snd; FunctionHandler = functionTransformer}
+        let newExpression = exp.Transform(transformers, expStore)
+        newExpression
 
-
-
-
-
-        let xgiLocalVars = ResizeArray<IXgxVar>()
-
-        let rec helper (exp: IExpression, expStore:IStorage option) : IExpression list =
-            [   match exp.FunctionName with
-                | Some funcName ->
-                    let newArgs = exp.FunctionArguments |> bind (fun ex -> helper (ex, None))
-
-                    match funcName with
-                    | ("&&" | "||" | "!") -> exp.WithNewFunctionArguments newArgs
-                    | (">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/") as op ->
-                        if prjParam.TargetType <> XGI then 
-                            failwithlog $"Inline function only supported on XGI"
-
-                        let out =
-                            match expStore with
-                            | Some store -> store
-                            | _ ->
-                                let out2 = createTypedXgxAutoVariable prjParam "out" exp.BoxedEvaluatedValue $"{op} output"
-                                xgiLocalVars.Add out2
-                                out2
-
-                        expandFunctionStatements.Add
-                        <| DuAugmentedPLCFunction
-                            { FunctionName = op
-                              Arguments = newArgs
-                              OriginalExpression = exp
-                              Output = out }
-
-                        out.ToExpression()
-
-                    | (FunctionNameRising | FunctionNameFalling) -> exp
-                    | _ -> failwithlog "ERROR"
-                | _ -> exp
-            ]
-
-        let newExp = helper (exp, expStore) |> List.exactlyOne
-        xgiLocalVars.Cast<IStorage>() |> newLocalStorages.AddRange // 위의 helper 수행 이후가 아니면, xgiLocalVars 가 채워지지 않는다.
-        newExp
 
     let rec internal binaryToNary
         (prjParam: XgxProjectParams)

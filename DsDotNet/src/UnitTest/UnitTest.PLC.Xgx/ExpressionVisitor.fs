@@ -32,8 +32,8 @@ type ExpressionVisitorTest() =
         oldText |> tracefn "%s\n" 
 
         // (int*IExpression -> IExpression) type 의 handler 함수에서 snd 인 IExpression 만 반환하는 handler
-        let transformers = {TerminalHandler = snd; FunctionHandler = snd}
-        let newExpression = expr.Transform(transformers)
+        let transformers = {TerminalHandler = snd; FunctionHandler = Tuple.second}
+        let newExpression = expr.Transform(transformers, None)
         let newText = newExpression.ToTextFormat()
         newText |> tracefn "%s\n" 
 
@@ -51,7 +51,7 @@ type ExpressionVisitorTest() =
         let prjParam = getXgxProjectParams XGI "UnitTestProject"
 
 
-        let functionTransformer (level:int, functionExpression:IExpression) =
+        let functionTransformer (level:int, functionExpression:IExpression, expStore:IStorage option) =
             match functionExpression.FunctionName with
             | Some("+" | "-" | "*" | "/" as op) when level <> 0 ->
                 let var =
@@ -74,7 +74,7 @@ type ExpressionVisitorTest() =
         // Terminal Handler: (int*IExpression -> IExpression) type 의 handler 함수에서 snd 인 IExpression 만 반환하는 handler.  즉 기존 것 그대로 사용
         // Function Handler: (int*IExpression -> IExpression) type 의 handler 함수에서 +, -, *, / 연산자를 만나면 새로운 변수를 생성하여 대입하는 handler
         let transformers = {TerminalHandler = snd; FunctionHandler = functionTransformer}
-        let newExpression = expr.Transform(transformers)
+        let newExpression = expr.Transform(transformers, None)
         let newText = newExpression.ToTextFormat()
         newText |> tracefn "%s\n" 
         let statementsText = statements |> map (fun s -> s.ToText()) |> String.concat "\r\n"

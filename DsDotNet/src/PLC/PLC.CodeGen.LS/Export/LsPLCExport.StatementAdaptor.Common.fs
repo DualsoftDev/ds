@@ -541,25 +541,12 @@ module XgxExpressionConvertorModule =
                     for arg in exp.FunctionArguments do
                         zipAndExpression prjParam {augmentParams with Exp = arg } true
                 ]
-                // xxx todo [pseudoFunction]
-                //let fn = exp.FunctionName.Value
-                //let functionBody = getBinaryFunction fn
-                //DuFunction { FunctionBody = functionBody;  Name = fn; Arguments = args }
 
-                let pseudoFunction (_args: Args) : bool =
-                    failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                DuFunction { FunctionBody = pseudoFunction;  Name = exp.FunctionName.Value; Arguments = args }
+                exp.WithNewFunctionArguments args
 
             else
                 let allowCallback = false
                 zipAndExpression prjParam {augmentParams with Exp = exp } allowCallback
-
-
-            //match exp.FunctionName with
-            //| Some "&&" ->
-            //    zipAndExpression prjParam {augmentParams with Exp = exp }
-            //| _ ->
-            //    exp
         else
             exp
 

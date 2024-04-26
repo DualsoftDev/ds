@@ -42,13 +42,12 @@ module LsPLCExportExpressionModule =
             let rec traverse (level:int) (exp:IExpression) =
                 match exp.Terminal, exp.FunctionName with
                 | Some _terminal, None -> th (level, exp)
-                | None, Some fn ->
+                | None, Some _fn ->
                     let args = exp.FunctionArguments
                     let newArgs = [for a in args do traverse (level + 1) a]
                     let newFn =
-                        let functionBody = getBinaryFunction fn
-                        let newFn = DuFunction { FunctionBody=functionBody; Name=fn; Arguments=newArgs }
-                        fh (level, newFn)
+                        let f = exp.WithNewFunctionArguments newArgs
+                        fh (level, f)
                     newFn
                 | _ -> failwith "Invalid expression"
             traverse 0 exp

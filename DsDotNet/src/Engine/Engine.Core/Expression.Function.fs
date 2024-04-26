@@ -48,7 +48,6 @@ module ExpressionFunctionModule =
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
 
-    // [pseudoFunction]
     /// operator 별로, arguments 가 주어졌을 때, 이를 연산하여 IExpression 을 반환하는 함수를 반환하는 함수
     let getBinaryFunction (op:string) : (Args -> IExpression) =
         match op with

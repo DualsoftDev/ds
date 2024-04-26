@@ -279,20 +279,20 @@ module XgxExpressionConvertorModule =
         //let functionTransformer (level:int, functionExpression:IExpression) =
         //    match functionExpression.FunctionName with
         //    | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/" as op) when level <> 0 ->
-        //        if op = "*" then
-        //            ()
         //        let args = functionExpression.FunctionArguments
-        //        let var =
-        //            let mnemonic = operatorToMnemonic op
-        //            //let initValue = typeDefaultValue functionExpression.DataType    // todo: functionExpression.BoxedEvaluatedValue 는 안되고... evaluator 를 구현해야 함
-        //            let initValue = typeDefaultValue args[0].DataType
-        //            let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
-        //            createTypedXgxAutoVariable prjParam "out" initValue $"{op} output"
+        //        let var:IXgxVar =
+        //            match expStore with
+        //            | Some store -> store :?> IXgxVar
+        //            | _ ->
+        //                let initValue = functionExpression.BoxedEvaluatedValue
+        //                let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
+        //                createTypedXgxAutoVariable prjParam "out" initValue $"{op} output"
 
         //        expandFunctionStatements.Add
         //        <| DuAugmentedPLCFunction
         //            {   FunctionName = op
         //                Arguments = args
+        //                OriginalExpression = functionExpression
         //                Output = var }
 
         //        //let augStatement = DuAssign(functionExpression, var)

@@ -18,8 +18,8 @@
                 <GlobalVariable Version="Ver 1.0" Count="3">
                     <Symbols>
                         <Symbol Name="cond" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="src" Comment="" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="tgt" Comment="" Device="" Kind="6" Type="SINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="src" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="tgt" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

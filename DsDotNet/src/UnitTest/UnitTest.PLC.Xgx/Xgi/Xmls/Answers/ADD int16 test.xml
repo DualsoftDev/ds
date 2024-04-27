@@ -17,14 +17,14 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="8">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="SINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="SINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="sum2" Comment="" Device="" Kind="6" Type="SINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="unn1" Comment="" Device="" Kind="6" Type="USINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="unn2" Comment="" Device="" Kind="6" Type="USINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="usum" Comment="" Device="" Kind="6" Type="USINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="usum2" Comment="" Device="" Kind="6" Type="USINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="sum2" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="unn1" Comment="" Device="" Kind="6" Type="UINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="unn2" Comment="" Device="" Kind="6" Type="UINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="usum" Comment="" Device="" Kind="6" Type="UINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="usum2" Comment="" Device="" Kind="6" Type="UINT" InitValue="3" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -56,7 +56,7 @@
                                     <Element ElementType="6" Coordinate="2049">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: ADD2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1690&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000020, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: ADD2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1686&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040, &#xA;"/>
                                     <Element ElementType="70" Coordinate="3073">
                                         nn1
                                     </Element>
@@ -93,7 +93,7 @@
                                     <Element ElementType="6" Coordinate="11265">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="11268" Param="FNAME: ADD2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1694&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000200, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="11268" Param="FNAME: ADD2_UINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1692&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200400, , 0&#xA;VAR_IN: IN2, 0x00200400, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000400, &#xA;"/>
                                     <Element ElementType="70" Coordinate="12289">
                                         unn1
                                     </Element>

@@ -17,17 +17,17 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="173">
                     <Symbols>
-                        <Symbol Name="ab0" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB210" State="0"/>
-                        <Symbol Name="ab1" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB211" State="0"/>
-                        <Symbol Name="ab10" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB220" State="0"/>
-                        <Symbol Name="ab2" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB212" State="0"/>
-                        <Symbol Name="ab3" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB213" State="0"/>
-                        <Symbol Name="ab4" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB214" State="0"/>
-                        <Symbol Name="ab5" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB215" State="0"/>
-                        <Symbol Name="ab6" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB216" State="0"/>
-                        <Symbol Name="ab7" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB217" State="0"/>
-                        <Symbol Name="ab8" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB218" State="0"/>
-                        <Symbol Name="ab9" Comment="" Device="" Kind="6" Type="BYTE" InitValue="0" Address="%MB219" State="0"/>
+                        <Symbol Name="ab0" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB210" State="0"/>
+                        <Symbol Name="ab1" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB211" State="0"/>
+                        <Symbol Name="ab10" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB220" State="0"/>
+                        <Symbol Name="ab2" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB212" State="0"/>
+                        <Symbol Name="ab3" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB213" State="0"/>
+                        <Symbol Name="ab4" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB214" State="0"/>
+                        <Symbol Name="ab5" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB215" State="0"/>
+                        <Symbol Name="ab6" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB216" State="0"/>
+                        <Symbol Name="ab7" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB217" State="0"/>
+                        <Symbol Name="ab8" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB218" State="0"/>
+                        <Symbol Name="ab9" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MB219" State="0"/>
                         <Symbol Name="ad0" Comment="" Device="" Kind="6" Type="UDINT" InitValue="0" Address="%MD36" State="0"/>
                         <Symbol Name="ad1" Comment="" Device="" Kind="6" Type="UDINT" InitValue="0" Address="%MD37" State="0"/>
                         <Symbol Name="ad10" Comment="" Device="" Kind="6" Type="UDINT" InitValue="0" Address="%MD46" State="0"/>
@@ -50,17 +50,17 @@
                         <Symbol Name="al7" Comment="" Device="" Kind="6" Type="ULINT" InitValue="0" Address="%ML12" State="0"/>
                         <Symbol Name="al8" Comment="" Device="" Kind="6" Type="ULINT" InitValue="0" Address="%ML13" State="0"/>
                         <Symbol Name="al9" Comment="" Device="" Kind="6" Type="ULINT" InitValue="0" Address="%ML14" State="0"/>
-                        <Symbol Name="aw0" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW94" State="0"/>
-                        <Symbol Name="aw1" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW95" State="0"/>
-                        <Symbol Name="aw10" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW104" State="0"/>
-                        <Symbol Name="aw2" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW96" State="0"/>
-                        <Symbol Name="aw3" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW97" State="0"/>
-                        <Symbol Name="aw4" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW98" State="0"/>
-                        <Symbol Name="aw5" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW99" State="0"/>
-                        <Symbol Name="aw6" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW100" State="0"/>
-                        <Symbol Name="aw7" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW101" State="0"/>
-                        <Symbol Name="aw8" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW102" State="0"/>
-                        <Symbol Name="aw9" Comment="" Device="" Kind="6" Type="USINT" InitValue="0" Address="%MW103" State="0"/>
+                        <Symbol Name="aw0" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW94" State="0"/>
+                        <Symbol Name="aw1" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW95" State="0"/>
+                        <Symbol Name="aw10" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW104" State="0"/>
+                        <Symbol Name="aw2" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW96" State="0"/>
+                        <Symbol Name="aw3" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW97" State="0"/>
+                        <Symbol Name="aw4" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW98" State="0"/>
+                        <Symbol Name="aw5" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW99" State="0"/>
+                        <Symbol Name="aw6" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW100" State="0"/>
+                        <Symbol Name="aw7" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW101" State="0"/>
+                        <Symbol Name="aw8" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW102" State="0"/>
+                        <Symbol Name="aw9" Comment="" Device="" Kind="6" Type="UINT" InitValue="0" Address="%MW103" State="0"/>
                         <Symbol Name="ax0" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="%MX1768" State="0"/>
                         <Symbol Name="ax1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="%MX1769" State="0"/>
                         <Symbol Name="ax10" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="%MX1778" State="0"/>

@@ -18,16 +18,16 @@
                 <GlobalVariable Version="Ver 1.0" Count="11">
                     <Symbols>
                         <Symbol Name="cond1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="SINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="" Device="" Kind="6" Type="SINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="nn4" Comment="" Device="" Kind="6" Type="SINT" InitValue="4" Address="" State="0"/>
-                        <Symbol Name="nn5" Comment="" Device="" Kind="6" Type="SINT" InitValue="5" Address="" State="0"/>
-                        <Symbol Name="nn6" Comment="" Device="" Kind="6" Type="SINT" InitValue="6" Address="" State="0"/>
-                        <Symbol Name="nn7" Comment="" Device="" Kind="6" Type="SINT" InitValue="7" Address="" State="0"/>
-                        <Symbol Name="nn8" Comment="" Device="" Kind="6" Type="SINT" InitValue="8" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn3" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn4" Comment="" Device="" Kind="6" Type="INT" InitValue="4" Address="" State="0"/>
+                        <Symbol Name="nn5" Comment="" Device="" Kind="6" Type="INT" InitValue="5" Address="" State="0"/>
+                        <Symbol Name="nn6" Comment="" Device="" Kind="6" Type="INT" InitValue="6" Address="" State="0"/>
+                        <Symbol Name="nn7" Comment="" Device="" Kind="6" Type="INT" InitValue="7" Address="" State="0"/>
+                        <Symbol Name="nn8" Comment="" Device="" Kind="6" Type="INT" InitValue="8" Address="" State="0"/>
                         <Symbol Name="result" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="SINT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="INT" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -59,7 +59,7 @@
                                     <Element ElementType="6" Coordinate="2049">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: MUL2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2072&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000020, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: MUL2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2068&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040, &#xA;"/>
                                     <Element ElementType="70" Coordinate="3073">
                                         nn2
                                     </Element>
@@ -74,7 +74,7 @@
                                     <Element ElementType="6" Coordinate="6145">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="6148" Param="FNAME: ADD2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1690&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000020, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="6148" Param="FNAME: ADD2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1686&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040, &#xA;"/>
                                     <Element ElementType="70" Coordinate="7169">
                                         nn1
                                     </Element>
@@ -89,7 +89,7 @@
                                     <Element ElementType="6" Coordinate="10241">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="10244" Param="FNAME: GT2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1275&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="10244" Param="FNAME: GT2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1270&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="11265">
                                         _t2_out
                                     </Element>
@@ -104,7 +104,7 @@
                                     <Element ElementType="6" Coordinate="14337">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="14340" Param="FNAME: MUL2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2072&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000020, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="14340" Param="FNAME: MUL2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2068&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040, &#xA;"/>
                                     <Element ElementType="70" Coordinate="15361">
                                         nn5
                                     </Element>
@@ -134,7 +134,7 @@
                                     <Element ElementType="6" Coordinate="22529">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="22532" Param="FNAME: ADD2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1690&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000020, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="22532" Param="FNAME: ADD2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1686&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040, &#xA;"/>
                                     <Element ElementType="70" Coordinate="23553">
                                         nn4
                                     </Element>
@@ -164,7 +164,7 @@
                                     <Element ElementType="6" Coordinate="30721">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="30724" Param="FNAME: GT2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1275&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="30724" Param="FNAME: GT2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1270&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="31745">
                                         _t7_out
                                     </Element>
@@ -206,13 +206,13 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="19">
                             <Symbols>
-                                <Symbol Name="_t1_out" Comment="$nn2 * $nn3" Device="" Kind="1" Type="SINT" InitValue="6" Address="" State="0"/>
-                                <Symbol Name="_t2_out" Comment="$nn1 + $_t1_out" Device="" Kind="1" Type="SINT" InitValue="7" Address="" State="0"/>
+                                <Symbol Name="_t1_out" Comment="$nn2 * $nn3" Device="" Kind="1" Type="INT" InitValue="6" Address="" State="0"/>
+                                <Symbol Name="_t2_out" Comment="$nn1 + $_t1_out" Device="" Kind="1" Type="INT" InitValue="7" Address="" State="0"/>
                                 <Symbol Name="_t3_out" Comment="$_t2_out &gt; 2s" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
-                                <Symbol Name="_t4_out" Comment="$nn5 * $nn6" Device="" Kind="1" Type="SINT" InitValue="30" Address="" State="0"/>
-                                <Symbol Name="_t5_out" Comment="$_t4_out / $nn7" Device="" Kind="1" Type="SINT" InitValue="4" Address="" State="0"/>
-                                <Symbol Name="_t6_out" Comment="$nn4 + $_t5_out" Device="" Kind="1" Type="SINT" InitValue="8" Address="" State="0"/>
-                                <Symbol Name="_t7_out" Comment="$_t6_out - $nn8" Device="" Kind="1" Type="SINT" InitValue="0" Address="" State="0"/>
+                                <Symbol Name="_t4_out" Comment="$nn5 * $nn6" Device="" Kind="1" Type="INT" InitValue="30" Address="" State="0"/>
+                                <Symbol Name="_t5_out" Comment="$_t4_out / $nn7" Device="" Kind="1" Type="INT" InitValue="4" Address="" State="0"/>
+                                <Symbol Name="_t6_out" Comment="$nn4 + $_t5_out" Device="" Kind="1" Type="INT" InitValue="8" Address="" State="0"/>
+                                <Symbol Name="_t7_out" Comment="$_t6_out - $nn8" Device="" Kind="1" Type="INT" InitValue="0" Address="" State="0"/>
                                 <Symbol Name="_t8_out" Comment="$_t7_out &gt; 5s" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="cond1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>

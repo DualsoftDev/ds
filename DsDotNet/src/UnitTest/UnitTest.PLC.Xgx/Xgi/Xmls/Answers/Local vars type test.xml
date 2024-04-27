@@ -22,16 +22,16 @@
                         <Symbol Name="myDoubleSum3" Comment="" Device="" Kind="6" Type="LREAL" InitValue="5.8580000000000005" Address="" State="0"/>
                         <Symbol Name="myDoubleSum4" Comment="" Device="" Kind="6" Type="LREAL" InitValue="5.8580000000000005" Address="" State="0"/>
                         <Symbol Name="mybool" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="mybyte" Comment="" Device="" Kind="6" Type="BYTE" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="mybyte" Comment="" Device="" Kind="6" Type="USINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="mychar" Comment="" Device="" Kind="6" Type="BYTE" InitValue="a" Address="" State="0"/>
                         <Symbol Name="myeuler" Comment="" Device="" Kind="6" Type="LREAL" InitValue="2.718" Address="" State="0"/>
-                        <Symbol Name="myint16" Comment="" Device="" Kind="6" Type="SINT" InitValue="16" Address="" State="0"/>
+                        <Symbol Name="myint16" Comment="" Device="" Kind="6" Type="INT" InitValue="16" Address="" State="0"/>
                         <Symbol Name="myint32" Comment="" Device="" Kind="6" Type="DINT" InitValue="32" Address="" State="0"/>
                         <Symbol Name="myint64" Comment="" Device="" Kind="6" Type="LINT" InitValue="64" Address="" State="0"/>
                         <Symbol Name="mypi" Comment="" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
-                        <Symbol Name="mysbyte" Comment="" Device="" Kind="6" Type="BYTE" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="mysbyte" Comment="" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
                         <Symbol Name="mysingle" Comment="" Device="" Kind="6" Type="REAL" InitValue="0.1" Address="" State="0"/>
-                        <Symbol Name="myuint16" Comment="" Device="" Kind="6" Type="USINT" InitValue="16" Address="" State="0"/>
+                        <Symbol Name="myuint16" Comment="" Device="" Kind="6" Type="UINT" InitValue="16" Address="" State="0"/>
                         <Symbol Name="myuint32" Comment="" Device="" Kind="6" Type="UDINT" InitValue="32" Address="" State="0"/>
                         <Symbol Name="myuint64" Comment="" Device="" Kind="6" Type="ULINT" InitValue="64" Address="" State="0"/>
                     </Symbols>

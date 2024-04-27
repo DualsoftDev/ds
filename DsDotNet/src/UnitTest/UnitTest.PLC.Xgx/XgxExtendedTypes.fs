@@ -26,8 +26,6 @@ type XgxExtendedTypesTest(xgx:PlatformTarget) =
             uint16  myuint16 = 16us;
             int32   myint32  = 32;
             uint32  myuint32 = 32u;
-            int64   myint64  = 64L;
-            uint64  myuint64 = 64UL;
 
             double myDoubleSum1 = 0.0;
             double myDoubleSum2 = 0.0;
@@ -36,6 +34,14 @@ type XgxExtendedTypesTest(xgx:PlatformTarget) =
             $myDoubleSum1 := $myDoubleSum2;
             $myDoubleSum2 := $myDoubleSum1 + $myDoubleSum3;
 """
+        let code =
+            match xgx with
+            | XGK -> code
+            | XGI -> code + """
+            int64   myint64  = 64L;
+            uint64  myuint64 = 64UL;
+"""
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)

@@ -18,21 +18,19 @@ type AutoMemoryAllocTest(xgx:PlatformTarget) =
            
             let code =
                 let data =
-                    if xgx = XGI
-                    then 
-                        [ for i in [ 0..128] -> $"bool ax{i} = false;"
-                          for i in [ 0..10] -> $"byte ab{i} = 0uy;"
-                          for i in [ 0..10] -> $"uint16 aw{i} = 0us;"
-                          for i in [ 0..10] -> $"uint32 ad{i} = 0u;"
-                          for i in [ 0..10] -> $"uint64 al{i} = 0UL;"
-                        ] 
-                    elif xgx = XGK
-                    then 
-                        [ for i in [ 0..128] -> $"bool ax{i} = false;"
-                          for i in [ 0..10] -> $"uint32 ad{i} = 0u;"
-                        ] 
-                    else
-                        failwithf $"not support {xgx}"
+                    [   for i in [ 0..128] -> $"bool ax{i} = false;"
+                        for i in [ 0..10] -> $"uint16 aw{i} = 0us;"
+                        for i in [ 0..10] -> $"uint32 ad{i} = 0u;"
+                    ] @ match xgx with
+                        | XGI ->
+                            [
+                                for i in [ 0..10] -> $"byte ab{i} = 0uy;"
+                                for i in [ 0..10] -> $"uint64 al{i} = 0UL;"
+                            ] 
+                        | XGK ->
+                            [] 
+                        | _ ->
+                            failwithf $"not support {xgx}"
 
                 data |> String.concat "\n" 
             let statements = parseCodeForTarget globalStorages code  xgx |> map withNoComment

@@ -163,7 +163,7 @@
                                     <Element ElementType="0" Coordinate="12294"/>
                                     <Element ElementType="1" Coordinate="12295"/>
                                     <Element ElementType="2" Coordinate="12298" Param="81"/>
-                                    <Element ElementType="33" Coordinate="12364" Param="MOV,2000,myCTUD"/>
+                                    <Element ElementType="33" Coordinate="12364" Param="DMOVU,2000,myCTUD"/>
                                     <Element ElementType="6" Coordinate="13313">
                                         load3
                                     </Element>

@@ -77,7 +77,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="RADD,nn1,nn2,sum"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="LADD,nn1,nn2,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="3073">
@@ -89,7 +89,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="81"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="RSUB,nn1,nn2,sub"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="LSUB,nn1,nn2,sub"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="5121">
@@ -101,7 +101,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="6148" Param="81"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="RMUL,nn1,nn2,mul"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="LMUL,nn1,nn2,mul"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
@@ -113,7 +113,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="RDIV,nn1,nn2,div"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="LDIV,nn1,nn2,div"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="10241" Param="90"/>

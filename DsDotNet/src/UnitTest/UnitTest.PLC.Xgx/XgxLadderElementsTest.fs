@@ -3,8 +3,6 @@ namespace T
 open NUnit.Framework
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
-open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
-open System.Security
 open Engine.Core
 open Engine.Parser.FS
 open Dual.UnitTest.Common.FS
@@ -70,6 +68,11 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             uint16  myuint16 = 16us;
             int32   myint32  = 32;
             uint32  myuint32 = 32u;
+"""
+        let code =
+            match xgx with
+            | XGK -> code
+            | XGI -> code + """
             int64   myint64  = 64L;
             uint64  myuint64 = 64UL;
 """
@@ -95,8 +98,14 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             bool    mybool   = false;
             int16   myint16  = 16s;
             int32   myint32  = 32;
+"""
+        let code =
+            match xgx with
+            | XGK -> code
+            | XGI -> code + """
             int64   myint64  = 64L;
 """
+
         let statements = parseCodeForWindows storages code
         storages["mybool"].Comment <- "mybool comment"
         storages["myint16"].Comment <- "myint16 comment <> ! +-*/"

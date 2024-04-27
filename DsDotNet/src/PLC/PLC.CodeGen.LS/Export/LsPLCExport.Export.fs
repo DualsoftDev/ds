@@ -553,10 +553,32 @@ module XgiExportModule =
 
         [<Obsolete("이중코일 체크 필요")>]
         member x.SanityCheck() =
-            // todo:
-            // project level 의 double coil check
-            // - Global 변수 중에 non-terminal expression 을 사용한 경우를 찾아서 marking 해 두고, POU 에서 해당 변수 할당하는 경우를 찾아서 error 를 발생시킨다.
-            ()
+            let { GlobalStorages = globalStorages
+                  POUs = pous } = x
+            let vars = globalStorages.Values |> toArray
+
+            let checkDoubleCoil() =
+                // todo:
+                // project level 의 double coil check
+                // - Global 변수 중에 non-terminal expression 을 사용한 경우를 찾아서 marking 해 두고, POU 에서 해당 변수 할당하는 경우를 찾아서 error 를 발생시킨다.
+                ()
+            let checkLWordUsage() =
+                if x.TargetType = XGK then
+                    // XGK 에서는 LWord 사용(double, long)을 지원하지 않는다.
+                    for v in vars do
+                        if v :? IMemberVariable || v :? TimerCounterBaseStruct then
+                            // todo: timer, counter 등의 구조체 변수는 기본적으로 LWord 등으로 선언되어 있는데... 
+                            ()
+                        else
+                            let t = v.DataType
+                            match t  with
+                            | _ when t.IsOneOf(typeof<int64>, typeof<uint64>) ->
+                                failwith $"Error on variable declararion {v.Name} ({t.Name}): XGK does not support int64 types (LWORD)" 
+                            | _ -> ()
+
+
+            checkDoubleCoil()
+            checkLWordUsage()
 
 
 

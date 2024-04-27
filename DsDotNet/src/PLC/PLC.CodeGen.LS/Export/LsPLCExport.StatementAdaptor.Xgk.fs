@@ -14,12 +14,20 @@ module XgkTypeConvertorModule =
 
 
     let operatorToXgkFunctionName op (typ:Type) =
-        let typePrefix =
+        let prefix =
             match typ with
-            | _ when typ = typeof<float> -> "R"     // or "L" for real
+            | _ when typ = typeof<single> -> "R"     // or "R" for real
+            | _ when typ = typeof<double> -> "L"     // or "L" for long real
+            | _ when typ.IsOneOf(typeof<int32>, typeof<uint32>) -> "D"
+            | _ when typ.IsOneOf(typeof<byte>, typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
             | _ -> ""
 
-        typePrefix +
+        let suffix =
+            match typ with
+            | _ when typ.IsOneOf(typeof<uint32>, typeof<uint64>) -> "U"
+            | _ -> ""
+
+        let opName =
             match op with
             | "+" -> "ADD"
             | "-" -> "SUB"
@@ -28,6 +36,8 @@ module XgkTypeConvertorModule =
             | "MOV" -> "MOV"
             | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
             | _ -> failwithlog "ERROR"
+
+        $"{prefix}{opName}{suffix}"
 
 
     /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.

@@ -6,6 +6,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
+open Dual.UnitTest.Common.FS
 
 type XgxCounterTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
@@ -281,8 +282,13 @@ type XgxFunctionTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        let test =
+            fun () -> 
+                let xml = x.generateXmlForTest f storages (map withNoComment statements)
+                x.saveTestResult f xml
+        match xgx with
+        | XGI -> test()
+        | XGK -> test |> ShouldFailWithSubstringT "XGK does not support"
 
     member x.``ADD double test`` () =
         let storages = Storages()

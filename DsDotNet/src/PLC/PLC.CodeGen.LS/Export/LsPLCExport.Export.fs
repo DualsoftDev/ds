@@ -553,8 +553,7 @@ module XgiExportModule =
 
         [<Obsolete("이중코일 체크 필요")>]
         member x.SanityCheck() =
-            let { GlobalStorages = globalStorages
-                  POUs = pous } = x
+            let { GlobalStorages = globalStorages } = x
             let vars = globalStorages.Values |> toArray
 
             let checkDoubleCoil() =

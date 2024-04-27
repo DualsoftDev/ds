@@ -77,6 +77,7 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             int64   myint64  = 64L;
             uint64  myuint64 = 64UL;
 """
+            | _ -> failwith "Not supported plc type"
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
@@ -106,6 +107,7 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             | XGI -> code + """
             int64   myint64  = 64L;
 """
+            | _ -> failwith "Not supported plc type"
 
         let statements = parseCodeForWindows storages code
         storages["mybool"].Comment <- "mybool comment"

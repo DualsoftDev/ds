@@ -41,6 +41,7 @@ type XgxExtendedTypesTest(xgx:PlatformTarget) =
             int64   myint64  = 64L;
             uint64  myuint64 = 64UL;
 """
+            | _ -> failwith "Not supported plc type"
 
         let statements = parseCodeForWindows storages code
         let f = getFuncName()

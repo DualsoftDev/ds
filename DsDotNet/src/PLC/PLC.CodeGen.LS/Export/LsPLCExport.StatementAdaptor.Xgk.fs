@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LS
 
 open Engine.Core
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module XgkTypeConvertorModule =
@@ -12,14 +13,20 @@ module XgkTypeConvertorModule =
             member x.StorageName = tc.Name
 
 
-    let operatorToXgkFunctionName op =
-        match op with
-        | "+" -> "ADD"
-        | "-" -> "SUB"
-        | "*" -> "MUL"
-        | "/" -> "DIV"
-        | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
-        | _ -> failwithlog "ERROR"
+    let operatorToXgkFunctionName op (typ:Type) =
+        let typePrefix =
+            match typ with
+            | _ when typ = typeof<float> -> "R"     // or "L" for real
+            | _ -> ""
+
+        typePrefix +
+            match op with
+            | "+" -> "ADD"
+            | "-" -> "SUB"
+            | "*" -> "MUL"
+            | "/" -> "DIV"
+            | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
+            | _ -> failwithlog "ERROR"
 
 
     /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.
@@ -51,7 +58,7 @@ module XgkTypeConvertorModule =
                     newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                 else
                     // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
-                    let newExp = DuFunction{FunctionBody = PseudoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
+                    let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
                     let createTmpStorage =
                         fun () -> 
                             match expStore with

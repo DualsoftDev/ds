@@ -62,7 +62,7 @@ module Interface =
     let inline address x = ( ^T: (member Address: string) x )
 
     type ITerminal with
-        member x.GetContact() =
+        member x.GetContact(): string =
             match x.Variable, x.Literal with
             | Some v, None -> v.Name
             | None, Some literal -> literal.ToText()

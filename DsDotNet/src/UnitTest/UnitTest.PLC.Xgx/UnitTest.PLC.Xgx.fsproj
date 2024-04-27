@@ -27,6 +27,7 @@
         <Compile Include="TestFixture.Xgx.fs" />
         <Compile Include="ExpressionVisitor.fs" />
         <Compile Include="XgxLadderElementsTest.fs" />
+        <Compile Include="XgxExtendedTypes.fs" />
         <Compile Include="XgxTestCommon.fs" />
         <Compile Include="XgxDrawing.fs" />
         <Compile Include="XgxRungBasics.fs" />

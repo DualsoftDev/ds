@@ -40,8 +40,7 @@ module ExpressionModule =
             member x.Variable = match x with | DuVariable variable -> Some variable | _ -> None
             member x.Literal  = match x with | DuLiteral literal   -> Some literal  | _ -> None
         interface IExpression<'T> with
-            member x.DataType = match x with | DuVariable v -> v.GetType() | DuLiteral l -> (l :> IExpression).DataType
-            //member x.EvaluatedValue = 
+            member x.DataType = typeof<'T>
             member x.BoxedEvaluatedValue = match x with | DuVariable v -> v.Value | DuLiteral l -> l.Value |> box
             member x.GetBoxedRawObject() = (x :> IExpression).BoxedEvaluatedValue
             member x.ToText() = (x :> IExpression).ToText(false)

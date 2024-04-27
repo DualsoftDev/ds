@@ -53,6 +53,8 @@ module XgiExportModule =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
+        let isXgi, isXgk = prjParam.TargetType = XGI, prjParam.TargetType = XGK
+
         let xmlRung (expr: FlatExpression option) (xgiCommand:CommandTypes option) (y:int) : RungGenerationInfo =
             let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
@@ -71,7 +73,7 @@ module XgiExportModule =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "<>") ->
             
-                let op = operatorToXgkFunctionName funName |> escapeXml
+                let op = operatorToXgkFunctionName funName expr.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
@@ -132,13 +134,23 @@ module XgiExportModule =
             for stmt in stmts do
                 match stmt with
                 | DuAssign(expr, target) when expr.DataType <> typeof<bool> ->
+                    let condition = Expression.True
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
-                    moveCmdRungXgk Expression.True expr.Terminal.Value target
+                    if isXgi then
+                        let command = ActionCmd(Move(condition, expr, target))
+                        let rgiSub = xmlRung None (Some command) rgi.NextRungY
+
+                        rgi <-
+                            {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                                NextRungY = 1 + rgiSub.NextRungY }
+                    else
+                        let source = expr.Terminal.Value
+                        moveCmdRungXgk condition source target
 
                 | DuAssign(expr, target) ->
                     simpleRung expr target
 
-                | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as op
+                | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as _op
                                            Arguments = args
                                            OriginalExpression = originalExpr
                                            Output = output }) ->
@@ -184,6 +196,7 @@ module XgiExportModule =
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
+
                 | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _func
                                            Arguments = args
                                            Output = output }) ->
@@ -195,8 +208,10 @@ module XgiExportModule =
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
-                | DuAction(DuCopy(condition, source, target)) when prjParam.TargetType = XGK ->
+
+                | DuAction(DuCopy(condition, source, target)) when isXgk ->
                     moveCmdRungXgk condition source.Terminal.Value target
+
                 | _ -> failwithlog "Not yet"
 
         let rungEnd = generateEndXml (rgi.NextRungY + 1)
@@ -267,7 +282,7 @@ module XgiExportModule =
                   CommentedStatements = commentedStatements } =
                 x
 
-            let newLocalStorages, commentedXgiStatements =
+            let newLocalStorages, newCommentedXgiStatements =
                 commentedStatementsToCommentedXgxStatements prjParam localStorages.Values commentedStatements
 
             let globalStoragesRefereces =
@@ -311,7 +326,7 @@ module XgiExportModule =
             (*
              * Rung 생성
              *)
-            let rungsXml = generateRungs prjParam prologComment commentedXgiStatements
+            let rungsXml = generateRungs prjParam prologComment newCommentedXgiStatements
 
             /// POU/Programs/Program
             let programTemplate = createXmlStringProgram taskName pouName scanName |> DualXmlNode.ofString
@@ -364,6 +379,7 @@ module XgiExportModule =
                     doc, prjParam
 
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
+            prjParam.SanityCheck()
 
             let { ProjectName = projName
                   TargetType = targetType
@@ -531,6 +547,13 @@ module XgiExportModule =
                 xdoc.SanityCheckVariableNameForXgk()
 
             xdoc.Check targetType
+
+        [<Obsolete("이중코일 체크 필요")>]
+        member x.SanityCheck() =
+            // todo:
+            // project level 의 double coil check
+            // - Global 변수 중에 non-terminal expression 을 사용한 경우를 찾아서 marking 해 두고, POU 에서 해당 변수 할당하는 경우를 찾아서 error 를 발생시킨다.
+            ()
 
 
 

@@ -43,7 +43,7 @@ module ExpressionFunctionModule =
 
     /// Expression<'T> 를 IExpression 으로 casting
     let internal iexpr any = (box any) :?> IExpression
-    let PseudoFunction<'T> (_args:Args):'T = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+    let NullFunction<'T> (_args:Args):'T = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
 
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
@@ -163,14 +163,14 @@ module ExpressionFunctionModule =
             | "createXgkCTU" | "createXgkCTD" | "createXgkCTUD" | "createXgkCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
-                DuFunction { FunctionBody=PseudoFunction<Counter>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Counter>; Name=funName; Arguments=args }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
             | "createXgkTON" | "createXgkTOF" | "createXgkCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
-                DuFunction { FunctionBody=PseudoFunction<Timer>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Timer>; Name=funName; Arguments=args }
         | "createTag" ->
-                DuFunction { FunctionBody=PseudoFunction<ITag>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<ITag>; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
 

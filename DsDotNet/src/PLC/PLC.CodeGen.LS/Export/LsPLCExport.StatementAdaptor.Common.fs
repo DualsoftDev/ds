@@ -275,7 +275,7 @@ module XgxExpressionConvertorModule =
               Exp = exp
               ExpStore = expStore} = augmentParams
 
-        let functionTransformer (level:int, functionExpression:IExpression, expStore:IStorage option) =
+        let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
             match functionExpression.FunctionName with
             | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/" as op) -> //when level <> 0 ->
                 let args = functionExpression.FunctionArguments

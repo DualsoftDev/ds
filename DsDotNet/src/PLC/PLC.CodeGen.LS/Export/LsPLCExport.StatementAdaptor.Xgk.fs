@@ -25,6 +25,7 @@ module XgkTypeConvertorModule =
             | "-" -> "SUB"
             | "*" -> "MUL"
             | "/" -> "DIV"
+            | "MOV" -> "MOV"
             | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
             | _ -> failwithlog "ERROR"
 

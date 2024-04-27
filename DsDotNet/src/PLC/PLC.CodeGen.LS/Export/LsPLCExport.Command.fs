@@ -752,7 +752,10 @@ module internal rec Command =
         | XGK, Some (ActionCmd(Move(condition, source, target))) when source.Terminal.IsSome ->
             let fbParam, fbWidth =
                 let s, d = source.GetTerminalString(prjParam), target.Name
-                $"Param={dq}MOV,{s},{d}{dq}", 3
+                let mov =
+                    assert (source.DataType = target.DataType)
+                    operatorToXgkFunctionName "MOV" source.DataType
+                $"Param={dq}{mov},{s},{d}{dq}", 3
             rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
         | _ ->
             match prjParam.TargetType, expr, cmdExp with

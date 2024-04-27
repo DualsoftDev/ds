@@ -135,13 +135,15 @@ module XGITag = //IEC61131Tag =
                     let typ =
                         match x.Type with
                         | ("BIT"|"BOOL") -> "BIT"
-                        | ("SINT"|"WORD") -> "WORD"
+                        | ("SINT" | "INT" | "DINT"
+                            |"USINT" | "UINT" | "UDINT"
+                            |"WORD") -> "WORD"
                         | "TON"| "TOF"| "TMR"  -> "BIT/WORD"
                         | ("CTU"| "CTD"| "CTUD"| "CTR" | "CTD_INT" | "CTU_INT" | "CTUD_INT" ) -> "BIT/WORD"
 
-                        | ("BYTE" | "STRING" | "DINT" | "LINT" | "LREAL" | "REAL"
-                            | "UINT" | "UDINT" | "ULINT" ) -> "WORD"        // xxx 이거 맞나??
-                        | _ -> 
+                        | ("BYTE" | "STRING" | "REAL" | "LREAL" ) -> "WORD"        // xxx 이거 맞나??
+
+                        | ("LINT" | "ULINT" | _ ) -> 
                             failwithlog $"Not supported data type {x.Type}"
 
                     $"Device=\"{x.Device}\""

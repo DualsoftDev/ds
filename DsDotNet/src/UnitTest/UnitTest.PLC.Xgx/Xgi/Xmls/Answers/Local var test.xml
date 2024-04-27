@@ -51,7 +51,7 @@
                                 <Symbol Name="mySByte" Comment="BYTE &lt;- SByte" Device="" Kind="1" Type="BYTE" Address="" State="0"/>
                                 <Symbol Name="mySingle" Comment="REAL &lt;- Single" Device="" Kind="1" Type="REAL" Address="" State="0"/>
                                 <Symbol Name="myString" Comment="STRING &lt;- String" Device="" Kind="1" Type="STRING" Address="" State="0"/>
-                                <Symbol Name="myUInt16" Comment="UINT &lt;- UInt16" Device="" Kind="1" Type="UINT" Address="" State="0"/>
+                                <Symbol Name="myUInt16" Comment="USINT &lt;- UInt16" Device="" Kind="1" Type="USINT" Address="" State="0"/>
                                 <Symbol Name="myUInt32" Comment="UDINT &lt;- UInt32" Device="" Kind="1" Type="UDINT" Address="" State="0"/>
                                 <Symbol Name="myUInt64" Comment="ULINT &lt;- UInt64" Device="" Kind="1" Type="ULINT" Address="" State="0"/>
                             </Symbols>

@@ -39,19 +39,21 @@ open PLC.CodeGen.Common
 [<AutoOpen>]
 module ConvertorPrologModule =
     let internal systemTypeToXgiTypeName (typ: System.Type) =
+        // pp.60, https://sol.ls-electric.com/uploads/document/16572861196090/XGI%20%EC%B4%88%EA%B8%89_V21_.pdf
         match typ.Name with
         | BOOL -> "BOOL"
-        | UINT8 -> "BYTE"
-        | FLOAT64 -> "LREAL"
-        | INT16 -> "SINT"
+        | CHAR -> "BYTE"
+        | INT8 -> "SINT"
+        | INT16 -> "INT"
         | INT32 -> "DINT"
         | INT64 -> "LINT"
-        | FLOAT32 -> "REAL"
-        | STRING -> "STRING" // 32 byte
-        | UINT16 -> "USINT"
+        | UINT8 -> "USINT"
+        | UINT16 -> "UINT"
         | UINT32 -> "UDINT"
         | UINT64 -> "ULINT"
-        | (INT8 | CHAR) -> "BYTE"
+        | FLOAT32 -> "REAL"
+        | FLOAT64 -> "LREAL"
+        | STRING -> "STRING" // 32 byte
         | _ -> failwithlog "ERROR"
 
     let private systemTypeToXgkTypeName (typ: System.Type) =

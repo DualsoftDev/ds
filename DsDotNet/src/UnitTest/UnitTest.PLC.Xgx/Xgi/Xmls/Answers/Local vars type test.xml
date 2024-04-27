@@ -31,7 +31,7 @@
                         <Symbol Name="mypi" Comment="" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
                         <Symbol Name="mysbyte" Comment="" Device="" Kind="6" Type="BYTE" InitValue="1" Address="" State="0"/>
                         <Symbol Name="mysingle" Comment="" Device="" Kind="6" Type="REAL" InitValue="0.1" Address="" State="0"/>
-                        <Symbol Name="myuint16" Comment="" Device="" Kind="6" Type="UINT" InitValue="16" Address="" State="0"/>
+                        <Symbol Name="myuint16" Comment="" Device="" Kind="6" Type="USINT" InitValue="16" Address="" State="0"/>
                         <Symbol Name="myuint32" Comment="" Device="" Kind="6" Type="UDINT" InitValue="32" Address="" State="0"/>
                         <Symbol Name="myuint64" Comment="" Device="" Kind="6" Type="ULINT" InitValue="64" Address="" State="0"/>
                     </Symbols>

@@ -24,8 +24,9 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             typedefof<uint16>
             typedefof<int32>
             typedefof<uint32>
-            typedefof<int64>
-            typedefof<uint64>
+            if xgx = XGI then
+                typedefof<int64>
+                typedefof<uint64>
             typedefof<string>
         ]
 

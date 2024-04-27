@@ -18,6 +18,7 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module ListnerCommonFunctionGenerator =
+
     let commonOpFunctionExtractor (funcCallCtxs: FuncCallContext array) (callName:string) (system:DsSystem) =
         if funcCallCtxs.Length > 1 
         then 
@@ -29,18 +30,20 @@ module ListnerCommonFunctionGenerator =
                 Some (system.Functions.Cast<OperatorFunction>().First(fun f->f.Name = funcName))
             else None 
 
+    let getCode (excuteCode:String)=
+        // 처음과 끝의 "${" 와 "}" 제외
+        let pureCode = excuteCode.Substring(2, excuteCode.Length - 2).TrimEnd('}') 
+        pureCode.TrimEnd().Trim([|'\r';'\n'|])
 
+    let commonFunctionCommandExtractor (fDef: FunctionCommandDefContext)=
+        // 함수 호출과 관련된 매개변수 추출
+        let excuteCode = fDef.functionCommand().GetText()
+        excuteCode |> getCode
 
-    let commonFuncArgsExtractor (fDef:FunctionDefContext) =
-        let args = 
-            let argsCtxs = fDef.Descendants<ArgumentContext>()
-            if argsCtxs.any() then   
-                argsCtxs
-                |> Seq.map (fun a -> a.GetText()) 
-                |> Seq.toArray
-            else
-                [||] // 매개변수가 없는 경우 빈 배열
-        args
+    let commonFunctionOperatorExtractor (fDef: FunctionOperatorDefContext)=
+        // 함수 호출과 관련된 매개변수 추출
+        let excuteCode = fDef.functionOperator().GetText()
+        excuteCode |> getCode
 
 /// <summary>
 /// System, Flow, Parenting(껍데기만),
@@ -214,47 +217,37 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     //    let pureCode = code.Substring(3, code.Length - 6) // 처음과 끝의 "<@{" 와 "}@>" 제외
     //    let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
     //    x.TheSystem.Statements.AddRange statements
+    
+    override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
+        
+        ctx.functionNameOnly() |> Seq.iter (fun fDef ->
+            let funcName = fDef.TryFindIdentifier1FromContext().Value
+            x.TheSystem.Functions.Add(OperatorFunction(funcName)) )
+        
+        let functionDefs = ctx.functionOperatorDef()
+        functionDefs |> Seq.iter (fun fDef ->
+            let funcName = fDef.functionName().GetText()
+            let pureCode = commonFunctionOperatorExtractor fDef
+            // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
+            let newFunc = OperatorFunction.Create(funcName, pureCode)
+            x.TheSystem.Functions.Add(newFunc) 
+            )
 
     override x.EnterCommandBlock(ctx: CommandBlockContext) =
-        // FunctionsBlockContext에서 모든 FunctionDefContext를 추출
-        let functionDefs = ctx.functionCommandDef()
-        let functionNameOnlys = ctx.functionNameOnly()
         
-        functionNameOnlys |> Seq.iter (fun fDef ->
+        ctx.functionNameOnly() |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
             x.TheSystem.Functions.Add(CommandFunction(funcName)) )
+
+        let functionDefs = ctx.functionCommandDef()
         functionDefs |> Seq.iter (fun fDef ->
-            // 함수 이름 추출
             let funcName = fDef.functionName().GetText()
-            // 함수 호출과 관련된 매개변수 추출
-            let excuteCode = fDef.functionCommand().GetText()
-            // 처음과 끝의 "${" 와 "}" 제외
-            let pureCode = excuteCode.Substring(2, excuteCode.Length - 2).TrimEnd('}') 
-
+            let pureCode = commonFunctionCommandExtractor fDef
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
-            let newFunc = CommandFunction.Create(funcName, DuCMDCode, pureCode)
-            x.TheSystem.Functions.Add(newFunc) )
+            let newFunc = CommandFunction.Create(funcName, pureCode)
+            x.TheSystem.Functions.Add(newFunc)
+            )
 
-    override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
-        // FunctionsBlockContext에서 모든 FunctionDefContext를 추출
-        let functionDefs = ctx.functionDef()
-        let functionNameOnlys = ctx.functionNameOnly()
-        
-        functionNameOnlys |> Seq.iter (fun fDef ->
-            let funcName = fDef.TryFindIdentifier1FromContext().Value
-            x.TheSystem.Functions.Add(OperatorFunction(funcName)))
-        functionDefs |> Seq.iter (fun fDef ->
-            // 함수 이름 추출
-            let funcName = fDef.functionName().GetText()
-
-            // 함수 호출과 관련된 매개변수 추출
-            let funcCall = fDef.functionOperator()
-            let functionType =  funcCall.functionType().GetText() |> tryGetOperatorType  |> Option.get
-            let args =  fDef |> commonFuncArgsExtractor 
-
-            // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
-            let newFunc = OperatorFunction.Create(funcName, functionType, args)
-            x.TheSystem.Functions.Add(newFunc) )
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등
     member x.GetContextInformation(parserRuleContext: ParserRuleContext) = // collectUpwardContextInformation

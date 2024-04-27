@@ -59,6 +59,7 @@ module InterfaceClass =
         | XlsAddress //주소
         | XlsVariable //변수
         | XlsCommand  //명령
+        | XlsOperator //연산
         | XlsAutoBTN //자동 버튼
         | XlsManualBTN //수동 버튼
         | XlsDriveBTN //운전 버튼
@@ -83,7 +84,7 @@ module InterfaceClass =
             | XlsAddress -> TextXlsAddress
             | XlsVariable -> TextXlsVariable
             | XlsCommand -> TextXlsCommand
-            
+            | XlsOperator -> TextXlsOperator
             | XlsAutoBTN -> TextXlsAutoBTN
             | XlsManualBTN -> TextXlsManualBTN
             | XlsDriveBTN -> TextXlsDriveBTN
@@ -108,6 +109,7 @@ module InterfaceClass =
         | TextXlsAddress -> XlsAddress
         | TextXlsVariable -> XlsVariable
         | TextXlsCommand -> XlsCommand
+        | TextXlsOperator -> XlsOperator
         | TextXlsAutoBTN -> XlsAutoBTN
         | TextXlsManualBTN -> XlsManualBTN
         | TextXlsEmergencyBTN -> XlsEmergencyBTN

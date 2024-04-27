@@ -285,21 +285,17 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
 
 
 
-
+operatorBlock: '[' 'operators' ']' '=' '{' functionNameOnly* | functionOperatorDef* '}' ;
+    functionOperatorDef :  functionName '=' functionOperator;
+    functionOperator : codeBlock;
+    
+commandBlock:  '[' 'commands' ']'  '=' '{' functionNameOnly* | functionCommandDef* '}' ;
+    functionCommandDef :  functionName '=' functionCommand;
+    functionCommand : codeBlock;
+    
 functionNameOnly: identifier1 SEMICOLON;
-operatorBlock: '[' 'operators' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBRACE;
-    functionDef: functionName EQ functionOperator SEMICOLON;
-    functionName: identifier1;
-    functionOperator: functionType (argument (argument)*)?;
-    functionType: '$'identifier1;
+functionName: identifier1;
 
-
-commandBlock: '[' 'commands' ']' '=' '{' functionNameOnly* | functionCommandDef* '}' ;
-functionCommandDef :  functionName '=' functionCommand;
-functionCommand : codeBlock;
-
-//functionCommand : '{' functionCommandCode '}'; 
-//functionCommandCode :  .*? ; //  any character between braces
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     callListing:

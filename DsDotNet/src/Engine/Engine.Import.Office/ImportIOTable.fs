@@ -66,82 +66,79 @@ module ImportIOTable =
 
         try
 
-            let handleFunctionCreationOrUpdate (sys:DsSystem) funcName funcBodyText  =
+            let handleFunctionCreationOrUpdate (sys:DsSystem) funcName funcBodyText isCommand =
                 match sys.Functions.TryFind(fun f -> f.Name = funcName) with
                 | Some func ->
                     match func with
                     | :? OperatorFunction as op when op.OperatorType = DuOPUnDefined ->
-                        match tryGetOperatorType(funcBodyText) with
-                        | Some opType -> 
-                            let _, parms= getOperatorTypeNArgs (funcBodyText)
+                            let opType, parms= getOperatorTypeNArgs (funcBodyText)
                             op.OperatorType <- opType
                             op.Parameters.AddRange(parms)
                             Some (op :> Func)
-                        | None -> failWithLog $"error {funcName} {funcBodyText} is not operatorType"
 
                     | :? CommandFunction as cmd when cmd.CommandType = DuCMDUnDefined ->
-                        match tryGetCommandType(funcBodyText) with
-                        | Some cmdType -> 
-                            cmd.CommandType <- cmdType
+                        if funcBodyText = ""
+                        then 
+                            failWithLog $"error {funcName} function body is empty"
+                        else 
+                            cmd.CommandType <- DuCMDCode
                             cmd.CommandCode <- funcBodyText
                             Some (cmd :> Func)
-                        | None -> failWithLog $"error {funcName} {funcBodyText} is not commandType"
 
                     | _ -> Some func
 
                 | None ->
-                    match tryGetOperatorType(funcBodyText), tryGetCommandType(funcBodyText) with
-                    | Some opType, Some cmdType -> failWithLog  $"error {funcBodyText} is multi functionType"
-                    | Some opType, None -> 
-                        let _, parms= getOperatorTypeNArgs (funcBodyText)
-                        let func = OperatorFunction.Create(funcName, opType, parms)
+                    if isCommand 
+                    then
+                        let func = CommandFunction.Create(funcName, funcBodyText)
                         sys.Functions.Add func |> ignore
                         Some (func)
-                    | None,  Some cmdType -> 
-                        let func = CommandFunction.Create(funcName, cmdType, funcBodyText)
+                    else 
+                        let func =  OperatorFunction.Create(funcName, funcBodyText)
                         sys.Functions.Add func |> ignore
                         Some (func)
-                    | _ -> None
+                       
+            let getAutoGenFuncName funcBodyText =
+                let opType, args = getOperatorTypeNArgs(funcBodyText)
+                let paras =
+                    if args.any()
+                    then 
+                        [ for param in args do
+                                $"_{param}";
+                        ] |> String.concat "" 
+                    else ""
+                $"{opType.ToText().TrimStart('$')}{paras}" 
+                            
             
-            let getFunctionNUpdate (callName, funcDefine , funcBodyText, tableIO: Data.DataTable, isJob: bool, page) =
+            let getFunctionNUpdate (callName:string, funcName:string, funcBodyText:string, isCommand: bool, page) =
                 if ((trimSpace funcBodyText) = "" || funcBodyText = TextSkip || funcBodyText = TextFuncNotUsed)
                 then
                     None
                 else 
-                    let funcTypeText, parms = 
-                        match tryGetOperatorType funcBodyText with
-                        | Some _ -> 
-                            if funcBodyText.Contains(';') 
-                            then 
-                                Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{callName}", page, 0u)
+                    //let funcTypeText, parms = 
+                    //    match tryGetOperatorType funcBodyText with
+                    //    | Some _ -> 
+                    //        if funcBodyText.Contains(';') 
+                    //        then 
+                    //            Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{callName}", page, 0u)
                             
-                            getOperatorTypeNArgs (funcBodyText)
-                        | None ->  funcDefine, [|funcBodyText|]
+                    //        getOperatorTypeNArgs (funcBodyText)
+                    //    | None ->  funcDefine, [|funcBodyText|]
 
-                    if (not <| isJob) && funcTypeText <> "$n" then
-                        Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcTypeText}", page, 0u)
-               
-  
+                    //if (not <| isJob) && funcTypeText <> "$n" then
+                    //    Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcTypeText}", page, 0u)
 
-                    let funcName =
-                        if funcDefine = ""
-                        then 
-                            match tryGetOperatorType(funcTypeText) with
-                            | Some op  -> 
-                                let paras =
-                                    if parms.any()
-                                    then 
-                                        String.concat "" [
-                                                    for param in parms do
-                                                        $"_{param}";
-                                                ]
-                                    else ""
-                                $"{op.ToText().TrimStart('$')}{paras}" 
-                            | _ -> failwithf $"error {funcTypeText} is not functionType"
-                            
-                        else funcDefine
+                    if isCommand
+                    then 
+                        handleFunctionCreationOrUpdate sys funcName funcBodyText true
+                    else 
+                        let funcName =
+                            match funcName = "" with
+                            | true -> getAutoGenFuncName funcBodyText
+                            | false -> funcName
 
-                    handleFunctionCreationOrUpdate sys funcName funcBodyText
+                        handleFunctionCreationOrUpdate sys funcName funcBodyText false
+                        
                             
             let dicDev =
                 sys.Jobs
@@ -178,7 +175,7 @@ module ImportIOTable =
                 let job = dicJob[devName]
                 
                 let func = $"{row.[(int) IOColumn.Func]}"
-                match getFunctionNUpdate (job.Name, "", func, tableIO, true, page) with
+                match getFunctionNUpdate (job.Name, "", func,   false, page) with
                 |Some f ->  
                         if  not(f :? OperatorFunction)
                         then
@@ -200,7 +197,15 @@ module ImportIOTable =
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
                         
-                getFunctionNUpdate (name, name, func, tableIO, true, page) |> ignore
+                getFunctionNUpdate (name, name, func,  true, page) |> ignore
+
+            let updateOperator (row: Data.DataRow, tableIO: Data.DataTable, page) =
+                let name = $"{row.[(int) IOColumn.Name]}"
+                let func = $"{row.[(int) IOColumn.Func]}"
+                if func = "" then
+                    Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
+                        
+                getFunctionNUpdate (name, name, func,   false,  page) |> ignore
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
                 let btnName = $"{row.[(int) IOColumn.Name]}"
@@ -213,7 +218,7 @@ module ImportIOTable =
                     btn.InAddress  <-inaddr.Trim() 
                     btn.OutAddress <-outaddr.Trim() 
 
-                    match getFunctionNUpdate (btn.Name, "", $"{row.[(int) IOColumn.Func]}", tableIO, false, page) with
+                    match getFunctionNUpdate (btn.Name, "", $"{row.[(int) IOColumn.Func]}",  false, page) with
                     |Some f -> btn.OperatorFunction <-  getOperatorFuntion f |> Some 
                     |_->()
 
@@ -235,7 +240,7 @@ module ImportIOTable =
                     let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
                     lamp.InAddress  <-inaddr.Trim() 
                     lamp.OutAddress <-outaddr.Trim() 
-                    match getFunctionNUpdate (lamp.Name, "", func,  tableIO, false, page) with
+                    match getFunctionNUpdate (lamp.Name, "", func,    false, page) with
                     |Some f ->    lamp.OperatorFunction <- getOperatorFuntion f |> Some 
                     |_->()
 
@@ -254,7 +259,7 @@ module ImportIOTable =
                     let inaddr =  getValidCondiAddress (cond) Util.runtimeTarget
                     cond.InAddress  <-inaddr.Trim() 
 
-                    match getFunctionNUpdate (cond.Name, "", func, tableIO, false, page) with
+                    match getFunctionNUpdate (cond.Name, "", func,   false, page) with
                     |Some f ->   cond.OperatorFunction <- getOperatorFuntion f |> Some 
                     |_->()
 
@@ -294,6 +299,7 @@ module ImportIOTable =
                         | XlsIdleLamp -> updateLamp (row, LampType.DuIdleModeLamp, tableIO, page)
                         | XlsHomingLamp -> updateLamp (row, LampType.DuOriginStateLamp, tableIO, page)
                         | XlsCommand -> updateCommand (row, tableIO, page) 
+                        | XlsOperator -> updateOperator (row, tableIO, page) 
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
 

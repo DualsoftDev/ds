@@ -175,10 +175,23 @@ module ExportIOTable =
                     func 
                 ]
             )
+            
+        let operatorRows =
+            sys.Functions
+                .OfType<OperatorFunction>()
+                .Where(fun f->not(sys.AutoNameOperators.Cast<Func>().Contains(f)))
+                                    .Map(fun func->
+                                    [ TextXlsOperator
+                                      func.Name
+                                      ""
+                                      ""
+                                      ""
+                                      func.ToDsText() ]
+                                      )   
 
-
-        let funcRows =
-            sys.Functions.Where(fun f->not(sys.AutoNameGenFuncs.Cast<Func>().Contains(f)))
+        let commandRows =
+            sys.Functions
+                .OfType<CommandFunction>()
                                     .Map(fun func->
                                     [ TextXlsCommand
                                       func.Name
@@ -187,6 +200,7 @@ module ExportIOTable =
                                       ""
                                       func.ToDsText() ]
                                       )
+
         let variRows = sys.Variables.Map(fun vari->
                 [ TextXlsCommand
                   vari.Name
@@ -195,10 +209,17 @@ module ExportIOTable =
                   ""
                   vari.ToDsText() ]
                   )
-        let sampleFuncRows =  if funcRows.any() then [] else  [[TextXlsCommand;"";"";"";"";]]
+
+        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"";"";"";"";]]
+        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"";"";"";"";]]
         let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"";"";"";"";]]
         let dts = 
-            getConditionDefListRows (sys.ReadyConditions)  @ funcRows @ sampleFuncRows @ sampleVariRows
+            getConditionDefListRows (sys.ReadyConditions)  
+            @ commandRows 
+            @ operatorRows
+            @ sampleOperatorRows
+            @ sampleCommandRows
+            @ sampleVariRows
             |> Seq.chunkBySize(IOchunkBySize)
             |> Seq.map(fun rows->
                 let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")

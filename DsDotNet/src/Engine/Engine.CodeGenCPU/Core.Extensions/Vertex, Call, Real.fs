@@ -40,7 +40,7 @@ module ConvertCpuVertex =
                        
 
         member c.UsingTon  = c.CallOperatorType = DuOPTimer
-        member c.UsingCompare  = c.CallOperatorType = DuOPCompare
+        member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingNot  = c.CallOperatorType = DuOPNot
         member c.UsingMove  = c.CallCommandType = DuCMDCode
         member c.EndPlan =  

@@ -44,22 +44,23 @@ module CodeElements =
 
     type OperatorFunctionTypes =
         | DuOPUnDefined
+        | DuOPCode
         | DuOPNot
         | DuOPTimer
-        | DuOPCompare
         member x.ToText() =
             match x  with
-            | DuOPUnDefined -> ""
+            | DuOPUnDefined|DuOPCode -> ""
             | DuOPNot -> "$not"
             | DuOPTimer -> "$time"
-            | DuOPCompare -> "$if"
      
-    let tryGetOperatorType (text:string) = 
+    let getOperatorType (text:string) = 
         match text.ToLower()  with
-            | "$not" -> DuOPNot       |> Some   
-            | "$time" -> DuOPTimer     |> Some   
-            | "$if" -> DuOPCompare   |> Some   
-            | _ -> None
+            | "$not" -> DuOPNot      
+            | "$time" -> DuOPTimer   
+            | _ -> 
+                if text <> "" 
+                then DuOPCode 
+                else failWithLog "operatorType is empty error"
             
     let getOperatorTypeNArgs (text:string) = 
         let text = text.Trim()
@@ -69,16 +70,11 @@ module CodeElements =
             | head :: xs -> head, xs.ToArray()
             | [] -> failwith "Input line is empty or improperly formatted"
 
-        funcType, parameters
+        (getOperatorType funcType), parameters
 
     type CommandFunctionTypes =
         | DuCMDUnDefined
         | DuCMDCode
-
-    let tryGetCommandType (text:string) = 
-        if text <> "" && tryGetOperatorType text = None  //operator type이 아닌 경우
-        then DuCMDCode  |> Some  
-        else None
 
 
     [<AbstractClass>]
@@ -94,11 +90,12 @@ module CodeElements =
     and OperatorFunction(name:string) =
         inherit Func(name)
         member val OperatorType = DuOPUnDefined with get, set
+        member val OperatorCode = "" with get, set
         member val Parameters = ResizeArray<string>()
         member x.ToDsText() = 
-            if x.OperatorType <> DuOPUnDefined   
-            then $"""{x.OperatorType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
-            else ""
+            if x.OperatorType = DuOPCode   
+            then x.OperatorCode
+            else $"""{x.OperatorType.ToText()} {String.Join(" ", x.Parameters)}""".Trim()
 
     ///Copy, Assign, ... Commands (복사, 대입 명령)
     and CommandFunction(name:string) =

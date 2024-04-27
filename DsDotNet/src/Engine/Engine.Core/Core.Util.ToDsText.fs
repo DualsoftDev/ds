@@ -5,6 +5,7 @@ open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Reflection     
+open System
 
 [<AutoOpen>]
 module internal ToDsTextModule =
@@ -151,6 +152,20 @@ module internal ToDsTextModule =
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
                 yield $"{tab}{rb}"
 
+
+            let funcCodePrint funcName (code:string) =
+                let codeLines = code.Split([|"\r\n"; "\n"|], StringSplitOptions.None)
+                [
+                    if codeLines.length() > 1
+                    then 
+                        yield $"{tab2}{funcName} = {lbCode}"
+                        for line in codeLines  
+                            do yield $"{tab2}{line}"
+                        yield $"{tab2}{rbCode}"
+                    else 
+                        yield $"{tab2}{funcName} = {lbCode}{code}{rbCode}"
+                ]
+
             let operators = system.Functions.OfType<OperatorFunction>()
             if operators.Any() then
                 yield $"{tab}[operators] = {lb}"
@@ -159,7 +174,7 @@ module internal ToDsTextModule =
                     then 
                         yield $"{tab2}{op.Name};"
                     else 
-                        yield $"{tab2}{op.Name} = {op.ToDsText()};"
+                        yield! funcCodePrint op.Name (op.ToDsText())
 
                 yield $"{tab}{rb}"
 
@@ -171,15 +186,7 @@ module internal ToDsTextModule =
                     then 
                         yield $"{tab2}{cmd.Name};"
                     else
-                        let cmdLines = cmd.ToDsText().Split('\n')
-                        if cmdLines.length() > 1
-                        then 
-                            yield $"{tab2}{cmd.Name} = {lbCode}"
-                            for line in cmdLines  
-                                do yield $"{tab3}{line.TrimEnd('\r')}"
-                            yield $"{tab2}{rbCode}"
-                        else 
-                            yield $"{tab2}{cmd.Name} = {lbCode}{cmd.ToDsText()}{rbCode}"
+                        yield! funcCodePrint cmd.Name (cmd.ToDsText())
 
                 yield $"{tab}{rb}"
 

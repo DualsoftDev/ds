@@ -127,7 +127,7 @@ module CoreExtensionModule =
         member x.HWButtons            = x.HWButtons :> seq<_>
         member x.HWLamps              = x.HWLamps   :> seq<_>
 
-        member x.AutoNameGenFuncs  =
+        member x.AutoNameOperators  =
                     x.Jobs.Choose(fun j-> j.OperatorFunction)
                     @ x.HWButtons.Choose(fun f-> f.OperatorFunction)
                     @ x.HWLamps.Choose(fun f-> f.OperatorFunction)

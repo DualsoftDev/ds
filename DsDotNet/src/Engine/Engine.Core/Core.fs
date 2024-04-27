@@ -476,16 +476,22 @@ module CoreModule =
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
     type OperatorFunction with
-        static member Create(name:string, funcType, (parameters:string array)) =
+        static member Create(name:string,  excuteCode:string) =
             let op = OperatorFunction(name)
-            op.OperatorType <- funcType 
-            op.Parameters.AddRange(parameters)
-            op   
+            let opType, parameters = getOperatorTypeNArgs excuteCode
+            match opType with
+            |DuOPCode ->
+                op.OperatorType <- DuOPCode 
+                op.OperatorCode <- excuteCode
+            |_->
+                op.OperatorType <- opType 
+                op.Parameters.AddRange(parameters)
+            op
             
     type CommandFunction with
-        static member Create(name:string, funcType, (excuteCode:string)) =
+        static member Create(name:string, excuteCode:string) =
             let cmd = CommandFunction(name)
-            cmd.CommandType <- funcType 
+            cmd.CommandType <- if excuteCode = "" then DuCMDUnDefined else DuCMDCode 
             cmd.CommandCode <- excuteCode
             cmd 
 

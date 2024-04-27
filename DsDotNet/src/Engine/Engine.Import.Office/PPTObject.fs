@@ -381,7 +381,7 @@ module PPTObjectModule =
 
             elif nodeType = CALLOPFunc && shape.InnerText.Contains(".")
             then
-                name <- shape.InnerText.Replace(".", "_")
+                name <- "OP_" + shape.InnerText.Replace(".", "_")
             else 
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
 
@@ -427,7 +427,7 @@ module PPTObjectModule =
             | CALLOPFunc -> 
                 if shape.InnerText.Contains(".")
                 then
-                    opFunc <- $"if {shape.InnerText} == true"
+                    opFunc <-  $"if {shape.InnerText} == true;"
             | CALLCMDFunc 
                 -> 
                     cmdFunc <- ""

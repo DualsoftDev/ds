@@ -60,24 +60,8 @@ module ImportU =
             | None -> 
                 let newfunc = 
                     match node.NodeType with
-                    | CALLOPFunc  ->  
-                        let op =
-                            if not (node.OperatorFunc.IsNullOrEmpty()) 
-                            then
-                                let opType, args = getOperatorTypeNArgs node.OperatorFunc
-                                OperatorFunction.Create(funcName, tryGetOperatorType(opType).Value, args)
-                            else 
-                                OperatorFunction(funcName)
-                        op :> Func
-                    | CALLCMDFunc  ->  
-                        let cmd = 
-                            if node.CommandFunc = ""
-                            then 
-                                CommandFunction.Create(funcName, DuCMDUnDefined, "")
-                            else 
-                                CommandFunction.Create(funcName, DuCMDCode, node.CommandFunc)
-                        cmd :> Func
-
+                    | CALLOPFunc  ->   OperatorFunction.Create(funcName, node.OperatorFunc) :> Func
+                    | CALLCMDFunc  ->     CommandFunction.Create(funcName, node.CommandFunc):> Func
                     | _ -> failwithlog "error"
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc

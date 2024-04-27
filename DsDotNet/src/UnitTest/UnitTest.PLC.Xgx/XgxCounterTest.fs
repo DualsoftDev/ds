@@ -275,6 +275,9 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int64 nn2 = 2L;
             int64 sum = 0L;
             $sum := $nn1 + $nn2;
+            int64 sub = $nn1 - $nn2;
+            int64 mul = $nn1 * $nn2;
+            int64 div = $nn1 / $nn2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -288,6 +291,9 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             double nn2 = 2.2;
             double sum = 0.0;
             $sum := $nn1 + $nn2;
+            double sub = $nn1 - $nn2;
+            double mul = $nn1 * $nn2;
+            double div = $nn1 / $nn2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()

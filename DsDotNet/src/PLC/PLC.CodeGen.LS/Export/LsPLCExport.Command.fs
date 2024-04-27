@@ -753,10 +753,13 @@ module internal rec Command =
             let fbParam, fbWidth =
                 let s, d = source.GetTerminalString(prjParam), target.Name
                 let mov =
-                    assert (source.DataType = target.DataType)
-                    operatorToXgkFunctionName "MOV" source.DataType
+                    let st, tt = source.DataType, target.DataType
+                    // move 의 type 이 동일해야 한다.  timer/counter 는 예외.  reset coil 이나 preset 설정 등 허용.
+                    assert (st = tt || tt = typeof<TimerCounterBaseStruct>)
+                    operatorToXgkFunctionName "MOV" st
                 $"Param={dq}{mov},{s},{d}{dq}", 3
             rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
+
         | _ ->
             match prjParam.TargetType, expr, cmdExp with
             | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone

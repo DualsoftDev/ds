@@ -39,9 +39,12 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="3">
+                    <Symbols Count="6">
+                        <Symbol Name="div" Comment="" Device="M" DevicePos="20" Type="WORD"/>
+                        <Symbol Name="mul" Comment="" Device="M" DevicePos="16" Type="WORD"/>
                         <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
                         <Symbol Name="nn2" Comment="" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="sub" Comment="" Device="M" DevicePos="12" Type="WORD"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="8" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
@@ -77,8 +80,44 @@
                                     <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="4097" Param="90"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="END">
+                                    <Element ElementType="63" Coordinate="3073">
+                                        [1] int64 sub = $nn1 - $nn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="4097">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="4100" Param="81"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="SUB,nn1,nn2,sub"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="5121">
+                                        [2] int64 mul = $nn1 * $nn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="6145">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="6148" Param="81"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="MUL,nn1,nn2,mul"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="7169">
+                                        [3] int64 div = $nn1 / $nn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="8193">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="DIV,nn1,nn2,div"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="10241" Param="90"/>
+                                    <Element ElementType="33" Coordinate="10334" Param="END">
                                         END
                                     </Element>
                                 </Rung>

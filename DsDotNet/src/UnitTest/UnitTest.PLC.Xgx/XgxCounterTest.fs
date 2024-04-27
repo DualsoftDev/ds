@@ -256,6 +256,29 @@ type XgxFunctionTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+
+    member x.``ADD int16 test`` () =
+        let storages = Storages()
+        let code = """
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 sum = 0s;
+            int16 sum2 = 0s;
+            $sum := $nn1 + $nn2;
+            $sum2 := $sum;
+
+            uint16 unn1 = 1us;
+            uint16 unn2 = 2us;
+            uint16 usum = 0us;
+            uint16 usum2 = 0us;
+            $usum := $unn1 + $unn2;
+            $usum2 := $usum;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
     member x.``ADD int32 test`` () =
         let storages = Storages()
         let code = """
@@ -263,6 +286,11 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int nn2 = 2;
             int sum = 0;
             $sum := $nn1 + $nn2;
+
+            uint unn1 = 1u;
+            uint unn2 = 2u;
+            uint usum = 0u;
+            $usum := $unn1 + $unn2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -279,6 +307,15 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             int64 sub = $nn1 - $nn2;
             int64 mul = $nn1 * $nn2;
             int64 div = $nn1 / $nn2;
+
+            uint64 unn1 = 1UL;
+            uint64 unn2 = 2UL;
+            uint64 usum = 0UL;
+            $usum := $unn1 + $unn2;
+            uint64 usub = $unn1 - $unn2;
+            uint64 umul = $unn1 * $unn2;
+            uint64 udiv = $unn1 / $unn2;
+
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -438,6 +475,7 @@ type XgiFunctionTest() =
     inherit XgxFunctionTest(XGI)
 
     [<Test>] member __.``ADD simple test`` () = base.``ADD simple test``()
+    [<Test>] member __.``ADD int16 test`` () = base.``ADD int16 test``()
     [<Test>] member __.``ADD int32 test`` () = base.``ADD int32 test``()
     [<Test>] member __.``ADD int64 test`` () = base.``ADD int64 test``()
     [<Test>] member __.``ADD double test`` () = base.``ADD double test``()
@@ -453,6 +491,7 @@ type XgkFunctionTest() =
     inherit XgxFunctionTest(XGK)
 
     [<Test>] member __.``ADD simple test`` () = base.``ADD simple test``()
+    [<Test>] member __.``ADD int16 test`` () = base.``ADD int16 test``()
     [<Test>] member __.``ADD int32 test`` () = base.``ADD int32 test``()
     [<Test>] member __.``ADD int64 test`` () = base.``ADD int64 test``()
     [<Test>] member __.``ADD double test`` () = base.``ADD double test``()

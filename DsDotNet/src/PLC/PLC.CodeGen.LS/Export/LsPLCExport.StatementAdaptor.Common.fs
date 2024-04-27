@@ -48,7 +48,7 @@ module ConvertorPrologModule =
         | INT64 -> "LINT"
         | FLOAT32 -> "REAL"
         | STRING -> "STRING" // 32 byte
-        | UINT16 -> "UINT"
+        | UINT16 -> "USINT"
         | UINT32 -> "UDINT"
         | UINT64 -> "ULINT"
         | (INT8 | CHAR) -> "BYTE"

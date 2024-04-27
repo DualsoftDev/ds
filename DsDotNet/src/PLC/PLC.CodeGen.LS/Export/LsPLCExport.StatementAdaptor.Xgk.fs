@@ -13,18 +13,24 @@ module XgkTypeConvertorModule =
             member x.StorageName = tc.Name
 
 
+    /// {prefix}{Op}{suffix} 형태로 반환.  e.g "DADDU" : "{D}{ADD}{U}" => DWORD ADD UNSIGNED
+    ///
+    /// - prefix: "D" for DWORD, "R" for REAL, "L" for LONG REAL, "$" for STRING
+    ///
+    /// suffix: "U" for UNSIGNED
     let operatorToXgkFunctionName op (typ:Type) =
         let prefix =
             match typ with
             | _ when typ = typeof<single> -> "R"     // or "R" for real
             | _ when typ = typeof<double> -> "L"     // or "L" for long real
+            | _ when typ = typeof<string> -> "$"     // or "$" for string
             | _ when typ.IsOneOf(typeof<int32>, typeof<uint32>) -> "D"
             | _ when typ.IsOneOf(typeof<byte>, typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
             | _ -> ""
 
         let suffix =
             match typ with
-            | _ when typ.IsOneOf(typeof<uint32>, typeof<uint64>) -> "U"
+            | _ when typ.IsOneOf(typeof<uint16>, typeof<uint32>) && op <> "MOV" -> "U"  // MOVE 는 "MOVU" 등이 없다.  size 만 중요하지 unsigned 여부는 중요하지 않다.
             | _ -> ""
 
         let opName =

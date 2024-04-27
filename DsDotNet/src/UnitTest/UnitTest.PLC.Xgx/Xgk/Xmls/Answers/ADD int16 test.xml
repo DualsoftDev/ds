@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    ADD int32 test
+    ADD int16 test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -39,13 +39,15 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="6">
+                    <Symbols Count="8">
                         <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="sum" Comment="" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="unn1" Comment="" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="unn2" Comment="" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="usum" Comment="" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="sum" Comment="" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="sum2" Comment="" Device="M" DevicePos="3" Type="WORD"/>
+                        <Symbol Name="unn1" Comment="" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="unn2" Comment="" Device="M" DevicePos="5" Type="WORD"/>
+                        <Symbol Name="usum" Comment="" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="usum2" Comment="" Device="M" DevicePos="7" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -77,11 +79,11 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="DADD,nn1,nn2,sum"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="3073">
-                                        [1] $usum := $unn1 + $unn2
+                                        [1] $sum2 := $sum
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -89,11 +91,35 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="81"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="DADDU,unn1,unn2,usum"/>
+                                    <Element ElementType="33" Coordinate="4178" Param="MOV,sum,sum2"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="END">
+                                    <Element ElementType="63" Coordinate="6145">
+                                        [2] $usum := $unn1 + $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="7169">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="7172" Param="81"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="ADDU,unn1,unn2,usum"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="8193">
+                                        [3] $usum2 := $usum
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="9217">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="9220" Param="81"/>
+                                    <Element ElementType="33" Coordinate="9298" Param="MOV,usum,usum2"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="12289" Param="90"/>
+                                    <Element ElementType="33" Coordinate="12382" Param="END">
                                         END
                                     </Element>
                                 </Rung>

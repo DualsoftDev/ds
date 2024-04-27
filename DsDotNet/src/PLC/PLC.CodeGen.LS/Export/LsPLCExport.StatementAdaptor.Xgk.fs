@@ -96,8 +96,7 @@ module XgkTypeConvertorModule =
                         varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
                     | _ ->
                         if lstgs.any() || rstgs.any() then
-                            let stg = createTmpStorage()
-                            newExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts)
+                            newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                         else
                             exp, [], []
             | _ ->

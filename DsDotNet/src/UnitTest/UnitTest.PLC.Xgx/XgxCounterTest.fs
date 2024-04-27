@@ -256,6 +256,33 @@ type XgxFunctionTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+    member x.``ADD int8 test`` () =
+        let storages = Storages()
+        let code = """
+            int8 nn1 = 1y;
+            int8 nn2 = 2y;
+            int8 sum = 0y;
+            int8 sum2 = 0y;
+            $sum := $nn1 + $nn2;
+            $sum2 := $sum;
+
+            uint8 unn1 = 1uy;
+            uint8 unn2 = 2uy;
+            uint8 usum = 0uy;
+            uint8 usum2 = 0uy;
+            $usum := $unn1 + $unn2;
+            $usum2 := $usum;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let test =
+            fun () -> 
+                let xml = x.generateXmlForTest f storages (map withNoComment statements)
+                x.saveTestResult f xml
+        match xgx with
+        | XGI -> test()
+        | XGK -> test |> ShouldFailWithSubstringT "not supported in XGK"
+
 
     member x.``ADD int16 test`` () =
         let storages = Storages()
@@ -337,6 +364,22 @@ type XgxFunctionTest(xgx:PlatformTarget) =
             double sub = $nn1 - $nn2;
             double mul = $nn1 * $nn2;
             double div = $nn1 / $nn2;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``ADD single test`` () =
+        let storages = Storages()
+        let code = """
+            single nn1 = 1.1f;
+            single nn2 = 2.2f;
+            single sum = 0.0f;
+            $sum := $nn1 + $nn2;
+            single sub = $nn1 - $nn2;
+            single mul = $nn1 * $nn2;
+            single div = $nn1 / $nn2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -475,9 +518,11 @@ type XgiFunctionTest() =
     inherit XgxFunctionTest(XGI)
 
     [<Test>] member __.``ADD simple test`` () = base.``ADD simple test``()
+    [<Test>] member __.``ADD int8 test`` () = base.``ADD int8 test``()
     [<Test>] member __.``ADD int16 test`` () = base.``ADD int16 test``()
     [<Test>] member __.``ADD int32 test`` () = base.``ADD int32 test``()
     [<Test>] member __.``ADD int64 test`` () = base.``ADD int64 test``()
+    [<Test>] member __.``ADD single test`` () = base.``ADD single test``()
     [<Test>] member __.``ADD double test`` () = base.``ADD double test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
@@ -491,9 +536,11 @@ type XgkFunctionTest() =
     inherit XgxFunctionTest(XGK)
 
     [<Test>] member __.``ADD simple test`` () = base.``ADD simple test``()
+    [<Test>] member __.``ADD int8 test`` () = base.``ADD int8 test``()
     [<Test>] member __.``ADD int16 test`` () = base.``ADD int16 test``()
     [<Test>] member __.``ADD int32 test`` () = base.``ADD int32 test``()
     [<Test>] member __.``ADD int64 test`` () = base.``ADD int64 test``()
+    [<Test>] member __.``ADD single test`` () = base.``ADD single test``()
     [<Test>] member __.``ADD double test`` () = base.``ADD double test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()

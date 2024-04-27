@@ -21,11 +21,13 @@ module XgkTypeConvertorModule =
     let operatorToXgkFunctionName op (typ:Type) =
         let prefix =
             match typ with
-            | _ when typ = typeof<single> -> "R"     // or "R" for real
-            | _ when typ = typeof<double> -> "L"     // or "L" for long real
-            | _ when typ = typeof<string> -> "$"     // or "$" for string
+            | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
+                failwith $"byte (sint) type operation {op} is not supported in XGK"     // byte 연산 지원 여부 확인 필요
             | _ when typ.IsOneOf(typeof<int32>, typeof<uint32>) -> "D"
-            | _ when typ.IsOneOf(typeof<byte>, typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
+            | _ when typ = typeof<single> -> "R"     //"R" for real
+            | _ when typ = typeof<double> -> "L"     //"L" for long real
+            | _ when typ = typeof<string> -> "$"     //"$" for string
+            | _ when typ.IsOneOf(typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
             | _ -> ""
 
         let suffix =

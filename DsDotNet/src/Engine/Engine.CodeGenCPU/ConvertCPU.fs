@@ -73,7 +73,8 @@ module ConvertCPU =
                 
                 if (v :?> Call).TargetHasJob
                 then yield! vm.C2_ActionOut()
-                else yield! vm.C3_FunctionOut()
+                elif (v :?> Call).CallCommandType <> DuCMDUnDefined
+                then yield! vm.C3_FunctionOut()
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
                 yield vm.C1_CallMemo() 

@@ -100,6 +100,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     registerSystem exSys
                     exSys
             | _ -> x.TheSystem <- DsSystem(name)
+            
+            RuntimeDS.System <- x.TheSystem 
 
             debugfn ($"System: {name}")
         | None -> failwithlog "ERROR"
@@ -206,12 +208,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         )
         |> ignore
 
-    override x.EnterCodeBlock(ctx: CodeBlockContext) =
-        let code = ctx.GetOriginalText()
-        x.TheSystem.OriginalCodeBlocks.Add code
-        let pureCode = code.Substring(3, code.Length - 6) // 처음과 끝의 "<@{" 와 "}@>" 제외
-        let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
-        x.TheSystem.Statements.AddRange statements
+    //override x.EnterCodeBlock(ctx: CodeBlockContext) =
+    //    let code = ctx.GetOriginalText()
+    //    x.TheSystem.OriginalCodeBlocks.Add code
+    //    let pureCode = code.Substring(3, code.Length - 6) // 처음과 끝의 "<@{" 와 "}@>" 제외
+    //    let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
+    //    x.TheSystem.Statements.AddRange statements
 
     override x.EnterCommandBlock(ctx: CommandBlockContext) =
         // FunctionsBlockContext에서 모든 FunctionDefContext를 추출
@@ -225,9 +227,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             // 함수 이름 추출
             let funcName = fDef.functionName().GetText()
             // 함수 호출과 관련된 매개변수 추출
-            let excuteCode = fDef.functionCommand().functionCommandCode().GetText()
+            let excuteCode = fDef.functionCommand().GetText()
+            // 처음과 끝의 "${" 와 "}" 제외
+            let pureCode = excuteCode.Substring(2, excuteCode.Length - 2).TrimEnd('}') 
+
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
-            let newFunc = CommandFunction.Create(funcName, DuCMDCode, excuteCode)
+            let newFunc = CommandFunction.Create(funcName, DuCMDCode, pureCode)
             x.TheSystem.Functions.Add(newFunc) )
 
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =

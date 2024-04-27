@@ -10,6 +10,7 @@ open System.Reflection
 module internal ToDsTextModule =
     let getTab n = Seq.init n (fun _ -> "    ") |> String.concat ""
     let lb, rb = "{", "}"
+    let lbCode, rbCode = "${", "}"
     let combineLines = ofNotNullAny >> joinLines
     let mutable  pCooment = true //printComment
 
@@ -166,19 +167,19 @@ module internal ToDsTextModule =
             if commands.Any() then
                 yield $"{tab}[commands] = {lb}"
                 for cmd in commands do
-                    if cmd.CommandType = DuCMDUnDefined
+                    if cmd.CommandType = DuCMDUnDefined ||  cmd.CommandCode = ""
                     then 
                         yield $"{tab2}{cmd.Name};"
                     else
-                        let cmdArgs = cmd.ToDsText().Trim(';').Split(';')
-                        if cmdArgs.length() > 1
+                        let cmdLines = cmd.ToDsText().Split('\n')
+                        if cmdLines.length() > 1
                         then 
-                            yield $"{tab2}{cmd.Name} = {lb}"
-                            for arg in cmdArgs  
-                                do yield $"{tab3}{arg};"
-                            yield $"{tab2}{rb}"
+                            yield $"{tab2}{cmd.Name} = {lbCode}"
+                            for line in cmdLines  
+                                do yield $"{tab3}{line.TrimEnd('\r')}"
+                            yield $"{tab2}{rbCode}"
                         else 
-                            yield $"{tab2}{cmd.Name} = {lb}{cmd.ToDsText()}{rb};"
+                            yield $"{tab2}{cmd.Name} = {lbCode}{cmd.ToDsText()}{rbCode}"
 
                 yield $"{tab}{rb}"
 
@@ -406,11 +407,13 @@ module internal ToDsTextModule =
                 yield $"{tab}[external file={quote es.RelativeFilePath}] {es.Name}; {commentSystem es}"
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
-            yield codeBlockToDs system
+            //yield codeBlockToDs system
 
             // todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
-            for code in system.OriginalCodeBlocks do
-                yield code
+            //for code in system.OriginalCodeBlocks do
+            //    yield code
+            
+            // code 는 [Commands] = { cmd1 = ${code1}$, cmd2 = ${code2}$ } 복수개 저장
 
             yield rb
             yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}]"

@@ -659,11 +659,16 @@ module PPTUtil =
                     rows
                     |> Seq.iter (fun row ->
                         let cells = row.Descendants<DocumentFormat.OpenXml.Drawing.TableCell>()
-
-                        if cells.Count() = colCnt
-                        then
+                        if cells.Count() = colCnt then
                             let rowTemp = dt.NewRow()
-                            rowTemp.ItemArray <- cells.Select(fun c -> c.InnerText) |> Seq.cast<obj> |> Seq.toArray
+                            let cellTexts = cells |> Seq.map (fun cell ->
+                                        cell.Descendants<DocumentFormat.OpenXml.Drawing.Paragraph>()
+                                        |> Seq.filter(fun node -> node.InnerText <> "")
+                                        |> Seq.map (fun node ->node.InnerText)
+                                        |> String.concat "\r\n"
+                                    ) 
+                                    
+                            rowTemp.ItemArray <- cellTexts |> Seq.cast<obj> |> Seq.toArray 
                             rowTemp |> dt.Rows.Add |> ignore
                         else 
                             Office.ErrorPPT(ErrorCase.Name, ErrID._1004, "", pageIndex, 0u)

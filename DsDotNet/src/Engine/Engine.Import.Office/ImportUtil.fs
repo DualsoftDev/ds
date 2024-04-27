@@ -70,7 +70,12 @@ module ImportU =
                                 OperatorFunction(funcName)
                         op :> Func
                     | CALLCMDFunc  ->  
-                        let cmd = CommandFunction.Create(funcName, DuCMDCode, node.CommandFunc)
+                        let cmd = 
+                            if node.CommandFunc = ""
+                            then 
+                                CommandFunction.Create(funcName, DuCMDUnDefined, "")
+                            else 
+                                CommandFunction.Create(funcName, DuCMDCode, node.CommandFunc)
                         cmd :> Func
 
                     | _ -> failwithlog "error"

@@ -50,15 +50,15 @@ module CodeElements =
         member x.ToText() =
             match x  with
             | DuOPUnDefined -> ""
-            | DuOPNot -> "not"
-            | DuOPTimer -> "time"
-            | DuOPCompare -> "if"
+            | DuOPNot -> "$not"
+            | DuOPTimer -> "$time"
+            | DuOPCompare -> "$if"
      
     let tryGetOperatorType (text:string) = 
         match text.ToLower()  with
-            | "not" -> DuOPNot       |> Some   
-            | "time" -> DuOPTimer     |> Some   
-            | "if" -> DuOPCompare   |> Some   
+            | "$not" -> DuOPNot       |> Some   
+            | "$time" -> DuOPTimer     |> Some   
+            | "$if" -> DuOPCompare   |> Some   
             | _ -> None
             
     let getOperatorTypeNArgs (text:string) = 
@@ -74,11 +74,6 @@ module CodeElements =
     type CommandFunctionTypes =
         | DuCMDUnDefined
         | DuCMDCode
-
-        member x.ToText() =
-            match x  with
-            | DuCMDUnDefined -> ""
-            | DuCMDCode -> "cmd"
 
     let tryGetCommandType (text:string) = 
         if text <> "" && tryGetOperatorType text = None  //operator type이 아닌 경우

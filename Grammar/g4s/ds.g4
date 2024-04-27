@@ -71,8 +71,8 @@ WS: [ \t\r\n]+ -> skip;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
-fragment CODE_BLOCK_START: '<@{';
-fragment CODE_BLOCK_END: '}@>';
+fragment CODE_BLOCK_START: '${';
+fragment CODE_BLOCK_END: '}';
 CODE_BLOCK: CODE_BLOCK_START (BLOCK_COMMENT|LINE_COMMENT|CODE_BLOCK|.)*? CODE_BLOCK_END;
 
 fragment Identifier: ValidIdStart ValidIdChar*;
@@ -200,7 +200,7 @@ system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
         : LBRACE (  flowBlock | jobBlock | commandBlock | operatorBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
-                    | codeBlock | variableBlock )*
+                    | variableBlock )*
           RBRACE       // identifier1Listing|parenting|causal|call
           (SEMICOLON)?;
     systemName:identifier1;
@@ -291,14 +291,15 @@ operatorBlock: '[' 'operators' ']' EQ LBRACE (functionDef|functionNameOnly)+ RBR
     functionDef: functionName EQ functionOperator SEMICOLON;
     functionName: identifier1;
     functionOperator: functionType (argument (argument)*)?;
-    functionType: identifier1;
+    functionType: '$'identifier1;
 
 
 commandBlock: '[' 'commands' ']' '=' '{' functionNameOnly* | functionCommandDef* '}' ;
 functionCommandDef :  functionName '=' functionCommand;
+functionCommand : codeBlock;
 
-functionCommand : '{' functionCommandCode '}'; 
-functionCommandCode :  .*? ; //  any character between braces
+//functionCommand : '{' functionCommandCode '}'; 
+//functionCommandCode :  .*? ; //  any character between braces
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     callListing:

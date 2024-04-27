@@ -430,7 +430,7 @@ module PPTObjectModule =
                     opFunc <- $"if {shape.InnerText} == true"
             | CALLCMDFunc 
                 -> 
-                    cmdFunc <- "non"
+                    cmdFunc <- ""
             | DUMMY -> ()
 
         member x.PageNum = iPage

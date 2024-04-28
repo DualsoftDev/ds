@@ -273,10 +273,8 @@ flowBlock
         aliasMnemonic: identifier1;
 
 variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
-    variableDef: varName '=' '(' varType ',' argumentGroups ')';     // R100   = (Word, 0)
+    variableDef: varType varName '=' argument;
     varName: IDENTIFIER1;
-    argumentGroups: argumentGroup ('~' argumentGroup)*;
-    argumentGroup: argument (',' argument)*;
     argument: intValue | floatValue | varIdentifier;
     varIdentifier: IDENTIFIER1;
     intValue: INTEGER;
@@ -285,11 +283,11 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
 
 
 
-operatorBlock: '[' 'operators' ']' '=' '{' functionNameOnly* | functionOperatorDef* '}' ;
+operatorBlock: '[' 'operators' ']' '=' '{' (functionNameOnly | functionOperatorDef)* '}' ;
     functionOperatorDef :  functionName '=' functionOperator;
     functionOperator : codeBlock;
     
-commandBlock:  '[' 'commands' ']'  '=' '{' functionNameOnly* | functionCommandDef* '}' ;
+commandBlock:  '[' 'commands' ']'  '=' '{' (functionNameOnly | functionCommandDef)* '}' ;
     functionCommandDef :  functionName '=' functionCommand;
     functionCommand : codeBlock;
     

@@ -123,7 +123,6 @@ module CoreModule =
         member val Functions = ResizeArray<Func>()
 
         member val Flows = createNamedHashSet<Flow>()
-        member val Statements = StatementContainer()
         member val Variables = ResizeArray<VariableData>()
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()

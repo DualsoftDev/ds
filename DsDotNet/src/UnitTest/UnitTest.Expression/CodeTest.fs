@@ -174,18 +174,18 @@ double myDouble = 3.14 + 3.14;
             let storages = Storages()
             let ds = """
 [sys] MySystem = {
-    <@{
-    // This is arbitary code block;
-    // }@> commented out---This is arbitary code block;
-    float32 myFloat32 = 3.14f + 3.14f;
-    single mySingle = 3.14f + 3.14f;
-    }@>
+    [commands] = {
+        test = ${
+            float32 myFloat32 = 3.14f + 3.14f;
+            single mySingle = 3.14f + 3.14f;
+        }
+    }
 }
 """
             let system = parseText ds
-            system.Statements.Count === 2
-            system.Statements[0].ToText() === "float32 myFloat32 = 3.140000105f + 3.140000105f"
-            system.Statements[1].ToText() === "float32 mySingle = 3.140000105f + 3.140000105f"
+            system.Functions.Count === 1
+            system.Functions[0].Statements[0].ToText() ==="float32 myFloat32 = 3.140000105f + 3.140000105f"
+            system.Functions[0].Statements[1].ToText() ==="float32 mySingle = 3.140000105f + 3.140000105f"
 
             let text = system.ToDsText(true)
             ds =~= text

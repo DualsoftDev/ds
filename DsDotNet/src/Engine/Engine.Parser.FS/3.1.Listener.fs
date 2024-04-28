@@ -218,6 +218,32 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     //    let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
     //    x.TheSystem.Statements.AddRange statements
     
+
+    
+//variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
+//    variableDef: varType varName '=' argument;
+//    varName: IDENTIFIER1;
+//    argument: intValue | floatValue | varIdentifier;
+//    varIdentifier: IDENTIFIER1;
+//    intValue: INTEGER;
+//    floatValue:FLOAT;
+//    varType: IDENTIFIER1;
+
+    override x.EnterVariableBlock(ctx: VariableBlockContext) =
+        let variableDefs = ctx.variableDef()
+        variableDefs |> Seq.iter (fun vari ->
+            let varType = vari.varType().GetText() |> textToDataType
+            let varName = vari.varName().GetText()
+            let argument = vari.argument().GetText()
+
+            let variableData = VariableData (varName, varType, argument)
+            let value = varType.ToValue(argument)
+            let variable = varType.ToType().CreateVariable(varName, value)
+
+            options.Storages.Add (varName, variable) |>ignore
+            x.TheSystem.Variables.Add variableData   |>ignore
+            )
+
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
         
         ctx.functionNameOnly() |> Seq.iter (fun fDef ->
@@ -228,8 +254,15 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         functionDefs |> Seq.iter (fun fDef ->
             let funcName = fDef.functionName().GetText()
             let pureCode = commonFunctionOperatorExtractor fDef
+
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
             let newFunc = OperatorFunction.Create(funcName, pureCode)
+            let assignCode = $"${funcName} := {pureCode}" 
+            let variable = ("bool"  |> System.Type.FromString).CreateVariable(funcName, false)
+            options.Storages.Add (variable.Name, variable) |>ignore
+
+            let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
+            newFunc.Statements.AddRange(statements)
             x.TheSystem.Functions.Add(newFunc) 
             )
 
@@ -243,8 +276,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         functionDefs |> Seq.iter (fun fDef ->
             let funcName = fDef.functionName().GetText()
             let pureCode = commonFunctionCommandExtractor fDef
+
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
             let newFunc = CommandFunction.Create(funcName, pureCode)
+            let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
+            newFunc.Statements.AddRange(statements)
             x.TheSystem.Functions.Add(newFunc)
             )
 

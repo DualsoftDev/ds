@@ -234,6 +234,22 @@ module DsDataType =
             | DuUINT64  -> typedefof<uint64>
             | DuUINT8   -> typedefof<uint8>
 
+        member x.ToValue(value:string) =
+            match x with
+            | DuBOOL    -> value |> Convert.ToBoolean |> box       
+            | DuCHAR    -> value |> Convert.ToChar    |> box 
+            | DuFLOAT32 -> value |> Convert.ToSingle  |> box 
+            | DuFLOAT64 -> value |> Convert.ToDouble  |> box 
+            | DuINT16   -> value |> Convert.ToInt16   |> box 
+            | DuINT32   -> value |> Convert.ToInt32   |> box 
+            | DuINT64   -> value |> Convert.ToInt64   |> box 
+            | DuINT8    -> value |> Convert.ToSByte   |> box 
+            | DuSTRING  -> value                      |> box 
+            | DuUINT16  -> value |> Convert.ToUInt16  |> box 
+            | DuUINT32  -> value |> Convert.ToUInt32  |> box 
+            | DuUINT64  -> value |> Convert.ToUInt64  |> box 
+            | DuUINT8   -> value |> Convert.ToByte    |> box 
+
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
     type IOType = | In | Out | Memory | NotUsed

@@ -10,7 +10,7 @@ open Dual.Common.Core.FS
 module CodeElements =
     (*
       [variables] = { //이름 = (타입,초기값)
-        R100 = (word, 0)
+        int32 R100 = 0
       }
      *)
     /// Variable Declaration: name = (type, init)  CodeBlock 사용 ? 선택 필요
@@ -20,7 +20,7 @@ module CodeElements =
         member _.InitValue = initValue
         member _.ToDsText() =
             let genTargetText name (varType:DataType) value =
-                $"{name} = ({varType.ToText()} , {value})"
+                $"{varType.ToText()} {name} = {value}"
 
             if initValue = TextAddrEmpty then
                 let forcedValue =
@@ -80,6 +80,7 @@ module CodeElements =
     [<AbstractClass>]
     type Func(name:string) =
         member x.Name = name
+        member val Statements = StatementContainer()
         member x.ToDsText() =
             match x with
             | :? OperatorFunction as op -> op.ToDsText()
@@ -102,6 +103,7 @@ module CodeElements =
         inherit Func(name)
         member val CommandType = DuCMDUnDefined with get, set
         member val CommandCode = "" with get, set
+
         member x.ToDsText() = x.CommandCode
 
     [<Extension>]

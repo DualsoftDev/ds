@@ -72,8 +72,9 @@ type VertexManager with
         let v = v :?> VertexMCall
         let coin = v.Vertex :?> Call
         [
-            let set = v.PSFunc.Expr
             match coin.CallCommandType with 
-            | DuCMDCode -> yield set --> (v.PSFunc, getFuncName())
+            | DuCMDCode ->
+                yield! coin.TargetFunc.Statements.Select(fun s-> withExpressionComment "Command"  s)
+            
             | _-> failwithlog $"{v.Name} 함수 정의가 없습니다."
         ]

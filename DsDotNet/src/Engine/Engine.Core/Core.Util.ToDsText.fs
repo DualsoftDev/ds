@@ -111,7 +111,7 @@ module internal ToDsTextModule =
             yield $"{tab}{rb}"
         ] |> combineLines
 
-    let codeBlockToDs (theSystem:DsSystem) =
+    let printVariables (theSystem:DsSystem) =
         let vars = theSystem.Variables
         let tab = getTab 1
         let tab2 = getTab 2
@@ -152,6 +152,7 @@ module internal ToDsTextModule =
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
                 yield $"{tab}{rb}"
 
+            yield printVariables system
 
             let funcCodePrint funcName (code:string) =
                 let codeLines = code.Split([|"\r\n"; "\n"|], StringSplitOptions.None)
@@ -160,7 +161,7 @@ module internal ToDsTextModule =
                     then 
                         yield $"{tab2}{funcName} = {lbCode}"
                         for line in codeLines  
-                            do yield $"{tab2}{line}"
+                            do yield $"{tab3}{line}"
                         yield $"{tab2}{rbCode}"
                     else 
                         yield $"{tab2}{funcName} = {lbCode}{code}{rbCode}"
@@ -412,6 +413,7 @@ module internal ToDsTextModule =
             let commentSystem(es:ExternalSystem) = if pCooment then  $"// {es.AbsoluteFilePath}" else "";
             for es in system.ExternalSystems do
                 yield $"{tab}[external file={quote es.RelativeFilePath}] {es.Name}; {commentSystem es}"
+            
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
             //yield codeBlockToDs system

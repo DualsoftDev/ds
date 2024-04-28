@@ -278,7 +278,7 @@ module ImportIOTable =
                     then
                         match TextToXlsType(case) with
                         | XlsAddress -> updateDev (row, tableIO, page)
-                        | XlsVariable -> updateVar (row, tableIO, page)
+                        | XlsVariable ->    updateVar (row, tableIO, page)
 
                         | XlsAutoBTN -> updateBtn (row, BtnType.DuAutoBTN, tableIO, page)
                         | XlsManualBTN -> updateBtn (row, BtnType.DuManualBTN, tableIO, page)

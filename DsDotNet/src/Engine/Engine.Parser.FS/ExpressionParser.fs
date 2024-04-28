@@ -308,7 +308,7 @@ module rec ExpressionParser =
 
             | :? AssignContext as assignCtx ->
                 if not <| storages.ContainsKey storageName then
-                    failwith $"ERROR: Failed to assign into non existing storage {storageName}"
+                            failwith $"ERROR: Failed to assign into non existing storage {storageName}"
 
                 let storage = storages[storageName]
 

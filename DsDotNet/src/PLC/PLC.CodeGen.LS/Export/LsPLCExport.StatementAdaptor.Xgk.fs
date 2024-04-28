@@ -42,7 +42,9 @@ module XgkTypeConvertorModule =
             | "*" -> "MUL"
             | "/" -> "DIV"
             | "MOV" -> "MOV"
-            | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
+            | "!=" -> "<>"
+            | "==" -> "="
+            | (">" | ">=" | "<"  | "<="  | "=" | "<>" ) -> op
             | _ -> failwithlog "ERROR"
 
         $"{prefix}{opName}{suffix}"

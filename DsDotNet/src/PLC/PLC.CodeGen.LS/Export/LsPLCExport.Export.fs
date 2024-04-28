@@ -71,16 +71,16 @@ module XgiExportModule =
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "<>") ->
+            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "==", "!=", "<>") ->
             
-                let op = operatorToXgkFunctionName funName expr.DataType
+                let op = operatorToXgkFunctionName funName expr.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
                     if funName.IsOneOf("+", "-", "*", "/") then
                         let param = $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
                         drawXgkFBRight xy param
-                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "<>") then
+                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "==", "!=", "<>") then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
                         drawXgkFBLeft xy param target.Name
                     else

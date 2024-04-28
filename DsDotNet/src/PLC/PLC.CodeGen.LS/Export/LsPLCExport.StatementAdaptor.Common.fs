@@ -231,9 +231,9 @@ module XgxExpressionConvertorModule =
     let operatorToXgiFunctionName =
         function
         | ">" -> "GT"
-        | ">=" -> "GTE"
+        | ">=" -> "GE"
         | "<" -> "LT"
-        | "<=" -> "LTE"
+        | "<=" -> "LE"
         | "=" -> "EQ"
         | "!=" -> "NE"
         | "+" -> "ADD"

@@ -6,6 +6,7 @@ open Dual.Common.Core.FS
 /// 래더에서 타입 체크할때 사용하기 위한 타입
 // RecordType.h : LS 산전에서 전달받은 header file
 // #define BOOL_CHECKTYPE			0x00000001
+// pp.60, https://sol.ls-electric.com/uploads/document/16572861196090/XGI%20%EC%B4%88%EA%B8%89_V21_.pdf
 [<Flags>]
 type CheckType =
     | BOOL          = 0x00000001
@@ -13,15 +14,25 @@ type CheckType =
     | WORD          = 0x00000004
     | DWORD         = 0x00000008
     | LWORD         = 0x00000010
+    /// int8.   1 byte 크기
     | SINT          = 0x00000020
+    /// int16.  2 byte 크기
     | INT           = 0x00000040
+    /// int32.  4 byte 크기
     | DINT          = 0x00000080
+    /// int64.  8 byte 크기.  XGK 에서는 사용하지 않음
     | LINT          = 0x00000100
+    /// uint8.  1 byte 크기
     | USINT         = 0x00000200
+    /// uint16. 2 byte 크기
     | UINT          = 0x00000400
+    /// uint32. 4 byte 크기
     | UDINT         = 0x00000800
+    /// uint64. 8 byte 크기.  XGK 에서는 사용하지 않음
     | ULINT         = 0x00001000
+    /// single. 4 byte 크기
     | REAL          = 0x00002000
+    /// double. 8 byte 크기
     | LREAL         = 0x00004000
     | TIME          = 0x00008000
     | DATE          = 0x00010000

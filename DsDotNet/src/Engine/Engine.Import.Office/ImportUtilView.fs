@@ -90,9 +90,9 @@ module ImportViewModule =
                     ConvertReal(r, dicV.[r], dummys) |> ignore)
 
 
-            edge.Targets
+            edge.Sources
             |> Seq.iter (fun src ->
-                edge.Sources
+                edge.Targets
                 |> Seq.iter (fun tgt ->
                     newNode.AddEdge(ModelingEdgeInfo<ViewNode>(dicV.[src], edge.EdgeSymbol, dicV.[tgt]))
                     )

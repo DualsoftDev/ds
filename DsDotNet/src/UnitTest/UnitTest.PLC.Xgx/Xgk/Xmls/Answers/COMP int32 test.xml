@@ -39,23 +39,31 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="18">
+                    <Symbols Count="26">
                         <Symbol Name="b1" Comment="" Device="M" DevicePos="128" Type="BIT"/>
+                        <Symbol Name="b10" Comment="" Device="M" DevicePos="136" Type="BIT"/>
+                        <Symbol Name="b11" Comment="" Device="M" DevicePos="137" Type="BIT"/>
+                        <Symbol Name="b12" Comment="" Device="M" DevicePos="138" Type="BIT"/>
                         <Symbol Name="b2" Comment="" Device="M" DevicePos="129" Type="BIT"/>
                         <Symbol Name="b3" Comment="" Device="M" DevicePos="130" Type="BIT"/>
                         <Symbol Name="b5" Comment="" Device="M" DevicePos="131" Type="BIT"/>
                         <Symbol Name="b6" Comment="" Device="M" DevicePos="132" Type="BIT"/>
                         <Symbol Name="b7" Comment="" Device="M" DevicePos="133" Type="BIT"/>
                         <Symbol Name="b8" Comment="" Device="M" DevicePos="134" Type="BIT"/>
+                        <Symbol Name="b9" Comment="" Device="M" DevicePos="135" Type="BIT"/>
                         <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
                         <Symbol Name="nn2" Comment="" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="ub1" Comment="" Device="M" DevicePos="135" Type="BIT"/>
-                        <Symbol Name="ub2" Comment="" Device="M" DevicePos="136" Type="BIT"/>
-                        <Symbol Name="ub3" Comment="" Device="M" DevicePos="137" Type="BIT"/>
-                        <Symbol Name="ub5" Comment="" Device="M" DevicePos="138" Type="BIT"/>
-                        <Symbol Name="ub6" Comment="" Device="M" DevicePos="139" Type="BIT"/>
-                        <Symbol Name="ub7" Comment="" Device="M" DevicePos="140" Type="BIT"/>
-                        <Symbol Name="ub8" Comment="" Device="M" DevicePos="141" Type="BIT"/>
+                        <Symbol Name="ub1" Comment="" Device="M" DevicePos="139" Type="BIT"/>
+                        <Symbol Name="ub10" Comment="" Device="M" DevicePos="147" Type="BIT"/>
+                        <Symbol Name="ub11" Comment="" Device="M" DevicePos="148" Type="BIT"/>
+                        <Symbol Name="ub12" Comment="" Device="M" DevicePos="149" Type="BIT"/>
+                        <Symbol Name="ub2" Comment="" Device="M" DevicePos="140" Type="BIT"/>
+                        <Symbol Name="ub3" Comment="" Device="M" DevicePos="141" Type="BIT"/>
+                        <Symbol Name="ub5" Comment="" Device="M" DevicePos="142" Type="BIT"/>
+                        <Symbol Name="ub6" Comment="" Device="M" DevicePos="143" Type="BIT"/>
+                        <Symbol Name="ub7" Comment="" Device="M" DevicePos="144" Type="BIT"/>
+                        <Symbol Name="ub8" Comment="" Device="M" DevicePos="145" Type="BIT"/>
+                        <Symbol Name="ub9" Comment="" Device="M" DevicePos="146" Type="BIT"/>
                         <Symbol Name="unn1" Comment="" Device="M" DevicePos="4" Type="WORD"/>
                         <Symbol Name="unn2" Comment="" Device="M" DevicePos="6" Type="WORD"/>
                     </Symbols>
@@ -165,91 +173,187 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
-                                        [7] bool ub1 = $unn1 &gt; $unn2
+                                        [7] bool b9 = 1 &gt; 2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="16385" Param="&gt;,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="16385" Param="&gt;,1,2"/>
                                     <Element ElementType="2" Coordinate="16394" Param="90"/>
                                     <Element ElementType="14" Coordinate="16478">
-                                        ub1
+                                        b9
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="17409">
-                                        [8] bool ub2 = $unn1 &lt; $unn2
+                                        [8] bool b10 = 1 &lt; 2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="18433" Param="&lt;,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="18433" Param="&lt;,1,2"/>
                                     <Element ElementType="2" Coordinate="18442" Param="90"/>
                                     <Element ElementType="14" Coordinate="18526">
-                                        ub2
+                                        b10
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [9] bool ub3 = $unn1 = $unn2
+                                        [9] bool b11 = 1 = 2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="20481" Param="=,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="20481" Param="=,1,2"/>
                                     <Element ElementType="2" Coordinate="20490" Param="90"/>
                                     <Element ElementType="14" Coordinate="20574">
-                                        ub3
+                                        b11
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="21505">
-                                        [10] bool ub5 = $unn1 != $unn2
+                                        [10] bool b12 = 1 != 2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="22529" Param="&lt;&gt;,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="22529" Param="&lt;&gt;,1,2"/>
                                     <Element ElementType="2" Coordinate="22538" Param="90"/>
                                     <Element ElementType="14" Coordinate="22622">
-                                        ub5
+                                        b12
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="23553">
-                                        [11] bool ub6 = $unn1 != $unn2
+                                        [11] bool ub1 = $unn1 &gt; $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="24577" Param="&lt;&gt;,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="24577" Param="&gt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="24586" Param="90"/>
                                     <Element ElementType="14" Coordinate="24670">
-                                        ub6
+                                        ub1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="25601">
-                                        [12] bool ub7 = $unn1 &gt;= $unn2
+                                        [12] bool ub2 = $unn1 &lt; $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="26625" Param="&gt;=,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="26625" Param="&lt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="26634" Param="90"/>
                                     <Element ElementType="14" Coordinate="26718">
-                                        ub7
+                                        ub2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="27649">
-                                        [13] bool ub8 = $unn1 &lt;= $unn2
+                                        [13] bool ub3 = $unn1 = $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="28673" Param="&lt;=,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="28673" Param="=,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="28682" Param="90"/>
                                     <Element ElementType="14" Coordinate="28766">
+                                        ub3
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="29697">
+                                        [14] bool ub5 = $unn1 != $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="30721" Param="&lt;&gt;,unn1,unn2"/>
+                                    <Element ElementType="2" Coordinate="30730" Param="90"/>
+                                    <Element ElementType="14" Coordinate="30814">
+                                        ub5
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="31745">
+                                        [15] bool ub6 = $unn1 != $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="32769" Param="&lt;&gt;,unn1,unn2"/>
+                                    <Element ElementType="2" Coordinate="32778" Param="90"/>
+                                    <Element ElementType="14" Coordinate="32862">
+                                        ub6
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="33793">
+                                        [16] bool ub7 = $unn1 &gt;= $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="34817" Param="&gt;=,unn1,unn2"/>
+                                    <Element ElementType="2" Coordinate="34826" Param="90"/>
+                                    <Element ElementType="14" Coordinate="34910">
+                                        ub7
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="35841">
+                                        [17] bool ub8 = $unn1 &lt;= $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="36865" Param="&lt;=,unn1,unn2"/>
+                                    <Element ElementType="2" Coordinate="36874" Param="90"/>
+                                    <Element ElementType="14" Coordinate="36958">
                                         ub8
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="30721" Param="90"/>
-                                    <Element ElementType="33" Coordinate="30814" Param="END">
+                                    <Element ElementType="63" Coordinate="37889">
+                                        [18] bool ub9 = 1 &gt; 2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="38913" Param="&gt;,1,2"/>
+                                    <Element ElementType="2" Coordinate="38922" Param="90"/>
+                                    <Element ElementType="14" Coordinate="39006">
+                                        ub9
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="39937">
+                                        [19] bool ub10 = 1 &lt; 2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="40961" Param="&lt;,1,2"/>
+                                    <Element ElementType="2" Coordinate="40970" Param="90"/>
+                                    <Element ElementType="14" Coordinate="41054">
+                                        ub10
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="41985">
+                                        [20] bool ub11 = 1 = 2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="43009" Param="=,1,2"/>
+                                    <Element ElementType="2" Coordinate="43018" Param="90"/>
+                                    <Element ElementType="14" Coordinate="43102">
+                                        ub11
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="44033">
+                                        [21] bool ub12 = 1 != 2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="45057" Param="&lt;&gt;,1,2"/>
+                                    <Element ElementType="2" Coordinate="45066" Param="90"/>
+                                    <Element ElementType="14" Coordinate="45150">
+                                        ub12
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="47105" Param="90"/>
+                                    <Element ElementType="33" Coordinate="47198" Param="END">
                                         END
                                     </Element>
                                 </Rung>

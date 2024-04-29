@@ -25,6 +25,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
+            bool b9 = 1s > 2s;
+            bool b10 = 1y < 2y;
+            bool b11 = 1y = 2y;
+            bool b12 = 1y <> 2y;
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
@@ -34,6 +38,11 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
             bool ub8 = $unn1 <= $unn2;
+
+            bool ub9 = 1uy > 2uy;
+            bool ub10 = 1uy < 2uy;
+            bool ub11 = 1uy = 2uy;
+            bool ub12 = 1uy <> 2uy;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -63,6 +72,11 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
+            bool b9 = 1s > 2s;
+            bool b10 = 1s < 2s;
+            bool b11 = 1s = 2s;
+            bool b12 = 1s <> 2s;
+
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
@@ -72,6 +86,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
             bool ub8 = $unn1 <= $unn2;
+            bool ub9 = 1us > 2us;
+            bool ub10 = 1us < 2us;
+            bool ub11 = 1us = 2us;
+            bool ub12 = 1us <> 2us;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -100,6 +118,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
+            bool b9 = 1 > 2;
+            bool b10 = 1 < 2;
+            bool b11 = 1 = 2;
+            bool b12 = 1 <> 2;
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
@@ -109,6 +131,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
             bool ub8 = $unn1 <= $unn2;
+            bool ub9 = 1 > 2;
+            bool ub10 = 1 < 2;
+            bool ub11 = 1 = 2;
+            bool ub12 = 1 <> 2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -139,6 +165,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
+            bool b9 = 1L > 2L;
+            bool b10 = 1L < 2L;
+            bool b11 = 1L = 2L;
+            bool b12 = 1L <> 2L;
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
@@ -148,6 +178,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
             bool ub8 = $unn1 <= $unn2;
+            bool ub9 = 1UL > 2UL;
+            bool ub10 = 1UL < 2UL;
+            bool ub11 = 1UL = 2UL;
+            bool ub12 = 1UL <> 2UL;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()

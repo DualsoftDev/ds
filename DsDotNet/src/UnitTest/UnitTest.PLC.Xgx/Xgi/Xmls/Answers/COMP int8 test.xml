@@ -15,24 +15,32 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="18">
+                <GlobalVariable Version="Ver 1.0" Count="26">
                     <Symbols>
                         <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b10" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b11" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b12" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="b5" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b6" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b7" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="b8" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b9" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
                         <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="SINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="ub1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="ub10" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub11" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="ub12" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="ub2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="ub3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="ub5" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="ub6" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="ub7" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="ub8" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub9" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="unn1" Comment="" Device="" Kind="6" Type="USINT" InitValue="1" Address="" State="0"/>
                         <Symbol Name="unn2" Comment="" Device="" Kind="6" Type="USINT" InitValue="2" Address="" State="0"/>
                     </Symbols>
@@ -199,99 +207,99 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="36865">
-                                        [7] bool ub1 = $unn1 &gt; $unn2
+                                        [7] bool b9 = 1s &gt; 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="37889">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="37892" Param="FNAME: GT2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1282&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="37892" Param="FNAME: GT2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1270&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="38913">
-                                        unn1
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="38919">
-                                        ub1
+                                        b9
                                     </Element>
                                     <Element ElementType="70" Coordinate="39937">
-                                        unn2
+                                        2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="41985">
-                                        [8] bool ub2 = $unn1 &lt; $unn2
+                                        [8] bool b10 = 1y &lt; 2y
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="43009">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="43012" Param="FNAME: LT2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1562&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="43012" Param="FNAME: LT2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1555&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="44033">
-                                        unn1
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="44039">
-                                        ub2
+                                        b10
                                     </Element>
                                     <Element ElementType="70" Coordinate="45057">
-                                        unn2
+                                        2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="47105">
-                                        [9] bool ub3 = $unn1 = $unn2
+                                        [9] bool b11 = 1y = 2y
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="48129">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="48132" Param="FNAME: EQ2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1002&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="48132" Param="FNAME: EQ2_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 995&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="49153">
-                                        unn1
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="49159">
-                                        ub3
+                                        b11
                                     </Element>
                                     <Element ElementType="70" Coordinate="50177">
-                                        unn2
+                                        2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="52225">
-                                        [10] bool ub5 = $unn1 != $unn2
+                                        [10] bool b12 = 1y != 2y
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="53249">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="53252" Param="FNAME: NE_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2295&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="53252" Param="FNAME: NE_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2288&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="54273">
-                                        unn1
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="54279">
-                                        ub5
+                                        b12
                                     </Element>
                                     <Element ElementType="70" Coordinate="55297">
-                                        unn2
+                                        2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="57345">
-                                        [11] bool ub6 = $unn1 != $unn2
+                                        [11] bool ub1 = $unn1 &gt; $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="58369">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="58372" Param="FNAME: NE_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2295&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="58372" Param="FNAME: GT2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1282&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="59393">
                                         unn1
                                     </Element>
                                     <Element ElementType="70" Coordinate="59399">
-                                        ub6
+                                        ub1
                                     </Element>
                                     <Element ElementType="70" Coordinate="60417">
                                         unn2
@@ -299,19 +307,19 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="62465">
-                                        [12] bool ub7 = $unn1 &gt;= $unn2
+                                        [12] bool ub2 = $unn1 &lt; $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="63489">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="63492" Param="FNAME: GE2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1142&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="63492" Param="FNAME: LT2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1562&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="64513">
                                         unn1
                                     </Element>
                                     <Element ElementType="70" Coordinate="64519">
-                                        ub7
+                                        ub2
                                     </Element>
                                     <Element ElementType="70" Coordinate="65537">
                                         unn2
@@ -319,27 +327,187 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="67585">
-                                        [13] bool ub8 = $unn1 &lt;= $unn2
+                                        [13] bool ub3 = $unn1 = $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="68609">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="68612" Param="FNAME: LE2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1422&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="68612" Param="FNAME: EQ2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1002&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="69633">
                                         unn1
                                     </Element>
                                     <Element ElementType="70" Coordinate="69639">
-                                        ub8
+                                        ub3
                                     </Element>
                                     <Element ElementType="70" Coordinate="70657">
                                         unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="73729" Param="90"/>
-                                    <Element ElementType="33" Coordinate="73822" Param="END">
+                                    <Element ElementType="63" Coordinate="72705">
+                                        [14] bool ub5 = $unn1 != $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="73729">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="73732" Param="FNAME: NE_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2295&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="74753">
+                                        unn1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="74759">
+                                        ub5
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="75777">
+                                        unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="77825">
+                                        [15] bool ub6 = $unn1 != $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="78849">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="78852" Param="FNAME: NE_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2295&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="79873">
+                                        unn1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="79879">
+                                        ub6
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="80897">
+                                        unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="82945">
+                                        [16] bool ub7 = $unn1 &gt;= $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="83969">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="83972" Param="FNAME: GE2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1142&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="84993">
+                                        unn1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="84999">
+                                        ub7
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="86017">
+                                        unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="88065">
+                                        [17] bool ub8 = $unn1 &lt;= $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="89089">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="89092" Param="FNAME: LE2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1422&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="90113">
+                                        unn1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="90119">
+                                        ub8
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="91137">
+                                        unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="93185">
+                                        [18] bool ub9 = 1uy &gt; 2uy
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="94209">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="94212" Param="FNAME: GT2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1282&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="95233">
+                                        1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="95239">
+                                        ub9
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="96257">
+                                        2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="98305">
+                                        [19] bool ub10 = 1uy &lt; 2uy
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="99329">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="99332" Param="FNAME: LT2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1562&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="100353">
+                                        1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="100359">
+                                        ub10
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="101377">
+                                        2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="103425">
+                                        [20] bool ub11 = 1uy = 2uy
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="104449">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="104452" Param="FNAME: EQ2_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1002&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="105473">
+                                        1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="105479">
+                                        ub11
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="106497">
+                                        2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="108545">
+                                        [21] bool ub12 = 1uy != 2uy
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="109569">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="109572" Param="FNAME: NE_USINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2295&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200200, , 0&#xA;VAR_IN: IN2, 0x00200200, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="110593">
+                                        1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="110599">
+                                        ub12
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="111617">
+                                        2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="114689" Param="90"/>
+                                    <Element ElementType="33" Coordinate="114782" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -349,24 +517,32 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="18">
+                        <LocalVar Version="Ver 1.0" Count="26">
                             <Symbols>
                                 <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b10" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b11" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b12" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b3" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b5" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b6" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b7" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b8" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b9" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub1" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="ub10" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="ub11" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="ub12" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub3" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub5" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub6" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub7" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub8" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="ub9" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="unn1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="unn2" Comment="" Device="" Kind="8" State="0"/>
                             </Symbols>

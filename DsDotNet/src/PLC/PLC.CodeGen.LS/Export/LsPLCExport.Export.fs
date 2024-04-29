@@ -393,7 +393,7 @@ module XgiExportModule =
                 prjParam
 
             // todo : 사전에 처리 되었어야...
-            for g in prjParam.GlobalStorages.Values do
+            for g in globalStorages.Values do
                 g.IsGlobal <- true
 
             EnableXmlComment <- enableXmlComment

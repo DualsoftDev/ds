@@ -261,7 +261,7 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="30721" Param="&lt;&gt;U,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="30721" Param="U&lt;&gt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="30730" Param="90"/>
                                     <Element ElementType="14" Coordinate="30814">
                                         ub5
@@ -273,7 +273,7 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="32769" Param="&lt;&gt;U,unn1,unn2"/>
+                                    <Element ElementType="33" Coordinate="32769" Param="U&lt;&gt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="32778" Param="90"/>
                                     <Element ElementType="14" Coordinate="32862">
                                         ub6
@@ -345,7 +345,7 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="45057" Param="&lt;&gt;U,1,2"/>
+                                    <Element ElementType="33" Coordinate="45057" Param="U&lt;&gt;,1,2"/>
                                     <Element ElementType="2" Coordinate="45066" Param="90"/>
                                     <Element ElementType="14" Coordinate="45150">
                                         ub12

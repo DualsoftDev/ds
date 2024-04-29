@@ -5,6 +5,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
 open Dual.UnitTest.Common.FS
+open PLC.CodeGen.Common
 
 type XgxComparisonTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
@@ -113,11 +114,13 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
 
-        let nn1, unn1 = storages.["nn1"], storages.["unn1"]
+        let nn1, nn2, unn1 = storages.["nn1"], storages.["nn2"], storages.["unn1"]
         nn1.DataType === typeof<int32>
         unn1.DataType === typeof<uint32>
-        tracefn "%s\n" unn1.Address
-        //eu.Address === pi.Address + 4
+        if xgx = XGK then
+            let addrNn1 = XgkAddress.FromAddress(nn1.Address)
+            let addrNn2 = XgkAddress.FromAddress(nn2.Address)
+            addrNn2.WordOffset === addrNn1.WordOffset + 2 
 
         x.saveTestResult f xml
 
@@ -155,7 +158,6 @@ type XgxComparisonTest(xgx:PlatformTarget) =
                 nn1.DataType === typeof<int64>
                 unn1.DataType === typeof<uint64>
                 tracefn "%s\n" unn1.Address
-                //eu.Address === pi.Address + 8
                 x.saveTestResult f xml
         match xgx with
         | XGI -> test()
@@ -183,8 +185,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let pi, eu = storages.["pi"], storages.["eu"]
         pi.DataType === typeof<double>
         eu.DataType === typeof<double>
-        tracefn "%s\n" eu.Address
-        //eu.Address === pi.Address + 4
+        if xgx = XGK then
+            let addrPi = XgkAddress.FromAddress(pi.Address)
+            let addrEu = XgkAddress.FromAddress(eu.Address)
+            addrEu.WordOffset === addrPi.WordOffset + 4 
 
         x.saveTestResult f xml
 
@@ -209,8 +213,10 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let pi, eu = storages.["pi"], storages.["eu"]
         pi.DataType === typeof<single>
         eu.DataType === typeof<single>
-        tracefn "%s\n" eu.Address
-        //eu.Address === pi.Address + 4
+        if xgx = XGK then
+            let addrPi = XgkAddress.FromAddress(pi.Address)
+            let addrEu = XgkAddress.FromAddress(eu.Address)
+            addrEu.WordOffset === addrPi.WordOffset + 2
 
         x.saveTestResult f xml
 

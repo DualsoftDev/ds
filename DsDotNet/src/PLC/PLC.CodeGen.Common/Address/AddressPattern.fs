@@ -1,9 +1,9 @@
 namespace PLC.CodeGen.Common
 
-open System.Linq
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Globalization
+open System.Text.RegularExpressions
 
 
 [<AutoOpen>]
@@ -178,6 +178,49 @@ module LSEAddressPattern =
     let isXgiTag tag = tryParseXGITag tag |> fun f -> f.IsSome
     ///XGK 검증필요
     let isXgkTag tag = tryParseXGKTag tag |> fun f -> f.IsSome
+
+
+type XgkAddress private () as this =
+    static let parseXgkAddress (addr:string) =
+
+        assert(isInUnitTest())      // 일단 unit test 사용 only 로..  완전하게 구현 불가능한 함수.
+
+        match addr with
+        // P/M 에 대한 Bit 지정은 5자리를 full 로 채워야 한다.
+        | RegexPattern @"^([PM])(\d{4})([\da-fA-F]+)$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] -> 
+            device, word, Some(hexaBit)
+        // P/M 에 대한 Word 지정은 4자리를 full 로 채워야 한다.
+        | RegexPattern @"^([PM])(\d{4})$" [DevicePattern device; Int32Pattern word] -> 
+            device, word, None
+        // 나머지는 모두 bit 로 간주
+        | RegexPattern @"^([PM])(\d{0,4})([\da-fA-F]+)$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] -> 
+            device, word, Some(hexaBit)
+
+        // W123456, W12345F : 꽉 채워지는 경우. no ambiguity
+        | RegexPattern @"^([W])(\d{5})([\da-fA-F])$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] -> 
+            device, word, Some(hexaBit)
+        // W1234F : 덜 채워졌지만, hex 로 끝나는 경우. no ambiguity
+        | RegexPattern @"^([W])(\d{1,4})([a-fA-F])$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] -> 
+            device, word, Some(hexaBit)
+        // W12345 : 덜 채워졌지만, hex 로 끝나지 않는 경우. ambiguous.  마지막은 강제로 hex 로 취급한다.
+        | RegexPattern @"^([W])(\d{4})(\d)$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] -> 
+            device, word, Some(hexaBit)
+
+        | _ -> failwithf $"Invalid XGK address : {addr}"
+
+    member val Device:string = null with get, set
+    member val WordOffset = 0 with get, set
+    member val BitOffset:int option = None with get, set
+    member x.TotalBitOffset =
+        let w = x.WordOffset
+        match x.BitOffset with
+        | Some bit -> w * 16 + bit
+        | None -> w * 16
+
+    static member FromAddress (address:string) =
+        let device, word, bit = parseXgkAddress address
+        let xgkAddress = new XgkAddress(Device = device.ToString(), WordOffset = word, BitOffset = bit)
+        xgkAddress
 
 
 [<Extension>]

@@ -53,6 +53,8 @@ module XgiExportModule =
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
+        let isXgi, isXgk = prjParam.TargetType = XGI, prjParam.TargetType = XGK
+
         let xmlRung (expr: FlatExpression option) (xgiCommand:CommandTypes option) (y:int) : RungGenerationInfo =
             let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
@@ -69,16 +71,16 @@ module XgiExportModule =
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "<>") ->
+            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "==", "!=", "<>") ->
             
-                let op = operatorToXgkFunctionName funName |> escapeXml
+                let op = operatorToXgkFunctionName funName expr.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
                     if funName.IsOneOf("+", "-", "*", "/") then
                         let param = $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
                         drawXgkFBRight xy param
-                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "<>") then
+                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "==", "!=", "<>") then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
                         drawXgkFBLeft xy param target.Name
                     else
@@ -132,25 +134,31 @@ module XgiExportModule =
             for stmt in stmts do
                 match stmt with
                 | DuAssign(expr, target) when expr.DataType <> typeof<bool> ->
+                    let condition = Expression.True
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
-                    moveCmdRungXgk Expression.True expr.Terminal.Value target
+                    if isXgi then
+                        let command = ActionCmd(Move(condition, expr, target))
+                        let rgiSub = xmlRung None (Some command) rgi.NextRungY
+
+                        rgi <-
+                            {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                                NextRungY = 1 + rgiSub.NextRungY }
+                    else
+                        match expr.Terminal with
+                        | Some terminal ->
+                            moveCmdRungXgk condition terminal target
+                        | _ ->
+                            simpleRung expr target
 
                 | DuAssign(expr, target) ->
                     simpleRung expr target
 
-                | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as op
+                | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as _op
                                            Arguments = args
+                                           OriginalExpression = originalExpr
                                            Output = output }) ->
-                    let psedoFunction (_args: Args) : bool =
-                        failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-
-                    let expr =
-                        DuFunction
-                            { FunctionBody = psedoFunction
-                              Name = op
-                              Arguments = args }
-
-                    simpleRung expr (output :?> IStorage)
+                    let expr = originalExpr.WithNewFunctionArguments args
+                    simpleRung expr output
 
 
                 // <kwak> <timer>
@@ -191,6 +199,7 @@ module XgiExportModule =
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
+
                 | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _func
                                            Arguments = args
                                            Output = output }) ->
@@ -202,8 +211,10 @@ module XgiExportModule =
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
-                | DuAction(DuCopy(condition, source, target)) when prjParam.TargetType = XGK ->
+
+                | DuAction(DuCopy(condition, source, target)) when isXgk ->
                     moveCmdRungXgk condition source.Terminal.Value target
+
                 | _ -> failwithlog "Not yet"
 
         let rungEnd = generateEndXml (rgi.NextRungY + 1)
@@ -274,7 +285,7 @@ module XgiExportModule =
                   CommentedStatements = commentedStatements } =
                 x
 
-            let newLocalStorages, commentedXgiStatements =
+            let newLocalStorages, newCommentedXgiStatements =
                 commentedStatementsToCommentedXgxStatements prjParam localStorages.Values commentedStatements
 
             let globalStoragesRefereces =
@@ -318,7 +329,7 @@ module XgiExportModule =
             (*
              * Rung 생성
              *)
-            let rungsXml = generateRungs prjParam prologComment commentedXgiStatements
+            let rungsXml = generateRungs prjParam prologComment newCommentedXgiStatements
 
             /// POU/Programs/Program
             let programTemplate = createXmlStringProgram taskName pouName scanName |> DualXmlNode.ofString
@@ -371,6 +382,7 @@ module XgiExportModule =
                     doc, prjParam
 
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
+            prjParam.SanityCheck()
 
             let { ProjectName = projName
                   TargetType = targetType
@@ -538,3 +550,40 @@ module XgiExportModule =
                 xdoc.SanityCheckVariableNameForXgk()
 
             xdoc.Check targetType
+
+        [<Obsolete("이중코일 체크 필요")>]
+        member x.SanityCheck() =
+            let { GlobalStorages = globalStorages } = x
+            let vars = globalStorages.Values |> toArray
+
+            let checkDoubleCoil() =
+                // todo:
+                // project level 의 double coil check
+                // - Global 변수 중에 non-terminal expression 을 사용한 경우를 찾아서 marking 해 두고, POU 에서 해당 변수 할당하는 경우를 찾아서 error 를 발생시킨다.
+                ()
+            let checkLWordUsage() =
+                if x.TargetType = XGK then
+                    // XGK 에서는 LWord 사용(double, long)을 지원하지 않는다.
+                    for v in vars do
+                        if v :? IMemberVariable || v :? TimerCounterBaseStruct then
+                            // todo: timer, counter 등의 구조체 변수는 기본적으로 LWord 등으로 선언되어 있는데... 
+                            ()
+                        else
+                            let t = v.DataType
+                            match t  with
+                            | _ when t.IsOneOf(typeof<int64>, typeof<uint64>) ->
+                                failwith $"Error on variable declararion {v.Name} ({t.Name}): XGK does not support int64 types (LWORD)" 
+                            | _ -> ()
+
+
+            checkDoubleCoil()
+            checkLWordUsage()
+
+
+
+    let IsXg5kXGT(xmlProjectFilePath:string) =
+        let xdoc = DualXmlDocument.loadFromFile xmlProjectFilePath
+        xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGTBasicParam") <> null
+    let IsXg5kXGI(xmlProjectFilePath:string) =
+        let xdoc = DualXmlDocument.loadFromFile xmlProjectFilePath
+        xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGIBasicParam") <> null

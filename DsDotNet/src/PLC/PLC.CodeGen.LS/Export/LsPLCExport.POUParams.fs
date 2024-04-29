@@ -190,3 +190,6 @@ module POUParametersModule =
         member x.SanityCheck(prjParam: XgxProjectParams) =
             for CommentedStatement(_comment, stmt) in x.CommentedStatements do
                 stmt.SanityCheck prjParam
+
+            // todo: POU 내에서의 double coil (이중 코일) 체크
+            

@@ -43,51 +43,50 @@ module ExpressionFunctionModule =
 
     /// Expression<'T> 를 IExpression 으로 casting
     let internal iexpr any = (box any) :?> IExpression
-    let PsedoFunction<'T> (_args:Args):'T = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
+    let NullFunction<'T> (_args:Args):'T = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
 
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
 
+    /// operator 별로, arguments 가 주어졌을 때, 이를 연산하여 IExpression 을 반환하는 함수를 반환하는 함수
+    let getBinaryFunction (op:string) (opndType:Type) : (Args -> IExpression) =
+        match op with
+        | "&&" | "||" when opndType <> typedefof<bool> -> failwith $"{op} expects bool.  Type mismatch"
+        | "+" when opndType = typeof<string> -> fConcat
+        | "+"  -> fAdd
+        | "-"  -> fSub
+        | "*"  -> fMul
+        | "/"  -> fDiv
+        | "%"  -> fMod
+
+        | ">"  -> fGt
+        | ">=" -> fGte
+        | "<"  -> fLt
+        | "<=" -> fLte
+        | "=" when opndType = typeof<string> -> fEqualString
+        | "="  -> fEqual
+        | "!=" | "<>" -> fNotEqual
+
+        | "&&" -> fLogicalAnd
+        | "||" -> fLogicalOr
+
+        | ">>" | ">>>" -> fShiftRight
+        | "<<" | "<<<" -> fShiftLeft
+
+
+        | "&" | "&&&" -> fBitwiseAnd
+        | "|" | "|||" -> fBitwiseOr
+        | "^" | "^^^" -> fBitwiseXor
+        | "~" | "~~~" -> failwith "Not binary operation"
+
+        | _ -> failwith $"Undefined operator for getBinaryFunction({op})"
+
     let createBinaryExpression (opnd1:IExpression) (op:string) (opnd2:IExpression) : IExpression =
         let t1 = opnd1.DataType
 
-        verifyArgumentsTypes op [opnd1; opnd2]
-        match op with
-        | "&&" | "||" -> if t1 <> typedefof<bool> then failwith $"{op} expects bool.  Type mismatch"
-        | _ -> ()
-
-        let t = t1.Name
         let args = [opnd1; opnd2]
-
-        match op with
-        | "+" when t = STRING -> fConcat args
-        | "+" -> fAdd args
-        | "-" -> fSub args
-        | "*" -> fMul args
-        | "/" -> fDiv args
-
-        | ">"  -> fGt  args
-        | ">=" -> fGte args
-        | "<"  -> fLt  args
-        | "<=" -> fLte args
-        | "=" when t = STRING -> fEqualString args
-        | "="  -> fEqual args
-        | ("!=" | "<>" | "^^")  -> fNotEqual args       // ^^ 는 logical XOR 로, not equal 과 동일해서, notEqual 로 처리한다.
-
-        | ("<<<" | "<<") -> fShiftLeft  args
-        | (">>>" | ">>") -> fShiftRight args
-
-        | ("&&&" | "&") ->  fBitwiseAnd args
-        | ("|||" | "|") ->  fBitwiseOr  args
-        | ("^^^" | "^") ->  fBitwiseXor args
-        | ("~~~" | "~") ->  failwithlog "Not binary operation" //fBitwiseNot args
-
-        | "&&"  -> fLogicalAnd  args
-        | "||"  -> fLogicalOr  args
-
-
-        | _ -> failwith $"NOT Yet {op}"
-        |> iexpr
+        verifyArgumentsTypes op args
+        getBinaryFunction op t1 args  |> iexpr
 
     let createUnaryExpression (op:string) (opnd:IExpression) : IExpression =
         (* unary operator 처리.
@@ -96,9 +95,9 @@ module ExpressionFunctionModule =
          *)
         match op with
         | ("~" | "~~~" ) -> fBitwiseNot [opnd]
-        | "!"  -> fLogicalNot [opnd]
+        | "!"  -> fbLogicalNot [opnd]
         | _ ->
-            failwith $"NOT Yet {op}"
+            failwith $"Undefined operator for createUnaryExpression({op})"
 
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
         verifyArgumentsTypes funName args
@@ -110,30 +109,30 @@ module ExpressionFunctionModule =
         | ("*" | "mul") -> fMul args
         | ("/" | "div") -> fDiv args
 
-        | (">"  | "gt")  -> fGt args
-        | (">=" | "gte") -> fGte args
-        | ("<"  | "lt")  -> fLt args
-        | ("<=" | "lte") -> fLte args
+        | (">"  | "gt")  -> fbGt args
+        | (">=" | "gte") -> fbGte args
+        | ("<"  | "lt")  -> fbLt args
+        | ("<=" | "lte") -> fbLte args
 
-        | ("="  | "equal") when t = STRING -> fEqualString args
-        | ("="  | "equal") -> fEqual args
-        | ("!=" | "<>" | "notEqual") when t = STRING -> fNotEqualString args
-        | ("!=" | "<>" | "^^" | "notEqual") -> fNotEqual args
+        | ("="  | "equal") when t = STRING -> fbEqualString args
+        | ("="  | "equal") -> fbEqual args
+        | ("!=" | "<>" | "notEqual") when t = STRING -> fbNotEqualString args
+        | ("!=" | "<>" | "^^" | "notEqual") -> fbNotEqual args
 
         | ("<<" | "<<<" | "shiftLeft") -> fShiftLeft args
         | (">>" | ">>>" | "shiftRight") -> fShiftLeft args
 
-        | ("&&" | "and") -> fLogicalAnd args
-        | ("||" | "or")  -> fLogicalOr  args
-        | ("!"  | "not") -> fLogicalNot args        // 따로 or 같이??? neg 는 contact 이나 coil 하나만 받아서 rung 생성하는 용도, not 은 expression 을 받아서 평가하는 용도
+        | ("&&" | "and") -> fbLogicalAnd args
+        | ("||" | "or")  -> fbLogicalOr  args
+        | ("!"  | "not") -> fbLogicalNot args        // 따로 or 같이??? neg 는 contact 이나 coil 하나만 받아서 rung 생성하는 용도, not 은 expression 을 받아서 평가하는 용도
 
         | ("&" | "&&&") -> fBitwiseAnd  args
         | ("|" | "|||") -> fBitwiseOr   args
         | ("^" | "^^^") -> fBitwiseXor  args
         | ("~" | "~~~") -> fBitwiseNot  args
 
-        | FunctionNameRising  -> fRising  args
-        | FunctionNameFalling -> fFalling args
+        | FunctionNameRising  -> fbRising  args
+        | FunctionNameFalling -> fbFalling args
         //| "neg"     -> fNegate  args
         //| "set"     -> fSet     args
         //| "reset"   -> fReset   args
@@ -164,17 +163,14 @@ module ExpressionFunctionModule =
             | "createXgkCTU" | "createXgkCTD" | "createXgkCTUD" | "createXgkCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
-                let psedoFunction (_args:Args):Counter = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Counter>; Name=funName; Arguments=args }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
             | "createXgkTON" | "createXgkTOF" | "createXgkCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
-                let psedoFunction (_args:Args):Timer = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Timer>; Name=funName; Arguments=args }
         | "createTag" ->
-                let psedoFunction (_args:Args):ITag = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
-                DuFunction { FunctionBody=psedoFunction; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<ITag>; Name=funName; Arguments=args }
 
         | _ -> failwith $"NOT yet: {funName}"
 
@@ -424,21 +420,36 @@ module ExpressionFunctionModule =
 
         let fConcat         args = cf _concat         "+"      args
 
-        let fEqual          args: Expression<bool> = cf _equal          "="  args
-        let fNotEqual       args: Expression<bool> = cf _notEqual       "!=" args
-        let fGt             args: Expression<bool> = cf _gt             ">"  args
-        let fLt             args: Expression<bool> = cf _lt             "<"  args
-        let fGte            args: Expression<bool> = cf _gte            ">=" args
-        let fLte            args: Expression<bool> = cf _lte            "<=" args
-        let fEqualString    args: Expression<bool> = cf _equalString    "="  args
-        let fNotEqualString args: Expression<bool> = cf _notEqualString "!=" args
-        let fLogicalAnd     args: Expression<bool> = cf _logicalAnd     "&&" args
-        let fLogicalOr      args: Expression<bool> = cf _logicalOr      "||" args
-        let fLogicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
+        let fEqual          args: IExpression = cf _equal          "="  args
+        let fNotEqual       args: IExpression = cf _notEqual       "!=" args
+        let fGt             args: IExpression = cf _gt             ">"  args
+        let fLt             args: IExpression = cf _lt             "<"  args
+        let fGte            args: IExpression = cf _gte            ">=" args
+        let fLte            args: IExpression = cf _lte            "<=" args
+        let fEqualString    args: IExpression = cf _equalString    "="  args
+        let fNotEqualString args: IExpression = cf _notEqualString "!=" args
+        let fLogicalAnd     args: IExpression = cf _logicalAnd     "&&" args
+        let fLogicalOr      args: IExpression = cf _logicalOr      "||" args
+        let fLogicalNot     args: IExpression = cf _logicalNot     "!"  args
+        let fRising         args: IExpression = cf _rising      FunctionNameRising args
+        let fFalling        args: IExpression = cf _falling     FunctionNameFalling args
 
+        (* FB: Functions that returns Expression<Bool> *)
+        let fbEqual          args: Expression<bool> = cf _equal          "="  args
+        let fbNotEqual       args: Expression<bool> = cf _notEqual       "!=" args
+        let fbGt             args: Expression<bool> = cf _gt             ">"  args
+        let fbLt             args: Expression<bool> = cf _lt             "<"  args
+        let fbGte            args: Expression<bool> = cf _gte            ">=" args
+        let fbLte            args: Expression<bool> = cf _lte            "<=" args
+        let fbEqualString    args: Expression<bool> = cf _equalString    "="  args
+        let fbNotEqualString args: Expression<bool> = cf _notEqualString "!=" args
+        let fbLogicalAnd     args: Expression<bool> = cf _logicalAnd     "&&" args
+        let fbLogicalOr      args: Expression<bool> = cf _logicalOr      "||" args
+        let fbLogicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
 
-        let fRising         args: Expression<bool> = cf _rising      FunctionNameRising args
-        let fFalling        args: Expression<bool> = cf _falling     FunctionNameFalling args
+        (* FB: Functions that returns Expression<Bool> *)
+        let fbRising        args: Expression<bool> = cf _rising      FunctionNameRising args
+        let fbFalling       args: Expression<bool> = cf _falling     FunctionNameFalling args
 
         let fSin            args = cf _sin            "sin"    args
         let fCos            args = cf _cos            "cos"    args

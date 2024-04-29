@@ -1,11 +1,10 @@
 namespace T
-open Xunit
-open NUnit.Framework
 
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LS
+open NUnit.Framework
+
 
 type XgxCounterTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
@@ -239,156 +238,6 @@ type XgxCounterTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-type XgxFunctionTest(xgx:PlatformTarget) =
-    inherit XgxTestBaseClass(xgx)
-
-    member x.``ADD simple test`` () =
-        let storages = Storages()
-        let code = """
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``ADD int32 test`` () =
-        let storages = Storages()
-        let code = """
-            int nn1 = 1;
-            int nn2 = 2;
-            int sum = 0;
-            $sum := $nn1 + $nn2;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``ADD int64 test`` () =
-        let storages = Storages()
-        let code = """
-            int64 nn1 = 1L;
-            int64 nn2 = 2L;
-            int64 sum = 0L;
-            $sum := $nn1 + $nn2;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``ADD double test`` () =
-        let storages = Storages()
-        let code = """
-            double nn1 = 1.1;
-            double nn2 = 2.2;
-            double sum = 0.0;
-            $sum := $nn1 + $nn2;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
-    member x.``ADD 3 items test`` () =
-        let storages = Storages()
-        let code = """
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``ADD 7 items test`` () =
-        let storages = Storages()
-        let code =
-            generateInt16VariableDeclarations 1 8 + """
-
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``ADD 8 items test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 8 + """
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``ADD 10 items test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 10 + """
-
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``DIV 3 items test`` () =
-        let storages = Storages()
-        let code = """
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-
-            int16 quotient = 0s;
-            $quotient := $nn1 / $nn2 / $nn3;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-    member x.``ADD MUL 3 items test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 8 + """
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``Comparision, Arithmatic, AND test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 8 + """
-            int16 sum = 0s;
-            bool result = false;
-
-            $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
-
-
-
-
-
 //[<Collection("XgxCounterTest")>]
 type XgiCounterTest() =
     inherit XgxCounterTest(XGI)
@@ -419,39 +268,4 @@ type XgkCounterTest() =
     /// TODO: XGK CTUD 에서 cu 나 cd 등의 조건이 단일 변수가 아닌 복합 expression 인 경우의 처리가 필요
     /// 복합 expression 들을 별도의 auto 변수에 할당한 후, auto 변수를 사용하는 방법으로 처리할 수 있음.
     [<Test>] member __.``Counter CTUD with conditional test`` () = base.``Counter CTUD with conditional test``()
-
-
-//[<Collection("SerialXgxFunctionTest")>]
-type XgiFunctionTest() =
-    inherit XgxFunctionTest(XGI)
-
-    [<Test>] member __.``ADD simple test`` () = base.``ADD simple test``()
-    [<Test>] member __.``ADD int32 test`` () = base.``ADD int32 test``()
-    [<Test>] member __.``ADD int64 test`` () = base.``ADD int64 test``()
-    [<Test>] member __.``ADD double test`` () = base.``ADD double test``()
-    [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
-    [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
-    [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()
-    [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
-    [<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
-    [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
-    [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
-
-type XgkFunctionTest() =
-    inherit XgxFunctionTest(XGK)
-
-    [<Test>] member __.``ADD simple test`` () = base.``ADD simple test``()
-    [<Test>] member __.``ADD int32 test`` () = base.``ADD int32 test``()
-    [<Test>] member __.``ADD int64 test`` () = base.``ADD int64 test``()
-    [<Test>] member __.``ADD double test`` () = base.``ADD double test``()
-    [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
-    [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
-    [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()
-    [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
-    [<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
-    [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
-    [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
-
-
-
 

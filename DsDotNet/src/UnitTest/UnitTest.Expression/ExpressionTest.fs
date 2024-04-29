@@ -133,27 +133,27 @@ module Exp =
             fAbs [ fSub [fMul [v 1.1; v 2.0]; v 2.2] ] |> evaluate :?> double <= 0.00001 |> ShouldBeTrue
             fConcat [v "Hello, "; v "world!"]|> evaluate === "Hello, world!"
             fMul [v 2; v 3] |> evaluate === 6
-            fEqualString [v "Hello"; v "world"]    |> evaluate === false
-            fEqualString [v "Hello"; v "Hello"]    |> evaluate === true
-            fNotEqualString [v "Hello"; v "world"] |> evaluate === true
-            fNotEqualString [v "Hello"; v "Hello"] |> evaluate === false
-            fNotEqual [v 1; v 2]                   |> evaluate === true
-            fNotEqual [v 2; v 2]                   |> evaluate === false
+            fbEqualString [v "Hello"; v "world"]    |> evaluate === false
+            fbEqualString [v "Hello"; v "Hello"]    |> evaluate === true
+            fbNotEqualString [v "Hello"; v "world"] |> evaluate === true
+            fbNotEqualString [v "Hello"; v "Hello"] |> evaluate === false
+            fbNotEqual [v 1; v 2]                   |> evaluate === true
+            fbNotEqual [v 2; v 2]                   |> evaluate === false
             fEqual [v 2; v 2]                      |> evaluate === true
             fEqual [v 2; v 2.0]                    |> evaluate=== true
             fEqual [v 2; v 2.0f]                   |> evaluate === true
 
 
-            fGte [v 2; v 3]                        |> evaluate === false
-            fGte [v 5; v 4]                        |> evaluate === true
-            fLogicalNot [v true]                          |> evaluate  === false
-            fLogicalNot [v false]                         |> evaluate  === true
-            fLogicalAnd [v true; v false]                 |> evaluate === false
-            fLogicalAnd [v true; v true]                  |> evaluate === true
-            fLogicalAnd [v true; v true; v true; v false] |> evaluate === false
-            fLogicalOr  [v true; v false]                 |> evaluate === true
-            fLogicalOr  [v false;v false]                 |> evaluate === false
-            fLogicalOr  [v true; v true; v true; v false] |> evaluate === true
+            fbGte [v 2; v 3]                        |> evaluate === false
+            fbGte [v 5; v 4]                        |> evaluate === true
+            fbLogicalNot [v true]                          |> evaluate  === false
+            fbLogicalNot [v false]                         |> evaluate  === true
+            fbLogicalAnd [v true; v false]                 |> evaluate === false
+            fbLogicalAnd [v true; v true]                  |> evaluate === true
+            fbLogicalAnd [v true; v true; v true; v false] |> evaluate === false
+            fbLogicalOr  [v true; v false]                 |> evaluate === true
+            fbLogicalOr  [v false;v false]                 |> evaluate === false
+            fbLogicalOr  [v true; v true; v true; v false] |> evaluate === true
             fShiftLeft [v 1; v 1]                  |> evaluate === 2
             fShiftLeft [v 2; v -1]                 |> evaluate === 0
             fShiftLeft [v 1; v 3]                  |> evaluate === 8
@@ -167,8 +167,8 @@ module Exp =
         [<Test>]
         member __.``31 Rising, Falling test`` () =
             let t = createTag("t2", "%M1.1", 2)
-            fFalling [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
-            fRising [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
+            fbFalling [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
+            fbRising [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
 
         [<Test>]
         member __.``4 Composition test`` () =

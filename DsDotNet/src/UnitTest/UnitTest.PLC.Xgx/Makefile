@@ -7,4 +7,5 @@ confirm:
 	-cp xgk/Xmls/*.xml xgk/Xmls/Answers/
 yes: confirm
 no:
-	git restore xgi/Xmls/Answers xgk/Xmls/Answers
+	(cd xgi/Xmls/Answers; git restore .)
+	(cd xgk/Xmls/Answers; git restore .)

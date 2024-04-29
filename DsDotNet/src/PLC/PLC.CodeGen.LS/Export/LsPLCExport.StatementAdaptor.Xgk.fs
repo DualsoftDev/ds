@@ -19,6 +19,11 @@ module XgkTypeConvertorModule =
     ///
     /// suffix: "U" for UNSIGNED
     let operatorToXgkFunctionName op (typ:Type) =
+        let isComparison =
+            match op with
+            | (">" | ">=" | "<"  | "<="  | "=" | "!=" | "<>" )-> true
+            | _ -> false
+
         let prefix =
             match typ with
             | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
@@ -30,7 +35,7 @@ module XgkTypeConvertorModule =
             | _ when typ.IsOneOf(typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
             | _ -> ""
 
-        let suffix =
+        let unsigned =
             match typ with
             | _ when typ.IsOneOf(typeof<uint16>, typeof<uint32>) && op <> "MOV" -> "U"  // MOVE 는 "MOVU" 등이 없다.  size 만 중요하지 unsigned 여부는 중요하지 않다.
             | _ -> ""
@@ -44,10 +49,13 @@ module XgkTypeConvertorModule =
             | "MOV" -> "MOV"
             | "!=" -> "<>"
             | "==" -> "="
-            | (">" | ">=" | "<"  | "<="  | "=" | "<>" ) -> op
+            | _ when isComparison -> op
             | _ -> failwithlog "ERROR"
 
-        $"{prefix}{opName}{suffix}"
+        if isComparison then
+            $"{unsigned}{prefix}{opName}"       // e.g "UD<="
+        else
+            $"{prefix}{opName}{unsigned}"
 
 
     /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.

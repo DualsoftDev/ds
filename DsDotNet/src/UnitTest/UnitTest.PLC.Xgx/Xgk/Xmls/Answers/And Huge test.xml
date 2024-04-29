@@ -120,14 +120,14 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="2049" Param="&gt;,nn1,nn2"/>
+                                    <Element ElementType="33" Coordinate="2049" Param="D&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="2058" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         _t1_GT
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="3073" Param="&gt;,nn1,nn2"/>
+                                    <Element ElementType="33" Coordinate="3073" Param="D&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="3082" Param="90"/>
                                     <Element ElementType="14" Coordinate="3166">
                                         _t2_GT

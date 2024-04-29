@@ -73,7 +73,7 @@ module XgiExportModule =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "==", "!=", "<>") ->
             
-                let op = operatorToXgkFunctionName funName expr.DataType |> escapeXml
+                let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)

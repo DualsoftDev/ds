@@ -37,6 +37,13 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        let nn1, unn1 = storages.["nn1"], storages.["unn1"]
+
+        nn1.DataType === typeof<sbyte>
+        unn1.DataType === typeof<byte>
+        tracefn "%s\n" unn1.Address
+        //eu.Address === pi.Address + 1
+
         x.saveTestResult f xml
 
 
@@ -68,6 +75,13 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
+
+        let nn1, unn1 = storages.["nn1"], storages.["unn1"]
+        nn1.DataType === typeof<int16>
+        unn1.DataType === typeof<uint16>
+        tracefn "%s\n" unn1.Address
+        //eu.Address === pi.Address + 2
+
         x.saveTestResult f xml
 
     member x.``COMP int32 test`` () =
@@ -98,6 +112,13 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
+
+        let nn1, unn1 = storages.["nn1"], storages.["unn1"]
+        nn1.DataType === typeof<int32>
+        unn1.DataType === typeof<uint32>
+        tracefn "%s\n" unn1.Address
+        //eu.Address === pi.Address + 4
+
         x.saveTestResult f xml
 
     member x.``COMP int64 test`` () =
@@ -130,6 +151,11 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let test =
             fun () -> 
                 let xml = x.generateXmlForTest f storages (map withNoComment statements)
+                let nn1, unn1 = storages.["nn1"], storages.["unn1"]
+                nn1.DataType === typeof<int64>
+                unn1.DataType === typeof<uint64>
+                tracefn "%s\n" unn1.Address
+                //eu.Address === pi.Address + 8
                 x.saveTestResult f xml
         match xgx with
         | XGI -> test()
@@ -139,122 +165,53 @@ type XgxComparisonTest(xgx:PlatformTarget) =
     member x.``COMP double test`` () =
         let storages = Storages()
         let code = """
-            double nn1 = 1.1;
-            double nn2 = 2.2;
-            double sum = 0.0;
-            $sum := $nn1 + $nn2;
-            double sub = $nn1 - $nn2;
-            double mul = $nn1 * $nn2;
-            double div = $nn1 / $nn2;
+            double pi = 3.14;         // LREAL type 으로 변환됨
+            double eu = 2.718;
+            bool b1 = $pi > $eu;
+            bool b2 = $pi < $eu;
+            bool b3 = $pi = $eu;
+            //bool b4 = $pi == $eu;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool b5 = $pi != $eu;     // 확장 notation. "<>"
+            bool b6 = $pi <> $eu;
+            bool b7 = $pi >= $eu;
+            bool b8 = $pi <= $eu;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
+
+        let pi, eu = storages.["pi"], storages.["eu"]
+        pi.DataType === typeof<double>
+        eu.DataType === typeof<double>
+        tracefn "%s\n" eu.Address
+        //eu.Address === pi.Address + 4
+
         x.saveTestResult f xml
 
     member x.``COMP single test`` () =
         let storages = Storages()
         let code = """
-            single nn1 = 1.1f;
-            single nn2 = 2.2f;
-            single sum = 0.0f;
-            $sum := $nn1 + $nn2;
-            single sub = $nn1 - $nn2;
-            single mul = $nn1 * $nn2;
-            single div = $nn1 / $nn2;
+            single pi = 3.14f;        // REAL type 으로 변환됨
+            single eu = 2.718f;
+            bool b1 = $pi > $eu;
+            bool b2 = $pi < $eu;
+            bool b3 = $pi = $eu;
+            //bool b4 = $pi == $eu;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool b5 = $pi != $eu;     // 확장 notation. "<>"
+            bool b6 = $pi <> $eu;
+            bool b7 = $pi >= $eu;
+            bool b8 = $pi <= $eu;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
 
+        let pi, eu = storages.["pi"], storages.["eu"]
+        pi.DataType === typeof<single>
+        eu.DataType === typeof<single>
+        tracefn "%s\n" eu.Address
+        //eu.Address === pi.Address + 4
 
-    member x.``COMP 3 items test`` () =
-        let storages = Storages()
-        let code = """
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``COMP 7 items test`` () =
-        let storages = Storages()
-        let code =
-            generateInt16VariableDeclarations 1 8 + """
-
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``COMP 8 items test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 8 + """
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``COMP 10 items test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 10 + """
-
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``DIV 3 items test`` () =
-        let storages = Storages()
-        let code = """
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-
-            int16 quotient = 0s;
-            $quotient := $nn1 / $nn2 / $nn3;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-    member x.``COMP MUL 3 items test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 8 + """
-            int16 sum = 0s;
-            $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``Comparision, Arithmatic, AND test`` () =
-        let storages = Storages()
-        let code = generateInt16VariableDeclarations 1 8 + """
-            int16 sum = 0s;
-            bool result = false;
-
-            $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
 
@@ -272,15 +229,8 @@ type XgiComparisonTest() =
     [<Test>] member __.``COMP int16 test`` () = base.``COMP int16 test``()
     [<Test>] member __.``COMP int32 test`` () = base.``COMP int32 test``()
     [<Test>] member __.``COMP int64 test`` () = base.``COMP int64 test``()
-    //[<Test>] member __.``COMP single test`` () = base.``COMP single test``()
-    //[<Test>] member __.``COMP double test`` () = base.``COMP double test``()
-    //[<Test>] member __.``COMP 3 items test`` () = base.``COMP 3 items test``()
-    //[<Test>] member __.``COMP 7 items test`` () = base.``COMP 7 items test``()
-    //[<Test>] member __.``COMP 8 items test`` () = base.``COMP 8 items test``()
-    //[<Test>] member __.``COMP 10 items test`` () = base.``COMP 10 items test``()
-    //[<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
-    //[<Test>] member __.``COMP MUL 3 items test`` () = base.``COMP MUL 3 items test``()
-    //[<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
+    [<Test>] member __.``COMP single test`` () = base.``COMP single test``()
+    [<Test>] member __.``COMP double test`` () = base.``COMP double test``()
 
 type XgkComparisonTest() =
     inherit XgxComparisonTest(XGK)
@@ -289,15 +239,8 @@ type XgkComparisonTest() =
     [<Test>] member __.``COMP int16 test`` () = base.``COMP int16 test``()
     [<Test>] member __.``COMP int32 test`` () = base.``COMP int32 test``()
     [<Test>] member __.``COMP int64 test`` () = base.``COMP int64 test``()
-    //[<Test>] member __.``COMP single test`` () = base.``COMP single test``()
-    //[<Test>] member __.``COMP double test`` () = base.``COMP double test``()
-    //[<Test>] member __.``COMP 3 items test`` () = base.``COMP 3 items test``()
-    //[<Test>] member __.``COMP 7 items test`` () = base.``COMP 7 items test``()
-    //[<Test>] member __.``COMP 8 items test`` () = base.``COMP 8 items test``()
-    //[<Test>] member __.``COMP 10 items test`` () = base.``COMP 10 items test``()
-    //[<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
-    //[<Test>] member __.``COMP MUL 3 items test`` () = base.``COMP MUL 3 items test``()
-    //[<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
+    [<Test>] member __.``COMP single test`` () = base.``COMP single test``()
+    [<Test>] member __.``COMP double test`` () = base.``COMP double test``()
 
 
 

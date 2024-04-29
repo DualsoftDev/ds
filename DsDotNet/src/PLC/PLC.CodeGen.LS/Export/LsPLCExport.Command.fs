@@ -422,7 +422,7 @@ module internal rec Command =
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
-    let bxiCoil (x, y) (cmdExp: CommandTypes) : BlockXmlInfo =
+    let bxiCoil (x, y) (cmdExp: CommandTypes) (coilText:string) : BlockXmlInfo =
         let spanX = max 0 (coilCellX - x - 2)
 
         let xmls =
@@ -438,7 +438,7 @@ module internal rec Command =
                       SpanY = 1 }
 
                 let c = coord (coilCellX, y)
-                let xml = elementBody (int cmdExp.LDEnum) c (cmdExp.CoilTerminalTag.StorageName)
+                let xml = elementBody (int cmdExp.LDEnum) c coilText        // coilText: XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
 
                 { Coordinate = c
                   Xml = xml
@@ -597,15 +597,20 @@ module internal rec Command =
                 | false, false -> ElementType.ContactMode
                 |> int
 
+            // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
             let terminalText =
-                match terminal with
-                | :? IStorage as storage -> 
-                     if storage.Name.Contains (xgkTimerCounterContactMarking) 
-                     then storage.Name.Replace (xgkTimerCounterContactMarking, "")
-                     else storage.Name
+                match terminal, prjParam.TargetType with
+                | :? IStorage as storage, XGK ->
+                    storage.Address
+                | :? IStorage as storage, _ -> 
+                     if storage.Name.Contains (xgkTimerCounterContactMarking) then
+                        storage.Name.Replace (xgkTimerCounterContactMarking, "")
+                     else
+                        storage.Name
                      
-                | :? LiteralHolder<bool> as onoff -> if onoff.Value then "_ON" else "_OFF"
-                | _ -> terminal.ToText()
+                | :? LiteralHolder<bool> as onoff, _ -> if onoff.Value then "_ON" else "_OFF"
+                | _ ->
+                    terminal.ToText()
 
             let str = elementBody mode c terminalText
 
@@ -726,7 +731,12 @@ module internal rec Command =
 
                     let cmdXmls1 =
                         match cmdExp with
-                        | CoilCmd _cc -> bxiCoil (nx - 1, y) cmdExp
+                        | CoilCmd _cc ->
+                            let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
+                                match prjParam.TargetType, cmdExp.CoilTerminalTag with
+                                | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
+                                | _ -> cmdExp.CoilTerminalTag.StorageName
+                            bxiCoil (nx - 1, y) cmdExp coilText
                         | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
                             bxiCommand prjParam (nx, y) cmdExp
 

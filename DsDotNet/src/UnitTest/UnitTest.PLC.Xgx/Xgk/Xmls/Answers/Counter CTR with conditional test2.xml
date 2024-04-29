@@ -77,41 +77,41 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        cd1
+                                        M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="2052">
-                                        cd2
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="2054"/>
                                     <Element ElementType="6" Coordinate="2055">
-                                        cd3
+                                        M00002
                                     </Element>
                                     <Element ElementType="2" Coordinate="2058" Param="75"/>
                                     <Element ElementType="33" Coordinate="2142" Param="CTR,myCTR,2000"/>
                                     <Element ElementType="6" Coordinate="3073">
-                                        cd3
+                                        M00002
                                     </Element>
                                     <Element ElementType="2" Coordinate="3076" Param="0"/>
                                     <Element ElementType="0" Coordinate="3078"/>
                                     <Element ElementType="6" Coordinate="4097">
-                                        cd4
+                                        M00003
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="0"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="6145">
-                                        res0
+                                        M00004
                                     </Element>
                                     <Element ElementType="0" Coordinate="6147"/>
                                     <Element ElementType="6" Coordinate="6148">
-                                        res2
+                                        M00006
                                     </Element>
                                     <Element ElementType="2" Coordinate="6151" Param="84"/>
                                     <Element ElementType="17" Coordinate="6238">
                                         myCTR
                                     </Element>
                                     <Element ElementType="6" Coordinate="7169">
-                                        res1
+                                        M00005
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -121,33 +121,33 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="9217">
-                                        cd1
+                                        M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="9220">
-                                        cd2
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="9222"/>
                                     <Element ElementType="6" Coordinate="9223">
-                                        cd1
+                                        M00000
                                     </Element>
                                     <Element ElementType="2" Coordinate="9226" Param="81"/>
                                     <Element ElementType="14" Coordinate="9310">
-                                        xx7
+                                        M00007
                                     </Element>
                                     <Element ElementType="6" Coordinate="10241">
-                                        cd3
+                                        M00002
                                     </Element>
                                     <Element ElementType="2" Coordinate="10244" Param="0"/>
                                     <Element ElementType="0" Coordinate="10246"/>
                                     <Element ElementType="6" Coordinate="11265">
-                                        res0
+                                        M00004
                                     </Element>
                                     <Element ElementType="0" Coordinate="11267"/>
                                     <Element ElementType="6" Coordinate="11268">
-                                        res2
+                                        M00006
                                     </Element>
                                     <Element ElementType="6" Coordinate="12289">
-                                        res1
+                                        M00005
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -79,7 +79,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,sum"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,M0002"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="3073">
@@ -103,7 +103,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="81"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="ADDU,unn1,unn2,usum"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="ADDU,unn1,unn2,M0006"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="8193">

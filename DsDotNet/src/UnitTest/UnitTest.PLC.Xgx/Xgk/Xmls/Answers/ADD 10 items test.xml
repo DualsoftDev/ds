@@ -90,63 +90,63 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,_t1_ADD"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,M0011"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="3073">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="3076" Param="81"/>
-                                    <Element ElementType="33" Coordinate="3166" Param="ADD,_t1_ADD,nn3,_t2_ADD"/>
+                                    <Element ElementType="33" Coordinate="3166" Param="ADD,_t1_ADD,nn3,M0012"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="4097">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="81"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="ADD,_t2_ADD,nn4,_t3_ADD"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="ADD,_t2_ADD,nn4,M0013"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="5121">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="81"/>
-                                    <Element ElementType="33" Coordinate="5214" Param="ADD,_t3_ADD,nn5,_t4_ADD"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="ADD,_t3_ADD,nn5,M0014"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="6145">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="6148" Param="81"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="ADD,_t4_ADD,nn6,_t5_ADD"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="ADD,_t4_ADD,nn6,M0015"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="7169">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="81"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="ADD,_t5_ADD,nn7,_t6_ADD"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="ADD,_t5_ADD,nn7,M0016"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="8193">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="ADD,_t6_ADD,nn8,_t7_ADD"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="ADD,_t6_ADD,nn8,M0017"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="9217">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="9220" Param="81"/>
-                                    <Element ElementType="33" Coordinate="9310" Param="ADD,_t7_ADD,nn9,_t8_ADD"/>
+                                    <Element ElementType="33" Coordinate="9310" Param="ADD,_t7_ADD,nn9,M0018"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="10241">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="10244" Param="81"/>
-                                    <Element ElementType="33" Coordinate="10334" Param="ADD,_t8_ADD,nn10,sum"/>
+                                    <Element ElementType="33" Coordinate="10334" Param="ADD,_t8_ADD,nn10,M0010"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="12289" Param="90"/>

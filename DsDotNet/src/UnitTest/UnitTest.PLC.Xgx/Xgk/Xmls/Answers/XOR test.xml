@@ -71,21 +71,21 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        b1
+                                        M00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="2052">
-                                        b2
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="2054"/>
                                     <Element ElementType="2" Coordinate="2055" Param="84"/>
                                     <Element ElementType="14" Coordinate="2142">
-                                        b3
+                                        M00002
                                     </Element>
                                     <Element ElementType="7" Coordinate="3073">
-                                        b1
+                                        M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="3076">
-                                        b2
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

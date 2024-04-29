@@ -85,65 +85,65 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        x00
+                                        P00000
                                     </Element>
                                     <Element ElementType="0" Coordinate="2051"/>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
                                     <Element ElementType="33" Coordinate="2142" Param="TON,myTon,20"/>
                                     <Element ElementType="6" Coordinate="3073">
-                                        x01
+                                        P00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="3075"/>
                                     <Element ElementType="6" Coordinate="4097">
-                                        x02
+                                        P00002
                                     </Element>
                                     <Element ElementType="0" Coordinate="4099"/>
                                     <Element ElementType="6" Coordinate="5121">
-                                        x03
+                                        P00003
                                     </Element>
                                     <Element ElementType="0" Coordinate="5123"/>
                                     <Element ElementType="6" Coordinate="6145">
-                                        x04
+                                        P00004
                                     </Element>
                                     <Element ElementType="0" Coordinate="6147"/>
                                     <Element ElementType="6" Coordinate="7169">
-                                        x05
+                                        P00005
                                     </Element>
                                     <Element ElementType="0" Coordinate="7171"/>
                                     <Element ElementType="6" Coordinate="8193">
-                                        x06
+                                        P00006
                                     </Element>
                                     <Element ElementType="0" Coordinate="8195"/>
                                     <Element ElementType="6" Coordinate="9217">
-                                        x07
+                                        P00007
                                     </Element>
                                     <Element ElementType="0" Coordinate="9219"/>
                                     <Element ElementType="6" Coordinate="10241">
-                                        x08
+                                        P00008
                                     </Element>
                                     <Element ElementType="0" Coordinate="10243"/>
                                     <Element ElementType="6" Coordinate="11265">
-                                        x09
+                                        P00009
                                     </Element>
                                     <Element ElementType="0" Coordinate="11267"/>
                                     <Element ElementType="6" Coordinate="12289">
-                                        x10
+                                        P0000A
                                     </Element>
                                     <Element ElementType="0" Coordinate="12291"/>
                                     <Element ElementType="6" Coordinate="13313">
-                                        x11
+                                        P0000B
                                     </Element>
                                     <Element ElementType="0" Coordinate="13315"/>
                                     <Element ElementType="6" Coordinate="14337">
-                                        x12
+                                        P0000C
                                     </Element>
                                     <Element ElementType="0" Coordinate="14339"/>
                                     <Element ElementType="6" Coordinate="15361">
-                                        x13
+                                        P0000D
                                     </Element>
                                     <Element ElementType="0" Coordinate="15363"/>
                                     <Element ElementType="6" Coordinate="16385">
-                                        x14
+                                        P0000E
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

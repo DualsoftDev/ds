@@ -46,16 +46,20 @@ type XgxComparisonTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        let nn1, unn1 = storages.["nn1"], storages.["unn1"]
 
-        nn1.DataType === typeof<sbyte>
-        unn1.DataType === typeof<byte>
-        tracefn "%s\n" unn1.Address
-        //eu.Address === pi.Address + 1
+        let test =
+            fun () -> 
+                let xml = x.generateXmlForTest f storages (map withNoComment statements)
+                let nn1, unn1 = storages.["nn1"], storages.["unn1"]
 
-        x.saveTestResult f xml
-
+                nn1.DataType === typeof<sbyte>
+                unn1.DataType === typeof<byte>
+                tracefn "%s\n" unn1.Address
+                x.saveTestResult f xml
+        match xgx with
+        | XGI -> test()
+        | XGK -> test |> ShouldFailWithSubstringT "not supported in XGK"
+        | _ -> failwith "Not supported plc type"
 
     member x.``COMP int16 test`` () =
         let storages = Storages()

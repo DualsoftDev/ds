@@ -78,11 +78,11 @@ module XgiExportModule =
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
                     if funName.IsOneOf("+", "-", "*", "/") then
-                        let param = $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
+                        let param = $"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
                         drawXgkFBRight xy param
                     elif funName.IsOneOf(">", ">=", "<", "<=", "=", "==", "!=", "<>") then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
-                        drawXgkFBLeft xy param target.Name
+                        drawXgkFBLeft xy param target.Address
                     else
                         failwithlog $"ERROR: {funName}"
 

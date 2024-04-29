@@ -71,7 +71,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        cond
+                                        M00000
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
                                     <Element ElementType="33" Coordinate="2130" Param="MOV,src,tgt"/>

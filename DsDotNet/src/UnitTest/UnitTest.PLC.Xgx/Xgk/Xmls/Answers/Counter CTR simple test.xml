@@ -71,14 +71,14 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        cd
+                                        P00000
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
                                     <Element ElementType="33" Coordinate="2142" Param="CTR,myCTR,2000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="4097">
-                                        res
+                                        P00001
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="87"/>
                                     <Element ElementType="17" Coordinate="4190">

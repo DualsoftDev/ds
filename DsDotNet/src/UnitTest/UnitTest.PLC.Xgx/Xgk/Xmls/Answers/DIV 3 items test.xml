@@ -76,14 +76,14 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="DIV,nn1,nn2,_t1_DIV"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="DIV,nn1,nn2,M0004"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="3073">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="3076" Param="81"/>
-                                    <Element ElementType="33" Coordinate="3166" Param="DIV,_t1_DIV,nn3,quotient"/>
+                                    <Element ElementType="33" Coordinate="3166" Param="DIV,_t1_DIV,nn3,M0003"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="5121" Param="90"/>

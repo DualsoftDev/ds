@@ -2,11 +2,9 @@ namespace Engine.CodeGenCPU
 
 open System.Linq
 open Dual.Common.Core.FS
-open System.Collections.Generic
-open System.Runtime.CompilerServices
-open System.Reflection     
-open System
 open Engine.Core
+open PLC.CodeGen.Common
+
 
 [<AutoOpen>]
 module DsAddressModule =
@@ -72,18 +70,10 @@ module DsAddressModule =
             then
                 let cnt =
                     match ioType with 
-                    |In ->     let _inCnt = inCnt
-                               inCnt <- inCnt + 1; _inCnt
-
-                    |Out ->    let _outCnt = outCnt
-                               outCnt <- outCnt + 1; _outCnt
-
-                    |Memory -> let _memoryCnt = memoryCnt
-                               memoryCnt <- memoryCnt + 1; _memoryCnt
-
-                    |NotUsed -> failwithf $"{ioType} not support"
-
-
+                    | In      -> inCnt <- inCnt + 1        ; inCnt
+                    | Out     -> outCnt <- outCnt + 1      ; outCnt
+                    | Memory  -> memoryCnt <- memoryCnt + 1; memoryCnt
+                    | NotUsed -> failwithf $"{ioType} not support"
 
                 let getSlotInfoNonIEC(settingType: IOType, newCnt: int) =
                     let filterSlotsByType = 

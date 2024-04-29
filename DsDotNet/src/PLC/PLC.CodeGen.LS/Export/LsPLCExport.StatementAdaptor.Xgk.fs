@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LS
 
 open Engine.Core
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module XgkTypeConvertorModule =
@@ -12,14 +13,41 @@ module XgkTypeConvertorModule =
             member x.StorageName = tc.Name
 
 
-    let operatorToXgkFunctionName op =
-        match op with
-        | "+" -> "ADD"
-        | "-" -> "SUB"
-        | "*" -> "MUL"
-        | "/" -> "DIV"
-        | (">" | ">=" | "<"  | "<="  | "=" | "<>" | "!=" ) -> op
-        | _ -> failwithlog "ERROR"
+    /// {prefix}{Op}{suffix} 형태로 반환.  e.g "DADDU" : "{D}{ADD}{U}" => DWORD ADD UNSIGNED
+    ///
+    /// - prefix: "D" for DWORD, "R" for REAL, "L" for LONG REAL, "$" for STRING
+    ///
+    /// suffix: "U" for UNSIGNED
+    let operatorToXgkFunctionName op (typ:Type) =
+        let prefix =
+            match typ with
+            | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
+                failwith $"byte (sint) type operation {op} is not supported in XGK"     // byte 연산 지원 여부 확인 필요
+            | _ when typ.IsOneOf(typeof<int32>, typeof<uint32>) -> "D"
+            | _ when typ = typeof<single> -> "R"     //"R" for real
+            | _ when typ = typeof<double> -> "L"     //"L" for long real
+            | _ when typ = typeof<string> -> "$"     //"$" for string
+            | _ when typ.IsOneOf(typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
+            | _ -> ""
+
+        let suffix =
+            match typ with
+            | _ when typ.IsOneOf(typeof<uint16>, typeof<uint32>) && op <> "MOV" -> "U"  // MOVE 는 "MOVU" 등이 없다.  size 만 중요하지 unsigned 여부는 중요하지 않다.
+            | _ -> ""
+
+        let opName =
+            match op with
+            | "+" -> "ADD"
+            | "-" -> "SUB"
+            | "*" -> "MUL"
+            | "/" -> "DIV"
+            | "MOV" -> "MOV"
+            | "!=" -> "<>"
+            | "==" -> "="
+            | (">" | ">=" | "<"  | "<="  | "=" | "<>" ) -> op
+            | _ -> failwithlog "ERROR"
+
+        $"{prefix}{opName}{suffix}"
 
 
     /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.
@@ -42,16 +70,16 @@ module XgkTypeConvertorModule =
 
                 if fn.IsOneOf("!=", "=", "<>") && lexpr.DataType = typeof<bool> then
                     // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
-                    let l, r, nl, nr = lexpr, rexpr, fLogicalNot [lexpr], fLogicalNot [rexpr]
+                    let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
                     let newExp =
                         match fn with
-                        | ("!=" | "<>") -> fLogicalOr([fLogicalAnd [l; nr]; fLogicalAnd [nl; r]])
-                        | "=" -> fLogicalOr([fLogicalAnd [l; r]; fLogicalAnd [nl; nr]])
+                        | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
+                        | "=" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
                         | _ -> failwithlog "ERROR"
                     newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                 else
                     // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
-                    let newExp = DuFunction{FunctionBody = PsedoFunction<bool>; Name=fn; Arguments=[lexpr; rexpr]}
+                    let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
                     let createTmpStorage =
                         fun () -> 
                             match expStore with
@@ -70,8 +98,7 @@ module XgkTypeConvertorModule =
                         varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
                     | _ ->
                         if lstgs.any() || rstgs.any() then
-                            let stg = createTmpStorage()
-                            newExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts)
+                            newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                         else
                             exp, [], []
             | _ ->

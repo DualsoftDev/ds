@@ -54,12 +54,11 @@
                         <Symbol Name="_t1_MUL" Comment="$nn2 * $nn3" Device="M" DevicePos="10" Type="WORD"/>
                         <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2 * $nn3" Device="M" DevicePos="11" Type="WORD"/>
                         <Symbol Name="_t3_GT" Comment="$nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="130" Type="BIT"/>
-                        <Symbol Name="_t4_AND" Comment="$cond1 &amp;&amp; $nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="131" Type="BIT"/>
-                        <Symbol Name="_t5_MUL" Comment="$nn5 * $nn6" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="_t6_DIV" Comment="$nn5 * $nn6 / $nn7" Device="M" DevicePos="13" Type="WORD"/>
-                        <Symbol Name="_t7_ADD" Comment="$nn4 + $nn5 * $nn6 / $nn7" Device="M" DevicePos="14" Type="WORD"/>
-                        <Symbol Name="_t8_SUB" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8" Device="M" DevicePos="15" Type="WORD"/>
-                        <Symbol Name="_t9_GT" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="132" Type="BIT"/>
+                        <Symbol Name="_t4_MUL" Comment="$nn5 * $nn6" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="_t5_DIV" Comment="$nn5 * $nn6 / $nn7" Device="M" DevicePos="13" Type="WORD"/>
+                        <Symbol Name="_t6_ADD" Comment="$nn4 + $nn5 * $nn6 / $nn7" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="_t7_SUB" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8" Device="M" DevicePos="15" Type="WORD"/>
+                        <Symbol Name="_t8_GT" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="131" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -112,34 +111,34 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="81"/>
-                                    <Element ElementType="33" Coordinate="5214" Param="MUL,nn5,nn6,_t5_MUL"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="MUL,nn5,nn6,_t4_MUL"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="6145">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="6148" Param="81"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="DIV,_t5_MUL,nn7,_t6_DIV"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="DIV,_t4_MUL,nn7,_t5_DIV"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="7169">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="81"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="ADD,nn4,_t6_DIV,_t7_ADD"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="ADD,nn4,_t5_DIV,_t6_ADD"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="8193">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="SUB,_t7_ADD,nn8,_t8_SUB"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="SUB,_t6_ADD,nn8,_t7_SUB"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="9217" Param="&gt;,_t8_SUB,5"/>
+                                    <Element ElementType="33" Coordinate="9217" Param="&gt;,_t7_SUB,5"/>
                                     <Element ElementType="2" Coordinate="9226" Param="90"/>
                                     <Element ElementType="14" Coordinate="9310">
-                                        _t9_GT
+                                        _t8_GT
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -155,7 +154,7 @@
                                         result
                                     </Element>
                                     <Element ElementType="6" Coordinate="11265">
-                                        _t9_GT
+                                        _t8_GT
                                     </Element>
                                     <Element ElementType="2" Coordinate="11268" Param="0"/>
                                 </Rung>

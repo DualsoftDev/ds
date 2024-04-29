@@ -23,14 +23,18 @@ module TagModule =
         inherit TagBase<'T>(param)
         override x.ToBoxedExpression() = var2expr x
 
+    type IMemberVariable = interface end
     /// Timer, Counter 등의 structure 내의 변수.  PLC 로 내릴 때, 실제 변수를 생성하지는 않지만, 참조는 가능해야 한다.  e.g myTimer1.EN
     type MemberVariable<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit Variable<'T>(param)
+        interface IMemberVariable
 
 
+    type IPlanVar = interface end
     /// PlanVar 나의 시스템 내부의 global variable
     type PlanVar<'T when 'T:equality> (param:StorageCreationParams<'T>) =
         inherit Variable<'T>(param)
+        interface IPlanVar
 
 
 

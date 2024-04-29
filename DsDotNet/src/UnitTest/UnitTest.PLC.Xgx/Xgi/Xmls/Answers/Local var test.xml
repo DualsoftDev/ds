@@ -42,13 +42,13 @@
                         <LocalVar Version="Ver 1.0" Count="13">
                             <Symbols>
                                 <Symbol Name="myBoolean" Comment="BOOL &lt;- Boolean" Device="" Kind="1" Type="BOOL" Address="" State="0"/>
-                                <Symbol Name="myByte" Comment="BYTE &lt;- Byte" Device="" Kind="1" Type="BYTE" Address="" State="0"/>
+                                <Symbol Name="myByte" Comment="USINT &lt;- Byte" Device="" Kind="1" Type="USINT" Address="" State="0"/>
                                 <Symbol Name="myChar" Comment="BYTE &lt;- Char" Device="" Kind="1" Type="BYTE" Address="" State="0"/>
                                 <Symbol Name="myDouble" Comment="LREAL &lt;- Double" Device="" Kind="1" Type="LREAL" Address="" State="0"/>
-                                <Symbol Name="myInt16" Comment="SINT &lt;- Int16" Device="" Kind="1" Type="SINT" Address="" State="0"/>
+                                <Symbol Name="myInt16" Comment="INT &lt;- Int16" Device="" Kind="1" Type="INT" Address="" State="0"/>
                                 <Symbol Name="myInt32" Comment="DINT &lt;- Int32" Device="" Kind="1" Type="DINT" Address="" State="0"/>
                                 <Symbol Name="myInt64" Comment="LINT &lt;- Int64" Device="" Kind="1" Type="LINT" Address="" State="0"/>
-                                <Symbol Name="mySByte" Comment="BYTE &lt;- SByte" Device="" Kind="1" Type="BYTE" Address="" State="0"/>
+                                <Symbol Name="mySByte" Comment="SINT &lt;- SByte" Device="" Kind="1" Type="SINT" Address="" State="0"/>
                                 <Symbol Name="mySingle" Comment="REAL &lt;- Single" Device="" Kind="1" Type="REAL" Address="" State="0"/>
                                 <Symbol Name="myString" Comment="STRING &lt;- String" Device="" Kind="1" Type="STRING" Address="" State="0"/>
                                 <Symbol Name="myUInt16" Comment="UINT &lt;- UInt16" Device="" Kind="1" Type="UINT" Address="" State="0"/>

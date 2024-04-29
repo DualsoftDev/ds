@@ -17,10 +17,10 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="4">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="SINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="" Device="" Kind="6" Type="SINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="quotient" Comment="" Device="" Kind="6" Type="SINT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn3" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="quotient" Comment="" Device="" Kind="6" Type="INT" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -92,7 +92,7 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="5">
                             <Symbols>
-                                <Symbol Name="_t1_DIV" Comment="/ output" Device="" Kind="1" Type="SINT" InitValue="0" Address="" State="0"/>
+                                <Symbol Name="_t1_DIV" Comment="/ output" Device="" Kind="1" Type="INT" InitValue="0" Address="" State="0"/>
                                 <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn3" Comment="" Device="" Kind="8" State="0"/>

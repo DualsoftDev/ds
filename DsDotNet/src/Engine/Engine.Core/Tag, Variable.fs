@@ -55,6 +55,12 @@ module TagVariableModule =
         member val Comment: string = comment with get, set
         member val Address = address with get, set
 
+        // interface IExpression<'T> 를 지원해야 하지만, 정의 위치상 구현하기 힘듦.
+        // interface IExpression<'T> with ... 
+        // IStorage 로 casting 해서 IStorage::ToExpression extension method 를 사용하도록 한다.
+        member x.ToExpression():IExpression<'T> = x.ToBoxedExpression() :?> IExpression<'T>
+
+
         interface IStorage with
             member x.DsSystem = param.System
             member x.Target = param.Target
@@ -69,7 +75,7 @@ module TagVariableModule =
             member x.Address with get() = x.Address and set(v) = x.Address <- v
             member x.ToBoxedExpression() = x.ToBoxedExpression()
             member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name) 
-                        
+             
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v
 

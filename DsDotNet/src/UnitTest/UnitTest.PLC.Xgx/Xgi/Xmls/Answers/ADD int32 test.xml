@@ -15,11 +15,14 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="3">
+                <GlobalVariable Version="Ver 1.0" Count="6">
                     <Symbols>
                         <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="DINT" InitValue="1" Address="" State="0"/>
                         <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="DINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="sum" Comment="" Device="" Kind="6" Type="DINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="unn1" Comment="" Device="" Kind="6" Type="UDINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="unn2" Comment="" Device="" Kind="6" Type="UDINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="usum" Comment="" Device="" Kind="6" Type="UDINT" InitValue="3" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -63,8 +66,28 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="END">
+                                    <Element ElementType="63" Coordinate="6145">
+                                        [1] $usum := $unn1 + $unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="7169">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="7172" Param="FNAME: ADD2_UDINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1691&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200800, , 0&#xA;VAR_IN: IN2, 0x00200800, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000800, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="8193">
+                                        unn1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="8199">
+                                        usum
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="9217">
+                                        unn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="12289" Param="90"/>
+                                    <Element ElementType="33" Coordinate="12382" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -74,11 +97,14 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="3">
+                        <LocalVar Version="Ver 1.0" Count="6">
                             <Symbols>
                                 <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="sum" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="unn1" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="unn2" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="usum" Comment="" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

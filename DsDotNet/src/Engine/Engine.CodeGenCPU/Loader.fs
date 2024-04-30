@@ -74,6 +74,11 @@ module CpuLoader =
             RuntimeDS.System <- sys
 
             sys.TagManager <- SystemManager(sys, storages, target)
+            sys.Variables.Iter(fun v->
+                let variTag =  createVariableByType v.Name v.Type
+                storages.Add(variTag.Name, variTag)
+                )
+
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
             sys.GetVertices().Iter(fun v->
@@ -83,6 +88,9 @@ module CpuLoader =
                 | (:? Call | :? RealExF | :? Alias)
                     -> v.TagManager <-  VertexMCall(v)
                 | _ -> failwithlog (getFuncName()))
+
+
+
 
         createTagM system
         system.GetRecursiveLoadedSystems()

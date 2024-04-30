@@ -234,10 +234,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         variableDefs |> Seq.iter (fun vari ->
             let varType = vari.varType().GetText() |> textToDataType
             let varName = vari.varName().GetText()
-            let argument = vari.argument().GetText()
+            let value = DsDataType.typeDefaultValue (varType.ToType())
 
-            let variableData = VariableData (varName, varType, argument)
-            let value = varType.ToValue(argument)
+            let variableData = VariableData (varName, varType)
             let variable = varType.ToType().CreateVariable(varName, value)
 
             options.Storages.Add (varName, variable) |>ignore

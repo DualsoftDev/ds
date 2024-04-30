@@ -8,40 +8,12 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module CodeElements =
-    (*
-      [variables] = { //이름 = (타입,초기값)
-        int32 R100 = 0
-      }
-     *)
-    /// Variable Declaration: name = (type, init)  CodeBlock 사용 ? 선택 필요
-    type VariableData(name:string, varType:DataType, initValue:string) =
+    /// Variable 은 초기값 없음 값 할당은 [commands] 섹션 이용
+    type VariableData(name:string, varType:DataType) =
         member _.Name = name
         member _.Type = varType
-        member _.InitValue = initValue
-        member _.ToDsText() =
-            let genTargetText name (varType:DataType) value =
-                $"{varType.ToText()} {name} = {value}"
-
-            if initValue = TextAddrEmpty then
-                let forcedValue =
-                    match varType with
-                    | DuFLOAT32 -> "0.0f"
-                    | DuFLOAT64 -> "0.0"
-                    | DuINT8    -> "0y"
-                    | DuUINT8   -> "0uy"
-                    | DuINT16   -> "0s"
-                    | DuUINT16  -> "0us"
-                    | DuINT32   -> "0"
-                    | DuUINT32  -> "0u"
-                    | DuINT64   -> "0L"
-                    | DuUINT64  -> "0UL"
-                    | DuBOOL    -> "false"
-                    | DuCHAR    -> "''"
-                    | DuSTRING  -> "\"\""
-                genTargetText name varType forcedValue
-            else
-                genTargetText name varType initValue
-
+        member _.ToDsText() = $"{varType.ToText()} {name}"
+           
     type OperatorFunctionTypes =
         | DuOPUnDefined
         | DuOPCode

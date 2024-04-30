@@ -61,6 +61,10 @@ module TagModule =
         | UINT8  -> new Variable<uint8>  (createParam())
         | _  -> failwithlog "ERROR"
 
+    let createVariableByType (name:string) (dataType:DsDataType.DataType) : IVariable =
+        let defaultValue = DsDataType.typeDefaultValue (dataType.ToType())
+        createVariable name { Object = defaultValue }
+
     type Statement with
      
         member x.GetTargetStorages() =

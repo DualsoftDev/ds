@@ -188,7 +188,7 @@ module ImportIOTable =
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let dataType = $"{row.[(int) IOColumn.DataType]}" |> textToDataType
-                let variableData = VariableData(name, dataType, TextAddrEmpty)
+                let variableData = VariableData(name, dataType)
                 sys.Variables.Add(variableData)
 
             let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =

@@ -273,13 +273,6 @@ module EtcListenerModule =
                 |> ignore
 
 
-        //DsSystem.Variable 여기에 저장 및 불러오기로 이동
-        member x.ProcessVariableDef(context: VariableDefContext) =
-            let varName = context.TryFindFirstChild<VarNameContext>().Value.GetText()
-            let varType = context.TryFindFirstChild<VarTypeContext>().Value.GetText()
-            let init = context.TryFindFirstChild<ArgumentContext>().Value.GetText()
-            x.TheSystem.Variables.Add(new VariableData(varName, varType |> textToDataType, init))
-
 
 //member private x.CreateFunctionApplication(context:FunApplicationContext):FunctionApplication =
 //    let funName = context.TryFindFirstChild<FunNameContext>().Value.GetText()

@@ -74,7 +74,11 @@ type VertexManager with
         [
             match coin.CallCommandType with 
             | DuCMDCode ->
-                yield! coin.TargetFunc.Statements.Select(fun s-> withExpressionComment "Command"  s)
+                yield! coin.TargetFunc.Statements.Select(fun s->
+                    
+                    //test ahn
+                    let a = s.GetTargetStorages()
+                    withExpressionComment "Command"  s)
             
             | _-> failwithlog $"{v.Name} 함수 정의가 없습니다."
         ]

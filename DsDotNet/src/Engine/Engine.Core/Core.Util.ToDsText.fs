@@ -119,7 +119,7 @@ module internal ToDsTextModule =
             if vars.Any() then
                 yield $"{tab}[variables] = {lb}"
                 for var in vars do
-                    yield $"{tab2}{var.ToDsText()}"
+                    yield $"{tab2}{var.ToDsText()};"
                 yield $"{tab}{rb}"
         ] |> combineLines
 

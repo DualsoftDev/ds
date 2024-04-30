@@ -273,15 +273,9 @@ flowBlock
         aliasMnemonic: identifier1;
 
 variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
-    variableDef: varType varName '=' argument;
+    variableDef: varType varName SEMICOLON;
     varName: IDENTIFIER1;
-    argument: intValue | floatValue | varIdentifier;
-    varIdentifier: IDENTIFIER1;
-    intValue: INTEGER;
-    floatValue:FLOAT;
     varType: IDENTIFIER1;
-
-
 
 operatorBlock: '[' 'operators' ']' '=' '{' (functionNameOnly | functionOperatorDef)* '}' ;
     functionOperatorDef :  functionName '=' functionOperator;

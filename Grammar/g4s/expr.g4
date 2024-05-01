@@ -9,11 +9,13 @@ LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 comment: BLOCK_COMMENT | LINE_COMMENT;
 identifier : IDENTIFIER;
     tag: TAG;
-        TAG: '%' IDENTIFIER;
+    TAG: '%' IDENTIFIER;
+    innerTag: '$'innerTagName ;
+    innerTagName: IDENTIFIER'@'IDENTIFIER;
     storage: '$' storageName;
     functionName: identifier | binaryOperator;
 
-terminal: storage | tag | literal;
+terminal: storage | tag | innerTag | literal;
     literal:
         /* -  */   literalSingle
         /* .  */ | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime

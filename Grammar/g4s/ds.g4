@@ -272,6 +272,8 @@ flowBlock
         aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
         aliasMnemonic: identifier1;
 
+codeBlock: CODE_BLOCK;
+
 variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     variableDef: varType varName SEMICOLON;
     varName: IDENTIFIER1;
@@ -305,7 +307,6 @@ funcCall: identifier1Func;
 
 
 
-codeBlock: CODE_BLOCK;
 
 interfaceBlock
     : '[' 'interfaces' ']' '=' LBRACE (interfaceListing)* RBRACE;

@@ -60,7 +60,13 @@ module ImportU =
             | None -> 
                 let newfunc = 
                     match node.NodeType with
-                    | CALLOPFunc  ->   OperatorFunction.Create(funcName, node.OperatorFunc) :> Func
+                    | CALLOPFunc  ->  
+                        if node.OperatorFunc <> ""
+                        then 
+                            OperatorFunction.Create(funcName, node.OperatorFunc) :> Func
+                        else 
+                            OperatorFunction(funcName) :> Func
+
                     | CALLCMDFunc  ->     CommandFunction.Create(funcName, node.CommandFunc):> Func
                     | _ -> failwithlog "error"
                 mySys.Functions.Add(newfunc) |>ignore

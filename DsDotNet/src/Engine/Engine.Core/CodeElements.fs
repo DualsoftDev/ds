@@ -7,7 +7,7 @@ open System.Text.RegularExpressions
 open Dual.Common.Core.FS
 
 [<AutoOpen>]
-module CodeElements =
+module rec CodeElements =
     /// Variable 은 초기값 없음 값 할당은 [commands] 섹션 이용
     type VariableData(name:string, varType:DataType) =
         member _.Name = name
@@ -34,6 +34,7 @@ module CodeElements =
                 then DuOPCode 
                 else failWithLog "operatorType is empty error"
             
+    
     let getOperatorTypeNArgs (text:string) = 
         let text = text.Trim()
         let funcType, parameters =
@@ -43,6 +44,16 @@ module CodeElements =
             | [] -> failwith "Input line is empty or improperly formatted"
 
         (getOperatorType funcType), parameters
+
+    let updateOperator (op:OperatorFunction) (funcBodyText:string) = 
+        let opType, parms = getOperatorTypeNArgs (funcBodyText) 
+        match opType with
+        |DuOPCode ->
+            op.OperatorType <- DuOPCode 
+            op.OperatorCode <- funcBodyText
+        |_->
+            op.OperatorType <- opType 
+            op.Parameters <- parms.ToResizeArray()
 
     type CommandFunctionTypes =
         | DuCMDUnDefined
@@ -64,7 +75,7 @@ module CodeElements =
         inherit Func(name)
         member val OperatorType = DuOPUnDefined with get, set
         member val OperatorCode = "" with get, set
-        member val Parameters = ResizeArray<string>()
+        member val Parameters = ResizeArray<string>() with get, set
         member x.ToDsText() = 
             if x.OperatorType = DuOPCode   
             then x.OperatorCode

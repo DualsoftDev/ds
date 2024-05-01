@@ -77,6 +77,12 @@ module TagManagerModule =
 
         member _.Name   = v.QualifiedName
         member _.Vertex = v
+        member _.IsOperator = match v with 
+                              | :? Call as c -> c.CallOperatorType = DuOPCode
+                              |_-> false  
+        member _.IsCommand =  match v with 
+                              | :? Call as c -> c.CallCommandType = DuCMDCode
+                              |_-> false
         member _.Flow   = v.Parent.GetFlow()
         member _.System = v.Parent.GetFlow().System
         member _.Storages = s

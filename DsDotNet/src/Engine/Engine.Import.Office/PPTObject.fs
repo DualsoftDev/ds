@@ -340,40 +340,41 @@ module PPTObjectModule =
                 | Some item -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), item
                 | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
 
+        let getNodeType() =
+            let name = GetBracketsRemoveName(shape.InnerText)
+            if (shape.CheckFlowChartPreparation()) then
+                CALLOPFunc
+            elif (shape.CheckRectangle()) then
+                if name.Contains(".")
+                then REALExF
+                else REAL
+            elif (shape.CheckHomePlate()) then
+                match GetSquareBrackets(shape.InnerText, false) with
+                | Some text -> if text.Contains("~") then IF_DEVICE else IF_LINK
+                | None -> IF_LINK
+
+            elif (shape.CheckFoldedCornerPlate()) then
+                OPEN_EXSYS_CALL
+            elif (shape.CheckFoldedCornerRound()) then
+                COPY_DEV
+            elif (shape.CheckEllipse()) then
+                if name.Contains(".")
+                then CALL
+                else CALLCMDFunc
+            elif (shape.CheckBevelShapePlate()) then
+                LAMP
+            elif (shape.CheckBevelShapeRound()) then
+                BUTTON     
+            elif (shape.CheckBevelShapeMaxRound()) then
+                CONDITION
+            elif (shape.CheckLayout()) then
+                shape.ErrorName(ErrID._62, iPage)
+            else
+                shape.ErrorName(ErrID._1, iPage)
+
         do
 
-            nodeType <-
-                let name = GetBracketsRemoveName(shape.InnerText)
-                if (shape.CheckFlowChartPreparation()) then
-                    CALLOPFunc
-                elif (shape.CheckRectangle()) then
-                    if name.Contains(".")
-                    then REALExF
-                    else REAL
-                elif (shape.CheckHomePlate()) then
-                    match GetSquareBrackets(shape.InnerText, false) with
-                    | Some text -> if text.Contains("~") then IF_DEVICE else IF_LINK
-                    | None -> IF_LINK
-
-                elif (shape.CheckFoldedCornerPlate()) then
-                    OPEN_EXSYS_CALL
-                elif (shape.CheckFoldedCornerRound()) then
-                    COPY_DEV
-                elif (shape.CheckEllipse()) then
-                    if name.Contains(".")
-                    then CALL
-                    else CALLCMDFunc
-                elif (shape.CheckBevelShapePlate()) then
-                    LAMP
-                elif (shape.CheckBevelShapeRound()) then
-                    BUTTON     
-                elif (shape.CheckBevelShapeMaxRound()) then
-                    CONDITION
-                elif (shape.CheckLayout()) then
-                    shape.ErrorName(ErrID._62, iPage)
-                else
-                    shape.ErrorName(ErrID._1, iPage)
-
+            nodeType <- getNodeType() 
             if nodeType = CALL  
             then 
                 let callName =  GetHeadBracketRemoveName(shape.InnerText)
@@ -381,12 +382,11 @@ module PPTObjectModule =
 
             elif nodeType = CALLOPFunc && shape.InnerText.Contains(".")
             then
-                name <- shape.InnerText.Replace(".", "_") + "_OP"
+                name <- shape.InnerText.Replace(".", "_") + "_OPERATOR"
             else 
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
 
             nameCheck (shape, nodeType, iPage)
-
 
             match nodeType with
   
@@ -427,8 +427,9 @@ module PPTObjectModule =
             | CALLOPFunc -> 
                 if shape.InnerText.Contains(".")
                 then
-                    let opName =  $"{pageTitle}_{name}"
-                    opFunc <- $"${opName} = true;"
+                    let name = shape.InnerText.Replace(".", "_") 
+                    let endTag = $"{pageTitle}_{name}@ET"
+                    opFunc <- $"${endTag} = true;"
             | CALLCMDFunc 
                 -> 
                     cmdFunc <- ""

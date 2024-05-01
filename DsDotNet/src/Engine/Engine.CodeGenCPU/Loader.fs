@@ -89,6 +89,16 @@ module CpuLoader =
                     -> v.TagManager <-  VertexMCall(v)
                 | _ -> failwithlog (getFuncName()))
 
+            sys.Functions.Iter(fun f->
+                let tags = getTotalTags f.Statements
+                tags
+                    .Filter(fun t-> t.Name.Contains("@"))
+                    .Iter(fun t->
+                        
+                    storages.Add(t.Name, t)
+                    )
+                )
+
 
 
 

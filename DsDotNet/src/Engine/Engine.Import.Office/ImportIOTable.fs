@@ -71,9 +71,7 @@ module ImportIOTable =
                 | Some func ->
                     match func with
                     | :? OperatorFunction as op when op.OperatorType = DuOPUnDefined ->
-                            let opType, parms= getOperatorTypeNArgs (funcBodyText)
-                            op.OperatorType <- opType
-                            op.Parameters.AddRange(parms)
+                            updateOperator op funcBodyText
                             Some (op :> Func)
 
                     | :? CommandFunction as cmd when cmd.CommandType = DuCMDUnDefined ->

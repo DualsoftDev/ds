@@ -155,17 +155,19 @@ module ConvertCPU =
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
         ]
 
-    let private funcCommandCall(s:DsSystem) =
+    let private funcCall(s:DsSystem) =
         let coinCommandFuncs =
-            s.GetVerticesOfCoins().OfType<Call>()
-                .Where(fun c->c.TargetHasFunc && (c.TargetFunc :? CommandFunction))
+            s.GetVertices().OfType<Call>()
+                .Where(fun c->c.TargetHasFunc)
                 .Select(fun c->c.TagManager :?> VertexMCall)
 
         [
             for coin in coinCommandFuncs do
-                yield coin.CallFunctionPS()
-                yield coin.CallFunctionPE()
-                yield! coin.C3_FunctionOut()
+                if coin.IsOperator  //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
+                then yield! coin.C1_DoOperator()
+                    
+                if coin.IsCommand //Command 함수는 Call Memo에 의해서 실행
+                then yield! coin.C2_DoCommand()
         ]
 
     let private emulationDevice(s:DsSystem) =
@@ -246,7 +248,7 @@ module ConvertCPU =
             yield! apiPlanSync sys
             
             //funcCall 적용 
-            yield! funcCommandCall sys
+            yield! funcCall sys
             
             //Timer Count 적용 
             yield! applyTimerCounterSpec sys

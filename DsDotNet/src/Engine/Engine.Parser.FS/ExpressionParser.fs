@@ -23,7 +23,7 @@ module rec ExpressionParser =
         parser.AddErrorListener(listener_parser)
         parser
 
-    let createExpression (storages: Storages) (ctx: ExprContext) : IExpression =
+    let createExpressionForSystem (storages: Storages) (ctx: ExprContext) (sysName: string) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =
             let text = ctx.GetText()
@@ -131,6 +131,22 @@ module rec ExpressionParser =
                         match storage with
                         | Some strg -> strg.ToBoxedExpression() :?> IExpression
                         | None -> failwith $"Failed to find variable/tag name in {sctx.GetText()}"
+
+                    | :? InnerTagContext as sctx -> 
+             
+                        let innerTagName = 
+                            let innerTagCtx = sctx.TryFindFirstChild<InnerTagNameContext>().Value
+                            if sysName = "" then innerTagCtx.GetText()
+                            else //system 내부 planVar 사용 포멧으로 변경 STN1_Device2_ADV@ET => mySys_STN1_Device2_ADV_ET
+                                let innerTag = innerTagCtx.GetText().Replace("@", "_")
+                                $"{sysName}_{innerTag}"   
+
+                        match storages.TryFind(innerTagName) with
+                        | Some strg -> strg.ToBoxedExpression() :?> IExpression
+                        | None ->
+                            let innerVari = createVariableByType innerTagName DuBOOL
+                            storages.Add(innerVari.Name, innerVari) 
+                            innerVari.ToBoxedExpression() :?> IExpression
                     | _ -> failwithlog "ERROR"
 
                 | :? ArrayReferenceExprContext ->
@@ -148,15 +164,20 @@ module rec ExpressionParser =
 
         helper ctx
 
-    let parseExpression (storages: Storages) (text: string) : IExpression =
+    let createExpression (storages: Storages) (ctx: ExprContext) =
+        createExpressionForSystem storages ctx ""
+
+    let parseExpressionForSystem (storages: Storages) (text: string) (systemName: string) : IExpression =
         try
             let parser = createParser (text)
             let ctx = parser.expr ()
 
-            createExpression storages ctx
+            createExpressionForSystem storages ctx systemName
         with exn ->
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
 
+    let parseExpression (storages: Storages) (text: string) : IExpression =
+        parseExpressionForSystem storages text ""
 
     let private getFirstChildExpressionContext (ctx: ParserRuleContext) : ExprContext =
         ctx.children.OfType<ExprContext>().First()

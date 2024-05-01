@@ -59,12 +59,12 @@ module SystemManagerModule =
 
         
 
-        let dtimeyy  = dsSysUint8 "_RTC_TIME[0]"  false sys  SystemTag.datet_yy         //ls xgi 현재시각[년도]
-        let dtimemm  = dsSysUint8 "_RTC_TIME[1]"  false sys  SystemTag.datet_mm         //ls xgi 현재시각[월]
-        let dtimedd  = dsSysUint8 "_RTC_TIME[2]"  false sys  SystemTag.datet_dd         //ls xgi 현재시각[일]
-        let dtimeh   = dsSysUint8 "_RTC_TIME[3]"  false sys  SystemTag.datet_h          //ls xgi 현재시각[시]
-        let dtimem   = dsSysUint8 "_RTC_TIME[4]"  false sys  SystemTag.datet_m          //ls xgi 현재시각[분]
-        let dtimes   = dsSysUint8 "_RTC_TIME[5]"  false sys  SystemTag.datet_s          //ls xgi 현재시각[초]
+        //let dtimeyy  = dsSysUint8 "_RTC_TIME[0]"  false sys  SystemTag.datet_yy         //ls xgi 현재시각[년도]
+        //let dtimemm  = dsSysUint8 "_RTC_TIME[1]"  false sys  SystemTag.datet_mm         //ls xgi 현재시각[월]
+        //let dtimedd  = dsSysUint8 "_RTC_TIME[2]"  false sys  SystemTag.datet_dd         //ls xgi 현재시각[일]
+        //let dtimeh   = dsSysUint8 "_RTC_TIME[3]"  false sys  SystemTag.datet_h          //ls xgi 현재시각[시]
+        //let dtimem   = dsSysUint8 "_RTC_TIME[4]"  false sys  SystemTag.datet_m          //ls xgi 현재시각[분]
+        //let dtimes   = dsSysUint8 "_RTC_TIME[5]"  false sys  SystemTag.datet_s          //ls xgi 현재시각[초]
         //let dtimewk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[요일]
         //let dtimeyk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[년대]
 
@@ -101,6 +101,17 @@ module SystemManagerModule =
  
             on.Value <- true
             off.Value <- false
+
+            if target = PlatformTarget.XGK
+            then
+                on.Address  <- "F00099"
+                off.Address <- "F0009A"
+
+                flicker20msec .Address <- "F00090"
+                flicker100msec.Address <- "F00091"
+                flicker200msec.Address <- "F00092"
+                flicker1sec   .Address <- "F00093"
+                flicker2sec   .Address <- "F00094"
 
         interface ITagManager with
             member x.Target = sys
@@ -142,12 +153,12 @@ module SystemManagerModule =
             | SystemTag.home_lamp   ->    home_lamp
 
 
-            | SystemTag.datet_yy        ->    dtimeyy
-            | SystemTag.datet_mm        ->    dtimemm
-            | SystemTag.datet_dd        ->    dtimedd
-            | SystemTag.datet_h         ->    dtimeh
-            | SystemTag.datet_m         ->    dtimem
-            | SystemTag.datet_s         ->    dtimes
+            //| SystemTag.datet_yy        ->    dtimeyy
+            //| SystemTag.datet_mm        ->    dtimemm
+            //| SystemTag.datet_dd        ->    dtimedd
+            //| SystemTag.datet_h         ->    dtimeh
+            //| SystemTag.datet_m         ->    dtimem
+            //| SystemTag.datet_s         ->    dtimes
             | SystemTag.timeout         ->    tout
             
             | SystemTag.pauseMonitor         ->    pauseMonitor

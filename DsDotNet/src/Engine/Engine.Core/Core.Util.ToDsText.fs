@@ -225,18 +225,27 @@ module internal ToDsTextModule =
 
 
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
+                let getHwInfo(hw:HwSystemDef) = 
+                    let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
+                    let items = 
+                        if hw.OperatorFunction.IsSome 
+                        then [printFunc hw.OperatorFunction.Value]  @ flows else flows
+                                
+                    let itemText = if items.any() then (items |> String.concat "; ") + ";" else ""
+                    let inAddr =  addressPrint  hw.InAddress  
+                    let outAddr = addressPrint  hw.OutAddress 
+                    itemText, inAddr, outAddr
+
                 [
-                    if hws.length() > 0 then
+                    match hws.length() with
+                    |0-> ()
+                    |1-> 
+                        let itemText, inAddr, outAddr = getHwInfo (hws.Head())
+                        yield $"{tab2}[{category}] = {lb} {hws.Head().Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {itemText} {rb} {rb}"
+                    |_->
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
-                            let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
-                            let items = 
-                                if hw.OperatorFunction.IsSome 
-                                then [printFunc hw.OperatorFunction.Value]  @ flows else flows
-                                
-                            let itemText = if items.any() then (items |> String.concat "; ") + ";" else ""
-                            let inAddr =  addressPrint  hw.InAddress  
-                            let outAddr = addressPrint  hw.OutAddress 
+                            let itemText, inAddr, outAddr = getHwInfo hw
                             yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
                           
                         yield $"{tab2}{rb}"

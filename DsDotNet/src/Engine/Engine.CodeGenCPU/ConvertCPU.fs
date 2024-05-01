@@ -230,7 +230,7 @@ module ConvertCPU =
 
             //Active 시스템 적용 
             if isActive
-            then   //test ahn loaded는 제외 성능 고려해서 다시 구현
+            then   
                 yield! applySystemSpec sys
 
             //Flow 적용

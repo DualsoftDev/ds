@@ -71,14 +71,17 @@ type VertexManager with
     member v.C3_FunctionOut() =
         let v = v :?> VertexMCall
         let coin = v.Vertex :?> Call
+        let comment = getFuncName()
         [
             match coin.CallCommandType with 
             | DuCMDCode ->
                 yield! coin.TargetFunc.Statements.Select(fun s->
-                    
-                    //test ahn
-                    let a = s.GetTargetStorages()
-                    withExpressionComment "Command"  s)
+                     match s with
+                     | DuAssign (cmdExpr, target) ->
+                        let sets = (*v.PSFunc.Expr <&&>*) cmdExpr
+                        withExpressionComment comment (DuAssign (sets, target))
+                     |_ -> failWithLog $"err {comment}"
+                     )
             
             | _-> failwithlog $"{v.Name} 함수 정의가 없습니다."
         ]

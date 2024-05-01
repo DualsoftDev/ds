@@ -261,6 +261,8 @@ module TagManagerModule =
         member _.RXErrShortOn       = rxErrOpenOff    
         member _.RXErrShortRising   = rxErrOpenRising 
         member _.RXErrShortTemp     = rxErrOpenTemp   
+        ///command Plan Set
         member _.PSFunc           =  callFuncPS
+        ///command Plan End
         member _.PEFunc           =  callFuncPE
 

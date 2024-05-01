@@ -24,7 +24,7 @@ type VertexMReal with
                 else                          
                     (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr  
 
-            let rst = (v.RT.Expr <||> v.OFF.Expr) <&&> real.CoinAlloffExpr  //test ahn
+            let rst = (v.RT.Expr <||> v.OFF.Expr) <&&> real.CoinAlloffExpr  //test ahn 아래형식 테스트 필요
             //let rst = (v.RT.Expr <||> v.OFF.Expr) <&&> !!real.CoinAllContacts.ToOrElseOff()
 
             //수식 순서 중요

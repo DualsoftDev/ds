@@ -36,7 +36,7 @@ module internal ToDsTextModule =
         let ess = es |> Seq.fold folder []
         let getName (v:Vertex) =
             match v with    
-            | :? Call as c when c.TargetHasFuncOnly -> "$"+(getRawName v.PureNames true)
+            | :? Call as c when c.TargetHasFunc -> "$"+(getRawName v.PureNames true)
             |_-> getRawName v.PureNames true    
             
         let getNames (vs:Vertex seq) = vs.Select(getName).JoinWith(", ")

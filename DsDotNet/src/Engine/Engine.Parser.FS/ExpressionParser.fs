@@ -132,18 +132,18 @@ module rec ExpressionParser =
                         | Some strg -> strg.ToBoxedExpression() :?> IExpression
                         | None -> failwith $"Failed to find variable/tag name in {sctx.GetText()}"
 
-                    | :? InnerTagContext as sctx -> 
+                    //| :? InnerTagContext as sctx -> 
              
-                        let innerTagCtx = sctx.TryFindFirstChild<InnerTagNameContext>().Value
-                        let innerTagName = innerTagCtx.GetText().Replace("@", "_")
+                    //    let innerTagCtx = sctx.TryFindFirstChild<InnerTagNameContext>().Value
+                    //    let innerTagName = innerTagCtx.GetText().Replace("@", "_")
 
-                        match storages.TryFind(innerTagName) with
-                        | Some strg -> strg.ToBoxedExpression() :?> IExpression
-                        | None ->
-                            let innerVari = createVariableByType innerTagName DuBOOL
-                            storages.Add(innerVari.Name, innerVari) 
-                            innerVari.ToBoxedExpression() :?> IExpression
-                    | _ -> failwithlog "ERROR"
+                    //    match storages.TryFind(innerTagName) with
+                    //    | Some strg -> strg.ToBoxedExpression() :?> IExpression
+                    //    | None ->
+                    //        let innerVari = createVariableByType innerTagName DuBOOL
+                    //        storages.Add(innerVari.Name, innerVari) 
+                    //        innerVari.ToBoxedExpression() :?> IExpression
+                    //| _ -> failwithlog "ERROR"
 
                 | :? ArrayReferenceExprContext ->
                     debugfn $"ArrayReference: {text}"

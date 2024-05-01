@@ -10,12 +10,10 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 identifier : IDENTIFIER;
     tag: TAG;
     TAG: '%' IDENTIFIER;
-    innerTag: '$'innerTagName ;
-    innerTagName: IDENTIFIER'@'IDENTIFIER;
     storage: '$' storageName;
     functionName: identifier | binaryOperator;
 
-terminal: storage | tag | innerTag | literal;
+terminal: storage | tag | literal;
     literal:
         /* -  */   literalSingle
         /* .  */ | literalDouble         // 'double' 이름 그대로 사용 불가 : symbol double conflicts with generated code in target language or runtime

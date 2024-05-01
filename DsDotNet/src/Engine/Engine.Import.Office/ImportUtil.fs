@@ -61,14 +61,7 @@ module ImportU =
             | None -> 
                 let newfunc = 
                     match node.NodeType with
-                    | CALLOPFunc  -> 
-                        if node.Name.Contains(".")  //dev1.ADV 직접 api 입력시 자동으로 비교문 생성
-                        then
-                            let opCode =  $"${node.OperatorCodeTag(mySys)} = true"
-                            OperatorFunction.Create(funcName, opCode) :> Func
-                        else
-                            OperatorFunction(funcName) :> Func
-
+                    | CALLOPFunc  ->      OperatorFunction(funcName) :> Func
                     | CALLCMDFunc  ->     CommandFunction.Create(funcName, ""):> Func
                     | _ -> failwithlog "error"
                 mySys.Functions.Add(newfunc) |>ignore
@@ -77,13 +70,20 @@ module ImportU =
 
         let call =
             match node.NodeType with
-            | CALLOPFunc | CALLCMDFunc  ->  
+            | CALLOPFunc when not(node.Name.Contains(".")) ->
                 Call.Create(getFunc(), parentWrapper)  
 
-            | CALL ->  
+            | CALLCMDFunc  ->  
+                Call.Create(getFunc(), parentWrapper)  
 
-                if parentWrapper.GetCore() :? Flow 
-                then failWithLog  $"Action 정의는 work 내부에만 존재 가능합니다. error {node.Name}."    
+            | CALL | CALLOPFunc when node.Name.Contains(".") ->  
+                match node.NodeType with
+                | CALL ->
+                    if parentWrapper.GetCore() :? Flow 
+                    then failWithLog  $"Action 정의는 work 내부에만 존재 가능합니다. error {node.Name}."    
+                | _ ->
+                    if parentWrapper.GetCore() :? Real 
+                    then failWithLog  $"Operator 정의는 work 외부에만 존재 가능합니다. error {node.Name}."    
                 
                 let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
                 if jobCallNames.Contains sysName

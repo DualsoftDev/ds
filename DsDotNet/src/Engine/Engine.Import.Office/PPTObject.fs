@@ -445,9 +445,9 @@ module PPTObjectModule =
 
         member x.Position = shape.GetPosition(slieSize)
 
-        member x.OperatorCodeTag(sys:DsSystem) = 
-                    let codeTagName = name.Replace(".", "_")
-                    $"{sys.Name}_{pageTitle}_{codeTagName}@ET"
+        member x.JobName = pageTitle+"_"+name.Replace(".", "_")
+        member x.OperatorCode = 
+                $"${x.JobName} = true;"
 
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 

@@ -70,20 +70,20 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        ix
+                                        P00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="2052">
-                                        ix
+                                        P00000
                                     </Element>
                                     <Element ElementType="8" Coordinate="2055">
-                                        ix
+                                        P00000
                                     </Element>
                                     <Element ElementType="9" Coordinate="2058">
-                                        ix
+                                        P00000
                                     </Element>
                                     <Element ElementType="2" Coordinate="2061" Param="78"/>
                                     <Element ElementType="14" Coordinate="2142">
-                                        qx
+                                        P00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

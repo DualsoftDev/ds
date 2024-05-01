@@ -70,11 +70,11 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="7" Coordinate="2049">
-                                        x00
+                                        P00000
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="87"/>
                                     <Element ElementType="14" Coordinate="2142">
-                                        x01
+                                        P00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

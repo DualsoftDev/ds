@@ -74,7 +74,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,sum"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,M0002"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="4097" Param="90"/>

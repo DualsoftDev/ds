@@ -88,7 +88,7 @@
                                     <Element ElementType="33" Coordinate="2049" Param="&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="2058" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
-                                        b3
+                                        M00082
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -98,21 +98,21 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="4097">
-                                        b1
+                                        M00080
                                     </Element>
                                     <Element ElementType="7" Coordinate="4100">
-                                        b2
+                                        M00081
                                     </Element>
                                     <Element ElementType="0" Coordinate="4102"/>
                                     <Element ElementType="2" Coordinate="4103" Param="84"/>
                                     <Element ElementType="14" Coordinate="4190">
-                                        b4
+                                        M00083
                                     </Element>
                                     <Element ElementType="7" Coordinate="5121">
-                                        b1
+                                        M00080
                                     </Element>
                                     <Element ElementType="6" Coordinate="5124">
-                                        b2
+                                        M00081
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -122,21 +122,21 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="7169">
-                                        b1
+                                        M00080
                                     </Element>
                                     <Element ElementType="6" Coordinate="7172">
-                                        b2
+                                        M00081
                                     </Element>
                                     <Element ElementType="0" Coordinate="7174"/>
                                     <Element ElementType="2" Coordinate="7175" Param="84"/>
                                     <Element ElementType="14" Coordinate="7262">
-                                        b5
+                                        M00084
                                     </Element>
                                     <Element ElementType="7" Coordinate="8193">
-                                        b1
+                                        M00080
                                     </Element>
                                     <Element ElementType="7" Coordinate="8196">
-                                        b2
+                                        M00081
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -148,7 +148,7 @@
                                     <Element ElementType="33" Coordinate="10241" Param="&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="10250" Param="90"/>
                                     <Element ElementType="14" Coordinate="10334">
-                                        b6
+                                        M00085
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -160,7 +160,7 @@
                                     <Element ElementType="33" Coordinate="12289" Param="&gt;,nn1,3"/>
                                     <Element ElementType="2" Coordinate="12298" Param="90"/>
                                     <Element ElementType="14" Coordinate="12382">
-                                        b7
+                                        M00086
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -173,7 +173,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="14340" Param="81"/>
-                                    <Element ElementType="33" Coordinate="14430" Param="ADD,nn1,nn2,sum"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="ADD,nn1,nn2,M0009"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
@@ -185,13 +185,13 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="16388" Param="81"/>
-                                    <Element ElementType="33" Coordinate="16478" Param="ADD,nn1,nn2,_t1_ADD"/>
+                                    <Element ElementType="33" Coordinate="16478" Param="ADD,nn1,nn2,M0010"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="33" Coordinate="17409" Param="&gt;,_t1_ADD,3"/>
                                     <Element ElementType="2" Coordinate="17418" Param="90"/>
                                     <Element ElementType="14" Coordinate="17502">
-                                        b8
+                                        M00087
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

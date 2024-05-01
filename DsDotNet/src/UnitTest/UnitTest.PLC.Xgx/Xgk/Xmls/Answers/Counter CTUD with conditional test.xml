@@ -94,7 +94,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="4097">
-                                        res0
+                                        M00008
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="0"/>
                                     <Element ElementType="0" Coordinate="4102"/>
@@ -103,74 +103,74 @@
                                         myCTUD
                                     </Element>
                                     <Element ElementType="6" Coordinate="5121">
-                                        res1
+                                        M00009
                                     </Element>
                                     <Element ElementType="6" Coordinate="5124">
-                                        res2
+                                        M0000A
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="6145">
-                                        cu1
+                                        M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="6148">
-                                        cu2
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="6150"/>
                                     <Element ElementType="2" Coordinate="6151" Param="84"/>
                                     <Element ElementType="14" Coordinate="6238">
-                                        _t1__temp_internal
+                                        M00010
                                     </Element>
                                     <Element ElementType="6" Coordinate="7169">
-                                        cu3
+                                        M00002
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="0"/>
                                     <Element ElementType="0" Coordinate="7174"/>
                                     <Element ElementType="6" Coordinate="8193">
-                                        cu4
+                                        M00003
                                     </Element>
                                     <Element ElementType="2" Coordinate="8196" Param="0"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="9217">
-                                        cd1
+                                        M00004
                                     </Element>
                                     <Element ElementType="0" Coordinate="9219"/>
                                     <Element ElementType="2" Coordinate="9220" Param="0"/>
                                     <Element ElementType="0" Coordinate="9222"/>
                                     <Element ElementType="2" Coordinate="9223" Param="84"/>
                                     <Element ElementType="14" Coordinate="9310">
-                                        _t2__temp_internal
+                                        M00011
                                     </Element>
                                     <Element ElementType="6" Coordinate="10241">
-                                        cd2
+                                        M00005
                                     </Element>
                                     <Element ElementType="0" Coordinate="10246"/>
                                     <Element ElementType="6" Coordinate="11265">
-                                        cd3
+                                        M00006
                                     </Element>
                                     <Element ElementType="6" Coordinate="11268">
-                                        cd4
+                                        M00007
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="12289">
-                                        load1
+                                        M0000B
                                     </Element>
                                     <Element ElementType="6" Coordinate="12292">
-                                        load2
+                                        M0000C
                                     </Element>
                                     <Element ElementType="0" Coordinate="12294"/>
                                     <Element ElementType="1" Coordinate="12295"/>
                                     <Element ElementType="2" Coordinate="12298" Param="81"/>
                                     <Element ElementType="33" Coordinate="12364" Param="DMOV,2000,myCTUD"/>
                                     <Element ElementType="6" Coordinate="13313">
-                                        load3
+                                        M0000D
                                     </Element>
                                     <Element ElementType="2" Coordinate="13316" Param="0"/>
                                     <Element ElementType="0" Coordinate="13318"/>
                                     <Element ElementType="6" Coordinate="14337">
-                                        load4
+                                        M0000E
                                     </Element>
                                     <Element ElementType="2" Coordinate="14340" Param="0"/>
                                 </Rung>

@@ -86,7 +86,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="LADD,mypi,myeuler,myDoubleSum3"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="LADD,mypi,myeuler,M0028"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="3073">
@@ -98,7 +98,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="81"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="LADD,3.14,2.718,myDoubleSum4"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="LADD,3.14,2.718,M0032"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="5121">
@@ -122,7 +122,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="9220" Param="81"/>
-                                    <Element ElementType="33" Coordinate="9310" Param="LADD,myDoubleSum1,myDoubleSum3,myDoubleSum2"/>
+                                    <Element ElementType="33" Coordinate="9310" Param="LADD,myDoubleSum1,myDoubleSum3,M0024"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="11265" Param="90"/>

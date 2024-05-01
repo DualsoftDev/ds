@@ -75,30 +75,30 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo
+                                        P0000A
                                     </Element>
                                     <Element ElementType="0" Coordinate="2051"/>
                                     <Element ElementType="7" Coordinate="2052">
-                                        Clamp1_RET_I
+                                        P0000B
                                     </Element>
                                     <Element ElementType="0" Coordinate="2054"/>
                                     <Element ElementType="7" Coordinate="2055">
-                                        IOP_ClampOperation
+                                        P0000F
                                     </Element>
                                     <Element ElementType="2" Coordinate="2058" Param="75"/>
                                     <Element ElementType="33" Coordinate="2142" Param="TON,TOUT3,150"/>
                                     <Element ElementType="0" Coordinate="3075"/>
                                     <Element ElementType="7" Coordinate="3076">
-                                        Clamp2_RET_I
+                                        P0000C
                                     </Element>
                                     <Element ElementType="0" Coordinate="3078"/>
                                     <Element ElementType="0" Coordinate="4099"/>
                                     <Element ElementType="7" Coordinate="4100">
-                                        Clamp3_RET_I
+                                        P0000D
                                     </Element>
                                     <Element ElementType="0" Coordinate="4102"/>
                                     <Element ElementType="7" Coordinate="5124">
-                                        Clamp4_RET_I
+                                        P0000E
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

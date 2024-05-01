@@ -73,16 +73,16 @@ module XgiExportModule =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "==", "!=", "<>") ->
             
-                let op = operatorToXgkFunctionName funName expr.DataType |> escapeXml
+                let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
                     if funName.IsOneOf("+", "-", "*", "/") then
-                        let param = $"Param={dq}{op},{ls},{rs},{target.Name}{dq}"
+                        let param = $"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
                         drawXgkFBRight xy param
                     elif funName.IsOneOf(">", ">=", "<", "<=", "=", "==", "!=", "<>") then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
-                        drawXgkFBLeft xy param target.Name
+                        drawXgkFBLeft xy param target.Address
                     else
                         failwithlog $"ERROR: {funName}"
 
@@ -393,7 +393,7 @@ module XgiExportModule =
                 prjParam
 
             // todo : 사전에 처리 되었어야...
-            for g in prjParam.GlobalStorages.Values do
+            for g in globalStorages.Values do
                 g.IsGlobal <- true
 
             EnableXmlComment <- enableXmlComment

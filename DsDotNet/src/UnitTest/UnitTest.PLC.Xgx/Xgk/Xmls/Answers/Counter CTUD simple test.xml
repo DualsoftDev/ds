@@ -80,7 +80,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="4097">
-                                        r
+                                        P00002
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="87"/>
                                     <Element ElementType="17" Coordinate="4190">
@@ -89,7 +89,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="5121">
-                                        xld
+                                        P00003
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="81"/>
                                     <Element ElementType="33" Coordinate="5202" Param="DMOV,2000,myCTUD"/>

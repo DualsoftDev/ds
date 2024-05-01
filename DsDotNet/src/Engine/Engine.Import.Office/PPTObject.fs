@@ -380,9 +380,9 @@ module PPTObjectModule =
                 let callName =  GetHeadBracketRemoveName(shape.InnerText)
                 name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimNewLine
 
-            elif nodeType = CALLOPFunc && shape.InnerText.Contains(".")
-            then
-                name <- shape.InnerText.Replace(".", "_") + "_OPERATOR"
+            //elif nodeType = CALLOPFunc && shape.InnerText.Contains(".")
+            //then
+            //    name <- shape.InnerText.Replace(".", "_") + "_OPERATOR"
             else 
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
 
@@ -424,15 +424,8 @@ module PPTObjectModule =
 
             | REALExF
             | LAYOUT
-            | CALLOPFunc -> 
-                if shape.InnerText.Contains(".")
-                then
-                    let name = shape.InnerText.Replace(".", "_") 
-                    let endTag = $"{pageTitle}_{name}@ET"
-                    opFunc <- $"${endTag} = true;"
+            | CALLOPFunc 
             | CALLCMDFunc 
-                -> 
-                    cmdFunc <- ""
             | DUMMY -> ()
 
         member x.PageNum = iPage
@@ -443,8 +436,7 @@ module PPTObjectModule =
         member x.RealFinished = shape.IsUnderlined()
 
         member x.Safeties = safeties
-        member x.OperatorFunc = opFunc
-        member x.CommandFunc = cmdFunc
+
         member x.IfName = ifName
         member x.IfTXs = ifTXs
         member x.IfRXs = ifRXs
@@ -452,6 +444,10 @@ module PPTObjectModule =
         member x.PageTitle = pageTitle
 
         member x.Position = shape.GetPosition(slieSize)
+
+        member x.OperatorCodeTag(sys:DsSystem) = 
+                    let codeTagName = name.Replace(".", "_")
+                    $"{sys.Name}_{pageTitle}_{codeTagName}@ET"
 
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 

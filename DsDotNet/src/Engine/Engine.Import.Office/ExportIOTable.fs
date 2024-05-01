@@ -243,6 +243,7 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                            .Where(fun w->w.TargetHasJob)   
                             .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
                         
             seq {

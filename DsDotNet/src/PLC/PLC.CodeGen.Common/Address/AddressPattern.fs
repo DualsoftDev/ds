@@ -180,7 +180,7 @@ module LSEAddressPattern =
     let isXgkTag tag = tryParseXGKTag tag |> fun f -> f.IsSome
 
 
-type XgkAddress private () as this =
+type XgkAddress private () =
     static let parseXgkAddress (addr:string) =
 
         assert(isInUnitTest())      // 일단 unit test 사용 only 로..  완전하게 구현 불가능한 함수.

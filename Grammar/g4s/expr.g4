@@ -149,9 +149,10 @@ expr: functionName '(' arguments? ')'                 # FunctionCallExpr    // f
 //INTEGER: SIGN? DIGITS;
 IDENTIFIER: VALID_ID_START VALID_ID_CHAR*;
 fragment VALID_ID_START: ('a' .. 'z') | ('A' .. 'Z') | '_';
-fragment VALID_ID_CHAR: VALID_ID_START | ('0' .. '9');
+fragment VALID_ID_CHAR: VALID_ID_START | ('0' .. '9') | HangulChar;
 fragment DIGIT: ('0' .. '9');
 fragment DIGITS: DIGIT+;
+fragment HangulChar: [\u3131-\u314E\u314F-\u3163|\uAC00-\uD7A3]+;
 
 fragment SCIENTIFIC_NUMBER: SIGN? NUMBER (E SIGN? DIGITS)?;
 fragment NUMBER: ((DIGITS)? ('.' DIGITS)) | ( (DIGITS) '.' (DIGITS)?);

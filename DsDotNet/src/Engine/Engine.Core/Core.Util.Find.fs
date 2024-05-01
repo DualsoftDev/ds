@@ -234,6 +234,16 @@ type FindExtension =
 
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
+    [<Extension>] static member GetVerticesHasJob(x:DsSystem) =  
+                    getVerticesOfSystem(x)
+                        .Choose(fun v -> v.GetPureCall())
+                        .Where(fun v -> v.TargetHasJob)
+
+    [<Extension>] static member GetVerticesHasJobOfFlow(x:Flow) =  
+                    getVerticesOfFlow(x)
+                        .Choose(fun v -> v.GetPureCall())
+                        .Where(fun v -> v.TargetHasJob)
+
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
     [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 
                     let vs = x.GetVertices()

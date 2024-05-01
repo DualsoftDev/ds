@@ -54,20 +54,22 @@ module ImportU =
             jobCallNames: string seq
         ) =
         let getFunc() = 
-            let funcName = $"{node.PageTitle}_{node.Name}"
+            let nodeFunName = node.Name.Replace(".", "_")         
+            let funcName = $"{node.PageTitle}_{nodeFunName}"
             match mySys.Functions |> Seq.tryFind(fun f->f.Name = funcName) with
             | Some f -> f
             | None -> 
                 let newfunc = 
                     match node.NodeType with
-                    | CALLOPFunc  ->  
-                        if node.OperatorFunc <> ""
-                        then 
-                            OperatorFunction.Create(funcName, node.OperatorFunc) :> Func
-                        else 
+                    | CALLOPFunc  -> 
+                        if node.Name.Contains(".")  //dev1.ADV 직접 api 입력시 자동으로 비교문 생성
+                        then
+                            let opCode =  $"${node.OperatorCodeTag(mySys)} = true"
+                            OperatorFunction.Create(funcName, opCode) :> Func
+                        else
                             OperatorFunction(funcName) :> Func
 
-                    | CALLCMDFunc  ->     CommandFunction.Create(funcName, node.CommandFunc):> Func
+                    | CALLCMDFunc  ->     CommandFunction.Create(funcName, ""):> Func
                     | _ -> failwithlog "error"
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc

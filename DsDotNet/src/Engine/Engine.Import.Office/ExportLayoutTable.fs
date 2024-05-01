@@ -45,7 +45,7 @@ module ExportLayoutTable =
               ]
               
         let rows = flows.SelectMany(fun f -> 
-                        f.GetVerticesOfFlow().OfType<Call>().SelectMany(fun c->
+                        f.GetVerticesHasJobOfFlow().SelectMany(fun c->
                             c.TargetJob.DeviceDefs.Select(fun d->
                                 let xywh = d.GetDevice(f.System).ChannelPoints.First(fun kv->kv.Key = TextEmtpyChannel).Value
                                 rowItem (d.DeviceName, f , xywh)

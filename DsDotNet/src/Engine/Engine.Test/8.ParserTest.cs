@@ -135,29 +135,15 @@ namespace Engine
     [flow] f1 = {
         Work1 > Work2;
     }
-    [operators] = {
-        opNot = not;
-    }
+
     [buttons] = {
-        [a] = {
-            AutoSelect(_, -) = { $opNot; f1; }
+        [a] = {  AutoSelect(_, -) = { f1; } }
+        [m] = {  ManualSelect(_, -) = {  f1; } }
+        [d] = {  DrivePushBtn(_, -) = {  f1; } }
+        [e] = {  EmergencyBtn(_, -) = { f1; } }
+        [p] = {  PausePushBtn(_, -) = { f1; } }
+        [c] = {  ClearPushBtn(_, -) = { f1; } }
         }
-        [m] = {
-            ManualSelect(_, -) = { $opNot; f1; }
-        }
-        [d] = {
-            DrivePushBtn(_, -) = { $opNot; f1; }
-        }
-        [e] = {
-            EmergencyBtn(_, -) = { f1; }
-        }
-        [p] = {
-            PausePushBtn(_, -) = { f1; }
-        }
-        [c] = {
-            ClearPushBtn(_, -) = { f1; }
-        }
-    }
     }
 
 ";
@@ -167,32 +153,15 @@ namespace Engine
     [flow] f1 = {
         Work1 > Work2;
     }
-    [operators] = {
-        opNot = not;
-    }
 
     [lamps] = {
-        [a] = {
-            AutoModeLamp(-, _) = { $opNot; }
-        }
-        [m] = {
-            ManualModeLamp(-, _) = { $opNot; }
-        }
-        [d] = {
-            DriveLamp(-, _) = {  }
-        }
-        [e] = {
-            ErrorLamp(-, _) = {  }
-        }
-        [r] = {
-            ReadyStateLamp(-, _) = {  }
-        }
-        [i] = {
-            IdleModeLamp(-, _) = { $opNot; }
-        }
-        [o] = {
-            OriginStateLamp(-, _) = {  }
-        }
+        [a] = { AutoModeLamp(-, _) = { } }
+        [m] = { ManualModeLamp(-, _) = {  } }
+        [d] = { DriveLamp(-, _) = {  } }
+        [e] = { ErrorLamp(-, _) = {  } }
+        [r] = { ReadyStateLamp(-, _) = {  } }
+        [i] = { IdleModeLamp(-, _) = { } }
+        [o] = { OriginStateLamp(-, _) = {  } }
     }
 }
 ";
@@ -202,14 +171,11 @@ namespace Engine
     [flow] f1 = {
         Work1 > Work2;
     }
-    [operators] = {
-        opNot = not;
-    }
 
 	[conditions] = {
         [r] = {
-            f1_Condition1(_, _) = { $opNot; f1; }
-            f1_Condition2(_, _) = { $opNot; f1; }
+            f1_Condition1(_, _) = { f1; }
+            f1_Condition2(_, _) = { f1; }
         }
     }
 

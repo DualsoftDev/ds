@@ -19,7 +19,7 @@ type VertexMCall with
                 match s with
                 | DuAssign (cmdExpr, _) ->
                     let code = cmdExpr.ToText()
-                    let expr = parseExpressionForSystem v.Storages code v.System.Name
+                    let expr = parseExpression v.Storages code 
                     withExpressionComment comment (DuAssign (expr, v.PEFunc))
                 |_ -> failWithLog $"err {comment}"
                 )

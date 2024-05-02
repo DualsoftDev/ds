@@ -28,16 +28,19 @@ module ConvertCpuVertex =
 
     type Call with
         member c._on     = c.System._on
-        member c._off     = c.System._off
+        member c._off    = c.System._off
 
-        member c.InTags  = 
-                    if c.TargetHasJob
-                    then 
-                        c.TargetJob.DeviceDefs
-                                    .Where(fun d-> d.InAddress <> TextSkip && d.InAddress <> TextAddrEmpty)
-                                    .Select(fun d->d.InTag :?> Tag<bool>)
-                    else  []
-                       
+        member c.HasSensor  =
+            match c.TargetHasJob with
+            | true -> 
+                c.TargetJob.DeviceDefs
+                    .Where(fun d-> d.OutAddress <> TextSkip
+                                && d.OutAddress <> TextAddrEmpty)
+                    .any()
+            | false -> false
+            
+        member c.JobAndSensor = c.VC.JobAndSensor
+        member c.JobOrSensor = c.VC.JobOrSensor
 
         member c.UsingTon  = c.CallOperatorType = DuOPTimer
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
@@ -53,13 +56,14 @@ module ConvertCpuVertex =
         member c.EndActionOnlyIO = 
                 if c.UsingNot 
                     then 
-                        if c.InTags.any() 
-                        then !!c.InTags.ToOrElseOff() 
+                        if c.HasSensor
+                        then !!c.JobOrSensor.Expr  //안전상이 이유로 센서 OR Not 사용 (하나라도 감지되지 않아야)
                         else failwithf $"$n 함수는 실제 Input address가 있어야 가능합니다. {c.Name} "   
 
-                elif c.InTags.any()
-                    then c.InTags.ToAnd() 
-                else c.EndPlan
+                else
+                    if c.HasSensor 
+                        then c.JobAndSensor.Expr
+                        else c.EndPlan
 
         member c.EndAction = 
                 if c.UsingTon  then c.VC.TDON.DN.Expr

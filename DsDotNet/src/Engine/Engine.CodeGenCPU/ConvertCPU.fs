@@ -77,7 +77,9 @@ module ConvertCPU =
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
                 yield vm.C1_CallMemo() 
-
+                yield vm.J1_JobActionAndSensor() 
+                yield vm.J2_JobActionOrSensor() 
+                
             if IsSpec (v, VertexAll, AliasNotCare) then
                 yield vm.M2_PauseMonitor()
                 yield! vm.S1_RGFH()

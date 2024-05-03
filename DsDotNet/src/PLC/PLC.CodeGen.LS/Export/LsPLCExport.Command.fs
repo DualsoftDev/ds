@@ -767,7 +767,7 @@ module internal rec Command =
                     // move 의 type 이 동일해야 한다.  timer/counter 는 예외.  reset coil 이나 preset 설정 등 허용.
                     assert (st = tt || tt = typeof<TimerCounterBaseStruct>)
                     operatorToXgkFunctionName "MOV" st
-                $"Param={dq}{mov},{s},{d}{dq}", 3
+                $"Param={dq}{mov},{s},{d}{dq}", 3           // Param="MOV,source,destination"
             rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
 
         | _ ->

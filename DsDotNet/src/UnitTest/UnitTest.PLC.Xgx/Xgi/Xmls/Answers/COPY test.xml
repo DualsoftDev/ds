@@ -15,11 +15,13 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="3">
+                <GlobalVariable Version="Ver 1.0" Count="5">
                     <Symbols>
                         <Symbol Name="cond" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="src" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
                         <Symbol Name="tgt" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="xsrc" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="xtgt" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -60,8 +62,25 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="END">
+                                    <Element ElementType="63" Coordinate="5121">
+                                        [1] copyIf($cond, $xsrc, $xtgt)
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="6145">
+                                        cond
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="6148" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="7169">
+                                        xsrc
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="7175">
+                                        xtgt
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="10241" Param="90"/>
+                                    <Element ElementType="33" Coordinate="10334" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -71,11 +90,13 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="3">
+                        <LocalVar Version="Ver 1.0" Count="5">
                             <Symbols>
                                 <Symbol Name="cond" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="src" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="tgt" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="xsrc" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="xtgt" Comment="" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

@@ -106,6 +106,12 @@ module XgiExportModule =
                     { Xmls = rgiSub.Xmls @ rgi.Xmls
                       NextRungY = rgiSub.NextRungY }
 
+        // todo
+        let xgkBoolTypeCopyIfRungs (condition:IExpression<bool>) (source: IExpression<bool>) (destination: IStorage) : unit =
+            failwith "NOT yet!!"
+            ()
+
+
         /// XGK 용 MOV : MOV,S,D
         let moveCmdRungXgk (condition:IExpression<bool>) (source: ITerminal) (destination: IStorage) : unit =
             // test case : XGK "Add 10 items test"
@@ -160,6 +166,12 @@ module XgiExportModule =
                     let expr = originalExpr.WithNewFunctionArguments args
                     simpleRung expr output
 
+                | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _op
+                                           Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
+                                           OriginalExpression = originalExpr
+                                           Output = destination }) when isXgk && source.DataType = typeof<bool> ->
+                    xgkBoolTypeCopyIfRungs condition source destination
+                    ()
 
                 // <kwak> <timer>
                 | Statement.DuTimer timerStatement ->

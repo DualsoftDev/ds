@@ -398,8 +398,11 @@ type XgxGenerationTest(xgx:PlatformTarget) =
             bool cond = false;
             int16 src = 1s;
             int16 tgt = 2s;
-
             copyIf($cond, $src, $tgt);
+
+            bool xsrc = false;
+            bool xtgt = false;
+            copyIf($cond, $xsrc, $xtgt);
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()

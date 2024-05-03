@@ -219,6 +219,8 @@ module rec TypeConvertorModule =
         /// Non-boolean function
         | FunctionCmd of Function
         | ActionCmd of PLCAction
+        /// "Param="MOV,SRC,DST"" 와 같은 형태의 명령
+        | XgkParamCmd of string
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 

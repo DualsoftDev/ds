@@ -107,7 +107,24 @@ module XgiExportModule =
                       NextRungY = rgiSub.NextRungY }
 
         // todo
-        let xgkBoolTypeCopyIfRungs (condition:IExpression<bool>) (source: IExpression<bool>) (destination: IStorage) : unit =
+        let xgkBoolTypeCopyIfRungs (condition:IExpression<bool>) (source: ITerminal) (destination: IStorage) : unit =
+            assert(destination.DataType = typeof<bool>)
+            match tryParseXGKTag destination.Address with
+            | Some ( {
+                Tag = tag
+                Device = device
+                DataType = datatType
+                BitOffset = totalBitOffset
+                }) ->
+                    let dh = sprintf "%A%04d" device (totalBitOffset / 16) // destination head : destination 의 word
+                    let offset = totalBitOffset % 16 // destination 이 속한 word 내에서의 bit offset
+                    let mSet = 1us <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
+                    let mClear = UInt16.MaxValue - (1us <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
+                    let printBinary (n:uint16) = Convert.ToString(int n, 2).PadLeft(16, '0')
+                    tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
+                    ()
+            | _ -> failwith "ERROR: XGK Tag parsing error"
+
             failwith "NOT yet!!"
             ()
 
@@ -170,7 +187,8 @@ module XgiExportModule =
                                            Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
                                            OriginalExpression = originalExpr
                                            Output = destination }) when isXgk && source.DataType = typeof<bool> ->
-                    xgkBoolTypeCopyIfRungs condition source destination
+                    
+                    xgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
                     ()
 
                 // <kwak> <timer>

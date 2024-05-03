@@ -77,17 +77,17 @@
                                     <Element ElementType="33" Coordinate="2142" Param="CTR,myCTR,2000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="4097">
+                                    <Element ElementType="6" Coordinate="6145">
                                         P00001
                                     </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="87"/>
-                                    <Element ElementType="17" Coordinate="4190">
+                                    <Element ElementType="2" Coordinate="6148" Param="87"/>
+                                    <Element ElementType="17" Coordinate="6238">
                                         myCTR
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="END">
+                                    <Element ElementType="2" Coordinate="8193" Param="90"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="END">
                                         END
                                     </Element>
                                 </Rung>

@@ -90,60 +90,60 @@
                                     <Element ElementType="2" Coordinate="3076" Param="0"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="5121">
+                                    <Element ElementType="6" Coordinate="6145">
                                         M00003
                                     </Element>
-                                    <Element ElementType="0" Coordinate="5123"/>
-                                    <Element ElementType="6" Coordinate="5124">
+                                    <Element ElementType="0" Coordinate="6147"/>
+                                    <Element ElementType="6" Coordinate="6148">
                                         M00005
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5127" Param="84"/>
-                                    <Element ElementType="17" Coordinate="5214">
+                                    <Element ElementType="2" Coordinate="6151" Param="84"/>
+                                    <Element ElementType="17" Coordinate="6238">
                                         myCTU
                                     </Element>
-                                    <Element ElementType="6" Coordinate="6145">
+                                    <Element ElementType="6" Coordinate="7169">
                                         M00004
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="7169">
+                                    <Element ElementType="63" Coordinate="8193">
                                         [1] $xx7 := ($cu1 &amp;&amp; $cu2 || $cu3 || ($res0 || $res1) &amp;&amp; $res2) &amp;&amp; $cu1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="8193">
+                                    <Element ElementType="6" Coordinate="9217">
                                         M00000
                                     </Element>
-                                    <Element ElementType="6" Coordinate="8196">
+                                    <Element ElementType="6" Coordinate="9220">
                                         M00001
                                     </Element>
-                                    <Element ElementType="0" Coordinate="8198"/>
-                                    <Element ElementType="6" Coordinate="8199">
+                                    <Element ElementType="0" Coordinate="9222"/>
+                                    <Element ElementType="6" Coordinate="9223">
                                         M00000
                                     </Element>
-                                    <Element ElementType="2" Coordinate="8202" Param="81"/>
-                                    <Element ElementType="14" Coordinate="8286">
+                                    <Element ElementType="2" Coordinate="9226" Param="81"/>
+                                    <Element ElementType="14" Coordinate="9310">
                                         M00006
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9217">
+                                    <Element ElementType="6" Coordinate="10241">
                                         M00002
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9220" Param="0"/>
-                                    <Element ElementType="0" Coordinate="9222"/>
-                                    <Element ElementType="6" Coordinate="10241">
+                                    <Element ElementType="2" Coordinate="10244" Param="0"/>
+                                    <Element ElementType="0" Coordinate="10246"/>
+                                    <Element ElementType="6" Coordinate="11265">
                                         M00003
                                     </Element>
-                                    <Element ElementType="0" Coordinate="10243"/>
-                                    <Element ElementType="6" Coordinate="10244">
+                                    <Element ElementType="0" Coordinate="11267"/>
+                                    <Element ElementType="6" Coordinate="11268">
                                         M00005
                                     </Element>
-                                    <Element ElementType="6" Coordinate="11265">
+                                    <Element ElementType="6" Coordinate="12289">
                                         M00004
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="13313" Param="90"/>
-                                    <Element ElementType="33" Coordinate="13406" Param="END">
+                                    <Element ElementType="2" Coordinate="14337" Param="90"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="END">
                                         END
                                     </Element>
                                 </Rung>

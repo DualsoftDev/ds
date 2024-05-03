@@ -416,7 +416,7 @@ module internal rec Command =
 
         | XGK ->
             match cmd with
-            | FunctionBlockCmd(fbc) -> bxiFBCommandXgk prjParam (x, y) fbc
+            | FunctionBlockCmd(fbc) -> bxiXgkFBCommand prjParam (x, y) fbc
             | _ -> failwithlog "Unknown CommandType"
 
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
@@ -451,10 +451,10 @@ module internal rec Command =
           TotalSpanY = 1
           XmlElements = xmls }
 
-    let bxiFBCommandXgk (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
+    let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
+        let cmdWidth = 3
         let xmls =
             let spanX =
-                let cmdWidth = 3
                 (coilCellX - x - cmdWidth)
 
             let cmdParam = 
@@ -493,7 +493,7 @@ module internal rec Command =
         { X = x
           Y = y
           TotalSpanX = 31
-          TotalSpanY = 1
+          TotalSpanY = cmdWidth
           XmlElements = xmls }
 
     /// 왼쪽에 FB (비교 연산 등) 를 그리고, 오른쪽에 coil 을 그린다.

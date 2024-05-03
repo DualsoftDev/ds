@@ -135,11 +135,12 @@ module XgiExportModule =
 
 
         /// XGK 용 MOV : MOV,S,D
-        let moveCmdRungXgk (condition:IExpression<bool>) (source: ITerminal) (destination: IStorage) : unit =
+        let moveCmdRungXgk (condition:IExpression<bool>) (source: IExpression) (destination: IStorage) : unit =
             // test case : XGK "Add 10 items test"
             if prjParam.TargetType <> XGK then
                 failwithlog "Something wrong!"
 
+            let srcTerminal: ITerminal = source.Terminal.Value
             let x, y = 0, rgi.NextRungY
 
             //xmlRung 활용 필요
@@ -162,16 +163,15 @@ module XgiExportModule =
                             tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
 
                             let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
-                            let sourceTrueCondition = fbLogicalAnd([condition; iexpr source]) |> flatten
-                            let sourceNeg = fbLogicalNot [iexpr source]
-                            let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [sourceNeg]]) |> flatten
+                            let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
+                            let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
                             failwith "ERROR"
                             //let cmd = 
                             //rgiXmlRung (Some flatCondition) None rgi.NextRungY
                     | _ ->
                         failwith "ERROR: XGK Tag parsing error"
                 else
-                    ActionCmd(Move(condition, source :?> IExpression, destination))
+                    ActionCmd(Move(condition, srcTerminal :?> IExpression, destination))
             let blockXml = rxiRung prjParam (x, y) (Some flatCondition) (Some cmd)
             let xml = wrapWithRung blockXml.Xml
             rgi <- {   Xmls = xml::rgi.Xmls
@@ -201,8 +201,8 @@ module XgiExportModule =
                                 NextRungY = 1 + rgiSub.NextRungY }
                     else
                         match expr.Terminal with
-                        | Some terminal ->
-                            moveCmdRungXgk condition terminal target
+                        | Some _terminal ->
+                            moveCmdRungXgk condition expr target
                         | _ ->
                             simpleRung expr target
 
@@ -221,7 +221,7 @@ module XgiExportModule =
                                            OriginalExpression = originalExpr
                                            Output = destination }) when isXgk && source.DataType = typeof<bool> ->
                     
-                    moveCmdRungXgk condition source.Terminal.Value destination
+                    moveCmdRungXgk condition source destination
                     //let rgiSub = rgiXgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
                     //rgi <-
                     //    { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -279,7 +279,7 @@ module XgiExportModule =
                           NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuAction(DuCopy(condition, source, target)) when isXgk ->
-                    moveCmdRungXgk condition source.Terminal.Value target
+                    moveCmdRungXgk condition source target
 
                 | _ -> failwithlog "Not yet"
 

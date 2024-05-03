@@ -41,7 +41,7 @@ module ExportIOTable =
             let row = dt.NewRow()
             row.ItemArray <- rowHeaderItems.Select(fun f -> f |> box).ToArray()
             row |> dt.Rows.Add |> ignore
-
+    
     let  addIOColumn(dt:DataTable) =
 
         dt.Columns.Add($"{IOColumn.Case}", typeof<string>) |> ignore
@@ -85,7 +85,6 @@ module ExportIOTable =
         toBtnText (sys.HomeHWButtons, ExcelCase.XlsHomeBTN)
         toBtnText (sys.TestHWButtons, ExcelCase.XlsTestBTN)
         toBtnText (sys.ReadyHWButtons, ExcelCase.XlsReadyBTN)
-        emptyLine (dt)
         toLampText (sys.AutoHWLamps, ExcelCase.XlsAutoLamp)
         toLampText (sys.ManualHWLamps, ExcelCase.XlsManualLamp)
         toLampText (sys.IdleHWLamps, ExcelCase.XlsIdleLamp)
@@ -94,8 +93,6 @@ module ExportIOTable =
         toLampText (sys.ReadyHWLamps, ExcelCase.XlsReadyLamp)
         toLampText (sys.DriveHWLamps, ExcelCase.XlsDriveLamp)
         toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
-
-        emptyLine (dt)
 
 
         dt
@@ -537,9 +534,9 @@ module ExportIOTable =
             let columnNames = 
                 dataTable.Columns 
                 |> Seq.cast<DataColumn> 
-                |> Seq.map (fun col -> col.ColumnName)
+                |> Seq.map (fun col -> "\""+col.ColumnName+"\"")
                 |> Seq.toArray
-                |> (fun array -> String.Join("\t", array)) // 여기를 수정
+                |> (fun array -> String.Join("\t", array))
 
             csvContent.AppendLine(columnNames) |> ignore
 
@@ -551,10 +548,11 @@ module ExportIOTable =
                     row.ItemArray
                     |> Seq.map (fun obj ->
                         let field = obj.ToString()
-                        field.Replace("\t", "\\t") // 탭 문자 처리
+                        //field.Replace("\t", "\\t") // 탭 문자 처리
+                        "\""+field.Replace("\t", "\\t")+"\"" // 탭 문자 처리
                     )
                     |> Seq.toArray
-                    |> (fun array -> String.Join("\t", array)) // 여기를 수정
+                    |> (fun array -> String.Join("\t", array))
 
                 csvContent.AppendLine(fieldValues) |> ignore)
 

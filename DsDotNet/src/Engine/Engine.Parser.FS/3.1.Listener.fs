@@ -33,7 +33,9 @@ module ListnerCommonFunctionGenerator =
     let getCode (excuteCode:String)=
         // 처음과 끝의 "${" 와 "}" 제외
         let pureCode = excuteCode.Substring(2, excuteCode.Length - 2).TrimEnd('}') 
-        pureCode.TrimEnd().Trim([|'\r';'\n'|])
+        pureCode.Split(';')
+                .Map(fun s->s.Trim().Trim([|'\r';'\n'|]))
+                .JoinWith(";\r\n").Trim([|'\r';'\n'|])
 
     let commonFunctionCommandExtractor (fDef: FunctionCommandDefContext)=
         // 함수 호출과 관련된 매개변수 추출

@@ -133,8 +133,8 @@
                                     <Element ElementType="33" Coordinate="2142" Param="TON,myTon,20"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="END">
+                                    <Element ElementType="2" Coordinate="5121" Param="90"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="END">
                                         END
                                     </Element>
                                 </Rung>

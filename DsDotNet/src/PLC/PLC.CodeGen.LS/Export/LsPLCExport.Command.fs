@@ -472,13 +472,13 @@ module internal rec Command =
 
               { Coordinate = c
                 Xml = xml
-                SpanX = 1
+                SpanX = cmdWidth
                 SpanY = 1 } ]
 
         { X = x
           Y = y
           TotalSpanX = 31
-          TotalSpanY = cmdWidth
+          TotalSpanY = 1
           XmlElements = xmls }
 
     let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =

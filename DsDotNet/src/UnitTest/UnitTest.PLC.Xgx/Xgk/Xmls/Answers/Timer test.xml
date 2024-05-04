@@ -80,29 +80,29 @@
                                     <Element ElementType="33" Coordinate="2142" Param="TON,myTon,0"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="6145">
+                                    <Element ElementType="63" Coordinate="4097">
                                         [1] $x7 := ($x0 || $x1) &amp;&amp; $x2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="7169">
+                                    <Element ElementType="6" Coordinate="5121">
                                         P00001
                                     </Element>
-                                    <Element ElementType="0" Coordinate="7171"/>
-                                    <Element ElementType="6" Coordinate="7172">
+                                    <Element ElementType="0" Coordinate="5123"/>
+                                    <Element ElementType="6" Coordinate="5124">
                                         P00003
                                     </Element>
-                                    <Element ElementType="2" Coordinate="7175" Param="84"/>
-                                    <Element ElementType="14" Coordinate="7262">
+                                    <Element ElementType="2" Coordinate="5127" Param="84"/>
+                                    <Element ElementType="14" Coordinate="5214">
                                         P00004
                                     </Element>
-                                    <Element ElementType="6" Coordinate="8193">
+                                    <Element ElementType="6" Coordinate="6145">
                                         P00002
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="10241" Param="90"/>
-                                    <Element ElementType="33" Coordinate="10334" Param="END">
+                                    <Element ElementType="2" Coordinate="8193" Param="90"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="END">
                                         END
                                     </Element>
                                 </Rung>

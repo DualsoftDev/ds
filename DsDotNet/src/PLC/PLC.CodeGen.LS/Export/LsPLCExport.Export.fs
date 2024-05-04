@@ -155,18 +155,18 @@ module XgiExportModule =
                     DataType = datatType
                     BitOffset = totalBitOffset
                     }) ->
-                        let dh = sprintf "%A%04d" device (totalBitOffset / 16) // destination head : destination 의 word
-                        let offset = totalBitOffset % 16 // destination 이 속한 word 내에서의 bit offset
-                        let mSet = 1us <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
-                        let mClear = UInt16.MaxValue - (1us <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
-                        let printBinary (n:uint16) = Convert.ToString(int n, 2).PadLeft(16, '0')
+                        let dh = sprintf "%A%05d" device (totalBitOffset / 8) // destination head : destination 의 word
+                        let offset = totalBitOffset % 8 // destination 이 속한 word 내에서의 bit offset
+                        let mSet = 1uy <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
+                        let mClear = Byte.MaxValue - (1uy <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
+                        let printBinary (n:byte) = Convert.ToString(int n, 2).PadLeft(8, '0')
                         tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
 
                         let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
                         let rgiSub =
                             let cmd =
-                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},2{dq}"
+                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
                                 XgkParamCmd(param, 5)
                             let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
                             rgiXmlRung (Some sourceTrueCondition) (Some cmd) rgi.NextRungY
@@ -175,7 +175,7 @@ module XgiExportModule =
 
                         let rgiSub =
                             let cmd =
-                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},2{dq}"
+                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
                                 XgkParamCmd(param, 5)
                             let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
                             rgiXmlRung (Some sourceFalseCondition) (Some cmd) rgi.NextRungY

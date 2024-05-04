@@ -79,25 +79,46 @@
                                     <Element ElementType="33" Coordinate="2142" Param="CTD,myCTD,2000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="6145">
+                                    <Element ElementType="6" Coordinate="4097">
                                         P00001
                                     </Element>
-                                    <Element ElementType="2" Coordinate="6148" Param="87"/>
-                                    <Element ElementType="17" Coordinate="6238">
+                                    <Element ElementType="2" Coordinate="4100" Param="87"/>
+                                    <Element ElementType="17" Coordinate="4190">
                                         myCTD
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="7169">
+                                    <Element ElementType="63" Coordinate="5121">
                                         [1] ctd myCTD1 = createXgiCTD(2000u, $cd)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="8193">
+                                    <Element ElementType="6" Coordinate="6145">
                                         P00000
                                     </Element>
-                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="CTD,myCTD1,2000"/>
+                                    <Element ElementType="2" Coordinate="6148" Param="81"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="CTD,myCTD1,2000"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="8193">
+                                        P00001
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="8196" Param="87"/>
+                                    <Element ElementType="17" Coordinate="8286">
+                                        myCTD1
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="9217">
+                                        [2] ctd myCTD2 = createXgiCTD(2000u, $cd)
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="10241">
+                                        P00000
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="10244" Param="81"/>
+                                    <Element ElementType="33" Coordinate="10334" Param="CTD,myCTD2,2000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="12289">
@@ -105,33 +126,12 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="12292" Param="87"/>
                                     <Element ElementType="17" Coordinate="12382">
-                                        myCTD1
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="13313">
-                                        [2] ctd myCTD2 = createXgiCTD(2000u, $cd)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="14337">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="14340" Param="81"/>
-                                    <Element ElementType="33" Coordinate="14430" Param="CTD,myCTD2,2000"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="18433">
-                                        P00001
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="18436" Param="87"/>
-                                    <Element ElementType="17" Coordinate="18526">
                                         myCTD2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="20481" Param="90"/>
-                                    <Element ElementType="33" Coordinate="20574" Param="END">
+                                    <Element ElementType="2" Coordinate="14337" Param="90"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="END">
                                         END
                                     </Element>
                                 </Rung>

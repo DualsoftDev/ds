@@ -155,7 +155,7 @@ module XgiExportModule =
                     DataType = datatType
                     BitOffset = totalBitOffset
                     }) ->
-                        let dh = sprintf "%A%05d" device (totalBitOffset / 8) // destination head : destination 의 word
+                        let dh = sprintf "%A%04d%s" device (totalBitOffset / 16) (if totalBitOffset % 16 >= 8 then "8" else "0")  // destination head : destination 의 word
                         let offset = totalBitOffset % 8 // destination 이 속한 word 내에서의 bit offset
                         let mSet = 1uy <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
                         let mClear = Byte.MaxValue - (1uy <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도

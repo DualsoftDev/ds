@@ -394,15 +394,36 @@ type XgxGenerationTest(xgx:PlatformTarget) =
     member x.``COPY test`` () =
         let storages = Storages()
 
-        let code = """
-            bool cond = false;
+        let code =
+            let ands (x:string) = [0..63] |> map (fun i -> sprintf "$%s%02d" x i) |> String.concat " && "
+            let start = 256     // 임시 변수 사용 공간 회피 시작 주소
+            let copyIfs =
+                [
+                    for i in [0..9] @ [15..17] @ [30..33] do
+                        yield sprintf "copyIf($cond%02d, $x%02d, $y%02d);" i i i
+                ] |> String.concat "\n"
+            let addressPrefix =
+                match xgx with
+                | XGI -> "MX"
+                | XGK -> "M"
+                | _ -> failwith "Not supported runtime target"
+            generateNamedBitTagVariableDeclarations xgx "x" addressPrefix (start+0) 64 +
+            generateNamedBitTagVariableDeclarations xgx "y" addressPrefix (start+64) 64 +
+            generateNamedBitTagVariableDeclarations xgx "cond" addressPrefix (start+128) 64 +
+            $"""
+            $x63 := {ands "x"};
+            $y63 := {ands "y"};
+            $cond63 := {ands "cond"};
+
             int16 src = 1s;
             int16 tgt = 2s;
-            copyIf($cond, $src, $tgt);
+            copyIf($cond50, $src, $tgt);
 
-            bool xsrc = false;
-            bool xtgt = false;
-            copyIf($cond, $xsrc, $xtgt);
+            copyIf($cond51, true, $y51);
+            copyIf($cond52, false, $y52);
+
+            {copyIfs}
+
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()

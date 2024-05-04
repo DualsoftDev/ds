@@ -417,6 +417,7 @@ module internal rec Command =
         | XGK ->
             match cmd with
             | FunctionBlockCmd(fbc) -> bxiXgkFBCommand prjParam (x, y) fbc
+            | XgkParamCmd(param, width) -> bxiXgkFBCommandWithParam (x, y) (param, width)
             | _ -> failwithlog "Unknown CommandType"
 
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
@@ -451,26 +452,10 @@ module internal rec Command =
           TotalSpanY = 1
           XmlElements = xmls }
 
-    let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
-        let cmdWidth = 3
-        let xmls =
-            let spanX =
-                (coilCellX - x - cmdWidth)
 
-            let cmdParam = 
-                match fbc with
-                | TimerMode ts ->
-                    let typ = ts.Timer.Type.ToString()
-                    let var = ts.Timer.Name
-                    let value =
-                        let res = prjParam.GetXgkTimerResolution(ts.Timer.TimerStruct.XgkStructVariableDevicePos)
-                        int <| (float ts.Timer.PRE.Value) / res
-                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
-                | CounterMode cs ->
-                    let typ = cs.Counter.Type.ToString()
-                    let var = cs.Counter.Name
-                    let value = cs.Counter.PRE.Value 
-                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
+    let bxiXgkFBCommandWithParam (x, y) (cmdParam: string, cmdWidth:int) : BlockXmlInfo =
+        let xmls =
+            let spanX = (coilCellX - x - cmdWidth)
 
             [ let c = coord (x, y)
               let xml =
@@ -495,6 +480,25 @@ module internal rec Command =
           TotalSpanX = 31
           TotalSpanY = cmdWidth
           XmlElements = xmls }
+
+    let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
+        let cmdWidth = 3
+        let cmdParam = 
+            match fbc with
+            | TimerMode ts ->
+                let typ = ts.Timer.Type.ToString()
+                let var = ts.Timer.Name
+                let value =
+                    let res = prjParam.GetXgkTimerResolution(ts.Timer.TimerStruct.XgkStructVariableDevicePos)
+                    int <| (float ts.Timer.PRE.Value) / res
+                $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
+            | CounterMode cs ->
+                let typ = cs.Counter.Type.ToString()
+                let var = cs.Counter.Name
+                let value = cs.Counter.PRE.Value 
+                $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
+        bxiXgkFBCommandWithParam (x, y) (cmdParam, cmdWidth)
+
 
     /// 왼쪽에 FB (비교 연산 등) 를 그리고, 오른쪽에 coil 을 그린다.
     let drawXgkFBLeft (x, y) (fbParam: string) (target: string) : XmlOutput =

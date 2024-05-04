@@ -146,36 +146,51 @@ module XgiExportModule =
             //xmlRung 활용 필요
             let flatCondition = condition.Flatten() :?> FlatExpression
 
-            let cmd =
-                if destination.DataType = typeof<bool> then
-                    match tryParseXGKTag destination.Address with
-                    | Some ( {
-                        Tag = tag
-                        Device = device
-                        DataType = datatType
-                        BitOffset = totalBitOffset
-                        }) ->
-                            let dh = sprintf "%A%04d" device (totalBitOffset / 16) // destination head : destination 의 word
-                            let offset = totalBitOffset % 16 // destination 이 속한 word 내에서의 bit offset
-                            let mSet = 1us <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
-                            let mClear = UInt16.MaxValue - (1us <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
-                            let printBinary (n:uint16) = Convert.ToString(int n, 2).PadLeft(16, '0')
-                            tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
 
-                            let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
+            if destination.DataType = typeof<bool> then
+                match tryParseXGKTag destination.Address with
+                | Some ( {
+                    Tag = tag
+                    Device = device
+                    DataType = datatType
+                    BitOffset = totalBitOffset
+                    }) ->
+                        let dh = sprintf "%A%04d" device (totalBitOffset / 16) // destination head : destination 의 word
+                        let offset = totalBitOffset % 16 // destination 이 속한 word 내에서의 bit offset
+                        let mSet = 1us <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
+                        let mClear = UInt16.MaxValue - (1us <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
+                        let printBinary (n:uint16) = Convert.ToString(int n, 2).PadLeft(16, '0')
+                        tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
+
+                        let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
+
+                        let rgiSub =
+                            let cmd =
+                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},2{dq}"
+                                XgkParamCmd(param, 5)
                             let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
+                            rgiXmlRung (Some sourceTrueCondition) (Some cmd) rgi.NextRungY
+                        rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                                    NextRungY = 1 + rgiSub.NextRungY }
+
+                        let rgiSub =
+                            let cmd =
+                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},2{dq}"
+                                XgkParamCmd(param, 5)
                             let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
-                            failwith "ERROR"
-                            //let cmd = 
-                            //rgiXmlRung (Some flatCondition) None rgi.NextRungY
-                    | _ ->
-                        failwith "ERROR: XGK Tag parsing error"
-                else
-                    ActionCmd(Move(condition, srcTerminal :?> IExpression, destination))
-            let blockXml = rxiRung prjParam (x, y) (Some flatCondition) (Some cmd)
-            let xml = wrapWithRung blockXml.Xml
-            rgi <- {   Xmls = xml::rgi.Xmls
-                       NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
+                            rgiXmlRung (Some sourceFalseCondition) (Some cmd) rgi.NextRungY
+                        rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                                    NextRungY = 1 + rgiSub.NextRungY }
+
+
+                | _ ->
+                    failwith "ERROR: XGK Tag parsing error"
+            else
+                let cmd = ActionCmd(Move(condition, srcTerminal :?> IExpression, destination))
+                let blockXml = rxiRung prjParam (x, y) (Some flatCondition) (Some cmd)
+                let xml = wrapWithRung blockXml.Xml
+                rgi <- {   Xmls = xml::rgi.Xmls
+                           NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
 
         // Rung 별로 생성
         for CommentAndXgxStatements(cmt, stmts) in commentedStatements do

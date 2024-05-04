@@ -219,8 +219,8 @@ module rec TypeConvertorModule =
         /// Non-boolean function
         | FunctionCmd of Function
         | ActionCmd of PLCAction
-        /// "Param="MOV,SRC,DST"" 와 같은 형태의 명령
-        | XgkParamCmd of string
+        /// "Param="MOV,SRC,DST"" 와 같은 형태의 명령. int 는 명령의 길이.  대부분 3
+        | XgkParamCmd of string * int
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 

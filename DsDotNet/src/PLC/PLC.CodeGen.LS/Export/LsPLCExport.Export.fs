@@ -163,24 +163,49 @@ module XgiExportModule =
                         tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
 
                         let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
+                        
+                        let condWithTrue, condWithFalse =
+                            match source with
+                            | :? Expression<bool> as DuTerminal(DuLiteral lh) when lh.Value  ->
+                                Some (flatten condition), None
+                            | :? Expression<bool> as DuTerminal(DuLiteral lh) when not lh.Value  ->
+                                None, Some (flatten condition)
+                            | _ ->
+                                let t = fbLogicalAnd([condition; source]) |> flatten
+                                let f = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
+                                Some t, Some f
 
-                        let rgiSub =
+                        if condWithTrue.IsSome then
                             let cmd =
                                 let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
                                 XgkParamCmd(param, 5)
-                            let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
-                            rgiXmlRung (Some sourceTrueCondition) (Some cmd) rgi.NextRungY
-                        rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                                    NextRungY = 1 + rgiSub.NextRungY }
-
-                        let rgiSub =
+                            let rgiSub = rgiXmlRung condWithTrue (Some cmd) rgi.NextRungY
+                            rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                                        NextRungY = 1 + rgiSub.NextRungY }
+                        if condWithFalse.IsSome then
                             let cmd =
                                 let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
                                 XgkParamCmd(param, 5)
-                            let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
-                            rgiXmlRung (Some sourceFalseCondition) (Some cmd) rgi.NextRungY
-                        rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                                    NextRungY = 1 + rgiSub.NextRungY }
+                            let rgiSub = rgiXmlRung condWithFalse (Some cmd) rgi.NextRungY
+                            rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                                        NextRungY = 1 + rgiSub.NextRungY }
+                        //let rgiSub =
+                        //    let cmd =
+                        //        let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
+                        //        XgkParamCmd(param, 5)
+                        //    let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
+                        //    rgiXmlRung (Some sourceTrueCondition) (Some cmd) rgi.NextRungY
+                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                        //            NextRungY = 1 + rgiSub.NextRungY }
+
+                        //let rgiSub =
+                        //    let cmd =
+                        //        let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
+                        //        XgkParamCmd(param, 5)
+                        //    let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
+                        //    rgiXmlRung (Some sourceFalseCondition) (Some cmd) rgi.NextRungY
+                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                        //            NextRungY = 1 + rgiSub.NextRungY }
 
 
                 | _ ->

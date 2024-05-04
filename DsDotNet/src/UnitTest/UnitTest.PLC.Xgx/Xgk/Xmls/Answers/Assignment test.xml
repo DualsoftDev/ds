@@ -184,190 +184,151 @@
                                     <Element ElementType="6" Coordinate="26625">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="26628">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="26631" Param="72"/>
-                                    <Element ElementType="33" Coordinate="26718" Param="BOR,M00080,1,M00080,1"/>
+                                    <Element ElementType="2" Coordinate="26628" Param="75"/>
+                                    <Element ElementType="33" Coordinate="26718" Param="BAND,M00080,254,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="28673">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="28676">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="28679" Param="72"/>
-                                    <Element ElementType="33" Coordinate="28766" Param="BAND,M00080,254,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="30721">
+                                    <Element ElementType="63" Coordinate="28673">
                                         [9] bool b2 = true
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="31745">
+                                    <Element ElementType="6" Coordinate="29697">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="31748">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="31751" Param="72"/>
-                                    <Element ElementType="33" Coordinate="31838" Param="BOR,M00080,2,M00080,1"/>
+                                    <Element ElementType="2" Coordinate="29700" Param="75"/>
+                                    <Element ElementType="33" Coordinate="29790" Param="BOR,M00080,2,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="33793">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="33796">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="33799" Param="72"/>
-                                    <Element ElementType="33" Coordinate="33886" Param="BAND,M00080,253,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="35841">
+                                    <Element ElementType="63" Coordinate="31745">
                                         [10] bool b3 = $nn1 &gt; $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="36865" Param="&gt;,nn1,nn2"/>
-                                    <Element ElementType="2" Coordinate="36874" Param="90"/>
-                                    <Element ElementType="14" Coordinate="36958">
+                                    <Element ElementType="33" Coordinate="32769" Param="&gt;,nn1,nn2"/>
+                                    <Element ElementType="2" Coordinate="32778" Param="90"/>
+                                    <Element ElementType="14" Coordinate="32862">
                                         M00082
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="37889">
+                                    <Element ElementType="63" Coordinate="33793">
                                         [11] bool b4 = $b1 != $b2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="38913">
+                                    <Element ElementType="6" Coordinate="34817">
+                                        M00080
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="34820">
+                                        M00081
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="34822"/>
+                                    <Element ElementType="2" Coordinate="34823" Param="84"/>
+                                    <Element ElementType="14" Coordinate="34910">
+                                        M00083
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="35841">
+                                        M00080
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35844">
+                                        M00081
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="36865">
+                                        [12] bool b5 = $b1 = $b2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="37889">
+                                        M00080
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="37892">
+                                        M00081
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="37894"/>
+                                    <Element ElementType="2" Coordinate="37895" Param="84"/>
+                                    <Element ElementType="14" Coordinate="37982">
+                                        M00084
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="38913">
                                         M00080
                                     </Element>
                                     <Element ElementType="7" Coordinate="38916">
                                         M00081
                                     </Element>
-                                    <Element ElementType="0" Coordinate="38918"/>
-                                    <Element ElementType="2" Coordinate="38919" Param="84"/>
-                                    <Element ElementType="14" Coordinate="39006">
-                                        M00083
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="39937">
-                                        M00080
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="39940">
-                                        M00081
-                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="40961">
-                                        [12] bool b5 = $b1 = $b2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="41985">
-                                        M00080
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="41988">
-                                        M00081
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="41990"/>
-                                    <Element ElementType="2" Coordinate="41991" Param="84"/>
-                                    <Element ElementType="14" Coordinate="42078">
-                                        M00084
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="43009">
-                                        M00080
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="43012">
-                                        M00081
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="44033">
+                                    <Element ElementType="63" Coordinate="39937">
                                         [13] bool b6 = false
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="45057">
+                                    <Element ElementType="6" Coordinate="40961">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="45060">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="45063" Param="72"/>
-                                    <Element ElementType="33" Coordinate="45150" Param="BOR,M00080,32,M00080,1"/>
+                                    <Element ElementType="2" Coordinate="40964" Param="75"/>
+                                    <Element ElementType="33" Coordinate="41054" Param="BAND,M00080,223,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="47105">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="47108">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="47111" Param="72"/>
-                                    <Element ElementType="33" Coordinate="47198" Param="BAND,M00080,223,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="49153">
+                                    <Element ElementType="63" Coordinate="43009">
                                         [14] $b6 := $nn1 &gt; $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="50177" Param="&gt;,nn1,nn2"/>
-                                    <Element ElementType="2" Coordinate="50186" Param="90"/>
-                                    <Element ElementType="14" Coordinate="50270">
+                                    <Element ElementType="33" Coordinate="44033" Param="&gt;,nn1,nn2"/>
+                                    <Element ElementType="2" Coordinate="44042" Param="90"/>
+                                    <Element ElementType="14" Coordinate="44126">
                                         M00085
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="51201">
+                                    <Element ElementType="63" Coordinate="45057">
                                         [15] bool b7 = $nn1 &gt; 3s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="52225" Param="&gt;,nn1,3"/>
-                                    <Element ElementType="2" Coordinate="52234" Param="90"/>
-                                    <Element ElementType="14" Coordinate="52318">
+                                    <Element ElementType="33" Coordinate="46081" Param="&gt;,nn1,3"/>
+                                    <Element ElementType="2" Coordinate="46090" Param="90"/>
+                                    <Element ElementType="14" Coordinate="46174">
                                         M00086
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="53249">
+                                    <Element ElementType="63" Coordinate="47105">
                                         [16] uint16 sum = $nn1 + $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="54273">
+                                    <Element ElementType="6" Coordinate="48129">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="54276" Param="81"/>
-                                    <Element ElementType="33" Coordinate="54366" Param="ADD,nn1,nn2,M0009"/>
+                                    <Element ElementType="2" Coordinate="48132" Param="81"/>
+                                    <Element ElementType="33" Coordinate="48222" Param="ADD,nn1,nn2,M0009"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="55297">
+                                    <Element ElementType="63" Coordinate="49153">
                                         [17] bool b8 = $nn1 + $nn2 &gt; 3s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="56321">
+                                    <Element ElementType="6" Coordinate="50177">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="56324" Param="81"/>
-                                    <Element ElementType="33" Coordinate="56414" Param="ADD,nn1,nn2,M0010"/>
+                                    <Element ElementType="2" Coordinate="50180" Param="81"/>
+                                    <Element ElementType="33" Coordinate="50270" Param="ADD,nn1,nn2,M0010"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="57345" Param="&gt;,_t1_ADD,3"/>
-                                    <Element ElementType="2" Coordinate="57354" Param="90"/>
-                                    <Element ElementType="14" Coordinate="57438">
+                                    <Element ElementType="33" Coordinate="51201" Param="&gt;,_t1_ADD,3"/>
+                                    <Element ElementType="2" Coordinate="51210" Param="90"/>
+                                    <Element ElementType="14" Coordinate="51294">
                                         M00087
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="59393" Param="90"/>
-                                    <Element ElementType="33" Coordinate="59486" Param="END">
+                                    <Element ElementType="2" Coordinate="53249" Param="90"/>
+                                    <Element ElementType="33" Coordinate="53342" Param="END">
                                         END
                                     </Element>
                                 </Rung>

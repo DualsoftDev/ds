@@ -204,29 +204,32 @@ module XgiExportModule =
 
             for stmt in stmts do
                 match stmt with
-                | DuAssign(condition, expr, target) when expr.DataType <> typeof<bool> ->
-                    let condition =
+                | DuAssign(condition, expr, target) when isXgk || expr.DataType <> typeof<bool> ->
+                    let cond =
                         match condition with
                         | Some c -> c
                         | None -> Expression.True
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                     if isXgi then
-                        let command = ActionCmd(Move(condition, expr, target))
+                        let command = ActionCmd(Move(cond, expr, target))
                         let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                         rgi <-
                             {   Xmls = rgiSub.Xmls @ rgi.Xmls
                                 NextRungY = 1 + rgiSub.NextRungY }
                     else
-                        match expr.Terminal with
-                        | Some _terminal ->
-                            moveCmdRungXgk condition expr target
+                        match condition, expr.Terminal with
+                        | _, Some _ when expr.DataType <> typeof<bool> ->
+                            moveCmdRungXgk cond expr target
+                        | Some _, Some _ -> //when expr.DataType <> typeof<bool> ->
+                            moveCmdRungXgk cond expr target
                         | _ ->
                             simpleRung expr target
 
                 | DuAssign(condition, expr, target) ->
                     assert condition.IsNone
                     simpleRung expr target
+
 
                 | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as _op
                                            Arguments = args

@@ -39,17 +39,15 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="10">
+                    <Symbols Count="8">
                         <Symbol Name="mybool" Comment="" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="mybyte" Comment="" Device="M" DevicePos="9" Type="WORD"/>
-                        <Symbol Name="mychar" Comment="" Device="M" DevicePos="8" Type="WORD"/>
                         <Symbol Name="mydouble" Comment="" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="myint16" Comment="" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="myint16" Comment="" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="" Device="M" DevicePos="10" Type="WORD"/>
                         <Symbol Name="mysbyte" Comment="" Device="M" DevicePos="1" Type="WORD"/>
                         <Symbol Name="mysingle" Comment="" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="myuint16" Comment="" Device="M" DevicePos="11" Type="WORD"/>
-                        <Symbol Name="myuint32" Comment="" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="myuint16" Comment="" Device="M" DevicePos="9" Type="WORD"/>
+                        <Symbol Name="myuint32" Comment="" Device="M" DevicePos="12" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -72,8 +70,117 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="END">
+                                    <Element ElementType="63" Coordinate="1025">
+                                        [0] bool mybool = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="2049">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="2052">
+                                        _OFF
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2055" Param="72"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="BOR,M00000,1,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="4097">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="4100">
+                                        _OFF
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="4103" Param="72"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="BAND,M00000,254,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="6145">
+                                        [1] float32 mysingle = 0.1000000015f
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="7169">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="7172" Param="81"/>
+                                    <Element ElementType="33" Coordinate="7250" Param="RMOV,0.1,mysingle"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="9217">
+                                        [2] float64 mydouble = 3.14
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="10241">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="10244" Param="81"/>
+                                    <Element ElementType="33" Coordinate="10322" Param="LMOV,3.14,mydouble"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="12289">
+                                        [3] int8 mysbyte = 1y
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="13313">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="13316" Param="81"/>
+                                    <Element ElementType="33" Coordinate="13394" Param="MOV,1,mysbyte"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="15361">
+                                        [4] uint16 myint16 = 16s
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="16385">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="16388" Param="81"/>
+                                    <Element ElementType="33" Coordinate="16466" Param="MOV,16,myint16"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="18433">
+                                        [5] int16 myuint16 = 16us
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="19457">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="19460" Param="81"/>
+                                    <Element ElementType="33" Coordinate="19538" Param="MOV,16,myuint16"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="21505">
+                                        [6] int32 myint32 = 32
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="22529">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="22532" Param="81"/>
+                                    <Element ElementType="33" Coordinate="22610" Param="DMOV,32,myint32"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="24577">
+                                        [7] uint32 myuint32 = 32u
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="25601">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="25604" Param="81"/>
+                                    <Element ElementType="33" Coordinate="25682" Param="DMOV,32,myuint32"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="28673" Param="90"/>
+                                    <Element ElementType="33" Coordinate="28766" Param="END">
                                         END
                                     </Element>
                                 </Rung>

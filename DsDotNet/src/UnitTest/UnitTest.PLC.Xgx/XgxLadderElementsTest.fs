@@ -63,8 +63,6 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             single  mysingle = 0.1f;
             double  mydouble = 3.14;
             sbyte   mysbyte  = 1y;
-            char    mychar   = 'a';
-            byte    mybyte   = 2uy;
             int16   myint16  = 16s;
             uint16  myuint16 = 16us;
             int32   myint32  = 32;
@@ -76,6 +74,8 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
             | XGI -> code + """
             int64   myint64  = 64L;
             uint64  myuint64 = 64UL;
+            char    mychar   = 'a';
+            byte    mybyte   = 2uy;
 """
             | _ -> failwith "Not supported plc type"
         let statements = parseCodeForWindows storages code

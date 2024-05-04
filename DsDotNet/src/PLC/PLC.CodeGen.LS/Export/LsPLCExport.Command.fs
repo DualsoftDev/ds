@@ -95,21 +95,6 @@ module internal rec Command =
                 | _ -> failwith "ERROR: Unknown terminal literal case."
             | _ -> failwith "ERROR: Not a Terminal"
 
-    /// '_ON' 에 대한 flat expression
-    let fakeAlwaysOnFlatExpression =
-        let on =
-            { new System.Object() with
-                member x.Finalize() = ()
-              interface IExpressionizableTerminal with
-                  member x.ToText() = "_ON" }
-
-        FlatTerminal(on, false, false)
-
-    /// '_ON' 에 대한 expression
-    let fakeAlwaysOnExpression: Expression<bool> =
-        let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
-        DuTerminal(DuVariable on)
-
     /// Option<IExpression<bool>> to IExpression
     let private obe2e (obe: IExpression<bool> option) : IExpression = obe.Value :> IExpression
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
@@ -605,7 +590,9 @@ module internal rec Command =
             let terminalText =
                 match terminal, prjParam.TargetType with
                 | :? IStorage as storage, XGK ->
-                    storage.Address
+                    match storage.Address, storage.Name with
+                    | "", StartsWith("_") -> storage.Name
+                    | _ -> storage.Address
                 | :? IStorage as storage, _ -> 
                      if storage.Name.Contains (xgkTimerCounterContactMarking) then
                         storage.Name.Replace (xgkTimerCounterContactMarking, "")

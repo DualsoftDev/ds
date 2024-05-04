@@ -65,7 +65,7 @@ module TagModule =
      
         member x.GetTargetStorages() =
             match x with
-            | DuAssign (_expr, target) -> [ target ]
+            | DuAssign (_, _expr, target) -> [ target ]
             | DuVarDecl (_expr, var) -> [ var ]
             | DuTimer timerStatement -> [timerStatement.Timer.DN ]
             | DuCounter counterStatement -> [counterStatement.Counter.DN ]
@@ -74,7 +74,7 @@ module TagModule =
 
         member x.GetSourceStorages() =
             match x with
-            | DuAssign (expr, _target) -> expr.CollectStorages()
+            | DuAssign (_, expr, _target) -> expr.CollectStorages()
             | DuVarDecl (expr, _var) -> expr.CollectStorages()
             | DuTimer timerStatement -> 
                 [ for s in timerStatement.Timer.InputEvaluateStatements do

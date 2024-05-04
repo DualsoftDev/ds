@@ -68,26 +68,74 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $sum := $nn1 + $nn2 + $nn3
+                                        [0] uint16 nn1 = 1s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        _ON
+                                        _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="ADD,nn1,nn2,M0004"/>
+                                    <Element ElementType="33" Coordinate="2130" Param="MOV,1,nn1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="3073">
+                                    <Element ElementType="63" Coordinate="4097">
+                                        [1] uint16 nn2 = 2s
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="5121">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="5124" Param="81"/>
+                                    <Element ElementType="33" Coordinate="5202" Param="MOV,2,nn2"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="7169">
+                                        [2] uint16 nn3 = 3s
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="8193">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
+                                    <Element ElementType="33" Coordinate="8274" Param="MOV,3,nn3"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="10241">
+                                        [3] uint16 sum = 0s
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="11265">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="11268" Param="81"/>
+                                    <Element ElementType="33" Coordinate="11346" Param="MOV,0,sum"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="13313">
+                                        [4] $sum := $nn1 + $nn2 + $nn3
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="14337">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="3076" Param="81"/>
-                                    <Element ElementType="33" Coordinate="3166" Param="ADD,_t1_ADD,nn3,M0003"/>
+                                    <Element ElementType="2" Coordinate="14340" Param="81"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="ADD,nn1,nn2,M0004"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="5121" Param="90"/>
-                                    <Element ElementType="33" Coordinate="5214" Param="END">
+                                    <Element ElementType="6" Coordinate="15361">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="15364" Param="81"/>
+                                    <Element ElementType="33" Coordinate="15454" Param="ADD,_t1_ADD,nn3,M0003"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="17409" Param="90"/>
+                                    <Element ElementType="33" Coordinate="17502" Param="END">
                                         END
                                     </Element>
                                 </Rung>

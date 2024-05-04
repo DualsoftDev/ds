@@ -120,197 +120,305 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x16 := $nn1 + $nn2 &gt; $nn3 &amp;&amp; $nn4 - $nn5 + $nn6 &gt; $nn7 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $nn1 &gt; $nn2 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36 &amp;&amp; $x37
+                                        [0] int32 nn1 = 1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        _ON
+                                        _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="DADD,nn1,nn2,M0018"/>
+                                    <Element ElementType="33" Coordinate="2130" Param="DMOV,1,nn1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="3073" Param="D&gt;,_t1_ADD,nn3"/>
-                                    <Element ElementType="2" Coordinate="3082" Param="90"/>
-                                    <Element ElementType="14" Coordinate="3166">
-                                        M00200
+                                    <Element ElementType="63" Coordinate="4097">
+                                        [1] int32 nn2 = 2
                                     </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="4097">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="81"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="DSUB,nn4,nn5,M0022"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="5121">
-                                        _ON
+                                        _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="81"/>
-                                    <Element ElementType="33" Coordinate="5214" Param="DADD,_t3_SUB,nn6,M0024"/>
+                                    <Element ElementType="33" Coordinate="5202" Param="DMOV,2,nn2"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="6145" Param="D&gt;,_t4_ADD,nn7"/>
-                                    <Element ElementType="2" Coordinate="6154" Param="90"/>
-                                    <Element ElementType="14" Coordinate="6238">
-                                        M00201
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="7169" Param="D&gt;,nn1,nn2"/>
-                                    <Element ElementType="2" Coordinate="7178" Param="90"/>
-                                    <Element ElementType="14" Coordinate="7262">
-                                        M00202
+                                    <Element ElementType="63" Coordinate="7169">
+                                        [2] int32 nn3 = 3
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="8193">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
+                                    <Element ElementType="33" Coordinate="8274" Param="DMOV,3,nn3"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="10241">
+                                        [3] int32 nn4 = 4
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="11265">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="11268" Param="81"/>
+                                    <Element ElementType="33" Coordinate="11346" Param="DMOV,4,nn4"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="13313">
+                                        [4] int32 nn5 = 5
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="14337">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="14340" Param="81"/>
+                                    <Element ElementType="33" Coordinate="14418" Param="DMOV,5,nn5"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="16385">
+                                        [5] int32 nn6 = 6
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="17409">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="17412" Param="81"/>
+                                    <Element ElementType="33" Coordinate="17490" Param="DMOV,6,nn6"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="19457">
+                                        [6] int32 nn7 = 7
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="20481">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="20484" Param="81"/>
+                                    <Element ElementType="33" Coordinate="20562" Param="DMOV,7,nn7"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="22529">
+                                        [7] int32 nn8 = 8
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="23553">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="23556" Param="81"/>
+                                    <Element ElementType="33" Coordinate="23634" Param="DMOV,8,nn8"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="25601">
+                                        [8] int32 nn9 = 9
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="26625">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="26628" Param="81"/>
+                                    <Element ElementType="33" Coordinate="26706" Param="DMOV,9,nn9"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="28673">
+                                        [9] $x16 := $nn1 + $nn2 &gt; $nn3 &amp;&amp; $nn4 - $nn5 + $nn6 &gt; $nn7 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $nn1 &gt; $nn2 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36 &amp;&amp; $x37
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="29697">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="29700" Param="81"/>
+                                    <Element ElementType="33" Coordinate="29790" Param="DADD,nn1,nn2,M0018"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="30721" Param="D&gt;,_t1_ADD,nn3"/>
+                                    <Element ElementType="2" Coordinate="30730" Param="90"/>
+                                    <Element ElementType="14" Coordinate="30814">
                                         M00200
                                     </Element>
-                                    <Element ElementType="6" Coordinate="8196">
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="31745">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="31748" Param="81"/>
+                                    <Element ElementType="33" Coordinate="31838" Param="DSUB,nn4,nn5,M0022"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="32769">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="32772" Param="81"/>
+                                    <Element ElementType="33" Coordinate="32862" Param="DADD,_t3_SUB,nn6,M0024"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="33793" Param="D&gt;,_t4_ADD,nn7"/>
+                                    <Element ElementType="2" Coordinate="33802" Param="90"/>
+                                    <Element ElementType="14" Coordinate="33886">
                                         M00201
                                     </Element>
-                                    <Element ElementType="6" Coordinate="8199">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8202">
-                                        P00001
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8205">
-                                        P00002
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8208">
-                                        P00003
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8211">
-                                        P00004
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8214">
-                                        P00005
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8217">
-                                        P00006
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8220">
-                                        P00007
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8223">
-                                        P00008
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8226">
-                                        P00009
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8229">
-                                        P0000A
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8232">
-                                        P0000B
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8235">
-                                        P0000C
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8238">
-                                        P0000D
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8241">
-                                        P0000E
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8244">
-                                        P0000F
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8247">
-                                        P00010
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8250">
-                                        P00011
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8253">
-                                        P00012
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8256">
-                                        P00013
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8259">
-                                        P00014
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8262">
-                                        P00015
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8265">
-                                        P00016
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8268">
-                                        P00017
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8271">
-                                        P00018
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8274">
-                                        P00019
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8277">
-                                        P0001A
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8280">
-                                        P0001B
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="8283">
-                                        P0001C
-                                    </Element>
-                                    <Element ElementType="14" Coordinate="8286">
-                                        M00203
-                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
-                                        M00203
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="9220">
-                                        P0001D
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="9223">
-                                        P0001E
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="9226">
+                                    <Element ElementType="33" Coordinate="34817" Param="D&gt;,nn1,nn2"/>
+                                    <Element ElementType="2" Coordinate="34826" Param="90"/>
+                                    <Element ElementType="14" Coordinate="34910">
                                         M00202
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9229">
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="35841">
+                                        M00200
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35844">
+                                        M00201
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35847">
+                                        P00000
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35850">
+                                        P00001
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35853">
+                                        P00002
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35856">
+                                        P00003
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35859">
+                                        P00004
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35862">
+                                        P00005
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35865">
+                                        P00006
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35868">
+                                        P00007
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35871">
+                                        P00008
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35874">
+                                        P00009
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35877">
+                                        P0000A
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35880">
+                                        P0000B
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35883">
+                                        P0000C
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35886">
+                                        P0000D
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35889">
+                                        P0000E
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35892">
+                                        P0000F
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35895">
+                                        P00010
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35898">
+                                        P00011
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35901">
+                                        P00012
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35904">
+                                        P00013
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35907">
+                                        P00014
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35910">
+                                        P00015
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35913">
+                                        P00016
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35916">
+                                        P00017
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35919">
+                                        P00018
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35922">
+                                        P00019
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35925">
+                                        P0001A
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35928">
+                                        P0001B
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="35931">
+                                        P0001C
+                                    </Element>
+                                    <Element ElementType="14" Coordinate="35934">
+                                        M00203
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="36865">
+                                        M00203
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="36868">
+                                        P0001D
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="36871">
+                                        P0001E
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="36874">
+                                        M00202
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="36877">
                                         P00020
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9232">
+                                    <Element ElementType="6" Coordinate="36880">
                                         P00021
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9235">
+                                    <Element ElementType="6" Coordinate="36883">
                                         P00022
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9238">
+                                    <Element ElementType="6" Coordinate="36886">
                                         P00023
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9241">
+                                    <Element ElementType="6" Coordinate="36889">
                                         P00024
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9244">
+                                    <Element ElementType="6" Coordinate="36892">
                                         P00025
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9247" Param="60"/>
-                                    <Element ElementType="14" Coordinate="9310">
+                                    <Element ElementType="2" Coordinate="36895" Param="60"/>
+                                    <Element ElementType="14" Coordinate="36958">
                                         M00204
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="10241">
+                                    <Element ElementType="6" Coordinate="37889">
                                         M00204
                                     </Element>
-                                    <Element ElementType="2" Coordinate="10244" Param="87"/>
-                                    <Element ElementType="14" Coordinate="10334">
+                                    <Element ElementType="2" Coordinate="37892" Param="87"/>
+                                    <Element ElementType="14" Coordinate="37982">
                                         P00010
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="12289" Param="90"/>
-                                    <Element ElementType="33" Coordinate="12382" Param="END">
+                                    <Element ElementType="2" Coordinate="39937" Param="90"/>
+                                    <Element ElementType="33" Coordinate="40030" Param="END">
                                         END
                                     </Element>
                                 </Rung>

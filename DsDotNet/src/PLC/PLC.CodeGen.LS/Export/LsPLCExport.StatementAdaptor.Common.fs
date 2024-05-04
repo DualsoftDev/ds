@@ -139,10 +139,13 @@ module rec TypeConvertorModule =
             Only alphabet capital/small letters and '_' are allowed in the second letter.
             (e.g. variable1, _variable2, variableAB_3, SYMBOL, ...)
         *)
-        match name |> Seq.toList with
-        | ch :: _ when isHangul ch -> ()
-        | ch1 :: ch2 :: _ when isValidStart ch1 && isValidStart ch2 -> ()
-        | _ -> failwith $"Invalid XGI variable name {name}.  Use longer name"
+        match name with
+        | "_1ON" | "_1OFF" -> ()
+        | _ ->
+            match name |> Seq.toList with
+            | ch :: _ when isHangul ch -> ()
+            | ch1 :: ch2 :: _ when isValidStart ch1 && isValidStart ch2 -> ()
+            | _ -> failwith $"Invalid XGI variable name {name}.  Use longer name"
 
         match name with
         | RegexPattern @"^ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
@@ -229,6 +232,26 @@ module rec TypeConvertorModule =
 [<AutoOpen>]
 module XgxExpressionConvertorModule =
     type XgxStorage = ResizeArray<IStorage>
+    /// '_ON' 에 대한 flat expression
+    let fakeAlwaysOnFlatExpression =
+        let on =
+            { new System.Object() with
+                member x.Finalize() = ()
+              interface IExpressionizableTerminal with
+                  member x.ToText() = "_ON" }
+
+        FlatTerminal(on, false, false)
+
+    /// '_ON' 에 대한 expression
+    let fakeAlwaysOnExpression: Expression<bool> =
+        let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
+        DuTerminal(DuVariable on)
+
+    /// '_1ON' 에 대한 expression
+    let fake1OnExpression: Expression<bool> =
+        let on = createXgxVariable "_1ON" true "가짜 _1ON" :?> XgxVar<bool>
+        DuTerminal(DuVariable on)
+
 
     let operatorToXgiFunctionName =
         function
@@ -527,7 +550,7 @@ module XgxExpressionConvertorModule =
                 failwith "Terminal expression cannot be converted to statement"
 
             let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText()}"
-            DuAssign(x, var), var
+            DuAssign(None, x, var), var
 
     /// XGK/XGI 공용 Statement 확장
     let internal statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
@@ -535,7 +558,7 @@ module XgxExpressionConvertorModule =
 
         let newStatements =
             match statement with
-            | DuAssign(exp, target) ->
+            | DuAssign(condition, exp, target) ->
                 let defaultConvertorParams =
                     {   Storage = newLocalStorages
                         ExpandFunctionStatements = augmentedStatements
@@ -561,7 +584,7 @@ module XgxExpressionConvertorModule =
                                   Output = target } ]
                 | _ ->
                     let newExp = collectExpandedExpression prjParam defaultConvertorParams
-                    [ DuAssign(newExp, target) ]
+                    [ DuAssign(condition, newExp, target) ]
 
             | DuVarDecl(exp, decl) ->
                 let _newExp =
@@ -583,15 +606,20 @@ module XgxExpressionConvertorModule =
                     let _typ = initValue.GetType()
                     let var = createXgxVariable decl.Name initValue comment
                     newLocalStorages.Add var
+                    []
 
-                | (:? IVariable | :? ITag) when decl.IsGlobal -> newLocalStorages.Add decl
+                | (:? IVariable | :? ITag) when decl.IsGlobal ->
+                    newLocalStorages.Add decl
+                    if prjParam.TargetType = XGK then
+                        [ DuAssign(Some fake1OnExpression, exp, decl) ]
+                    else
+                        []
                 | (:? IVariable | :? ITag) ->
                     let var = createXgxVariable decl.Name decl.BoxedValue decl.Comment
                     newLocalStorages.Add var
+                    []
 
                 | _ -> failwithlog "ERROR"
-
-                []
 
             | (DuTimer _ | DuCounter _) -> [ statement ]
 

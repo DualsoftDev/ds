@@ -101,7 +101,7 @@ module XgkTypeConvertorModule =
                     | ("+" | "-" | "*" | "/")
                     | (">" | ">=" | "<" | "<=" | "=" | "!=") ->
                         let stg = createTmpStorage()
-                        let stmt = DuAssign(newExp, stg)
+                        let stmt = DuAssign(None, newExp, stg)
                         let varExp = stg.ToExpression()
                         varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
                     | _ ->
@@ -126,7 +126,7 @@ module XgkTypeConvertorModule =
 
         let newStatements =
             match statement with
-            | DuAssign(exp, target) ->
+            | DuAssign(condition, exp, target) ->
                 let exp2 = exp2expXgk prjParam (exp, Some target) newLocalStorages augmentedStatements
                 let duplicated =
                     option {
@@ -138,7 +138,7 @@ module XgkTypeConvertorModule =
                 if augmentedStatements.any() && (exp = exp2 || duplicated) then
                     []
                 else
-                    let newStatement = DuAssign(exp2, target)
+                    let newStatement = DuAssign(condition, exp2, target)
                     statement2XgxStatements prjParam newLocalStorages newStatement
 
 
@@ -147,12 +147,12 @@ module XgkTypeConvertorModule =
             // b3 := $nn1 > $nn2;
             | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
                 newLocalStorages.Add decl
-                let stmt = DuAssign(exp, decl)
+                let stmt = DuAssign(Some systemOnRising, exp, decl)
                 statement2XgkStatements prjParam newLocalStorages stmt
 
             | DuTimer tmr when tmr.ResetCondition.IsSome ->
                 // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                let resetStatement = DuAssign(tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct))
+                let resetStatement = DuAssign(None, tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct))
                 [ statement; resetStatement ]
 
             | DuTimer _  -> [ statement ]
@@ -163,8 +163,8 @@ module XgkTypeConvertorModule =
                 let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
                 let typ = ctr.Counter.Type
                 match typ with
-                | CTD -> DuAssign(ctr.LoadCondition.Value, resetCoil) |> statements.Add
-                | (CTR|CTU|CTUD) -> DuAssign(ctr.ResetCondition.Value, resetCoil) |> statements.Add
+                | CTD -> DuAssign(None, ctr.LoadCondition.Value, resetCoil) |> statements.Add
+                | (CTR|CTU|CTUD) -> DuAssign(None, ctr.ResetCondition.Value, resetCoil) |> statements.Add
 
                 if typ = CTUD then
                     let mutable newStatement = statement

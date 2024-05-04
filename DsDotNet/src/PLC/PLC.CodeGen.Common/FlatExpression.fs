@@ -91,6 +91,7 @@ module FlatExpressionModule =
                 ->
                 match arg with
                 | DuTerminal(DuVariable t) -> FlatTerminal(t, true, n = FunctionNameFalling)
+                | DuTerminal(DuLiteral b) -> FlatTerminal(b, (n = FunctionNameRising), false)
                 | _ -> failwithlog "ERROR"
             | DuFunction fs ->
                 let op =

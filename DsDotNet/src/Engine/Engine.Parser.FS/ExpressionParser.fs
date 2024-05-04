@@ -316,7 +316,7 @@ module rec ExpressionParser =
                     createExpression storages (getFirstChildExpressionContext ctx)
 
                 match assignCtx.children.ToFSharpList() with
-                | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(createExp ctx, storage)
+                | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(None, createExp ctx, storage)
                 | _ -> failwithlog "ERROR"
 
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx

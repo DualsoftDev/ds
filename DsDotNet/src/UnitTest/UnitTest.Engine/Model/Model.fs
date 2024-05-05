@@ -154,6 +154,13 @@ module ModelTests1 =
         member __.``Model component [Task Device/Link (old:JobDef)] test`` () =
             compareExact ParserTest.TaskLinkorDevice 
 
+        [<Test>]
+        member __.``Model component [Function/Commands] test`` () =
+            compareExact ParserTest.Commnads    
+        [<Test>]
+        member __.``Model component [Function/Operators] test`` () =
+            compareExact ParserTest.Operators 
+            
         //[<Test>]
         //member __.``X Ppt20221213Text test`` () =
         //    // 현재 test 실패

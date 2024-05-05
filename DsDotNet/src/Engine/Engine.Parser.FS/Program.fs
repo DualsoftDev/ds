@@ -31,9 +31,12 @@ module Program =
         """
 [sys] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2;
+        #STN1_ON > Seg1 > Seg2;
         Seg1 = {
             Ap > Am;
+        }
+        Seg2 = {
+            STN1_COMMAD1(); 
         }
     }
     [flow] "Flow.Complex" = {
@@ -90,6 +93,15 @@ C4 > C5;
         Am = { A."-"(%I2, %Q2); }
         Bp = { B."+"(%I3, %Q3); }
         Bm = { B."-"(%I4, %Q4); }
+    }
+    [variables] = {
+        Int32 D100;
+    }
+    [operators] = {
+        STN1_ON = #{$Ap = true;}
+    }
+    [commands] = {
+        STN1_COMMAD1 = #{$D100 := 560;}
     }
 
     [buttons] = {

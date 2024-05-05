@@ -245,6 +245,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             x.TheSystem.Variables.Add variableData   |>ignore
             )
 
+    override x.EnterJobBlock(ctx: JobBlockContext) = 
+        let jobs = ctx.callListing()
+        jobs |> Seq.iter (fun job ->
+            let jobName = job.jobName().GetText()
+            let variTag =  createVariableByType jobName DuBOOL
+            options.Storages.Add(variTag.Name, variTag)
+            )
+
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
         
         ctx.operatorNameOnly() |> Seq.iter (fun fDef ->

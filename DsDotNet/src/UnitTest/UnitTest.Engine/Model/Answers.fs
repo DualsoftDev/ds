@@ -21,9 +21,12 @@ module ModelAnswers =
     let answerEveryScenarioText = """
 [sys] My = {
     [flow] MyFlow = {
-        Seg1 > Seg2;		// Seg1(Real)> Seg2(Real);
+        #STN1_ON > Seg1 > Seg2;		// #STN1_ON(Call)> Seg1(Real) > Seg2(Real);
         Seg1 = {
             Ap > Am;		// Ap(Call)> Am(Call);
+        }
+        Seg2 = {
+            STN1_COMMAD1(); // island
         }
     }
     [flow] "Flow.Complex" = {
@@ -44,7 +47,7 @@ module ModelAnswers =
             Ap1 > Bp1 > Bm1 > Ap2 > Am2 > Bm2;		// Ap1(Alias)> Bp1(Alias) > Bm1(Alias) > Ap2(Alias) > Am2(Alias) > Bm2(Alias);
             Ap1 > Am1 > Bm1;		// Ap1(Alias)> Am1(Alias) > Bm1(Alias);
         }
-            R2; // island
+        R2; // island
         [aliases] = {
             Main.Ap = { Ap1; Ap2; }
             Main.Am = { Am1; Am2; }
@@ -58,6 +61,15 @@ module ModelAnswers =
         Am = { A."-"(%I2, %Q2); }
         Bp = { B."+"(%I3, %Q3); }
         Bm = { B."-"(%I4, %Q4); }
+    }
+    [variables] = {
+        Int32 D100;
+    }
+    [operators] = {
+        STN1_ON = #{$Ap = true;}
+    }
+    [commands] = {
+        STN1_COMMAD1 = #{$D100 := 560;}
     }
     [buttons] = {
         [e] = { EMGBTN(_, _) = { F; } }
@@ -74,7 +86,6 @@ module ModelAnswers =
         [layouts] = {
             C = (1600, 500, 300, 300);
         }
-     
         [finish] = {
             F.R2;
             F.R1;
@@ -83,9 +94,9 @@ module ModelAnswers =
             F.Main.Ap;
         }
     }
-    [device file="cylinder.ds"] A; // C:/dsa/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
-    [device file="cylinder.ds"] B; // C:/dsa/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
-    [external file="station.ds"] C; // C:/dsa/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/station.ds
+    [device file="cylinder.ds"] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [device file="cylinder.ds"] B; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [external file="station.ds"] C; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/station.ds
 }
 """
 

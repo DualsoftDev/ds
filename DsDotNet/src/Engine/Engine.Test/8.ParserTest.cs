@@ -635,5 +635,52 @@ namespace Engine
     [flow] F1_C1 = { TX > RX; }
 }
 ";
+
+
+        
+        public static string Operators = @"
+    [sys] Control = {
+    [flow] F = {
+        #OP1, #OP2 > Main <|> Reset;	
+        Main = {
+            mv1up > mv1dn;		
+        }
+    }
+    [jobs] = {
+        mv1up = { A.""+""(%I300, %Q300); }
+        mv1dn = { A.""-""(%I301, %Q301); }
+    }
+    [operators] = {
+        OP1 = #{$mv1up = true;}
+        OP2 = #{$mv1dn = true;}
+    }
+    [device file=""cylinder.ds""] A; 
+}
+";
+
+        public static string Commnads = @"
+    [sys] Control = {
+    [flow] F = {
+        Main <|> Reset;	
+        Main = {
+            mv1up > mv1dn > CMD1(), CMD2();		
+        }
+    }
+    [jobs] = {
+        mv1up = { A.""+""(%I300, %Q300); }
+        mv1dn = { A.""-""(%I301, %Q301); }
+    }
+    [variables] = {
+        Int32 v0;
+    }
+    [commands] = {
+        CMD1 = #{$v0 := 1;}
+        CMD2 = #{$v0 := 2;}
+    }
+    [device file=""cylinder.ds""] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+}
+";
+
+
     }
 }

@@ -618,7 +618,7 @@ module ImportU =
                 let dicQualifiedNameSegs =
                     dicVertex.Values
                         .OfType<Call>()
-                        .Where(fun call -> call.TargetHasJob)
+                        .Where(fun call -> call.IsJob)
                         .Select(fun call -> call.TargetJob.Name, call)
                     |> dict
 

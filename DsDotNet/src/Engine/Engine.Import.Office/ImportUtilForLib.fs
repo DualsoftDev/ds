@@ -234,7 +234,7 @@ module ImportUtilForLib =
             let func = OperatorFunction.Create(node.JobName, node.OperatorCode) :> Func
             mySys.Functions.Add func |> ignore
              
-            Call.Create(jobForCall, func, parent)
+            Call.Create(func, parent)
         else 
             Call.Create(jobForCall, parent)
 

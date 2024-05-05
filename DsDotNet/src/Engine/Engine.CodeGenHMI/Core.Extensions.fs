@@ -95,14 +95,14 @@ module ConvertHMI =
                 ErrTimeShortage  = getLamp  tm (VertexTag.txErrTimeShortage |>int)  
                 
                 Devices      = calls
-                                    .Where(fun c->c.TargetHasJob)
+                                    .Where(fun c->c.IsJob)
                                     .SelectMany(fun c->
                                       c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()
                                                             .Select(fun d->d.GetHMI())
                                        ).ToArray()
                                
                 Jobs         = calls 
-                                    .Where(fun c->c.TargetHasJob)
+                                    .Where(fun c->c.IsJob)
                                     .Select(fun c->c.TargetJob.GetHMI()).ToArray()
             }
 

@@ -71,7 +71,7 @@ WS: [ \t\r\n]+ -> skip;
 BLOCK_COMMENT : '/*' (BLOCK_COMMENT|.)*? '*/' -> channel(HIDDEN) ;
 LINE_COMMENT  : '//' .*? ('\n'|EOF) -> channel(HIDDEN) ;
 
-fragment CODE_BLOCK_START: '${';
+fragment CODE_BLOCK_START: '#{';
 fragment CODE_BLOCK_END: '}';
 CODE_BLOCK: CODE_BLOCK_START (BLOCK_COMMENT|LINE_COMMENT|CODE_BLOCK|.)*? CODE_BLOCK_END;
 
@@ -181,7 +181,8 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier23: (identifier2 | identifier3);
     identifier123: (identifier1 | identifier2 | identifier3);
 
-    identifier1Func: '$'identifier1;
+    identifier1Operator: '#'identifier1;
+    identifier1Command: identifier1'()';
     identifier123CNF: identifier123 (COMMA identifier123)*;
 
     flowPath: identifier2;
@@ -252,16 +253,18 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disabl
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' LBRACE (
-        causal | parentingBlock | identifier1Listing | identifier1sListing 
-        | identifier1Func | identifier1Funcs
+        causal | parentingBlock 
+        | identifier1Listing | identifier1Listings 
+        | identifier1Operator
         | aliasBlock
         // | safetyBlock
         )* RBRACE  (SEMICOLON)?   // |flowTask|callDef
     ;
-    parentingBlock: identifier1 EQ LBRACE (identifier1sListing | causal)* RBRACE;
-    identifier1Funcs: (identifier1Func (COMMA identifier1Func)*)?  SEMICOLON; 
+    parentingBlock: identifier1 EQ LBRACE (identifier1Listings | causal | identifier1Commands )* RBRACE;
+
     identifier1Listing: identifier1  SEMICOLON;     // A;
-    identifier1sListing: (identifier1 (COMMA identifier1)*)?  SEMICOLON;     // A, B, C;
+    identifier1Listings: (identifier1 (COMMA identifier1)*)?  SEMICOLON;     // A, B, C;
+    identifier1Commands: (identifier1Command (COMMA identifier1Command)*)?  SEMICOLON;     // A(), B(), C();
         
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
@@ -279,16 +282,18 @@ variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     varName: IDENTIFIER1;
     varType: IDENTIFIER1;
 
-operatorBlock: '[' 'operators' ']' '=' '{' (functionNameOnly | functionOperatorDef)* '}' ;
-    functionOperatorDef :  functionName '=' functionOperator;
-    functionOperator : codeBlock;
+operatorBlock: '[' 'operators' ']' '=' '{' (operatorNameOnly | operatorDef)* '}' ;
+    operatorNameOnly: operatorName SEMICOLON;
+    operatorDef :  operatorName '=' operator;
+    operatorName: identifier1;
+    operator : codeBlock;
     
-commandBlock:  '[' 'commands' ']'  '=' '{' (functionNameOnly | functionCommandDef)* '}' ;
-    functionCommandDef :  functionName '=' functionCommand;
-    functionCommand : codeBlock;
+commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
+    commandNameOnly: commandName SEMICOLON;
+    commandDef :  commandName '=' command;
+    commandName: identifier1;
+    command : codeBlock;
     
-functionNameOnly: identifier1 SEMICOLON;
-functionName: identifier1;
 
 
 jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
@@ -303,7 +308,7 @@ jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
     interfaceLink: identifier12;
 
 
-funcCall: identifier1Func;
+funcCall: identifier1Operator | identifier1Command;
 
 
 
@@ -347,11 +352,11 @@ buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 conditionBlock: '[' 'conditions' ']' '=' LBRACE (categoryBlocks)* RBRACE;
 
-// B.F1 > Set1F <| T.A21;
+// B.F1 > Set1F > T.A21;
 causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF: causalToken (',' causalToken)* ;
-    causalToken: identifier12|identifier1Func;
+    causalToken: identifier12 | identifier1Operator | identifier1Command;
 
     causalOperator
         : '>'   // CAUSAL_FWD

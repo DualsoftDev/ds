@@ -158,7 +158,6 @@ module TagKindList =
     |callFuncPlanSet           = 11029
     |callFuncPlanEnd           = 11030
     |callJobAndSensor          = 11031
-    |callJobOrSensor           = 11032
     
     |txErrTimeShortage         = 11033
     |txErrTimeOver             = 11034

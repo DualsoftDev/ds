@@ -59,7 +59,7 @@ namespace Diagram.View.MSAGL
             {
                 foreach (Vertex v in fv.Flow.Value.GetVerticesOfFlow())
                 {
-                    var tasks = (v.GetPure() is Call c && c.TargetHasJob)
+                    var tasks = (v.GetPure() is Call c && c.IsJob)
                         ? c.TargetJob.DeviceDefs.Cast<TaskDev>().ToList()
                         : new List<TaskDev>();
                     var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);

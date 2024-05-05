@@ -175,7 +175,7 @@ double myDouble = 3.14 + 3.14;
             let ds = """
 [sys] MySystem = {
     [commands] = {
-        test = ${
+        test = #{
             float32 myFloat32 = 3.14f + 3.14f;
             single mySingle = 3.14f + 3.14f;
         }

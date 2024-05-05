@@ -241,7 +241,6 @@ module TagManagerModule =
         let callFuncPS  = createTag "callFuncPS" false VertexTag.callFuncPlanSet
         let callFuncPE  = createTag "callFuncPE" false VertexTag.callFuncPlanEnd
         let callJobAndSensor  = createTag "callJobAndSensor" false VertexTag.callJobAndSensor
-        let callJobOrSensor   = createTag "callJobOrSensor" false VertexTag.callJobOrSensor
    
         let rxErrShortOn     = createTag "rxErrShortOn"      false VertexTag.rxErrShortOn    
         let rxErrShortRising = createTag "rxErrShortRising"  false VertexTag.rxErrShortRising
@@ -272,6 +271,5 @@ module TagManagerModule =
         member _.PEFunc           =  callFuncPE
         ///device Action Sensors And 연산 Bit
         member _.JobAndSensor    =  callJobAndSensor
-        member _.JobOrSensor     =  callJobOrSensor
 
         

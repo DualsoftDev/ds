@@ -46,7 +46,7 @@ type VertexMReal with
     member v.R4_RealSync() =
         let real = v.Vertex :?> Real
         let set = real.Graph.Vertices.OfType<Call>()
-                      .Where(fun call -> call.TargetHasJob)
+                      .Where(fun call -> call.IsJob)
                       .SelectMany(fun call -> call.TargetJob.ApiDefs)
                       .Select(fun api-> api.SL2).ToAndElseOn()
 

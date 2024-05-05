@@ -72,10 +72,10 @@ module ConvertCPU =
                 yield vm.M6_CallErrorTotalMonitor() 
                
 
-                if (v :?> Call).TargetHasJob
+                if (v :?> Call).IsJob
                 then
                     yield! vm.C2_ActionOut()
-                    yield! vm.J1_JobActionSensor() 
+                    yield vm.J1_JobActionSensor() 
 
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
@@ -141,7 +141,7 @@ module ConvertCPU =
                     a, 
                         coinAll.Where(fun f->
                         match f with
-                        | :? Call as c when c.TargetHasJob ->  c.TargetJob.ApiDefs.Contains(a)
+                        | :? Call as c when c.IsJob ->  c.TargetJob.ApiDefs.Contains(a)
                         | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.ApiDefs.Contains(a)
                         |_ -> false
                     )
@@ -162,7 +162,7 @@ module ConvertCPU =
     let private funcCall(s:DsSystem) =
         let coinCommandFuncs =
             s.GetVertices().OfType<Call>()
-                .Where(fun c->c.TargetHasFunc)
+                .Where(fun c->c.IsFunction)
                 .Select(fun c->c.TagManager :?> VertexMCall)
 
         [

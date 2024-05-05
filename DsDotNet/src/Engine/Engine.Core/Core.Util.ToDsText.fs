@@ -11,9 +11,16 @@ open System
 module internal ToDsTextModule =
     let getTab n = Seq.init n (fun _ -> "    ") |> String.concat ""
     let lb, rb = "{", "}"
-    let lbCode, rbCode = "${", "}"
+    let lbCode, rbCode = "#{", "}"
     let combineLines = ofNotNullAny >> joinLines
     let mutable  pCooment = true //printComment
+
+    let getName (v:Vertex) =
+            match v with    
+            | :? Call as c when c.IsCommand -> (getRawName v.PureNames true) + "()"
+            | :? Call as c when c.IsOperator -> "#"+(getRawName v.PureNames true)
+                
+            |_-> getRawName v.PureNames true    
 
     type private MEI = ModelingEdgeInfo<Vertex>
     let private modelingEdgeInfosToDs (es:MEI seq) (tab:string) =
@@ -34,13 +41,9 @@ module internal ToDsTextModule =
 
         let es  = es |> Seq.sortBy(fun e -> e.EdgeSymbol.Count(fun ch -> ch = '|'))
         let ess = es |> Seq.fold folder []
-        let getName (v:Vertex) =
-            match v with    
-            | :? Call as c when c.TargetHasFunc -> "$"+(getRawName v.PureNames true)
-            |_-> getRawName v.PureNames true    
+
             
         let getNames (vs:Vertex seq) = vs.Select(getName).JoinWith(", ")
-
         [
             for es in ess do
                 let comments = ResizeArray<string>()
@@ -80,7 +83,7 @@ module internal ToDsTextModule =
             if notMentioned.any() 
             then 
                 let comment  = if pCooment then "// island"  else ""
-                let isLandCommas =  notMentioned.Select(fun i -> i.Name.QuoteOnDemand()).JoinWith(", ")
+                let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(", ")
                 yield $"{getTab (indent)}{isLandCommas}; {comment}"
         ]
 
@@ -187,7 +190,7 @@ module internal ToDsTextModule =
                     then 
                         yield $"{tab2}{cmd.Name};"
                     else
-                        yield! funcCodePrint cmd.Name (cmd.ToDsText())
+                        yield! funcCodePrint $"{cmd.Name}" (cmd.ToDsText())
 
                 yield $"{tab}{rb}"
 

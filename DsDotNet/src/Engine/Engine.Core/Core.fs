@@ -252,16 +252,16 @@ module CoreModule =
             | OperatorFuncType func -> func.Name
             , parent)
 
-        let hasJob = function
-            | JobType _ | JobFuncType _ -> true
+        let isJob = function
+            | JobType _  -> true
             | _ -> false
 
-        let hasFunc = function
-            | CommadFuncType _ | OperatorFuncType _ | JobFuncType _ -> true
+        let isCommand = function
+            | CommadFuncType _ -> true
             | _ -> false        
 
-        let isFuncOnly = function
-            | CommadFuncType _ | OperatorFuncType _ -> true
+        let isOperator = function
+            | OperatorFuncType _ -> true
             | _ -> false
             
         member _.TargetJob =
@@ -278,11 +278,11 @@ module CoreModule =
             | _ -> failwith "TargetFunc is only available for FuncType or JobFuncType."
 
         /// Indicates if the target includes a job.
-        member _.TargetHasJob = hasJob targetOption
+        member _.IsJob = isJob targetOption
+        member _.IsCommand = isCommand targetOption
+        member _.IsOperator = isOperator targetOption
+        member _.IsFunction  =isCommand targetOption || isOperator targetOption
 
-        /// Indicates if the target includes a function.
-        member _.TargetHasFunc = hasFunc targetOption
-        member _.TargetHasFuncOnly  = isFuncOnly targetOption
         member _.CallOperatorType  = 
             match targetOption with
             | JobType _ -> DuOPUnDefined

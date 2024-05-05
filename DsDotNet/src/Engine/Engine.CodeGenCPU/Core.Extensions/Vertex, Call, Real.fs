@@ -31,7 +31,7 @@ module ConvertCpuVertex =
         member c._off    = c.System._off
 
         member c.HasSensor  =
-            match c.TargetHasJob with
+            match c.IsJob with
             | true -> 
                 c.TargetJob.DeviceDefs
                     .Where(fun d-> d.OutAddress <> TextSkip
@@ -40,14 +40,13 @@ module ConvertCpuVertex =
             | false -> false
             
         member c.JobAndSensor = c.VC.JobAndSensor
-        member c.JobOrSensor = c.VC.JobOrSensor
 
         member c.UsingTon  = c.CallOperatorType = DuOPTimer
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingNot  = c.CallOperatorType = DuOPNot
         member c.UsingMove  = c.CallCommandType = DuCMDCode
         member c.EndPlan =  
-                    if c.TargetHasFuncOnly
+                    if c.IsFunction
                     then
                         (c.TagManager :?> VertexMCall).PEFunc.Expr
                     else 
@@ -57,7 +56,7 @@ module ConvertCpuVertex =
                 if c.UsingNot 
                     then 
                         if c.HasSensor
-                        then !!c.JobOrSensor.Expr  //안전상이 이유로 센서 OR Not 사용 (하나라도 감지되지 않아야)
+                        then !!c.JobAndSensor.Expr  //안전상이 이유로 센서 OR 사용시 job을 분해해서 사용(하나라도 감지되지 않아야)
                         else failwithf $"$n 함수는 실제 Input address가 있어야 가능합니다. {c.Name} "   
 
                 else
@@ -92,22 +91,22 @@ module ConvertCpuVertex =
         //                         else failwith $"{c.Name} not use counter"
         
         member c.PSs =
-            if c.TargetHasJob 
+            if c.IsJob 
             then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PS)
             else [c.VC.PSFunc]
 
         member c.PEs =
-            if c.TargetHasJob 
+            if c.IsJob 
             then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PE)
             else [c.VC.PEFunc]
 
         member c.TXs = 
-            if c.TargetHasJob
+            if c.IsJob
             then c.TargetJob.DeviceDefs |>Seq.collect(fun j -> j.ApiItem.TXs)
             else []
 
         member c.RXs = 
-            if c.TargetHasJob
+            if c.IsJob
             then c.TargetJob.DeviceDefs |>Seq.collect(fun j -> j.ApiItem.RXs)
             else []
 

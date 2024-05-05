@@ -17,11 +17,10 @@ type VertexManager with
     member v.J1_JobActionSensor() =
         let vc = v :?> VertexMCall
         let coin = v.Vertex :?> Call
-        [ 
-            match coin.TargetHasJob with
-            | true -> 
-                (getCallTags(coin).ToAnd(), coin._off.Expr) --| (vc.JobAndSensor, getFuncName())
-                (getCallTags(coin).ToOr(), coin._off.Expr) --| (vc.JobOrSensor, getFuncName())
-            | false ->
-                failWithLog $"{coin.Name} Target Have not Job error "
-        ]
+        match coin.IsJob with
+        | true -> 
+            let sensors = getCallTags(coin)
+            let sets = if sensors.any() then sensors.ToAnd() else vc._off.Expr
+            (sets, coin._off.Expr) --| (vc.JobAndSensor, getFuncName())
+        | false ->
+            failWithLog $"{coin.Name} Target Have not Job error "

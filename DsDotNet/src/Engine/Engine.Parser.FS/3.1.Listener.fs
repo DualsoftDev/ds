@@ -37,14 +37,14 @@ module ListnerCommonFunctionGenerator =
                 .Map(fun s->s.Trim().Trim([|'\r';'\n'|]))
                 .JoinWith(";\r\n").Trim([|'\r';'\n'|])
 
-    let commonFunctionCommandExtractor (fDef: FunctionCommandDefContext)=
+    let commonFunctionCommandExtractor (fDef: CommandDefContext)=
         // 함수 호출과 관련된 매개변수 추출
-        let excuteCode = fDef.functionCommand().GetText()
+        let excuteCode = fDef.command().GetText()
         excuteCode |> getCode
 
-    let commonFunctionOperatorExtractor (fDef: FunctionOperatorDefContext)=
+    let commonFunctionOperatorExtractor (fDef: OperatorDefContext)=
         // 함수 호출과 관련된 매개변수 추출
-        let excuteCode = fDef.functionOperator().GetText()
+        let excuteCode = fDef.operator().GetText()
         excuteCode |> getCode
 
 /// <summary>
@@ -247,13 +247,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
         
-        ctx.functionNameOnly() |> Seq.iter (fun fDef ->
+        ctx.operatorNameOnly() |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
             x.TheSystem.Functions.Add(OperatorFunction(funcName)) )
         
-        let functionDefs = ctx.functionOperatorDef()
+        let functionDefs = ctx.operatorDef()
         functionDefs |> Seq.iter (fun fDef ->
-            let funcName = fDef.functionName().GetText()
+            let funcName = fDef.operatorName().GetText()
             let pureCode = commonFunctionOperatorExtractor fDef
 
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
@@ -269,13 +269,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     override x.EnterCommandBlock(ctx: CommandBlockContext) =
         
-        ctx.functionNameOnly() |> Seq.iter (fun fDef ->
+        ctx.commandNameOnly() |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
             x.TheSystem.Functions.Add(CommandFunction(funcName)) )
 
-        let functionDefs = ctx.functionCommandDef()
+        let functionDefs = ctx.commandDef()
         functionDefs |> Seq.iter (fun fDef ->
-            let funcName = fDef.functionName().GetText()
+            let funcName = fDef.commandName().GetText()
             let pureCode = commonFunctionCommandExtractor fDef
 
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
@@ -409,15 +409,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 None
 
         let candidateCtxs: ParserRuleContext list =
-            let funcsCausalContext =  
-                let multiFuncsctx = sysctx.TryFindChildren<Identifier1FuncsContext>()
-                [
-                    if multiFuncsctx.any()
-                        then yield! multiFuncsctx |> Seq.collect(fun f->f.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>())
-                        else yield! sysctx.Descendants<Identifier1FuncContext>().Cast<ParserRuleContext>() 
-                ]
             let normalCausalContext =  
-                let multictx = sysctx.TryFindChildren<Identifier1sListingContext>()
+                let multictx = sysctx.TryFindChildren<Identifier1ListingsContext>()
                 [
                     if multictx.any()
                         then yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
@@ -425,7 +418,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 ]
             [ 
                 yield! normalCausalContext
-                yield! funcsCausalContext
+                yield! sysctx.Descendants<Identifier1CommandContext>().Cast<ParserRuleContext>() 
+                yield! sysctx.Descendants<Identifier1OperatorContext>().Cast<ParserRuleContext>() 
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
             ]
 
@@ -453,47 +447,48 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for (optParent, ctxInfo) in candidates do
                     let parent = optParent
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-                    if  ctxInfo.ContextType = typeof<Identifier1FuncContext>  && existing.IsNone
+                    if  (ctxInfo.ContextType = typeof<Identifier1OperatorContext> 
+                       ||ctxInfo.ContextType = typeof<Identifier1CommandContext>)
+                         && existing.IsNone
                     then
                         let func = tryFindFunc system (ctxInfo.Names.CombineQuoteOnDemand()) |> Option.get
-                        if func.IsNonNull() then
-                            Call.Create(func, parent) |> ignore
+                        Call.Create(func, parent) |> ignore
                     else
-                    match existing with
-                    | Some v -> debugfn $"{v.Name} already exists.  Skip creating it."
-                    | None ->
-                        let name = ctxInfo.Names.CombineQuoteOnDemand()
-                        match cycle, ctxInfo.Names with
-                        | 0, [ r ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
-                            match parent.GetCore()  with
-                            | :? Flow as flow->
-                                if not <| isCallName (parent, ctxInfo.Names)  then
-                                    Real.Create(r, flow) |> ignore
-                            |_ ->
-                                failwithf $"{name} needs Job define"
+                        match existing with
+                        | Some v -> debugfn $"{v.Name} already exists.  Skip creating it."
+                        | None ->
+                            let name = ctxInfo.Names.CombineQuoteOnDemand()
+                            match cycle, ctxInfo.Names with
+                            | 0, [ r ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
+                                match parent.GetCore()  with
+                                | :? Flow as flow->
+                                    if not <| isCallName (parent, ctxInfo.Names)  then
+                                        Real.Create(r, flow) |> ignore
+                                |_ ->
+                                    failwithf $"{name} needs Job define"
 
-                        | 1, [ c ] when not <| (isAliasMnemonic (parent, name)) ->
-                            match tryFindJob system c with
-                            | Some job ->
-                                  if job.DeviceDefs.any () then
-                                    Call.Create(job, parent) |> ignore
-                            | None -> ()
+                            | 1, [ c ] when not <| (isAliasMnemonic (parent, name)) ->
+                                match tryFindJob system c with
+                                | Some job ->
+                                      if job.DeviceDefs.any () then
+                                        Call.Create(job, parent) |> ignore
+                                | None -> ()
                             
-                        | 1, realorFlow :: [ cr ] when
-                            not <| isAliasMnemonic (parent, name)
-                            ->
-                            let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
-                            RealOtherFlow.Create(otherFlowReal, parent) |> ignore
-                            debugfn $"{realorFlow}.{cr} should already have been created."
+                            | 1, realorFlow :: [ cr ] when
+                                not <| isAliasMnemonic (parent, name)
+                                ->
+                                let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
+                                RealOtherFlow.Create(otherFlowReal, parent) |> ignore
+                                debugfn $"{realorFlow}.{cr} should already have been created."
 
-                        | 2, [ q ] when isAliasMnemonic (parent, name) ->
-                            let flow = parent.GetFlow()
-                            let aliasDef = tryFindAliasDefWithMnemonic flow (q.QuoteOnDemand()) |> Option.get
-                            Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
+                            | 2, [ q ] when isAliasMnemonic (parent, name) ->
+                                let flow = parent.GetFlow()
+                                let aliasDef = tryFindAliasDefWithMnemonic flow (q.QuoteOnDemand()) |> Option.get
+                                Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
 
-                        | _, [ _q ] -> ()
-                        | _, _ofn :: [ _ofrn ] -> ()
-                        | _ -> failwithlog "ERROR"
+                            | _, [ _q ] -> ()
+                            | _, _ofn :: [ _ofrn ] -> ()
+                            | _ -> failwithlog "ERROR"
 
             loop
 

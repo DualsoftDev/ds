@@ -78,6 +78,10 @@ module CpuLoader =
                 let variTag =  createVariableByType v.Name v.Type
                 storages.Add(variTag.Name, variTag)
                 )
+            sys.Jobs.Iter(fun j->
+                let variTag =  createVariableByType j.Name DuBOOL
+                storages.Add(variTag.Name, variTag)
+                )
 
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
@@ -88,18 +92,6 @@ module CpuLoader =
                 | (:? Call | :? RealExF | :? Alias)
                     -> v.TagManager <-  VertexMCall(v)
                 | _ -> failwithlog (getFuncName()))
-
-            sys.Functions.Iter(fun f->
-                let tags = getTotalTags f.Statements
-                tags
-                    .Filter(fun t-> t.Name.Contains("@"))
-                    .Iter(fun t->
-                        
-                    storages.Add(t.Name, t)
-                    )
-                )
-
-
 
 
         createTagM system

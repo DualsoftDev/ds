@@ -157,7 +157,7 @@ module internal ModelFindModule =
 
     let getVerticesOfJobCalls x   =  
         getVerticesOfSystem(x).OfType<Call>()
-                              .Where(fun c->c.TargetHasJob)    
+                              .Where(fun c->c.IsJob)    
 
     let getDistinctApis(x:DsSystem) =
         getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.ApiDefs)
@@ -237,12 +237,12 @@ type FindExtension =
     [<Extension>] static member GetVerticesHasJob(x:DsSystem) =  
                     getVerticesOfSystem(x)
                         .Choose(fun v -> v.GetPureCall())
-                        .Where(fun v -> v.TargetHasJob)
+                        .Where(fun v -> v.IsJob)
 
     [<Extension>] static member GetVerticesHasJobOfFlow(x:Flow) =  
                     getVerticesOfFlow(x)
                         .Choose(fun v -> v.GetPureCall())
-                        .Where(fun v -> v.TargetHasJob)
+                        .Where(fun v -> v.IsJob)
 
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
     [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 

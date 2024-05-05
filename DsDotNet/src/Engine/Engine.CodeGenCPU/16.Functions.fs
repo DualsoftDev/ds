@@ -32,8 +32,8 @@ type VertexMCall with
             yield! call.TargetFunc.Statements.Select(fun s->
                     match s with
                     | DuAssign (_, cmdExpr, target) ->
-                    let sets = v.MM.Expr <&&> cmdExpr
-                    withExpressionComment comment (DuAssign (None, sets, target))
+                    let sets = v.MM.Expr :> IExpression<bool> |> Some
+                    withExpressionComment comment (DuAssign (sets, cmdExpr, target))
                     |_ -> failWithLog $"err {comment}"
                     )
         ]

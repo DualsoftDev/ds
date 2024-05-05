@@ -14,26 +14,14 @@ let getCallTags(coin:Call) =
 
 type VertexManager with
    
-    member v.J1_JobActionAndSensor() =
+    member v.J1_JobActionSensor() =
         let vc = v :?> VertexMCall
         let coin = v.Vertex :?> Call
-        let sets =
+        [ 
             match coin.TargetHasJob with
-            | true -> getCallTags(coin).ToAnd()
+            | true -> 
+                (getCallTags(coin).ToAnd(), coin._off.Expr) --| (vc.JobAndSensor, getFuncName())
+                (getCallTags(coin).ToOr(), coin._off.Expr) --| (vc.JobOrSensor, getFuncName())
             | false ->
-                coin._off.Expr //  input 없으면 JobSensor은 off
-          
-        (sets, coin._off.Expr) --| (vc.JobAndSensor, getFuncName())
-
-    member v.J2_JobActionOrSensor() =
-        let vc = v :?> VertexMCall
-        let coin = v.Vertex :?> Call
-        let sets =
-            match coin.TargetHasJob with
-            | true -> getCallTags(coin).ToOr()
-            | false ->
-                coin._off.Expr //  input 없으면 JobSensor은 off
-          
-        (sets, coin._off.Expr) --| (vc.JobOrSensor, getFuncName())
-
-        
+                failWithLog $"{coin.Name} Target Have not Job error "
+        ]

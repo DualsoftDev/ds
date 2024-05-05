@@ -17,10 +17,10 @@ type VertexMCall with
         [
             yield! call.TargetFunc.Statements.Select(fun s->
                 match s with
-                | DuAssign (cmdExpr, _) ->
+                | DuAssign (_, cmdExpr, _) ->
                     let code = cmdExpr.ToText()
                     let expr = parseExpression v.Storages code 
-                    withExpressionComment comment (DuAssign (expr, v.PEFunc))
+                    withExpressionComment comment (DuAssign (None, expr, v.PEFunc))
                 |_ -> failWithLog $"err {comment}"
                 )
         ]
@@ -31,9 +31,9 @@ type VertexMCall with
         [
             yield! call.TargetFunc.Statements.Select(fun s->
                     match s with
-                    | DuAssign (cmdExpr, target) ->
+                    | DuAssign (_, cmdExpr, target) ->
                     let sets = v.MM.Expr <&&> cmdExpr
-                    withExpressionComment comment (DuAssign (sets, target))
+                    withExpressionComment comment (DuAssign (None, sets, target))
                     |_ -> failWithLog $"err {comment}"
                     )
         ]

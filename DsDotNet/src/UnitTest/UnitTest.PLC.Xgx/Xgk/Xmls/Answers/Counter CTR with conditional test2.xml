@@ -72,87 +72,183 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctr myCTR = createXgiCTR(2000u, ($cd1 &amp;&amp; $cd2 || $cd3 || $cd4) &amp;&amp; $cd3, ($res0 || $res1) &amp;&amp; $res2)
+                                        [0] bool cd1 = false
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2052" Param="75"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="BAND,M00000,254,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="4097">
+                                        [1] bool cd2 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="5121">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="5124" Param="75"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="BAND,M00000,253,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="7169">
+                                        [2] bool cd3 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="8193">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="8196" Param="75"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="BAND,M00000,251,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="10241">
+                                        [3] bool cd4 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="11265">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="11268" Param="75"/>
+                                    <Element ElementType="33" Coordinate="11358" Param="BAND,M00000,247,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="13313">
+                                        [4] bool res0 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="14337">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="14340" Param="75"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="BAND,M00000,239,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="16385">
+                                        [5] bool res1 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="17409">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="17412" Param="75"/>
+                                    <Element ElementType="33" Coordinate="17502" Param="BAND,M00000,223,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="19457">
+                                        [6] bool res2 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="20481">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="20484" Param="75"/>
+                                    <Element ElementType="33" Coordinate="20574" Param="BAND,M00000,191,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="22529">
+                                        [7] bool xx7 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="23553">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="23556" Param="75"/>
+                                    <Element ElementType="33" Coordinate="23646" Param="BAND,M00000,127,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="25601">
+                                        [8] ctr myCTR = createXgiCTR(2000u, ($cd1 &amp;&amp; $cd2 || $cd3 || $cd4) &amp;&amp; $cd3, ($res0 || $res1) &amp;&amp; $res2)
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="26625">
                                         M00000
                                     </Element>
-                                    <Element ElementType="6" Coordinate="2052">
+                                    <Element ElementType="6" Coordinate="26628">
                                         M00001
                                     </Element>
-                                    <Element ElementType="0" Coordinate="2054"/>
-                                    <Element ElementType="6" Coordinate="2055">
+                                    <Element ElementType="0" Coordinate="26630"/>
+                                    <Element ElementType="6" Coordinate="26631">
                                         M00002
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2058" Param="75"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="CTR,myCTR,2000"/>
-                                    <Element ElementType="6" Coordinate="3073">
+                                    <Element ElementType="2" Coordinate="26634" Param="75"/>
+                                    <Element ElementType="33" Coordinate="26718" Param="CTR,myCTR,2000"/>
+                                    <Element ElementType="6" Coordinate="27649">
                                         M00002
                                     </Element>
-                                    <Element ElementType="2" Coordinate="3076" Param="0"/>
-                                    <Element ElementType="0" Coordinate="3078"/>
-                                    <Element ElementType="6" Coordinate="4097">
+                                    <Element ElementType="2" Coordinate="27652" Param="0"/>
+                                    <Element ElementType="0" Coordinate="27654"/>
+                                    <Element ElementType="6" Coordinate="28673">
                                         M00003
                                     </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="0"/>
+                                    <Element ElementType="2" Coordinate="28676" Param="0"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="6145">
+                                    <Element ElementType="6" Coordinate="30721">
                                         M00004
                                     </Element>
-                                    <Element ElementType="0" Coordinate="6147"/>
-                                    <Element ElementType="6" Coordinate="6148">
+                                    <Element ElementType="0" Coordinate="30723"/>
+                                    <Element ElementType="6" Coordinate="30724">
                                         M00006
                                     </Element>
-                                    <Element ElementType="2" Coordinate="6151" Param="84"/>
-                                    <Element ElementType="17" Coordinate="6238">
+                                    <Element ElementType="2" Coordinate="30727" Param="84"/>
+                                    <Element ElementType="17" Coordinate="30814">
                                         myCTR
                                     </Element>
-                                    <Element ElementType="6" Coordinate="7169">
+                                    <Element ElementType="6" Coordinate="31745">
                                         M00005
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="8193">
-                                        [1] $xx7 := ($cd1 &amp;&amp; $cd2 || $cd3 || ($res0 || $res1) &amp;&amp; $res2) &amp;&amp; $cd1
+                                    <Element ElementType="63" Coordinate="32769">
+                                        [9] $xx7 := ($cd1 &amp;&amp; $cd2 || $cd3 || ($res0 || $res1) &amp;&amp; $res2) &amp;&amp; $cd1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
+                                    <Element ElementType="6" Coordinate="33793">
                                         M00000
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9220">
+                                    <Element ElementType="6" Coordinate="33796">
                                         M00001
                                     </Element>
-                                    <Element ElementType="0" Coordinate="9222"/>
-                                    <Element ElementType="6" Coordinate="9223">
+                                    <Element ElementType="0" Coordinate="33798"/>
+                                    <Element ElementType="6" Coordinate="33799">
                                         M00000
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9226" Param="81"/>
-                                    <Element ElementType="14" Coordinate="9310">
+                                    <Element ElementType="2" Coordinate="33802" Param="81"/>
+                                    <Element ElementType="14" Coordinate="33886">
                                         M00007
                                     </Element>
-                                    <Element ElementType="6" Coordinate="10241">
+                                    <Element ElementType="6" Coordinate="34817">
                                         M00002
                                     </Element>
-                                    <Element ElementType="2" Coordinate="10244" Param="0"/>
-                                    <Element ElementType="0" Coordinate="10246"/>
-                                    <Element ElementType="6" Coordinate="11265">
+                                    <Element ElementType="2" Coordinate="34820" Param="0"/>
+                                    <Element ElementType="0" Coordinate="34822"/>
+                                    <Element ElementType="6" Coordinate="35841">
                                         M00004
                                     </Element>
-                                    <Element ElementType="0" Coordinate="11267"/>
-                                    <Element ElementType="6" Coordinate="11268">
+                                    <Element ElementType="0" Coordinate="35843"/>
+                                    <Element ElementType="6" Coordinate="35844">
                                         M00006
                                     </Element>
-                                    <Element ElementType="6" Coordinate="12289">
+                                    <Element ElementType="6" Coordinate="36865">
                                         M00005
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="14337" Param="90"/>
-                                    <Element ElementType="33" Coordinate="14430" Param="END">
+                                    <Element ElementType="2" Coordinate="38913" Param="90"/>
+                                    <Element ElementType="33" Coordinate="39006" Param="END">
                                         END
                                     </Element>
                                 </Rung>

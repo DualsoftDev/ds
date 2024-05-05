@@ -4,9 +4,11 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open FB
 open System.Runtime.CompilerServices
+open Engine.Core
 
 [<AutoOpen>]
 module internal Common =
+    let systemOnRising = fRising([Expression.True]) :?> IExpression<bool>
 
     let bxiRungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
         let xs = rungXmlInfos

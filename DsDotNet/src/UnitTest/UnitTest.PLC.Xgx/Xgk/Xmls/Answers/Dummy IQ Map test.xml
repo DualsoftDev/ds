@@ -69,53 +69,101 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $QCar := $qAvante || $qSonata
+                                        [0] bool qAvante = false
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        M00000
+                                        _1ON
                                     </Element>
-                                    <Element ElementType="0" Coordinate="2051"/>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        P0000F
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="3073">
-                                        M00001
-                                    </Element>
+                                    <Element ElementType="2" Coordinate="2052" Param="75"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="BAND,M00000,254,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] $iAvante := $ICar
+                                        [1] bool qSonata = false
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="5121">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="5124" Param="75"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="BAND,M00000,253,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="7169">
+                                        [2] $QCar := $qAvante || $qSonata
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="8193">
+                                        M00000
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="8195"/>
+                                    <Element ElementType="2" Coordinate="8196" Param="87"/>
+                                    <Element ElementType="14" Coordinate="8286">
+                                        P0000F
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="9217">
+                                        M00001
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="10241">
+                                        [3] bool iSonata = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="11265">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="11268" Param="75"/>
+                                    <Element ElementType="33" Coordinate="11358" Param="BAND,M00000,251,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="13313">
+                                        [4] bool iAvante = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="14337">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="14340" Param="75"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="BAND,M00000,247,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="16385">
+                                        [5] $iAvante := $ICar
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="17409">
                                         P0010F
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5124" Param="87"/>
-                                    <Element ElementType="14" Coordinate="5214">
+                                    <Element ElementType="2" Coordinate="17412" Param="87"/>
+                                    <Element ElementType="14" Coordinate="17502">
                                         M00003
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="6145">
-                                        [2] $iSonata := $ICar
+                                    <Element ElementType="63" Coordinate="18433">
+                                        [6] $iSonata := $ICar
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="7169">
+                                    <Element ElementType="6" Coordinate="19457">
                                         P0010F
                                     </Element>
-                                    <Element ElementType="2" Coordinate="7172" Param="87"/>
-                                    <Element ElementType="14" Coordinate="7262">
+                                    <Element ElementType="2" Coordinate="19460" Param="87"/>
+                                    <Element ElementType="14" Coordinate="19550">
                                         M00002
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="9217" Param="90"/>
-                                    <Element ElementType="33" Coordinate="9310" Param="END">
+                                    <Element ElementType="2" Coordinate="21505" Param="90"/>
+                                    <Element ElementType="33" Coordinate="21598" Param="END">
                                         END
                                     </Element>
                                 </Rung>

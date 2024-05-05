@@ -175,9 +175,9 @@ module LSEAddressPattern =
     ///XGK 검증필요
     let tryParseXGKTagByCpu (tag: string) (modelId: int) = (|LsTagXGKPattern|_|) (modelId |> Some, tag)
 
-    let isXgiTag tag = tryParseXGITag tag |> fun f -> f.IsSome
+    let isXgiTag tag = tryParseXGITag tag |> Option.isSome
     ///XGK 검증필요
-    let isXgkTag tag = tryParseXGKTag tag |> fun f -> f.IsSome
+    let isXgkTag tag = tryParseXGKTag tag |> Option.isSome
 
 
 type XgkAddress private () =

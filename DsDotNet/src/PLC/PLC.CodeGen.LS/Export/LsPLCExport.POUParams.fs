@@ -121,7 +121,7 @@ module POUParametersModule =
     type Statement with
         member x.SanityCheck(_prjParam: XgxProjectParams) =
             match x with
-            | DuAssign(_expr, _target) -> ()
+            | DuAssign(_, _expr, _target) -> ()
             | DuVarDecl(_expr, _variable) -> ()
             | DuTimer(_t:TimerStatement) -> ()
             | DuCounter(c:CounterStatement) ->

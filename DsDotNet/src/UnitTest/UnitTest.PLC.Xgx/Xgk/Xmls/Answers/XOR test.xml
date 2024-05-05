@@ -66,31 +66,67 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $b3 := $b1 != $b2
+                                        [0] bool b1 = false
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2052" Param="75"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="BAND,M00000,254,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="4097">
+                                        [1] bool b2 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="5121">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="5124" Param="75"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="BAND,M00000,253,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="7169">
+                                        [2] bool b3 = false
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="8193">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="8196" Param="75"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="BAND,M00000,251,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="10241">
+                                        [3] $b3 := $b1 != $b2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="11265">
                                         M00000
                                     </Element>
-                                    <Element ElementType="7" Coordinate="2052">
+                                    <Element ElementType="7" Coordinate="11268">
                                         M00001
                                     </Element>
-                                    <Element ElementType="0" Coordinate="2054"/>
-                                    <Element ElementType="2" Coordinate="2055" Param="84"/>
-                                    <Element ElementType="14" Coordinate="2142">
+                                    <Element ElementType="0" Coordinate="11270"/>
+                                    <Element ElementType="2" Coordinate="11271" Param="84"/>
+                                    <Element ElementType="14" Coordinate="11358">
                                         M00002
                                     </Element>
-                                    <Element ElementType="7" Coordinate="3073">
+                                    <Element ElementType="7" Coordinate="12289">
                                         M00000
                                     </Element>
-                                    <Element ElementType="6" Coordinate="3076">
+                                    <Element ElementType="6" Coordinate="12292">
                                         M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="5121" Param="90"/>
-                                    <Element ElementType="33" Coordinate="5214" Param="END">
+                                    <Element ElementType="2" Coordinate="14337" Param="90"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="END">
                                         END
                                     </Element>
                                 </Rung>

@@ -199,19 +199,19 @@ module Exp =
             let target = createTag("target", "%M1.1", 1)
             let targetExpr = var2expr target
 
-            let stmt = DuAssign (expr, target)
+            let stmt = DuAssign (None, expr, target)
             stmt.Do()
             targetExpr |> evaluate === 24
 
-            (DuAssign (v 9, target)).Do()
+            (DuAssign (None, v 9, target)).Do()
             targetExpr |> evaluate === 9
 
             let source = createTag("source", "%M1.1", 33)
-            DuAssign(var2expr source, target).Do()
+            DuAssign(None, var2expr source, target).Do()
             targetExpr |> evaluate === 33
             source.Value <- 44
             targetExpr |> evaluate  === 33
-            DuAssign(var2expr source, target).Do()
+            DuAssign(None, var2expr source, target).Do()
             targetExpr |> evaluate === 44
 
         [<Test>]
@@ -278,7 +278,7 @@ module Exp =
             let target = createTag("target", "%M1.1", 1)
             target.ToText() === "$target"
 
-            let stmt = DuAssign (expr, target)
+            let stmt = DuAssign (None, expr, target)
             stmt.ToText() === "$target := *(2, 3, 4)"
 
 

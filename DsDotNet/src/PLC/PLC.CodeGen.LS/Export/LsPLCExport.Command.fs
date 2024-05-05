@@ -95,21 +95,6 @@ module internal rec Command =
                 | _ -> failwith "ERROR: Unknown terminal literal case."
             | _ -> failwith "ERROR: Not a Terminal"
 
-    /// '_ON' 에 대한 flat expression
-    let fakeAlwaysOnFlatExpression =
-        let on =
-            { new System.Object() with
-                member x.Finalize() = ()
-              interface IExpressionizableTerminal with
-                  member x.ToText() = "_ON" }
-
-        FlatTerminal(on, false, false)
-
-    /// '_ON' 에 대한 expression
-    let fakeAlwaysOnExpression: Expression<bool> =
-        let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
-        DuTerminal(DuVariable on)
-
     /// Option<IExpression<bool>> to IExpression
     let private obe2e (obe: IExpression<bool> option) : IExpression = obe.Value :> IExpression
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
@@ -416,7 +401,8 @@ module internal rec Command =
 
         | XGK ->
             match cmd with
-            | FunctionBlockCmd(fbc) -> bxiFBCommandXgk prjParam (x, y) fbc
+            | FunctionBlockCmd(fbc) -> bxiXgkFBCommand prjParam (x, y) fbc
+            | XgkParamCmd(param, width) -> bxiXgkFBCommandWithParam (x, y) (param, width)
             | _ -> failwithlog "Unknown CommandType"
 
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
@@ -451,26 +437,10 @@ module internal rec Command =
           TotalSpanY = 1
           XmlElements = xmls }
 
-    let bxiFBCommandXgk (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
-        let xmls =
-            let spanX =
-                let cmdWidth = 3
-                (coilCellX - x - cmdWidth)
 
-            let cmdParam = 
-                match fbc with
-                | TimerMode ts ->
-                    let typ = ts.Timer.Type.ToString()
-                    let var = ts.Timer.Name
-                    let value =
-                        let res = prjParam.GetXgkTimerResolution(ts.Timer.TimerStruct.XgkStructVariableDevicePos)
-                        int <| (float ts.Timer.PRE.Value) / res
-                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
-                | CounterMode cs ->
-                    let typ = cs.Counter.Type.ToString()
-                    let var = cs.Counter.Name
-                    let value = cs.Counter.PRE.Value 
-                    $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
+    let bxiXgkFBCommandWithParam (x, y) (cmdParam: string, cmdWidth:int) : BlockXmlInfo =
+        let xmls =
+            let spanX = (coilCellX - x - cmdWidth)
 
             [ let c = coord (x, y)
               let xml =
@@ -487,7 +457,7 @@ module internal rec Command =
 
               { Coordinate = c
                 Xml = xml
-                SpanX = 1
+                SpanX = cmdWidth
                 SpanY = 1 } ]
 
         { X = x
@@ -495,6 +465,25 @@ module internal rec Command =
           TotalSpanX = 31
           TotalSpanY = 1
           XmlElements = xmls }
+
+    let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
+        let cmdWidth = 3
+        let cmdParam = 
+            match fbc with
+            | TimerMode ts ->
+                let typ = ts.Timer.Type.ToString()
+                let var = ts.Timer.Name
+                let value =
+                    let res = prjParam.GetXgkTimerResolution(ts.Timer.TimerStruct.XgkStructVariableDevicePos)
+                    int <| (float ts.Timer.PRE.Value) / res
+                $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
+            | CounterMode cs ->
+                let typ = cs.Counter.Type.ToString()
+                let var = cs.Counter.Name
+                let value = cs.Counter.PRE.Value 
+                $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
+        bxiXgkFBCommandWithParam (x, y) (cmdParam, cmdWidth)
+
 
     /// 왼쪽에 FB (비교 연산 등) 를 그리고, 오른쪽에 coil 을 그린다.
     let drawXgkFBLeft (x, y) (fbParam: string) (target: string) : XmlOutput =
@@ -601,7 +590,9 @@ module internal rec Command =
             let terminalText =
                 match terminal, prjParam.TargetType with
                 | :? IStorage as storage, XGK ->
-                    storage.Address
+                    match storage.Address, storage.Name with
+                    | "", StartsWith("_") -> storage.Name
+                    | _ -> storage.Address
                 | :? IStorage as storage, _ -> 
                      if storage.Name.Contains (xgkTimerCounterContactMarking) then
                         storage.Name.Replace (xgkTimerCounterContactMarking, "")
@@ -767,7 +758,7 @@ module internal rec Command =
                     // move 의 type 이 동일해야 한다.  timer/counter 는 예외.  reset coil 이나 preset 설정 등 허용.
                     assert (st = tt || tt = typeof<TimerCounterBaseStruct>)
                     operatorToXgkFunctionName "MOV" st
-                $"Param={dq}{mov},{s},{d}{dq}", 3
+                $"Param={dq}{mov},{s},{d}{dq}", 3           // Param="MOV,source,destination"
             rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
 
         | _ ->

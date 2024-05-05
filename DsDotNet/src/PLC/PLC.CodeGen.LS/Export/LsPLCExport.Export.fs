@@ -55,7 +55,7 @@ module XgiExportModule =
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
         let isXgi, isXgk = prjParam.TargetType = XGI, prjParam.TargetType = XGK
 
-        let xmlRung (expr: FlatExpression option) (xgiCommand:CommandTypes option) (y:int) : RungGenerationInfo =
+        let rgiXmlRung (expr: FlatExpression option) (xgiCommand:CommandTypes option) (y:int) : RungGenerationInfo =
             let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
 
@@ -70,17 +70,19 @@ module XgiExportModule =
             rgi <- rgi.AddSingleLineXml(xml)
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
+            let comparisonOps = [|">"; ">="; "<"; "<="; "="; "=="; "!="; "<>"|]
+            let arithmaticOps = [|"+"; "-"; "*"; "/"|]
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when funName.IsOneOf("+", "-", "*", "/", ">", ">=", "<", "<=", "=", "==", "!=", "<>") ->
+            | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOps @ comparisonOps) ->
             
                 let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
-                    if funName.IsOneOf("+", "-", "*", "/") then
+                    if funName.IsOneOf(arithmaticOps) then
                         let param = $"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
                         drawXgkFBRight xy param
-                    elif funName.IsOneOf(">", ">=", "<", "<=", "=", "==", "!=", "<>") then
+                    elif funName.IsOneOf(comparisonOps) then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
                         drawXgkFBLeft xy param target.Address
                     else
@@ -100,26 +102,120 @@ module XgiExportModule =
 
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command = CoilCmd(coil)
-                let rgiSub = xmlRung (Some flatExpr) (Some command) rgi.NextRungY
+                let rgiSub = rgiXmlRung (Some flatExpr) (Some command) rgi.NextRungY
                 //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 rgi <-
                     { Xmls = rgiSub.Xmls @ rgi.Xmls
                       NextRungY = rgiSub.NextRungY }
 
+        //// todo
+        //let rgiXgkBoolTypeCopyIfRungs (condition:IExpression<bool>) (source: ITerminal) (destination: IStorage) : RungGenerationInfo =
+        //    assert(destination.DataType = typeof<bool>)
+        //    match tryParseXGKTag destination.Address with
+        //    | Some ( {
+        //        Tag = tag
+        //        Device = device
+        //        DataType = datatType
+        //        BitOffset = totalBitOffset
+        //        }) ->
+        //            let dh = sprintf "%A%04d" device (totalBitOffset / 16) // destination head : destination 의 word
+        //            let offset = totalBitOffset % 16 // destination 이 속한 word 내에서의 bit offset
+        //            let mSet = 1us <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
+        //            let mClear = UInt16.MaxValue - (1us <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
+        //            let printBinary (n:uint16) = Convert.ToString(int n, 2).PadLeft(16, '0')
+        //            tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
+
+        //            let flatCondition = condition.Flatten() :?> FlatExpression
+        //            let cmd = 
+        //            rgiXmlRung (Some flatCondition) None rgi.NextRungY
+        //    | _ ->
+        //        failwith "ERROR: XGK Tag parsing error"
+
+        //    failwith "NOT yet!!"
+
+
         /// XGK 용 MOV : MOV,S,D
-        let moveCmdRungXgk (condition:IExpression<bool>) (source: ITerminal) (destination: IStorage) : unit =
+        let moveCmdRungXgk (condition:IExpression<bool>) (source: IExpression) (destination: IStorage) : unit =
             // test case : XGK "Add 10 items test"
             if prjParam.TargetType <> XGK then
                 failwithlog "Something wrong!"
 
+            let srcTerminal: ITerminal = source.Terminal.Value
             let x, y = 0, rgi.NextRungY
 
             //xmlRung 활용 필요
             let flatCondition = condition.Flatten() :?> FlatExpression
-            let blockXml = rxiRung prjParam (x, y) (Some flatCondition) (Some (ActionCmd(Move(condition, source :?> IExpression, destination))))
-            let xml = wrapWithRung blockXml.Xml
-            rgi <- {   Xmls = xml::rgi.Xmls
-                       NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
+
+
+            if destination.DataType = typeof<bool> then
+                match tryParseXGKTag destination.Address with
+                | Some ( {
+                    Tag = tag
+                    Device = device
+                    DataType = datatType
+                    BitOffset = totalBitOffset
+                    }) ->
+                        let dh = sprintf "%A%04d%s" device (totalBitOffset / 16) (if totalBitOffset % 16 >= 8 then "8" else "0")  // destination head : destination 의 word
+                        let offset = totalBitOffset % 8 // destination 이 속한 word 내에서의 bit offset
+                        let mSet = 1uy <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
+                        let mClear = Byte.MaxValue - (1uy <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
+                        let printBinary (n:byte) = Convert.ToString(int n, 2).PadLeft(8, '0')
+                        tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
+
+                        let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
+                        
+                        let condWithTrue, condWithFalse =
+                            match source with
+                            | :? Expression<bool> as DuTerminal(DuLiteral lh) when lh.Value  ->
+                                Some (flatten condition), None
+                            | :? Expression<bool> as DuTerminal(DuLiteral lh) when not lh.Value  ->
+                                None, Some (flatten condition)
+                            | _ ->
+                                let t = fbLogicalAnd([condition; source]) |> flatten
+                                let f = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
+                                Some t, Some f
+
+                        if condWithTrue.IsSome then
+                            let cmd =
+                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
+                                XgkParamCmd(param, 5)
+                            let rgiSub = rgiXmlRung condWithTrue (Some cmd) rgi.NextRungY
+                            rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                                        NextRungY = 1 + rgiSub.NextRungY }
+                        if condWithFalse.IsSome then
+                            let cmd =
+                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
+                                XgkParamCmd(param, 5)
+                            let rgiSub = rgiXmlRung condWithFalse (Some cmd) rgi.NextRungY
+                            rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                                        NextRungY = 1 + rgiSub.NextRungY }
+                        //let rgiSub =
+                        //    let cmd =
+                        //        let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
+                        //        XgkParamCmd(param, 5)
+                        //    let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
+                        //    rgiXmlRung (Some sourceTrueCondition) (Some cmd) rgi.NextRungY
+                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                        //            NextRungY = 1 + rgiSub.NextRungY }
+
+                        //let rgiSub =
+                        //    let cmd =
+                        //        let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
+                        //        XgkParamCmd(param, 5)
+                        //    let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
+                        //    rgiXmlRung (Some sourceFalseCondition) (Some cmd) rgi.NextRungY
+                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
+                        //            NextRungY = 1 + rgiSub.NextRungY }
+
+
+                | _ ->
+                    failwith "ERROR: XGK Tag parsing error"
+            else
+                let cmd = ActionCmd(Move(condition, srcTerminal :?> IExpression, destination))
+                let blockXml = rxiRung prjParam (x, y) (Some flatCondition) (Some cmd)
+                let xml = wrapWithRung blockXml.Xml
+                rgi <- {   Xmls = xml::rgi.Xmls
+                           NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
 
         // Rung 별로 생성
         for CommentAndXgxStatements(cmt, stmts) in commentedStatements do
@@ -133,25 +229,32 @@ module XgiExportModule =
 
             for stmt in stmts do
                 match stmt with
-                | DuAssign(expr, target) when expr.DataType <> typeof<bool> ->
-                    let condition = Expression.True
+                | DuAssign(condition, expr, target) when isXgk || expr.DataType <> typeof<bool> ->
+                    let cond =
+                        match condition with
+                        | Some c -> c
+                        | None -> Expression.True
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                     if isXgi then
-                        let command = ActionCmd(Move(condition, expr, target))
-                        let rgiSub = xmlRung None (Some command) rgi.NextRungY
+                        let command = ActionCmd(Move(cond, expr, target))
+                        let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                         rgi <-
                             {   Xmls = rgiSub.Xmls @ rgi.Xmls
                                 NextRungY = 1 + rgiSub.NextRungY }
                     else
-                        match expr.Terminal with
-                        | Some terminal ->
-                            moveCmdRungXgk condition terminal target
+                        match condition, expr.Terminal with
+                        | _, Some _ when expr.DataType <> typeof<bool> ->
+                            moveCmdRungXgk cond expr target
+                        | Some _, Some _ -> //when expr.DataType <> typeof<bool> ->
+                            moveCmdRungXgk cond expr target
                         | _ ->
                             simpleRung expr target
 
-                | DuAssign(expr, target) ->
+                | DuAssign(condition, expr, target) ->
+                    assert condition.IsNone
                     simpleRung expr target
+
 
                 | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as _op
                                            Arguments = args
@@ -160,11 +263,21 @@ module XgiExportModule =
                     let expr = originalExpr.WithNewFunctionArguments args
                     simpleRung expr output
 
+                | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _op
+                                           Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
+                                           OriginalExpression = originalExpr
+                                           Output = destination }) when isXgk && source.DataType = typeof<bool> ->
+                    
+                    moveCmdRungXgk condition source destination
+                    //let rgiSub = rgiXgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
+                    //rgi <-
+                    //    { Xmls = rgiSub.Xmls @ rgi.Xmls
+                    //      NextRungY = 1 + rgiSub.NextRungY }
 
                 // <kwak> <timer>
                 | Statement.DuTimer timerStatement ->
                     let command = FunctionBlockCmd(TimerMode(timerStatement))
-                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -172,7 +285,7 @@ module XgiExportModule =
 
                 | Statement.DuCounter counterStatement ->
                     let command = FunctionBlockCmd(CounterMode(counterStatement))
-                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -183,7 +296,7 @@ module XgiExportModule =
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
-                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -194,7 +307,7 @@ module XgiExportModule =
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmatic(fn, (output :?> INamedExpressionizableTerminal), args))
-                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -206,14 +319,14 @@ module XgiExportModule =
                     let condition = args[0] :?> IExpression<bool>
                     let source = args[1]
                     let command = ActionCmd(Move(condition, source, output))
-                    let rgiSub = xmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuAction(DuCopy(condition, source, target)) when isXgk ->
-                    moveCmdRungXgk condition source.Terminal.Value target
+                    moveCmdRungXgk condition source target
 
                 | _ -> failwithlog "Not yet"
 

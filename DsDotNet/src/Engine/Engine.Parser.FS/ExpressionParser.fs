@@ -1,7 +1,6 @@
 namespace Engine.Parser.FS
 
 open System.Linq
-open System.Collections.Generic
 
 open Antlr4.Runtime
 open Dual.Common.Core.FS
@@ -60,6 +59,7 @@ module rec ExpressionParser =
                     | :? BinaryExprBitwiseOrContext
                     | :? BinaryExprLogicalAndContext
                     | :? BinaryExprLogicalOrContext) ->
+
                     debugfn $"Binary: {text}"
 
                     match ctx.children.ToFSharpList() with
@@ -89,24 +89,21 @@ module rec ExpressionParser =
                     match terminal with
                     | :? LiteralContext as exp ->
                         assert (exp.ChildCount = 1)
+                        let lit2exp x = literal2expr x |> iexpr
 
                         match exp.children[0] with
-                        | :? LiteralSbyteContext -> text.Replace("y", "")  |> System.SByte.Parse |> literal2expr |> iexpr
-                        | :? LiteralByteContext  -> text.Replace("uy", "") |> System.Byte.Parse  |> literal2expr |> iexpr
-                        | :? LiteralInt16Context -> text.Replace("s", "")  |> System.Int16.Parse |> literal2expr |> iexpr
-                        | :? LiteralUint16Context ->
-                            text.Replace("us", "") |> System.UInt16.Parse |> literal2expr |> iexpr
-                        | :? LiteralInt32Context -> text |> System.Int32.Parse |> literal2expr |> iexpr
-                        | :? LiteralUint32Context ->
-                            text.Replace("u", "") |> System.UInt32.Parse |> literal2expr |> iexpr
-                        | :? LiteralInt64Context -> text.Replace("L", "") |> System.Int64.Parse |> literal2expr |> iexpr
-                        | :? LiteralUint64Context ->
-                            text.Replace("UL", "") |> System.UInt64.Parse |> literal2expr |> iexpr
-                        | :? LiteralSingleContext ->
-                            text.Replace("f", "") |> System.Single.Parse |> literal2expr |> iexpr
-                        | :? LiteralDoubleContext -> text |> System.Double.Parse  |> literal2expr |> iexpr
-                        | :? LiteralBoolContext ->   text |> System.Boolean.Parse |> literal2expr |> iexpr
-                        | :? LiteralStringContext -> text |> deQuoteOnDemand      |> literal2expr |> iexpr
+                        | :? LiteralSbyteContext ->  text.Replace("y", "")  |> System.SByte.Parse |> lit2exp
+                        | :? LiteralByteContext  ->  text.Replace("uy", "") |> System.Byte.Parse  |> lit2exp
+                        | :? LiteralInt16Context ->  text.Replace("s", "")  |> System.Int16.Parse |> lit2exp
+                        | :? LiteralUint16Context -> text.Replace("us", "") |> System.UInt16.Parse |> lit2exp
+                        | :? LiteralInt32Context ->  text |> System.Int32.Parse |> lit2exp
+                        | :? LiteralUint32Context -> text.Replace("u", "") |> System.UInt32.Parse |> lit2exp
+                        | :? LiteralInt64Context ->  text.Replace("L", "") |> System.Int64.Parse |> lit2exp
+                        | :? LiteralUint64Context -> text.Replace("UL", "") |> System.UInt64.Parse |> lit2exp
+                        | :? LiteralSingleContext -> text.Replace("f", "") |> System.Single.Parse |> lit2exp
+                        | :? LiteralDoubleContext -> text |> System.Double.Parse  |> lit2exp
+                        | :? LiteralBoolContext ->   text |> System.Boolean.Parse |> lit2exp
+                        | :? LiteralStringContext -> text |> deQuoteOnDemand      |> lit2exp
                         | :? LiteralCharContext ->
                             // text : "'a'" 의 형태
                             let dq, sq = "\"", "'"
@@ -118,8 +115,10 @@ module rec ExpressionParser =
                             |> literal2expr
                             |> iexpr
                         | _ -> failwithlog "ERROR"
+
                     | :? TagContext -> failwithlog "Obsoleted.  Why not Storage???" // todo : remove
                     //iexpr <| tag (storages[text])
+
                     | :? StorageContext as sctx ->
                         let storage =
                             option {
@@ -132,18 +131,7 @@ module rec ExpressionParser =
                         | Some strg -> strg.ToBoxedExpression() :?> IExpression
                         | None -> failwith $"Failed to find variable/tag name in {sctx.GetText()}"
 
-                    //| :? InnerTagContext as sctx -> 
-             
-                    //    let innerTagCtx = sctx.TryFindFirstChild<InnerTagNameContext>().Value
-                    //    let innerTagName = innerTagCtx.GetText().Replace("@", "_")
-
-                    //    match storages.TryFind(innerTagName) with
-                    //    | Some strg -> strg.ToBoxedExpression() :?> IExpression
-                    //    | None ->
-                    //        let innerVari = createVariableByType innerTagName DuBOOL
-                    //        storages.Add(innerVari.Name, innerVari) 
-                    //        innerVari.ToBoxedExpression() :?> IExpression
-                    //| _ -> failwithlog "ERROR"
+                    | _ -> failwithlog "ERROR"
 
                 | :? ArrayReferenceExprContext ->
                     debugfn $"ArrayReference: {text}"
@@ -160,13 +148,12 @@ module rec ExpressionParser =
 
         helper ctx
 
-   
-    let parseExpression (storages: Storages) (text: string): IExpression =
+    let parseExpression (storages: Storages) (text: string) : IExpression =
         try
             let parser = createParser (text)
             let ctx = parser.expr ()
 
-            createExpression storages ctx 
+            createExpression storages ctx
         with exn ->
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
 
@@ -321,7 +308,7 @@ module rec ExpressionParser =
 
             | :? AssignContext as assignCtx ->
                 if not <| storages.ContainsKey storageName then
-                            failwith $"ERROR: Failed to assign into non existing storage {storageName}"
+                    failwith $"ERROR: Failed to assign into non existing storage {storageName}"
 
                 let storage = storages[storageName]
 
@@ -329,7 +316,7 @@ module rec ExpressionParser =
                     createExpression storages (getFirstChildExpressionContext ctx)
 
                 match assignCtx.children.ToFSharpList() with
-                | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(createExp ctx, storage)
+                | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(None, createExp ctx, storage)
                 | _ -> failwithlog "ERROR"
 
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx
@@ -372,21 +359,21 @@ module rec ExpressionParser =
             let children = parser.toplevels().children
 
             let topLevels =
-                [ for t in children do
-                      match t with
-                      | :? ToplevelContext as ctx -> ctx
-                      | :? ITerminalNode as semicolon when semicolon.GetText() = ";" -> ()
-                      | _ -> failwithlog "ERROR" ]
+                [   for t in children do
+                        match t with
+                        | :? ToplevelContext as ctx -> ctx
+                        | :? ITerminalNode as semicolon when semicolon.GetText() = ";" -> ()
+                        | _ -> failwithlog "ERROR" ]
 
 
-            [ for t in topLevels do
-                  let text = t.GetOriginalText()
-                  //debugfn $"Toplevel: {text}"
-                  assert (t.ChildCount = 1)
+            [   for t in topLevels do
+                    let text = t.GetOriginalText()
+                    //debugfn $"Toplevel: {text}"
+                    assert (t.ChildCount = 1)
 
-                  match t.children[0] with
-                  | :? StatementContext as stmt -> tryCreateStatement storages stmt
-                  | _ -> failwith $"ERROR: {text}: expect statements" ]
+                    match t.children[0] with
+                    | :? StatementContext as stmt -> tryCreateStatement storages stmt
+                    | _ -> failwith $"ERROR: {text}: expect statements" ]
             |> List.choose id
         with exn ->
             failwith $"Failed to parse code: {text}\r\n{exn}"
@@ -401,9 +388,9 @@ module rec ExpressionParser =
 
         member x.CreateBridgeTag(name: string, address: string, boxedValue: obj) : ITag =
             let createParam () =
-                { defaultStorageCreationParams (unbox boxedValue) (VariableTag.PcUserVariable|>int) with
-                    Name = name
-                    Address = Some address }
+                {   defaultStorageCreationParams (unbox boxedValue) (VariableTag.PcUserVariable|>int) with
+                        Name = name
+                        Address = Some address }
 
             match x.Name with
             | BOOL    -> new Tag<bool>  (createParam ())

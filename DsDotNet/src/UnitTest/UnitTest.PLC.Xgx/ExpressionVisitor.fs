@@ -20,7 +20,7 @@ type ExpressionVisitorTest() =
 
     let getExpression (statment:Statement) =
         match statment with
-        | DuAssign(expr, var) -> expr
+        | DuAssign(_, expr, var) -> expr
         | _ -> failwith "Not supported"
 
     let stringEquals (str1:string) (str2:string) =
@@ -65,7 +65,7 @@ type ExpressionVisitorTest() =
                     let initValue = typeDefaultValue args[0].DataType
                     let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
                     createTypedXgxAutoVariable prjParam mnemonic initValue comment
-                let augStatement = DuAssign(functionExpression, var)
+                let augStatement = DuAssign(None, functionExpression, var)
                 statements.Add augStatement
                 storages.Add var
                 var.ToExpression()

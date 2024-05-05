@@ -22,13 +22,13 @@ module CounterStatementModule =
         let statements = StatementContainer()
         match cParams.CountUpCondition with
         | Some up->
-            let statement = DuAssign (up, cs.CU)
+            let statement = DuAssign (None, up, cs.CU)
             statement.Do()
             statements.Add statement
         | None -> ()
         match cParams.CountDownCondition with
         | Some down ->
-            let statement = DuAssign (down, cs.CD)
+            let statement = DuAssign (None, down, cs.CD)
             statement.Do()
             statements.Add statement
         | None -> ()
@@ -36,7 +36,7 @@ module CounterStatementModule =
         if not <| isItNull cs.RES then
             match cParams.ResetCondition  with
             | Some reset ->
-                let statement = DuAssign (reset, cs.RES)
+                let statement = DuAssign (None, reset, cs.RES)
                 statement.Do()
                 statements.Add statement
             | None -> ()
@@ -47,7 +47,7 @@ module CounterStatementModule =
                 // unit test 에 한해, reset condition 허용
                 failwith <| "Load condition is not supported for XGK compatibility"
 
-            let statement = DuAssign (load, cs.LD)
+            let statement = DuAssign (None, load, cs.LD)
             statement.Do()
             statements.Add statement
         | None -> ()

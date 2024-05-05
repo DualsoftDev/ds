@@ -32,25 +32,42 @@ module XgxGenerationTestModule =
         generateVariableDeclarationSeq typ varNamePrefix initialValueSetter start count |> String.concat "\n"
 
     /// bool x00 = createTag("%IX0.0.0", false); 등과 같은 항목을 반복 생성한다.
-    let generateBitTagVariableDeclarationSeq (xgx:PlatformTarget) (start: int) (count: int) =
+    /// varPrefix: e.g "x", addressPrefix: e.g. "%IX0."
+    let generateBitTagVariableDeclarationSeq (xgx:PlatformTarget) (varPrefix:string) (addressPrefix:string) (start: int) (count: int) =
         seq {
             for i in start .. start + count - 1 do
                 let tag =
                     match xgx with
-                    | XGI -> sprintf "%%IX0.%d.%d" (i / 16) (i % 16)
-                    | XGK -> sprintf "P%05X" i
+                    | XGI when addressPrefix.StartsWith("MX") ->
+                        sprintf "%%%s%d%d" addressPrefix (i / 16) (i % 16)
+                    | XGI ->
+                        sprintf "%%%s.%d.%d" addressPrefix (i / 16) (i % 16)
+                    | XGK -> sprintf "%s%04d%X" addressPrefix (i / 16) (i % 16)
                     | _ -> failwith "Not supported runtime target"
-                yield sprintf "bool x%02d = createTag(\"%s\", false);" i tag
+                yield sprintf "bool %s%02d = createTag(\"%s\", false);" varPrefix (i-start) tag
         } 
+
+    let private getAddressPrefix (xgx:PlatformTarget) =
+        match xgx with
+        | XGI -> "IX0"
+        | XGK -> "P"
+        | _ -> failwith "Not supported runtime target"
+
     let generateBitTagVariableDeclarations (xgx:PlatformTarget) (start: int) (count: int) =
-        generateBitTagVariableDeclarationSeq xgx start count |> String.concat "\n"
+        let addressPrefix = getAddressPrefix xgx
+        generateBitTagVariableDeclarationSeq xgx "x" addressPrefix start count |> String.concat "\n"
+
+    /// bool varPrefix00 = createTag("%IX0.0.0", false); 등과 같은 항목을 반복 생성한다.
+    let generateNamedBitTagVariableDeclarations (xgx:PlatformTarget) (varPrefix:string) (addressPrefix:string) (start: int) (count: int) =
+        generateBitTagVariableDeclarationSeq xgx varPrefix addressPrefix start count |> String.concat "\n"
 
     let generateInt16VariableDeclarations (start: int) (count: int) =
         generateVariableDeclarations "int16" "nn" (fun i -> sprintf "%ds" i) start count
 
     let generateLargeVariableDeclarations (xgx:PlatformTarget) =
+        let addressPrefix = getAddressPrefix xgx
         seq {
-            yield! generateBitTagVariableDeclarationSeq xgx 0 40
+            yield! generateBitTagVariableDeclarationSeq xgx "x" addressPrefix 0 40
             yield! generateVariableDeclarationSeq "int32" "nn" (fun i -> sprintf "%d" i) 1 9
         } |> String.concat "\n"
         

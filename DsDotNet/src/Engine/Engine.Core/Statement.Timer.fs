@@ -1,4 +1,4 @@
-﻿namespace Engine.Core
+namespace Engine.Core
 
 open Dual.Common.Core.FS
 
@@ -23,7 +23,7 @@ module TimerStatementModule =
         let statements = StatementContainer()
         match tParams.RungConditionIn with
         | Some cond ->
-            let rungInStatement = DuAssign (cond, ts.EN)
+            let rungInStatement = DuAssign (None, cond, ts.EN)
             rungInStatement.Do()
             statements.Add rungInStatement
         | None -> ()
@@ -40,7 +40,7 @@ module TimerStatementModule =
              * 현재 구현은 상위 로직에서 reset condition 을 사용하지 않도록 하고 있음.
              *)
 
-            let resetStatement = DuAssign (cond, ts.RES)
+            let resetStatement = DuAssign (None, cond, ts.RES)
             resetStatement.Do()
             statements.Add resetStatement
         | None -> ()

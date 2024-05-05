@@ -211,7 +211,7 @@ module ExpressionModule =
     }
 
     type Statement =
-        | DuAssign of expression:IExpression * target:IStorage
+        | DuAssign of condition:IExpression<bool> option * expression:IExpression * target:IStorage
         /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
         | DuVarDecl of expression:IExpression * variable:IStorage
 
@@ -229,7 +229,7 @@ module ExpressionModule =
         member x.Statement = match x with | CommentedStatement (_c, s) -> s
         member x.TargetName =
              match x.Statement with
-             | DuAssign (_expression, target) -> target.Name
+             | DuAssign (_, _expression, target) -> target.Name
              | DuVarDecl (_expression,variable) -> variable.Name
              | DuTimer (t:TimerStatement) -> t.Timer.Name
              | DuCounter (c:CounterStatement) -> c.Counter.Name
@@ -240,7 +240,7 @@ module ExpressionModule =
 
         member x.TargetValue    =
             match x.Statement with
-            | DuAssign (_expression, target) -> target.BoxedValue
+            | DuAssign (_, _expression, target) -> target.BoxedValue
             | DuVarDecl (_expression,variable) -> variable.BoxedValue
             | DuTimer (t:TimerStatement) -> t.Timer.DN.Value
             | DuCounter (c:CounterStatement) -> c.Counter.DN.Value
@@ -259,7 +259,7 @@ module ExpressionModule =
     type Statement with
         member x.Do() =
             match x with
-            | DuAssign (expr, target) ->
+            | DuAssign (_, expr, target) ->
                 assert(target.DataType = expr.DataType)
                 target.BoxedValue <- expr.BoxedEvaluatedValue
 
@@ -283,7 +283,7 @@ module ExpressionModule =
 
         member x.ToText() =
             match x with
-            | DuAssign (expr, target) -> $"{target.ToText()} := {expr.ToText()}"
+            | DuAssign (_condition, expr, target) -> $"{target.ToText()} := {expr.ToText()}"    // todo: condition 을 totext 에 포함할지 여부
             | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()}"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer

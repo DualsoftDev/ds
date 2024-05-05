@@ -13,5 +13,6 @@ open System.Runtime.InteropServices
 [<assembly: InternalsVisibleTo("Dualsoft")>]
 [<assembly: InternalsVisibleTo("TestProfiler")>]
 [<assembly: InternalsVisibleTo("Newtonsoft.Json")>]
+[<assembly: InternalsVisibleTo("PLC.CodeGen.LS")>]
 
 do ()

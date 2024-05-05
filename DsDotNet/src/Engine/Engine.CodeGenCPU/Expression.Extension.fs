@@ -19,11 +19,11 @@ module ExpressionExtension =
     /// logical NOT for expression 
     let (!!) exp = unaryOp fbLogicalNot exp
     /// storage 에 expression assign 하는 statement 생성
-    let (<==) storage exp  = DuAssign(exp, storage)
+    let (<==) storage exp  = DuAssign(None, exp, storage)
     /// storage 에 expression rising 값을 assign 하는 statement 생성
-    let (<=^) rising exp   = DuAssign(exp, rising)
+    let (<=^) rising exp   = DuAssign(None, exp, rising)
     /// storage 에 expression falling 값을 assign 하는 statement 생성
-    let (<=!^) falling exp = DuAssign(exp, falling)
+    let (<=!^) falling exp = DuAssign(None, exp, falling)
   
     /// set 조건, reset 조건을 op 에 의해서 coil 에 assign 하는 CommentedStatement 생성
     let inline coilOp op sets rsts (coil, comment) = 

@@ -39,21 +39,26 @@ module CollectStoragesModule =
     type Statement with
 
         member x.CollectStorages() : IStorage list =
-            [ match x with
-              | DuAssign(exp, tgt) ->
-                  yield! exp.CollectStorages()
-                  yield tgt
-                 
-              /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
-              | DuVarDecl(exp, var) ->
-                  yield! exp.CollectStorages()
-                  yield var
+            [
+                match x with
+                | DuAssign(condition, exp, tgt) ->
+                    match condition with
+                    | Some condition ->
+                        yield! condition.CollectStorages()
+                    | None -> ()
+                    yield! exp.CollectStorages()
+                    yield tgt
+                
+                /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
+                | DuVarDecl(exp, var) ->
+                    yield! exp.CollectStorages()
+                    yield var
 
-              | DuTimer stmt -> yield! stmt.CollectStorages()
-              | DuCounter stmt -> yield! stmt.CollectStorages()
-              | DuAction stmt -> yield! stmt.CollectStorages()
+                | DuTimer stmt -> yield! stmt.CollectStorages()
+                | DuCounter stmt -> yield! stmt.CollectStorages()
+                | DuAction stmt -> yield! stmt.CollectStorages()
 
-              | DuAugmentedPLCFunction _functionParameters -> failwithlog "ERROR" ]
+                | DuAugmentedPLCFunction _functionParameters -> failwithlog "ERROR" ]
 
     type CommentedStatement with
 

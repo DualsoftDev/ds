@@ -185,17 +185,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             .DeQuoteOnDemand()
 
     override x.EnterLoadDeviceBlock(ctx: LoadDeviceBlockContext) =
-        let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
-        let file = x.GetValidFile fileSpecCtx
+         let file = 
+             match ctx.TryFindFirstChild<FileSpecContext>() with
+             |Some f ->  x.GetValidFile f
+             |None -> ""
 
-        let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
-        let devs = ctx.TryFindFirstChild<DeviceNameListContext>().Value.Descendants<DeviceNameContext>()
-       
-        devs.Iter(fun dev->
-             let loadedName = dev.CollectNameComponents().Combine()
-             x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)    |> ignore
+         let devs = ctx.TryFindFirstChild<DeviceNameListContext>().Value.Descendants<DeviceNameContext>()
+         devs.Iter(fun dev->
+                let loadedName = dev.CollectNameComponents().Combine()
+                let file = if file <> "" then file else $"dsLib/{loadedName}.ds"
+                let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
+            
+                x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)    |> ignore
             )
-     
 
     override x.EnterLoadExternalSystemBlock(ctx: LoadExternalSystemBlockContext) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value

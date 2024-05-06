@@ -138,7 +138,6 @@ GTE: '>=';
 LTE: '<=';
 
 OR2: '||';
-EQ2: '==';
 NEQ: '!=';
 //NEWLINE: '\r'? '\n';
 
@@ -208,7 +207,7 @@ system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
 
 
 //[device file="c:\my.ds"] A, B, C;
-loadDeviceBlock: '[' 'device' fileSpec ']' deviceNameList SEMICOLON;
+loadDeviceBlock: '[' 'device' fileSpec? ']' deviceNameList SEMICOLON;
     deviceNameList: deviceName (COMMA deviceName)*;
     deviceName:identifier1;
     fileSpec: 'file' '=' filePath;
@@ -276,11 +275,10 @@ flowBlock
         aliasMnemonic: identifier1;
 
 codeBlock: CODE_BLOCK;
-
 variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
     variableDef: varType varName SEMICOLON;
     varName: IDENTIFIER1;
-    varType: IDENTIFIER1;
+    varType: identifier1;
 
 operatorBlock: '[' 'operators' ']' '=' '{' (operatorNameOnly | operatorDef)* '}' ;
     operatorNameOnly: operatorName SEMICOLON;

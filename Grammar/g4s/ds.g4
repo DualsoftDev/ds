@@ -117,7 +117,7 @@ LBRACE: '{';
 RBRACE: '}';
 LPARENTHESIS: '(';
 RPARENTHESIS: ')';
-EQ: '=';
+EQ: '==';
 SEMICOLON: ';';
 DOT: '.';
 TILDE: '~';
@@ -199,10 +199,10 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
-        : LBRACE (  flowBlock | jobBlock | commandBlock | operatorBlock | loadDeviceBlock | loadExternalSystemBlock
+        : '{' (  flowBlock | jobBlock | commandBlock | operatorBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
                     | variableBlock )*
-          RBRACE       // identifier1Listing|parenting|causal|call
+          '}'       // identifier1Listing|parenting|causal|call
           (SEMICOLON)?;
     systemName:identifier1;
 
@@ -229,14 +229,14 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
         }
     }
  */
-propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disableBlock)* RBRACE;
-    safetyBlock: '[' 'safety' ']' EQ LBRACE (safetyDef)* RBRACE;    
-        safetyDef: safetyKey EQ LBRACE safetyValues RBRACE;
+propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableBlock)* '}';
+    safetyBlock: '[' 'safety' ']' '=' '{' (safetyDef)* '}';    
+        safetyDef: safetyKey '=' '{' safetyValues '}';
             // Real|Call = { ((Real|Call);)* }
             safetyKey: identifier23;
             safetyValues: identifier23 (SEMICOLON identifier23)* (SEMICOLON)?;
 
-    layoutBlock: '[' 'layouts' fileSpec? ']' '=' LBRACE (positionDef)* RBRACE;
+    layoutBlock: '[' 'layouts' fileSpec? ']' '=' '{' (positionDef)* '}';
         positionDef: deviceOrApiName '=' xywh;
             deviceOrApiName: identifier12;
             xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEMICOLON)?;
@@ -244,23 +244,23 @@ propsBlock: '[' 'prop' ']' EQ LBRACE (safetyBlock|layoutBlock|finishBlock|disabl
             y: INTEGER;
             w: INTEGER;
             h: INTEGER;
-    finishBlock: '[' 'finish' ']' '=' LBRACE (finishListing)* RBRACE;
+    finishBlock: '[' 'finish' ']' '=' '{' (finishListing)* '}';
         finishTarget: identifier2;
         finishListing: finishTarget (SEMICOLON finishTarget)* (SEMICOLON)?;
-    disableBlock: '[' 'disable' ']' '=' LBRACE (disableListing)* RBRACE;
+    disableBlock: '[' 'disable' ']' '=' '{' (disableListing)* '}';
         disableTarget: identifier23;
         disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;
 
 flowBlock
-    : '[' 'flow' ']' identifier1 '=' LBRACE (
+    : '[' 'flow' ']' identifier1 '=' '{' (
         causal | parentingBlock 
         | identifier1Listing | identifier1Listings 
         | identifier1Operator
         | aliasBlock
         // | safetyBlock
-        )* RBRACE  (SEMICOLON)?   // |flowTask|callDef
+        )* '}'  (SEMICOLON)?   // |flowTask|callDef
     ;
-    parentingBlock: identifier1 EQ LBRACE (identifier1Listings | causal | identifier1Commands )* RBRACE;
+    parentingBlock: identifier1 '=' '{' (identifier1Listings | causal | identifier1Commands )* '}';
 
     identifier1Listing: identifier1  SEMICOLON;     // A;
     identifier1Listings: (identifier1 (COMMA identifier1)*)?  SEMICOLON;     // A, B, C;
@@ -268,9 +268,9 @@ flowBlock
         
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
-    aliasBlock: '[' 'aliases' ']' '=' LBRACE (aliasListing)* RBRACE;
+    aliasBlock: '[' 'aliases' ']' '=' '{' (aliasListing)* '}';
         aliasListing:
-            aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE (';')?
+            aliasDef '=' '{' (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ '}' (';')?
             ;
         aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
         aliasMnemonic: identifier1;
@@ -296,9 +296,9 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
     
 
 
-jobBlock: '[' 'jobs' ']' '=' LBRACE (callListing|linkListing)* RBRACE;
+jobBlock: '[' 'jobs' ']' '=' '{' (callListing|linkListing)* '}';
     callListing:
-        jobName '=' LBRACE (callApiDef|funcCall)? ( ';' callApiDef|funcCall)* (';')+ RBRACE (SEMICOLON)?;
+        jobName '=' '{' (callApiDef|funcCall)? ( ';' callApiDef|funcCall)* (';')+ '}' (SEMICOLON)?;
     linkListing:
         jobName '=' interfaceLink SEMICOLON;
     jobName: etcName1;
@@ -314,11 +314,11 @@ funcCall: identifier1Operator | identifier1Command;
 
 
 interfaceBlock
-    : '[' 'interfaces' ']' '=' LBRACE (interfaceListing)* RBRACE;
+    : '[' 'interfaces' ']' '=' '{'  (interfaceListing)* '}';
     interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
 
     // A23 = { M.U ~ S.S3U ~ _ }
-    interfaceDef: interfaceName EQ LBRACE (serPhrase|linkPhrase) RBRACE;
+    interfaceDef: interfaceName '=' '{' (serPhrase|linkPhrase) '}';
     interfaceName: identifier1;
     serPhrase: callComponents TILDE callComponents (TILDE callComponents)?;
         callComponents: identifier123CNF*;
@@ -327,30 +327,30 @@ interfaceBlock
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
 categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmgBlock|testBlock|homeBlock|readyBlock|idleBlock|originBlock;
-    autoBlock      :'[' ('a_in'|'a') ']' EQ categoryBlock;
-    manualBlock    :'[' ('m_in'|'m') ']' EQ categoryBlock;
-    driveBlock     :'[' ('d_in'|'d') ']' EQ categoryBlock;
-    errorOrEmgBlock:'[' ('e_in'|'e') ']' EQ categoryBlock;
-    pauseBlock     :'[' ('p_in'|'p') ']' EQ categoryBlock;
-    clearBlock     :'[' ('c_in'|'c') ']' EQ categoryBlock;
-    testBlock      :'[' ('t_in'|'t') ']' EQ categoryBlock;
-    homeBlock      :'[' ('h_in'|'h') ']' EQ categoryBlock;
-    readyBlock     :'[' ('r_in'|'r') ']' EQ categoryBlock;
-    idleBlock      :'[' ('i_in'|'i') ']' EQ categoryBlock;
-    originBlock    :'[' ('o_in'|'o') ']' EQ categoryBlock;
+    autoBlock      :'[' ('a_in'|'a') ']' '=' categoryBlock;
+    manualBlock    :'[' ('m_in'|'m') ']' '=' categoryBlock;
+    driveBlock     :'[' ('d_in'|'d') ']' '=' categoryBlock;
+    errorOrEmgBlock:'[' ('e_in'|'e') ']' '=' categoryBlock;
+    pauseBlock     :'[' ('p_in'|'p') ']' '=' categoryBlock;
+    clearBlock     :'[' ('c_in'|'c') ']' '=' categoryBlock;
+    testBlock      :'[' ('t_in'|'t') ']' '=' categoryBlock;
+    homeBlock      :'[' ('h_in'|'h') ']' '=' categoryBlock;
+    readyBlock     :'[' ('r_in'|'r') ']' '=' categoryBlock;
+    idleBlock      :'[' ('i_in'|'i') ']' '=' categoryBlock;
+    originBlock    :'[' ('o_in'|'o') ']' '=' categoryBlock;
     
-    categoryBlock: LBRACE (() | (hwSysItemDef)*) RBRACE;
+    categoryBlock: '{' (() | (hwSysItemDef)*) '}';
   
-    hwSysItemDef:  hwSysItemNameAddr '=' LBRACE hwSysItems? RBRACE (SEMICOLON)?;
+    hwSysItemDef:  hwSysItemNameAddr '=' '{' hwSysItems? '}' (SEMICOLON)?;
     hwSysItems: (flowName|funcCall)? ( ';' flowName|funcCall)* (';')+; 
     hwSysItemNameAddr: hwSysItemName addressInOut;
     hwSysItemName: identifier12;
 
     flowName: identifier1;
 
-buttonBlock: '[' 'buttons' ']' '=' LBRACE (categoryBlocks)* RBRACE;
-lampBlock: '[' 'lamps' ']' '=' LBRACE (categoryBlocks)* RBRACE;
-conditionBlock: '[' 'conditions' ']' '=' LBRACE (categoryBlocks)* RBRACE;
+buttonBlock: '[' 'buttons' ']' '=' '{' (categoryBlocks)* '}';
+lampBlock: '[' 'lamps' ']' '=' '{' (categoryBlocks)* '}';
+conditionBlock: '[' 'conditions' ']' '=' '{' (categoryBlocks)* '}';
 
 // B.F1 > Set1F > T.A21;
 causal: causalPhrase SEMICOLON;

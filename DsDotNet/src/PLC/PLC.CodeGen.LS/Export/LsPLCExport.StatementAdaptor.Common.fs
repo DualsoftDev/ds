@@ -11,14 +11,14 @@ open PLC.CodeGen.Common
     - 사칙연산 함수(Add, ..) 의 입력은 XGI 에서 전원선으로부터 연결이 불가능한 반면,
       ds 문법으로 작성시에는 expression 을 이용하기 때문에 직접 호환이 불가능하다.
       * add(<expr1>, <expr2>) 를
-            tmp1 := <expr1> 및 tmp2 := <expr2> 와 같이
+            tmp1 = <expr1> 및 tmp2 = <expr2> 와 같이
             . 임시 변수를 생성해서 assign rung 을 만들고
             . 임시 변수를 add 함수의 입력 argument 에 tag 로 작성하도록 한다.
 
     - 임의의 rung 에 사칙연산 함수가 포함되면, 해당 부분만 잘라서 임시 변수에 저장하고 그 값을 이용해야 한다.
-      * e.g $result := ($t1 + $t2) > 3
-            . $tmp := $t1 + $t2
-            . $result := $tmp > 3
+      * e.g $result = ($t1 + $t2) > 3
+            . $tmp = $t1 + $t2
+            . $result = $tmp > 3
 
     - Timer 나 Counter 의 Rung In Condition 은 복수개이더라도 전원선 연결이 가능하다.
       * 임시 변수 없이 expression 을 그대로 전원선 연결해서 그리면 된다.
@@ -259,7 +259,7 @@ module XgxExpressionConvertorModule =
         | ">=" -> "GE"
         | "<" -> "LT"
         | "<=" -> "LE"
-        | "=" -> "EQ"
+        | "==" -> "EQ"
         | "!=" -> "NE"
         | "+" -> "ADD"
         | "-" -> "SUB"
@@ -304,7 +304,7 @@ module XgxExpressionConvertorModule =
 
         let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
             match functionExpression.FunctionName with
-            | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "+" | "-" | "*" | "/" as op) -> //when level <> 0 ->
+            | Some(">" | ">=" | "<" | "<=" | "==" | "!=" | "+" | "-" | "*" | "/" as op) -> //when level <> 0 ->
                 let args = functionExpression.FunctionArguments
                 let var:IStorage =
                     expStore |> Option.defaultWith (fun () -> 
@@ -439,7 +439,7 @@ module XgxExpressionConvertorModule =
             | _ ->
                 NotApplied(exp.WithNewFunctionArguments newArgs)
 
-        | Some(">" | ">=" | "<" | "<=" | "=" | "!=" | "&&" | "||" as op) ->
+        | Some(">" | ">=" | "<" | "<=" | "==" | "!=" | "&&" | "||" as op) ->
             let newArgs = binaryToNary prjParam { augmentParams with Exp = exp } [ op ] op
             NotApplied(exp.WithNewFunctionArguments newArgs)
 
@@ -565,7 +565,7 @@ module XgxExpressionConvertorModule =
                         Exp = exp
                         ExpStore = None}
 
-                // todo : "sum := tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
+                // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some("+" | "-" | "*" | "/" as op) ->
 

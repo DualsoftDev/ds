@@ -51,7 +51,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $result := $nn1 + $nn2 * $nn3 &gt; 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s
+                                        [0] $result = $nn1 + $nn2 * $nn3 &gt; 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

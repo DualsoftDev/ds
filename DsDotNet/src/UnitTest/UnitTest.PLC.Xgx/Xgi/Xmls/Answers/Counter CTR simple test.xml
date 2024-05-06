@@ -63,7 +63,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $myCTR.RST := $cd
+                                        [1] $myCTR.RST = $cd
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -651,8 +651,8 @@ namespace Engine
         mv1dn = { A.""-""(%I301, %Q301); }
     }
     [operators] = {
-        OP1 = #{$mv1up = true;}
-        OP2 = #{$mv1dn = true;}
+        OP1 = #{$mv1up == true;}
+        OP2 = #{$mv1dn == true;}
     }
     [device file=""cylinder.ds""] A; 
 }
@@ -674,8 +674,8 @@ namespace Engine
         Int32 v0;
     }
     [commands] = {
-        CMD1 = #{$v0 := 1;}
-        CMD2 = #{$v0 := 2;}
+        CMD1 = #{$v0 = 1;}
+        CMD2 = #{$v0 = 2;}
     }
     [device file=""cylinder.ds""] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
 }

@@ -39,14 +39,15 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="9">
+                    <Symbols Count="10">
                         <Symbol Name="b1" Comment="" Device="M" DevicePos="128" Type="BIT"/>
                         <Symbol Name="b2" Comment="" Device="M" DevicePos="129" Type="BIT"/>
                         <Symbol Name="b3" Comment="" Device="M" DevicePos="130" Type="BIT"/>
-                        <Symbol Name="b5" Comment="" Device="M" DevicePos="131" Type="BIT"/>
-                        <Symbol Name="b6" Comment="" Device="M" DevicePos="132" Type="BIT"/>
-                        <Symbol Name="b7" Comment="" Device="M" DevicePos="133" Type="BIT"/>
-                        <Symbol Name="b8" Comment="" Device="M" DevicePos="134" Type="BIT"/>
+                        <Symbol Name="b4" Comment="" Device="M" DevicePos="131" Type="BIT"/>
+                        <Symbol Name="b5" Comment="" Device="M" DevicePos="132" Type="BIT"/>
+                        <Symbol Name="b6" Comment="" Device="M" DevicePos="133" Type="BIT"/>
+                        <Symbol Name="b7" Comment="" Device="M" DevicePos="134" Type="BIT"/>
+                        <Symbol Name="b8" Comment="" Device="M" DevicePos="135" Type="BIT"/>
                         <Symbol Name="eu" Comment="" Device="M" DevicePos="4" Type="WORD"/>
                         <Symbol Name="pi" Comment="" Device="M" DevicePos="0" Type="WORD"/>
                     </Symbols>
@@ -120,11 +121,11 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [4] bool b3 = $pi = $eu
+                                        [4] bool b3 = $pi == $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="12289" Param="L=,pi,eu"/>
+                                    <Element ElementType="33" Coordinate="12289" Param="L==,pi,eu"/>
                                     <Element ElementType="2" Coordinate="12298" Param="90"/>
                                     <Element ElementType="14" Coordinate="12382">
                                         M00082
@@ -132,11 +133,11 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [5] bool b5 = $pi != $eu
+                                        [5] bool b4 = $pi == $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="14337" Param="L&lt;&gt;,pi,eu"/>
+                                    <Element ElementType="33" Coordinate="14337" Param="L==,pi,eu"/>
                                     <Element ElementType="2" Coordinate="14346" Param="90"/>
                                     <Element ElementType="14" Coordinate="14430">
                                         M00083
@@ -144,7 +145,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
-                                        [6] bool b6 = $pi != $eu
+                                        [6] bool b5 = $pi != $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -156,11 +157,11 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="17409">
-                                        [7] bool b7 = $pi &gt;= $eu
+                                        [7] bool b6 = $pi != $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="18433" Param="L&gt;=,pi,eu"/>
+                                    <Element ElementType="33" Coordinate="18433" Param="L&lt;&gt;,pi,eu"/>
                                     <Element ElementType="2" Coordinate="18442" Param="90"/>
                                     <Element ElementType="14" Coordinate="18526">
                                         M00085
@@ -168,19 +169,31 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [8] bool b8 = $pi &lt;= $eu
+                                        [8] bool b7 = $pi &gt;= $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="20481" Param="L&lt;=,pi,eu"/>
+                                    <Element ElementType="33" Coordinate="20481" Param="L&gt;=,pi,eu"/>
                                     <Element ElementType="2" Coordinate="20490" Param="90"/>
                                     <Element ElementType="14" Coordinate="20574">
                                         M00086
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="22529" Param="90"/>
-                                    <Element ElementType="33" Coordinate="22622" Param="END">
+                                    <Element ElementType="63" Coordinate="21505">
+                                        [9] bool b8 = $pi &lt;= $eu
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="33" Coordinate="22529" Param="L&lt;=,pi,eu"/>
+                                    <Element ElementType="2" Coordinate="22538" Param="90"/>
+                                    <Element ElementType="14" Coordinate="22622">
+                                        M00087
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="24577" Param="90"/>
+                                    <Element ElementType="33" Coordinate="24670" Param="END">
                                         END
                                     </Element>
                                 </Rung>

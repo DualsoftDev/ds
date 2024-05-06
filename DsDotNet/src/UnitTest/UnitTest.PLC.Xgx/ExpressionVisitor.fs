@@ -15,7 +15,7 @@ type ExpressionVisitorTest() =
         bool cond1 = false;
         bool result = false;
 
-        $result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+        $result = $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
     """
 
     let getExpression (statment:Statement) =
@@ -123,12 +123,12 @@ type ExpressionVisitorTest() =
         Storage: _t6_SUB
         Literal: 5s"""
         
-        let statementsAnswer = """_t1_MUL := $nn2 * $nn3
-_t2_ADD := $nn1 + $_t1_MUL
-_t3_MUL := $nn5 * $nn6
-_t4_DIV := $_t3_MUL / $nn7
-_t5_ADD := $nn4 + $_t4_DIV
-_t6_SUB := $_t5_ADD - $nn8"""
+        let statementsAnswer = """_t1_MUL = $nn2 * $nn3
+_t2_ADD = $nn1 + $_t1_MUL
+_t3_MUL = $nn5 * $nn6
+_t4_DIV = $_t3_MUL / $nn7
+_t5_ADD = $nn4 + $_t4_DIV
+_t6_SUB = $_t5_ADD - $nn8"""
 
         let storagesAnswer = """_t1_MUL = $nn2 * $nn3
 _t2_ADD = $nn1 + $_t1_MUL

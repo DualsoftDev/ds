@@ -18,7 +18,7 @@ module rec ExpressionSerializeModule =
 
                 (["<<" ; "<<<" ; ">>" ; ">>>"], i); incr()
                 ([">" ; ">=" ; "<" ; "<=";], i)   ; incr()
-                (["=" ; "!=";], i)                ; incr()
+                (["==" ; "!=";], i)                ; incr()
                 (["&" ; "&&&";], i)               ; incr()   // bitwise and   (C++/F# style)
                 (["^" ; "^^^";], i)               ; incr()   // bitwise xor
                 (["|" ; "|||";], i)               ; incr()   // bitwise or
@@ -39,7 +39,7 @@ module rec ExpressionSerializeModule =
                 "+"; "-"
                 "<<" ; "<<<" ; ">>" ; ">>>"
                 ">" ; ">=" ; "<" ; "<=";
-                "=" ; "!=";
+                "==" ; "!=";
                 "&" ; "&&&";   // bitwise and   (C++/F# style)
                 "^" ; "^^^";   // bitwise xor
                 "|" ; "|||";   // bitwise or

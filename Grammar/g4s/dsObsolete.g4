@@ -9,12 +9,12 @@ import dsLexer;
 }
  */
 
-cpus: '[' 'cpus' ']' (identifier1)? '=' cpusBlock;
+cpus: '[' 'cpus' ']' (identifier1)? '==' cpusBlock;
 cpusBlock
     : LBRACE (cpu)* RBRACE
     ;
 
-cpu: cpuProp identifier1 '=' cpuBlock;    // [cpu] Cpu = {..}
+cpu: cpuProp identifier1 '==' cpuBlock;    // [cpu] Cpu = {..}
 cpuProp: '[' 'cpu' ']';
 cpuBlock
     : LBRACE flowPath (SEIMCOLON flowPath)* SEIMCOLON? RBRACE
@@ -55,7 +55,7 @@ ACCESS_SRE: ('accsre'|'accsr'|'accre'|'accse'|'accs'|'accr'|'acce');
 /*
 
 sysTask
-    : taskProp id '=' LBRACE (listing|call)* RBRACE
+    : taskProp id '==' LBRACE (listing|call)* RBRACE
     ;
 taskProp: '[' 'task' ']';
 

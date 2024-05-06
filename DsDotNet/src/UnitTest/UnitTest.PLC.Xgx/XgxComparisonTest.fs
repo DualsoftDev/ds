@@ -19,21 +19,21 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             uint8 unn2 = 2uy;
             bool b1 = $nn1 > $nn2;
             bool b2 = $nn1 < $nn2;
-            bool b3 = $nn1 = $nn2;
-            //bool b4 = $nn1 == $nn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool b3 = $nn1 == $nn2;
+            bool b4 = $nn1 == $nn2;   
             bool b5 = $nn1 != $nn2;     // 확장 notation. "<>"
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
             bool b9 = 1s > 2s;
             bool b10 = 1y < 2y;
-            bool b11 = 1y = 2y;
+            bool b11 = 1y == 2y;
             bool b12 = 1y <> 2y;
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
-            bool ub3 = $unn1 = $unn2;
-            //bool ub4 = $unn1 == $unn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool ub3 = $unn1 == $unn2;
+            bool ub4 = $unn1 == $unn2;
             bool ub5 = $unn1 != $unn2;     // 확장 notation. "<>"
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
@@ -41,7 +41,7 @@ type XgxComparisonTest(xgx:PlatformTarget) =
 
             bool ub9 = 1uy > 2uy;
             bool ub10 = 1uy < 2uy;
-            bool ub11 = 1uy = 2uy;
+            bool ub11 = 1uy == 2uy;
             bool ub12 = 1uy <> 2uy;
 """
         let statements = parseCodeForWindows storages code
@@ -70,29 +70,29 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             uint16 unn2 = 2us;
             bool b1 = $nn1 > $nn2;
             bool b2 = $nn1 < $nn2;
-            bool b3 = $nn1 = $nn2;
-            //bool b4 = $nn1 == $nn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool b3 = $nn1 == $nn2;
+             bool b4 = $nn1 == $nn2;
             bool b5 = $nn1 != $nn2;     // 확장 notation. "<>"
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
             bool b9 = 1s > 2s;
             bool b10 = 1s < 2s;
-            bool b11 = 1s = 2s;
+            bool b11 = 1s == 2s;
             bool b12 = 1s <> 2s;
 
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
-            bool ub3 = $unn1 = $unn2;
-            //bool ub4 = $unn1 == $unn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool ub3 = $unn1 == $unn2;
+             bool ub4 = $unn1 == $unn2;  
             bool ub5 = $unn1 != $unn2;     // 확장 notation. "<>"
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
             bool ub8 = $unn1 <= $unn2;
             bool ub9 = 1us > 2us;
             bool ub10 = 1us < 2us;
-            bool ub11 = 1us = 2us;
+            bool ub11 = 1us == 2us;
             bool ub12 = 1us <> 2us;
 """
         let statements = parseCodeForWindows storages code
@@ -116,28 +116,28 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             uint32 unn2 = 2u;
             bool b1 = $nn1 > $nn2;
             bool b2 = $nn1 < $nn2;
-            bool b3 = $nn1 = $nn2;
-            //bool b4 = $nn1 == $nn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool b3 = $nn1 == $nn2;
+            bool b4 = $nn1 == $nn2;   
             bool b5 = $nn1 != $nn2;     // 확장 notation. "<>"
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
             bool b9 = 1 > 2;
             bool b10 = 1 < 2;
-            bool b11 = 1 = 2;
+            bool b11 = 1 == 2;
             bool b12 = 1 <> 2;
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
-            bool ub3 = $unn1 = $unn2;
-            //bool ub4 = $unn1 == $unn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool ub3 = $unn1 == $unn2;
+            bool ub4 = $unn1 == $unn2;  
             bool ub5 = $unn1 != $unn2;     // 확장 notation. "<>"
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
             bool ub8 = $unn1 <= $unn2;
             bool ub9 = 1 > 2;
             bool ub10 = 1 < 2;
-            bool ub11 = 1 = 2;
+            bool ub11 = 1 == 2;
             bool ub12 = 1 <> 2;
 """
         let statements = parseCodeForWindows storages code
@@ -163,28 +163,28 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             uint64 unn2 = 2UL;
             bool b1 = $nn1 > $nn2;
             bool b2 = $nn1 < $nn2;
-            bool b3 = $nn1 = $nn2;
-            //bool b4 = $nn1 == $nn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool b3 = $nn1 == $nn2;
+            bool b4 = $nn1 == $nn2;   
             bool b5 = $nn1 != $nn2;     // 확장 notation. "<>"
             bool b6 = $nn1 <> $nn2;
             bool b7 = $nn1 >= $nn2;
             bool b8 = $nn1 <= $nn2;
             bool b9 = 1L > 2L;
             bool b10 = 1L < 2L;
-            bool b11 = 1L = 2L;
+            bool b11 = 1L == 2L;
             bool b12 = 1L <> 2L;
 
             bool ub1 = $unn1 > $unn2;
             bool ub2 = $unn1 < $unn2;
-            bool ub3 = $unn1 = $unn2;
-            //bool ub4 = $unn1 == $unn2;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool ub3 = $unn1 == $unn2;
+            bool ub4 = $unn1 == $unn2;   
             bool ub5 = $unn1 != $unn2;     // 확장 notation. "<>"
             bool ub6 = $unn1 <> $unn2;
             bool ub7 = $unn1 >= $unn2;
             bool ub8 = $unn1 <= $unn2;
             bool ub9 = 1UL > 2UL;
             bool ub10 = 1UL < 2UL;
-            bool ub11 = 1UL = 2UL;
+            bool ub11 = 1UL == 2UL;
             bool ub12 = 1UL <> 2UL;
 """
         let statements = parseCodeForWindows storages code
@@ -209,9 +209,9 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             double eu = 2.718;
             bool b1 = $pi > $eu;
             bool b2 = $pi < $eu;
-            bool b3 = $pi = $eu;
-            //bool b4 = $pi == $eu;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
-            bool b5 = $pi != $eu;     // 확장 notation. "<>"
+            bool b3 = $pi == $eu;
+            bool b4 = $pi == $eu;   
+                  bool b5 = $pi != $eu;     // 확장 notation. "<>"
             bool b6 = $pi <> $eu;
             bool b7 = $pi >= $eu;
             bool b8 = $pi <= $eu;
@@ -237,8 +237,8 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             single eu = 2.718f;
             bool b1 = $pi > $eu;
             bool b2 = $pi < $eu;
-            bool b3 = $pi = $eu;
-            //bool b4 = $pi == $eu;   // equality check 에 "==" 는 지원 안함.  ":=" 사용부분과 헷갈림
+            bool b3 = $pi == $eu;
+            bool b4 = $pi == $eu;   
             bool b5 = $pi != $eu;     // 확장 notation. "<>"
             bool b6 = $pi <> $eu;
             bool b7 = $pi >= $eu;

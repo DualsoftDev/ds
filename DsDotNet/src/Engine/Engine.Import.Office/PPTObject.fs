@@ -447,7 +447,7 @@ module PPTObjectModule =
 
         member x.JobName = pageTitle+"_"+name.Replace(".", "_")
         member x.OperatorCode = 
-                $"${x.JobName} = true;"
+                $"${x.JobName} == true;"
 
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 

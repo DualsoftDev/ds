@@ -29,8 +29,8 @@ type XgxExtendedTypesTest(xgx:PlatformTarget) =
             double myDoubleSum2 = 0.0;
             double myDoubleSum3 = $mypi + $myeuler;
             double myDoubleSum4 = 3.14 + 2.718;
-            $myDoubleSum1 := $myDoubleSum2;
-            $myDoubleSum2 := $myDoubleSum1 + $myDoubleSum3;
+            $myDoubleSum1 = $myDoubleSum2;
+            $myDoubleSum2 = $myDoubleSum1 + $myDoubleSum3;
 """
         let code =
             match xgx with

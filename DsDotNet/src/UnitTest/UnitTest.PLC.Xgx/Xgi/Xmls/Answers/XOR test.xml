@@ -44,7 +44,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $b3 := $b1 != $b2
+                                        [0] $b3 = $b1 != $b2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

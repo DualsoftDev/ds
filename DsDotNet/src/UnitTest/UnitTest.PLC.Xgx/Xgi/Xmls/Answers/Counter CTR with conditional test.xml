@@ -88,7 +88,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="8193">
-                                        [1] $xx7 := ($cd1 &amp;&amp; $cd2 || $cd3 || ($res0 || $res1) &amp;&amp; $res2) &amp;&amp; $cd1
+                                        [1] $xx7 = ($cd1 &amp;&amp; $cd2 || $cd3 || ($res0 || $res1) &amp;&amp; $res2) &amp;&amp; $cd1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

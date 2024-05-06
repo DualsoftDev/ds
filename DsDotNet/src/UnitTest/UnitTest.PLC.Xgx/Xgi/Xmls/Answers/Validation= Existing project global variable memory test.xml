@@ -138,7 +138,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10
+                                        sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -406,7 +406,7 @@ XckU4UJCOYh5CA==
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $xx1 := $xx0
+                                        [0] $xx1 = $xx0
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -452,7 +452,7 @@ XckU4UJCOYh5CA==
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [1] $yy1 := $yy0
+                                        [1] $yy1 = $yy0
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -498,7 +498,7 @@ XckU4UJCOYh5CA==
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [2] $zz1 := $zz0
+                                        [2] $zz1 = $zz0
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

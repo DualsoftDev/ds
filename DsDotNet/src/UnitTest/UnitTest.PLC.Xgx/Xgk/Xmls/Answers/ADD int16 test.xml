@@ -119,7 +119,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] $sum := $nn1 + $nn2
+                                        [4] $sum = $nn1 + $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -131,7 +131,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
-                                        [5] $sum2 := $sum
+                                        [5] $sum2 = $sum
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -191,7 +191,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="30721">
-                                        [10] $usum := $unn1 + $unn2
+                                        [10] $usum = $unn1 + $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -203,7 +203,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="32769">
-                                        [11] $usum2 := $usum
+                                        [11] $usum2 = $usum
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

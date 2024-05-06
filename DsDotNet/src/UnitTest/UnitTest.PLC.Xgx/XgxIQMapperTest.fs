@@ -20,13 +20,13 @@ type IQMapperTest(xgx:PlatformTarget) =
                 bool qAvante = false;
                 bool qSonata = false;
                 
-                $QCar := $qAvante || $qSonata;
+                $QCar = $qAvante || $qSonata;
 
                 bool iSonata = false;
                 bool iAvante = false;
                 
-                $iAvante := $ICar;
-                $iSonata := $ICar;
+                $iAvante = $ICar;
+                $iSonata = $ICar;
                 """
                 let iq = if xgx = XGI then """bool QCar = createTag("%QX1.0.1", false);bool ICar = createTag("%IX1.0.1", false);""" 
                           elif xgx = XGK then """bool QCar = createTag("P0000F", false);bool ICar = createTag("P0010F", false);"""

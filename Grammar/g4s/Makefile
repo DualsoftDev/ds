@@ -1,7 +1,7 @@
 .ONESHELL: # Applies to every targets in the file!
 
-jar := antlr4-4.13.0-complete.jar
-jarPath := /usr/local/lib/$(jar)
+jar = antlr4-4.13.0-complete.jar
+jarPath = /usr/local/lib/$(jar)
 
 antlr4=java -Xmx500M -cp $(jarPath) org.antlr.v4.Tool
 grun=java -Xmx500M -cp $(jarPath):. org.antlr.v4.gui.TestRig
@@ -85,7 +85,7 @@ xxx:
 	dotnet build
 	dotnet run
 
-antlrjar := https://www.antlr.org/download/$(jar)
+antlrjar = https://www.antlr.org/download/$(jar)
 java-install:
 	# choco install python
 	pip install antlr4-tools

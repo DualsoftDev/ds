@@ -6,7 +6,7 @@
 // file:   (functionDecl | varDecl)+ ;
 
 // varDecl
-//     :   type ID ('=' expr)? ';'
+//     :   type ID ('==' expr)? ';'
 //     ;
 // type:   'float' | 'int' | 'void' ; // user-defined types
 
@@ -25,7 +25,7 @@
 //     |   varDecl
 //     |   'if' expr 'then' stat ('else' stat)?
 //     |   'return' expr? ';' 
-//     |   expr '=' expr ';' // assignment
+//     |   expr '==' expr ';' // assignment
 //     |   expr ';'          // func call
 //     ;
 

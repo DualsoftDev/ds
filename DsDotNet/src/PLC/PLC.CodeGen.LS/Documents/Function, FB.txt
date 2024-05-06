@@ -7,35 +7,35 @@
     - IEC 표준 ST function block 정의
         https://www.fernhillsoftware.com/help/iec-61131/common-elements/program-unit/function-block.html
 
-        function-block ::=
+        function-block =
             FUNCTION_BLOCK function-block-name
             { variable-declaration }
             [ function-block-code ]
             END_FUNCTION_BLOCK
 
-        function-block-code ::= [ structured-text | instruction-list ]
+        function-block-code = [ structured-text | instruction-list ]
 
         (* Rising edge detector *)
         Function_Block R_TRIG
 	        Var_Input CLK : Bool; End_Var
 	        Var_Output Q : Bool; End_Var
-	        Var M : Bool := False; End_Var
+	        Var M : Bool = False; End_Var
 
-	        Q := CLK AND NOT M;
-	        M := CLK;
+	        Q = CLK AND NOT M;
+	        M = CLK;
         End_Function_Block
 
 
 
-        function ::=
+        function =
           FUNCTION function-name [ : return-type ]
             { variable-declaration }
             [ function-code ]
           END_FUNCTION
 
-        return-type ::= [ Elementary Data Type | Derived Data Type ]
+        return-type = [ Elementary Data Type | Derived Data Type ]
 
-        function-code ::= structured-text
+        function-code = structured-text
 
         (* Example *)
 
@@ -48,15 +48,15 @@
 	        end_var
 
 	        (* Calculate the mean *)
-	        Mean := (v1 + v2 + v3 + v4) / 4;
+	        Mean = (v1 + v2 + v3 + v4) / 4;
 
 	        (* Calculate the standard deviation *)
-	        SumOfSquares := (v1 - Mean) ** 2 +
+	        SumOfSquares = (v1 - Mean) ** 2 +
 				        (v2 - Mean) ** 2 +
 				        (v3 - Mean) ** 2 +
 				        (v4 - Mean) ** 2;
 
-	        CalcStdDev := sqrt( SumOfSquares / 4 );
+	        CalcStdDev = sqrt( SumOfSquares / 4 );
         End_Function
 
 
@@ -101,18 +101,18 @@ define (* functionBlock *) realfb {
     }
     // statements ...
 
-	out1 := <expr>;
+	out1 = <expr>;
     // var_xxx 사용
 }
 
 define (* function *) BOOL myfunction {
     variables {
     }
-    myfunction := <expr>;
+    myfunction = <expr>;
 }
 
 // fb instance 선언: fb name 이 하나의 type 이 되어야 한다.
-realfb real1 = create_fb_instance(realfb, in1:=true, ...)
+realfb real1 = create_fb_instance(realfb, in1=true, ...)
 bool x = real1.out1 && real1.out2;
 
 

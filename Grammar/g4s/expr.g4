@@ -48,11 +48,11 @@ toplevels: toplevel (';' toplevel)* ';';
 
 statement: assign | varDecl | timerDecl | counterDecl | copyStatement;
     assign: normalAssign | risingAssign | fallingAssign;
-    normalAssign: '$' storageName ':=' expr;
-    // risingAssign: 'rising' '(' '$' storageName ')' ':=' expr;
-    // fallingAssign: 'falling' '(' '$' storageName ')' ':=' expr;
-    risingAssign: 'ppulse' '(' '$' storageName ')' ':=' expr;
-    fallingAssign: 'npulse' '(' '$' storageName ')' ':=' expr;
+    normalAssign: '$' storageName '=' expr;
+    // risingAssign: 'rising' '(' '$' storageName ')' '==' expr;
+    // fallingAssign: 'falling' '(' '$' storageName ')' '==' expr;
+    risingAssign: 'ppulse' '(' '$' storageName ')' '==' expr;
+    fallingAssign: 'npulse' '(' '$' storageName ')' '==' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
         storageName: IDENTIFIER ('.' IDENTIFIER )*;
     type:
@@ -119,7 +119,7 @@ expr: functionName '(' arguments? ')'                 # FunctionCallExpr    // f
     binaryOperatorAdditive:'+'|'-';
     binaryOperatorBitwiseShift: '<<' | '<<<' | '>>' | '>>>';   // bitwise shift
     binaryOperatorRelational:'>' | '>=' | '<' | '<=';
-    binaryOperatorEquality:'=' | '!=' | '<>';
+    binaryOperatorEquality:'==' | '!=' | '<>';
     binaryOperatorBitwiseAnd: '&' | '&&&';   // bitwise and   (C++/F# style)
     binaryOperatorBitwiseXor: '^' | '^^^';   // bitwise xor
     binaryOperatorBitwiseOr: '|' | '|||';   // bitwise or
@@ -186,7 +186,7 @@ TIMES : '*' ;
 DIV : '/' ;
 GT : '>' ;
 LT : '<' ;
-EQ : '=' ;
+EQ : '==' ;
 POINT : '.' ;
 POW : '^' ;
 

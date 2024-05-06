@@ -26,7 +26,7 @@ test:qstring EOF;
 qstring: STRING_LITERAL EOF;
 
 
-system: '[' SYS ((IP|HOST) '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
+system: '[' SYS ((IP|HOST) '==' host)? ']' systemName '==' (sysBlock|sysCopySpec);    // [sys] Seg = {..}
     sysBlock
         : LBRACE (flow | interfaces | buttons)* RBRACE       // identifier1Listing|parenting|causal|call
         ;
@@ -38,11 +38,11 @@ system: '[' SYS ((IP|HOST) '=' host)? ']' systemName '=' (sysBlock|sysCopySpec);
 //[sys] B = @copy_system(A);
 sysCopySpec: '@' 'copy_system' LPARENTHESIS sourceSystemName RPARENTHESIS SEIMCOLON;
     sourceSystemName:identifier1;
-layouts: '[' 'layouts' ']' (identifier1)? '=' layoutsBlock;
+layouts: '[' 'layouts' ']' (identifier1)? '==' layoutsBlock;
     layoutsBlock
         : LBRACE (positionDef)* RBRACE
         ;
-positionDef: apiPath '=' xywh;
+positionDef: apiPath '==' xywh;
     apiPath: identifier2;
     xywh: LPARENTHESIS x COMMA y (COMMA w COMMA h)? RPARENTHESIS (SEIMCOLON)?;
     x: INTEGER;
@@ -50,11 +50,11 @@ positionDef: apiPath '=' xywh;
     w: INTEGER;
     h: INTEGER;
 
-addresses: '[' 'addresses' ']' (identifier1)? '=' addressesBlock;
+addresses: '[' 'addresses' ']' (identifier1)? '==' addressesBlock;
 addressesBlock
     : LBRACE (addressDef)* RBRACE
     ;
-addressDef: segmentPath '=' address;
+addressDef: segmentPath '==' address;
     segmentPath: identifier3;
     address: LPARENTHESIS (startTag)? COMMA (resetTag)? COMMA (endTag)? RPARENTHESIS (SEIMCOLON)?;
     startTag: TAG_ADDRESS;
@@ -88,14 +88,14 @@ propertyBlock: (addresses|safety|layouts);
 
 
 flow
-    : '[' 'flow' ']' identifier1 '=' LBRACE (
+    : '[' 'flow' ']' identifier1 '==' LBRACE (
         causal | parenting | identifier12Listing
         | alias
         | safety)* RBRACE     // |flowTask|callDef
     ;
 
 interfaces
-    : '[' 'interfaces' ']' (identifier1)? '=' LBRACE (interfaceListing)* RBRACE;
+    : '[' 'interfaces' ']' (identifier1)? '==' LBRACE (interfaceListing)* RBRACE;
     interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
 
     // A23 = { M.U ~ S.S3U ~ _ }
@@ -107,9 +107,9 @@ interfaces
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
 
-alias: '[' 'aliases' ']' (identifier1)? '=' LBRACE (aliasListing)* RBRACE;
+alias: '[' 'aliases' ']' (identifier1)? '==' LBRACE (aliasListing)* RBRACE;
     aliasListing:
-        aliasDef '=' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
+        aliasDef '==' LBRACE (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ RBRACE
         ;
     aliasDef: identifier12;     // {타시스템}.{interface명} or { (my system / flow /) segment 명}
     aliasMnemonic: identifier1;

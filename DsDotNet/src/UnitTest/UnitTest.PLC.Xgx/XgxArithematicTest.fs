@@ -15,7 +15,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 nn1 = 1s;
             int16 nn2 = 2s;
             int16 sum = 0s;
-            $sum := $nn1 + $nn2;
+            $sum = $nn1 + $nn2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -29,15 +29,15 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int8 nn2 = 2y;
             int8 sum = 0y;
             int8 sum2 = 0y;
-            $sum := $nn1 + $nn2;
-            $sum2 := $sum;
+            $sum = $nn1 + $nn2;
+            $sum2 = $sum;
 
             uint8 unn1 = 1uy;
             uint8 unn2 = 2uy;
             uint8 usum = 0uy;
             uint8 usum2 = 0uy;
-            $usum := $unn1 + $unn2;
-            $usum2 := $usum;
+            $usum = $unn1 + $unn2;
+            $usum2 = $usum;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -58,15 +58,15 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 nn2 = 2s;
             int16 sum = 0s;
             int16 sum2 = 0s;
-            $sum := $nn1 + $nn2;
-            $sum2 := $sum;
+            $sum = $nn1 + $nn2;
+            $sum2 = $sum;
 
             uint16 unn1 = 1us;
             uint16 unn2 = 2us;
             uint16 usum = 0us;
             uint16 usum2 = 0us;
-            $usum := $unn1 + $unn2;
-            $usum2 := $usum;
+            $usum = $unn1 + $unn2;
+            $usum2 = $usum;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -79,12 +79,12 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int nn1 = 1;
             int nn2 = 2;
             int sum = 0;
-            $sum := $nn1 + $nn2;
+            $sum = $nn1 + $nn2;
 
             uint unn1 = 1u;
             uint unn2 = 2u;
             uint usum = 0u;
-            $usum := $unn1 + $unn2;
+            $usum = $unn1 + $unn2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -97,7 +97,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int64 nn1 = 1L;
             int64 nn2 = 2L;
             int64 sum = 0L;
-            $sum := $nn1 + $nn2;
+            $sum = $nn1 + $nn2;
             int64 sub = $nn1 - $nn2;
             int64 mul = $nn1 * $nn2;
             int64 div = $nn1 / $nn2;
@@ -105,7 +105,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             uint64 unn1 = 1UL;
             uint64 unn2 = 2UL;
             uint64 usum = 0UL;
-            $usum := $unn1 + $unn2;
+            $usum = $unn1 + $unn2;
             uint64 usub = $unn1 - $unn2;
             uint64 umul = $unn1 * $unn2;
             uint64 udiv = $unn1 / $unn2;
@@ -128,7 +128,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             double nn1 = 1.1;
             double nn2 = 2.2;
             double sum = 0.0;
-            $sum := $nn1 + $nn2;
+            $sum = $nn1 + $nn2;
             double sub = $nn1 - $nn2;
             double mul = $nn1 * $nn2;
             double div = $nn1 / $nn2;
@@ -144,7 +144,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             single nn1 = 1.1f;
             single nn2 = 2.2f;
             single sum = 0.0f;
-            $sum := $nn1 + $nn2;
+            $sum = $nn1 + $nn2;
             single sub = $nn1 - $nn2;
             single mul = $nn1 * $nn2;
             single div = $nn1 / $nn2;
@@ -162,7 +162,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 nn2 = 2s;
             int16 nn3 = 3s;
             int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3;
+            $sum = $nn1 + $nn2 + $nn3;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -175,7 +175,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             generateInt16VariableDeclarations 1 8 + """
 
             int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
+            $sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -186,7 +186,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
+            $sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -198,7 +198,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let code = generateInt16VariableDeclarations 1 10 + """
 
             int16 sum = 0s;
-            $sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
+            $sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
         """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -213,7 +213,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 nn3 = 3s;
 
             int16 quotient = 0s;
-            $quotient := $nn1 / $nn2 / $nn3;
+            $quotient = $nn1 / $nn2 / $nn3;
         """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -223,7 +223,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
-            $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
+            $sum = $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
         """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -236,7 +236,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             bool result = false;
 
-            $result := $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+            $result = $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
         """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()

@@ -28,7 +28,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
                 bool x7 = createTag("%IX0.0.7", false);
                 ton myTon = createXgiTON(2000u, $myQBit0);
-                $x7 := ($x0 || $x1) && $x2;
+                $x7 = ($x0 || $x1) && $x2;
                 """
             | XGK -> """
                 bool myQBit0 = createTag("P0001A", false);
@@ -38,7 +38,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
 
                 bool x7 = createTag("P00004", false);
                 ton myTon = createXgkTON(20u, $myQBit0);
-                $x7 := ($x0 || $x1) && $x2;
+                $x7 = ($x0 || $x1) && $x2;
                 """
             | _ -> failwith "Not supported plc type"
         

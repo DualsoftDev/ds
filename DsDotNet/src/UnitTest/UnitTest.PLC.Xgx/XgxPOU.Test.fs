@@ -23,7 +23,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let code = """
             bool xx0 = false;
             bool xx1 = false;
-            $xx1 := $xx0;
+            $xx1 = $xx0;
 """
         let statements = parseCodeForWindows localStorages code |> map withNoComment
         {
@@ -40,7 +40,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let code = """
             bool yy0 = false;
             bool yy1 = false;
-            $yy1 := $yy0;
+            $yy1 = $yy0;
 """
         let statements = parseCodeForWindows storages code|> map withNoComment
         {
@@ -58,7 +58,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let code = """
             bool zz0 = false;
             bool zz1 = false;
-            $zz1 := $zz0;
+            $zz1 = $zz0;
 """
         let statements = parseCodeForWindows storages code|> map withNoComment
         {

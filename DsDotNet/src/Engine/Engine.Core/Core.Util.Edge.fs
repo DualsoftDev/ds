@@ -134,7 +134,7 @@ module EdgeModule =
                for any vertex k in the graph, do
                   for each vertex i in the graph, do
                      for each vertex j in the graph, do
-                        transMat[i, j] := transMat[i, j] OR (transMat[i, k]) AND transMat[k, j])
+                        transMat[i, j] = transMat[i, j] OR (transMat[i, k]) AND transMat[k, j])
                      done
                   done
                done

@@ -28,8 +28,8 @@ module FlatExpressionModule =
                 | ">=" -> "<"
                 | "<" -> ">="
                 | "<=" -> ">"
-                | "=" -> "!="
-                | "!=" -> "="
+                | "==" -> "!="
+                | "!=" -> "=="
                 | _ -> failwithlog "ERROR"
                 |> OpCompare
             | OpArithmatic _ -> failwithlog "ERROR: Negation not supported for Arithmatic operator."
@@ -99,7 +99,7 @@ module FlatExpressionModule =
                     | "&&" -> Op.And
                     | "||" -> Op.Or
                     | "!" -> Op.Neg
-                    | (">" | "<" | ">=" | "<=" | "=" | "!=") -> Op.OpCompare fs.Name
+                    | (">" | "<" | ">=" | "<=" | "==" | "!=") -> Op.OpCompare fs.Name
                     | ("+" | "-" | "*" | "/") -> Op.OpArithmatic fs.Name
                     | _ -> failwithlog "ERROR"
 

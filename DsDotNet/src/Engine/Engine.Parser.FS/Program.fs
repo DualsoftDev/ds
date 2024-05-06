@@ -98,10 +98,10 @@ C4 > C5;
         Int32 D100;
     }
     [operators] = {
-        STN1_ON = #{$Ap = true;}
+        STN1_ON = #{$Ap == true;}
     }
     [commands] = {
-        STN1_COMMAD1 = #{$D100 := 560;}
+        STN1_COMMAD1 = #{$D100 = 560;}
     }
 
     [buttons] = {

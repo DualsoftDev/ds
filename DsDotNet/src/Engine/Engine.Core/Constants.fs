@@ -332,7 +332,7 @@ module DsTextFunction =
     let [<Literal>] TextOnDelayTimer = "t"
     let [<Literal>] TextRingCounter = "c"
     let [<Literal>] TextNot = "n"
-    let [<Literal>] TextEQ = "="
+    let [<Literal>] TextEQ = "=="
     let [<Literal>] TextNotEQ = "!="
     let [<Literal>] TextGT = ">"
     let [<Literal>] TextGTE = ">="

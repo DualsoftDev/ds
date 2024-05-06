@@ -19,7 +19,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             bool result = false;
 
-            $result := $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+            $result = $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
         """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -33,7 +33,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             bool result = false;
 
-            $result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
+            $result = $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
         """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -48,7 +48,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             bool result = false;
 """
-        let exprCode = "$result := $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;"
+        let exprCode = "$result = $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;"
         let statements_ = parseCodeForWindows storages code
         let expr1 = parseExpression storages exprCode :?> Expression<bool>
         let expr2 = parseExpression storages exprCode :?> Expression<bool>
@@ -64,7 +64,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool result3 = false;
             bool result4 = false;
 
-            $result1 :=
+            $result1 =
                 $x00
                 || ( $x10 && $x11 && $x12 && $x13 && $x14)
                 || ( $x06 && $x07 && $x08 && $x09 )
@@ -73,7 +73,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
                 || $x01             // 여기 다름
                 ;
 
-            $result2 :=
+            $result2 =
                 $x00
                 || ( $x10 && $x11 && $x12 && $x13 && $x14)
                 || ( $x06 && $x07 && $x08 && $x09 )
@@ -82,7 +82,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
                 || $x00
                 ;
 
-            $result3 :=
+            $result3 =
                 $x00
                 || ( $x10 && $x11 && $x12 && $x13 && $x14)
                 || ( $x06 && $x07 && $x08 && $x09 )
@@ -91,7 +91,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
                 || $x01             // 여기 다름
                 ;
 
-            $result4 :=
+            $result4 =
                 $x00
                 || ( $x10 && $x11 && $x12 && $x13 && $x14)
                 || ( $x06 && $x07 && $x08 && $x09 )
@@ -112,7 +112,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool b1 = false;
             bool b2 = false;
             bool b3 = false;
-            $b3 := $b1 <> $b2;
+            $b3 = $b1 <> $b2;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -126,9 +126,9 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool b2 = true;
             bool b3 = $nn1 > $nn2;
             bool b4 = $b1 <> $b2;
-            bool b5 = $b1 = $b2;
+            bool b5 = $b1 == $b2;
             bool b6 = false;
-            $b6 := $nn1 > $nn2;
+            $b6 = $nn1 > $nn2;
             bool b7 = $nn1 > 3s;
 
             int16 sum = $nn1 + $nn2;

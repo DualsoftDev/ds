@@ -266,7 +266,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
             let newFunc = OperatorFunction.Create(funcName, pureCode)
-            let assignCode = $"${funcName} := {pureCode}" 
+            let assignCode = $"${funcName} = {pureCode}" 
             if not(options.Storages.ContainsKey funcName)
             then
                 let variable = ("bool"  |> System.Type.FromString).CreateVariable(funcName, false)

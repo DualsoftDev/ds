@@ -25,11 +25,11 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
                 bool qx = createTag("P00001", false);
                 """
             | _ -> failwith "Not supported plc type"
-            + "$qx := $ix && ! $ix && rising($ix) && falling($ix);"
+            + "$qx = $ix && ! $ix && rising($ix) && falling($ix);"
 
         let statements = parseCodeForWindows storages code
         statements.Length === 1
-        statements[0].ToText() === "$qx := $ix && !($ix) && rising($ix) && falling($ix)"
+        statements[0].ToText() === "$qx = $ix && !($ix) && rising($ix) && falling($ix)"
 
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)

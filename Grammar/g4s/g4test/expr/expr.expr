@@ -16,19 +16,19 @@ ctud myCTUD =
         , $res0 || $res1 && res2
         , $ld1 && ! $ld2 ||$ld3 || ! $ld4);
 
-$n0 := add($n1, $n2) > 3;
+$n0 = add($n1, $n2) > 3;
 
 
-ppulse($a) := $b;
+ppulse($a) = $b;
 
-$qx := $ix && ! $ix && rising($ix) && falling($ix);
+$qx = $ix && ! $ix && rising($ix) && falling($ix);
 
-$myCTR.RST := $cd;
-
-
+$myCTR.RST = $cd;
 
 
-$myBit17 :=
+
+
+$myBit17 =
     $myBit00 &&
     $myBit01 &&
     $myBit02 &&
@@ -52,7 +52,7 @@ $myBit17 :=
 copyIf(true, 10, $tag1);        // statement.  not expression
 
 bool myBit1 = createTag("%IX0.0.0", false);
-$myBit1 := true;
+$myBit1 = true;
 int8 myByte = createTag(0y);
 
 ton mytimer = createTON($cond1 || $cond2, 1000us);
@@ -104,7 +104,7 @@ Int(3.4);
 +(1, 2, 3);
 abs($tag3);
 
-$myvar := Int(3.4) + 1 + 2 + (abs($tag3));
+$myvar = Int(3.4) + 1 + 2 + (abs($tag3));
 
 /* variable declaration */
 //....
@@ -112,10 +112,10 @@ $myvar := Int(3.4) + 1 + 2 + (abs($tag3));
 
 "hello, " + "world";
 
-/* assign statements : target := expression */
-$mytag := $tag1 && $tag2;
-$tag3 := 3
-$myvar := Int(3.4) + 1 + 2 + (abs($tag3));
+/* assign statements : target = expression */
+$mytag = $tag1 && $tag2;
+$tag3 = 3
+$myvar = Int(3.4) + 1 + 2 + (abs($tag3));
 
 /* expression */
 hello((1 + 2) * 3, sin(1), array[3][2][g(2)], myvar);

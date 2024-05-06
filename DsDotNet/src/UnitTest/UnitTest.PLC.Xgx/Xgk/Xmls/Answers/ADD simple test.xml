@@ -102,7 +102,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] $sum := $nn1 + $nn2
+                                        [3] $sum = $nn1 + $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

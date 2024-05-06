@@ -74,7 +74,7 @@
 							<LDRoutine>
 								<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">DS Logic for XGI</Element>
 								</Rung>
-								<Rung BlockMask="0"><Element ElementType="63" Coordinate="1025">sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10</Element>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="1025">sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10</Element>
 								</Rung>
 								<Rung BlockMask="0"><Element ElementType="6" Coordinate="2049">_ON</Element>
 									<Element ElementType="102" Coordinate="2052" Param="FNAME: ADD8_SINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1750&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;PROP_COLOR: 16777215&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200020, , 0&#xA;VAR_IN: IN2, 0x00200020, , 0&#xA;VAR_IN: IN3, 0x00200020, , 0&#xA;VAR_IN: IN4, 0x00200020, , 0&#xA;VAR_IN: IN5, 0x00200020, , 0&#xA;VAR_IN: IN6, 0x00200020, , 0&#xA;VAR_IN: IN7, 0x00200020, , 0&#xA;VAR_IN: IN8, 0x00200020, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000020, &#xA;"></Element>

@@ -279,7 +279,7 @@ module Exp =
             target.ToText() === "$target"
 
             let stmt = DuAssign (None, expr, target)
-            stmt.ToText() === "$target := *(2, 3, 4)"
+            stmt.ToText() === "$target = *(2, 3, 4)"
 
 
             let storages = Storages()

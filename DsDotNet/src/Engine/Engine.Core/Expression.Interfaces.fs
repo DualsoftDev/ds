@@ -43,7 +43,7 @@ module ExpressionForwardDeclModule =
 
         /// Function expression 인 경우 function name 반환.  terminal 이면 none
         ///
-        /// e.g "+", "-", "*", "/", ">", ">=", "<", "<=", "=", "!=", "&&", "||", "!", "createTON", "createTOF", "createCounter", "createTimer"
+        /// e.g "+", "-", "*", "/", ">", ">=", "<", "<=", "==", "!=", "&&", "||", "!", "createTON", "createTOF", "createCounter", "createTimer"
         abstract FunctionName: string option
 
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환

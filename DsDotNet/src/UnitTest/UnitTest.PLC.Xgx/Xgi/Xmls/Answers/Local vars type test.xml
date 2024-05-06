@@ -98,7 +98,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [2] $myDoubleSum1 := $myDoubleSum2
+                                        [2] $myDoubleSum1 = $myDoubleSum2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -115,7 +115,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
-                                        [3] $myDoubleSum2 := $myDoubleSum1 + $myDoubleSum3
+                                        [3] $myDoubleSum2 = $myDoubleSum1 + $myDoubleSum3
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

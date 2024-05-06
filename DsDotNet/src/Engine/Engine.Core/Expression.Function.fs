@@ -26,7 +26,7 @@ module private ExpressionHelperModule =
     let isThisOperatorRequireAllArgumentsSameType: (string -> bool)  =
         let hash =
             [   "+" ; "-" ; "*" ; "/" ; "%"
-                ">" ; ">=" ; "<" ; "<=" ; "=" ; "!="
+                ">" ; ">=" ; "<" ; "<=" ; "==" ; "!="
                 "&&" ; "||"
                 "&" ; "|" ; "&&&" ; "|||"
                 "add"; "sub"; "mul"; "div"
@@ -36,7 +36,7 @@ module private ExpressionHelperModule =
         fun (name:string) -> hash.Contains (name)
     let verifyArgumentsTypes operator args =
         if isThisOperatorRequireAllArgumentsSameType operator && not <| isAllExpressionSameType args then
-            failwith $"Type mismatch for operator={operator}"
+            failwith $"Type mismatch for operator   '{operator}'"
 [<AutoOpen>]
 module ExpressionFunctionModule =
     open ExpressionHelperModule
@@ -63,8 +63,8 @@ module ExpressionFunctionModule =
         | ">=" -> fGte
         | "<"  -> fLt
         | "<=" -> fLte
-        | "=" when opndType = typeof<string> -> fEqualString
-        | "="  -> fEqual
+        | "==" when opndType = typeof<string> -> fEqualString
+        | "=="  -> fEqual
         | "!=" | "<>" -> fNotEqual
 
         | "&&" -> fLogicalAnd
@@ -114,8 +114,8 @@ module ExpressionFunctionModule =
         | ("<"  | "lt")  -> fbLt args
         | ("<=" | "lte") -> fbLte args
 
-        | ("="  | "equal") when t = STRING -> fbEqualString args
-        | ("="  | "equal") -> fbEqual args
+        | ("=="  | "equal") when t = STRING -> fbEqualString args
+        | ("=="  | "equal") -> fbEqual args
         | ("!=" | "<>" | "notEqual") when t = STRING -> fbNotEqualString args
         | ("!=" | "<>" | "^^" | "notEqual") -> fbNotEqual args
 
@@ -420,13 +420,13 @@ module ExpressionFunctionModule =
 
         let fConcat         args = cf _concat         "+"      args
 
-        let fEqual          args: IExpression = cf _equal          "="  args
+        let fEqual          args: IExpression = cf _equal          "=="  args
         let fNotEqual       args: IExpression = cf _notEqual       "!=" args
         let fGt             args: IExpression = cf _gt             ">"  args
         let fLt             args: IExpression = cf _lt             "<"  args
         let fGte            args: IExpression = cf _gte            ">=" args
         let fLte            args: IExpression = cf _lte            "<=" args
-        let fEqualString    args: IExpression = cf _equalString    "="  args
+        let fEqualString    args: IExpression = cf _equalString    "=="  args
         let fNotEqualString args: IExpression = cf _notEqualString "!=" args
         let fLogicalAnd     args: IExpression = cf _logicalAnd     "&&" args
         let fLogicalOr      args: IExpression = cf _logicalOr      "||" args
@@ -435,13 +435,13 @@ module ExpressionFunctionModule =
         let fFalling        args: IExpression = cf _falling     FunctionNameFalling args
 
         (* FB: Functions that returns Expression<Bool> *)
-        let fbEqual          args: Expression<bool> = cf _equal          "="  args
+        let fbEqual          args: Expression<bool> = cf _equal          "=="  args
         let fbNotEqual       args: Expression<bool> = cf _notEqual       "!=" args
         let fbGt             args: Expression<bool> = cf _gt             ">"  args
         let fbLt             args: Expression<bool> = cf _lt             "<"  args
         let fbGte            args: Expression<bool> = cf _gte            ">=" args
         let fbLte            args: Expression<bool> = cf _lte            "<=" args
-        let fbEqualString    args: Expression<bool> = cf _equalString    "="  args
+        let fbEqualString    args: Expression<bool> = cf _equalString    "=="  args
         let fbNotEqualString args: Expression<bool> = cf _notEqualString "!=" args
         let fbLogicalAnd     args: Expression<bool> = cf _logicalAnd     "&&" args
         let fbLogicalOr      args: Expression<bool> = cf _logicalOr      "||" args

@@ -70,7 +70,7 @@ module XgiExportModule =
             rgi <- rgi.AddSingleLineXml(xml)
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
-            let comparisonOps = [|">"; ">="; "<"; "<="; "="; "=="; "!="; "<>"|]
+            let comparisonOps = [|">"; ">="; "<"; "<="; "=="; "!="; "<>"|]
             let arithmaticOps = [|"+"; "-"; "*"; "/"|]
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOps @ comparisonOps) ->
@@ -291,7 +291,7 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = (">" | ">=" | "<" | "<=" | "=" | "!=") as op
+                | DuAugmentedPLCFunction({ FunctionName = (">" | ">=" | "<" | "<=" | "==" | "!=") as op
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op

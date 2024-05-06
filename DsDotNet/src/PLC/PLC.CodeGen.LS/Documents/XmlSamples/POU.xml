@@ -56,7 +56,7 @@ Project
                                     <Element ElementType="63" Coordinate="1">DS Logic for XGI</Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="1025">sum := $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10</Element>
+                                    <Element ElementType="63" Coordinate="1025">sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10</Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">_ON</Element>

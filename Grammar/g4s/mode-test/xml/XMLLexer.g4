@@ -26,7 +26,7 @@ CLOSE       :   '>'                     -> popMode ;
 SPECIAL_CLOSE:  '?>'                    -> popMode ; // close <?xml...?>
 SLASH_CLOSE :   '/>'                    -> popMode ;
 SLASH       :   '/' ;
-EQUALS      :   '=' ;
+EQUALS      :   '==' ;
 STRING      :   '"' ~[<"]* '"'
             |   '\'' ~[<']* '\''
             ;

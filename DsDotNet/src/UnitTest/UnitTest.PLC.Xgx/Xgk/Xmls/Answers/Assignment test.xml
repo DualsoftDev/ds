@@ -237,7 +237,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="36865">
-                                        [12] bool b5 = $b1 = $b2
+                                        [12] bool b5 = $b1 == $b2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -273,7 +273,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="43009">
-                                        [14] $b6 := $nn1 &gt; $nn2
+                                        [14] $b6 = $nn1 &gt; $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

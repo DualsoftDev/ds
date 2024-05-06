@@ -186,7 +186,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="28673">
-                                        [9] $sum := $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8
+                                        [9] $sum = $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

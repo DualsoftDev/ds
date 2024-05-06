@@ -146,7 +146,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [6] $qq := true &amp;&amp; ($nn1 + $nn2) * 9s + $nn3 &gt; 3s
+                                        [6] $qq = true &amp;&amp; ($nn1 + $nn2) * 9s + $nn3 &gt; 3s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

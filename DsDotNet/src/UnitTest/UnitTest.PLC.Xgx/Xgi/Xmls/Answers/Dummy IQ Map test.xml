@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $QCar := $qAvante || $qSonata
+                                        [0] $QCar = $qAvante || $qSonata
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -65,7 +65,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] $iAvante := $ICar
+                                        [1] $iAvante = $ICar
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -79,7 +79,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [2] $iSonata := $ICar
+                                        [2] $iSonata = $ICar
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

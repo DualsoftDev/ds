@@ -73,7 +73,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x31 := $x02 &amp;&amp; ($x03 || $x04 || $x05) &amp;&amp; ($x06 || $x07) &amp;&amp; $x08 &amp;&amp; ($x09 || $x10 &amp;&amp; ($x11 || $x12 || $x13 &amp;&amp; $x14 &amp;&amp; $x15 || !($x16 &amp;&amp; $x17 &amp;&amp; $x18)) &amp;&amp; $x19)
+                                        [0] $x31 = $x02 &amp;&amp; ($x03 || $x04 || $x05) &amp;&amp; ($x06 || $x07) &amp;&amp; $x08 &amp;&amp; ($x09 || $x10 &amp;&amp; ($x11 || $x12 || $x13 &amp;&amp; $x14 &amp;&amp; $x15 || !($x16 &amp;&amp; $x17 &amp;&amp; $x18)) &amp;&amp; $x19)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

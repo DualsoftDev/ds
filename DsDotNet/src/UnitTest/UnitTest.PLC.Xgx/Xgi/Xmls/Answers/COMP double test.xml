@@ -15,11 +15,12 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="9">
+                <GlobalVariable Version="Ver 1.0" Count="10">
                     <Symbols>
                         <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="b3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b4" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="b5" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b6" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b7" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
@@ -90,7 +91,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [2] bool b3 = $pi = $eu
+                                        [2] bool b3 = $pi == $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -110,19 +111,19 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [3] bool b5 = $pi != $eu
+                                        [3] bool b4 = $pi == $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="17409">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="17412" Param="FNAME: NE_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2285&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="17412" Param="FNAME: EQ2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 992&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="18433">
                                         pi
                                     </Element>
                                     <Element ElementType="70" Coordinate="18439">
-                                        b5
+                                        b4
                                     </Element>
                                     <Element ElementType="70" Coordinate="19457">
                                         eu
@@ -130,7 +131,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="21505">
-                                        [4] bool b6 = $pi != $eu
+                                        [4] bool b5 = $pi != $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -142,7 +143,7 @@
                                         pi
                                     </Element>
                                     <Element ElementType="70" Coordinate="23559">
-                                        b6
+                                        b5
                                     </Element>
                                     <Element ElementType="70" Coordinate="24577">
                                         eu
@@ -150,19 +151,19 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="26625">
-                                        [5] bool b7 = $pi &gt;= $eu
+                                        [5] bool b6 = $pi != $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="27649">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="27652" Param="FNAME: GE2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1132&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="27652" Param="FNAME: NE_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2285&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="28673">
                                         pi
                                     </Element>
                                     <Element ElementType="70" Coordinate="28679">
-                                        b7
+                                        b6
                                     </Element>
                                     <Element ElementType="70" Coordinate="29697">
                                         eu
@@ -170,27 +171,47 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="31745">
-                                        [6] bool b8 = $pi &lt;= $eu
+                                        [6] bool b7 = $pi &gt;= $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="32769">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="32772" Param="FNAME: LE2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1412&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="32772" Param="FNAME: GE2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1132&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="33793">
                                         pi
                                     </Element>
                                     <Element ElementType="70" Coordinate="33799">
-                                        b8
+                                        b7
                                     </Element>
                                     <Element ElementType="70" Coordinate="34817">
                                         eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="37889" Param="90"/>
-                                    <Element ElementType="33" Coordinate="37982" Param="END">
+                                    <Element ElementType="63" Coordinate="36865">
+                                        [7] bool b8 = $pi &lt;= $eu
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="37889">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="37892" Param="FNAME: LE2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1412&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="38913">
+                                        pi
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="38919">
+                                        b8
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="39937">
+                                        eu
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="43009" Param="90"/>
+                                    <Element ElementType="33" Coordinate="43102" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -200,11 +221,12 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="9">
+                        <LocalVar Version="Ver 1.0" Count="10">
                             <Symbols>
                                 <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b3" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b4" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b5" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b6" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b7" Comment="" Device="" Kind="8" State="0"/>

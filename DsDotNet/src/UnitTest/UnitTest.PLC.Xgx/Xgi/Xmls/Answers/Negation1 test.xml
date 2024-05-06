@@ -43,7 +43,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x01 := !($x00)
+                                        [0] $x01 = !($x00)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -9,7 +9,7 @@
             </Rung>
             <Rung BlockMask="0">
                 <Element ElementType="63" Coordinate="1025">
-                    [0] $xx1 := $xx0
+                    [0] $xx1 = $xx0
                 </Element>
             </Rung>
             <Rung BlockMask="0">

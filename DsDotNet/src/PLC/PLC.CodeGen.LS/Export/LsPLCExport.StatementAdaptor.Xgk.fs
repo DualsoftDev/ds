@@ -21,7 +21,7 @@ module XgkTypeConvertorModule =
     let operatorToXgkFunctionName op (typ:Type) =
         let isComparison =
             match op with
-            | (">" | ">=" | "<"  | "<="  | "=" | "!=" | "<>" )-> true
+            | (">" | ">=" | "<"  | "<="  | "==" | "!=" | "<>" )-> true
             | _ -> false
 
         let prefix =
@@ -48,7 +48,7 @@ module XgkTypeConvertorModule =
             | "/" -> "DIV"
             | "MOV" -> "MOV"
             | "!=" -> "<>"
-            | "==" -> "="
+            | "==" -> "=="
             | _ when isComparison -> op
             | _ -> failwithlog "ERROR"
 
@@ -64,10 +64,10 @@ module XgkTypeConvertorModule =
     ///
     /// e.g: XGK 의 경우, 함수를 지원하지 않으므로,
     ///     입력 exp: "2 + 3 > 4"
-    ///     추가 statement : "tmp1 := 2 + 3"
+    ///     추가 statement : "tmp1 = 2 + 3"
     ///     추가 storage : tmp2
     ///     최종 exp: "tmp1 > 4"
-    ///     반환 : exp, [tmp2], [tmp1 := 2 + 3]
+    ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
     let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) (newLocalStorages: XgxStorage) (newStatements:StatementContainer) : IExpression =
         assert (prjParam.TargetType = XGK)
         let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : IExpression * IStorage list * Statement list =
@@ -76,13 +76,13 @@ module XgkTypeConvertorModule =
                 let lexpr, lstgs, lstmts = helper (nestLevel + 1) (l, None)
                 let rexpr, rstgs, rstmts = helper (nestLevel + 1) (r, None)
 
-                if fn.IsOneOf("!=", "=", "<>") && lexpr.DataType = typeof<bool> then
+                if fn.IsOneOf("!=", "==", "<>") && lexpr.DataType = typeof<bool> then
                     // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
                     let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
                     let newExp =
                         match fn with
                         | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
-                        | "=" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
+                        | "==" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
                         | _ -> failwithlog "ERROR"
                     newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                 else
@@ -99,7 +99,7 @@ module XgkTypeConvertorModule =
 
                     match fn with
                     | ("+" | "-" | "*" | "/")
-                    | (">" | ">=" | "<" | "<=" | "=" | "!=") ->
+                    | (">" | ">=" | "<" | "<=" | "==" | "!=") ->
                         let stg = createTmpStorage()
                         let stmt = DuAssign(None, newExp, stg)
                         let varExp = stg.ToExpression()
@@ -144,7 +144,7 @@ module XgkTypeConvertorModule =
 
             // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.  다음과 같이 2개의 문장으로 분리한다.
             // bool b3;
-            // b3 := $nn1 > $nn2;
+            // b3 = $nn1 > $nn2;
             | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
                 newLocalStorages.Add decl
                 let stmt = DuAssign(Some systemOnRising, exp, decl)

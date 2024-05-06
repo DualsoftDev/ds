@@ -17,9 +17,9 @@ open Engine.Core
             let storages = Storages()
             let trues =
                 [
-                    "sin(0.0) = 0.0"            // todo: "sin(0) = 0.0f" Not yet!!
-                    "sin(toDouble(0)) = 0.0"
-                    "toInt(sin(0.0)) = 0"
+                    "sin(0.0) == 0.0"            // todo: "sin(0) = 0.0f" Not yet!!
+                    "sin(toDouble(0)) == 0.0"
+                    "toInt(sin(0.0)) == 0"
 
                     "sin(3.14 / 2.0) >= 0.9999"
                     "sin(3.14 / 2.0) <= 1.0"

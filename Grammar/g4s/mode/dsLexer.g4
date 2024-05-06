@@ -76,7 +76,7 @@ LBRACE: '{';
 RBRACE: '}';
 LPARENTHESIS: '(';
 RPARENTHESIS: ')';
-EQ: '=';
+EQ: '==';
 SEIMCOLON: ';';
 DOT: '.';
 TILDE: '~';

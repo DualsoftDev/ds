@@ -222,19 +222,33 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     //    let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
     //    x.TheSystem.Statements.AddRange statements
     
-
     override x.EnterVariableBlock(ctx: VariableBlockContext) =
-        let variableDefs = ctx.variableDef()
-        variableDefs |> Seq.iter (fun vari ->
-            let varType = vari.varType().GetText() |> textToDataType
-            let varName = vari.varName().GetText()
-            let value = DsDataType.typeDefaultValue (varType.ToType())
 
+        let addVari varName varType (value:string) (isVariableInitDef:bool)= 
             let variableData = VariableData (varName, varType)
-            let variable = varType.ToType().CreateVariable(varName, value)
+
+            let variable = createVariableByType varName varType
+            if isVariableInitDef
+            then 
+                variableData.InitValue <- value
+                variable.BoxedValue <-varType.ToValue(value)
 
             options.Storages.Add (varName, variable) |>ignore
             x.TheSystem.Variables.Add variableData   |>ignore
+
+
+        ctx.variableDef() |> Seq.iter (fun vari ->
+            let varName = vari.varName().GetText()
+            let varType = vari.varType().GetText() |> textToDataType
+            let value = DsDataType.typeDefaultValue (varType.ToType())
+            addVari varName varType  $"{value}" false
+            )   
+
+        ctx.variableInitDef() |> Seq.iter (fun vari ->
+            let varName = vari.varName().GetText()
+            let varType = vari.varType().GetText() |> textToDataType
+            let value = vari.initValue().GetText().TrimStart('(').TrimEnd(')')
+            addVari varName varType  value true
             )
 
     override x.EnterJobBlock(ctx: JobBlockContext) = 

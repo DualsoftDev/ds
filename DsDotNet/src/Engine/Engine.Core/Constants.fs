@@ -167,6 +167,25 @@ module DsDataType =
         | UINT8     -> box 0uy
         | _  -> failwithlog "ERROR"
 
+    let typeDefaultToString (typ:System.Type) =
+        match typ.Name with
+        | BOOL      -> "false"
+        | CHAR      -> "' '"
+        | FLOAT32   -> "0.0f"
+        | FLOAT64   -> "0.0"
+        | INT16     -> "0s"
+        | INT32     -> "0"
+        | INT64     -> "0L"
+        | INT8      -> "0y"
+        | STRING    -> ""
+        | UINT16    -> "0us"
+        | UINT32    -> "0u"
+        | UINT64    -> "0UL"
+        | UINT8     -> "0uy"
+        | _  -> failwithlog "ERROR"
+
+    
+
     type DataType =
         | DuBOOL
         | DuCHAR
@@ -223,22 +242,32 @@ module DsDataType =
             | DuUINT32  -> typedefof<uint32>
             | DuUINT64  -> typedefof<uint64>
             | DuUINT8   -> typedefof<uint8>
+            
 
-        member x.ToValue(value:string) =
+             
+
+        member x.ToValue(valueText:string) =
+            
+            let valueText = 
+                if x = DuCHAR || x = DuSTRING || x = DuBOOL  //"false" //"' '" //""
+                then  valueText 
+                else valueText.TrimEnd([|'f';'s';'L';'u';'s';'U';'L';'y'|])   //"0.0f" //"0.0" //"0s" //"0" //"0L" //"0y" //"0us" //"0u" //"0UL" //"0uy"
+              
             match x with
-            | DuBOOL    -> value |> Convert.ToBoolean |> box       
-            | DuCHAR    -> value |> Convert.ToChar    |> box 
-            | DuFLOAT32 -> value |> Convert.ToSingle  |> box 
-            | DuFLOAT64 -> value |> Convert.ToDouble  |> box 
-            | DuINT16   -> value |> Convert.ToInt16   |> box 
-            | DuINT32   -> value |> Convert.ToInt32   |> box 
-            | DuINT64   -> value |> Convert.ToInt64   |> box 
-            | DuINT8    -> value |> Convert.ToSByte   |> box 
-            | DuSTRING  -> value                      |> box 
-            | DuUINT16  -> value |> Convert.ToUInt16  |> box 
-            | DuUINT32  -> value |> Convert.ToUInt32  |> box 
-            | DuUINT64  -> value |> Convert.ToUInt64  |> box 
-            | DuUINT8   -> value |> Convert.ToByte    |> box 
+
+            | DuBOOL    -> valueText |> Convert.ToBoolean |> box       
+            | DuCHAR    -> valueText |> Convert.ToChar    |> box 
+            | DuFLOAT32 -> valueText |> Convert.ToSingle  |> box 
+            | DuFLOAT64 -> valueText |> Convert.ToDouble  |> box 
+            | DuINT16   -> valueText |> Convert.ToInt16   |> box 
+            | DuINT32   -> valueText |> Convert.ToInt32   |> box 
+            | DuINT64   -> valueText |> Convert.ToInt64   |> box 
+            | DuINT8    -> valueText |> Convert.ToSByte   |> box 
+            | DuSTRING  -> valueText                      |> box 
+            | DuUINT16  -> valueText |> Convert.ToUInt16  |> box 
+            | DuUINT32  -> valueText |> Convert.ToUInt32  |> box 
+            | DuUINT64  -> valueText |> Convert.ToUInt64  |> box 
+            | DuUINT8   -> valueText |> Convert.ToByte    |> box 
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 

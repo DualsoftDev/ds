@@ -113,18 +113,13 @@ module ImportIOTable =
                 then
                     None
                 else 
-                    //let funcTypeText, parms = 
-                    //    match tryGetOperatorType funcBodyText with
-                    //    | Some _ -> 
-                    //        if funcBodyText.Contains(';') 
-                    //        then 
-                    //            Office.ErrorPPT(ErrorCase.Name, ErrID._1008, $"{callName}", page, 0u)
-                            
-                    //        getOperatorTypeNArgs (funcBodyText)
-                    //    | None ->  funcDefine, [|funcBodyText|]
+                    
 
-                    //if (not <| isJob) && funcTypeText <> "$n" then
-                    //    Office.ErrorPPT(ErrorCase.Name, ErrID._1005, $"{funcTypeText}", page, 0u)
+
+                    let funcBodyText =
+                        if funcBodyText.EndsWith(";") 
+                        then funcBodyText
+                        else $"{funcBodyText};"
 
                     if isCommand
                     then 
@@ -135,7 +130,13 @@ module ImportIOTable =
                             | true -> getAutoGenFuncName funcBodyText
                             | false -> funcName
 
-                        handleFunctionCreationOrUpdate sys funcName funcBodyText false
+                        let func = handleFunctionCreationOrUpdate sys funcName funcBodyText false
+                        //operator 만 적용
+                        match sys.Jobs.TryFind(fun f-> f.Name = callName) with
+                        | Some job ->
+                            job.OperatorFunction <- (func.Value :?> OperatorFunction) |> Some
+                        | None -> ()
+                        func
                         
                             
             let dicDev =
@@ -186,8 +187,14 @@ module ImportIOTable =
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
-                let dataType = $"{row.[(int) IOColumn.DataType]}" |> textToDataType
+                let dataType = ($"{row.[(int) IOColumn.DataType]}").Trim() |> textToDataType
+                let value  = ($"{row.[(int) IOColumn.Func]}").Trim()
                 let variableData = VariableData(name, dataType)
+
+                if value <> ""
+                then 
+                    variableData.InitValue <- value
+
                 sys.Variables.Add(variableData)
 
             let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =

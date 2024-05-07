@@ -8,11 +8,11 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module rec CodeElements =
-    /// Variable 은 초기값 없음 값 할당은 [commands] 섹션 이용
     type VariableData(name:string, varType:DataType) =
         member _.Name = name
         member _.Type = varType
         member _.ToDsText() = $"{varType.ToText()} {name}"
+        member val InitValue = getNull<string>() with get, set
            
     type OperatorFunctionTypes =
         | DuOPUnDefined

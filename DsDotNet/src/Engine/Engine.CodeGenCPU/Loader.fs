@@ -79,7 +79,7 @@ module CpuLoader =
                 storages.Add(variTag.Name, variTag)
                 )
             sys.Jobs.Iter(fun j->
-                let variTag =  createVariableByType j.Name DuBOOL
+                let variTag =  createVariableByType j.Name j.DataType
                 storages.Add(variTag.Name, variTag)
                 )
 

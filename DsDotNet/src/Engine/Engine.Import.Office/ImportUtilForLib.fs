@@ -229,9 +229,9 @@ module ImportUtilForLib =
 
         if node.NodeType = CALLOPFunc
         then
-            let func = OperatorFunction.Create(node.OperatorName, node.OperatorCode) :> Func
-            mySys.Functions.Add func |> ignore
-             
+            let func = OperatorFunction.Create(node.OperatorName, node.OperatorCode) 
+            mySys.Functions.Add (func:> Func) |> ignore
+            jobForCall.OperatorFunction <- func |> Some
             Call.Create(func, parent)
         else 
             Call.Create(jobForCall, parent)

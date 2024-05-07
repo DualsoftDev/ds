@@ -122,7 +122,11 @@ module internal ToDsTextModule =
             if vars.Any() then
                 yield $"{tab}[variables] = {lb}"
                 for var in vars do
-                    yield $"{tab2}{var.ToDsText()};"
+                    if var.InitValue.IsNull() 
+                    then
+                        yield $"{tab2}{var.ToDsText()};"
+                    else 
+                        yield $"{tab2}{var.ToDsText()}({var.InitValue});"
                 yield $"{tab}{rb}"
         ] |> combineLines
 
@@ -151,7 +155,7 @@ module internal ToDsTextModule =
                     let jobItemText =  jobItems.JoinWith("; ") + ";"
                     if c.DataType.ToType() <> typeof<bool>
                     then
-                        yield $"{tab2}{c.Name.QuoteOnDemand()}{(c.DataType.ToText())} = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{c.Name.QuoteOnDemand()}(type:{c.DataType.ToText()}) = {lb} {jobItemText} {rb}"  
                     else 
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
 

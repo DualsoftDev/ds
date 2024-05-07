@@ -126,21 +126,23 @@ module ExportIOTable =
     let ToDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable seq =
   
         let totalRows =
-            let calls = selectFlows.SelectMany(fun f-> f.GetVerticesOfFlow().OfType<Call>())
             let coins = sys.GetVerticesOfJobCalls()
             seq {
 
                 let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
 
                 for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
-                    if coins.Where(fun c->c.TargetJob.DeviceDefs.Contains(dev)).any()
+                    if coins.Where(fun c->c.TargetJob.DeviceDefs.Contains(dev)).IsEmpty()
                     then
-                        let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
-                        if sortedDeviceDefs.Head() = dev then
-                            yield rowIOItems (dev, job, true) target //첫 TaskDev만 만듬
-                        else
-                            yield rowIOItems (dev, job, false) target
-            }
+                        dev.OutAddress <- TextSkip
+
+
+                    let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
+                    if sortedDeviceDefs.Head() = dev then
+                        yield rowIOItems (dev, job, true) target //첫 TaskDev만 만듬
+                    else
+                        yield rowIOItems (dev, job, false) target
+        }
 
         let dts = 
             totalRows 
@@ -156,7 +158,7 @@ module ExportIOTable =
 
 
 
-    let ToFuncVariTableExternalIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
+    let ToFuncVariTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
 
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
@@ -176,7 +178,7 @@ module ExportIOTable =
         let operatorRows =
             sys.Functions
                 .OfType<OperatorFunction>()
-                .Where(fun f->not(sys.AutoNameOperators.Cast<Func>().Contains(f)))
+                //.Where(fun f->not(sys.AutoNameOperators.Cast<Func>().Contains(f)))
                                     .Map(fun func->
                                     [ TextXlsOperator
                                       func.Name
@@ -206,6 +208,7 @@ module ExportIOTable =
                   ""
                   vari.ToDsText() ]
                   )
+
 
         let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"";"";"";"";]]
         let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"";"";"";"";]]
@@ -518,7 +521,7 @@ module ExportIOTable =
     let ToIOListDataTables (system: DsSystem) target = 
         let tableDeviceIOs = ToDeviceIOTables system system.Flows true target
         let tablePanelIO = ToPanelIOTable system system.Flows true target
-        let tabletableFuncVariExternal = ToFuncVariTableExternalIOTables system system.Flows true target
+        let tabletableFuncVariExternal = ToFuncVariTables system system.Flows true target
         
         let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal
      

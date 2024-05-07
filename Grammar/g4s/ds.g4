@@ -275,10 +275,32 @@ flowBlock
         aliasMnemonic: identifier1;
 
 codeBlock: CODE_BLOCK;
-variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
+
+varType: identifier1;
+
+    // identifier1에서 varType 이름과 같게 사용하면 예외처리 필요  ex) [sys] Single = {..} <- 예외
+   //    'int8' | 'sbyte' | 'Int8' | 'Sbyte'
+   //    | 'uint8' | 'byte' | 'UInt8' | 'Byte'
+   //    | 'int16' | 'short' | 'word' | 'Int16' | 'Short' | 'Word' |     
+   //    | 'uint16'| 'ushort'| 'UInt16'| 'Ushort'
+   //    | 'int32' | 'int'   | 'dword' | 'Int32' | 'Int'   | 'Dword'
+   //    | 'uint32'| 'uint' |    'UInt32'| 'Uint' 
+   //    | 'int64' | 'long' | 'Int64' | 'Long'
+   //    | 'uint64'| 'ulong' | 'UInt64'| 'Ulong'
+   //    | 'double' | 'float64' | 'Double' | 'Float64'
+   //    | 'single' | 'float32' | 'Single' | 'Float32'
+   //    | 'char' | 'Char'
+   //    | 'string' | 'String'
+   //    | 'bool' | 'boolean'| 'Bool'   | 'Boolean' ;
+
+
+variableBlock: '[' 'variables' ']' '=' '{' (variableInitDef | variableDef)* '}';
     variableDef: varType varName SEMICOLON;
-    varName: IDENTIFIER1;
-    varType: identifier1;
+    variableInitDef: varType varName initValue SEMICOLON;
+    varName: identifier1;
+
+    initValue: IDENTIFIERVALUE;
+    IDENTIFIERVALUE : '(' ('-'|[a-zA-Z_0-9]|HangulChar)+ ')';   //값으로 문자열도 오기 때문에 ()로 감싸줌
 
 operatorBlock: '[' 'operators' ']' '=' '{' (operatorNameOnly | operatorDef)* '}' ;
     operatorNameOnly: operatorName SEMICOLON;
@@ -301,7 +323,7 @@ jobBlock: '[' 'jobs' ']' '=' '{' (callListing|linkListing)* '}';
         jobName '=' interfaceLink SEMICOLON;
     jobName: (jobNameOnly | jobNameWithType);
     jobNameOnly: identifier1;
-    jobNameWithType: identifier1 '('varType')';
+    jobNameWithType: identifier1 '(' 'type:' varType')';
 
     callApiDef: (interfaceCall addressInOut|interfaceCall);
 

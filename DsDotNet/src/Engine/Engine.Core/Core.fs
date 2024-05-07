@@ -307,12 +307,12 @@ module CoreModule =
         member _.TargetWrapper = target
 
 
-
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:TaskDev seq, opFunc: OperatorFunction  option) =
+    type Job (name:string, tasks:TaskDev seq, duType:DataType, opFunc: OperatorFunction option) =
         inherit Named(name)
         member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks
+        member x.DataType =  duType
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
         //하나의 Job에는 하나의 Func만 지원 적용 
         member val OperatorFunction = opFunc with get, set
@@ -332,6 +332,8 @@ module CoreModule =
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
+
+
 
 
     /// 자신을 외부에서 물리적으로 조작하거나 조건을 나타날때 ex) system auto 물리버튼

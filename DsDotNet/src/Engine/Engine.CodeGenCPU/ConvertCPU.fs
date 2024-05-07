@@ -63,7 +63,10 @@ module ConvertCPU =
                 yield! vm.F2_RootReset()
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
-                yield vm.F3_VertexEndWithOutReal()
+                    yield vm.F3_VertexEndWithOutReal()    
+
+            if IsSpec (v, CallInFlow, AliasNotCare) && v.GetPureCall().Value.IsOperator then
+                    yield vm.F4_CallOperatorEnd()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 

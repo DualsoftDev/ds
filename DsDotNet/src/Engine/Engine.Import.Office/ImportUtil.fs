@@ -202,7 +202,7 @@ module ImportU =
                                     | _ -> failwithlog "Error MakeJobs")
 
 
-                        let job = Job(jobBase + "_" + api.Name, devs |> Seq.toList, None)
+                        let job = Job(jobBase + "_" + api.Name, devs |> Seq.toList, DuBOOL, None)
 
                         if dicJobName.ContainsKey(job.Name) then
                             Office.ErrorName(node.Shape, ErrID._33, node.PageNum)

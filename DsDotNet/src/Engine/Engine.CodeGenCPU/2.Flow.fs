@@ -54,12 +54,20 @@ type VertexManager with
             match v.Vertex  with
             | :? Alias   as rf -> rf.V.Vertex.GetPure().V.ET.Expr
             | :? RealExF as rf -> rf.V.Vertex.GetPure().V.ET.Expr
-            | :? Call as call -> 
-                    call.EndAction  <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
+            | _ ->
+                failwithlog "Error"
+
+        let rsts = v._off.Expr
+        (sets, rsts) --| (v.ET, getFuncName())
+
+    member v.F4_CallOperatorEnd() =
+        let sets =
+            match v.Vertex  with
+            | :? Call as call when call.IsOperator ->   //test ahn : OP 결과값으로 인과처리 추가
+                    (*call.EndAction  <||>*) ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
             | _ ->
                 failwithlog "Error"
              
 
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())
-

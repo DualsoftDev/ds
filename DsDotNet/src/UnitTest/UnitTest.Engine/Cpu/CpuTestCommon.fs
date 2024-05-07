@@ -62,9 +62,12 @@ module CpuTestUtil =
         member x.Reals  =  realTypeAll.Select(getVM)
         member x.Calls  =  callTypeAll.Select(getVM)
         member x.InRealCalls  =  callTypeAll.Where(fun f->f.Parent.GetCore() :? Real).OfType<Call>()
-        member x.VertexInFlows    =  callTypeAll.Where(fun f->f.Parent.GetCore() :? Flow)
+        member x.AbleVertexInFlows    =  callTypeAll
+                                                .Where(fun f->f.Parent.GetCore() :? Flow)
+                                                .Where(fun f-> not(f :? Call ))
                                                  |> Seq.append ([x.ARInF.Vertex])
                                                  |> Seq.append ([x.AREInF.Vertex])
+
         member x.ALL    =  vertexAll.Select(getVM)
         member x.GenerationIO() =  sys.GenerationIO()
 

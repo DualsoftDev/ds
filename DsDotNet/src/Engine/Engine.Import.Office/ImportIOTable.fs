@@ -178,8 +178,9 @@ module ImportIOTable =
                         if  not(f :? OperatorFunction)
                         then
                             failWithLog $"error {f.Name} is not OperatorFunction"
-
-                        job.OperatorFunction <- getOperatorFuntion f |> Some 
+                        let op = f :?> OperatorFunction
+                        job.OperatorFunction <- Some op
+                        sys.Functions.Add op
                 |_->()
                         
              

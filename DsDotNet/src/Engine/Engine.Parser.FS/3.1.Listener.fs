@@ -237,13 +237,21 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             x.TheSystem.Variables.Add variableData   |>ignore
             )
 
-    //override x.EnterJobBlock(ctx: JobBlockContext) = 
-    //    let jobs = ctx.callListing()
-    //    jobs |> Seq.iter (fun job ->
-    //        let jobName = job.jobName().GetText()
-    //        let variTag =  createVariableByType jobName DuBOOL
-    //        options.Storages.Add(variTag.Name, variTag)
-    //        )
+    override x.EnterJobBlock(ctx: JobBlockContext) = 
+        let jobs = ctx.callListing()
+        jobs |> Seq.iter (fun job ->
+            let jobName, duDataType = 
+                match job.TryFindFirstChild<JobNameOnlyContext>() with
+                | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL
+                |_ -> 
+                    let JobNameWithTypeCtx = job.TryFindFirstChild<JobNameWithTypeContext>().Value
+                    let jobName = JobNameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
+                    let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
+                    jobName, duDataType
+
+            let variTag =  createVariableByType jobName duDataType
+            options.Storages.Add(variTag.Name, variTag)
+            )
 
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
         
@@ -558,8 +566,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let callListings = ctx.Descendants<CallListingContext>().ToArray()
 
             for callList in callListings do
-                let getRawJobName = callList.TryFindFirstChild<EtcName1Context>().Value
-                let jobName = getRawJobName.GetText().DeQuoteOnDemand()
                 let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
              
                 let getAddress (addressCtx: IParseTree) =
@@ -611,10 +617,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 assert (apiItems.Any())
-                let funcCallCtxs = callList.Descendants<FuncCallContext>().ToArray()
-                let jobFuncs = commonOpFunctionExtractor funcCallCtxs jobName system
-       
-                let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList, jobFuncs)
+                //let funcCallCtxs = callList.Descendants<FuncCallContext>().ToArray()
+                //let jobFuncs = commonOpFunctionExtractor funcCallCtxs jobName system
+                let jobName, duDataType = 
+                    match callList.TryFindFirstChild<JobNameOnlyContext>() with
+                    | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL
+                    |_ -> 
+                        let JobNameWithTypeCtx = callList.TryFindFirstChild<JobNameWithTypeContext>().Value
+                        let jobName = JobNameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
+                        let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
+                        jobName, duDataType
+
+                let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList, duDataType, None)
                 job |> system.Jobs.Add
 
 

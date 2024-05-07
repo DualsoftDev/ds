@@ -446,6 +446,7 @@ module PPTObjectModule =
         member x.Position = shape.GetPosition(slieSize)
 
         member x.JobName = pageTitle+"_"+name.Replace(".", "_")
+        member x.OperatorName = x.JobName+"_OP"
         member x.OperatorCode = 
                 $"${x.JobName} == true;"
 

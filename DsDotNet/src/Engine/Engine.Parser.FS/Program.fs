@@ -370,7 +370,7 @@ C4 > C5;
 [sys] A = {
     [flow] F = {
         a3 <|> a4;
-        a1 <|> a2 ||> a3 ||> a2;
+        a1 <|> a2 |> a3 |> a2;
         a1 > a2 > a3 > a4;
     }
     [interfaces] = {

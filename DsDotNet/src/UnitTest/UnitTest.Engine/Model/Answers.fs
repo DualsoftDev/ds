@@ -106,7 +106,7 @@ module ModelAnswers =
 [sys] A = {
     [flow] F = {
         a1 <|> a2;
-        a3 ||> a2 ||> a3 <|> a4;
+        a3 |> a2 |> a3 <|> a4;
         a1 > a2 > a3 > a4;
     }
     [interfaces] = {

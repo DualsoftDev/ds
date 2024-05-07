@@ -16,28 +16,25 @@ module DsText =
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
     //edge
     let [<Literal>] TextStartEdge         = ">"
-    let [<Literal>] TextStartPush         = ">>"
     let [<Literal>] TextResetEdge         = "|>"
-    let [<Literal>] TextResetPush         = "||>"
     let [<Literal>] TextStartReset        = "=>"
     let [<Literal>] TextInterlockWeak     = "<|>"
     let [<Literal>] TextInterlockStrong   = "<||>"
     let [<Literal>] TextStartEdgeRev      = "<"
-    let [<Literal>] TextStartPushRev      = "<<"
     let [<Literal>] TextResetEdgeRev      = "<|"
-    let [<Literal>] TextResetPushRev      = "<||"
     let [<Literal>] TextStartResetRev     = "<="
 
 
     /// 사용자 모델링한 edge type (단 reverse 는 반대로 뒤집어서)
     type ModelingEdgeType =
         | StartEdge          (*  ">"    *)
-        | StartPush          (*  ">>"   *)
         | ResetEdge          (*  "|>"   *)
-        | ResetPush          (*  "||>"  *)
         | StartReset         (*  "=>"   *)
         | InterlockWeak      (*  "<|>"  *)
         | InterlockStrong    (*  "<||>" *)
+        | RevStartEdge       (*  "<"    *)
+        | RevResetEdge       (*  "<|"   *)
+        | RevStartReset      (*  "<="   *)
 
     /// Runtime Edge Types
     [<Flags>]
@@ -50,24 +47,45 @@ module DsText =
 
     type internal MET = ModelingEdgeType
     type internal RET = EdgeType
+    
+    /// 뒤집힌 edge 판정.  뒤집혀 있으면 source target 을 반대로 하고 edge 를 다시 뒤집을 것.
+    let isReversedEdge(modelingEdgeType:ModelingEdgeType) =
+        match modelingEdgeType with
+        | RevStartEdge
+        | RevResetEdge
+        | RevStartReset -> true
+        | _ -> false
+
+    let toTextModelEdge(edgeType:ModelingEdgeType) =
+        match edgeType with
+        | StartEdge       ->    TextStartEdge
+        | ResetEdge       ->    TextResetEdge
+        | StartReset      ->    TextStartReset
+        | InterlockWeak   ->    TextInterlockWeak
+        | InterlockStrong ->    TextInterlockStrong
+        | RevStartEdge ->    TextStartEdgeRev   
+        | RevResetEdge ->    TextResetEdgeRev   
+        | RevStartReset ->   TextStartResetRev  
+
+    let toModelEdge(edgeText:string) =
+        match edgeText with
+        | TextStartEdge       ->    StartEdge
+        | TextResetEdge       ->    ResetEdge
+        | TextStartReset      ->    StartReset
+        | TextInterlockWeak   ->    InterlockWeak
+        | TextInterlockStrong ->    InterlockStrong
+        | TextStartEdgeRev ->    RevStartEdge
+        | TextResetEdgeRev ->    RevResetEdge
+        | TextStartResetRev ->    RevStartReset
+        |_ -> failwithf $"'{edgeText}' is not modelEdgeType"
 
     type ModelingEdgeInfo<'v>(sources:'v seq, edgeSymbol:string, targets:'v seq) =
         new(source, edgeSymbol, target) = ModelingEdgeInfo([source], edgeSymbol, [target])
         member val Sources = sources.ToFSharpList()
         member val Targets = targets.ToFSharpList()
         member val EdgeSymbol = edgeSymbol
-        member x.EdgeRevSymbol =  match edgeSymbol with
-                                    | TextStartEdge       ->    TextStartEdgeRev
-                                    | TextStartPush       ->    TextStartPushRev
-                                    | TextResetEdge       ->    TextResetEdgeRev
-                                    | TextResetPush       ->    TextResetPushRev
-                                    | TextStartReset      ->    TextStartResetRev
-                                    |  TextStartEdgeRev      ->    TextStartEdge 
-                                    |  TextStartPushRev      ->    TextStartPush 
-                                    |  TextResetEdgeRev      ->    TextResetEdge 
-                                    |  TextResetPushRev      ->    TextResetPush 
-                                    |  TextStartResetRev     ->   TextStartReset 
-                                    |_ -> failwith $"{edgeSymbol} symbol is directionless"
+        member x.IsReversedEdge = isReversedEdge (toModelEdge edgeSymbol)
+        member x.EdgeType = toModelEdge edgeSymbol
 
     /// source 와 target 을 edge operator 에 따라서 확장 생성
     let expandModelingEdge (modelingEdgeInfo:ModelingEdgeInfo<'v>) : ('v * EdgeType * 'v) list =
@@ -79,17 +97,13 @@ module DsText =
                 yield!
                     match edgeSymbol with
                     | (* ">"    *) TextStartEdge     -> [(s, RET.Start, t)]
-                    | (* ">>"   *) TextStartPush     -> [(s, RET.Start ||| RET.Strong, t)]
                     | (* "|>"   *) TextResetEdge     -> [(s, RET.Reset, t)]
-                    | (* "||>"  *) TextResetPush     -> [(s, RET.Reset ||| RET.Strong, t)]
 
                     | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
                     | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
                     | (* "<||>" *) TextInterlockStrong     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
                     | (* "<"    *) TextStartEdgeRev  -> [(t, RET.Start, s)]
-                    | (* "<<"   *) TextStartPushRev  -> [(t, RET.Start ||| RET.Strong, s)]
                     | (* "<|"   *) TextResetEdgeRev  -> [(t, RET.Reset, s)]
-                    | (* "<||"  *) TextResetPushRev  -> [(t, RET.Reset ||| RET.Strong, s)]
                     | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
 
                     | _
@@ -109,38 +123,14 @@ type ModelingEdgeExt =
             if isStrong then ">>" else ">"
 
     [<Extension>]
-    static member ToText(edgeType:ModelingEdgeType) =
-        match edgeType with
-        | StartEdge       ->    TextStartEdge
-        | StartPush       ->    TextStartPush
-        | ResetEdge       ->    TextResetEdge
-        | ResetPush       ->    TextResetPush
-        | StartReset      ->    TextStartReset
-        | InterlockWeak   ->    TextInterlockWeak
-        | InterlockStrong ->    TextInterlockStrong
+    static member ToText(edgeType:ModelingEdgeType) = DsText.toTextModelEdge edgeType
 
     [<Extension>]
-    static member ToModelEdge(edgeText:string) =
-        match edgeText with
-        | TextStartEdge       ->    StartEdge
-        | TextStartPush       ->    StartPush
-        | TextResetEdge       ->    ResetEdge
-        | TextResetPush       ->    ResetPush
-        | TextStartReset      ->    StartReset
-        | TextInterlockWeak   ->    InterlockWeak
-        | TextInterlockStrong ->    InterlockStrong
-        |_ -> failwithf $"'{edgeText}' is not modelEdgeType"
+    static member ToModelEdge(edgeText:string) = DsText.toModelEdge edgeText
 
-    /// 뒤집힌 edge 판정.  뒤집혀 있으면 source target 을 반대로 하고 edge 를 다시 뒤집을 것.
     [<Extension>]
-    static member IsReversedEdge(edgeText:string) =
-        match edgeText with
-        | TextStartEdgeRev
-        | TextStartPushRev
-        | TextResetEdgeRev
-        | TextResetPushRev
-        | TextStartResetRev -> true
-        | _ -> false
+    static member IsReversedEdge(edgeText:string) = DsText.isReversedEdge (DsText.toModelEdge edgeText)
+
 
 
 [<AutoOpen>]

@@ -31,14 +31,10 @@ module ImportDocCheck =
         flow.ModelingEdges.Add(ModelingEdgeInfo(v ("START"), TextStartEdge, v ("시작인과")))
         |> ignore
 
-        flow.ModelingEdges.Add(ModelingEdgeInfo(v ("START"), TextStartPush, v ("시작유지")))
-        |> ignore
 
         flow.ModelingEdges.Add(ModelingEdgeInfo(v ("RESET"), TextResetEdge, v ("복귀인과")))
         |> ignore
 
-        flow.ModelingEdges.Add(ModelingEdgeInfo(v ("RESET"), TextResetPush, v ("복귀유지")))
-        |> ignore
 
         flow.ModelingEdges.Add(ModelingEdgeInfo(v ("ETC"), TextInterlockStrong, v ("상호행위간섭")))
         |> ignore

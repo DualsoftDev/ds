@@ -115,20 +115,7 @@ namespace Engine
 }
 
 ";
-        public static string StrongCausal = @"
-[sys] L = {
-    [flow] F = {
-        Main = {
-            Ap >> Am;
-        }
-    }
-    [jobs] = {
-        Ap = { A.""+""(%I1, %Q1); }
-        Am = { A.""-""(%I2, %Q2); }
-    }
-    [device file=""cylinder.ds""] A;
-}
-";
+
 
         public static string Buttons = @"
 [sys] HelloDS_DATA = {

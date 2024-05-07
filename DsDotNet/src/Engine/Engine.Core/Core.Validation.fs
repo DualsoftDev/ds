@@ -21,13 +21,12 @@ module ValidateMoudle =
         graph.Edges
             .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
             .Iter(fun edge ->
-                [edge.Source ;edge.Target].Iter(fun v->
-                    match getPure v with 
+                    match getPure edge.Target with 
                     | :? Real    -> ()
                     | :? RealExF -> ()
                     | _ -> failwithlog $"Reset 연결은 Work 타입에만 연결가능합니다. \t[{edge.Source.Name} |> {edge.Target.Name}]"
                     //| _ -> failwithlog $"ResetEdge can only be used on Type Work \t[{edge.Source.Name} |> {edge.Target.Name}]"
-            ))
+            )
 
         if bRoot  
         then

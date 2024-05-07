@@ -362,7 +362,7 @@ module CoreModule =
         member _.ToDsText() = 
             let src = operand1.QuoteOnDemand()
             let tgt = operand2.QuoteOnDemand()
-            sprintf "%s %s %s"  src (operator.ToText()) tgt  //"+" <||> "-"
+            sprintf "%s %s %s"  src (operator |> toTextModelEdge) tgt  //"+" <||> "-"
         static member Create(system:DsSystem, operand1, operator, operand2) =
             let ri = ApiResetInfo(operand1, operator, operand2)
             system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]"

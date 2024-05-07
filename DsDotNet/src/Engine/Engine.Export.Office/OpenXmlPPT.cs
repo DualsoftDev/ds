@@ -153,13 +153,7 @@ namespace Engine.Export.Office
             Shape tgtShape = ShapeManager.AddSlideShape(slide, GetName(tgt), GetShapeType(tgt), xPos, yPos);
             updatePosition(slideWidth, ref xPos, ref yPos);
 
-            bool bRev =
-                fEdge.EdgeSymbol == TextStartEdgeRev || fEdge.EdgeSymbol == TextStartEdgeRev
-                || fEdge.EdgeSymbol == TextResetEdgeRev || fEdge.EdgeSymbol == TextResetEdgeRev
-                || fEdge.EdgeSymbol == TextStartResetRev;
-            var edgeName = bRev ? fEdge.EdgeRevSymbol.ToModelEdge() : fEdge.EdgeSymbol.ToModelEdge();
-
-            ConnectionManager.CreateConnectionShape(slide, srcShape, tgtShape, edgeName, bRev);
+            ConnectionManager.CreateConnectionShape(slide, srcShape, tgtShape, fEdge.EdgeType);
         }
     }
 }

@@ -181,24 +181,13 @@ public partial class UcView : UserControl
             gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
             gEdge.Attr.ArrowheadLength = edge_attr_HeadSize;
         }
-        else if (et == ModelingEdgeType.StartPush)
-        {
-            gEdge.Attr.AddStyle(Style.Solid);
-            gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
-            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-        }
+       
         else if (et == ModelingEdgeType.ResetEdge)
         {
             gEdge.Attr.AddStyle(Style.Dashed);
             gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
         }
-        else if (et == ModelingEdgeType.ResetPush)
-        {
-            gEdge.Attr.AddStyle(Style.Dashed);
-            gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
-            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-        }
-
+      
         else if (et == ModelingEdgeType.InterlockWeak)
         {
             gEdge.Attr.AddStyle(Style.Dashed);

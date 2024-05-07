@@ -1,4 +1,4 @@
-﻿using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Office.LongProperties;
 using DocumentFormat.OpenXml.Drawing.Wordprocessing;
@@ -16,7 +16,7 @@ namespace Engine.Export.Office
 {
     public static class ConnectionManager
     {
-        public static ConnectionShape CreateConnectionShape(Slide slide, Shape startShape, Shape endShape, ModelingEdgeType edgeType, bool bRev)
+        public static ConnectionShape CreateConnectionShape(Slide slide, Shape startShape, Shape endShape, ModelingEdgeType edgeType)
         {
             uint id = GetNextShapeId(slide);
             string typeName = "Connector";
@@ -32,7 +32,7 @@ namespace Engine.Export.Office
             var connectionShape = new ConnectionShape()
             {
                 NonVisualConnectionShapeProperties = CreateNonVisualConnectionShapeProperties(id, typeName, startShape, endShape, isStartRect, isLeftToRight),
-                ShapeProperties = CreateShapeProperties(startPoint, endPoint, edgeType, bRev),
+                ShapeProperties = CreateShapeProperties(startPoint, endPoint, edgeType),
                 ShapeStyle = CreateShapeStyle()
             };
 
@@ -153,7 +153,7 @@ namespace Engine.Export.Office
             return ret;
         }
 
-        private static ShapeProperties CreateShapeProperties(Tuple<long, long> startPoint, Tuple<long, long> endPoint, ModelingEdgeType edgeType, bool bRev)
+        private static ShapeProperties CreateShapeProperties(Tuple<long, long> startPoint, Tuple<long, long> endPoint, ModelingEdgeType edgeType)
         {
             var shapeProperties = new ShapeProperties();
             bool verticalFlip = DetermineVerticalFlip(startPoint, endPoint);
@@ -187,12 +187,12 @@ namespace Engine.Export.Office
             var tail = Drawing.LineEndValues.Arrow;
             var lineType = Drawing.PresetLineDashValues.Solid;
 
-            if (edgeType.IsStartEdge || edgeType.IsStartPush) { };
-            if (edgeType.IsResetEdge || edgeType.IsResetPush) { lineType = Drawing.PresetLineDashValues.Dash; }
+            if (edgeType.IsStartEdge ) { };
+            if (edgeType.IsResetEdge ) { lineType = Drawing.PresetLineDashValues.Dash; }
             if (edgeType.IsInterlockWeak || edgeType.IsInterlockStrong) { lineType = Drawing.PresetLineDashValues.Dash; head = Drawing.LineEndValues.Arrow; }
             if (edgeType.IsStartReset) { head = Drawing.LineEndValues.Diamond; }
 
-            if (bRev)
+            if (isReversedEdge(edgeType))
             {
                 var tailTemp = tail;
                 tail = head;

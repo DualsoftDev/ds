@@ -152,7 +152,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         for tuple in resets do
             let left, right = tuple
             let opnd1, op, opnd2 = left, "<|>", right
-            ApiResetInfo.Create(x.TheSystem, opnd1, op.ToModelEdge(), opnd2) |> ignore
+            ApiResetInfo.Create(x.TheSystem, opnd1, op |> toModelEdge, opnd2) |> ignore
 
     member x.GetValidFile(fileSpecCtx: FileSpecContext) =
           fileSpecCtx
@@ -223,16 +223,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     //    x.TheSystem.Statements.AddRange statements
     
 
-    
-//variableBlock: '[' 'variables' ']' '=' '{' variableDef* '}';
-//    variableDef: varType varName '=' argument;
-//    varName: IDENTIFIER1;
-//    argument: intValue | floatValue | varIdentifier;
-//    varIdentifier: IDENTIFIER1;
-//    intValue: INTEGER;
-//    floatValue:FLOAT;
-//    varType: IDENTIFIER1;
-
     override x.EnterVariableBlock(ctx: VariableBlockContext) =
         let variableDefs = ctx.variableDef()
         variableDefs |> Seq.iter (fun vari ->
@@ -247,13 +237,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             x.TheSystem.Variables.Add variableData   |>ignore
             )
 
-    override x.EnterJobBlock(ctx: JobBlockContext) = 
-        let jobs = ctx.callListing()
-        jobs |> Seq.iter (fun job ->
-            let jobName = job.jobName().GetText()
-            let variTag =  createVariableByType jobName DuBOOL
-            options.Storages.Add(variTag.Name, variTag)
-            )
+    //override x.EnterJobBlock(ctx: JobBlockContext) = 
+    //    let jobs = ctx.callListing()
+    //    jobs |> Seq.iter (fun job ->
+    //        let jobName = job.jobName().GetText()
+    //        let variTag =  createVariableByType jobName DuBOOL
+    //        options.Storages.Add(variTag.Name, variTag)
+    //        )
 
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
         
@@ -268,14 +258,15 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
             let newFunc = OperatorFunction.Create(funcName, pureCode)
-            let assignCode = $"${funcName} = {pureCode}" 
-            if not(options.Storages.ContainsKey funcName)
-            then
-                let variable = ("bool"  |> System.Type.FromString).CreateVariable(funcName, false)
-                options.Storages.Add (variable.Name, variable) |>ignore
+            let assignCode = $"bool {funcName} = false; ${funcName} = {pureCode}" 
 
             let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
-            newFunc.Statements.AddRange(statements)
+            statements.Iter(fun s->
+                match s with
+                | DuAssign (_, _, _) -> newFunc.Statements.Add s  //비교구문 있는 Statement만 추가
+                |_ -> ()  //bool {funcName} = false 부분은 추가하지 않음
+                )
+
             x.TheSystem.Functions.Add(newFunc) 
             )
 

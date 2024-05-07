@@ -226,9 +226,6 @@ module ImportU =
                 //인터페이스는 인터페이스끼리 인과가능
                 if (src.NodeType.IsIF && src.NodeType = tgt.NodeType |> not) then
                     Office.ErrorConnect(edge.ConnectionShape, ErrID._37, src.Name, tgt.Name, edge.PageNum)
-                //인터페이스 인과는 강 리셋 불가
-                if (edge.Causal = InterlockStrong || edge.Causal = ResetPush) then
-                    Office.ErrorConnect(edge.ConnectionShape, ErrID._11, src.Name, tgt.Name, edge.PageNum)
                 //인터페이스 Link는 인과정보 정의 불가
                 if (src.NodeType = IF_LINK || tgt.NodeType = IF_LINK) then
                     Office.ErrorConnect(edge.ConnectionShape, ErrID._32, src.Name, tgt.Name, edge.PageNum)

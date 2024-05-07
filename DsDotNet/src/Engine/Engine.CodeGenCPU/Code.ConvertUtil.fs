@@ -44,6 +44,7 @@ module CodeConvertUtil =
                     match getPure f with
                     | :? Real    as r  -> r.V.G
                     | :? RealExF as rf -> rf.Real.V.G
+                    | :? Call as c when c.IsOperator -> c.V.ET
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
    

@@ -110,10 +110,7 @@ module ModelTests1 =
         member __.``Model component [DisableValid] test`` () =
             compare ParserTest.DisableValid answerDisableValid
 
-        [<Test>]
-        member __.``Model component [StrongCausal] test`` () =
-            compareExact ParserTest.StrongCausal 
-
+   
         [<Test>]
         member __.``Model component [Buttons] test`` () =
             compare ParserTest.Buttons answerButtons

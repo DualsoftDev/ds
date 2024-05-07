@@ -181,7 +181,7 @@ module ImportUtilForLib =
                 autoTaskDev.Value.InAddress <- ""
                 autoTaskDev.Value.OutAddress <- ""
                 tasks.Add(autoTaskDev.Value)|>ignore
-                Job(loadedName + "_" + apiName, tasks |> Seq.toList, None)
+                Job(loadedName + "_" + apiName, tasks |> Seq.toList, DuBOOL, None)
             else 
                 let libRelPath =
                     PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
@@ -219,7 +219,7 @@ module ImportUtilForLib =
                         tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
                 | _->
                     tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
-                Job(loadedName + "_" + apiName, tasks |> Seq.toList, None)
+                Job(loadedName + "_" + apiName, tasks |> Seq.toList, DuBOOL, None)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)
@@ -227,11 +227,9 @@ module ImportUtilForLib =
             then mySys.Jobs.Add(job);job
             else tempJob
 
-            
-
         if node.NodeType = CALLOPFunc
         then
-            let func = OperatorFunction.Create(node.JobName, node.OperatorCode) :> Func
+            let func = OperatorFunction.Create(node.OperatorName, node.OperatorCode) :> Func
             mySys.Functions.Add func |> ignore
              
             Call.Create(func, parent)

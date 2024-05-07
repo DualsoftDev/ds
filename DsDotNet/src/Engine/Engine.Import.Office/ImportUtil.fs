@@ -53,28 +53,35 @@ module ImportU =
             dicSeg: Dictionary<string, Vertex>,
             jobCallNames: string seq
         ) =
-        let getFunc() = 
-            let nodeFunName = node.Name.Replace(".", "_")         
-            let funcName = $"{node.PageTitle}_{nodeFunName}"
-            match mySys.Functions |> Seq.tryFind(fun f->f.Name = funcName) with
+        let getOperatorFunc() = 
+            match mySys.Functions |> Seq.tryFind(fun f->f.Name = node.OperatorName) with
             | Some f -> f
             | None -> 
                 let newfunc = 
                     match node.NodeType with
-                    | CALLOPFunc  ->      OperatorFunction(funcName) :> Func
-                    | CALLCMDFunc  ->     CommandFunction.Create(funcName, ""):> Func
+                    | CALLOPFunc  ->      OperatorFunction(node.OperatorName) :> Func
+                    | _  ->   failwithlog "error"
+                mySys.Functions.Add(newfunc) |>ignore
+                newfunc
+
+        let getCommandFunc() = 
+            match mySys.Functions |> Seq.tryFind(fun f->f.Name = node.CommandName) with
+            | Some f -> f
+            | None -> 
+                let newfunc = 
+                    match node.NodeType with
+                    | CALLCMDFunc  ->     CommandFunction(node.CommandName):> Func
                     | _ -> failwithlog "error"
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc
 
-
         let call =
             match node.NodeType with
             | CALLOPFunc when not(node.Name.Contains(".")) ->
-                Call.Create(getFunc(), parentWrapper)  
+                Call.Create(getOperatorFunc(), parentWrapper)  
 
             | CALLCMDFunc  ->  
-                Call.Create(getFunc(), parentWrapper)  
+                Call.Create(getCommandFunc(), parentWrapper)  
 
             | CALL | CALLOPFunc when node.Name.Contains(".") ->  
                 match node.NodeType with
@@ -202,7 +209,7 @@ module ImportU =
                                     | _ -> failwithlog "Error MakeJobs")
 
 
-                        let job = Job(jobBase + "_" + api.Name, devs |> Seq.toList, None)
+                        let job = Job(jobBase + "_" + api.Name, devs |> Seq.toList, DuBOOL, None)
 
                         if dicJobName.ContainsKey(job.Name) then
                             Office.ErrorName(node.Shape, ErrID._33, node.PageNum)

@@ -296,14 +296,18 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing|linkListing)* '}';
     callListing:
-        jobName '=' '{' (callApiDef|funcCall)? ( ';' callApiDef|funcCall)* (';')+ '}' (SEMICOLON)?;
+        jobName '=' '{' (callApiDef ';')*'}' (SEMICOLON)?;
     linkListing:
         jobName '=' interfaceLink SEMICOLON;
-    jobName: etcName1;
+    jobName: (jobNameOnly | jobNameWithType);
+    jobNameOnly: identifier1;
+    jobNameWithType: identifier1 '('varType')';
+
     callApiDef: (interfaceCall addressInOut|interfaceCall);
 
     interfaceCall: identifier12;
     interfaceLink: identifier12;
+
 
 
 funcCall: identifier1Operator | identifier1Command;

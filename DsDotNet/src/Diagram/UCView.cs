@@ -102,11 +102,14 @@ public partial class UcView : UserControl
 
     private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
     {
-        bool bDrawSubSrc = edge.Sources[0].IsChildExist;
-        bool bDrawSubTgt = edge.Targets[0].IsChildExist;
+        var src = edge.IsReversedEdge ? edge.Targets[0] : edge.Sources[0];
+        var tgt = edge.IsReversedEdge ? edge.Sources[0] : edge.Targets[0];
 
-        ViewNode mEdgeSrc = edge.Sources[0];
-        ViewNode mEdgeTgt = edge.Targets[0];
+        bool bDrawSubSrc = src.IsChildExist;
+        bool bDrawSubTgt = tgt.IsChildExist;
+
+        ViewNode mEdgeSrc = src;
+        ViewNode mEdgeTgt = tgt;
         Subgraph subGSrc = new(mEdgeSrc.UIKey);
         Subgraph subGTgt = new(mEdgeTgt.UIKey);
 

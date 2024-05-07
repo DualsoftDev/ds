@@ -239,7 +239,6 @@ module CoreModule =
 
     type CallOptions =
         | JobType of Job
-        | JobFuncType of Job * Func // Func = Command or Operator
         | CommadFuncType of CommandFunction
         | OperatorFuncType of OperatorFunction
 
@@ -247,7 +246,6 @@ module CoreModule =
         inherit Indirect
             (match targetOption with
             | JobType job -> job.Name
-            | JobFuncType (job, _) -> job.Name
             | CommadFuncType func -> func.Name
             | OperatorFuncType func -> func.Name
             , parent)
@@ -267,14 +265,12 @@ module CoreModule =
         member _.TargetJob =
             match targetOption with
             | JobType job -> job
-            | JobFuncType (job, _) -> job
             | _ -> failwith "TargetJob is only available for JobType or JobFuncType."
 
         member _.TargetFunc =
             match targetOption with
             | CommadFuncType func -> func :> Func
             | OperatorFuncType func -> func :> Func
-            | JobFuncType (_, func) -> func 
             | _ -> failwith "TargetFunc is only available for FuncType or JobFuncType."
 
         /// Indicates if the target includes a job.
@@ -286,14 +282,12 @@ module CoreModule =
         member _.CallOperatorType  = 
             match targetOption with
             | JobType _ -> DuOPUnDefined
-            | JobFuncType (_, func) -> if (func :? OperatorFunction) then (func :?> OperatorFunction).OperatorType else DuOPUnDefined
             | CommadFuncType _ -> DuOPUnDefined
             | OperatorFuncType func -> func.OperatorType
 
         member _.CallCommandType  = 
             match targetOption with
             | JobType _ -> DuCMDUnDefined
-            | JobFuncType (_, func) -> if (func :? CommandFunction) then (func :?> CommandFunction).CommandType else DuCMDUnDefined
             | CommadFuncType func -> func.CommandType
             | OperatorFuncType _ -> DuCMDUnDefined
 
@@ -307,12 +301,12 @@ module CoreModule =
         member _.TargetWrapper = target
 
 
-
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:TaskDev seq, opFunc: OperatorFunction  option) =
+    type Job (name:string, tasks:TaskDev seq, duType:DataType, opFunc: OperatorFunction option) =
         inherit Named(name)
         member x.ActionType:JobActionType = getJobActionType name
         member x.DeviceDefs = tasks
+        member x.DataType =  duType
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
         //하나의 Job에는 하나의 Func만 지원 적용 
         member val OperatorFunction = opFunc with get, set
@@ -332,6 +326,8 @@ module CoreModule =
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
+
+
 
 
     /// 자신을 외부에서 물리적으로 조작하거나 조건을 나타날때 ex) system auto 물리버튼
@@ -515,10 +511,7 @@ module CoreModule =
             addCallVertex parent call
             call   
 
-        static member Create(target:Job, func:Func, parent:ParentWrapper) =
-            let call = Call((target, func)|>JobFuncType, parent)
-            addCallVertex parent call
-            call  
+     
 
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with

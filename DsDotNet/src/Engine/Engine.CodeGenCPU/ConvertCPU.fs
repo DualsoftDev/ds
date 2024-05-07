@@ -63,7 +63,10 @@ module ConvertCPU =
                 yield! vm.F2_RootReset()
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
-                yield vm.F3_VertexEndWithOutReal()
+                    yield vm.F3_VertexEndWithOutReal()    
+
+            if IsSpec (v, CallInFlow, AliasNotCare) && v.GetPureCall().Value.IsOperator then
+                    yield vm.F4_CallOperatorEnd()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 
@@ -163,15 +166,13 @@ module ConvertCPU =
         let coinCommandFuncs =
             s.GetVertices().OfType<Call>()
                 .Where(fun c->c.IsFunction)
-                .Select(fun c->c.TagManager :?> VertexMCall)
-
         [
             for coin in coinCommandFuncs do
                 if coin.IsOperator  //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
-                then yield! coin.C1_DoOperator()
+                then yield! coin.VC.C1_DoOperator()
                     
                 if coin.IsCommand //Command 함수는 Call Memo에 의해서 실행
-                then yield! coin.C2_DoCommand()
+                then yield! coin.VC.C2_DoCommand()
         ]
 
     let private emulationDevice(s:DsSystem) =

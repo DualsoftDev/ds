@@ -23,9 +23,9 @@ module XgiPrologModule =
         else
             xml
 
-    let validateVariableName (name:string) =
+    let validateVariableName (name:string) (targetType:PlatformTarget) =
         match name.ToUpper() with
-        | RegexPattern @"^([NMR][XBWDL]?)(\d+)$" [_reserved; _num] ->
+        | RegexPattern @"^([NMR][XBWDL]?)(\d+)$" [_reserved; _num] when targetType = XGI ->
             Error $"'{name}' is not valid symbol name.  (Can't use direct variable name)"
         | RegexPattern @"([\s]+)" [_ws] ->
             Error $"'{name}' contains white space char"
@@ -58,7 +58,7 @@ module XgiPrologModule =
     } with
         member x.Validate(targetType) =
             result {
-                let! _ = validateVariableName x.Name
+                let! _ = validateVariableName x.Name targetType
                 let! _ = if  x.Address.IsNullOrEmpty() && x.Device = ""  //빈주소 자동 변수로 허용
                          then Ok true 
                          else validateAddress x.Name x.Address targetType

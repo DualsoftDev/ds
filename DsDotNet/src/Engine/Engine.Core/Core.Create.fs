@@ -15,6 +15,21 @@ module CoreCreateModule =
         let system = DsSystem(systemName)
         system
 
+    let genClearRealAddForSingleReal (mySys: DsSystem) =
+        let updateSingleReal (flow:Flow) (real: Real) =
+            let oldReal = flow.Graph.Vertices.OfType<Real>().Head()
+            let realName = $"genClearReal{real.Name}"
+            let clearReal = Real.Create(realName, flow)
+            flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , "<|>", clearReal)) |> ignore
+            flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , ">", clearReal)) |> ignore
+
+        mySys.Flows.Iter(fun flow ->
+            let reals = flow.Graph.Vertices.OfType<Real>()
+
+            if reals.length() = 1
+            then updateSingleReal flow (reals.First())
+        )
+
     let createTaskDevUsingApiName (sys: DsSystem) (devName: string) (apiName: string): TaskDev =
 
         let api = 
@@ -54,10 +69,9 @@ module CoreCreateModule =
                     // Potentially update other ApiItems based on the new ApiItem
                     sys.ApiItems.TakeWhile(fun a -> a <> newApi)
                          .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.InterlockWeak, newApi.Name) |> ignore)
-
-
+                
                 newApi
-            else 
+            else
                 failwithf $"api {apiName} 중복 생성에러"
 
         TaskDev(api, TextAddrEmpty, TextAddrEmpty, devName)

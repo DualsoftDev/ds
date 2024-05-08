@@ -17,7 +17,7 @@ module DsAddressModule =
     let getCurrentMemoryIndex() = memoryCnt;
     let InitializeIOMemoryIndex () =
                 memoryCnt <- InitStartMemory
-                inCnt <- 0  
+                inCnt <- 0
                 outCnt <- 0
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
@@ -70,9 +70,12 @@ module DsAddressModule =
             then
                 let cnt =
                     match ioType with 
-                    | In      -> inCnt <- inCnt + 1        ; inCnt
-                    | Out     -> outCnt <- outCnt + 1      ; outCnt
-                    | Memory  -> memoryCnt <- memoryCnt + 1; memoryCnt
+                    | In      -> let ret = inCnt
+                                 inCnt <- inCnt + 1 ; ret
+                    | Out     -> let ret =outCnt
+                                 outCnt <- outCnt + 1    ;ret
+                    | Memory  -> let ret =memoryCnt
+                                 memoryCnt <- memoryCnt + 1; ret
                     | NotUsed -> failwithf $"{ioType} not support"
 
                 let getSlotInfoNonIEC(settingType: IOType, newCnt: int) =

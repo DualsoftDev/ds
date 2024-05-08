@@ -350,6 +350,7 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                           .Where(fun w->w.IsJob)
                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
                     
             let devs  = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev))
@@ -383,6 +384,7 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                            .Where(fun w->w.IsJob)  
                             .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
             let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
@@ -421,6 +423,7 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                            .Where(fun w->w.IsJob)
                             .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
             let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
@@ -462,6 +465,7 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetVerticesOfCoins().OfType<Call>()
+                            .Where(fun w->w.IsJob)
                             .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
             let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)

@@ -125,7 +125,9 @@ module ExportModule =
             if not (usedTagNames.ContainsKey(tagKV.Key)) 
                && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림
                && TagKindExt.GetVariableTagKind(tagKV.Value).IsNone //VariableTag 살림
-            then globalStorage.Remove(tagKV.Key)|>ignore
+            then 
+                globalStorage.Remove(tagKV.Key)|>ignore
+   
             )
 
         let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter

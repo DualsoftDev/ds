@@ -191,20 +191,18 @@ module EdgeModule =
     
     let checkRealEdgeErrExist (sys:DsSystem) (bStart:bool)  =
         let vs = sys.GetVertices()
-        let checkReals = vs.OfType<Real>()
-        let realAlias = vs.GetAliasTypeReals()
-        let realExs = vs.OfType<RealExF>()
-        let realExAlias = vs.GetAliasTypeRealExs()
+        let reals = vs.OfType<Real>()
+        //let callOperator = vs.OfType<Call>().Where(fun f -> f.IsOperator).Cast<Vertex>()
         let errors = System.Collections.Generic.List<Real>()
 
-        for real in checkReals do
-            let realAlias_ = realAlias.Where(fun f -> f.GetPure() = real).OfType<Vertex>()
-            let realExs_ = realExs.Where(fun f -> f.GetPure() = real).OfType<Vertex>()
-            let realExAlias_ = realExAlias.Where(fun f -> f.GetPure() = real).OfType<Vertex>()
+        for real in reals do
+            let realAlias_ = vs.GetAliasTypeReals().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
+            let realExs_ = vs.OfType<RealExF>().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
+            let realExAlias_ = vs.GetAliasTypeRealExs().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
             let checkList = ([real:>Vertex] @ realAlias_ @ realExs_ @ realExAlias_)
 
             let checks = if bStart then checkList |> Seq.collect(fun f -> getStartRootEdges(f))
-                                    else checkList |> Seq.collect(fun f -> getResetRootEdges(f))
+                                   else checkList |> Seq.collect(fun f -> getResetRootEdges(f))
             if checks.IsEmpty() then
                 errors.Add(real)
 

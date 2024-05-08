@@ -105,7 +105,7 @@ module internal XgiSymbolsModule =
         match xgxSymbol with
         | DuStorage(:? ITag as t) ->
             let name = t.Name
-                    //전처리  XGI % 생략시 자동 붙히기
+            //전처리  XGI % 생략시 자동 붙히기
             match prjParam.TargetType with
                 | XGI -> if t.Address <> TextAddrEmpty && not(t.Address.StartsWith("%"))
                          then

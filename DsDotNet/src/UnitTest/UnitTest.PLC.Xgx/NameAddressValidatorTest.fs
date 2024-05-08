@@ -19,14 +19,14 @@ type NameAddressValidatorTest() =
             "한글_이름"
         ]
         for name in validNames do
-            validateVariableName name |> Result.isOk === true
+            validateVariableName name XGI |> Result.isOk === true
 
         let invalidNames = [
             "mx0"; "mb0"; "mb999"; "MX0"; "Mx0"; "mX0"    // 직접 변수와 동일한 이름 불허
             "v 0"; "v\t0"; "v\r0";
         ]
         for xName in invalidNames do
-            validateVariableName xName |> Result.isError === true
+            validateVariableName xName XGI |> Result.isError === true
 
 
     [<Test>]

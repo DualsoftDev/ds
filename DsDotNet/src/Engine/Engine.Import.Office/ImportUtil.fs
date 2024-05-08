@@ -129,23 +129,7 @@ module ImportU =
 
         dicSeg.Add(node.Key, call)
 
-
-    //let private createExSystemReal (mySys: DsSystem, node: pptNode, parentFlow: Flow) =
-    //    let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-
-    //    if mySys.TryFindExternalSystem(sysName).IsNone then
-    //        node.Shape.ErrorName(ErrID._50, node.PageNum)
-
-    //    let realExS =
-    //        match mySys.Jobs.TryFind(fun job -> job.Name = sysName + "_" + apiName) with
-    //        | Some job ->
-    //            if job.LinkDefs.any () then
-    //                CallSys.Create(job, DuParentFlow(parentFlow))
-    //            else
-    //                node.Shape.ErrorName(ErrID._51, node.PageNum)
-    //        | None -> node.Shape.ErrorName(ErrID._49, node.PageNum)
-
-    //    realExS
+        
 
     let private getParent
         (
@@ -504,6 +488,9 @@ module ImportU =
             createCall ()
             //Alias Node 처리 마감
             createAlias ()
+
+            mySys.ReferenceSystems
+                 .Iter(genClearRealAddForSingleReal)
 
         //pptEdge 변환 및 등록
         [<Extension>]

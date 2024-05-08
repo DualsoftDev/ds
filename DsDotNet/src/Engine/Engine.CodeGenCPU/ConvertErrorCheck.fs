@@ -67,7 +67,7 @@ module ConvertErrorCheck =
     let checkErrRealResetExist (sys:DsSystem) =
         let errors = checkRealEdgeErrExist sys false
         if errors.Count > 0 then
-            let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Flow.Name}.{e.Name}"))
+            let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Parent.GetFlow().Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
 
     let checkDuplicatesNNullAddress (sys: DsSystem) = 

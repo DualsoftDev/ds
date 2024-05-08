@@ -121,8 +121,11 @@ module internal ModelFindModule =
 
     let ofAliasForCallVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)
+        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)  
 
+    let ofCallForOperator (xs:Vertex seq) =
+        xs.OfType<Call>().Where(fun f -> f.IsOperator).Cast<Vertex>()
+        
     let ofAliasForRealVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
         |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
@@ -230,10 +233,13 @@ type FindExtension =
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
-
-
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
+
+    [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
+    [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =  
+                    getVerticesOfSystem(x) |> ofCallForOperator
+
     [<Extension>] static member GetVerticesHasJob(x:DsSystem) =  
                     getVerticesOfSystem(x)
                         .Choose(fun v -> v.GetPureCall())

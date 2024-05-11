@@ -238,9 +238,8 @@ module TagManagerModule =
         let timerOnDelayBit = timer  s $"{v.Name}_TON"  sys (sysManager.TargetType)
         let memo           = createTag "Memo" false VertexTag.callMemo
         
-        let callFuncPS  = createTag "callFuncPS" false VertexTag.callFuncPlanSet
-        let callFuncPE  = createTag "callFuncPE" false VertexTag.callFuncPlanEnd
-        let callJobAndSensor  = createTag "callJobAndSensor" false VertexTag.callJobAndSensor
+        let callCommandEnd  = createTag "callCommandEnd" false VertexTag.callCommandEnd
+        let callOperatorValue  = createTag "callOperatorValue" false VertexTag.callOperatorValue
    
         let rxErrShortOn     = createTag "rxErrShortOn"      false VertexTag.rxErrShortOn    
         let rxErrShortRising = createTag "rxErrShortRising"  false VertexTag.rxErrShortRising
@@ -265,11 +264,9 @@ module TagManagerModule =
         member _.RXErrShortOn       = rxErrOpenOff    
         member _.RXErrShortRising   = rxErrOpenRising 
         member _.RXErrShortTemp     = rxErrOpenTemp   
-        ///command Plan Set
-        member _.PSFunc           =  callFuncPS
-        ///command Plan End
-        member _.PEFunc           =  callFuncPE
-        ///device Action Sensors And 연산 Bit
-        member _.JobAndSensor    =  callJobAndSensor
+        ///callCommandEnd
+        member _.CallCommandEnd           =  callCommandEnd
+        ///Call Operator 연산결과 값 (T/F)
+        member _.CallOperatorValue    =  callOperatorValue
 
         

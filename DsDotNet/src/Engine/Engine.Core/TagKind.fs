@@ -14,6 +14,8 @@ module TagKindList =
     let [<Literal>] TagStartApi          = 12000
     let [<Literal>] TagStartAction       = 14000
     let [<Literal>] TagStartActionHwTag  = 15000
+    let [<Literal>] TagStartVariable     = 16000
+    let [<Literal>] TagStartJob          = 17000
 
     let skipValueChangedForTagKind = -1
     
@@ -101,11 +103,11 @@ module TagKindList =
     |test_lamp                 = 10028
     |home_lamp                 = 10029
     
-    | flowPause                = 10040
-    | flowStopError            = 10041
-    | flowStopConditionErr     = 10042
-    | flowStopConditionErrLamp = 10043
-    | flowStopEmergencyErrLamp = 10044
+    |flowPause                = 10040
+    |flowStopError            = 10041
+    |flowStopConditionErr     = 10042
+    |flowStopConditionErrLamp = 10043
+    |flowStopEmergencyErrLamp = 10044
 
 
       //복수 mode  존재 불가
@@ -155,9 +157,9 @@ module TagKindList =
     |realData                  = 11026
     |realSync                  = 11027
     |callMemo                  = 11028
-    |callFuncPlanSet           = 11029
-    |callFuncPlanEnd           = 11030
-    |callJobAndSensor          = 11031
+
+    |callCommandEnd            = 11030
+    |callOperatorValue         = 11031
     
     |txErrTimeShortage         = 11033
     |txErrTimeOver             = 11034
@@ -213,4 +215,10 @@ module TagKindList =
     |PcUserVariable               = 16001
     |PlcSysVariable               = 16002
     |PlcUserVariable              = 16003
+    
+    /// 17000 ~ 17999
+    [<Flags>]
+    type JobTag    =
+    |JobAndExprTag                = 17000
+    |JobOrExprTag                 = 17001
 

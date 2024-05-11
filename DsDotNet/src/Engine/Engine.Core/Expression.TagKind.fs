@@ -1,4 +1,4 @@
-﻿namespace Engine.Core
+namespace Engine.Core
 
 open Dual.Common.Core.FS
 open System
@@ -18,6 +18,7 @@ module TagKindModule =
         | EventAction   of Tag: IStorage * Target: TaskDev      * TagKind: ActionTag
         | EventHwSys    of Tag: IStorage * Target: HwSystemItem * TagKind: HwSysTag
         | EventVariable of Tag: IStorage * Target: DsSystem     * TagKind: VariableTag
+        | EventJob      of Tag: IStorage * Target: Job          * TagKind: JobTag
         
 
     let TagDSSubject = new Subject<TagDS>()
@@ -44,12 +45,16 @@ type TagKindExt =
     [<Extension>] static member GetActionTagKind    (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
     [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.tryGetEnumValue<HwSysTag>(x.TagKind)
     [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.tryGetEnumValue<VariableTag>(x.TagKind)
+    [<Extension>] static member GetJobTagKind       (x:IStorage) = DU.tryGetEnumValue<JobTag>(x.TagKind)
     [<Extension>] static member GetAllTagKinds () : TagKindTuple array =
                     EnumEx.Extract<SystemTag>()
                     @ EnumEx.Extract<FlowTag>()
                     @ EnumEx.Extract<VertexTag>()
                     @ EnumEx.Extract<ApiItemTag>()
                     @ EnumEx.Extract<ActionTag>()
+                    @ EnumEx.Extract<HwSysTag>()
+                    @ EnumEx.Extract<VariableTag>()
+                    @ EnumEx.Extract<JobTag>()
 
     [<Extension>]
     static member GetTagInfo (x:IStorage) =
@@ -65,6 +70,7 @@ type TagKindExt =
             | :? ApiItem as a      ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
             | :? TaskDev  as d      ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
             | :? HwSystemItem as h ->Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
+            | :? Job as j          ->Some( EventJob     (x, j, x.GetJobTagKind().Value))
             |_ -> None
         |None -> None
    
@@ -78,6 +84,7 @@ type TagKindExt =
         |EventAction    (i, _, _) -> i
         |EventHwSys     (i, _, _) -> i
         |EventVariable  (i, _, _) -> i
+        |EventJob       (i, _, _) -> i
 
 
 
@@ -92,32 +99,35 @@ type TagKindExt =
         |EventAction    ( _, target, _) -> target |> box
         |EventHwSys     ( _, target, _) -> target |> box
         |EventVariable  ( _, target, _) -> target |> box
+        |EventJob       ( _, target, _) -> target |> box
 
       
     [<Extension>]
     static member GetTagToText(x:TagDS) =
         let getText(tag:IStorage) (obj:INamed) kind = $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
         match x with
-        |EventSystem (tag, obj, kind) -> getText tag obj kind
-        |EventFlow   (tag, obj, kind) -> getText tag obj kind
-        |EventVertex (tag, obj, kind) -> getText tag obj kind
-        |EventApiItem(tag, obj, kind) -> getText tag obj kind
-        |EventAction (tag, obj, kind) -> getText tag obj kind
-        |EventHwSys  (tag, obj, kind) -> getText tag obj kind
+        |EventSystem    (tag, obj, kind) -> getText tag obj kind
+        |EventFlow      (tag, obj, kind) -> getText tag obj kind
+        |EventVertex    (tag, obj, kind) -> getText tag obj kind
+        |EventApiItem   (tag, obj, kind) -> getText tag obj kind
+        |EventAction    (tag, obj, kind) -> getText tag obj kind
+        |EventHwSys     (tag, obj, kind) -> getText tag obj kind
         |EventVariable  (tag, obj, kind) -> getText tag obj kind
+        |EventJob       (tag, obj, kind) -> getText tag obj kind
         
     
 
     [<Extension>]
     static member GetSystem(x:TagDS) =
         match x with
-        |EventSystem (_, obj, _) -> obj
-        |EventFlow   (_, obj, _) -> obj.System
-        |EventVertex (_, obj, _) -> obj.Parent.GetSystem()       
-        |EventApiItem(_, obj, _) -> obj.ApiSystem           //active system이 아니고 loaded 시스템
-        |EventAction (_, obj, _) -> obj.ApiItem.ApiSystem   //active system이 아니고 loaded 시스템
-        |EventHwSys  (_, obj, _) -> obj.System
+        |EventSystem    (_, obj, _) -> obj
+        |EventFlow      (_, obj, _) -> obj.System
+        |EventVertex    (_, obj, _) -> obj.Parent.GetSystem()       
+        |EventApiItem   (_, obj, _) -> obj.ApiSystem           //active system이 아니고 loaded 시스템
+        |EventAction    (_, obj, _) -> obj.ApiItem.ApiSystem   //active system이 아니고 loaded 시스템
+        |EventHwSys     (_, obj, _) -> obj.System
         |EventVariable  (_, obj, _) -> obj
+        |EventJob       (_, obj, _) -> obj.System
         
     [<Extension>]
     static member IsStatusTag(x:TagDS) =
@@ -196,3 +206,4 @@ type TagKindExt =
         |EventAction (_, _, _) -> false
         |EventHwSys  (_, _, _) -> false
         |EventVariable  (_, _, _) -> true
+        |EventJob       (_, _, _) -> true

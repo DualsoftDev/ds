@@ -63,8 +63,8 @@ type VertexManager with
     member v.F4_CallOperatorEnd() =
         let sets =
             match v.Vertex  with
-            | :? Call as call when call.IsOperator ->   //test ahn : OP 결과값으로 인과처리 추가
-                    (*call.EndAction  <||>*) ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
+            | :? Call as call when call.IsOperator ->  
+                    call.VC.CallOperatorValue.Expr  <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
             | _ ->
                 failwithlog "Error"
              

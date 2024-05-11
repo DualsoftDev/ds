@@ -88,8 +88,8 @@ module ModelAnswers =
             C = (1600, 500, 300, 300);
         }
         [finish] = {
-            F.R2;
             F.R1;
+            F.R2;
         }
         [disable] = {
             F.Main.Ap;

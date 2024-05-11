@@ -74,6 +74,10 @@ module internal XgiSymbolsModule =
 
             if t.Address = TextAddrEmpty || t.Address = TextSkip then
                 let addr:string = allocator()
+
+                if "M0575E" = addr
+                then    
+                    ()
                 t.Address <- addr
 
     let getXGXTagInfo (targetType:PlatformTarget) (address:string) (name:string) =  

@@ -63,7 +63,13 @@ module ImportIOTable =
         | DataType = 1
         | Manual = 2
 
-    let getDevName (row: Data.DataRow) = $"{row.[(int) IOColumn.Flow]}_{row.[(int) IOColumn.Name]}"
+    let getDevName (row: Data.DataRow) = 
+        let flowName = row.[(int) IOColumn.Flow]
+        if flowName <> ""
+        then
+            $"{flowName}_{row.[(int) IOColumn.Name]}"
+        else 
+            $"{row.[(int) IOColumn.Name]}"
 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 

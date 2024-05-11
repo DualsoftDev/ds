@@ -43,27 +43,3 @@ type VertexManager with
         (sets, rsts) ==| (v.MM, getFuncName())
 
     
-    member v.C2_ActionOut() =
-        let v = v :?> VertexMCall
-        let coin = v.Vertex :?> Call
-        [
-            let rstNormal = coin._off.Expr
-            for td in coin.TargetJob.DeviceDefs do
-                let api = td.ApiItem
-                if td.OutAddress <> TextSkip && td.OutAddress <> TextAddrEmpty
-                then 
-                    let rstMemos = coin.MutualResetCalls.Select(fun c->c.VC.MM)
-                    let sets =
-                        if RuntimeDS.Package.IsPackageEmulation()
-                        then api.PE.Expr <&&> api.PS.Expr <&&> coin._off.Expr
-                        else api.PE.Expr <&&> api.PS.Expr <&&> !!rstMemos.ToOrElseOff()
-
-                    if coin.TargetJob.ActionType = JobActionType.Push 
-                    then 
-                            let rstPush = rstMemos.ToOr()
-                        
-                            yield (sets, rstPush  ) ==| (td.AO, getFuncName())
-                    else 
-                            yield (sets, rstNormal) --| (td.AO, getFuncName())
-        ]
-

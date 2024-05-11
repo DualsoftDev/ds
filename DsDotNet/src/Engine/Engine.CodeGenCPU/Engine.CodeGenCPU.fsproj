@@ -16,7 +16,7 @@
         <Compile Include="TagManager/TagManager.Flow.fs" />
         <Compile Include="TagManager/TagManager.Vertex.fs" />
         <Compile Include="TagManager/TagManager.Api.fs" />
-        <Compile Include="TagManager/TagManager.Link.fs" />
+        <Compile Include="TagManager\TagManager.Job.fs" />
         <Compile Include="Expression.Extension.fs" />
         <Compile Include="Core.Extensions.Utils.fs" />
         <Compile Include="AutoGen.Address.fs" />

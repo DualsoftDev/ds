@@ -8,9 +8,13 @@ open System
 
 [<AutoOpen>]
 module ConvertCpuTaskDev =
+    
+    let addressExist address = address  <> TextSkip && address <> TextAddrEmpty
 
     type TaskDev with
         member td.AO = td.OutTag :?> Tag<bool>
+        member td.ExistInput   = addressExist td.InAddress
+        member td.ExistOutput  = addressExist td.OutAddress
 
     type HwSystemDef with
         member s.ActionINFunc = 

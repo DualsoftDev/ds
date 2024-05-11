@@ -73,12 +73,7 @@ module ConvertCPU =
                 yield! vm.M3_CallErrorTXMonitor() 
                 yield! vm.M4_CallErrorRXMonitor() 
                 yield vm.M6_CallErrorTotalMonitor() 
-               
-
-                if (v :?> Call).IsJob
-                then
-                    yield! vm.C2_ActionOut()
-                    yield vm.J1_JobActionSensor() 
+         
 
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
@@ -169,12 +164,19 @@ module ConvertCPU =
         [
             for coin in coinCommandFuncs do
                 if coin.IsOperator  //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
-                then yield! coin.VC.C1_DoOperator()
+                then yield coin.VC.C1_DoOperator()
                     
                 if coin.IsCommand //Command 함수는 Call Memo에 의해서 실행
                 then yield! coin.VC.C2_DoCommand()
         ]
 
+    let private applyJob(s:DsSystem) =
+            [
+                for jm in s.Jobs.Map(fun j->j.TagManager :?> JobManager) do
+                   yield! jm.J1_JobAndOrTags()
+                   yield! jm.J2_JobActionOuts() 
+            ]
+        
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
@@ -254,6 +256,10 @@ module ConvertCPU =
             
             //funcCall 적용 
             yield! funcCall sys
+
+            //allpyJob 적용 
+            yield! applyJob sys
+     
             
             //Timer Count 적용 
             yield! applyTimerCounterSpec sys

@@ -455,17 +455,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let candidateCtxs: ParserRuleContext list =
             let normalCausalContext =  
-                let multictx = sysctx.TryFindChildren<Identifier1ListingsContext>()
+                let nonCausalsContext = sysctx.TryFindChildren<NonCausalsContext>()
                 [
-                    if multictx.any()
-                        then yield! multictx |> Seq.collect(fun f->f.Descendants<Identifier1Context>().Cast<ParserRuleContext>())
-                        else yield! sysctx.Descendants<Identifier1ListingContext>().Cast<ParserRuleContext>() 
+                    if nonCausalsContext.any() then
+                        let nonCausalGroup = nonCausalsContext.Head()
+                        yield!  nonCausalGroup.TryFindChildren<Identifier1Context>().Cast<ParserRuleContext>()
+                        yield!  nonCausalGroup.TryFindChildren<IdentifierCommandNameContext>().Cast<ParserRuleContext>()
                 ]
             [ 
                 yield! normalCausalContext
-                yield! sysctx.Descendants<Identifier1CommandContext>().Cast<ParserRuleContext>() 
-                yield! sysctx.Descendants<Identifier1OperatorContext>().Cast<ParserRuleContext>() 
+                yield! sysctx.Descendants<IdentifierCommandNameContext>().Cast<ParserRuleContext>() 
+                yield! sysctx.Descendants<IdentifierOperatorNameContext>().Cast<ParserRuleContext>() 
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
+                yield! sysctx.Descendants<NonCausalContext>().Cast<ParserRuleContext>() 
             ]
 
         let tokenCreator (cycle: int) =
@@ -492,8 +494,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for (optParent, ctxInfo) in candidates do
                     let parent = optParent
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-                    if  (ctxInfo.ContextType = typeof<Identifier1OperatorContext> 
-                       ||ctxInfo.ContextType = typeof<Identifier1CommandContext>)
+                    if  (ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> 
+                       ||ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
                          && existing.IsNone
                     then
                         let func = tryFindFunc system (ctxInfo.Names.CombineQuoteOnDemand()) |> Option.get
@@ -662,7 +664,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
                         jobName, duDataType
 
-                let job = Job(jobName, apiItems.Cast<TaskDev>() |> Seq.toList, duDataType, None)
+                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, duDataType, None)
                 job |> system.Jobs.Add
 
 

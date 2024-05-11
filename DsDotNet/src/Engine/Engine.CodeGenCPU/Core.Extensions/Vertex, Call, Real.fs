@@ -10,6 +10,8 @@ open System
 module ConvertCpuVertex =
 
 
+    let getJobManager(c:Call) = c.TargetJob.TagManager :?> JobManager
+       
     let getSafetyExpr(xs:Call seq, sys:DsSystem) =    
         if xs.any()
         then
@@ -39,16 +41,18 @@ module ConvertCpuVertex =
                     .any()
             | false -> false
             
-        member c.JobAndSensor = c.VC.JobAndSensor
 
         member c.UsingTon  = c.CallOperatorType = DuOPTimer
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingNot  = c.CallOperatorType = DuOPNot
         member c.UsingMove  = c.CallCommandType = DuCMDCode
         member c.EndPlan =  
-                    if c.IsFunction
+                    if c.IsCommand
                     then
-                        (c.TagManager :?> VertexMCall).PEFunc.Expr
+                        (c.TagManager :?> VertexMCall).CallCommandEnd.Expr
+                    elif c.IsOperator
+                    then
+                        (c.TagManager :?> VertexMCall).CallOperatorValue.Expr
                     else 
                         c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
 
@@ -56,12 +60,12 @@ module ConvertCpuVertex =
                 if c.UsingNot 
                     then 
                         if c.HasSensor
-                        then !!c.JobAndSensor.Expr  //안전상이 이유로 센서 OR 사용시 job을 분해해서 사용(하나라도 감지되지 않아야)
+                        then !!getJobManager(c).JobOrExprTag.Expr  //안전상이 이유로 센서 OR 사용시 job을 분해해서 사용(하나라도 감지되지 않아야)
                         else failwithf $"$n 함수는 실제 Input address가 있어야 가능합니다. {c.Name} "   
 
                 else
                     if c.HasSensor 
-                        then c.JobAndSensor.Expr
+                        then getJobManager(c).JobAndExprTag.Expr
                         else c.EndPlan
 
         member c.EndAction = 
@@ -93,12 +97,12 @@ module ConvertCpuVertex =
         member c.PSs =
             if c.IsJob 
             then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PS)
-            else [c.VC.PSFunc]
+            else [c.VC._on]
 
         member c.PEs =
             if c.IsJob 
             then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PE)
-            else [c.VC.PEFunc]
+            else [c.VC.CallCommandEnd]
 
         member c.TXs = 
             if c.IsJob

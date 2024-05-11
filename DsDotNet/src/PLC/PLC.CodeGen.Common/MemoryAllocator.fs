@@ -49,7 +49,7 @@ module MemoryAllocator =
         let startByte, endByte = availableByteRange
         /// optional fragmented bit position
         let mutable ofBit: int option = None // Some (startByte * 8)
-        /// optional framented byte [start, end) position
+        /// optional framented byte [start, end] position
         let mutable ofByteRange: IntRange option = None
         let mutable byteCursor = startByte
 
@@ -76,7 +76,7 @@ module MemoryAllocator =
                     | None, Some(s, e) ->
                         let bit = s * 8
                         ofBit <- Some(bit + 1)
-                        ofByteRange <- if s + 1 = e then None else Some(s + 1, e)
+                        ofByteRange <- if s + (unitSize/8) = e then None else Some(s + (unitSize/8), e)
                         bit
                     | None, None ->
                         let bit = byteCursor * 8

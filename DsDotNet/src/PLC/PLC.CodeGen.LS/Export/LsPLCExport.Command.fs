@@ -590,15 +590,13 @@ module internal rec Command =
             let terminalText =
                 match terminal, prjParam.TargetType with
                 | :? IStorage as storage, XGK ->
-                    match storage.Address, storage.Name with
-                    | "", StartsWith("_") -> storage.Name
-                    | _ -> storage.Address
-                | :? IStorage as storage, _ -> 
-                     if storage.Name.Contains (xgkTimerCounterContactMarking) then
+                    if storage.Name.Contains (xgkTimerCounterContactMarking) then
                         storage.Name.Replace (xgkTimerCounterContactMarking, "")
                      else
-                        storage.Name
-                     
+                        match storage.Address, storage.Name with
+                        | "", StartsWith("_") -> storage.Name
+                        | _ -> storage.Address
+                | :? IStorage as storage, _ ->   storage.Name
                 | :? LiteralHolder<bool> as onoff, _ -> if onoff.Value then "_ON" else "_OFF"
                 | _ ->
                     terminal.ToText()

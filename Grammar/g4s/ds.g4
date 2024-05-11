@@ -179,10 +179,14 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier12: (identifier1 | identifier2);
     identifier23: (identifier2 | identifier3);
     identifier123: (identifier1 | identifier2 | identifier3);
-
-    identifier1Operator: '#'identifier1;
-    identifier1Command: identifier1'()';
     identifier123CNF: identifier123 (COMMA identifier123)*;
+
+    identifierCommandName : IDENTIFIER1 ;
+    identifierCommandPara : IDENTIFIER1 ;
+    identifierOperatorName : IDENTIFIER1 ;
+
+    identifierOperator: '#'identifierOperatorName;
+    identifierCommand: identifierCommandName '(' identifierCommandPara? ')';
 
     flowPath: identifier2;
 
@@ -253,17 +257,14 @@ propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableB
 flowBlock
     : '[' 'flow' ']' identifier1 '=' '{' (
         causal | parentingBlock 
-        | identifier1Listing | identifier1Listings 
-        | identifier1Operator
+        | nonCausal | nonCausals 
         | aliasBlock
         // | safetyBlock
         )* '}'  (SEMICOLON)?   // |flowTask|callDef
     ;
-    parentingBlock: identifier1 '=' '{' (identifier1Listings | causal | identifier1Commands )* '}';
-
-    identifier1Listing: identifier1  SEMICOLON;     // A;
-    identifier1Listings: (identifier1 (COMMA identifier1)*)?  SEMICOLON;     // A, B, C;
-    identifier1Commands: (identifier1Command (COMMA identifier1Command)*)?  SEMICOLON;     // A(), B(), C();
+    parentingBlock: identifier1 '=' '{' (causal | nonCausal | nonCausals)* '}';
+    nonCausal : (identifier1 | identifierCommand);
+    nonCausals: (nonCausal (COMMA nonCausal)*)?  SEMICOLON;     // A, B(), C;
         
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
@@ -332,7 +333,7 @@ jobBlock: '[' 'jobs' ']' '=' '{' (callListing|linkListing)* '}';
 
 
 
-funcCall: identifier1Operator | identifier1Command;
+funcCall: identifierOperator | identifierCommand;
 
 
 
@@ -380,7 +381,7 @@ conditionBlock: '[' 'conditions' ']' '=' '{' (categoryBlocks)* '}';
 causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF: causalToken (',' causalToken)* ;
-    causalToken: identifier12 | identifier1Operator | identifier1Command;
+    causalToken: identifier12 | identifierOperator | identifierCommand;
 
     causalOperator
         : '>'   // CAUSAL_FWD

@@ -302,9 +302,10 @@ module CoreModule =
 
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, tasks:TaskDev seq, duType:DataType, opFunc: OperatorFunction option) =
-        inherit Named(name)
+    type Job (name:string, system:DsSystem, tasks:TaskDev seq, duType:DataType, opFunc: OperatorFunction option) =
+        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         member x.ActionType:JobActionType = getJobActionType name
+        member x.System = system
         member x.DeviceDefs = tasks
         member x.DataType =  duType
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)

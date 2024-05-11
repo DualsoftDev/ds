@@ -110,6 +110,8 @@ module ParserUtilityModule =
                     || tree :? Identifier2Context
                     || tree :? Identifier3Context
                     || tree :? Identifier4Context
+                    || tree :? IdentifierCommandNameContext
+                    || tree :? IdentifierOperatorNameContext
 
             x.TryFindFirstChild(pred, true)
 
@@ -124,7 +126,8 @@ module ParserUtilityModule =
             option {
                 let! idCtx = x.TryFindNameComponentContext()
 
-                if idCtx :? Identifier1Context then
+                if  idCtx :? Identifier1Context 
+                then
                     return [| idCtx.GetText().DeQuoteOnDemand() |]
                 else
                     let! name = x.TryGetName()

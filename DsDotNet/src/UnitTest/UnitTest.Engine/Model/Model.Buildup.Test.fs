@@ -35,10 +35,10 @@ module ModelBuildupTests1 =
             let apiM = apis.First(fun ai -> ai.Name = "RET")
             let callAp =
                 let apiItem = TaskDev(apiP, "%I1", "%Q1",  dev.Name)
-                Job("Ap", [apiItem], DuBOOL, None)
+                Job("Ap", system, [apiItem], DuBOOL, None)
             let callAm =
                 let apiItem = TaskDev(apiM, "%I2", "%Q2", dev.Name)
-                Job("Am", [apiItem], DuBOOL, None)
+                Job("Am", system, [apiItem], DuBOOL, None)
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 

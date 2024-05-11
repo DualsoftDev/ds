@@ -96,7 +96,7 @@ module ErrID =
     let _1007 = "시스템에 Condition 이름이 없습니다."
     let _1008 = "Function 적용은 1개만 가능합니다."
     let _1009 = "그룹 Action Function 적용은 처음 Device 1개에만 적용해서 그룹에 전체 반영됩니다."
-    let _1010 = "함수에대한 내용이 없습니다. ex) $t 2000"
+    let _1010 = "함수에 대한 내용이 없습니다. ex) $D100 = 55;"
 
 //todo
 // "리얼 행위의 자식은 한곳에만 정의가능합니다.(alias, exFlow 정의불가)"

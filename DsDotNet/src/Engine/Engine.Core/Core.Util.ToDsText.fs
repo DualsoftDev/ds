@@ -180,11 +180,12 @@ module internal ToDsTextModule =
             if operators.Any() then
                 yield $"{tab}[operators] = {lb}"
                 for op in operators do
+                    let name = op.Name.QuoteOnDemand()
                     if op.OperatorType = DuOPUnDefined
                     then 
-                        yield $"{tab2}{op.Name};"
+                        yield $"{tab2}{name};"
                     else 
-                        yield! funcCodePrint op.Name (op.ToDsText())
+                        yield! funcCodePrint name (op.ToDsText())
 
                 yield $"{tab}{rb}"
 
@@ -192,11 +193,12 @@ module internal ToDsTextModule =
             if commands.Any() then
                 yield $"{tab}[commands] = {lb}"
                 for cmd in commands do
+                    let name = cmd.Name.QuoteOnDemand()
                     if cmd.CommandType = DuCMDUnDefined ||  cmd.CommandCode = ""
                     then 
-                        yield $"{tab2}{cmd.Name};"
+                        yield $"{tab2}{name};"
                     else
-                        yield! funcCodePrint $"{cmd.Name}" (cmd.ToDsText())
+                        yield! funcCodePrint $"{name}" (cmd.ToDsText())
 
                 yield $"{tab}{rb}"
 

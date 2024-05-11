@@ -64,6 +64,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     member val ButtonCategories = HashSet<(DsSystem * string)>()
 
     member val TheSystem: DsSystem = getNull<DsSystem> () with get, set
+    member val IsJobParsingDone: bool = false with get, set
 
     /// 하나의 main.ds 를 loading 할 때, 외부 system 을 copy/reference 로 loading 시, 해당 system 의 구분을 위해서 사용
     member val OptLoadedSystemName: string option = None with get, set
@@ -267,8 +268,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             options.Storages.Add(variTag.Name, variTag)
             )
 
+        x.IsJobParsingDone <- true
+
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
-        
+        if not(x.IsJobParsingDone)
+        then
+            failwithlog "[Jobs] Session must be loaded first."
+
         ctx.operatorNameOnly() |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
             x.TheSystem.Functions.Add(OperatorFunction(funcName)) )
@@ -280,7 +286,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
             let newFunc = OperatorFunction.Create(funcName, pureCode)
-            let assignCode = $"bool {funcName} = false; ${funcName} = {pureCode}" 
+            //let assignCode = $"bool {funcName} = false; ${funcName} = {pureCode}" 
+            let assignCode = $"${funcName} = {pureCode}" 
 
             let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
             statements.Iter(fun s->
@@ -293,7 +300,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             )
 
     override x.EnterCommandBlock(ctx: CommandBlockContext) =
-        
+        if not(x.IsJobParsingDone)
+        then
+            failwithlog "[Jobs] Session must be loaded first."
+
         ctx.commandNameOnly() |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
             x.TheSystem.Functions.Add(CommandFunction(funcName)) )

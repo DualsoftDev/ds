@@ -375,14 +375,10 @@ module PPTObjectModule =
         do
 
             nodeType <- getNodeType() 
-            if nodeType = CALL  
+            if nodeType = CALL   || nodeType = CALLOPFunc
             then 
                 let callName =  GetHeadBracketRemoveName(shape.InnerText)
                 name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimNewLine
-
-            //elif nodeType = CALLOPFunc && shape.InnerText.Contains(".")
-            //then
-            //    name <- shape.InnerText.Replace(".", "_") + "_OPERATOR"
             else 
                 name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
 
@@ -446,10 +442,10 @@ module PPTObjectModule =
         member x.Position = shape.GetPosition(slieSize)
 
         member x.JobName = pageTitle+"_"+name.Replace(".", "_")
-        member x.OperatorName = x.JobName+"_OP"
-        member x.CommandName = x.JobName+"_CMD"
+        member x.OperatorName = x.JobName(*+"_OP"*)
+        member x.CommandName  = x.JobName(*+"_CMD"*)
         member x.OperatorCode = 
-                $"${x.JobName} == true;"
+                $"${x.JobName.QuoteOnDemand()} == true;"
 
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 

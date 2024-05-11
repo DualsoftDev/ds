@@ -637,6 +637,7 @@ namespace Engine
         mv1up = { A.""+""(%I300, %Q300); }
         mv1dn = { A.""-""(%I301, %Q301); }
     }
+    [variables] = {}
     [operators] = {
         OP1 = #{$mv1up == true;}
         OP2 = #{$mv1dn == true;}

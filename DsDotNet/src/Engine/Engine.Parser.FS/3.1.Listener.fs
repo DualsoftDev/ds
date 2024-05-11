@@ -46,7 +46,7 @@ module ListnerCommonFunctionGenerator =
         // 함수 호출과 관련된 매개변수 추출
         let excuteCode = fDef.operator().GetText()
         excuteCode |> getCode
-
+  
 /// <summary>
 /// System, Flow, Parenting(껍데기만),
 /// Interface name map 구조까지 생성
@@ -55,8 +55,17 @@ module ListnerCommonFunctionGenerator =
 /// </summary>
 type DsParserListener(parser: dsParser, options: ParserOptions) =
     inherit dsBaseListener()
-    do parser.Reset()
 
+    let checkVariableNJobParsingDone(x:DsParserListener) = 
+        if not(x.IsJobParsingDone)
+        then
+            failwithlog "[jobs] Session must be loaded first."
+        if not(x.IsVariableParsingDone)
+        then
+            failwithlog "[variables] Session must be loaded first."
+
+    do parser.Reset()
+   
     member val AntlrParser = parser
     member val ParserOptions = options with get, set
 
@@ -65,6 +74,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     member val TheSystem: DsSystem = getNull<DsSystem> () with get, set
     member val IsJobParsingDone: bool = false with get, set
+    member val IsVariableParsingDone: bool = false with get, set
 
     /// 하나의 main.ds 를 loading 할 때, 외부 system 을 copy/reference 로 loading 시, 해당 system 의 구분을 위해서 사용
     member val OptLoadedSystemName: string option = None with get, set
@@ -251,7 +261,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let value = vari.initValue().GetText().TrimStart('(').TrimEnd(')')
             addVari varName varType  value true
             )
-
+        x.IsVariableParsingDone <- true
+            
     override x.EnterJobBlock(ctx: JobBlockContext) = 
         let jobs = ctx.callListing()
         jobs |> Seq.iter (fun job ->
@@ -271,10 +282,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         x.IsJobParsingDone <- true
 
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
-        if not(x.IsJobParsingDone)
-        then
-            failwithlog "[Jobs] Session must be loaded first."
-
+        checkVariableNJobParsingDone(x)
+    
         ctx.operatorNameOnly() |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
             x.TheSystem.Functions.Add(OperatorFunction(funcName)) )
@@ -288,7 +297,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let newFunc = OperatorFunction.Create(funcName, pureCode)
             let code = $"${funcName} = {pureCode};"
             let assignCode = 
-                match x.TheSystem.Jobs.any(fun j->j.Name = funcName) with
+                match options.Storages.any(fun s->s.Key = funcName) with
                 | true ->   code // EnterJobBlock job Tag 에서 이미 만듬 
                 | false ->  $"bool {funcName} = false;{code}"
 
@@ -303,10 +312,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             )
 
     override x.EnterCommandBlock(ctx: CommandBlockContext) =
-        if not(x.IsJobParsingDone)
-        then
-            failwithlog "[Jobs] Session must be loaded first."
-
+        checkVariableNJobParsingDone(x)
+      
         ctx.commandNameOnly() |> Seq.iter (fun fDef ->
             let funcName = fDef.TryFindIdentifier1FromContext().Value
             x.TheSystem.Functions.Add(CommandFunction(funcName)) )

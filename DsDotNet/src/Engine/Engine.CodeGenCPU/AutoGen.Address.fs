@@ -191,14 +191,17 @@ module DsAddressModule =
 
         for b in sys.HWButtons do
             b.OutAddress <- TextSkip
+            b.InAddress <- TextAddrEmpty
             b.InAddress <- getValidBtnAddress b target |> fst
 
         for l in sys.HWLamps do
             l.InAddress <- TextSkip
+            l.OutAddress <- TextAddrEmpty
             l.OutAddress <- getValidLampAddress l target |> snd
 
         for c in sys.HWConditions do
             c.OutAddress <- TextSkip
+            c.InAddress <- TextAddrEmpty
             c.InAddress <- getValidCondiAddress c  target
             
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))

@@ -128,6 +128,8 @@ module internal ToDsTextModule =
                     else 
                         yield $"{tab2}{var.ToDsText()}({var.InitValue});"
                 yield $"{tab}{rb}"
+            elif theSystem.Functions.Any() then
+                yield $"{tab}[variables] = {lb}{rb}"
         ] |> combineLines
 
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool)=
@@ -160,7 +162,8 @@ module internal ToDsTextModule =
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
 
                 yield $"{tab}{rb}"
-
+            elif system.Functions.Any() then
+                yield $"{tab}[jobs] = {lb}{rb}" 
             yield printVariables system
 
             let funcCodePrint funcName (code:string) =

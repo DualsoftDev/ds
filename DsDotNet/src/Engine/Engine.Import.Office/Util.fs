@@ -88,3 +88,5 @@ module Util =
         | "R" -> ConditionType.DuReadyState
         | "D" -> failwith $"{key} is Not support Type" //ConditionType.DuDriveState 추후 구현
         | _ -> failwith $"{key} is Error Type"
+
+

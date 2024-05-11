@@ -286,8 +286,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
             let newFunc = OperatorFunction.Create(funcName, pureCode)
-            //let assignCode = $"bool {funcName} = false; ${funcName} = {pureCode}" 
-            let assignCode = $"${funcName} = {pureCode}" 
+            let code = $"${funcName} = {pureCode};"
+            let assignCode = 
+                match x.TheSystem.Jobs.any(fun j->j.Name = funcName) with
+                | true ->   code // EnterJobBlock job Tag 에서 이미 만듬 
+                | false ->  $"bool {funcName} = false;{code}"
 
             let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
             statements.Iter(fun s->

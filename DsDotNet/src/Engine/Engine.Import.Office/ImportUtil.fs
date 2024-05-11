@@ -687,7 +687,7 @@ module ImportU =
             && activeSys.IsSome && activeSys.Value = sys
             && pageTables.isEmpty()
             then  failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
-
+            
             pageTables
             |> Seq.collect (fun (pageIndex, table) ->
                 table.Rows
@@ -695,7 +695,7 @@ module ImportU =
                     .ToArray()
                     .Where(fun r -> r.ItemArray[(int) IOColumn.Case] <> $"{IOColumn.Case}") // head row 제외
                 |> Seq.map (fun row -> pageIndex, row))
-            |> Seq.groupBy (fun (_, row) -> row.ItemArray.[(int) IOColumn.Name].ToString())
+            |> Seq.groupBy (fun (_, row) -> getDevName row)
             |> Seq.iter (fun (name, rows) ->
                 let rowsWithIndexes = rows |> Seq.toArray
 

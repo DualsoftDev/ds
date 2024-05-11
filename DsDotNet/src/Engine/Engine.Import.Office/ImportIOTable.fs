@@ -14,11 +14,12 @@ module ImportIOTable =
     [<Flags>]
     type IOColumn =
         | Case = 0
-        | Name = 1
-        | DataType = 2
-        | Input = 3
-        | Output = 4
-        | Func = 5
+        | Flow = 1
+        | Name = 2
+        | DataType = 3
+        | Input = 4
+        | Output = 5
+        | Func = 6
 
     [<Flags>]
     type ErrorColumn =
@@ -61,6 +62,8 @@ module ImportIOTable =
         | Name = 0
         | DataType = 1
         | Manual = 2
+
+    let getDevName (row: Data.DataRow) = $"{row.[(int) IOColumn.Flow]}_{row.[(int) IOColumn.Name]}"
 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
@@ -158,9 +161,9 @@ module ImportIOTable =
                     else 
                         f :?> OperatorFunction
 
-            let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
-                let devName = $"{row.[(int) IOColumn.Name]}"
 
+            let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
+                let devName = getDevName row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
 
@@ -198,7 +201,7 @@ module ImportIOTable =
                 sys.Variables.Add(variableData)
 
             let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =
-                let name = $"{row.[(int) IOColumn.Name]}"
+                let name = getDevName row
                 let func = $"{row.[(int) IOColumn.Func]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
@@ -206,7 +209,7 @@ module ImportIOTable =
                 getFunctionNUpdate (name, name, func,  true, page) |> ignore
 
             let updateOperator (row: Data.DataRow, tableIO: Data.DataTable, page) =
-                let name = $"{row.[(int) IOColumn.Name]}"
+                let name = getDevName row
                 let func = $"{row.[(int) IOColumn.Func]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
@@ -279,7 +282,7 @@ module ImportIOTable =
                     let case = $"{row.[(int) IOColumn.Case]}"
 
                     if
-                        (trimSpace $"{row.[(int) IOColumn.Name]}" <> "" //name 존재시만
+                        (trimSpace (getDevName row) <> "" //name 존재시만
                          && case <> $"{IOColumn.Case}") //header 스킵
                     then
                         match TextToXlsType(case) with

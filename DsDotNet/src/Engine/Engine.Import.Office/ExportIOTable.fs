@@ -32,6 +32,7 @@ module ExportIOTable =
             let  rowHeaderItems =
                 [
                     $"{IOColumn.Case}"
+                    $"{IOColumn.Flow}"
                     $"{IOColumn.Name}"
                     $"{IOColumn.DataType}"
                     $"{IOColumn.Input}"
@@ -45,6 +46,7 @@ module ExportIOTable =
     let  addIOColumn(dt:DataTable) =
 
         dt.Columns.Add($"{IOColumn.Case}", typeof<string>) |> ignore
+        dt.Columns.Add($"{IOColumn.Flow}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
@@ -63,7 +65,7 @@ module ExportIOTable =
                 if containSys then
                     let func =  if btn.OperatorFunction.IsSome then btn.OperatorFunction.Value.ToDsText() else ""
                     let i, o = getValidBtnAddress(btn) target 
-                    dt.Rows.Add(xlsCase.ToText(), btn.Name, "bool",  i, o ,func)
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, "bool",  i, o ,func)
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
@@ -72,7 +74,7 @@ module ExportIOTable =
                     let func =  if lamp.OperatorFunction.IsSome then lamp.OperatorFunction.Value.ToDsText() else ""
 
                     let i, o = getValidLampAddress(lamp) target 
-                    dt.Rows.Add(xlsCase.ToText(), lamp.Name, "bool",   i, o, func)
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, "bool",   i, o, func)
                     |> ignore
 
 
@@ -98,7 +100,11 @@ module ExportIOTable =
         dt
 
 
-    
+    let splitNameForRow(name:string) = 
+        let head = name.Split('_')[0];
+        let tail = name[head.Length+1..]
+        head, tail
+
     let rowIOItems (dev: TaskDev, job: Job, firstJobRow :bool) target =
             let funcs =
                 if firstJobRow then
@@ -113,9 +119,10 @@ module ExportIOTable =
                 |NoneTRx -> true,true
                 |_ ->  false,false
 
-
+            let flow, name = splitNameForRow dev.ApiName
             [ TextXlsAddress
-              dev.ApiName
+              flow
+              name
               "bool"
               getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target )
               getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target )
@@ -167,6 +174,7 @@ module ExportIOTable =
                 let i= getValidCondiAddress(cond) target
                 [
                     ExcelCase.XlsConditionReady.ToText()
+                    ""
                     cond.Name
                     "bool"
                     i
@@ -174,14 +182,19 @@ module ExportIOTable =
                     func 
                 ]
             )
-            
+        
+        
         let operatorRows =
+            
             sys.Functions
                 .OfType<OperatorFunction>()
                 //.Where(fun f->not(sys.AutoNameOperators.Cast<Func>().Contains(f)))
                                     .Map(fun func->
+                                    let flow, name = splitNameForRow func.Name
+                                    
                                     [ TextXlsOperator
-                                      func.Name
+                                      flow
+                                      name
                                       ""
                                       ""
                                       ""
@@ -192,9 +205,10 @@ module ExportIOTable =
             sys.Functions
                 .OfType<CommandFunction>()
                                     .Map(fun func->
+                                    let flow, name = splitNameForRow func.Name
                                     [ TextXlsCommand
-                                      func.Name
-                                      ""
+                                      flow
+                                      name
                                       ""
                                       ""
                                       func.ToDsText() ]

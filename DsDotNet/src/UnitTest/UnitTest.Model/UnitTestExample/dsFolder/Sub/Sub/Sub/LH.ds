@@ -55,7 +55,7 @@
     }
     [interfaces] = {
         Func1 = { StationFlow_LH.S131 ~ StationFlow_LH.S132 }
-        Func2 = { StationFlow_LH.CLEAR ~ _ }
+        Func2 = { StationFlow_LH.CLEAR ~ StationFlow_LH.CLEAR }
     }
     [device file="../../../lib/Cylinder/Single.ds"] StationFlow_LH_Pin01; 
     [device file="../../../lib/Robot/Weld.ds"] StationFlow_LH_RbtWeld011; 

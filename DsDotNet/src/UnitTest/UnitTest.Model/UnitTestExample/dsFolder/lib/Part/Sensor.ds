@@ -6,8 +6,8 @@
         PositionADV > PartON;
     }
     [interfaces] = {
-        MOVE = { _ ~ Flow.PartON }
-        REMOVE = { Flow.PartOFF ~ _ }
+        MOVE = { Flow.PartON ~ Flow.PartON }
+        REMOVE = { Flow.PartOFF ~ Flow.PartOFF }
         REMOVE <|> MOVE;
     }
 }

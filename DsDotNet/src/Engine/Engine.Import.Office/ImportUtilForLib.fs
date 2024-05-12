@@ -178,10 +178,10 @@ module ImportUtilForLib =
             if autoTaskDev.IsSome
             then
                 let tasks = HashSet<TaskDev>()
-                autoTaskDev.Value.InAddress <- ""
-                autoTaskDev.Value.OutAddress <- ""
+                autoTaskDev.Value.InAddress <- ("")
+                autoTaskDev.Value.OutAddress<- ("")
                 tasks.Add(autoTaskDev.Value)|>ignore
-                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList, DuBOOL, None)
+                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList, DuBOOL)
             else 
                 let libRelPath =
                     PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
@@ -202,7 +202,7 @@ module ImportUtilForLib =
                 let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
                     let devOrg= addOrGetExistSystem loadedSys newloadedName
                     let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-                    TaskDev(api, "", "", newloadedName)
+                    TaskDev(api, ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
 
                 let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget
                 if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
@@ -219,7 +219,7 @@ module ImportUtilForLib =
                         tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
                 | _->
                     tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
-                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList, DuBOOL, None)
+                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList, DuBOOL)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)
@@ -231,7 +231,6 @@ module ImportUtilForLib =
         then
             let func = OperatorFunction.Create(node.OperatorName, node.OperatorCode) 
             mySys.Functions.Add (func:> Func) |> ignore
-            jobForCall.OperatorFunction <- func |> Some
             Call.Create(func, parent)
         else 
             Call.Create(jobForCall, parent)

@@ -46,7 +46,14 @@ module ListnerCommonFunctionGenerator =
         // 함수 호출과 관련된 매개변수 추출
         let excuteCode = fDef.operator().GetText()
         excuteCode |> getCode
-  
+
+    let commonDeviceParamExtractor (devCtx: DevParamInOutContext)=
+        match devCtx.TryFindFirstChild<DevParamInOutBodyContext>() with
+        |Some ctx -> 
+            getDevParm $"{ctx.GetText()}"
+        |None ->
+            failWithLog "commonDeviceParamExtractor error"
+    
 /// <summary>
 /// System, Flow, Parenting(껍데기만),
 /// Interface name map 구조까지 생성
@@ -604,8 +611,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             for callList in callListings do
                 let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
              
-                let getAddress (addressCtx: IParseTree) =
-                    addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
+                //let getAddress (addressCtx: IParseTree) =
+                //    addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
 
                 let apiItems =
                     [ for apiDefCtx in apiDefCtxs do
@@ -625,18 +632,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                       then x.CreateLoadedDeivce(device)
                                                       None
 
-                                      match apiDefCtx.TryFindFirstChild<AddressInOutContext>() with
-                                      |Some addressCtx -> 
-                                          let! txAddressCtx = addressCtx.TryFindFirstChild<OutAddrContext>()
-                                          let! rxAddressCtx = addressCtx.TryFindFirstChild<InAddrContext>()
-                                          let tx = getAddress (txAddressCtx)
-                                          let rx = getAddress (rxAddressCtx)
+                                      let inParam, outParm =
+                                          match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
+                                          |Some devParam -> 
+                                               commonDeviceParamExtractor  devParam
+                                          |None ->
+                                               TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
 
-                                          debugfn $"TX={tx} RX={rx}"
-                                          return TaskDev(apiPoint, rx, tx, device)
-                                      |None ->
-                                          return TaskDev(apiPoint, TextAddrEmpty, TextAddrEmpty, device)
-                                        
+                                      debugfn $"TX={inParam} RX={outParm}"
+                                      return TaskDev(apiPoint, inParam, outParm, device)
+
                                   }
 
                               match apiItem with
@@ -664,7 +669,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
                         jobName, duDataType
 
-                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, duDataType, None)
+                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, duDataType)
                 job |> system.Jobs.Add
 
 

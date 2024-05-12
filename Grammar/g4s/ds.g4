@@ -190,12 +190,12 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
     flowPath: identifier2;
 
-addressInOut: LPARENTHESIS inAddr COMMA outAddr RPARENTHESIS (SEMICOLON)?;
-inAddr: addressItem;
-outAddr: addressItem;
-addressItem: tagAddress | funAddress | '-';
+devParamInOut: '(' devParamInOutBody ')' (SEMICOLON)?;
+devParamInOutBody:  inParam COMMA outParam;
+inParam: addressItem (':' IDENTIFIERVALUE)? (':' IDENTIFIERVALUE)? ;
+outParam: addressItem (':' IDENTIFIERVALUE)? (':' IDENTIFIERVALUE)? ;
+addressItem: tagAddress | '-' | '_';
 tagAddress: TAG_ADDRESS;
-funAddress: IDENTIFIER1;
 
 // model: (system|)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;
@@ -326,7 +326,7 @@ jobBlock: '[' 'jobs' ']' '=' '{' (callListing|linkListing)* '}';
     jobNameOnly: identifier1;
     jobNameWithType: identifier1 '(' 'type:' varType')';
 
-    callApiDef: (interfaceCall addressInOut|interfaceCall);
+    callApiDef: (interfaceCall devParamInOut|interfaceCall);
 
     interfaceCall: identifier12;
     interfaceLink: identifier12;
@@ -367,8 +367,8 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmg
     categoryBlock: '{' (() | (hwSysItemDef)*) '}';
   
     hwSysItemDef:  hwSysItemNameAddr '=' '{' hwSysItems? '}' (SEMICOLON)?;
-    hwSysItems: (flowName|funcCall)? ( ';' flowName|funcCall)* (';')+; 
-    hwSysItemNameAddr: hwSysItemName addressInOut;
+    hwSysItems: flowName? ( ';' flowName)* (';')+; 
+    hwSysItemNameAddr: hwSysItemName devParamInOut;
     hwSysItemName: identifier12;
 
     flowName: identifier1;

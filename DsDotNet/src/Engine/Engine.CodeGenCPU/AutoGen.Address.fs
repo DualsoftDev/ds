@@ -175,15 +175,14 @@ module DsAddressModule =
         newAddr
 
   
-    let private getValidBtnHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
+    let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
         let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, IOType.Memory, target)
         let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, IOType.Memory, target)
         inAddr, outAddr
 
-    let getValidBtnAddress (btn: ButtonDef)  target     = getValidBtnHwItem btn  false false target
-    let getValidLampAddress (lamp: LampDef)  target     = getValidBtnHwItem lamp true false  target
-    let getValidCondiAddress (cond: ConditionDef) target = getValidAddress(cond.InAddress, cond.Name, false, IOType.In, target)
-
+    let getValidCondiAddress (cond: ConditionDef)  target   = getValidHwItem cond  false true target
+    let getValidBtnAddress (btn: ButtonDef)  target         = getValidHwItem btn  false false target
+    let getValidLampAddress (lamp: LampDef)  target         = getValidHwItem lamp true false  target
 
     let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) target =
         
@@ -205,7 +204,7 @@ module DsAddressModule =
             c.OutAddress <- TextSkip
             if c.InAddress = "" then
                 c.InAddress <- TextAddrEmpty
-            c.InAddress <- getValidCondiAddress c  target
+            c.InAddress <- getValidCondiAddress c  target |> fst
             
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
                             |> Seq.sortBy (fun (dev,_) ->dev.ApiName)
@@ -218,8 +217,8 @@ module DsAddressModule =
                 |NoneTRx -> true,true
                 |_ ->  false,false
 
-            dev.InAddress <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target)
-            dev.OutAddress <-  getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target)
+            dev.InAddress  <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target)
+            dev.OutAddress <- getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target)
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

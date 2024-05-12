@@ -147,15 +147,15 @@ module ConvertCpuDsSystem =
                 then
                     if  dev.InAddress <> TextSkip then
                         let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev).Value
-                        dev.InTag <- inT  ; dev.InAddress <- inT.Address
+                        dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
                       
                     if  dev.OutAddress <> TextSkip then
                         let outT = createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev).Value
-                        dev.OutTag <- outT; dev.OutAddress <- outT.Address
+                        dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
                 else 
                     if  dev.InAddress <> TextSkip then
                         let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev).Value
-                        dev.InTag <- inT  ; dev.InAddress <- inT.Address
+                        dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
                       
 
         member x.GenerationIO() =

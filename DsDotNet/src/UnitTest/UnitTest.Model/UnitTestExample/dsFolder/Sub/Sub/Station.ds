@@ -18,7 +18,7 @@
         StationFlow_RH_Func2 = { StationFlow_RH.Func2(_, _); }
     }
     [interfaces] = {
-        Func2 = { StationFlow.RESET ~ _ }
+        Func2 = { StationFlow.RESET ~ StationFlow.RESET }
         Func1 = { StationFlow.START ~ StationFlow.FINISH }
     }
     [external file="./Sub/LH.ds"] StationFlow_LH; 

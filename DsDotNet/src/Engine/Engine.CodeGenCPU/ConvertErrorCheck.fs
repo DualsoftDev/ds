@@ -138,12 +138,14 @@ module ConvertErrorCheck =
     let setSimulationAddress(sys:DsSystem) = 
         sys.Jobs.ForEach(fun j->
             j.DeviceDefs.ForEach(fun d-> 
-                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- TextAddrEmpty
-                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- TextAddrEmpty)
+                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- (TextAddrEmpty)
+                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- (TextAddrEmpty)
+                )
             )
         sys.HWLamps.ForEach(fun l -> 
-                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <- TextAddrEmpty)
+                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <-TextAddrEmpty
+                        )
         sys.HWButtons.ForEach(fun b->                                         
-                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <- TextAddrEmpty
-                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <-TextAddrEmpty
+                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <-TextAddrEmpty
+                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <- TextAddrEmpty
                         )   

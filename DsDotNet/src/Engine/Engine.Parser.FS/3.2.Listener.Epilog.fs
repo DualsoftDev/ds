@@ -13,27 +13,18 @@ open System.Collections.Generic
 
 [<AutoOpen>]
 module EtcListenerModule =
+
     let getHwSysItem (hwItem:HwSysItemDefContext)= 
         let nameAddr = hwItem.TryFindFirstChild<HwSysItemNameAddrContext>().Value
         let nameCtx = nameAddr.TryFindFirstChild<HwSysItemNameContext>().Value
         let name = nameCtx.GetText()
-
-        let addrIn, addrOut =
-            match nameAddr.ChildCount with
-            | 2 ->
-                option {
-                    let! inOutCtx = nameAddr.TryFindFirstChild<AddressInOutContext>()
-                    let! inCtx = inOutCtx.TryFindFirstChild<InAddrContext>()
-                    let! outCtx = inOutCtx.TryFindFirstChild<OutAddrContext>()
-
-                    return
-                        inCtx.GetText() ,
-                        outCtx.GetText()
-                }
-                |> Option.get
-            | _ -> null, null
-
-        name, addrIn, addrOut 
+        let inParam, outParm =
+            match nameAddr.TryFindFirstChild<DevParamInOutContext>() with
+            |Some devParam -> 
+                commonDeviceParamExtractor  devParam
+            |None ->
+                TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
+        name, inParam, outParm
 
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
     type DsParserListener with
@@ -73,7 +64,7 @@ module EtcListenerModule =
                     let flowBtnInfo =
                         [ for bd in buttonDefs do
                               option {
-                                  let btnName, addrIn, addrOut = getHwSysItem bd
+                                  let btnName, inParam, outParam = getHwSysItem bd
                                   let flows =
                                       bd
                                           .Descendants<FlowNameContext>()
@@ -85,12 +76,8 @@ module EtcListenerModule =
                                           .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
                                           .ToHashSet()
 
-                                  let funcCallCtxs = bd.Descendants<FuncCallContext>().ToArray()
-                                  let buttonFuncs = commonOpFunctionExtractor funcCallCtxs btnName system
-      
-
                                   if flows.Count > 0 then
-                                      return targetBtnType, btnName, addrIn, addrOut, flows, buttonFuncs
+                                      return targetBtnType, btnName, inParam, outParam, flows
                                   else
                                       failwithlog "There are no flows in button"
                               } ]
@@ -98,11 +85,11 @@ module EtcListenerModule =
                     flowBtnInfo
                     |> List.choose id
                     |> List.iter (fun ps ->
-                        let targetBtnType, btnName, addrIn, addrOut, flows, func = ps
+                        let targetBtnType, btnName, inParam, outParam, flows = ps
 
                         flows
                         |> Seq.iter (fun flow ->
-                            system.AddButton(targetBtnType, btnName, addrIn, addrOut, flow, func)))
+                            system.AddButton(targetBtnType, btnName, inParam, outParam, flow)))
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
             for ctxChild in ctx.children do
@@ -131,21 +118,18 @@ module EtcListenerModule =
                               option {
                                   let! flowNameCtxs = ld.Descendants<FlowNameContext>().ToArray()
                                   
-                                  let lmpName, addrIn, addrOut = getHwSysItem ld
+                                  let lmpName, inParam, outParam = getHwSysItem ld
                                   if flowNameCtxs.length() > 1
                                   then 
                                        let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
                                     
-                                  let funcCallCtxs = ld.Descendants<FuncCallContext>().ToArray()
-                                  let func = commonOpFunctionExtractor funcCallCtxs lmpName system
-
                                   if flowNameCtxs.length() = 0
                                   then
-                                       return targetLmpType, lmpName, addrIn, addrOut, None, func 
+                                       return targetLmpType, lmpName, inParam, outParam, None
                                   else
                                        let! flow = flowNameCtxs.First().GetText() |> system.TryFindFlow
-                                       return targetLmpType, lmpName, addrIn, addrOut, Some flow, func 
+                                       return targetLmpType, lmpName, inParam, outParam, Some flow
                               } ]
 
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
@@ -170,9 +154,7 @@ module EtcListenerModule =
                         [ for cd in conditionDefs do
                               option {
 
-                                  let cndName, addrIn, addrOut = getHwSysItem cd
-                                  let funcCallCtxs = cd.Descendants<FuncCallContext>().ToArray()
-                                  let func = commonOpFunctionExtractor funcCallCtxs cndName system
+                                  let cndName, inParam, outParam = getHwSysItem cd
                                   let flows =
                                       cd
                                           .Descendants<FlowNameContext>()
@@ -184,16 +166,16 @@ module EtcListenerModule =
                                           .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
                                           .ToHashSet()
 
-                                  return targetCndType, cndName, addrIn, addrOut, flows, func 
+                                  return targetCndType, cndName, inParam, outParam, flows
                               } ]
 
                     flowConditionInfo
                     |> List.choose id
                     |> List.iter (fun ps ->
-                        let targetCndType, cndName, inAddr, outAddr, flows, func = ps
+                        let targetCndType, cndName, inParam, outParam,  flows = ps
 
                         flows
-                        |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, inAddr, outAddr, flow, func)))
+                        |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, inParam, outParam,  flow)))
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyDefContext>()

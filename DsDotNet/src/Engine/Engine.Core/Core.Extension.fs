@@ -63,23 +63,35 @@ module CoreExtensionModule =
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
            
+    let getDevParm (parmInOutText:string) = 
+        let getDevParam (txt:string) =
+            match txt.Split(':') |> Seq.toList with
+            | [addr] -> {DevAddress = addr; DevValue = None; DevTime = None}
+            | addr::xs when xs.Length = 1 ->  {DevAddress = addr; DevValue = Some(xs.Head); DevTime = None}
+            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValue = Some(xs.Head); DevTime = Some(Convert.ToInt32(xs.Last()))}
+            | _-> failwithlog $"{txt} getDevParam format error ex) Value or Value:Time"
 
-
-  
-
+        match parmInOutText.Split(',') |> Seq.toList with
+        | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
+        | _-> failwithlog $"{parmInOutText} getDevParmInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
+    
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
                 if system <> targetFlow.System
                 then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
 
-    let getButtons (sys:DsSystem, btnType:BtnType) = sys.HWButtons.Where(fun f->f.ButtonType = btnType)
-    let getLamps (sys:DsSystem, lampType:LampType) = sys.HWLamps.Where(fun f->f.LampType = lampType)
-    let getConditions (sys:DsSystem, cType:ConditionType) = sys.HWConditions.Where(fun f->f.ConditionType = cType)
+    let getButtons (sys:DsSystem, btnType:BtnType) = sys.HwSystemDefs.OfType<ButtonDef>().Where(fun f->f.ButtonType = btnType)
+    let getLamps (sys:DsSystem, lampType:LampType) = sys.HwSystemDefs.OfType<LampDef>().Where(fun f->f.LampType = lampType)
+    let getConditions (sys:DsSystem, cType:ConditionType) = sys.HwSystemDefs.OfType<ConditionDef>().Where(fun f->f.ConditionType = cType)
 
 
     type DsSystem with
+    
+        member x.HWButtons = x.HwSystemDefs.OfType<ButtonDef>()
+        member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
+        member x.HWLamps = x.HwSystemDefs.OfType<LampDef>()
 
-        member x.AddButton(btnType:BtnType, btnName:string, inAddress:TagAddress, outAddress:TagAddress, flow:Flow, opFunc: OperatorFunction option) =
+        member x.AddButton(btnType:BtnType, btnName:string, inDevParam:DevParam, outDevParam:DevParam, flow:Flow) =
             checkSystem(x, flow, btnName)
           
             let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
@@ -91,12 +103,13 @@ module CoreExtensionModule =
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
-                      x.HWButtons.Add(ButtonDef(btnName,x, btnType, inAddress, outAddress, HashSet[|flow|], opFunc))
+                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, inDevParam, outDevParam, HashSet[|flow|]))
                       |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
-                      HwSystemItem.CreateHWApi(btnName, x) |> ignore
 
+        member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
+            x.AddButton(btnType, btnName, inAddress|>defaultDevParam, outAddress|>defaultDevParam, flow)       
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, inAddr:string, outAddr:string, flow:Flow option,  opFunc: OperatorFunction option) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, inDevParam:DevParam, outDevParam:DevParam, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
@@ -104,34 +117,27 @@ module CoreExtensionModule =
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
             | None -> 
                       let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
-                      x.HWLamps.Add(LampDef(lmpName, x,lmpType, inAddr, outAddr, flows , opFunc))
+                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, inDevParam, outDevParam, flows))
                       |> verifyM $"중복 LampDef [name:{lmpName}]"
-                      HwSystemItem.CreateHWApi(lmpName, x) |> ignore
+        
+        member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string, flow:Flow option) =
+                x.AddLamp(lmpType, lmpName, inAddress|>defaultDevParam, outAddress|>defaultDevParam, flow)       
 
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddr:string, outAddr:string, flow:Flow,  opFunc: OperatorFunction option) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, inDevParam:DevParam, outDevParam:DevParam, flow:Flow) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None -> 
-                      x.HWConditions.Add(ConditionDef(condiName,x, condiType, inAddr, outAddr, HashSet[|flow|], opFunc))
+                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, inDevParam, outDevParam, HashSet[|flow|]))
                       |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
-                      HwSystemItem.CreateHWApi(condiName, x) |> ignore
 
+        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddress:string, outAddress:string, flow:Flow) =
+                x.AddCondtion(condiType, condiName, inAddress|>defaultDevParam, outAddress|>defaultDevParam, flow)       
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
-
-        member x.HWConditions     = x.HWConditions :> seq<_>
-        member x.HWButtons            = x.HWButtons :> seq<_>
-        member x.HWLamps              = x.HWLamps   :> seq<_>
-
-        member x.AutoNameOperators  =
-                    x.HWButtons.Choose(fun f-> f.OperatorFunction)
-                    @ x.HWLamps.Choose(fun f-> f.OperatorFunction)
-                    @ x.HWConditions.Choose(fun f-> f.OperatorFunction)
-
 
         member x.AutoHWButtons        = getButtons(x, DuAutoBTN)
         member x.ManualHWButtons      = getButtons(x, DuManualBTN)
@@ -155,10 +161,6 @@ module CoreExtensionModule =
 
         member x.ReadyConditions     = getConditions(x, DuReadyState)
         member x.DriveConditions     = getConditions(x, DuDriveState)
-
-        member x.HWSystemDefs = x.HWButtons.OfType<HwSystemDef>() 
-                                @ x.HWLamps.OfType<HwSystemDef>() 
-                                @ x.HWConditions.OfType<HwSystemDef>()
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =
@@ -198,7 +200,7 @@ module CoreExtensionModule =
                            |> Seq.map(fun (d, inout, _) -> $"{d.QualifiedName} <-{inout}") 
 
     let inValidHwSystemTag (x:DsSystem) = 
-                    x.HWSystemDefs 
+                    x.HwSystemDefs 
                            |> Seq.collect(fun h -> 
                                 [
                                     match h with
@@ -209,6 +211,8 @@ module CoreExtensionModule =
                                 ])
                            |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
                            |> Seq.map(fun (h, inout, _) -> $"{h.Name} <-{inout}") 
+
+
 [<Extension>]
 type SystemExt =
     [<Extension>]
@@ -237,4 +241,15 @@ type SystemExt =
     [<Extension>]
     static member GetDevice(x:TaskDev, sys:DsSystem) = sys.Devices.First(fun f->f.Name  = x.DeviceName)
 
+    [<Extension>]
+    static member ToTextForDevParam(x:TaskDev) = toTextInOutDev x.InParam x.OutParam
+
+    [<Extension>]
+    static member ToTextForDevParam(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
+
+    [<Extension>]
+    static member IsSensorTargetFalse(x:DevParam) = 
+                match x.DevValue with
+                |Some(v) when v.GetType() = typedefof<bool> -> not (Convert.ToBoolean(v))  //RX 기본은 True
+                |_ -> false
 

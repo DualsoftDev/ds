@@ -16,7 +16,7 @@ module TagKindModule =
         | EventVertex   of Tag: IStorage * Target: Vertex       * TagKind: VertexTag
         | EventApiItem  of Tag: IStorage * Target: ApiItem      * TagKind: ApiItemTag
         | EventAction   of Tag: IStorage * Target: TaskDev      * TagKind: ActionTag
-        | EventHwSys    of Tag: IStorage * Target: HwSystemItem * TagKind: HwSysTag
+        | EventHwSys    of Tag: IStorage * Target: HwSystemDef  * TagKind: HwSysTag
         | EventVariable of Tag: IStorage * Target: DsSystem     * TagKind: VariableTag
         | EventJob      of Tag: IStorage * Target: Job          * TagKind: JobTag
         
@@ -69,7 +69,7 @@ type TagKindExt =
             | :? Vertex as v       ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
             | :? ApiItem as a      ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
             | :? TaskDev  as d      ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
-            | :? HwSystemItem as h ->Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
+            | :? HwSystemDef as h ->Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
             | :? Job as j          ->Some( EventJob     (x, j, x.GetJobTagKind().Value))
             |_ -> None
         |None -> None

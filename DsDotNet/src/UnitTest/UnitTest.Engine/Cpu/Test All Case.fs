@@ -21,8 +21,8 @@ type TestAllCase() =
                      sprintf "%%MX%d" index
         for j in sys.Jobs do
             for dev in j.DeviceDefs  do
-                    dev.InAddress <- addr()
-                    dev.OutAddress <- addr()
+                    dev.InAddress <- ( addr())
+                    dev.OutAddress <- ( addr())
 
         for b in sys.HWButtons do
             b.InAddress <- addr()

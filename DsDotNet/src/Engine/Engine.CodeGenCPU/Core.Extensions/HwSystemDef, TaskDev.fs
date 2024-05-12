@@ -19,7 +19,7 @@ module ConvertCpuTaskDev =
     type HwSystemDef with
         member s.ActionINFunc = 
             match  s.InTag with
-            | :? Tag<bool> as inTag -> 
-                if hasNot (s.OperatorFunction)
-                then !!inTag.Expr else inTag.Expr
+            | :? Tag<bool> as inTag -> inTag.Expr  //test ahn not 처리
+                //if hasNot (s.OperatorFunction)
+                //then !!inTag.Expr else inTag.Expr
             | _ -> failwithf $"{s.Name} input address is empty."

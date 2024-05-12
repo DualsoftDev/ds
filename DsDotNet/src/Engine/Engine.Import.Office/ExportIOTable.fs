@@ -37,7 +37,7 @@ module ExportIOTable =
                     $"{IOColumn.DataType}"
                     $"{IOColumn.Input}"
                     $"{IOColumn.Output}" 
-                    $"{IOColumn.Func}"
+                    $"{IOColumn.Func} (OUT~IN)"
                 ]
             let row = dt.NewRow()
             row.ItemArray <- rowHeaderItems.Select(fun f -> f |> box).ToArray()
@@ -63,15 +63,16 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let func =  if btn.OperatorFunction.IsSome then btn.OperatorFunction.Value.ToDsText() else ""
+                    let func =  toTextDevParmInOut btn.InParam btn.OutParam
                     let i, o = getValidBtnAddress(btn) target 
+                    
                     dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, "bool",  i, o ,func)
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let func =  if lamp.OperatorFunction.IsSome then lamp.OperatorFunction.Value.ToDsText() else ""
+                    let func =  toTextDevParmInOut lamp.InParam lamp.OutParam
 
                     let i, o = getValidLampAddress(lamp) target 
                     dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, "bool",   i, o, func)
@@ -105,13 +106,9 @@ module ExportIOTable =
         let tail = name[head.Length+1..]
         head, tail
 
-    let rowIOItems (dev: TaskDev, job: Job, firstJobRow :bool) target =
-            let funcs =
-                if firstJobRow then
-                    if job.OperatorFunction.IsSome then job.OperatorFunction.Value.ToDsText() else ""
-                else
-                    TextFuncNotUsed
-
+    let rowIOItems (dev: TaskDev, job: Job) target =
+            let funcs = toTextInOutDev dev.InParam dev.OutParam
+               
             let inSkip, outSkip =
                 match job.ActionType with
                 |NoneRx -> true,false
@@ -141,14 +138,8 @@ module ExportIOTable =
                 for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
                     if coins.Where(fun c->c.TargetJob.DeviceDefs.Contains(dev)).IsEmpty()
                     then
-                        dev.OutAddress <- TextSkip
-
-
-                    let sortedDeviceDefs = job.DeviceDefs |> Seq.sortBy (fun f -> f.ApiName)
-                    if sortedDeviceDefs.Head() = dev then
-                        yield rowIOItems (dev, job, true) target //첫 TaskDev만 만듬
-                    else
-                        yield rowIOItems (dev, job, false) target
+                        dev.OutAddress <- ( TextSkip)
+                        yield rowIOItems (dev, job) target
         }
 
         let dts = 
@@ -170,15 +161,15 @@ module ExportIOTable =
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
             
-                let func =  if cond.OperatorFunction.IsSome then cond.OperatorFunction.Value.ToDsText() else ""
-                let i= getValidCondiAddress(cond) target
+                let func = toTextDevParmInOut cond.InParam cond.OutParam
+                let i, o= getValidCondiAddress(cond) target
                 [
                     ExcelCase.XlsConditionReady.ToText()
                     ""
                     cond.Name
                     "bool"
                     i
-                    TextSkip
+                    o
                     func 
                 ]
             )
@@ -517,7 +508,7 @@ module ExportIOTable =
             ]
 
         let rows =
-            let hws = sys.HWSystemDefs.Where(fun f->f :? ButtonDef || f :? LampDef )
+            let hws = sys.HwSystemDefs.Where(fun f->f :? ButtonDef || f :? LampDef )
                                       .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
                                       .OrderBy(fun (name, addr) -> addr)
             hws

@@ -127,12 +127,9 @@ module CoreModule =
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()
         ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
-        member val HWSystemItems = createNamedHashSet<HwSystemItem>()
+        member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         member val StartPoints = createQualifiedNamedHashSet<Real>()
-        member val internal HWButtons = HashSet<ButtonDef>()
-        member val internal HWLamps = HashSet<LampDef>()
-        member val internal HWConditions = HashSet<ConditionDef>()
 
     type Flow private (name: string, system: DsSystem) =
         inherit FqdnObject(name, system)
@@ -151,38 +148,6 @@ module CoreModule =
             system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{name}]"
             flow
 
-
-    [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inAddress: TagAddress, outAddress: TagAddress, opFunc: OperatorFunction option)=
-        inherit FqdnObject(name, system)
-        member x.Name = name
-        member val SettingFlows = flows with get, set
-        //SettingFlows 없으면 전역 시스템 설정
-        member val IsGlobalSystemHw = flows.IsEmpty()
-        ///  작동을 위한 외부 IO 입력 주소
-        member val InAddress = inAddress with get, set
-        ///  작동을 위한 외부 IO 출력 주소
-        member val OutAddress = outAddress  with get, set
-        /// CPU 생성 시 할당됨 InTag
-        member val InTag = getNull<ITag>() with get, set
-        /// CPU 생성 시 할당됨 OutTag
-        member val OutTag = getNull<ITag>() with get, set
-        member val OperatorFunction = opFunc with get, set
-
-
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inAddress: TagAddress, outAddress: TagAddress, flows: HashSet<Flow>, opFunc: OperatorFunction  option) =
-        inherit HwSystemDef(name, system,flows, inAddress, outAddress, opFunc)
-        member x.ButtonType = btnType
-        member val ErrorEmergency = getNull<IStorage>() with get, set
-
-    and LampDef (name: string, system:DsSystem,lampType: LampType, inAddress: TagAddress,  outAddress: TagAddress,  flows: HashSet<Flow>, opFunc: OperatorFunction  option) =
-        inherit HwSystemDef(name, system, flows, inAddress, outAddress, opFunc) //inAddress lamp check bit
-        member x.LampType = lampType
-
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inAddress: TagAddress, outAddress:TagAddress,  flows: HashSet<Flow>, opFunc: OperatorFunction  option) =
-        inherit HwSystemDef(name,  system,flows, inAddress, outAddress, opFunc) // outAddress condition check bit
-        member x.ConditionType = conditionType
-        member val ErrorCondition = getNull<IStorage>() with get, set
 
 
     and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, mnemonics: string []) =
@@ -302,42 +267,99 @@ module CoreModule =
 
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, system:DsSystem, tasks:TaskDev seq, duType:DataType, opFunc: OperatorFunction option) =
+    type Job (name:string, system:DsSystem, tasks:TaskDev seq, duType:DataType) =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         member x.ActionType:JobActionType = getJobActionType name
         member x.System = system
         member x.DeviceDefs = tasks
         member x.DataType =  duType
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
-        //하나의 Job에는 하나의 Func만 지원 적용 
-        member val OperatorFunction = opFunc with get, set
 
-    type TagAddress = string
-    /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  [jobs] = { Ap = { A."+"(%I1, %Q1); } }
-    /// Old name : JobDef
-    type TaskDev (api:ApiItem, inAddress:TagAddress, outAddress:TagAddress, deviceName:string) as this =
+    type DevAddress = string
+    type DevParam = {
+        DevAddress: DevAddress
+        DevValue: obj option
+        DevTime: int option
+    }  
+
+    let defaultDevParam (address) = { DevAddress = address; DevValue = None; DevTime = None; }
+    let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
+    let toTextDevParam (x:DevParam) = 
+        match x.DevAddress, x.DevValue, x.DevTime  with 
+        | address, Some(v), Some(t) ->    $"{addressPrint address}:{v}:{t}"
+        | address, Some(v), None    ->    $"{addressPrint address}:{v}"
+        | address, None, None       ->    $"{addressPrint address}"
+        | _ ->    failwithlog "{x} format error"
+    let toTextInOutDev (inp:DevParam) (outp:DevParam) = 
+        let inText = toTextDevParam inp
+        let outText = toTextDevParam outp
+        $"{inText}, {outText}"
+     
+      /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
+    ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
+    type TaskDev (api:ApiItem, inParam:DevParam, outParam:DevParam, deviceName:string) as this =
         inherit FqdnObject(api.Name, createFqdnObject([|deviceName|]))
         member _.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member val ApiName = this.QualifiedName
         member val DeviceName = deviceName
-        member val InAddress   = inAddress  with get, set
-        member val OutAddress  = outAddress with get, set
+
+        member val InParam  = inParam   with get, set
+        member val OutParam = outParam  with get, set
+
+        member x.InAddress
+            with get() = this.InParam  |> fun (d) -> d.DevAddress
+            and set(v) = this.InParam <- { DevAddress = v; DevValue = this.InParam.DevValue; DevTime = this.InParam.DevTime; }
+
+        member x.OutAddress
+            with get() = this.OutParam  |> fun (d) -> d.DevAddress
+            and set(v) = this.OutParam <- { DevAddress = v; DevValue = this.OutParam.DevValue; DevTime = this.OutParam.DevTime; }
+               
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
 
+    [<AbstractClass>]
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam) as this =
+        inherit FqdnObject(name, system)
+        member x.Name = name
+        member x.System = system
+        member val SettingFlows = flows with get, set
+        //SettingFlows 없으면 전역 시스템 설정
+        member val IsGlobalSystemHw = flows.IsEmpty()
+
+        member val InParam  = inParam   with get, set
+        member val OutParam = outParam  with get, set
+
+        member x.InAddress
+            with get() = this.InParam  |> fun (d) -> d.DevAddress
+            and set(v) = this.InParam <- { DevAddress = v; DevValue = this.InParam.DevValue; DevTime = this.InParam.DevTime; }
+
+        member x.OutAddress
+            with get() = this.OutParam  |> fun (d) -> d.DevAddress
+            and set(v) = this.OutParam <- { DevAddress = v; DevValue = this.OutParam.DevValue; DevTime = this.OutParam.DevTime; }
+            
+        /// CPU 생성 시 할당됨 InTag
+        member val InTag = getNull<ITag>() with get, set
+        /// CPU 생성 시 할당됨 OutTag
+        member val OutTag = getNull<ITag>() with get, set
 
 
+    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inDevParam: DevParam, outDevParam: DevParam, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam)
+        member x.ButtonType = btnType
+        member val ErrorEmergency = getNull<IStorage>() with get, set
 
-    /// 자신을 외부에서 물리적으로 조작하거나 조건을 나타날때 ex) system auto 물리버튼
-    and HwSystemItem private (name:string, system:DsSystem) =
-        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
-        interface INamedVertex
-        member _.Name = name
-        member _.System = system
-        member val Xywh:Xywh = null with get, set //제어반 버튼위치
+    and LampDef (name: string, system:DsSystem,lampType: LampType, inDevParam: DevParam, outDevParam: DevParam,  flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam) //inAddress lamp check bit
+        member x.LampType = lampType
+
+    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inDevParam: DevParam, outDevParam: DevParam,  flows: HashSet<Flow>) =
+        inherit HwSystemDef(name,  system, flows, inDevParam, outDevParam) // outAddress condition check bit
+        member x.ConditionType = conditionType
+        member val ErrorCondition = getNull<IStorage>() with get, set
+
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
     and ApiItem private (name:string, system:DsSystem) =
@@ -563,9 +585,4 @@ module CoreModule =
             ai4e.AddRXs rxs |> ignore
             ai4e
 
-    type HwSystemItem with
-        static member CreateHWApi(name, system) =
-            let cp = HwSystemItem(name, system)
-            system.HWSystemItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
-            cp
-     
+

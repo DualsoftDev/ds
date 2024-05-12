@@ -138,8 +138,6 @@ module internal ToDsTextModule =
         let tab2 = getTab 2
         let tab3 = getTab 3
        
-        let printFunc (func:Func) = $"${func.Name}"
-        let addressPrint (addr:string) = if isNullOrEmpty  addr then TextAddrEmpty else addr
         [
             yield $"[sys] {system.Name.QuoteOnDemand()} = {lb}"
 
@@ -147,7 +145,7 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             if system.Jobs.Any() then
-                let printDev (ai:TaskDev) = $"{ai.ApiName}({addressPrint ai.InAddress}, {addressPrint ai.OutAddress})"
+                let printDev (ai:TaskDev) = $"{ai.ApiName}({toTextDevParam ai.InParam}, {toTextDevParam ai.OutParam})"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
                     let jobItems =
@@ -241,11 +239,11 @@ module internal ToDsTextModule =
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
                 let getHwInfo(hw:HwSystemDef) = 
                     let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
-                    let items = 
-                        if hw.OperatorFunction.IsSome 
-                        then [printFunc hw.OperatorFunction.Value]  @ flows else flows
+                    //let items = 
+                    //    if hw.OperatorFunction.IsSome 
+                    //    then [printFunc hw.OperatorFunction.Value]  @ flows else flows
                                 
-                    let itemText = if items.any() then (items |> String.concat "; ") + ";" else ""
+                    let itemText = if flows.any() then (flows |> String.concat "; ") + ";" else ""
                     let inAddr =  addressPrint  hw.InAddress  
                     let outAddr = addressPrint  hw.OutAddress 
                     itemText, inAddr, outAddr

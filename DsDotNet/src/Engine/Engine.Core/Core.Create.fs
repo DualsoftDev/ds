@@ -74,7 +74,7 @@ module CoreCreateModule =
             else
                 failwithf $"api {apiName} 중복 생성에러"
 
-        TaskDev(api, TextAddrEmpty, TextAddrEmpty, devName)
+        TaskDev(api, TextAddrEmpty |> defaultDevParam, TextAddrEmpty  |> defaultDevParam, devName)
 
 
     let apiAutoGenUpdateSystem(sys:DsSystem) =

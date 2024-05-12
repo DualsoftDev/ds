@@ -183,15 +183,14 @@ module ConvertCPU =
 
             let coins = s.GetVerticesOfJobCalls()  
             let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
-            for (notFunc, dts) in jobs.Select(fun j-> (j.OperatorFunction |> hasNot), j.DeviceDefs) do
-                for dt in dts do
-                if dt.InTag.IsNonNull() then  
-                    yield dt.SensorEmulation(s, notFunc)
+            for dev in jobs.SelectMany(fun j-> j.DeviceDefs) do
+                if dev.InTag.IsNonNull() then  
+                    yield dev.SensorEmulation(s, dev.InParam.IsSensorTargetFalse())
         ]
      
     let private applyTimerCounterSpec(s:DsSystem) =
         [
-            yield! s.T1_DelayCall()
+           // yield! s.T1_DelayCall()
         ]
      
             

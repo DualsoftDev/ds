@@ -5,9 +5,9 @@
             R3; 
     }
     [interfaces] = {
-        HOME = { Flow.R1 ~ _ }
-        RESET = { Flow.R2 ~ _ }
-        WELD = { Flow.R3 ~ _ }
+        HOME = { Flow.R1 ~ Flow.R1 }
+        RESET = { Flow.R2 ~ Flow.R2 }
+        WELD = { Flow.R3 ~ Flow.R3 }
         RESET <||> HOME;
         RESET <||> WELD;
         HOME <||> WELD;

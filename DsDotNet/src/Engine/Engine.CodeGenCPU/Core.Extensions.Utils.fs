@@ -24,7 +24,7 @@ module ConvertCoreExtUtils =
     let errText (x:Call)  = getVMCoin(x).ErrorText
 
     let createHwApiBridgeTag (x:HwSystemDef, sys:DsSystem)  = 
-        let hwApi =   sys.HWSystemItems.First(fun f->f.Name = x.Name)
+        let hwApi =   sys.HwSystemDefs.First(fun f->f.Name = x.Name)
         let bridgeType = 
             match x with
             | :? ButtonDef -> BridgeType.Button

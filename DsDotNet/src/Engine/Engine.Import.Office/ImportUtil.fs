@@ -27,22 +27,22 @@ module ImportU =
     let createGenBtnLamp(mySys: DsSystem) =
         let flows = mySys.Flows
         flows.Iter(fun flow ->
-                    mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow, None)
-                    mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow, None)
-                    mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow, None)
-                    mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow, None)
-                    mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow, None)
-                    mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow, None)
+                    mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow)
+                    mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow)
+                    mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow)
+                    mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow)
+                    mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow)
+                    mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow)
             )
 
-        mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "-", "", None, None)
-        mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "-", "", None, None)
-        mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "-", "", None, None)
+        mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "-", "", None)
+        mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "-", "", None)
+        mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "-", "", None)
 
-        mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "-", "", None, None)
-        mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None, None)
-        mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None, None)
-        mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None, None)
+        mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "-", "", None)
+        mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None)
+        mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None)
+        mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
 
 
     let private createCallVertex
@@ -189,11 +189,11 @@ module ImportU =
                                 .Select(fun (api, tgt) ->
                                     match node.NodeType with
                                     | OPEN_EXSYS_CALL
-                                    | COPY_DEV -> TaskDev(api, "", "", tgt) 
+                                    | COPY_DEV -> TaskDev(api, ""|>defaultDevParam, ""|>defaultDevParam, tgt) 
                                     | _ -> failwithlog "Error MakeJobs")
 
 
-                        let job = Job(jobBase + "_" + api.Name, mySys, devs |> Seq.toList, DuBOOL, None)
+                        let job = Job(jobBase + "_" + api.Name, mySys, devs |> Seq.toList, DuBOOL)
 
                         if dicJobName.ContainsKey(job.Name) then
                             Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
@@ -301,7 +301,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}_{b.Key}", "", "", flow, None)))
+                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}_{b.Key}", "", "", flow)))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
@@ -310,7 +310,7 @@ module ImportU =
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
                 else 
                     dicFlow.Iter(fun flow ->
-                        node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value, None)))
+                        node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value)))
                 )        
                 
         //MakeLamps 리스트 만들기
@@ -335,11 +335,11 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}_{l.Key}", "", "", Some flow, None)))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}_{l.Key}", "", "", Some flow)))
             
             headPageLamps
             |> Seq.iter (fun node ->
-                node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None, None)))
+                node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None)))
                 
         //MakeReadyConditions 리스트 만들기
         [<Extension>]
@@ -349,7 +349,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.CondiDefs.any())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow, None)))
+                node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow)))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.CondiHeadPageDefs.any())
@@ -358,7 +358,7 @@ module ImportU =
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
                 else 
                     dicFlow.Iter(fun flow ->
-                        node.CondiHeadPageDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, c.Key, "", "", flow.Value, None)))
+                        node.CondiHeadPageDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, c.Key, "", "", flow.Value)))
                 )     
                 
         [<Extension>]

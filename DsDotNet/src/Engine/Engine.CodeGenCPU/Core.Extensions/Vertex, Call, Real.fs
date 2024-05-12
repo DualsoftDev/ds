@@ -10,7 +10,6 @@ open System
 module ConvertCpuVertex =
 
 
-    let getJobManager(c:Call) = c.TargetJob.TagManager :?> JobManager
        
     let getSafetyExpr(xs:Call seq, sys:DsSystem) =    
         if xs.any()
@@ -31,13 +30,13 @@ module ConvertCpuVertex =
     type Call with
         member c._on     = c.System._on
         member c._off    = c.System._off
+        member c.JM    = c.TargetJob.TagManager :?> JobManager
 
         member c.HasSensor  =
             match c.IsJob with
             | true -> 
                 c.TargetJob.DeviceDefs
-                    .Where(fun d-> d.OutAddress <> TextSkip
-                                && d.OutAddress <> TextAddrEmpty)
+                    .Where(fun d-> d.ExistInput)
                     .any()
             | false -> false
             
@@ -60,12 +59,12 @@ module ConvertCpuVertex =
                 if c.UsingNot 
                     then 
                         if c.HasSensor
-                        then !!getJobManager(c).JobOrExprTag.Expr  //안전상이 이유로 센서 OR 사용시 job을 분해해서 사용(하나라도 감지되지 않아야)
+                        then !!c.JM.JobOrExprTag.Expr  //안전상이 이유로 센서 OR 사용시 job을 분해해서 사용(하나라도 감지되지 않아야)
                         else failwithf $"$n 함수는 실제 Input address가 있어야 가능합니다. {c.Name} "   
 
                 else
                     if c.HasSensor 
-                        then getJobManager(c).JobAndExprTag.Expr
+                        then c.JM.JobAndExprTag.Expr
                         else c.EndPlan
 
         member c.EndAction = 

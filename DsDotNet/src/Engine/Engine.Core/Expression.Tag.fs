@@ -65,6 +65,26 @@ module TagModule =
         let defaultValue = DsDataType.typeDefaultValue (dataType.ToType())
         createVariable name { Object = defaultValue }
 
+
+    let createTagByBoxedValue (name:string)  (boxedValue:BoxedObjectHolder) tagKind address sys fqdn: ITag =
+        let v = boxedValue.Object
+        let createParam () = {defaultStorageCreationParams(unbox v) tagKind with Name=name; Address= Some address; System=sys; Target = Some fqdn}
+        match v.GetType().Name with
+        | BOOL   -> new Tag<bool>   (createParam())
+        | CHAR   -> new Tag<char>   (createParam())
+        | FLOAT32-> new Tag<single> (createParam())
+        | FLOAT64-> new Tag<double> (createParam())
+        | INT16  -> new Tag<int16>  (createParam())
+        | INT32  -> new Tag<int32>  (createParam())
+        | INT64  -> new Tag<int64>  (createParam())
+        | INT8   -> new Tag<int8>   (createParam())
+        | STRING -> new Tag<string> (createParam())
+        | UINT16 -> new Tag<uint16> (createParam())
+        | UINT32 -> new Tag<uint32> (createParam())
+        | UINT64 -> new Tag<uint64> (createParam())
+        | UINT8  -> new Tag<uint8>  (createParam())
+        | _  -> failwithlog "ERROR"
+
     type Statement with
      
         member x.GetTargetStorages() =
@@ -78,7 +98,11 @@ module TagModule =
 
         member x.GetSourceStorages() =
             match x with
-            | DuAssign (_, expr, _target) -> expr.CollectStorages()
+            | DuAssign (condi, expr, _target) ->
+                        if condi.IsSome
+                        then expr.CollectStorages()@condi.Value.CollectStorages()
+                        else expr.CollectStorages()
+                        
             | DuVarDecl (expr, _var) -> expr.CollectStorages()
             | DuTimer timerStatement -> 
                 [ for s in timerStatement.Timer.InputEvaluateStatements do
@@ -86,7 +110,8 @@ module TagModule =
             | DuCounter counterStatement ->
                 [ for s in counterStatement.Counter.InputEvaluateStatements do
                     yield! s.GetSourceStorages() ]
-            | DuAction (DuCopy (condition, _source, _target)) -> condition.CollectStorages()
+            | DuAction (DuCopy (condition, source, _target)) ->
+                condition.CollectStorages()@source.CollectStorages()
             | DuAugmentedPLCFunction _ -> []
 
       

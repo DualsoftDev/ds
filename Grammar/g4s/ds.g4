@@ -190,10 +190,12 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
     flowPath: identifier2;
 
+
+IDENTIFIERPARAM : ':' ('-'|[a-zA-Z_0-9]|HangulChar)+ ;   //값으로 문자열도 오기 때문에 ()로 감싸줌
 devParamInOut: '(' devParamInOutBody ')' (SEMICOLON)?;
 devParamInOutBody:  inParam COMMA outParam;
-inParam: addressItem (':' IDENTIFIERVALUE)? (':' IDENTIFIERVALUE)? ;
-outParam: addressItem (':' IDENTIFIERVALUE)? (':' IDENTIFIERVALUE)? ;
+inParam:  addressItem | (addressItem  IDENTIFIERPARAM)| (addressItem  IDENTIFIERPARAM  IDENTIFIERPARAM);
+outParam: addressItem | (addressItem  IDENTIFIERPARAM)| (addressItem  IDENTIFIERPARAM  IDENTIFIERPARAM);
 addressItem: tagAddress | '-' | '_';
 tagAddress: TAG_ADDRESS;
 
@@ -295,11 +297,11 @@ varType: identifier1;
    //    | 'bool' | 'boolean'| 'Bool'   | 'Boolean' ;
 
 
+
 variableBlock: '[' 'variables' ']' '=' '{' (variableInitDef | variableDef)* '}';
     variableDef: varType varName SEMICOLON;
     variableInitDef: varType varName initValue SEMICOLON;
     varName: identifier1;
-
     initValue: IDENTIFIERVALUE;
     IDENTIFIERVALUE : '(' ('-'|[a-zA-Z_0-9]|HangulChar)+ ')';   //값으로 문자열도 오기 때문에 ()로 감싸줌
 

@@ -106,7 +106,7 @@ module ExpressionModule =
     let literal2expr (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then
-            DuTerminal (DuLiteral ({Value=x}:LiteralHolder<_>))
+            DuTerminal (DuLiteral ({Value=x}:LiteralHolder<'T>))
         else
             failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 

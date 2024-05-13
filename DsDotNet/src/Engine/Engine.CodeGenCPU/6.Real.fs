@@ -64,9 +64,9 @@ type VertexMReal with
 
 
 
-    member v.R6_RealDataMove() =
-        let set = v.RD.ToExpression() 
-        (set) --> (v.RD, getFuncName())
+    member v.R6_RealDataMove() = ()
+        //let set = v.RD.ToExpression() 
+        //(set) --> (v.RD, getFuncName())
 
     member v.R7_RealGoingOriginError() =
         let dop = v.Flow.d_st.Expr

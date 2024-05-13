@@ -50,7 +50,7 @@ module ConvertCPU =
                 yield vm.R3_RealStartPoint()
                 yield vm.R4_RealSync() 
                 yield! vm.R5_DummyDAGCoils() 
-                yield vm.R6_RealDataMove() 
+                //yield vm.R6_RealDataMove() 
                 yield! vm.R7_RealGoingOriginError() 
                 
                 
@@ -132,19 +132,7 @@ module ConvertCPU =
         
     let private apiPlanSync(s:DsSystem) =
         [
-            let apis = s.GetDistinctApis()
-            let coinAll = s.GetVerticesOfCoins()  
-            let apiCoinsSet =
-                apis.Select(fun a->
-                    a, 
-                        coinAll.Where(fun f->
-                        match f with
-                        | :? Call as c when c.IsJob ->  c.TargetJob.ApiDefs.Contains(a)
-                        | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.ApiDefs.Contains(a)
-                        |_ -> false
-                    )
-                )
-            
+            let apiCoinsSet =  s.GetApiCoinsSet()
             for (api, coins) in apiCoinsSet do
                 let am = api.TagManager :?> ApiItemManager
                 yield am.A2_PlanReceive(s)
@@ -173,8 +161,9 @@ module ConvertCPU =
     let private applyJob(s:DsSystem) =
             [
                 for jm in s.Jobs.Map(fun j->j.TagManager :?> JobManager) do
-                   yield! jm.J1_JobAndOrTags()
-                   yield! jm.J2_JobActionOuts() 
+                   yield! jm.J1_JobAndTag()
+                   yield! jm.J2_JobValueTag()
+                   yield! jm.J3_JobActionOuts()
             ]
         
     let private emulationDevice(s:DsSystem) =
@@ -185,13 +174,9 @@ module ConvertCPU =
             let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
             for dev in jobs.SelectMany(fun j-> j.DeviceDefs) do
                 if dev.InTag.IsNonNull() then  
-                    yield dev.SensorEmulation(s, dev.InParam.IsSensorTargetFalse())
+                    yield dev.SensorEmulation(s, dev.InParam.IsSensorNot())
         ]
-     
-    let private applyTimerCounterSpec(s:DsSystem) =
-        [
-           // yield! s.T1_DelayCall()
-        ]
+ 
      
             
 
@@ -258,8 +243,4 @@ module ConvertCPU =
 
             //allpyJob 적용 
             yield! applyJob sys
-     
-            
-            //Timer Count 적용 
-            yield! applyTimerCounterSpec sys
         ]

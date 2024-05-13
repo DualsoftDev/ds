@@ -9,13 +9,8 @@ open Dual.Common.Core.FS
 type VertexManager with
     member v.C1_CallMemo() =
         let v = v :?> VertexMCall
-        let call = 
-            match v.Vertex with
-            | :? Call as c->  c
-            | :? Alias as al->  al.TargetWrapper.CallTarget().Value
-            |_ -> failwithf "error coin Type"
-
-
+        let call = v.Vertex.GetPureCall().Value
+       
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
         
         let sets = 

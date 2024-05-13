@@ -204,15 +204,15 @@ C4 > C5;
     }
 
     [jobs] = {
-        Ap = { A."+"(%MX0, %MX1); }
-        Am = { A."-"(%IX0.0.1, %QX0.0.1); }
-        Bp = { B."+"(%IX0.0.2, %QX0.0.2); }
-        Bm = { B."-"(%IX0.0.3, %QX0.0.3); }
+        Ap = { A."+"(_, _); }
+        Am = { A."-"(_, _); }
+        Bp = { B."+"(_, _); }
+        Bm = { B."-"(_, _); }
     }
 
     [buttons] = {
         [e] = {
-            EMGBTN(%IX0.0.4,%QX0.1.3) = { F; }
+            EMGBTN(_,_) = { F; }
             //EmptyButton = {}
             //NonExistingFlowButton = { F1; }
         }

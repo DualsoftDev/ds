@@ -13,7 +13,7 @@ open Engine.Parser.FS
 type Spec08_DAGStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
     [<Test>]
     member __.``D1 DAG Head Start`` () =
         for real in t.Reals do

@@ -49,8 +49,9 @@ module ExpressionExtension =
     /// Create Add Statement   //test ahn  Add 함수로 변경 필요
     let (---) (sets) = coilSub (fun s c -> c <== s) sets
     /// Create Copy Statement 
-    let (-->) (sets) = coilMove (fun s c -> c <== s) sets
-     
+    let (-->) (sets, copyExpr) (target, comment:string) = 
+        DuAction(DuCopy(sets, copyExpr, target))  |> withExpressionComment comment
+                
     /// Create One Scan Relay Coils Statement
     let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (rising: TypedValueStorage<bool>, risingRelay: TypedValueStorage<bool>, risingTemp : TypedValueStorage<bool>, comment:string) =
         [

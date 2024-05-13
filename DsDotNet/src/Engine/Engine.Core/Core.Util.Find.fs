@@ -257,12 +257,28 @@ type FindExtension =
                     let aliases = vs.OfType<Alias>().Cast<Vertex>()
                     (calls@aliases)
                         .Where(fun c->c.Parent.GetCore() :? Real)     
+        
+    [<Extension>] static member GetApiCoinsSet(x:DsSystem) = 
+                        let apis = x.GetDistinctApis()
+                        let coinAll = x.GetVerticesOfCoins()  
+                        apis |> Seq.map(fun a->
+                                a, 
+                                    coinAll.Filter(fun f->
+                                    match f with
+                                    | :? Call as c when c.IsJob ->  c.TargetJob.ApiDefs.Contains(a)
+                                    | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.ApiDefs.Contains(a)
+                                    |_ -> false
+                                )
+                        )
+            
 
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
 
-    [<Extension>] static member GetVerticesOfCoinCalls(x:DsSystem) = 
-                    x.GetVerticesOfJobCalls().Where(fun c->c.Parent.GetCore() :? Real) 
-
+    [<Extension>] static member GetVerticesOfJobCoins(x:DsSystem, job:Job) = 
+                    x.GetVerticesOfCoins()
+                     .Select(fun v-> v.GetPureCall().Value)
+                     .Where(fun c-> c.IsJob && c.TargetJob = job)
+  
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
 

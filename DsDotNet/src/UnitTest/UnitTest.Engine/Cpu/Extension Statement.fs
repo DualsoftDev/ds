@@ -13,5 +13,5 @@ open Engine.Parser.FS
 type Spec14_ExtensionStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
     [<Test>] member __.``E1`` () = Eq 1 1

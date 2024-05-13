@@ -63,17 +63,18 @@ module CoreExtensionModule =
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
            
-    let getDevParm (parmInOutText:string) = 
+    let getDevParm (paramInOutText:string) = 
         let getDevParam (txt:string) =
+   
             match txt.Split(':') |> Seq.toList with
             | [addr] -> {DevAddress = addr; DevValue = None; DevTime = None}
-            | addr::xs when xs.Length = 1 ->  {DevAddress = addr; DevValue = Some(xs.Head); DevTime = None}
-            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValue = Some(xs.Head); DevTime = Some(Convert.ToInt32(xs.Last()))}
+            | addr::xs when xs.Length = 1 ->  {DevAddress = addr; DevValue = Some(toValue(xs.Head)|>unbox); DevTime = None}
+            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValue = Some(toValue(xs.Head)|>unbox); DevTime = Some(Convert.ToInt32(xs.Last()))}
             | _-> failwithlog $"{txt} getDevParam format error ex) Value or Value:Time"
 
-        match parmInOutText.Split(',') |> Seq.toList with
+        match paramInOutText.Split(',') |> Seq.toList with
         | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
-        | _-> failwithlog $"{parmInOutText} getDevParmInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
+        | _-> failwithlog $"{paramInOutText} getDevParmInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
     
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
@@ -248,7 +249,7 @@ type SystemExt =
     static member ToTextForDevParam(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
 
     [<Extension>]
-    static member IsSensorTargetFalse(x:DevParam) = 
+    static member IsSensorNot(x:DevParam) = 
                 match x.DevValue with
                 |Some(v) when v.GetType() = typedefof<bool> -> not (Convert.ToBoolean(v))  //RX 기본은 True
                 |_ -> false

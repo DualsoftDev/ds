@@ -47,7 +47,7 @@ module ConvertErrorCheck =
 
                     if td.OutAddress <> TextSkip && coin.TargetJob.ActionType = JobActionType.Push 
                     then 
-                        if coin.MutualResetCalls.Select(fun c->c.VC.MM).isEmpty()
+                        if coin.MutualResetCoins.isEmpty()
                         then 
                             failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
                              

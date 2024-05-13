@@ -62,7 +62,7 @@
 		<Compile Include="Origins\OriginTester.fs" />
 		<Compile Include="Cpu\CpuTestCommon.fs" />
 		<Compile Include="Cpu\Test All Case.fs" />
-		<Compile Include="Cpu\Port Statement.fs" />
+		<Compile Include="Cpu\Api Statement.fs" />
 		<Compile Include="Cpu\Flow Statement.fs" />
 		<Compile Include="Cpu\Status Statement.fs" />
 		<Compile Include="Cpu\Operation Mode Statement.fs" />

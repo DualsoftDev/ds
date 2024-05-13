@@ -184,8 +184,7 @@ module DsDataType =
         | UINT8     -> "0uy"
         | _  -> failwithlog "ERROR"
 
-    
-
+ 
     type DataType =
         | DuBOOL
         | DuCHAR
@@ -270,6 +269,46 @@ module DsDataType =
             | DuUINT8   -> valueText |> Convert.ToByte    |> box 
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
+
+    let getDataType (typ:System.Type) =
+        match typ.Name with
+        | BOOL      -> DuBOOL
+        | CHAR      -> DuCHAR
+        | FLOAT32   -> DuFLOAT32
+        | FLOAT64   -> DuFLOAT64
+        | INT16     -> DuINT16
+        | INT32     -> DuINT32
+        | INT64     -> DuINT64
+        | INT8      -> DuINT8
+        | STRING    -> DuSTRING
+        | UINT16    -> DuUINT16
+        | UINT32    -> DuUINT32
+        | UINT64    -> DuUINT64
+        | UINT8     -> DuUINT8
+        | _  -> failwithlog "ERROR"
+
+        
+    let toValue (valueText:string) =
+        let trimmedValue, dataType = 
+            match valueText with
+            | _ when valueText.StartsWith("\"") && valueText.EndsWith("\"") && valueText.Length > 1 ->
+                valueText.[1..valueText.Length-2], DuSTRING
+            | _ when valueText.StartsWith("'") && valueText.EndsWith("'") && valueText.Length = 3 ->
+                valueText.[1].ToString(), DuCHAR
+            | _ when valueText.Contains('.') ->
+                if valueText.EndsWith("f") then valueText.TrimEnd('f'), DuFLOAT32
+                else valueText, DuFLOAT64
+            | _ when valueText.EndsWith("L") -> valueText.TrimEnd('L'), DuINT64
+            | _ when valueText.EndsWith("u") -> valueText.TrimEnd('u'), DuUINT32
+            | _ when valueText.EndsWith("y") -> valueText.TrimEnd('y'), DuINT8
+            | _ when valueText.EndsWith("s") -> valueText.TrimEnd('s'), DuINT16
+            | _ when valueText.EndsWith("uy") -> valueText.TrimEnd([|'u';'y'|]), DuUINT8
+            | _ when valueText.EndsWith("us") -> valueText.TrimEnd([|'u';'s'|]), DuUINT16
+            | _ when valueText.EndsWith("UL") -> valueText.TrimEnd([|'U';'L'|]), DuUINT64
+            | _ when valueText.ToLower() = "true" || valueText.ToLower() = "false" -> valueText, DuBOOL
+            | _ -> valueText, DuINT32
+
+        dataType.ToValue trimmedValue
 
     type IOType = | In | Out | Memory | NotUsed
 

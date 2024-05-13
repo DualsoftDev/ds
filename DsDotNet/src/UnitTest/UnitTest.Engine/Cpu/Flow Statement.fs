@@ -13,7 +13,7 @@ open System.Linq
 type Spec02_FlowStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
 
     [<Test>]
     member __.``F1 Root Start`` () =

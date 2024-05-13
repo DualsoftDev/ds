@@ -15,7 +15,7 @@ open System.Linq
 [<AutoOpen>]
 module CpuTestUtil =
 
-    type CpuTestSample() =
+    type CpuTestSample(target) =
 
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
@@ -23,7 +23,7 @@ module CpuTestUtil =
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- sys
             RuntimeDS.Package <- RuntimePackage.PLC
-            applyTagManager (sys, Storages(), XGI)
+            applyTagManager (sys, Storages(), target)
             checkCausalModel sys
             sys
 
@@ -45,6 +45,10 @@ module CpuTestUtil =
         let realTypeAll       = vertices.OfType<Real>()
         let vertexAll         = vertices
         do
+            
+            RuntimeGeneratorModule.clearNFullSlotHwSlotDataTypes()
+            DsAddressModule.assignAutoAddress(sys, 0, 100000) target
+            
             sys.GenerationIO()
             sys.GenerationOrigins()
 
@@ -61,6 +65,9 @@ module CpuTestUtil =
         member x.Coins  =  coinTypeAll.Select(getVM)
         member x.Reals  =  realTypeAll.Select(getVM)
         member x.Calls  =  callTypeAll.Select(getVM)
+        member x.Apis  =  sys.ApiItems.Select(getAM)
+        member x.ApiCoinsSet  =  sys.GetApiCoinsSet().Select(fun (api,coins)->(getAM(api),coins))
+
         member x.InRealCalls  =  callTypeAll.Where(fun f->f.Parent.GetCore() :? Real).OfType<Call>()
         member x.AbleVertexInFlows    =  callTypeAll
                                                 .Where(fun f->f.Parent.GetCore() :? Flow)
@@ -69,7 +76,6 @@ module CpuTestUtil =
                                                  |> Seq.append ([x.AREInF.Vertex])
 
         member x.ALL    =  vertexAll.Select(getVM)
-        member x.GenerationIO() =  sys.GenerationIO()
 
     let doCheck (commentedStatement:CommentedStatement) =
         let st = commentedStatement.Statement
@@ -80,7 +86,7 @@ module CpuTestUtil =
         |> Seq.filter(fun f-> not <| f.Name.StartsWith("_"))
         |> Seq.iter(fun f->f.BoxedValue <- true)
 
-        st.Do()     // test ahn 추후 정답지 작성
+        st.Do()    
         st.GetTargetStorages().Head.BoxedValue === st.GetTargetStorages().Head.BoxedValue
 
     let doChecks (commentedStatements:CommentedStatement seq) = commentedStatements.Iter(doCheck)

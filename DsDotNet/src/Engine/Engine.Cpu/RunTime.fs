@@ -175,7 +175,6 @@ module RunTime =
         
     [<Extension>]
     type DsCpuExt  =
-        //Job 만들기
         [<Extension>]
         static member GetDsCPU (dsSys:DsSystem) (target) : DsCPU*HMIPackage*(PouGen seq) =
             let loadedSystems = dsSys.GetRecursiveLoadedSystems()

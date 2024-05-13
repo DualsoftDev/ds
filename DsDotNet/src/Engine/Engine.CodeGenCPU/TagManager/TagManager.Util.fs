@@ -76,7 +76,7 @@ module TagManagerUtil =
         t
 
     type BridgeType = | Device | Button | Lamp | Condition | DummyTemp
-    let createBridgeTag(stg:Storages, name, address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed): ITag option=
+    let createBridgeTag(stg:Storages, name, address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed, duType:DataType): ITag option=
         if address = TextSkip || address = "" 
         then None
         else
@@ -96,9 +96,11 @@ module TagManagerUtil =
                               | _ -> failwithlog "error: HwSysTag create "
        
             let plcAddrName = getPlcTagAbleName name stg
-            let t =
-                let param = {defaultStorageCreationParams(false) tagKind with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
-                (Tag(param) :> ITag)
+            let t = createTagByBoxedValue plcAddrName {Object = duType.DefaultValue()} tagKind address sys fqdn
+                //let param = {defaultStorageCreationParams() tagKind with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
+            //let t =
+            //    let param = {defaultStorageCreationParams(false) tagKind with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
+            //    (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t
-
+            

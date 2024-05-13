@@ -12,7 +12,7 @@ open Engine.Parser.FS
 type Spec09_TimmerStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
     //[<Test>]
     //member __.``T1 Delay Call`` () =
     //    t.Sys.T1_DelayCall() |> doChecks

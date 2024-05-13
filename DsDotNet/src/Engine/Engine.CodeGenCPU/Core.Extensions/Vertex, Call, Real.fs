@@ -26,6 +26,15 @@ module ConvertCpuVertex =
         member r.VR = r.TagManager :?> VertexMReal
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
+        member r.MutualResetCoins =  r.Parent.GetSystem().S.MutualCalls[r]
+    
+    let getJM(j:Job) = j.TagManager:?> JobManager
+
+    type Job with
+        member j.ActionInBool = 
+            if j.DataType = DuBOOL
+            then getJM(j).JobBoolValueTag.Expr |> Some
+            else None
 
     type Call with
         member c._on     = c.System._on
@@ -43,7 +52,6 @@ module ConvertCpuVertex =
 
         member c.UsingTon  = c.CallOperatorType = DuOPTimer
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
-        member c.UsingNot  = c.CallOperatorType = DuOPNot
         member c.UsingMove  = c.CallCommandType = DuCMDCode
         member c.EndPlan =  
                     if c.IsCommand
@@ -56,16 +64,9 @@ module ConvertCpuVertex =
                         c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
 
         member c.EndActionOnlyIO = 
-                if c.UsingNot 
-                    then 
-                        if c.HasSensor
-                        then !!c.JM.JobOrExprTag.Expr  //안전상이 이유로 센서 OR 사용시 job을 분해해서 사용(하나라도 감지되지 않아야)
-                        else failwithf $"$n 함수는 실제 Input address가 있어야 가능합니다. {c.Name} "   
-
-                else
-                    if c.HasSensor 
-                        then c.JM.JobAndExprTag.Expr
-                        else c.EndPlan
+                if c.HasSensor && c.TargetJob.ActionInBool.IsSome
+                    then c.JM.JobBoolValueTag.Expr
+                    else c.EndPlan
 
         member c.EndAction = 
                 if c.UsingTon  then c.VC.TDON.DN.Expr
@@ -73,11 +74,9 @@ module ConvertCpuVertex =
 
         member c.GetEndAction(x:ApiItem) =
             let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
-            if td.InAddress <> TextSkip && td.InAddress <> TextAddrEmpty
+            if td.ExistInput
             then 
-                let inTag = td.InTag :?> Tag<bool>
-                if c.UsingNot  then !!inTag.Expr|>Some
-                               else inTag.Expr  |>Some
+                Some(td.GetInExpr())
             else 
                 None
       
@@ -121,7 +120,6 @@ module ConvertCpuVertex =
                                     getVMCoin(c).ErrOpen 
                                 ]
                          
-        member c.MutualResetCalls =  c.System.S.MutualCalls[c].Cast<Call>()
           
         member c.SafetyExpr = getSafetyExpr(c.SafetyConditions.Choose(fun f->f.GetSafetyCall()), c.System)
 

@@ -11,7 +11,7 @@ open Engine.Parser.FS
 
 type Spec07_CallStatement() =
     inherit EngineTestBaseClass()
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
 
     //[<Test>]
     //member __.``C1 Call Plan Send`` () =

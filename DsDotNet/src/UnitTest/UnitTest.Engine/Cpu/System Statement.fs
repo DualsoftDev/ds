@@ -13,7 +13,7 @@ open Engine.Parser.FS
 type Spec13_SystemStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
     [<Test>]
     member __.``Y1 System Bit Set Flow`` () =
         t.Sys.Y1_SystemBitSetFlow() |> doChecks

@@ -12,7 +12,7 @@ open Engine.Parser.FS
 type Spec12_ButtonLampStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
     [<Test>]
     member __.``B1 HW Button Output`` () =
         t.Sys.B1_HWButtonOutput() |> doChecks

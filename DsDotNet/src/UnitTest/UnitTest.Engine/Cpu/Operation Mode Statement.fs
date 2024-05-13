@@ -12,7 +12,7 @@ open Engine.CodeGenCPU
 type Spec04_OperationStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
 
     //[<Test>]
     //member __.``O1 Ready Operation State`` () =

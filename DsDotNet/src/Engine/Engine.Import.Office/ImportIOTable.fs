@@ -72,7 +72,7 @@ module ImportIOTable =
             $"{row.[(int) IOColumn.Name]}"
 
             
-    let getDevParmInOut (inAddr:string, outAddr:string, funcDev:string) = 
+    let getPPTDevParmInOut (inAddr:string, outAddr:string, funcDev:string) = 
         match funcDev.Split('~') |> Seq.toList with
         | tx::rx when rx.Length = 1 -> getDevParm $"{inAddr}:{tx}, {outAddr}:{rx.Head}"
         | [] -> inAddr|>defaultDevParam, outAddr|>defaultDevParam
@@ -229,7 +229,7 @@ module ImportIOTable =
                     btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidBtnAddress (btn)  Util.runtimeTarget
-                    let inParams, outParms = getDevParmInOut ((inaddr.Trim()), (outaddr.Trim()), func)
+                    let inParams, outParms = getPPTDevParmInOut ((inaddr.Trim()), (outaddr.Trim()), func)
                     btn.InParam <- inParams
                     btn.OutParam <- outParms
 
@@ -247,7 +247,7 @@ module ImportIOTable =
                     lamp.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"
                     let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
-                    let inParams, outParms = getDevParmInOut ((inaddr.Trim()), (outaddr.Trim()), func)
+                    let inParams, outParms = getPPTDevParmInOut ((inaddr.Trim()), (outaddr.Trim()), func)
                     lamp.InParam<- inParams
                     lamp.OutParam <- outParms
 
@@ -264,7 +264,7 @@ module ImportIOTable =
                     cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
                     cond.OutAddress  <- $"{row.[(int) IOColumn.Output]}" 
                     let inaddr, outaddr =  getValidCondiAddress cond Util.runtimeTarget
-                    let inParams, outParms = getDevParmInOut (inaddr.Trim(), outaddr.Trim(), func)
+                    let inParams, outParms = getPPTDevParmInOut (inaddr.Trim(), outaddr.Trim(), func)
                     cond.InParam <- inParams
                     cond.OutParam <- outParms
                    

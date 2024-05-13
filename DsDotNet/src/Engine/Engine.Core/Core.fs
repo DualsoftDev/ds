@@ -284,6 +284,10 @@ module CoreModule =
 
     let defaultDevParam (address) = { DevAddress = address; DevValue = None; DevTime = None; }
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
+    let getDataTypeParam (x:DevParam) = 
+        if x.DevValue.IsNone then DuBOOL
+        else x.DevValue.Value.GetType() |> getDataType
+
     let toTextDevParam (x:DevParam) = 
         match x.DevAddress, x.DevValue, x.DevTime  with 
         | address, Some(v), Some(t) ->    $"{addressPrint address}:{v}:{t}"

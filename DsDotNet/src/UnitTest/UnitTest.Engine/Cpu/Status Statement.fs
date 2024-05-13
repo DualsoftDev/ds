@@ -12,7 +12,7 @@ open System.Linq
 type Spec03_StatusStatement() =
     inherit EngineTestBaseClass()
 
-    let t = CpuTestSample()
+    let t = CpuTestSample(WINDOWS)
 
     [<Test>]
     member __.``S1 RealRGFH`` () =

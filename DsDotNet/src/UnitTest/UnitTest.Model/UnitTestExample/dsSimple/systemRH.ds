@@ -16,8 +16,8 @@
     }
 
     [jobs] = {
-        Ap = { LH.ADV(%I1, %Q1); }
-        Am = { LH.RET(%I2, %Q2); }
+        Ap = { LH.ADV(_, _); }
+        Am = { LH.RET(_, _); }
     }
   
     [external file="systemLH.ds"] LH;

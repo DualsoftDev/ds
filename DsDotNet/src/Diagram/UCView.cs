@@ -4,7 +4,9 @@ using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
@@ -102,8 +104,8 @@ public partial class UcView : UserControl
 
     private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
     {
-        var src = edge.IsReversedEdge ? edge.Targets[0] : edge.Sources[0];
-        var tgt = edge.IsReversedEdge ? edge.Sources[0] : edge.Targets[0];
+        var src = edge.Sources[0];
+        var tgt = edge.Targets[0];
 
         bool bDrawSubSrc = src.IsChildExist;
         bool bDrawSubTgt = tgt.IsChildExist;
@@ -177,20 +179,39 @@ public partial class UcView : UserControl
         gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Generalization;
 
         gEdge.Attr.Color = Color.DarkGray;
+
+        void updateRowSource(bool bRev) 
+        {
+            if (bRev)
+            {
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.None;
+            }
+            else
+            {
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.None;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+            }
+        }
+   
+
+
         ModelingEdgeType et = edge.EdgeSymbol.ToModelEdge();
-        if (et == ModelingEdgeType.StartEdge)
+        if (et == ModelingEdgeType.StartEdge || et == ModelingEdgeType.RevStartEdge)
         {
             gEdge.Attr.AddStyle(Style.Solid);
             gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
             gEdge.Attr.ArrowheadLength = edge_attr_HeadSize;
+            updateRowSource(et == ModelingEdgeType.RevStartEdge);
         }
        
-        else if (et == ModelingEdgeType.ResetEdge)
+        else if (et == ModelingEdgeType.ResetEdge || et == ModelingEdgeType.RevResetEdge)
         {
             gEdge.Attr.AddStyle(Style.Dashed);
             gEdge.Attr.LineWidth = edge_attr_linewidthWeek;
+            updateRowSource(et == ModelingEdgeType.RevResetEdge);
         }
-      
+
         else if (et == ModelingEdgeType.InterlockWeak)
         {
             gEdge.Attr.AddStyle(Style.Dashed);
@@ -204,10 +225,23 @@ public partial class UcView : UserControl
             gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
         }
-        else if (et == ModelingEdgeType.StartReset)
+        else if (et == ModelingEdgeType.StartReset|| et == ModelingEdgeType.RevStartReset)
         {
             gEdge.Attr.AddStyle(Style.Solid);
-            gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
+            if (et == ModelingEdgeType.RevStartReset)
+            {
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Tee;
+            }
+            else
+            {
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+            }
+        }
+        else    
+        {
+           throw new Exception($"Error {et.ToText()} not DrawEdgeStyle");
         }
 
         UpdateLabelText(gEdge.SourceNode);

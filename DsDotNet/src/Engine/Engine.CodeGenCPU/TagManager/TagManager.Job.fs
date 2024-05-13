@@ -12,13 +12,11 @@ module JobManagerModule =
      type JobManager(job:Job)  =
         let stg = job.System.TagManager.Storages
 
-        let cpv (jobTag:JobTag) =
-            let name = job.QualifiedName
+        let cpv (name) (jobTag:JobTag) =
             let pv:IStorage = createPlanVar stg name job.DataType true job (int jobTag) job.System 
-            pv :?> PlanVar<bool>
+            pv 
             
-        let devAndExpr = cpv JobTag.JobAndExprTag
-        let devOrExpr = cpv JobTag.JobOrExprTag
+        let jobValueTag = cpv job.Name JobTag.JobValueTag
    
         do 
             if job.DataType <> DuBOOL && job.DeviceDefs.Count() > 1
@@ -29,6 +27,6 @@ module JobManagerModule =
             member _.Target = job
             member _.Storages = stg
         
-        member _.JobAndExprTag = devAndExpr
-        member _.JobOrExprTag = devOrExpr
+        member _.JobValueTag   = jobValueTag 
+        member _.JobBoolValueTag   = jobValueTag  :?> PlanVar<bool>    
         member _.Job   = job

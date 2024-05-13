@@ -78,12 +78,8 @@ module CpuLoader =
                 let variTag =  createVariableByType v.Name v.Type
                 storages.Add(variTag.Name, variTag)
                 )
-            sys.Jobs.Iter(fun j->
-                j.TagManager <- JobManager(j)
-                let variTag =  createVariableByType j.Name j.DataType
-                storages.Add(variTag.Name, variTag)
-                )
-
+            
+            sys.Jobs.Iter(fun j->j.TagManager <- JobManager(j))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
             sys.GetVertices().Iter(fun v->

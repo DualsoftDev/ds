@@ -8,8 +8,10 @@ open T
 open Engine.Core
 open Dual.Common.Core.FS
 open Engine.CodeGenPLC
+open Engine.CodeGenCPU
 
-type TestAllCase() =
+
+type XgxConvertDsCPU(target:PlatformTarget) =
     inherit EngineTestBaseClass()
 
     let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/Xgi/Xmls/{testName}.xml")
@@ -35,27 +37,19 @@ type TestAllCase() =
             c.InAddress <-  addr()
 
 
-    [<Test>]
     member __.``Test All Case`` () =
-        let t = CpuTestSample()
+        let t = CpuTestSample(target)
         let f = getFuncName()
-        let result = exportXMLforLSPLC(XGI, t.Sys, myTemplate f, None, 0, 0, 0)
-        //추후 정답과 비교 필요
+        let result = exportXMLforLSPLC(target, t.Sys, myTemplate f, None, 0, 0, 0)
         result === result
 
 
-    [<Test>]
-    member __.``Allocate existing global Memory`` () =
-        let t = CpuTestSample()
-
-        let myXml = getFuncName() |> myTemplate
-        let result = exportXMLforLSPLC(XGI, t.Sys, myXml, None, 0, 0, 0)
-        result === result
+type XgiConvertDsCPU() =
+    inherit XgxConvertDsCPU(XGI)
+    [<Test>] member __.``Test All Case`` () = base.``Test All Case``()
 
 
-    [<Test>]
-    member __.``Allocate existing global IO`` () =
-        let t = CpuTestSample()
-        let myXml = getFuncName() |> myTemplate
-        (fun () -> exportXMLforLSPLC(XGI, t.Sys, myXml, Some myExistIO, 0, 0, 0))  |> ShouldFail
+type XgkConvertDsCPU() =
+    inherit XgxConvertDsCPU(XGK)
+    [<Test>] member __.``Test All Case`` () = base.``Test All Case``()
 

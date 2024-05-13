@@ -219,6 +219,5 @@ module TagKindList =
     /// 17000 ~ 17999
     [<Flags>]
     type JobTag    =
-    |JobAndExprTag                = 17000
-    |JobOrExprTag                 = 17001
+    |JobValueTag                  = 17000
 

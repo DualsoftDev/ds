@@ -11,6 +11,7 @@ using System;
 
 using static Engine.Core.DsText;
 using static Engine.Core.CoreModule;
+using static Engine.Core.DsConstants;
 
 namespace Engine.Export.Office
 {

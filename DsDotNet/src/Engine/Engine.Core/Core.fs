@@ -279,21 +279,29 @@ module CoreModule =
     type DevParam = {
         DevAddress: DevAddress
         DevValue: obj option
-        DevTime: int option
+        DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
     }  
 
-    let defaultDevParam (address) = { DevAddress = address; DevValue = None; DevTime = None; }
+    let defaultDevParam (address) = 
+        {   
+            DevAddress = address
+            DevValue = None
+            DevTime = None
+        }
+
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
+
+    let toTextDevParam (x:DevParam) = 
+        match x.DevAddress, x.DevValue, x.DevTime  with 
+        | address, Some(v), Some(t) ->    $"{addressPrint address}:{v}:{t}ms"
+        | address, Some(v), None    ->    $"{addressPrint address}:{v}"
+        | address, None, None       ->    $"{addressPrint address}"
+        | _ ->    failwithlog "{x} format error"
+
     let getDataTypeParam (x:DevParam) = 
         if x.DevValue.IsNone then DuBOOL
         else x.DevValue.Value.GetType() |> getDataType
 
-    let toTextDevParam (x:DevParam) = 
-        match x.DevAddress, x.DevValue, x.DevTime  with 
-        | address, Some(v), Some(t) ->    $"{addressPrint address}:{v}:{t}"
-        | address, Some(v), None    ->    $"{addressPrint address}:{v}"
-        | address, None, None       ->    $"{addressPrint address}"
-        | _ ->    failwithlog "{x} format error"
     let toTextInOutDev (inp:DevParam) (outp:DevParam) = 
         let inText = toTextDevParam inp
         let outText = toTextDevParam outp

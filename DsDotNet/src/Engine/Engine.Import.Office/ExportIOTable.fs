@@ -37,7 +37,8 @@ module ExportIOTable =
                     $"{IOColumn.DataType}"
                     $"{IOColumn.Input}"
                     $"{IOColumn.Output}" 
-                    $"{IOColumn.Func} (OUT~IN)"
+                    $"{IOColumn.FuncIn} \n(value:ms)"
+                    $"{IOColumn.FuncOut} \n(value:ms)"
                 ]
             let row = dt.NewRow()
             row.ItemArray <- rowHeaderItems.Select(fun f -> f |> box).ToArray()
@@ -51,9 +52,17 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Output}", typeof<string>) |> ignore
-        dt.Columns.Add($"{IOColumn.Func}", typeof<string>)  |> ignore
+        dt.Columns.Add($"{IOColumn.FuncIn}", typeof<string>)  |> ignore
+        dt.Columns.Add($"{IOColumn.FuncOut}", typeof<string>)  |> ignore
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
+
+    let toTextPPTFunc (x:DevParam) =
+        match x.DevValue, x.DevTime  with 
+        | Some(v), Some(t) -> $"{v}:{t}ms"
+        | Some(v), None    -> $"{v}"
+        | None , Some(v)   -> $"{v}ms"
+        | None , None      -> $""
 
     let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable =
 
@@ -63,19 +72,20 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let func =  toTextDevParmInOut btn.InParam btn.OutParam
+                    let funcIn =  toTextPPTFunc btn.InParam 
+                    let funcOut =  toTextPPTFunc btn.OutParam
                     let i, o = getValidBtnAddress(btn) target 
                     
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, "bool",  i, o ,func)
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, "bool",  i, o ,funcIn, funcOut)
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let func =  toTextDevParmInOut lamp.InParam lamp.OutParam
-
+                    let funcIn =  toTextPPTFunc lamp.InParam 
+                    let funcOut =  toTextPPTFunc lamp.OutParam
                     let i, o = getValidLampAddress(lamp) target 
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, "bool",   i, o, func)
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, "bool",   i, o,funcIn, funcOut)
                     |> ignore
 
 
@@ -107,7 +117,8 @@ module ExportIOTable =
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-            let funcs = toTextInOutDev dev.InParam dev.OutParam
+            let funcIn  = toTextPPTFunc dev.InParam
+            let funcOut = toTextPPTFunc dev.OutParam
                
             let inSkip, outSkip =
                 match job.ActionType with
@@ -123,7 +134,9 @@ module ExportIOTable =
               "bool"
               getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target )
               getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target )
-              funcs ]
+              funcIn 
+              funcOut
+              ]
 
     let IOchunkBySize = 22
 
@@ -161,7 +174,8 @@ module ExportIOTable =
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
             
-                let func = toTextDevParmInOut cond.InParam cond.OutParam
+                let funcIn =  toTextPPTFunc cond.InParam 
+                let funcOut =  toTextPPTFunc cond.OutParam
                 let i, o= getValidCondiAddress(cond) target
                 [
                     ExcelCase.XlsConditionReady.ToText()
@@ -170,7 +184,8 @@ module ExportIOTable =
                     "bool"
                     i
                     o
-                    func 
+                    funcIn 
+                    funcOut 
                 ]
             )
         

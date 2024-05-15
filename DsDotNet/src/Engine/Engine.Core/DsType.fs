@@ -1,8 +1,9 @@
 // Copyright (c) Dual Inc.  All Rights Reserved.
 namespace Engine.Core
 
-open Dual.Common.Core.FS
 open System
+open Dual.Common.Core.FS
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module DsType =

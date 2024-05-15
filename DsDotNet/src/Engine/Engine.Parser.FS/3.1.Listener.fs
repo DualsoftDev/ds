@@ -50,7 +50,7 @@ module ListnerCommonFunctionGenerator =
     let commonDeviceParamExtractor (devCtx: DevParamInOutContext)=
         match devCtx.TryFindFirstChild<DevParamInOutBodyContext>() with
         |Some ctx -> 
-            getDevParm $"{ctx.GetText()}"
+            getDevParamInOut $"{ctx.GetText()}"
         |None ->
             failWithLog "commonDeviceParamExtractor error"
     

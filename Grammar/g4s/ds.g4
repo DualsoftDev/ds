@@ -99,14 +99,6 @@ IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
 IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
 
-TAG_ADDRESS: ValidTagStart ValidTagChar*;
-   fragment ValidTagStart
-      : '%' | ('a' .. 'z') | ('A' .. 'Z') // '%' | '_' | HangulChar
-      ;
-   fragment ValidTagChar
-      : ('a' .. 'z') | ('A' .. 'Z') | ('a' .. 'z')('a' .. 'z') | ('A' .. 'Z')('A' .. 'Z') | 
-        ('0' .. '9')(('0' .. '9'))* DOT | ('0' .. '9')
-      ;
 
 
 SQUOTE: '\'';
@@ -190,14 +182,11 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
     flowPath: identifier2;
 
-
-IDENTIFIERPARAM : ':' ('-'|[a-zA-Z_0-9]|HangulChar)+ ;   //값으로 문자열도 오기 때문에 ()로 감싸줌
 devParamInOut: '(' devParamInOutBody ')' (SEMICOLON)?;
 devParamInOutBody:  inParam COMMA outParam;
-inParam:  addressItem | (addressItem  IDENTIFIERPARAM)| (addressItem  IDENTIFIERPARAM  IDENTIFIERPARAM);
-outParam: addressItem | (addressItem  IDENTIFIERPARAM)| (addressItem  IDENTIFIERPARAM  IDENTIFIERPARAM);
-addressItem: tagAddress | '-' | '_';
-tagAddress: TAG_ADDRESS;
+content : .+?;
+inParam:  content;
+outParam:  content;
 
 // model: (system|)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;

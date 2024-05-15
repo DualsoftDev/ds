@@ -10,6 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Windows.Forms;
 using static Engine.Core.CoreModule;
+using static Engine.Core.DsConstants;
 using static Engine.Core.DsText;
 using static Engine.Core.DsType;
 using static Engine.Import.Office.InterfaceClass;

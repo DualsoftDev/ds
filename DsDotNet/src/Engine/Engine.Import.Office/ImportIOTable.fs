@@ -19,7 +19,8 @@ module ImportIOTable =
         | DataType = 3
         | Input = 4
         | Output = 5
-        | Func = 6
+        | FuncIn = 6
+        | FuncOut = 7
 
     [<Flags>]
     type ErrorColumn =
@@ -70,19 +71,32 @@ module ImportIOTable =
             $"{flowName}_{row.[(int) IOColumn.Name]}"
         else 
             $"{row.[(int) IOColumn.Name]}"
-
             
-    let getPPTDevParmInOut (inAddr:string, outAddr:string, funcDev:string) = 
-        match funcDev.Split('~') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> getDevParm $"{inAddr}:{tx}, {outAddr}:{rx.Head}"
-        | [] -> inAddr|>defaultDevParam, outAddr|>defaultDevParam
-        | _-> failwithlog $"{funcDev} getDevParmInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
+    let parsingFunc (txt:string) =
+        let parts = txt.Split(':')
+        match parts with
+        | [|strPart; timePart|] 
+            when getValueNType(strPart).IsSome && timePart.ToLower().EndsWith("ms")->
+                sprintf "%s:%s" strPart (timePart.ToLower())
+        | _ ->
+            if txt.ToLower().EndsWith("ms") 
+            then
+                sprintf "-:%s" (txt.ToLower())  // Only a time
+            elif  getValueNType(txt).IsSome
+            then
+                sprintf "%s:-" txt  // Only a value
+            else 
+                failWithLog $"error parsingFunc {txt} ex) true:500ms" 
 
-    let toTextDevParmInOut (inParam:DevParam) (outParam:DevParam) = 
-        let inText = toTextDevParam inParam
-        let outText = toTextDevParam outParam
-        $"{outText[outParam.DevAddress.Length..]} ~ {inText[inParam.DevAddress.Length..]} "
-
+    let getPPTDevParamInOut (inAddr:string, outAddr:string, funcIn:string, funcOut:string) = 
+        let paramFromText (address:string) (funcTxt:string) =
+            if funcTxt <> ""
+            then getDevParam  $"{address}:{parsingFunc funcTxt}"
+            else address|>defaultDevParam
+        
+        paramFromText inAddr funcIn, paramFromText outAddr funcOut
+        
+ 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try
@@ -171,23 +185,30 @@ module ImportIOTable =
                     else 
                         f :?> OperatorFunction
 
+                        
+            let extractHardwareData (row: Data.DataRow) =
+                let name = $"{row.[(int) IOColumn.Name]}".Trim()
+                let funcIn = $"{row.[(int) IOColumn.FuncIn]}".Trim()
+                let funcOut = $"{row.[(int) IOColumn.FuncOut]}".Trim()
+                let inAddress = $"{row.[(int) IOColumn.Input]}".Trim()
+                let outAddress = $"{row.[(int) IOColumn.Output]}".Trim()
+                (name, funcIn, funcOut, inAddress, outAddress)
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
+                let _,funcIn, funcOut, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
 
                 let dev = dicDev.[devName]
-                let inAdd =    $"{row.[(int) IOColumn.Input]}".Trim() |>emptyToSkipAddress
-                let outAdd =   $"{row.[(int) IOColumn.Output]}".Trim()|>emptyToSkipAddress
+                let inAdd =    inAddress|>emptyToSkipAddress
+                let outAdd =   outAddress|>emptyToSkipAddress
 
                 dev.InAddress <- (  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget))
                 dev.OutAddress <- (  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget))
 
                 let job = dicJob[devName]
-                
-                let func = $"{row.[(int) IOColumn.Func]}"
-                let inP, outP = getDevParm func
+                let inP, outP = getPPTDevParamInOut (inAdd, outAdd, funcIn, funcOut)
                 dev.InParam <- inP
                 dev.OutParam<- outP
                         
@@ -195,7 +216,7 @@ module ImportIOTable =
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let dataType = ($"{row.[(int) IOColumn.DataType]}").Trim() |> textToDataType
-                let value  = ($"{row.[(int) IOColumn.Func]}").Trim()
+                let value  = ($"{row.[(int) IOColumn.FuncIn]}").Trim()
                 let variableData = VariableData(name, dataType)
 
                 if value <> ""
@@ -206,7 +227,7 @@ module ImportIOTable =
 
             let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = getDevName row
-                let func = $"{row.[(int) IOColumn.Func]}"
+                let func = $"{row.[(int) IOColumn.FuncIn]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
                         
@@ -214,57 +235,53 @@ module ImportIOTable =
 
             let updateOperator (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = getDevName row
-                let func = $"{row.[(int) IOColumn.Func]}"
+                let func = $"{row.[(int) IOColumn.FuncIn]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
                         
                 getFunctionNUpdate (name, name, func,   false,  page) |> ignore
 
+
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
-                let btnName = $"{row.[(int) IOColumn.Name]}"
-                let func = $"{row.[(int) IOColumn.Func]}"
-                match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = btnName.DeQuoteOnDemand()) with
+                let name, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some btn ->
-                    btn.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
-                    btn.OutAddress <- $"{row.[(int) IOColumn.Output]}"
+                    btn.InAddress  <- inAddress
+                    btn.OutAddress <- outAddress
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidBtnAddress (btn)  Util.runtimeTarget
-                    let inParams, outParms = getPPTDevParmInOut ((inaddr.Trim()), (outaddr.Trim()), func)
+                    let inParams, outParms = getPPTDevParamInOut (inaddr, outaddr, funcIn, funcOut)
                     btn.InParam <- inParams
                     btn.OutParam <- outParms
 
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{btnName}", page, 0u)
+                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
 
 
             let updateLamp (row: Data.DataRow, lampType: LampType, tableIO: Data.DataTable, page) =
-                let name = $"{row.[(int) IOColumn.Name]}"
-                let func = $"{row.[(int) IOColumn.Func]}"
-
+                let name, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
                 let lamps = sys.HWLamps.Where(fun w -> w.LampType = lampType)
 
                 match lamps.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some lamp ->
-                    lamp.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
-                    lamp.OutAddress <- $"{row.[(int) IOColumn.Output]}"
+                    lamp.InAddress  <- inAddress
+                    lamp.OutAddress <- outAddress
                     let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
-                    let inParams, outParms = getPPTDevParmInOut ((inaddr.Trim()), (outaddr.Trim()), func)
+                    let inParams, outParms = getPPTDevParamInOut (inaddr, outaddr, funcIn, funcOut)
                     lamp.InParam<- inParams
                     lamp.OutParam <- outParms
 
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
-                let name = $"{row.[(int) IOColumn.Name]}"
-                let func = $"{row.[(int) IOColumn.Func]}"
-
+                let name, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
                 let conds = sys.HWConditions.Where(fun w -> w.ConditionType = cType)
 
                 match conds.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some cond ->
-                    cond.InAddress  <- $"{row.[(int) IOColumn.Input]}" 
-                    cond.OutAddress  <- $"{row.[(int) IOColumn.Output]}" 
+                    cond.InAddress  <- inAddress
+                    cond.OutAddress  <-outAddress
                     let inaddr, outaddr =  getValidCondiAddress cond Util.runtimeTarget
-                    let inParams, outParms = getPPTDevParmInOut (inaddr.Trim(), outaddr.Trim(), func)
+                    let inParams, outParms = getPPTDevParamInOut (inaddr, outaddr, funcIn, funcOut)
                     cond.InParam <- inParams
                     cond.OutParam <- outParms
                    

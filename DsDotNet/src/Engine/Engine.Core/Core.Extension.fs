@@ -62,19 +62,26 @@ module CoreExtensionModule =
             | :? Call as call -> call :> Vertex 
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
-           
-    let getDevParm (paramInOutText:string) = 
-        let getDevParam (txt:string) =
-   
+         
+         
+    let getDevParam (txt:string) =
             match txt.Split(':') |> Seq.toList with
             | [addr] -> {DevAddress = addr; DevValue = None; DevTime = None}
-            | addr::xs when xs.Length = 1 ->  {DevAddress = addr; DevValue = Some(toValue(xs.Head)|>unbox); DevTime = None}
+            | addr::xs when xs.Length = 1 -> 
+                    if xs.Head.EndsWith("ms")
+                    then 
+                        let time = Convert.ToInt32(xs.Head.TrimEnd([|'m';'s'|]))
+                        {DevAddress = addr; DevValue = None; DevTime = Some(time)}
+                    else
+                        {DevAddress = addr; DevValue = Some(toValue(xs.Head)|>unbox); DevTime = None}
+
             | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValue = Some(toValue(xs.Head)|>unbox); DevTime = Some(Convert.ToInt32(xs.Last()))}
             | _-> failwithlog $"{txt} getDevParam format error ex) Value or Value:Time"
 
+    let getDevParamInOut (paramInOutText:string) = 
         match paramInOutText.Split(',') |> Seq.toList with
         | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
-        | _-> failwithlog $"{paramInOutText} getDevParmInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
+        | _-> failwithlog $"{paramInOutText} getDevParamInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
     
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =

@@ -36,7 +36,7 @@ type JobManager with
     member j.J3_JobActionOuts() =
         let job = j.Job
         let vs = job.System.GetVerticesOfCoins()
-        let jobCoins = vs.GetVerticesOfJobCoins(job)
+        let jobCoins = vs.GetVerticesOfJobCoins(job).OfType<Call>()
 
         let _off = job.System._off.Expr
         [

@@ -26,7 +26,9 @@ module ConvertCpuVertex =
         member r.VR = r.TagManager :?> VertexMReal
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
-        member r.MutualResetCoins =  r.Parent.GetSystem().S.MutualCalls[r]
+        member r.MutualResetCoins = 
+            let mutual = r.Parent.GetSystem().S.MutualCalls
+            mutual[r]
     
     let getJM(j:Job) = j.TagManager:?> JobManager
     type VariableData with

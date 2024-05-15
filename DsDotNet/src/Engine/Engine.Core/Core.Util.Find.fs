@@ -274,11 +274,18 @@ type FindExtension =
 
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
 
-    [<Extension>] static member GetVerticesOfJobCoins(x:DsSystem, job:Job) = 
-                    x.GetVerticesOfCoins()
-                     .Select(fun v-> v.GetPureCall().Value)
-                     .Where(fun c-> c.IsJob && c.TargetJob = job)
-  
+    [<Extension>] static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) = 
+                        xs.Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외
+                          .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
+
+    [<Extension>] static member GetTargetDevCoins(taskDev:TaskDev, coins:Vertex seq) = 
+                        coins.Where(fun c-> 
+                                    c.GetPureCall().Value.TargetJob.DeviceDefs.Contains(taskDev)
+                        )
+          
+    [<Extension>] static member IsRootFlowDev(taskDev:TaskDev, coins:Vertex seq) = 
+                        taskDev.GetTargetDevCoins(coins).IsEmpty()
+
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
 

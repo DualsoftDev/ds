@@ -208,17 +208,24 @@ module DsAddressModule =
             
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
                             |> Seq.sortBy (fun (dev,_) ->dev.ApiName)
+
+        let vs = sys.GetVerticesOfCoins()
         for (dev, job) in devJobSet  do
-
-            let inSkip, outSkip =
-                match job.ActionType with
-                |NoneRx -> true,false
-                |NoneTx -> false,true
-                |NoneTRx -> true,true
-                |_ ->  false,false
-
-            dev.InAddress  <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target)
-            dev.OutAddress <- getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target)
+            let coins = vs.GetVerticesOfJobCoins(job)
+            //외부입력 전용 확인하여 출력 스킵 및 입력 선두주소 고정
+            if dev.IsRootFlowDev(coins) 
+            then
+                dev.InAddress  <- getExternalTempMemory target
+                dev.OutAddress <- TextSkip
+            else 
+                let inSkip, outSkip =
+                    match job.ActionType with
+                    |NoneRx -> true,false
+                    |NoneTx -> false,true
+                    |NoneTRx -> true,true
+                    |_ ->  false,false
+                dev.InAddress  <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target)
+                dev.OutAddress <- getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target)
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

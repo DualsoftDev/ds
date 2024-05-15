@@ -14,14 +14,7 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreModule =
-    /// FQDN(Fully Qualified Domain Name) 객체를 생성합니다.
-    let createFqdnObject (nameComponents: string array) = 
-        {
-            new IQualifiedNamed with
-                member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
-                member _.NameComponents = nameComponents
-                member x.QualifiedName = nameComponents.Combine()
-        }
+
 
     // 파서 로딩 타입 정의
     type ParserLoadingType = DuNone | DuDevice | DuExternal 
@@ -267,20 +260,26 @@ module CoreModule =
 
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, system:DsSystem, tasks:TaskDev seq, duType:DataType) =
+    type Job (name:string, system:DsSystem, tasks:TaskDev seq, duType:DataType option) =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         member x.ActionType:JobActionType = getJobActionType name
         member x.System = system
         member x.DeviceDefs = tasks
-        member x.DataType =  duType
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
+        member val DataType = duType  with get, set
 
     type DevAddress = string
     type DevParam = {
         DevAddress: DevAddress
         DevValue: obj option
         DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
-    }  
+    } with
+        member x.DevValueType = 
+            match x.DevValue with
+            |Some (v)-> v.GetType() |> Some
+            |None -> None
+            
+            
 
     let defaultDevParam (address) = 
         {   
@@ -309,23 +308,23 @@ module CoreModule =
      
       /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
     ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
-    type TaskDev (api:ApiItem, inParam:DevParam, outParam:DevParam, deviceName:string) as this =
+    type TaskDev (api:ApiItem, inParam:DevParam, outParam:DevParam, deviceName:string) =
         inherit FqdnObject(api.Name, createFqdnObject([|deviceName|]))
-        member _.ApiItem = api
+        member x.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
-        member val ApiName = this.QualifiedName
-        member val DeviceName = deviceName
+        member x.ApiName = (x:>FqdnObject).QualifiedName
+        member x.DeviceName = deviceName
 
         member val InParam  = inParam   with get, set
         member val OutParam = outParam  with get, set
 
         member x.InAddress
-            with get() = this.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = this.InParam <- { DevAddress = v; DevValue = this.InParam.DevValue; DevTime = this.InParam.DevTime; }
+            with get() = x.InParam  |> fun (d) -> d.DevAddress
+            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevTime = x.InParam.DevTime; }
 
         member x.OutAddress
-            with get() = this.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = this.OutParam <- { DevAddress = v; DevValue = this.OutParam.DevValue; DevTime = this.OutParam.DevTime; }
+            with get() = x.OutParam  |> fun (d) -> d.DevAddress
+            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevTime = x.OutParam.DevTime; }
                
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
@@ -333,7 +332,7 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam) as this =
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam) =
         inherit FqdnObject(name, system)
         member x.Name = name
         member x.System = system
@@ -345,12 +344,12 @@ module CoreModule =
         member val OutParam = outParam  with get, set
 
         member x.InAddress
-            with get() = this.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = this.InParam <- { DevAddress = v; DevValue = this.InParam.DevValue; DevTime = this.InParam.DevTime; }
+            with get() = x.InParam  |> fun (d) -> d.DevAddress
+            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevTime = x.InParam.DevTime; }
 
         member x.OutAddress
-            with get() = this.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = this.OutParam <- { DevAddress = v; DevValue = this.OutParam.DevValue; DevTime = this.OutParam.DevTime; }
+            with get() = x.OutParam  |> fun (d) -> d.DevAddress
+            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevTime = x.OutParam.DevTime; }
             
         /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set

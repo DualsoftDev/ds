@@ -141,19 +141,21 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationTaskDevIO() =
             let jobDevices = x.Jobs |> Seq.map(fun j -> j, j.DeviceDefs) |> Seq.sortBy(fun (j,_)-> j.QualifiedName) 
-            let calls = x.GetVerticesOfJobCalls()  //test ahn //외부입력 전용 확인하여 출력 생성하지 않는다.
+            let vs = x.GetVerticesOfCoins()
+            
             for job, devs in jobDevices do
+                let coins = vs.GetVerticesOfJobCoins(job)
                 for dev in devs do
                 if  dev.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev, job.DataType).Value
+                    let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev, job.DataType.Value).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
-                //if not(calls.Where(fun f->f.TargetJob.DeviceDefs.Contains(dev)).any()) //외부입력 전용 확인하여 출력 생성하지 않는다.
-                //then    
-                if  dev.OutAddress <> TextSkip then
-                    let outT = createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, job.DataType).Value
-                    dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
-     
+                  //외부입력 전용 확인하여 출력 생성하지 않는다.
+                if not(dev.IsRootFlowDev(coins))
+                then
+                    if  dev.OutAddress <> TextSkip then
+                        let outT = createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, job.DataType.Value).Value
+                        dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
         member x.GenerationIO() =
 

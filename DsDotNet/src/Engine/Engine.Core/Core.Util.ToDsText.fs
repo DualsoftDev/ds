@@ -149,9 +149,9 @@ module internal ToDsTextModule =
                         |> Seq.map printDev
                           
                     let jobItemText =  jobItems.JoinWith("; ") + ";"
-                    if c.DataType.ToType() <> typeof<bool>
+                    if c.DataType.IsSome && c.DataType.Value <> DuBOOL
                     then
-                        yield $"{tab2}{c.Name.QuoteOnDemand()}(type:{c.DataType.ToText()}) = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{c.Name.QuoteOnDemand()}(type:{c.DataType.Value.ToText()}) = {lb} {jobItemText} {rb}"  
                     else 
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
 

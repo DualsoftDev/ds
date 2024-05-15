@@ -185,8 +185,8 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 devParamInOut: '(' devParamInOutBody ')' (SEMICOLON)?;
 devParamInOutBody:  inParam COMMA outParam;
 content : .+?;
-inParam:  content;
-outParam:  content;
+inParam:  content (':'content)*;
+outParam:  content (':'content)*;
 
 // model: (system|)* EOF;        // importStatement|cpus
 comment: BLOCK_COMMENT | LINE_COMMENT;

@@ -29,10 +29,11 @@ module ConvertCpuVertex =
         member r.MutualResetCoins =  r.Parent.GetSystem().S.MutualCalls[r]
     
     let getJM(j:Job) = j.TagManager:?> JobManager
-
+    type VariableData with
+        member v.VM = v.TagManager :?> VariableManager
     type Job with
         member j.ActionInBool = 
-            if j.DataType = DuBOOL
+            if j.DataType.Value = DuBOOL
             then getJM(j).JobBoolValueTag.Expr |> Some
             else None
 

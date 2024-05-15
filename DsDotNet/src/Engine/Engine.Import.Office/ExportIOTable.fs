@@ -28,21 +28,21 @@ module ExportIOTable =
         row.ItemArray <- cols.Select(fun f -> "" |> box).ToArray()
         row |> dt.Rows.Add |> ignore
 
-    let  addHeaderLine(dt:DataTable) =
-            let  rowHeaderItems =
-                [
-                    $"{IOColumn.Case}"
-                    $"{IOColumn.Flow}"
-                    $"{IOColumn.Name}"
-                    $"{IOColumn.DataType}"
-                    $"{IOColumn.Input}"
-                    $"{IOColumn.Output}" 
-                    $"{IOColumn.FuncIn} \n(value:ms)"
-                    $"{IOColumn.FuncOut} \n(value:ms)"
-                ]
-            let row = dt.NewRow()
-            row.ItemArray <- rowHeaderItems.Select(fun f -> f |> box).ToArray()
-            row |> dt.Rows.Add |> ignore
+    //let  addHeaderLine(dt:DataTable) =
+    //        let  rowHeaderItems =
+    //            [
+    //                $"{IOColumn.Case}"
+    //                $"{IOColumn.Flow}"
+    //                $"{IOColumn.Name}"
+    //                $"{IOColumn.DataType}"
+    //                $"{IOColumn.Input}"
+    //                $"{IOColumn.Output}" 
+    //                $"{IOColumn.FuncIn} \n(value:ms)"
+    //                $"{IOColumn.FuncOut} \n(value:ms)"
+    //            ]
+    //        let row = dt.NewRow()
+    //        row.ItemArray <- rowHeaderItems.Select(fun f -> f |> box).ToArray()
+    //        row |> dt.Rows.Add |> ignore
     
     let  addIOColumn(dt:DataTable) =
 
@@ -53,7 +53,9 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Output}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.FuncIn}", typeof<string>)  |> ignore
+        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncIn \n(val:ms)"
         dt.Columns.Add($"{IOColumn.FuncOut}", typeof<string>)  |> ignore
+        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncOut \n(val:ms)"
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
@@ -141,18 +143,22 @@ module ExportIOTable =
     let IOchunkBySize = 22
 
     let ToDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable seq =
-  
+        let vs = sys.GetVerticesOfCoins()
+        
         let totalRows =
-            let coins = sys.GetVerticesOfJobCalls()
             seq {
 
                 let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
 
                 for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
-                    if coins.Where(fun c->c.TargetJob.DeviceDefs.Contains(dev)).IsEmpty()
+                    let coins = vs.GetVerticesOfJobCoins(job)
+                    
+                    //외부입력 전용 확인하여 출력 생성하지 않는다.
+                    if  dev.IsRootFlowDev(coins) 
                     then
                         dev.OutAddress <- ( TextSkip)
-                        yield rowIOItems (dev, job) target
+
+                    yield rowIOItems (dev, job) target
         }
 
         let dts = 
@@ -217,26 +223,29 @@ module ExportIOTable =
                                       name
                                       ""
                                       ""
+                                      ""
                                       func.ToDsText() ]
                                       )
 
         let variRows = sys.Variables.Map(fun vari->
-                [ TextXlsCommand
+                [ TextXlsVariable
+                  "ALL"
                   vari.Name
                   vari.Type.ToText()
                   ""
                   ""
-                  vari.ToDsText() ]
+                  vari.InitValue]
                   )
 
 
-        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"";"";"";"";]]
-        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"";"";"";"";]]
-        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"";"";"";"";]]
+        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator]]
+        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand]]
+        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable]]
         let dts = 
             getConditionDefListRows (sys.ReadyConditions)  
             @ commandRows 
             @ operatorRows
+            @ variRows
             @ sampleOperatorRows
             @ sampleCommandRows
             @ sampleVariRows

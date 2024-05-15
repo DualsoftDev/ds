@@ -38,16 +38,26 @@ module ConvertCoreExtUtils =
         createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutParam|>getDataTypeParam)
         |> iter (fun t -> x.OutTag  <- t)
 
-
     let getInExpr (x:DevParam, devTag:ITag, sys:DsSystem) = 
         let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag.off) :?> PlanVar<bool> 
-        if devTag.IsNonNull()
-        then 
-            match x.DevValue with
-            |Some(v) -> createCustomFunctionExpression TextEQ [literal2expr v;devTag.ToExpression()]   
-            |None -> sysOff.Expr
+        if devTag.IsNull() 
+        then sysOff.Expr  :> IExpression
         else 
-            sysOff.Expr
+            match x.DevValue with
+            |Some(v) -> 
+                 if v.GetType() = typedefof<bool>
+                 then 
+                     if Convert.ToBoolean(v) then  devTag.ToExpression()
+                     else 
+                        !!(devTag.ToExpression():?> Expression<bool>) :> IExpression
+                 else // bool 타입아닌 경우 비교문 생성
+                    createCustomFunctionExpression TextEQ [literal2expr v;devTag.ToExpression()]   
+
+            |None -> 
+                if devTag.DataType = typedefof<bool>
+                then
+                     devTag.ToExpression()
+                else sysOff.Expr
 
     [<AutoOpen>]
     [<Extension>]

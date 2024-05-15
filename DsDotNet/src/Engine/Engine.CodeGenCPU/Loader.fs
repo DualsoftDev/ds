@@ -74,11 +74,7 @@ module CpuLoader =
             RuntimeDS.System <- sys
 
             sys.TagManager <- SystemManager(sys, storages, target)
-            sys.Variables.Iter(fun v->
-                let variTag =  createVariableByType v.Name v.Type
-                storages.Add(variTag.Name, variTag)
-                )
-            
+            sys.Variables.Iter(fun v-> v.TagManager <- VariableManager(v, sys))
             sys.Jobs.Iter(fun j->j.TagManager <- JobManager(j))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))

@@ -97,10 +97,6 @@ module TagManagerUtil =
        
             let plcAddrName = getPlcTagAbleName name stg
             let t = createTagByBoxedValue plcAddrName {Object = duType.DefaultValue()} tagKind address sys fqdn
-                //let param = {defaultStorageCreationParams() tagKind with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
-            //let t =
-            //    let param = {defaultStorageCreationParams(false) tagKind with Name=plcAddrName; Address= Some address; System=sys; TagKind = tagKind; Target = Some fqdn}
-            //    (Tag(param) :> ITag)
             stg.Add(t.Name, t)
             Some t
             

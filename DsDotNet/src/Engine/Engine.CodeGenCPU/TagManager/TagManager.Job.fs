@@ -13,13 +13,13 @@ module JobManagerModule =
         let stg = job.System.TagManager.Storages
 
         let cpv (name) (jobTag:JobTag) =
-            let pv:IStorage = createPlanVar stg name job.DataType true job (int jobTag) job.System 
+            let pv:IStorage = createPlanVar stg name job.DataType.Value true job (int jobTag) job.System 
             pv 
             
         let jobValueTag = cpv job.Name JobTag.JobValueTag
    
         do 
-            if job.DataType <> DuBOOL && job.DeviceDefs.Count() > 1
+            if job.DataType.Value <> DuBOOL && job.DeviceDefs.Count() > 1
             then 
                 failWithLog $"Job {job.Name} {job.DataType} bool 타입이 아니면 하나의 Device만 할당 가능합니다."
         

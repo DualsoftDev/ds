@@ -674,7 +674,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
                         jobName, duDataType
 
-                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, duDataType)
+                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, Some duDataType)
                 job |> system.Jobs.Add
 
 

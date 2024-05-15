@@ -17,6 +17,7 @@
         <Compile Include="TagManager/TagManager.Vertex.fs" />
         <Compile Include="TagManager/TagManager.Api.fs" />
         <Compile Include="TagManager\TagManager.Job.fs" />
+        <Compile Include="TagManager\VariableManager.fs" />
         <Compile Include="Expression.Extension.fs" />
         <Compile Include="Core.Extensions.Utils.fs" />
         <Compile Include="AutoGen.Address.fs" />
@@ -38,6 +39,7 @@
         <Compile Include="8.DAG.fs" />
         <Compile Include="9.Status, Monitor.fs" />
         <Compile Include="10.Job.fs" />
+        <Compile Include="11.Variable.fs" />
         <Compile Include="12.System.fs" />
         <Compile Include="13.ButtonLamp.fs" />
         <Compile Include="14.Extension.fs" />

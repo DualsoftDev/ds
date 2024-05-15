@@ -12,15 +12,16 @@ module rec CodeElements =
     type VariableType = 
         | Mutable
         | Immutable
-
-    type VariableData(name:string, varType:DataType, variableType:VariableType) as this =
-        member _.Name = name
-        member _.Type = varType
-        member _.VariableType = variableType
-        member _.ToDsText() = 
+  
+    type VariableData(name:string, varType:DataType, variableType:VariableType)  =
+        inherit FqdnObject(name, createFqdnObject([||]))
+        member x.Name = name
+        member x.Type = varType
+        member x.VariableType = variableType
+        member x.ToDsText() = 
                 match variableType with
                 | Mutable ->  $"{varType.ToText()} {name}"
-                | Immutable -> $"const {varType.ToText()} {name} = {this.InitValue}"
+                | Immutable -> $"const {varType.ToText()} {name} = {x.InitValue}"
         member val InitValue = getNull<string>() with get, set
            
     type OperatorFunctionTypes =
@@ -96,7 +97,7 @@ module rec CodeElements =
         member val CommandType = DuCMDUnDefined with get, set
         member val CommandCode = "" with get, set
 
-        member x.ToDsText() = x.CommandCode
+        member x.ToDsText() = if x.CommandCode = "" then TextSkip else x.CommandCode
 
     [<Extension>]
     type SystemFuncExt =

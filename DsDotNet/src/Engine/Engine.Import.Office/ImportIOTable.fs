@@ -72,26 +72,26 @@ module ImportIOTable =
         else 
             $"{row.[(int) IOColumn.Name]}"
             
-    let parsingFunc (txt:string) =
-        let parts = txt.Split(':')
-        match parts with
-        | [|strPart; timePart|] 
-            when getValueNType(strPart).IsSome && timePart.ToLower().EndsWith("ms")->
-                sprintf "%s:%s" strPart (timePart.ToLower())
-        | _ ->
-            if txt.ToLower().EndsWith("ms") 
-            then
-                sprintf "-:%s" (txt.ToLower())  // Only a time
-            elif  getValueNType(txt).IsSome
-            then
-                sprintf "%s:-" txt  // Only a value
-            else 
-                failWithLog $"error parsingFunc {txt} ex) true:500ms" 
+    //let parsingFunc (txt:string) =
+    //    let parts = txt.Split(':')
+    //    match parts with
+    //    | [|strPart; timePart|] 
+    //        when getValueNType(strPart).IsSome && timePart.ToLower().EndsWith("ms")->
+    //            sprintf "%s:%s" strPart (timePart.ToLower())
+    //    | _ ->
+    //        if txt.ToLower().EndsWith("ms") 
+    //        then
+    //            sprintf "-:%s" (txt.ToLower())  // Only a time
+    //        elif  getValueNType(txt).IsSome
+    //        then
+    //            sprintf "%s:-" txt  // Only a value
+    //        else 
+    //            failWithLog $"error parsingFunc {txt} ex) true:500ms" 
 
     let getPPTDevParamInOut (inAddr:string, outAddr:string, funcIn:string, funcOut:string) = 
         let paramFromText (address:string) (funcTxt:string) =
             if funcTxt <> ""
-            then getDevParam  $"{address}:{parsingFunc funcTxt}"
+            then getDevParam  $"{address}:{funcTxt}"
             else address|>defaultDevParam
         
         paramFromText inAddr funcIn, paramFromText outAddr funcOut
@@ -207,11 +207,18 @@ module ImportIOTable =
                 dev.InAddress <- (  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget))
                 dev.OutAddress <- (  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget))
 
-                let job = dicJob[devName]
                 let inP, outP = getPPTDevParamInOut (inAdd, outAdd, funcIn, funcOut)
-                dev.InParam <- inP
-                dev.OutParam<- outP
-                        
+
+                dev.InParam  <- inP
+                dev.OutParam <- outP
+
+                let job = dicJob[devName]
+                match inP.DevValueType with
+                | Some (t) when t <> typedefof<bool> ->
+                    job.DataType <- getDataType t |>Some
+                | _ -> 
+                    job.DataType <- DuBOOL |> Some
+                    
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"

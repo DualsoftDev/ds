@@ -77,6 +77,15 @@ module FqdnImpl =
         abstract ToText : unit -> string
         default x.ToText() = x.Name
 
+    /// FQDN(Fully Qualified Domain Name) 객체를 생성합니다.
+    let createFqdnObject (nameComponents: string array) = 
+        {
+            new IQualifiedNamed with
+                member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
+                member _.NameComponents = nameComponents
+                member x.QualifiedName = nameComponents.Combine()
+        }
+
     type FqdnObject(name:string, parent:IQualifiedNamed) =
         inherit Named(name)
         interface IQualifiedNamed with

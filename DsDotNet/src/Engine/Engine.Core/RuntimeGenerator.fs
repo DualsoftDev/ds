@@ -1,4 +1,4 @@
-﻿namespace Engine.Core
+namespace Engine.Core
 
 open System.Reactive.Subjects
 open Dual.Common.Core.FS
@@ -52,13 +52,18 @@ module RuntimeGeneratorModule =
         | "Developer" -> Developer
         | _ -> failwithlogf $"Error {getFuncName()}"
 
-
-
     let InitStartMemory = 1000
     let BufferAlramSize = 1000
     let ExternalTempMemory =  "M0.0"
     let ExternalTempIECMemory =  "%MX0"
     let ExternalTempNoIECMemory =  "M00000"
+    let getExternalTempMemory (target:PlatformTarget) =
+        match target with
+        | XGI -> ExternalTempIECMemory
+        | XGK -> ExternalTempNoIECMemory
+        | WINDOWS  -> ExternalTempMemory
+        | AB 
+        | MELSEC  -> failwithlog $"{target} not support"
    
     type RuntimeDS() =
         static let mutable runtimePackage = Simulation

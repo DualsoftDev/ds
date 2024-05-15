@@ -158,13 +158,20 @@ module ConvertCPU =
                 then yield! coin.VC.C2_DoCommand()
         ]
 
+    let private applyVariables(s:DsSystem) =
+        [
+            for v in s.Variables do
+                if v.VariableType = Immutable
+                then yield v.VM.V1_ConstMove(s)
+        ]   
+            
     let private applyJob(s:DsSystem) =
-            [
-                for jm in s.Jobs.Map(fun j->j.TagManager :?> JobManager) do
-                   yield! jm.J1_JobAndTag()
-                   yield! jm.J2_JobValueTag()
-                   yield! jm.J3_JobActionOuts()
-            ]
+        [
+            for jm in s.Jobs.Map(fun j->j.TagManager :?> JobManager) do
+                yield! jm.J1_JobAndTag()
+                yield! jm.J2_JobValueTag()
+                yield! jm.J3_JobActionOuts()
+        ]
         
     let private emulationDevice(s:DsSystem) =
         [
@@ -220,6 +227,8 @@ module ConvertCPU =
                             yield! sys.Y1_SystemBitSetFlow()
             | Developer ->  ()
 
+            //Variables  적용 
+          //  yield! applyVariables sys
 
             //Active 시스템 적용 
             if isActive

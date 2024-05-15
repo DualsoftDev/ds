@@ -217,9 +217,10 @@ module ImportIOTable =
                 let name = $"{row.[(int) IOColumn.Name]}"
                 let dataType = ($"{row.[(int) IOColumn.DataType]}").Trim() |> textToDataType
                 let value  = ($"{row.[(int) IOColumn.FuncIn]}").Trim()
-                let variableData = VariableData(name, dataType)
+                let constVari = value <> ""
+                let variableData = VariableData(name, dataType, if constVari then Immutable else Mutable )
 
-                if value <> ""
+                if constVari
                 then 
                     variableData.InitValue <- value
 

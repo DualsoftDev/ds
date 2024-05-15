@@ -287,12 +287,12 @@ varType: identifier1;
 
 
 
-variableBlock: '[' 'variables' ']' '=' '{' (variableInitDef | variableDef)* '}';
-    variableDef: varType varName SEMICOLON;
-    variableInitDef: varType varName initValue SEMICOLON;
+variableBlock: '[' 'variables' ']' '=' '{' (constDef | variableDef)* '}';
+    variableDef: varType (varName | varName '=' initValue) SEMICOLON;
+    constDef: 'const' varType (constName | constName '=' initValue) SEMICOLON;
     varName: identifier1;
-    initValue: IDENTIFIERVALUE;
-    IDENTIFIERVALUE : '(' ('-'|[a-zA-Z_0-9]|HangulChar)+ ')';   //값으로 문자열도 오기 때문에 ()로 감싸줌
+    constName: identifier1;
+    initValue: content;
 
 operatorBlock: '[' 'operators' ']' '=' '{' (operatorNameOnly | operatorDef)* '}' ;
     operatorNameOnly: operatorName SEMICOLON;

@@ -242,14 +242,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     
     override x.EnterVariableBlock(ctx: VariableBlockContext) =
 
-        let addVari varName varType (value:string) (isVariableInitDef:bool)= 
-            let variableData = VariableData (varName, varType)
+        let addVari varName varType (value:string) (isImmutable:bool)= 
+            let variableData = VariableData (varName, varType, if isImmutable then Immutable else Mutable)
 
             let variable = createVariableByType varName varType
-            if isVariableInitDef
-            then 
-                variableData.InitValue <- value
-                variable.BoxedValue <-varType.ToValue(value)
+            variableData.InitValue <- value
+            variable.BoxedValue <-varType.ToValue(value)
 
             options.Storages.Add (varName, variable) |>ignore
             x.TheSystem.Variables.Add variableData   |>ignore
@@ -258,15 +256,22 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         ctx.variableDef() |> Seq.iter (fun vari ->
             let varName = vari.varName().GetText()
             let varType = vari.varType().GetText() |> textToDataType
+            if vari.TryFindFirstChild<InitValueContext>().IsSome
+            then 
+                failWithLog $"{varName} = {vari.initValue().GetText()}; 할당은 Const 타입만 가능합니다.\nCommand를 이용하세요."
             let value = DsDataType.typeDefaultValue (varType.ToType())
             addVari varName varType  $"{value}" false
             )   
 
-        ctx.variableInitDef() |> Seq.iter (fun vari ->
-            let varName = vari.varName().GetText()
+        ctx.constDef() |> Seq.iter (fun vari ->
+            let constName = vari.constName().GetText()
             let varType = vari.varType().GetText() |> textToDataType
-            let value = vari.initValue().GetText().TrimStart('(').TrimEnd(')')
-            addVari varName varType  value true
+            if vari.TryFindFirstChild<InitValueContext>().IsNone
+            then 
+                failWithLog $"Const 타입은 초기값 설정이 필요합니다. ({varType.ToText()} {constName})"
+
+            let value = vari.initValue().GetText()
+            addVari constName varType  value true
             )
         x.IsVariableParsingDone <- true
             
@@ -306,7 +311,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let assignCode = 
                 match options.Storages.any(fun s->s.Key = funcName) with
                 | true ->   code // EnterJobBlock job Tag 에서 이미 만듬 
-                | false ->  $"bool {funcName} = false;{code}"
+                | false ->  $"bool {funcName} = false;{code}" //op 결과 bool 변수를 임시로 만듬
 
             let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
             statements.Iter(fun s->

@@ -8,10 +8,19 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module rec CodeElements =
-    type VariableData(name:string, varType:DataType) =
+
+    type VariableType = 
+        | Mutable
+        | Immutable
+
+    type VariableData(name:string, varType:DataType, variableType:VariableType) as this =
         member _.Name = name
         member _.Type = varType
-        member _.ToDsText() = $"{varType.ToText()} {name}"
+        member _.VariableType = variableType
+        member _.ToDsText() = 
+                match variableType with
+                | Mutable ->  $"{varType.ToText()} {name}"
+                | Immutable -> $"const {varType.ToText()} {name} = {this.InitValue}"
         member val InitValue = getNull<string>() with get, set
            
     type OperatorFunctionTypes =

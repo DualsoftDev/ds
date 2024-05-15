@@ -96,7 +96,7 @@ C4 > C5;
     }
     [variables] = {
         Int32 D200;
-        Int32 D100(5);
+        const Int32 D100 = 5;
     }
     [operators] = {
         STN1_ON = #{$Ap == true;}

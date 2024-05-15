@@ -122,11 +122,7 @@ module internal ToDsTextModule =
             if vars.Any() then
                 yield $"{tab}[variables] = {lb}"
                 for var in vars do
-                    if var.InitValue.IsNull() 
-                    then
-                        yield $"{tab2}{var.ToDsText()};"
-                    else 
-                        yield $"{tab2}{var.ToDsText()}({var.InitValue});"
+                    yield $"{tab2}{var.ToDsText()};"
                 yield $"{tab}{rb}"
             elif theSystem.Functions.Any() then
                 yield $"{tab}[variables] = {lb}{rb}"

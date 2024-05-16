@@ -10,6 +10,10 @@ module FlatExpressionModule =
         | And
         | Or
         | Neg
+
+        | RisingAfter
+        | FallingAfter
+
         | OpUnit // Logical XOR 는 function 인 '<>' 로 구현됨
         | OpCompare of operator: string
         | OpArithmatic of operator: string
@@ -99,6 +103,9 @@ module FlatExpressionModule =
                     | "&&" -> Op.And
                     | "||" -> Op.Or
                     | "!" -> Op.Neg
+                    | FunctionNameRisingAfter -> Op.RisingAfter
+                    | FunctionNameFallingAfter -> Op.FallingAfter
+
                     | (">" | "<" | ">=" | "<=" | "==" | "!=") -> Op.OpCompare fs.Name
                     | ("+" | "-" | "*" | "/") -> Op.OpArithmatic fs.Name
                     | _ -> failwithlog "ERROR"
@@ -143,6 +150,13 @@ module FlatExpressionModule =
                 let spanY = spanXYs |> map snd |> List.sum
                 spanX, spanY
             | FlatNary(Neg, [ neg ]) -> helper neg
+            
+            | FlatNary(risingOrFallingAfter, args) when risingOrFallingAfter = RisingAfter || risingOrFallingAfter = FallingAfter ->
+                let spanXYs = args |> map helper
+                let spanX = (spanXYs |> map fst |> List.sum) + 1
+                let spanY = spanXYs |> map snd |> List.max
+                spanX, spanY
+
             | _ -> failwithlog "ERROR"
 
         helper expr

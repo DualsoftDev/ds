@@ -691,6 +691,22 @@ module internal rec Command =
         // negation 없애기
         | FlatNary(Neg, inner :: []) -> FlatNary(OpUnit, [ inner.Negate() ]) |> bxiLadderBlock prjParam (x, y)
 
+
+        | FlatNary(risingOrFallingAfter, flatExpArg::[]) when risingOrFallingAfter = RisingAfter || risingOrFallingAfter = FallingAfter ->
+            let blockXml = bxiLadderBlock prjParam (x, y) flatExpArg
+            let mode =
+                match risingOrFallingAfter with
+                | RisingAfter -> ElementType.RisingContact
+                | FallingAfter -> ElementType.FallingContact
+                | _ -> failwith "ERROR: Unexpected."
+            let xx, yy = x + blockXml.TotalSpanX, y
+            let c = coord (xx, yy)
+            let xml = elementFull mode c "" ""
+            { blockXml with
+                TotalSpanX = blockXml.TotalSpanX + 1
+                X = x; Y = y;
+                XmlElements = blockXml.XmlElements +++ { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } }
+
         | _ -> failwithlog "Unknown FlatExpression case"
 
     type FlatExpression with

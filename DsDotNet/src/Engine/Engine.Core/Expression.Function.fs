@@ -47,6 +47,8 @@ module ExpressionFunctionModule =
 
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
+    let [<Literal>] FunctionNameRisingAfter  = "risingAfter"
+    let [<Literal>] FunctionNameFallingAfter = "fallingAfter"
 
     /// operator 별로, arguments 가 주어졌을 때, 이를 연산하여 IExpression 을 반환하는 함수를 반환하는 함수
     let getBinaryFunction (op:string) (opndType:Type) : (Args -> IExpression) =
@@ -133,6 +135,11 @@ module ExpressionFunctionModule =
 
         | FunctionNameRising  -> fbRising  args
         | FunctionNameFalling -> fbFalling args
+
+
+        | FunctionNameRisingAfter  -> fbRisingAfter  args
+        | FunctionNameFallingAfter -> fbFallingAfter args
+
         //| "neg"     -> fNegate  args
         //| "set"     -> fSet     args
         //| "reset"   -> fReset   args
@@ -433,6 +440,8 @@ module ExpressionFunctionModule =
         let fLogicalNot     args: IExpression = cf _logicalNot     "!"  args
         let fRising         args: IExpression = cf _rising      FunctionNameRising args
         let fFalling        args: IExpression = cf _falling     FunctionNameFalling args
+        let fRisingAfter    args: IExpression = cf _rising      FunctionNameRisingAfter args
+        let fFallingAfter   args: IExpression = cf _falling     FunctionNameFallingAfter args
 
         (* FB: Functions that returns Expression<Bool> *)
         let fbEqual          args: Expression<bool> = cf _equal          "=="  args
@@ -450,6 +459,9 @@ module ExpressionFunctionModule =
         (* FB: Functions that returns Expression<Bool> *)
         let fbRising        args: Expression<bool> = cf _rising      FunctionNameRising args
         let fbFalling       args: Expression<bool> = cf _falling     FunctionNameFalling args
+
+        let fbRisingAfter   args: Expression<bool> = cf _rising      FunctionNameRisingAfter args
+        let fbFallingAfter  args: Expression<bool> = cf _falling     FunctionNameFallingAfter args
 
         let fSin            args = cf _sin            "sin"    args
         let fCos            args = cf _cos            "cos"    args

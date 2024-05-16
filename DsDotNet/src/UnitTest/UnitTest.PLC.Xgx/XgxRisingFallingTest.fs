@@ -35,13 +35,48 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+
+    member x.``RisingAfter, FallingAfter contact test`` () =
+        let storages = Storages()
+        let code =
+            match xgx with
+            | XGI -> """
+                bool ix1 = createTag("%IX0.0.0", false);
+                bool ix2 = createTag("%IX0.0.1", false);
+                bool ix3 = createTag("%IX0.0.2", false);
+                bool qx1 = createTag("%QX0.1.0", false);
+                bool qx2 = createTag("%QX0.1.1", false);
+                bool qx3 = createTag("%QX0.1.2", false);
+                """
+            | XGK -> """
+                bool ix1 = createTag("P00000", false);
+                bool ix2 = createTag("P00001", false);
+                bool ix3 = createTag("P00002", false);
+                bool qx1 = createTag("P00010", false);
+                bool qx2 = createTag("P00012", false);
+                bool qx3 = createTag("P00013", false);
+                """
+            | _ -> failwith "Not supported plc type"
+            + """
+                $qx1 = $ix1 && risingAfter($ix2 && !($ix3));
+                $qx2 = $ix1 || fallingAfter($ix2 && !($ix3));
+                $qx3 = (fallingAfter($ix1 || !($ix2)) && $ix3) || fallingAfter($ix1);
+                """
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
  
 type XgiRisingFallingTest() =
     inherit XgxRisingFallingTest(XGI)
     [<Test>] member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
+    [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
 
 type XgkRisingFallingTest() =
     inherit XgxRisingFallingTest(XGK)
     [<Test>] member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
+    [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
 
      

@@ -258,33 +258,31 @@ module CoreModule =
         inherit Indirect(name, parent)
         member _.TargetWrapper = target
 
-
+    type InOutDataType = DataType*DataType
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, system:DsSystem, tasks:TaskDev seq, duType:DataType option) =
+    type Job (name:string, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         member x.ActionType:JobActionType = getJobActionType name
         member x.System = system
         member x.DeviceDefs = tasks
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
-        member val DataType = duType  with get, set
+        member val InDataType  = DuBOOL  with get, set
+        member val OutDataType = DuBOOL  with get, set
 
     type DevAddress = string
     type DevParam = {
         DevAddress: DevAddress
         DevValue: obj option
+        DevDataType : DataType option
         DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
     } with
-        member x.DevValueType = 
-            match x.DevValue with
-            |Some (v)-> v.GetType() |> Some
-            |None -> None
-            
-            
+        member x.DevValueType = match x.DevValue with |Some (v)-> v.GetType() |None -> typedefof<bool>            
 
     let defaultDevParam (address) = 
         {   
             DevAddress = address
             DevValue = None
+            DevDataType = None
             DevTime = None
         }
 
@@ -320,11 +318,11 @@ module CoreModule =
 
         member x.InAddress
             with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevTime = x.InParam.DevTime; }
+            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevDataType = x.InParam.DevDataType; DevTime = x.InParam.DevTime; }
 
         member x.OutAddress
             with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevTime = x.OutParam.DevTime; }
+            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevDataType = x.OutParam.DevDataType;  DevTime = x.OutParam.DevTime; }
                
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
@@ -332,25 +330,24 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam) =
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam)  =
         inherit FqdnObject(name, system)
         member x.Name = name
         member x.System = system
         member val SettingFlows = flows with get, set
         //SettingFlows 없으면 전역 시스템 설정
         member val IsGlobalSystemHw = flows.IsEmpty()
-
         member val InParam  = inParam   with get, set
         member val OutParam = outParam  with get, set
 
         member x.InAddress
             with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevTime = x.InParam.DevTime; }
+            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevDataType = x.InParam.DevDataType; DevTime = x.InParam.DevTime; }
 
         member x.OutAddress
             with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevTime = x.OutParam.DevTime; }
-            
+            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevDataType = x.OutParam.DevDataType;  DevTime = x.OutParam.DevTime; }
+               
         /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
         /// CPU 생성 시 할당됨 OutTag

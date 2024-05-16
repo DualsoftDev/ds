@@ -128,6 +128,14 @@ module internal ToDsTextModule =
                 yield $"{tab}[variables] = {lb}{rb}"
         ] |> combineLines
 
+    let getInOutTypeText name (inType:DataType option) (outType:DataType option) =
+        let inDataType = if inType.IsSome then inType.Value else DuBOOL
+        let outDataType = if outType.IsSome then outType.Value else DuBOOL
+        match inDataType, outDataType with
+        | DuBOOL, DuBOOL -> $"{name}"
+        | i, o when i = o -> $"{name}(type:{inDataType.ToText()})"
+        | _ ->  $"{name}(type:{inDataType.ToText()}, {outDataType.ToText()})"
+
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool)=
         pCooment <- printComment
         let tab = getTab indent
@@ -149,9 +157,9 @@ module internal ToDsTextModule =
                         |> Seq.map printDev
                           
                     let jobItemText =  jobItems.JoinWith("; ") + ";"
-                    if c.DataType.IsSome && c.DataType.Value <> DuBOOL
+                    if c.InDataType <> DuBOOL || c.OutDataType <> DuBOOL
                     then
-                        yield $"{tab2}{c.Name.QuoteOnDemand()}(type:{c.DataType.Value.ToText()}) = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{getInOutTypeText (c.Name.QuoteOnDemand()) (Some(c.InDataType))  (Some(c.OutDataType))} = {lb} {jobItemText} {rb}"  
                     else 
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
 
@@ -254,7 +262,8 @@ module internal ToDsTextModule =
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
                             let itemText, inAddr, outAddr = getHwInfo hw
-                            yield $"{tab3}{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
+
+                            yield $"{tab3}{getInOutTypeText (hw.Name.QuoteOnDemand()) hw.InParam.DevDataType hw.OutParam.DevDataType }({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
                           
                         yield $"{tab2}{rb}"
                 ] |> combineLines

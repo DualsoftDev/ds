@@ -64,23 +64,23 @@ module CoreExtensionModule =
         |_ -> failwithlog "Error"
          
          
-    let getDevParam (txt:string) =
+    let getDevParam (txt:string) (duDataType:DataType)=
             match txt.Split(':') |> Seq.toList with
-            | [addr] -> {DevAddress = addr; DevValue = None; DevTime = None}
+            | [addr] -> {DevAddress = addr; DevValue = None; DevDataType = Some duDataType; DevTime = None}
             | addr::xs when xs.Length = 1 -> 
                     if xs.Head.EndsWith("ms")
                     then 
                         let time = Convert.ToInt32(xs.Head.TrimEnd([|'m';'s'|]))
-                        {DevAddress = addr; DevValue = None; DevTime = Some(time)}
+                        {DevAddress = addr; DevValue = None; DevDataType = Some duDataType; DevTime = Some(time)}
                     else
-                        {DevAddress = addr; DevValue = Some(toValue(xs.Head)|>unbox); DevTime = None}
+                        {DevAddress = addr; DevValue = Some(duDataType.ToValue(xs.Head)|>unbox); DevDataType =Some  duDataType; DevTime = None}
 
-            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValue = Some(toValue(xs.Head)|>unbox); DevTime = Some(Convert.ToInt32(xs.Last()))}
+            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValue = Some(duDataType.ToValue(xs.Head)|>unbox); DevDataType =Some  duDataType; DevTime = Some(Convert.ToInt32(xs.Last()))}
             | _-> failwithlog $"{txt} getDevParam format error ex) Value or Value:Time"
 
-    let getDevParamInOut (paramInOutText:string) = 
+    let getDevParamInOut (paramInOutText:string) (duDataType:DataType) = 
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
+        | tx::rx when rx.Length = 1 -> getDevParam tx duDataType,  getDevParam rx.Head duDataType
         | _-> failwithlog $"{paramInOutText} getDevParamInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
     
 

@@ -15,13 +15,23 @@ open System.Collections.Generic
 module EtcListenerModule =
 
     let getHwSysItem (hwItem:HwSysItemDefContext)= 
-        let nameAddr = hwItem.TryFindFirstChild<HwSysItemNameAddrContext>().Value
-        let nameCtx = nameAddr.TryFindFirstChild<HwSysItemNameContext>().Value
-        let name = nameCtx.GetText()
+    
+
+        let nameNAddr = hwItem.TryFindFirstChild<HwSysItemNameAddrContext>().Value
+        let name, inDataType, outDataType = 
+            match nameNAddr.TryFindFirstChild<HwSysItemNameOnlyContext>() with
+                | Some getRawName -> getRawName.GetText().DeQuoteOnDemand(), DuBOOL, DuBOOL
+                |_ -> 
+                      let nameWithTypeCtx = nameNAddr.TryFindFirstChild<HwSysItemNameWithTypeContext>().Value
+                      let name = nameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
+                      let inDataType = nameWithTypeCtx.TryFindFirstChild<InVarTypeContext>().Value.GetText()|> textToDataType
+                      let outDataType = nameWithTypeCtx.TryFindFirstChild<OutVarTypeContext>().Value.GetText()|> textToDataType
+                      name, inDataType, outDataType
+
         let inParam, outParm =
-            match nameAddr.TryFindFirstChild<DevParamInOutContext>() with
+            match nameNAddr.TryFindFirstChild<DevParamInOutContext>() with
             |Some devParam -> 
-                commonDeviceParamExtractor  devParam
+                commonDeviceParamExtractor  devParam duDataType
             |None ->
                 TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
         name, inParam, outParm

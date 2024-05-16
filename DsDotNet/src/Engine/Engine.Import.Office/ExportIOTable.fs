@@ -28,34 +28,20 @@ module ExportIOTable =
         row.ItemArray <- cols.Select(fun f -> "" |> box).ToArray()
         row |> dt.Rows.Add |> ignore
 
-    //let  addHeaderLine(dt:DataTable) =
-    //        let  rowHeaderItems =
-    //            [
-    //                $"{IOColumn.Case}"
-    //                $"{IOColumn.Flow}"
-    //                $"{IOColumn.Name}"
-    //                $"{IOColumn.DataType}"
-    //                $"{IOColumn.Input}"
-    //                $"{IOColumn.Output}" 
-    //                $"{IOColumn.FuncIn} \n(value:ms)"
-    //                $"{IOColumn.FuncOut} \n(value:ms)"
-    //            ]
-    //        let row = dt.NewRow()
-    //        row.ItemArray <- rowHeaderItems.Select(fun f -> f |> box).ToArray()
-    //        row |> dt.Rows.Add |> ignore
-    
+ 
     let  addIOColumn(dt:DataTable) =
 
         dt.Columns.Add($"{IOColumn.Case}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Flow}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.DataType}", typeof<string>) |> ignore
+        dt.Columns[dt.Columns.Count-1].ColumnName <- "DataType \n(In:Out)"
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Output}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.FuncIn}", typeof<string>)  |> ignore
-        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncIn \n(val:ms)"
+        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncIn \n(값:유지ms)"
         dt.Columns.Add($"{IOColumn.FuncOut}", typeof<string>)  |> ignore
-        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncOut \n(val:ms)"
+        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncOut \n(값:지속ms)"
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 

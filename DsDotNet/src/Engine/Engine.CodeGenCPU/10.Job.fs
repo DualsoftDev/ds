@@ -14,7 +14,7 @@ type JobManager with
         let devs = j.Job.DeviceDefs
         let hasInputdevs = devs.Where(fun d-> d.ExistInput)
         [
-            if j.Job.DataType.Value = DuBOOL && hasInputdevs.any() 
+            if j.Job.InDataType = DuBOOL && hasInputdevs.any() 
             then 
                 let andSets = hasInputdevs.Select(fun d-> d.GetInExpr()).ToAndElseOff()
                 yield (andSets, sys._off.Expr) --| (j.JobBoolValueTag, getFuncName())
@@ -22,16 +22,12 @@ type JobManager with
 
     member j.J2_JobValueTag() =
         let devs = j.Job.DeviceDefs
-        if j.Job.DataType.Value <> DuBOOL && devs.Count() > 1
-        then 
-            failWithLog $"Job {j.Job.Name} {j.Job.DataType.Value} bool 타입이 아니면 하나의 Device만 할당 가능합니다."
-        else 
-            let hasInputdevs = devs.Where(fun d-> d.ExistInput)
-            [
-                if hasInputdevs.any()
-                then
-                    yield (j.Job.System._on.Expr, hasInputdevs.Head().InTag.ToExpression()) --> (j.JobValueTag, getFuncName())
-            ]
+        let hasInputdevs = devs.Where(fun d-> d.ExistInput)
+        [
+            if hasInputdevs.any()
+            then
+                yield (j.Job.System._on.Expr, hasInputdevs.Head().InTag.ToExpression()) --> (j.JobValueTag, getFuncName())
+        ]
      
     member j.J3_JobActionOuts() =
         let job = j.Job
@@ -53,11 +49,11 @@ type JobManager with
                     if job.ActionType = JobActionType.Push 
                     then 
                         let rstPush = rstMemos.ToOr()
-                        if j.Job.DataType.Value = DuBOOL
+                        if j.Job.OutDataType = DuBOOL
                         then yield (sets, rstPush  ) ==| (td.OutTag:?> Tag<bool>, getFuncName())
                         else failWithLog $"{job.Name} {job.ActionType} 은 bool 타입만 지원합니다." 
                     else 
-                        if j.Job.DataType.Value = DuBOOL
+                        if j.Job.OutDataType = DuBOOL
                         then yield (sets, _off) --| (td.OutTag:?> Tag<bool>, getFuncName())
                         elif td.OutParam.DevValue.IsNone 
                         then 

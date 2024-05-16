@@ -170,14 +170,15 @@ module DsDataType =
                 (x.[1].ToString(), DuCHAR)  |>Some
             | _ when x.Contains('.') ->
                 if x.EndsWith("f") then  (x.TrimEnd('f'), DuFLOAT32)  |>Some else (x, DuFLOAT64)  |>Some
-            | _ when x.EndsWith("L") ->  (x.TrimEnd('L'), DuINT64) |>Some
-            | _ when x.EndsWith("u") ->  (x.TrimEnd('u'), DuUINT32) |>Some
-            | _ when x.EndsWith("y") ->  (x.TrimEnd('y'), DuINT8) |>Some
-            | _ when x.EndsWith("s") ->  (x.TrimEnd('s'), DuINT16) |>Some
+                //2자리 부터 체크
             | _ when x.EndsWith("uy") -> (x.TrimEnd([|'u';'y'|]), DuUINT8) |>Some
             | _ when x.EndsWith("us") -> (x.TrimEnd([|'u';'s'|]), DuUINT16) |>Some
             | _ when x.EndsWith("UL") -> (x.TrimEnd([|'U';'L'|]), DuUINT64) |>Some
             | _ when x.ToLower() = "true" || x.ToLower() = "false" -> (x, DuBOOL) |>Some
+            | _ when x.EndsWith("L") ->  (x.TrimEnd('L'), DuINT64) |>Some
+            | _ when x.EndsWith("u") ->  (x.TrimEnd('u'), DuUINT32) |>Some
+            | _ when x.EndsWith("y") ->  (x.TrimEnd('y'), DuINT8) |>Some
+            | _ when x.EndsWith("s") ->  (x.TrimEnd('s'), DuINT16) |>Some
             | _ when System.Int32.TryParse (x, &value)-> (x, DuINT32) |>Some
             | _ -> None
         trimmedValueNDataType

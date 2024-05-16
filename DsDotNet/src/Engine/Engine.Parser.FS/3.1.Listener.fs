@@ -47,10 +47,10 @@ module ListnerCommonFunctionGenerator =
         let excuteCode = fDef.operator().GetText()
         excuteCode |> getCode
 
-    let commonDeviceParamExtractor (devCtx: DevParamInOutContext)=
+    let commonDeviceParamExtractor (devCtx: DevParamInOutContext) duDataType=
         match devCtx.TryFindFirstChild<DevParamInOutBodyContext>() with
         |Some ctx -> 
-            getDevParamInOut $"{ctx.GetText()}"
+            getDevParamInOut $"{ctx.GetText()}" duDataType
         |None ->
             failWithLog "commonDeviceParamExtractor error"
     
@@ -278,16 +278,17 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     override x.EnterJobBlock(ctx: JobBlockContext) = 
         let jobs = ctx.callListing()
         jobs |> Seq.iter (fun job ->
-            let jobName, duDataType = 
+            let jobName ,inDataType, _= 
                 match job.TryFindFirstChild<JobNameOnlyContext>() with
-                | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL
+                | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL, DuBOOL
                 |_ -> 
                     let JobNameWithTypeCtx = job.TryFindFirstChild<JobNameWithTypeContext>().Value
                     let jobName = JobNameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
-                    let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
-                    jobName, duDataType
+                    let inDataType = JobNameWithTypeCtx.TryFindFirstChild<InVarTypeContext>().Value.GetText()|> textToDataType
+                    let outDataType = JobNameWithTypeCtx.TryFindFirstChild<OutVarTypeContext>().Value.GetText()|> textToDataType
+                    jobName, inDataType, outDataType
 
-            let variTag =  createVariableByType jobName duDataType
+            let variTag =  createVariableByType jobName inDataType
             options.Storages.Add(variTag.Name, variTag)
             )
 
@@ -616,8 +617,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             for callList in callListings do
                 let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
              
-                //let getAddress (addressCtx: IParseTree) =
-                //    addressCtx.TryFindFirstChild<AddressItemContext>().Map(getText).Value
+                let jobName, duDataType = 
+                    match callList.TryFindFirstChild<JobNameOnlyContext>() with
+                    | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL
+                    |_ -> 
+                        let JobNameWithTypeCtx = callList.TryFindFirstChild<JobNameWithTypeContext>().Value
+                        let jobName = JobNameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
+                        let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
+                        jobName, duDataType
 
                 let apiItems =
                     [ for apiDefCtx in apiDefCtxs do
@@ -640,7 +647,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                       let inParam, outParm =
                                           match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
                                           |Some devParam -> 
-                                               commonDeviceParamExtractor  devParam
+                                               commonDeviceParamExtractor  devParam duDataType
                                           |None ->
                                                TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
 
@@ -663,18 +670,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 assert (apiItems.Any())
-                //let funcCallCtxs = callList.Descendants<FuncCallContext>().ToArray()
-                //let jobFuncs = commonOpFunctionExtractor funcCallCtxs jobName system
-                let jobName, duDataType = 
-                    match callList.TryFindFirstChild<JobNameOnlyContext>() with
-                    | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL
-                    |_ -> 
-                        let JobNameWithTypeCtx = callList.TryFindFirstChild<JobNameWithTypeContext>().Value
-                        let jobName = JobNameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
-                        let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
-                        jobName, duDataType
+            
 
-                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, Some duDataType)
+                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList)
                 job |> system.Jobs.Add
 
 

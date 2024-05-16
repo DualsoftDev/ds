@@ -181,7 +181,7 @@ module ImportUtilForLib =
                 autoTaskDev.Value.InAddress <- ("")
                 autoTaskDev.Value.OutAddress<- ("")
                 tasks.Add(autoTaskDev.Value)|>ignore
-                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList, None)
+                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList)
             else 
                 let libRelPath =
                     PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
@@ -219,7 +219,7 @@ module ImportUtilForLib =
                         tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
                 | _->
                     tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
-                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList, None)
+                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)

@@ -64,6 +64,8 @@ module ImportIOTable =
         | DataType = 1
         | Manual = 2
 
+    type DevParamRawItem  = string*DataType*string
+
     let getDevName (row: Data.DataRow) = 
         let flowName = row.[(int) IOColumn.Flow]
         if flowName <> ""
@@ -72,29 +74,15 @@ module ImportIOTable =
         else 
             $"{row.[(int) IOColumn.Name]}"
             
-    //let parsingFunc (txt:string) =
-    //    let parts = txt.Split(':')
-    //    match parts with
-    //    | [|strPart; timePart|] 
-    //        when getValueNType(strPart).IsSome && timePart.ToLower().EndsWith("ms")->
-    //            sprintf "%s:%s" strPart (timePart.ToLower())
-    //    | _ ->
-    //        if txt.ToLower().EndsWith("ms") 
-    //        then
-    //            sprintf "-:%s" (txt.ToLower())  // Only a time
-    //        elif  getValueNType(txt).IsSome
-    //        then
-    //            sprintf "%s:-" txt  // Only a value
-    //        else 
-    //            failWithLog $"error parsingFunc {txt} ex) true:500ms" 
 
-    let getPPTDevParamInOut (inAddr:string, outAddr:string, funcIn:string, funcOut:string) = 
-        let paramFromText (address:string) (funcTxt:string) =
-            if funcTxt <> ""
-            then getDevParam  $"{address}:{funcTxt}"
-            else address|>defaultDevParam
-        
-        paramFromText inAddr funcIn, paramFromText outAddr funcOut
+    let getPPTDevParamInOut (inParamRaw:DevParamRawItem) (outParamRaw:DevParamRawItem ) = 
+        let paramFromText paramRaw =
+            let addr, dataType, func = paramRaw
+            if func <> ""
+            then getDevParam  $"{addr}:{func}" dataType
+            else addr|>defaultDevParam
+
+        paramFromText inParamRaw , paramFromText outParamRaw
         
  
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
@@ -178,46 +166,69 @@ module ImportIOTable =
                 |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiName, j))
                 |> dict
 
-            let getOperatorFuntion (f:Func) =
-                if  not(f :? OperatorFunction)
-                    then
-                        failWithLog $"error {f.Name} is not OperatorFunction"
-                    else 
-                        f :?> OperatorFunction
+ 
+            let getInOutDataType (inOutText:string) =
+                if inOutText = ""
+                then DuBOOL, DuBOOL
+                else
+                    let checkInType, checkOutType =
+                        if inOutText.Contains(":")
+                        then 
+                            inOutText.Split(':').Head(), inOutText.Split(':').Last()
+                        else
+                            inOutText, inOutText 
 
-                        
+                    textToDataType checkInType, textToDataType checkOutType
+                
+
+            let checkHardwareDataType (name:string) (dataTypeText:string)  (addrIn:string, valueIn:obj option) (addrOut:string, valueOut:obj option) =
+                let checkHardwareDataType (duDataType:DataType, value:obj option) =
+                    match value with
+                    | Some v ->
+                        let valType =getDataType(v.GetType()) 
+                        if valType <> duDataType 
+                            then failWithLog $"error datatype : {name}\r\n [{duDataType.ToText()}]  <> value {v}[{valType.ToType().ToDsDataTypeString()}]"
+                    | _-> if duDataType <> DuBOOL 
+                            then failWithLog $"Bit 타입이 아니면 func에 값을 입력해야 합니다. \r\n에러 항목 : {name}({dataTypeText})"
+
+
+                let checkInType, checkOutType = getInOutDataType dataTypeText
+
+                if addrIn  <> TextSkip then checkHardwareDataType (checkInType, valueIn)    
+                if addrOut <> TextSkip then checkHardwareDataType (checkOutType, valueOut)    
+                
             let extractHardwareData (row: Data.DataRow) =
                 let name = $"{row.[(int) IOColumn.Name]}".Trim()
+                let inOutDataType = $"{row.[(int) IOColumn.DataType]}".Trim()
                 let funcIn = $"{row.[(int) IOColumn.FuncIn]}".Trim()
                 let funcOut = $"{row.[(int) IOColumn.FuncOut]}".Trim()
                 let inAddress = $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAddress = $"{row.[(int) IOColumn.Output]}".Trim()
-                (name, funcIn, funcOut, inAddress, outAddress)
+                (name, inOutDataType, funcIn, funcOut, inAddress, outAddress)
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
-                let _,funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
 
                 let dev = dicDev.[devName]
                 let inAdd =    inAddress|>emptyToSkipAddress
                 let outAdd =   outAddress|>emptyToSkipAddress
+                let checkInType, checkOutType = getInOutDataType dataType
 
                 dev.InAddress <- (  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget))
                 dev.OutAddress <- (  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget))
 
-                let inP, outP = getPPTDevParamInOut (inAdd, outAdd, funcIn, funcOut)
+                let inParams, outParms = getPPTDevParamInOut (inAdd, checkInType, funcIn) (outAdd, checkOutType, funcOut)
+                checkHardwareDataType name dataType (inAdd,inParams.DevValue) (outAdd,outParms.DevValue) 
 
-                dev.InParam  <- inP
-                dev.OutParam <- outP
+                dev.InParam  <- inParams
+                dev.OutParam <- outParms
 
                 let job = dicJob[devName]
-                match inP.DevValueType with
-                | Some (t) when t <> typedefof<bool> ->
-                    job.DataType <- getDataType t |>Some
-                | _ -> 
-                    job.DataType <- DuBOOL |> Some
+                //job.DataType은 in의 타입을 따른다. 조건으로만 사용하기 때문에
+                job.InDataType <- checkInType
                     
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
@@ -251,14 +262,18 @@ module ImportIOTable =
 
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
-                let name, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+
+
                 match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some btn ->
                     btn.InAddress  <- inAddress
                     btn.OutAddress <- outAddress
                     //ValidBtnAddress
                     let inaddr, outaddr =  getValidBtnAddress (btn)  Util.runtimeTarget
-                    let inParams, outParms = getPPTDevParamInOut (inaddr, outaddr, funcIn, funcOut)
+                    let checkInType, checkOutType = getInOutDataType dataType
+                    let inParams, outParms = getPPTDevParamInOut (inaddr, checkInType, funcIn) (outaddr, checkOutType, funcOut)
+                    checkHardwareDataType name dataType (inaddr,inParams.DevValue) (outaddr,outParms.DevValue) 
                     btn.InParam <- inParams
                     btn.OutParam <- outParms
 
@@ -266,7 +281,7 @@ module ImportIOTable =
 
 
             let updateLamp (row: Data.DataRow, lampType: LampType, tableIO: Data.DataTable, page) =
-                let name, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
                 let lamps = sys.HWLamps.Where(fun w -> w.LampType = lampType)
 
                 match lamps.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
@@ -274,14 +289,16 @@ module ImportIOTable =
                     lamp.InAddress  <- inAddress
                     lamp.OutAddress <- outAddress
                     let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
-                    let inParams, outParms = getPPTDevParamInOut (inaddr, outaddr, funcIn, funcOut)
+                    let checkInType, checkOutType = getInOutDataType dataType
+                    let inParams, outParms = getPPTDevParamInOut (inaddr, checkInType, funcIn) (outaddr, checkOutType, funcOut)
+                    checkHardwareDataType name dataType (inaddr,inParams.DevValue) (outaddr,outParms.DevValue) 
                     lamp.InParam<- inParams
                     lamp.OutParam <- outParms
 
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
-                let name, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
                 let conds = sys.HWConditions.Where(fun w -> w.ConditionType = cType)
 
                 match conds.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
@@ -289,7 +306,9 @@ module ImportIOTable =
                     cond.InAddress  <- inAddress
                     cond.OutAddress  <-outAddress
                     let inaddr, outaddr =  getValidCondiAddress cond Util.runtimeTarget
-                    let inParams, outParms = getPPTDevParamInOut (inaddr, outaddr, funcIn, funcOut)
+                    let checkInType, checkOutType = getInOutDataType dataType
+                    let inParams, outParms = getPPTDevParamInOut (inaddr, checkInType, funcIn) (outaddr, checkOutType, funcOut)
+                    checkHardwareDataType name dataType (inaddr,inParams.DevValue) (outaddr,outParms.DevValue) 
                     cond.InParam <- inParams
                     cond.OutParam <- outParms
                    

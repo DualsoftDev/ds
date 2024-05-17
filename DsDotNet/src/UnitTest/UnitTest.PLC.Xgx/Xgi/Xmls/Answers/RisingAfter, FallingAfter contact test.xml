@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Attribute="3145730" Version="513" WksNodeCount="16">
+    RisingAfter, FallingAfter contact test
+    <NetworkConfiguration>
+        <NetworkList>
+            <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
+        </NetworkList>
+    </NetworkConfiguration>
+    <Configurations>
+        <Configuration Version="259" Attribute="272119649" Kind="1" Type="111" FindGlobal="1" FindSymbol="1" WriteSignature="773e53b3-4446-4204-b905-4558a1d0de61" UploadProhibit="75" SD_UploadProhibit="74">
+            NewPLC
+            <Parameters>
+                <Parameter Type="BASIC PARAMETER">
+                    <XGIBasicParam bp_ver="100" head="1145128264" size="400" OsVersion="1" CPUType="43009" STATIC_PERIOD_TIME="10" RESTART_METHOD="43521" REMOTE_ACCESS_PERMIT="43522" SCAN_WD_TIME_0="500" SCAN_WD_TIME_1="500" SCAN_WD_TIME_2="500" SCAN_WD_TIME_3="500" STANDARD_INPUT_FILTER_TIME="3" OUTPUT_PARAMETER_RESERVED_0="6328" OUTPUT_PARAMETER_RESERVED_3="46" SOE_RETAIN_HISTORY="43544" M_AREA_SIZE_0="32" M_AREA_SIZE_1="32" M_AREA_SIZE_2="32" M_AREA_SIZE_3="32" M_AREA_LATCH1_END="8191" CHECK_FUSE_ERROR="43572" FUSE_ERROR_MODE="43573" CHECK_IO_ERROR="43574" IO_ERROR_MODE="43575" CHECK_SP_ERROR="43576" SP_ERROR_MODE="43577" CHECK_CP_ERROR="43578" CP_ERROR_MODE="43579" MODBUS_STATION="63" MODBUS_BAUDRATE="4434" MODBUS_DATABIT="43592" MODBUS_PARITY="43602" MODBUS_STOPBIT="43617" MODBUS_TRX_MODE="43632" DI_START_DEVICE_TYPE="73" DO_START_DEVICE_TYPE="81" AI_START_DEVICE_TYPE="77" AO_START_DEVICE_TYPE="77" AI_DEVICE_OFFSET="2000" AO_DEVICE_OFFSET="4000" tail="1414483782"></XGIBasicParam>
+                </Parameter>
+            </Parameters>
+            <GlobalVariables>
+                <GlobalVariable Version="Ver 1.0" Count="6">
+                    <Symbols>
+                        <Symbol Name="ix1" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.0" State="0"/>
+                        <Symbol Name="ix2" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.1" State="0"/>
+                        <Symbol Name="ix3" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.2" State="0"/>
+                        <Symbol Name="qx1" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX0.1.0" State="0"/>
+                        <Symbol Name="qx2" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX0.1.1" State="0"/>
+                        <Symbol Name="qx3" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX0.1.2" State="0"/>
+                    </Symbols>
+                    <TempVar></TempVar>
+                    <HMIFlags></HMIFlags>
+                    <DirectVarComment></DirectVarComment>
+                </GlobalVariable>
+            </GlobalVariables>
+            <Tasks>
+                <Task Version="257" Attribute="2">
+                    Scan Program
+                </Task>
+            </Tasks>
+            <POU>
+                <Programs>
+                    <Program Task="Scan Program" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">
+                        DsLogic
+                        <Body>
+                            <LDRoutine>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="1">
+                                        DS Logic for XGI
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="1025">
+                                        [0] $qx1 = $ix1 &amp;&amp; risingAfter($ix2 &amp;&amp; !($ix3))
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="2049">
+                                        ix1
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="2052">
+                                        ix2
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="2055">
+                                        ix3
+                                    </Element>
+                                    <Element ElementType="72" Coordinate="2058"/>
+                                    <Element ElementType="2" Coordinate="2061" Param="78"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        qx1
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="3073">
+                                        [1] $qx2 = $ix1 || fallingAfter($ix2 &amp;&amp; !($ix3))
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="4097">
+                                        ix1
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="4100" Param="3"/>
+                                    <Element ElementType="0" Coordinate="4105"/>
+                                    <Element ElementType="2" Coordinate="4106" Param="81"/>
+                                    <Element ElementType="14" Coordinate="4190">
+                                        qx2
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="5121">
+                                        ix2
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="5124">
+                                        ix3
+                                    </Element>
+                                    <Element ElementType="73" Coordinate="5127"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="6145">
+                                        [2] $qx3 = fallingAfter($ix1 || !($ix2)) &amp;&amp; $ix3 || fallingAfter($ix1)
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="7169">
+                                        ix1
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="7171"/>
+                                    <Element ElementType="73" Coordinate="7172"/>
+                                    <Element ElementType="6" Coordinate="7175">
+                                        ix3
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="7177"/>
+                                    <Element ElementType="2" Coordinate="7178" Param="81"/>
+                                    <Element ElementType="14" Coordinate="7262">
+                                        qx3
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="8193">
+                                        ix2
+                                    </Element>
+                                    <Element ElementType="0" Coordinate="8201"/>
+                                    <Element ElementType="6" Coordinate="9217">
+                                        ix1
+                                    </Element>
+                                    <Element ElementType="73" Coordinate="9220"/>
+                                    <Element ElementType="2" Coordinate="9223" Param="0"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="11265" Param="90"/>
+                                    <Element ElementType="33" Coordinate="11358" Param="END">
+                                        END
+                                    </Element>
+                                </Rung>
+                                <OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">
+                                    QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+XckU4UJCOYh5CA==
+                                </OnlineUploadData>
+                            </LDRoutine>
+                        </Body>
+                        <LocalVar Version="Ver 1.0" Count="6">
+                            <Symbols>
+                                <Symbol Name="ix1" Comment="" Device="I" Kind="8" State="0"/>
+                                <Symbol Name="ix2" Comment="" Device="I" Kind="8" State="0"/>
+                                <Symbol Name="ix3" Comment="" Device="I" Kind="8" State="0"/>
+                                <Symbol Name="qx1" Comment="" Device="Q" Kind="8" State="0"/>
+                                <Symbol Name="qx2" Comment="" Device="Q" Kind="8" State="0"/>
+                                <Symbol Name="qx3" Comment="" Device="Q" Kind="8" State="0"/>
+                            </Symbols>
+                            <TempVar Count="0"/>
+                        </LocalVar>
+                        <RungTable/>
+                    </Program>
+                </Programs>
+            </POU>
+        </Configuration>
+    </Configurations>
+</Project>

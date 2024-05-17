@@ -315,7 +315,7 @@ jobBlock: '[' 'jobs' ']' '=' '{' (callListing|linkListing)* '}';
         jobName '=' interfaceLink SEMICOLON;
     jobName: identifier1;
 
-    callApiDef: (interfaceCall devParamInOut|interfaceCall);
+    callApiDef: (interfaceCall devParamInOut | interfaceCall);
 
     interfaceCall: identifier12;
     interfaceLink: identifier12;
@@ -359,9 +359,7 @@ categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmg
     hwSysItemDef:  hwSysItemNameAddr '=' '{' hwSysItems? '}' (SEMICOLON)?;
     hwSysItems: flowName? ( ';' flowName)* (';')+; 
     hwSysItemNameAddr: hwSysItemName devParamInOut;
-    hwSysItemName: (hwSysItemNameOnly | hwSysItemNameWithType);
-    hwSysItemNameOnly: identifier1;
-    hwSysItemNameWithType: identifier1 '(' 'type' ':' inVarType (',' outVarType)?  ')';
+    hwSysItemName: identifier1;
     flowName: identifier1;
 
 buttonBlock: '[' 'buttons' ']' '=' '{' (categoryBlocks)* '}';

@@ -21,7 +21,8 @@ module private ExpressionHelperModule =
 
     /// 모든 args 의 data type 이 동일한지 여부 반환
     let isAllExpressionSameType(args:Args) =
-        args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.length = 1
+        let types = args |> Seq.distinctBy(fun a -> a.DataType) |> Seq.map(fun a ->a.BoxedEvaluatedValue, a.DataType)
+        types|> Seq.length = 1
     let verifyAllExpressionSameType = isAllExpressionSameType >> verifyM "Type mismatch"
     let isThisOperatorRequireAllArgumentsSameType: (string -> bool)  =
         let hash =
@@ -45,8 +46,12 @@ module ExpressionFunctionModule =
     let internal iexpr any = (box any) :?> IExpression
     let NullFunction<'T> (_args:Args):'T = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
 
+    /// argument 는 TERMINAL(variable) 이어야 함.  해당 argument 의 rising 검출 함수
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
+    /// argument 는 boolean expression.  해당 expression 전체 수행 결과의 rising 검출 함수.  ladder 상에서 해당 expression 뒤에(AFTER) rising 검출
+    let [<Literal>] FunctionNameRisingAfter  = "risingAfter"
+    let [<Literal>] FunctionNameFallingAfter = "fallingAfter"
 
     /// operator 별로, arguments 가 주어졌을 때, 이를 연산하여 IExpression 을 반환하는 함수를 반환하는 함수
     let getBinaryFunction (op:string) (opndType:Type) : (Args -> IExpression) =
@@ -133,6 +138,11 @@ module ExpressionFunctionModule =
 
         | FunctionNameRising  -> fbRising  args
         | FunctionNameFalling -> fbFalling args
+
+
+        | FunctionNameRisingAfter  -> fbRisingAfter  args
+        | FunctionNameFallingAfter -> fbFallingAfter args
+
         //| "neg"     -> fNegate  args
         //| "set"     -> fSet     args
         //| "reset"   -> fReset   args
@@ -209,6 +219,8 @@ module ExpressionFunctionModule =
 
         let _rising (_args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
         let _falling (_args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _risingAfter (_args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _fallingAfter (_args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
 
 
         let _sin (args:Args) = args.Select(evalArg >> toFloat64).Expect1() |> Math.Sin
@@ -431,8 +443,10 @@ module ExpressionFunctionModule =
         let fLogicalAnd     args: IExpression = cf _logicalAnd     "&&" args
         let fLogicalOr      args: IExpression = cf _logicalOr      "||" args
         let fLogicalNot     args: IExpression = cf _logicalNot     "!"  args
-        let fRising         args: IExpression = cf _rising      FunctionNameRising args
-        let fFalling        args: IExpression = cf _falling     FunctionNameFalling args
+        let fRising         args: IExpression = cf _rising         FunctionNameRising args
+        let fFalling        args: IExpression = cf _falling        FunctionNameFalling args
+        let fRisingAfter    args: IExpression = cf _risingAfter    FunctionNameRisingAfter args
+        let fFallingAfter   args: IExpression = cf _fallingAfter   FunctionNameFallingAfter args
 
         (* FB: Functions that returns Expression<Bool> *)
         let fbEqual          args: Expression<bool> = cf _equal          "=="  args
@@ -448,8 +462,11 @@ module ExpressionFunctionModule =
         let fbLogicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
 
         (* FB: Functions that returns Expression<Bool> *)
-        let fbRising        args: Expression<bool> = cf _rising      FunctionNameRising args
-        let fbFalling       args: Expression<bool> = cf _falling     FunctionNameFalling args
+        let fbRising        args: Expression<bool> = cf _rising          FunctionNameRising args
+        let fbFalling       args: Expression<bool> = cf _falling         FunctionNameFalling args
+
+        let fbRisingAfter   args: Expression<bool> = cf _risingAfter     FunctionNameRisingAfter args
+        let fbFallingAfter  args: Expression<bool> = cf _fallingAfter    FunctionNameFallingAfter args
 
         let fSin            args = cf _sin            "sin"    args
         let fCos            args = cf _cos            "cos"    args

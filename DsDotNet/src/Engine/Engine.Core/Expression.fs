@@ -74,7 +74,7 @@ module ExpressionModule =
         | DuTerminal of Terminal<'T>
         | DuFunction of FunctionSpec<'T>  //FunctionBody:(Arguments -> 'T) * Name * Arguments
         interface IExpression<'T> with
-            member x.DataType = x.DataType
+            member x.DataType = x.DataType 
             member x.EvaluatedValue = x.Evaluate()
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
@@ -93,7 +93,14 @@ module ExpressionModule =
                 | DuFunction fs -> DuFunction {fs with Arguments = args }
                 | _ -> failwithlog "ERROR"
 
-        member x.DataType = typedefof<'T>
+        member x.DataType =
+               match x with
+                | DuTerminal t ->
+                    match t with
+                    | DuLiteral literal -> literal.Value.GetType()
+                    | _ -> typedefof<'T>
+                | _ -> typedefof<'T>
+         
         /// expression 의 type 이 동일한 경우 ToString() 결과가 같으면 동일한 것으로 간주
         /// type 이 다르면 항상 false 반환
         member x.IsEqual (y:IExpression) =
@@ -106,7 +113,7 @@ module ExpressionModule =
     let literal2expr (x:'T) =
         let t = x.GetType()
         if t.IsValueType || t = typedefof<string> then
-            DuTerminal (DuLiteral ({Value=x|> unbox}:LiteralHolder<'T>))
+            DuTerminal (DuLiteral ({Value = (x|> unbox)}:LiteralHolder<'T>))
         else
             failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 

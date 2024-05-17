@@ -55,11 +55,11 @@ type JobManager with
                     else 
                         if j.Job.OutDataType = DuBOOL
                         then yield (sets, _off) --| (td.OutTag:?> Tag<bool>, getFuncName())
-                        elif td.OutParam.DevValue.IsNone 
+                        elif td.OutParam.DevValue.IsNull() 
                         then 
                             failWithLog $"{td.Name} {td.OutParam.DevAddress} 은 value 값을 입력해야 합니다." 
                         else 
-                            yield (sets, td.OutParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
+                            yield (sets, td.OutParam.DevValue|>literal2expr) --> (td.OutTag, getFuncName())
         ]
    
 

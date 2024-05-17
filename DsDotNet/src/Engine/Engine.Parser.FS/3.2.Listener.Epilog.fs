@@ -15,23 +15,14 @@ open System.Collections.Generic
 module EtcListenerModule =
 
     let getHwSysItem (hwItem:HwSysItemDefContext)= 
-    
 
         let nameNAddr = hwItem.TryFindFirstChild<HwSysItemNameAddrContext>().Value
-        let name, inDataType, outDataType = 
-            match nameNAddr.TryFindFirstChild<HwSysItemNameOnlyContext>() with
-                | Some getRawName -> getRawName.GetText().DeQuoteOnDemand(), DuBOOL, DuBOOL
-                |_ -> 
-                      let nameWithTypeCtx = nameNAddr.TryFindFirstChild<HwSysItemNameWithTypeContext>().Value
-                      let name = nameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
-                      let inDataType = nameWithTypeCtx.TryFindFirstChild<InVarTypeContext>().Value.GetText()|> textToDataType
-                      let outDataType = nameWithTypeCtx.TryFindFirstChild<OutVarTypeContext>().Value.GetText()|> textToDataType
-                      name, inDataType, outDataType
+        let name = nameNAddr.TryFindFirstChild<HwSysItemNameContext>().Value.GetText()
 
         let inParam, outParm =
             match nameNAddr.TryFindFirstChild<DevParamInOutContext>() with
             |Some devParam -> 
-                commonDeviceParamExtractor  devParam duDataType
+                commonDeviceParamExtractor devParam 
             |None ->
                 TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
         name, inParam, outParm

@@ -46,11 +46,11 @@ module ExportIOTable =
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
     let toTextPPTFunc (x:DevParam) =
-        match x.DevValue, x.DevTime  with 
-        | Some(v), Some(t) -> $"{v}:{t}ms"
-        | Some(v), None    -> $"{v}"
-        | None , Some(v)   -> $"{v}ms"
-        | None , None      -> $""
+        match x.DevValueNType, x.DevTime with 
+        | Some(v, _), Some(t) -> $"{v}:{t}ms"
+        | Some(v, _), None    -> $"{v}"
+        | None, Some(v)       -> $"{v}ms"
+        | None, None          -> $""
 
     let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable =
 

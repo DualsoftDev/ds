@@ -88,6 +88,23 @@ module DsDataType =
             | DuUINT64  -> UINT64
             | DuUINT8   -> UINT8
 
+         member x.ToStringValue (value: obj) =
+            match x, value with
+            | DuBOOL     , _ -> value.ToString()
+            | DuCHAR     , _ -> sprintf "'%c'" (Convert.ToChar(value))
+            | DuFLOAT32  , (:? float32 as v) -> sprintf "%gf" v
+            | DuFLOAT64  , (:? float as v) -> sprintf "%g" v
+            | DuINT16    , (:? int16 as v) -> sprintf "%ds" v
+            | DuINT32    , (:? int as v) -> sprintf "%d" v
+            | DuINT64    , (:? int64 as v) -> sprintf "%dL" v
+            | DuINT8     , (:? sbyte as v) -> sprintf "%dy" v
+            | DuSTRING   , (:? string as v) -> v
+            | DuUINT16   , (:? uint16 as v) -> sprintf "%dus" v
+            | DuUINT32   , (:? uint32 as v) -> sprintf "%du" v
+            | DuUINT64   , (:? uint64 as v) -> sprintf "%dUL" v
+            | DuUINT8    , (:? byte as v) -> sprintf "%duy" v
+            | _  -> failwithf "ERROR: Unsupported type %s for value %O" (x.ToText()) value
+
 
         member x.ToTextLower() = x.ToText().ToLower()
         member x.ToBlockSizeNText() = 
@@ -160,7 +177,7 @@ module DsDataType =
         | _  -> failwithlog "ERROR"
 
 
-    let getValueNType (x:string) =
+    let getTextValueNType (x:string) =
         let trimmedValueNDataType = 
             let mutable value = 0
             match x with
@@ -183,11 +200,16 @@ module DsDataType =
             | _ -> None
         trimmedValueNDataType
         
-    let toValue (x:string) =
-        let trimmedValueNDataType =  getValueNType x
-        match trimmedValueNDataType with
-        | Some (value, datatype) -> datatype.ToValue value
+    let getTrimmedValueNType(x)  = 
+        let trimmedTextValueNDataType =  getTextValueNType x
+        match trimmedTextValueNDataType with
+        | Some (v,ty) -> ty.ToValue(v), ty
         | None -> failwithlog $"TryParse error datatype {x}"
+
+    let toValue (x:string) = getTrimmedValueNType x |> fst
+
+    let toValueType (x:string) = getTrimmedValueNType x |> snd
+
 
     type IOType = | In | Out | Memory | NotUsed
 

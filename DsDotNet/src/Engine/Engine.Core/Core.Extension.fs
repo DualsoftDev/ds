@@ -64,23 +64,23 @@ module CoreExtensionModule =
         |_ -> failwithlog "Error"
          
          
-    let getDevParam (txt:string) (duDataType:DataType)=
+    let getDevParam (txt:string) =
             match txt.Split(':') |> Seq.toList with
-            | [addr] -> {DevAddress = addr; DevValue = None; DevDataType = Some duDataType; DevTime = None}
+            | [addr] -> {DevAddress = addr; DevValueNType = None;  DevTime = None}
             | addr::xs when xs.Length = 1 -> 
                     if xs.Head.EndsWith("ms")
                     then 
                         let time = Convert.ToInt32(xs.Head.TrimEnd([|'m';'s'|]))
-                        {DevAddress = addr; DevValue = None; DevDataType = Some duDataType; DevTime = Some(time)}
+                        {DevAddress = addr; DevValueNType = None; DevTime = Some(time)}
                     else
-                        {DevAddress = addr; DevValue = Some(duDataType.ToValue(xs.Head)|>unbox); DevDataType =Some  duDataType; DevTime = None}
+                        {DevAddress = addr; DevValueNType = Some(toValue(xs.Head)|>unbox, toValueType(xs.Head));  DevTime = None}
 
-            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValue = Some(duDataType.ToValue(xs.Head)|>unbox); DevDataType =Some  duDataType; DevTime = Some(Convert.ToInt32(xs.Last()))}
+            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValueNType = Some(toValue(xs.Head)|>unbox, toValueType(xs.Head));  DevTime = Some(Convert.ToInt32(xs.Last()))}
             | _-> failwithlog $"{txt} getDevParam format error ex) Value or Value:Time"
 
-    let getDevParamInOut (paramInOutText:string) (duDataType:DataType) = 
+    let getDevParamInOut (paramInOutText:string) = 
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> getDevParam tx duDataType,  getDevParam rx.Head duDataType
+        | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
         | _-> failwithlog $"{paramInOutText} getDevParamInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
     
 
@@ -257,7 +257,7 @@ type SystemExt =
 
     [<Extension>]
     static member IsSensorNot(x:DevParam) = 
-                match x.DevValue with
-                |Some(v) when v.GetType() = typedefof<bool> -> not (Convert.ToBoolean(v))  //RX 기본은 True
+                match x.DevValueNType with
+                |Some(v, ty) when ty = DuBOOL -> not (Convert.ToBoolean(v))  //RX 기본은 True
                 |_ -> false
 

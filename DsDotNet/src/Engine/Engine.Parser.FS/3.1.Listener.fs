@@ -47,13 +47,22 @@ module ListnerCommonFunctionGenerator =
         let excuteCode = fDef.operator().GetText()
         excuteCode |> getCode
 
-    let commonDeviceParamExtractor (devCtx: DevParamInOutContext) duDataType=
+    let commonDeviceParamExtractor (devCtx: DevParamInOutContext) =
         match devCtx.TryFindFirstChild<DevParamInOutBodyContext>() with
         |Some ctx -> 
-            getDevParamInOut $"{ctx.GetText()}" duDataType
+            getDevParamInOut $"{ctx.GetText()}"
         |None ->
             failWithLog "commonDeviceParamExtractor error"
     
+    let commonCallParamExtractor (ctx: JobBlockContext) =
+        let callListings = ctx.Descendants<CallListingContext>().ToArray()
+        [
+            for callList in callListings do
+                let jobName = callList.TryFindFirstChild<JobNameContext>().Value.GetText().DeQuoteOnDemand()     
+                let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
+                yield jobName, apiDefCtxs
+        ]
+             
 /// <summary>
 /// System, Flow, Parenting(껍데기만),
 /// Interface name map 구조까지 생성
@@ -64,9 +73,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     inherit dsBaseListener()
 
     let checkVariableNJobParsingDone(x:DsParserListener) = 
-        if not(x.IsJobParsingDone)
-        then
-            failwithlog "[jobs] Session must be loaded first."
         if not(x.IsVariableParsingDone)
         then
             failwithlog "[variables] Session must be loaded first."
@@ -80,7 +86,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     member val ButtonCategories = HashSet<(DsSystem * string)>()
 
     member val TheSystem: DsSystem = getNull<DsSystem> () with get, set
-    member val IsJobParsingDone: bool = false with get, set
+    //member val IsJobParsingDone: bool = false with get, set
     member val IsVariableParsingDone: bool = false with get, set
 
     /// 하나의 main.ds 를 loading 할 때, 외부 system 을 copy/reference 로 loading 시, 해당 system 의 구분을 위해서 사용
@@ -275,24 +281,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             )
         x.IsVariableParsingDone <- true
             
-    override x.EnterJobBlock(ctx: JobBlockContext) = 
-        let jobs = ctx.callListing()
-        jobs |> Seq.iter (fun job ->
-            let jobName ,inDataType, _= 
-                match job.TryFindFirstChild<JobNameOnlyContext>() with
-                | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL, DuBOOL
-                |_ -> 
-                    let JobNameWithTypeCtx = job.TryFindFirstChild<JobNameWithTypeContext>().Value
-                    let jobName = JobNameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
-                    let inDataType = JobNameWithTypeCtx.TryFindFirstChild<InVarTypeContext>().Value.GetText()|> textToDataType
-                    let outDataType = JobNameWithTypeCtx.TryFindFirstChild<OutVarTypeContext>().Value.GetText()|> textToDataType
-                    jobName, inDataType, outDataType
+    //override x.EnterJobBlock(ctx: JobBlockContext) = 
 
-            let variTag =  createVariableByType jobName inDataType
-            options.Storages.Add(variTag.Name, variTag)
-            )
+    //    let jobs = ctx.callListing()
+    //    jobs |> Seq.iter (fun job ->
+    //        let jobName =  job.TryFindFirstChild<JobNameContext>().Value
+    //        let variTag =  createVariableByType jobName inDataType
+    //        options.Storages.Add(variTag.Name, variTag)
+    //        )
 
-        x.IsJobParsingDone <- true
+    //    x.IsJobParsingDone <- true
 
     override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
         checkVariableNJobParsingDone(x)
@@ -612,20 +610,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
-            let callListings = ctx.Descendants<CallListingContext>().ToArray()
-
-            for callList in callListings do
-                let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
-             
-                let jobName, duDataType = 
-                    match callList.TryFindFirstChild<JobNameOnlyContext>() with
-                    | Some getRawJobName -> getRawJobName.GetText().DeQuoteOnDemand(), DuBOOL
-                    |_ -> 
-                        let JobNameWithTypeCtx = callList.TryFindFirstChild<JobNameWithTypeContext>().Value
-                        let jobName = JobNameWithTypeCtx.TryFindFirstChild<Identifier1Context>().Value.GetText().DeQuoteOnDemand()
-                        let duDataType = JobNameWithTypeCtx.TryFindFirstChild<VarTypeContext>().Value.GetText()|> textToDataType
-                        jobName, duDataType
-
+            let callListings = commonCallParamExtractor ctx 
+            
+            for job, apiDefCtxs in callListings do
                 let apiItems =
                     [ for apiDefCtx in apiDefCtxs do
                           let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
@@ -647,7 +634,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                       let inParam, outParm =
                                           match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
                                           |Some devParam -> 
-                                               commonDeviceParamExtractor  devParam duDataType
+                                               commonDeviceParamExtractor  devParam 
                                           |None ->
                                                TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
 
@@ -672,7 +659,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 assert (apiItems.Any())
             
 
-                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList)
+                let job = Job(job, system, apiItems.Cast<TaskDev>() |> Seq.toList)
                 job |> system.Jobs.Add
 
 

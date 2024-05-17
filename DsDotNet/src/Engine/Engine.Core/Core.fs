@@ -272,32 +272,35 @@ module CoreModule =
     type DevAddress = string
     type DevParam = {
         DevAddress: DevAddress
-        DevValue: obj option
-        DevDataType : DataType option
+        DevValueNType: (obj*DataType) option
         DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
     } with
-        member x.DevValueType = match x.DevValue with |Some (v)-> v.GetType() |None -> typedefof<bool>            
+        member x.DevValue = match x.DevValueNType with 
+                                |Some (v, _)->  v
+                                |None -> null
+        member x.DevType = match x.DevValueNType with 
+                                |Some (_, t)-> t
+                                |None -> DuBOOL          
 
     let defaultDevParam (address) = 
         {   
             DevAddress = address
-            DevValue = None
-            DevDataType = None
+            DevValueNType = None
             DevTime = None
         }
 
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
     let toTextDevParam (x:DevParam) = 
-        match x.DevAddress, x.DevValue, x.DevTime  with 
-        | address, Some(v), Some(t) ->    $"{addressPrint address}:{v}:{t}ms"
-        | address, Some(v), None    ->    $"{addressPrint address}:{v}"
+        match x.DevAddress, x.DevValueNType, x.DevTime  with 
+        | address, Some(v,ty), Some(t) ->    $"{addressPrint address}:{ty.ToStringValue(v)}:{t}ms"
+        | address, Some(v,ty), None    ->    $"{addressPrint address}:{ty.ToStringValue(v)}"
         | address, None, None       ->    $"{addressPrint address}"
         | _ ->    failwithlog "{x} format error"
 
-    let getDataTypeParam (x:DevParam) = 
-        if x.DevValue.IsNone then DuBOOL
-        else x.DevValue.Value.GetType() |> getDataType
+    //let getDataTypeParam (x:DevParam) = 
+    //    if x.DevValueNType.IsNone then DuBOOL
+    //    else x.DevValue.Value.GetType() |> getDataType
 
     let toTextInOutDev (inp:DevParam) (outp:DevParam) = 
         let inText = toTextDevParam inp
@@ -318,11 +321,11 @@ module CoreModule =
 
         member x.InAddress
             with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevDataType = x.InParam.DevDataType; DevTime = x.InParam.DevTime; }
+            and set(v) = x.InParam <- { DevAddress = v; DevValueNType = x.InParam.DevValueNType;  DevTime = x.InParam.DevTime; }
 
         member x.OutAddress
             with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevDataType = x.OutParam.DevDataType;  DevTime = x.OutParam.DevTime; }
+            and set(v) = x.OutParam <- { DevAddress = v; DevValueNType = x.OutParam.DevValueNType;  DevTime = x.OutParam.DevTime; }
                
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
@@ -342,11 +345,11 @@ module CoreModule =
 
         member x.InAddress
             with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- { DevAddress = v; DevValue = x.InParam.DevValue; DevDataType = x.InParam.DevDataType; DevTime = x.InParam.DevTime; }
+            and set(v) = x.InParam <- { DevAddress = v; DevValueNType = x.InParam.DevValueNType;  DevTime = x.InParam.DevTime; }
 
         member x.OutAddress
             with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- { DevAddress = v; DevValue = x.OutParam.DevValue; DevDataType = x.OutParam.DevDataType;  DevTime = x.OutParam.DevTime; }
+            and set(v) = x.OutParam <- { DevAddress = v; DevValueNType = x.OutParam.DevValueNType;  DevTime = x.OutParam.DevTime; }
                
         /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set

@@ -33,9 +33,9 @@ module ConvertCoreExtUtils =
             | _ -> 
                 failwithf "bridgeType err"
 
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InParam|>getDataTypeParam)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InParam.DevType)
         |> iter (fun t -> x.InTag   <- t)
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutParam|>getDataTypeParam)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutParam.DevType)
         |> iter (fun t -> x.OutTag  <- t)
 
     let getInExpr (x:DevParam, devTag:ITag, sys:DsSystem) = 
@@ -43,21 +43,13 @@ module ConvertCoreExtUtils =
         if devTag.IsNull() 
         then sysOff.Expr  :> IExpression
         else 
-            match x.DevValue with
-            |Some(v) -> 
-                 if v.GetType() = typedefof<bool>
-                 then 
-                     if Convert.ToBoolean(v) then  devTag.ToExpression()
-                     else 
-                        !!(devTag.ToExpression():?> Expression<bool>) :> IExpression
-                 else // bool 타입아닌 경우 비교문 생성
-                    createCustomFunctionExpression TextEQ [literal2expr v;devTag.ToExpression()]   
-
-            |None -> 
-                if devTag.DataType = typedefof<bool>
-                then
-                     devTag.ToExpression()
-                else sysOff.Expr
+            if x.DevType = DuBOOL
+            then 
+                if Convert.ToBoolean(x.DevValue) then  devTag.ToExpression()
+                else 
+                !!(devTag.ToExpression():?> Expression<bool>) :> IExpression
+            else // bool 타입아닌 경우 비교문 생성
+                createCustomFunctionExpression TextEQ [literal2expr x.DevValue ;devTag.ToExpression()]   
 
     [<AutoOpen>]
     [<Extension>]

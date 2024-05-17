@@ -11,80 +11,7 @@ open Engine.CodeGenCPU
 [<AutoOpen>]
 module ImportIOTable =
 
-    [<Flags>]
-    type IOColumn =
-        | Case = 0
-        | Flow = 1
-        | Name = 2
-        | DataType = 3
-        | Input = 4
-        | Output = 5
-        | FuncIn = 6
-        | FuncOut = 7
 
-    [<Flags>]
-    type ErrorColumn =
-        | No = 0
-        | Name = 1
-        | ErrorAddress = 2
-
-    [<Flags>]
-    type TextColumn =
-        | Name = 0
-        | Empty1 = 1
-        | Empty2 = 2
-        | Empty3 = 3
-        | Color = 4
-        | Ltalic = 5
-        | UnderLine = 6
-        | StrikeOut = 7
-        | Bold = 8
-
-    [<Flags>]
-    type ManualColumn_I =
-        | Name = 0
-        | DataType = 1
-        | Input = 2
-
-    [<Flags>]
-    type ManualColumn_O =
-        | Name = 0
-        | DataType = 1
-        | Output = 2   
-
-    [<Flags>]
-    type ManualColumn_M =
-        | Name = 0
-        | DataType = 1
-        | Manual = 2
-
-    [<Flags>]
-    type ManualColumn_ControlPanel =
-        | Name = 0
-        | DataType = 1
-        | Manual = 2
-
-    type DevParamRawItem  = string*DataType*string
-
-    let getDevName (row: Data.DataRow) = 
-        let flowName = row.[(int) IOColumn.Flow]
-        if flowName <> ""
-        then
-            $"{flowName}_{row.[(int) IOColumn.Name]}"
-        else 
-            $"{row.[(int) IOColumn.Name]}"
-            
-
-    let getPPTDevParamInOut (inParamRaw:DevParamRawItem) (outParamRaw:DevParamRawItem ) = 
-        let paramFromText paramRaw =
-            let addr, dataType, func = paramRaw
-            if func <> ""
-            then getDevParam  $"{addr}:{func}" dataType
-            else addr|>defaultDevParam
-
-        paramFromText inParamRaw , paramFromText outParamRaw
-        
- 
     let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
 
         try
@@ -181,14 +108,14 @@ module ImportIOTable =
                     textToDataType checkInType, textToDataType checkOutType
                 
 
-            let checkHardwareDataType (name:string) (dataTypeText:string)  (addrIn:string, valueIn:obj option) (addrOut:string, valueOut:obj option) =
-                let checkHardwareDataType (duDataType:DataType, value:obj option) =
-                    match value with
-                    | Some v ->
-                        let valType =getDataType(v.GetType()) 
+            let checkHardwareDataType (name:string) (dataTypeText:string)  (addrIn:string, valueIn:obj) (addrOut:string, valueOut:obj) =
+                let checkHardwareDataType (duDataType:DataType, value:obj) =
+                    if value.IsNonNull() then
+                        let valType =getDataType(value.GetType()) 
                         if valType <> duDataType 
-                            then failWithLog $"error datatype : {name}\r\n [{duDataType.ToText()}]  <> value {v}[{valType.ToType().ToDsDataTypeString()}]"
-                    | _-> if duDataType <> DuBOOL 
+                            then failWithLog $"error datatype : {name}\r\n [{duDataType.ToText()}]  <> value {value}[{valType.ToType().ToDsDataTypeString()}]"
+                    else 
+                        if duDataType <> DuBOOL 
                             then failWithLog $"Bit 타입이 아니면 func에 값을 입력해야 합니다. \r\n에러 항목 : {name}({dataTypeText})"
 
 

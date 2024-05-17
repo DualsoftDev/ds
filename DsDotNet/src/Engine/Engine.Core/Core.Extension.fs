@@ -7,6 +7,7 @@ open System.Diagnostics
 open Dual.Common.Core.FS
 open System
 open System.Runtime.CompilerServices
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module CoreExtensionModule =
@@ -62,21 +63,48 @@ module CoreExtensionModule =
             | :? Call as call -> call :> Vertex 
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
-         
-         
-    let getDevParam (txt:string) =
-            match txt.Split(':') |> Seq.toList with
-            | [addr] -> {DevAddress = addr; DevValueNType = None;  DevTime = None}
-            | addr::xs when xs.Length = 1 -> 
-                    if xs.Head.EndsWith("ms")
-                    then 
-                        let time = Convert.ToInt32(xs.Head.TrimEnd([|'m';'s'|]))
-                        {DevAddress = addr; DevValueNType = None; DevTime = Some(time)}
-                    else
-                        {DevAddress = addr; DevValueNType = Some(toValue(xs.Head)|>unbox, toValueType(xs.Head));  DevTime = None}
+    
+    let parseTime (item: string) =
+        let timePattern = @"(\d+)ms"
+        let m = Regex.Match(item, timePattern)
+        if m.Success then Some(Convert.ToInt32(m.Groups.[1].Value)) else None
 
-            | addr::xs when xs.Length = 2 -> {DevAddress = addr; DevValueNType = Some(toValue(xs.Head)|>unbox, toValueType(xs.Head));  DevTime = Some(Convert.ToInt32(xs.Last()))}
-            | _-> failwithlog $"{txt} getDevParam format error ex) Value or Value:Time"
+    let parseValueNType (item: string) =
+        let trimmedTextValueNDataType = getTextValueNType item
+        match trimmedTextValueNDataType with
+        | Some (v,ty) -> Some( ty.ToValue(v), ty)
+        | None -> None
+
+
+    // Main function
+    let getDevParam (txt: string) =
+        let parts = txt.Split(':') |> Seq.toList
+        match parts with
+        | [addr] -> 
+            createDevParam addr None None None
+    
+        | addr::[item] ->
+            match parseTime(item) with
+            | Some time -> 
+                createDevParam addr None None (Some time)
+            | None ->
+                match parseValueNType(item) with
+                | Some(v, ty) -> createDevParam addr None (Some(v, ty)) None
+                | None -> createDevParam addr (Some item) None None
+    
+        | addr::[item1; item2] ->
+            match parseTime(item2) with
+            | Some time ->
+                match parseValueNType(item1) with
+                | Some(v, ty) -> createDevParam addr None (Some(v, ty)) (Some time)
+                | None -> createDevParam addr (Some item1) None (Some time)
+            | None ->
+                createDevParam addr (Some item1) (Some(toValue item2 |> unbox, toValueType item2)) None
+    
+        | addr::[item1; item2; item3] ->
+            createDevParam addr (Some item1) (Some(toValue item2 |> unbox, toValueType item2)) (parseTime(item3))
+    
+        | _-> failwithlog $"{txt} getDevParam format error ex) Name:Value:Time"
 
     let getDevParamInOut (paramInOutText:string) = 
         match paramInOutText.Split(',') |> Seq.toList with
@@ -94,7 +122,8 @@ module CoreExtensionModule =
 
 
     type DsSystem with
-    
+
+                    
         member x.HWButtons = x.HwSystemDefs.OfType<ButtonDef>()
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
         member x.HWLamps = x.HwSystemDefs.OfType<LampDef>()

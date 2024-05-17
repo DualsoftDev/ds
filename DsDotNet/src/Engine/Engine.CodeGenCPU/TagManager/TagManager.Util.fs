@@ -9,6 +9,7 @@ open Dual.Common.Core.FS.ForwardDecl.ShowForwardDeclSample
 [<AutoOpen>]
 module TagManagerUtil =
 
+    let addressExist address = address  <> TextSkip && address <> TextAddrEmpty
 
     let getPlcTagAbleName (name:string) (storages:Storages) =
         let getValidName (name:string) =
@@ -91,8 +92,8 @@ module TagManagerUtil =
 
                 | Button | Lamp | Condition
                     ->   match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with
-                              | HwSysTag.HwSysIn      -> $"{name}_IN"
-                              | HwSysTag.HwSysOut     -> $"{name}_OUT"
+                              | HwSysTag.HwSysIn      -> $"{name}_I"
+                              | HwSysTag.HwSysOut     -> $"{name}_O"
                               | _ -> failwithlog "error: HwSysTag create "
        
             let plcAddrName = getPlcTagAbleName name stg

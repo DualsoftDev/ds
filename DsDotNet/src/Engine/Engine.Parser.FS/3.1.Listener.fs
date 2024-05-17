@@ -72,10 +72,6 @@ module ListnerCommonFunctionGenerator =
 type DsParserListener(parser: dsParser, options: ParserOptions) =
     inherit dsBaseListener()
 
-    let checkVariableNJobParsingDone(x:DsParserListener) = 
-        if not(x.IsVariableParsingDone)
-        then
-            failwithlog "[variables] Session must be loaded first."
 
     do parser.Reset()
    
@@ -86,8 +82,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     member val ButtonCategories = HashSet<(DsSystem * string)>()
 
     member val TheSystem: DsSystem = getNull<DsSystem> () with get, set
-    //member val IsJobParsingDone: bool = false with get, set
-    member val IsVariableParsingDone: bool = false with get, set
 
     /// 하나의 main.ds 를 loading 할 때, 외부 system 을 copy/reference 로 loading 시, 해당 system 의 구분을 위해서 사용
     member val OptLoadedSystemName: string option = None with get, set
@@ -256,7 +250,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             variable.BoxedValue <-varType.ToValue(value)
 
             options.Storages.Add (varName, variable) |>ignore
-            x.TheSystem.Variables.Add variableData   |>ignore
+            x.TheSystem.AddVariables variableData   |>ignore
 
 
         ctx.variableDef() |> Seq.iter (fun vari ->
@@ -279,67 +273,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let value = vari.initValue().GetText()
             addVari constName varType  value true
             )
-        x.IsVariableParsingDone <- true
             
-    //override x.EnterJobBlock(ctx: JobBlockContext) = 
-
-    //    let jobs = ctx.callListing()
-    //    jobs |> Seq.iter (fun job ->
-    //        let jobName =  job.TryFindFirstChild<JobNameContext>().Value
-    //        let variTag =  createVariableByType jobName inDataType
-    //        options.Storages.Add(variTag.Name, variTag)
-    //        )
-
-    //    x.IsJobParsingDone <- true
-
-    override x.EnterOperatorBlock(ctx: OperatorBlockContext) =
-        checkVariableNJobParsingDone(x)
-    
-        ctx.operatorNameOnly() |> Seq.iter (fun fDef ->
-            let funcName = fDef.TryFindIdentifier1FromContext().Value
-            x.TheSystem.Functions.Add(OperatorFunction(funcName)) )
-        
-        let functionDefs = ctx.operatorDef()
-        functionDefs |> Seq.iter (fun fDef ->
-            let funcName = fDef.operatorName().GetText()
-            let pureCode = commonFunctionOperatorExtractor fDef
-
-            // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
-            let newFunc = OperatorFunction.Create(funcName, pureCode)
-            let code = $"${funcName} = {pureCode};"
-            let assignCode = 
-                match options.Storages.any(fun s->s.Key = funcName) with
-                | true ->   code // EnterJobBlock job Tag 에서 이미 만듬 
-                | false ->  $"bool {funcName} = false;{code}" //op 결과 bool 변수를 임시로 만듬
-
-            let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
-            statements.Iter(fun s->
-                match s with
-                | DuAssign (_, _, _) -> newFunc.Statements.Add s  //비교구문 있는 Statement만 추가
-                |_ -> ()  //bool {funcName} = false 부분은 추가하지 않음
-                )
-
-            x.TheSystem.Functions.Add(newFunc) 
-            )
-
-    override x.EnterCommandBlock(ctx: CommandBlockContext) =
-        checkVariableNJobParsingDone(x)
-      
-        ctx.commandNameOnly() |> Seq.iter (fun fDef ->
-            let funcName = fDef.TryFindIdentifier1FromContext().Value
-            x.TheSystem.Functions.Add(CommandFunction(funcName)) )
-
-        let functionDefs = ctx.commandDef()
-        functionDefs |> Seq.iter (fun fDef ->
-            let funcName = fDef.commandName().GetText()
-            let pureCode = commonFunctionCommandExtractor fDef
-
-            // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
-            let newFunc = CommandFunction.Create(funcName, pureCode)
-            let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
-            newFunc.Statements.AddRange(statements)
-            x.TheSystem.Functions.Add(newFunc)
-            )
 
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등
@@ -608,6 +542,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             }
             |> ignore
 
+        let createDeviceVariable (system: DsSystem) (devParam:DevParam) =
+            match devParam.DevName with
+            | Some name ->
+                let address = devParam.DevAddress
+                let dataType = devParam.DevType
+                let variable = createVariableByType name dataType
+
+                system.AddActionVariables (ActionVariable(name, address, dataType)) |> ignore
+                options.Storages.Add(name, variable) |> ignore
+
+            | None -> ()
+
+
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
             let callListings = commonCallParamExtractor ctx 
@@ -616,6 +563,15 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let apiItems =
                     [ for apiDefCtx in apiDefCtxs do
                           let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
+                          let inParam, outParm =
+                                    match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
+                                    |Some devParam -> 
+                                        commonDeviceParamExtractor devParam 
+                                    |None ->
+                                        TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
+
+                          createDeviceVariable system inParam 
+                          createDeviceVariable system outParm 
 
                           match apiPath with
                           | device :: [ api ] ->
@@ -631,13 +587,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                       then x.CreateLoadedDeivce(device)
                                                       None
 
-                                      let inParam, outParm =
-                                          match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
-                                          |Some devParam -> 
-                                               commonDeviceParamExtractor  devParam 
-                                          |None ->
-                                               TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
-
+                               
                                       debugfn $"TX={inParam} RX={outParm}"
                                       return TaskDev(apiPoint, inParam, outParm, device)
 
@@ -647,7 +597,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                               | Some apiItem -> yield apiItem
                               | _ -> 
                                     match tryFindLoadedSystem system device with
-                                    |Some dev-> yield createTaskDevUsingApiName dev.ReferenceSystem device api
+                                    |Some dev-> yield createTaskDevUsingApiName dev.ReferenceSystem device api (inParam, outParm) 
                                     |None -> failwithlog $"device({device}) api({api}) is not exist"
 
                           | _ -> 
@@ -799,9 +749,63 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
 
+
+              
+        let createOperator(ctx:OperatorBlockContext) =
+            ctx.operatorNameOnly() |> Seq.iter (fun fDef ->
+                let funcName = fDef.TryFindIdentifier1FromContext().Value
+                x.TheSystem.Functions.Add(OperatorFunction(funcName)) )
+        
+            let functionDefs = ctx.operatorDef()
+            functionDefs |> Seq.iter (fun fDef ->
+                let funcName = fDef.operatorName().GetText()
+                let pureCode = commonFunctionOperatorExtractor fDef
+
+                // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
+                let newFunc = OperatorFunction.Create(funcName, pureCode)
+                let code = $"${funcName} = {pureCode};"
+                let assignCode = 
+                    match options.Storages.any(fun s->s.Key = funcName) with
+                    | true ->   code // EnterJobBlock job Tag 에서 이미 만듬 
+                    | false ->  $"bool {funcName} = false;{code}" //op 결과 bool 변수를 임시로 만듬
+
+                let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
+                statements.Iter(fun s->
+                    match s with
+                    | DuAssign (_, _, _) -> newFunc.Statements.Add s  //비교구문 있는 Statement만 추가
+                    |_ -> ()  //bool {funcName} = false 부분은 추가하지 않음
+                    )
+
+                x.TheSystem.Functions.Add(newFunc) 
+                )
+
+
+        let createCommand(ctx:CommandBlockContext) =
+            ctx.commandNameOnly() |> Seq.iter (fun fDef ->
+                let funcName = fDef.TryFindIdentifier1FromContext().Value
+                x.TheSystem.Functions.Add(CommandFunction(funcName)) )
+
+            let functionDefs = ctx.commandDef()
+            functionDefs |> Seq.iter (fun fDef ->
+                let funcName = fDef.commandName().GetText()
+                let pureCode = commonFunctionCommandExtractor fDef
+
+                // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
+                let newFunc = CommandFunction.Create(funcName, pureCode)
+                let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
+                newFunc.Statements.AddRange(statements)
+                x.TheSystem.Functions.Add(newFunc)
+                )
+
         for ctx in sysctx.Descendants<JobBlockContext>() do
             createTaskDevice x.TheSystem ctx
 
+        for ctx in sysctx.Descendants<OperatorBlockContext>() do
+            createOperator ctx
+
+        for ctx in sysctx.Descendants<CommandBlockContext>() do
+            createCommand ctx
+       
         for ctx in sysctx.Descendants<AliasListingContext>() do
             createAliasDef x ctx |> ignore
 
@@ -824,7 +828,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         apiAutoGenUpdateSystem system
         guardedValidateSystem system
-
+      
 
 [<AutoOpen>]
 module ParserLoadApiModule =

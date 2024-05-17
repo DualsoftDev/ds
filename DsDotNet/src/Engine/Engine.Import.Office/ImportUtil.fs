@@ -118,7 +118,7 @@ module ImportU =
                     let autoGenDevTask    =
                         if autoGenSys.IsSome
                             then
-                                createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName |> Some
+                                createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName (TextAddrEmpty |> defaultDevParam, TextAddrEmpty  |> defaultDevParam)|> Some
                             else 
                                 None
 
@@ -375,7 +375,7 @@ module ImportU =
                              dev.ChannelPoints[TextEmtpyChannel] <-xywh
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType = CALL)
+            |> Seq.filter (fun node -> node.NodeType = CALL|| node.NodeType = CALLOPFunc)
             |> Seq.iter (fun node ->
                 match getJobActionType node.CallApiName with
                 | MultiAction (_,cnt) -> 

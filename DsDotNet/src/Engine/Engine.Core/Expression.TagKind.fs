@@ -65,12 +65,12 @@ type TagKindExt =
                                        then Some( EventVariable  (x, s, x.GetVariableTagKind().Value))
                                        else Some( EventSystem  (x, s, x.GetSystemTagKind().Value))
 
-            | :? Flow as f         ->Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
-            | :? Vertex as v       ->Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
-            | :? ApiItem as a      ->Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-            | :? TaskDev  as d      ->Some( EventAction  (x, d, x.GetActionTagKind().Value))
-            | :? HwSystemDef as h ->Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
-            | :? Job as j          ->Some( EventJob     (x, j, x.GetJobTagKind().Value))
+            | :? Flow as f         -> Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
+            | :? Vertex as v       -> Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
+            | :? ApiItem as a      -> Some( EventApiItem (x, a, x.GetApiTagKind().Value))
+            | :? TaskDev  as d     -> Some( EventAction  (x, d, x.GetActionTagKind().Value))
+            | :? HwSystemDef as h  -> Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
+            | :? Job as j          -> Some( EventJob     (x, j, x.GetJobTagKind().Value))
             |_ -> None
         |None -> None
    

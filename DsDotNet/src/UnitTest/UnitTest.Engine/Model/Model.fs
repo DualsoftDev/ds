@@ -157,6 +157,9 @@ module ModelTests1 =
         [<Test>]
         member __.``Model component [Function/Operators] test`` () =
             compareExact ParserTest.Operators 
+        [<Test>]
+        member __.``Model component [DevParam] test`` () =
+            compareExact ParserTest.DevParam 
             
         //[<Test>]
         //member __.``X Ppt20221213Text test`` () =

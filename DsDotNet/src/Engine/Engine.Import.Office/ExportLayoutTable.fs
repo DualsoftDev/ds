@@ -47,7 +47,12 @@ module ExportLayoutTable =
         let rows = flows.SelectMany(fun f -> 
                         f.GetVerticesHasJobOfFlow().SelectMany(fun c->
                             c.TargetJob.DeviceDefs.Select(fun d->
-                                let xywh = d.GetDevice(f.System).ChannelPoints.First(fun kv->kv.Key = TextEmtpyChannel).Value
+                                let points = d.GetDevice(f.System).ChannelPoints
+                                let chs = points.Where(fun kv->kv.Key = TextEmtpyChannel)
+                                if chs.IsEmpty()
+                                then
+                                    failwithf $"Device {d.DeviceName} has no channel point"
+                                let xywh = chs.First().Value
                                 rowItem (d.DeviceName, f , xywh)
                                 )
                             )

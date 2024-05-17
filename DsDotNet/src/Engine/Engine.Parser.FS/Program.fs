@@ -89,7 +89,7 @@ C4 > C5;
     }
 
     [jobs] = {
-        Ap = { A."+"(%I1, %Q1); }
+        Ap = { A."+"(%I1:APIN, %Q1); }
         Am = { A."-"(%I2, %Q2); }
         Bp = { B."+"(%I3, %Q3); }
         Bm = { B."-"(%I4, %Q4); }
@@ -99,7 +99,7 @@ C4 > C5;
         const Int32 D100 = 5;
     }
     [operators] = {
-        STN1_ON = #{$Ap == true;}
+        STN1_ON = #{$APIN == true;}
     }
     [commands] = {
         STN1_COMMAD1 = #{$D100 = 560;}

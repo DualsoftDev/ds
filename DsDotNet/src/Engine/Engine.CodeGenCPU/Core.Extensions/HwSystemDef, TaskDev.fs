@@ -9,7 +9,6 @@ open System
 [<AutoOpen>]
 module ConvertCpuTaskDev =
     
-    let addressExist address = address  <> TextSkip && address <> TextAddrEmpty
 
     type TaskDev with
         member td.ExistInput   = addressExist td.InAddress

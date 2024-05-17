@@ -103,12 +103,12 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationCallConditionMemory()  = 
             for condi in x.HWConditions do
-                condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true condi (int FlowTag.flowStopConditionErrLamp) x
+                condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true condi (int HwSysTag.HwStopConditionErrLamp) x
                 condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty, condi.Name, false, IOType.Memory, getTarget(x))
 
         member private x.GenerationButtonEmergencyMemory()  = 
             for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
-                emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true emg (int FlowTag.flowStopEmergencyErrLamp) x
+                emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true emg (int HwSysTag.HwStopEmergencyErrLamp) x
                 emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, emg.Name, false, IOType.Memory, getTarget(x))
 
         member private x.GenerationEmulationMemory()  = 

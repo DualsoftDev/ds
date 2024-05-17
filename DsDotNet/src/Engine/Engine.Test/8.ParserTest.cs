@@ -624,7 +624,28 @@ namespace Engine
 ";
 
 
-        
+
+        public static string DevParam = @"
+    [sys] Control = {
+    [flow] F = {
+        #OP1, #OP2 > Main <|> Reset;	
+        Main = {
+            mv1up > mv1dn;		
+        }
+    }
+    [jobs] = {
+        mv1up = { A.""+""(%I300:symbol1:0us:12ms, %Q300:ABC); }
+        mv1dn = { A.""-""(%I301:1ms, %Q301:0f); }
+    }
+    [variables] = {}
+    [operators] = {
+        OP1 = #{$ABC == false;}
+        OP2 = #{$symbol1 > 12us;}
+    }
+    [device file=""cylinder.ds""] A; 
+}
+";
+
         public static string Operators = @"
     [sys] Control = {
     [flow] F = {
@@ -634,13 +655,13 @@ namespace Engine
         }
     }
     [jobs] = {
-        mv1up = { A.""+""(%I300, %Q300); }
+        mv1up = { A.""+""(%I300:symbol1:0us:12ms, %Q300:ABC); }
         mv1dn = { A.""-""(%I301, %Q301); }
     }
     [variables] = {}
     [operators] = {
-        OP1 = #{$mv1up == true;}
-        OP2 = #{$mv1dn == true;}
+        OP1 = #{$symbol1 == 0us;}
+        OP2 = #{$symbol1 > 12us;}
     }
     [device file=""cylinder.ds""] A; 
 }
@@ -656,14 +677,14 @@ namespace Engine
     }
     [jobs] = {
         mv1up = { A.""+""(%I300, %Q300); }
-        mv1dn = { A.""-""(%I301, %Q301); }
+        mv1dn = { A.""-""(%I301, %Q301:AOUT:300); }
     }
     [variables] = {
         Int32 v0;
     }
     [commands] = {
         CMD1 = #{$v0 = 1;}
-        CMD2 = #{$v0 = 2;}
+        CMD2 = #{$AOUT = 2;}
     }
     [device file=""cylinder.ds""] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
 }

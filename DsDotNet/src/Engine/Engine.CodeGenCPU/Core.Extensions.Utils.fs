@@ -43,11 +43,14 @@ module ConvertCoreExtUtils =
         if devTag.IsNull() 
         then sysOff.Expr  :> IExpression
         else 
-            if x.DevType = DuBOOL
+            if x.DevType = DuBOOL 
             then 
-                if Convert.ToBoolean(x.DevValue) then  devTag.ToExpression()
+                if x.DevValue.IsNull() 
+                    then devTag.ToExpression()
+                elif Convert.ToBoolean(x.DevValue) 
+                    then  devTag.ToExpression()
                 else 
-                !!(devTag.ToExpression():?> Expression<bool>) :> IExpression
+                    !!(devTag.ToExpression():?> Expression<bool>) :> IExpression
             else // bool 타입아닌 경우 비교문 생성
                 createCustomFunctionExpression TextEQ [literal2expr x.DevValue ;devTag.ToExpression()]   
 

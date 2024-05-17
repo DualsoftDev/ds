@@ -85,6 +85,9 @@ module CoreModule =
         inherit FqdnObject(name, createFqdnObject([||]))
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
+        let variables = ResizeArray<VariableData>()
+        let actionVariables = ResizeArray<ActionVariable>()
+
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
         let channelInfos =
             loadedSystems 
@@ -115,14 +118,30 @@ module CoreModule =
         member val Jobs = ResizeArray<Job>()
         member val Functions = ResizeArray<Func>()
 
+        member _.Variables = variables |> seq
+        member _.ActionVariables = actionVariables |> seq
+
         member val Flows = createNamedHashSet<Flow>()
-        member val Variables = ResizeArray<VariableData>()
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()
         ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
         member val StartPoints = createQualifiedNamedHashSet<Real>()
+
+        member x.AddVariables(variableData:VariableData) = 
+                if variables.any(fun v->v.Name = variableData.Name)
+                then 
+                    failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
+                else 
+                    variables.Add(variableData) 
+                    
+        member x.AddActionVariables(actionVariable:ActionVariable) = 
+                if actionVariables.any(fun v->v.Name = actionVariable.Name)
+                then 
+                    failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
+                else 
+                    actionVariables.Add(actionVariable)
 
     type Flow private (name: string, system: DsSystem) =
         inherit FqdnObject(name, system)
@@ -266,12 +285,11 @@ module CoreModule =
         member x.System = system
         member x.DeviceDefs = tasks
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
-        member val InDataType  = DuBOOL  with get, set
-        member val OutDataType = DuBOOL  with get, set
 
     type DevAddress = string
     type DevParam = {
         DevAddress: DevAddress
+        DevName : string option  //In or Out Tag 이름
         DevValueNType: (obj*DataType) option
         DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
     } with
@@ -280,27 +298,48 @@ module CoreModule =
                                 |None -> null
         member x.DevType = match x.DevValueNType with 
                                 |Some (_, t)-> t
-                                |None -> DuBOOL          
+                                |None -> DuBOOL     //기본 타입 bool     
 
     let defaultDevParam (address) = 
         {   
             DevAddress = address
+            DevName = None
             DevValueNType = None
             DevTime = None
         }
 
+    let changeAddressDevParam (x:DevParam) (address:string) = 
+        { 
+          DevAddress = address
+          DevName = x.DevName
+          DevValueNType = x.DevValueNType;  
+          DevTime = x.DevTime;
+    }
+
+    let createDevParam (address:string) (name:string option) (vNt:(obj*DataType) option) (t:int option) = 
+        { 
+          DevAddress = address
+          DevName = name
+          DevValueNType =vNt
+          DevTime =t
+    }
+
+
+
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
     let toTextDevParam (x:DevParam) = 
-        match x.DevAddress, x.DevValueNType, x.DevTime  with 
-        | address, Some(v,ty), Some(t) ->    $"{addressPrint address}:{ty.ToStringValue(v)}:{t}ms"
-        | address, Some(v,ty), None    ->    $"{addressPrint address}:{ty.ToStringValue(v)}"
-        | address, None, None       ->    $"{addressPrint address}"
-        | _ ->    failwithlog "{x} format error"
+        match x.DevAddress, x.DevName , x.DevValueNType, x.DevTime  with 
+        | address, Some(n) , Some(v,ty), Some(t) -> $"{addressPrint address}:{n}:{ty.ToStringValue(v)}:{t}ms"
+        | address, Some(n) , Some(v,ty), None    -> $"{addressPrint address}:{n}:{ty.ToStringValue(v)}"
+        | address, Some(n) , None, None          -> $"{addressPrint address}:{n}"
+        | address, Some(n) , None,Some(t)        -> $"{addressPrint address}:{n}:{t}ms"
+        | address, None, Some(v,ty), None        -> $"{addressPrint address}:{ty.ToStringValue(v)}"
+        | address, None, Some(v,ty), Some(t)     -> $"{addressPrint address}:{ty.ToStringValue(v)}:{t}ms"
+        | address, None, None, Some(t)           -> $"{addressPrint address}:{t}ms"
+        | address, None, None, None              -> $"{addressPrint address}"
 
-    //let getDataTypeParam (x:DevParam) = 
-    //    if x.DevValueNType.IsNone then DuBOOL
-    //    else x.DevValue.Value.GetType() |> getDataType
+
 
     let toTextInOutDev (inp:DevParam) (outp:DevParam) = 
         let inText = toTextDevParam inp
@@ -321,11 +360,11 @@ module CoreModule =
 
         member x.InAddress
             with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- { DevAddress = v; DevValueNType = x.InParam.DevValueNType;  DevTime = x.InParam.DevTime; }
+            and set(v) = x.InParam <- changeAddressDevParam  x.InParam v
 
         member x.OutAddress
             with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- { DevAddress = v; DevValueNType = x.OutParam.DevValueNType;  DevTime = x.OutParam.DevTime; }
+            and set(v) = x.OutParam <- changeAddressDevParam  x.OutParam v
                
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
@@ -345,11 +384,11 @@ module CoreModule =
 
         member x.InAddress
             with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- { DevAddress = v; DevValueNType = x.InParam.DevValueNType;  DevTime = x.InParam.DevTime; }
+            and set(v) = x.InParam <- changeAddressDevParam  x.InParam v
 
         member x.OutAddress
             with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- { DevAddress = v; DevValueNType = x.OutParam.DevValueNType;  DevTime = x.OutParam.DevTime; }
+            and set(v) = x.OutParam <- changeAddressDevParam  x.OutParam v
                
         /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set

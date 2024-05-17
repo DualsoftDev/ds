@@ -75,7 +75,7 @@ module CpuLoader =
 
             sys.TagManager <- SystemManager(sys, storages, target)
             sys.Variables.Iter(fun v-> v.TagManager <- VariableManager(v, sys))
-            sys.Jobs.Iter(fun j->j.TagManager <- JobManager(j))
+            sys.ActionVariables.Iter(fun a-> a.TagManager <- ActionVariableManager(a, sys))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
             sys.GetVertices().Iter(fun v->

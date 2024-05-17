@@ -30,19 +30,17 @@ module ConvertCpuVertex =
             let mutual = r.Parent.GetSystem().S.MutualCalls
             mutual[r]
     
-    let getJM(j:Job) = j.TagManager:?> JobManager
     type VariableData with
-        member v.VM = v.TagManager :?> VariableManager
-    type Job with
-        member j.ActionInBool = 
-            if j.InDataType = DuBOOL
-            then getJM(j).JobBoolValueTag.Expr |> Some
-            else None
+        member v.VM = v.TagManager :?> VariableManager  
+        
+    type ActionVariable  with
+        member av.VM = av.TagManager :?> ActionVariableManager
+
+
 
     type Call with
         member c._on     = c.System._on
         member c._off    = c.System._off
-        member c.JM    = c.TargetJob.TagManager :?> JobManager
 
         member c.HasSensor  =
             match c.IsJob with
@@ -67,8 +65,8 @@ module ConvertCpuVertex =
                         c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
 
         member c.EndActionOnlyIO = 
-                if c.HasSensor && c.TargetJob.ActionInBool.IsSome
-                    then c.JM.JobBoolValueTag.Expr
+                if c.HasSensor && c.TargetJob.ActionInExpr.IsSome
+                    then c.TargetJob.ActionInExpr.Value
                     else c.EndPlan
 
         member c.EndAction = 

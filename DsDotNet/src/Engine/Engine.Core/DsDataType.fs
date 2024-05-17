@@ -201,7 +201,7 @@ module DsDataType =
         trimmedValueNDataType
         
     let getTrimmedValueNType(x)  = 
-        let trimmedTextValueNDataType =  getTextValueNType x
+        let trimmedTextValueNDataType = getTextValueNType x
         match trimmedTextValueNDataType with
         | Some (v,ty) -> ty.ToValue(v), ty
         | None -> failwithlog $"TryParse error datatype {x}"

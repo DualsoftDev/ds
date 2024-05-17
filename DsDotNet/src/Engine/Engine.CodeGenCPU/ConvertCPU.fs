@@ -151,6 +151,7 @@ module ConvertCPU =
                 .Where(fun c->c.IsFunction)
         [
             for coin in coinCommandFuncs do
+           //test ahn
                 if coin.IsOperator  //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
                 then yield coin.VC.C1_DoOperator()
                     
@@ -163,14 +164,15 @@ module ConvertCPU =
             for v in s.Variables do
                 if v.VariableType = Immutable
                 then yield v.VM.V1_ConstMove(s)
+
+            for v in s.ActionVariables do
+                yield v.VM.V2_ActionVairableMove(s)
         ]   
             
     let private applyJob(s:DsSystem) =
         [
-            for jm in s.Jobs.Map(fun j->j.TagManager :?> JobManager) do
-                yield! jm.J1_JobAndTag()
-                yield! jm.J2_JobValueTag()
-                yield! jm.J3_JobActionOuts()
+            for j in s.Jobs do
+                yield! j.J1_JobActionOuts()
         ]
         
     let private emulationDevice(s:DsSystem) =
@@ -228,7 +230,7 @@ module ConvertCPU =
             | Developer ->  ()
 
             //Variables  적용 
-          //  yield! applyVariables sys
+            yield! applyVariables sys
 
             //Active 시스템 적용 
             if isActive

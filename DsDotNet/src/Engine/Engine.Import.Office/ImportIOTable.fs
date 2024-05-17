@@ -46,16 +46,6 @@ module ImportIOTable =
                         sys.Functions.Add func |> ignore
                         Some (func)
                        
-            let getAutoGenFuncName funcBodyText =
-                let opType, args = getOperatorTypeNArgs(funcBodyText)
-                let paras =
-                    if args.any()
-                    then 
-                        [ for param in args do
-                                $"_{param}";
-                        ] |> String.concat "" 
-                    else ""
-                $"{opType.ToText().TrimStart('$')}{paras}" 
                             
             
             let getFunctionNUpdate (callName:string, funcName:string, funcBodyText:string, isCommand: bool, page) =
@@ -74,7 +64,7 @@ module ImportIOTable =
                     else 
                         let funcName =
                             match funcName = "" with
-                            | true -> getAutoGenFuncName funcBodyText
+                            | true -> $"OP_{funcBodyText}"
                             | false -> funcName
 
                         let func = handleFunctionCreationOrUpdate sys funcName funcBodyText false
@@ -152,10 +142,6 @@ module ImportIOTable =
 
                 dev.InParam  <- inParams
                 dev.OutParam <- outParms
-
-                let job = dicJob[devName]
-                //job.DataType은 in의 타입을 따른다. 조건으로만 사용하기 때문에
-                job.InDataType <- checkInType
                     
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
@@ -169,7 +155,7 @@ module ImportIOTable =
                 then 
                     variableData.InitValue <- value
 
-                sys.Variables.Add(variableData)
+                sys.AddVariables(variableData)
 
             let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = getDevName row

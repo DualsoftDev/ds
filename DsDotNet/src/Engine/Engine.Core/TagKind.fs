@@ -106,8 +106,7 @@ module TagKindList =
     |flowPause                = 10040
     |flowStopError            = 10041
     |flowStopConditionErr     = 10042
-    |flowStopConditionErrLamp = 10043
-    |flowStopEmergencyErrLamp = 10044
+
 
 
       //복수 mode  존재 불가
@@ -206,7 +205,8 @@ module TagKindList =
     type HwSysTag    =
     |HwSysIn                     = 15000
     |HwSysOut                    = 15001
-
+    |HwStopConditionErrLamp      = 15010
+    |HwStopEmergencyErrLamp      = 15011
     
     /// 16000 ~ 16999
     [<Flags>]

@@ -45,8 +45,10 @@ module ExpressionFunctionModule =
     let internal iexpr any = (box any) :?> IExpression
     let NullFunction<'T> (_args:Args):'T = failwithlog "THIS IS PSEUDO FUNCTION.  SHOULD NOT BE EVALUATED!!!!"
 
+    /// argument 는 TERMINAL(variable) 이어야 함.  해당 argument 의 rising 검출 함수
     let [<Literal>] FunctionNameRising  = "rising"
     let [<Literal>] FunctionNameFalling = "falling"
+    /// argument 는 boolean expression.  해당 expression 전체 수행 결과의 rising 검출 함수.  ladder 상에서 해당 expression 뒤에(AFTER) rising 검출
     let [<Literal>] FunctionNameRisingAfter  = "risingAfter"
     let [<Literal>] FunctionNameFallingAfter = "fallingAfter"
 
@@ -216,6 +218,8 @@ module ExpressionFunctionModule =
 
         let _rising (_args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
         let _falling (_args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _risingAfter (_args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let _fallingAfter (_args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
 
 
         let _sin (args:Args) = args.Select(evalArg >> toFloat64).Expect1() |> Math.Sin
@@ -438,10 +442,10 @@ module ExpressionFunctionModule =
         let fLogicalAnd     args: IExpression = cf _logicalAnd     "&&" args
         let fLogicalOr      args: IExpression = cf _logicalOr      "||" args
         let fLogicalNot     args: IExpression = cf _logicalNot     "!"  args
-        let fRising         args: IExpression = cf _rising      FunctionNameRising args
-        let fFalling        args: IExpression = cf _falling     FunctionNameFalling args
-        let fRisingAfter    args: IExpression = cf _rising      FunctionNameRisingAfter args
-        let fFallingAfter   args: IExpression = cf _falling     FunctionNameFallingAfter args
+        let fRising         args: IExpression = cf _rising         FunctionNameRising args
+        let fFalling        args: IExpression = cf _falling        FunctionNameFalling args
+        let fRisingAfter    args: IExpression = cf _risingAfter    FunctionNameRisingAfter args
+        let fFallingAfter   args: IExpression = cf _fallingAfter   FunctionNameFallingAfter args
 
         (* FB: Functions that returns Expression<Bool> *)
         let fbEqual          args: Expression<bool> = cf _equal          "=="  args
@@ -457,11 +461,11 @@ module ExpressionFunctionModule =
         let fbLogicalNot     args: Expression<bool> = cf _logicalNot     "!"  args
 
         (* FB: Functions that returns Expression<Bool> *)
-        let fbRising        args: Expression<bool> = cf _rising      FunctionNameRising args
-        let fbFalling       args: Expression<bool> = cf _falling     FunctionNameFalling args
+        let fbRising        args: Expression<bool> = cf _rising          FunctionNameRising args
+        let fbFalling       args: Expression<bool> = cf _falling         FunctionNameFalling args
 
-        let fbRisingAfter   args: Expression<bool> = cf _rising      FunctionNameRisingAfter args
-        let fbFallingAfter  args: Expression<bool> = cf _falling     FunctionNameFallingAfter args
+        let fbRisingAfter   args: Expression<bool> = cf _risingAfter     FunctionNameRisingAfter args
+        let fbFallingAfter  args: Expression<bool> = cf _fallingAfter    FunctionNameFallingAfter args
 
         let fSin            args = cf _sin            "sin"    args
         let fCos            args = cf _cos            "cos"    args

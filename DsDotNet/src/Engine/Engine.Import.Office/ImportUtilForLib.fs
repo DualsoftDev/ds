@@ -161,15 +161,15 @@ module ImportUtilForLib =
             then mySys.Jobs.Add(job);job
             else tempJob
         
-      //  Call.Create(jobForCall, parent)
+        Call.Create(jobForCall, parent)
 
-        if node.NodeType = CALLOPFunc
-        then
-            let func = OperatorFunction.Create(node.OperatorName, "") 
-            mySys.Functions.Add (func:> Func) |> ignore
-            Call.Create(func, parent)
-        else 
-            Call.Create(jobForCall, parent)
+        //if node.NodeType = CALLOPFunc
+        //then
+        //    let func = OperatorFunction.Create(node.OperatorName, "") 
+        //    mySys.Functions.Add (func:> Func) |> ignore
+        //    Call.Create(func, parent)
+        //else 
+        //    Call.Create(jobForCall, parent)
 
                 
         

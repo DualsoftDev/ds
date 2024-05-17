@@ -90,6 +90,21 @@ module DsType =
 
         replaceName
 
+    let GetLastParenthesesReplaceName (name: string, replaceName: string) =
+        let patternTail = @"\([^)]*\)$" // 끝 소괄호 제거
+
+        let replacedName = System.Text.RegularExpressions.Regex.Replace(name, patternTail, replaceName) // Perform the replacement
+        replacedName
+
+    let GetLastParenthesesContents (name: string) =
+        let patternTail = @"\(([^)]*)\)$" // Regular expression to match the content inside the last parentheses
+        let m = System.Text.RegularExpressions.Regex.Match(name, patternTail) // Find the match
+        if m.Success then
+            m.Groups.[1].Value // Return the captured content
+        else
+            "" // Return an empty string if no match is found
+
+
     // 특수 대괄호 제거 후 순수 이름 추출
     // [yy]xx[xxx]Name[1,3] => xx[xxx]Name
     // 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리

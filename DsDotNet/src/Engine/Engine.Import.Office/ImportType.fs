@@ -68,7 +68,7 @@ module ImportType =
 
     let getDevName (row: Data.DataRow) = 
         let flowName = row.[(int) IOColumn.Flow]
-        if flowName <> ""
+        if flowName <> "" && flowName <> TextSkip
         then
             $"{flowName}_{row.[(int) IOColumn.Name]}"
         else 
@@ -87,18 +87,7 @@ module ImportType =
             let addr, (dataType:DataType), func = paramRaw
             if func <> ""
             then 
-                let typedFunc = 
-                    match func.Split(':') with
-                    | items when items.Length = 1 -> 
-                        if func.EndsWith("ms")
-                        then  func
-                        else dataType.ToStringValue(dataType.ToValue(func))
-
-                    | items when items.Length = 2 -> $"{dataType.ToStringValue(dataType.ToValue(items.Head()))}{items.Last()}"
-                    | _-> 
-                        failwithf $"error func : {func}"
-                
-                getDevParam  $"{addr}:{typedFunc}" 
+                getDevParam $"{addr}:{func}" 
             else
                 addr|>defaultDevParam
 

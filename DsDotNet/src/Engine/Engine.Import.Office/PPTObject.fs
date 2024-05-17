@@ -264,14 +264,15 @@ module PPTObjectModule =
 
         let mutable name = ""
         let mutable ifName = ""
-        let mutable opFunc = ""
-        let mutable cmdFunc = ""
+        let mutable opDevParam = "" |> defaultDevParam
+        let mutable cmdDevParam = "" |> defaultDevParam
         let mutable ifTXs = HashSet<string>()
         let mutable ifRXs = HashSet<string>()
         let mutable nodeType: NodeType = NodeType.REAL
 
         let trimNewLine (text: string) = text.Replace("\n", "")
         let trimSpace (text: string) = text.TrimStart(' ').TrimEnd(' ')
+        let trimSpaceNewLine (text: string) = text |> trimSpace |> trimNewLine
 
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
@@ -372,15 +373,26 @@ module PPTObjectModule =
             else
                 shape.ErrorName(ErrID._1, iPage)
 
+        let getOpCmdParam name = 
+               let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
+               $"{'-'}:{func}"|> getDevParam
+
         do
 
             nodeType <- getNodeType() 
-            if nodeType = CALL   || nodeType = CALLOPFunc
-            then 
+            match nodeType with
+            | CALL -> 
                 let callName =  GetHeadBracketRemoveName(shape.InnerText)
-                name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimNewLine
-            else 
-                name <- GetBracketsRemoveName(shape.InnerText) |> trimSpace |> trimNewLine
+                name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimSpaceNewLine
+            | CALLOPFunc ->
+                name <- GetLastParenthesesReplaceName(shape.InnerText, "") |> trimSpaceNewLine
+                opDevParam <-  getOpCmdParam shape.InnerText
+
+            | CALLCMDFunc ->
+                name <- GetLastParenthesesReplaceName(shape.InnerText, "") |> trimSpaceNewLine
+                cmdDevParam <-  getOpCmdParam shape.InnerText
+            | _ -> 
+                name <- GetBracketsRemoveName(shape.InnerText) |> trimSpaceNewLine
 
             nameCheck (shape, nodeType, iPage)
 
@@ -444,12 +456,14 @@ module PPTObjectModule =
         member x.JobName = pageTitle+"_"+name.Replace(".", "_")
         member x.OperatorName = x.JobName(*+"_OP"*)
         member x.CommandName  = x.JobName(*+"_CMD"*)
-        member x.OperatorCode = 
-                $"${x.JobName.QuoteOnDemand()} == true;"
-
+        member x.OpDevParam  = opDevParam
+        member x.CmdDevParam  = cmdDevParam
+        
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 
         member x.CallApiName =
+            if nodeType = CALLOPFunc  || nodeType = CALLCMDFunc then
+                failwithf $"not support {nodeType}({name}) type"
             if name.Contains '$' then
                 failwithf $"not support '$' replace '.' {name}"
             else

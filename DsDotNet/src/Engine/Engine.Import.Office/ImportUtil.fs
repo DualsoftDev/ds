@@ -77,21 +77,39 @@ module ImportU =
 
         let call =
             match node.NodeType with
-            | CALLOPFunc when not(node.Name.Contains(".")) ->
-                Call.Create(getOperatorFunc(), parentWrapper)  
+            | CALLOPFunc | CALLCMDFunc ->
 
-            | CALLCMDFunc  ->  
-                Call.Create(getCommandFunc(), parentWrapper)  
+          
+                let loadedName  = node.CallName
+                let apiName = "ON"
+                let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiName
 
-            | CALL | CALLOPFunc when node.Name.Contains(".") ->  
-                match node.NodeType with
-                | CALL ->
+                let call = addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, None)
+                if call.TargetJob.DeviceDefs.Count() > 1 then
+                    failwithlog $"error {node.Name} ({node.NodeType}) 는 하나의 디바이스만 Job으로 구성 가능합니다."
+
+
+                if CALLCMDFunc =  node.NodeType
+                then
                     if parentWrapper.GetCore() :? Flow 
-                    then failWithLog  $"Action 정의는 work 내부에만 존재 가능합니다. error {node.Name}."    
-                | _ ->
+                        then failWithLog  $"Command 정의는 work 내부에만 존재 가능합니다. error {node.Name}."  
+                    
+                    call.TargetJob.DeviceDefs.Head().OutParam <- node.CmdDevParam
+
+                elif CALLOPFunc =  node.NodeType
+                then
                     if parentWrapper.GetCore() :? Real 
-                    then failWithLog  $"Operator 정의는 work 외부에만 존재 가능합니다. error {node.Name}."    
-                
+                        then failWithLog  $"Operator 정의는 work 외부에만 존재 가능합니다. error {node.Name}."    
+
+                    call.TargetJob.DeviceDefs.Head().InParam <- node.OpDevParam
+
+                call
+
+
+            | CALL  ->  
+                if parentWrapper.GetCore() :? Flow 
+                then failWithLog  $"Action 정의는 work 내부에만 존재 가능합니다. error {node.Name}."    
+                   
                 let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
                 if jobCallNames.Contains sysName
                 then 
@@ -375,7 +393,7 @@ module ImportU =
                              dev.ChannelPoints[TextEmtpyChannel] <-xywh
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType = CALL|| node.NodeType = CALLOPFunc)
+            |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.iter (fun node ->
                 match getJobActionType node.CallApiName with
                 | MultiAction (_,cnt) -> 
@@ -386,6 +404,13 @@ module ImportU =
                     let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
                     addChannelPoints dev node
                     )
+
+            doc.Nodes
+            |> Seq.filter (fun node -> node.NodeType = CALLOPFunc)
+            |> Seq.iter (fun node ->
+                    let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
+                    addChannelPoints dev node
+            )
 
         //real call alias  만들기
         [<Extension>]

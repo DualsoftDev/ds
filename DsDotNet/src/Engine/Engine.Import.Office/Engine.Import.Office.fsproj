@@ -19,13 +19,13 @@
         <Compile Include="Util.fs" />
         <Compile Include="MessgeError.fs" />
         <Compile Include="PPTUtil.fs" />
+        <Compile Include="ImportType.fs" />
         <Compile Include="PPTObject.fs" />
         <Compile Include="PPTDummy.fs" />
         <Compile Include="PPTDoc.fs" />
         <Compile Include="GraphView.fs" />
         <Compile Include="ImportDocCheck.fs" />
         <Compile Include="ImportUtilView.fs" />
-        <Compile Include="ImportType.fs" />
         <Compile Include="ImportIOTable.fs" />
         <Compile Include="ExportExcel.fs" />
         <Compile Include="ExportPDF.fs" />

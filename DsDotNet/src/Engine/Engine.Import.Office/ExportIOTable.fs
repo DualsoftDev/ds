@@ -142,7 +142,7 @@ module ExportIOTable =
                     //외부입력 전용 확인하여 출력 생성하지 않는다.
                     if  dev.IsRootFlowDev(coins) 
                     then
-                        dev.OutAddress <- ( TextSkip)
+                        dev.OutAddress <- (TextSkip)
 
                     yield rowIOItems (dev, job) target
         }
@@ -224,9 +224,9 @@ module ExportIOTable =
                   )
 
 
-        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator]]
-        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand]]
-        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable]]
+        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"-";"-";"";"-"]]
+        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"-";"";"-"]]
+        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"-";"";"";"-";"-";"";"-"]]
         let dts = 
             getConditionDefListRows (sys.ReadyConditions)  
             @ commandRows 

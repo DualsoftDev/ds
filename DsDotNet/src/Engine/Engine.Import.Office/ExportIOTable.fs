@@ -224,7 +224,7 @@ module ExportIOTable =
                   "ALL"
                   vari.Name
                   vari.Type.ToText()
-                  vari.InitValue
+                  if vari.VariableType = Mutable then  TextSkip else vari.InitValue 
                   TextSkip
                   TextSkip
                   TextSkip

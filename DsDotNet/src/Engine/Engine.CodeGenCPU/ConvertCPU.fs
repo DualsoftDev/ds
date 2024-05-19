@@ -149,7 +149,7 @@ module ConvertCPU =
             s.GetVertices().OfType<Call>().Where(fun c->c.IsPureOperator)
 
         let flowOperatorFuncs =
-            s.GetVertices().OfType<Call>().Where(fun c->c.IsOperator)
+            s.GetVertices().OfType<Call>().Where(fun c->c.IsOperator && not (c.IsPureOperator))
 
         let pureCommandFuncs =
             s.GetVertices().OfType<Call>().Where(fun c->c.IsPureCommand)
@@ -180,6 +180,7 @@ module ConvertCPU =
         [
             let coins = s.GetVerticesOfCoins()  
             let jobs = coins.OfType<Call>()
+                            .Where(fun c-> c.IsJob)
                             .Select(fun c-> c.TargetJob).Distinct()
             for j in jobs do
                 yield! j.J1_JobActionOuts()

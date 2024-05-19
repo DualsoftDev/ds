@@ -22,6 +22,12 @@ module DsDataType =
     let [<Literal>] UINT64  = "UInt64"
     let [<Literal>] UINT8   = "Byte"
 
+    let [<Literal>] PLCBOOL    = "bit"
+    let [<Literal>] PLCUINT8   = "byte"
+    let [<Literal>] PLCUINT16  = "word"
+    let [<Literal>] PLCUINT32  = "dword"
+    let [<Literal>] PLCUINT64  = "lword"
+
     let typeDefaultValue (typ:System.Type) =
         match typ.Name with
         | BOOL      -> box false
@@ -88,6 +94,23 @@ module DsDataType =
             | DuUINT64  -> UINT64
             | DuUINT8   -> UINT8
 
+         member x.ToPLCText() =
+            match x with
+            | DuBOOL    -> PLCBOOL
+            | DuCHAR    -> CHAR
+            | DuFLOAT32 -> FLOAT32
+            | DuFLOAT64 -> FLOAT64
+            | DuINT16   -> INT16
+            | DuINT32   -> INT32
+            | DuINT64   -> INT64
+            | DuINT8    -> INT8
+            | DuSTRING  -> STRING
+            | DuUINT16  -> PLCUINT16
+            | DuUINT32  -> PLCUINT32
+            | DuUINT64  -> PLCUINT64
+            | DuUINT8   -> PLCUINT8
+
+
          member x.ToStringValue (value: obj) =
             match x, value with
             | DuBOOL     , _ -> value.ToString()
@@ -98,21 +121,21 @@ module DsDataType =
             | DuINT32    , (:? int as v) -> sprintf "%d" v
             | DuINT64    , (:? int64 as v) -> sprintf "%dL" v
             | DuINT8     , (:? sbyte as v) -> sprintf "%dy" v
-            | DuSTRING   , (:? string as v) -> v
+            | DuSTRING   , (:? string as v) -> sprintf "\"%s\"" v
             | DuUINT16   , (:? uint16 as v) -> sprintf "%dus" v
             | DuUINT32   , (:? uint32 as v) -> sprintf "%du" v
             | DuUINT64   , (:? uint64 as v) -> sprintf "%dUL" v
             | DuUINT8    , (:? byte as v) -> sprintf "%duy" v
             | _  -> failwithf "ERROR: Unsupported type %s for value %O" (x.ToText()) value
 
-
+            
         member x.ToTextLower() = x.ToText().ToLower()
         member x.ToBlockSizeNText() = 
             match x with
-            | DuUINT16  -> 16, "Word"
-            | DuUINT32  -> 32, "DWord"
-            | DuUINT64  -> 64, "LWord"
-            | DuUINT8   -> 8 , "Byte"
+            | DuUINT16  -> 16, PLCUINT16 
+            | DuUINT32  -> 32, PLCUINT32 
+            | DuUINT64  -> 64, PLCUINT64 
+            | DuUINT8   -> 8 , PLCUINT8
             | _ -> failwithf $"'{x}' not support ToBlockSize"
 
         member x.ToType() =
@@ -177,28 +200,35 @@ module DsDataType =
         | _  -> failwithlog "ERROR"
 
 
-    let getTextValueNType (x:string) =
-        let trimmedValueNDataType = 
-            let mutable value = 0
-            match x with
-            | _ when x.StartsWith("\"") && x.EndsWith("\"") && x.Length > 1 ->
-                (x.[1..x.Length-2], DuSTRING) |> Some
-            | _ when x.StartsWith("'") && x.EndsWith("'") && x.Length = 3 ->
-                (x.[1].ToString(), DuCHAR)  |>Some
-            | _ when x.Contains('.') ->
-                if x.EndsWith("f") then  (x.TrimEnd('f'), DuFLOAT32)  |>Some else (x, DuFLOAT64)  |>Some
-                //2자리 부터 체크
-            | _ when x.EndsWith("uy") -> (x.TrimEnd([|'u';'y'|]), DuUINT8) |>Some
-            | _ when x.EndsWith("us") -> (x.TrimEnd([|'u';'s'|]), DuUINT16) |>Some
-            | _ when x.EndsWith("UL") -> (x.TrimEnd([|'U';'L'|]), DuUINT64) |>Some
-            | _ when x.ToLower() = "true" || x.ToLower() = "false" -> (x, DuBOOL) |>Some
-            | _ when x.EndsWith("L") ->  (x.TrimEnd('L'), DuINT64) |>Some
-            | _ when x.EndsWith("u") ->  (x.TrimEnd('u'), DuUINT32) |>Some
-            | _ when x.EndsWith("y") ->  (x.TrimEnd('y'), DuINT8) |>Some
-            | _ when x.EndsWith("s") ->  (x.TrimEnd('s'), DuINT16) |>Some
-            | _ when System.Int32.TryParse (x, &value)-> (x, DuINT32) |>Some
-            | _ -> None
-        trimmedValueNDataType
+    
+    let getTextValueNType (x: string) =
+        let mutable value = 0
+        match x with
+        | _ when x.StartsWith("\"") && x.EndsWith("\"") && x.Length > 1 ->
+            Some (x.[1..x.Length-2], DuSTRING)
+        | _ when x.StartsWith("'") && x.EndsWith("'") && x.Length = 3 ->
+            Some (x.[1].ToString(), DuCHAR)
+        | _ when x.Contains('.') && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.' || c = 'f') ->
+            if x.EndsWith("f") then Some (x.TrimEnd('f'), DuFLOAT32) else Some (x, DuFLOAT64)
+        | _ when x.EndsWith("uy") && x.TrimEnd([|'u';'y'|]) |> Int32.TryParse |> fst ->
+            Some (x.TrimEnd([|'u';'y'|]), DuUINT8)
+        | _ when x.EndsWith("us") && x.TrimEnd([|'u';'s'|]) |> Int32.TryParse |> fst ->
+            Some (x.TrimEnd([|'u';'s'|]), DuUINT16)
+        | _ when x.EndsWith("UL") && x.TrimEnd([|'U';'L'|]) |> Int64.TryParse |> fst ->
+            Some (x.TrimEnd([|'U';'L'|]), DuUINT64)
+        | _ when x.ToLower() = "true" || x.ToLower() = "false" ->
+            Some (x, DuBOOL)
+        | _ when x.EndsWith("L") && x.TrimEnd('L') |> Int64.TryParse |> fst ->
+            Some (x.TrimEnd('L'), DuINT64)
+        | _ when x.EndsWith("u") && x.TrimEnd('u') |> Int32.TryParse |> fst ->
+            Some (x.TrimEnd('u'), DuUINT32)
+        | _ when x.EndsWith("y") && x.TrimEnd('y') |> Int32.TryParse |> fst ->
+            Some (x.TrimEnd('y'), DuINT8)
+        | _ when x.EndsWith("s") && x.TrimEnd('s') |> Int32.TryParse |> fst ->
+            Some (x.TrimEnd('s'), DuINT16)
+        | _ when System.Int32.TryParse (x, &value) ->
+            Some (x, DuINT32)
+        | _ -> None
         
     let getTrimmedValueNType(x)  = 
         let trimmedTextValueNDataType = getTextValueNType x
@@ -217,10 +247,10 @@ module DsDataType =
 
     let getBlockType(blockSlottype:string) =
         match blockSlottype.ToLower() with
-        | "byte"  -> DuUINT8
-        | "word"  -> DuUINT16
-        | "dword" -> DuUINT32
-        | "lword" -> DuUINT64
+        | PLCUINT8  -> DuUINT8
+        | PLCUINT16 -> DuUINT16
+        | PLCUINT32 -> DuUINT32
+        | PLCUINT64 -> DuUINT64
         | _ -> failwithf $"'size bit {blockSlottype}' not support getBlockType"
 
 

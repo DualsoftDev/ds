@@ -542,14 +542,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             }
             |> ignore
 
-        let createDeviceVariable (system: DsSystem) (devParam:DevParam) =
+        let createDeviceVariable (system: DsSystem) (devParam:DevParam) (jobName:string) =
             match devParam.DevName with
             | Some name ->
                 let address = devParam.DevAddress
                 let dataType = devParam.DevType
                 let variable = createVariableByType name dataType
 
-                system.AddActionVariables (ActionVariable(name, address, dataType)) |> ignore
+                system.AddActionVariables (ActionVariable(name, address, jobName, dataType)) |> ignore
                 options.Storages.Add(name, variable) |> ignore
 
             | None -> ()
@@ -570,9 +570,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     |None ->
                                         TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
 
-                          createDeviceVariable system inParam 
-                          createDeviceVariable system outParm 
-
+                   
                           match apiPath with
                           | device :: [ api ] ->
                               let apiItem =
@@ -589,7 +587,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                                
                                       debugfn $"TX={inParam} RX={outParm}"
-                                      return TaskDev(apiPoint, inParam, outParm, device)
+                                      return TaskDev(apiPoint, job, inParam, outParm, device)
 
                                   }
 
@@ -603,6 +601,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                           | _ -> 
                                     let errText = String.Join(", ", apiPath.ToArray())
                                     failwithlog $"loading type error ({errText})device"
+
+
+                          createDeviceVariable system inParam $"{job}_I"
+                          createDeviceVariable system outParm $"{job}_O"
+
                           ]
 
 

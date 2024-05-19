@@ -21,4 +21,4 @@ module ActionVariableManagerModule =
             member _.Storages = stg
 
         member _.ActionVariableTag  = actionVariTag        
-        member _.ActionSourceTag    = stg.First(fun f->f.Value.Address = v.Address).Value            
+        member _.ActionSourceTag    = stg[v.TargetName]

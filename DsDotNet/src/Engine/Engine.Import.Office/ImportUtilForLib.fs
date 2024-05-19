@@ -132,11 +132,11 @@ module ImportUtilForLib =
 
 
                 let apiPureName = GetBracketsRemoveName(apiName).Trim()
-
+                let jobName = loadedName + "_" + apiName
                 let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
                     let devOrg= addOrGetExistSystem loadedSys newloadedName
                     let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-                    TaskDev(api, ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
+                    TaskDev(api,jobName, ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
 
                 let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget
                 if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
@@ -153,7 +153,7 @@ module ImportUtilForLib =
                         tasks.Add(getLoadedTasks devOrg mutiName)|>ignore
                 | _->
                     tasks.Add(getLoadedTasks devOrg loadedName)|>ignore
-                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList)
+                Job(jobName, mySys, tasks |> Seq.toList)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)

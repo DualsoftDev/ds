@@ -229,8 +229,13 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
-        | CALLOPFunc -> ()
-        | CALLCMDFunc 
+        | CALLOPFunc | CALLCMDFunc -> 
+            let nameNFunc = GetBracketsRemoveName(shape.InnerText) 
+            let namePure = GetLastParenthesesReplaceName(nameNFunc, "")
+            if not(namePure.Contains(".")) &&  namePure <> nameNFunc  // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
+            then
+                shape.ErrorName(ErrID._70, iPage)
+                
         | IF_DEVICE
         | IF_LINK
         | DUMMY
@@ -264,8 +269,8 @@ module PPTObjectModule =
 
         let mutable name = ""
         let mutable ifName = ""
-        let mutable opDevParam = "" |> defaultDevParam
-        let mutable cmdDevParam = "" |> defaultDevParam
+        let mutable opDevParam:DevParam option = None
+        let mutable cmdDevParam:(DevParam*DevParam) option = None
         let mutable ifTXs = HashSet<string>()
         let mutable ifRXs = HashSet<string>()
         let mutable nodeType: NodeType = NodeType.REAL
@@ -342,7 +347,8 @@ module PPTObjectModule =
                 | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
 
         let getNodeType() =
-            let name = GetBracketsRemoveName(shape.InnerText)
+            let nameNfunc = GetBracketsRemoveName(shape.InnerText)
+            let name = GetLastParenthesesReplaceName (nameNfunc, "")
             if (shape.CheckFlowChartPreparation()) then
                 CALLOPFunc
             elif (shape.CheckRectangle()) then
@@ -359,7 +365,7 @@ module PPTObjectModule =
             elif (shape.CheckFoldedCornerRound()) then
                 COPY_DEV
             elif (shape.CheckEllipse()) then
-                if name.Contains(".")
+                if name.Contains(".") && nameNfunc = name
                 then CALL
                 else CALLCMDFunc
             elif (shape.CheckBevelShapePlate()) then
@@ -373,26 +379,63 @@ module PPTObjectModule =
             else
                 shape.ErrorName(ErrID._1, iPage)
 
-        let getOpCmdParam name = 
-               let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-               $"{'-'}:{func}"|> getDevParam
+        let getOperatorParam (name:string) = 
+            try
+                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
+                if func.Contains(",")
+                then 
+                    failwithf $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력) 규격 입니다"
+
+                $"{'-'}:{func}"|> getDevParam
+            with _->
+                shape.ErrorName(ErrID._70, iPage)
+
+
+        let getCommadParam (name:string) = 
+            try
+                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
+            
+                let inFunc, outFunc =
+           
+                    if func.Contains(",")
+                    then 
+                        func.Split(",").Head() |> trimSpaceNewLine
+                        , func.Split(",").Last() |> trimSpaceNewLine
+                    else 
+                        TextSkip, func 
+
+                let getParam x = 
+                    if x = TextSkip
+                    then 
+                        $"{'-'}" |> getDevParam
+                    else 
+                        $"{'-'}:{x}"|> getDevParam
+
+                getParam inFunc, getParam outFunc
+
+
+            with _->
+                let msg = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300) "
+                shape.ErrorName(msg, iPage)
 
         do
 
             nodeType <- getNodeType() 
+            let nameNFunc =  shape.InnerText.Replace("”", "\"").Replace("“", "\"")  |> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+            let namePure =  GetLastParenthesesReplaceName(nameNFunc, "") |> trimSpaceNewLine
+            let nameTrim  =  String.Join('.', namePure.Split('.').Select(trimSpace)) |> trimSpaceNewLine
+            
+            name <- nameTrim
+
             match nodeType with
-            | CALL -> 
-                let callName =  GetHeadBracketRemoveName(shape.InnerText)
-                name <- String.Join('.', callName.Split('.').Select(trimSpace)) |> trimSpaceNewLine
             | CALLOPFunc ->
-                name <- GetLastParenthesesReplaceName(shape.InnerText, "") |> trimSpaceNewLine
-                opDevParam <-  getOpCmdParam shape.InnerText
+                if nameTrim.Contains(".") then
+                    opDevParam <-  Some (getOperatorParam nameNFunc)
 
             | CALLCMDFunc ->
-                name <- GetLastParenthesesReplaceName(shape.InnerText, "") |> trimSpaceNewLine
-                cmdDevParam <-  getOpCmdParam shape.InnerText
-            | _ -> 
-                name <- GetBracketsRemoveName(shape.InnerText) |> trimSpaceNewLine
+                if namePure.Contains(".") then
+                    cmdDevParam <-  Some(getCommadParam nameNFunc)
+            | _ -> ()
 
             nameCheck (shape, nodeType, iPage)
 
@@ -456,27 +499,30 @@ module PPTObjectModule =
         member x.JobName = pageTitle+"_"+name.Replace(".", "_")
         member x.OperatorName = x.JobName(*+"_OP"*)
         member x.CommandName  = x.JobName(*+"_CMD"*)
+        member x.IsDevOperator  = not(opDevParam.IsNone) && nodeType = CALLOPFunc 
+        member x.IsDevCommand  = not(cmdDevParam.IsNone) && nodeType = CALLCMDFunc 
+        member x.IsPureOperator  = opDevParam.IsNone
+        member x.IsPureCommand  = cmdDevParam.IsNone
         member x.OpDevParam  = opDevParam
         member x.CmdDevParam  = cmdDevParam
+        member x.IsAliasFunction = x.Alias.IsSome && (x.IsDevOperator || x.IsDevCommand)
         
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 
         member x.CallApiName =
-            if nodeType = CALLOPFunc  || nodeType = CALLCMDFunc then
+            if nodeType = CALLOPFunc  || (nodeType = CALLCMDFunc && x.IsPureCommand) then
                 failwithf $"not support {nodeType}({name}) type"
-            if name.Contains '$' then
-                failwithf $"not support '$' replace '.' {name}"
-            else
-                let apiName = name.Split('.')[1] |> trimSpace
 
-                match GetSquareBrackets(apiName, false) with
-                | Some apiType ->
-                    match apiType with
-                    | ""
-                    | "_"
-                    | "N" -> GetLastBracketRelaceName(apiName, "-")
-                    | _ -> apiName
-                | None -> apiName
+            let apiName = name.Split('.')[1] |> trimSpace
+
+            match GetSquareBrackets(apiName, false) with
+            | Some apiType ->
+                match apiType with
+                | ""
+                | "_"
+                | "N" -> GetLastBracketRelaceName(apiName, "-")
+                | _ -> apiName
+            | None -> apiName
 
         member val Id = shape.GetId()
         member val Key = Objkey(iPage, shape.GetId())

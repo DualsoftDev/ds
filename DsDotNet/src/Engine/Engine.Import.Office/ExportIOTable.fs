@@ -38,10 +38,8 @@ module ExportIOTable =
         dt.Columns[dt.Columns.Count-1].ColumnName <- "DataType \n(In:Out)"
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Output}", typeof<string>) |> ignore
-        dt.Columns.Add($"{IOColumn.FuncIn}", typeof<string>)  |> ignore
-        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncIn \n(값:유지ms)"
-        dt.Columns.Add($"{IOColumn.FuncOut}", typeof<string>)  |> ignore
-        dt.Columns[dt.Columns.Count-1].ColumnName <- "FuncOut \n(값:지속ms)"
+        dt.Columns.Add($"{IOColumn.InSymbol}", typeof<string>)  |> ignore
+        dt.Columns.Add($"{IOColumn.OutSymbol}", typeof<string>)  |> ignore
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
@@ -60,20 +58,22 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let funcIn =  toTextPPTFunc btn.InParam 
-                    let funcOut =  toTextPPTFunc btn.OutParam
-                    let i, o = getValidBtnAddress(btn) target 
+                    let inSym =  toTextPPTFunc btn.InParam 
+                    let outSym =  toTextPPTFunc btn.OutParam
+                    updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
+                    let dType = getPPTHwDevDataTypeText btn
                     
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, "bool",  i, o ,funcIn, funcOut)
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, dType,  btn.InAddress, btn.OutAddress ,inSym, outSym)
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let funcIn =  toTextPPTFunc lamp.InParam 
-                    let funcOut =  toTextPPTFunc lamp.OutParam
-                    let i, o = getValidLampAddress(lamp) target 
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, "bool",   i, o,funcIn, funcOut)
+                    let inSym =  toTextPPTFunc lamp.InParam 
+                    let outSym =  toTextPPTFunc lamp.OutParam
+                    updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) Util.runtimeTarget
+                    let dType = getPPTHwDevDataTypeText lamp
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,inSym, outSym)
                     |> ignore
 
 
@@ -105,8 +105,8 @@ module ExportIOTable =
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-            let funcIn  = toTextPPTFunc dev.InParam
-            let funcOut = toTextPPTFunc dev.OutParam
+            let inSym  =  dev.InParam.DevSymbolName
+            let outSym =  dev.OutParam.DevSymbolName
                
             let inSkip, outSkip =
                 match job.ActionType with
@@ -119,11 +119,11 @@ module ExportIOTable =
             [ TextXlsAddress
               flow
               name
-              "bool"
+              getPPTTDevDataTypeText dev
               getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target )
               getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target )
-              funcIn 
-              funcOut
+              inSym 
+              outSym
               ]
 
     let IOchunkBySize = 22
@@ -134,17 +134,19 @@ module ExportIOTable =
         let totalRows =
             seq {
 
-                let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
+                let devJobSet = 
+                    sys.Jobs |> Seq.collect(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
+                             |> Seq.sortBy (fun (dev,j) -> $"{dev.InParam.DevType.ToText()}{dev.OutParam.DevType.ToText()}{dev.ApiName}") 
 
-                for (dev, job) in devJobSet |> Seq.sortBy (fun (dev,j) ->dev.ApiName) do
-                    let coins = vs.GetVerticesOfJobCoins(job)
+                for (dev, job) in  devJobSet do
+                        let coins = vs.GetVerticesOfJobCoins(job)
                     
-                    //외부입력 전용 확인하여 출력 생성하지 않는다.
-                    if  dev.IsRootFlowDev(coins) 
-                    then
-                        dev.OutAddress <- (TextSkip)
+                        //외부입력 전용 확인하여 출력 생성하지 않는다.
+                        if  dev.IsRootFlowDev(coins) 
+                        then
+                            dev.OutAddress <- (TextSkip)
 
-                    yield rowIOItems (dev, job) target
+                        yield rowIOItems (dev, job) target
         }
 
         let dts = 
@@ -166,18 +168,16 @@ module ExportIOTable =
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
             
-                let funcIn =  toTextPPTFunc cond.InParam 
-                let funcOut =  toTextPPTFunc cond.OutParam
-                let i, o= getValidCondiAddress(cond) target
+                updateHwAddress (cond) (cond.InAddress, cond.OutAddress) Util.runtimeTarget
                 [
                     ExcelCase.XlsConditionReady.ToText()
                     ""
                     cond.Name
-                    "bool"
-                    i
-                    o
-                    funcIn 
-                    funcOut 
+                    getPPTHwDevDataTypeText cond
+                    cond.InAddress
+                    cond.OutAddress
+                    cond.InParam.DevSymbolName 
+                    cond.OutParam.DevSymbolName 
                 ]
             )
         
@@ -193,10 +193,12 @@ module ExportIOTable =
                                     [ TextXlsOperator
                                       flow
                                       name
+                                      TextSkip
                                       ""
-                                      ""
-                                      ""
-                                      func.ToDsText() ]
+                                      TextSkip
+                                      TextSkip
+                                      TextSkip
+                                      ]
                                       )   
 
         let commandRows =
@@ -207,26 +209,31 @@ module ExportIOTable =
                                     [ TextXlsCommand
                                       flow
                                       name
+                                      TextSkip
+                                      TextSkip
                                       ""
-                                      ""
-                                      ""
-                                      func.ToDsText() ]
+                                      TextSkip
+                                      TextSkip
+                                      ]
                                       )
 
         let variRows = sys.Variables.Map(fun vari->
-                [ TextXlsVariable
+                [ 
+                  TextXlsVariable
                   "ALL"
                   vari.Name
                   vari.Type.ToText()
-                  ""
-                  ""
-                  vari.InitValue]
+                  vari.InitValue
+                  TextSkip
+                  TextSkip
+                  TextSkip
+                  ]
                   )
 
 
         let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"-";"-";"";"-"]]
         let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"-";"";"-"]]
-        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"-";"";"";"-";"-";"";"-"]]
+        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"ALL";"";"";"";"-";"-";"-"]]
         let dts = 
             getConditionDefListRows (sys.ReadyConditions)  
             @ commandRows 

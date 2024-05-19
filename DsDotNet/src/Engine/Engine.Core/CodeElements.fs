@@ -26,10 +26,11 @@ module rec CodeElements =
         member val InitValue = getNull<string>() with get, set
          
     //action 주소를 가지는 변수
-    type ActionVariable(name:string, address:string, varType:DataType)  =
+    type ActionVariable(name:string, address:string, targetName:string, varType:DataType)  =
         inherit FqdnObject(name, createFqdnObject([||]))
         member x.Name = name
         member x.Address = address
+        member x.TargetName = targetName
         member x.Type = varType
 
     type OperatorFunctionTypes =
@@ -80,3 +81,72 @@ module rec CodeElements =
         member val CommandCode = "" with get, set
 
         member x.ToDsText() = if x.CommandCode = "" then TextSkip else x.CommandCode
+    
+    type DevAddress = string
+    type DevParam = {
+        DevAddress: DevAddress
+        DevName : string option  //In or Out Tag 이름
+        DevValueNType: (obj*DataType) option
+        DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
+    } with
+        member x.DevValue = match x.DevValueNType with 
+                                |Some (v, _)->  v
+                                |None -> null
+        member x.DevType = match x.DevValueNType with 
+                                |Some (_, t)-> t
+                                |None -> DuBOOL     //기본 타입 bool   
+        member x.DevSymbolName = match x.DevName with 
+                                 |Some (n)-> n
+                                 |None -> "" 
+        member x.ToPostText() = 
+             match x.DevValueNType, x.DevTime with 
+                |Some (v, _), None->   $"{v}"
+                |Some (v, _), Some(t)->   $"{v}_{t}"
+                |None, Some(t)->   $"{t}"
+                |None, None->   $"_"
+                              
+        
+
+    let defaultDevParam (address) = 
+        {   
+            DevAddress = address
+            DevName = None
+            DevValueNType = None
+            DevTime = None
+        }
+
+    let changeDevParam (x:DevParam) (address:string) (symbol:string option) = 
+        { 
+          DevAddress = address
+          DevName =  symbol
+          DevValueNType = x.DevValueNType 
+          DevTime = x.DevTime
+    }
+    
+    let createDevParam (address:string) (name:string option) (vNt:(obj*DataType) option) (t:int option) = 
+        { 
+          DevAddress = address
+          DevName = name
+          DevValueNType =vNt
+          DevTime =t
+    }
+
+    let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
+
+    let toTextDevParam (x:DevParam) = 
+        match x.DevAddress, x.DevName , x.DevValueNType, x.DevTime  with 
+        | address, Some(n) , Some(v,ty), Some(t) -> $"{addressPrint address}:{n}:{ty.ToStringValue(v)}:{t}ms"
+        | address, Some(n) , Some(v,ty), None    -> $"{addressPrint address}:{n}:{ty.ToStringValue(v)}"
+        | address, Some(n) , None, None          -> $"{addressPrint address}:{n}"
+        | address, Some(n) , None,Some(t)        -> $"{addressPrint address}:{n}:{t}ms"
+        | address, None, Some(v,ty), None        -> $"{addressPrint address}:{ty.ToStringValue(v)}"
+        | address, None, Some(v,ty), Some(t)     -> $"{addressPrint address}:{ty.ToStringValue(v)}:{t}ms"
+        | address, None, None, Some(t)           -> $"{addressPrint address}:{t}ms"
+        | address, None, None, None              -> $"{addressPrint address}"
+
+
+
+    let toTextInOutDev (inp:DevParam) (outp:DevParam) = 
+        let inText = toTextDevParam inp
+        let outText = toTextDevParam outp
+        $"{inText}, {outText}"

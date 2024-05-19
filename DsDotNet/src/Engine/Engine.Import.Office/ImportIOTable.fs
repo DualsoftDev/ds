@@ -114,52 +114,55 @@ module ImportIOTable =
                 if addrIn  <> TextSkip then checkHardwareDataType (checkInType, valueIn)    
                 if addrOut <> TextSkip then checkHardwareDataType (checkOutType, valueOut)    
                 
+            let getSymbol x = if x <> "" then Some x else None
+
             let extractHardwareData (row: Data.DataRow) =
                 let name = $"{row.[(int) IOColumn.Name]}".Trim()
                 let inOutDataType = $"{row.[(int) IOColumn.DataType]}".Trim()
-                let funcIn = $"{row.[(int) IOColumn.FuncIn]}".Trim()
-                let funcOut = $"{row.[(int) IOColumn.FuncOut]}".Trim()
+                let inSymbol = $"{row.[(int) IOColumn.InSymbol]}".Trim()
+                let outSymbol = $"{row.[(int) IOColumn.OutSymbol]}".Trim()
                 let inAddress = $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAddress = $"{row.[(int) IOColumn.Output]}".Trim()
-                (name, inOutDataType, funcIn, funcOut, inAddress, outAddress)
+                (name, inOutDataType, getSymbol inSymbol, getSymbol outSymbol, inAddress, outAddress)
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
-                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
-
+    
                 let dev = dicDev.[devName]
                 let inAdd =    inAddress|>emptyToSkipAddress
                 let outAdd =   outAddress|>emptyToSkipAddress
-                let checkInType, checkOutType = getInOutDataType dataType
 
                 dev.InAddress <- (  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget))
                 dev.OutAddress <- (  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget))
-
-                let inParams, outParms = getPPTDevParamInOut (inAdd, checkInType, funcIn) (outAdd, checkOutType, funcOut)
-                checkHardwareDataType name dataType (inAdd,inParams.DevValue) (outAdd,outParms.DevValue) 
-
-                dev.InParam  <- inParams
-                dev.OutParam <- outParms
-                    
+                let checkInType, checkOutType = getInOutDataType dataType
+                updatePPTDevParam dev (inSym,checkInType) (outSym, checkOutType)
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = $"{row.[(int) IOColumn.Name]}"
-                let dataType = ($"{row.[(int) IOColumn.DataType]}").Trim() |> textToDataType
-                let value  = ($"{row.[(int) IOColumn.FuncIn]}").Trim()
-                let constVari = value <> ""
-                let variableData = VariableData(name, dataType, if constVari then Immutable else Mutable )
 
-                if constVari
-                then 
-                    variableData.InitValue <- value
+                if name <> ""
+                then
+                    let dataType = ($"{row.[(int) IOColumn.DataType]}").Trim() 
+                    if dataType = TextSkip || dataType = ""
+                    then
+                        failwithlog $"내부변수 {name} datatype 입력이 필요합니다."
 
-                sys.AddVariables(variableData)
+                    let value  = ($"{row.[(int) IOColumn.InSymbol]}").Trim()
+                    let constVari = value <> ""
+                    let variableData = VariableData(name, dataType|> textToDataType, if constVari then Immutable else Mutable )
+
+                    if constVari
+                    then 
+                        variableData.InitValue <- value
+
+                    sys.AddVariables(variableData)
 
             let updateCommand (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = getDevName row
-                let func = $"{row.[(int) IOColumn.FuncIn]}"
+                let func = $"{row.[(int) IOColumn.Output]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
                         
@@ -167,7 +170,7 @@ module ImportIOTable =
 
             let updateOperator (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let name = getDevName row
-                let func = $"{row.[(int) IOColumn.FuncIn]}"
+                let func = $"{row.[(int) IOColumn.Input]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
                         
@@ -175,55 +178,42 @@ module ImportIOTable =
 
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
-                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
 
 
                 match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some btn ->
-                    btn.InAddress  <- inAddress
-                    btn.OutAddress <- outAddress
-                    //ValidBtnAddress
-                    let inaddr, outaddr =  getValidBtnAddress (btn)  Util.runtimeTarget
+                    updateHwAddress (btn) (inAddress, outAddress) Util.runtimeTarget
                     let checkInType, checkOutType = getInOutDataType dataType
-                    let inParams, outParms = getPPTDevParamInOut (inaddr, checkInType, funcIn) (outaddr, checkOutType, funcOut)
-                    checkHardwareDataType name dataType (inaddr,inParams.DevValue) (outaddr,outParms.DevValue) 
-                    btn.InParam <- inParams
-                    btn.OutParam <- outParms
-
+                    updatePPTHwParam btn (inSym,checkInType) (outSym, checkOutType)
+             
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
 
 
             let updateLamp (row: Data.DataRow, lampType: LampType, tableIO: Data.DataTable, page) =
-                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 let lamps = sys.HWLamps.Where(fun w -> w.LampType = lampType)
 
                 match lamps.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some lamp ->
-                    lamp.InAddress  <- inAddress
-                    lamp.OutAddress <- outAddress
-                    let inaddr, outaddr =  getValidLampAddress (lamp)   Util.runtimeTarget
+                    updateHwAddress (lamp) (inAddress, outAddress) Util.runtimeTarget
                     let checkInType, checkOutType = getInOutDataType dataType
-                    let inParams, outParms = getPPTDevParamInOut (inaddr, checkInType, funcIn) (outaddr, checkOutType, funcOut)
-                    checkHardwareDataType name dataType (inaddr,inParams.DevValue) (outaddr,outParms.DevValue) 
-                    lamp.InParam<- inParams
-                    lamp.OutParam <- outParms
+                    updatePPTHwParam lamp (inSym,checkInType) (outSym, checkOutType)
+             
 
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
-                let name, dataType, funcIn, funcOut, inAddress, outAddress = extractHardwareData row
+                let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 let conds = sys.HWConditions.Where(fun w -> w.ConditionType = cType)
 
                 match conds.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some cond ->
-                    cond.InAddress  <- inAddress
-                    cond.OutAddress  <-outAddress
-                    let inaddr, outaddr =  getValidCondiAddress cond Util.runtimeTarget
+                    updateHwAddress (cond) (inAddress, outAddress) Util.runtimeTarget
                     let checkInType, checkOutType = getInOutDataType dataType
-                    let inParams, outParms = getPPTDevParamInOut (inaddr, checkInType, funcIn) (outaddr, checkOutType, funcOut)
-                    checkHardwareDataType name dataType (inaddr,inParams.DevValue) (outaddr,outParms.DevValue) 
-                    cond.InParam <- inParams
-                    cond.OutParam <- outParms
+                    updatePPTHwParam cond (inSym,checkInType) (outSym, checkOutType)
+             
+
                    
                 | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 

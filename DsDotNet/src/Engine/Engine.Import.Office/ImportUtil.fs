@@ -75,73 +75,79 @@ module ImportU =
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc
 
+
+        let getCallFunc loadedName= 
+            let apiName = "ON"
+            let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiName
+
+            let call = addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, None)
+            if call.TargetJob.DeviceDefs.Count() > 1 then
+                failwithlog $"error {node.Name} ({node.NodeType}) 는 하나의 디바이스만 Job으로 구성 가능합니다."
+            call
+
+
         let call =
+
             match node.NodeType with
-            | CALLOPFunc | CALLCMDFunc ->
+            | CALLOPFunc  ->
+                if parentWrapper.GetCore() :? Real 
+                    then failWithLog  $"Operator 정의는 work 외부에만 존재 가능합니다. error {node.Name}."    
 
-          
-                let loadedName  = node.CallName
-                let apiName = "ON"
-                let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiName
-
-                let call = addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, None)
-                if call.TargetJob.DeviceDefs.Count() > 1 then
-                    failwithlog $"error {node.Name} ({node.NodeType}) 는 하나의 디바이스만 Job으로 구성 가능합니다."
-
-
-                if CALLCMDFunc =  node.NodeType
-                then
-                    if parentWrapper.GetCore() :? Flow 
-                        then failWithLog  $"Command 정의는 work 내부에만 존재 가능합니다. error {node.Name}."  
+                if node.IsPureOperator 
+                then 
+                    Call.Create(getOperatorFunc(), parentWrapper)
+                else 
+                    let call = getCallFunc node.CallName
+                    call.TargetJob.DeviceDefs.Head().InParam <- node.OpDevParam.Value
+                    call
                     
-                    call.TargetJob.DeviceDefs.Head().OutParam <- node.CmdDevParam
 
-                elif CALLOPFunc =  node.NodeType
-                then
-                    if parentWrapper.GetCore() :? Real 
-                        then failWithLog  $"Operator 정의는 work 외부에만 존재 가능합니다. error {node.Name}."    
+            
 
-                    call.TargetJob.DeviceDefs.Head().InParam <- node.OpDevParam
-
-                call
-
-
-            | CALL  ->  
+            | CALL  |  CALLCMDFunc  ->  
                 if parentWrapper.GetCore() :? Flow 
                 then failWithLog  $"Action 정의는 work 내부에만 존재 가능합니다. error {node.Name}."    
-                   
-                let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-                if jobCallNames.Contains sysName
+                if node.NodeType = CALLCMDFunc && node.IsPureCommand 
                 then 
-                    let jobName = sysName + "_" + apiName
+                    Call.Create(getCommandFunc(), parentWrapper)
+                else 
+                    let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+                    let call = 
+                        if jobCallNames.Contains sysName
+                        then 
+                            let jobName = sysName + "_" + apiName
             
-                    match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
-                    | Some job ->
-                        if job.DeviceDefs.any () then
-                            Call.Create(job, parentWrapper)
+                            match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
+                            | Some job ->
+                                if job.DeviceDefs.any () then
+                                    Call.Create(job, parentWrapper)
+                                else
+                                    node.Shape.ErrorName(ErrID._52, node.PageNum)
+                            | None ->
+                                    node.Shape.ErrorName(ErrID._48, node.PageNum)
+
                         else
-                            node.Shape.ErrorName(ErrID._52, node.PageNum)
-                    | None ->
-                            node.Shape.ErrorName(ErrID._48, node.PageNum)
+                            let apiName = node.CallApiName
+                            let loadedName = node.CallName
 
-                else
-                    let apiName = node.CallApiName
-                    let loadedName = node.CallName
+                            let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
+                            let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
 
-                    //addLoadedLibSystemNCall (loadedName, apiName, mySys, parentFlow, parentReal, node)
+                            let autoGenDevTask    =
+                                if autoGenSys.IsSome
+                                    then
+                                        createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName (TextAddrEmpty |> defaultDevParam, TextAddrEmpty  |> defaultDevParam)|> Some
+                                    else 
+                                        None
 
-                    let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
-                    let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
+                            //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
+                            addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask)
 
-                    let autoGenDevTask    =
-                        if autoGenSys.IsSome
-                            then
-                                createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName (TextAddrEmpty |> defaultDevParam, TextAddrEmpty  |> defaultDevParam)|> Some
-                            else 
-                                None
-
-                    //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask)
+                    if node.NodeType = CALLCMDFunc
+                    then
+                        call.TargetJob.DeviceDefs.Head().InParam <- node.CmdDevParam.Value |> fst
+                        call.TargetJob.DeviceDefs.Head().OutParam <- node.CmdDevParam.Value |> snd
+                    call
 
             | _  -> failwithlog "error"
 
@@ -201,17 +207,18 @@ module ImportU =
                     let refSystem = mySys.TryFindLoadedSystem(JobTargetSystem).Value.ReferenceSystem
 
                     refSystem.ApiItems.ForEach(fun api ->
+                        let jobName =jobBase + "_" + api.Name
                         let devs =
                             jobSet.Value
                                 .Select(fun tgt -> getApiItems (mySys, tgt, api.Name), tgt)
                                 .Select(fun (api, tgt) ->
                                     match node.NodeType with
                                     | OPEN_EXSYS_CALL
-                                    | COPY_DEV -> TaskDev(api, ""|>defaultDevParam, ""|>defaultDevParam, tgt) 
+                                    | COPY_DEV -> TaskDev(api, jobName,  ""|>defaultDevParam, ""|>defaultDevParam, tgt) 
                                     | _ -> failwithlog "Error MakeJobs")
 
 
-                        let job = Job(jobBase + "_" + api.Name, mySys, devs |> Seq.toList)
+                        let job = Job(jobName, mySys, devs |> Seq.toList)
 
                         if dicJobName.ContainsKey(job.Name) then
                             Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
@@ -406,7 +413,7 @@ module ImportU =
                     )
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType = CALLOPFunc)
+            |> Seq.filter (fun node -> node.IsDevOperator || node.IsDevCommand)
             |> Seq.iter (fun node ->
                     let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
                     addChannelPoints dev node
@@ -459,6 +466,7 @@ module ImportU =
             let createCall () =
                 calls
                 |> Seq.iter (fun node ->
+
                         if dicChildParent.ContainsKey(node) then
                             createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex, jobCallNames)
                         else
@@ -468,9 +476,10 @@ module ImportU =
             let createAlias () =
                 pptNodes
                 |> Seq.filter (fun node -> node.IsAlias)
+                |> Seq.filter (fun node -> not(node.IsAliasFunction))
                 |> Seq.iter (fun node ->
                     let segOrg = dicVertex.[node.Alias.Value.Key]
-
+                    
                     let alias =
                         if dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
@@ -507,12 +516,55 @@ module ImportU =
 
                     dicVertex.Add(node.Key, alias))
 
+
+            let createAliasFunction() =
+                pptNodes
+                |> Seq.filter (fun node -> node.IsAliasFunction)
+                |> Seq.iter (fun node ->
+                    let segOrg = dicVertex.[node.Alias.Value.Key] :?> Call
+                    
+                    let call = 
+                        let parentWrapper = 
+                            if dicChildParent.ContainsKey(node)
+                            then
+                                let real = dicVertex.[dicChildParent.[node].Key] :?> Real
+                                DuParentReal(real)
+                            else
+                                let flow = dicFlow.[node.PageNum]
+                                DuParentFlow(flow)
+                          
+                      
+                        if node.IsDevCommand 
+                        then
+                            let newJobName = $"{segOrg.Name}_IN{(node.CmdDevParam.Value|>fst).ToPostText()}OUT{(node.CmdDevParam.Value|>snd).ToPostText()}"
+                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs) //CmdDevParam 할당 test ahn
+                            mySys.Jobs.Add newJob
+                            Call.Create(newJob, parentWrapper)
+
+
+                        elif node.IsDevOperator 
+                        then 
+                            let newJobName = $"{segOrg.Name}_IN{(node.OpDevParam.Value).ToPostText()}"
+                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs) //CmdDevParam 할당 test ahn
+                            mySys.Jobs.Add newJob
+                            Call.Create(newJob, parentWrapper)
+
+                        else 
+                            failWithLog "err"
+
+                    dicVertex.Add(node.Key, call)
+                    )
+
+
             //Real 부터
             createReal ()
             //Call 처리
             createCall ()
             //Alias Node 처리 마감
-            createAlias ()
+            createAlias ()  
+            
+            //createFunction Node 처리 마감
+            createAliasFunction ()
 
             mySys.ReferenceSystems
                  .Iter(genClearRealAddForSingleReal)

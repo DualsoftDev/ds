@@ -180,31 +180,38 @@ module DsAddressModule =
         let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, IOType.Memory, target)
         inAddr, outAddr
 
-    let getValidCondiAddress (cond: ConditionDef)  target   = getValidHwItem cond  false true target
-    let getValidBtnAddress (btn: ButtonDef)  target         = getValidHwItem btn  false false target
-    let getValidLampAddress (lamp: LampDef)  target         = getValidHwItem lamp true false  target
+    let updateHwAddress (hwItem: HwSystemDef) (inAddr, outAddr) target   =
+        hwItem.InAddress <- inAddr
+        hwItem.OutAddress <- outAddr
+
+        let inA, outA = 
+            match hwItem with
+            | :? ConditionDef as c -> getValidHwItem c  false true target
+            | :? ButtonDef as b -> getValidHwItem b  false false target
+            | :? LampDef as l -> getValidHwItem l  true false target
+            | _ -> failWithLog $"Error {hwItem.Name} not support"
+            
+        hwItem.InAddress <- inA
+        hwItem.OutAddress <- outA
 
     let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) target =
         
         setMemoryIndex(startMemory);
 
         for b in sys.HWButtons do
-            b.OutAddress <- TextSkip
-            if b.InAddress = "" then
-                b.InAddress <- TextAddrEmpty
-            b.InAddress <- getValidBtnAddress b target |> fst
+            let inA = if b.InAddress = "" then TextAddrEmpty else b.InAddress 
+            let outA = TextSkip
+            updateHwAddress b (inA, outA)  target
 
         for l in sys.HWLamps do
-            l.InAddress <- TextSkip
-            if l.OutAddress = "" then
-                l.OutAddress <- TextAddrEmpty
-            l.OutAddress <- getValidLampAddress l target |> snd
+            let inA = TextSkip
+            let outA = if l.OutAddress = "" then TextAddrEmpty else l.OutAddress 
+            updateHwAddress l (inA, outA)  target
 
         for c in sys.HWConditions do
-            c.OutAddress <- TextSkip
-            if c.InAddress = "" then
-                c.InAddress <- TextAddrEmpty
-            c.InAddress <- getValidCondiAddress c  target |> fst
+            let inA = if c.InAddress = "" then TextAddrEmpty else c.InAddress 
+            let outA = TextSkip
+            updateHwAddress c (inA, outA)  target
             
         let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
                             |> Seq.sortBy (fun (dev,_) ->dev.ApiName)

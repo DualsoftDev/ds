@@ -14,10 +14,10 @@ type VertexMCall with
     member v.C1_DoOperator() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
-        if call.TargetFunc.Statements.Count > 1
-        then failwithlog $"Operator({call.Name})에는 하나의 수식만 정의 가능합니다."
-        let s = call.TargetFunc.Statements.Head()
-        match s with
+        let sts = call.TargetFunc.Statements
+        if sts.Count <> 1
+        then failwithlog $"Operator({call.Name})에는 하나의 수식이 필요합니다. \r\n테이블 정의 수식 Count:({sts.Count})"
+        match sts.Head() with
         | DuAssign (_, cmdExpr, _) ->
             let code = cmdExpr.ToText()
             let expr = parseExpression v.Storages code 

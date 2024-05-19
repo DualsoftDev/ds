@@ -11,7 +11,76 @@ open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module CoreExtensionModule =
+    
+    
+    let parseTime (item: string) =
+        let timePattern = @"^(?i:(\d+(\.\d+)?)(ms|msec|sec))$"
+        let m = Regex.Match(item, timePattern)
+        if m.Success then
+            let valueStr = m.Groups.[1].Value
+            let unit = m.Groups.[3].Value.ToLower()
+            match unit with
+            | "ms" | "msec" -> 
+                if valueStr.Contains(".") then 
+                    failwithlog $" ms and msec do not support #.# {valueStr}"
+                else 
+                    Some(Convert.ToInt32(valueStr))
+            | "sec" -> 
+                Some(Convert.ToInt32(float valueStr * 1000.0)) // Convert seconds to milliseconds
+            | _ -> None
+        else None
 
+
+    let parseValueNType (item: string) =
+        let trimmedTextValueNDataType = getTextValueNType item
+        match trimmedTextValueNDataType with
+        | Some (v,ty) -> Some( ty.ToValue(v), ty)
+        | None -> None
+
+    let isName (item: string) =
+        // Simple check to see if the item is a valid .NET variable name
+        Regex.IsMatch(item, @"^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+    let getDevParam (txt: string) =
+        let parts = txt.Split(':') |> Seq.toList
+        let addr = parts.Head
+        let remainingParts = parts.Tail
+    
+        let mutable nameOpt = None
+        let mutable valueOpt = None
+        let mutable timeOpt = None
+
+        for part in remainingParts do
+            match parseTime part, parseValueNType part, isName part with
+            | Some time, _, _ -> 
+                if timeOpt.IsSome then failwithlog $"Duplicate Time part detected: {part}"
+                timeOpt <- Some time
+            | _, Some valueNType, _ ->
+                if valueOpt.IsSome then failwithlog $"Duplicate Value part detected: {part}"
+                valueOpt <- Some valueNType
+            | _, _, true ->
+                if nameOpt.IsSome then failwithlog $"Duplicate Name part detected: {part}"
+                nameOpt <- Some part
+            | _ -> failwithlog $"Unknown format detected: {part}"
+
+        createDevParam addr nameOpt valueOpt timeOpt
+
+
+    let getDevParamInOut (paramInOutText:string) = 
+        match paramInOutText.Split(',') |> Seq.toList with
+        | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
+        | _-> failwithlog $"{paramInOutText} getDevParamInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
+    
+
+    let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
+                if system <> targetFlow.System
+                then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
+
+    let getButtons (sys:DsSystem, btnType:BtnType) = sys.HwSystemDefs.OfType<ButtonDef>().Where(fun f->f.ButtonType = btnType)
+    let getLamps (sys:DsSystem, lampType:LampType) = sys.HwSystemDefs.OfType<LampDef>().Where(fun f->f.LampType = lampType)
+    let getConditions (sys:DsSystem, cType:ConditionType) = sys.HwSystemDefs.OfType<ConditionDef>().Where(fun f->f.ConditionType = cType)
+
+    
     let getRecursiveLoadeds (system:DsSystem) = 
         let loadeds = Dictionary<LoadedSystem, DsSystem>()  
         
@@ -63,64 +132,6 @@ module CoreExtensionModule =
             | :? Call as call -> call :> Vertex 
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
-    
-    let parseTime (item: string) =
-        let timePattern = @"(\d+)ms"
-        let m = Regex.Match(item, timePattern)
-        if m.Success then Some(Convert.ToInt32(m.Groups.[1].Value)) else None
-
-    let parseValueNType (item: string) =
-        let trimmedTextValueNDataType = getTextValueNType item
-        match trimmedTextValueNDataType with
-        | Some (v,ty) -> Some( ty.ToValue(v), ty)
-        | None -> None
-
-
-    // Main function
-    let getDevParam (txt: string) =
-        let parts = txt.Split(':') |> Seq.toList
-        match parts with
-        | [addr] -> 
-            createDevParam addr None None None
-    
-        | addr::[item] ->
-            match parseTime(item) with
-            | Some time -> 
-                createDevParam addr None None (Some time)
-            | None ->
-                match parseValueNType(item) with
-                | Some(v, ty) -> createDevParam addr None (Some(v, ty)) None
-                | None -> createDevParam addr (Some item) None None
-    
-        | addr::[item1; item2] ->
-            match parseTime(item2) with
-            | Some time ->
-                match parseValueNType(item1) with
-                | Some(v, ty) -> createDevParam addr None (Some(v, ty)) (Some time)
-                | None -> createDevParam addr (Some item1) None (Some time)
-            | None ->
-                createDevParam addr (Some item1) (Some(toValue item2 |> unbox, toValueType item2)) None
-    
-        | addr::[item1; item2; item3] ->
-            createDevParam addr (Some item1) (Some(toValue item2 |> unbox, toValueType item2)) (parseTime(item3))
-    
-        | _-> failwithlog $"{txt} getDevParam format error ex) Name:Value:Time"
-
-    let getDevParamInOut (paramInOutText:string) = 
-        match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
-        | _-> failwithlog $"{paramInOutText} getDevParamInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
-    
-
-    let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
-                if system <> targetFlow.System
-                then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
-
-    let getButtons (sys:DsSystem, btnType:BtnType) = sys.HwSystemDefs.OfType<ButtonDef>().Where(fun f->f.ButtonType = btnType)
-    let getLamps (sys:DsSystem, lampType:LampType) = sys.HwSystemDefs.OfType<LampDef>().Where(fun f->f.LampType = lampType)
-    let getConditions (sys:DsSystem, cType:ConditionType) = sys.HwSystemDefs.OfType<ConditionDef>().Where(fun f->f.ConditionType = cType)
-
-
     type DsSystem with
 
                     

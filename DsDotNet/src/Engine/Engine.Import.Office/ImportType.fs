@@ -19,8 +19,8 @@ module ImportType =
         | DataType = 3
         | Input = 4
         | Output = 5
-        | FuncIn = 6
-        | FuncOut = 7
+        | InSymbol = 6
+        | OutSymbol = 7
 
     [<Flags>]
     type ErrorColumn =
@@ -99,4 +99,33 @@ module ImportType =
         
         inP, outP
 
-   
+
+    let checkDataType name (devParam:DevParam) (dataType:DataType)= 
+        
+        if devParam.DevValueNType.IsSome && devParam.DevType <> dataType
+            then failWithLog $"error datatype : {name}\r\n [{devParam.DevType.ToText()}]  <> {dataType.ToText()}]"
+
+
+    let updatePPTDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
+        dev.InParam <- changeDevParam dev.InParam dev.InParam.DevAddress inSym
+        dev.OutParam <- changeDevParam dev.OutParam dev.OutParam.DevAddress outSym
+
+        checkDataType dev.Name dev.InParam inDataType   
+        checkDataType dev.Name dev.OutParam outDataType
+
+    let getPPTDataTypeText (inP:DevParam) (outP:DevParam) =
+        let inTypeText  = inP.DevType.ToPLCText() 
+        let outTypeText = outP.DevType.ToPLCText() 
+        if inTypeText = outTypeText 
+        then inTypeText
+        else $"{inTypeText}:{outTypeText}"
+
+    let getPPTTDevDataTypeText (dev:TaskDev) = getPPTDataTypeText dev.InParam dev.OutParam
+    let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InParam hwDev.OutParam
+
+    let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
+        hwDev.InParam <- changeDevParam hwDev.InParam hwDev.InParam.DevAddress inSym
+        hwDev.OutParam <- changeDevParam hwDev.OutParam hwDev.OutParam.DevAddress outSym
+
+        checkDataType hwDev.Name hwDev.InParam inDataType   
+        checkDataType hwDev.Name hwDev.OutParam outDataType

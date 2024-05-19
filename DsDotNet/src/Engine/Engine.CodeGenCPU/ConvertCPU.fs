@@ -178,7 +178,10 @@ module ConvertCPU =
             
     let private applyJob(s:DsSystem) =
         [
-            for j in s.Jobs do
+            let coins = s.GetVerticesOfCoins()  
+            let jobs = coins.OfType<Call>()
+                            .Select(fun c-> c.TargetJob).Distinct()
+            for j in jobs do
                 yield! j.J1_JobActionOuts()
         ]
         

@@ -24,12 +24,12 @@ type Job with
                         if RuntimeDS.Package.IsPackageEmulation()
                         then api.PE.Expr <&&> api.PS.Expr <&&> _off
                         else api.PE.Expr <&&> api.PS.Expr <&&> !!rstMemos.ToOrElseOff()
-
+                    let outParam = td.GetOutParam(j.Name)
                     if j.ActionType = JobActionType.Push 
                     then 
                         let rstPush = rstMemos.ToOr()
 
-                        if td.OutParam.DevType = DuBOOL
+                        if outParam.DevType = DuBOOL
                             then 
                                 failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
                         if td.ExistOutput
@@ -37,14 +37,14 @@ type Job with
                                 yield (sets, rstPush  ) ==| (td.OutTag:?> Tag<bool>, getFuncName())
 
                     else 
-                        if td.OutParam.DevType = DuBOOL
+                        if outParam.DevType = DuBOOL
                         then 
                             yield (sets, _off) --| (td.OutTag:?> Tag<bool>, getFuncName())
-                        elif td.OutParam.DevValue.IsNull() 
+                        elif outParam.DevValue.IsNull() 
                         then 
-                            failWithLog $"{td.Name} {td.OutParam.DevAddress} 은 value 값을 입력해야 합니다." 
+                            failWithLog $"{td.Name} {outParam.DevAddress} 은 value 값을 입력해야 합니다." 
                         else 
-                            yield (sets, td.OutParam.DevValue|>literal2expr) --> (td.OutTag, getFuncName())
+                            yield (sets, outParam.DevValue|>literal2expr) --> (td.OutTag, getFuncName())
         ]
    
 

@@ -147,14 +147,14 @@ module ConvertCpuDsSystem =
                 let coins = vs.GetVerticesOfJobCoins(job)
                 for dev in devs do
                 if  dev.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev, dev.InParam.DevType).Value
+                    let inT = createBridgeTag(x.Storages, dev.ApiName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev, dev.GetInParam(job.Name).DevType).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
                 if not(dev.IsRootFlowDev(coins))
                 then
                     if  dev.OutAddress <> TextSkip then
-                        let outT = createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, dev.OutParam.DevType).Value
+                        let outT = createBridgeTag(x.Storages, dev.ApiName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, dev.GetOutParam(job.Name).DevType).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
         member x.GenerationIO() =

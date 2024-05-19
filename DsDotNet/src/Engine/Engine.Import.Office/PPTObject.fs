@@ -392,9 +392,13 @@ module PPTObjectModule =
 
 
         let getCommadParam (name:string) = 
+            let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-            
+                if not(func.Contains(","))
+                then 
+                    failwithlog (error())
+
                 let inFunc, outFunc =
            
                     if func.Contains(",")
@@ -415,9 +419,14 @@ module PPTObjectModule =
 
 
             with _->
-                let msg = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300) "
-                shape.ErrorName(msg, iPage)
+                shape.ErrorName((error()), iPage)
 
+        let getPostParam(x:DevParam) =
+            match x.DevValueNType, x.DevTime with 
+            |Some (v, _), None->   $"{v}"
+            |Some (v, _), Some(t)->   $"{v}_{t}"
+            |None, Some(t)->   $"{t}"
+            |None, None->   $""
         do
 
             nodeType <- getNodeType() 
@@ -496,21 +505,40 @@ module PPTObjectModule =
 
         member x.Position = shape.GetPosition(slieSize)
 
-        member x.JobName = pageTitle+"_"+name.Replace(".", "_")
-        member x.OperatorName = x.JobName(*+"_OP"*)
-        member x.CommandName  = x.JobName(*+"_CMD"*)
-        member x.IsDevOperator  = not(opDevParam.IsNone) && nodeType = CALLOPFunc 
-        member x.IsDevCommand  = not(cmdDevParam.IsNone) && nodeType = CALLCMDFunc 
-        member x.IsPureOperator  = opDevParam.IsNone
-        member x.IsPureCommand  = cmdDevParam.IsNone
+                              
+                              
+        member x.OperatorName = pageTitle+"_"+name.Replace(".", "_")
+        member x.CommandName  = pageTitle+"_"+name.Replace(".", "_")
+        member x.IsDevOperator  = opDevParam.IsSome && nodeType = CALLOPFunc 
+        member x.IsDevCommand  = cmdDevParam.IsSome && nodeType = CALLCMDFunc 
+        member x.IsPureOperator  = opDevParam.IsNone && nodeType = CALLOPFunc 
+        member x.IsPureCommand  = cmdDevParam.IsNone && nodeType = CALLCMDFunc 
+        member x.IsFunction = nodeType = CALLOPFunc || nodeType = CALLCMDFunc 
         member x.OpDevParam  = opDevParam
         member x.CmdDevParam  = cmdDevParam
         member x.IsAliasFunction = x.Alias.IsSome && (x.IsDevOperator || x.IsDevCommand)
         
+        member x.JobName =
+            let pureJob = pageTitle+"_"+name.Replace(".", "_")
+            if x.IsFunction then
+                if x.IsDevOperator then
+                    let post = getPostParam (x.OpDevParam.Value)
+                    if post = "" then $"{pureJob}" else $"{pureJob}_IN{post}"
+                elif  x.IsDevCommand then
+                    let postIn = getPostParam (x.CmdDevParam.Value|>fst)
+                    let postOut = getPostParam (x.CmdDevParam.Value|>snd)
+                    if postIn = "" && postOut = "" 
+                    then $"{pureJob}"
+                    else $"{pureJob}_IN{postIn}_OUT{postOut}" 
+                else failwithlog "error"
+            else 
+                pureJob
+                              
+
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 
         member x.CallApiName =
-            if nodeType = CALLOPFunc  || (nodeType = CALLCMDFunc && x.IsPureCommand) then
+            if (nodeType = CALLOPFunc && x.IsPureOperator) || (nodeType = CALLCMDFunc && x.IsPureCommand) then
                 failwithf $"not support {nodeType}({name}) type"
 
             let apiName = name.Split('.')[1] |> trimSpace

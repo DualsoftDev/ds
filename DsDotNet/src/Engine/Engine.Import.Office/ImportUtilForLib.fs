@@ -103,7 +103,8 @@ module ImportUtilForLib =
             mySys: DsSystem,
             parentWrapper:ParentWrapper,
             node: pptNode,
-            autoTaskDev: TaskDev option
+            autoTaskDev: TaskDev option,
+            jobName: string
         ) =
 
         let parent =parentWrapper
@@ -115,7 +116,7 @@ module ImportUtilForLib =
                 autoTaskDev.Value.InAddress <- ("")
                 autoTaskDev.Value.OutAddress<- ("")
                 tasks.Add(autoTaskDev.Value)|>ignore
-                Job(loadedName + "_" + apiName, mySys, tasks |> Seq.toList)
+                Job(jobName, mySys, tasks |> Seq.toList)
             else 
                 let libRelPath =
                     PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
@@ -132,7 +133,6 @@ module ImportUtilForLib =
 
 
                 let apiPureName = GetBracketsRemoveName(apiName).Trim()
-                let jobName = loadedName + "_" + apiName
                 let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
                     let devOrg= addOrGetExistSystem loadedSys newloadedName
                     let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)

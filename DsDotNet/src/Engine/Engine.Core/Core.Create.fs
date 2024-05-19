@@ -30,7 +30,7 @@ module CoreCreateModule =
             then updateSingleReal flow (reals.First())
         )
 
-    let createTaskDevUsingApiName (sys: DsSystem) (devName: string) (apiName: string) (inParam:DevParam, outParm:DevParam): TaskDev =
+    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (inParam:DevParam, outParm:DevParam): TaskDev =
 
         let api = 
         
@@ -73,7 +73,7 @@ module CoreCreateModule =
                 newApi
             else
                 failwithf $"api {apiName} 중복 생성에러"
-        let jobName = devName + "_" + apiName
+
         TaskDev(api, jobName, inParam, outParm, devName)
 
 

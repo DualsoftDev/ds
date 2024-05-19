@@ -97,7 +97,7 @@ module ConvertCPU =
             
 
             if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageEmulation() then
-                yield! s.E1_PLCNotFunc(RuntimeDS.Package.IsPackageEmulation())
+                //yield! s.E1_PLCNotFunc(RuntimeDS.Package.IsPackageEmulation()) //test ahn  param 동작확인 필요
                 yield! s.E2_LightPLCOnly()
             else  
                 yield! s.B2_SWButtonOutput()
@@ -181,9 +181,10 @@ module ConvertCPU =
 
             let coins = s.GetVerticesOfJobCalls()  
             let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
-            for dev in jobs.SelectMany(fun j-> j.DeviceDefs) do
-                if dev.InTag.IsNonNull() then  
-                    yield dev.SensorEmulation(s, dev.InParam.IsSensorNot())
+            for job, devs in jobs.Select(fun j-> j, j.DeviceDefs) do
+                for dev in devs do
+                    if dev.InTag.IsNonNull() then  
+                        yield dev.SensorEmulation(s, dev.GetInParam(job.Name).IsSensorNot())
         ]
  
      

@@ -77,7 +77,7 @@ module ConvertCpuVertex =
             let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
             if td.ExistInput
             then 
-                Some(td.GetInExpr())
+                Some(td.GetInExpr(c.TargetJob.Name))
             else 
                 None
       

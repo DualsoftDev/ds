@@ -291,30 +291,31 @@ module CoreModule =
     ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
     type TaskDev (api:ApiItem, parentJob:string, inParam:DevParam, outParam:DevParam, deviceName:string) =
         inherit FqdnObject(api.Name, createFqdnObject([|deviceName|]))
+        let inParams  = Dictionary<string, DevParam>()
+        let outParams = Dictionary<string, DevParam>()
+        do  
+            inParams.Add (parentJob, inParam)
+            outParams.Add (parentJob, outParam)
+
         member x.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member x.ApiName = (x:>FqdnObject).QualifiedName
         member x.DeviceName = deviceName
 
-        member val InParam  = inParam   with get, set
-        member val OutParam = outParam  with get, set
+        member x.InParams = inParams 
+        member x.OutParams = outParams
+
+        member x.InDataType = inParams.Values.Select(fun f->f.DevType).First()
+        member x.OutDataType = outParams.Values.Select(fun f->f.DevType).First()
 
         member x.InAddress
-            with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- changeDevParam  x.InParam v x.InParam.DevName
+            with get() = inParams.First().Value  |> fun (d) -> d.DevAddress
+            and set(v) = inParams.ToArray().Iter(fun (kv)-> changeParam (kv.Key,inParams, v, kv.Value.DevName))
 
         member x.OutAddress
-            with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- changeDevParam  x.OutParam v x.OutParam.DevName
-
-        member x.InSymbol
-            with get() = x.InParam  |> fun (d) -> d.DevSymbolName
-            and set(v) = x.InParam <- changeDevParam  x.InParam  x.InParam.DevAddress  (v|>Some)
-
-        member x.OutSymbol
-            with get() = x.OutParam  |> fun (d) -> d.DevSymbolName
-            and set(v) = x.OutParam <- changeDevParam  x.OutParam x.OutParam.DevAddress   (v|>Some)
-               
+            with get() = outParams.First().Value  |> fun (d) -> d.DevAddress
+            and set(v) = outParams.ToArray().Iter(fun (kv)-> changeParam (kv.Key,outParams, v, kv.Value.DevName))
+   
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag

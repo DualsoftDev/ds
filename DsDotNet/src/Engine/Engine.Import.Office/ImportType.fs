@@ -73,6 +73,7 @@ module ImportType =
             $"{flowName}_{row.[(int) IOColumn.Name]}"
         else 
             $"{row.[(int) IOColumn.Name]}"
+    let getJobName (row: Data.DataRow) = getDevName(row).Replace(".", "_")
             
 
     let checkPPTDataType (devParamRaw:DevParamRawItem) (devParam:DevParam) = 
@@ -106,12 +107,12 @@ module ImportType =
             then failWithLog $"error datatype : {name}\r\n [{devParam.DevType.ToText()}]  <> {dataType.ToText()}]"
 
 
-    let updatePPTDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
-        dev.InParam <- changeDevParam dev.InParam dev.InParam.DevAddress inSym
-        dev.OutParam <- changeDevParam dev.OutParam dev.OutParam.DevAddress outSym
+    let updatePPTDevParam (dev:TaskDev) (jobName:string) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
+        dev.SetInSymbol(jobName, inSym) 
+        dev.SetOutSymbol(jobName, outSym)
 
-        checkDataType dev.Name dev.InParam inDataType   
-        checkDataType dev.Name dev.OutParam outDataType
+        checkDataType dev.Name (dev.GetInParam(jobName)) inDataType   
+        checkDataType dev.Name (dev.GetOutParam(jobName)) outDataType
 
     let getPPTDataTypeText (inP:DevParam) (outP:DevParam) =
         let inTypeText  = inP.DevType.ToPLCText() 
@@ -120,7 +121,7 @@ module ImportType =
         then inTypeText
         else $"{inTypeText}:{outTypeText}"
 
-    let getPPTTDevDataTypeText (dev:TaskDev) = getPPTDataTypeText dev.InParam dev.OutParam
+    let getPPTTDevDataTypeText (dev:TaskDev, jobName:string) = getPPTDataTypeText (dev.GetInParam(jobName)) (dev.GetOutParam(jobName))
     let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InParam hwDev.OutParam
 
     let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 

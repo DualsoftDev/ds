@@ -105,8 +105,8 @@ module ExportIOTable =
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-            let inSym  =  dev.InParam.DevSymbolName
-            let outSym =  dev.OutParam.DevSymbolName
+            let inSym  =  dev.GetInParam(job.Name).DevSymbolName
+            let outSym =  dev.GetOutParam(job.Name).DevSymbolName
                
             let inSkip, outSkip =
                 match job.ActionType with
@@ -119,7 +119,7 @@ module ExportIOTable =
             [ TextXlsAddress
               flow
               name
-              getPPTTDevDataTypeText dev
+              getPPTTDevDataTypeText (dev, (job.Name))
               getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target )
               getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target )
               inSym 
@@ -136,7 +136,8 @@ module ExportIOTable =
 
                 let devJobSet = 
                     sys.Jobs |> Seq.collect(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
-                             |> Seq.sortBy (fun (dev,j) -> $"{dev.InParam.DevType.ToText()}{dev.OutParam.DevType.ToText()}{dev.ApiName}") 
+                             |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).DevType.ToText()}{dev.GetOutParam(j.Name).DevType.ToText()}{dev.ApiName}") 
+                             |> Seq.distinctBy(fun (dev,j) -> dev)
 
                 for (dev, job) in  devJobSet do
                         let coins = vs.GetVerticesOfJobCoins(job)
@@ -400,7 +401,7 @@ module ExportIOTable =
         let rowItems (dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
-              "bool"
+              dev.InDataType.ToPLCText()
               addr 
                ]
 
@@ -439,7 +440,7 @@ module ExportIOTable =
         let rowItems (dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
-              "bool"
+              dev.OutDataType.ToPLCText()
               addr
                ]
 
@@ -481,7 +482,7 @@ module ExportIOTable =
         let rowItems ( dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
-              "bool"
+              dev.InDataType.ToPLCText()
               addr
                ]
 
@@ -520,7 +521,7 @@ module ExportIOTable =
         let rowItems (name  : string, address :string) =
             [ 
               name
-              "bool"
+              "bit"
               address
             ]
 

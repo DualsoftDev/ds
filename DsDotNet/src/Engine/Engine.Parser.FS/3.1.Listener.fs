@@ -558,7 +558,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
             let callListings = commonCallParamExtractor ctx 
-            
+            let dicTaskDevs = Dictionary<string,TaskDev>()
+
+            let getTaskDev (jobName:string) (task:TaskDev) (inParam) (outParm) =
+                if dicTaskDevs.ContainsKey(task.QualifiedName)
+                then
+                    let oldTaskDev = dicTaskDevs[task.QualifiedName]
+                    oldTaskDev.AddOrUpdateInParam(jobName, inParam)
+                    oldTaskDev.AddOrUpdateOutParam(jobName, outParm)
+                    oldTaskDev
+                else 
+                    dicTaskDevs.Add(task.QualifiedName, task)   
+                    task
+
             for job, apiDefCtxs in callListings do
                 let apiItems =
                     [ for apiDefCtx in apiDefCtxs do
@@ -587,15 +599,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                                
                                       debugfn $"TX={inParam} RX={outParm}"
-                                      return TaskDev(apiPoint, job, inParam, outParm, device)
-
+                                      let taskDev = TaskDev(apiPoint, job, inParam, outParm, device)
+                                      return getTaskDev job taskDev inParam outParm
                                   }
 
                               match apiItem with
                               | Some apiItem -> yield apiItem
                               | _ -> 
                                     match tryFindLoadedSystem system device with
-                                    |Some dev-> yield createTaskDevUsingApiName dev.ReferenceSystem device api (inParam, outParm) 
+                                    |Some dev->
+                                            let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) job device api (inParam, outParm) 
+                                            yield getTaskDev job taskDev inParam outParm
+                                             
                                     |None -> failwithlog $"device({device}) api({api}) is not exist"
 
                           | _ -> 

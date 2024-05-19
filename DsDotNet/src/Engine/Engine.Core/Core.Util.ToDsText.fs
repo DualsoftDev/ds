@@ -149,12 +149,12 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             if system.Jobs.Any() then
-                let printDev (ai:TaskDev) = $"{ai.ApiName}({toTextDevParam ai.InParam}, {toTextDevParam ai.OutParam})"
+                let printDev (ai:TaskDev) jobName= $"{ai.ApiName}({toTextDevParam (ai.GetInParam(jobName))}, {toTextDevParam (ai.GetOutParam(jobName))})"
                 yield $"{tab}[jobs] = {lb}"
                 for c in system.Jobs do
                     let jobItems =
                         c.DeviceDefs
-                        |> Seq.map printDev
+                        |> Seq.map (fun d-> printDev d (c.Name))
                           
                     let jobItemText =  jobItems.JoinWith("; ") + ";"
                     yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  

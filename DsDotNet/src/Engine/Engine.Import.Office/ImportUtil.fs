@@ -76,13 +76,39 @@ module ImportU =
                 newfunc
 
 
-        let getCallFunc loadedName= 
-            let apiName = "ON"
-            let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiName
+        let getCall ()= 
+            let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+            let call = 
+                //let jobName = node.JobName
+                let jobName = sysName + "_" + apiName
+                if jobCallNames.Contains sysName
+                then 
+            
+                    match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
+                    | Some job ->
+                        if job.DeviceDefs.any () then
+                            Call.Create(job, parentWrapper)
+                        else
+                            node.Shape.ErrorName(ErrID._52, node.PageNum)
+                    | None ->
+                            node.Shape.ErrorName(ErrID._48, node.PageNum)
 
-            let call = addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, None)
-            if call.TargetJob.DeviceDefs.Count() > 1 then
-                failwithlog $"error {node.Name} ({node.NodeType}) 는 하나의 디바이스만 Job으로 구성 가능합니다."
+                else
+                    let apiName = node.CallApiName
+                    let loadedName = node.CallName
+
+                    let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
+                    let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
+
+                    let autoGenDevTask    =
+                        if autoGenSys.IsSome
+                            then
+                                createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) jobName loadedName apiName (TextAddrEmpty |> defaultDevParam, TextAddrEmpty  |> defaultDevParam)|> Some
+                            else 
+                                None
+
+                    //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
+                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask, jobName)
             call
 
 
@@ -92,17 +118,11 @@ module ImportU =
             | CALLOPFunc  ->
                 if parentWrapper.GetCore() :? Real 
                     then failWithLog  $"Operator 정의는 work 외부에만 존재 가능합니다. error {node.Name}."    
-
                 if node.IsPureOperator 
-                then 
+                then
                     Call.Create(getOperatorFunc(), parentWrapper)
                 else 
-                    let call = getCallFunc node.CallName
-                    call.TargetJob.DeviceDefs.Head().InParam <- node.OpDevParam.Value
-                    call
-                    
-
-            
+                    getCall()
 
             | CALL  |  CALLCMDFunc  ->  
                 if parentWrapper.GetCore() :? Flow 
@@ -111,45 +131,23 @@ module ImportU =
                 then 
                     Call.Create(getCommandFunc(), parentWrapper)
                 else 
-                    let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-                    let call = 
-                        if jobCallNames.Contains sysName
-                        then 
-                            let jobName = sysName + "_" + apiName
-            
-                            match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
-                            | Some job ->
-                                if job.DeviceDefs.any () then
-                                    Call.Create(job, parentWrapper)
-                                else
-                                    node.Shape.ErrorName(ErrID._52, node.PageNum)
-                            | None ->
-                                    node.Shape.ErrorName(ErrID._48, node.PageNum)
-
-                        else
-                            let apiName = node.CallApiName
-                            let loadedName = node.CallName
-
-                            let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
-                            let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
-
-                            let autoGenDevTask    =
-                                if autoGenSys.IsSome
-                                    then
-                                        createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) loadedName apiName (TextAddrEmpty |> defaultDevParam, TextAddrEmpty  |> defaultDevParam)|> Some
-                                    else 
-                                        None
-
-                            //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                            addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask)
-
-                    if node.NodeType = CALLCMDFunc
-                    then
-                        call.TargetJob.DeviceDefs.Head().InParam <- node.CmdDevParam.Value |> fst
-                        call.TargetJob.DeviceDefs.Head().OutParam <- node.CmdDevParam.Value |> snd
-                    call
+                    getCall()
 
             | _  -> failwithlog "error"
+
+        if node.IsDevCommand 
+        then 
+            let jName = 
+                if node.IsAliasFunction
+                then 
+                    node.JobName
+                else        
+                    call.TargetJob.Name
+                        
+            call.TargetJob.DeviceDefs.Iter(fun d->
+                    d.AddOrUpdateInParam(jName, node.CmdDevParam.Value|>fst)
+                    d.AddOrUpdateOutParam(jName, node.CmdDevParam.Value|>snd)
+                    )
 
         dicSeg.Add(node.Key, call)
 
@@ -536,16 +534,27 @@ module ImportU =
                       
                         if node.IsDevCommand 
                         then
-                            let newJobName = $"{segOrg.Name}_IN{(node.CmdDevParam.Value|>fst).ToPostText()}OUT{(node.CmdDevParam.Value|>snd).ToPostText()}"
-                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs) //CmdDevParam 할당 test ahn
+                            let newJobName = node.JobName
+                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs)
+
+                            segOrg.TargetJob.DeviceDefs.Iter(fun d->
+                                    d.AddOrUpdateInParam(newJobName, node.CmdDevParam.Value|>fst)
+                                    d.AddOrUpdateOutParam(newJobName, node.CmdDevParam.Value|>snd)
+                            )
+
                             mySys.Jobs.Add newJob
                             Call.Create(newJob, parentWrapper)
 
 
                         elif node.IsDevOperator 
                         then 
-                            let newJobName = $"{segOrg.Name}_IN{(node.OpDevParam.Value).ToPostText()}"
-                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs) //CmdDevParam 할당 test ahn
+                            let newJobName = node.JobName
+                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs)
+
+                            segOrg.TargetJob.DeviceDefs.Iter(fun d->
+                                    d.AddOrUpdateInParam(newJobName, node.OpDevParam.Value)
+                            )
+
                             mySys.Jobs.Add newJob
                             Call.Create(newJob, parentWrapper)
 

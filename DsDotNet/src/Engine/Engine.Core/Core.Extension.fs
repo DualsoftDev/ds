@@ -224,10 +224,23 @@ module CoreExtensionModule =
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (name:string) = x.LoadedSystems.TryFind(fun f-> f.Name = name)
-    
-    type Real with
-        member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd
+            
+    type TaskDev with
+        member x.GetInParam(jobName:string) = x.InParams[jobName]
+        member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)
 
+        member x.GetOutParam(jobName:string) = x.OutParams[jobName]
+        member x.AddOrUpdateOutParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.OutParams, newDevParam)
+
+        member x.GetInSymbol(jobName:string) = x.InParams[jobName] |> fun (d) -> d.DevSymbolName
+        member x.SetInSymbol(jobName:string, symName:string option) =changeParam (jobName, x.InParams,  x.InParams[jobName].DevAddress, symName)
+
+        member x.GetOutSymbol(jobName:string) = x.OutParams[jobName] |> fun (d) -> d.DevSymbolName
+        member x.SetOutSymbol(jobName:string, symName:string option) =changeParam (jobName,  x.OutParams, x.OutParams[jobName].DevAddress, symName)
+
+    type Real with
+        member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  
+        
 
     type Call with
         member x.System = x.Parent.GetSystem()
@@ -290,7 +303,7 @@ type SystemExt =
     static member GetDevice(x:TaskDev, sys:DsSystem) = sys.Devices.First(fun f->f.Name  = x.DeviceName)
 
     [<Extension>]
-    static member ToTextForDevParam(x:TaskDev) = toTextInOutDev x.InParam x.OutParam
+    static member ToTextForDevParam(x:TaskDev, jobName:string) = toTextInOutDev (x.GetInParam(jobName)) (x.GetOutParam(jobName))
 
     [<Extension>]
     static member ToTextForDevParam(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam

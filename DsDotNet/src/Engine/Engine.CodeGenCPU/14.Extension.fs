@@ -8,28 +8,28 @@ open Dual.Common.Core.FS
 
 type DsSystem with
 
-    member s.E1_PLCNotFunc(skipRung:bool) =
-        let rsts = s._off.Expr
-         (* device not func 로직 처리*)
-        [
-            let reverseInputs = s.Jobs.SelectMany(fun j->j.DeviceDefs)
-                                      .Where(fun d->d.InParam.IsSensorNot())
+    //member s.E1_PLCNotFunc(skipRung:bool) =
+    //    let rsts = s._off.Expr
+    //     (* device not func 로직 처리*)
+    //    [
+    //        let reverseInputs = s.Jobs.SelectMany(fun j->j.DeviceDefs)
+    //                                  .Where(fun d->d.GetInParam(jobName).IsSensorNot())
 
-            let devs = s.Jobs.SelectMany(fun j -> j.DeviceDefs)
-            let orgInTag (revDev:TaskDev)=
-                let orgList = devs.Except(reverseInputs)
-                                  .Where(fun f->f.InAddress = revDev.InAddress)
-                if orgList.any() 
-                    then (orgList.First().InTag :?> Tag<bool>).Expr 
-                    else (s.GetTempTag(revDev)  :?> Tag<bool>).Expr 
+    //        let devs = s.Jobs.SelectMany(fun j -> j.DeviceDefs)
+    //        let orgInTag (revDev:TaskDev)=
+    //            let orgList = devs.Except(reverseInputs)
+    //                              .Where(fun f->f.InAddress = revDev.InAddress)
+    //            if orgList.any() 
+    //                then (orgList.First().InTag :?> Tag<bool>).Expr 
+    //                else (s.GetTempTag(revDev)  :?> Tag<bool>).Expr 
                     
 
-            for revDev in reverseInputs do
-                if not(skipRung)
-                then yield (orgInTag(revDev), rsts) --| (revDev.InTag, getFuncName()) //그대로 복사
+    //        for revDev in reverseInputs do
+    //            if not(skipRung)
+    //            then yield (orgInTag(revDev), rsts) --| (revDev.InTag, getFuncName()) //그대로 복사
 
-                revDev.InTag.Address <- TextAddrEmpty
-        ]
+    //            revDev.InTag.Address <- TextAddrEmpty
+    //    ]
 
 
     member s.E2_LightPLCOnly() =

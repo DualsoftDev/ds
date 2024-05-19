@@ -151,9 +151,8 @@ module ConvertCPU =
                 .Where(fun c->c.IsFunction)
         [
             for coin in coinCommandFuncs do
-           //test ahn
                 if coin.IsOperator  //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
-                then yield coin.VC.C1_DoOperator()
+                then yield! coin.VC.C1_DoOperator()
                     
                 if coin.IsCommand //Command 함수는 Call Memo에 의해서 실행
                 then yield! coin.VC.C2_DoCommand()

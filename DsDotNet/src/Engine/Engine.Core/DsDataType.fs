@@ -200,7 +200,6 @@ module DsDataType =
         | _  -> failwithlog "ERROR"
 
 
-    
     let getTextValueNType (x: string) =
         let mutable value = 0
         match x with
@@ -208,8 +207,10 @@ module DsDataType =
             Some (x.[1..x.Length-2], DuSTRING)
         | _ when x.StartsWith("'") && x.EndsWith("'") && x.Length = 3 ->
             Some (x.[1].ToString(), DuCHAR)
-        | _ when x.Contains('.') && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.' || c = 'f') ->
-            if x.EndsWith("f") then Some (x.TrimEnd('f'), DuFLOAT32) else Some (x, DuFLOAT64)
+        | _ when x.EndsWith("f") && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.' || c = 'f') ->
+            Some (x.TrimEnd('f'), DuFLOAT32)
+        | _ when x.Contains('.') && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.' ) ->
+            Some (x, DuFLOAT64)
         | _ when x.EndsWith("uy") && x.TrimEnd([|'u';'y'|]) |> Int32.TryParse |> fst ->
             Some (x.TrimEnd([|'u';'y'|]), DuUINT8)
         | _ when x.EndsWith("us") && x.TrimEnd([|'u';'s'|]) |> Int32.TryParse |> fst ->

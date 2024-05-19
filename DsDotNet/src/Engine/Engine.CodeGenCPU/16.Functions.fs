@@ -15,14 +15,20 @@ type VertexMCall with
         let call = v.Vertex :?> Call
         let comment = getFuncName()
         let sts = call.TargetFunc.Statements
-        if sts.Count <> 1
+        if sts.Count = 1
+        then 
+            [
+            match sts.Head() with
+            | DuAssign (_, cmdExpr, _) ->
+                let code = cmdExpr.ToText()
+                let expr = parseExpression v.Storages code 
+                yield withExpressionComment comment (DuAssign (None, expr, v.CallOperatorValue))
+            |_ -> failWithLog $"err {comment}"
+            ]
+        elif sts.Count > 1
         then failwithlog $"Operator({call.Name})에는 하나의 수식이 필요합니다. \r\n테이블 정의 수식 Count:({sts.Count})"
-        match sts.Head() with
-        | DuAssign (_, cmdExpr, _) ->
-            let code = cmdExpr.ToText()
-            let expr = parseExpression v.Storages code 
-            withExpressionComment comment (DuAssign (None, expr, v.CallOperatorValue))
-        |_ -> failWithLog $"err {comment}"
+        else []
+         
 
     member v.C2_DoCommand() =
         let call = v.Vertex :?> Call

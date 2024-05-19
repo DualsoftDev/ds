@@ -44,8 +44,7 @@ module DsAddressModule =
             |> Seq.filter(fun (i, dtype, _) -> i < index && usedType = dtype)
             |> Seq.map(fun (_, _, dSzie) ->
                     match dSzie with
-                    | DuUINT8   -> 8 
-                    | DuUINT16  -> 16 //기본 더미 Size
+                    | DuUINT8 | DuUINT16  -> 16 //기본 더미 Size
                     | DuUINT32  -> 32
                     | DuUINT64  -> 64
                     | _   -> failwithf $"{dSzie} not support"
@@ -53,6 +52,7 @@ module DsAddressModule =
 
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
+
         let iec = target = PlatformTarget.XGI
 
         let addr = if addr.IsNullOrEmpty()
@@ -118,8 +118,8 @@ module DsAddressModule =
                         let startPoint = getStartPointXGK (i)
                         if i = 0 then newCnt
                         else 
-                            let usedPoint = getUsedPointXGK (i-1, settingType)
-                            startPoint + (newCnt - usedPoint)
+                            let usedPoint = getUsedPointXGK (i, settingType)
+                            startPoint + (newCnt - usedPoint)  
                     | None -> failwithf "%AType 슬롯이 부족합니다." settingType
 
 
@@ -164,7 +164,8 @@ module DsAddressModule =
                 then
                     match ioType with 
                     |In |Out -> 
-                        let iSlot, sumBit = getSlotInfoIEC(ioType, cnt)
+                        let iSlot, sumBit =  getSlotInfoIEC(ioType, cnt)
+
                         if iec && ioType = IOType.In
                         then
                             getXgiIOTextBySize("I", cnt ,sizeBit, iSlot, sumBit)
@@ -194,8 +195,9 @@ module DsAddressModule =
                 else
                     match tryParseXGKTagByBitType addr (dataType = DuBOOL) with
                     | Some (t) -> t |> getXgKTextByTag
+                                  
                     | _ -> failwithf $"주소가 잘못되었습니다. {addr} (dataType:{dataType})"
-        
+     
         newAddr
 
   

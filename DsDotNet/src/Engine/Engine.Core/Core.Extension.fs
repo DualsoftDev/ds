@@ -260,6 +260,8 @@ module CoreExtensionModule =
         
 
     type Call with
+        member x.IsOperator = (x.Parent.GetCore() :? Flow)
+
         member x.System = x.Parent.GetSystem()
         member x.ManualTag = x.ExternalTags.First(fun (t,_)-> t = ManualTag)|> snd
         member x.ErrorSensorOn = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)|> snd

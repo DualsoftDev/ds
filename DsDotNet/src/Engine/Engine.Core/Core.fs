@@ -251,11 +251,9 @@ module CoreModule =
             | _ -> failwith "TargetFunc is only available for FuncType or JobFuncType."
 
         /// Indicates if the target includes a job.
-        member _.IsJob = isJob targetOption
-        member _.IsCommand = isCommand targetOption
-        member _.IsOperator = isOperator targetOption
-        member _.IsFunction  =isCommand targetOption || isOperator targetOption
-
+        member _.IsJob = isJob targetOption 
+        member _.IsPureCommand = isCommand targetOption  
+        member _.IsPureOperator = isOperator targetOption  
         member _.CallOperatorType  = 
             match targetOption with
             | JobType _ -> DuOPUnDefined

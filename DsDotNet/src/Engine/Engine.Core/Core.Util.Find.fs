@@ -124,7 +124,7 @@ module internal ModelFindModule =
         |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)  
 
     let ofCallForOperator (xs:Vertex seq) =
-        xs.OfType<Call>().Where(fun f -> f.IsOperator).Cast<Vertex>()
+        xs.OfType<Call>().Where(fun f -> f.Parent.GetCore() :? Flow).Cast<Vertex>()
         
     let ofAliasForRealVertex (xs:Vertex seq) =
         xs.OfType<Alias>()

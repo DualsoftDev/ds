@@ -136,8 +136,19 @@ module ImportUtilForLib =
                 let getLoadedTasks (loadedSys:DsSystem) (newloadedName:string)  =
                     let devOrg= addOrGetExistSystem loadedSys newloadedName
                     let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-                    TaskDev(api,jobName, ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
 
+                    if node.NodeType = CALLOPFunc 
+                    then 
+                        TaskDev(api,jobName,  node.OpDevParam.Value, ""|>defaultDevParam, newloadedName)
+
+                    elif node.NodeType = CALLCMDFunc
+                    then
+                        TaskDev(api,jobName,   node.CmdDevParam.Value|>fst,  node.CmdDevParam.Value|>snd, newloadedName)
+                    else 
+                        TaskDev(api,jobName,  ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
+
+
+                    
                 let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget
                 if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
                     node.Shape.ErrorName(ErrID._49, node.PageNum)

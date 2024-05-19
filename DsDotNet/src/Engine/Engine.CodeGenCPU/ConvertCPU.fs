@@ -140,22 +140,30 @@ module ConvertCPU =
                 if coins.any()
                 then
                     yield am.A1_PlanSend(s, coins)
-                    yield am.A1_PlanSend(s, coins)
                     yield am.A3_SensorLinking(s, coins.OfType<Call>())
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
         ]
 
     let private funcCall(s:DsSystem) =
-        let coinCommandFuncs =
-            s.GetVertices().OfType<Call>()
-                .Where(fun c->c.IsFunction)
+        let pureOperatorFuncs =
+            s.GetVertices().OfType<Call>().Where(fun c->c.IsPureOperator)
+
+        let flowOperatorFuncs =
+            s.GetVertices().OfType<Call>().Where(fun c->c.IsOperator)
+
+        let pureCommandFuncs =
+            s.GetVertices().OfType<Call>().Where(fun c->c.IsPureCommand)
+                          
         [
-            for coin in coinCommandFuncs do
-                if coin.IsOperator  //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
-                then yield! coin.VC.C1_DoOperator()
+
+            for coin in pureOperatorFuncs do
+                yield! coin.VC.C1_DoOperator()   //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
                     
-                if coin.IsCommand //Command 함수는 Call Memo에 의해서 실행
-                then yield! coin.VC.C2_DoCommand()
+            for coin in pureCommandFuncs do
+                yield! coin.VC.C2_DoCommand()  
+                
+            for coin in flowOperatorFuncs do
+                yield coin.VC.C3_DoOperatorDevice()
         ]
 
     let private applyVariables(s:DsSystem) =
@@ -178,8 +186,9 @@ module ConvertCPU =
         [
             yield s.SetFlagForEmulation()
 
-            let coins = s.GetVerticesOfJobCalls()  
-            let jobs = coins.OfType<Call>().Select(fun c-> c.TargetJob).Distinct()
+            let coins = s.GetVerticesOfCoins()  
+            let jobs = coins.OfType<Call>()
+                            .Select(fun c-> c.TargetJob).Distinct()
             for job, devs in jobs.Select(fun j-> j, j.DeviceDefs) do
                 for dev in devs do
                     if dev.InTag.IsNonNull() then  

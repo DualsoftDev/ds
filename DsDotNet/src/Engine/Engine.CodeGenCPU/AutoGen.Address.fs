@@ -187,7 +187,14 @@ module DsAddressModule =
 
             elif addr <> TextSkip && isSkip then
                  failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입 필요."
-            else addr
+            elif addr = TextSkip then TextSkip 
+                
+            else
+                if iec then addr
+                else
+                    match tryParseXGKTagByBitType addr (dataType = DuBOOL) with
+                    | Some (t) -> t |> getXgKTextByTag
+                    | _ -> failwithf $"주소가 잘못되었습니다. {addr} (dataType:{dataType})"
         
         newAddr
 

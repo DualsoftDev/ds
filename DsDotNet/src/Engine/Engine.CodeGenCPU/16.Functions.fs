@@ -49,3 +49,9 @@ type VertexMCall with
                 yield withExpressionComment comment (DuAssign (None, v.MM.Expr, v.CallCommandEnd))
         ]
 
+    member v.C3_DoOperatorDevice() =
+        let call = v.Vertex :?> Call
+        let inOps = 
+            call.TargetJob.DeviceDefs.Select(fun d->d.GetInExpr(call.TargetJob.Name)) 
+        let sets = inOps.ToAndElseOff()    
+        (sets, call._off.Expr) --| (v.CallOperatorValue, getFuncName()) //그대로 복사

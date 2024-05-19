@@ -55,7 +55,7 @@ module ConvertCpuVertex =
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
         member c.EndPlan =  
-                    if c.IsCommand
+                    if c.IsPureCommand
                     then
                         (c.TagManager :?> VertexMCall).CallCommandEnd.Expr
                     elif c.IsOperator

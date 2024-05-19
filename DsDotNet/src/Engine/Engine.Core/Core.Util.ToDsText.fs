@@ -17,8 +17,8 @@ module internal ToDsTextModule =
 
     let getName (v:Vertex) =
             match v with    
-            | :? Call as c when c.IsCommand -> (getRawName v.PureNames true) + "()"
-            | :? Call as c when c.IsOperator -> "#"+(getRawName v.PureNames true)
+            | :? Call as c when c.IsPureCommand -> (getRawName v.PureNames true) + "()"
+            | :? Call as c when c.IsPureOperator -> "#"+(getRawName v.PureNames true)
                 
             |_-> getRawName v.PureNames true    
 

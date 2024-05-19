@@ -434,15 +434,17 @@ module PPTObjectModule =
             let nameNFunc =  shape.InnerText.Replace("”", "\"").Replace("“", "\"")  |> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
             let namePure =  GetLastParenthesesReplaceName(nameNFunc, "") |> trimSpaceNewLine
             let nameTrim  =  String.Join('.', namePure.Split('.').Select(trimSpace)) |> trimSpaceNewLine
+            match GetSquareBrackets(shape.InnerText, false) with
+                | Some text ->name <- $"{nameTrim |> GetBracketsRemoveName|> trimSpaceNewLine}[{text}]"  
+                | None -> name <- nameTrim
             
-            name <- nameTrim
 
             match nodeType with
             | CALLOPFunc ->
                 if nameTrim.Contains(".") then
                     if GetLastParenthesesReplaceName(nameNFunc, "") =  nameNFunc
                     then
-                        opDevParam <-  Some (TextSkip |> defaultDevParam)
+                        opDevParam <-  Some (createDevParam "" None (Some(true, DuBOOL)) None)
                     else 
                         opDevParam <-  Some (getOperatorParam nameNFunc)
 

@@ -110,6 +110,22 @@ module DsDataType =
             | DuUINT64  -> PLCUINT64
             | DuUINT8   -> PLCUINT8
 
+        member x.ToPLCBitSize() =
+            match x with
+            | DuBOOL    -> 1
+            | DuCHAR    -> 8  //test ahn 확인필요
+            | DuFLOAT32 -> 32
+            | DuFLOAT64 -> 64
+            | DuINT16   -> 16
+            | DuINT32   -> 32
+            | DuINT64   -> 64
+            | DuINT8    -> 8
+            | DuSTRING  -> 32
+            | DuUINT16  -> 16
+            | DuUINT32  -> 32
+            | DuUINT64  -> 64
+            | DuUINT8   -> 8
+
 
          member x.ToStringValue (value: obj) =
             match x, value with

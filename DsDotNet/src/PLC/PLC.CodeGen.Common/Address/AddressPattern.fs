@@ -57,6 +57,34 @@ module LSEAddressPattern =
             sprintf "%s%04i" d wordIndex
         | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
 
+    let getXgkTextByType (device:string, offset: int, isBool:bool) : string =
+        if isBool
+        then getXgkBitText(device, offset)
+        else 
+            if offset%8 = 0 then getXgkWordText(device, offset/8)
+            else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
+
+                                    
+            
+    let getXgiIOTextBySize (device:string, offset: int, bitSize:int, iSlot:int, sumBit:int) : string =
+        if bitSize = 1
+        then $"%%{device}X0.{iSlot}.{(offset-sumBit) % 64}" 
+        else 
+            match bitSize with  //test ahn  xgi 규격확인
+            | 8 -> $"%%{device}B{iSlot}"
+            | 16 -> $"%%{device}W{iSlot}"
+            | 32 -> $"%%{device}D{iSlot}"
+            | 64 -> $"%%{device}L{iSlot}"
+            | _ -> failwithf $"Invalid size :{bitSize}"
+            
+
+    let getXgiMemoryTextBySize (device:string, offset: int, bitSize:int) : string =
+        if bitSize = 1
+        then $"%%{device}X{offset}" 
+        else 
+            if offset%8 = 0 then getXgkWordText(device, offset/8)
+            else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
+
 
     let createTagInfo = LsTagInfo.Create >> Some
     let (|LsTagXGIPattern|_|) ((modelId: int option), (tag: string)) =

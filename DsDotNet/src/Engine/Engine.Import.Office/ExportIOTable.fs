@@ -120,8 +120,8 @@ module ExportIOTable =
               flow
               name
               getPPTTDevDataTypeText (dev)
-              getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target )
-              getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target )
+              getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target )
+              getValidAddress(dev.OutAddress,  dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
               inSym 
               outSym
               ]

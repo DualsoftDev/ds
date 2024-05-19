@@ -125,7 +125,7 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="12289" Param="L==,pi,eu"/>
+                                    <Element ElementType="33" Coordinate="12289" Param="L=,pi,eu"/>
                                     <Element ElementType="2" Coordinate="12298" Param="90"/>
                                     <Element ElementType="14" Coordinate="12382">
                                         M00082
@@ -137,7 +137,7 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="14337" Param="L==,pi,eu"/>
+                                    <Element ElementType="33" Coordinate="14337" Param="L=,pi,eu"/>
                                     <Element ElementType="2" Coordinate="14346" Param="90"/>
                                     <Element ElementType="14" Coordinate="14430">
                                         M00083

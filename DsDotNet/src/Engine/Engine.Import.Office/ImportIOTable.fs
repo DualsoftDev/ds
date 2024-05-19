@@ -137,9 +137,12 @@ module ImportIOTable =
                 let inAdd =    inAddress|>emptyToSkipAddress
                 let outAdd =   outAddress|>emptyToSkipAddress
 
-                dev.InAddress <- (  getValidAddress(inAdd,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget))
-                dev.OutAddress <- (  getValidAddress(outAdd,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget))
                 let checkInType, checkOutType = getInOutDataType dataType
+
+                dev.InAddress <-  getValidAddress(inAdd, checkInType,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget)
+                dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
+
+
                 updatePPTDevParam dev jobName (inSym,checkInType) (outSym, checkOutType)
              
             let updateVar (row: Data.DataRow, tableIO: Data.DataTable, page) =

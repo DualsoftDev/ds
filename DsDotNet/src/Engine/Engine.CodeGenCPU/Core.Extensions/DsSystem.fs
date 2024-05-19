@@ -98,21 +98,21 @@ module ConvertCpuDsSystem =
             
             for call in x.GetVerticesOfCoins().OfType<Call>() |> Seq.sortBy (fun c -> c.Name) do
                 let cv =  call.TagManager :?> VertexMCall
-                cv.SF.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
+                cv.SF.Address <- getValidAddress(TextAddrEmpty, DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
                 call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
 
         member private x.GenerationCallConditionMemory()  = 
             for condi in x.HWConditions do
                 condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true condi (int HwSysTag.HwStopConditionErrLamp) x
-                condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty, condi.Name, false, IOType.Memory, getTarget(x))
+                condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty,DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
 
         member private x.GenerationButtonEmergencyMemory()  = 
             for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
                 emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true emg (int HwSysTag.HwStopEmergencyErrLamp) x
-                emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, emg.Name, false, IOType.Memory, getTarget(x))
+                emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getTarget(x))
 
         member private x.GenerationEmulationMemory()  = 
-            x._emulation.Address <- getValidAddress(TextAddrEmpty, x._emulation.Name, false, IOType.Memory  , getTarget(x))
+            x._emulation.Address <- getValidAddress(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
             RuntimeDS.EmulationAddress <- x._emulation.Address 
             
          
@@ -122,10 +122,10 @@ module ConvertCpuDsSystem =
                             |> Seq.sortBy (fun c -> c.Name) do
 
                 let cv =  call.TagManager :?> VertexMCall
-                cv.ErrShort.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrTimeShortage.Address <- getValidAddress(TextAddrEmpty, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrShort.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrTimeShortage.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
                 call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOn, cv.ErrShort:> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOff, cv.ErrOpen  :> IStorage) |>ignore
@@ -135,7 +135,7 @@ module ConvertCpuDsSystem =
         member private x.GenerationRealAlarmMemory()  = 
             for real in x.GetVertices().OfType<Real>() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> VertexMReal
-                rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty, rm.Name, false, IOType.Memory, getTarget(x))
+                rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty,DuBOOL, rm.Name, false, IOType.Memory, getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
 

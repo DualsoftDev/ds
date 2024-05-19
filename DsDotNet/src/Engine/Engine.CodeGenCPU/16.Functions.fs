@@ -20,9 +20,7 @@ type VertexMCall with
             [
             match sts.Head() with
             | DuAssign (_, cmdExpr, _) ->
-                let code = cmdExpr.ToText()
-                let expr = parseExpression v.Storages code 
-                yield withExpressionComment comment (DuAssign (None, expr, v.CallOperatorValue))
+                yield withExpressionComment comment (DuAssign (None, cmdExpr, v.CallOperatorValue))
             |_ -> failWithLog $"err {comment}"
             ]
         elif sts.Count > 1
@@ -40,9 +38,10 @@ type VertexMCall with
                         [
                             match s with
                             | DuAssign (_, cmdExpr, target) ->
-                            let sets = v.MM.Expr :> IExpression<bool> 
-                            yield withExpressionComment comment (DuAssign (sets|> Some, cmdExpr, target))
-                            yield withExpressionComment comment (DuAssign (None, sets, v.CallCommandEnd))
+
+                            let sets = fbRising [v.MM.Expr]:> IExpression<bool>
+                            yield withExpressionComment comment (DuAssign (sets|> Some, cmdExpr, target)) //test ahn PC fbRising 에서도 처리 
+                            yield withExpressionComment comment (DuAssign (None, v.MM.Expr, v.CallCommandEnd))
                             |_ -> failWithLog $"err {comment}"
                         ]
                     )

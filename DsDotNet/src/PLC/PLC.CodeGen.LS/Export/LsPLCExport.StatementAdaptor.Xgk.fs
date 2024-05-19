@@ -48,7 +48,7 @@ module XgkTypeConvertorModule =
             | "/" -> "DIV"
             | "MOV" -> "MOV"
             | "!=" -> "<>"
-            | "==" -> "=="
+            | "==" -> "="
             | _ when isComparison -> op
             | _ -> failwithlog "ERROR"
 

@@ -52,7 +52,7 @@ module DsAddressModule =
             ) |>  Seq.sum
 
 
-    let getValidAddress (addr: string, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
+    let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
         let iec = target = PlatformTarget.XGI
 
         let addr = if addr.IsNullOrEmpty()
@@ -64,18 +64,39 @@ module DsAddressModule =
                             addr
 
         let addr =  addr.Trim().ToUpper()
+        let getCurrent(curr:int)(bitSize:int) = 
+            if curr%bitSize = 0 then curr
+            else
+                curr + bitSize - (curr%bitSize)
 
+        let getNext (curr:int)(bitSize:int) = 
+            if curr%bitSize = 0 then  curr + bitSize
+            else
+                curr + bitSize - (curr%bitSize) + bitSize
+
+
+        let sizeBit = 
+                if target = PlatformTarget.XGI then dataType.ToPLCBitSize()
+                else
+                    match dataType.ToPLCBitSize() with
+                    | 1 -> 1
+                    | 8 -> 16
+                    | 16 -> 16
+                    | 32 -> 32
+                    | _ -> failwithf $"XGK {dataType} not support"
         let newAddr =
             if addr = TextAddrEmpty && not(isSkip)
             then
                 let cnt =
+                    
+
                     match ioType with 
-                    | In      -> let ret = inCnt
-                                 inCnt <- inCnt + 1 ; ret
-                    | Out     -> let ret =outCnt
-                                 outCnt <- outCnt + 1    ;ret
-                    | Memory  -> let ret =memoryCnt
-                                 memoryCnt <- memoryCnt + 1; ret
+                    | In      -> let ret = getCurrent inCnt sizeBit
+                                 inCnt <- getNext inCnt sizeBit ; ret
+                    | Out     -> let ret = getCurrent outCnt sizeBit 
+                                 outCnt <- getNext outCnt sizeBit   ;ret
+                    | Memory  -> let ret = getCurrent memoryCnt sizeBit  
+                                 memoryCnt <- getNext memoryCnt sizeBit; ret
                     | NotUsed -> failwithf $"{ioType} not support"
 
                 let getSlotInfoNonIEC(settingType: IOType, newCnt: int) =
@@ -141,28 +162,24 @@ module DsAddressModule =
                      || RuntimeDS.Package.IsPackageSIM()    
                      || RuntimeDS.Package.IsPackageEmulation()    //시뮬레이션도 PLC 주소규격으로 일단
                 then
-                    
                     match ioType with 
-                    |In ->  
-                            if iec
-                            then
-                                let iSlot, sumBit = getSlotInfoIEC(ioType, cnt)
-                                $"%%IX0.{iSlot}.{(cnt-sumBit) % 64}" 
-                            else 
-                                getXgkBitText("P", getSlotInfoNonIEC(ioType, cnt)) 
-                            
-                    |Out -> 
-                            if iec
-                            then
-                                let iSlot ,sumBit = getSlotInfoIEC(ioType, cnt)
-                                $"%%QX0.{iSlot}.{(cnt-sumBit) % 64}" 
-                            else 
-                                getXgkBitText("P", getSlotInfoNonIEC(ioType, cnt)) 
+                    |In |Out -> 
+                        let iSlot, sumBit = getSlotInfoIEC(ioType, cnt)
+                        if iec && ioType = IOType.In
+                        then
+                            getXgiIOTextBySize("I", cnt ,sizeBit, iSlot, sumBit)
+                        elif iec  && ioType = IOType.Out 
+                        then
+                            getXgiIOTextBySize("Q", cnt ,sizeBit, iSlot, sumBit)
+                        else 
+                            getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), dataType = DuBOOL)
 
                     |Memory -> if iec
-                                 then $"%%MX{cnt}" 
-                                 else  getXgkBitText("M", cnt) //PLC생성 외부 변수  M , PLC생성 내부 변수는 R
-                                   
+                               then 
+                                    getXgiMemoryTextBySize("M", cnt ,sizeBit)
+                               else 
+                                    getXgkTextByType("M", cnt, dataType = DuBOOL)
+
 
                     |NotUsed -> failwithf $"{ioType} not support"
 
@@ -176,8 +193,8 @@ module DsAddressModule =
 
   
     let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
-        let inAddr = getValidAddress(hwItem.InAddress, hwItem.Name, skipIn, IOType.Memory, target)
-        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.Name, skipOut, IOType.Memory, target)
+        let inAddr = getValidAddress(hwItem.InAddress, hwItem.InParam.DevType, hwItem.Name, skipIn, IOType.Memory, target)
+        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.OutParam.DevType , hwItem.Name, skipOut, IOType.Memory, target)
         inAddr, outAddr
 
     let updateHwAddress (hwItem: HwSystemDef) (inAddr, outAddr) target   =
@@ -231,8 +248,8 @@ module DsAddressModule =
                     |NoneTx -> false,true
                     |NoneTRx -> true,true
                     |_ ->  false,false
-                dev.InAddress  <- getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target)
-                dev.OutAddress <- getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target)
+                dev.InAddress  <- getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target)
+                dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

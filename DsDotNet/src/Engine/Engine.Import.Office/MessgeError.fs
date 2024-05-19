@@ -85,7 +85,7 @@ module ErrID =
     let _67 = "중복된 Condition 이름이 존재합니다."
     let _68 = "Safety조건으로는 Action만 가능합니다. Dev.Api 형식으로 입력하세요"
     let _69 = "처음페이지 슬라이드 노트에 Text가 없습니다."
-    let _70 = "내부 호출에는 속성(in, out)을 Table에 입력해야합니다."
+    let _70 = "내부 호출에는 Device.Api(in, out) 속성을 입력해야합니다."
     
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

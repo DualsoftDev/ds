@@ -132,7 +132,7 @@ module ImportIOTable =
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
-    
+                
                 let dev = dicDev.[devName]
                 let inAdd =    inAddress|>emptyToSkipAddress
                 let outAdd =   outAddress|>emptyToSkipAddress
@@ -153,7 +153,7 @@ module ImportIOTable =
                         failwithlog $"내부변수 {name} datatype 입력이 필요합니다."
 
                     let value  = ($"{row.[(int) IOColumn.InSymbol]}").Trim()
-                    let constVari = value <> ""
+                    let constVari = value <> "" && value <> TextSkip
                     let variableData = VariableData(name, dataType|> textToDataType, if constVari then Immutable else Mutable )
 
                     if constVari

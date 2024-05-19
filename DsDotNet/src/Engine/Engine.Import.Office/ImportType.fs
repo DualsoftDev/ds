@@ -101,32 +101,31 @@ module ImportType =
         inP, outP
 
 
-    let checkDataType name (devParam:DevParam) (dataType:DataType)= 
-        
-        if devParam.DevValueNType.IsSome && devParam.DevType <> dataType
-            then failWithLog $"error datatype : {name}\r\n [{devParam.DevType.ToText()}]  <> {dataType.ToText()}]"
+    let checkDataType name (devParamDataType:DataType) (dataType:DataType)= 
+          if devParamDataType <> dataType
+                then failWithLog $"error datatype : {name}\r\n [{devParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
 
 
     let updatePPTDevParam (dev:TaskDev) (jobName:string) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
         dev.SetInSymbol(jobName, inSym) 
         dev.SetOutSymbol(jobName, outSym)
 
-        checkDataType dev.Name (dev.GetInParam(jobName)) inDataType   
-        checkDataType dev.Name (dev.GetOutParam(jobName)) outDataType
+        checkDataType dev.Name dev.InDataType inDataType   
+        checkDataType dev.Name dev.OutDataType outDataType
 
-    let getPPTDataTypeText (inP:DevParam) (outP:DevParam) =
-        let inTypeText  = inP.DevType.ToPLCText() 
-        let outTypeText = outP.DevType.ToPLCText() 
+    let getPPTDataTypeText (inType:DataType) (outType:DataType) =
+        let inTypeText  = inType.ToPLCText() 
+        let outTypeText = outType.ToPLCText() 
         if inTypeText = outTypeText 
         then inTypeText
         else $"{inTypeText}:{outTypeText}"
 
-    let getPPTTDevDataTypeText (dev:TaskDev, jobName:string) = getPPTDataTypeText (dev.GetInParam(jobName)) (dev.GetOutParam(jobName))
-    let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InParam hwDev.OutParam
+    let getPPTTDevDataTypeText (dev:TaskDev) =   getPPTDataTypeText dev.InDataType dev.OutDataType
+    let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InParam.DevType hwDev.OutParam.DevType
 
     let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
         hwDev.InParam <- changeDevParam hwDev.InParam hwDev.InParam.DevAddress inSym
         hwDev.OutParam <- changeDevParam hwDev.OutParam hwDev.OutParam.DevAddress outSym
 
-        checkDataType hwDev.Name hwDev.InParam inDataType   
-        checkDataType hwDev.Name hwDev.OutParam outDataType
+        checkDataType hwDev.Name hwDev.InParam.DevType inDataType   
+        checkDataType hwDev.Name hwDev.OutParam.DevType outDataType

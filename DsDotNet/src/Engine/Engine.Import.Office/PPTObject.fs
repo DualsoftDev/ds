@@ -229,13 +229,14 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
-        | CALLOPFunc | CALLCMDFunc -> 
+        |  CALLCMDFunc -> 
             let nameNFunc = GetBracketsRemoveName(shape.InnerText) 
             let namePure = GetLastParenthesesReplaceName(nameNFunc, "")
             if not(namePure.Contains(".")) &&  namePure <> nameNFunc  // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
             then
                 shape.ErrorName(ErrID._70, iPage)
                 
+        | CALLOPFunc -> ()
         | IF_DEVICE
         | IF_LINK
         | DUMMY
@@ -439,7 +440,11 @@ module PPTObjectModule =
             match nodeType with
             | CALLOPFunc ->
                 if nameTrim.Contains(".") then
-                    opDevParam <-  Some (getOperatorParam nameNFunc)
+                    if GetLastParenthesesReplaceName(nameNFunc, "") =  nameNFunc
+                    then
+                        opDevParam <-  Some (TextSkip |> defaultDevParam)
+                    else 
+                        opDevParam <-  Some (getOperatorParam nameNFunc)
 
             | CALLCMDFunc ->
                 if namePure.Contains(".") then

@@ -119,7 +119,7 @@ module ExportIOTable =
             [ TextXlsAddress
               flow
               name
-              getPPTTDevDataTypeText (dev, (job.Name))
+              getPPTTDevDataTypeText (dev)
               getValidAddress(dev.InAddress,  dev.QualifiedName, inSkip,  IOType.In, target )
               getValidAddress(dev.OutAddress, dev.QualifiedName, outSkip, IOType.Out, target )
               inSym 

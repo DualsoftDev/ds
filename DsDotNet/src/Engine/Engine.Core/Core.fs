@@ -305,9 +305,7 @@ module CoreModule =
         member x.InParams = inParams 
         member x.OutParams = outParams
 
-        member x.InDataType = inParams.Values.Select(fun f->f.DevType).First()
-        member x.OutDataType = outParams.Values.Select(fun f->f.DevType).First()
-
+      
         member x.InAddress
             with get() = inParams.First().Value  |> fun (d) -> d.DevAddress
             and set(v) = inParams.ToArray().Iter(fun (kv)-> changeParam (kv.Key,inParams, v, kv.Value.DevName))

@@ -61,7 +61,7 @@ module CoreExtensionModule =
             | _, _, true ->
                 if nameOpt.IsSome then failwithlog $"Duplicate Name part detected: {part}"
                 nameOpt <- Some part
-            | _ -> failwithlog $"Unknown format detected: {part}"
+            | _ -> failwithlog $"Unknown format detected: text '{txt}' part '{part}'"
 
         createDevParam addr nameOpt valueOpt timeOpt
 
@@ -224,7 +224,19 @@ module CoreExtensionModule =
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (name:string) = x.LoadedSystems.TryFind(fun f-> f.Name = name)
-            
+
+    let getType (xs:DevParam seq) = 
+        if xs.Where(fun f->f.DevValueNType.IsSome).Any() 
+                then 
+                    let types = xs.Choose(fun f->f.DevValueNType).Select(fun (_,vt)->vt)
+                    if types.Distinct().Count() > 1
+                    then 
+                        failwithlog $"dataType miss matching error {String.Join(',', types.Select(fun f->f.ToText()))}"
+                    else
+                        xs.Select(fun f->f.DevType).First()
+
+                else DuBOOL
+
     type TaskDev with
         member x.GetInParam(jobName:string) = x.InParams[jobName]
         member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)
@@ -237,6 +249,11 @@ module CoreExtensionModule =
 
         member x.GetOutSymbol(jobName:string) = x.OutParams[jobName] |> fun (d) -> d.DevSymbolName
         member x.SetOutSymbol(jobName:string, symName:string option) =changeParam (jobName,  x.OutParams, x.OutParams[jobName].DevAddress, symName)
+
+
+        member x.InDataType = getType x.InParams.Values
+        member x.OutDataType  =getType x.OutParams.Values
+
 
     type Real with
         member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  

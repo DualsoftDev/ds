@@ -9,6 +9,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open Engine.CodeGenPLC
 open Engine.CodeGenCPU
+open Engine.Parser.FS
 
 
 type XgxConvertDsCPU(target:PlatformTarget) =
@@ -43,13 +44,40 @@ type XgxConvertDsCPU(target:PlatformTarget) =
         let result = exportXMLforLSPLC(target, t.Sys, myTemplate f, None, 0, 0, 0)
         result === result
 
+    member __.``Test DS Case`` () =
+        let f = getFuncName()
+        let testCode = """
+             [sys] HelloDS = {
+                [flow] STN1 = {
+                    STN1_EXT_ADV > Work1;
+                    Work1 = {
+                        STN1_Device4_RET; 
+                    }
+                }
+                [jobs] = {
+                    STN1_EXT_ADV = { STN1_EXT.ADV(P0010:66, -); }
+                    STN1_Device4_RET = { STN1_Device4.RET(P0020:300, -:200); }
+                }
+   
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_EXT; 
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_Device4; 
+            }
+            """
+
+        let systemRepo = ShareableSystemRepository()
+        let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+        let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+        
+        let result = exportXMLforLSPLC(target, helper.TheSystem, myTemplate f, None, 0, 0, 0)
+        result === result
 
 type XgiConvertDsCPU() =
     inherit XgxConvertDsCPU(XGI)
     [<Test>] member __.``Test All Case`` () = base.``Test All Case``()
+    [<Test>] member __.``Test DS Code`` () = base.``Test DS Case``()
 
 
 type XgkConvertDsCPU() =
     inherit XgxConvertDsCPU(XGK)
     [<Test>] member __.``Test All Case`` () = base.``Test All Case``()
-
+    [<Test>] member __.``Test DS Code`` () = base.``Test DS Case``()

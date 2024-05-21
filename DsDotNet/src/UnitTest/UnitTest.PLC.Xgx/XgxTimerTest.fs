@@ -243,6 +243,20 @@ type XgxTimerTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
+    member x.``TIMER= Not BOOLEAN ENABLE Condition test`` () =
+        let storages = Storages()
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code =
+            $"""
+                double pi = 3.14;
+                bool b1 = $pi > 6.28;
+                ton myTon = {ton}(15000u, $pi > 6.28);
+            """;
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
 
@@ -258,6 +272,7 @@ type XgiTimerTest() =
     [<Test>] member __.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
     [<Test>] member __.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
     [<Test>] member __.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()
+    [<Test>] member __.``TIMER= Not BOOLEAN ENABLE Condition test`` () = base.``TIMER= Not BOOLEAN ENABLE Condition test``()
 
 [<Collection("SeparatedTestGroup")>]
 type XgkTimerTest() =
@@ -271,3 +286,4 @@ type XgkTimerTest() =
     [<Test>] member __.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
     [<Test>] member __.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
     [<Test>] member __.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()
+    [<Test>] member __.``TIMER= Not BOOLEAN ENABLE Condition test`` () = base.``TIMER= Not BOOLEAN ENABLE Condition test``()

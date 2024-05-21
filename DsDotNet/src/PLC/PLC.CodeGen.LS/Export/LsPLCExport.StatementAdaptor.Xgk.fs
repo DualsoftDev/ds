@@ -57,6 +57,7 @@ module XgkTypeConvertorModule =
         else
             $"{prefix}{opName}{unsigned}"
 
+    type ExpressionConversionResult = IExpression * IStorage list * Statement list
 
     /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.
     /// 이 과정에서 추가할 필요가 있는 storate 는 newLocalStorages 에 추가한다.
@@ -68,9 +69,9 @@ module XgkTypeConvertorModule =
     ///     추가 storage : tmp2
     ///     최종 exp: "tmp1 > 4"
     ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
-    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) : IExpression * IStorage list * Statement list  =
+    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult  =
         assert (prjParam.TargetType = XGK)
-        let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : IExpression * IStorage list * Statement list =
+        let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
             match exp.FunctionName, exp.FunctionArguments with
             | Some fn, l::r::[] ->
                 let lexpr, lstgs, lstmts = helper (nestLevel + 1) (l, None)
@@ -119,13 +120,36 @@ module XgkTypeConvertorModule =
 
     /// XGK 전용 Statement 확장
     let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
+        do
+            ()
+        let xxx = 1
         let newStatements =
+            let timer2XgkStatements (timer:TimerStatement) : Statement list =
+                let mutable newTimer = DuTimer timer
+                [
+                    match timer.ResetCondition with
+                    | Some rst ->
+                        // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
+                        newTimer <- DuAssign(None, rst, new XgkTimerCounterStructResetCoil(timer.Timer.TimerStruct))
+                    | _ -> ()
+
+                    match timer.RungInCondition with
+                    | Some ric when not <| ric.IsPureBoolean() ->
+                        let assignStatement, ricVar = ric.ToAssignStatementAndAutoVariable prjParam
+                        newLocalStorages.Add(ricVar)
+                        newTimer <- DuTimer {timer with RungInCondition = Some (ricVar.ToExpression() :?> IExpression<bool>)}
+                        yield assignStatement
+                    | _ -> ()
+                    yield newTimer
+                ]
+
             match statement with
             | DuAssign(condition, exp, target) ->
                 let exp2, stgs, stmts = exp2expXgk prjParam (exp, Some target)
                 newLocalStorages.AddRange(stgs)
                 let duplicated =
                     option {
+                        // a := a 등의 형태 체크
                         let! terminal = exp2.Terminal
                         let! variable = terminal.Variable
                         return variable = target
@@ -138,7 +162,8 @@ module XgkTypeConvertorModule =
                     stmts @ statement2XgxStatements prjParam newLocalStorages newStatement
 
 
-            // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.  다음과 같이 2개의 문장으로 분리한다.
+            // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
+            // XGK 에서 다음과 같이 2개의 문장으로 분리한다.
             // bool b3;
             // b3 = $nn1 > $nn2;
             | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
@@ -146,17 +171,11 @@ module XgkTypeConvertorModule =
                 let stmt = DuAssign(Some systemOnRising, exp, decl)
                 statement2XgkStatements prjParam newLocalStorages stmt
 
-            | DuTimer tmr when tmr.ResetCondition.IsSome -> //|| tmr.RungInCondition.IsSome ->
-                let reset = tmr.ResetCondition |> map (fun r -> DuAssign(None, tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct)))
-
-                // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                let resetStatement = DuAssign(None, tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct))
-                [ statement; resetStatement ]
-
-            | DuTimer _  -> [ statement ]
+            | DuTimer tmr ->
+                timer2XgkStatements tmr
 
             | DuCounter ctr ->
-                let statements = ResizeArray<Statement>([statement])
+                let statements = StatementContainer([statement])
                 // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
                 let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
                 let typ = ctr.Counter.Type
@@ -168,9 +187,9 @@ module XgkTypeConvertorModule =
                     let mutable newStatement = statement
                     let mutable newCtr = ctr
 
-                    // newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
+                    /// newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
                     let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
-                        let assignStatement, ldVar = cond.ToAssignStatementAndAuotVariable prjParam
+                        let assignStatement, ldVar = cond.ToAssignStatementAndAutoVariable prjParam
                         statements.Add assignStatement
                         newLocalStorages.Add ldVar
 

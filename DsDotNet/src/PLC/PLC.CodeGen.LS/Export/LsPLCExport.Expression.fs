@@ -2,6 +2,7 @@ namespace PLC.CodeGen.LS
 
 
 open Engine.Core
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module LsPLCExportExpressionModule =
@@ -32,6 +33,31 @@ module LsPLCExportExpressionModule =
                     ] |> String.concat "\r\n"
                 | _ -> failwith "Invalid expression"
             traverse 0 exp
+
+
+
+        member exp.CollectOperators () : string list =
+            [
+                match exp.Terminal, exp.FunctionName with
+                | Some _terminal, None ->
+                    ()
+                | None, Some fn ->
+                    yield fn
+                    yield! exp.FunctionArguments |> collect (fun arg -> arg.CollectOperators())
+                | _ ->
+                    failwith "Invalid expression"
+            ]
+        member exp.IsPureBoolean() : bool = exp.CollectOperators() |> Seq.forall(fun op -> op.IsOneOf("&&", "||", "!"))
+
+        member exp.Visit (f: IExpression -> IExpression) : IExpression =
+            match exp.Terminal, exp.FunctionName with
+            | Some _terminal, None ->
+                f exp
+            | None, Some _fn ->
+                let args = exp.FunctionArguments |> map f
+                exp.WithNewFunctionArguments args |> f
+            | _ ->
+                failwith "Invalid expression"
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.

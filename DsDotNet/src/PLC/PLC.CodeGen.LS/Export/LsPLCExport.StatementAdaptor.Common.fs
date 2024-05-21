@@ -545,7 +545,7 @@ module XgxExpressionConvertorModule =
 
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
-        member x.ToAssignStatementAndAuotVariable (prjParam: XgxProjectParams) : (Statement * IXgxVar) =
+        member x.ToAssignStatementAndAutoVariable (prjParam: XgxProjectParams) : (Statement * IXgxVar) =
             if x.Terminal.IsSome then
                 failwith "Terminal expression cannot be converted to statement"
 

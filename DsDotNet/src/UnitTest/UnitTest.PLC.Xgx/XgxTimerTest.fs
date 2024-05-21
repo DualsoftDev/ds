@@ -249,6 +249,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
         let code =
             $"""
                 double pi = 3.14;
+                bool b0 = !($pi == 6.28);
                 bool b1 = $pi > 6.28;
                 ton myTon = {ton}(15000u, $pi > 6.28);
             """;

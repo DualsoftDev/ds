@@ -68,7 +68,7 @@ module XgkTypeConvertorModule =
     ///     추가 storage : tmp2
     ///     최종 exp: "tmp1 > 4"
     ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
-    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) (newLocalStorages: XgxStorage) (newStatements:StatementContainer) : IExpression =
+    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) : IExpression * IStorage list * Statement list  =
         assert (prjParam.TargetType = XGK)
         let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : IExpression * IStorage list * Statement list =
             match exp.FunctionName, exp.FunctionArguments with
@@ -113,21 +113,17 @@ module XgkTypeConvertorModule =
                 exp, [], []
 
         if exp.Terminal.IsSome then
-            exp
+            exp, [], []
         else
-            let expr, stgs, stmts = helper 0 (exp, expStore)
-            newLocalStorages.AddRange stgs
-            newStatements.AddRange stmts
-            expr
+            helper 0 (exp, expStore)
 
     /// XGK 전용 Statement 확장
     let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
-        let augmentedStatements = StatementContainer() // DuAugmentedPLCFunction case
-
         let newStatements =
             match statement with
             | DuAssign(condition, exp, target) ->
-                let exp2 = exp2expXgk prjParam (exp, Some target) newLocalStorages augmentedStatements
+                let exp2, stgs, stmts = exp2expXgk prjParam (exp, Some target)
+                newLocalStorages.AddRange(stgs)
                 let duplicated =
                     option {
                         let! terminal = exp2.Terminal
@@ -135,11 +131,11 @@ module XgkTypeConvertorModule =
                         return variable = target
                     } |> Option.defaultValue false
 
-                if augmentedStatements.any() && (exp = exp2 || duplicated) then
-                    []
+                if stmts.any() && (exp = exp2 || duplicated) then
+                    stmts
                 else
                     let newStatement = DuAssign(condition, exp2, target)
-                    statement2XgxStatements prjParam newLocalStorages newStatement
+                    stmts @ statement2XgxStatements prjParam newLocalStorages newStatement
 
 
             // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.  다음과 같이 2개의 문장으로 분리한다.
@@ -150,7 +146,9 @@ module XgkTypeConvertorModule =
                 let stmt = DuAssign(Some systemOnRising, exp, decl)
                 statement2XgkStatements prjParam newLocalStorages stmt
 
-            | DuTimer tmr when tmr.ResetCondition.IsSome ->
+            | DuTimer tmr when tmr.ResetCondition.IsSome -> //|| tmr.RungInCondition.IsSome ->
+                let reset = tmr.ResetCondition |> map (fun r -> DuAssign(None, tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct)))
+
                 // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
                 let resetStatement = DuAssign(None, tmr.ResetCondition.Value, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct))
                 [ statement; resetStatement ]
@@ -207,5 +205,5 @@ module XgkTypeConvertorModule =
                 // 공용 처리
                 statement2XgxStatements prjParam newLocalStorages statement
 
-        augmentedStatements @ newStatements |> List.ofSeq
+        newStatements |> List.ofSeq
 

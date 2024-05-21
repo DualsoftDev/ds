@@ -546,7 +546,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             match devParam.DevName with
             | Some name ->
                 let address = devParam.DevAddress
-                let dataType = devParam.DevType
+                let dataType = devParam.Type
                 let variable = createVariableByType name dataType
 
                 system.AddActionVariables (ActionVariable(name, address, jobName, dataType)) |> ignore

@@ -33,9 +33,9 @@ module ConvertCoreExtUtils =
             | _ -> 
                 failwithf "bridgeType err"
 
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InParam.DevType)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InParam.Type)
         |> iter (fun t -> x.InTag   <- t)
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutParam.DevType)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutParam.Type)
         |> iter (fun t -> x.OutTag  <- t)
 
     let getInExpr (x:DevParam, devTag:ITag, sys:DsSystem) = 
@@ -43,11 +43,11 @@ module ConvertCoreExtUtils =
         if devTag.IsNull() 
         then sysOff.Expr  :> IExpression
         else 
-            if x.DevType = DuBOOL 
+            if x.Type = DuBOOL 
             then 
                 if x.DevValue.IsNull() 
                     then devTag.ToExpression()
-                elif Convert.ToBoolean(x.DevValue) 
+                elif Convert.ToBoolean(x.Value) 
                     then  devTag.ToExpression()
                 else 
                     !!(devTag.ToExpression():?> Expression<bool>) :> IExpression

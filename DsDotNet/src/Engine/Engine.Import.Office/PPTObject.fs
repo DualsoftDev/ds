@@ -423,9 +423,9 @@ module PPTObjectModule =
                 shape.ErrorName((error()), iPage)
 
         let getPostParam(x:DevParam) =
-            match x.DevValueNType, x.DevTime with 
-            |Some (v, _), None->   $"{v}"
-            |Some (v, _), Some(t)->   $"{v}_{t}"
+            match x.DevValue, x.DevTime with 
+            |Some (v), None->   $"{v}"
+            |Some (v), Some(t)->   $"{v}_{t}"
             |None, Some(t)->   $"{t}"
             |None, None->   $""
         do
@@ -444,7 +444,7 @@ module PPTObjectModule =
                 if nameTrim.Contains(".") then
                     if GetLastParenthesesReplaceName(nameNFunc, "") =  nameNFunc
                     then
-                        opDevParam <-  Some (createDevParam "" None (Some(true, DuBOOL)) None)
+                        opDevParam <-  Some (createDevParam "" None  (Some(DuBOOL)) (Some(true)) None)
                     else 
                         opDevParam <-  Some (getOperatorParam nameNFunc)
 

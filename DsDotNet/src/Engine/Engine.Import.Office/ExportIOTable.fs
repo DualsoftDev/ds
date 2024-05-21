@@ -44,9 +44,9 @@ module ExportIOTable =
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
     let toTextPPTFunc (x:DevParam) =
-        match x.DevValueNType, x.DevTime with 
-        | Some(v, _), Some(t) -> $"{v}:{t}ms"
-        | Some(v, _), None    -> $"{v}"
+        match x.DevValue, x.DevTime with 
+        | Some(v), Some(t) -> $"{v}:{t}ms"
+        | Some(v), None    -> $"{v}"
         | None, Some(v)       -> $"{v}ms"
         | None, None          -> $""
 
@@ -105,8 +105,8 @@ module ExportIOTable =
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-            let inSym  =  dev.GetInParam(job.Name).DevSymbolName
-            let outSym =  dev.GetOutParam(job.Name).DevSymbolName
+            let inSym  =  dev.GetInParam(job.Name).Name
+            let outSym =  dev.GetOutParam(job.Name).Name
                
             let inSkip, outSkip =
                 match job.ActionType with
@@ -122,7 +122,7 @@ module ExportIOTable =
               getPPTTDevDataTypeText (dev)
               getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target )
               getValidAddress(dev.OutAddress,  dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
-              inSym 
+              inSym
               outSym
               ]
 
@@ -136,7 +136,7 @@ module ExportIOTable =
 
                 let devJobSet = 
                     sys.Jobs |> Seq.collect(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
-                             |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).DevType.ToText()}{dev.GetOutParam(j.Name).DevType.ToText()}{dev.ApiName}") 
+                             |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
                              |> Seq.distinctBy(fun (dev,j) -> dev)
 
                 for (dev, job) in  devJobSet do
@@ -177,8 +177,8 @@ module ExportIOTable =
                     getPPTHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
-                    cond.InParam.DevSymbolName 
-                    cond.OutParam.DevSymbolName 
+                    cond.InParam.Name 
+                    cond.OutParam.Name 
                 ]
             )
         
@@ -232,8 +232,8 @@ module ExportIOTable =
                   )
 
 
-        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"-";"-";"";"-"]]
-        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"-";"";"-"]]
+        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"";"-";"-";"-"]]
+        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"";"-";"-"]]
         let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"ALL";"";"";"";"-";"-";"-"]]
         let dts = 
             getConditionDefListRows (sys.ReadyConditions)  

@@ -128,9 +128,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[variables] = {lb}{rb}"
         ] |> combineLines
 
-    let getInOutTypeText name (inVnType:(obj*DataType) option) (outVnType:(obj*DataType) option) =
-        let inDataType = if inVnType.IsSome then inVnType.Value|>snd else DuBOOL
-        let outDataType = if outVnType.IsSome then outVnType.Value|>snd else DuBOOL
+    let getInOutTypeText name (inDataType:DataType) (outDataType:DataType) =
         match inDataType, outDataType with
         | DuBOOL, DuBOOL -> $"{name}"
         | i, o when i = o -> $"{name}(type:{inDataType.ToText()})"
@@ -259,7 +257,7 @@ module internal ToDsTextModule =
                         for hw in hws do
                             let itemText, inAddr, outAddr = getHwInfo hw
 
-                            yield $"{tab3}{getInOutTypeText (hw.Name.QuoteOnDemand()) hw.InParam.DevValueNType hw.OutParam.DevValueNType }({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
+                            yield $"{tab3}{getInOutTypeText (hw.Name.QuoteOnDemand()) hw.InParam.Type hw.OutParam.Type }({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
                           
                         yield $"{tab2}{rb}"
                 ] |> combineLines

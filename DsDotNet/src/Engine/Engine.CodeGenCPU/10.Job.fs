@@ -29,7 +29,7 @@ type Job with
                     then 
                         let rstPush = rstMemos.ToOr()
 
-                        if outParam.DevType = DuBOOL
+                        if outParam.Type = DuBOOL
                             then 
                                 failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
                         if td.ExistOutput
@@ -37,7 +37,7 @@ type Job with
                                 yield (sets, rstPush  ) ==| (td.OutTag:?> Tag<bool>, getFuncName())
 
                     else 
-                        if outParam.DevType = DuBOOL
+                        if outParam.Type = DuBOOL
                         then 
                             yield (sets, _off) --| (td.OutTag:?> Tag<bool>, getFuncName())
                         elif outParam.DevValue.IsNull() 

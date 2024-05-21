@@ -13,58 +13,6 @@ open System.Text.RegularExpressions
 module CoreExtensionModule =
     
     
-    let parseTime (item: string) =
-        let timePattern = @"^(?i:(\d+(\.\d+)?)(ms|msec|sec))$"
-        let m = Regex.Match(item, timePattern)
-        if m.Success then
-            let valueStr = m.Groups.[1].Value
-            let unit = m.Groups.[3].Value.ToLower()
-            match unit with
-            | "ms" | "msec" -> 
-                if valueStr.Contains(".") then 
-                    failwithlog $" ms and msec do not support #.# {valueStr}"
-                else 
-                    Some(Convert.ToInt32(valueStr))
-            | "sec" -> 
-                Some(Convert.ToInt32(float valueStr * 1000.0)) // Convert seconds to milliseconds
-            | _ -> None
-        else None
-
-
-    let parseValueNType (item: string) =
-        let trimmedTextValueNDataType = getTextValueNType item
-        match trimmedTextValueNDataType with
-        | Some (v,ty) -> Some( ty.ToValue(v), ty)
-        | None -> None
-
-    let isName (item: string) =
-        // Simple check to see if the item is a valid .NET variable name
-        Regex.IsMatch(item, @"^[a-zA-Z_][a-zA-Z0-9_]*$")
-
-    let getDevParam (txt: string) =
-        let parts = txt.Split(':') |> Seq.toList
-        let addr = parts.Head
-        let remainingParts = parts.Tail
-    
-        let mutable nameOpt = None
-        let mutable valueOpt = None
-        let mutable timeOpt = None
-
-        for part in remainingParts do
-            match parseTime part, parseValueNType part, isName part with
-            | Some time, _, _ -> 
-                if timeOpt.IsSome then failwithlog $"Duplicate Time part detected: {part}"
-                timeOpt <- Some time
-            | _, Some valueNType, _ ->
-                if valueOpt.IsSome then failwithlog $"Duplicate Value part detected: {part}"
-                valueOpt <- Some valueNType
-            | _, _, true ->
-                if nameOpt.IsSome then failwithlog $"Duplicate Name part detected: {part}"
-                nameOpt <- Some part
-            | _ -> failwithlog $"Unknown format detected: text '{txt}' part '{part}'"
-
-        createDevParam addr nameOpt valueOpt timeOpt
-
 
     let getDevParamInOut (paramInOutText:string) = 
         match paramInOutText.Split(',') |> Seq.toList with
@@ -226,14 +174,14 @@ module CoreExtensionModule =
         member x.GetLoadedSys   (name:string) = x.LoadedSystems.TryFind(fun f-> f.Name = name)
 
     let getType (xs:DevParam seq) = 
-        if xs.Where(fun f->f.DevValueNType.IsSome).Any() 
+        if xs.Where(fun f->f.DevType.IsSome).Any() 
                 then 
-                    let types = xs.Choose(fun f->f.DevValueNType).Select(fun (_,vt)->vt)
+                    let types = xs.Choose(fun f->f.DevType)
                     if types.Distinct().Count() > 1
                     then 
                         failwithlog $"dataType miss matching error {String.Join(',', types.Select(fun f->f.ToText()))}"
                     else
-                        xs.Select(fun f->f.DevType).First()
+                        xs.Select(fun f->f.DevType.Value).First()
 
                 else DuBOOL
 
@@ -244,10 +192,10 @@ module CoreExtensionModule =
         member x.GetOutParam(jobName:string) = x.OutParams[jobName]
         member x.AddOrUpdateOutParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.OutParams, newDevParam)
 
-        member x.GetInSymbol(jobName:string) = x.InParams[jobName] |> fun (d) -> d.DevSymbolName
+        member x.GetInSymbol(jobName:string) = x.InParams[jobName] |> fun (d) -> d.Name
         member x.SetInSymbol(jobName:string, symName:string option) =changeParam (jobName, x.InParams,  x.InParams[jobName].DevAddress, symName)
 
-        member x.GetOutSymbol(jobName:string) = x.OutParams[jobName] |> fun (d) -> d.DevSymbolName
+        member x.GetOutSymbol(jobName:string) = x.OutParams[jobName] |> fun (d) -> d.Name
         member x.SetOutSymbol(jobName:string, symName:string option) =changeParam (jobName,  x.OutParams, x.OutParams[jobName].DevAddress, symName)
 
 
@@ -327,9 +275,9 @@ type SystemExt =
     [<Extension>]
     static member ToTextForDevParam(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
 
-    [<Extension>]
-    static member IsSensorNot(x:DevParam) = 
-                match x.DevValueNType with
-                |Some(v, ty) when ty = DuBOOL -> not (Convert.ToBoolean(v))  //RX 기본은 True
-                |_ -> false
+    //[<Extension>]
+    //static member IsSensorNot(x:DevParam) = 
+    //            match x.DevValueNType with
+    //            |Some(v, ty) when ty = DuBOOL -> not (Convert.ToBoolean(v))  //RX 기본은 True
+    //            |_ -> false
 

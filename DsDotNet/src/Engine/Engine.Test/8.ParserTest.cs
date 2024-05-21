@@ -634,8 +634,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        mv1up = { A.""+""(%I300:symbol1:0us:12ms, %Q300:ABC); }
-        mv1dn = { A.""-""(%I301:1ms, %Q301:0f); }
+        mv1up = { A.""+""(%I300:symbol1:UInt16:0us:12ms, %Q300:ABC); }
+        mv1dn = { A.""-""(%I301:1ms, %Q301:Single:0f); }
     }
     [variables] = {}
     [operators] = {
@@ -655,7 +655,7 @@ namespace Engine
         }
     }
     [jobs] = {
-        mv1up = { A.""+""(%I300:symbol1:0us:12ms, %Q300:ABC); }
+        mv1up = { A.""+""(%I300:symbol1:UInt16, %Q300); }
         mv1dn = { A.""-""(%I301, %Q301); }
     }
     [variables] = {}
@@ -677,7 +677,7 @@ namespace Engine
     }
     [jobs] = {
         mv1up = { A.""+""(%I300, %Q300); }
-        mv1dn = { A.""-""(%I301, %Q301:AOUT:300); }
+        mv1dn = { A.""-""(%I301, %Q301:AOUT:Int32:300); }
     }
     [variables] = {
         Int32 v0;

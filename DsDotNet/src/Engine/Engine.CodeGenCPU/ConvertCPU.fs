@@ -196,7 +196,7 @@ module ConvertCPU =
             for job, devs in jobs.Select(fun j-> j, j.DeviceDefs) do
                 for dev in devs do
                     if dev.InTag.IsNonNull() then  
-                        yield dev.SensorEmulation(s, dev.GetInParam(job.Name).IsSensorNot())
+                        yield dev.SensorEmulation(s, job)
         ]
  
      

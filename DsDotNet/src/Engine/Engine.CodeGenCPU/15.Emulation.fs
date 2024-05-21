@@ -8,15 +8,10 @@ open Dual.Common.Core.FS
 
 type TaskDev with
 
-    member d.SensorEmulation(sys:DsSystem, bNotFunc:bool) =
-
-        let set = if bNotFunc 
-                  then !!d.ApiItem.PE.Expr
-                  else d.ApiItem.PE.Expr
-
-        let rst = sys._off.Expr
+    member d.SensorEmulation(sys:DsSystem, job:Job) =
         
-        (set, rst) --| (d.InTag, getFuncName())
+        let rst = sys._off.Expr
+        (d.GetInExpr(job.Name), rst) --| (d.InTag, getFuncName())
 
 type DsSystem with
 

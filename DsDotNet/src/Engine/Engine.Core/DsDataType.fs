@@ -271,20 +271,27 @@ module DsDataType =
         | _ -> failwithf $"'size bit {blockSlottype}' not support getBlockType"
 
 
-    let textToDataType(typeName:string) =
+    let tryTextToDataType(typeName:string) =
         match typeName.ToLower() with
         //system1   | system2   | plc
-        | "boolean" | "bool"    | "bit"  ->  DuBOOL
-        | "char"                         ->  DuCHAR
-        | "float32" | "single"           ->  DuFLOAT32
-        | "float64" | "double"           ->  DuFLOAT64
-        | "int16"   | "short"            ->  DuINT16
-        | "int32"   | "int"              ->  DuINT32
-        | "int64"   | "long"             ->  DuINT64
-        | "int8"    | "sbyte"            ->  DuINT8
-        | "string"                       ->  DuSTRING
-        | "uint16"  | "ushort"  |"word"  ->  DuUINT16
-        | "uint32"  | "uint"    |"dword" ->  DuUINT32
-        | "uint64"  | "ulong"   |"lword" ->  DuUINT64
-        | "uint8"   | "byte"    |"byte"  ->  DuUINT8
+        | "boolean" | "bool"    | "bit"  ->  DuBOOL      |> Some
+        | "char"                         ->  DuCHAR      |> Some
+        | "float32" | "single"           ->  DuFLOAT32   |> Some
+        | "float64" | "double"           ->  DuFLOAT64   |> Some
+        | "int16"   | "short"            ->  DuINT16     |> Some
+        | "int32"   | "int"              ->  DuINT32     |> Some
+        | "int64"   | "long"             ->  DuINT64     |> Some
+        | "int8"    | "sbyte"            ->  DuINT8      |> Some
+        | "string"                       ->  DuSTRING    |> Some
+        | "uint16"  | "ushort"  |"word"  ->  DuUINT16    |> Some
+        | "uint32"  | "uint"    |"dword" ->  DuUINT32    |> Some
+        | "uint64"  | "ulong"   |"lword" ->  DuUINT64    |> Some
+        | "uint8"   | "byte"    |"byte"  ->  DuUINT8     |> Some
+        | _ -> None
+
+
+    let textToDataType(typeName:string) =
+        match tryTextToDataType typeName with
+        |Some v -> v
         | _ -> failwithf $"'{typeName}' DataToType Error check type"
+

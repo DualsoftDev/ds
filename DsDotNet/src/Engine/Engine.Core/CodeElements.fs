@@ -87,18 +87,19 @@ module rec CodeElements =
     type DevParam = {
         DevAddress: DevAddress
         DevName : string option  //In or Out Tag 이름
-        DevValueNType: (obj*DataType) option
+        DevType: DataType option
+        DevValue: obj option
         DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
     } with
-        member x.DevValue = match x.DevValueNType with 
-                                 |Some (v, _)->  v
-                                 |None -> null
-        member x.DevType = match x.DevValueNType with 
-                                 |Some (_, t)-> t
-                                 |None -> DuBOOL     //기본 타입 bool   
-        member x.DevSymbolName = match x.DevName with 
-                                 |Some (n)-> n
-                                 |None -> "" 
+        member x.Value = match x.DevValue with 
+                              |Some (v)->  v
+                              |None -> null
+        member x.Type = match x.DevType with 
+                              |Some (t)-> t
+                              |None -> DuBOOL     //기본 타입 bool   
+        member x.Name = match x.DevName with 
+                              |Some (n)-> n
+                              |None -> "" 
        
         
 
@@ -106,7 +107,8 @@ module rec CodeElements =
         {   
             DevAddress = address
             DevName = None
-            DevValueNType = None
+            DevType = None
+            DevValue = None
             DevTime = None
         }
 
@@ -114,7 +116,8 @@ module rec CodeElements =
         { 
           DevAddress = address
           DevName =  symbol
-          DevValueNType = x.DevValueNType 
+          DevType = x.DevType 
+          DevValue = x.DevValue 
           DevTime = x.DevTime
     }
     
@@ -128,30 +131,99 @@ module rec CodeElements =
             paramDic.Remove(jobName) |> ignore
             paramDic.Add (jobName, changedDevParam)
 
-    let createDevParam (address:string) (name:string option) (vNt:(obj*DataType) option) (t:int option) = 
+
+
+
+    let createDevParam (address:string) (nametype:string option) (dutype:DataType option) (v:obj option)  (t:int option) = 
         { 
           DevAddress = address
-          DevName = name
-          DevValueNType =vNt
+          DevName = nametype
+          DevType = dutype
+          DevValue =v
           DevTime =t
     }
 
+    
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
     let toTextDevParam (x:DevParam) = 
-        match x.DevAddress, x.DevName , x.DevValueNType, x.DevTime  with 
-        | address, Some(n) , Some(v,ty), Some(t) -> $"{addressPrint address}:{n}:{ty.ToStringValue(v)}:{t}ms"
-        | address, Some(n) , Some(v,ty), None    -> $"{addressPrint address}:{n}:{ty.ToStringValue(v)}"
-        | address, Some(n) , None, None          -> $"{addressPrint address}:{n}"
-        | address, Some(n) , None,Some(t)        -> $"{addressPrint address}:{n}:{t}ms"
-        | address, None, Some(v,ty), None        -> $"{addressPrint address}:{ty.ToStringValue(v)}"
-        | address, None, Some(v,ty), Some(t)     -> $"{addressPrint address}:{ty.ToStringValue(v)}:{t}ms"
-        | address, None, None, Some(t)           -> $"{addressPrint address}:{t}ms"
-        | address, None, None, None              -> $"{addressPrint address}"
+        let address = addressPrint x.DevAddress
+        let name   = x.DevName |> Option.defaultValue ""
+        let typ    = x.DevType |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
+        let value = x.DevValue |> Option.map (fun v -> x.Type.ToStringValue(v)) |> Option.defaultValue ""
+        let time   = x.DevTime |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
 
+        let parts = [ address; name; typ; value; time ]
+        let result = parts |> List.filter (fun s -> not (String.IsNullOrEmpty(s))) |> String.concat ":"
 
+        result
 
     let toTextInOutDev (inp:DevParam) (outp:DevParam) = 
         let inText = toTextDevParam inp
         let outText = toTextDevParam outp
         $"{inText}, {outText}"
+
+
+        
+    let parseTime (item: string) =
+        let timePattern = @"^(?i:(\d+(\.\d+)?)(ms|msec|sec))$"
+        let m = Regex.Match(item, timePattern)
+        if m.Success then
+            let valueStr = m.Groups.[1].Value
+            let unit = m.Groups.[3].Value.ToLower()
+            match unit with
+            | "ms" | "msec" -> 
+                if valueStr.Contains(".") then 
+                    failwithlog $" ms and msec do not support #.# {valueStr}"
+                else 
+                    Some(Convert.ToInt32(valueStr))
+            | "sec" -> 
+                Some(Convert.ToInt32(float valueStr * 1000.0)) // Convert seconds to milliseconds
+            | _ -> None
+        else None
+
+
+    let parseValueNType (item: string) =
+        let trimmedTextValueNDataType = getTextValueNType item
+        match trimmedTextValueNDataType with
+        | Some (v,ty) -> Some(ty.ToValue(v), ty)
+        | None -> None
+
+    
+    let isValidName (name:string) = Regex.IsMatch(name , @"^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+    let getDevParam (txt: string) =
+        let parts = txt.Split(':') |> Seq.toList
+        let addr = parts.Head
+        let remainingParts = parts.Tail
+    
+        let mutable nameOpt = None
+        let mutable typeOpt = None
+        let mutable valueOpt = None
+        let mutable timeOpt = None
+        let checkType orgty newty = 
+            if orgty <> newty then failwithlog $"Duplicate type part detected: {newty}"
+
+        for part in remainingParts do
+            match parseTime part, tryTextToDataType part, parseValueNType part  with
+            | Some time, _ , _ -> 
+                if timeOpt.IsSome then failwithlog $"Duplicate time part detected: {part}"
+                timeOpt <- Some time
+
+            | _,Some duType,_ ->
+                if typeOpt.IsSome then checkType typeOpt.Value duType
+                typeOpt <- Some duType
+            | _, _, Some (value, ty) ->
+
+                if valueOpt.IsSome then failwithlog $"Duplicate value part detected: {part}"
+                valueOpt <- Some value
+                if typeOpt.IsSome then checkType typeOpt.Value ty
+                typeOpt <- Some ty
+
+            | _ when isValidName(part) ->
+                if nameOpt.IsSome then failwithlog $"Duplicate name part detected: {part}"
+                nameOpt <- Some part
+            | _ ->
+                failwithlog $"Unknown format detected: text '{part}'"
+                
+        createDevParam addr nameOpt typeOpt valueOpt timeOpt

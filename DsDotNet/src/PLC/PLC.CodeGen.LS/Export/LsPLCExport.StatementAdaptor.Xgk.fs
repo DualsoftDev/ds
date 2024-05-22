@@ -78,14 +78,18 @@ module XgkTypeConvertorModule =
                 let rexpr, rstgs, rstmts = helper (nestLevel + 1) (r, None)
 
                 if fn.IsOneOf("!=", "==", "<>") && lexpr.DataType = typeof<bool> then
-                    // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
-                    let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
-                    let newExp =
-                        match fn with
-                        | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
-                        | "==" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
-                        | _ -> failwithlog "ERROR"
-                    newExp, (lstgs @ rstgs), (lstmts @ rstmts)
+                    //if lexpr.DataType = typeof<bool> then
+                        // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
+                        let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
+                        let newExp =
+                            match fn with
+                            | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
+                            | "==" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
+                            | _ -> failwithlog "ERROR"
+                        newExp, (lstgs @ rstgs), (lstmts @ rstmts)
+                    //else
+                    //    let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
+                    //    newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                 else
                     // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
                     let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
@@ -130,13 +134,7 @@ module XgkTypeConvertorModule =
                 augs.Statements.Add <| DuAssign(None, rst, new XgkTimerCounterStructResetCoil(timer.Timer.TimerStruct))
             | _ -> ()
 
-            match timer.RungInCondition with
-            | Some ric when not <| ric.IsPureBoolean() ->
-                let assignStatement, ricVar = ric.ToAssignStatementAndAutoVariable prjParam
-                augs.Storages.Add(ricVar)
-                augs.Statements.Add <| assignStatement
-                augs.Statements.Add <| DuTimer {timer with RungInCondition = Some (ricVar.ToExpression() :?> IExpression<bool>)}
-            | _ -> ()
+            augs.Statements.Add statement
 
 
         match statement with
@@ -168,10 +166,6 @@ module XgkTypeConvertorModule =
         // bool b3;
         // b3 = $nn1 > $nn2;
         | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
-            let augs0 = Augments()
-            let exp = exp.MakeFlattenizable augs0
-
-
             augs.Storages.Add decl
             let stmt = DuAssign(Some systemOnRising, exp, decl)
             statement2XgkStatements prjParam augs stmt

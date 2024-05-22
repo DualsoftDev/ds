@@ -40,21 +40,6 @@ module LsPLCExportExpressionModule =
                 | _ -> failwith "Invalid expression"
             traverse 0 exp
 
-
-
-        member exp.CollectOperators () : string list =
-            [
-                match exp.Terminal, exp.FunctionName with
-                | Some _terminal, None ->
-                    ()
-                | None, Some fn ->
-                    yield fn
-                    yield! exp.FunctionArguments |> collect (fun arg -> arg.CollectOperators())
-                | _ ->
-                    failwith "Invalid expression"
-            ]
-        member exp.IsPureBoolean() : bool = exp.CollectOperators() |> Seq.forall(fun op -> op.IsOneOf("&&", "||", "!"))
-
         member exp.Visit (f: IExpression -> IExpression) : IExpression =
             match exp.Terminal, exp.FunctionName with
             | Some _terminal, None ->
@@ -92,7 +77,7 @@ module LsPLCExportExpressionModule =
         /// Expression 을 flattern 할 수 있는 형태로 변환
         /// 1. Non-terminal negation 을 terminal negation 으로 변경
         /// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
-        member exp.MakeFlattenizable (augs:Augments) : IExpression =
+        member exp.MakeFlattenizable(): IExpression =
             exp.TerminalizeNegate()
 
 

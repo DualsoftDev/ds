@@ -822,5 +822,7 @@ module internal rec Command =
                         | TimerMode(timerStatement) ->
                             timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
                     rxiRungImpl (x, y) (Some exp) cmdExp
+            | _, _, Some _ ->
+                    rxiRungImpl (x, y) expr cmdExp
             | _ ->
                 failwithlog "ERROR"

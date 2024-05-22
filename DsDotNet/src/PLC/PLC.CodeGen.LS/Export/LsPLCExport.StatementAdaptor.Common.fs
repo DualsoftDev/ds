@@ -172,6 +172,13 @@ module rec TypeConvertorModule =
         | UINT32 -> XgxVar<uint32>(createParam ())
         | UINT64 -> XgxVar<uint64>(createParam ())
         | UINT8 -> XgxVar<uint8>(createParam ())
+        | "DuFunction" ->
+            let defaultBool = 
+                { defaultStorageCreationParams false (VariableTag.PlcUserVariable|>int) with
+                    Name = name
+                    Comment = Some comment }
+
+            XgxVar<bool>(defaultBool)
         | _ -> failwithlog "ERROR"
 
     let sys = DsSystem("")
@@ -633,3 +640,30 @@ module XgxExpressionConvertorModule =
             | DuAugmentedPLCFunction _ -> failwithlog "ERROR"
 
         augs.Statements.AddRange (augmentedStatements @ newStatements)
+
+
+    type Statement with
+        /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
+        member x.VisitExpression (visit:IExpression -> IExpression) : Statement =
+            let tryVisit (exp:IExpression<bool> option) : IExpression<bool> option =
+                match exp with
+                | Some exp -> visit (exp:>IExpression) :?> IExpression<bool> |> Some
+                | None -> None
+
+            match x with
+            | DuAssign(condition, exp, tgt) -> DuAssign(tryVisit condition, visit exp, tgt)                
+            | DuVarDecl(exp, var) -> DuVarDecl(visit exp, var)
+            | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
+                DuTimer { tmr with RungInCondition = tryVisit rungIn; ResetCondition = tryVisit reset }
+            | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
+                DuCounter {ctr with UpCondition = tryVisit up; DownCondition = tryVisit down; ResetCondition = tryVisit reset; LoadCondition = tryVisit load}
+            | DuAction(DuCopy(condition, source, target)) ->
+                DuAction(DuCopy(visit condition :?> IExpression<bool>, visit source, target))
+
+            | DuAugmentedPLCFunction ({Arguments = args} as functionParameters) ->
+                let newArgs = args |> map visit
+                DuAugmentedPLCFunction { functionParameters with Arguments = newArgs }
+
+        member x.MakeExpressionsFlattenizable() =
+            let visitor (exp:IExpression) : IExpression = exp.MakeFlattenizable()
+            x.VisitExpression visitor

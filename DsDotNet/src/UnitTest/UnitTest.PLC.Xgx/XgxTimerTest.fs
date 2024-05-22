@@ -249,9 +249,11 @@ type XgxTimerTest(xgx:PlatformTarget) =
         let code =
             $"""
                 double pi = 3.14;
-                bool b0 = !($pi == 6.28);
-                bool b1 = $pi > 6.28;
-                ton myTon = {ton}(15000u, $pi > 6.28);
+                bool b0 = !($pi == 6.1);
+                bool b1 = true && !($pi == 6.2);
+                bool b2 = $pi > 6.23;
+                bool b3 = !($pi > 6.24);
+                ton myTon = {ton}(15000u, $pi > 6.25);
             """;
 
         let statements = parseCodeForWindows storages code

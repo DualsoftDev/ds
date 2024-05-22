@@ -15,11 +15,11 @@ module XgxTypeConvertorModule =
         (newLocalStorages: XgxStorage)
         (CommentedStatement(comment, statement))
       : CommentedXgxStatements =
-        let xgxStatements =
-            match prjParam.TargetType with
-            | XGI -> statement2XgiStatements prjParam newLocalStorages statement
-            | XGK -> statement2XgkStatements prjParam newLocalStorages statement
-            | _ -> failwith "Not supported runtime target"
+        let augs = Augments(newLocalStorages, StatementContainer())
+        match prjParam.TargetType with
+        | XGI -> statement2XgiStatements prjParam augs statement
+        | XGK -> statement2XgkStatements prjParam augs statement
+        | _ -> failwith "Not supported runtime target"
 
         let rungComment =
             [
@@ -31,4 +31,4 @@ module XgxTypeConvertorModule =
             |> escapeXml
 
        
-        CommentedXgiStatements(rungComment, xgxStatements)
+        CommentedXgiStatements(rungComment, augs.Statements.ToFSharpList())

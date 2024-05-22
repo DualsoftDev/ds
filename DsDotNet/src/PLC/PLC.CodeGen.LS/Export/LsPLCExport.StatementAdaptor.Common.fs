@@ -231,7 +231,6 @@ module rec TypeConvertorModule =
 
 [<AutoOpen>]
 module XgxExpressionConvertorModule =
-    type XgxStorage = ResizeArray<IStorage>
     /// '_ON' 에 대한 flat expression
     let fakeAlwaysOnFlatExpression =
         let on =
@@ -553,14 +552,14 @@ module XgxExpressionConvertorModule =
             DuAssign(None, x, var), var
 
     /// XGK/XGI 공용 Statement 확장
-    let internal statement2XgxStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
+    let internal statement2XgxStatements (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
         let augmentedStatements = StatementContainer() // DuAugmentedPLCFunction case
 
         let newStatements =
             match statement with
             | DuAssign(condition, exp, target) ->
                 let defaultConvertorParams =
-                    {   Storage = newLocalStorages
+                    {   Storage = augs.Storages
                         ExpandFunctionStatements = augmentedStatements
                         Exp = exp
                         ExpStore = None}
@@ -589,13 +588,13 @@ module XgxExpressionConvertorModule =
             | DuVarDecl(exp, decl) ->
                 let _newExp =
                     collectExpandedExpression prjParam
-                        { Storage = newLocalStorages
+                        { Storage = augs.Storages
                           ExpandFunctionStatements = augmentedStatements
                           Exp = exp
                           ExpStore = Some decl}
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
-                newLocalStorages.Remove decl |> ignore
+                augs.Storages.Remove decl |> ignore
 
                 match decl with
                 | :? IXgxVar as loc ->
@@ -605,18 +604,18 @@ module XgxExpressionConvertorModule =
 
                     let _typ = initValue.GetType()
                     let var = createXgxVariable decl.Name initValue comment
-                    newLocalStorages.Add var
+                    augs.Storages.Add var
                     []
 
                 | (:? IVariable | :? ITag) when decl.IsGlobal ->
-                    newLocalStorages.Add decl
+                    augs.Storages.Add decl
                     if prjParam.TargetType = XGK then
                         [ DuAssign(Some fake1OnExpression, exp, decl) ]
                     else
                         []
                 | (:? IVariable | :? ITag) ->
                     let var = createXgxVariable decl.Name decl.BoxedValue decl.Comment
-                    newLocalStorages.Add var
+                    augs.Storages.Add var
                     []
 
                 | _ -> failwithlog "ERROR"
@@ -633,4 +632,4 @@ module XgxExpressionConvertorModule =
 
             | DuAugmentedPLCFunction _ -> failwithlog "ERROR"
 
-        augmentedStatements @ newStatements |> List.ofSeq
+        augs.Statements.AddRange (augmentedStatements @ newStatements)

@@ -11,6 +11,12 @@ module LsPLCExportExpressionModule =
         FunctionHandler: int*IExpression*IStorage option -> IExpression     // (level, expression, resultStore) -> new expression
     }
 
+    type XgxStorage = ResizeArray<IStorage>
+    type Augments(storages:XgxStorage, statements:StatementContainer) =
+        new() = Augments(XgxStorage(), StatementContainer())
+        member val Storages = storages        // ResizeArray<IStorage>
+        member val Statements = statements    // ResizeArray<Statement>
+
     type IExpression with
         /// 주어진 Expression 을 multi-line text 형태로 변환한다.
         member exp.ToTextFormat() : string =
@@ -58,6 +64,15 @@ module LsPLCExportExpressionModule =
                 exp.WithNewFunctionArguments args |> f
             | _ ->
                 failwith "Invalid expression"
+
+        /// Non-terminal negation 을 terminal negation 으로 변경
+        member exp.TerminalizeNegate() : IExpression =
+            exp
+        /// Expression 을 flattern 할 수 있는 형태로 변환
+        /// 1. Non-terminal negation 을 terminal negation 으로 변경
+        /// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
+        member exp.MakeFlattenizable (augs:Augments) : IExpression =
+            exp
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.

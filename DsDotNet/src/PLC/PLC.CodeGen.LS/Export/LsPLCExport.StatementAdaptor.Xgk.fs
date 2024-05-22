@@ -69,7 +69,7 @@ module XgkTypeConvertorModule =
     ///     추가 storage : tmp2
     ///     최종 exp: "tmp1 > 4"
     ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
-    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult  =
+    let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) (augs:Augments) : IExpression =
         assert (prjParam.TargetType = XGK)
         let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
             match exp.FunctionName, exp.FunctionArguments with
@@ -114,115 +114,110 @@ module XgkTypeConvertorModule =
                 exp, [], []
 
         if exp.Terminal.IsSome then
-            exp, [], []
+            exp
         else
-            helper 0 (exp, expStore)
+            let exp, stgs, stmts = helper 0 (exp, expStore)
+            augs.Storages.AddRange(stgs)
+            augs.Statements.AddRange(stmts)
+            exp
 
     /// XGK 전용 Statement 확장
-    let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (newLocalStorages: XgxStorage) (statement: Statement) : Statement list =
-        do
-            ()
-        let xxx = 1
-        let newStatements =
-            let timer2XgkStatements (timer:TimerStatement) : Statement list =
-                let mutable newTimer = DuTimer timer
-                [
-                    match timer.ResetCondition with
-                    | Some rst ->
-                        // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                        newTimer <- DuAssign(None, rst, new XgkTimerCounterStructResetCoil(timer.Timer.TimerStruct))
-                    | _ -> ()
+    let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
+        let timer2XgkStatements (timer:TimerStatement) =
+            match timer.ResetCondition with
+            | Some rst ->
+                // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
+                augs.Statements.Add <| DuAssign(None, rst, new XgkTimerCounterStructResetCoil(timer.Timer.TimerStruct))
+            | _ -> ()
 
-                    match timer.RungInCondition with
-                    | Some ric when not <| ric.IsPureBoolean() ->
-                        let assignStatement, ricVar = ric.ToAssignStatementAndAutoVariable prjParam
-                        newLocalStorages.Add(ricVar)
-                        newTimer <- DuTimer {timer with RungInCondition = Some (ricVar.ToExpression() :?> IExpression<bool>)}
-                        yield assignStatement
-                    | _ -> ()
-                    yield newTimer
-                ]
+            match timer.RungInCondition with
+            | Some ric when not <| ric.IsPureBoolean() ->
+                let assignStatement, ricVar = ric.ToAssignStatementAndAutoVariable prjParam
+                augs.Storages.Add(ricVar)
+                augs.Statements.Add <| DuTimer {timer with RungInCondition = Some (ricVar.ToExpression() :?> IExpression<bool>)}
+                augs.Statements.Add <| assignStatement
+            | _ -> ()
 
-            match statement with
-            | DuAssign(condition, exp, target) ->
-                let exp2, stgs, stmts = exp2expXgk prjParam (exp, Some target)
-                newLocalStorages.AddRange(stgs)
-                let duplicated =
-                    option {
-                        // a := a 등의 형태 체크
-                        let! terminal = exp2.Terminal
-                        let! variable = terminal.Variable
-                        return variable = target
-                    } |> Option.defaultValue false
+        match statement with
+        | DuAssign(condition, exp, target) ->
+            let numStatementsBefore = augs.Statements.Count
+            let exp2 = exp2expXgk prjParam (exp, Some target) augs
+            let duplicated =
+                option {
+                    // a := a 등의 형태 체크
+                    let! terminal = exp2.Terminal
+                    let! variable = terminal.Variable
+                    return variable = target
+                } |> Option.defaultValue false
 
-                if stmts.any() && (exp = exp2 || duplicated) then
-                    stmts
-                else
-                    let newStatement = DuAssign(condition, exp2, target)
-                    stmts @ statement2XgxStatements prjParam newLocalStorages newStatement
+            if augs.Statements.Count = numStatementsBefore || (exp <> exp2 && not duplicated) then
+                let newStatement = DuAssign(condition, exp2, target)
+                statement2XgxStatements prjParam augs newStatement
+                
+                
+            //if augs.Statements.Count > numStatementsBefore && (exp = exp2 || duplicated) then
+            //    stmts
+            //else
+            //    let newStatement = DuAssign(condition, exp2, target)
+            //    stmts @ statement2XgxStatements prjParam newLocalStorages newStatement
 
 
-            // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
-            // XGK 에서 다음과 같이 2개의 문장으로 분리한다.
-            // bool b3;
-            // b3 = $nn1 > $nn2;
-            | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
-                newLocalStorages.Add decl
-                let stmt = DuAssign(Some systemOnRising, exp, decl)
-                statement2XgkStatements prjParam newLocalStorages stmt
+        // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
+        // XGK 에서 다음과 같이 2개의 문장으로 분리한다.
+        // bool b3;
+        // b3 = $nn1 > $nn2;
+        | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
+            augs.Storages.Add decl
+            let stmt = DuAssign(Some systemOnRising, exp, decl)
+            statement2XgkStatements prjParam augs stmt
 
-            | DuTimer tmr ->
-                timer2XgkStatements tmr
+        | DuTimer tmr -> timer2XgkStatements tmr
 
-            | DuCounter ctr ->
-                let statements = StatementContainer([statement])
-                // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
-                let typ = ctr.Counter.Type
-                match typ with
-                | CTD -> DuAssign(None, ctr.LoadCondition.Value, resetCoil) |> statements.Add
-                | (CTR|CTU|CTUD) -> DuAssign(None, ctr.ResetCondition.Value, resetCoil) |> statements.Add
+        | DuCounter ctr ->
+            let statements = StatementContainer([statement])
+            // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
+            let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
+            let typ = ctr.Counter.Type
+            match typ with
+            | CTD -> DuAssign(None, ctr.LoadCondition.Value, resetCoil) |> statements.Add
+            | (CTR|CTU|CTUD) -> DuAssign(None, ctr.ResetCondition.Value, resetCoil) |> statements.Add
 
-                if typ = CTUD then
-                    let mutable newStatement = statement
-                    let mutable newCtr = ctr
+            if typ = CTUD then
+                let mutable newCtr = ctr
 
-                    /// newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
-                    let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
-                        let assignStatement, ldVar = cond.ToAssignStatementAndAutoVariable prjParam
-                        statements.Add assignStatement
-                        newLocalStorages.Add ldVar
+                /// newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
+                let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
+                    let assignStatement, ldVar = cond.ToAssignStatementAndAutoVariable prjParam
+                    statements.Add assignStatement
+                    augs.Storages.Add ldVar
 
-                        let ldVarExp = ldVar.ToExpression() :?> IExpression<bool>
-                        newStatement <- newStatementGenerator(ldVarExp)
-                        match newStatement with
-                        | DuCounter ctr -> newCtr <- ctr
-                        | _ -> failwithlog "ERROR"
-
-                        statements[0] <- newStatement
+                    let ldVarExp = ldVar.ToExpression() :?> IExpression<bool>
+                    statements[0] <- newStatementGenerator(ldVarExp)
+                    match statements[0] with
+                    | DuCounter ctr -> newCtr <- ctr
+                    | _ -> failwithlog "ERROR"
 
 
-                    match newCtr.UpCondition with
-                    | Some cond when cond.Terminal.IsNone ->
-                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with UpCondition = Some ldVarExp }))
-                    | _ -> ()
+                match newCtr.UpCondition with
+                | Some cond when cond.Terminal.IsNone ->
+                    replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with UpCondition = Some ldVarExp }))
+                | _ -> ()
 
-                    match newCtr.DownCondition with
-                    | Some cond when cond.Terminal.IsNone ->
-                        replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with DownCondition = Some ldVarExp }))
-                    | _ -> ()
+                match newCtr.DownCondition with
+                | Some cond when cond.Terminal.IsNone ->
+                    replaceComplexCondition newCtr cond (fun ldVarExp -> DuCounter({ newCtr with DownCondition = Some ldVarExp }))
+                | _ -> ()
 
-                    (* XGK CTUD 에서 load : 별도의 statement 롭 분리: ldcondition --- MOV PV C0001  *)
-                    match newCtr.LoadCondition with
-                    | Some cond ->
-                        DuAction(DuCopy(cond, literal2expr(ctr.Counter.PRE.Value), ctr.Counter.CounterStruct)) |> statements.Add
-                    | _ -> ()
+                (* XGK CTUD 에서 load : 별도의 statement 롭 분리: ldcondition --- MOV PV C0001  *)
+                match newCtr.LoadCondition with
+                | Some cond ->
+                    DuAction(DuCopy(cond, literal2expr(ctr.Counter.PRE.Value), ctr.Counter.CounterStruct)) |> statements.Add
+                | _ -> ()
 
-                statements.ToFSharpList()
+            augs.Statements.AddRange(statements)
 
-            | _ ->
-                // 공용 처리
-                statement2XgxStatements prjParam newLocalStorages statement
+        | _ ->
+            // 공용 처리
+            statement2XgxStatements prjParam augs statement
 
-        newStatements |> List.ofSeq
 

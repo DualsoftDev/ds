@@ -134,9 +134,10 @@ module XgkTypeConvertorModule =
             | Some ric when not <| ric.IsPureBoolean() ->
                 let assignStatement, ricVar = ric.ToAssignStatementAndAutoVariable prjParam
                 augs.Storages.Add(ricVar)
-                augs.Statements.Add <| DuTimer {timer with RungInCondition = Some (ricVar.ToExpression() :?> IExpression<bool>)}
                 augs.Statements.Add <| assignStatement
+                augs.Statements.Add <| DuTimer {timer with RungInCondition = Some (ricVar.ToExpression() :?> IExpression<bool>)}
             | _ -> ()
+
 
         match statement with
         | DuAssign(condition, exp, target) ->
@@ -167,6 +168,10 @@ module XgkTypeConvertorModule =
         // bool b3;
         // b3 = $nn1 > $nn2;
         | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
+            let augs0 = Augments()
+            let exp = exp.MakeFlattenizable augs0
+
+
             augs.Storages.Add decl
             let stmt = DuAssign(Some systemOnRising, exp, decl)
             statement2XgkStatements prjParam augs stmt

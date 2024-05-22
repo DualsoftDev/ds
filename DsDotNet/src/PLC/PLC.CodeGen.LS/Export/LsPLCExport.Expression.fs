@@ -67,12 +67,33 @@ module LsPLCExportExpressionModule =
 
         /// Non-terminal negation 을 terminal negation 으로 변경
         member exp.TerminalizeNegate() : IExpression =
-            exp
+            match exp.Terminal, exp.FunctionName with
+            | Some terminal, None -> exp
+            | None, Some fn ->
+                let args = exp.FunctionArguments |> map (fun a -> a.TerminalizeNegate())
+                if fn = "!" then
+                    let arg0 = args.ExactlyOne()
+                    let subArgs = arg0.FunctionArguments
+                    match arg0.FunctionName with
+                    | Some "!" -> arg0
+                    | Some "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = subArgs } :> IExpression
+                    | Some "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = subArgs } :> IExpression
+                    | Some ">" ->  DuFunction { FunctionBody = fLt;       Name = "<";  Arguments = subArgs } :> IExpression
+                    | Some ">=" -> DuFunction { FunctionBody = fLte;      Name = "<="; Arguments = subArgs } :> IExpression
+                    | Some "<" ->  DuFunction { FunctionBody = fGt;       Name = ">";  Arguments = subArgs } :> IExpression
+                    | Some "<=" -> DuFunction { FunctionBody = fGte;      Name = ">="; Arguments = subArgs } :> IExpression
+
+                    | _ -> exp
+                else
+                    exp.WithNewFunctionArguments args
+            | _ ->
+                failwith "Invalid expression"
+
         /// Expression 을 flattern 할 수 있는 형태로 변환
         /// 1. Non-terminal negation 을 terminal negation 으로 변경
         /// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
         member exp.MakeFlattenizable (augs:Augments) : IExpression =
-            exp
+            exp.TerminalizeNegate()
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.

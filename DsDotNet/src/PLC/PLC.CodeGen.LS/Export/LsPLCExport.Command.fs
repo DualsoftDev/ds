@@ -486,7 +486,7 @@ module internal rec Command =
 
 
     /// 왼쪽에 FB (비교 연산 등) 를 그리고, 오른쪽에 coil 을 그린다.
-    let drawXgkFBLeft (x, y) (fbParam: string) (target: string) : XmlOutput =
+    let xmlXgkFBLeft (x, y) (fbParam: string) (target: string) : XmlOutput =
         assert (x = 0)
         let inner =
             [ 
@@ -505,7 +505,7 @@ module internal rec Command =
 
 
     /// 왼쪽에 _ON 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
-    let drawXgkFBRight (x, y) (fbParam: string) : XmlOutput =
+    let xmlXgkFBRight (x, y) (fbParam: string) : XmlOutput =
         assert (x = 0)
         let inner =
             [ 

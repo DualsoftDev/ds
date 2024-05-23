@@ -81,10 +81,10 @@ module XgiExportModule =
                     let xy = (0, rgi.NextRungY)
                     if funName.IsOneOf(arithmaticOps) then
                         let param = $"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
-                        drawXgkFBRight xy param
+                        xmlXgkFBRight xy param
                     elif funName.IsOneOf(comparisonOps) then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
-                        drawXgkFBLeft xy param target.Address
+                        xmlXgkFBLeft xy param target.Address
                     else
                         failwithlog $"ERROR: {funName}"
 

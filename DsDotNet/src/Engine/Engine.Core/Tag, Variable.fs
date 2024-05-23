@@ -91,8 +91,13 @@ module TagVariableModule =
         interface IType with
             member x.DataType = typedefof<'T>
 
+        interface ITerminal with
+            member x.Variable = Some(x:>IStorage)
+            member x.Literal = None
+
         interface INamedExpressionizableTerminal with
             member x.StorageName = name
+
 
         abstract ToText: unit -> string
         /// IExpression<'T> 의 boxed 형태의 expression 생성
@@ -126,6 +131,10 @@ module TagVariableModule =
 
             interface IExpressionizableTerminal with
                 member x.ToText() = x.ToText()// sprintf "%A" x.Value
+            interface ITerminal with
+                member x.Variable = None
+                member x.Literal = Some(x:>IExpressionizableTerminal)
+
             interface ILiteralHolder with
                 member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
                 member x.ToText() = x.ToText()// sprintf "%A" x.Value

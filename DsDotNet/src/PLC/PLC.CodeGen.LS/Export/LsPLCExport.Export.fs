@@ -79,12 +79,13 @@ module XgiExportModule =
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
+                    let targetContact = if target.Address.IsNullOrEmpty() then target.Name else target.Address
                     if funName.IsOneOf(arithmaticOps) then
-                        let param = $"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
+                        let param = $"Param={dq}{op},{ls},{rs},{targetContact}{dq}"        // XGK 에서는 직접변수를 사용
                         xmlXgkFBRight xy param
                     elif funName.IsOneOf(comparisonOps) then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
-                        xmlXgkFBLeft xy param target.Address
+                        xmlXgkFBLeft xy param targetContact
                     else
                         failwithlog $"ERROR: {funName}"
 

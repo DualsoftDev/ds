@@ -689,9 +689,22 @@ module internal rec Command =
         | FlatNary(OpCompare cmp, args) when isXgk ->
             let param =
                 let op = operatorToXgkFunctionName cmp args[0].DataType |> escapeXml
-                $"Param={dq}{op},{args[0]},{args[1]}{dq}"        // XGK 에서는 직접변수를 사용
+                let arg0, arg1 =
+                    match args[0], args[1] with
+                        | FlatTerminal(t0, _, _), FlatTerminal(t1, _, _) ->
+                            t0.GetContact(), t1.GetContact()
+                        | _ -> failwithlog "ERROR: Terminal is None"
+                $"Param={dq}{op},{arg0},{arg1}{dq}"        // todo: XGK 에서는 직접변수를 사용
+            let xml =
+                let c = coord (x, y)
+                elementFull (int ElementType.FBMode) c param ""
 
-            failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+            {   XmlElements = [ { Coordinate = c; Xml = xml; SpanX = 3; SpanY = 1 } ]
+                X = x; Y = y
+                TotalSpanX = 3; TotalSpanY = 1
+            }
+
+            //failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
         | FlatNary((OpCompare fn | OpArithmatic fn), _exprs) ->
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 

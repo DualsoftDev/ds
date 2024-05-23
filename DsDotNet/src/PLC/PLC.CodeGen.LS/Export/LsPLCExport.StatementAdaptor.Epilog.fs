@@ -31,5 +31,5 @@ module XgxTypeConvertorModule =
             ] |> ofNotNullAny |> String.concat "\r\n"
             |> escapeXml
 
-       
+        newLocalStorages.AddRange(augs.Storages)       
         CommentedXgiStatements(rungComment, augs.Statements.ToFSharpList())

@@ -241,11 +241,15 @@ module XgxExpressionConvertorModule =
     /// '_ON' 에 대한 flat expression
     let fakeAlwaysOnFlatExpression =
         let on =
-            { new System.Object() with
-                member x.Finalize() = ()
-              interface IExpressionizableTerminal with
-                  member x.ToText() = "_ON"
-                  member x.DataType = typedefof<bool> }
+            {   new System.Object() with
+                    member x.Finalize() = ()
+                interface IExpressionizableTerminal with
+                    member x.ToText() = "_ON"
+                    member x.DataType = typedefof<bool>
+                interface ITerminal with
+                    member x.Variable = None
+                    member x.Literal = Some(x:?>IExpressionizableTerminal)
+                  }
 
         FlatTerminal(on, false, false)
 
@@ -685,6 +689,7 @@ module XgxExpressionConvertorModule =
                         let stg = tmpVar :> IStorage
                         let stmt = DuAssign(None, exp2, stg)
                         augs.Statements.Add stmt
+                        augs.Storages.Add stg
                         tmpVar.ToExpression()
                     | _ -> exp2
             x.VisitExpression visitor

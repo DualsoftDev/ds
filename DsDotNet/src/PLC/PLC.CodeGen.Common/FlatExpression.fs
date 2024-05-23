@@ -38,17 +38,25 @@ module FlatExpressionModule =
                 |> OpCompare
             | OpArithmatic _ -> failwithlog "ERROR: Negation not supported for Arithmatic operator."
 
-    type TrueValue() =
+    [<AbstractClass>]
+    type BoolLiteralValue() =
         interface IExpressionizableTerminal with
-            member x.ToText() = "TRUE"
+            member x.ToText() = x.ToText()
         interface IType with
             member x.DataType = typedefof<bool>
+        interface ITerminal with
+            member x.Variable = None
+            member x.Literal = Some(x:>IExpressionizableTerminal)
+        abstract ToText: unit -> string
+        default x.ToText() = "TRUE"
+
+    type TrueValue() =
+        inherit BoolLiteralValue()
+        override x.ToText() = "TRUE"
 
     type FalseValue() =
-        interface IExpressionizableTerminal with
-            member x.ToText() = "FALSE"
-        interface IType with
-            member x.DataType = typedefof<bool>
+        inherit BoolLiteralValue()
+        override x.ToText() = "FALSE"
 
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =

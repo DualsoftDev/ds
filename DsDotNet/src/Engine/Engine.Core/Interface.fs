@@ -48,13 +48,14 @@ module Interface =
 
     and ISystem = interface end
 
-    type IExpressionizableTerminal =
-        inherit IText
-        inherit IType
-
     type ITerminal =
         abstract Variable: IStorage option
         abstract Literal: IExpressionizableTerminal option
+
+    and IExpressionizableTerminal =
+        inherit IText
+        inherit IType
+        inherit ITerminal
 
     // Collections and Managers
     type Storages() =

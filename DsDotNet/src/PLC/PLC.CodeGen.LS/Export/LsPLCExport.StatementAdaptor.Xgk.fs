@@ -11,6 +11,9 @@ module XgkTypeConvertorModule =
         inherit TimerCounterBaseStruct(None, tc.Name, tc.DN, tc.PRE, tc.ACC, tc.RES, (tc :> IStorage).DsSystem)
         interface INamedExpressionizableTerminal with
             member x.StorageName = tc.Name
+        interface ITerminal with
+            member x.Variable = Some tc.RES
+            member x.Literal = None
 
 
     /// {prefix}{Op}{suffix} 형태로 반환.  e.g "DADDU" : "{D}{ADD}{U}" => DWORD ADD UNSIGNED

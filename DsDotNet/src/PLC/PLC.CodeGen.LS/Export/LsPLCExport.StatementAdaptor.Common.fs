@@ -244,7 +244,8 @@ module XgxExpressionConvertorModule =
             { new System.Object() with
                 member x.Finalize() = ()
               interface IExpressionizableTerminal with
-                  member x.ToText() = "_ON" }
+                  member x.ToText() = "_ON"
+                  member x.DataType = typedefof<bool> }
 
         FlatTerminal(on, false, false)
 

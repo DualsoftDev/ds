@@ -41,10 +41,14 @@ module FlatExpressionModule =
     type TrueValue() =
         interface IExpressionizableTerminal with
             member x.ToText() = "TRUE"
+        interface IType with
+            member x.DataType = typedefof<bool>
 
     type FalseValue() =
         interface IExpressionizableTerminal with
             member x.ToText() = "FALSE"
+        interface IType with
+            member x.DataType = typedefof<bool>
 
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
@@ -55,6 +59,14 @@ module FlatExpressionModule =
         | FlatNary of Op * FlatExpression list
 
         interface IFlatExpression
+
+        interface IType with
+            member x.DataType = x.DataType
+
+        member x.DataType =
+            match x with
+            | FlatTerminal(terminal, _pulse, _neg) -> terminal.DataType
+            | FlatNary(_op, arg0::_) -> arg0.DataType
 
         member x.ToText() =
             match x with

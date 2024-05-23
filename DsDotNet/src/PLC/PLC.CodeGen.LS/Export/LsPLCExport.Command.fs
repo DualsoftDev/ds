@@ -688,9 +688,8 @@ module internal rec Command =
 
         | FlatNary(OpCompare cmp, args) when isXgk ->
             let param =
-                //let op = operatorToXgkFunctionName cmp args[0].DataType |> escapeXml
-                //$"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
-                ""
+                let op = operatorToXgkFunctionName cmp args[0].DataType |> escapeXml
+                $"Param={dq}{op},{args[0]},{args[1]}{dq}"        // XGK 에서는 직접변수를 사용
 
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
         | FlatNary((OpCompare fn | OpArithmatic fn), _exprs) ->

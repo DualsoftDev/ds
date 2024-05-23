@@ -667,3 +667,24 @@ module XgxExpressionConvertorModule =
         member x.MakeExpressionsFlattenizable() =
             let visitor (exp:IExpression) : IExpression = exp.MakeFlattenizable()
             x.VisitExpression visitor
+
+        member x.AugmentXgkArithmeticExpressionToAssignStatemnt (prjParam: XgxProjectParams) (augs: Augments) =
+            let rec visitor (exp:IExpression) : IExpression =
+                if exp.Terminal.IsSome then
+                    exp
+                else
+                    let exp2 =
+                        let args = exp.FunctionArguments |> map visitor
+                        exp.WithNewFunctionArguments args
+                    match exp2.FunctionName with
+                    | Some (("+" | "-" | "*" | "/") as fn) ->
+
+                        let tmpNameHint = operatorToMnemonic fn
+                        let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp2.BoxedEvaluatedValue $"{exp2.ToText()}"
+                        let stg = tmpVar :> IStorage
+                        let stmt = DuAssign(None, exp2, stg)
+                        augs.Statements.Add stmt
+                        tmpVar.ToExpression()
+                    | _ -> exp2
+            x.VisitExpression visitor
+

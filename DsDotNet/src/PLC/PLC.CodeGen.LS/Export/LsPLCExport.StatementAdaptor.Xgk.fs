@@ -134,7 +134,9 @@ module XgkTypeConvertorModule =
                 augs.Statements.Add <| DuAssign(None, rst, new XgkTimerCounterStructResetCoil(timer.Timer.TimerStruct))
             | _ -> ()
 
-            augs.Statements.Add statement
+            augs.Statements.Add (DuTimer timer)
+
+        let statement = statement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
 
 
         match statement with

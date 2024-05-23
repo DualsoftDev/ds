@@ -575,6 +575,7 @@ module internal rec Command =
     /// - Xml : 좌표 * 결과 xml 문자열
     let rec private bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
         let c = coord (x, y)
+        let isXgk = prjParam.TargetType = XGK
 
         match expr with
         | FlatTerminal(terminal, pulse, neg) ->
@@ -682,7 +683,17 @@ module internal rec Command =
               TotalSpanX = spanX
               TotalSpanY = spanY }
 
-        | FlatNary((OpCompare _ | OpArithmatic _), _exprs) ->
+        | FlatNary(OpArithmatic _, _exprs) when isXgk ->
+            failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+
+        | FlatNary(OpCompare cmp, args) when isXgk ->
+            let param =
+                //let op = operatorToXgkFunctionName cmp args[0].DataType |> escapeXml
+                //$"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
+                ""
+
+            failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
+        | FlatNary((OpCompare fn | OpArithmatic fn), _exprs) ->
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         // terminal case

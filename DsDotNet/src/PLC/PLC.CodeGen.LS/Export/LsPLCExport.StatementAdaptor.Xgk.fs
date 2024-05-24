@@ -129,11 +129,10 @@ module XgkTypeConvertorModule =
             exp
 
     /// XGK 전용 Statement 확장
-    let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (augs:Augments) (origStatement: Statement) : unit =
-        let statement = origStatement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
+    let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
+        let newStatement = statement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
 
-
-        match statement with
+        match newStatement with
         | DuAssign(condition, exp, target) ->
             let numStatementsBefore = augs.Statements.Count
             let exp2 = exp2expXgk prjParam (exp, Some target) augs
@@ -146,15 +145,8 @@ module XgkTypeConvertorModule =
                 } |> Option.defaultValue false
 
             if augs.Statements.Count = numStatementsBefore || (exp <> exp2 && not duplicated) then
-                let newStatement = DuAssign(condition, exp2, target)
-                statement2XgxStatements prjParam augs newStatement
-                
-                
-            //if augs.Statements.Count > numStatementsBefore && (exp = exp2 || duplicated) then
-            //    stmts
-            //else
-            //    let newStatement = DuAssign(condition, exp2, target)
-            //    stmts @ statement2XgxStatements prjParam newLocalStorages newStatement
+                let assignStatement = DuAssign(condition, exp2, target)
+                statement2XgxStatements prjParam augs assignStatement
 
 
         // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
@@ -176,7 +168,7 @@ module XgkTypeConvertorModule =
             augs.Statements.Add (DuTimer tmr)
 
         | DuCounter ctr ->
-            let statements = StatementContainer([statement])
+            let statements = StatementContainer([newStatement])
             // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
             let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
             let typ = ctr.Counter.Type
@@ -220,6 +212,6 @@ module XgkTypeConvertorModule =
 
         | _ ->
             // 공용 처리
-            statement2XgxStatements prjParam augs statement
+            statement2XgxStatements prjParam augs newStatement
 
 

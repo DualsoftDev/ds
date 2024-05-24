@@ -582,17 +582,16 @@ module XgxExpressionConvertorModule =
 
                     let augArithmaticAssignStatements = StatementContainer()
                     let param = { defaultConvertorParams with ExpandFunctionStatements = augArithmaticAssignStatements }
-                    match
-                        mergeArithmaticOperator prjParam param (Some target)
-                    with
+
+                    match mergeArithmaticOperator prjParam param (Some target) with
                     | AlreadyApplied _exp -> augArithmaticAssignStatements.ToFSharpList()
                     | NotApplied exp ->
                         augArithmaticAssignStatements.ToFSharpList()
                         @ [ DuAugmentedPLCFunction
-                                { FunctionName = op
-                                  Arguments = exp.FunctionArguments
+                                { FunctionName       = op
+                                  Arguments          = exp.FunctionArguments
                                   OriginalExpression = exp
-                                  Output = target } ]
+                                  Output             = target } ]
                 | _ ->
                     let newExp = collectExpandedExpression prjParam defaultConvertorParams
                     [ DuAssign(condition, newExp, target) ]
@@ -663,9 +662,15 @@ module XgxExpressionConvertorModule =
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
             | DuVarDecl(exp, var) -> DuVarDecl(visitTop exp, var)
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
-                DuTimer { tmr with RungInCondition = tryVisitTop rungIn; ResetCondition = tryVisitTop reset}
+                DuTimer { tmr with
+                            RungInCondition = tryVisitTop rungIn
+                            ResetCondition  = tryVisitTop reset }
             | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
-                DuCounter {ctr with UpCondition = tryVisitTop up; DownCondition = tryVisitTop down; ResetCondition = tryVisitTop reset; LoadCondition = tryVisitTop load}
+                DuCounter {ctr with
+                            UpCondition    = tryVisitTop up 
+                            DownCondition  = tryVisitTop down
+                            ResetCondition = tryVisitTop reset
+                            LoadCondition  = tryVisitTop load }
             | DuAction(DuCopy(condition, source, target)) ->
                 let cond = (visitTop condition) :?> IExpression<bool>
                 DuAction(DuCopy(cond, visitTop source, target))
@@ -679,6 +684,7 @@ module XgxExpressionConvertorModule =
             let visit2 _ (exp:IExpression) = visit exp
             x.VisitExpression visit2
 
+        /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
         member x.MakeExpressionsFlattenizable() =
             let visitor (exp:IExpression) : IExpression = exp.MakeFlattenizable()
             x.VisitExpression visitor

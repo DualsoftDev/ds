@@ -74,7 +74,8 @@ module LsPLCExportExpressionModule =
             | _ ->
                 failwith "Invalid expression"
 
-        /// Expression 을 flattern 할 수 있는 형태로 변환
+        /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
+        ///
         /// 1. Non-terminal negation 을 terminal negation 으로 변경
         /// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
         member exp.MakeFlattenizable(): IExpression =

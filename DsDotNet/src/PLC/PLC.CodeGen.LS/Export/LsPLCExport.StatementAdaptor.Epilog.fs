@@ -16,17 +16,17 @@ module XgxTypeConvertorModule =
         (CommentedStatement(comment, statement))
       : CommentedXgxStatements =
         let augs = Augments(newLocalStorages, StatementContainer())
-        let statement = statement.MakeExpressionsFlattenizable()
+        let newStatement = statement.MakeExpressionsFlattenizable()
         match prjParam.TargetType with
-        | XGI -> statement2XgiStatements prjParam augs statement
-        | XGK -> statement2XgkStatements prjParam augs statement
+        | XGI -> statement2XgiStatements prjParam augs newStatement
+        | XGK -> statement2XgkStatements prjParam augs newStatement
         | _ -> failwith "Not supported runtime target"
 
         let rungComment =
             [
                 comment
                 if prjParam.AppendDebugInfoToRungComment then
-                    let statementComment = statement.ToText()
+                    let statementComment = newStatement.ToText()
                     statementComment
             ] |> ofNotNullAny |> String.concat "\r\n"
             |> escapeXml

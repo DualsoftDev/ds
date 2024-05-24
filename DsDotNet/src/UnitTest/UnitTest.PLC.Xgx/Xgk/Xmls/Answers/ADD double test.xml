@@ -46,10 +46,6 @@
                         <Symbol Name="nn2" Comment="" Device="M" DevicePos="4" Type="WORD"/>
                         <Symbol Name="sub" Comment="" Device="M" DevicePos="12" Type="WORD"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="24" Type="WORD"/>
-                        <Symbol Name="_t2_SUB" Comment="$nn1 - $nn2" Device="M" DevicePos="28" Type="WORD"/>
-                        <Symbol Name="_t3_MUL" Comment="$nn1 * $nn2" Device="M" DevicePos="32" Type="WORD"/>
-                        <Symbol Name="_t4_DIV" Comment="$nn1 / $nn2" Device="M" DevicePos="36" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -117,18 +113,23 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="11268" Param="81"/>
-                                    <Element ElementType="33" Coordinate="11358" Param="LADD,nn1,nn2,M0024"/>
+                                    <Element ElementType="33" Coordinate="11358" Param="LADD,nn1,nn2,M0008"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="12289">
+                                    <Element ElementType="63" Coordinate="12289">
+                                        [4] float64 sub = $nn1 - $nn2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="13313">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="12292" Param="81"/>
-                                    <Element ElementType="33" Coordinate="12370" Param="LMOV,_t1_ADD,sum"/>
+                                    <Element ElementType="2" Coordinate="13316" Param="81"/>
+                                    <Element ElementType="33" Coordinate="13406" Param="LSUB,nn1,nn2,M0012"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="14337">
-                                        [4] float64 sub = $nn1 - $nn2
+                                        [5] float64 mul = $nn1 * $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -136,56 +137,23 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="15364" Param="81"/>
-                                    <Element ElementType="33" Coordinate="15454" Param="LSUB,nn1,nn2,M0028"/>
+                                    <Element ElementType="33" Coordinate="15454" Param="LMUL,nn1,nn2,M0016"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="16385">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="16388" Param="81"/>
-                                    <Element ElementType="33" Coordinate="16466" Param="LMOV,_t2_SUB,sub"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="18433">
-                                        [5] float64 mul = $nn1 * $nn2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="19457">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="19460" Param="81"/>
-                                    <Element ElementType="33" Coordinate="19550" Param="LMUL,nn1,nn2,M0032"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="20481">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="20484" Param="81"/>
-                                    <Element ElementType="33" Coordinate="20562" Param="LMOV,_t3_MUL,mul"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="22529">
+                                    <Element ElementType="63" Coordinate="16385">
                                         [6] float64 div = $nn1 / $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="23553">
+                                    <Element ElementType="6" Coordinate="17409">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="23556" Param="81"/>
-                                    <Element ElementType="33" Coordinate="23646" Param="LDIV,nn1,nn2,M0036"/>
+                                    <Element ElementType="2" Coordinate="17412" Param="81"/>
+                                    <Element ElementType="33" Coordinate="17502" Param="LDIV,nn1,nn2,M0020"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="24577">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="24580" Param="81"/>
-                                    <Element ElementType="33" Coordinate="24658" Param="LMOV,_t4_DIV,div"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="27649" Param="90"/>
-                                    <Element ElementType="33" Coordinate="27742" Param="END">
+                                    <Element ElementType="2" Coordinate="19457" Param="90"/>
+                                    <Element ElementType="33" Coordinate="19550" Param="END">
                                         END
                                     </Element>
                                 </Rung>

@@ -129,7 +129,7 @@ module XgkTypeConvertorModule =
             exp
 
     /// XGK 전용 Statement 확장
-    let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
+    let rec internal s2XgkSs (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
         let newStatement = statement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
 
         match newStatement with
@@ -146,7 +146,7 @@ module XgkTypeConvertorModule =
 
             if augs.Statements.Count = numStatementsBefore || (exp <> exp2 && not duplicated) then
                 let assignStatement = DuAssign(condition, exp2, target)
-                statement2XgxStatements prjParam augs assignStatement
+                s2XgxSs prjParam augs assignStatement
 
 
         // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
@@ -156,7 +156,7 @@ module XgkTypeConvertorModule =
         | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
             augs.Storages.Add decl
             let stmt = DuAssign(Some systemOnRising, exp, decl)
-            statement2XgkStatements prjParam augs stmt
+            s2XgkSs prjParam augs stmt
 
         | DuTimer tmr ->
             match tmr.ResetCondition with
@@ -212,6 +212,6 @@ module XgkTypeConvertorModule =
 
         | _ ->
             // 공용 처리
-            statement2XgxStatements prjParam augs newStatement
+            s2XgxSs prjParam augs newStatement
 
 

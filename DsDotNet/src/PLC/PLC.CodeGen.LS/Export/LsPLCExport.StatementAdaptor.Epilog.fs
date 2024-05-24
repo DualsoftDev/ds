@@ -9,8 +9,10 @@ open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module XgxTypeConvertorModule =
+    /// (Commented Statement) To (Commented Statements)
+    ///
     /// S -> [XS]
-    let internal statement2Statements
+    let internal cs2Css
         (prjParam: XgxProjectParams)
         (newLocalStorages: XgxStorage)
         (CommentedStatement(comment, statement))
@@ -18,8 +20,8 @@ module XgxTypeConvertorModule =
         let augs = Augments(newLocalStorages, StatementContainer())
         let newStatement = statement.MakeExpressionsFlattenizable()
         match prjParam.TargetType with
-        | XGI -> statement2XgiStatements prjParam augs newStatement
-        | XGK -> statement2XgkStatements prjParam augs newStatement
+        | XGI -> s2XgiSs prjParam augs newStatement
+        | XGK -> s2XgkSs prjParam augs newStatement
         | _ -> failwith "Not supported runtime target"
 
         let rungComment =

@@ -563,8 +563,8 @@ module XgxExpressionConvertorModule =
             let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText()}"
             DuAssign(None, x, var), var
 
-    /// XGK/XGI 공용 Statement 확장
-    let internal statement2XgxStatements (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
+    /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
+    let internal s2XgxSs (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
         let augmentedStatements = StatementContainer() // DuAugmentedPLCFunction case
 
         let newStatements =

@@ -126,8 +126,8 @@ module FlatExpressionModule =
                     | FunctionNameRisingAfter -> Op.RisingAfter
                     | FunctionNameFallingAfter -> Op.FallingAfter
 
-                    | (">" | "<" | ">=" | "<=" | "==" | "!=") -> Op.OpCompare fs.Name
-                    | ("+" | "-" | "*" | "/") -> Op.OpArithmatic fs.Name
+                    | (">"|">="|"<"|"<="|"=="|"!="|"<>") -> Op.OpCompare fs.Name
+                    | ("+"|"-"|"*"|"/") -> Op.OpArithmatic fs.Name
                     | _ -> failwithlog "ERROR"
 
                 let flatArgs = fs.Arguments |> map flattenExpression |> List.cast<FlatExpression>

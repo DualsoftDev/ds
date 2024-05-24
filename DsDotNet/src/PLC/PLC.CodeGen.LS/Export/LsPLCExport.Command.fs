@@ -100,7 +100,7 @@ module internal rec Command =
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
     // <timer> for XGI
-    let private bxiFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement)  target: BlockXmlInfo =
+    let private bxiXgiFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement)  target: BlockXmlInfo =
         let ts = timerStatement
         let typ = ts.Timer.Type     // TON, TOF, TMR
         let time: int = int ts.Timer.PRE.Value
@@ -116,11 +116,11 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(TimerMode(ts))
-            bxiFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
+            bxiXgiFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters
 
         blockXml
 
-    let private bxiFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) target: BlockXmlInfo =
+    let private bxiXgiFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) target: BlockXmlInfo =
         assert(prjParam.TargetType = XGI)
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -149,7 +149,7 @@ module internal rec Command =
 
         let blockXml =
             let cmd = FunctionBlockCmd(CounterMode(cs))
-            bxiFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters target
+            bxiXgiFunctionBlockInstanceXmls prjParam (x, y) cmd inputParameters outputParameters
 
         blockXml
 
@@ -159,7 +159,7 @@ module internal rec Command =
         member x.GetSizeString(target:PlatformTarget) = systemTypeToXgxTypeName target x
 
 
-    let bxiPredicate (prjParam: XgxProjectParams) (x, y) (predicate: Predicate) target: BlockXmlInfo =
+    let bxiXgiPredicate (prjParam: XgxProjectParams) (x, y) (predicate: Predicate) : BlockXmlInfo =
         match predicate with
         | Compare(name, output, args) ->
             let namedInputParameters =
@@ -171,7 +171,7 @@ module internal rec Command =
             let func =
                 match name with
                 | ("GT" | "GE" | "EQ" | "LE" | "LT" | "NE") ->
-                    let opCompType = args[0].DataType.GetSizeString(target)
+                    let opCompType = args[0].DataType.GetSizeString(prjParam.TargetType)
 
                     if name = "NE" then
                         $"{name}_{opCompType}" // NE_BOOL
@@ -179,9 +179,9 @@ module internal rec Command =
                         $"{name}2_{opCompType}" // e.g "GT2_INT"
                 | _ -> failwithlog "NOT YET"
 
-            bxiBox prjParam (x, y) func namedInputParameters outputParameters "" target
+            bxiXgiBox prjParam (x, y) func namedInputParameters outputParameters ""
 
-    let bxiFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockXmlInfo =
+    let bxiXgiFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockXmlInfo =
         match func with
         | Arithmatic(name, output, args) ->
             let namedInputParameters =
@@ -203,41 +203,40 @@ module internal rec Command =
                 | ("SUB" | "DIV") -> name // DIV 는 DIV, DIV2 만 존재함
                 | _ -> failwithlog "NOT YET"
 
-            bxiBox prjParam (x, y) func namedInputParameters outputParameters "" target
+            bxiXgiBox prjParam (x, y) func namedInputParameters outputParameters ""
 
-    let bxiAction (prjParam: XgxProjectParams) (x, y) (func: PLCAction) targetPLC: BlockXmlInfo =
+    let bxiXgiAction (prjParam: XgxProjectParams) (x, y) (func: PLCAction) : BlockXmlInfo =
         match func with
         | Move(condition, source, target) ->
             let namedInputParameters = [ "EN", condition :> IExpression; "IN", source ]
 
             let output = target :?> INamedExpressionizableTerminal
             let outputParameters = [ "OUT", output ]
-            bxiBox prjParam (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters "" targetPLC
+            bxiXgiBox prjParam (x, y) XgiConstants.FunctionNameMove namedInputParameters outputParameters ""
 
-    let bxiFunctionBlockInstanceXmls
+    let bxiXgiFunctionBlockInstanceXmls
             (prjParam: XgxProjectParams)
             (rungStartX, rungStartY)
             (cmd: CommandTypes)
             (namedInputParameters: (string * IExpression) list)
             (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
-            target
         : BlockXmlInfo =
             let func = cmd.VarType.ToString()
             let instanceName = cmd.InstanceName
-            bxiBox prjParam (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName target
+            bxiXgiBox prjParam (rungStartX, rungStartY) func namedInputParameters namedOutputParameters instanceName
 
     /// cmd 인자로 주어진 function block 의 type 과
     /// namedInputParameters 로 주어진 function block 에 연결된 다릿발 정보를 이용해서
     /// function block rung 을 그린다.
-    let bxiBox
+    let bxiXgiBox
             (prjParam: XgxProjectParams)
             (rungStartX, rungStartY)
             (functionName: string)
             (namedInputParameters: (string * IExpression) list)
             (namedOutputParameters: (string * INamedExpressionizableTerminal) list)
             (instanceName: string)
-            (targetType : PlatformTarget)
         : BlockXmlInfo =
+            let targetType = prjParam.TargetType
             let iDic = namedInputParameters |> dict
             let oDic = namedOutputParameters |> Tuple.toDictionary
 
@@ -390,13 +389,13 @@ module internal rec Command =
         match prjParam.TargetType with
         | XGI ->
             match cmd with
-            | PredicateCmd(pc) -> bxiPredicate prjParam (x, y) pc XGI
-            | FunctionCmd(fc) -> bxiFunction prjParam (x, y) fc XGI
-            | ActionCmd(ac) -> bxiAction prjParam (x, y) ac XGI
+            | PredicateCmd(pc) -> bxiXgiPredicate prjParam (x, y) pc
+            | FunctionCmd(fc) -> bxiXgiFunction prjParam (x, y) fc XGI
+            | ActionCmd(ac) -> bxiXgiAction prjParam (x, y) ac
             | FunctionBlockCmd(fbc) ->
                 match fbc with
-                | TimerMode(timerStatement) -> bxiFunctionBlockTimer prjParam (x, y) timerStatement XGI
-                | CounterMode(counterStatement) -> bxiFunctionBlockCounter prjParam (x, y) counterStatement XGI
+                | TimerMode(timerStatement) -> bxiXgiFunctionBlockTimer prjParam (x, y) timerStatement XGI
+                | CounterMode(counterStatement) -> bxiXgiFunctionBlockCounter prjParam (x, y) counterStatement XGI
             | _ -> failwithlog "Unknown CommandType"
 
         | XGK ->

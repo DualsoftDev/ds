@@ -315,7 +315,7 @@ module XgxExpressionConvertorModule =
 
         let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
             match functionExpression.FunctionName with
-            | Some(">" | ">=" | "<" | "<=" | "==" | "!=" | "+" | "-" | "*" | "/" as op) -> //when level <> 0 ->
+            | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/" as op) -> //when level <> 0 ->
                 let args = functionExpression.FunctionArguments
                 let var:IStorage =
                     expStore |> Option.defaultWith (fun () -> 
@@ -410,7 +410,7 @@ module XgxExpressionConvertorModule =
             augmentParams
 
         match exp.FunctionName with
-        | Some("+" | "-" | "*" | "/" as op) ->
+        | Some("+"|"-"|"*"|"/" as op) ->
             let newArgs =
                 binaryToNary prjParam { augmentParams with Exp = exp } [ "+"; "-"; "*"; "/" ] op
 
@@ -450,7 +450,7 @@ module XgxExpressionConvertorModule =
             | _ ->
                 NotApplied(exp.WithNewFunctionArguments newArgs)
 
-        | Some(">" | ">=" | "<" | "<=" | "==" | "!=" | "&&" | "||" as op) ->
+        | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "&&"|"||" as op) ->
             let newArgs = binaryToNary prjParam { augmentParams with Exp = exp } [ op ] op
             NotApplied(exp.WithNewFunctionArguments newArgs)
 
@@ -578,7 +578,7 @@ module XgxExpressionConvertorModule =
 
                 // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
-                | Some("+" | "-" | "*" | "/" as op) ->
+                | Some("+"|"-"|"*"|"/" as op) ->
 
                     let augArithmaticAssignStatements = StatementContainer()
                     let param = { defaultConvertorParams with ExpandFunctionStatements = augArithmaticAssignStatements }
@@ -693,7 +693,7 @@ module XgxExpressionConvertorModule =
                         let args = exp.FunctionArguments |> map (visitor (Some exp))
                         exp.WithNewFunctionArguments args
                     match newExp.FunctionName with
-                    | Some (("+" | "-" | "*" | "/") as fn) when parentExp.IsSome ->
+                    | Some ("+"|"-"|"*"|"/" as fn) when parentExp.IsSome ->
                         let tmpNameHint = operatorToMnemonic fn
                         let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
                         let stg = tmpVar :> IStorage

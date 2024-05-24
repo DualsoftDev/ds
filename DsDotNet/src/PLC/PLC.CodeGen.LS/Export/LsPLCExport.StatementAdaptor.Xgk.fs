@@ -24,7 +24,7 @@ module XgkTypeConvertorModule =
     let operatorToXgkFunctionName op (typ:Type) =
         let isComparison =
             match op with
-            | (">" | ">=" | "<"  | "<="  | "==" | "!=" | "<>" )-> true
+            | (">"|">="|"<"|"<="|"=="|"!="|"<>")-> true
             | _ -> false
 
         let prefix =
@@ -106,8 +106,8 @@ module XgkTypeConvertorModule =
                                 tmpVar :> IStorage
 
                     match fn with
-                    | ("+" | "-" | "*" | "/")
-                    | (">" | ">=" | "<" | "<=" | "==" | "!=") ->
+                    | ("+"|"-"|"*"|"/")
+                    | (">"|">="|"<"|"<="|"=="|"!="|"<>") ->
                         let stg = createTmpStorage()
                         let stmt = DuAssign(None, newExp, stg)
                         let varExp = stg.ToExpression()

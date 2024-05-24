@@ -327,8 +327,7 @@ module XgiExportModule =
         let newLocalStorages = ResizeArray<IStorage>(localStorages)
 
         for cmtSt in commentedStatements do
-            let xgxCmtStmts =
-                statement2Statements prjParam newLocalStorages cmtSt
+            let xgxCmtStmts:CommentedXgxStatements = statement2Statements prjParam newLocalStorages cmtSt
 
             let (CommentAndXgxStatements(_comment, xgxStatements)) = xgxCmtStmts
 

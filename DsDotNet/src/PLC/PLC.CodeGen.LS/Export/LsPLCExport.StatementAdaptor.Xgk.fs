@@ -129,7 +129,7 @@ module XgkTypeConvertorModule =
             exp
 
     /// XGK 전용 Statement 확장
-    let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
+    let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (augs:Augments) (origStatement: Statement) : unit =
         let timer2XgkStatements (timer:TimerStatement) =
             match timer.ResetCondition with
             | Some rst ->
@@ -139,7 +139,7 @@ module XgkTypeConvertorModule =
 
             augs.Statements.Add (DuTimer timer)
 
-        let statement = statement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
+        let statement = origStatement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
 
 
         match statement with

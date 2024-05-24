@@ -673,7 +673,7 @@ module XgxExpressionConvertorModule =
             let visitor (exp:IExpression) : IExpression = exp.MakeFlattenizable()
             x.VisitExpression visitor
 
-        member x.AugmentXgkArithmeticExpressionToAssignStatemnt (prjParam: XgxProjectParams) (augs: Augments) =
+        member x.AugmentXgkArithmeticExpressionToAssignStatemnt (prjParam: XgxProjectParams) (augs: Augments) : Statement =
             let rec visitor (exp:IExpression) : IExpression =
                 if exp.Terminal.IsSome then
                     exp

@@ -442,23 +442,21 @@ module internal rec Command =
         let xmls =
             let spanX = (coilCellX - x - cmdWidth)
 
-            [ let c = coord (x, y)
-              let xml =
-                let lengthParam = $"Param={dq}{3 * spanX}{dq}"
-                elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+            [   let c = coord (x, y)
+                let xml =
+                  let lengthParam = $"Param={dq}{3 * spanX}{dq}"
+                  elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-              { Coordinate = c
-                Xml = xml
-                SpanX = spanX
-                SpanY = 1 }
+                { Coordinate = coord (x, y)
+                  Xml = xml
+                  SpanX = spanX
+                  SpanY = 1 }
 
-              let c = coord (coilCellX, y)
-              let xml = elementFull (int ElementType.FBMode) c cmdParam ""
-
-              { Coordinate = c
-                Xml = xml
-                SpanX = cmdWidth
-                SpanY = 1 } ]
+                let xy = (coilCellX, y)
+                { Coordinate = coord xy
+                  Xml = xgkFBAt cmdParam xy
+                  SpanX = cmdWidth
+                  SpanY = 1 } ]
 
         { X = x
           Y = y
@@ -490,8 +488,7 @@ module internal rec Command =
         assert (x = 0)
         let inner =
             [ 
-                let c = coord (x, y)
-                elementFull (int ElementType.FBMode) c fbParam ""
+                xgkFBAt fbParam (x, y)
 
                 let c = coord (x + 3, y)
                 let spanX = coilCellX - 1
@@ -517,8 +514,8 @@ module internal rec Command =
                 let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                 elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-                let c = coord (coilCellX, y)
-                elementFull (int ElementType.FBMode) c fbParam ""
+                xgkFBAt fbParam (coilCellX, y)
+
             ] |> joinLines
         wrapWithRung inner
 
@@ -534,8 +531,8 @@ module internal rec Command =
                 let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                 elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-                let c = coord(coilCellX - fbWidth - cbx.TotalSpanX, y)
-                elementFull (int ElementType.FBMode) c fbParam ""
+                xgkFBAt fbParam (coilCellX - fbWidth - cbx.TotalSpanX, y)
+
             ] |> joinLines
 
         (* 좌측 expression 이 multiline 인 경우, 우측 FB 의 Coordinate 값이 expression 의 coordinate 중간에 삽입되는 형태로 정렬되어야 한다.  *)
@@ -687,7 +684,7 @@ module internal rec Command =
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         | FlatNary(OpCompare cmp, args) when isXgk ->
-            let param =
+            let fbParam =
                 let op = operatorToXgkFunctionName cmp args[0].DataType |> escapeXml
                 let arg0, arg1 =
                     match args[0], args[1] with
@@ -695,11 +692,9 @@ module internal rec Command =
                             t0.GetContact(), t1.GetContact()
                         | _ -> failwithlog "ERROR: Terminal is None"
                 $"Param={dq}{op},{arg0},{arg1}{dq}"        // todo: XGK 에서는 직접변수를 사용
-            let xml =
-                let c = coord (x, y)
-                elementFull (int ElementType.FBMode) c param ""
 
-            {   XmlElements = [ { Coordinate = c; Xml = xml; SpanX = 3; SpanY = 1 } ]
+            let xml = xgkFBAt fbParam (x, y)
+            {   XmlElements = [ { Coordinate = coord (x, y); Xml = xml; SpanX = 3; SpanY = 1 } ]
                 X = x; Y = y
                 TotalSpanX = 3; TotalSpanY = 1
             }

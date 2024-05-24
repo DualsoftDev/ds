@@ -649,48 +649,61 @@ module XgxExpressionConvertorModule =
 
     type Statement with
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
-        member x.VisitExpression (visit:IExpression -> IExpression) : Statement =
-            let tryVisit (exp:IExpression<bool> option) : IExpression<bool> option =
+        /// visit: parent expression -> 자신 expression -> 반환 expression : 아래의 AugmentXgkArithmeticExpressionToAssignStatemnt 샘플 참고
+        member x.VisitExpression (visit:IExpression option -> IExpression -> IExpression) : Statement =
+            let tryVisit (parentExp:IExpression option) (exp:IExpression<bool> option) : IExpression<bool> option =
                 match exp with
-                | Some exp -> visit (exp:>IExpression) :?> IExpression<bool> |> Some
+                | Some exp -> (visit parentExp (exp:>IExpression)) :?> IExpression<bool> |> Some
                 | None -> None
 
+            let visitTop exp = visit None exp
+            let tryVisitTop exp = tryVisit None exp
+
             match x with
-            | DuAssign(condition, exp, tgt) -> DuAssign(tryVisit condition, visit exp, tgt)                
-            | DuVarDecl(exp, var) -> DuVarDecl(visit exp, var)
+            | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
+            | DuVarDecl(exp, var) -> DuVarDecl(visitTop exp, var)
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
-                DuTimer { tmr with RungInCondition = tryVisit rungIn; ResetCondition = tryVisit reset }
+                DuTimer { tmr with RungInCondition = tryVisitTop rungIn; ResetCondition = tryVisitTop reset}
             | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
-                DuCounter {ctr with UpCondition = tryVisit up; DownCondition = tryVisit down; ResetCondition = tryVisit reset; LoadCondition = tryVisit load}
+                DuCounter {ctr with UpCondition = tryVisitTop up; DownCondition = tryVisitTop down; ResetCondition = tryVisitTop reset; LoadCondition = tryVisitTop load}
             | DuAction(DuCopy(condition, source, target)) ->
-                DuAction(DuCopy(visit condition :?> IExpression<bool>, visit source, target))
+                let cond = (visitTop condition) :?> IExpression<bool>
+                DuAction(DuCopy(cond, visitTop source, target))
 
             | DuAugmentedPLCFunction ({Arguments = args} as functionParameters) ->
-                let newArgs = args |> map visit
+                let newArgs = args |> map (fun arg -> visitTop arg)
                 DuAugmentedPLCFunction { functionParameters with Arguments = newArgs }
+
+        /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
+        member x.VisitExpression (visit:IExpression -> IExpression) : Statement =
+            let visit2 _ (exp:IExpression) = visit exp
+            x.VisitExpression visit2
 
         member x.MakeExpressionsFlattenizable() =
             let visitor (exp:IExpression) : IExpression = exp.MakeFlattenizable()
             x.VisitExpression visitor
 
+        /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙연산을 assign statement 로 변환한다.
         member x.AugmentXgkArithmeticExpressionToAssignStatemnt (prjParam: XgxProjectParams) (augs: Augments) : Statement =
-            let rec visitor (exp:IExpression) : IExpression =
+            let rec visitor (parentExp:IExpression option) (exp:IExpression): IExpression =
                 if exp.Terminal.IsSome then
                     exp
                 else
-                    let exp2 =
-                        let args = exp.FunctionArguments |> map visitor
+                    let newExp =
+                        let args = exp.FunctionArguments |> map (visitor (Some exp))
                         exp.WithNewFunctionArguments args
-                    match exp2.FunctionName with
-                    | Some (("+" | "-" | "*" | "/") as fn) ->
-
+                    match newExp.FunctionName with
+                    | Some (("+" | "-" | "*" | "/") as fn) when parentExp.IsSome ->
                         let tmpNameHint = operatorToMnemonic fn
-                        let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp2.BoxedEvaluatedValue $"{exp2.ToText()}"
+                        let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
                         let stg = tmpVar :> IStorage
-                        let stmt = DuAssign(None, exp2, stg)
+                        let stmt = DuAssign(None, newExp, stg)
                         augs.Statements.Add stmt
                         augs.Storages.Add stg
                         tmpVar.ToExpression()
-                    | _ -> exp2
-            x.VisitExpression visitor
+                    | _ ->
+                        newExp
+
+            // visitor 를 이용해서 statement 내의 모든 expression 을 변환한다.
+            x.VisitExpression visitor 
 

@@ -58,6 +58,7 @@
                         <Symbol Name="nn8" Comment="" Device="M" DevicePos="7" Type="WORD"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="9" Type="WORD"/>
                         <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="11" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -305,30 +306,37 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="48132" Param="81"/>
-                                    <Element ElementType="33" Coordinate="48222" Param="ADD,nn1,nn2,M0009"/>
+                                    <Element ElementType="33" Coordinate="48222" Param="ADD,nn1,nn2,M0010"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="49153">
+                                    <Element ElementType="6" Coordinate="49153">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="49156" Param="81"/>
+                                    <Element ElementType="33" Coordinate="49234" Param="MOV,_t1_ADD,sum"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="51201">
                                         [17] bool b8 = $nn1 + $nn2 &gt; 3s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="50177">
+                                    <Element ElementType="6" Coordinate="52225">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="50180" Param="81"/>
-                                    <Element ElementType="33" Coordinate="50270" Param="ADD,nn1,nn2,M0010"/>
+                                    <Element ElementType="2" Coordinate="52228" Param="81"/>
+                                    <Element ElementType="33" Coordinate="52318" Param="ADD,nn1,nn2,M0011"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="51201" Param="&gt;,_t1_ADD,3"/>
-                                    <Element ElementType="2" Coordinate="51210" Param="90"/>
-                                    <Element ElementType="14" Coordinate="51294">
+                                    <Element ElementType="33" Coordinate="53249" Param="&gt;,_t2_ADD,3"/>
+                                    <Element ElementType="2" Coordinate="53258" Param="90"/>
+                                    <Element ElementType="14" Coordinate="53342">
                                         M00087
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="53249" Param="90"/>
-                                    <Element ElementType="33" Coordinate="53342" Param="END">
+                                    <Element ElementType="2" Coordinate="55297" Param="90"/>
+                                    <Element ElementType="33" Coordinate="55390" Param="END">
                                         END
                                     </Element>
                                 </Rung>

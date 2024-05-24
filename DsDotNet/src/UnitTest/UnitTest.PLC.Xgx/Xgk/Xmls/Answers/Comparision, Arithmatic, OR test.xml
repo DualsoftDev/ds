@@ -51,13 +51,13 @@
                         <Symbol Name="result" Comment="" Device="M" DevicePos="144" Type="BIT"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="8" Type="WORD"/>
                         <Symbol Name="_t1_MUL" Comment="$nn2 * $nn3" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2 * $nn3" Device="M" DevicePos="11" Type="WORD"/>
-                        <Symbol Name="_t3_GT" Comment="$nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="145" Type="BIT"/>
-                        <Symbol Name="_t4_MUL" Comment="$nn5 * $nn6" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="_t5_DIV" Comment="$nn5 * $nn6 / $nn7" Device="M" DevicePos="13" Type="WORD"/>
-                        <Symbol Name="_t6_ADD" Comment="$nn4 + $nn5 * $nn6 / $nn7" Device="M" DevicePos="14" Type="WORD"/>
-                        <Symbol Name="_t7_SUB" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8" Device="M" DevicePos="15" Type="WORD"/>
-                        <Symbol Name="_t8_GT" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="146" Type="BIT"/>
+                        <Symbol Name="_t2_ADD" Comment="$nn1 + $_t1_MUL" Device="M" DevicePos="11" Type="WORD"/>
+                        <Symbol Name="_t3_MUL" Comment="$nn5 * $nn6" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="_t4_DIV" Comment="$_t3_MUL / $nn7" Device="M" DevicePos="13" Type="WORD"/>
+                        <Symbol Name="_t5_ADD" Comment="$nn4 + $_t4_DIV" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="_t6_SUB" Comment="$_t5_ADD - $nn8" Device="M" DevicePos="15" Type="WORD"/>
+                        <Symbol Name="_t7_GT" Comment="$_t2_ADD &gt; 2s" Device="M" DevicePos="145" Type="BIT"/>
+                        <Symbol Name="_t8_GT" Comment="$_t6_SUB &gt; 5s" Device="M" DevicePos="146" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -219,42 +219,42 @@
                                     <Element ElementType="33" Coordinate="33886" Param="ADD,nn1,_t1_MUL,M0011"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="34817" Param="&gt;,_t2_ADD,2"/>
-                                    <Element ElementType="2" Coordinate="34826" Param="90"/>
-                                    <Element ElementType="14" Coordinate="34910">
-                                        M00091
+                                    <Element ElementType="6" Coordinate="34817">
+                                        _ON
                                     </Element>
+                                    <Element ElementType="2" Coordinate="34820" Param="81"/>
+                                    <Element ElementType="33" Coordinate="34910" Param="MUL,nn5,nn6,M0012"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="35841">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="35844" Param="81"/>
-                                    <Element ElementType="33" Coordinate="35934" Param="MUL,nn5,nn6,M0012"/>
+                                    <Element ElementType="33" Coordinate="35934" Param="DIV,_t3_MUL,nn7,M0013"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="36865">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="36868" Param="81"/>
-                                    <Element ElementType="33" Coordinate="36958" Param="DIV,_t4_MUL,nn7,M0013"/>
+                                    <Element ElementType="33" Coordinate="36958" Param="ADD,nn4,_t4_DIV,M0014"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="37889">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="37892" Param="81"/>
-                                    <Element ElementType="33" Coordinate="37982" Param="ADD,nn4,_t5_DIV,M0014"/>
+                                    <Element ElementType="33" Coordinate="37982" Param="SUB,_t5_ADD,nn8,M0015"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="38913">
-                                        _ON
+                                    <Element ElementType="33" Coordinate="38913" Param="&gt;,_t2_ADD,2"/>
+                                    <Element ElementType="2" Coordinate="38922" Param="90"/>
+                                    <Element ElementType="14" Coordinate="39006">
+                                        M00091
                                     </Element>
-                                    <Element ElementType="2" Coordinate="38916" Param="81"/>
-                                    <Element ElementType="33" Coordinate="39006" Param="SUB,_t6_ADD,nn8,M0015"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="39937" Param="&gt;,_t7_SUB,5"/>
+                                    <Element ElementType="33" Coordinate="39937" Param="&gt;,_t6_SUB,5"/>
                                     <Element ElementType="2" Coordinate="39946" Param="90"/>
                                     <Element ElementType="14" Coordinate="40030">
                                         M00092

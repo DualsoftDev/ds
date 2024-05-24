@@ -53,6 +53,9 @@
                         <Symbol Name="mysingle" Comment="" Device="M" DevicePos="2" Type="WORD"/>
                         <Symbol Name="myuint16" Comment="" Device="M" DevicePos="13" Type="WORD"/>
                         <Symbol Name="myuint32" Comment="" Device="M" DevicePos="16" Type="WORD"/>
+                        <Symbol Name="_t1_ADD" Comment="$mypi + $myeuler" Device="M" DevicePos="36" Type="WORD"/>
+                        <Symbol Name="_t2_ADD" Comment="3.14 + 2.718" Device="M" DevicePos="40" Type="WORD"/>
+                        <Symbol Name="_t3_ADD" Comment="$myDoubleSum1 + $myDoubleSum3" Device="M" DevicePos="44" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -216,23 +219,18 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="35844" Param="81"/>
-                                    <Element ElementType="33" Coordinate="35934" Param="LADD,mypi,myeuler,M0028"/>
+                                    <Element ElementType="33" Coordinate="35934" Param="LADD,mypi,myeuler,M0036"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="36865">
-                                        [12] float64 myDoubleSum4 = 3.14 + 2.718
+                                    <Element ElementType="6" Coordinate="36865">
+                                        _1ON
                                     </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="37889">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="37892" Param="81"/>
-                                    <Element ElementType="33" Coordinate="37982" Param="LADD,3.14,2.718,M0032"/>
+                                    <Element ElementType="2" Coordinate="36868" Param="81"/>
+                                    <Element ElementType="33" Coordinate="36946" Param="LMOV,_t1_ADD,myDoubleSum3"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="38913">
-                                        [13] $myDoubleSum1 = $myDoubleSum2
+                                        [12] float64 myDoubleSum4 = 3.14 + 2.718
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -240,23 +238,49 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="39940" Param="81"/>
-                                    <Element ElementType="33" Coordinate="40018" Param="LMOV,myDoubleSum2,myDoubleSum1"/>
+                                    <Element ElementType="33" Coordinate="40030" Param="LADD,3.14,2.718,M0040"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="41985">
+                                    <Element ElementType="6" Coordinate="40961">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="40964" Param="81"/>
+                                    <Element ElementType="33" Coordinate="41042" Param="LMOV,_t2_ADD,myDoubleSum4"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="43009">
+                                        [13] $myDoubleSum1 = $myDoubleSum2
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="44033">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="44036" Param="81"/>
+                                    <Element ElementType="33" Coordinate="44114" Param="LMOV,myDoubleSum2,myDoubleSum1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="46081">
                                         [14] $myDoubleSum2 = $myDoubleSum1 + $myDoubleSum3
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="43009">
+                                    <Element ElementType="6" Coordinate="47105">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="43012" Param="81"/>
-                                    <Element ElementType="33" Coordinate="43102" Param="LADD,myDoubleSum1,myDoubleSum3,M0024"/>
+                                    <Element ElementType="2" Coordinate="47108" Param="81"/>
+                                    <Element ElementType="33" Coordinate="47198" Param="LADD,myDoubleSum1,myDoubleSum3,M0044"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="45057" Param="90"/>
-                                    <Element ElementType="33" Coordinate="45150" Param="END">
+                                    <Element ElementType="6" Coordinate="48129">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="48132" Param="81"/>
+                                    <Element ElementType="33" Coordinate="48210" Param="LMOV,_t3_ADD,myDoubleSum2"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="51201" Param="90"/>
+                                    <Element ElementType="33" Coordinate="51294" Param="END">
                                         END
                                     </Element>
                                 </Rung>

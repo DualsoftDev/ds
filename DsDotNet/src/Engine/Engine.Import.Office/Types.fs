@@ -58,6 +58,7 @@ module InterfaceClass =
     type ExcelCase =
         | XlsAddress //주소
         | XlsVariable //변수
+        | XlsConst //상수
         | XlsCommand  //명령
         | XlsOperator //연산
         | XlsAutoBTN //자동 버튼
@@ -83,6 +84,7 @@ module InterfaceClass =
             match x with
             | XlsAddress -> TextXlsAddress
             | XlsVariable -> TextXlsVariable
+            | XlsConst   -> TextXlsConst
             | XlsCommand -> TextXlsCommand
             | XlsOperator -> TextXlsOperator
             | XlsAutoBTN -> TextXlsAutoBTN

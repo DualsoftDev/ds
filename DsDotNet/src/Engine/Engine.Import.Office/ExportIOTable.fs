@@ -230,11 +230,12 @@ module ExportIOTable =
                   TextSkip
                   ]
                   )
-
+                  
 
         let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"";"-";"-";"-"]]
         let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"";"-";"-"]]
-        let sampleVariRows =  if variRows.any() then [] else  [[TextXlsVariable;"ALL";"";"";"";"-";"-";"-"]]
+        let sampleConstRows=  if variRows.any() then [] else  [[TextXlsVariable;"ALL";"";"";"";"-";"-";"-"]]
+        let sampleVariRows  =  if variRows.any() then [] else  [[TextXlsVariable;"ALL";"";"";"-";"-";"-";"-"]]
         let dts = 
             getConditionDefListRows (sys.ReadyConditions)  
             @ commandRows 
@@ -243,6 +244,7 @@ module ExportIOTable =
             @ sampleOperatorRows
             @ sampleCommandRows
             @ sampleVariRows
+            @ sampleConstRows
             |> Seq.chunkBySize(IOchunkBySize)
             |> Seq.map(fun rows->
                 let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")

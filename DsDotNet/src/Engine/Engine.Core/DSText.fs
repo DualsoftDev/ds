@@ -30,9 +30,10 @@ module DsText =
 module DsTextExport =
     //export Excel
     let [<Literal>] TextXlsAddress           = "외부주소"
-    let [<Literal>] TextXlsVariable          = "내부변수"
-    let [<Literal>] TextXlsOperator          = "내부연산"
-    let [<Literal>] TextXlsCommand           = "내부명령"
+    let [<Literal>] TextXlsVariable          = "변수"
+    let [<Literal>] TextXlsConst             = "상수"
+    let [<Literal>] TextXlsOperator          = "연산"
+    let [<Literal>] TextXlsCommand           = "명령"
     let [<Literal>] TextXlsAutoBTN           = "자동셀렉트"
     let [<Literal>] TextXlsManualBTN         = "수동셀렉트"
     let [<Literal>] TextXlsDriveBTN          = "운전푸쉬버튼"

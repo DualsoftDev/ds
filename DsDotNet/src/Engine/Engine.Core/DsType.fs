@@ -64,7 +64,6 @@ module DsType =
         | NoneRx  //인터페이스 관찰 없는 타입
         | NoneTx  //인터페이스 지시 없는 타입
         | NoneTRx //인터페이스 지시관찰 없는 타입
-        | Inverse ///구현대기 : 항시ON RXs(ActionIn) 인터페이스가 관찰될때까지 OFF
         | Push    // reset 인터페이스(Plan Out) 관찰될때까지 ON 
         | MultiAction  of string*int // 동시동작 개수 받기
 
@@ -131,7 +130,6 @@ module DsType =
         | Some "XX" -> JobActionType.NoneTRx
         | Some "XT" -> JobActionType.NoneTx
         | Some "XR" -> JobActionType.NoneRx
-        | Some "I" -> JobActionType.Inverse
         | Some "P" -> JobActionType.Push
         | Some s when isStringDigit s -> JobActionType.MultiAction (nameContents, (int s)) // 숫자일 경우 MultiAction으로 변환
         | Some t -> failwithf "Unknown ApiActionType: %s" t

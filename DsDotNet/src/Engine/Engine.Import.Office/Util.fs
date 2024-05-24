@@ -86,7 +86,7 @@ module Util =
     let getConditionType (key: string) =
         match key.Trim().ToUpper() with
         | "R" -> ConditionType.DuReadyState
-        | "D" -> failwith $"{key} is Not support Type" //ConditionType.DuDriveState 추후 구현
+        | "D" -> ConditionType.DuDriveState
         | _ -> failwith $"{key} is Error Type"
 
 

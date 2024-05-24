@@ -14,8 +14,8 @@ module InterfaceClass =
         | REAL //실제 나의 시스템 1 bit
         | REALExF //다른 Flow real
         | CALL //지시관찰
-        | CALLOPFunc  //Operator 함수전용
-        | CALLCMDFunc //Command  함수전용
+        //| CALLOPFunc  //Operator 함수전용
+        //| CALLCMDFunc //Command  함수전용
         | IF_DEVICE //인터페이스
         | IF_LINK //인터페이스
         | COPY_DEV //시스템복사 deivce
@@ -28,7 +28,7 @@ module InterfaceClass =
         | CONDITION //READY조건
 
         member x.IsReal = x = REAL || x = REALExF
-        member x.IsCall = x = CALL || x = CALLOPFunc|| x = CALLCMDFunc
+        member x.IsCall = x = CALL 
         member x.IsLoadSys = x = COPY_DEV || x = OPEN_EXSYS_LINK || x = OPEN_EXSYS_CALL
         member x.IsRealorCall = x.IsReal || x.IsCall
         member x.IsIF = x = IF_DEVICE || x = IF_LINK

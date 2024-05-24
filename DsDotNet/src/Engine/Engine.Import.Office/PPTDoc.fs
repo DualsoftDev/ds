@@ -238,6 +238,12 @@ module PPTDocModule =
                         | None -> ()))
 
 
+            let children = parents.Values.Collect(fun s->s)
+            nodes.Values.Iter(fun node->
+                let isRoot = not(children.Contains(node)) 
+                node.UpdateCallDevParm(isRoot)
+                )
+
             connections
             |> Seq.filter (fun (slide, _) -> slide.GetPage() <> pptHeadPage)
             |> Seq.iter (fun (slide, conns) -> 

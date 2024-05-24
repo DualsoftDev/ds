@@ -57,10 +57,7 @@ module ImportU =
             match mySys.Functions |> Seq.tryFind(fun f->f.Name = node.OperatorName) with
             | Some f -> f
             | None -> 
-                let newfunc = 
-                    match node.NodeType with
-                    | CALLOPFunc  ->      OperatorFunction(node.OperatorName) :> Func
-                    | _  ->   failwithlog "error"
+                let newfunc = OperatorFunction(node.OperatorName) :> Func
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc
 
@@ -68,10 +65,7 @@ module ImportU =
             match mySys.Functions |> Seq.tryFind(fun f->f.Name = node.CommandName) with
             | Some f -> f
             | None -> 
-                let newfunc = 
-                    match node.NodeType with
-                    | CALLCMDFunc  ->     CommandFunction(node.CommandName):> Func
-                    | _ -> failwithlog "error"
+                let newfunc = CommandFunction(node.CommandName):> Func
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc
 
@@ -113,29 +107,17 @@ module ImportU =
 
 
         let call =
-
-            match node.NodeType with
-            | CALLOPFunc  ->
-                if parentWrapper.GetCore() :? Real 
-                    then failWithLog  $"Operator 정의는 work 외부에만 존재 가능합니다. error {node.Name}."    
-                if node.IsPureOperator 
+            if node.IsFunction
+            then
+                if node.IsRootNode.Value
                 then
                     Call.Create(getOperatorFunc(), parentWrapper)
                 else 
-                    getCall()
-
-            | CALL  |  CALLCMDFunc  ->  
-                if parentWrapper.GetCore() :? Flow 
-                then failWithLog  $"Action 정의는 work 내부에만 존재 가능합니다. error {node.Name}."    
-                if node.NodeType = CALLCMDFunc && node.IsPureCommand 
-                then 
                     Call.Create(getCommandFunc(), parentWrapper)
-                else 
+            else 
                     getCall()
-
-            | _  -> failwithlog "error"
-
-        if node.IsDevCommand 
+          
+        if node.IsCallDevParam && node.IsRootNode.Value = false
         then 
             let jName = 
                 if node.IsAliasFunction
@@ -145,8 +127,8 @@ module ImportU =
                     call.TargetJob.Name
                         
             call.TargetJob.DeviceDefs.Iter(fun d->
-                    d.AddOrUpdateInParam(jName, node.CmdDevParam.Value|>fst)
-                    d.AddOrUpdateOutParam(jName, node.CmdDevParam.Value|>snd)
+                    d.AddOrUpdateInParam(jName, (node.DevParam.Value|>fst).Value)
+                    d.AddOrUpdateOutParam(jName, (node.DevParam.Value|>snd).Value)
                     )
 
         dicSeg.Add(node.Key, call)
@@ -399,6 +381,7 @@ module ImportU =
 
             doc.Nodes
             |> Seq.filter (fun node -> node.NodeType = CALL)
+            |> Seq.filter (fun node -> not(node.IsFunction))
             |> Seq.iter (fun node ->
                 match getJobActionType node.CallApiName with
                 | MultiAction (_,cnt) -> 
@@ -411,7 +394,7 @@ module ImportU =
                     )
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.IsDevOperator || node.IsDevCommand)
+            |> Seq.filter (fun node -> node.IsFunction)
             |> Seq.iter (fun node ->
                     let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
                     addChannelPoints dev node
@@ -464,11 +447,15 @@ module ImportU =
             let createCall () =
                 calls
                 |> Seq.iter (fun node ->
+                        try
 
-                        if dicChildParent.ContainsKey(node) then
-                            createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex, jobCallNames)
-                        else
-                            createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex, jobCallNames)
+                            if dicChildParent.ContainsKey(node) then
+                                createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex, jobCallNames)
+                            else
+                                createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex, jobCallNames)
+
+                        with ex ->
+                            node.Shape.ErrorName(ex.Message, node.PageNum)
                             )
 
             let createAlias () =
@@ -532,27 +519,27 @@ module ImportU =
                                 DuParentFlow(flow)
                           
                       
-                        if node.IsDevCommand 
+                        if node.IsCallDevParam && node.IsRootNode.Value = false
                         then
                             let newJobName = node.JobName
                             let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs)
 
                             segOrg.TargetJob.DeviceDefs.Iter(fun d->
-                                    d.AddOrUpdateInParam(newJobName, node.CmdDevParam.Value|>fst)
-                                    d.AddOrUpdateOutParam(newJobName, node.CmdDevParam.Value|>snd)
+                                    d.AddOrUpdateInParam(newJobName, (node.DevParam.Value|>fst).Value)
+                                    d.AddOrUpdateOutParam(newJobName, (node.DevParam.Value|>snd).Value)
                             )
 
                             mySys.Jobs.Add newJob
                             Call.Create(newJob, parentWrapper)
 
 
-                        elif node.IsDevOperator 
+                        elif node.IsCallDevParam && node.IsRootNode.Value = true
                         then 
                             let newJobName = node.JobName
                             let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs)
 
                             segOrg.TargetJob.DeviceDefs.Iter(fun d->
-                                    d.AddOrUpdateInParam(newJobName, node.OpDevParam.Value)
+                                    d.AddOrUpdateInParam(newJobName, (node.DevParam.Value|>fst).Value)
                             )
 
                             mySys.Jobs.Add newJob
@@ -710,7 +697,7 @@ module ImportU =
                 safeties //세이프티 입력 미등록 이름오류 체크
                 |> iter (fun safeFullName ->
                     if not (mySys.Jobs.Select(fun f -> f.Name).Contains safeFullName) then
-                        Office.ErrorName(node.Shape, ErrID._28, node.PageNum))
+                        node.Shape.ErrorName(ErrID._28, node.PageNum))
 
                 safeties
                 |> map (fun safeFullName -> dicQualifiedNameSegs.[safeFullName])

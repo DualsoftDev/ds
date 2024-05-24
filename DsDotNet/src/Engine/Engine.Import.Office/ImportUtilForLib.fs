@@ -137,16 +137,21 @@ module ImportUtilForLib =
                     let devOrg= addOrGetExistSystem loadedSys newloadedName
                     let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
 
-                    if node.NodeType = CALLOPFunc 
-                    then 
-                        TaskDev(api,jobName,  node.OpDevParam.Value, ""|>defaultDevParam, newloadedName)
 
-                    elif node.NodeType = CALLCMDFunc
-                    then
-                        TaskDev(api,jobName,   node.CmdDevParam.Value|>fst,  node.CmdDevParam.Value|>snd, newloadedName)
+
+                    if node.DevParam.IsSome then
+                        let inParam  = match node.DevParam.Value |>fst
+                                        with
+                                            | Some p -> p
+                                            | _ -> ""|>defaultDevParam
+                        let outParam  = match node.DevParam.Value |>snd
+                                        with
+                                            | Some p -> p
+                                            | _ -> ""|>defaultDevParam
+                                            
+                        TaskDev(api,jobName,  inParam, outParam, newloadedName)
                     else 
                         TaskDev(api,jobName,  ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
-
 
                     
                 let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget

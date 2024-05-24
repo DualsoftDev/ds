@@ -130,15 +130,6 @@ module XgkTypeConvertorModule =
 
     /// XGK 전용 Statement 확장
     let rec internal statement2XgkStatements (prjParam: XgxProjectParams) (augs:Augments) (origStatement: Statement) : unit =
-        let timer2XgkStatements (timer:TimerStatement) =
-            match timer.ResetCondition with
-            | Some rst ->
-                // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
-                augs.Statements.Add <| DuAssign(None, rst, new XgkTimerCounterStructResetCoil(timer.Timer.TimerStruct))
-            | _ -> ()
-
-            augs.Statements.Add (DuTimer timer)
-
         let statement = origStatement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
 
 
@@ -175,7 +166,14 @@ module XgkTypeConvertorModule =
             let stmt = DuAssign(Some systemOnRising, exp, decl)
             statement2XgkStatements prjParam augs stmt
 
-        | DuTimer tmr -> timer2XgkStatements tmr
+        | DuTimer tmr ->
+            match tmr.ResetCondition with
+            | Some rst ->
+                // XGI timer 의 RST 조건을 XGK 에서는 Reset rung 으로 분리한다.
+                augs.Statements.Add <| DuAssign(None, rst, new XgkTimerCounterStructResetCoil(tmr.Timer.TimerStruct))
+            | _ -> ()
+
+            augs.Statements.Add (DuTimer tmr)
 
         | DuCounter ctr ->
             let statements = StatementContainer([statement])

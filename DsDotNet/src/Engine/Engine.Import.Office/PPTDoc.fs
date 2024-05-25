@@ -170,15 +170,15 @@ module PPTDocModule =
                 |> Seq.map (fun (slide, groupSet) -> pages.[slide].PageNum, groupSet)
 
             let shapes = Office.PageShapes(doc)
-                            |> Seq.filter (fun (shape, page, _, _) -> 
+                            |> Seq.filter (fun (shape, page, _) -> 
                                         page <> pptHeadPage && pages.Values.Select(fun w -> w.PageNum).Contains(page)
                                         || page = pptHeadPage && shape.CheckBevelShape())
                                       
             
             
             pages.Values.Iter(fun pptPage -> 
-                            let ableShapes = shapes.Where(fun (shape, page, _, _) -> pptPage.PageNum = page)
-                                                   .Select(fun (shape, _, _, _) -> shape)
+                            let ableShapes = shapes.Where(fun (shape, page, _) -> pptPage.PageNum = page)
+                                                   .Select(fun (shape, _, _) -> shape)
                             pptPage.SlidePart.CheckValidShapes(pptPage.PageNum, ableShapes))
                
 
@@ -186,20 +186,20 @@ module PPTDocModule =
                             |> Seq.filter (fun (slide, _) -> slide.GetPage() <> pptHeadPage)
                             |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
             
-            let dicShape = Dictionary<int, HashSet<Tuple<Shape, bool>>>()
+            let dicShape = Dictionary<int, HashSet<Shape>>()
 
                
             shapes 
-            |> Seq.iter (fun (shape, page, geometry, isDash) ->
+            |> Seq.iter (fun (shape, page, geometry) ->
                 if (dicShape.ContainsKey(page) |> not) then
-                    dicShape.Add(page, HashSet<Tuple<Shape, bool>>()) |> ignore
+                    dicShape.Add(page, HashSet<Shape>()) |> ignore
 
-                dicShape.[page].Add(shape, isDash) |> ignore)
+                dicShape.[page].Add(shape) |> ignore)
 
            
 
             shapes
-            |> Seq.iter (fun (shape, page, geometry, isDash) ->
+            |> Seq.iter (fun (shape, page, geometry) ->
                 let pagePPT = pages.Values.Filter(fun w -> w.PageNum = page).First()
                 let headPageName = headSlide.PageTitle()
                 let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)

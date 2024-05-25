@@ -131,6 +131,8 @@ module ImportU =
                     d.AddOrUpdateOutParam(jName, (node.DevParam.Value|>snd).Value)
                     )
 
+        call.Disabled <- node.DisableCall
+
         dicSeg.Add(node.Key, call)
 
         

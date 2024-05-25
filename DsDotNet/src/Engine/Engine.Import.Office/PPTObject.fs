@@ -242,10 +242,6 @@ module PPTObjectModule =
 
 
 
-
-    let IsDummyShape (shape: Shape) =
-        shape.IsDashShape() && (shape.CheckRectangle() || shape.CheckEllipse())
-
     type pptPage(slidePart: SlidePart, iPage: int, bShow: bool) =
         member x.PageNum = iPage
         member x.SlidePart = slidePart
@@ -266,6 +262,7 @@ module PPTObjectModule =
         let mutable name = ""
         let mutable ifName = ""
         let mutable rootNode:bool option = None
+        let mutable disableCall = false
         let mutable devParam:(DevParam option*DevParam option) option = None
         let mutable ifTXs = HashSet<string>()
         let mutable ifRXs = HashSet<string>()
@@ -430,6 +427,8 @@ module PPTObjectModule =
                 
                 nodeType <- getNodeType() 
 
+                disableCall <- shape.IsDashShape()
+
                 match GetSquareBrackets(shape.InnerText, false) with
                     | Some text ->name <- $"{nameTrim |> GetBracketsRemoveName|> trimSpaceNewLine}[{text}]"  
                     | None -> name <- nameTrim
@@ -490,6 +489,9 @@ module PPTObjectModule =
         member x.IfTXs = ifTXs
         member x.IfRXs = ifRXs
         member x.NodeType = nodeType
+        member x.DisableCall = disableCall
+
+        
         member x.PageTitle = pageTitle
 
         member x.Position = shape.GetPosition(slieSize)

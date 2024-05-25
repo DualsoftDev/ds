@@ -212,6 +212,11 @@ module XgiExportModule =
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                     if isXgi then
                         let command = ActionCmd(Move(cond, expr, target))
+                        //let command =
+                        //    match expr.Terminal, expr.FunctionName with
+                        //    | Some _t, None -> ActionCmd(Move(cond, expr, target))
+                        //    | None, Some fn -> FunctionCmd(Arithmatic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
+                        //    | _ -> failwithlog "ERROR"
                         let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                         rgi <-

@@ -73,28 +73,26 @@ module XgkTypeConvertorModule =
     ///     최종 exp: "tmp1 > 4"
     ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
     let exp2expXgk (prjParam: XgxProjectParams) (exp: IExpression, expStore:IStorage option) (augs:Augments) : IExpression =
-        assert (prjParam.TargetType = XGK)
+        let isXgk = prjParam.TargetType = XGK
         let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
             match exp.FunctionName, exp.FunctionArguments with
             | Some fn, l::r::[] ->
                 let lexpr, lstgs, lstmts = helper (nestLevel + 1) (l, None)
                 let rexpr, rstgs, rstmts = helper (nestLevel + 1) (r, None)
 
-                if fn.IsOneOf("!=", "==", "<>") && lexpr.DataType = typeof<bool> then
-                    //if lexpr.DataType = typeof<bool> then
-                        // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
-                        let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
-                        let newExp =
-                            match fn with
-                            | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
-                            | "==" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
-                            | _ -> failwithlog "ERROR"
-                        newExp, (lstgs @ rstgs), (lstmts @ rstmts)
-                    //else
-                    //    let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
-                    //    newExp, (lstgs @ rstgs), (lstmts @ rstmts)
+                if (*isXgk &&*) lexpr.DataType = typeof<bool> && fn.IsOneOf("!=", "==", "<>") then
+                    // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
+                    let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
+                    let newExp =
+                        match fn with
+                        | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
+                        | "==" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
+                        | _ -> failwithlog "ERROR"
+                    newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                 else
-                    // XGK 에는 IEC Function 을 이용할 수 없으므로, 수식 내에 포함된 사칙 연산이나 비교 연산을 XGK function 으로 변환한다.
+                    // XGK 에는 IEC Function 을 이용할 수 없으므로, 
+                    // XGI 에는 사칙 연산을 중간 expression 으로 이용은 가능하나, ladder 그리는 로직이 너무 복잡해 지므로, 
+                    // 수식 내에 포함된 사칙 연산이나 비교 연산을 따로 빼내어서 임시 변수에 대입하는 assign 문장으로 으로 변환한다.
                     let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
                     let createTmpStorage =
                         fun () -> 
@@ -131,7 +129,6 @@ module XgkTypeConvertorModule =
     /// XGK 전용 Statement 확장
     let rec internal s2XgkSs (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
         let newStatement = statement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
-
         match newStatement with
         | DuAssign(condition, exp, target) ->
             let numStatementsBefore = augs.Statements.Count

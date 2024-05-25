@@ -657,6 +657,20 @@ module XgxExpressionConvertorModule =
                         augs.Statements.Add stmt
                         augs.Storages.Add stg
                         tmpVar.ToExpression()
+                        //let toAssignStatement =
+                        //    match prjParam.TargetType with
+                        //    | XGK -> parentExp.IsSome
+                        //    | XGI -> parentExp.IsSome && parentExp.Value.FunctionName <> Some fn
+                        //if toAssignStatement then
+                        //    let tmpNameHint = operatorToMnemonic fn
+                        //    let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
+                        //    let stg = tmpVar :> IStorage
+                        //    let stmt = DuAssign(None, newExp, stg)
+                        //    augs.Statements.Add stmt
+                        //    augs.Storages.Add stg
+                        //    tmpVar.ToExpression()
+                        //else
+                        //    newExp
                     | _ ->
                         newExp
 

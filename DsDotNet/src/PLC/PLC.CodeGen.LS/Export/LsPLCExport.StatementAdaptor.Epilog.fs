@@ -19,6 +19,7 @@ module XgxTypeConvertorModule =
       : CommentedXgxStatements =
         let augs = Augments(newLocalStorages, StatementContainer())
         let newStatement = statement.MakeExpressionsFlattenizable()
+        //let newStatement = newStatement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
         match prjParam.TargetType with
         | XGI -> s2XgiSs prjParam augs newStatement
         | XGK -> s2XgkSs prjParam augs newStatement

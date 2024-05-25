@@ -389,11 +389,6 @@ module XgxExpressionConvertorModule =
                 [ withAugmentedPLCFunction exp ]
         | _ -> [ exp ]
 
-    type internal MergeArithmaticResult =
-        /// arithmatic operator 를 적용해서, 결과 값을 이미 tag / variable 에 write 한 경우.  추후의 expression 과 혼합할 필요가 없다.
-        | AlreadyApplied of IExpression
-        | NotApplied of IExpression
-
     (* see ``ADD 3 items test`` *)
     /// 사칙 연산 처리
     /// - a + b + c => + [a; b; c] 로 변환 (flat 처리)
@@ -403,7 +398,7 @@ module XgxExpressionConvertorModule =
         (prjParam: XgxProjectParams)
         (augmentParams: AugmentedConvertorParams)
         (outputStore: IStorage option)
-      : MergeArithmaticResult =
+      : IExpression =
         let { Storage = newLocalStorages
               ExpandFunctionStatements = augmentedStatementsStorage
               Exp = exp } =
@@ -446,16 +441,16 @@ module XgxExpressionConvertorModule =
                     else
                         chunkBy8 [ outexp ] argsRemaining
 
-                AlreadyApplied(chunkBy8 [] newArgs)
+                chunkBy8 [] newArgs
             | _ ->
-                NotApplied(exp.WithNewFunctionArguments newArgs)
+                exp.WithNewFunctionArguments newArgs
 
         | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "&&"|"||" as op) ->
             let newArgs = binaryToNary prjParam { augmentParams with Exp = exp } [ op ] op
-            NotApplied(exp.WithNewFunctionArguments newArgs)
+            exp.WithNewFunctionArguments newArgs
 
         | _ ->
-            NotApplied(exp)
+            exp
 
     let rec private zipAndExpression (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) (allowCallback:bool) : IExpression =
         let { Storage = newLocalStorages
@@ -523,12 +518,7 @@ module XgxExpressionConvertorModule =
             exp
 
     and private zipVisitor (prjParam: XgxProjectParams) (augmentParams: AugmentedConvertorParams) : IExpression =
-        let exp =
-            match mergeArithmaticOperator prjParam augmentParams None with
-            | AlreadyApplied exp -> exp
-            | NotApplied exp -> exp
-
-
+        let exp = mergeArithmaticOperator prjParam augmentParams None
         let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
 
         if w > maxNumHorizontalContact && exp.FunctionName.IsSome && exp.FunctionName.Value.IsOneOf("&&", "||") then
@@ -583,15 +573,17 @@ module XgxExpressionConvertorModule =
                     let augArithmaticAssignStatements = StatementContainer()
                     let param = { defaultConvertorParams with ExpandFunctionStatements = augArithmaticAssignStatements }
 
-                    match mergeArithmaticOperator prjParam param (Some target) with
-                    | AlreadyApplied _exp -> augArithmaticAssignStatements.ToFSharpList()
-                    | NotApplied exp ->
+                    let exp = mergeArithmaticOperator prjParam param (Some target)
+                    if exp.FunctionArguments.IsEmpty then
                         augArithmaticAssignStatements.ToFSharpList()
-                        @ [ DuAugmentedPLCFunction
-                                { FunctionName       = op
-                                  Arguments          = exp.FunctionArguments
+                    else
+                        let augFunc =
+                            DuAugmentedPLCFunction
+                                { FunctionName = op
+                                  Arguments = exp.FunctionArguments
                                   OriginalExpression = exp
-                                  Output             = target } ]
+                                  Output = target }
+                        augArithmaticAssignStatements.ToFSharpList() @ [ augFunc ]
                 | _ ->
                     let newExp = collectExpandedExpression prjParam defaultConvertorParams
                     [ DuAssign(condition, newExp, target) ]

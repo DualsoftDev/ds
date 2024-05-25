@@ -600,7 +600,7 @@ module PPTUtil =
                 let geometry =
                     shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
 
-                shape, page, geometry, shape.IsDashShape())
+                shape, page, geometry)
 
       
 

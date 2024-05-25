@@ -47,7 +47,12 @@ type VertexManager with
                     else 
                         call.PEs.ToAndElseOn() <&&> (call.EndAction <||> coin._sim.Expr)
 
-                let sets = coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr
+                let sets = 
+                    if call.Disabled then 
+                        coin.ST.Expr <&&> real.V.G.Expr
+                    else
+                        coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr
+
                 let rsts = coin.RT.Expr
                 yield (sets, rsts) ==| (coin.ET, getFuncName() )
         ]

@@ -35,6 +35,18 @@ type VertexManager with
 
         let parentReal = call.Parent.GetCore() :?> Vertex
         let rsts = rst <||> !!call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
-        (sets, rsts) ==| (v.MM, getFuncName())
+
+        
+        if call.Disabled 
+        then
+            (v._off.Expr, rsts) ==| (v.MM, getFuncName())
+        else
+            (sets, rsts) ==| (v.MM, getFuncName())
+
+       
+    
+
+
+
 
     

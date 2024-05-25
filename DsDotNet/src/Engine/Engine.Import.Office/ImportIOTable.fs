@@ -153,14 +153,14 @@ module ImportIOTable =
                     let dataType = ($"{row.[(int) IOColumn.DataType]}").Trim() 
                     if dataType = TextSkip || dataType = ""
                     then
-                        failwithlog $"내부변수 {name} datatype 입력이 필요합니다."
+                        failwithlog $"변수 {name} datatype 입력이 필요합니다."
 
                     let value  = ($"{row.[(int) IOColumn.Input]}").Trim()
                     let constVari = value <> "" && value <> TextSkip
                     
                     if isConst && isConst <> constVari
                     then
-                        failwithlog $"내부상수 {name} Input영약에 상수 값 입력이 필요합니다."
+                        failwithlog $"상수 {name} Input영약에 상수 값 입력이 필요합니다."
 
                     let variableData = VariableData(name, dataType|> textToDataType, if constVari then Immutable else Mutable )
 
@@ -240,7 +240,7 @@ module ImportIOTable =
                     then
                         match TextToXlsType(case) with
                         | XlsAddress -> updateDev (row, tableIO, page)
-                        | XlsVariable ->    updateVarNConst (row, tableIO, page, false)
+                        | XlsVariable -> updateVarNConst (row, tableIO, page, false)
                         | XlsConst ->    updateVarNConst (row, tableIO, page, true)
 
                         | XlsAutoBTN -> updateBtn (row, BtnType.DuAutoBTN, tableIO, page)

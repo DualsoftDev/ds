@@ -1,7 +1,7 @@
 [<AutoOpen>]
 module Engine.CodeGenCPU.ConvertEmulation
 
-open System.Linq
+open System
 open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
@@ -9,9 +9,25 @@ open Dual.Common.Core.FS
 type TaskDev with
 
     member d.SensorEmulation(sys:DsSystem, job:Job) =
-        
+
+        let set = d.ApiItem.PE.Expr
         let rst = sys._off.Expr
-        (d.GetInExpr(job.Name), rst) --| (d.InTag, getFuncName())
+
+        let inParam = d.GetInParam(job.Name)
+        if inParam.Type = DuBOOL
+        then 
+            let setBool = if inParam.Value.IsNull() || (inParam.Value |> Convert.ToBoolean)
+                          then set 
+                          else !!set
+
+            (setBool, rst) --| (d.InTag, getFuncName())
+        else 
+
+            let setData = if inParam.DevValue.IsNull()
+                            then failWithLog $"{d.Name} {inParam.DevAddress} 은 value 값을 입력해야 합니다." 
+                            else inParam.DevValue.Value|>literal2expr
+
+            (set, setData) --> (d.InTag, getFuncName())
 
 type DsSystem with
 

@@ -234,8 +234,8 @@ module ExportIOTable =
 
         let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"";"-";"-";"-"]]
         let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"";"-";"-"]]
-        let sampleConstRows=  if variRows.any() then [] else  [[TextXlsVariable;"ALL";"";"";"";"-";"-";"-"]]
-        let sampleVariRows  =  if variRows.any() then [] else  [[TextXlsVariable;"ALL";"";"";"-";"-";"-";"-"]]
+        let sampleConstRows=  if variRows.any() then [] else  [[TextXlsConst;"-";"";"";"";"-";"-";"-"]]
+        let sampleVariRows  =  if variRows.any() then [] else  [[TextXlsVariable;"-";"";"";"-";"-";"-";"-"]]
         let dts = 
             getConditionDefListRows (sys.ReadyConditions)  
             @ commandRows 

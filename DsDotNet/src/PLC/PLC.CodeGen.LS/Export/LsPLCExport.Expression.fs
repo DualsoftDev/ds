@@ -16,6 +16,7 @@ module LsPLCExportExpressionModule =
         new() = Augments(XgxStorage(), StatementContainer())
         member val Storages = storages        // ResizeArray<IStorage>
         member val Statements = statements    // ResizeArray<Statement>
+        member val ExpressionStore:IStorage option = None with get, set
 
     type IExpression with
         /// 주어진 Expression 을 multi-line text 형태로 변환한다.

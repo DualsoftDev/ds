@@ -395,6 +395,7 @@ module ImportU =
 
             doc.Nodes
             |> Seq.filter (fun node -> node.IsFunction)
+            |> Seq.filter (fun node -> mySys.Devices.any(fun f->f.Name = node.CallName))
             |> Seq.iter (fun node ->
                     let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
                     addChannelPoints dev node

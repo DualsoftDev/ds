@@ -67,7 +67,8 @@ type VertexManager with
         ]
 
     member v.M4_CallErrorRXMonitor() =
-        let callV = v :?> VertexMCall
+        //let callV = v :?> VertexMCall
+        let cv = v :?> VertexMCall
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
         
@@ -76,28 +77,41 @@ type VertexManager with
         [
             let using      = if call.HasSensor then v._on.Expr else  v._off.Expr 
             let input      = call.EndActionOnlyIO
+            let checkCondi = using <&&> dop <&&> real.V.G.Expr <&&>   call.V.G.Expr
 
-            let offSet     = callV.RXErrOpenOff
-            let offRising  = callV.RXErrOpenRising
-            let offTemp    = callV.RXErrOpenTemp
-                                
-            let onSet      = callV.RXErrShortOn
-            let onRising   = callV.RXErrShortRising
-            let onTenmp    = callV.RXErrShortTemp
-
-            let RxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
-            let RxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
+            
+            let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
+            let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
        
-            yield! (using <&&> input  , v.ErrShort.Expr)  --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
-            yield! (using <&&> !!input, v.ErrOpen.Expr)   --^ (offRising, offSet, offTemp, "RXErrOpenOff")
+            let setRising  = fbRising [input]:> IExpression<bool>    
+            let setFalling = fbFalling[input] :> IExpression<bool>
 
-            yield (dop <&&> real.V.G.Expr <&&>   call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrTimeShortage, getFuncName())
-            yield (dop <&&> real.V.G.Expr <&&> !!call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
-            if call.UsingTon
-            then //단락 에레는 시간적용한 감지시 채터링 이슈로 Call Going 시 제외시키고 부모 Going일때만 체크
-                yield (dop <&&> real.V.G.Expr <&&>  !!call.V.G.Expr <&&>  offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
-            else 
-                yield (dop <&&> real.V.G.Expr <&&>                      offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
+            yield (checkCondi <&&>  rxReadyExpr <&&> setRising,  rst<||>v._sim.Expr)    ==| (v.ErrShort, getFuncName())
+            yield (checkCondi <&&>  rxFinishExpr <&&>setFalling,  rst<||>v._sim.Expr)   ==| (v.ErrOpen, getFuncName())
+
+
+
+            //let offSet     = callV.RXErrOpenOff
+            //let offRising  = callV.RXErrOpenRising
+            //let offTemp    = callV.RXErrOpenTemp
+                                
+            //let onSet      = callV.RXErrShortOn
+            //let onRising   = callV.RXErrShortRising
+            //let onTenmp    = callV.RXErrShortTemp
+
+            //let RxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
+            //let RxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
+       
+            //yield! (using <&&> input  , v.ErrShort.Expr)  --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
+            //yield! (using <&&> !!input, v.ErrOpen.Expr)   --^ (offRising, offSet, offTemp, "RXErrOpenOff")
+
+            //yield (dop <&&> real.V.G.Expr <&&>   call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrTimeShortage, getFuncName())
+            //yield (dop <&&> real.V.G.Expr <&&> !!call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
+            //if call.UsingTon
+            //then //단락 에레는 시간적용한 감지시 채터링 이슈로 Call Going 시 제외시키고 부모 Going일때만 체크
+            //    yield (dop <&&> real.V.G.Expr <&&>  !!call.V.G.Expr <&&>  offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
+            //else 
+            //    yield (dop <&&> real.V.G.Expr <&&>                      offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
         ]
         
 

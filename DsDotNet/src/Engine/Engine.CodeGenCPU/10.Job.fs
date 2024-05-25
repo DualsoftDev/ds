@@ -44,7 +44,7 @@ type Job with
                         then 
                             failWithLog $"{td.Name} {outParam.DevAddress} 은 value 값을 입력해야 합니다." 
                         else 
-                            yield (sets, outParam.DevValue|>literal2expr) --> (td.OutTag, getFuncName())
+                            yield (sets, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
         ]
    
 

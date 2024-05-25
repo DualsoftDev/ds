@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open System.Collections.Generic
 open Engine.CodeGenCPU
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module ImportIOTable =
@@ -62,13 +63,12 @@ module ImportIOTable =
                     then 
                         handleFunctionCreationOrUpdate sys funcName funcBodyText true
                     else 
-                        let funcName =
-                            match funcName = "" with
-                            | true -> $"OP_{funcBodyText}"
-                            | false -> funcName
+                        //let funcName =
+                        //    match funcName = "" with
+                        //    | true -> $"OP_{funcBodyText}"
+                        //    | false -> funcName
 
-                        let func = handleFunctionCreationOrUpdate sys funcName funcBodyText false
-                        func
+                        handleFunctionCreationOrUpdate sys funcName funcBodyText false
                         
                             
             let dicDev =
@@ -175,6 +175,10 @@ module ImportIOTable =
                 let func = $"{row.[(int) IOColumn.Output]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
+
+                if not(func.Contains(" = "))
+                        then 
+                            failWithLog $"명령 함수는 할당( = ) 구문이 있어야 합니다. {name} {func}"
                         
                 getFunctionNUpdate (name, name, func,  true, page) |> ignore
 
@@ -183,7 +187,12 @@ module ImportIOTable =
                 let func = $"{row.[(int) IOColumn.Input]}"
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
-                        
+
+                if not(func.Contains("=="))
+                then 
+                    failWithLog $"연산자 함수는 비교(==) 구문이 있어야 합니다. {name} {func}"
+
+           
                 getFunctionNUpdate (name, name, func,   false,  page) |> ignore
 
 

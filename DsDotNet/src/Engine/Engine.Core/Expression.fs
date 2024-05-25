@@ -321,6 +321,36 @@ module ExpressionModule =
             | DuAugmentedPLCFunction _ ->
                 failwithlog "ERROR"
 
+        member x.ToConditionText() =
+            match x with
+            | DuAssign (_condition, expr, _) -> $"{expr.ToText()}" 
+            | DuVarDecl (expr, _) -> $"{expr.ToText()}"
+            | DuTimer timerStatement ->
+                let ts, t = timerStatement, timerStatement.Timer
+                let functionName = ts.FunctionName  // e.g "createTON"
+                let args = [    // [preset; rung-in-condition; (reset-condition)]
+                    sprintf "%A" t.PRE.Value
+                    match ts.RungInCondition with | Some c -> c.ToText() | None -> ()
+                    match ts.ResetCondition  with | Some c -> c.ToText() | None -> () ]
+                let args = String.Join(", ", args)
+                $"{functionName}({args})"
+
+            | DuCounter counterStatement ->
+                let cs, c = counterStatement, counterStatement.Counter
+                let functionName = cs.FunctionName  // e.g "createCTU"
+                let args = [    // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
+                    sprintf "%A" c.PRE.Value
+                    match cs.UpCondition    with | Some c -> c.ToText() | None -> ()
+                    match cs.DownCondition  with | Some c -> c.ToText() | None -> ()
+                    match cs.ResetCondition with | Some c -> c.ToText() | None -> ()
+                    if c.ACC.Value <> 0u then
+                        sprintf "%A" c.ACC.Value ]
+                let args = String.Join(", ", args)
+                $"{functionName}({args})"
+            | DuAction (DuCopy (condition, _, _)) ->
+                $"{condition.ToText()}"
+            | DuAugmentedPLCFunction _ ->
+                failwithlog "ERROR"
 
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =

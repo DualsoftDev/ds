@@ -182,20 +182,23 @@ module ExportIOTable =
                 ]
             )
         
+        let funcText (xs:Statement seq)=    String.Join(";", xs.Select(fun s->s.ToText()))
+        let funcOperatorText (xs:Statement seq)=    String.Join(";", xs.Select(fun s->s.ToConditionText()))
         
         let operatorRows =
             
             sys.Functions
                 .OfType<OperatorFunction>()
-                //.Where(fun f->not(sys.AutoNameOperators.Cast<Func>().Contains(f)))
                                     .Map(fun func->
                                     let flow, name = splitNameForRow func.Name
-                                    
+                                    let funcText =    funcOperatorText func.Statements
+
+
                                     [ TextXlsOperator
                                       flow
                                       name
                                       TextSkip
-                                      ""
+                                      funcText
                                       TextSkip
                                       TextSkip
                                       TextSkip
@@ -207,12 +210,15 @@ module ExportIOTable =
                 .OfType<CommandFunction>()
                                     .Map(fun func->
                                     let flow, name = splitNameForRow func.Name
+                                    let funcText =    funcText func.Statements
+         
+
                                     [ TextXlsCommand
                                       flow
                                       name
                                       TextSkip
                                       TextSkip
-                                      ""
+                                      funcText
                                       TextSkip
                                       TextSkip
                                       ]

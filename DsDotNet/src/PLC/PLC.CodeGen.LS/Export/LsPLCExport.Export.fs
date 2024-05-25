@@ -313,7 +313,7 @@ module XgiExportModule =
                     xs |> filter(fun stg-> not(stg.GetSystemTagKind().IsSome && stg.Name.StartsWith("_")))
 
     /// [S] -> [XS]
-    let internal commentedStatementsToCommentedXgxStatements
+    let internal css2Css
         (prjParam: XgxProjectParams)
         (localStorages: IStorage seq)
         (commentedStatements: CommentedStatement list)
@@ -324,7 +324,7 @@ module XgiExportModule =
         *)
 
         let newCommentedStatements = ResizeArray<CommentedXgxStatements>()
-        let newLocalStorages = ResizeArray<IStorage>(localStorages)
+        let newLocalStorages = XgxStorage(localStorages)
 
         for cmtSt in commentedStatements do
             let xgxCmtStmts:CommentedXgxStatements = cs2Css prjParam newLocalStorages cmtSt
@@ -373,7 +373,7 @@ module XgiExportModule =
                 x
 
             let newLocalStorages, newCommentedXgiStatements =
-                commentedStatementsToCommentedXgxStatements prjParam localStorages.Values commentedStatements
+                css2Css prjParam localStorages.Values commentedStatements
 
             let globalStoragesRefereces =
                 [

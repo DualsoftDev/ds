@@ -564,7 +564,7 @@ module XgxExpressionConvertorModule =
             DuAssign(None, x, var), var
 
     /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
-    let internal s2XgxSs (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
+    let internal s2Ss (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
         let augmentedStatements = StatementContainer() // DuAugmentedPLCFunction case
 
         let newStatements =

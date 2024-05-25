@@ -1,6 +1,6 @@
 XgxProjectParams.GenerateXmlDocument
     XgxPOUParams.GenerateXmlNode
-        commentedStatementsToCommentedXgxStatements
+        css2Css (=> commentedStatementsToCommentedXgxStatements)
             cs2Css (=> statement2Statements)
                 s2XgxSs (=> statement2XgxStatements)
                     collectExpandedExpression

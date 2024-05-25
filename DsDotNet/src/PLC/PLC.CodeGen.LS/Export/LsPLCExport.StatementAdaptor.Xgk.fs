@@ -146,7 +146,7 @@ module XgkTypeConvertorModule =
 
             if augs.Statements.Count = numStatementsBefore || (exp <> exp2 && not duplicated) then
                 let assignStatement = DuAssign(condition, exp2, target)
-                s2XgxSs prjParam augs assignStatement
+                s2Ss prjParam augs assignStatement
 
 
         // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
@@ -212,6 +212,6 @@ module XgkTypeConvertorModule =
 
         | _ ->
             // 공용 처리
-            s2XgxSs prjParam augs newStatement
+            s2Ss prjParam augs newStatement
 
 

@@ -44,11 +44,11 @@ module ImportU =
         mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None)
         mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
 
-    let getJobName (node:pptNode) apiName (mySys:DsSystem)=
-                let jobFirstName = mySys.Name + "_" + apiName
-                match mySys.Jobs.TryFind(fun job -> job.Name = jobFirstName) with
-                | Some job -> node.JobName
-                | None ->jobFirstName
+    //let getJobName (node:pptNode) apiName (jobs:Job seq) (sysName:string)=
+    //            let jobFirstName = sysName + "_" + apiName
+    //            match jobs.TryFind(fun job -> job.Name = jobFirstName) with
+    //            | Some job -> node.JobName
+    //            | None ->jobFirstName
                 
     let private createCallVertex
         (
@@ -74,24 +74,32 @@ module ImportU =
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc
 
+        let getCallFromLoadedSys(loadSysName, apiName) = 
+            match mySys.Jobs.TryFind(fun job -> 
+                                job.DeviceDefs.Any(fun d-> d.DeviceName = loadSysName)) with
+            | Some job ->
+                let dev = job.DeviceDefs.First(fun d-> d.DeviceName = loadSysName)
+                dev.AddOrUpdateInParam (node.JobName, node.DevParamIn)
+                dev.AddOrUpdateOutParam (node.JobName, node.DevParamOut)
 
-        let getCall ()= 
-            let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+                Call.Create(job, parentWrapper)
+            | None ->
+                let device =  mySys.Devices.First(fun d->d.Name = loadSysName)
+                let api = device.ReferenceSystem.ApiItems.First(fun a->a.Name = apiName)   
+                let devTask = TaskDev(api, node.JobName,  node.DevParamIn, node.DevParamOut, loadSysName) 
+                let job = Job(node.JobName , mySys, [devTask])
+                mySys.Jobs.Add job 
+
+                Call.Create(job, parentWrapper)
+
+        let getCall()= 
+            let loadSysName, apiName = GetSysNApi(node.PageTitle, node.Name)
             let call = 
-                let jobName = getJobName node apiName mySys
-                if jobCallNames.Contains sysName
+                if jobCallNames.Contains loadSysName
                 then 
-            
-                    match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
-                    | Some job ->
-                        if job.DeviceDefs.any () then
-                            Call.Create(job, parentWrapper)
-                        else
-                            node.Shape.ErrorName(ErrID._52, node.PageNum)
-                    | None ->
-                            node.Shape.ErrorName(ErrID._48, node.PageNum)
-
+                    getCallFromLoadedSys(loadSysName, apiName)
                 else
+                    let jobName = node.JobName
                     let apiName = node.CallApiName
                     let loadedName = node.CallName
 
@@ -834,7 +842,7 @@ module ImportU =
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =
             
-            doc.MakeJobs(sys)
+            //doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
 
             //자동생성

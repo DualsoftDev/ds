@@ -127,7 +127,9 @@ module ImportIOTable =
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
-                let jobName = getJobName row
+
+                let job = sys.Jobs.First(fun j->j.DeviceDefs.Any(fun d-> $"{d.DeviceName}.{d.ApiItem.Name}" = devName))
+                let jobName = job.Name
                 
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then

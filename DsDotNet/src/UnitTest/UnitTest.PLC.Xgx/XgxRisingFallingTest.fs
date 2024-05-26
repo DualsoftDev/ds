@@ -11,10 +11,7 @@ open PLC.CodeGen.LS
 
 type XgxRisingFallingTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
-
-    member x.``Normal, Negation, Rising, Falling contact test`` () =
-        let storages = Storages()
-        let code =
+    let baseCode =
             match xgx with
             | XGI -> """
                 bool ix = createTag("%IX0.0.0", false);
@@ -25,11 +22,30 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
                 bool qx = createTag("P00001", false);
                 """
             | _ -> failwith "Not supported plc type"
-            + "$qx = $ix && ! $ix && rising($ix) && falling($ix);"
+
+
+
+    member x.``Normal, Rising, Falling contact test`` () =
+        let storages = Storages()
+        let testCode = "$qx = $ix && !($ix) && rising($ix) && falling($ix);"
+        let code = baseCode + testCode
 
         let statements = parseCodeForWindows storages code
         statements.Length === 1
-        statements[0].ToText() === "$qx = $ix && !($ix) && rising($ix) && falling($ix)"
+        statements[0].ToText() === testCode.TrimEnd(';')
+
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Negation, Rising, Falling contact test`` () =
+        let storages = Storages()
+        let testCode = "$qx = rising(!($ix)) && falling(!($ix));"
+        let code = baseCode +  testCode
+
+        let statements = parseCodeForWindows storages code
+        statements.Length === 1
+        statements[0].ToText() === testCode.TrimEnd(';')
 
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
@@ -71,12 +87,14 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
  
 type XgiRisingFallingTest() =
     inherit XgxRisingFallingTest(XGI)
-    [<Test>] member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
+    [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
+    [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
 
 type XgkRisingFallingTest() =
     inherit XgxRisingFallingTest(XGK)
-    [<Test>] member x.``Normal, Negation, Rising, Falling contact test`` () = base.``Normal, Negation, Rising, Falling contact test`` ()
+    [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
+    [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
 
      

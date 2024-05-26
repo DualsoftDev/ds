@@ -44,7 +44,12 @@ module ImportU =
         mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None)
         mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
 
-
+    let getJobName (node:pptNode) apiName (mySys:DsSystem)=
+                let jobFirstName = mySys.Name + "_" + apiName
+                match mySys.Jobs.TryFind(fun job -> job.Name = jobFirstName) with
+                | Some job -> node.JobName
+                | None ->jobFirstName
+                
     let private createCallVertex
         (
             mySys: DsSystem,
@@ -73,8 +78,7 @@ module ImportU =
         let getCall ()= 
             let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
             let call = 
-                //let jobName = node.JobName
-                let jobName = sysName + "_" + apiName
+                let jobName = getJobName node apiName mySys
                 if jobCallNames.Contains sysName
                 then 
             

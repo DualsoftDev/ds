@@ -149,3 +149,19 @@ module ConvertErrorCheck =
                          if b.InAddress.IsNullOrEmpty() then   b.InAddress <-TextAddrEmpty
                          if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <- TextAddrEmpty
                         )   
+
+    let checkJobs(sys:DsSystem) = 
+        for j in sys.Jobs do
+            for td in j.DeviceDefs do
+                if td.ExistOutput
+                then 
+                    let outParam = td.GetOutParam(j.Name)
+                    if j.ActionType = JobActionType.Push 
+                    then 
+                        if outParam.Type = DuBOOL
+                            then 
+                                failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
+                    else 
+                        if outParam.Type <> DuBOOL && outParam.DevValue.IsNull() 
+                        then 
+                            failWithLog $"{td.Name} {outParam.DevAddress} 은 value 값을 입력해야 합니다." 

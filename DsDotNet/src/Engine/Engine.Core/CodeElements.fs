@@ -167,7 +167,7 @@ module rec CodeElements =
         
     let parseTime (item: string) =
         let timePattern = @"^(?i:(\d+(\.\d+)?)(ms|msec|sec))$"
-        let m = Regex.Match(item, timePattern)
+        let m = Regex.Match(item.ToLower(), timePattern)
         if m.Success then
             let valueStr = m.Groups.[1].Value
             let unit = m.Groups.[3].Value.ToLower()

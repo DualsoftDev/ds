@@ -219,9 +219,9 @@ module ConvertCPU =
              | PC  -> ()
              | PLC 
              | Emulation ->  
-                        checkDuplicatesNNullAddress(sys)
-                        checkErrExternalStartRealExist(sys)
-
+                        checkDuplicatesNNullAddress sys
+                        checkErrExternalStartRealExist sys
+                        checkJobs sys
              | Simulation -> () 
              | Developer ->  ()      
              

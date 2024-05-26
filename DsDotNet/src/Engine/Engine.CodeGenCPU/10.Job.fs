@@ -27,22 +27,12 @@ type Job with
                     let outParam = td.GetOutParam(j.Name)
                     if j.ActionType = JobActionType.Push 
                     then 
-                        let rstPush = rstMemos.ToOr()
-
-                        if outParam.Type = DuBOOL
-                            then 
-                                failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
                         if td.ExistOutput
-                            then 
-                                yield (sets, rstPush  ) ==| (td.OutTag:?> Tag<bool>, getFuncName())
-
+                        then yield (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, getFuncName())
                     else 
                         if outParam.Type = DuBOOL
                         then 
                             yield (sets, _off) --| (td.OutTag:?> Tag<bool>, getFuncName())
-                        elif outParam.DevValue.IsNull() 
-                        then 
-                            failWithLog $"{td.Name} {outParam.DevAddress} 은 value 값을 입력해야 합니다." 
                         else 
                             yield (sets, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
         ]

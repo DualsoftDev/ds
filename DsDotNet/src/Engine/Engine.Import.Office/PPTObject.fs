@@ -230,8 +230,6 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
-
-                
         | IF_DEVICE
         | IF_LINK
         | DUMMY
@@ -320,7 +318,7 @@ module PPTObjectModule =
                         |> Seq.filter (fun f -> f = "_" |> not)
                         |> HashSet
                 else
-                    shape.ErrorName(ErrID._43, iPage)
+                      shape.ErrorName(ErrID._43, iPage)
             | None -> shape.ErrorName(ErrID._53, iPage)
 
         let updateLinkIF (text: string) =
@@ -346,31 +344,26 @@ module PPTObjectModule =
         let getNodeType() =
             let nameNfunc = GetBracketsRemoveName(shape.InnerText)
             let name = GetLastParenthesesReplaceName (nameNfunc, "")
-            if (shape.CheckRectangle()) then
-                if name.Contains(".")
-                then REALExF
-                else REAL
-            elif (shape.CheckHomePlate()) then
+
+            match shape with
+            | s when s.CheckRectangle() ->
+                if name.Contains(".") then REALExF else REAL
+            | s when s.CheckHomePlate() ->
                 match GetSquareBrackets(shape.InnerText, false) with
                 | Some text -> if text.Contains("~") then IF_DEVICE else IF_LINK
                 | None -> IF_LINK
 
-            elif (shape.CheckFoldedCornerPlate()) then
-                OPEN_EXSYS_CALL
-            elif (shape.CheckFoldedCornerRound()) then
-                COPY_DEV
-            elif (shape.CheckEllipse()) then
-                CALL
-            elif (shape.CheckBevelShapePlate()) then
-                LAMP
-            elif (shape.CheckBevelShapeRound()) then
-                BUTTON     
-            elif (shape.CheckBevelShapeMaxRound()) then
-                CONDITION
-            elif (shape.CheckLayout()) then
-                shape.ErrorName(ErrID._62, iPage)
-            else
+            | s when s.CheckFoldedCornerPlate() -> OPEN_EXSYS_CALL
+            | s when s.CheckFoldedCornerRound() -> COPY_DEV
+            | s when s.CheckEllipse() -> CALL
+            | s when s.CheckBevelShapePlate() -> LAMP
+            | s when s.CheckBevelShapeRound() -> BUTTON
+            | s when s.CheckBevelShapeMaxRound() -> CONDITION
+            | s when s.CheckLayout() -> shape.ErrorName(ErrID._62, iPage)
+            | _ ->
                 shape.ErrorName(ErrID._1, iPage)
+
+         
 
         let getOperatorParam (name:string) = 
             try
@@ -506,7 +499,14 @@ module PPTObjectModule =
         member x.IsFunction = x.IsCall && not(name.Contains("."))
         member x.IsAliasFunction = x.Alias.IsSome && (x.IsFunction)
         member x.DevParam   = devParam
-        
+        member x.DevParamIn   = 
+            if devParam.IsSome && (devParam.Value|>fst).IsSome
+            then  (devParam.Value|>fst).Value else ""|>defaultDevParam     
+
+        member x.DevParamOut   = 
+            if devParam.IsSome && (devParam.Value|>snd).IsSome
+            then  (devParam.Value|>snd).Value else ""|>defaultDevParam     
+
         member x.JobName =
             let pureJob = pageTitle+"_"+name.Replace(".", "_")
             if x.IsCallDevParam then

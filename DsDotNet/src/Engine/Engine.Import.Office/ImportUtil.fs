@@ -76,9 +76,9 @@ module ImportU =
 
         let getCallFromLoadedSys(loadSysName, apiName) = 
             match mySys.Jobs.TryFind(fun job -> 
-                                job.DeviceDefs.Any(fun d-> d.DeviceName = loadSysName)) with
+                                job.DeviceDefs.Any(fun d-> d.DeviceName = loadSysName && d.ApiName = apiName)) with
             | Some job ->
-                let dev = job.DeviceDefs.First(fun d-> d.DeviceName = loadSysName)
+                let dev = job.DeviceDefs.First(fun d-> d.DeviceName = loadSysName && d.ApiName = apiName)
                 dev.AddOrUpdateInParam (node.JobName, node.DevParamIn)
                 dev.AddOrUpdateOutParam (node.JobName, node.DevParamOut)
 

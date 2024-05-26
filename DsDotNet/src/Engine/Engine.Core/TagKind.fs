@@ -216,8 +216,3 @@ module TagKindList =
     |PlcSysVariable               = 16002
     |PlcUserVariable              = 16003
     
-    /// 17000 ~ 17999
-    [<Flags>]
-    type JobTag    =
-    |JobValueTag                  = 17000
-

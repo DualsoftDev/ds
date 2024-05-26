@@ -21,9 +21,10 @@ type Job with
                     let api = td.ApiItem
                     let rstMemos = jobCoins.SelectMany(fun coin->coin.MutualResetCoins.Select(fun c->c.VC.MM))
                     let sets =
-                        if RuntimeDS.Package.IsPackageEmulation()
-                        then api.PE.Expr <&&> api.PS.Expr <&&> _off
+                        if RuntimeDS.Package.IsPackageEmulation() then _off
                         else api.PE.Expr <&&> api.PS.Expr <&&> !!rstMemos.ToOrElseOff()
+
+
                     let outParam = td.GetOutParam(j.Name)
                     if j.ActionType = JobActionType.Push 
                     then 

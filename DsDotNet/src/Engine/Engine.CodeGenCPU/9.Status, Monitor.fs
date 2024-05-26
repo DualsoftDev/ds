@@ -68,7 +68,7 @@ type VertexManager with
 
     member v.M4_CallErrorRXMonitor() =
         //let callV = v :?> VertexMCall
-        let cv = v :?> VertexMCall
+        let cv = v :?> VertexMCall  //test ahn error 타입 추가
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
         

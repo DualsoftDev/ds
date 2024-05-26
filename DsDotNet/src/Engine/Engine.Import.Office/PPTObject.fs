@@ -377,7 +377,7 @@ module PPTObjectModule =
                 shape.ErrorName(ErrID._70, iPage)
 
 
-        let getCommadParam (name:string) = 
+        let getCoinParam (name:string) = 
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
@@ -386,20 +386,15 @@ module PPTObjectModule =
                     failwithlog (error())
 
                 let inFunc, outFunc =
-           
-                    if func.Contains(",")
-                    then 
-                        func.Split(",").Head() |> trimSpaceNewLine
-                        , func.Split(",").Last() |> trimSpaceNewLine
-                    else 
-                        TextSkip, func 
+                    func.Split(",").Head() |> trimSpaceNewLine
+                    , func.Split(",").Last() |> trimSpaceNewLine
 
                 let getParam x = 
                     if x = TextSkip
                     then 
-                        $"{'-'}" |> getDevParam
+                        "" |> getDevParam
                     else 
-                        $"{'-'}:{x}"|> getDevParam
+                        $":{x}"|> getDevParam
 
                 getParam inFunc, getParam outFunc
 
@@ -543,7 +538,7 @@ module PPTObjectModule =
 
                 | false, true -> //real dev call
                     if hasDevParam then
-                        let inParam, outParam = getCommadParam nameNFunc
+                        let inParam, outParam = getCoinParam nameNFunc
                         devParam <- Some(Some(inParam), Some(outParam))
 
                 | _ ->  
@@ -551,7 +546,21 @@ module PPTObjectModule =
                     then
                         failWithLog "function call 'devParam' not support"
 
+        member x.UpdateCallProperty(call:Call) =
 
+            call.Disabled <- x.DisableCall
+
+            if x.IsCallDevParam && x.IsRootNode.Value = false
+            then 
+                let jName = if x.IsAliasFunction then x.JobName 
+                            else call.TargetJob.Name
+                        
+                call.TargetJob.DeviceDefs.Iter(fun d->
+                        d.AddOrUpdateInParam(jName, (x.DevParam.Value|>fst).Value)
+                        d.AddOrUpdateOutParam(jName, (x.DevParam.Value|>snd).Value)
+                        )
+
+            
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 
         member x.CallApiName =

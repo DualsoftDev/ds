@@ -138,10 +138,7 @@ module ImportUtilForLib =
                     let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
 
                     match mySys.DeviceDefs.TryFind(fun d->d.ApiItem = api) with
-                    |Some taskDev ->
-                        taskDev.AddOrUpdateInParam  (node.JobName, node.DevParamIn)
-                        taskDev.AddOrUpdateOutParam (node.JobName, node.DevParamOut)
-                        taskDev
+                    |Some taskDev ->taskDev
                     |None -> 
                         TaskDev(api,jobName,  node.DevParamIn,  node.DevParamOut, newloadedName)
 

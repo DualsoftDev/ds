@@ -277,7 +277,9 @@ C4 > C5;
         Fm = { F."-"(%I2, %Q2); }
         Gm = { G."-"(%I3, %Q3); }
     }
-    [device file="cylinder.ds"] F, G;
+    [device file="cylinder.ds"] 
+        F, 
+        G;
 }
 
 """
@@ -310,7 +312,9 @@ C4 > C5;
 
     
 
-    [device file="cylinder.ds"] A, B;
+    [device file="cylinder.ds"]
+    A,
+    B;
 }
 """
 

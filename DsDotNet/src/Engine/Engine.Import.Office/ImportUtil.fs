@@ -656,6 +656,8 @@ module ImportU =
 
         [<Extension>]
         static member ValidatePPTSystem(doc: pptDoc, sys: DsSystem) =
+
+            (* Root Call 연결 없음 체크 *)
             let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
        
             doc.Nodes.Where(fun n -> n.NodeType.IsCall && n.IsRootNode.Value)
@@ -665,6 +667,19 @@ module ImportU =
                             then
                                 n.Shape.ErrorShape(ErrID._71, n.PageNum)
                 )
+            (* Multi Call Api별 갯수 동일 체크*)
+            let calls = doc.Nodes
+                                .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
+                                .GroupBy(fun n -> n.CallName)
+            calls.Iter(fun call -> 
+                let callEachCounts = call.Select(fun f->f.JobType.Value.DeviceCount)
+                if callEachCounts.Distinct().Count() > 1
+                then
+                    let errNode = call.Select(fun f->f).First() 
+                    errNode.Shape.ErrorShape(ErrID._72, errNode.PageNum)
+            )
+
+                                
          
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =

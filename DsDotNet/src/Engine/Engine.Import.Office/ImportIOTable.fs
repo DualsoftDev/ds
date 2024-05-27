@@ -128,9 +128,6 @@ module ImportIOTable =
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
 
-                let job = sys.Jobs.First(fun j->j.DeviceDefs.Any(fun d-> $"{d.DeviceName}.{d.ApiItem.Name}" = devName))
-                let jobName = job.Name
-                
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
@@ -145,7 +142,7 @@ module ImportIOTable =
                 dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
 
 
-                updatePPTDevParam dev jobName (inSym,checkInType) (outSym, checkOutType)
+                updatePPTDevParam dev  (inSym,checkInType) (outSym, checkOutType)
              
             let updateVarNConst (row: Data.DataRow, tableIO: Data.DataTable, page, isConst:bool) =
                 let name = $"{row.[(int) IOColumn.Name]}"

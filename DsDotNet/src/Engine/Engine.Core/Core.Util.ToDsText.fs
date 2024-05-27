@@ -440,7 +440,7 @@ module internal ToDsTextModule =
                     else
                         $"\r\n{tab2}" + String.Join($",\r\n{tab2}", devices.Select(fun d -> d.Name.QuoteOnDemand()))
                     
-                yield $"{tab}[device file={quote path}] {textDevices}; //{commentDevice (devices.First().AbsoluteFilePath)}"
+                yield $"{tab}[device file={quote path}] {textDevices}; {commentDevice (devices.First().AbsoluteFilePath)}"
 
             for es in system.ExternalSystems do
                 yield $"{tab}[external file={quote es.RelativeFilePath}] {es.Name}; {commentDevice es.AbsoluteFilePath}"

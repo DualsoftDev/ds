@@ -74,8 +74,11 @@ module ImportType =
         else 
             $"{row.[(int) IOColumn.Name]}"
 
-
-            
+    let getMultiDeviceName (loadedName:string) index = 
+            //index 2자리로 표현
+            let indexStr = index.ToString().PadLeft(2, '0')
+            $"{loadedName}_{indexStr}"
+                    
 
     let checkPPTDataType (devParamRaw:DevParamRawItem) (devParam:DevParam) = 
         let address, typePPT = devParamRaw |>fun (addr,t,_) -> addr, t
@@ -107,9 +110,11 @@ module ImportType =
                 then failWithLog $"error datatype : {name}\r\n [{devParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
 
 
-    let updatePPTDevParam (dev:TaskDev) (jobName:string) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
-        dev.SetInSymbol(jobName, inSym) 
-        dev.SetOutSymbol(jobName, outSym)
+    let updatePPTDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
+
+
+        dev.SetInSymbol(inSym) 
+        dev.SetOutSymbol(outSym)
 
         checkDataType dev.Name dev.InDataType inDataType   
         checkDataType dev.Name dev.OutDataType outDataType

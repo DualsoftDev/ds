@@ -192,11 +192,16 @@ module CoreExtensionModule =
         member x.GetOutParam(jobName:string) = x.OutParams[jobName]
         member x.AddOrUpdateOutParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.OutParams, newDevParam)
 
-        member x.GetInSymbol(jobName:string) = x.InParams[jobName] |> fun (d) -> d.Name
-        member x.SetInSymbol(jobName:string, symName:string option) =changeParam (jobName, x.InParams,  x.InParams[jobName].DevAddress, symName)
+        member x.SetInSymbol(symName:string option) =
+            x.InParams.ToList() |> Seq.iter(fun kv -> 
+                changeParam (kv.Key, x.InParams,  x.InParams[kv.Key].DevAddress, symName)
+            )
+            
 
-        member x.GetOutSymbol(jobName:string) = x.OutParams[jobName] |> fun (d) -> d.Name
-        member x.SetOutSymbol(jobName:string, symName:string option) =changeParam (jobName,  x.OutParams, x.OutParams[jobName].DevAddress, symName)
+        member x.SetOutSymbol(symName:string option) = 
+                x.OutParams.ToList() |> Seq.iter(fun kv -> 
+                changeParam (kv.Key, x.OutParams,  x.OutParams[kv.Key].DevAddress, symName)
+            )
 
 
         member x.InDataType = getType x.InParams.Values

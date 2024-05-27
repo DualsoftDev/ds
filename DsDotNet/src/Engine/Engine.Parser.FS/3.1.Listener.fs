@@ -575,6 +575,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let apiItems =
                     [ for apiDefCtx in apiDefCtxs do
                           let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
+                          let devName = String.Join("_", apiPath.ToArray())
                           let inParam, outParm =
                                     match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
                                     |Some devParam -> 
@@ -618,8 +619,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     failwithlog $"loading type error ({errText})device"
 
 
-                          createDeviceVariable system inParam $"{job}_I"
-                          createDeviceVariable system outParm $"{job}_O"
+                          createDeviceVariable system inParam $"{devName}_I"
+                          createDeviceVariable system outParm $"{devName}_O"
 
                           ]
 

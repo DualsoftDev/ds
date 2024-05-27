@@ -74,6 +74,20 @@ module ImportU =
                 mySys.Functions.Add(newfunc) |>ignore
                 newfunc
 
+        let getCallFromLoadedSys(loadSysName, apiName) = 
+            match mySys.Jobs.TryFind(fun job -> 
+                                job.DeviceDefs.Any(fun d-> d.DeviceName = loadSysName && d.ApiName = apiName)) with
+            | Some job ->   
+                Call.Create(job, parentWrapper)
+            
+            | None ->
+                let device =  mySys.Devices.First(fun d->d.Name = loadSysName)
+                let api = device.ReferenceSystem.ApiItems.First(fun a->a.Name = apiName)   
+                let devTask = TaskDev(api, node.JobName,  node.DevParamIn, node.DevParamOut, loadSysName) 
+                let job = Job(node.JobName , mySys, [devTask])
+                mySys.Jobs.Add job 
+
+                Call.Create(job, parentWrapper)
 
         let getCall ()= 
             let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
@@ -81,16 +95,7 @@ module ImportU =
                 let jobName = getJobName node apiName mySys
                 if jobCallNames.Contains sysName
                 then 
-            
-                    match mySys.Jobs.TryFind(fun job -> job.Name = jobName) with
-                    | Some job ->
-                        if job.DeviceDefs.any () then
-                            Call.Create(job, parentWrapper)
-                        else
-                            failWithLog ErrID._52
-                    | None ->
-                            failWithLog ErrID._48
-
+                    getCallFromLoadedSys(sysName, apiName)
                 else
                     let apiName = node.CallApiName
                     let loadedName = node.CallName
@@ -121,21 +126,8 @@ module ImportU =
             else 
                     getCall()
           
-        if node.IsCallDevParam && node.IsRootNode.Value = false
-        then 
-            let jName = 
-                if node.IsAliasFunction
-                then 
-                    node.JobName
-                else        
-                    call.TargetJob.Name
-                        
-            call.TargetJob.DeviceDefs.Iter(fun d->
-                    d.AddOrUpdateInParam(jName, (node.DevParam.Value|>fst).Value)
-                    d.AddOrUpdateOutParam(jName, (node.DevParam.Value|>snd).Value)
-                    )
 
-        call.Disabled <- node.DisableCall
+        node.UpdateCallProperty(call)
 
         dicSeg.Add(node.Key, call)
 
@@ -177,42 +169,7 @@ module ImportU =
 
     [<Extension>]
     type ImportUtil =
-        //Job 만들기
-        [<Extension>]
-        static member MakeJobs(doc: pptDoc, mySys: DsSystem) =
-            let dicJobName = Dictionary<string, Job>()
-
-            doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType.IsLoadSys)
-            |> Seq.iter (fun node ->
-                node.JobInfos
-                |> Seq.iter (fun jobSet ->
-                    let jobBase = jobSet.Key
-                    let JobTargetSystem = jobSet.Value.First()
-                    //ppt에서는 동일한 디바이스만 동시 Job구성 가능하여  아무시스템이나 찾아도 API는 같음
-                    let refSystem = mySys.TryFindLoadedSystem(JobTargetSystem).Value.ReferenceSystem
-
-                    refSystem.ApiItems.ForEach(fun api ->
-                        let jobName =jobBase + "_" + api.Name
-                        let devs =
-                            jobSet.Value
-                                .Select(fun tgt -> getApiItems (mySys, tgt, api.Name), tgt)
-                                .Select(fun (api, tgt) ->
-                                    match node.NodeType with
-                                    | OPEN_EXSYS_CALL
-                                    | COPY_DEV -> TaskDev(api, jobName,  ""|>defaultDevParam, ""|>defaultDevParam, tgt) 
-                                    | _ -> failwithlog "Error MakeJobs")
-
-
-                        let job = Job(jobName, mySys, devs |> Seq.toList)
-
-                        if dicJobName.ContainsKey(job.Name) then
-                            Office.ErrorName(node.Shape, ErrID._33, node.PageNum)
-                        else
-                            dicJobName.Add(job.Name, job)
-
-                        mySys.Jobs.Add(job))))
-
+        
 
 
         //Interface Reset 정보 만들기
@@ -834,7 +791,6 @@ module ImportU =
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =
             
-            doc.MakeJobs(sys)
             doc.MakeFlows(sys) |> ignore
 
             //자동생성

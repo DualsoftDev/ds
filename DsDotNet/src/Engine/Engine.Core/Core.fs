@@ -105,7 +105,7 @@ module CoreModule =
         interface ISystem 
         member _.AddLoadedSystem(childSys) = 
             loadedSystems.Add(childSys)
-            |> verifyM $"중복된 로드된 시스템 이름 [{childSys.Name}]"
+            |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
             addApiItemsForDevice childSys
 
         member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem)

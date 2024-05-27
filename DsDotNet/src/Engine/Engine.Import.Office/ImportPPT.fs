@@ -222,14 +222,14 @@ module ImportPPTModule =
                         pathStack.Pop() |> ignore)
 
                 // 그룹으로 정의한 디바이스와 일반디바이스가 이름이 중첩되는지 확인  //DevA_G1, DevA_G2,... => DevA 있으면 안됨
-                let pattern = "_G\\d+$";
-                sys.LoadedSystems.Where(fun f ->   Regex.Match(f.Name, pattern).Success)   
-                                 .Select(fun f -> f.Name,  Regex.Replace(f.Name, pattern, "").TrimEnd())
-                                 .Iter(fun (name, g)->
-                                    match  sys.GetLoadedSys(g) with
-                                    | Some s ->  failwithf $"디바이스 {s.Name}은 그룹디바이스 정의되서 사용중입니다. \nAction 이름 뒤에 그룹구성숫자 [Num] 입력필요"
-                                    | None -> ()
-                                  )
+                //let pattern = "_G\\d+$";
+                //sys.LoadedSystems.Where(fun f ->   Regex.Match(f.Name, pattern).Success)   
+                //                 .Select(fun f -> f.Name,  Regex.Replace(f.Name, pattern, "").TrimEnd())
+                //                 .Iter(fun (name, g)->
+                //                    match  sys.GetLoadedSys(g) with
+                //                    | Some s ->  failwithf $"디바이스 {s.Name}은 그룹디바이스 정의되서 사용중입니다. \nAction 이름 뒤에 그룹구성숫자 [Num] 입력필요"
+                //                    | None -> ()
+                //                  )
 
                 { Config = cfg
                   System = sys

@@ -508,7 +508,7 @@ module PPTObjectModule =
         member x.DevParam   = devParam
         
         member x.JobName =
-            let pureJob = pageTitle+"_"+name.Replace(".", "_")
+            let pureJob = pageTitle+"_"+GetLastBracketRelaceName(name, "").Replace(".", "_")
             if x.IsCallDevParam then
                 let inParam = devParam.Value |> fst
                 let outParam = devParam.Value |> snd

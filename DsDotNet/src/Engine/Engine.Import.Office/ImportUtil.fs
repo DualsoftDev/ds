@@ -87,9 +87,9 @@ module ImportU =
                         if job.DeviceDefs.any () then
                             Call.Create(job, parentWrapper)
                         else
-                            node.Shape.ErrorName(ErrID._52, node.PageNum)
+                            failWithLog ErrID._52
                     | None ->
-                            node.Shape.ErrorName(ErrID._48, node.PageNum)
+                            failWithLog ErrID._48
 
                 else
                     let apiName = node.CallApiName
@@ -106,7 +106,7 @@ module ImportU =
                                 None
 
                     //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask, jobName)
+                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask)
             call
 
 

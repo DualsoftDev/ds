@@ -478,6 +478,15 @@ module PPTObjectModule =
         member x.IfRXs = ifRXs
         member x.NodeType = nodeType
         member x.DisableCall = disableCall
+        
+        member x.JobType = 
+                if x.IsCall && not(x.IsFunction) 
+                then
+                    try
+                        getJobActionType x.CallApiName |>Some
+                    with ex -> x.Shape.ErrorName($"{ex.Message}", iPage)
+                else 
+                    None
 
         
         member x.PageTitle = pageTitle

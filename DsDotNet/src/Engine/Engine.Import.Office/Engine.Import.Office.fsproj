@@ -33,6 +33,7 @@
         <Compile Include="ExportIOTable.fs" />
         <Compile Include="ImportUtilForDev.fs" />
         <Compile Include="ImportUtilForLib.fs" />
+        <Compile Include="ImportUtilForVertex.fs" />
         <Compile Include="ImportUtil.fs" />
         <Compile Include="ImportPPT.fs" />
         <Compile Include="LibraryPPTLoader.fs" />

@@ -315,14 +315,34 @@ module PPTDocModule =
 type PPTDocExt =
     [<Extension>]
     static member GetCopyPathNName(doc: pptDoc) =
+
+        let callJobDic = doc.Nodes.Select(fun node-> node.CallName, node.JobType)|>dict
+        let getDevCount (devName) = 
+            if callJobDic.ContainsKey(devName) 
+            then 
+                callJobDic[devName].Value.DeviceCount 
+            else 
+                1
+            
         doc.Nodes
         |> Seq.filter (fun node -> node.NodeType.IsLoadSys)
         |> Seq.collect (fun node ->
-            node.CopySys.Select(fun copy ->
-                let loadFilePath =
-                    if copy.Value.EndsWith(".pptx") then
-                        copy.Value
-                    else
-                        copy.Value + ".pptx"
+            node.CopySys |> Seq.collect (fun copy ->
+                let devCount = getDevCount(copy.Key)
+                let loadFilePath = 
+                    if copy.Value.EndsWith(".pptx") then copy.Value
+                    else copy.Value + ".pptx"
 
-                loadFilePath, copy.Key.Trim(), node))
+                if devCount > 1 then
+                    seq {
+                        for i in 1 .. devCount do
+                            let multiName = getMultiDeviceName (copy.Key.Trim()) i
+                            yield loadFilePath, multiName, node
+                    }
+                else
+                    seq {
+                        yield loadFilePath, copy.Key.Trim(), node
+                    }
+            )
+        )
+

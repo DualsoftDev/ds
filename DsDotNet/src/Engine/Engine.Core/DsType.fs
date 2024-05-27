@@ -66,6 +66,11 @@ module DsType =
         | NoneTRx //인터페이스 지시관찰 없는 타입
         | Push    // reset 인터페이스(Plan Out) 관찰될때까지 ON 
         | MultiAction  of string*int // 동시동작 개수 받기
+        member x.DeviceCount = 
+            match x with
+            | MultiAction (_, cnt) -> cnt
+            | _ -> 1
+        
 
     [<Flags>]    
     type ScreenType =
@@ -131,7 +136,11 @@ module DsType =
         | Some "XT" -> JobActionType.NoneTx
         | Some "XR" -> JobActionType.NoneRx
         | Some "P" -> JobActionType.Push
-        | Some s when isStringDigit s -> JobActionType.MultiAction (nameContents, (int s)) // 숫자일 경우 MultiAction으로 변환
+        | Some s when isStringDigit s ->
+                if (int s) < 2 then
+                    failWithLog $"MultiAction Count >= 2 : {name}"
+
+                JobActionType.MultiAction (nameContents, (int s)) // 숫자일 경우 MultiAction으로 변환
         | Some t -> failwithf "Unknown ApiActionType: %s" t
         | None -> JobActionType.Normal
 

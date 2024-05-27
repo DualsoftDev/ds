@@ -20,7 +20,7 @@ module Util =
     let mutable currentFileName = ""
     let mutable runtimeTarget = WINDOWS
 
-    let getDummyDeviceName (loadedName:string) index = $"{loadedName}_{index}"
+    let getMultiDeviceName (loadedName:string) index = $"{loadedName}_{index}"
 
 
     let GetTailNumber (name: string) =

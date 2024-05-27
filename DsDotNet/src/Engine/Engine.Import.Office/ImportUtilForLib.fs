@@ -55,7 +55,7 @@ module ImportUtilForLib =
                         let devOrg = if i = 1 then devOrg
                                         else ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
 
-                        let mutiName = getDummyDeviceName loadedName i
+                        let mutiName = getMultiDeviceName loadedName i
                         let devParams = getDevParams mutiName
 
                         tasks.Add(getLoadedTasks mySys devOrg mutiName apiPureName devParams node)|>ignore

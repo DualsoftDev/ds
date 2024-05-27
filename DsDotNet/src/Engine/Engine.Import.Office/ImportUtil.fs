@@ -18,159 +18,9 @@ open System.Reflection
 
 [<AutoOpen>]
 module ImportU =
-
-    let private getApiItems (sys: DsSystem, refSys: string, apiName: string) =
-        let refSystem = sys.TryFindLoadedSystem(refSys).Value.ReferenceSystem
-        refSystem.TryFindExportApiItem([| refSystem.Name; apiName |]).Value
-
-        
-    let createGenBtnLamp(mySys: DsSystem) =
-        let flows = mySys.Flows
-        flows.Iter(fun flow ->
-                    mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow)
-                    mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow)
-                    mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow)
-                    mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow)
-                    mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow)
-                    mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow)
-            )
-
-        mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "-", "", None)
-        mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "-", "", None)
-        mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "-", "", None)
-
-        mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "-", "", None)
-        mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None)
-        mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None)
-        mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
-
-    let getJobName (node:pptNode) apiName (mySys:DsSystem)=
-        let jobFirstName = node.CallName + "_" + apiName
-        match mySys.Jobs.TryFind(fun job -> job.Name = jobFirstName) with
-        | Some job -> node.JobName
-        | None ->jobFirstName
-                
-    let private createCallVertex
-        (
-            mySys: DsSystem,
-            node: pptNode,
-            parentWrapper:ParentWrapper,
-            dicSeg: Dictionary<string, Vertex>,
-            jobCallNames: string seq
-        ) =
-        let getOperatorFunc() = 
-            match mySys.Functions |> Seq.tryFind(fun f->f.Name = node.OperatorName) with
-            | Some f -> f
-            | None -> 
-                let newfunc = OperatorFunction(node.OperatorName) :> Func
-                mySys.Functions.Add(newfunc) |>ignore
-                newfunc
-
-        let getCommandFunc() = 
-            match mySys.Functions |> Seq.tryFind(fun f->f.Name = node.CommandName) with
-            | Some f -> f
-            | None -> 
-                let newfunc = CommandFunction(node.CommandName):> Func
-                mySys.Functions.Add(newfunc) |>ignore
-                newfunc
-
-        let getCallFromLoadedSys(loadSysName, apiName) = 
-            match mySys.Jobs.TryFind(fun job -> 
-                                job.DeviceDefs.Any(fun d-> d.DeviceName = loadSysName && d.ApiName = apiName)) with
-            | Some job ->   
-                Call.Create(job, parentWrapper)
-            
-            | None ->
-                let device =  mySys.Devices.First(fun d->d.Name = loadSysName)
-                let api = device.ReferenceSystem.ApiItems.First(fun a->a.Name = apiName)   
-                let devTask = TaskDev(api, node.JobName,  node.DevParamIn, node.DevParamOut, loadSysName) 
-                let job = Job(node.JobName , mySys, [devTask])
-                mySys.Jobs.Add job 
-
-                Call.Create(job, parentWrapper)
-
-        let getCall ()= 
-            let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-            let call = 
-                let jobName = getJobName node apiName mySys
-                if jobCallNames.Contains sysName
-                then 
-                    getCallFromLoadedSys(sysName, apiName)
-                else
-                    let apiName = node.CallApiName
-                    let loadedName = node.CallName
-
-                    let apiNameForLib =  GetBracketsRemoveName(apiName).Trim()
-                    let libAbsolutePath, autoGenSys = getLibraryPath mySys loadedName apiNameForLib
-
-                    let autoGenDevTask    =
-                        if autoGenSys.IsSome
-                            then
-                                createTaskDevUsingApiName (autoGenSys.Value.ReferenceSystem) jobName loadedName apiName (TextAddrEmpty |> defaultDevParam, TextAddrEmpty  |> defaultDevParam)|> Some
-                            else 
-                                None
-
-                    //let Version = libConfig.Version  active sys랑 비교 필요 //test ahn
-                    addLibraryNCall (libAbsolutePath, loadedName, apiName, mySys, parentWrapper, node, autoGenDevTask)
-            call
-
-
-        let call =
-            if node.IsFunction
-            then
-                if node.IsRootNode.Value
-                then
-                    Call.Create(getOperatorFunc(), parentWrapper)
-                else 
-                    Call.Create(getCommandFunc(), parentWrapper)
-            else 
-                    getCall()
-          
-
-        node.UpdateCallProperty(call)
-
-        dicSeg.Add(node.Key, call)
-
-        
-
-    let private getParent
-        (
-            edge: pptEdge,
-            parents: Dictionary<pptNode, seq<pptNode>>,
-            dicSeg: Dictionary<string, Vertex>
-        ) =
-        ImportDocCheck.SameParent(parents, edge)
-
-        let newParents =
-            parents
-            |> Seq.filter (fun group -> group.Value.Contains(edge.StartNode) && group.Value.Contains(edge.EndNode))
-            |> Seq.map (fun group -> dicSeg.[group.Key.Key])
-
-        if (newParents.Any() && newParents.length () > 1) then
-            failwithlog "중복부모"
-
-        if (newParents.Any()) then
-            Some(newParents |> Seq.head)
-        else
-            None
-
-
-
-    let private getOtherFlowReal (flows: Flow seq, nodeEx: pptNode) =
-        let flowName, nodeName = nodeEx.Name.Split('.')[0], nodeEx.Name.Split('.')[1]
-
-        match flows.TryFind(fun f -> f.Name = flowName) with
-        | Some flow ->
-            match flow.Graph.Vertices.TryFind(fun f -> f.Name = nodeName) with
-            | Some real -> real
-            | None -> nodeEx.Shape.ErrorName($"{ErrID._27} Error Name : [{nodeName}]", nodeEx.PageNum)
-        | None -> nodeEx.Shape.ErrorName($"{ErrID._26} Error Name : [{flowName}]", nodeEx.PageNum)
-
-
+    
     [<Extension>]
     type ImportUtil =
-        
-
 
         //Interface Reset 정보 만들기
         [<Extension>]
@@ -349,7 +199,7 @@ module ImportU =
                 match getJobActionType node.CallApiName with
                 | MultiAction (_,cnt) -> 
                     for i in [1..cnt] do 
-                        let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = (getDummyDeviceName node.CallName i))
+                        let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallName i))
                         addChannelPoints dev node
                 | _ ->
                     let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
@@ -403,10 +253,6 @@ module ImportU =
                 |> Seq.filter (fun node -> node.Alias.IsNone)
                 |> Seq.filter (fun node -> node.NodeType.IsCall)
 
-            let jobCallNames =
-                    pptNodes.Where(fun node -> node.NodeType.IsLoadSys)
-                    |> Seq.collect (fun node -> node.JobCallNames)
-                    
 
             let createCall () =
                 calls
@@ -414,9 +260,9 @@ module ImportU =
                         try
 
                             if dicChildParent.ContainsKey(node) then
-                                createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex, jobCallNames)
+                                createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
                             else
-                                createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex, jobCallNames)
+                                createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex)
 
                         with ex ->
                             node.Shape.ErrorName(ex.Message, node.PageNum)
@@ -787,7 +633,39 @@ module ImportU =
 
             libApisNSys
 
+        [<Extension>]
+        static member CreateGenBtnLamp(mySys: DsSystem) =
+            let flows = mySys.Flows
+            flows.Iter(fun flow ->
+                        mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow)
+                        mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow)
+                        mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow)
+                        mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow)
+                        mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow)
+                        mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow)
+                )
 
+            mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "-", "", None)
+
+            mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
+
+        [<Extension>]
+        static member ValidatePPTSystem(doc: pptDoc, sys: DsSystem) =
+            let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
+       
+            doc.Nodes.Where(fun n -> n.NodeType.IsCall && n.IsRootNode.Value)
+                     .Iter(fun n -> 
+                            let call = doc.DicVertex[n.Key]
+                            if not(rootEdgeSrcs.Contains (call))
+                            then
+                                n.Shape.ErrorShape(ErrID._71, n.PageNum)
+                )
+         
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =
             
@@ -799,7 +677,7 @@ module ImportU =
                             
                 if sys.HWButtons.IsEmpty() && sys.HWLamps.IsEmpty()
                 then
-                    createGenBtnLamp(sys)
+                    sys.CreateGenBtnLamp()
 
             //수동생성
             //doc.MakeButtons(sys)
@@ -816,4 +694,6 @@ module ImportU =
             doc.MakeApiTxRx()
             //AnimationPoint  만들기
             doc.MakeAnimationPoint(sys)
+
+            doc.ValidatePPTSystem(sys)
             doc.IsBuilded <- true

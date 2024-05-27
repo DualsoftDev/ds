@@ -86,6 +86,7 @@ module ErrID =
     let _68 = "Safety조건으로는 Action만 가능합니다. Dev.Api 형식으로 입력하세요"
     let _69 = "처음페이지 슬라이드 노트에 Text가 없습니다."
     let _70 = "내부 함수 호출은 이름만 입력해야합니다."
+    let _71 = "Flow에 존재하는 Action은 반드시 연결이 필요합니다."
     
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

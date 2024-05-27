@@ -61,7 +61,7 @@ module ValidateMoudle =
             logWarn $"%A{exn}"
 
 
-
+    //하나의 Api는 여러개의 Job에 할당될 수 있다? 없다 ?
     let validateJobs(sys:DsSystem) =
         sys.ApiUsages.Iter(fun a->
             let parentJob = sys.Jobs.Where(fun j-> j.ApiDefs.Contains(a))
@@ -71,8 +71,18 @@ module ValidateMoudle =
                 failwithf $"{a.QualifiedName} is 중복 assigned ({jobNames})"
         )
 
+    let validateRootCallConnection(sys:DsSystem) =
+        let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
+        sys.GetVerticesCallOperator().Iter(fun callOp->
+            if not(rootEdgeSrcs.Contains (callOp))
+                then
+                failWithLog $"Flow에 존재하는 Action은 반드시 연결이 필요합니다. {callOp.Name}"
+            )
+
+
+
     type DsSystem with
         member x.Validate() = 
             validateGraphOfSystem x
-         //   validateJobs x
+            validateRootCallConnection x
                 

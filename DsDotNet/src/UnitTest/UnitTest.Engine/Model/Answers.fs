@@ -95,8 +95,7 @@ module ModelAnswers =
             F.Main.Ap;
         }
     }
-    [device file="cylinder.ds"] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
-    [device file="cylinder.ds"] B; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [device file="cylinder.ds"] A, B; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
     [external file="station.ds"] C; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/station.ds
 }
 """
@@ -173,8 +172,7 @@ module ModelAnswers =
             A = (945, 123, 45, 67);
         }
     }
-    [device file="cylinder.ds"] A; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
-    [device file="cylinder.ds"] B; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file="cylinder.ds"] A, B; // E:\projects\dualsoft\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
 """
     let answerFinishValid = """

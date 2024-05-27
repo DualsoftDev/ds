@@ -426,13 +426,24 @@ module internal ToDsTextModule =
                 if finished.Any()  then yield finished
                 if disabled.Any()  then yield disabled
                 yield $"{tab}{rb}"
-            let commentDevice(d:Device) = if pCooment then  $"// {d.AbsoluteFilePath}" else "";
-            for d in system.Devices do
-                yield $"{tab}[device file={quote d.RelativeFilePath}] {d.Name.QuoteOnDemand()}; {commentDevice d}"
-            
-            let commentSystem(es:ExternalSystem) = if pCooment then  $"// {es.AbsoluteFilePath}" else "";
+            let commentDevice(absoluteFilePath:string) = if pCooment then  $"// {absoluteFilePath}" else "";
+         
+            let groupedDevices = 
+                system.Devices
+                |> Seq.groupBy (fun d -> d.RelativeFilePath)  
+
+            for (path, devices) in groupedDevices do
+                
+                let textDevices = 
+                    if devices.Count() = 1 then
+                        devices.First().Name.QuoteOnDemand()
+                    else
+                        $"\r\n{tab2}" + String.Join($",\r\n{tab2}", devices.Select(fun d -> d.Name.QuoteOnDemand()))
+                    
+                yield $"{tab}[device file={quote path}] {textDevices}; //{commentDevice (devices.First().AbsoluteFilePath)}"
+
             for es in system.ExternalSystems do
-                yield $"{tab}[external file={quote es.RelativeFilePath}] {es.Name}; {commentSystem es}"
+                yield $"{tab}[external file={quote es.RelativeFilePath}] {es.Name}; {commentDevice es.AbsoluteFilePath}"
             
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)

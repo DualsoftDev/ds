@@ -583,7 +583,9 @@ module XgxExpressionConvertorModule =
 
             | _ -> failwithlog "ERROR"
 
-        | (DuTimer _ | DuCounter _) -> augs.Statements.Add statement 
+        | DuAugmentedPLCFunction _ 
+        | (DuTimer _ | DuCounter _) ->
+            augs.Statements.Add statement 
 
         | DuAction(DuCopy(condition, source, target)) ->
             let funcName = XgiConstants.FunctionNameMove
@@ -593,20 +595,20 @@ module XgxExpressionConvertorModule =
                     OriginalExpression = condition
                     Output = target } |> augs.Statements.Add
 
-        | DuAugmentedPLCFunction _ -> failwithlog "ERROR"
+        | _ -> failwithlog "ERROR"
 
 
     type Statement with
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
         /// visit: parent expression -> 자신 expression -> 반환 expression : 아래의 AugmentXgkArithmeticExpressionToAssignStatemnt 샘플 참고
-        member x.VisitExpression (visit:IExpression option -> IExpression -> IExpression) : Statement =
-            let tryVisit (parentExp:IExpression option) (exp:IExpression<bool> option) : IExpression<bool> option =
+        member x.VisitExpression (visit:IExpression list -> IExpression -> IExpression) : Statement =
+            let tryVisit (expPath:IExpression list) (exp:IExpression<bool> option) : IExpression<bool> option =
                 match exp with
-                | Some exp -> (visit parentExp (exp:>IExpression)) :?> IExpression<bool> |> Some
+                | Some exp -> (visit expPath (exp:>IExpression)) :?> IExpression<bool> |> Some
                 | None -> None
 
-            let visitTop exp = visit None exp
-            let tryVisitTop exp = tryVisit None exp
+            let visitTop exp = visit [] exp
+            let tryVisitTop exp = tryVisit [] exp
 
             match x with
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
@@ -635,42 +637,63 @@ module XgxExpressionConvertorModule =
             x.VisitExpression visit2
 
         /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
-        member x.MakeExpressionsFlattenizable() =
-            let visitor (exp:IExpression) : IExpression = exp.MakeFlattenizable()
+        member x.DistributeNegate() =
+            let visitor (exp:IExpression) : IExpression = exp.DistributeNegate()
             x.VisitExpression visitor
 
         /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙연산을 assign statement 로 변환한다.
         member x.AugmentXgkArithmeticExpressionToAssignStatemnt (prjParam: XgxProjectParams) (augs: Augments) : Statement =
-            let rec visitor (parentExp:IExpression option) (exp:IExpression): IExpression =
+            let rec visitor (expPath:IExpression list) (exp:IExpression): IExpression =
                 if exp.Terminal.IsSome then
                     exp
                 else
+                    tracefn $"exp: {exp.ToText()}"
                     let newExp =
-                        let args = exp.FunctionArguments |> map (visitor (Some exp))
+                        let args = exp.FunctionArguments |> map (fun ex -> visitor (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
                     match newExp.FunctionName with
-                    | Some ("+"|"-"|"*"|"/" as fn) when parentExp.IsSome ->
-                        let tmpNameHint = operatorToMnemonic fn
-                        let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
-                        let stg = tmpVar :> IStorage
-                        let stmt = DuAssign(None, newExp, stg)
-                        augs.Statements.Add stmt
-                        augs.Storages.Add stg
-                        tmpVar.ToExpression()
-                        //let toAssignStatement =
-                        //    match prjParam.TargetType with
-                        //    | XGK -> parentExp.IsSome
-                        //    | XGI -> parentExp.IsSome && parentExp.Value.FunctionName <> Some fn
-                        //if toAssignStatement then
-                        //    let tmpNameHint = operatorToMnemonic fn
-                        //    let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
-                        //    let stg = tmpVar :> IStorage
-                        //    let stmt = DuAssign(None, newExp, stg)
-                        //    augs.Statements.Add stmt
-                        //    augs.Storages.Add stg
-                        //    tmpVar.ToExpression()
-                        //else
-                        //    newExp
+                    | Some ("+"|"-"|"*"|"/" as fn) when expPath.Any() ->
+
+                        //let tmpNameHint = operatorToMnemonic fn
+                        //let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
+                        //let stg = tmpVar :> IStorage
+                        //let stmt = DuAssign(None, newExp, stg)
+
+                        //augs.Statements.Add stmt
+                        //augs.Storages.Add stg
+                        //tmpVar.ToExpression()
+
+
+
+                        let augment =
+                            match prjParam.TargetType, expPath with
+                            | XGK, _head::_ -> true
+                            | XGI, _head::_ when _head.FunctionName <> Some fn -> true
+                            | _ ->
+                                false
+
+                        if augment then
+                            let tmpNameHint = operatorToMnemonic fn
+                            let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
+                            let stg = tmpVar :> IStorage
+
+                            let stmt =
+                                match prjParam.TargetType with
+                                | XGK -> DuAssign(None, newExp, stg)
+                                | XGI ->
+                                    let newExp = mergeArithmaticOperator prjParam augs (Some tmpVar) newExp
+                                    DuAugmentedPLCFunction {
+                                        FunctionName = fn
+                                        Arguments = newExp.FunctionArguments
+                                        OriginalExpression = newExp
+                                        Output = tmpVar }
+                                | _ -> failwithlog "ERROR"
+
+                            augs.Statements.Add stmt
+                            augs.Storages.Add stg
+                            tmpVar.ToExpression()
+                        else
+                            newExp
                     | _ ->
                         newExp
 

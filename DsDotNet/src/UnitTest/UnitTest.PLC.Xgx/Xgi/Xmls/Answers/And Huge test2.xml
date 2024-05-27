@@ -102,7 +102,7 @@
                                         nn1
                                     </Element>
                                     <Element ElementType="70" Coordinate="3079">
-                                        _t1_out
+                                        _t1_ADD
                                     </Element>
                                     <Element ElementType="70" Coordinate="4097">
                                         nn2
@@ -112,45 +112,45 @@
                                     <Element ElementType="6" Coordinate="6145">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="6148" Param="FNAME: GT2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1267&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="6148" Param="FNAME: SUB&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 127&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"/>
                                     <Element ElementType="70" Coordinate="7169">
-                                        _t1_out
+                                        nn4
                                     </Element>
                                     <Element ElementType="70" Coordinate="7175">
-                                        _t2_out
+                                        _t2_SUB
                                     </Element>
                                     <Element ElementType="70" Coordinate="8193">
-                                        nn3
+                                        nn5
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="10241">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="10244" Param="FNAME: SUB&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 127&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="10244" Param="FNAME: ADD2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1685&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000080, &#xA;"/>
                                     <Element ElementType="70" Coordinate="11265">
-                                        nn4
+                                        _t2_SUB
                                     </Element>
                                     <Element ElementType="70" Coordinate="11271">
-                                        _t3_out
+                                        _t3_ADD
                                     </Element>
                                     <Element ElementType="70" Coordinate="12289">
-                                        nn5
+                                        nn6
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="14337">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="14340" Param="FNAME: ADD2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1685&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000080, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="14340" Param="FNAME: GT2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1267&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="15361">
-                                        _t3_out
+                                        _t1_ADD
                                     </Element>
                                     <Element ElementType="70" Coordinate="15367">
                                         _t4_out
                                     </Element>
                                     <Element ElementType="70" Coordinate="16385">
-                                        nn6
+                                        nn3
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -159,7 +159,7 @@
                                     </Element>
                                     <Element ElementType="102" Coordinate="18436" Param="FNAME: GT2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1267&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
                                     <Element ElementType="70" Coordinate="19457">
-                                        _t4_out
+                                        _t3_ADD
                                     </Element>
                                     <Element ElementType="70" Coordinate="19463">
                                         _t5_out
@@ -185,7 +185,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="26625">
-                                        _t2_out
+                                        _t4_out
                                     </Element>
                                     <Element ElementType="6" Coordinate="26628">
                                         _t5_out
@@ -340,11 +340,11 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="54">
                             <Symbols>
-                                <Symbol Name="_t1_out" Comment="$nn1 + $nn2" Device="" Kind="1" Type="DINT" InitValue="3" Address="" State="0"/>
-                                <Symbol Name="_t2_out" Comment="$_t1_out &gt; $nn3" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="_t3_out" Comment="$nn4 - $nn5" Device="" Kind="1" Type="DINT" InitValue="-1" Address="" State="0"/>
-                                <Symbol Name="_t4_out" Comment="$_t3_out + $nn6" Device="" Kind="1" Type="DINT" InitValue="5" Address="" State="0"/>
-                                <Symbol Name="_t5_out" Comment="$_t4_out &gt; $nn7" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="" Kind="1" Type="DINT" InitValue="3" Address="" State="0"/>
+                                <Symbol Name="_t2_SUB" Comment="$nn4 - $nn5" Device="" Kind="1" Type="DINT" InitValue="-1" Address="" State="0"/>
+                                <Symbol Name="_t3_ADD" Comment="$_t2_SUB + $nn6" Device="" Kind="1" Type="DINT" InitValue="5" Address="" State="0"/>
+                                <Symbol Name="_t4_out" Comment="$_t1_ADD &gt; $nn3" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="_t5_out" Comment="$_t3_ADD &gt; $nn7" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="_t6_out" Comment="$nn1 &gt; $nn2" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="_t7_split" Comment="&amp;&amp; split output" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="_t8_split" Comment="&amp;&amp; split output" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>

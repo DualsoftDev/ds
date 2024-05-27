@@ -127,8 +127,7 @@ module XgkTypeConvertorModule =
             exp
 
     /// XGK 전용 Statement 확장
-    let rec internal s2XgkSs (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
-        let newStatement = statement.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
+    let rec internal s2XgkSs (prjParam: XgxProjectParams) (augs:Augments) (newStatement: Statement) : unit =
         match newStatement with
         | DuAssign(condition, exp, target) ->
             let numStatementsBefore = augs.Statements.Count

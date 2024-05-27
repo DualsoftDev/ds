@@ -51,12 +51,13 @@ module LsPLCExportExpressionModule =
             | _ ->
                 failwith "Invalid expression"
 
+        /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
         /// Non-terminal negation 을 terminal negation 으로 변경
-        member exp.TerminalizeNegate() : IExpression =
+        member exp.DistributeNegate() : IExpression =
             match exp.Terminal, exp.FunctionName with
             | Some terminal, None -> exp
             | None, Some fn ->
-                let args = exp.FunctionArguments |> map (fun a -> a.TerminalizeNegate())
+                let args = exp.FunctionArguments |> map (fun a -> a.DistributeNegate())
                 if fn = "!" then
                     let arg0 = args.ExactlyOne()
                     let subArgs = arg0.FunctionArguments
@@ -75,12 +76,9 @@ module LsPLCExportExpressionModule =
             | _ ->
                 failwith "Invalid expression"
 
-        /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
-        ///
-        /// 1. Non-terminal negation 을 terminal negation 으로 변경
-        /// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
-        member exp.MakeFlattenizable(): IExpression =
-            exp.TerminalizeNegate()
+        ///// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
+        //member exp.MakeFlattenizable(): IExpression =
+        //    exp.DistributeNegate()
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.

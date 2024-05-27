@@ -62,7 +62,7 @@
                                         nn2
                                     </Element>
                                     <Element ElementType="70" Coordinate="3079">
-                                        _t2_MUL
+                                        _t1_MUL
                                     </Element>
                                     <Element ElementType="70" Coordinate="4097">
                                         nn3
@@ -77,7 +77,7 @@
                                         nn5
                                     </Element>
                                     <Element ElementType="70" Coordinate="7175">
-                                        _t4_MUL
+                                        _t2_MUL
                                     </Element>
                                     <Element ElementType="70" Coordinate="8193">
                                         nn6
@@ -89,7 +89,7 @@
                                     </Element>
                                     <Element ElementType="102" Coordinate="10244" Param="FNAME: DIV&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 99&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"/>
                                     <Element ElementType="70" Coordinate="11265">
-                                        _t4_MUL
+                                        _t2_MUL
                                     </Element>
                                     <Element ElementType="70" Coordinate="11271">
                                         _t3_DIV
@@ -107,10 +107,10 @@
                                         nn1
                                     </Element>
                                     <Element ElementType="70" Coordinate="15367">
-                                        _t1_ADD
+                                        _t4_ADD
                                     </Element>
                                     <Element ElementType="70" Coordinate="16385">
-                                        _t2_MUL
+                                        _t1_MUL
                                     </Element>
                                     <Element ElementType="70" Coordinate="17409">
                                         nn4
@@ -125,7 +125,7 @@
                                     </Element>
                                     <Element ElementType="102" Coordinate="20484" Param="FNAME: SUB&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 127&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"/>
                                     <Element ElementType="70" Coordinate="21505">
-                                        _t1_ADD
+                                        _t4_ADD
                                     </Element>
                                     <Element ElementType="70" Coordinate="21511">
                                         sum
@@ -148,10 +148,10 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="13">
                             <Symbols>
-                                <Symbol Name="_t1_ADD" Comment="+ output" Device="" Kind="1" Type="INT" InitValue="15" Address="" State="0"/>
-                                <Symbol Name="_t2_MUL" Comment="* output" Device="" Kind="1" Type="INT" InitValue="6" Address="" State="0"/>
-                                <Symbol Name="_t3_DIV" Comment="/ output" Device="" Kind="1" Type="INT" InitValue="4" Address="" State="0"/>
-                                <Symbol Name="_t4_MUL" Comment="* output" Device="" Kind="1" Type="INT" InitValue="30" Address="" State="0"/>
+                                <Symbol Name="_t1_MUL" Comment="$nn2 * $nn3" Device="" Kind="1" Type="INT" InitValue="6" Address="" State="0"/>
+                                <Symbol Name="_t2_MUL" Comment="$nn5 * $nn6" Device="" Kind="1" Type="INT" InitValue="30" Address="" State="0"/>
+                                <Symbol Name="_t3_DIV" Comment="$_t2_MUL / $nn7" Device="" Kind="1" Type="INT" InitValue="4" Address="" State="0"/>
+                                <Symbol Name="_t4_ADD" Comment="$nn1 + $_t1_MUL + $nn4 + $_t3_DIV" Device="" Kind="1" Type="INT" InitValue="15" Address="" State="0"/>
                                 <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn3" Comment="" Device="" Kind="8" State="0"/>

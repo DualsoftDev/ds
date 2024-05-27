@@ -45,10 +45,10 @@ module ImportU =
         mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
 
     let getJobName (node:pptNode) apiName (mySys:DsSystem)=
-                let jobFirstName = mySys.Name + "_" + apiName
-                match mySys.Jobs.TryFind(fun job -> job.Name = jobFirstName) with
-                | Some job -> node.JobName
-                | None ->jobFirstName
+        let jobFirstName = node.CallName + "_" + apiName
+        match mySys.Jobs.TryFind(fun job -> job.Name = jobFirstName) with
+        | Some job -> node.JobName
+        | None ->jobFirstName
                 
     let private createCallVertex
         (

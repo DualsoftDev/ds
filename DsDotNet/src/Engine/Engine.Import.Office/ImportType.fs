@@ -73,7 +73,8 @@ module ImportType =
             $"{flowName}_{row.[(int) IOColumn.Name]}"
         else 
             $"{row.[(int) IOColumn.Name]}"
-    let getJobName (row: Data.DataRow) = getDevName(row).Replace(".", "_")
+
+
             
 
     let checkPPTDataType (devParamRaw:DevParamRawItem) (devParam:DevParam) = 

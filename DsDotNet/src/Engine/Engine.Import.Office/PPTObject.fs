@@ -230,8 +230,6 @@ module PPTObjectModule =
             with ex ->
                 shape.ErrorName(ex.Message, iPage)
 
-
-                
         | IF_DEVICE
         | IF_LINK
         | DUMMY
@@ -320,7 +318,7 @@ module PPTObjectModule =
                         |> Seq.filter (fun f -> f = "_" |> not)
                         |> HashSet
                 else
-                    shape.ErrorName(ErrID._43, iPage)
+                      shape.ErrorName(ErrID._43, iPage)
             | None -> shape.ErrorName(ErrID._53, iPage)
 
         let updateLinkIF (text: string) =
@@ -346,31 +344,26 @@ module PPTObjectModule =
         let getNodeType() =
             let nameNfunc = GetBracketsRemoveName(shape.InnerText)
             let name = GetLastParenthesesReplaceName (nameNfunc, "")
-            if (shape.CheckRectangle()) then
-                if name.Contains(".")
-                then REALExF
-                else REAL
-            elif (shape.CheckHomePlate()) then
+
+            match shape with
+            | s when s.CheckRectangle() ->
+                if name.Contains(".") then REALExF else REAL
+            | s when s.CheckHomePlate() ->
                 match GetSquareBrackets(shape.InnerText, false) with
                 | Some text -> if text.Contains("~") then IF_DEVICE else IF_LINK
                 | None -> IF_LINK
 
-            elif (shape.CheckFoldedCornerPlate()) then
-                OPEN_EXSYS_CALL
-            elif (shape.CheckFoldedCornerRound()) then
-                COPY_DEV
-            elif (shape.CheckEllipse()) then
-                CALL
-            elif (shape.CheckBevelShapePlate()) then
-                LAMP
-            elif (shape.CheckBevelShapeRound()) then
-                BUTTON     
-            elif (shape.CheckBevelShapeMaxRound()) then
-                CONDITION
-            elif (shape.CheckLayout()) then
-                shape.ErrorName(ErrID._62, iPage)
-            else
-                shape.ErrorName(ErrID._1, iPage)
+            | s when s.CheckFoldedCornerPlate() -> OPEN_EXSYS_CALL
+            | s when s.CheckFoldedCornerRound() -> COPY_DEV
+            | s when s.CheckEllipse() -> CALL
+            | s when s.CheckBevelShapePlate() -> LAMP
+            | s when s.CheckBevelShapeRound() -> BUTTON
+            | s when s.CheckBevelShapeMaxRound() -> CONDITION
+            | s when s.CheckLayout() -> shape.ErrorName(ErrID._62, iPage)
+            | _ ->
+                 failWithLog ErrID._1
+
+         
 
         let getOperatorParam (name:string) = 
             try
@@ -384,7 +377,7 @@ module PPTObjectModule =
                 shape.ErrorName(ErrID._70, iPage)
 
 
-        let getCommadParam (name:string) = 
+        let getCoinParam (name:string) = 
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
@@ -393,20 +386,15 @@ module PPTObjectModule =
                     failwithlog (error())
 
                 let inFunc, outFunc =
-           
-                    if func.Contains(",")
-                    then 
-                        func.Split(",").Head() |> trimSpaceNewLine
-                        , func.Split(",").Last() |> trimSpaceNewLine
-                    else 
-                        TextSkip, func 
+                    func.Split(",").Head() |> trimSpaceNewLine
+                    , func.Split(",").Last() |> trimSpaceNewLine
 
                 let getParam x = 
                     if x = TextSkip
                     then 
-                        $"{'-'}" |> getDevParam
+                        "" |> getDevParam
                     else 
-                        $"{'-'}:{x}"|> getDevParam
+                        $":{x}"|> getDevParam
 
                 getParam inFunc, getParam outFunc
 
@@ -506,7 +494,14 @@ module PPTObjectModule =
         member x.IsFunction = x.IsCall && not(name.Contains("."))
         member x.IsAliasFunction = x.Alias.IsSome && (x.IsFunction)
         member x.DevParam   = devParam
-        
+        member x.DevParamIn   = 
+            if devParam.IsSome && (devParam.Value|>fst).IsSome
+            then  (devParam.Value|>fst).Value else ""|>defaultDevParam     
+
+        member x.DevParamOut   = 
+            if devParam.IsSome && (devParam.Value|>snd).IsSome
+            then  (devParam.Value|>snd).Value else ""|>defaultDevParam     
+
         member x.JobName =
             let pureJob = pageTitle+"_"+GetLastBracketRelaceName(name, "").Replace(".", "_")
             if x.IsCallDevParam then
@@ -543,7 +538,7 @@ module PPTObjectModule =
 
                 | false, true -> //real dev call
                     if hasDevParam then
-                        let inParam, outParam = getCommadParam nameNFunc
+                        let inParam, outParam = getCoinParam nameNFunc
                         devParam <- Some(Some(inParam), Some(outParam))
 
                 | _ ->  
@@ -551,7 +546,21 @@ module PPTObjectModule =
                     then
                         failWithLog "function call 'devParam' not support"
 
+        member x.UpdateCallProperty(call:Call) =
 
+            call.Disabled <- x.DisableCall
+
+            if x.IsCallDevParam && x.IsRootNode.Value = false
+            then 
+                let jName = if x.IsAliasFunction then x.JobName 
+                            else call.TargetJob.Name
+                        
+                call.TargetJob.DeviceDefs.Iter(fun d->
+                        d.AddOrUpdateInParam(jName, (x.DevParam.Value|>fst).Value)
+                        d.AddOrUpdateOutParam(jName, (x.DevParam.Value|>snd).Value)
+                        )
+
+            
         member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
 
         member x.CallApiName =

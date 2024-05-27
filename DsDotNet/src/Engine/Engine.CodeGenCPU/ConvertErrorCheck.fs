@@ -110,7 +110,10 @@ module ConvertErrorCheck =
         let allAddresses = 
             [
                 yield! sys.Jobs |> Seq.collect (fun j -> 
-                    j.DeviceDefs |> Seq.collect (fun d -> [($"{d.ApiName}_IN", d.InAddress); ($"{d.ApiName}_OUT", d.OutAddress)]))
+                    j.DeviceDefs|> Seq.collect (fun d -> [($"{d.ApiName}_IN", d.InAddress); ($"{d.ApiName}_OUT", d.OutAddress)])
+                               )
+                    |> Seq.distinctBy(fun (name,_)-> name)
+                    
                 yield! sys.HWButtons |> Seq.collect (fun b -> [(b.Name, b.InAddress); (b.Name, b.OutAddress)])
                 yield! sys.HWLamps |> Seq.collect (fun l -> [(l.Name, l.OutAddress)])
             ] |> Seq.filter (fun (_, addr) -> addr <> TextAddrEmpty && addr <> TextSkip) |> Seq.toList

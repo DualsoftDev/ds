@@ -39,7 +39,9 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Output}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.InSymbol}", typeof<string>)  |> ignore
+        dt.Columns[dt.Columns.Count-1].ColumnName <- "Symbol\nIn"
         dt.Columns.Add($"{IOColumn.OutSymbol}", typeof<string>)  |> ignore
+        dt.Columns[dt.Columns.Count-1].ColumnName <- "Symbol\nOut"
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 

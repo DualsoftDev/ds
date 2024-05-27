@@ -64,10 +64,10 @@ module LsPLCExportExpressionModule =
                     | Some "!" -> arg0
                     | Some "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = subArgs } :> IExpression
                     | Some "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = subArgs } :> IExpression
-                    | Some ">" ->  DuFunction { FunctionBody = fLt;       Name = "<";  Arguments = subArgs } :> IExpression
-                    | Some ">=" -> DuFunction { FunctionBody = fLte;      Name = "<="; Arguments = subArgs } :> IExpression
-                    | Some "<" ->  DuFunction { FunctionBody = fGt;       Name = ">";  Arguments = subArgs } :> IExpression
-                    | Some "<=" -> DuFunction { FunctionBody = fGte;      Name = ">="; Arguments = subArgs } :> IExpression
+                    | Some ">" ->  DuFunction { FunctionBody = fLt;       Name = "<="; Arguments = subArgs } :> IExpression
+                    | Some ">=" -> DuFunction { FunctionBody = fLte;      Name = "<";  Arguments = subArgs } :> IExpression
+                    | Some "<" ->  DuFunction { FunctionBody = fGt;       Name = ">="; Arguments = subArgs } :> IExpression
+                    | Some "<=" -> DuFunction { FunctionBody = fGte;      Name = ">";  Arguments = subArgs } :> IExpression
 
                     | _ -> exp
                 else

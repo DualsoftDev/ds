@@ -541,7 +541,7 @@ module XgxExpressionConvertorModule =
         | DuAssign(condition, exp, target) ->
             // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
             match exp.FunctionName with
-            | Some("+"|"-"|"*"|"/" as op) ->
+            | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/" as op) ->
                 let exp = mergeArithmaticOperator prjParam augs (Some target) exp
                 if exp.FunctionArguments.Any() then
                     let augFunc =
@@ -575,8 +575,11 @@ module XgxExpressionConvertorModule =
 
             | (:? IVariable | :? ITag) when decl.IsGlobal ->
                 augs.Storages.Add decl
+                assert(exp.Terminal.IsSome)
                 if prjParam.TargetType = XGK then
-                    DuAssign(Some fake1OnExpression, exp, decl) |> augs.Statements.Add 
+                    DuAssign(Some fake1OnExpression, exp, decl) |> augs.Statements.Add
+                else
+                    ()
             | (:? IVariable | :? ITag) ->
                 let var = createXgxVariable decl.Name decl.BoxedValue decl.Comment
                 augs.Storages.Add var
@@ -612,7 +615,10 @@ module XgxExpressionConvertorModule =
 
             match x with
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
-            | DuVarDecl(exp, var) -> DuVarDecl(visitTop exp, var)
+            | DuVarDecl(exp, var) ->
+                match exp.Terminal with
+                | Some t -> DuVarDecl(visitTop exp, var)
+                | None -> DuAssign(None, visitTop exp, var)
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
                 DuTimer { tmr with
                             RungInCondition = tryVisitTop rungIn
@@ -652,7 +658,7 @@ module XgxExpressionConvertorModule =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
                     match newExp.FunctionName with
-                    | Some ("+"|"-"|"*"|"/" as fn) when expPath.Any() ->
+                    | Some (">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/" as fn) when expPath.Any() ->
 
                         //let tmpNameHint = operatorToMnemonic fn
                         //let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"

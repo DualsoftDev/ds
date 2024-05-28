@@ -22,13 +22,8 @@ module XgkTypeConvertorModule =
     /// - prefix: "D" for DWORD, "R" for REAL, "L" for LONG REAL, "$" for STRING
     ///
     /// suffix: "U" for UNSIGNED
-    let operatorToXgkFunctionName op (typ:Type) =
+    let operatorToXgkFunctionName (op:string) (typ:Type) : string =
         let isComparison = (|IsComparisonOperator|_|) op |> Option.isSome
-        //let isComparison =
-        //    match op with
-        //    | (">"|">="|"<"|"<="|"=="|"!="|"<>")-> true
-        //    | _ -> false
-
         let prefix =
             match typ with
             | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
@@ -169,9 +164,11 @@ module XgkTypeConvertorModule =
             // XGI counter 의 LD(Load) 조건을 XGK 에서는 Reset rung 으로 분리한다.
             let resetCoil = new XgkTimerCounterStructResetCoil(ctr.Counter.CounterStruct)
             let typ = ctr.Counter.Type
-            match typ with
-            | CTD -> DuAssign(None, ctr.LoadCondition.Value, resetCoil) |> statements.Add
-            | (CTR|CTU|CTUD) -> DuAssign(None, ctr.ResetCondition.Value, resetCoil) |> statements.Add
+            let assingExp =
+                match typ with
+                | CTD -> ctr.LoadCondition.Value
+                | (CTR|CTU|CTUD) -> ctr.ResetCondition.Value
+            DuAssign(None, assingExp, resetCoil) |> statements.Add
 
             if typ = CTUD then
                 let mutable newCtr = ctr

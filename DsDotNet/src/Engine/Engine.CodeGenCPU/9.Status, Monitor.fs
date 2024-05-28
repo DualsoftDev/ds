@@ -83,7 +83,7 @@ type VertexManager with
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
        
-            let setRising  = fbRising [input]:> IExpression<bool>    
+            let setRising  = fbRising [input] :> IExpression<bool>    
             let setFalling = fbFalling[input] :> IExpression<bool>
 
             yield (checkCondi <&&>  rxReadyExpr <&&> setRising,  rst<||>v._sim.Expr)    ==| (v.ErrShort, getFuncName())

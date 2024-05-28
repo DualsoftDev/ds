@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module Engine.CodeGenCPU.ConvertFlowState
 
 open System.Linq
@@ -39,14 +39,14 @@ type Flow with
     member f.ST5_ErrorState() =
         let setDeviceError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
                                 |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
-        let setConditionError = f.stopConditionErr.Expr <&&> !!f._sim.Expr
+        let setConditionError = !!f.readyCondition.Expr <&&> !!f._sim.Expr //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
         let set =  setDeviceError<||> setConditionError
         let rst = f.clear_btn.Expr
            
         (set, rst) ==| (f.e_st, getFuncName())
 
     member f.ST6_DriveState () =
-        let set = (f.drive_btn.Expr <||> f.HWBtnDriveExpr)
+        let set = (f.drive_btn.Expr <||> f.HWBtnDriveExpr) <&&> f.driveCondition.Expr
         let rst = !!f.aop.Expr <||> f.t_st.Expr  <||> f.pause.Expr
          
         (set, rst) ==| (f.d_st, getFuncName())
@@ -58,10 +58,10 @@ type Flow with
         (set, rst) ==| (f.t_st, getFuncName())
 
     member f.ST8_ReadyState() =
-        let set = f.ready_btn.Expr <||> f.HWBtnReadyExpr 
+        let set = (f.ready_btn.Expr <||> f.HWBtnReadyExpr) 
+                  <&&> (f.readyCondition.Expr <&&> !!f._sim.Expr)  //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
         ///시뮬레이션 때문에 e_st 사용 안하고  stopError/ stopConditionErr 구분해서사용
         let rst = (f.stopError.Expr <||> f.emg_st.Expr)
-                  <||> (f.stopConditionErr.Expr <&&> !!f._sim.Expr)
                   <||> (f.pause.Expr)
 
         (set, rst) ==| (f.r_st, getFuncName())

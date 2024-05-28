@@ -103,9 +103,10 @@ module TagKindList =
     |test_lamp                 = 10028
     |home_lamp                 = 10029
     
-    |flowPause                = 10040
-    |flowStopError            = 10041
-    |flowStopConditionErr     = 10042
+    |flowPause                 = 10040
+    |flowStopError             = 10041
+    |flowReadyCondition        = 10042
+    |flowDriveCondition        = 10043
 
 
 

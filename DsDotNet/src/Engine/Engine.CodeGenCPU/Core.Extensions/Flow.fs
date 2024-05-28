@@ -17,12 +17,12 @@ module ConvertCpuFlow =
                        .Select(fun b ->b.ActionINFunc)
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
-    let getConditionsError(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
+    let getConditionsToAndElseOn(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
         let tags = condis
                     .Where(fun c -> c.SettingFlows.Contains(flow))
                     .Where(fun c ->c.InTag.IsNonNull())
                     .Select(fun c -> !!c.ActionINFunc)
-        if tags.any() then tags.ToOrElseOff() else flow.System._off.Expr
+        tags.ToAndElseOn()
 
     type Flow with
 
@@ -66,7 +66,8 @@ module ConvertCpuFlow =
         member f.home_lamp   = getFM(f).GetFlowTag(FlowTag.home_lamp    )
 
         member f.stopError  = getFM(f).GetFlowTag(FlowTag.flowStopError    )
-        member f.stopConditionErr= getFM(f).GetFlowTag(FlowTag.flowStopConditionErr    )
+        member f.readyCondition= getFM(f).GetFlowTag(FlowTag.flowReadyCondition )
+        member f.driveCondition= getFM(f).GetFlowTag(FlowTag.flowDriveCondition )
         member f.pause    = getFM(f).GetFlowTag(FlowTag.flowPause    )
         member f.F = f |> getFM
         member f._on     = f.System._on
@@ -87,7 +88,8 @@ module ConvertCpuFlow =
         member f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )
 
-        member f.HWConditionsErrorExpr = getConditionsError(f, f.System.HWConditions    ) 
+        member f.HWReadyConditionsToAndElseOn = getConditionsToAndElseOn(f, f.System.HWConditions.Where(fun f->f.ConditionType = DuReadyState))
+        member f.HWDriveConditionsToAndElseOn = getConditionsToAndElseOn(f, f.System.HWConditions.Where(fun f->f.ConditionType = DuDriveState))
 
         member f.AutoExpr   =  
                 let hmiAuto = f.auto_btn.Expr <&&> !!f.manual_btn.Expr

@@ -125,8 +125,9 @@ module ConvertCPU =
     let private applyFlowMonitorSpec(f:Flow) =
         [
             yield f.F1_FlowError()
-            yield f.F2_FlowConditionErr()
-            yield f.F3_FlowPause()
+            yield f.F2_FlowPause()
+            yield f.F3_FlowReadyCondition()
+            yield f.F4_FlowDriveCondition()
             
         ]
         

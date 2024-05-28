@@ -14,15 +14,19 @@ type Flow with
         let set = f.Graph.Vertices.OfType<Real>().SelectMany(fun r->r.Errors).ToOrElseOff()
         let rst = f.clear_btn.Expr
         (set, rst) ==| (f.stopError, getFuncName())
-
     
-    member f.F2_FlowConditionErr() =
-        let set = f.HWConditionsErrorExpr
-        let rst = f.clear_btn.Expr
-        (set, rst) ==| (f.stopConditionErr, getFuncName())
-
-    
-    member f.F3_FlowPause() =
+    member f.F2_FlowPause() =
         let set = f.pause_btn.Expr <||> f.HWBtnPauseExpr
         let rst = f.clear_btn.Expr
         (set, rst) ==| (f.pause, getFuncName())
+
+    member f.F3_FlowReadyCondition() =
+        let set = f.HWReadyConditionsToAndElseOn
+        let rst = f.clear_btn.Expr
+        (set, rst) ==| (f.readyCondition, getFuncName())
+
+    member f.F4_FlowDriveCondition() =
+        let set = f.HWDriveConditionsToAndElseOn
+        let rst = f.clear_btn.Expr
+        (set, rst) ==| (f.driveCondition, getFuncName())
+

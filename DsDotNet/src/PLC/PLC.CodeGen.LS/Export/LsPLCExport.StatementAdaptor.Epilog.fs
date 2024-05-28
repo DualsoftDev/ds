@@ -20,8 +20,8 @@ module XgxTypeConvertorModule =
         let newStatement = newStatement.AugmentXgiFunctionParameters prjParam augs
 
         match prjParam.TargetType with
-        | XGI -> s2XgiSs prjParam augs newStatement
-        | XGK -> s2XgkSs prjParam augs newStatement
+        | XGI -> newStatement.ToStatements(prjParam, augs)
+        | XGK -> newStatement.ToStatementsXgk(prjParam, augs)
         | _ -> failwith "Not supported runtime target"
 
         let rungComment =

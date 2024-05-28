@@ -26,8 +26,8 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
 
 
     member x.``Normal, Rising, Falling contact test`` () =
-        let storages = Storages()
-        let testCode = "$qx = $ix && !($ix) && rising($ix) && falling($ix);"
+        let storages = Storages() //확인필요 !(!($ix)) ==> !($ix) PLC 내려갈때 처리되고 있습니다.
+        let testCode = "$qx = !(!($ix)) && !($ix) && rising($ix) && falling($ix);"
         let code = baseCode + testCode
 
         let statements = parseCodeForWindows storages code

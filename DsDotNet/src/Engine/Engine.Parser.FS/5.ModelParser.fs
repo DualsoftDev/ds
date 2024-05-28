@@ -44,7 +44,7 @@ module ModelParser =
 
         let system = listener.TheSystem
         system.CreateMRIEdgesTransitiveClosure()
-        system.AutoAppendMutualReset()
+        system.AutoAppendInterfaceReset()
 
         system.Validate() |> ignore
 

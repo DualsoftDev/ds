@@ -179,39 +179,67 @@ module EdgeModule =
             createMRIEdgesTransitiveClosure f
 
 
-    ///srcs로 인해서 시작가능한 reals 구하고 구해진 reals에 리셋으로 연결된 target reals 구한다
-    let getMutalResetAbleReals (edges:Edge seq) (srcs:Real seq) : Real seq = 
-        let isResetEdge (edge: Edge) =
-            edge.EdgeType.HasFlag(EdgeType.Reset)
+    let isResetEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Reset)
+    let isStartEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Start)
 
-        // Find all target Reals connected by a reset edge to the source Reals
-        let targetReals =
-            srcs 
-            |> Seq.collect (fun src ->
-                edges
-                |> Seq.filter (fun e -> e.Source = src && isResetEdge e)
-                |> Seq.map (fun e -> e.Target)
-                |> Seq.choose (function
-                    | :? Real as real -> Some real
-                    | _ -> None)
-            )
+    /// srcs로 인해서 시작가능한 reals 구하고 구해진 reals에 리셋으로 연결된 target reals 구한다
+    let private appendInterfaceReset (srcs: Real seq) : Real seq =
+
+           // Recursive function to find all Real objects connected via Start edges
+        let rec getStartReals (src: Real) (visited: HashSet<Real>) : Real list =
+            let graphOrder = src.Parent.GetGraph().BuildPairwiseComparer()
+            src.Parent.GetGraph().Edges
+            |> Seq.filter isStartEdge
+            |> Seq.collect (fun e -> [e.Source; e.Target])
+            |> Seq.filter (fun n -> graphOrder src n = Some true)
+            |> Seq.choose (function
+                | :? Real as real when not (visited.Contains real) ->
+                    visited.Add real |> ignore
+                    Some real
+                | :? RealExF as realexf when not (visited.Contains realexf.Real) ->
+                    getStartReals realexf.Real visited |> ignore
+                    Some realexf.Real
+                | _ -> None)
+            |> Seq.toList
+        // Create a HashSet to keep track of visited Real objects
+        let visited = HashSet<Real>()
+        // Find all Real objects connected by Start edges to the source Reals
+        let startLinkReals =
+            srcs
+            |> Seq.collect (fun src -> getStartReals src visited)
+            |> Seq.append srcs
             |> Seq.distinct
 
-        // Combine the original source Reals with the newly found target Reals
-        srcs
-        |> Seq.append targetReals
+        // Find all target Reals connected by a reset edge to the startLinkReals
+        startLinkReals
+        |> Seq.collect (fun link ->
+            link.Parent.GetGraph().Edges
+            |> Seq.filter (fun e -> isResetEdge e && e.Source = link)
+            |> Seq.map (fun e -> e.Target)
+            |> Seq.choose (function
+                | :? Real as real -> Some real
+                | :? RealExF as realexf -> Some realexf.Real
+                | _ -> None)
+        )
         |> Seq.distinct
 
+    /// Automatically append mutual reset information
+    let autoAppendInterfaceReset (sys: DsSystem) = 
+        let apiNResetNodes =
+            sys.ApiItems
+            |> Seq.map (fun api ->
+                let resetAbleReals = appendInterfaceReset api.TXs
+                api, resetAbleReals
+            )
+        apiNResetNodes
+        |> Seq.iter (fun (api, resetAbleReals) ->
+            sys.ApiItems
+                .Where(fun f -> f <> api && f.RXs.Overlaps(resetAbleReals))
+                .Iter (fun f -> 
+                        ApiResetInfo.Create(sys, api.Name, "|>"|> toModelEdge ,f.Name, true) |> ignore
+            )
+        )
 
-
-    let autoAppendMutualReset(sys:DsSystem) = 
-        let edges = sys.Flows |> Seq.collect(fun f->f.Graph.Edges)
-        let apiSet = sys.ApiItems.Select(fun api->
-                   let ableReals = getMutalResetAbleReals edges api.TXs
-                   api, ableReals
-                    )
-        apiSet.ToList()
-           
     
     let getResetRootEdges (v:Vertex) =
         let es = getResetStrongEdgeSources(v)
@@ -246,7 +274,7 @@ module EdgeModule =
    
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
-        member x.AutoAppendMutualReset() = autoAppendMutualReset x
+        member x.AutoAppendInterfaceReset() = autoAppendInterfaceReset x
                                    
 
     type Flow with

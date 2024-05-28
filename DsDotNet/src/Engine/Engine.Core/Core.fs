@@ -371,7 +371,8 @@ module CoreModule =
 
 
     /// API 의 reset 정보:  "+" <||> "-";
-    and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string) =
+    and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
+        member _.AutoGenByFlow = autoGenByFlow 
         member _.Operand1 = operand1  // "+"
         member _.Operand2 = operand2  // "-"
         member _.Operator = operator  // "<|>", "|>", "<|"
@@ -379,8 +380,8 @@ module CoreModule =
             let src = operand1.QuoteOnDemand()
             let tgt = operand2.QuoteOnDemand()
             sprintf "%s %s %s"  src (operator |> toTextModelEdge) tgt  //"+" <|> "-"
-        static member Create(system:DsSystem, operand1, operator, operand2) =
-            let ri = ApiResetInfo(operand1, operator, operand2)
+        static member Create(system:DsSystem, operand1, operator, operand2, autoGenByFlow) =
+            let ri = ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
             system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]"
             ri
 

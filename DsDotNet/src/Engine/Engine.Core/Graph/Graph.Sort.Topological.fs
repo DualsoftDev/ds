@@ -43,7 +43,7 @@ module internal GraphSortImpl =
     let topologicalGroupSort (graph:Graph<_, _>) =
         let vertices = topologicalSort graph
 
-        let graphOrder = GraphPairwiseOrderImpl.isAncestorDescendant graph
+        let graphOrder = GraphPairwiseOrderImpl.isAncestorDescendant (graph, EdgeType.Start)
          
 
         let dicVs = Dictionary<int, ResizeArray<IVertex>>()

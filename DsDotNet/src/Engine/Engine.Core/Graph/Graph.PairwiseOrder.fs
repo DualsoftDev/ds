@@ -29,7 +29,7 @@ module internal GraphPairwiseOrderImpl =
 
         curried    
 
-    let isAncestorDescendant (graph:Graph<'V, 'E>) =
+    let isAncestorDescendant (graph:Graph<'V, 'E>, edgeType:EdgeType)=
         let vs = graph.Vertices |> indexed |> map (fun (n, v) -> (v, n)) |> dict
         let n = vs.length()
         // ancestor, descendant 관계에 있는 모든 node 쌍들에 대해서 hash 값으로 저정
@@ -50,7 +50,7 @@ module internal GraphPairwiseOrderImpl =
                 visited.Add(v) |> ignore
                 let ancestors = v::ancestors
  
-                graph.GetOutgoingVertices(v)
+                graph.GetOutgoingVerticesWithEdgeType (v, edgeType)
                 |> iter (fun a -> traverse a ancestors)
  
 

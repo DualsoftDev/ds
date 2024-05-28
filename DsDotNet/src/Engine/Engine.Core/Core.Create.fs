@@ -66,9 +66,9 @@ module CoreCreateModule =
                                 // Create an edge between myAlias and exAlias
                                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
               
-                    // Potentially update other ApiItems based on the new ApiItem
-                    sys.ApiItems.TakeWhile(fun a -> a <> newApi)
-                         .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.InterlockWeak, newApi.Name) |> ignore)
+                    // Potentially update other ApiItems based on the new ApiItem  
+                    //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
+                    //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.InterlockWeak, newApi.Name) |> ignore)
                 
                 newApi
             else

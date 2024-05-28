@@ -195,6 +195,26 @@ module ModelTests1 =
             logInfo "=== RecursiveSystem"
             (fun () -> compare Program.RecursiveSystemText "" ) |> ShouldFail
 
+        [<Test>]
+        member __.``Interlock extract simple test`` () =
+            logInfo "=== Interlock extract"
+            let testCode = """
+            [sys] DoubleCylinder = {
+                [flow] FLOW = {
+                    ADV <|> RET;
+                }
+                [interfaces] = {
+                    "+" = { FLOW.ADV ~ FLOW.ADV }
+                    "-" = { FLOW.RET ~ FLOW.RET }
+                }
+            }
+            """
+
+            let systemRepo = ShareableSystemRepository()
+            let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+            //"+" |> "-", "-" |> "+";
+            helper.TheSystem.ApiResetInfos.Count === 2
 
         [<Test>]
         member __.``Interlock extract test`` () =
@@ -204,18 +224,15 @@ module ModelTests1 =
                 [flow] FLOW = {
                     VP > PP > SP;
                     VM > PM > SM;
-                    VP <|> VM <|> PM;
+                    VP <|> VM;
                     PP <|> PM;
                     PP |> SM;
                     PM |> SP;
                 }
                 [interfaces] = {
-                    ADV = { FLOW.VP ~ FLOW.SP }
+                    ADV = { FLOW.VP ~ FLOW.VP }
                     RET = { FLOW.VM ~ FLOW.SM }
-                    AA = { FLOW.VM ~ FLOW.SM }
-                    BB = { FLOW.VM ~ FLOW.SM }
                     ADV <|> RET;
-                    RET |> AA <|> BB;
                 }
             }
             """
@@ -223,5 +240,5 @@ module ModelTests1 =
             let systemRepo = ShareableSystemRepository()
             let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-        
-            helper.TheSystem.ApiResetInfos.Count === 1
+            //ADV <|> RET, ADV |> RET, RET |> ADV;  => 기존 인과에 추가되서 생성
+            helper.TheSystem.ApiResetInfos.Count === 3

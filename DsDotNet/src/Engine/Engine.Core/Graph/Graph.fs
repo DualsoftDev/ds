@@ -69,20 +69,29 @@ module GraphModule =
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
         member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Target = vertex)
-        member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Source = vertex )
+        member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Source = vertex)
         member x.GetEdges(vertex:'V) = x.GetIncomingEdges(vertex).Concat(x.GetOutgoingEdges(vertex))
         member x.GetIncomingVertices(vertex:'V) = x.GetIncomingEdges(vertex).Select(fun e -> e.Source)
+        member x.GetIncomingVerticesWithEdgeType(vertex:'V, edgeType:EdgeType) = 
+                                    x.GetIncomingEdges(vertex).Where(fun e -> e.EdgeType.HasFlag edgeType)
+                                     .Select(fun e -> e.Source)
+
         member x.GetOutgoingVertices(vertex:'V) = x.GetOutgoingEdges(vertex).Select(fun e -> e.Target)
+        member x.GetOutgoingVerticesWithEdgeType(vertex:'V, edgeType:EdgeType) = 
+                                    x.GetOutgoingEdges(vertex).Where(fun e -> e.EdgeType.HasFlag edgeType)
+                                     .Select(fun e -> e.Target)
         member x.Inits =
             let inits =
-                x.Edges.Select(fun e -> e.Source)
-                    .Where(fun src -> not <| x.GetIncomingEdges(src).Any())
+                x.Edges
+                    .Select(fun e -> e.Source)
+                    .Where(fun src -> not <| x.GetIncomingVerticesWithEdgeType(src, EdgeType.Start).Any())
                     .Distinct()
             x.Islands @ inits
         member x.Lasts =
             let lasts =
-                x.Edges.Select(fun e -> e.Target)
-                    .Where(fun tgt -> not <| x.GetOutgoingEdges(tgt).Any())
+                x.Edges
+                    .Select(fun e -> e.Target)
+                    .Where(fun tgt -> not <| x.GetOutgoingVerticesWithEdgeType(tgt, EdgeType.Start).Any())
                     .Distinct()
             x.Islands @ lasts
 

@@ -213,7 +213,7 @@ module internal ToDsTextModule =
                         $"{s} ~ {e}"
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 
-                for ri in system.ApiResetInfos do
+                for ri in system.ApiResetInfos.Where(fun a->not(a.AutoGenByFlow)) do
                     yield $"{tab2}{ri.ToDsText()};"
 
                 yield $"{tab}{rb}"

@@ -40,12 +40,12 @@ module ImportU =
                     Office.ErrorConnect(edge.ConnectionShape, ErrID._32, src.Name, tgt.Name, edge.PageNum)
 
                 if
-                    (edge.Causal = InterlockStrong) //인터락 AugmentedTransitiveClosure 타입 만들기 재료
+                    (edge.Causal = InterlockStrong||edge.Causal = InterlockWeak) //인터락 AugmentedTransitiveClosure 타입 만들기 재료
                 then
                     resets.Add(src.Name, tgt.Name) |> ignore
                 else
                     sys.ApiResetInfos.Add(
-                        ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal, edge.EndNode.Name)
+                        ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal, edge.EndNode.Name, false)
                     )
                     |> ignore)
 
@@ -59,7 +59,7 @@ module ImportU =
                 | None -> dicIL.Add(dicIL.length (), [ src; tgt ] |> HashSet)
 
             let createInterlockInfos (src, tgt) =
-                let mei = ApiResetInfo.Create(sys, src, InterlockWeak, tgt)
+                let mei = ApiResetInfo.Create(sys, src, InterlockWeak, tgt, false)
                 sys.ApiResetInfos.Add(mei) |> ignore
 
             resets.ForEach updateILInfo

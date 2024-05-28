@@ -160,10 +160,21 @@ module CoreExtensionModule =
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =
-                match src.Name.QuoteOnDemand() = apiInfo.Operand1, src.Name.QuoteOnDemand() = apiInfo.Operand2 with
-                |true, false -> Some apiInfo.Operand2
-                |false, true -> Some apiInfo.Operand1
-                |_ -> None
+                match apiInfo.Operator with
+                | ModelingEdgeType.InterlockWeak -> 
+                    match src.Name.QuoteOnDemand() = apiInfo.Operand1, src.Name.QuoteOnDemand() = apiInfo.Operand2 with
+                    |true, false -> Some apiInfo.Operand2
+                    |false, true -> Some apiInfo.Operand1
+                    |_ -> None
+                | ModelingEdgeType.ResetEdge -> 
+                    match src.Name.QuoteOnDemand() = apiInfo.Operand1 with
+                    |true -> Some apiInfo.Operand2
+                    |_ -> None
+                | ModelingEdgeType.RevResetEdge -> 
+                    match src.Name.QuoteOnDemand() = apiInfo.Operand2 with
+                    |true -> Some apiInfo.Operand1
+                    |_ -> None
+                | _ -> None
 
             let resets = x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
 

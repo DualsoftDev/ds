@@ -156,22 +156,58 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     override x.EnterInterfaceResetDef(ctx: InterfaceResetDefContext) =
         // I1 <|> I2 <|> I3;  ==> [| I1; <|>; I2; <|>; I3; |]
         let terms =
-            let pred =
-                fun (tree: IParseTree) -> tree :? Identifier1Context || tree :? CausalOperatorResetContext
+            let pred (tree: IParseTree) = 
+                tree :? Identifier1Context || tree :? CausalOperatorResetContext
 
             [| for des in ctx.Descendants<RuleContext>(false, pred) do
                    des.GetText() |]
 
-        // I1 <||> I2 와 I2 <||> I3 에 대해서 해석
-        let apis = terms.Where(fun f->f <> "<|>")
-        let resets = apis.AllPairs(apis)
-                         .Where(fun (l, r)-> l <> r) 
-                         .DistinctBy(fun (l, r)->  [l;r].Order().JoinWith(";")) 
-        for tuple in resets do
-            let left, right = tuple
-            let opnd1, op, opnd2 = left, "<|>", right
-            ApiResetInfo.Create(x.TheSystem, opnd1, op |> toModelEdge, opnd2) |> ignore
+        if terms.Contains("|>") || terms.Contains("<|") then 
+            // I1 |> I2 <| I3 <|> I4 에 대해서 해석
+            let processTerms (terms: string[]) =
+                let mutable currentTerms = []
+                let mutable edges = []
+                let mutable lastOperator = ""
 
+                for term in terms do
+                    match term with
+                    | "|>" | "<|" | "<|>" ->
+                        if currentTerms.Length > 1 then
+                            let opnd1 = currentTerms.[currentTerms.Length - 2]
+                            let opnd2 = currentTerms.[currentTerms.Length - 1]
+                            edges <- (opnd1, lastOperator, opnd2) :: edges
+                        lastOperator <- term
+                    | _ ->
+                        currentTerms <- currentTerms @ [term]
+
+                // Add the final edge
+                if currentTerms.Length > 1 then
+                    let opnd1 = currentTerms.[currentTerms.Length - 2]
+                    let opnd2 = currentTerms.[currentTerms.Length - 1]
+                    edges <- (opnd1, lastOperator, opnd2) :: edges
+
+                edges.Reverse()
+
+            let edgesToCreate = processTerms terms
+
+            // Create edges
+            for (opnd1, op, opnd2) in edgesToCreate do
+                ApiResetInfo.Create(x.TheSystem, opnd1, op |> toModelEdge, opnd2) |> ignore
+
+        else
+            // I1 <|> I2 와 I2 <|> I3 에 대해서 해석
+            let apis = terms |> Array.filter (fun f -> f <> "<|>")
+            let resets = 
+                apis
+                |> Seq.allPairs apis
+                |> Seq.filter (fun (l, r) -> l <> r) 
+                |> Seq.distinctBy (fun (l, r) -> [| l; r |] |> Array.sort |> String.concat ";")
+            
+            for (left, right) in resets do
+                let opnd1, op, opnd2 = left, "<|>", right
+                ApiResetInfo.Create(x.TheSystem, opnd1, op |> toModelEdge, opnd2) |> ignore
+
+        
     member x.GetValidFile(fileSpecCtx: FileSpecContext) =
           fileSpecCtx
                     .TryFindFirstChild<FilePathContext>()

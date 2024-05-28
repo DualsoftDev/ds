@@ -13,7 +13,8 @@
 		Func3 = { Flow.e ~ Flow.e }
         Func2 = { Flow.c ~ Flow.d }
         Func1 = { Flow.a ~ Flow.b }
-		Func1 <|> Func2;
+		Func1 |> Func2;
+		Func1 <| Func2;
 		Func3 <|> Func4 <|> Func5;
     }
 }

@@ -184,7 +184,7 @@ module ModelTests1 =
             (fun () -> compare InvalidDuplicationTest.CyclicEdgeModel ""  )  |> ShouldFailWithSubstringT "Cyclic"
 
 
-    type InvalidModelTests1() =
+    type ModelGraphTests1() =
         inherit EngineTestBaseClass()
 
         let systemRepo = ShareableSystemRepository()
@@ -194,3 +194,34 @@ module ModelTests1 =
         member __.``RecursiveSystem test`` () =
             logInfo "=== RecursiveSystem"
             (fun () -> compare Program.RecursiveSystemText "" ) |> ShouldFail
+
+
+        [<Test>]
+        member __.``Interlock extract test`` () =
+            logInfo "=== Interlock extract"
+            let testCode = """
+            [sys] DoubleCylinder = {
+                [flow] FLOW = {
+                    VP > PP > SP;
+                    VM > PM > SM;
+                    VP <|> VM <|> PM;
+                    PP <|> PM;
+                    PP |> SM;
+                    PM |> SP;
+                }
+                [interfaces] = {
+                    ADV = { FLOW.VP ~ FLOW.SP }
+                    RET = { FLOW.VM ~ FLOW.SM }
+                    AA = { FLOW.VM ~ FLOW.SM }
+                    BB = { FLOW.VM ~ FLOW.SM }
+                    ADV <|> RET;
+                    RET |> AA <|> BB;
+                }
+            }
+            """
+
+            let systemRepo = ShareableSystemRepository()
+            let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+        
+            helper.TheSystem.ApiResetInfos.Count === 1

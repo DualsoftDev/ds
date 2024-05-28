@@ -35,7 +35,6 @@ module ModelParser =
             listener.ProcessSafetyBlock(ctx)
 
 
-        //listener.ProcessLayouts(sysctx)
 
         listener
 
@@ -45,6 +44,7 @@ module ModelParser =
 
         let system = listener.TheSystem
         system.CreateMRIEdgesTransitiveClosure()
+        system.AutoAppendMutualReset()
 
         system.Validate() |> ignore
 

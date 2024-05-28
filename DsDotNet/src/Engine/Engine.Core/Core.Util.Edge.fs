@@ -177,6 +177,41 @@ module EdgeModule =
     let createMRIEdgesTransitiveClosure4System(system:DsSystem) =
         for f in system.Flows do
             createMRIEdgesTransitiveClosure f
+
+
+    ///srcs로 인해서 시작가능한 reals 구하고 구해진 reals에 리셋으로 연결된 target reals 구한다
+    let getMutalResetAbleReals (edges:Edge seq) (srcs:Real seq) : Real seq = 
+        let isResetEdge (edge: Edge) =
+            edge.EdgeType.HasFlag(EdgeType.Reset)
+
+        // Find all target Reals connected by a reset edge to the source Reals
+        let targetReals =
+            srcs 
+            |> Seq.collect (fun src ->
+                edges
+                |> Seq.filter (fun e -> e.Source = src && isResetEdge e)
+                |> Seq.map (fun e -> e.Target)
+                |> Seq.choose (function
+                    | :? Real as real -> Some real
+                    | _ -> None)
+            )
+            |> Seq.distinct
+
+        // Combine the original source Reals with the newly found target Reals
+        srcs
+        |> Seq.append targetReals
+        |> Seq.distinct
+
+
+
+    let autoAppendMutualReset(sys:DsSystem) = 
+        let edges = sys.Flows |> Seq.collect(fun f->f.Graph.Edges)
+        let apiSet = sys.ApiItems.Select(fun api->
+                   let ableReals = getMutalResetAbleReals edges api.TXs
+                   api, ableReals
+                    )
+        apiSet.ToList()
+           
     
     let getResetRootEdges (v:Vertex) =
         let es = getResetStrongEdgeSources(v)
@@ -211,6 +246,7 @@ module EdgeModule =
    
     type DsSystem with
         member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
+        member x.AutoAppendMutualReset() = autoAppendMutualReset x
                                    
 
     type Flow with

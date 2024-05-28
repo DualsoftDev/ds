@@ -529,13 +529,28 @@ module XgxExpressionConvertorModule =
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
         member x.ToAssignStatement (prjParam: XgxProjectParams) (augs:Augments) : IExpression =
-            if x.Terminal.IsSome then
-                failwith "Terminal expression cannot be converted to statement"
+            match x.FunctionName with
+            | Some fn ->
+                let tmpNameHint = operatorToMnemonic fn
+                let var = createTypedXgxAutoVariable prjParam tmpNameHint x.BoxedEvaluatedValue $"{x.ToText()}"
+                let stmt =
+                    match prjParam.TargetType with
+                    | XGK -> DuAssign(None, x, var)
+                    | XGI ->
+                        let newExp = mergeArithmaticOperator prjParam augs (Some var) x
+                        DuAugmentedPLCFunction {
+                            FunctionName = fn
+                            Arguments = newExp.FunctionArguments
+                            OriginalExpression = newExp
+                            Output = var }
+                    | _ -> failwithlog "ERROR"
 
-            let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText()}"
-            augs.Statements.Add <| DuAssign(None, x, var)
-            augs.Storages.Add var
-            var.ToExpression()
+                augs.Statements.Add <| stmt
+                augs.Storages.Add var
+                var.ToExpression()
+            | None -> x
+
+
 
     /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
     let internal s2Ss (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
@@ -651,22 +666,11 @@ module XgxExpressionConvertorModule =
 
 
         /// XGI Timer/Counter 의 RungInCondition, ResetCondition 이 Non-terminal 인 경우, assign statement 로 변환한다.
+        ///
+        /// - 현재, 구현 편의상 XGI Timer/Counter 의 다릿발에는 boolean expression 만 수용하므로 사칙/비교 연산을 assign statement 로 변환한다.
         member x.AugmentXgiFunctionParameters (prjParam: XgxProjectParams) (augs: Augments) : Statement =
             let toAssignOndemand (exp:IExpression<bool> option) : IExpression<bool> option =
-                match exp with
-                | Some exp ->
-                    match exp.FunctionName with
-                    | Some fn ->
-                        let tmpNameHint = operatorToMnemonic fn
-                        let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText()}"
-                        let stg = tmpVar :> IStorage
-                        let stmt = DuAssign(None, exp, stg)
-
-                        augs.Statements.Add stmt
-                        augs.Storages.Add stg
-                        Some <| (tmpVar.ToExpression() :?> IExpression<bool>)
-                    | _ -> None
-                | _ -> None
+                exp |> map (fun exp -> exp.ToAssignStatement prjParam augs :?> IExpression<bool>)
 
             match prjParam.TargetType, x with
             | XGK, _ -> x
@@ -695,18 +699,6 @@ module XgxExpressionConvertorModule =
                         exp.WithNewFunctionArguments args
                     match newExp.FunctionName with
                     | Some (">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/" as fn) when expPath.Any() ->
-
-                        //let tmpNameHint = operatorToMnemonic fn
-                        //let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
-                        //let stg = tmpVar :> IStorage
-                        //let stmt = DuAssign(None, newExp, stg)
-
-                        //augs.Statements.Add stmt
-                        //augs.Storages.Add stg
-                        //tmpVar.ToExpression()
-
-
-
                         let augment =
                             match prjParam.TargetType, expPath with
                             | XGK, _head::_ -> true
@@ -715,25 +707,7 @@ module XgxExpressionConvertorModule =
                                 false
 
                         if augment then
-                            let tmpNameHint = operatorToMnemonic fn
-                            let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint newExp.BoxedEvaluatedValue $"{newExp.ToText()}"
-                            let stg = tmpVar :> IStorage
-
-                            let stmt =
-                                match prjParam.TargetType with
-                                | XGK -> DuAssign(None, newExp, stg)
-                                | XGI ->
-                                    let newExp = mergeArithmaticOperator prjParam augs (Some tmpVar) newExp
-                                    DuAugmentedPLCFunction {
-                                        FunctionName = fn
-                                        Arguments = newExp.FunctionArguments
-                                        OriginalExpression = newExp
-                                        Output = tmpVar }
-                                | _ -> failwithlog "ERROR"
-
-                            augs.Statements.Add stmt
-                            augs.Storages.Add stg
-                            tmpVar.ToExpression()
+                            newExp.ToAssignStatement prjParam augs
                         else
                             newExp
                     | _ ->

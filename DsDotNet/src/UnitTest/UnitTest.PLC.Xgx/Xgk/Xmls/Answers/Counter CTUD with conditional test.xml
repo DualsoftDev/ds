@@ -57,8 +57,8 @@
                         <Symbol Name="res1" Comment="" Device="M" DevicePos="9" Type="BIT"/>
                         <Symbol Name="res2" Comment="" Device="M" DevicePos="10" Type="BIT"/>
                         <Symbol Name="xx7" Comment="" Device="M" DevicePos="15" Type="BIT"/>
-                        <Symbol Name="_t1__temp_internal" Comment="Temporary assignment for $cu1 &amp;&amp; $cu2 || $cu3 || $cu4" Device="M" DevicePos="16" Type="BIT"/>
-                        <Symbol Name="_t2__temp_internal" Comment="Temporary assignment for $cd1 || $cd2 || $cd3 &amp;&amp; $cd4" Device="M" DevicePos="17" Type="BIT"/>
+                        <Symbol Name="_t1_OR" Comment="$cu1 &amp;&amp; $cu2 || $cu3 || $cu4" Device="M" DevicePos="16" Type="BIT"/>
+                        <Symbol Name="_t2_OR" Comment="$cd1 || $cd2 || $cd3 &amp;&amp; $cd4" Device="M" DevicePos="17" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -326,7 +326,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="57348" Param="75"/>
-                                    <Element ElementType="33" Coordinate="57420" Param="CTUD,C0001,_t1__temp_internal,_t2__temp_internal,2000"/>
+                                    <Element ElementType="33" Coordinate="57420" Param="CTUD,C0001,_t1_OR,_t2_OR,2000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="59393">

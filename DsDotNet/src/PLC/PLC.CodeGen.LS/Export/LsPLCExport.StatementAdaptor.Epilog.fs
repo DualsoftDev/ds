@@ -21,7 +21,7 @@ module XgxTypeConvertorModule =
         let newStatement1 = statement.DistributeNegate()
         let originalComment = newStatement1.ToText()
         let newStatement2 = newStatement1.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
-        //let newStatement2 = newStatement2.AugmentXgiFunctionParameters prjParam augs
+        let newStatement2 = newStatement2.AugmentXgiFunctionParameters prjParam augs
 
         match prjParam.TargetType with
         | XGI -> s2XgiSs prjParam augs newStatement2

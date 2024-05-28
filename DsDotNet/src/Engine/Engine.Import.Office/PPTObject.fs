@@ -402,6 +402,15 @@ module PPTObjectModule =
             with _->
                 shape.ErrorName((error()), iPage)
 
+        let getTrimName(nameTrim:string) =
+            match GetSquareBrackets(nameTrim, false) with
+                    | Some text -> 
+                        let pureName = nameTrim |> GetBracketsRemoveName|> trimSpaceNewLine
+                        if shape.CheckHomePlate() then   pureName //AA [xxx ~ yyy] 
+                        else $"{pureName}[{text}]"   //AA[4] 
+                                    
+                    | None -> nameTrim
+
         let getPostParam(x:DevParam) =
             match x.DevValue, x.DevTime with 
             |Some (v), None->   $"{v}"
@@ -417,9 +426,7 @@ module PPTObjectModule =
 
                 disableCall <- shape.IsDashShape()
 
-                match GetSquareBrackets(shape.InnerText, false) with
-                    | Some text ->name <- $"{nameTrim |> GetBracketsRemoveName|> trimSpaceNewLine}[{text}]"  
-                    | None -> name <- nameTrim
+                name <- getTrimName nameTrim
             
                 nameCheck (shape, nodeType, iPage, namePure, nameNFunc)
 

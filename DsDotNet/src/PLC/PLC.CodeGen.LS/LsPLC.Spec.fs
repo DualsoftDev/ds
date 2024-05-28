@@ -299,6 +299,11 @@ module Config =
                     let [<Literal>] ClosedContactMode      = 7 // '-|/|-'
                     let [<Literal>] PulseContactMode       = 8 // '-|P|-'
                     let [<Literal>] NPulseContactMode      = 9// '-|N|-'
+
+                    let [<Literal>] PulseClosedContactMode  = 10// '-|/P|-'
+                    let [<Literal>] NPulseClosedContactMode = 11// '-|/N|-'
+
+
                     ///addonly hereadditional contact type device.
                     let [<Literal>] ContactType_End        = 13
 

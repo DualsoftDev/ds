@@ -2,6 +2,7 @@ namespace PLC.CodeGen.LS
 
 
 open Engine.Core
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module LsPLCExportExpressionModule =
@@ -9,6 +10,13 @@ module LsPLCExportExpressionModule =
         TerminalHandler: int*IExpression -> IExpression
         FunctionHandler: int*IExpression*IStorage option -> IExpression     // (level, expression, resultStore) -> new expression
     }
+
+    type XgxStorage = ResizeArray<IStorage>
+    type Augments(storages:XgxStorage, statements:StatementContainer) =
+        new() = Augments(XgxStorage(), StatementContainer())
+        member val Storages = storages        // ResizeArray<IStorage>
+        member val Statements = statements    // ResizeArray<Statement>
+        member val ExpressionStore:IStorage option = None with get, set
 
     type IExpression with
         /// 주어진 Expression 을 multi-line text 형태로 변환한다.
@@ -32,6 +40,45 @@ module LsPLCExportExpressionModule =
                     ] |> String.concat "\r\n"
                 | _ -> failwith "Invalid expression"
             traverse 0 exp
+
+        member exp.Visit (f: IExpression -> IExpression) : IExpression =
+            match exp.Terminal, exp.FunctionName with
+            | Some _terminal, None ->
+                f exp
+            | None, Some _fn ->
+                let args = exp.FunctionArguments |> map f
+                exp.WithNewFunctionArguments args |> f
+            | _ ->
+                failwith "Invalid expression"
+
+        /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
+        /// Non-terminal negation 을 terminal negation 으로 변경
+        member exp.DistributeNegate() : IExpression =
+            match exp.Terminal, exp.FunctionName with
+            | Some terminal, None -> exp
+            | None, Some fn ->
+                let args = exp.FunctionArguments |> map (fun a -> a.DistributeNegate())
+                if fn = "!" then
+                    let arg0 = args.ExactlyOne()
+                    let subArgs = arg0.FunctionArguments
+                    match arg0.FunctionName with
+                    | Some "!" -> arg0
+                    | Some "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = subArgs } :> IExpression
+                    | Some "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = subArgs } :> IExpression
+                    | Some ">" ->  DuFunction { FunctionBody = fLt;       Name = "<="; Arguments = subArgs } :> IExpression
+                    | Some ">=" -> DuFunction { FunctionBody = fLte;      Name = "<";  Arguments = subArgs } :> IExpression
+                    | Some "<" ->  DuFunction { FunctionBody = fGt;       Name = ">="; Arguments = subArgs } :> IExpression
+                    | Some "<=" -> DuFunction { FunctionBody = fGte;      Name = ">";  Arguments = subArgs } :> IExpression
+
+                    | _ -> exp
+                else
+                    exp.WithNewFunctionArguments args
+            | _ ->
+                failwith "Invalid expression"
+
+        ///// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
+        //member exp.MakeFlattenizable(): IExpression =
+        //    exp.DistributeNegate()
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.

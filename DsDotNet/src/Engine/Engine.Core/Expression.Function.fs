@@ -27,7 +27,7 @@ module private ExpressionHelperModule =
     let isThisOperatorRequireAllArgumentsSameType: (string -> bool)  =
         let hash =
             [   "+" ; "-" ; "*" ; "/" ; "%"
-                ">" ; ">=" ; "<" ; "<=" ; "==" ; "!="
+                ">";">=";"<";"<=";"==";"!=";"<>"
                 "&&" ; "||"
                 "&" ; "|" ; "&&&" ; "|||"
                 "add"; "sub"; "mul"; "div"

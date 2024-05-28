@@ -296,7 +296,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
     member __.``Atomic Negation test`` () =
         let myTagA = createTag("tag0", "%IX0.0.0", false)
         let myTagB = createTag("tag1", "%IX0.0.1", false)
-        let pulse, negated = false, false
+        let pulse, negated = None, false
         let flatTerminal = FlatTerminal(myTagA, pulse, negated)
         let negatedFlatTerminal = flatTerminal.Negate()
         match negatedFlatTerminal with
@@ -324,7 +324,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
 
         (* ! (! A & B) === A || ! B) test *)
-        let expAnd = FlatNary(And, [FlatNary(Neg, [FlatTerminal(myTagA, false, false)]); FlatTerminal(myTagB, false, false)])
+        let expAnd = FlatNary(And, [FlatNary(Neg, [FlatTerminal(myTagA, None, false)]); FlatTerminal(myTagB, None, false)])
         let negatedAnd = expAnd.Negate()
         match negatedAnd with
         | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->

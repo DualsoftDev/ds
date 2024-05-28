@@ -38,23 +38,45 @@ module FlatExpressionModule =
                 |> OpCompare
             | OpArithmatic _ -> failwithlog "ERROR: Negation not supported for Arithmatic operator."
 
-    type TrueValue() =
+    [<AbstractClass>]
+    type BoolLiteralValue() =
         interface IExpressionizableTerminal with
-            member x.ToText() = "TRUE"
+            member x.ToText() = x.ToText()
+        interface IType with
+            member x.DataType = typedefof<bool>
+        interface ITerminal with
+            member x.Variable = None
+            member x.Literal = Some(x:>IExpressionizableTerminal)
+        abstract ToText: unit -> string
+        default x.ToText() = "TRUE"
+
+    type TrueValue() =
+        inherit BoolLiteralValue()
+        override x.ToText() = "TRUE"
 
     type FalseValue() =
-        interface IExpressionizableTerminal with
-            member x.ToText() = "FALSE"
+        inherit BoolLiteralValue()
+        override x.ToText() = "FALSE"
 
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)
-        | FlatTerminal of terminal: IExpressionizableTerminal * pulse: bool * negated: bool
+        ///
+        /// pulse : None 이면 pulse 없음, Some true 이면 rising edge, Some false 이면 falling edge
+        | FlatTerminal of terminal: IExpressionizableTerminal * pulse: bool option * negated: bool
 
         /// N-ary Expressions : And / Or 및 terms
         | FlatNary of Op * FlatExpression list
 
         interface IFlatExpression
+
+        interface IType with
+            member x.DataType = x.DataType
+
+        member x.DataType =
+            match x with
+            | FlatTerminal(terminal, _pulse, _neg) -> terminal.DataType
+            | FlatNary(_op, arg0::_) -> arg0.DataType
 
         member x.ToText() =
             match x with
@@ -81,21 +103,28 @@ module FlatExpressionModule =
         match expression with
         | :? Expression<'T> as express ->
             match express with
-            | DuTerminal(DuVariable t) -> FlatTerminal(t, false, false)
-            | DuTerminal(DuLiteral b) -> FlatTerminal(b, false, false)
+            | DuTerminal(DuVariable t) -> FlatTerminal(t, None, false)
+            | DuTerminal(DuLiteral b) -> FlatTerminal(b, None, false)
 
             (* rising/falling/negation 은 function 으로 구현되어 있으며,
                해당 function type 에 따라서 risng/falling/negation 의 contact/coil 을 생성한다.
                (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
                 Terminal<'T>.Evaluate() 가 bool type 으로 제한됨 )
              *)
-            | DuFunction { Name = n
-                           Arguments = [ (:? Expression<bool> as arg) ] } when
-                n = FunctionNameRising || n = FunctionNameFalling
-                ->
+            | DuFunction { Name = (FunctionNameRising | FunctionNameFalling) as n
+                           Arguments = [ (:? Expression<bool> as arg) ] } ->
+                let positivePulse = n = FunctionNameRising |> Some
                 match arg with
-                | DuTerminal(DuVariable t) -> FlatTerminal(t, true, n = FunctionNameFalling)
-                | DuTerminal(DuLiteral b) -> FlatTerminal(b, (n = FunctionNameRising), false)
+                | DuTerminal(DuVariable v) -> FlatTerminal(v, positivePulse, false)
+                | DuTerminal(DuLiteral b) -> FlatTerminal(b, positivePulse, false)
+                | DuFunction ({ Name = "!"
+                                Arguments = (:? Expression<bool> as arg0)::[]} as f) ->
+                    match arg0 with
+                    | DuTerminal(DuVariable v) -> FlatTerminal(v, positivePulse, true)
+                    | DuTerminal(DuLiteral b) -> FlatTerminal(b, positivePulse, true)
+                    | _ -> failwithlog "ERROR"
+                    //FlatTerminal(b, (n = FunctionNameRising), false)
+
                 | _ -> failwithlog "ERROR"
             | DuFunction fs ->
                 let op =
@@ -106,8 +135,10 @@ module FlatExpressionModule =
                     | FunctionNameRisingAfter -> Op.RisingAfter
                     | FunctionNameFallingAfter -> Op.FallingAfter
 
-                    | (">" | "<" | ">=" | "<=" | "==" | "!=") -> Op.OpCompare fs.Name
-                    | ("+" | "-" | "*" | "/") -> Op.OpArithmatic fs.Name
+                    | (">"|">="|"<"|"<="|"=="|"!="|"<>") -> // XGK 일때만 유효
+                        Op.OpCompare fs.Name
+
+                    | ("+"|"-"|"*"|"/")// -> Op.OpArithmatic fs.Name
                     | _ -> failwithlog "ERROR"
 
                 let flatArgs = fs.Arguments |> map flattenExpression |> List.cast<FlatExpression>

@@ -57,7 +57,7 @@ type ExpressionVisitorTest() =
 
         let functionTransformer (level:int, functionExpression:IExpression, expStore:IStorage option) =
             match functionExpression.FunctionName with
-            | Some("+" | "-" | "*" | "/" as op) when level <> 0 ->
+            | Some("+"|"-"|"*"|"/" as op) when level <> 0 ->
                 let var =
                     let args = functionExpression.FunctionArguments
                     let mnemonic = operatorToMnemonic op

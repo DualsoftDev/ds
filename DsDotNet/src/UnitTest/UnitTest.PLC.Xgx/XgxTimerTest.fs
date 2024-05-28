@@ -248,9 +248,15 @@ type XgxTimerTest(xgx:PlatformTarget) =
         let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
         let code =
             $"""
-                double pi = 3.14;
-                bool b1 = $pi > 6.28;
-                ton myTon = {ton}(15000u, $pi > 6.28);
+                //double pi = 3.14;
+                //bool b0 = !(2.1 == 6.1);
+                //bool b1 = !($pi == 6.1);
+                //bool b2 = true && !($pi == 6.2);
+                //bool b3 = $pi > 6.23;
+                //bool b4 = !($pi > 6.24);
+                //ton myTon0 = {ton}(15000u, 3.14 > 6.25);
+                ton myTon1 = {ton}(15000u, (3.14 + 2.0) > 6.25);
+                //ton myTon2 = {ton}(15000u, $pi > 6.25);
             """;
 
         let statements = parseCodeForWindows storages code

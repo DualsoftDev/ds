@@ -10,6 +10,7 @@ open PLC.CodeGen.Common
 open Config.POU.Program.LDRoutine
 open Command
 open System
+open PLC.CodeGen.Common.K
 
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
@@ -70,21 +71,20 @@ module XgiExportModule =
             rgi <- rgi.AddSingleLineXml(xml)
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
-            let comparisonOps = [|">"; ">="; "<"; "<="; "=="; "!="; "<>"|]
-            let arithmaticOps = [|"+"; "-"; "*"; "/"|]
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOps @ comparisonOps) ->
+            | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOperators @ comparisonOperators) ->
             
                 let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
-                    if funName.IsOneOf(arithmaticOps) then
-                        let param = $"Param={dq}{op},{ls},{rs},{target.Address}{dq}"        // XGK 에서는 직접변수를 사용
-                        drawXgkFBRight xy param
-                    elif funName.IsOneOf(comparisonOps) then
+                    let targetContact = if target.Address.IsNullOrEmpty() then target.Name else target.Address
+                    if funName.IsOneOf(arithmaticOperators) then
+                        let param = $"Param={dq}{op},{ls},{rs},{targetContact}{dq}"        // XGK 에서는 직접변수를 사용
+                        xmlXgkFBRight xy param
+                    elif funName.IsOneOf(comparisonOperators) then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
-                        drawXgkFBLeft xy param target.Address
+                        xmlXgkFBLeft xy param targetContact
                     else
                         failwithlog $"ERROR: {funName}"
 
@@ -107,32 +107,6 @@ module XgiExportModule =
                 rgi <-
                     { Xmls = rgiSub.Xmls @ rgi.Xmls
                       NextRungY = rgiSub.NextRungY }
-
-        //// todo
-        //let rgiXgkBoolTypeCopyIfRungs (condition:IExpression<bool>) (source: ITerminal) (destination: IStorage) : RungGenerationInfo =
-        //    assert(destination.DataType = typeof<bool>)
-        //    match tryParseXGKTag destination.Address with
-        //    | Some ( {
-        //        Tag = tag
-        //        Device = device
-        //        DataType = datatType
-        //        BitOffset = totalBitOffset
-        //        }) ->
-        //            let dh = sprintf "%A%04d" device (totalBitOffset / 16) // destination head : destination 의 word
-        //            let offset = totalBitOffset % 16 // destination 이 속한 word 내에서의 bit offset
-        //            let mSet = 1us <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
-        //            let mClear = UInt16.MaxValue - (1us <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
-        //            let printBinary (n:uint16) = Convert.ToString(int n, 2).PadLeft(16, '0')
-        //            tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
-
-        //            let flatCondition = condition.Flatten() :?> FlatExpression
-        //            let cmd = 
-        //            rgiXmlRung (Some flatCondition) None rgi.NextRungY
-        //    | _ ->
-        //        failwith "ERROR: XGK Tag parsing error"
-
-        //    failwith "NOT yet!!"
-
 
         /// XGK 용 MOV : MOV,S,D
         let moveCmdRungXgk (condition:IExpression<bool>) (source: IExpression) (destination: IStorage) : unit =
@@ -237,6 +211,11 @@ module XgiExportModule =
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                     if isXgi then
                         let command = ActionCmd(Move(cond, expr, target))
+                        //let command =
+                        //    match expr.Terminal, expr.FunctionName with
+                        //    | Some _t, None -> ActionCmd(Move(cond, expr, target))
+                        //    | None, Some fn -> FunctionCmd(Arithmatic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
+                        //    | _ -> failwithlog "ERROR"
                         let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                         rgi <-
@@ -291,7 +270,7 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = (">" | ">=" | "<" | "<=" | "==" | "!=") as op
+                | DuAugmentedPLCFunction({ FunctionName = (">"|">="|"<"|"<="|"=="|"!="|"<>") as op
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
@@ -302,7 +281,7 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = ("+" | "-" | "*" | "/") as op
+                | DuAugmentedPLCFunction({ FunctionName = ("+"|"-"|"*"|"/") as op
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
@@ -338,7 +317,7 @@ module XgiExportModule =
                     xs |> filter(fun stg-> not(stg.GetSystemTagKind().IsSome && stg.Name.StartsWith("_")))
 
     /// [S] -> [XS]
-    let internal commentedStatementsToCommentedXgxStatements
+    let internal css2Css
         (prjParam: XgxProjectParams)
         (localStorages: IStorage seq)
         (commentedStatements: CommentedStatement list)
@@ -349,11 +328,10 @@ module XgiExportModule =
         *)
 
         let newCommentedStatements = ResizeArray<CommentedXgxStatements>()
-        let newLocalStorages = ResizeArray<IStorage>(localStorages)
+        let newLocalStorages = XgxStorage(localStorages)
 
         for cmtSt in commentedStatements do
-            let xgxCmtStmts =
-                statement2Statements prjParam newLocalStorages cmtSt
+            let xgxCmtStmts:CommentedXgxStatements = cs2Css prjParam newLocalStorages cmtSt
 
             let (CommentAndXgxStatements(_comment, xgxStatements)) = xgxCmtStmts
 
@@ -399,7 +377,7 @@ module XgiExportModule =
                 x
 
             let newLocalStorages, newCommentedXgiStatements =
-                commentedStatementsToCommentedXgxStatements prjParam localStorages.Values commentedStatements
+                css2Css prjParam localStorages.Values commentedStatements
 
             let globalStoragesRefereces =
                 [

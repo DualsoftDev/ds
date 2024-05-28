@@ -244,6 +244,77 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
+    member x.``Arithmatic test1`` () =
+        let storages = Storages()
+        let code = "bool b0 = !(2.1 == 6.1);";
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Arithmatic test2`` () =
+        let storages = Storages()
+        let code = "bool b0 = true && (2.1 == 6.1);";
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Arithmatic test3`` () =
+        let storages = Storages()
+        let code = "bool b0 = false && (2.1 == 6.1);";
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Arithmatic test4`` () =
+        let storages = Storages()
+        let code = "bool b0 = !(2.1 > 6.1);";
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Arithmatic test5`` () =
+        let storages = Storages()
+        let code = "bool b0 = false && !(2.1 <= 6.1);";
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Arithmatic test6`` () =
+        let storages = Storages()
+        let code = "bool b0 = false && !(2.1 == 6.1);";
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
+    member x.``Arithmatic assign test`` () =
+        let storages = Storages()
+        let code =
+            $"""
+                double pi = 3.14;
+                bool b0 = !(2.1 == 6.1);
+                bool b1 = !($pi == 6.1);
+                bool b2 = true && !($pi == 6.2);
+                bool b3 = $pi > 6.23;
+                bool b4 = !($pi > 6.24);
+            """;
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
 
 
@@ -268,6 +339,13 @@ type XgiArithematicTest() =
     [<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
     [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
     [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
+    [<Test>] member __.``Arithmatic test1`` () = base.``Arithmatic test1``()
+    [<Test>] member __.``Arithmatic test2`` () = base.``Arithmatic test2``()
+    [<Test>] member __.``Arithmatic test3`` () = base.``Arithmatic test3``()
+    [<Test>] member __.``Arithmatic test4`` () = base.``Arithmatic test4``()
+    [<Test>] member __.``Arithmatic test5`` () = base.``Arithmatic test5``()
+    [<Test>] member __.``Arithmatic test6`` () = base.``Arithmatic test6``()
+    [<Test>] member __.``Arithmatic assign test`` () = base.``Arithmatic assign test``()
 
 type XgkArithematicTest() =
     inherit XgxArithematicTest(XGK)
@@ -286,6 +364,13 @@ type XgkArithematicTest() =
     [<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
     [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
     [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
+    [<Test>] member __.``Arithmatic test1`` () = base.``Arithmatic test1``()
+    [<Test>] member __.``Arithmatic test2`` () = base.``Arithmatic test2``()
+    [<Test>] member __.``Arithmatic test3`` () = base.``Arithmatic test3``()
+    [<Test>] member __.``Arithmatic test4`` () = base.``Arithmatic test4``()
+    [<Test>] member __.``Arithmatic test5`` () = base.``Arithmatic test5``()
+    [<Test>] member __.``Arithmatic test6`` () = base.``Arithmatic test6``()
+    [<Test>] member __.``Arithmatic assign test`` () = base.``Arithmatic assign test``()
 
 
 

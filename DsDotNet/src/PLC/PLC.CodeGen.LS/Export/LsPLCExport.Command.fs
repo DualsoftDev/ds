@@ -577,10 +577,12 @@ module internal rec Command =
         | FlatTerminal(terminal, pulse, neg) ->
             let mode =
                 match pulse, neg with
-                | true, true -> ElementType.NPulseContactMode
-                | true, false -> ElementType.PulseContactMode
-                | false, true -> ElementType.ClosedContactMode
-                | false, false -> ElementType.ContactMode
+                | Some(true),  true  -> ElementType.PulseClosedContactMode
+                | Some(true),  false -> ElementType.PulseContactMode
+                | Some(false), true  -> ElementType.NPulseClosedContactMode
+                | Some(false), false -> ElementType.NPulseContactMode
+                | None, true         -> ElementType.ClosedContactMode
+                | None, false        -> ElementType.ContactMode
                 |> int
 
             // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용

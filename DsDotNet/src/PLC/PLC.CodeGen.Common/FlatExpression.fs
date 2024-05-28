@@ -61,7 +61,9 @@ module FlatExpressionModule =
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)
-        | FlatTerminal of terminal: IExpressionizableTerminal * pulse: bool * negated: bool
+        ///
+        /// pulse : None 이면 pulse 없음, Some true 이면 rising edge, Some false 이면 falling edge
+        | FlatTerminal of terminal: IExpressionizableTerminal * pulse: bool option * negated: bool
 
         /// N-ary Expressions : And / Or 및 terms
         | FlatNary of Op * FlatExpression list
@@ -101,21 +103,28 @@ module FlatExpressionModule =
         match expression with
         | :? Expression<'T> as express ->
             match express with
-            | DuTerminal(DuVariable t) -> FlatTerminal(t, false, false)
-            | DuTerminal(DuLiteral b) -> FlatTerminal(b, false, false)
+            | DuTerminal(DuVariable t) -> FlatTerminal(t, None, false)
+            | DuTerminal(DuLiteral b) -> FlatTerminal(b, None, false)
 
             (* rising/falling/negation 은 function 으로 구현되어 있으며,
                해당 function type 에 따라서 risng/falling/negation 의 contact/coil 을 생성한다.
                (Terminal<'T> 이 generic 이어서 DuTag 에 bool type 으로 제한 할 수 없음.
                 Terminal<'T>.Evaluate() 가 bool type 으로 제한됨 )
              *)
-            | DuFunction { Name = n
-                           Arguments = [ (:? Expression<bool> as arg) ] } when
-                n = FunctionNameRising || n = FunctionNameFalling
-                ->
+            | DuFunction { Name = (FunctionNameRising | FunctionNameFalling) as n
+                           Arguments = [ (:? Expression<bool> as arg) ] } ->
+                let positivePulse = n = FunctionNameRising |> Some
                 match arg with
-                | DuTerminal(DuVariable t) -> FlatTerminal(t, true, n = FunctionNameFalling)
-                | DuTerminal(DuLiteral b) -> FlatTerminal(b, (n = FunctionNameRising), false)
+                | DuTerminal(DuVariable v) -> FlatTerminal(v, positivePulse, false)
+                | DuTerminal(DuLiteral b) -> FlatTerminal(b, positivePulse, false)
+                | DuFunction ({ Name = "!"
+                                Arguments = (:? Expression<bool> as arg0)::[]} as f) ->
+                    match arg0 with
+                    | DuTerminal(DuVariable v) -> FlatTerminal(v, positivePulse, true)
+                    | DuTerminal(DuLiteral b) -> FlatTerminal(b, positivePulse, true)
+                    | _ -> failwithlog "ERROR"
+                    //FlatTerminal(b, (n = FunctionNameRising), false)
+
                 | _ -> failwithlog "ERROR"
             | DuFunction fs ->
                 let op =

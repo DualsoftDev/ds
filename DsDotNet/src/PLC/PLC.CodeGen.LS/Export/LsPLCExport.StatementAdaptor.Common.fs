@@ -251,7 +251,7 @@ module XgxExpressionConvertorModule =
                     member x.Literal = Some(x:?>IExpressionizableTerminal)
                   }
 
-        FlatTerminal(on, false, false)
+        FlatTerminal(on, None, false)
 
     /// '_ON' 에 대한 expression
     let fakeAlwaysOnExpression: Expression<bool> =

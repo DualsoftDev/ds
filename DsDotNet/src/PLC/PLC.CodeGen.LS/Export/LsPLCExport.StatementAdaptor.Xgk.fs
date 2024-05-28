@@ -23,10 +23,11 @@ module XgkTypeConvertorModule =
     ///
     /// suffix: "U" for UNSIGNED
     let operatorToXgkFunctionName op (typ:Type) =
-        let isComparison =
-            match op with
-            | (">"|">="|"<"|"<="|"=="|"!="|"<>")-> true
-            | _ -> false
+        let isComparison = (|IsComparisonOperator|_|) op |> Option.isSome
+        //let isComparison =
+        //    match op with
+        //    | (">"|">="|"<"|"<="|"=="|"!="|"<>")-> true
+        //    | _ -> false
 
         let prefix =
             match typ with
@@ -105,8 +106,7 @@ module XgkTypeConvertorModule =
                                 tmpVar :> IStorage
 
                     match fn with
-                    | ("+"|"-"|"*"|"/")
-                    | (">"|">="|"<"|"<="|"=="|"!="|"<>") ->
+                    | IsArithmaticOrComparisionOperator _ ->
                         let stg = createTmpStorage()
                         let stmt = DuAssign(None, newExp, stg)
                         let varExp = stg.ToExpression()

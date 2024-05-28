@@ -305,7 +305,7 @@ module XgxExpressionConvertorModule =
 
         let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
             match functionExpression.FunctionName with
-            | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/" as op) -> //when level <> 0 ->
+            | Some(IsArithmaticOrComparisionOperator op) -> //when level <> 0 ->
                 let args = functionExpression.FunctionArguments
                 let var:IStorage =
                     expStore |> Option.defaultWith (fun () -> 
@@ -391,7 +391,7 @@ module XgxExpressionConvertorModule =
             augs.Storages, augs.Statements, augs.ExpressionStore
 
         match exp.FunctionName with
-        | Some("+"|"-"|"*"|"/" as op) ->
+        | Some(IsArithmaticOperator op) ->
             let newArgs =
                 binaryToNary prjParam augs [ "+"; "-"; "*"; "/" ] op exp
 
@@ -558,7 +558,7 @@ module XgxExpressionConvertorModule =
         | DuAssign(condition, exp, target) ->
             // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
             match exp.FunctionName with
-            | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/" as op) ->
+            | Some(IsArithmaticOrComparisionOperator op) ->
                 let exp = mergeArithmaticOperator prjParam augs (Some target) exp
                 if exp.FunctionArguments.Any() then
                     let augFunc =
@@ -698,7 +698,7 @@ module XgxExpressionConvertorModule =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
                     match newExp.FunctionName with
-                    | Some (">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/" as fn) when expPath.Any() ->
+                    | Some (IsArithmaticOrComparisionOperator fn) when expPath.Any() ->
                         let augment =
                             match prjParam.TargetType, expPath with
                             | XGK, _head::_ -> true

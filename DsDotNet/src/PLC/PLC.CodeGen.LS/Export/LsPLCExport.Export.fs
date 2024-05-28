@@ -331,7 +331,7 @@ module XgiExportModule =
         let newLocalStorages = XgxStorage(localStorages)
 
         for cmtSt in commentedStatements do
-            let xgxCmtStmts:CommentedXgxStatements = cs2Css prjParam newLocalStorages cmtSt
+            let xgxCmtStmts:CommentedXgxStatements = cmtSt.ToCommentedStatements(prjParam, newLocalStorages)
 
             let (CommentAndXgxStatements(_comment, xgxStatements)) = xgxCmtStmts
 

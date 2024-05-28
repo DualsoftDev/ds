@@ -182,28 +182,24 @@ module rec TypeConvertorModule =
             XgxVar<bool>(defaultBool)
         | _ -> failwithlog "ERROR"
 
-    let sys = DsSystem("")
-
     let private getTmpName (nameHint: string) (n:int) = $"_t{n}_{nameHint}"
-    let createTypedXgxAutoVariable (prjParam: XgxProjectParams) (nameHint: string) (initValue: obj) comment : IXgxVar =
-        let n = prjParam.AutoVariableCounter()
-        let name = getTmpName nameHint n
-        createXgxVariable name initValue comment
+    type XgxProjectParams with
+        member x.createTypedXgxAutoVariable(nameHint: string, initValue: obj, comment) : IXgxVar =
+            let n = x.AutoVariableCounter()
+            let name = getTmpName nameHint n
+            createXgxVariable name initValue comment
 
+        member x.createXgxAutoVariableT(nameHint: string, initValue: 'T, comment) : XgxVar<'T> =
+            let n = x.AutoVariableCounter()
+            let name = getTmpName nameHint n
 
-    let internal createXgxAutoVariableT (prjParam: XgxProjectParams) (nameHint: string) comment (initValue: 'T) =
-        let n = prjParam.AutoVariableCounter()
-        let name = getTmpName nameHint n
+            let param =
+                { defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
+                    Name = name
+                    Comment = Some comment }
 
-        let param =
-            { defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
-                Name = name
-                Comment = Some comment }
+            XgxVar(param)
 
-        XgxVar(param)
-
-
-    (* Moved from Command.fs *)
 
     /// FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     type FunctionBlock =
@@ -224,14 +220,14 @@ module rec TypeConvertorModule =
 
     /// 실행을 가지는 type
     type CommandTypes =
-        | CoilCmd of CoilOutputMode
+        | CoilCmd          of CoilOutputMode
         /// Predicate.  (boolean function)
-        | PredicateCmd of Predicate
+        | PredicateCmd     of Predicate
         /// Non-boolean function
-        | FunctionCmd of Function
-        | ActionCmd of PLCAction
+        | FunctionCmd      of Function
+        | ActionCmd        of PLCAction
         /// "Param="MOV,SRC,DST"" 와 같은 형태의 명령. int 는 명령의 길이.  대부분 3
-        | XgkParamCmd of string * int
+        | XgkParamCmd      of string * int
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
 
@@ -267,16 +263,16 @@ module XgxExpressionConvertorModule =
 
     let operatorToXgiFunctionName =
         function
-        | ">" -> "GT"
+        | ">"  -> "GT"
         | ">=" -> "GE"
-        | "<" -> "LT"
+        | "<"  -> "LT"
         | "<=" -> "LE"
         | "==" -> "EQ"
         | "!=" -> "NE"
-        | "+" -> "ADD"
-        | "-" -> "SUB"
-        | "*" -> "MUL"
-        | "/" -> "DIV"
+        | "+"  -> "ADD"
+        | "-"  -> "SUB"
+        | "*"  -> "MUL"
+        | "/"  -> "DIV"
         | _ -> failwithlog "ERROR"
 
 
@@ -305,13 +301,13 @@ module XgxExpressionConvertorModule =
 
         let opName =
             match op with
-            | "+" -> "ADD"
-            | "-" -> "SUB"
-            | "*" -> "MUL"
-            | "/" -> "DIV"
-            | "MOV" -> "MOV"
+            | "+"  -> "ADD"
+            | "-"  -> "SUB"
+            | "*"  -> "MUL"
+            | "/"  -> "DIV"
             | "!=" -> "<>"
             | "==" -> "="
+            | "MOV" -> "MOV"
             | _ when isComparison -> op
             | _ -> failwithlog "ERROR"
 
@@ -353,7 +349,7 @@ module XgxExpressionConvertorModule =
                     expStore |> Option.defaultWith (fun () -> 
                         let initValue = functionExpression.BoxedEvaluatedValue
                         let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
-                        createTypedXgxAutoVariable prjParam "out" initValue comment )
+                        prjParam.createTypedXgxAutoVariable("out", initValue, comment))
 
                 expandFunctionStatements.Add
                 <| DuAugmentedPLCFunction
@@ -385,7 +381,7 @@ module XgxExpressionConvertorModule =
 
             let out =
                 let tmpNameHint = operatorToMnemonic op
-                createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{op} output"
+                prjParam.createTypedXgxAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, $"{op} output")
 
             storage.Add out
 
@@ -451,7 +447,7 @@ module XgxExpressionConvertorModule =
                             outputStore.Value
                         else
                             let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
-                            createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue comment
+                            prjParam.createTypedXgxAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
 
                     let outexp = out.ToExpression()
 
@@ -514,7 +510,7 @@ module XgxExpressionConvertorModule =
 
                 let subSums =
                     [ for max in maxs do
-                          let out = createXgxAutoVariableT prjParam "split"  ($"{op} split output") false
+                          let out = prjParam.createXgxAutoVariableT("split", false, $"{op} split output")
                           newLocalStorages.Add out
 
                           DuAugmentedPLCFunction
@@ -526,7 +522,7 @@ module XgxExpressionConvertorModule =
 
                           var2expr out :> IExpression ]
 
-                let grandTotal = createXgxAutoVariableT prjParam "split" ($"{op} split output") false
+                let grandTotal = prjParam.createXgxAutoVariableT("split", false, $"{op} split output")
                 newLocalStorages.Add grandTotal
 
                 DuAugmentedPLCFunction
@@ -574,7 +570,7 @@ module XgxExpressionConvertorModule =
             match x.FunctionName with
             | Some fn when replacableFunctionNames.Contains fn ->
                 let tmpNameHint = operatorToMnemonic fn
-                let var = createTypedXgxAutoVariable prjParam tmpNameHint x.BoxedEvaluatedValue $"{x.ToText()}"
+                let var = prjParam.createTypedXgxAutoVariable(tmpNameHint, x.BoxedEvaluatedValue, $"{x.ToText()}")
                 let stmt =
                     match prjParam.TargetType with
                     | XGK -> DuAssign(None, x, var)

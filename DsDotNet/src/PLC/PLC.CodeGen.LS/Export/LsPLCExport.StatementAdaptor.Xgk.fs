@@ -58,7 +58,7 @@ module XgkTypeConvertorModule =
                                 | Some stg -> stg
                                 | None ->
                                     let tmpNameHint = operatorToMnemonic fn
-                                    let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText()}"
+                                    let tmpVar = prjParam.createTypedXgxAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, $"{exp.ToText()}")
                                     tmpVar :> IStorage
 
                         match fn with

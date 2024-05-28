@@ -126,11 +126,11 @@ module rec TypeConvertorModule =
         interface
         end
 
-    type CommentedXgxStatements = CommentedXgiStatements of comment: string * statements: Statement list
+    type CommentedStatements = CommentedStatements of comment: string * statements: Statement list
 
-    let (|CommentAndXgxStatements|) = function | CommentedXgiStatements(x, ys) -> x, ys
+    let (|CommentAndStatements|) = function | CommentedStatements(x, ys) -> x, ys
 
-    let commentAndXgxStatement = (|CommentAndXgxStatements|)
+    let commentAndStatements = (|CommentAndStatements|)
 
     let createXgxVariable (name: string) (initValue: obj) comment : IXgxVar =
         (*

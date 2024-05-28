@@ -9,7 +9,7 @@ module XgxTypeConvertorModule =
         /// (Commented Statement) To (Commented Statements)
         ///
         /// S -> [XS]
-        member internal x.ToCommentedStatements (prjParam: XgxProjectParams, newLocalStorages: XgxStorage) : CommentedXgxStatements =
+        member internal x.ToCommentedStatements (prjParam: XgxProjectParams, newLocalStorages: XgxStorage) : CommentedStatements =
             let (CommentedStatement(comment, statement)) = x
             let augs = Augments(newLocalStorages, StatementContainer())
             let newStatement = statement.DistributeNegate()
@@ -31,5 +31,5 @@ module XgxTypeConvertorModule =
                 ] |> ofNotNullAny |> String.concat "\r\n"
                 |> escapeXml
 
-            CommentedXgiStatements(rungComment, augs.Statements.ToFSharpList())
+            CommentedStatements(rungComment, augs.Statements.ToFSharpList())
 

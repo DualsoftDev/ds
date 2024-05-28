@@ -1,11 +1,7 @@
 namespace PLC.CodeGen.LS
 
-open System.Linq
-open System.Security
-
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module XgxTypeConvertorModule =
@@ -18,14 +14,14 @@ module XgxTypeConvertorModule =
         (CommentedStatement(comment, statement))
       : CommentedXgxStatements =
         let augs = Augments(newLocalStorages, StatementContainer())
-        let newStatement1 = statement.DistributeNegate()
-        let originalComment = newStatement1.ToText()
-        let newStatement2 = newStatement1.AugmentXgkArithmeticExpressionToAssignStatemnt prjParam augs
-        let newStatement2 = newStatement2.AugmentXgiFunctionParameters prjParam augs
+        let newStatement = statement.DistributeNegate()
+        let originalComment = newStatement.ToText()
+        let newStatement = newStatement.FunctionToAssignStatement prjParam augs
+        let newStatement = newStatement.AugmentXgiFunctionParameters prjParam augs
 
         match prjParam.TargetType with
-        | XGI -> s2XgiSs prjParam augs newStatement2
-        | XGK -> s2XgkSs prjParam augs newStatement2
+        | XGI -> s2XgiSs prjParam augs newStatement
+        | XGK -> s2XgkSs prjParam augs newStatement
         | _ -> failwith "Not supported runtime target"
 
         let rungComment =

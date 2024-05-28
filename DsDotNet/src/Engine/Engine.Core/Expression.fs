@@ -226,6 +226,9 @@ module ExpressionModule =
         | DuCounter of CounterStatement
         | DuAction  of ActionStatement
 
+        /// PLC function (비교, 사칙연산, Move) 을 호출하는 statement
+        ///
+        /// - 주로 XGI 에서 사용.  XGK 에서는 zipAndExpression 와 s2Ss 에서 사용.  s2Ss 사용은 DuAction(DuCopy...) 부분인데, 대체 가능함.
         | DuAugmentedPLCFunction of FunctionParameters
 
     /// 추가 가능한 Statement container

@@ -687,8 +687,8 @@ module XgxExpressionConvertorModule =
             | _ -> x
 
 
-        /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙연산을 assign statement 로 변환한다.
-        member x.AugmentXgkArithmeticExpressionToAssignStatemnt (prjParam: XgxProjectParams) (augs: Augments) : Statement =
+        /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙/비교연산을 assign statement 로 변환한다.
+        member x.FunctionToAssignStatement (prjParam: XgxProjectParams) (augs: Augments) : Statement =
             let rec visitor (expPath:IExpression list) (exp:IExpression): IExpression =
                 if exp.Terminal.IsSome then
                     exp

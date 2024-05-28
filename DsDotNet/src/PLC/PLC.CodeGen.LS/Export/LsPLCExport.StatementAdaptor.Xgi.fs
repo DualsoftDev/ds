@@ -7,4 +7,4 @@ open Engine.Core
 module XgiTypeConvertorModule =
     /// Statement To XGI Statements. XGI 전용 Statement 확장
     let internal s2XgiSs (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) =
-        s2Ss prjParam augs statement
+        statement.ToStatements(prjParam, augs)

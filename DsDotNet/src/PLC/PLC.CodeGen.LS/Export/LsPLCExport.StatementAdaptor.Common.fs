@@ -528,9 +528,9 @@ module XgxExpressionConvertorModule =
 
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
-        member x.ToAssignStatement (prjParam: XgxProjectParams) (augs:Augments) : IExpression =
+        member x.ToAssignStatement (prjParam: XgxProjectParams) (augs:Augments) (replacableFunctionNames:string seq) : IExpression =
             match x.FunctionName with
-            | Some fn ->
+            | Some fn when replacableFunctionNames.Contains fn ->
                 let tmpNameHint = operatorToMnemonic fn
                 let var = createTypedXgxAutoVariable prjParam tmpNameHint x.BoxedEvaluatedValue $"{x.ToText()}"
                 let stmt =
@@ -548,7 +548,7 @@ module XgxExpressionConvertorModule =
                 augs.Statements.Add <| stmt
                 augs.Storages.Add var
                 var.ToExpression()
-            | None -> x
+            | _ -> x
 
 
 
@@ -670,7 +670,7 @@ module XgxExpressionConvertorModule =
         /// - 현재, 구현 편의상 XGI Timer/Counter 의 다릿발에는 boolean expression 만 수용하므로 사칙/비교 연산을 assign statement 로 변환한다.
         member x.AugmentXgiFunctionParameters (prjParam: XgxProjectParams) (augs: Augments) : Statement =
             let toAssignOndemand (exp:IExpression<bool> option) : IExpression<bool> option =
-                exp |> map (fun exp -> exp.ToAssignStatement prjParam augs :?> IExpression<bool>)
+                exp |> map (fun exp -> exp.ToAssignStatement prjParam augs K.arithmaticOrComparisionOperators :?> IExpression<bool>)
 
             match prjParam.TargetType, x with
             | XGK, _ -> x
@@ -707,7 +707,7 @@ module XgxExpressionConvertorModule =
                                 false
 
                         if augment then
-                            newExp.ToAssignStatement prjParam augs
+                            newExp.ToAssignStatement prjParam augs K.arithmaticOrComparisionOperators
                         else
                             newExp
                     | _ ->

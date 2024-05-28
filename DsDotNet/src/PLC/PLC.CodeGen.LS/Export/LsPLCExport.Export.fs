@@ -10,6 +10,7 @@ open PLC.CodeGen.Common
 open Config.POU.Program.LDRoutine
 open Command
 open System
+open PLC.CodeGen.Common.K
 
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
@@ -70,20 +71,18 @@ module XgiExportModule =
             rgi <- rgi.AddSingleLineXml(xml)
 
         let simpleRung (expr: IExpression) (target: IStorage) : unit =
-            let comparisonOps = [|">";">=";"<";"<=";"==";"!=";"<>";|]
-            let arithmaticOps = [|"+"; "-"; "*"; "/"|]
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOps @ comparisonOps) ->
+            | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOperators @ comparisonOperators) ->
             
                 let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
                     let targetContact = if target.Address.IsNullOrEmpty() then target.Name else target.Address
-                    if funName.IsOneOf(arithmaticOps) then
+                    if funName.IsOneOf(arithmaticOperators) then
                         let param = $"Param={dq}{op},{ls},{rs},{targetContact}{dq}"        // XGK 에서는 직접변수를 사용
                         xmlXgkFBRight xy param
-                    elif funName.IsOneOf(comparisonOps) then
+                    elif funName.IsOneOf(comparisonOperators) then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
                         xmlXgkFBLeft xy param targetContact
                     else

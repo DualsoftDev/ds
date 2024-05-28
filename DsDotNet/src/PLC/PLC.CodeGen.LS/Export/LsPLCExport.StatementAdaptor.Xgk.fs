@@ -4,6 +4,7 @@ namespace PLC.CodeGen.LS
 open Engine.Core
 open Dual.Common.Core.FS
 open System
+open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module XgkTypeConvertorModule =
@@ -177,7 +178,9 @@ module XgkTypeConvertorModule =
 
                 /// newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
                 let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
-                    let ldVarExp = cond.ToAssignStatement prjParam augs :?> IExpression<bool>
+                    let ldVarExp =
+                        let operators = [|"&&"; "||"; "!"|] @ K.arithmaticOrComparisionOperators
+                        cond.ToAssignStatement prjParam augs operators :?> IExpression<bool>
                     statements[0] <- newStatementGenerator(ldVarExp)
                     match statements[0] with
                     | DuCounter ctr -> newCtr <- ctr

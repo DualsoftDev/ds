@@ -17,7 +17,7 @@ module ImportUtilVertex =
     let getJobName (node: pptNode) apiName (mySys: DsSystem) =
         let jobFirstName = node.CallName + "_" + apiName
         match mySys.Jobs |> Seq.tryFind (fun job -> job.Name = jobFirstName) with
-        | Some job -> node.JobName
+        | Some _ -> node.JobName //기존에 있으면 다른 이름으로 만듬
         | None -> jobFirstName
 
     let getOperatorFunc (sys: DsSystem) (node: pptNode) =
@@ -45,8 +45,16 @@ module ImportUtilVertex =
         | None ->
             let device = sys.Devices |> Seq.find (fun d -> d.Name = loadSysName)
             let api = device.ReferenceSystem.ApiItems |> Seq.find (fun a -> a.Name = apiName)
-            let devTask = TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, loadSysName)
+            let devTask = 
+                match sys.Jobs.SelectMany(fun j->j.DeviceDefs).TryFind(fun d->d.ApiItem = api) with 
+                | Some (taskDev) ->
+                    taskDev.AddOrUpdateInParam   (node.JobName, node.DevParamIn  )
+                    taskDev.AddOrUpdateOutParam  (node.JobName, node.DevParamOut )
+                    taskDev
+                | _ -> 
+                    TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, loadSysName)
             let job = Job(node.JobName, sys, [devTask])
+
             sys.Jobs.Add job |> ignore
             Call.Create(job, parentWrapper)
 
@@ -70,7 +78,7 @@ module ImportUtilVertex =
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
 
-    let getCallFromNewSys (sys: DsSystem) (node: pptNode) jobName parentWrapper =
+    let getCallFromNewSys (sys: DsSystem) (node: pptNode)  parentWrapper =
         let apiName = node.CallApiName
         let loadedName = node.CallName
 
@@ -82,14 +90,15 @@ module ImportUtilVertex =
             | Some autoGenSys ->
                 let referenceSystem = autoGenSys.ReferenceSystem
                 let defaultParams = TextAddrEmpty |> defaultDevParam, TextAddrEmpty |> defaultDevParam
-                Some (createTaskDevUsingApiName referenceSystem jobName loadedName apiName defaultParams)
+                Some (createTaskDevUsingApiName referenceSystem node.JobName loadedName apiName defaultParams)
             | None -> None
 
         addLibraryNCall (libAbsolutePath, loadedName, apiName, sys, parentWrapper, node, autoGenDevTask)
 
     let createCallVertex (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-        let jobName = getJobName node apiName mySys
+        //let jobName = getJobName node apiName mySys
+        //let jobName = node.JobName
         let loadedSys = mySys.Devices.Select(fun d -> d.Name)
         let call =
             if node.IsFunction then
@@ -107,7 +116,7 @@ module ImportUtilVertex =
                 then
                     getCallFromMultiLoadedSys mySys node sysName apiName parentWrapper
                 else
-                    getCallFromNewSys mySys node jobName parentWrapper
+                    getCallFromNewSys mySys node  parentWrapper
 
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)

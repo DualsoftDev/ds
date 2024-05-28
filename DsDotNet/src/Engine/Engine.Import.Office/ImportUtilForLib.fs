@@ -26,7 +26,7 @@ module ImportUtilForLib =
         ) =
 
         let parent =parentWrapper
-
+        let jobName = node.JobName
         let job =
             if autoTaskDev.IsSome
             then
@@ -34,7 +34,7 @@ module ImportUtilForLib =
                 autoTaskDev.Value.InAddress <- ("")
                 autoTaskDev.Value.OutAddress<- ("")
                 tasks.Add(autoTaskDev.Value)|>ignore
-                Job(node.JobName, mySys, tasks |> Seq.toList)
+                Job(jobName, mySys, tasks |> Seq.toList)
             else 
                 let libRelPath =
                     PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
@@ -58,10 +58,10 @@ module ImportUtilForLib =
                         let mutiName = getMultiDeviceName loadedName i
                         let devParams = getDevParams mutiName
 
-                        tasks.Add(getLoadedTasks mySys devOrg mutiName apiPureName devParams node)|>ignore
+                        tasks.Add(getLoadedTasks mySys devOrg mutiName apiPureName devParams node jobName)|>ignore
                 | _->
-                    tasks.Add(getLoadedTasks mySys devOrg loadedName apiPureName (getDevParams(loadedName)) node)|>ignore
-                Job(node.JobName, mySys, tasks |> Seq.toList)
+                    tasks.Add(getLoadedTasks mySys devOrg loadedName apiPureName (getDevParams(loadedName)) node jobName)|>ignore
+                Job(jobName, mySys, tasks |> Seq.toList)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)

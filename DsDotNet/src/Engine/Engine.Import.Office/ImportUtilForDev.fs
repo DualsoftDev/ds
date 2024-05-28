@@ -101,7 +101,7 @@ module ImportUtilForDev =
         else 
             mySys.GetLoadedSys(loadedName).Value.ReferenceSystem
 
-    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode)=
+    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
         let devOrg= addOrGetExistSystem mySys loadedSys newloadedName devParams
         let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
 
@@ -115,8 +115,8 @@ module ImportUtilForDev =
                                 | Some p -> p
                                 | _ -> ""|>defaultDevParam
                                             
-            TaskDev(api,node.JobName,  inParam, outParam, newloadedName)
-        else 
-            TaskDev(api,node.JobName,  ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
+            TaskDev(api, jobName ,  inParam, outParam, newloadedName)
+        else            
+            TaskDev(api, jobName ,  ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
 
                     

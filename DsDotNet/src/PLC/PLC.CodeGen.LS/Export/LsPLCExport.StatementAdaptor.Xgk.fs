@@ -177,11 +177,7 @@ module XgkTypeConvertorModule =
 
                 /// newStatementGenerator : fun () -> DuCounter({ ctr with UpCondition = Some ldVarExp })
                 let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
-                    let assignStatement, ldVar = cond.ToAssignStatementAndAutoVariable prjParam
-                    statements.Add assignStatement
-                    augs.Storages.Add ldVar
-
-                    let ldVarExp = ldVar.ToExpression() :?> IExpression<bool>
+                    let ldVarExp = cond.ToAssignStatement prjParam augs :?> IExpression<bool>
                     statements[0] <- newStatementGenerator(ldVarExp)
                     match statements[0] with
                     | DuCounter ctr -> newCtr <- ctr

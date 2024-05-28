@@ -528,12 +528,14 @@ module XgxExpressionConvertorModule =
 
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
-        member x.ToAssignStatementAndAutoVariable (prjParam: XgxProjectParams) : (Statement * IXgxVar) =
+        member x.ToAssignStatement (prjParam: XgxProjectParams) (augs:Augments) : IExpression =
             if x.Terminal.IsSome then
                 failwith "Terminal expression cannot be converted to statement"
 
             let var = createTypedXgxAutoVariable prjParam "_temp_internal" false $"Temporary assignment for {x.ToText()}"
-            DuAssign(None, x, var), var
+            augs.Statements.Add <| DuAssign(None, x, var)
+            augs.Storages.Add var
+            var.ToExpression()
 
     /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
     let internal s2Ss (prjParam: XgxProjectParams) (augs:Augments) (statement: Statement) : unit =
@@ -646,6 +648,40 @@ module XgxExpressionConvertorModule =
         member x.DistributeNegate() =
             let visitor (exp:IExpression) : IExpression = exp.DistributeNegate()
             x.VisitExpression visitor
+
+
+        /// XGI Timer/Counter 의 RungInCondition, ResetCondition 이 Non-terminal 인 경우, assign statement 로 변환한다.
+        member x.AugmentXgiFunctionParameters (prjParam: XgxProjectParams) (augs: Augments) : Statement =
+            let toAssignOndemand (exp:IExpression<bool> option) : IExpression<bool> option =
+                match exp with
+                | Some exp ->
+                    match exp.FunctionName with
+                    | Some fn ->
+                        let tmpNameHint = operatorToMnemonic fn
+                        let tmpVar = createTypedXgxAutoVariable prjParam tmpNameHint exp.BoxedEvaluatedValue $"{exp.ToText()}"
+                        let stg = tmpVar :> IStorage
+                        let stmt = DuAssign(None, exp, stg)
+
+                        augs.Statements.Add stmt
+                        augs.Storages.Add stg
+                        Some <| (tmpVar.ToExpression() :?> IExpression<bool>)
+                    | _ -> None
+                | _ -> None
+
+            match prjParam.TargetType, x with
+            | XGK, _ -> x
+            | XGI, DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
+                DuTimer { tmr with
+                            RungInCondition = toAssignOndemand rungIn
+                            ResetCondition  = toAssignOndemand reset }
+            | XGI, DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
+                DuCounter {ctr with
+                            UpCondition    = toAssignOndemand up 
+                            DownCondition  = toAssignOndemand down
+                            ResetCondition = toAssignOndemand reset
+                            LoadCondition  = toAssignOndemand load }
+            | _ -> x
+
 
         /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙연산을 assign statement 로 변환한다.
         member x.AugmentXgkArithmeticExpressionToAssignStatemnt (prjParam: XgxProjectParams) (augs: Augments) : Statement =

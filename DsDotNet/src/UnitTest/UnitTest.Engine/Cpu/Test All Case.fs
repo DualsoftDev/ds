@@ -55,8 +55,8 @@ type XgxConvertDsCPU(target:PlatformTarget) =
                     }
                 }
                 [jobs] = {
-                    STN1_EXT_ADV = { STN1_EXT.ADV(P0010:66, -); }
-                    STN1_Device4_RET = { STN1_Device4.RET(P0020:300, -:200); }
+                    STN1_EXT_ADV = { STN1_EXT.ADV(-:66, -); }
+                    STN1_Device4_RET = { STN1_Device4.RET(-:300, -:200); }
                 }
    
                 [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_EXT; 

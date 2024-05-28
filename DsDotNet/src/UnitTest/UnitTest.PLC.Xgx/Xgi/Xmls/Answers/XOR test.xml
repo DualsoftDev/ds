@@ -56,24 +56,15 @@
                                         b1
                                     </Element>
                                     <Element ElementType="70" Coordinate="3079">
-                                        _t1_out
+                                        b3
                                     </Element>
                                     <Element ElementType="70" Coordinate="4097">
                                         b2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="6145">
-                                        _t1_out
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="6148" Param="87"/>
-                                    <Element ElementType="14" Coordinate="6238">
-                                        b3
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="8193" Param="90"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="END">
+                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -83,9 +74,8 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="4">
+                        <LocalVar Version="Ver 1.0" Count="3">
                             <Symbols>
-                                <Symbol Name="_t1_out" Comment="$b1 != $b2" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b3" Comment="" Device="" Kind="8" State="0"/>

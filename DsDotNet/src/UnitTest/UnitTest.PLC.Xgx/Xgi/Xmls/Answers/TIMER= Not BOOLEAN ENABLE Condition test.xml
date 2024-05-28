@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145730" Version="513" WksNodeCount="16">
-    Assignment simple test
+    TIMER= Not BOOLEAN ENABLE Condition test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
@@ -15,11 +15,9 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="3">
+                <GlobalVariable Version="Ver 1.0" Count="1">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="myTon1" Comment="TIMER myTon1" Device="" Kind="6" Type="TON" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -44,27 +42,53 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $sum = $nn1 + $nn2
+                                        [0] ton myTon1 = createXgiTON(15000u, 3.14 + 2.0 &gt; 6.25)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: ADD2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1686&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000040, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: ADD2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1688&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00004000, &#xA;"/>
                                     <Element ElementType="70" Coordinate="3073">
-                                        nn1
+                                        3.14
                                     </Element>
                                     <Element ElementType="70" Coordinate="3079">
-                                        sum
+                                        _t1_ADD
                                     </Element>
                                     <Element ElementType="70" Coordinate="4097">
-                                        nn2
+                                        2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="END">
+                                    <Element ElementType="6" Coordinate="6145">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="6148" Param="FNAME: GT2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1272&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="7169">
+                                        _t1_ADD
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="7175">
+                                        _t2_GT
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="8193">
+                                        6.25
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="10241">
+                                        _t2_GT
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="10244" Param="FNAME: TON&#xA;TYPE: function_block&#xA;INSTANCE: myTon1,VAR&#xA;INDEX: 81&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: IN, 0x00200001, , 0&#xA;VAR_IN: PT, 0x00208000, , 0&#xA;VAR_OUT: Q, 0x00000001,&#xA;VAR_OUT: ET, 0x00008000, &#xA;">
+                                        myTon1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="11265">
+                                        T#15000MS
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="14337" Param="90"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -76,9 +100,9 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="3">
                             <Symbols>
-                                <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="sum" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="_t1_ADD" Comment="3.14 + 2.0" Device="" Kind="1" Type="LREAL" InitValue="5.140000000000001" Address="" State="0"/>
+                                <Symbol Name="_t2_GT" Comment="$_t1_ADD &gt; 6.25" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="myTon1" Comment="TIMER myTon1" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

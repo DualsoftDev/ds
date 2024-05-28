@@ -1,4 +1,5 @@
 namespace PLC.CodeGen.Common
+open Dual.Common.Core.FS
 
 /// Konstants (Constants) collection
 
@@ -109,3 +110,8 @@ module K =
     let ErrNoAddressAssigned = "No address assigned."
     let ErrNameIsNullOrEmpty = "Name is null or empty."
     let ErrAddressIsNullOrEmpty = "Address is null or empty."
+
+
+    let comparisonOperators = [|">";">=";"<";"<=";"==";"!=";"<>";|]
+    let arithmaticOperators = [|"+"; "-"; "*"; "/"|]
+    let arithmaticOrComparisionOperators = comparisonOperators @ arithmaticOperators

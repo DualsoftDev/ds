@@ -51,13 +51,13 @@
                         <Symbol Name="result" Comment="" Device="M" DevicePos="144" Type="BIT"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="8" Type="WORD"/>
                         <Symbol Name="_t1_MUL" Comment="$nn2 * $nn3" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2 * $nn3" Device="M" DevicePos="11" Type="WORD"/>
-                        <Symbol Name="_t3_GT" Comment="$nn1 + $nn2 * $nn3 &gt; 2s" Device="M" DevicePos="145" Type="BIT"/>
+                        <Symbol Name="_t2_ADD" Comment="$nn1 + $_t1_MUL" Device="M" DevicePos="11" Type="WORD"/>
+                        <Symbol Name="_t3_GT" Comment="$_t2_ADD &gt; 2s" Device="M" DevicePos="145" Type="BIT"/>
                         <Symbol Name="_t4_MUL" Comment="$nn5 * $nn6" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="_t5_DIV" Comment="$nn5 * $nn6 / $nn7" Device="M" DevicePos="13" Type="WORD"/>
-                        <Symbol Name="_t6_ADD" Comment="$nn4 + $nn5 * $nn6 / $nn7" Device="M" DevicePos="14" Type="WORD"/>
-                        <Symbol Name="_t7_SUB" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8" Device="M" DevicePos="15" Type="WORD"/>
-                        <Symbol Name="_t8_GT" Comment="$nn4 + $nn5 * $nn6 / $nn7 - $nn8 &gt; 5s" Device="M" DevicePos="146" Type="BIT"/>
+                        <Symbol Name="_t5_DIV" Comment="$_t4_MUL / $nn7" Device="M" DevicePos="13" Type="WORD"/>
+                        <Symbol Name="_t6_ADD" Comment="$nn4 + $_t5_DIV" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="_t7_SUB" Comment="$_t6_ADD - $nn8" Device="M" DevicePos="15" Type="WORD"/>
+                        <Symbol Name="_t8_GT" Comment="$_t7_SUB &gt; 5s" Device="M" DevicePos="146" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

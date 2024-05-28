@@ -38,13 +38,25 @@ module FlatExpressionModule =
                 |> OpCompare
             | OpArithmatic _ -> failwithlog "ERROR: Negation not supported for Arithmatic operator."
 
-    type TrueValue() =
+    [<AbstractClass>]
+    type BoolLiteralValue() =
         interface IExpressionizableTerminal with
-            member x.ToText() = "TRUE"
+            member x.ToText() = x.ToText()
+        interface IType with
+            member x.DataType = typedefof<bool>
+        interface ITerminal with
+            member x.Variable = None
+            member x.Literal = Some(x:>IExpressionizableTerminal)
+        abstract ToText: unit -> string
+        default x.ToText() = "TRUE"
+
+    type TrueValue() =
+        inherit BoolLiteralValue()
+        override x.ToText() = "TRUE"
 
     type FalseValue() =
-        interface IExpressionizableTerminal with
-            member x.ToText() = "FALSE"
+        inherit BoolLiteralValue()
+        override x.ToText() = "FALSE"
 
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
@@ -55,6 +67,14 @@ module FlatExpressionModule =
         | FlatNary of Op * FlatExpression list
 
         interface IFlatExpression
+
+        interface IType with
+            member x.DataType = x.DataType
+
+        member x.DataType =
+            match x with
+            | FlatTerminal(terminal, _pulse, _neg) -> terminal.DataType
+            | FlatNary(_op, arg0::_) -> arg0.DataType
 
         member x.ToText() =
             match x with
@@ -106,8 +126,10 @@ module FlatExpressionModule =
                     | FunctionNameRisingAfter -> Op.RisingAfter
                     | FunctionNameFallingAfter -> Op.FallingAfter
 
-                    | (">" | "<" | ">=" | "<=" | "==" | "!=") -> Op.OpCompare fs.Name
-                    | ("+" | "-" | "*" | "/") -> Op.OpArithmatic fs.Name
+                    | (">"|">="|"<"|"<="|"=="|"!="|"<>") -> // XGK 일때만 유효
+                        Op.OpCompare fs.Name
+
+                    | ("+"|"-"|"*"|"/")// -> Op.OpArithmatic fs.Name
                     | _ -> failwithlog "ERROR"
 
                 let flatArgs = fs.Arguments |> map flattenExpression |> List.cast<FlatExpression>

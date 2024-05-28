@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    ADD 8 items test
+    Arithmatic test3
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -39,22 +39,9 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="9">
-                        <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="nn3" Comment="" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="nn4" Comment="" Device="M" DevicePos="3" Type="WORD"/>
-                        <Symbol Name="nn5" Comment="" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="nn6" Comment="" Device="M" DevicePos="5" Type="WORD"/>
-                        <Symbol Name="nn7" Comment="" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="nn8" Comment="" Device="M" DevicePos="7" Type="WORD"/>
-                        <Symbol Name="sum" Comment="" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="9" Type="WORD"/>
-                        <Symbol Name="_t2_ADD" Comment="$_t1_ADD + $nn3" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="_t3_ADD" Comment="$_t2_ADD + $nn4" Device="M" DevicePos="11" Type="WORD"/>
-                        <Symbol Name="_t4_ADD" Comment="$_t3_ADD + $nn5" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="_t5_ADD" Comment="$_t4_ADD + $nn6" Device="M" DevicePos="13" Type="WORD"/>
-                        <Symbol Name="_t6_ADD" Comment="$_t5_ADD + $nn7" Device="M" DevicePos="14" Type="WORD"/>
+                    <Symbols Count="1">
+                        <Symbol Name="b0" Comment="" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="_t1_EQ" Comment="2.1 == 6.1" Device="M" DevicePos="1" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -78,169 +65,31 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] uint16 nn1 = 1s
+                                        [0] $b0 = false &amp;&amp; 2.1 == 6.1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2130" Param="MOV,1,nn1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="4097">
-                                        [1] uint16 nn2 = 2s
+                                    <Element ElementType="33" Coordinate="2049" Param="L=,2.1,6.1"/>
+                                    <Element ElementType="2" Coordinate="2058" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="5121">
-                                        _1ON
+                                    <Element ElementType="6" Coordinate="3073">
+                                        _OFF
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5124" Param="81"/>
-                                    <Element ElementType="33" Coordinate="5202" Param="MOV,2,nn2"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="7169">
-                                        [2] uint16 nn3 = 3s
+                                    <Element ElementType="6" Coordinate="3076">
+                                        M00001
                                     </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="8193">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8274" Param="MOV,3,nn3"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="10241">
-                                        [3] uint16 nn4 = 4s
+                                    <Element ElementType="2" Coordinate="3079" Param="84"/>
+                                    <Element ElementType="14" Coordinate="3166">
+                                        M00000
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="11265">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="11268" Param="81"/>
-                                    <Element ElementType="33" Coordinate="11346" Param="MOV,4,nn4"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="13313">
-                                        [4] uint16 nn5 = 5s
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="14337">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="14340" Param="81"/>
-                                    <Element ElementType="33" Coordinate="14418" Param="MOV,5,nn5"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="16385">
-                                        [5] uint16 nn6 = 6s
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="17409">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="17412" Param="81"/>
-                                    <Element ElementType="33" Coordinate="17490" Param="MOV,6,nn6"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="19457">
-                                        [6] uint16 nn7 = 7s
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="20481">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="20484" Param="81"/>
-                                    <Element ElementType="33" Coordinate="20562" Param="MOV,7,nn7"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="22529">
-                                        [7] uint16 nn8 = 8s
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="23553">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="23556" Param="81"/>
-                                    <Element ElementType="33" Coordinate="23634" Param="MOV,8,nn8"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="25601">
-                                        [8] uint16 sum = 0s
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="26625">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="26628" Param="81"/>
-                                    <Element ElementType="33" Coordinate="26706" Param="MOV,0,sum"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="28673">
-                                        [9] $sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="29697">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="29700" Param="81"/>
-                                    <Element ElementType="33" Coordinate="29790" Param="ADD,nn1,nn2,M0009"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="30721">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="30724" Param="81"/>
-                                    <Element ElementType="33" Coordinate="30814" Param="ADD,_t1_ADD,nn3,M0010"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="31745">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="31748" Param="81"/>
-                                    <Element ElementType="33" Coordinate="31838" Param="ADD,_t2_ADD,nn4,M0011"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="32769">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="32772" Param="81"/>
-                                    <Element ElementType="33" Coordinate="32862" Param="ADD,_t3_ADD,nn5,M0012"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="33793">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="33796" Param="81"/>
-                                    <Element ElementType="33" Coordinate="33886" Param="ADD,_t4_ADD,nn6,M0013"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="34817">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="34820" Param="81"/>
-                                    <Element ElementType="33" Coordinate="34910" Param="ADD,_t5_ADD,nn7,M0014"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="35841">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="35844" Param="81"/>
-                                    <Element ElementType="33" Coordinate="35934" Param="ADD,_t6_ADD,nn8,M0008"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="37889" Param="90"/>
-                                    <Element ElementType="33" Coordinate="37982" Param="END">
+                                    <Element ElementType="2" Coordinate="5121" Param="90"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="END">
                                         END
                                     </Element>
                                 </Rung>

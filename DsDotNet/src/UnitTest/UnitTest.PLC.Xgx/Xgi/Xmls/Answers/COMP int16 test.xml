@@ -69,7 +69,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b1 = $nn1 &gt; $nn2
+                                        [0] $b1 = $nn1 &gt; $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -89,7 +89,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] bool b2 = $nn1 &lt; $nn2
+                                        [1] $b2 = $nn1 &lt; $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -109,7 +109,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [2] bool b3 = $nn1 == $nn2
+                                        [2] $b3 = $nn1 == $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -129,7 +129,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [3] bool b4 = $nn1 == $nn2
+                                        [3] $b4 = $nn1 == $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -149,7 +149,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="21505">
-                                        [4] bool b5 = $nn1 != $nn2
+                                        [4] $b5 = $nn1 != $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -169,7 +169,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="26625">
-                                        [5] bool b6 = $nn1 != $nn2
+                                        [5] $b6 = $nn1 != $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -189,7 +189,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="31745">
-                                        [6] bool b7 = $nn1 &gt;= $nn2
+                                        [6] $b7 = $nn1 &gt;= $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -209,7 +209,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="36865">
-                                        [7] bool b8 = $nn1 &lt;= $nn2
+                                        [7] $b8 = $nn1 &lt;= $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -229,7 +229,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="41985">
-                                        [8] bool b9 = 1s &gt; 2s
+                                        [8] $b9 = 1s &gt; 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -249,7 +249,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="47105">
-                                        [9] bool b10 = 1s &lt; 2s
+                                        [9] $b10 = 1s &lt; 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -269,7 +269,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="52225">
-                                        [10] bool b11 = 1s == 2s
+                                        [10] $b11 = 1s == 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -289,7 +289,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="57345">
-                                        [11] bool b12 = 1s != 2s
+                                        [11] $b12 = 1s != 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -309,7 +309,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="62465">
-                                        [12] bool ub1 = $unn1 &gt; $unn2
+                                        [12] $ub1 = $unn1 &gt; $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -329,7 +329,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="67585">
-                                        [13] bool ub2 = $unn1 &lt; $unn2
+                                        [13] $ub2 = $unn1 &lt; $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -349,7 +349,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="72705">
-                                        [14] bool ub3 = $unn1 == $unn2
+                                        [14] $ub3 = $unn1 == $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -369,7 +369,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="77825">
-                                        [15] bool ub4 = $unn1 == $unn2
+                                        [15] $ub4 = $unn1 == $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -389,7 +389,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="82945">
-                                        [16] bool ub5 = $unn1 != $unn2
+                                        [16] $ub5 = $unn1 != $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -409,7 +409,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="88065">
-                                        [17] bool ub6 = $unn1 != $unn2
+                                        [17] $ub6 = $unn1 != $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -429,7 +429,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="93185">
-                                        [18] bool ub7 = $unn1 &gt;= $unn2
+                                        [18] $ub7 = $unn1 &gt;= $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -449,7 +449,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="98305">
-                                        [19] bool ub8 = $unn1 &lt;= $unn2
+                                        [19] $ub8 = $unn1 &lt;= $unn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -469,7 +469,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="103425">
-                                        [20] bool ub9 = 1us &gt; 2us
+                                        [20] $ub9 = 1us &gt; 2us
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -489,7 +489,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="108545">
-                                        [21] bool ub10 = 1us &lt; 2us
+                                        [21] $ub10 = 1us &lt; 2us
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -509,7 +509,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="113665">
-                                        [22] bool ub11 = 1us == 2us
+                                        [22] $ub11 = 1us == 2us
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -529,7 +529,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="118785">
-                                        [23] bool ub12 = 1us != 2us
+                                        [23] $ub12 = 1us != 2us
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

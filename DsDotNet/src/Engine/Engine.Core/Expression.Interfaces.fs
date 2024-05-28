@@ -35,7 +35,7 @@ module ExpressionForwardDeclModule =
 
     // Interface to access Expression<'T> in a boxed manner
     type IExpression =
-        abstract DataType : System.Type
+        inherit IType
         abstract BoxedEvaluatedValue : obj
         abstract GetBoxedRawObject: unit -> obj
         abstract ToText : unit -> string

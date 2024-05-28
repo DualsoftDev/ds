@@ -50,10 +50,10 @@
                         <Symbol Name="nn8" Comment="" Device="M" DevicePos="7" Type="WORD"/>
                         <Symbol Name="sum" Comment="" Device="M" DevicePos="8" Type="WORD"/>
                         <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="9" Type="WORD"/>
-                        <Symbol Name="_t2_ADD" Comment="$nn1 + $nn2 + $nn3" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="_t3_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4" Device="M" DevicePos="11" Type="WORD"/>
-                        <Symbol Name="_t4_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="_t5_ADD" Comment="$nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6" Device="M" DevicePos="13" Type="WORD"/>
+                        <Symbol Name="_t2_ADD" Comment="$_t1_ADD + $nn3" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="_t3_ADD" Comment="$_t2_ADD + $nn4" Device="M" DevicePos="11" Type="WORD"/>
+                        <Symbol Name="_t4_ADD" Comment="$_t3_ADD + $nn5" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="_t5_ADD" Comment="$_t4_ADD + $nn6" Device="M" DevicePos="13" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

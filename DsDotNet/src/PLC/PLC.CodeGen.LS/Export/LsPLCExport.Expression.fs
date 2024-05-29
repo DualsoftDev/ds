@@ -18,6 +18,7 @@ module LsPLCExportExpressionModule =
         member val Statements = statements    // ResizeArray<Statement>
         member val ExpressionStore:IStorage option = None with get, set
 
+
     type IExpression with
         /// 주어진 Expression 을 multi-line text 형태로 변환한다.
         member exp.ToTextFormat() : string =
@@ -86,7 +87,7 @@ module LsPLCExportExpressionModule =
         member exp.Transform(tfs:ExpressionTransformers, resultStore:IStorage option) : IExpression =
             let {TerminalHandler = th; FunctionHandler = fh} = tfs
 
-            let rec traverse (level:int) (exp:IExpression) (resultStore:IStorage option) =
+            let rec traverse (level:int) (exp:IExpression) (resultStore:IStorage option) : IExpression =
                 match exp.Terminal, exp.FunctionName with
                 | Some _terminal, None -> th (level, exp)
                 | None, Some _fn ->
@@ -98,3 +99,6 @@ module LsPLCExportExpressionModule =
                     newFn
                 | _ -> failwith "Invalid expression"
             traverse 0 exp resultStore
+
+
+

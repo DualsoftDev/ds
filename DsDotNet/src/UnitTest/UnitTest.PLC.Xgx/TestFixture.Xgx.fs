@@ -84,6 +84,7 @@ module XgxGenerationTestModule =
 module XgxFixtures =
 
     let mutable runtimeTarget = WINDOWS
+    let sys = DsSystem("")
     let setRuntimeTarget(target:PlatformTarget) =
         let runtimeTargetBackup = target
         RuntimeDS.System <- sys

@@ -53,7 +53,7 @@ module XgiExportModule =
             | _ -> x.GetContact()
 
     /// (조건=coil) seq 로부터 rung xml 들의 string 을 생성
-    let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedXgxStatements seq) : XmlOutput =
+    let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedStatements seq) : XmlOutput =
         let isXgi, isXgk = prjParam.TargetType = XGI, prjParam.TargetType = XGK
 
         let rgiXmlRung (expr: FlatExpression option) (xgiCommand:CommandTypes option) (y:int) : RungGenerationInfo =
@@ -192,7 +192,7 @@ module XgiExportModule =
                            NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
 
         // Rung 별로 생성
-        for CommentAndXgxStatements(cmt, stmts) in commentedStatements do
+        for CommentAndStatements(cmt, stmts) in commentedStatements do
 
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
@@ -321,19 +321,19 @@ module XgiExportModule =
         (prjParam: XgxProjectParams)
         (localStorages: IStorage seq)
         (commentedStatements: CommentedStatement list)
-      : IStorage list * CommentedXgxStatements list =
+      : IStorage list * CommentedStatements list =
         (* Timer 및 Counter 의 Rung In Condition 을 제외한 부수의 조건들이 직접 tag 가 아닌 condition expression 으로
             존재하는 경우, condition 들을 임시 tag 에 assign 하는 rung 으로 분리해서 저장.
             => 새로운 임시 tag 와 새로운 임시 tag 에 저장하기 위한 rung 들이 추가된다.
         *)
 
-        let newCommentedStatements = ResizeArray<CommentedXgxStatements>()
+        let newCommentedStatements = ResizeArray<CommentedStatements>()
         let newLocalStorages = XgxStorage(localStorages)
 
         for cmtSt in commentedStatements do
-            let xgxCmtStmts:CommentedXgxStatements = cs2Css prjParam newLocalStorages cmtSt
+            let xgxCmtStmts:CommentedStatements = cmtSt.ToCommentedStatements(prjParam, newLocalStorages)
 
-            let (CommentAndXgxStatements(_comment, xgxStatements)) = xgxCmtStmts
+            let (CommentAndStatements(_comment, xgxStatements)) = xgxCmtStmts
 
             if xgxStatements.Any() then
                 newCommentedStatements.Add xgxCmtStmts

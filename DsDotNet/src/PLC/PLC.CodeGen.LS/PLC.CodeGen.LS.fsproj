@@ -54,7 +54,6 @@
         <Compile Include="Export\LsPLCExport.Expression.fs" />
         <Compile Include="Export\LsPLCExport.StatementAdaptor.Common.fs" />
         <Compile Include="Export\LsPLCExport.StatementAdaptor.Xgk.fs" />
-        <Compile Include="Export\LsPLCExport.StatementAdaptor.Xgi.fs" />
         <Compile Include="Export\LsPLCExport.StatementAdaptor.Epilog.fs" />
         <Compile Include="Export\LsPLCExport.Command.fs" />
         <Compile Include="Export\LsPLCExport.Tag.fs" />

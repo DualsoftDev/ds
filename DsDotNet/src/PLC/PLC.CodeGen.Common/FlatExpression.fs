@@ -135,10 +135,10 @@ module FlatExpressionModule =
                     | FunctionNameRisingAfter -> Op.RisingAfter
                     | FunctionNameFallingAfter -> Op.FallingAfter
 
-                    | (">"|">="|"<"|"<="|"=="|"!="|"<>") -> // XGK 일때만 유효
+                    | IsComparisonOperator _ -> // XGK 일때만 유효
                         Op.OpCompare fs.Name
 
-                    | ("+"|"-"|"*"|"/")// -> Op.OpArithmatic fs.Name
+                    | IsArithmaticOperator _ // -> Op.OpArithmatic fs.Name
                     | _ -> failwithlog "ERROR"
 
                 let flatArgs = fs.Arguments |> map flattenExpression |> List.cast<FlatExpression>

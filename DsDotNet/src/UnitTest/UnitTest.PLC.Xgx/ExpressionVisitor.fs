@@ -64,7 +64,7 @@ type ExpressionVisitorTest() =
                     //let initValue = typeDefaultValue functionExpression.DataType
                     let initValue = typeDefaultValue args[0].DataType
                     let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
-                    createTypedXgxAutoVariable prjParam mnemonic initValue comment
+                    prjParam.CreateAutoVariable(mnemonic, initValue, comment)
                 let augStatement = DuAssign(None, functionExpression, var)
                 statements.Add augStatement
                 storages.Add var

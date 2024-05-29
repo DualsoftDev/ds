@@ -112,6 +112,18 @@ module K =
     let ErrAddressIsNullOrEmpty = "Address is null or empty."
 
 
+    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"
     let comparisonOperators = [|">";">=";"<";"<=";"==";"!=";"<>";|]
+    /// "+"|"-"|"*"|"/"
     let arithmaticOperators = [|"+"; "-"; "*"; "/"|]
+    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
     let arithmaticOrComparisionOperators = comparisonOperators @ arithmaticOperators
+
+[<AutoOpen>]
+module OperatorActivePatterns =
+    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"
+    let (|IsComparisonOperator|_|) (op:string) = if K.comparisonOperators |> Array.contains op then Some op else None
+    /// "+"|"-"|"*"|"/"
+    let (|IsArithmaticOperator|_|) (op:string) = if K.arithmaticOperators |> Array.contains op then Some op else None
+    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
+    let (|IsArithmaticOrComparisionOperator|_|) (op:string) = if K.arithmaticOrComparisionOperators |> Array.contains op then Some op else None

@@ -468,16 +468,18 @@ module internal rec Command =
         let cmdParam = 
             match fbc with
             | TimerMode ts ->
-                let typ = ts.Timer.Type.ToString()
-                let var = ts.Timer.Name
+                let t = ts.Timer
+                let typ = t.Type.ToString()
+                let var = t.Name
                 let value =
-                    let res = prjParam.GetXgkTimerResolution(ts.Timer.TimerStruct.XgkStructVariableDevicePos)
-                    int <| (float ts.Timer.PRE.Value) / res
+                    let res = prjParam.GetXgkTimerResolution(t.TimerStruct.XgkStructVariableDevicePos)
+                    int <| (float t.PRE.Value) / res
                 $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="TON,T0000,1000"
             | CounterMode cs ->
-                let typ = cs.Counter.Type.ToString()
-                let var = cs.Counter.Name
-                let value = cs.Counter.PRE.Value 
+                let c = cs.Counter
+                let typ = c.Type.ToString()
+                let var = c.Name
+                let value = c.PRE.Value 
                 $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
         bxiXgkFBCommandWithParam (x, y) (cmdParam, cmdWidth)
 

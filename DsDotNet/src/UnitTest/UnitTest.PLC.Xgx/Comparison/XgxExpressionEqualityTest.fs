@@ -15,7 +15,7 @@ open System
 type XgxExpEqualityTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
-    member x.``Comparision, Arithmatic, OR test`` () =
+    member x.``Comparision, Arithmetic, OR test`` () =
         let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
@@ -28,7 +28,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Comparision, Arithmatic, OR test2`` () =
+    member x.``Comparision, Arithmetic, OR test2`` () =
         let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             bool cond1 = false;
@@ -160,8 +160,8 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 type XgiExpEqualityTest() =
     inherit XgxExpEqualityTest(XGI)
 
-    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
-    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
+    [<Test>] member __.``Comparision, Arithmetic, OR test`` () = base.``Comparision, Arithmetic, OR test``()
+    [<Test>] member __.``Comparision, Arithmetic, OR test2`` () = base.``Comparision, Arithmetic, OR test2``()
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``()
@@ -171,8 +171,8 @@ type XgiExpEqualityTest() =
 
 type XgkExpEqualityTest() =
     inherit XgxExpEqualityTest(XGK)
-    [<Test>] member __.``Comparision, Arithmatic, OR test`` () = base.``Comparision, Arithmatic, OR test``()
-    [<Test>] member __.``Comparision, Arithmatic, OR test2`` () = base.``Comparision, Arithmatic, OR test2``()
+    [<Test>] member __.``Comparision, Arithmetic, OR test`` () = base.``Comparision, Arithmetic, OR test``()
+    [<Test>] member __.``Comparision, Arithmetic, OR test2`` () = base.``Comparision, Arithmetic, OR test2``()
     [<Test>] member __.``Expression equality test`` () = base.``Expression equality test``()
     [<Test>] member __.``Expression equality generation test`` () = base.``Expression equality generation test``()
     [<Test>] member __.``XOR test`` () = base.``XOR test``() 

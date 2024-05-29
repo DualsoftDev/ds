@@ -182,7 +182,7 @@ module internal rec Command =
 
     let bxiXgiFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockXmlInfo =
         match func with
-        | Arithmatic(name, output, args) ->
+        | Arithmetic(name, output, args) ->
             let namedInputParameters =
                 [ "EN", fakeAlwaysOnExpression :> IExpression ]
                 @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n + 1}"))
@@ -682,7 +682,7 @@ module internal rec Command =
               TotalSpanX = spanX
               TotalSpanY = spanY }
 
-        | FlatNary(OpArithmatic _, _exprs) when isXgk ->
+        | FlatNary(OpArithmetic _, _exprs) when isXgk ->
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
 
         | FlatNary(OpCompare cmp, args) when isXgk ->
@@ -701,7 +701,7 @@ module internal rec Command =
                 TotalSpanX = 3; TotalSpanY = 1
             }
 
-        | FlatNary((OpCompare _fn | OpArithmatic _fn), _args) when isXgi ->
+        | FlatNary((OpCompare _fn | OpArithmetic _fn), _args) when isXgi ->
             failwithlog "ERROR : Not yet!"  // todo
 
         // terminal case

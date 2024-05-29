@@ -16,7 +16,7 @@ module FlatExpressionModule =
 
         | OpUnit // Logical XOR 는 function 인 '<>' 로 구현됨
         | OpCompare of operator: string
-        | OpArithmatic of operator: string
+        | OpArithmetic of operator: string
 
         member x.ToText() = sprintf "%A" x
 
@@ -36,7 +36,7 @@ module FlatExpressionModule =
                 | "!=" -> "=="
                 | _ -> failwithlog "ERROR"
                 |> OpCompare
-            | OpArithmatic _ -> failwith "ERROR: Negation not supported for Arithmatic operator."
+            | OpArithmetic _ -> failwith "ERROR: Negation not supported for Arithmetic operator."
             | _ -> failwith "ERROR"
 
     [<AbstractClass>]
@@ -140,7 +140,7 @@ module FlatExpressionModule =
                     | IsComparisonOperator _ -> // XGK 일때만 유효
                         Op.OpCompare fs.Name
 
-                    | IsArithmaticOperator _ // -> Op.OpArithmatic fs.Name
+                    | IsArithmeticOperator _ // -> Op.OpArithmetic fs.Name
                     | _ -> failwithlog "ERROR"
 
                 let flatArgs = fs.Arguments |> map flattenExpression |> List.cast<FlatExpression>

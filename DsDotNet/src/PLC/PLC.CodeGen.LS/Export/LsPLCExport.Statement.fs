@@ -16,8 +16,8 @@ module StatementExtensionModule =
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
-                | Some(IsArithmaticOrComparisionOperator op) ->
-                    let exp = exp.FlattenArithmaticOperator(prjParam, augs, Some target)
+                | Some(IsArithmeticOrComparisionOperator op) ->
+                    let exp = exp.FlattenArithmeticOperator(prjParam, augs, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
                             DuAugmentedPLCFunction
@@ -155,7 +155,7 @@ module StatementExtensionModule =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
                     match newExp.FunctionName with
-                    | Some (IsArithmaticOrComparisionOperator fn) when expPath.Any() ->
+                    | Some (IsArithmeticOrComparisionOperator fn) when expPath.Any() ->
                         let augment =
                             match prjParam.TargetType, expPath with
                             | XGK, _head::_ -> true

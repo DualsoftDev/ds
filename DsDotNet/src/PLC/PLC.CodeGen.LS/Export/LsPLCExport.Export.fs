@@ -214,7 +214,7 @@ module XgiExportModule =
                         //let command =
                         //    match expr.Terminal, expr.FunctionName with
                         //    | Some _t, None -> ActionCmd(Move(cond, expr, target))
-                        //    | None, Some fn -> FunctionCmd(Arithmatic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
+                        //    | None, Some fn -> FunctionCmd(Arithmetic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
                         //    | _ -> failwithlog "ERROR"
                         let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
@@ -285,7 +285,7 @@ module XgiExportModule =
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command = FunctionCmd(Arithmatic(fn, (output :?> INamedExpressionizableTerminal), args))
+                    let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                     rgi <-

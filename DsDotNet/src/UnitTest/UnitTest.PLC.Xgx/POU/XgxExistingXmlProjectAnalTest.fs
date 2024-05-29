@@ -16,7 +16,7 @@ type XgxExistingXmlProjectAnalTest() =
 
     [<Test>]
     member __.``Xml project read global variable test`` () =
-        let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
+        let xmlPrj = $"{__SOURCE_DIRECTORY__}/../../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
 
         let usedMAddresses =
             DualXmlDocument.loadFromFile xmlPrj

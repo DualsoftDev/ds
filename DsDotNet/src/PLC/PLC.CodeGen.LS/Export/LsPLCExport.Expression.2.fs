@@ -114,7 +114,7 @@ module XgxExpressionConvertorModule =
         ///   * 추가되는 local variable 은 newLocalStorages 에 추가한다.
         ///
         ///   * 새로 생성되는 expression 을 반환한다.
-        member internal exp.ReplaceInnerArithmaticOrComparisionToFunctionStatements
+        member internal exp.ReplaceInnerArithmeticOrComparisionToFunctionStatements
             (prjParam: XgxProjectParams, augs: Augments) 
           : IExpression =
             let newLocalStorages, expandFunctionStatements, expStore =
@@ -122,7 +122,7 @@ module XgxExpressionConvertorModule =
 
             let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
                 match functionExpression.FunctionName with
-                | Some(IsArithmaticOrComparisionOperator op) -> //when level <> 0 ->
+                | Some(IsArithmeticOrComparisionOperator op) -> //when level <> 0 ->
                     let args = functionExpression.FunctionArguments
                     let var:IStorage =
                         expStore |> Option.defaultWith (fun () -> 
@@ -197,7 +197,7 @@ module XgxExpressionConvertorModule =
         /// - a + b + c => + [a; b; c] 로 변환 (flat 처리)
         ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성 (XGI function block 의 다릿발 갯수 제한 때문)
         /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
-        member internal exp.FlattenArithmaticOperator
+        member internal exp.FlattenArithmeticOperator
           (  prjParam: XgxProjectParams
              , augs: Augments
              , outputStore: IStorage option
@@ -206,7 +206,7 @@ module XgxExpressionConvertorModule =
                 augs.Storages, augs.Statements, augs.ExpressionStore
 
             match exp.FunctionName with
-            | Some(IsArithmaticOperator op) ->
+            | Some(IsArithmeticOperator op) ->
                 let newArgs =
                     exp.BinaryToNary(prjParam, augs, [ "+"; "-"; "*"; "/" ], op)
 
@@ -315,7 +315,7 @@ module XgxExpressionConvertorModule =
                 exp
 
         member private exp.ZipVisitor (prjParam: XgxProjectParams, augs: Augments) : IExpression =
-            let exp = exp.FlattenArithmaticOperator(prjParam, augs, None)
+            let exp = exp.FlattenArithmeticOperator(prjParam, augs, None)
             let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
 
             if w > maxNumHorizontalContact && exp.FunctionName.IsSome && exp.FunctionName.Value.IsOneOf("&&", "||") then
@@ -335,7 +335,7 @@ module XgxExpressionConvertorModule =
 
         member internal exp.CollectExpandedExpression (prjParam: XgxProjectParams, augs: Augments) : IExpression =
             let newExp =
-                exp.ReplaceInnerArithmaticOrComparisionToFunctionStatements(prjParam, augs)
+                exp.ReplaceInnerArithmeticOrComparisionToFunctionStatements(prjParam, augs)
 
             let newExp = newExp.ZipVisitor(prjParam, augs)
             newExp
@@ -357,7 +357,7 @@ module XgxExpressionConvertorModule =
                         match prjParam.TargetType with
                         | XGK -> DuAssign(None, x, var)
                         | XGI ->
-                            let newExp = x.FlattenArithmaticOperator(prjParam, augs, Some var)
+                            let newExp = x.FlattenArithmeticOperator(prjParam, augs, Some var)
                             DuAugmentedPLCFunction {
                                 FunctionName = fn
                                 Arguments = newExp.FunctionArguments
@@ -412,7 +412,7 @@ module XgxExpressionConvertorModule =
                                     tmpVar :> IStorage
 
                         match fn with
-                        | IsArithmaticOrComparisionOperator _ ->
+                        | IsArithmeticOrComparisionOperator _ ->
                             let stg = createTmpStorage()
                             let stmt = DuAssign(None, newExp, stg)
                             let varExp = stg.ToExpression()

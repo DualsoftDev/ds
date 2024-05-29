@@ -1,4 +1,4 @@
-namespace T.Arithematic
+namespace T.Arithmetic
 open T
 
 open NUnit.Framework
@@ -232,7 +232,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Comparision, Arithmatic, AND test`` () =
+    member x.``Comparision, Arithmetic, AND test`` () =
         let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
@@ -246,7 +246,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
-    member x.``Arithmatic test1`` () =
+    member x.``Arithmetic test1`` () =
         let storages = Storages()
         let code = "bool b0 = !(2.1 == 6.1);";
 
@@ -255,7 +255,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Arithmatic test2`` () =
+    member x.``Arithmetic test2`` () =
         let storages = Storages()
         let code = "bool b0 = true && (2.1 == 6.1);";
 
@@ -264,7 +264,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Arithmatic test3`` () =
+    member x.``Arithmetic test3`` () =
         let storages = Storages()
         let code = "bool b0 = false && (2.1 == 6.1);";
 
@@ -273,7 +273,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Arithmatic test4`` () =
+    member x.``Arithmetic test4`` () =
         let storages = Storages()
         let code = "bool b0 = !(2.1 > 6.1);";
 
@@ -282,7 +282,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Arithmatic test5`` () =
+    member x.``Arithmetic test5`` () =
         let storages = Storages()
         let code = "bool b0 = false && !(2.1 <= 6.1);";
 
@@ -291,7 +291,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Arithmatic test6`` () =
+    member x.``Arithmetic test6`` () =
         let storages = Storages()
         let code = "bool b0 = false && !(2.1 == 6.1);";
 
@@ -301,7 +301,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
-    member x.``Arithmatic assign test`` () =
+    member x.``Arithmetic assign test`` () =
         let storages = Storages()
         let code =
             $"""
@@ -340,14 +340,14 @@ type XgiArithematicTest() =
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
     [<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
     [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
-    [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
-    [<Test>] member __.``Arithmatic test1`` () = base.``Arithmatic test1``()
-    [<Test>] member __.``Arithmatic test2`` () = base.``Arithmatic test2``()
-    [<Test>] member __.``Arithmatic test3`` () = base.``Arithmatic test3``()
-    [<Test>] member __.``Arithmatic test4`` () = base.``Arithmatic test4``()
-    [<Test>] member __.``Arithmatic test5`` () = base.``Arithmatic test5``()
-    [<Test>] member __.``Arithmatic test6`` () = base.``Arithmatic test6``()
-    [<Test>] member __.``Arithmatic assign test`` () = base.``Arithmatic assign test``()
+    [<Test>] member __.``Comparision, Arithmetic, AND test`` () = base.``Comparision, Arithmetic, AND test``()
+    [<Test>] member __.``Arithmetic test1`` () = base.``Arithmetic test1``()
+    [<Test>] member __.``Arithmetic test2`` () = base.``Arithmetic test2``()
+    [<Test>] member __.``Arithmetic test3`` () = base.``Arithmetic test3``()
+    [<Test>] member __.``Arithmetic test4`` () = base.``Arithmetic test4``()
+    [<Test>] member __.``Arithmetic test5`` () = base.``Arithmetic test5``()
+    [<Test>] member __.``Arithmetic test6`` () = base.``Arithmetic test6``()
+    [<Test>] member __.``Arithmetic assign test`` () = base.``Arithmetic assign test``()
 
 type XgkArithematicTest() =
     inherit XgxArithematicTest(XGK)
@@ -365,14 +365,14 @@ type XgkArithematicTest() =
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
     [<Test>] member __.``DIV 3 items test`` () = base.``DIV 3 items test``()
     [<Test>] member __.``ADD MUL 3 items test`` () = base.``ADD MUL 3 items test``()
-    [<Test>] member __.``Comparision, Arithmatic, AND test`` () = base.``Comparision, Arithmatic, AND test``()
-    [<Test>] member __.``Arithmatic test1`` () = base.``Arithmatic test1``()
-    [<Test>] member __.``Arithmatic test2`` () = base.``Arithmatic test2``()
-    [<Test>] member __.``Arithmatic test3`` () = base.``Arithmatic test3``()
-    [<Test>] member __.``Arithmatic test4`` () = base.``Arithmatic test4``()
-    [<Test>] member __.``Arithmatic test5`` () = base.``Arithmatic test5``()
-    [<Test>] member __.``Arithmatic test6`` () = base.``Arithmatic test6``()
-    [<Test>] member __.``Arithmatic assign test`` () = base.``Arithmatic assign test``()
+    [<Test>] member __.``Comparision, Arithmetic, AND test`` () = base.``Comparision, Arithmetic, AND test``()
+    [<Test>] member __.``Arithmetic test1`` () = base.``Arithmetic test1``()
+    [<Test>] member __.``Arithmetic test2`` () = base.``Arithmetic test2``()
+    [<Test>] member __.``Arithmetic test3`` () = base.``Arithmetic test3``()
+    [<Test>] member __.``Arithmetic test4`` () = base.``Arithmetic test4``()
+    [<Test>] member __.``Arithmetic test5`` () = base.``Arithmetic test5``()
+    [<Test>] member __.``Arithmetic test6`` () = base.``Arithmetic test6``()
+    [<Test>] member __.``Arithmetic assign test`` () = base.``Arithmetic assign test``()
 
 
 

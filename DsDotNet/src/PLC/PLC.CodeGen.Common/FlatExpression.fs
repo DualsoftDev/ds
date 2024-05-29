@@ -36,7 +36,8 @@ module FlatExpressionModule =
                 | "!=" -> "=="
                 | _ -> failwithlog "ERROR"
                 |> OpCompare
-            | OpArithmatic _ -> failwithlog "ERROR: Negation not supported for Arithmatic operator."
+            | OpArithmatic _ -> failwith "ERROR: Negation not supported for Arithmatic operator."
+            | _ -> failwith "ERROR"
 
     [<AbstractClass>]
     type BoolLiteralValue() =
@@ -77,6 +78,7 @@ module FlatExpressionModule =
             match x with
             | FlatTerminal(terminal, _pulse, _neg) -> terminal.DataType
             | FlatNary(_op, arg0::_) -> arg0.DataType
+            | _ -> failwithlog "ERROR"
 
         member x.ToText() =
             match x with
@@ -118,7 +120,7 @@ module FlatExpressionModule =
                 | DuTerminal(DuVariable v) -> FlatTerminal(v, positivePulse, false)
                 | DuTerminal(DuLiteral b) -> FlatTerminal(b, positivePulse, false)
                 | DuFunction ({ Name = "!"
-                                Arguments = (:? Expression<bool> as arg0)::[]} as f) ->
+                                Arguments = (:? Expression<bool> as arg0)::[]} as _f) ->
                     match arg0 with
                     | DuTerminal(DuVariable v) -> FlatTerminal(v, positivePulse, true)
                     | DuTerminal(DuLiteral b) -> FlatTerminal(b, positivePulse, true)
@@ -164,29 +166,6 @@ module FlatExpressionModule =
         | :? IExpression<double> as exp -> flattenExpressionT exp
         | :? IExpression<string> as exp -> flattenExpressionT exp
         | :? IExpression<char> as exp -> flattenExpressionT exp
-
-        //| :? Expression<bool> as exp -> flattenExpressionT exp
-
-        | _ when expression.FunctionName.IsSome ->
-            match expression.FunctionName with
-            Some("!") ->
-                assert(expression.FunctionArguments.ExactlyOne().Terminal.IsSome)
-                let arg0 = expression.FunctionArguments.ExactlyOne() :?> Expression<bool> 
-                match arg0 with
-                | DuTerminal(DuVariable v) ->
-                    //let x = v :> IExpressionizableTerminal
-                    FlatTerminal(v, None, true)
-                | _ -> failwithlog "ERROR"
-
-            | Some( "&&" | "||" as fn) ->
-                let op =
-                    match fn with
-                    | "&&" -> Op.And
-                    | "||" -> Op.Or
-                    | _ -> failwithlog "ERROR"
-
-                let flatArgs = expression.FunctionArguments |> map flattenExpression |> List.cast<FlatExpression>
-                FlatNary(op, flatArgs)
 
         | _ -> failwithlog "NOT yet"
 

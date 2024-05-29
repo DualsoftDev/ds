@@ -427,7 +427,7 @@ module XgxExpressionConvertorModule =
              , augs: Augments
              , outputStore: IStorage option
           ) : IExpression =
-            let newLocalStorages, augmentedStatementsStorage, expStore =
+            let newLocalStorages, augmentedStatementsStorage, _expStore =
                 augs.Storages, augs.Statements, augs.ExpressionStore
 
             match exp.FunctionName with
@@ -607,8 +607,6 @@ module XgxExpressionConvertorModule =
         ///     최종 exp: "tmp1 > 4"
         ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
         member x.AugmentXgk (prjParam: XgxProjectParams, expStore:IStorage option, augs:Augments) : IExpression =
-            let xexp = x
-            let isXgk = prjParam.TargetType = XGK
             let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
                 match exp.FunctionName, exp.FunctionArguments with
                 | Some fn, l::r::[] ->
@@ -726,8 +724,6 @@ module XgxExpressionConvertorModule =
                         OriginalExpression = condition
                         Output = target } |> augs.Statements.Add
 
-            | _ -> failwithlog "ERROR"
-
 
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
         /// visit: [상위로부터 부모까지의 expression 경로] -> 자신 expression -> 반환 expression : 아래의 FunctionToAssignStatement 샘플 참고
@@ -744,7 +740,7 @@ module XgxExpressionConvertorModule =
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
             | DuVarDecl(exp, var) ->
                 match exp.Terminal with
-                | Some t -> DuVarDecl(visitTop exp, var)
+                | Some _ -> DuVarDecl(visitTop exp, var)
                 | None -> DuAssign(None, visitTop exp, var)
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
                 DuTimer { tmr with

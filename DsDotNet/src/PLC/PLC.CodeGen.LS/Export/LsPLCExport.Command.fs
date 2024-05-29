@@ -26,12 +26,12 @@ module internal rec Command =
             | PredicateCmd pc -> tet (pc)
             | FunctionCmd fc -> tet (fc)
             | FunctionBlockCmd fbc -> tet (fbc)
-            | ActionCmd _ac -> failwithlog "ERROR: check"
+            | _ -> failwith "ERROR"
 
         member x.InstanceName =
             match x with
             | FunctionBlockCmd(fbc) -> fbc.GetInstanceText()
-            | _ -> failwithlog "do not make instanceTag"
+            | _ -> failwith "do not make instanceTag"
 
         member x.VarType =
             match x with
@@ -62,6 +62,7 @@ module internal rec Command =
                 | COMPulseCoil _ -> ElementType.PulseCoilMode
                 | COMNPulseCoil _ -> ElementType.NPulseCoilMode
             | (PredicateCmd _ | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _) -> ElementType.VertFBMode
+            | _ -> failwith "ERROR"
 
     //   /// Coil의 부정 Command를 반환한다.
     //member x.``ReverseCmd 사용안함`` () =
@@ -100,7 +101,7 @@ module internal rec Command =
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
     // <timer> for XGI
-    let private bxiXgiFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement)  target: BlockXmlInfo =
+    let private bxiXgiFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement) : BlockXmlInfo =
         let ts = timerStatement
         let typ = ts.Timer.Type     // TON, TOF, TMR
         let time: int = int ts.Timer.PRE.Value
@@ -120,7 +121,7 @@ module internal rec Command =
 
         blockXml
 
-    let private bxiXgiFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) target: BlockXmlInfo =
+    let private bxiXgiFunctionBlockCounter (prjParam: XgxProjectParams) (x, y) (counterStatement: CounterStatement) : BlockXmlInfo =
         assert(prjParam.TargetType = XGI)
         //let paramDic = Dictionary<string, FuctionParameterShape>()
         let cs = counterStatement
@@ -394,8 +395,8 @@ module internal rec Command =
             | ActionCmd(ac) -> bxiXgiAction prjParam (x, y) ac
             | FunctionBlockCmd(fbc) ->
                 match fbc with
-                | TimerMode(timerStatement) -> bxiXgiFunctionBlockTimer prjParam (x, y) timerStatement XGI
-                | CounterMode(counterStatement) -> bxiXgiFunctionBlockCounter prjParam (x, y) counterStatement XGI
+                | TimerMode(timerStatement) -> bxiXgiFunctionBlockTimer prjParam (x, y) timerStatement
+                | CounterMode(counterStatement) -> bxiXgiFunctionBlockCounter prjParam (x, y) counterStatement
             | _ -> failwithlog "Unknown CommandType"
 
         | XGK ->
@@ -702,7 +703,7 @@ module internal rec Command =
                 TotalSpanX = 3; TotalSpanY = 1
             }
 
-        | FlatNary((OpCompare fn | OpArithmatic fn), args) when isXgi ->
+        | FlatNary((OpCompare _fn | OpArithmatic _fn), _args) when isXgi ->
             failwithlog "ERROR : Not yet!"  // todo
 
         // terminal case
@@ -844,5 +845,3 @@ module internal rec Command =
                     rxiRungImpl (x, y) (Some exp) cmdExp
             | _, _, Some _ ->
                     rxiRungImpl (x, y) expr cmdExp
-            | _ ->
-                failwithlog "ERROR"

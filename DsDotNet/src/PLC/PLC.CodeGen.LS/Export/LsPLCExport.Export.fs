@@ -124,9 +124,9 @@ module XgiExportModule =
             if destination.DataType = typeof<bool> then
                 match tryParseXGKTag destination.Address with
                 | Some ( {
-                    Tag = tag
+                    Tag = _tag
                     Device = device
-                    DataType = datatType
+                    DataType = _datatType
                     BitOffset = totalBitOffset
                     }) ->
                         let dh = sprintf "%A%04d%s" device (totalBitOffset / 16) (if totalBitOffset % 16 >= 8 then "8" else "0")  // destination head : destination 의 word
@@ -214,7 +214,7 @@ module XgiExportModule =
                         //let command =
                         //    match expr.Terminal, expr.FunctionName with
                         //    | Some _t, None -> ActionCmd(Move(cond, expr, target))
-                        //    | None, Some fn -> FunctionCmd(Arithmatic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
+                        //    | None, Some fn -> FunctionCmd(Arithmetic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
                         //    | _ -> failwithlog "ERROR"
                         let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
@@ -244,7 +244,7 @@ module XgiExportModule =
 
                 | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _op
                                            Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
-                                           OriginalExpression = originalExpr
+                                           OriginalExpression = _originalExpr
                                            Output = destination }) when isXgk && source.DataType = typeof<bool> ->
                     
                     moveCmdRungXgk condition source destination
@@ -285,7 +285,7 @@ module XgiExportModule =
                                            Arguments = args
                                            Output = output }) ->
                     let fn = operatorToXgiFunctionName op
-                    let command = FunctionCmd(Arithmatic(fn, (output :?> INamedExpressionizableTerminal), args))
+                    let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
 
                     rgi <-

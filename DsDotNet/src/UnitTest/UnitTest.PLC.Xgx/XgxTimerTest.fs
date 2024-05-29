@@ -1,4 +1,5 @@
-namespace T
+namespace T.CounterTimer
+open T
 
 
 open NUnit.Framework

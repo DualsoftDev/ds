@@ -124,10 +124,10 @@ module OperatorActivePatterns =
     /// ">"|">="|"<"|"<="|"=="|"!="|"<>"
     let (|IsComparisonOperator|_|) (op:string) = if K.comparisonOperators |> Array.contains op then Some op else None
     /// "+"|"-"|"*"|"/"
-    let (|IsArithmaticOperator|_|) (op:string) = if K.arithmaticOperators |> Array.contains op then Some op else None
+    let (|IsArithmeticOperator|_|) (op:string) = if K.arithmaticOperators |> Array.contains op then Some op else None
     /// ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
-    let (|IsArithmaticOrComparisionOperator|_|) (op:string) = if K.arithmaticOrComparisionOperators |> Array.contains op then Some op else None
+    let (|IsArithmeticOrComparisionOperator|_|) (op:string) = if K.arithmaticOrComparisionOperators |> Array.contains op then Some op else None
 
     let isComparisonOperator op = (|IsComparisonOperator|_|) op |> Option.isSome
-    let isArithmaticOperator op = (|IsArithmaticOperator|_|) op |> Option.isSome
-    let isArithmaticOrComparisionOperator op = (|IsArithmaticOrComparisionOperator|_|) op |> Option.isSome
+    let isArithmeticOperator op = (|IsArithmeticOperator|_|) op |> Option.isSome
+    let isArithmeticOrComparisionOperator op = (|IsArithmeticOrComparisionOperator|_|) op |> Option.isSome

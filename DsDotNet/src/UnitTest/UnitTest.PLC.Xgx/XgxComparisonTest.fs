@@ -1,4 +1,6 @@
-namespace T
+namespace T.Comparison
+open T
+
 open NUnit.Framework
 
 open Engine.Parser.FS

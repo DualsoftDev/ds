@@ -1,4 +1,6 @@
-namespace T
+namespace T.POU
+open T
+
 open Dual.UnitTest.Common.FS
 
 open NUnit.Framework

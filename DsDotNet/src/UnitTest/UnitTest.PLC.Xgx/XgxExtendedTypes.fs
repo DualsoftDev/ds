@@ -1,4 +1,5 @@
-namespace T
+namespace T.Types
+open T
 
 open NUnit.Framework
 open Dual.Common.Core.FS

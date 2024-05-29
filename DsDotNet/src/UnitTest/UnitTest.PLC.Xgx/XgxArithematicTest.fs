@@ -1,4 +1,6 @@
-namespace T
+namespace T.Arithematic
+open T
+
 open NUnit.Framework
 
 open Engine.Parser.FS

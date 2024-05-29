@@ -1,12 +1,11 @@
-namespace T
+namespace T.Types
+open T
+
 open Dual.UnitTest.Common.FS
-
 open NUnit.Framework
-
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LS
 
 
 type XgxRisingFallingTest(xgx:PlatformTarget) =

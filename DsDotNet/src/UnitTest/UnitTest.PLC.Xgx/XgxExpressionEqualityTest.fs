@@ -1,4 +1,6 @@
-namespace T
+namespace T.Comparison
+open T
+
 open Dual.UnitTest.Common.FS
 
 

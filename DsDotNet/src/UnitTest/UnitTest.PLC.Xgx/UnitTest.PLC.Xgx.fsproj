@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
@@ -36,6 +36,7 @@
         <Compile Include="XgxTimerTest.fs" />
         <Compile Include="XgxCounterTest.fs" />
         <Compile Include="Comparison/XgxExpressionEqualityTest.fs" />
+        <Compile Include="Comparison\XgxNegationTest.fs" />
         <Compile Include="POU/XgxPOU.Test.fs" />
         <Compile Include="POU/XgxExistingXmlProjectAnalTest.fs" />
         <Compile Include="Types/XgxExtendedTypes.fs" />

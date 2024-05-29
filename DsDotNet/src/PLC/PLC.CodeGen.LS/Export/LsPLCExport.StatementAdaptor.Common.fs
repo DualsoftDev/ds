@@ -160,19 +160,19 @@ module rec TypeConvertorModule =
         let typ = initValue.GetType()
 
         match typ.Name with
-        | BOOL -> XgxVar<bool>(createParam ())
-        | CHAR -> XgxVar<char>(createParam ())
+        | BOOL    -> XgxVar<bool>  (createParam ())
+        | CHAR    -> XgxVar<char>  (createParam ())
         | FLOAT32 -> XgxVar<single>(createParam ())
         | FLOAT64 -> XgxVar<double>(createParam ())
-        | INT16 -> XgxVar<int16>(createParam ())
-        | INT32 -> XgxVar<int32>(createParam ())
-        | INT64 -> XgxVar<int64>(createParam ())
-        | INT8 -> XgxVar<int8>(createParam ())
-        | STRING -> XgxVar<string>(createParam ())
-        | UINT16 -> XgxVar<uint16>(createParam ())
-        | UINT32 -> XgxVar<uint32>(createParam ())
-        | UINT64 -> XgxVar<uint64>(createParam ())
-        | UINT8 -> XgxVar<uint8>(createParam ())
+        | INT16   -> XgxVar<int16> (createParam ())
+        | INT32   -> XgxVar<int32> (createParam ())
+        | INT64   -> XgxVar<int64> (createParam ())
+        | INT8    -> XgxVar<int8>  (createParam ())
+        | STRING  -> XgxVar<string>(createParam ())
+        | UINT16  -> XgxVar<uint16>(createParam ())
+        | UINT32  -> XgxVar<uint32>(createParam ())
+        | UINT64  -> XgxVar<uint64>(createParam ())
+        | UINT8   -> XgxVar<uint8> (createParam ())
         | "DuFunction" ->
             let defaultBool = 
                 { defaultStorageCreationParams false (VariableTag.PlcUserVariable|>int) with
@@ -326,242 +326,243 @@ module XgxExpressionConvertorModule =
             | "<>" -> "NE"
             | _ -> failwithlog "ERROR"
 
-    /// expression 내부의 비교 및 사칙 연산을 xgi/xgk function 으로 대체
-    ///
-    /// - 인자로 받은 {exp, expandFunctionStatements, newLocalStorages} 를 이용해서,
-    ///
-    ///   * 추가되는 statement 는 expandFunctionStatements 에 추가하고,
-    ///
-    ///   * 추가되는 local variable 은 newLocalStorages 에 추가한다.
-    ///
-    ///   * 새로 생성되는 expression 을 반환한다.
-    let internal replaceInnerArithmaticOrComparisionToXgiFunctionStatements
-        (prjParam: XgxProjectParams) (augs: Augments) (exp: IExpression)
-      : IExpression =
-        let newLocalStorages, expandFunctionStatements, expStore =
-            augs.Storages, augs.Statements, augs.ExpressionStore
-
-        let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
-            match functionExpression.FunctionName with
-            | Some(IsArithmaticOrComparisionOperator op) -> //when level <> 0 ->
-                let args = functionExpression.FunctionArguments
-                let var:IStorage =
-                    expStore |> Option.defaultWith (fun () -> 
-                        let initValue = functionExpression.BoxedEvaluatedValue
-                        let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
-                        prjParam.createTypedXgxAutoVariable("out", initValue, comment))
-
-                expandFunctionStatements.Add
-                <| DuAugmentedPLCFunction
-                    {   FunctionName = op
-                        Arguments = args
-                        OriginalExpression = functionExpression
-                        Output = var }
-
-                newLocalStorages.Add var
-                var.ToExpression()
-            | _ ->
-                functionExpression
-
-        let transformers = {TerminalHandler = snd; FunctionHandler = functionTransformer}
-        let newExpression = exp.Transform(transformers, expStore)
-        newExpression
 
 
-    let rec internal binaryToNary
-        (prjParam: XgxProjectParams)
-        (augs: Augments)
-        (operatorsToChange: string list)
-        (currentOp: string)
-        (exp: IExpression)
-      : IExpression list =
-        let storage, augmentedStatementsStorage = augs.Storages, augs.Statements
-        let withAugmentedPLCFunction (exp: IExpression) =
-            let op = exp.FunctionName.Value
+    type IExpression with
+        /// expression 내부의 비교 및 사칙 연산을 xgi/xgk function 으로 대체
+        ///
+        /// - 인자로 받은 {exp, expandFunctionStatements, newLocalStorages} 를 이용해서,
+        ///
+        ///   * 추가되는 statement 는 expandFunctionStatements 에 추가하고,
+        ///
+        ///   * 추가되는 local variable 은 newLocalStorages 에 추가한다.
+        ///
+        ///   * 새로 생성되는 expression 을 반환한다.
+        member internal exp.ReplaceInnerArithmaticOrComparisionToFunctionStatements
+            (prjParam: XgxProjectParams, augs: Augments) 
+          : IExpression =
+            let newLocalStorages, expandFunctionStatements, expStore =
+                augs.Storages, augs.Statements, augs.ExpressionStore
 
-            let out =
-                let tmpNameHint = operatorToMnemonic op
-                prjParam.createTypedXgxAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, $"{op} output")
+            let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
+                match functionExpression.FunctionName with
+                | Some(IsArithmaticOrComparisionOperator op) -> //when level <> 0 ->
+                    let args = functionExpression.FunctionArguments
+                    let var:IStorage =
+                        expStore |> Option.defaultWith (fun () -> 
+                            let initValue = functionExpression.BoxedEvaluatedValue
+                            let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
+                            prjParam.createTypedXgxAutoVariable("out", initValue, comment))
 
-            storage.Add out
+                    expandFunctionStatements.Add
+                    <| DuAugmentedPLCFunction
+                        {   FunctionName = op
+                            Arguments = args
+                            OriginalExpression = functionExpression
+                            Output = var }
 
-            let args =
-                exp.FunctionArguments
-                |> List.bind (fun arg -> binaryToNary prjParam augs operatorsToChange op arg)
+                    newLocalStorages.Add var
+                    var.ToExpression()
+                | _ ->
+                    functionExpression
 
-            DuAugmentedPLCFunction
-                { FunctionName = op
-                  Arguments = args
-                  OriginalExpression = exp
-                  Output = out }
-            |> augmentedStatementsStorage.Add
+            let transformers = {TerminalHandler = snd; FunctionHandler = functionTransformer}
+            let newExpression = exp.Transform(transformers, expStore)
+            newExpression
 
-            out.ToExpression()
 
-        match exp.FunctionName with
-        | Some op when operatorsToChange.Contains(op) -> // ("+"|"-"|"*"|"/"   (*|"&&"|"||"*) as op) ->
-            if op = currentOp then
+        member internal exp.BinaryToNary
+          ( prjParam: XgxProjectParams
+            , augs: Augments
+            , operatorsToChange: string list
+            , currentOp: string
+          ) : IExpression list =
+            let storage, augmentedStatementsStorage = augs.Storages, augs.Statements
+            let withAugmentedPLCFunction (exp: IExpression) =
+                let op = exp.FunctionName.Value
+
+                let out =
+                    let tmpNameHint = operatorToMnemonic op
+                    prjParam.createTypedXgxAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, $"{op} output")
+
+                storage.Add out
+
                 let args =
-                    [ for arg in exp.FunctionArguments do
-                          match arg.Terminal, arg.FunctionName with
-                          | Some _, _ -> yield arg
-                          | None, Some("-" | "/") -> yield withAugmentedPLCFunction arg
-                          | None, Some _fn -> yield! binaryToNary prjParam augs operatorsToChange op arg
-                          | _ -> failwithlog "ERROR" ]
-
-                args
-            else
-                [ withAugmentedPLCFunction exp ]
-        | _ -> [ exp ]
-
-    (* see ``ADD 3 items test`` *)
-    /// 사칙 연산 처리
-    /// - a + b + c => + [a; b; c] 로 변환 (flat 처리)
-    ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성 (XGI function block 의 다릿발 갯수 제한 때문)
-    /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
-    let internal mergeArithmaticOperator
-        (prjParam: XgxProjectParams)
-        (augs: Augments)
-        (outputStore: IStorage option)
-        (exp: IExpression)
-      : IExpression =
-        let newLocalStorages, augmentedStatementsStorage, expStore =
-            augs.Storages, augs.Statements, augs.ExpressionStore
-
-        match exp.FunctionName with
-        | Some(IsArithmaticOperator op) ->
-            let newArgs =
-                binaryToNary prjParam augs [ "+"; "-"; "*"; "/" ] op exp
-
-            match op with
-            | "+"
-            | "*" when newArgs.Length >= 8 ->
-                let rec chunkBy8 (prevSum: IExpression list) (argsRemaining: IExpression list) : IExpression =
-                    let allArgs = prevSum @ argsRemaining
-                    let numSkip = min 8 allArgs.Length
-                    let args = allArgs.Take(numSkip).ToFSharpList()
-                    let argsRemaining = allArgs |> List.skip numSkip
-
-                    let out =
-                        if argsRemaining.IsEmpty then
-                            outputStore.Value
-                        else
-                            let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
-                            prjParam.createTypedXgxAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
-
-                    let outexp = out.ToExpression()
-
-                    DuAugmentedPLCFunction
-                        { FunctionName = op
-                          Arguments = args
-                          OriginalExpression = exp
-                          Output = out }
-                    |> augmentedStatementsStorage.Add
-
-                    out |> newLocalStorages.Add
-
-                    if allArgs.Length <= 8 then
-                        outexp
-                    else
-                        chunkBy8 [ outexp ] argsRemaining
-
-                chunkBy8 [] newArgs
-            | _ ->
-                exp.WithNewFunctionArguments newArgs
-
-        | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "&&"|"||" as op) ->
-            let newArgs = binaryToNary prjParam augs [ op ] op exp
-            exp.WithNewFunctionArguments newArgs
-
-        | _ ->
-            exp
-
-    let rec private zipAndExpression (prjParam: XgxProjectParams) (augs: Augments) (allowCallback:bool) (exp: IExpression) : IExpression =
-        let newLocalStorages, expandFunctionStatements = augs.Storages, augs.Statements
-
-        let flatExpression = exp.Flatten() :?> FlatExpression
-        let w, _h = flatExpression |> precalculateSpan
-
-        if w > maxNumHorizontalContact then
-            let exp = if allowCallback then zipVisitor prjParam augs exp else exp
-
-            match exp.FunctionName with
-            | Some op when op.IsOneOf("||") ->
-                zipVisitor prjParam augs exp
-            | Some op when op = "&&" ->
-                let mutable partSpanX = 0
-                let maxX = maxNumHorizontalContact
-
-                let folder (z: IExpression list list * IExpression list) (e: IExpression) =
-                    let built, building = z
-                    let _flatExp = e.Flatten() :?> FlatExpression
-                    let spanX = e.Flatten() :?> FlatExpression |> precalculateSpan |> fst
-
-                    let max, remaining =
-                        if partSpanX + spanX > maxX then
-                            partSpanX <- spanX
-                            built +++ building, [ e ]
-                        else
-                            partSpanX <- partSpanX + spanX
-                            built, building @ [ e ]
-                    (max |> filter List.any), remaining
-
-                let maxs, remaining = List.fold folder ([], []) exp.FunctionArguments
-
-                let subSums =
-                    [ for max in maxs do
-                          let out = prjParam.createXgxAutoVariableT("split", false, $"{op} split output")
-                          newLocalStorages.Add out
-
-                          DuAugmentedPLCFunction
-                              { FunctionName = op
-                                Arguments = max
-                                OriginalExpression = exp
-                                Output = out }
-                          |> expandFunctionStatements.Add
-
-                          var2expr out :> IExpression ]
-
-                let grandTotal = prjParam.createXgxAutoVariableT("split", false, $"{op} split output")
-                newLocalStorages.Add grandTotal
+                    exp.FunctionArguments
+                    |> List.bind (fun arg -> arg.BinaryToNary(prjParam, augs, operatorsToChange, op) )
 
                 DuAugmentedPLCFunction
                     { FunctionName = op
-                      Arguments = subSums @ remaining
+                      Arguments = args
                       OriginalExpression = exp
-                      Output = grandTotal }
-                |> expandFunctionStatements.Add
+                      Output = out }
+                |> augmentedStatementsStorage.Add
 
-                var2expr grandTotal :> IExpression
-            | _ -> exp
-        else
-            exp
+                out.ToExpression()
 
-    and private zipVisitor (prjParam: XgxProjectParams) (augs: Augments) (exp: IExpression) : IExpression =
-        let exp = mergeArithmaticOperator prjParam augs None exp
-        let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
+            match exp.FunctionName with
+            | Some op when operatorsToChange.Contains(op) -> // ("+"|"-"|"*"|"/"   (*|"&&"|"||"*) as op) ->
+                if op = currentOp then
+                    let args =
+                        [ for arg in exp.FunctionArguments do
+                              match arg.Terminal, arg.FunctionName with
+                              | Some _, _ -> yield arg
+                              | None, Some("-" | "/") -> yield withAugmentedPLCFunction arg
+                              | None, Some _fn -> yield! arg.BinaryToNary(prjParam, augs, operatorsToChange, op)
+                              | _ -> failwithlog "ERROR" ]
 
-        if w > maxNumHorizontalContact && exp.FunctionName.IsSome && exp.FunctionName.Value.IsOneOf("&&", "||") then
-            if exp.FunctionArguments.Any(fun e -> e.Flatten() :?> FlatExpression |> precalculateSpan |> fst >= 20 ) then
-                let args = [
-                    for arg in exp.FunctionArguments do
-                        zipAndExpression prjParam augs true arg
-                ]
+                    args
+                else
+                    [ withAugmentedPLCFunction exp ]
+            | _ -> [ exp ]
 
-                exp.WithNewFunctionArguments args
+        (* see ``ADD 3 items test`` *)
+        /// 사칙 연산 처리
+        /// - a + b + c => + [a; b; c] 로 변환 (flat 처리)
+        ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성 (XGI function block 의 다릿발 갯수 제한 때문)
+        /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
+        member internal exp.FlattenArithmaticOperator
+          (  prjParam: XgxProjectParams
+             , augs: Augments
+             , outputStore: IStorage option
+          ) : IExpression =
+            let newLocalStorages, augmentedStatementsStorage, expStore =
+                augs.Storages, augs.Statements, augs.ExpressionStore
 
+            match exp.FunctionName with
+            | Some(IsArithmaticOperator op) ->
+                let newArgs =
+                    exp.BinaryToNary(prjParam, augs, [ "+"; "-"; "*"; "/" ], op)
+
+                match op with
+                | "+"
+                | "*" when newArgs.Length >= 8 ->
+                    let rec chunkBy8 (prevSum: IExpression list) (argsRemaining: IExpression list) : IExpression =
+                        let allArgs = prevSum @ argsRemaining
+                        let numSkip = min 8 allArgs.Length
+                        let args = allArgs.Take(numSkip).ToFSharpList()
+                        let argsRemaining = allArgs |> List.skip numSkip
+
+                        let out =
+                            if argsRemaining.IsEmpty then
+                                outputStore.Value
+                            else
+                                let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
+                                prjParam.createTypedXgxAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
+
+                        let outexp = out.ToExpression()
+
+                        DuAugmentedPLCFunction
+                            { FunctionName = op
+                              Arguments = args
+                              OriginalExpression = exp
+                              Output = out }
+                        |> augmentedStatementsStorage.Add
+
+                        out |> newLocalStorages.Add
+
+                        if allArgs.Length <= 8 then
+                            outexp
+                        else
+                            chunkBy8 [ outexp ] argsRemaining
+
+                    chunkBy8 [] newArgs
+                | _ ->
+                    exp.WithNewFunctionArguments newArgs
+
+            | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "&&"|"||" as op) ->
+                let newArgs = exp.BinaryToNary(prjParam, augs, [ op ], op)
+                exp.WithNewFunctionArguments newArgs
+
+            | _ ->
+                exp
+
+        member internal exp.ZipAndExpression (prjParam: XgxProjectParams, augs: Augments, allowCallback:bool) : IExpression =
+            let newLocalStorages, expandFunctionStatements = augs.Storages, augs.Statements
+
+            let flatExpression = exp.Flatten() :?> FlatExpression
+            let w, _h = flatExpression |> precalculateSpan
+
+            if w > maxNumHorizontalContact then
+                let exp = if allowCallback then exp.ZipVisitor(prjParam, augs) else exp
+
+                match exp.FunctionName with
+                | Some op when op.IsOneOf("||") ->
+                    exp.ZipVisitor(prjParam, augs)
+                | Some op when op = "&&" ->
+                    let mutable partSpanX = 0
+                    let maxX = maxNumHorizontalContact
+
+                    let folder (z: IExpression list list * IExpression list) (e: IExpression) =
+                        let built, building = z
+                        let _flatExp = e.Flatten() :?> FlatExpression
+                        let spanX = e.Flatten() :?> FlatExpression |> precalculateSpan |> fst
+
+                        let max, remaining =
+                            if partSpanX + spanX > maxX then
+                                partSpanX <- spanX
+                                built +++ building, [ e ]
+                            else
+                                partSpanX <- partSpanX + spanX
+                                built, building @ [ e ]
+                        (max |> filter List.any), remaining
+
+                    let maxs, remaining = List.fold folder ([], []) exp.FunctionArguments
+
+                    let subSums =
+                        [ for max in maxs do
+                              let out = prjParam.createXgxAutoVariableT("split", false, $"{op} split output")
+                              newLocalStorages.Add out
+
+                              DuAugmentedPLCFunction
+                                  { FunctionName = op
+                                    Arguments = max
+                                    OriginalExpression = exp
+                                    Output = out }
+                              |> expandFunctionStatements.Add
+
+                              var2expr out :> IExpression ]
+
+                    let grandTotal = prjParam.createXgxAutoVariableT("split", false, $"{op} split output")
+                    newLocalStorages.Add grandTotal
+
+                    DuAugmentedPLCFunction
+                        { FunctionName = op
+                          Arguments = subSums @ remaining
+                          OriginalExpression = exp
+                          Output = grandTotal }
+                    |> expandFunctionStatements.Add
+
+                    var2expr grandTotal :> IExpression
+                | _ -> exp
             else
-                let allowCallback = false
-                zipAndExpression prjParam augs allowCallback exp
-        else
-            exp
+                exp
 
-    let internal collectExpandedExpression (prjParam: XgxProjectParams) (augs: Augments) (exp: IExpression) : IExpression =
-        let newExp =
-            replaceInnerArithmaticOrComparisionToXgiFunctionStatements prjParam augs exp
+        member private exp.ZipVisitor (prjParam: XgxProjectParams, augs: Augments) : IExpression =
+            let exp = exp.FlattenArithmaticOperator(prjParam, augs, None)
+            let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
 
-        let newExp = zipVisitor  prjParam augs newExp
-        newExp
+            if w > maxNumHorizontalContact && exp.FunctionName.IsSome && exp.FunctionName.Value.IsOneOf("&&", "||") then
+                if exp.FunctionArguments.Any(fun e -> e.Flatten() :?> FlatExpression |> precalculateSpan |> fst >= 20 ) then
+                    let args = [
+                        for arg in exp.FunctionArguments do
+                            arg.ZipAndExpression(prjParam, augs, true)
+                    ]
+
+                    exp.WithNewFunctionArguments args
+
+                else
+                    let allowCallback = false
+                    exp.ZipAndExpression(prjParam, augs, allowCallback)
+            else
+                exp
+
+        member internal exp.CollectExpandedExpression (prjParam: XgxProjectParams, augs: Augments) : IExpression =
+            let newExp =
+                exp.ReplaceInnerArithmaticOrComparisionToFunctionStatements(prjParam, augs)
+
+            let newExp = newExp.ZipVisitor(prjParam, augs)
+            newExp
 
 
     type IExpression with
@@ -575,7 +576,7 @@ module XgxExpressionConvertorModule =
                     match prjParam.TargetType with
                     | XGK -> DuAssign(None, x, var)
                     | XGI ->
-                        let newExp = mergeArithmaticOperator prjParam augs (Some var) x
+                        let newExp = x.FlattenArithmaticOperator(prjParam, augs, Some var)
                         DuAugmentedPLCFunction {
                             FunctionName = fn
                             Arguments = newExp.FunctionArguments
@@ -598,7 +599,7 @@ module XgxExpressionConvertorModule =
                 // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some(IsArithmaticOrComparisionOperator op) ->
-                    let exp = mergeArithmaticOperator prjParam augs (Some target) exp
+                    let exp = exp.FlattenArithmaticOperator(prjParam, augs, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
                             DuAugmentedPLCFunction
@@ -608,13 +609,13 @@ module XgxExpressionConvertorModule =
                                     Output = target }
                         augs.Statements.Add augFunc
                 | _ ->
-                    let newExp = collectExpandedExpression prjParam augs exp
+                    let newExp = exp.CollectExpandedExpression(prjParam, augs)
                     DuAssign(condition, newExp, target) |> augs.Statements.Add 
 
             | DuVarDecl(exp, decl) ->
                 let _newExp =
                     augs.ExpressionStore <- Some decl
-                    collectExpandedExpression prjParam augs exp
+                    exp.CollectExpandedExpression(prjParam, augs)
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 augs.Storages.Remove decl |> ignore

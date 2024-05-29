@@ -316,11 +316,13 @@ type PPTDocExt =
     [<Extension>]
     static member GetCopyPathNName(doc: pptDoc) =
 
-        let callJobDic = doc.Nodes.Select(fun node-> node.CallName, node.JobType)|>dict
+        let callJobDic = doc.Nodes
+                            .Where(fun node-> node.IsCall && not(node.IsFunction))
+                            .Select(fun node-> node.CallName, node.JobOption)|>dict
         let getDevCount (devName) = 
             if callJobDic.ContainsKey(devName) 
             then 
-                callJobDic[devName].Value.DeviceCount 
+                callJobDic[devName].DeviceCount 
             else 
                 1
             

@@ -34,7 +34,7 @@ module ImportUtilForLib =
                 autoTaskDev.Value.InAddress <- ("")
                 autoTaskDev.Value.OutAddress<- ("")
                 tasks.Add(autoTaskDev.Value)|>ignore
-                Job(jobName, mySys, tasks |> Seq.toList)
+                Job(jobName, mySys, tasks |> Seq.toList, JobActionType.Normal)
             else 
                 let libRelPath =
                     PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
@@ -49,7 +49,7 @@ module ImportUtilForLib =
                     node.Shape.ErrorName(ErrID._49, node.PageNum)
 
                 let tasks = HashSet<TaskDev>()
-                match getJobActionType apiName with
+                match  node.JobOption with
                 | MultiAction (_, cnt) ->  
                     for i in [1..cnt] do
                         let devOrg = if i = 1 then devOrg
@@ -61,7 +61,7 @@ module ImportUtilForLib =
                         tasks.Add(getLoadedTasks mySys devOrg mutiName apiPureName devParams node jobName)|>ignore
                 | _->
                     tasks.Add(getLoadedTasks mySys devOrg loadedName apiPureName (getDevParams(loadedName)) node jobName)|>ignore
-                Job(jobName, mySys, tasks |> Seq.toList)
+                Job(jobName, mySys, tasks |> Seq.toList, node.JobOption)
 
         let jobForCall =
             let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)

@@ -277,9 +277,9 @@ module CoreModule =
 
     type InOutDataType = DataType*DataType
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, system:DsSystem, tasks:TaskDev seq) =
+    type Job (name:string, system:DsSystem, tasks:TaskDev seq, jobActionType:JobActionType) =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
-        member x.ActionType:JobActionType = getJobActionType name
+        member x.ActionType:JobActionType = jobActionType
         member x.System = system
         member x.DeviceDefs = tasks
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)

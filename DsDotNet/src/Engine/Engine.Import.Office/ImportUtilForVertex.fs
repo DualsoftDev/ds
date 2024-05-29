@@ -53,28 +53,28 @@ module ImportUtilVertex =
                     taskDev
                 | _ -> 
                     TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, loadSysName)
-            let job = Job(node.JobName, sys, [devTask])
+            let job = Job(node.JobName, sys, [devTask], JobActionType.Normal)
 
             sys.Jobs.Add job |> ignore
             Call.Create(job, parentWrapper)
 
     let getCallFromMultiLoadedSys (sys: DsSystem) (node: pptNode) (loadSysName: string) (apiName: string) parentWrapper =
 
-            let multiName = getMultiDeviceName loadSysName node.JobType.Value.DeviceCount
+            let multiName = getMultiDeviceName loadSysName node.JobOption.DeviceCount
             match sys.Jobs |> Seq.tryFind (fun job ->
                 job.DeviceDefs |> Seq.exists (fun d -> d.DeviceName = multiName && d.ApiName = apiName)) with
             | Some job -> Call.Create(job, parentWrapper)
             | None ->
                 let devTasks =
                     seq{
-                        for i in [1..node.JobType.Value.DeviceCount] do
+                        for i in [1..node.JobOption.DeviceCount] do
                             let multiName = getMultiDeviceName loadSysName i 
                             let device = sys.Devices |> Seq.find (fun d -> d.Name = multiName)
                             let api = device.ReferenceSystem.ApiItems |> Seq.find (fun a -> a.Name = apiName)
                             yield  TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, multiName)
                     }
 
-                let job = Job(node.JobName, sys, devTasks)
+                let job = Job(node.JobName, sys, devTasks, node.JobOption)
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
 
@@ -96,10 +96,6 @@ module ImportUtilVertex =
         addLibraryNCall (libAbsolutePath, loadedName, apiName, sys, parentWrapper, node, autoGenDevTask)
 
     let createCallVertex (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
-        let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
-        //let jobName = getJobName node apiName mySys
-        //let jobName = node.JobName
-        let loadedSys = mySys.LoadedSystems.Select(fun d -> d.Name)
         let call =
             if node.IsFunction then
                 if node.IsRootNode.Value then
@@ -107,8 +103,10 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                    
-                let multiName = getMultiDeviceName sysName (node.JobType.Value.DeviceCount)
+                let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+                let loadedSys = mySys.LoadedSystems.Select(fun d -> d.Name)
+      
+                let multiName = getMultiDeviceName sysName (node.JobOption.DeviceCount)
                 if loadedSys |> Seq.contains sysName 
                 then
                     getCallFromLoadedSys mySys node sysName apiName parentWrapper

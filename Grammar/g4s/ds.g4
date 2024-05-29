@@ -310,14 +310,14 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
-        jobName '=' '{' (callApiDef ';')*'}' (SEMICOLON)?;
+        jobName ('('jobTypeOption')')? '=' '{' (callApiDef ';')*'}' (SEMICOLON)?;
 
     jobName: identifier1;
+    jobTypeOption : identifier1;
 
     callApiDef: (interfaceCall devParamInOut | interfaceCall);
 
     interfaceCall: identifier12;
-    interfaceLink: identifier12;
 
 
 

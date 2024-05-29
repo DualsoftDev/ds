@@ -503,7 +503,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     dicTaskDevs.Add(task.QualifiedName, task)   
                     task
 
-            for job, apiDefCtxs in callListings do
+            for jobName, jobOption, apiDefCtxs in callListings do
                 let apiItems =
                     [ for apiDefCtx in apiDefCtxs do
                           let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
@@ -532,8 +532,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                                
                                       debugfn $"TX={inParam} RX={outParm}"
-                                      let taskDev = TaskDev(apiPoint, job, inParam, outParm, device)
-                                      return getTaskDev job taskDev inParam outParm
+                                      let taskDev = TaskDev(apiPoint, jobName, inParam, outParm, device)
+                                      return getTaskDev jobName taskDev inParam outParm
                                   }
 
                               match apiItem with
@@ -541,8 +541,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                               | _ -> 
                                     match tryFindLoadedSystem system device with
                                     |Some dev->
-                                            let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) job device api (inParam, outParm) 
-                                            yield getTaskDev job taskDev inParam outParm
+                                            let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) jobName device api (inParam, outParm) 
+                                            yield getTaskDev jobName taskDev inParam outParm
                                              
                                     |None -> failwithlog $"device({device}) api({api}) is not exist"
 
@@ -558,9 +558,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 assert (apiItems.Any())
-            
 
-                let job = Job(job, system, apiItems.Cast<TaskDev>() |> Seq.toList)
+
+                let jobType= if jobOption.IsSome 
+                             then getJobActionType $"{jobName}[{jobOption.Value}]"
+                             else JobActionType.Normal
+
+                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, jobType)
                 job |> system.Jobs.Add
 
 

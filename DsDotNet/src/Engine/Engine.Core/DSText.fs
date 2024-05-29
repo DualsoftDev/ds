@@ -29,6 +29,7 @@ module DsText =
     let [<Literal>] TextJobNoneTX = "XT"
     let [<Literal>] TextJobNoneTRX = "XX"
     let [<Literal>] TextJobPush = "P"
+    let [<Literal>] TextJobMulti = "N"
 
 [<AutoOpen>]
 module DsTextExport =

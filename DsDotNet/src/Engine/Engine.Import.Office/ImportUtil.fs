@@ -35,10 +35,6 @@ module ImportU =
                 //인터페이스는 인터페이스끼리 인과가능
                 if (src.NodeType.IsIF && src.NodeType = tgt.NodeType |> not) then
                     Office.ErrorConnect(edge.ConnectionShape, ErrID._37, src.Name, tgt.Name, edge.PageNum)
-                //인터페이스 Link는 인과정보 정의 불가
-                if (src.NodeType = IF_LINK || tgt.NodeType = IF_LINK) then
-                    Office.ErrorConnect(edge.ConnectionShape, ErrID._32, src.Name, tgt.Name, edge.PageNum)
-
                 if
                     (edge.Causal = InterlockStrong||edge.Causal = InterlockWeak) //인터락 AugmentedTransitiveClosure 타입 만들기 재료
                 then
@@ -196,7 +192,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.filter (fun node -> not(node.IsFunction))
             |> Seq.iter (fun node ->
-                match getJobActionType node.CallApiName with
+                match node.JobOption with
                 | MultiAction (_,cnt) -> 
                     for i in [1..cnt] do 
                         let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallName i))
@@ -271,8 +267,11 @@ module ImportU =
             let createAlias () =
                 pptNodes
                 |> Seq.filter (fun node -> node.IsAlias)
-                |> Seq.filter (fun node -> not(node.IsAliasFunction))
                 |> Seq.iter (fun node ->
+
+                    if node.IsFunction then
+                        node.Shape.ErrorName($"Alias Function은 지원하지 않습니다.", node.PageNum)
+
                     let segOrg = dicVertex.[node.Alias.Value.Key]
                     
                     let alias =
@@ -312,56 +311,6 @@ module ImportU =
                     dicVertex.Add(node.Key, alias))
 
 
-            let createAliasFunction() =
-                pptNodes
-                |> Seq.filter (fun node -> node.IsAliasFunction)
-                |> Seq.iter (fun node ->
-                    let segOrg = dicVertex.[node.Alias.Value.Key] :?> Call
-                    
-                    let call = 
-                        let parentWrapper = 
-                            if dicChildParent.ContainsKey(node)
-                            then
-                                let real = dicVertex.[dicChildParent.[node].Key] :?> Real
-                                DuParentReal(real)
-                            else
-                                let flow = dicFlow.[node.PageNum]
-                                DuParentFlow(flow)
-                          
-                      
-                        if node.IsCallDevParam && node.IsRootNode.Value = false
-                        then
-                            let newJobName = node.JobName
-                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs)
-
-                            segOrg.TargetJob.DeviceDefs.Iter(fun d->
-                                    d.AddOrUpdateInParam(newJobName, (node.DevParam.Value|>fst).Value)
-                                    d.AddOrUpdateOutParam(newJobName, (node.DevParam.Value|>snd).Value)
-                            )
-
-                            mySys.Jobs.Add newJob
-                            Call.Create(newJob, parentWrapper)
-
-
-                        elif node.IsCallDevParam && node.IsRootNode.Value = true
-                        then 
-                            let newJobName = node.JobName
-                            let newJob = Job(newJobName, mySys, segOrg.TargetJob.DeviceDefs)
-
-                            segOrg.TargetJob.DeviceDefs.Iter(fun d->
-                                    d.AddOrUpdateInParam(newJobName, (node.DevParam.Value|>fst).Value)
-                            )
-
-                            mySys.Jobs.Add newJob
-                            Call.Create(newJob, parentWrapper)
-
-                        else 
-                            failWithLog "err"
-
-                    dicVertex.Add(node.Key, call)
-                    )
-
-
             //Real 부터
             createReal ()
             //Call 처리
@@ -370,7 +319,7 @@ module ImportU =
             createAlias ()  
             
             //createFunction Node 처리 마감
-            createAliasFunction ()
+            //createAliasFunction ()
 
             mySys.ReferenceSystems
                  .Iter(genClearRealAddForSingleReal)
@@ -672,7 +621,7 @@ module ImportU =
                                 .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
                                 .GroupBy(fun n -> n.CallName)
             calls.Iter(fun call -> 
-                let callEachCounts = call.Select(fun f->f.JobType.Value.DeviceCount)
+                let callEachCounts = call.Select(fun f->f.JobOption.DeviceCount)
                 if callEachCounts.Distinct().Count() > 1
                 then
                     let errNode = call.Select(fun f->f).First() 

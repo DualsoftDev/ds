@@ -231,7 +231,6 @@ module PPTObjectModule =
                 shape.ErrorName(ex.Message, iPage)
 
         | IF_DEVICE
-        | IF_LINK
         | DUMMY
         | BUTTON
         | CONDITION
@@ -306,21 +305,20 @@ module PPTObjectModule =
                     let txs = (txrx.Split('~')[0])
                     let rxs = (txrx.Split('~')[1])
 
-                    ifTXs <-
-                        txs.Split(';').Where(fun f -> f = "" |> not)
-                        |> trimStartEndSeq
-                        |> Seq.filter (fun f -> f = "_" |> not)
-                        |> HashSet
+                    let getRealName (xs: string) =
+                        let ifs = xs.Split(';').Where(fun f -> f = "" |> not) |> trimStartEndSeq
+                        if ifs.Contains("_") || ifs.IsEmpty()
+                        then 
+                            failWithLog ErrID._43
+                        ifs |> HashSet
 
-                    ifRXs <-
-                        rxs.Split(';').Where(fun f -> f = "" |> not)
-                        |> trimStartEndSeq
-                        |> Seq.filter (fun f -> f = "_" |> not)
-                        |> HashSet
+                    ifTXs <- getRealName txs
+                    ifRXs <- getRealName rxs
                 else
-                      shape.ErrorName(ErrID._43, iPage)
-            | None -> shape.ErrorName(ErrID._53, iPage)
-
+                            failWithLog ErrID._43
+            | None -> 
+                failWithLog ErrID._53
+                
         let updateLinkIF (text: string) =
             ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
             let txrx = GetSquareBrackets(shape.InnerText, false)
@@ -348,11 +346,7 @@ module PPTObjectModule =
             match shape with
             | s when s.CheckRectangle() ->
                 if name.Contains(".") then REALExF else REAL
-            | s when s.CheckHomePlate() ->
-                match GetSquareBrackets(shape.InnerText, false) with
-                | Some text -> if text.Contains("~") then IF_DEVICE else IF_LINK
-                | None -> IF_LINK
-
+            | s when s.CheckHomePlate() -> IF_DEVICE
             | s when s.CheckFoldedCornerPlate() -> OPEN_EXSYS_CALL
             | s when s.CheckFoldedCornerRound() -> COPY_DEV
             | s when s.CheckEllipse() -> CALL
@@ -438,7 +432,6 @@ module PPTObjectModule =
                     | Some text -> updateSafety text
                     | None -> ()
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
-                | IF_LINK -> updateLinkIF shape.InnerText
                 | OPEN_EXSYS_CALL
                 | OPEN_EXSYS_LINK
                 | COPY_DEV ->
@@ -486,14 +479,7 @@ module PPTObjectModule =
         member x.NodeType = nodeType
         member x.DisableCall = disableCall
         
-        member x.JobType = 
-                if x.IsCall && not(x.IsFunction) 
-                then
-                    try
-                        getJobActionType x.CallApiName |>Some
-                    with ex -> x.Shape.ErrorName($"{ex.Message}", iPage)
-                else 
-                    None
+
 
         
         member x.PageTitle = pageTitle
@@ -508,7 +494,6 @@ module PPTObjectModule =
         member x.IsCallDevParam = nodeType = CALL  && devParam.IsSome 
         member x.IsRootNode = rootNode
         member x.IsFunction = x.IsCall && not(name.Contains("."))
-        member x.IsAliasFunction = x.Alias.IsSome && (x.IsFunction)
         member x.DevParam   = devParam
         member x.DevParamIn   = 
             if devParam.IsSome && (devParam.Value|>fst).IsSome
@@ -538,13 +523,7 @@ module PPTObjectModule =
                 else 
                     pureJob
 
-            match x.JobType with
-            | Some t -> 
-                if t = Normal  then jobName
-                else 
-                    $"{jobName}[{t.ToText()}]"
-            | None -> jobName   
-
+            jobName
 
         member x.UpdateCallDevParm(isRoot:bool) =
             rootNode <- Some isRoot
@@ -577,16 +556,35 @@ module PPTObjectModule =
 
             if x.IsCallDevParam && x.IsRootNode.Value = false
             then 
-                let jName = if x.IsAliasFunction then x.JobName 
-                            else call.TargetJob.Name
-                        
                 call.TargetJob.DeviceDefs.Iter(fun d->
-                        d.AddOrUpdateInParam(jName, (x.DevParam.Value|>fst).Value)
-                        d.AddOrUpdateOutParam(jName, (x.DevParam.Value|>snd).Value)
+                        d.AddOrUpdateInParam(x.JobName , (x.DevParam.Value|>fst).Value)
+                        d.AddOrUpdateOutParam(x.JobName , (x.DevParam.Value|>snd).Value)
                         )
 
             
-        member x.CallName = $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
+        member x.CallName = 
+            if (nodeType <> CALL) then
+                shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
+
+            $"{pageTitle}_{name.Split('.')[0] |> trimSpace}"
+
+        member x.JobOption =
+            if (nodeType <> CALL || x.IsFunction) then
+                shape.ErrorName($"JobOption not support {nodeType}({name}) type", iPage)
+
+            let name = name.Split('.')[1] |> trimSpace
+            match GetSquareBrackets(name, false) with
+            | Some apiType ->
+                match apiType with
+                | TextJobNoneRX -> JobActionType.NoneRx
+                | TextJobNoneTX -> JobActionType.NoneTx
+                | TextJobNoneTRX ->  JobActionType.NoneTRx
+                | TextJobPush -> JobActionType.Push
+                | _ -> if isStringDigit apiType 
+                       then JobActionType.MultiAction(name.Split('[')[0], int apiType)
+                       else JobActionType.Normal
+
+            |None -> JobActionType.Normal
 
         member x.CallApiName =
             if (nodeType = CALL && x.IsFunction) then

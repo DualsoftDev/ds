@@ -36,11 +36,11 @@ module ModelBuildupTests1 =
             let callAp =
                 let jName = "Ap"
                 let apiItem = TaskDev(apiP, jName, "%I1"|>defaultDevParam, "%Q1"|>defaultDevParam,  dev.Name)
-                Job(jName, system, [apiItem])
+                Job(jName, system, [apiItem], Normal)
             let callAm =
                 let jName = "Am"
                 let apiItem = TaskDev(apiM,jName, "%I2"|>defaultDevParam, "%Q2"|>defaultDevParam, dev.Name)
-                Job(jName, system, [apiItem])
+                Job(jName, system, [apiItem], Normal)
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 

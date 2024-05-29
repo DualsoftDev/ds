@@ -17,7 +17,6 @@ module InterfaceClass =
         //| CALLOPFunc  //Operator 함수전용
         //| CALLCMDFunc //Command  함수전용
         | IF_DEVICE //인터페이스
-        | IF_LINK //인터페이스
         | COPY_DEV //시스템복사 deivce
         | OPEN_EXSYS_LINK //시스템참조 Passive sytem(초기 로딩과 같은 경로 ExSystem 이면 Acive)
         | OPEN_EXSYS_CALL //시스템참조 Active sytem (초기 로딩과 다른 경로 ExSystem 이면 Passive)
@@ -31,7 +30,7 @@ module InterfaceClass =
         member x.IsCall = x = CALL 
         member x.IsLoadSys = x = COPY_DEV || x = OPEN_EXSYS_LINK || x = OPEN_EXSYS_CALL
         member x.IsRealorCall = x.IsReal || x.IsCall
-        member x.IsIF = x = IF_DEVICE || x = IF_LINK
+        member x.IsIF = x = IF_DEVICE
 
         member x.GetLoadingType() =
             match x with

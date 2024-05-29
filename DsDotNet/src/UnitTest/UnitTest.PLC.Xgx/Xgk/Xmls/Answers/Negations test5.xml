@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    Normal, Rising, Falling contact test
+    Negations test5
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -65,32 +65,14 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !($ix) &amp;&amp; $ix &amp;&amp; !($ix) &amp;&amp; $ix &amp;&amp; !($ix) &amp;&amp; rising($ix) &amp;&amp; falling($ix)
+                                        [0] $qx = !($ix)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="7" Coordinate="2049">
                                         P00000
                                     </Element>
-                                    <Element ElementType="6" Coordinate="2052">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="2055">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="2058">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="2061">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="8" Coordinate="2064">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="9" Coordinate="2067">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="2070" Param="69"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         P00001
                                     </Element>

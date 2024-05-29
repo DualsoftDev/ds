@@ -31,6 +31,7 @@ module XgkTypeConvertorModule =
         ///     최종 exp: "tmp1 > 4"
         ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
         member x.AugmentXgk (prjParam: XgxProjectParams, expStore:IStorage option, augs:Augments) : IExpression =
+            let xexp = x
             let isXgk = prjParam.TargetType = XGK
             let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
                 match exp.FunctionName, exp.FunctionArguments with

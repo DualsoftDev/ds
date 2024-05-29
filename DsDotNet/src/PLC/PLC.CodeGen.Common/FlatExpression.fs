@@ -143,6 +143,9 @@ module FlatExpressionModule =
 
                 let flatArgs = fs.Arguments |> map flattenExpression |> List.cast<FlatExpression>
                 FlatNary(op, flatArgs)
+
+        //| :? DuTerminal(DuVariable (v:TypedValueStorage<'T'>)) -> FlatTerminal(v, None, false)
+
         | _ -> failwithlog "Not yet for non boolean expression"
 
     // <kwak> IExpression<'T> vs IExpression : 강제 변환
@@ -161,6 +164,29 @@ module FlatExpressionModule =
         | :? IExpression<double> as exp -> flattenExpressionT exp
         | :? IExpression<string> as exp -> flattenExpressionT exp
         | :? IExpression<char> as exp -> flattenExpressionT exp
+
+        //| :? Expression<bool> as exp -> flattenExpressionT exp
+
+        | _ when expression.FunctionName.IsSome ->
+            match expression.FunctionName with
+            Some("!") ->
+                assert(expression.FunctionArguments.ExactlyOne().Terminal.IsSome)
+                let arg0 = expression.FunctionArguments.ExactlyOne() :?> Expression<bool> 
+                match arg0 with
+                | DuTerminal(DuVariable v) ->
+                    //let x = v :> IExpressionizableTerminal
+                    FlatTerminal(v, None, true)
+                | _ -> failwithlog "ERROR"
+
+            | Some( "&&" | "||" as fn) ->
+                let op =
+                    match fn with
+                    | "&&" -> Op.And
+                    | "||" -> Op.Or
+                    | _ -> failwithlog "ERROR"
+
+                let flatArgs = expression.FunctionArguments |> map flattenExpression |> List.cast<FlatExpression>
+                FlatNary(op, flatArgs)
 
         | _ -> failwithlog "NOT yet"
 

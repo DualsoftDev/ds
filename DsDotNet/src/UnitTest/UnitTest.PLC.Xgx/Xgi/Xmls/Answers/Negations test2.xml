@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145730" Version="513" WksNodeCount="16">
-    Normal, Rising, Falling contact test
+    Negations test2
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
@@ -43,32 +43,14 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !($ix) &amp;&amp; $ix &amp;&amp; !($ix) &amp;&amp; $ix &amp;&amp; !($ix) &amp;&amp; rising($ix) &amp;&amp; falling($ix)
+                                        [0] $qx = $ix
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="7" Coordinate="2049">
+                                    <Element ElementType="6" Coordinate="2049">
                                         ix
                                     </Element>
-                                    <Element ElementType="6" Coordinate="2052">
-                                        ix
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="2055">
-                                        ix
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="2058">
-                                        ix
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="2061">
-                                        ix
-                                    </Element>
-                                    <Element ElementType="8" Coordinate="2064">
-                                        ix
-                                    </Element>
-                                    <Element ElementType="9" Coordinate="2067">
-                                        ix
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="2070" Param="69"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         qx
                                     </Element>

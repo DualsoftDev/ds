@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LS
 
 open Engine.Core
 open Dual.Common.Core.FS
+open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module LsPLCExportExpressionModule =
@@ -54,28 +55,108 @@ module LsPLCExportExpressionModule =
 
         /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
         /// Non-terminal negation 을 terminal negation 으로 변경
-        member exp.DistributeNegate() : IExpression =
-            match exp.Terminal, exp.FunctionName with
-            | Some terminal, None -> exp
-            | None, Some fn ->
-                let args = exp.FunctionArguments |> map (fun a -> a.DistributeNegate())
-                if fn = "!" then
-                    let arg0 = args.ExactlyOne()
-                    let subArgs = arg0.FunctionArguments
-                    match arg0.FunctionName with
-                    | Some "!" -> arg0
-                    | Some "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = subArgs } :> IExpression
-                    | Some "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = subArgs } :> IExpression
-                    | Some ">" ->  DuFunction { FunctionBody = fLt;       Name = "<="; Arguments = subArgs } :> IExpression
-                    | Some ">=" -> DuFunction { FunctionBody = fLte;      Name = "<";  Arguments = subArgs } :> IExpression
-                    | Some "<" ->  DuFunction { FunctionBody = fGt;       Name = ">="; Arguments = subArgs } :> IExpression
-                    | Some "<=" -> DuFunction { FunctionBody = fGte;      Name = ">";  Arguments = subArgs } :> IExpression
+        member x.ApplyNegate() : IExpression =
+            let exp = x
+            let negate (expr:IExpression) : IExpression =
+                match expr.Terminal, expr.FunctionName with
+                    | Some terminal, None ->
+                        DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = [expr] } :> IExpression
+                    | None, Some "!" -> expr.FunctionArguments.ExactlyOne()
+                    | None, Some fn -> DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = [expr]} :> IExpression
+                    | _ -> failwith "Invalid expression"
 
-                    | _ -> exp
+            let rec visitArgs (negated:bool) (expr:IExpression) : IExpression =
+                match expr.Terminal, expr.FunctionName with
+                | Some terminal, None ->
+                    match negated with
+                    | true -> createUnaryExpression "!" expr
+                    | false -> expr
+                | None, Some fn ->
+                    //let negated = negated <> (fn = "!")
+                    visitFunction negated expr
+
+            and visitFunction (negated:bool) (expr:IExpression) : IExpression =
+                if negated then
+                    match expr.Terminal, expr.FunctionName with
+                    | Some terminal, None ->
+                        negate expr//.FunctionArguments.ExactlyOne()
+                    | None, Some(IsComparisonOperator fn) ->
+                        let args = expr.FunctionArguments |> map (visitArgs false)
+                        match fn with
+                        | "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = args } :> IExpression
+                        | "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = args } :> IExpression
+                        | ">" ->  DuFunction { FunctionBody = fLt;       Name = "<="; Arguments = args } :> IExpression
+                        | ">=" -> DuFunction { FunctionBody = fLte;      Name = "<";  Arguments = args } :> IExpression
+                        | "<" ->  DuFunction { FunctionBody = fGt;       Name = ">="; Arguments = args } :> IExpression
+                        | "<=" -> DuFunction { FunctionBody = fGte;      Name = ">";  Arguments = args } :> IExpression
+                        | _ -> failwith "Invalid expression"
+                    | None, Some("&&" | "||" as fn) ->
+                        let args = expr.FunctionArguments |> map (visitArgs false)
+                        match fn with
+                        | "&&" -> DuFunction { FunctionBody = fLogicalOr; Name = "||"; Arguments = args } :> IExpression
+                        | "||" -> DuFunction { FunctionBody = fLogicalAnd; Name = "&&"; Arguments = args } :> IExpression
+                    | None, Some "!" ->
+                        expr.FunctionArguments.ExactlyOne() |> visitFunction false
                 else
-                    exp.WithNewFunctionArguments args
-            | _ ->
-                failwith "Invalid expression"
+                    match expr.Terminal, expr.FunctionName with
+                    | Some terminal, None -> expr
+                    | None, Some "!" ->
+                        let args = expr.FunctionArguments |> map (visitArgs true)
+                        args.ExactlyOne()
+                    | None, Some fn ->
+                        let args = expr.FunctionArguments |> map (visitArgs false)
+                        expr.WithNewFunctionArguments args
+                    
+                
+            //let rec visit (parentNegated:bool) (expr:IExpression) : IExpression =
+            //    match expr.Terminal, expr.FunctionName with
+            //    | Some terminal, None ->
+            //        match parentNegated with
+            //        | true -> fLogicalNot([expr])
+            //        | false -> expr
+            //    | None, Some fn ->
+            //        let negated = parentNegated <> (fn = "!")
+            //        let newExp =
+            //            if negated then
+            //                if fn = "!" then
+            //                    negate (expr.FunctionArguments.ExactlyOne())
+            //                else
+            //                    let args = expr.FunctionArguments |> map (fun ex -> negate ex |> visit (not negated))
+            //                    match fn with
+            //                    | "!" -> negate expr
+            //                    | "&&" -> DuFunction { FunctionBody = fLogicalOr; Name = "||"; Arguments = args } :> IExpression
+            //                    | "||" -> DuFunction { FunctionBody = fLogicalOr; Name = "&&"; Arguments = args } :> IExpression
+
+            //                    | "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = args } :> IExpression
+            //                    | "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = args } :> IExpression
+            //                    | ">" ->  DuFunction { FunctionBody = fLt;       Name = "<="; Arguments = args } :> IExpression
+            //                    | ">=" -> DuFunction { FunctionBody = fLte;      Name = "<";  Arguments = args } :> IExpression
+            //                    | "<" ->  DuFunction { FunctionBody = fGt;       Name = ">="; Arguments = args } :> IExpression
+            //                    | "<=" -> DuFunction { FunctionBody = fGte;      Name = ">";  Arguments = args } :> IExpression
+
+            //                    | _ -> DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = args } :> IExpression
+            //            else
+            //                expr
+
+            //        //let negated = if fn = "!" then not parentNegated else parentNegated
+            //        //let negated = parentNegated
+            //        match newExp.Terminal, newExp.FunctionName with
+            //        //| Some terminal, None when negated ->
+            //        //    DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = [newExp] } :> IExpression                        
+            //        | Some terminal, None ->
+            //            newExp
+            //        | None, Some "!" ->
+            //            let args = newExp.FunctionArguments |> map (visit (not parentNegated))
+            //            args.ExactlyOne()
+            //        | None, Some fn ->
+            //            let args = newExp.FunctionArguments |> map (visit (parentNegated))
+            //            newExp.WithNewFunctionArguments args
+            //    | _ ->
+            //        failwith "Invalid expression"
+            //visit false exp
+
+            let xxx = visitFunction false exp
+            xxx
 
         ///// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
         //member exp.MakeFlattenizable(): IExpression =

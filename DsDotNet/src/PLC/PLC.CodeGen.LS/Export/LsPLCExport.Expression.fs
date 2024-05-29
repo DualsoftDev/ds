@@ -60,9 +60,9 @@ module LsPLCExportExpressionModule =
             let negate (expr:IExpression) : IExpression =
                 match expr.Terminal, expr.FunctionName with
                     | Some terminal, None ->
-                        DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = [expr] } :> IExpression
+                        createUnaryExpression "!" expr
                     | None, Some "!" -> expr.FunctionArguments.ExactlyOne()
-                    | None, Some fn -> DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = [expr]} :> IExpression
+                    | None, Some fn -> createUnaryExpression "!" expr
                     | _ -> failwith "Invalid expression"
 
             let rec visitArgs (negated:bool) (expr:IExpression) : IExpression =
@@ -82,19 +82,21 @@ module LsPLCExportExpressionModule =
                         negate expr//.FunctionArguments.ExactlyOne()
                     | None, Some(IsComparisonOperator fn) ->
                         let args = expr.FunctionArguments |> map (visitArgs false)
-                        match fn with
-                        | "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = args } :> IExpression
-                        | "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = args } :> IExpression
-                        | ">" ->  DuFunction { FunctionBody = fLt;       Name = "<="; Arguments = args } :> IExpression
-                        | ">=" -> DuFunction { FunctionBody = fLte;      Name = "<";  Arguments = args } :> IExpression
-                        | "<" ->  DuFunction { FunctionBody = fGt;       Name = ">="; Arguments = args } :> IExpression
-                        | "<=" -> DuFunction { FunctionBody = fGte;      Name = ">";  Arguments = args } :> IExpression
-                        | _ -> failwith "Invalid expression"
+                        let reverseFn =
+                            match fn with
+                            | "==" -> "!="
+                            | "!=" -> "=="
+                            | ">" ->  "<="
+                            | ">=" -> "<"
+                            | "<" ->  ">="
+                            | "<=" -> ">"
+                        createCustomFunctionExpression reverseFn args
                     | None, Some("&&" | "||" as fn) ->
-                        let args = expr.FunctionArguments |> map (visitArgs false)
-                        match fn with
-                        | "&&" -> DuFunction { FunctionBody = fLogicalOr; Name = "||"; Arguments = args } :> IExpression
-                        | "||" -> DuFunction { FunctionBody = fLogicalAnd; Name = "&&"; Arguments = args } :> IExpression
+                        let args = expr.FunctionArguments |> map (visitArgs true)
+                        let reverseFn = if fn = "&&" then "||" else "&&"
+                        createCustomFunctionExpression reverseFn args
+                        //| "&&" -> DuFunction { FunctionBody = fLogicalOr; Name = "||"; Arguments = args } :> IExpression
+                        //| "||" -> DuFunction { FunctionBody = fLogicalAnd; Name = "&&"; Arguments = args } :> IExpression
                     | None, Some "!" ->
                         expr.FunctionArguments.ExactlyOne() |> visitFunction false
                 else

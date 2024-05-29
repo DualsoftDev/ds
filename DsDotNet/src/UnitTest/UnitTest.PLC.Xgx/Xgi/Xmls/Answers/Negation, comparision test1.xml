@@ -43,7 +43,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = 2 != 3 &amp;&amp; $ix == true &amp;&amp; 3.14 &lt;= 5.0 || (true || false) &amp;&amp; (true || $ix)
+                                        [0] $qx = 2 != 3 &amp;&amp; $ix == true &amp;&amp; 3.14 &lt;= 5.0 || (!(true) || !(false)) &amp;&amp; (true || $ix)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -106,7 +106,7 @@
                                     <Element ElementType="14" Coordinate="14430">
                                         qx
                                     </Element>
-                                    <Element ElementType="6" Coordinate="15361">
+                                    <Element ElementType="7" Coordinate="15361">
                                         _ON
                                     </Element>
                                     <Element ElementType="0" Coordinate="15363"/>
@@ -115,7 +115,7 @@
                                     </Element>
                                     <Element ElementType="0" Coordinate="15366"/>
                                     <Element ElementType="2" Coordinate="15367" Param="0"/>
-                                    <Element ElementType="6" Coordinate="16385">
+                                    <Element ElementType="7" Coordinate="16385">
                                         _OFF
                                     </Element>
                                     <Element ElementType="6" Coordinate="16388">
@@ -136,9 +136,9 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="5">
                             <Symbols>
-                                <Symbol Name="_t1_NE" Comment="2 != 3" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="_t1_NE" Comment="2 != 3" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
                                 <Symbol Name="_t2_EQ" Comment="$ix == true" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="_t3_LE" Comment="3.14 &lt;= 5.0" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="_t3_LE" Comment="3.14 &lt;= 5.0" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
                                 <Symbol Name="ix" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="qx" Comment="" Device="Q" Kind="8" State="0"/>
                             </Symbols>

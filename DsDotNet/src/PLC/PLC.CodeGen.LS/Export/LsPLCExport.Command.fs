@@ -13,8 +13,6 @@ open Engine.Core.ExpressionModule
 
 [<AutoOpen>]
 module internal rec Command =
-    /// Rung 의 Command 정의를 위한 type.
-    //Command = CoilCmd or FunctionCmd or FunctionBlockCmd
     type CommandTypes with
 
         member x.CoilTerminalTag =

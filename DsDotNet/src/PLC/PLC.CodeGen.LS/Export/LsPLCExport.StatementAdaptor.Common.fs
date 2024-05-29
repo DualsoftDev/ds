@@ -219,18 +219,22 @@ module rec TypeConvertorModule =
                 | CounterMode counterStatement -> counterStatement.Counter.DN
 
 
+    /// Rung 의 Command 정의를 위한 type.
+    ///Command = CoilCmd | PredicateCmd | FunctionCmd | ActionCmd | FunctionBlockCmd | XgkParamCmd
     /// 실행을 가지는 type
     type CommandTypes =
+        /// 출력 코일
         | CoilCmd          of CoilOutputMode
-        /// Predicate.  (boolean function)
+        /// Predicate.  (boolean function).  비교 연산
         | PredicateCmd     of Predicate
-        /// Non-boolean function
+        /// Non-boolean function.  사칙연산
         | FunctionCmd      of Function
+        /// Action.  Move 등
         | ActionCmd        of PLCAction
-        /// "Param="MOV,SRC,DST"" 와 같은 형태의 명령. int 는 명령의 길이.  대부분 3
-        | XgkParamCmd      of string * int
         /// Timer, Counter 등
         | FunctionBlockCmd of FunctionBlock
+        /// "Param="MOV,SRC,DST"" 와 같은 형태의 명령. int 는 명령의 길이.  대부분 3
+        | XgkParamCmd      of string * int
 
 //let createPLCCommandCopy(endTag, from, toTag) = FunctionPure.CopyMode(endTag, (from, toTag))
 

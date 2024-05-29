@@ -276,13 +276,7 @@ module CoreModule =
         member _.TargetWrapper = target
 
     type InOutDataType = DataType*DataType
-    /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, system:DsSystem, tasks:TaskDev seq, jobActionType:JobActionType) =
-        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
-        member x.ActionType:JobActionType = jobActionType
-        member x.System = system
-        member x.DeviceDefs = tasks
-        member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
+
 
      
       /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
@@ -316,6 +310,23 @@ module CoreModule =
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
+
+    /// Job 정의: Call 이 호출하는 Job 항목
+    type Job (name:string, system:DsSystem, tasks:TaskDev seq, jobActionType:JobActionType) =
+        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
+        member x.ActionType:JobActionType = jobActionType
+        member x.System = system
+        member x.DeviceDefs = tasks
+        member x.OnDelayTime = 
+                let times = tasks.Choose(fun t-> t.InParams[x.Name].Time)
+                if times.GroupBy(fun t->t).Count() > 1
+                then 
+                    let errTask = String.Join(", ", tasks.Select(fun t-> $"{t.Name} {t.InParams[x.Name].Time}"))
+                    failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
+                
+                if times.any() then times.First() |> Some else None
+
+        member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
 
     [<AbstractClass>]
     type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam)  =

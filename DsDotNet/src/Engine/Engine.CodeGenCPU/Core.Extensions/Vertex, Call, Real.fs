@@ -51,7 +51,7 @@ module ConvertCpuVertex =
             | false -> false
             
 
-        member c.UsingTon  = c.CallOperatorType = DuOPTimer
+        member c.UsingTon  = c.TargetJob.OnDelayTime.IsSome
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
         member c.EndPlan =  
@@ -85,9 +85,9 @@ module ConvertCpuVertex =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
                  !!rv.SYNC.Expr <&&> (rv.G.Expr <||> rv.Flow.h_st.Expr)
 
-        //member c.PresetTime =   if c.UsingTon
-        //                        then c.TargetJob.OperatorFunction.Value.GetDelayTime()
-        //                        else failwith $"{c.Name} not use timer" 
+        member c.PresetTime =   if c.UsingTon
+                                then c.TargetJob.OnDelayTime.Value.ToString() |> CountUnitType.Parse
+                                else failwith $"{c.Name} not use timer"
 
         //member c.PresetCounter = if c.UsingCtr
         //                         then c.TargetJob.Func.Value.GetRingCount()

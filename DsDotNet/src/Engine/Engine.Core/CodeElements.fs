@@ -100,6 +100,7 @@ module rec CodeElements =
         member x.Name = match x.DevName with 
                               |Some (n)-> n
                               |None -> "" 
+        member x.Time = x.DevTime 
        
         
 
@@ -227,3 +228,4 @@ module rec CodeElements =
                 failwithlog $"Unknown format detected: text '{part}'"
                 
         createDevParam addr nameOpt typeOpt valueOpt timeOpt
+

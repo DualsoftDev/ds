@@ -67,8 +67,6 @@ type VertexManager with
         ]
 
     member v.M4_CallErrorRXMonitor() =
-        //let callV = v :?> VertexMCall
-        let cv = v :?> VertexMCall  //test ahn error 타입 추가
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
         
@@ -83,8 +81,8 @@ type VertexManager with
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
        
-            let setRising  = fbRising [input] :> IExpression<bool>    
-            let setFalling = fbFalling[input] :> IExpression<bool>
+            let setRising  = fbRisingAfter [input] :> IExpression<bool>    
+            let setFalling = fbFallingAfter[input] :> IExpression<bool>
             (*open short error*)
             yield (checkCondi <&&>  rxReadyExpr <&&> setRising,  rst<||>v._sim.Expr)  ==| (v.ErrShort, getFuncName())
             yield (checkCondi <&&>  rxFinishExpr<&&>setFalling,  rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())

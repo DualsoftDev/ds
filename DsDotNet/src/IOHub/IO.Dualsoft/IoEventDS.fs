@@ -16,7 +16,7 @@ module ScanDSImpl =
     let pointMax = 64 //MAX_RANDOM_BYTE_POINTS
     let longSize = 8 // 8byte
 
-    type IoEventDS(dsCPU:DsCPU, vendors:VendorSpec seq,  client:Client, server:Server) =
+    type IoEventDS(dsCPU:DsCPU, vendors:VendorSpec seq,  client:Client, _server:Server) =
         let vendorDic = vendors.SelectMany(fun f-> f.Files.Select(fun s->s.GetPath().ToLower(), f.AddressResolver)) |> dict
         let tagSet = dsCPU.TagIndexSet
         let actionTags = dsCPU.Storages.Where(fun f-> TagKindExt.GetActionTagKind(f.Value).IsSome)
@@ -108,7 +108,7 @@ module ScanDSImpl =
                     let dev =t.Address.Substring(0,1) //예외확인
                     let prov = vendorDic.First(fun f-> f.Key.Split('/').Last() = dev)
                     match prov.Value.GetAddressInfo(t.Address) with
-                        | true, memType, offset, contentBitLength -> 
+                        | true, _memType, _offset, _contentBitLength -> 
                             ()
                             //let sm = vspec.StreamManager :?>  StreamManager
                             //let clients  = server.Clients

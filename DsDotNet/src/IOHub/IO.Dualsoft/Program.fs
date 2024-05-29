@@ -2,11 +2,7 @@ namespace Client
 
 open IO.Core
 open System
-open System.Linq
 open System.Threading
-open ZmqTestModule
-open Dual.Common.Core.FS
-open IOClient.DS.ScanDSImpl
 open Engine.Core
 open System.IO
 open Engine.Parser.FS
@@ -36,13 +32,13 @@ module ZmqTestClient =
         let model: Model = ParserLoader.LoadFromConfig(jsonPath) target
         let dsCPU, _, _ = DsCpuExt.GetDsCPU (model.System) target
 
-        let serverThread = server.Run()
+        let _serverThread = server.Run()
         let client =  new Client($"{zmqHWInfo.ServerIP}:{zmqHWInfo.ServerPort}")
         let iospec = client.GetMeta()
         iospec|>regulate
         zmqStartDs(dsCPU, server, client)
        
-        Console.ReadKey()
+        Console.ReadKey() |> ignore
         0  
 
 

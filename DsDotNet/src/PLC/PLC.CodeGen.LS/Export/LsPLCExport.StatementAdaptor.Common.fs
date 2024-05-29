@@ -660,12 +660,12 @@ module XgxExpressionConvertorModule =
 
 
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
-        /// visit: parent expression -> 자신 expression -> 반환 expression : 아래의 AugmentXgkArithmeticExpressionToAssignStatemnt 샘플 참고
+        /// visit: [상위로부터 부모까지의 expression 경로] -> 자신 expression -> 반환 expression : 아래의 FunctionToAssignStatement 샘플 참고
         member x.VisitExpression (visit:IExpression list -> IExpression -> IExpression) : Statement =
+
+            /// IExpression option 인 경우의 visitor
             let tryVisit (expPath:IExpression list) (exp:IExpression<bool> option) : IExpression<bool> option =
-                match exp with
-                | Some exp -> (visit expPath (exp:>IExpression)) :?> IExpression<bool> |> Some
-                | None -> None
+                exp |> map (fun exp -> visit expPath exp :?> IExpression<bool> ) 
 
             let visitTop exp = visit [] exp
             let tryVisitTop exp = tryVisit [] exp

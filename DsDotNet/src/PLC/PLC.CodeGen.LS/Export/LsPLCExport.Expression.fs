@@ -87,7 +87,7 @@ module LsPLCExportExpressionModule =
         member exp.Transform(tfs:ExpressionTransformers, resultStore:IStorage option) : IExpression =
             let {TerminalHandler = th; FunctionHandler = fh} = tfs
 
-            let rec traverse (level:int) (exp:IExpression) (resultStore:IStorage option) =
+            let rec traverse (level:int) (exp:IExpression) (resultStore:IStorage option) : IExpression =
                 match exp.Terminal, exp.FunctionName with
                 | Some _terminal, None -> th (level, exp)
                 | None, Some _fn ->

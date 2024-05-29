@@ -408,8 +408,8 @@ module PPTObjectModule =
         let getPostParam(x:DevParam) =
             match x.DevValue, x.DevTime with 
             |Some (v), None->   $"{v}"
-            |Some (v), Some(t)->   $"{v}_{t}"
-            |None, Some(t)->   $"{t}"
+            |Some (v), Some(t)->   $"{v}_{t}ms"
+            |None, Some(t)->   $"{t}ms"
             |None, None->   $""
         do
 
@@ -591,15 +591,7 @@ module PPTObjectModule =
                 shape.ErrorName($"not support {nodeType}({name}) type", iPage)
 
             let apiName = name.Split('.')[1] |> trimSpace
-
-            match GetSquareBrackets(apiName, false) with
-            | Some apiType ->
-                match apiType with
-                | ""
-                | "_"
-                | "N" -> GetLastBracketRelaceName(apiName, "-")
-                | _ -> apiName
-            | None -> apiName
+            apiName
 
         member val Id = shape.GetId()
         member val Key = Objkey(iPage, shape.GetId())

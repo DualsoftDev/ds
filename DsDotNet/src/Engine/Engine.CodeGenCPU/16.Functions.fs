@@ -52,6 +52,17 @@ type VertexMCall with
     member v.C3_DoOperatorDevice() =
         let call = v.Vertex :?> Call
         let inOps = 
-            call.TargetJob.DeviceDefs.Select(fun d->d.GetInExpr(call.TargetJob.Name)) 
-        let sets = inOps.ToAndElseOff()    
-        (sets, call._off.Expr) --| (v.CallOperatorValue, getFuncName()) //그대로 복사
+            call.TargetJob.DeviceDefs
+                .Select(fun d->
+                    if d.InAddress = TextAddrEmpty || d.InAddress = TextSkip
+                    then //주소가 없으면 Plan 으로 처리
+                        d.ApiItem.PE.Expr
+                    else    
+                        d.GetInExpr(call.TargetJob.Name)
+                ) 
+
+        if inOps.IsEmpty()
+        then failwithlog $"Device({call.Name})에는 입력이 필요합니다."
+        else
+            let sets = inOps.ToAndElseOff()    
+            (sets, call._off.Expr) --| (v.CallOperatorValue, getFuncName()) //그대로 복사

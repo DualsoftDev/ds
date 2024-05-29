@@ -379,8 +379,11 @@ module CoreModule =
         member _.ApiSystem = system
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
-
-
+        override x.ToText() = 
+            let txs = x.TXs.Select(fun r->r.Name) |> String.concat(", ")
+            let rxs = x.RXs.Select(fun r->r.Name) |> String.concat(", ")
+            $"{name}\r\n[{txs} ~ {rxs}]"
+                 
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
         member _.AutoGenByFlow = autoGenByFlow 

@@ -424,6 +424,7 @@ public partial class UcView : UserControl
                 {
                     nNode.Attr.Shape = Shape.InvHouse;
                     nNode.Attr.FillColor = Color.BlueViolet;
+                    nNode.Attr.LabelMargin = 6;
                 }
             }
             //if (viewNode.NodeType == ViewType.VCOPY_SYS)

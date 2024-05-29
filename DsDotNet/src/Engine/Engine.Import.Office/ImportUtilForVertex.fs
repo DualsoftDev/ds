@@ -54,7 +54,7 @@ module ImportUtilVertex =
                         taskDev
                     | _ -> 
                         TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, loadSysName)
-                let job = Job(node.JobName, sys, [devTask], JobActionType.Normal)
+                let job = Job(node.JobName, sys, [devTask], node.JobOption)
 
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
@@ -63,7 +63,7 @@ module ImportUtilVertex =
                 if device.AutoGenFromParentSystem
                 then
                     let autoTaskDev = getAutoGenDevTask device loadSysName node.JobName apiName
-                    let job = Job(node.JobName, sys, [autoTaskDev.Value], JobActionType.Normal)
+                    let job = Job(node.JobName, sys, [autoTaskDev.Value],  node.JobOption)
                     sys.Jobs.Add job |> ignore
                     Call.Create(job, parentWrapper)
                 else 

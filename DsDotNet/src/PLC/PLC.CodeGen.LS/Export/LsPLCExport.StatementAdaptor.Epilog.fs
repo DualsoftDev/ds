@@ -11,9 +11,9 @@ module XgxTypeConvertorModule =
         /// S -> [XS]
         member internal x.ToCommentedStatements (prjParam: XgxProjectParams, newLocalStorages: XgxStorage) : CommentedStatements =
             let (CommentedStatement(comment, statement)) = x
+            let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
             let newStatement = statement.DistributeNegate()
-            let originalComment = newStatement.ToText()
             let newStatement = newStatement.FunctionToAssignStatement prjParam augs
             let newStatement = newStatement.AugmentXgiFunctionParameters prjParam augs
 

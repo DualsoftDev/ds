@@ -51,7 +51,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $b1 = $pi &gt; $eu
+                                        [0] bool b1 = $pi &gt; $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -71,7 +71,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $b2 = $pi &lt; $eu
+                                        [1] bool b2 = $pi &lt; $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -91,7 +91,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [2] $b3 = $pi == $eu
+                                        [2] bool b3 = $pi == $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -111,7 +111,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [3] $b4 = $pi == $eu
+                                        [3] bool b4 = $pi == $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -131,7 +131,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="21505">
-                                        [4] $b5 = $pi != $eu
+                                        [4] bool b5 = $pi != $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -151,7 +151,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="26625">
-                                        [5] $b6 = $pi != $eu
+                                        [5] bool b6 = $pi != $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -171,7 +171,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="31745">
-                                        [6] $b7 = $pi &gt;= $eu
+                                        [6] bool b7 = $pi &gt;= $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -191,7 +191,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="36865">
-                                        [7] $b8 = $pi &lt;= $eu
+                                        [7] bool b8 = $pi &lt;= $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

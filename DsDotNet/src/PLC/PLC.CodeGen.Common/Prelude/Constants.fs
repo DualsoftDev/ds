@@ -127,3 +127,7 @@ module OperatorActivePatterns =
     let (|IsArithmaticOperator|_|) (op:string) = if K.arithmaticOperators |> Array.contains op then Some op else None
     /// ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
     let (|IsArithmaticOrComparisionOperator|_|) (op:string) = if K.arithmaticOrComparisionOperators |> Array.contains op then Some op else None
+
+    let isComparisonOperator op = (|IsComparisonOperator|_|) op |> Option.isSome
+    let isArithmaticOperator op = (|IsArithmaticOperator|_|) op |> Option.isSome
+    let isArithmaticOrComparisionOperator op = (|IsArithmaticOrComparisionOperator|_|) op |> Option.isSome

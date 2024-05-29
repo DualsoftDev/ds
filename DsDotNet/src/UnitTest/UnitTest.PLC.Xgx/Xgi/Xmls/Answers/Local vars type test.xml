@@ -58,7 +58,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $myDoubleSum3 = $mypi + $myeuler
+                                        [0] float64 myDoubleSum3 = $mypi + $myeuler
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -78,7 +78,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $myDoubleSum4 = 3.14 + 2.718
+                                        [1] float64 myDoubleSum4 = 3.14 + 2.718
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

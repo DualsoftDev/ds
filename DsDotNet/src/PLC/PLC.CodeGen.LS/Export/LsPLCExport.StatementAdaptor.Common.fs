@@ -566,36 +566,106 @@ module XgxExpressionConvertorModule =
             newExp
 
 
+    type ExpressionConversionResult = IExpression * IStorage list * Statement list
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
         member x.ToAssignStatement (prjParam: XgxProjectParams) (augs:Augments) (replacableFunctionNames:string seq) : IExpression =
             match x.FunctionName with
             | Some fn when replacableFunctionNames.Contains fn ->
-                let tmpNameHint = operatorToMnemonic fn
-                let var = prjParam.CreateAutoVariable(tmpNameHint, x.BoxedEvaluatedValue, $"{x.ToText()}")
-                let stmt =
-                    match prjParam.TargetType with
-                    | XGK -> DuAssign(None, x, var)
-                    | XGI ->
-                        let newExp = x.FlattenArithmaticOperator(prjParam, augs, Some var)
-                        DuAugmentedPLCFunction {
-                            FunctionName = fn
-                            Arguments = newExp.FunctionArguments
-                            OriginalExpression = newExp
-                            Output = var }
-                    | _ -> failwithlog "ERROR"
+                match fn with
+                | "==" | "<>" | "!=" when prjParam.TargetType = XGK && x.FunctionArguments[0].DataType = typedefof<bool> ->
+                    x.AugmentXgk(prjParam, None, augs)
+                | _ ->
+                    let tmpNameHint = operatorToMnemonic fn
+                    let var = prjParam.CreateAutoVariable(tmpNameHint, x.BoxedEvaluatedValue, $"{x.ToText()}")
+                    let stmt =
+                        match prjParam.TargetType with
+                        | XGK -> DuAssign(None, x, var)
+                        | XGI ->
+                            let newExp = x.FlattenArithmaticOperator(prjParam, augs, Some var)
+                            DuAugmentedPLCFunction {
+                                FunctionName = fn
+                                Arguments = newExp.FunctionArguments
+                                OriginalExpression = newExp
+                                Output = var }
+                        | _ -> failwithlog "ERROR"
 
-                augs.Statements.Add <| stmt
-                augs.Storages.Add var
-                var.ToExpression()
+                    augs.Statements.Add <| stmt
+                    augs.Storages.Add var
+                    var.ToExpression()
             | _ -> x
 
+
+        /// exp 내에 포함된, {문장(statement)으로 추출 해야만 할 요소}를 newStatements 에 추가한다.
+        /// 이 과정에서 추가할 필요가 있는 storate 는 newLocalStorages 에 추가한다.
+        /// 반환 : exp, 추가된 storage, 추가된 statement
+        ///
+        /// e.g: XGK 의 경우, 함수를 지원하지 않으므로,
+        ///     입력 exp: "2 + 3 > 4"
+        ///     추가 statement : "tmp1 = 2 + 3"
+        ///     추가 storage : tmp2
+        ///     최종 exp: "tmp1 > 4"
+        ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
+        member x.AugmentXgk (prjParam: XgxProjectParams, expStore:IStorage option, augs:Augments) : IExpression =
+            let xexp = x
+            let isXgk = prjParam.TargetType = XGK
+            let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
+                match exp.FunctionName, exp.FunctionArguments with
+                | Some fn, l::r::[] ->
+                    let lexpr, lstgs, lstmts = helper (nestLevel + 1) (l, None)
+                    let rexpr, rstgs, rstmts = helper (nestLevel + 1) (r, None)
+
+                    if (*isXgk &&*) lexpr.DataType = typeof<bool> && fn.IsOneOf("!=", "==", "<>") then
+                        // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
+                        let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
+                        let newExp =
+                            match fn with
+                            | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])
+                            | "==" -> fbLogicalOr([fbLogicalAnd [l; r]; fbLogicalAnd [nl; nr]])
+                            | _ -> failwithlog "ERROR"
+                        newExp, (lstgs @ rstgs), (lstmts @ rstmts)
+                    else
+                        // XGK 에는 IEC Function 을 이용할 수 없으므로, 
+                        // XGI 에는 사칙 연산을 중간 expression 으로 이용은 가능하나, ladder 그리는 로직이 너무 복잡해 지므로, 
+                        // 수식 내에 포함된 사칙 연산이나 비교 연산을 따로 빼내어서 임시 변수에 대입하는 assign 문장으로 으로 변환한다.
+                        let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
+                        let createTmpStorage =
+                            fun () -> 
+                                match expStore with
+                                | Some stg -> stg
+                                | None ->
+                                    let tmpNameHint = operatorToMnemonic fn
+                                    let tmpVar = prjParam.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, $"{exp.ToText()}")
+                                    tmpVar :> IStorage
+
+                        match fn with
+                        | IsArithmaticOrComparisionOperator _ ->
+                            let stg = createTmpStorage()
+                            let stmt = DuAssign(None, newExp, stg)
+                            let varExp = stg.ToExpression()
+                            varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
+                        | _ ->
+                            if lstgs.any() || rstgs.any() then
+                                newExp, (lstgs @ rstgs), (lstmts @ rstmts)
+                            else
+                                exp, [], []
+                | _ ->
+                    exp, [], []
+
+            if x.Terminal.IsSome then
+                x
+            else
+                let exp, stgs, stmts = helper 0 (x, expStore)
+                augs.Storages.AddRange(stgs)
+                augs.Statements.AddRange(stmts)
+                exp
 
 
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
         member internal x.ToStatements (prjParam: XgxProjectParams, augs:Augments) : unit =
-            match x with
+            let statement = x
+            match statement with
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
@@ -646,7 +716,7 @@ module XgxExpressionConvertorModule =
 
             | DuAugmentedPLCFunction _ 
             | (DuTimer _ | DuCounter _) ->
-                augs.Statements.Add x 
+                augs.Statements.Add statement 
 
             | DuAction(DuCopy(condition, source, target)) ->
                 let funcName = XgiConstants.FunctionNameMove
@@ -662,7 +732,7 @@ module XgxExpressionConvertorModule =
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
         /// visit: [상위로부터 부모까지의 expression 경로] -> 자신 expression -> 반환 expression : 아래의 FunctionToAssignStatement 샘플 참고
         member x.VisitExpression (visit:IExpression list -> IExpression -> IExpression) : Statement =
-
+            let statement = x
             /// IExpression option 인 경우의 visitor
             let tryVisit (expPath:IExpression list) (exp:IExpression<bool> option) : IExpression<bool> option =
                 exp |> map (fun exp -> visit expPath exp :?> IExpression<bool> ) 
@@ -670,7 +740,7 @@ module XgxExpressionConvertorModule =
             let visitTop exp = visit [] exp
             let tryVisitTop exp = tryVisit [] exp
 
-            match x with
+            match statement with
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
             | DuVarDecl(exp, var) ->
                 match exp.Terminal with
@@ -696,13 +766,15 @@ module XgxExpressionConvertorModule =
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (visit:IExpression -> IExpression) : Statement =
+            let statement = x
             let visit2 _ (exp:IExpression) = visit exp
-            x.VisitExpression visit2
+            statement.VisitExpression visit2
 
         /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
         member x.DistributeNegate() =
-            let visitor (exp:IExpression) : IExpression = exp.DistributeNegate()
-            x.VisitExpression visitor
+            let statement = x
+            let visitor (exp:IExpression) : IExpression = exp.ApplyNegate()
+            statement.VisitExpression visitor
 
 
         /// XGI Timer/Counter 의 RungInCondition, ResetCondition 이 Non-terminal 인 경우, assign statement 로 변환한다.

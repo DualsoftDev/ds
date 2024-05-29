@@ -42,7 +42,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $b0 = 2.1 != 6.1
+                                        [0] bool b0 = !(2.1 == 6.1)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

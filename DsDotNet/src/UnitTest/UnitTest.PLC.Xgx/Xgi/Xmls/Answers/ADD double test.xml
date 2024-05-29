@@ -67,7 +67,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $sub = $nn1 - $nn2
+                                        [1] float64 sub = $nn1 - $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -87,7 +87,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [2] $mul = $nn1 * $nn2
+                                        [2] float64 mul = $nn1 * $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -107,7 +107,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [3] $div = $nn1 / $nn2
+                                        [3] float64 div = $nn1 / $nn2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

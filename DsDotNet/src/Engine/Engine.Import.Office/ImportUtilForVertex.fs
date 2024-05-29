@@ -44,19 +44,31 @@ module ImportUtilVertex =
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
             let device = sys.LoadedSystems |> Seq.find (fun d -> d.Name = loadSysName)
-            let api = device.ReferenceSystem.ApiItems |> Seq.find (fun a -> a.Name = apiName)
-            let devTask = 
-                match sys.Jobs.SelectMany(fun j->j.DeviceDefs).TryFind(fun d->d.ApiItem = api) with 
-                | Some (taskDev) ->
-                    taskDev.AddOrUpdateInParam   (node.JobName, node.DevParamIn  )
-                    taskDev.AddOrUpdateOutParam  (node.JobName, node.DevParamOut )
-                    taskDev
-                | _ -> 
-                    TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, loadSysName)
-            let job = Job(node.JobName, sys, [devTask], JobActionType.Normal)
+            match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
+            |Some api ->
+                let devTask = 
+                    match sys.Jobs.SelectMany(fun j->j.DeviceDefs).TryFind(fun d->d.ApiItem = api) with 
+                    | Some (taskDev) ->
+                        taskDev.AddOrUpdateInParam   (node.JobName, node.DevParamIn  )
+                        taskDev.AddOrUpdateOutParam  (node.JobName, node.DevParamOut )
+                        taskDev
+                    | _ -> 
+                        TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, loadSysName)
+                let job = Job(node.JobName, sys, [devTask], JobActionType.Normal)
 
-            sys.Jobs.Add job |> ignore
-            Call.Create(job, parentWrapper)
+                sys.Jobs.Add job |> ignore
+                Call.Create(job, parentWrapper)
+
+            | None -> 
+                if device.AutoGenFromParentSystem
+                then
+                    let autoTaskDev = getAutoGenDevTask device loadSysName node.JobName apiName
+                    let job = Job(node.JobName, sys, [autoTaskDev.Value], JobActionType.Normal)
+                    sys.Jobs.Add job |> ignore
+                    Call.Create(job, parentWrapper)
+                else 
+                    let ableApis = String.Join(", ", device.ReferenceSystem.ApiItems.Select(fun a->a.Name))
+                    failwithlog $"Loading system ({loadSysName}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
 
     let getCallFromMultiLoadedSys (sys: DsSystem) (node: pptNode) (loadSysName: string) (apiName: string) parentWrapper =
 
@@ -87,10 +99,7 @@ module ImportUtilVertex =
 
         let autoGenDevTask =
             match autoGenSys with
-            | Some autoGenSys ->
-                let referenceSystem = autoGenSys.ReferenceSystem
-                let defaultParams = TextAddrEmpty |> defaultDevParam, TextAddrEmpty |> defaultDevParam
-                Some (createTaskDevUsingApiName referenceSystem node.JobName loadedName apiName defaultParams)
+            | Some autoGenSys -> getAutoGenDevTask autoGenSys loadedName node.JobName apiName
             | None -> None
 
         addLibraryNCall (libAbsolutePath, loadedName, apiName, sys, parentWrapper, node, autoGenDevTask)

@@ -66,8 +66,8 @@ module DBLoggerORM =
         $"""
 CREATE TABLE [{Tn.Storage}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-    , [name]        NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
-    , [fqdn]        NVARCHAR(64) NOT NULL CHECK(LENGTH(fqdn) <= 64)
+    , [name]        NVARCHAR(128) NOT NULL CHECK(LENGTH(name) <= 128)
+    , [fqdn]        NVARCHAR(128) NOT NULL CHECK(LENGTH(fqdn) <= 128)
     , [tagKind]     INTEGER NOT NULL
     , [dataType]    NVARCHAR(64) NOT NULL CHECK(LENGTH(dataType) <= 64)
     , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind, dataType, name)

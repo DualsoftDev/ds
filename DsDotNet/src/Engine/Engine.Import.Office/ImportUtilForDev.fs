@@ -101,6 +101,11 @@ module ImportUtilForDev =
         else 
             loadedSys
 
+    let getAutoGenDevTask  (autoGenSys:LoadedSystem) loadedName jobName apiName = 
+        let referenceSystem = autoGenSys.ReferenceSystem
+        let defaultParams = "" |> defaultDevParam, "" |> defaultDevParam
+        Some (createTaskDevUsingApiName referenceSystem jobName loadedName apiName defaultParams)
+
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
         let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
         let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)

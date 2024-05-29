@@ -69,6 +69,16 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+
+    member x.``Equality test1`` () =
+        let storages = Storages()
+        let code = baseCode + "$qx = $ix != true;"
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
     member x.``Negation, comparision test1`` () =
         let storages = Storages()
         let code = baseCode + """$qx =
@@ -159,6 +169,7 @@ type XgiRisingFallingTest() =
     [<Test>] member x.``Negations test4`` () = base.``Negations test4`` ()
     [<Test>] member x.``Negations test5`` () = base.``Negations test5`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
+    [<Test>] member x.``Equality test1`` () = base.``Equality test1`` ()
 
 type XgkRisingFallingTest() =
     inherit XgxRisingFallingTest(XGK)
@@ -171,5 +182,6 @@ type XgkRisingFallingTest() =
     [<Test>] member x.``Negations test4`` () = base.``Negations test4`` ()
     [<Test>] member x.``Negations test5`` () = base.``Negations test5`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
+    [<Test>] member x.``Equality test1`` () = base.``Equality test1`` ()
 
      

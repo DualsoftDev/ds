@@ -33,7 +33,6 @@ module LsPLCExportExpressionModule =
                     | None, Some literal -> $"{space}Literal: {literal.ToText()}"
                     | _ -> failwith "Invalid expression"
 
-                //| Some terminal, None-> $"{space}Terminal: { terminal.ToString() }"
                 | None, Some fn ->
                     [
                         $"{space}Function: {fn}"
@@ -59,110 +58,60 @@ module LsPLCExportExpressionModule =
             let exp = x
             let negate (expr:IExpression) : IExpression =
                 match expr.Terminal, expr.FunctionName with
-                    | Some terminal, None ->
+                    | Some _terminal, None ->
                         createUnaryExpression "!" expr
                     | None, Some "!" -> expr.FunctionArguments.ExactlyOne()
-                    | None, Some fn -> createUnaryExpression "!" expr
+                    | None, Some _fn -> createUnaryExpression "!" expr
                     | _ -> failwith "Invalid expression"
 
             let rec visitArgs (negated:bool) (expr:IExpression) : IExpression =
                 match expr.Terminal, expr.FunctionName with
-                | Some terminal, None ->
+                | Some _terminal, None ->
                     match negated with
                     | true -> createUnaryExpression "!" expr
                     | false -> expr
-                | None, Some fn ->
+                | None, Some _fn ->
                     //let negated = negated <> (fn = "!")
                     visitFunction negated expr
+                | _ -> failwith "Invalid expression"
 
             and visitFunction (negated:bool) (expr:IExpression) : IExpression =
+                let args = expr.FunctionArguments
                 if negated then
                     match expr.Terminal, expr.FunctionName with
-                    | Some terminal, None ->
+                    | Some _terminal, None ->
                         negate expr//.FunctionArguments.ExactlyOne()
                     | None, Some(IsComparisonOperator fn) ->
-                        let args = expr.FunctionArguments |> map (visitArgs false)
+                        let newArgs = args |> map (visitArgs false)
                         let reverseFn =
                             match fn with
                             | "==" -> "!="
-                            | "!=" -> "=="
+                            | "!=" | "<>" -> "=="
                             | ">" ->  "<="
                             | ">=" -> "<"
                             | "<" ->  ">="
                             | "<=" -> ">"
-                        createCustomFunctionExpression reverseFn args
+                            | _ -> failwith "ERROR"
+                        createCustomFunctionExpression reverseFn newArgs
                     | None, Some("&&" | "||" as fn) ->
-                        let args = expr.FunctionArguments |> map (visitArgs true)
+                        let newArgs = args |> map (visitArgs true)
                         let reverseFn = if fn = "&&" then "||" else "&&"
-                        createCustomFunctionExpression reverseFn args
-                        //| "&&" -> DuFunction { FunctionBody = fLogicalOr; Name = "||"; Arguments = args } :> IExpression
-                        //| "||" -> DuFunction { FunctionBody = fLogicalAnd; Name = "&&"; Arguments = args } :> IExpression
+                        createCustomFunctionExpression reverseFn newArgs
                     | None, Some "!" ->
-                        expr.FunctionArguments.ExactlyOne() |> visitFunction false
+                        args.ExactlyOne() |> visitFunction false
+                    | _ -> failwith "Invalid expression"
                 else
                     match expr.Terminal, expr.FunctionName with
-                    | Some terminal, None -> expr
+                    | Some _terminal, None -> expr
                     | None, Some "!" ->
-                        let args = expr.FunctionArguments |> map (visitArgs true)
-                        args.ExactlyOne()
-                    | None, Some fn ->
-                        let args = expr.FunctionArguments |> map (visitArgs false)
-                        expr.WithNewFunctionArguments args
-                    
-                
-            //let rec visit (parentNegated:bool) (expr:IExpression) : IExpression =
-            //    match expr.Terminal, expr.FunctionName with
-            //    | Some terminal, None ->
-            //        match parentNegated with
-            //        | true -> fLogicalNot([expr])
-            //        | false -> expr
-            //    | None, Some fn ->
-            //        let negated = parentNegated <> (fn = "!")
-            //        let newExp =
-            //            if negated then
-            //                if fn = "!" then
-            //                    negate (expr.FunctionArguments.ExactlyOne())
-            //                else
-            //                    let args = expr.FunctionArguments |> map (fun ex -> negate ex |> visit (not negated))
-            //                    match fn with
-            //                    | "!" -> negate expr
-            //                    | "&&" -> DuFunction { FunctionBody = fLogicalOr; Name = "||"; Arguments = args } :> IExpression
-            //                    | "||" -> DuFunction { FunctionBody = fLogicalOr; Name = "&&"; Arguments = args } :> IExpression
+                        let newArgs = args |> map (visitArgs true)
+                        newArgs.ExactlyOne()
+                    | None, Some _fn ->
+                        let newArgs = args |> map (visitArgs false)
+                        expr.WithNewFunctionArguments newArgs
+                    | _ -> failwith "Invalid expression"
 
-            //                    | "==" -> DuFunction { FunctionBody = fNotEqual; Name = "!="; Arguments = args } :> IExpression
-            //                    | "!=" -> DuFunction { FunctionBody = fEqual;    Name = "=="; Arguments = args } :> IExpression
-            //                    | ">" ->  DuFunction { FunctionBody = fLt;       Name = "<="; Arguments = args } :> IExpression
-            //                    | ">=" -> DuFunction { FunctionBody = fLte;      Name = "<";  Arguments = args } :> IExpression
-            //                    | "<" ->  DuFunction { FunctionBody = fGt;       Name = ">="; Arguments = args } :> IExpression
-            //                    | "<=" -> DuFunction { FunctionBody = fGte;      Name = ">";  Arguments = args } :> IExpression
-
-            //                    | _ -> DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = args } :> IExpression
-            //            else
-            //                expr
-
-            //        //let negated = if fn = "!" then not parentNegated else parentNegated
-            //        //let negated = parentNegated
-            //        match newExp.Terminal, newExp.FunctionName with
-            //        //| Some terminal, None when negated ->
-            //        //    DuFunction { FunctionBody = fLogicalNot; Name = "!"; Arguments = [newExp] } :> IExpression                        
-            //        | Some terminal, None ->
-            //            newExp
-            //        | None, Some "!" ->
-            //            let args = newExp.FunctionArguments |> map (visit (not parentNegated))
-            //            args.ExactlyOne()
-            //        | None, Some fn ->
-            //            let args = newExp.FunctionArguments |> map (visit (parentNegated))
-            //            newExp.WithNewFunctionArguments args
-            //    | _ ->
-            //        failwith "Invalid expression"
-            //visit false exp
-
-            let xxx = visitFunction false exp
-            xxx
-
-        ///// 1. Expression 내의 비교 연산을 임시 변수로 할당하고 대체
-        //member exp.MakeFlattenizable(): IExpression =
-        //    exp.DistributeNegate()
+            visitFunction false exp
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    Comparision, Arithmatic, OR test
+    Comparision, Arithmetic, OR test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    TIMER= Not Condition test 2
+    Equality test1
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -39,14 +39,9 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="7">
-                        <Symbol Name="Clamp1_RET_I" Comment="" Device="P" DevicePos="11" Type="BIT"/>
-                        <Symbol Name="Clamp2_RET_I" Comment="" Device="P" DevicePos="12" Type="BIT"/>
-                        <Symbol Name="Clamp3_RET_I" Comment="" Device="P" DevicePos="13" Type="BIT"/>
-                        <Symbol Name="Clamp4_RET_I" Comment="" Device="P" DevicePos="14" Type="BIT"/>
-                        <Symbol Name="ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo" Comment="" Device="P" DevicePos="10" Type="BIT"/>
-                        <Symbol Name="IOP_ClampOperation" Comment="" Device="P" DevicePos="15" Type="BIT"/>
-                        <Symbol Name="TOUT3" Comment="TIMER TOUT3" Device="T" DevicePos="0" Type="BIT/WORD"/>
+                    <Symbols Count="2">
+                        <Symbol Name="ix" Comment="" Device="P" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="qx" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -70,40 +65,31 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ton TOUT3 = createXgkTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo &amp;&amp; ||(!($Clamp1_RET_I), !($Clamp2_RET_I), !($Clamp3_RET_I), !($Clamp4_RET_I)) &amp;&amp; !($IOP_ClampOperation))
+                                        [0] $qx = $ix != true
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        P0000A
+                                        P00000
                                     </Element>
-                                    <Element ElementType="0" Coordinate="2051"/>
                                     <Element ElementType="7" Coordinate="2052">
-                                        P0000B
+                                        _ON
                                     </Element>
                                     <Element ElementType="0" Coordinate="2054"/>
-                                    <Element ElementType="7" Coordinate="2055">
-                                        P0000F
+                                    <Element ElementType="2" Coordinate="2055" Param="84"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        P00001
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2058" Param="75"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="TON,TOUT3,150"/>
-                                    <Element ElementType="0" Coordinate="3075"/>
-                                    <Element ElementType="7" Coordinate="3076">
-                                        P0000C
+                                    <Element ElementType="7" Coordinate="3073">
+                                        P00000
                                     </Element>
-                                    <Element ElementType="0" Coordinate="3078"/>
-                                    <Element ElementType="0" Coordinate="4099"/>
-                                    <Element ElementType="7" Coordinate="4100">
-                                        P0000D
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="4102"/>
-                                    <Element ElementType="7" Coordinate="5124">
-                                        P0000E
+                                    <Element ElementType="6" Coordinate="3076">
+                                        _ON
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="8193" Param="90"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="END">
+                                    <Element ElementType="2" Coordinate="5121" Param="90"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="END">
                                         END
                                     </Element>
                                 </Rung>

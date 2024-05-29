@@ -171,7 +171,7 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="7">
                             <Symbols>
-                                <Symbol Name="_t1_NE" Comment="$pi != 6.2" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="_t1_NE" Comment="$pi != 6.2" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
                                 <Symbol Name="b0" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>

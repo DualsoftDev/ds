@@ -595,7 +595,8 @@ module XgxExpressionConvertorModule =
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
         member internal x.ToStatements (prjParam: XgxProjectParams, augs:Augments) : unit =
-            match x with
+            let statement = x
+            match statement with
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
@@ -646,7 +647,7 @@ module XgxExpressionConvertorModule =
 
             | DuAugmentedPLCFunction _ 
             | (DuTimer _ | DuCounter _) ->
-                augs.Statements.Add x 
+                augs.Statements.Add statement 
 
             | DuAction(DuCopy(condition, source, target)) ->
                 let funcName = XgiConstants.FunctionNameMove
@@ -662,7 +663,7 @@ module XgxExpressionConvertorModule =
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
         /// visit: [상위로부터 부모까지의 expression 경로] -> 자신 expression -> 반환 expression : 아래의 FunctionToAssignStatement 샘플 참고
         member x.VisitExpression (visit:IExpression list -> IExpression -> IExpression) : Statement =
-
+            let statement = x
             /// IExpression option 인 경우의 visitor
             let tryVisit (expPath:IExpression list) (exp:IExpression<bool> option) : IExpression<bool> option =
                 exp |> map (fun exp -> visit expPath exp :?> IExpression<bool> ) 
@@ -670,7 +671,7 @@ module XgxExpressionConvertorModule =
             let visitTop exp = visit [] exp
             let tryVisitTop exp = tryVisit [] exp
 
-            match x with
+            match statement with
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
             | DuVarDecl(exp, var) ->
                 match exp.Terminal with
@@ -696,13 +697,15 @@ module XgxExpressionConvertorModule =
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (visit:IExpression -> IExpression) : Statement =
+            let statement = x
             let visit2 _ (exp:IExpression) = visit exp
-            x.VisitExpression visit2
+            statement.VisitExpression visit2
 
         /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
         member x.DistributeNegate() =
-            let visitor (exp:IExpression) : IExpression = exp.DistributeNegate()
-            x.VisitExpression visitor
+            let statement = x
+            let visitor (exp:IExpression) : IExpression = exp.ApplyNegate()
+            statement.VisitExpression visitor
 
 
         /// XGI Timer/Counter 의 RungInCondition, ResetCondition 이 Non-terminal 인 경우, assign statement 로 변환한다.

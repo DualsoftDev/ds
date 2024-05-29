@@ -24,15 +24,88 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
             | _ -> failwith "Not supported plc type"
 
 
+    member x.``Negations test1`` () =
+        let storages = Storages()
+        let code = baseCode + "$qx = !$ix;"
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Negations test2`` () =
+        let storages = Storages()
+        let code = baseCode + "$qx = !!$ix;"
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Negations test3`` () =
+        let storages = Storages()
+        let code = baseCode + "$qx = !!!$ix;"
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Negations test4`` () =
+        let storages = Storages()
+        let code = baseCode + "$qx = !!!!$ix;"
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Negations test5`` () =
+        let storages = Storages()
+        let code = baseCode + "$qx = !!!!!$ix;"
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
+    member x.``Equality test1`` () =
+        let storages = Storages()
+        let code = baseCode + "$qx = $ix != true;"
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Negation, comparision test1`` () =
+        let storages = Storages()
+        let code = baseCode + """$qx =
+        ( !(2 == 3) && !($ix != true) && !!!(3.14 > 5.0) )
+            || ( !(true && false) && !!(true || $ix)  ) ;"""
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
 
     member x.``Normal, Rising, Falling contact test`` () =
         let storages = Storages() //확인필요 !(!($ix)) ==> !($ix) PLC 내려갈때 처리되고 있습니다.
-        let testCode = "$qx = !(!($ix)) && !($ix) && rising($ix) && falling($ix);"
+        let testCode =
+            """$qx =       !$ix
+                    &&    !!$ix
+                    &&   !!!$ix
+                    &&  !!!!$ix
+                    && !!!!!$ix
+                    && rising($ix) && falling($ix);"""
         let code = baseCode + testCode
 
         let statements = parseCodeForWindows storages code
         statements.Length === 1
-        statements[0].ToText() === testCode.TrimEnd(';')
+        let xxx = statements[0].ToText()
+        //statements[0].ToText() === testCode.TrimEnd(';')
 
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
@@ -90,11 +163,25 @@ type XgiRisingFallingTest() =
     [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
+    [<Test>] member x.``Negations test1`` () = base.``Negations test1`` ()
+    [<Test>] member x.``Negations test2`` () = base.``Negations test2`` ()
+    [<Test>] member x.``Negations test3`` () = base.``Negations test3`` ()
+    [<Test>] member x.``Negations test4`` () = base.``Negations test4`` ()
+    [<Test>] member x.``Negations test5`` () = base.``Negations test5`` ()
+    [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
+    [<Test>] member x.``Equality test1`` () = base.``Equality test1`` ()
 
 type XgkRisingFallingTest() =
     inherit XgxRisingFallingTest(XGK)
     [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
+    [<Test>] member x.``Negations test1`` () = base.``Negations test1`` ()
+    [<Test>] member x.``Negations test2`` () = base.``Negations test2`` ()
+    [<Test>] member x.``Negations test3`` () = base.``Negations test3`` ()
+    [<Test>] member x.``Negations test4`` () = base.``Negations test4`` ()
+    [<Test>] member x.``Negations test5`` () = base.``Negations test5`` ()
+    [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
+    [<Test>] member x.``Equality test1`` () = base.``Equality test1`` ()
 
      

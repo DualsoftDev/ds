@@ -98,22 +98,24 @@ module CpuLoader =
     type CpuLoaderExt =
         [<Extension>]
         static member LoadStatements (system:DsSystem, storages:Storages, targetType) =
-            UniqueName.resetAll()
-            applyTagManager (system, storages, targetType)
+                UniqueName.resetAll()
+                applyTagManager (system, storages, targetType)
           
-            let pous =
-                //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
-                let systems = system.GetRecursiveLoadeds() 
-                systems
-                |> Seq.distinctBy(fun f->f.ReferenceSystem)
-                |> Seq.map(fun s ->
-                    match s with
-                    | :? Device as d         -> DevicePou   (d, convertSystem(d.ReferenceSystem, false))
-                    | :? ExternalSystem as e -> ExternalPou (e, convertSystem(e.ReferenceSystem, false))
-                    | _ -> failwithlog (getFuncName())
-                    )
-                //자신(Acitve) system을  CPU 변환
-                |>Seq.append [ActivePou (system, convertSystem(system, true))]
+                let pous =
+                    //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
+                    let systems = system.GetRecursiveLoadeds() 
+                    systems
+                    |> Seq.distinctBy(fun f->f.ReferenceSystem)
+                    |> Seq.map(fun s ->
+                        try 
+                            match s with
+                            | :? Device as d         -> DevicePou   (d, convertSystem(d.ReferenceSystem, false))
+                            | :? ExternalSystem as e -> ExternalPou (e, convertSystem(e.ReferenceSystem, false))
+                            | _ -> failwithlog (getFuncName())
+                        with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
+                        )
+                    //자신(Acitve) system을  CPU 변환
+                    |>Seq.append [ActivePou (system, convertSystem(system, true))]
 
-            pous
+                pous
 

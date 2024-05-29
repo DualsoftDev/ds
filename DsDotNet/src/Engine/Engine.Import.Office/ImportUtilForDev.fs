@@ -99,10 +99,10 @@ module ImportUtilForDev =
             mySys.AddLoadedSystem(Device(loadedSys, devParams, false))
             loadedSys
         else 
-            mySys.GetLoadedSys(loadedName).Value.ReferenceSystem
+            loadedSys
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
-        let devOrg= addOrGetExistSystem mySys loadedSys newloadedName devParams
+        let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
         let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
 
         if node.DevParam.IsSome then

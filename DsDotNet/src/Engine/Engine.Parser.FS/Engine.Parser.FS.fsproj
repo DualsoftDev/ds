@@ -10,34 +10,35 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Remove="C:\Users\kwak\.nuget\packages\fsharp.core\6.0.6\contentFiles\any\netstandard2.0\FSharp.Core.xml"/>
+        <None Remove="C:\Users\kwak\.nuget\packages\fsharp.core\6.0.6\contentFiles\any\netstandard2.0\FSharp.Core.xml" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
-        <Compile Include="0.ParserException.fs"/>
-        <Compile Include="0.Parser.Prologue.fs"/>
-        <Compile Include="0.ParserObject.fs"/>
-        <Compile Include="1.AllListener.fs"/>
-        <Compile Include="1.ErrorListener.fs"/>
-        <Compile Include="1.ParserUtility.fs"/>
-        <Compile Include="FqdnParser.fs"/>
-        <Compile Include="ExpressionParser.fs"/>
-        <Compile Include="1.ContextInformation.fs"/>
-        <Compile Include="3.1.Listener.fs"/>
-        <Compile Include="3.2.Listener.Epilog.fs"/>
-        <Compile Include="5.ModelParser.fs"/>
-        <Compile Include="SystemBuilder.fs"/>
-        <Compile Include="ParserLoader.fs"/>
-        <Compile Include="AssemblyInfo.fs"/>
-        <Compile Include="Program.fs"/>
-        <Compile Include="EntryPoint.fs"/>
-        <Content Include="FodyWeavers.xml"/>
+        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="0.ParserException.fs" />
+        <Compile Include="0.Parser.Prologue.fs" />
+        <Compile Include="0.ParserObject.fs" />
+        <Compile Include="1.AllListener.fs" />
+        <Compile Include="1.ErrorListener.fs" />
+        <Compile Include="1.ParserUtility.fs" />
+        <Compile Include="FqdnParser.fs" />
+        <Compile Include="ExpressionParser.fs" />
+        <Compile Include="1.ContextInformation.fs" />
+        <Compile Include="3.0.ListenerUtil.fs" />
+        <Compile Include="3.1.Listener.fs" />
+        <Compile Include="3.2.Listener.Epilog.fs" />
+        <Compile Include="5.ModelParser.fs" />
+        <Compile Include="SystemBuilder.fs" />
+        <Compile Include="ParserLoader.fs" />
+        <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="Program.fs" />
+        <Compile Include="EntryPoint.fs" />
+        <Content Include="FodyWeavers.xml" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1"/>
-        <PackageReference Include="Antlr4BuildTasks" Version="12.2.0" PrivateAssets="all"/>
+        <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+        <PackageReference Include="Antlr4BuildTasks" Version="12.2.0" PrivateAssets="all" />
         <PackageReference Include="Fody" Version="6.6.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -48,12 +49,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj"/>
+        <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="log4net" Version="2.0.15"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+        <PackageReference Include="log4net" Version="2.0.15" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 
 </Project>

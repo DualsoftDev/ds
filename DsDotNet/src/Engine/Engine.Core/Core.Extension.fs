@@ -182,8 +182,8 @@ module CoreExtensionModule =
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
-        member x.GetLoadedSys   (name:string) = x.LoadedSystems.TryFind(fun f-> f.Name = name)
-
+        member x.GetLoadedSys   (loadSys:DsSystem) = x.LoadedSystems.TryFind(fun f-> f.ReferenceSystem = loadSys)
+         
     let getType (xs:DevParam seq) = 
         if xs.Where(fun f->f.DevType.IsSome).Any() 
                 then 

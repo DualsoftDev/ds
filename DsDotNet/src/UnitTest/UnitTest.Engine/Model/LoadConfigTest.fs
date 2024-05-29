@@ -12,12 +12,12 @@ module LoadConfigTestModule =
     type LoadConfigTest() =
         inherit EngineTestBaseClass()
 
-        let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/UnitTestExample"|])
+        let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/ImportOfficeExample/Sample"|])
         let configFile = PathManager.getFullPath  ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
         
         let loadConfigTest() =
             let cfg =
-                {   DsFilePath =  $@"{dsFileDir}dsFolder/Factory.ds" 
+                {   DsFilePath =  $@"{dsFileDir}/Factory.ds" 
                     HWIP =  RuntimeDS.IP
                     }
             ModelLoader.SaveConfig configFile cfg
@@ -42,17 +42,12 @@ module LoadConfigTestModule =
 
             let mySysText = """
 [sys] L = {
-    [external file="dsFolder/sub/sub/sub/RH.ds"] A;
-    [external file="dsFolder/sub/sub/sub/RH.ds"] B;
+    [external file="sub/sub/sub/RH.ds"] A;
+    [external file="sub/sub/sub/RH.ds"] B;
 }
 """
 
-//file="station.ds"
-//[sys] Station = {
-    //[flow] F = {
-    //    Vp > Pp > Sp;
-    //    Vm > Pm > Sm;
-    //} ....
+
 
             let system = parseText systemRepo dsFileDir mySysText
             validateGraphOfSystem system

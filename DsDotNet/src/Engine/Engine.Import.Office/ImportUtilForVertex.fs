@@ -43,7 +43,7 @@ module ImportUtilVertex =
             job.DeviceDefs |> Seq.exists (fun d -> d.DeviceName = loadSysName && d.ApiName = apiName)) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
-            let device = sys.Devices |> Seq.find (fun d -> d.Name = loadSysName)
+            let device = sys.LoadedSystems |> Seq.find (fun d -> d.Name = loadSysName)
             let api = device.ReferenceSystem.ApiItems |> Seq.find (fun a -> a.Name = apiName)
             let devTask = 
                 match sys.Jobs.SelectMany(fun j->j.DeviceDefs).TryFind(fun d->d.ApiItem = api) with 
@@ -99,7 +99,7 @@ module ImportUtilVertex =
         let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
         //let jobName = getJobName node apiName mySys
         //let jobName = node.JobName
-        let loadedSys = mySys.Devices.Select(fun d -> d.Name)
+        let loadedSys = mySys.LoadedSystems.Select(fun d -> d.Name)
         let call =
             if node.IsFunction then
                 if node.IsRootNode.Value then

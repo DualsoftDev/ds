@@ -33,10 +33,11 @@ module CoreCreateModule =
     let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (inParam:DevParam, outParm:DevParam): TaskDev =
 
         let api = 
-        
             // Check if the API already exists
-            if not (sys.ApiItems.Any(fun w -> w.Name = apiName)) 
+            if sys.ApiItems.Any(fun w -> w.Name = apiName)
             then
+                failwithf $"api {apiName} 중복 생성에러"
+            else
                 // Add a default flow if no flows exist
                 if sys.Flows.IsEmpty() then
                     sys.Flows.Add(Flow.Create("genFlow", sys)) |> ignore
@@ -71,8 +72,6 @@ module CoreCreateModule =
                     //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.InterlockWeak, newApi.Name) |> ignore)
                 
                 newApi
-            else
-                failwithf $"api {apiName} 중복 생성에러"
 
         TaskDev(api, jobName, inParam, outParm, devName)
 

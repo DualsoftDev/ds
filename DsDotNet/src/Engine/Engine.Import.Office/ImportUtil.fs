@@ -182,15 +182,15 @@ module ImportU =
         [<Extension>]
         static member MakeAnimationPoint(doc: pptDoc, mySys: DsSystem) =
 
-            let addChannelPoints (dev:Device) (node:pptNode) = 
-                if dev.IsNull()
+            let addChannelPoints (loaded:LoadedSystem) (node:pptNode) = 
+                if loaded.IsNull()
                     then node.Shape.ErrorName(ErrID._61, node.PageNum)
                     else
                         if node.Position.X >=0 && node.Position.Y >= 0
                         then 
                              let xywh = Xywh(node.Position.X, node.Position.Y
                                            , node.Position.Width, node.Position.Height) 
-                             dev.ChannelPoints[TextEmtpyChannel] <-xywh
+                             loaded.ChannelPoints[TextEmtpyChannel] <-xywh
 
             doc.Nodes
             |> Seq.filter (fun node -> node.NodeType = CALL)
@@ -199,18 +199,18 @@ module ImportU =
                 match getJobActionType node.CallApiName with
                 | MultiAction (_,cnt) -> 
                     for i in [1..cnt] do 
-                        let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallName i))
+                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallName i))
                         addChannelPoints dev node
                 | _ ->
-                    let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
+                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallName)
                     addChannelPoints dev node
                     )
 
             doc.Nodes
             |> Seq.filter (fun node -> node.IsFunction)
-            |> Seq.filter (fun node -> mySys.Devices.any(fun f->f.Name = node.CallName))
+            |> Seq.filter (fun node -> mySys.LoadedSystems.any(fun f->f.Name = node.CallName))
             |> Seq.iter (fun node ->
-                    let dev = mySys.Devices.FirstOrDefault(fun f->f.Name = node.CallName)
+                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallName)
                     addChannelPoints dev node
             )
 

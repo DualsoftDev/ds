@@ -520,23 +520,32 @@ module PPTObjectModule =
 
         member x.JobName =
             let pureJob = pageTitle+"_"+GetLastBracketRelaceName(name, "").Replace(".", "_")
-            if x.IsCallDevParam then
-                let inParam = devParam.Value |> fst
-                let outParam = devParam.Value |> snd
+            let jobName =
+                if x.IsCallDevParam then
+                    let inParam = devParam.Value |> fst
+                    let outParam = devParam.Value |> snd
 
-                if inParam.IsSome && outParam.IsNone then
-                    let post = getPostParam inParam.Value
-                    if post = "" then $"{pureJob}" else $"{pureJob}_IN{post}"
-                elif inParam.IsSome && outParam.IsSome then
-                    let postIn = getPostParam inParam.Value
-                    let postOut = getPostParam outParam.Value
-                    if postIn = "" && postOut = "" 
-                    then $"{pureJob}"
-                    else $"{pureJob}_IN{postIn}_OUT{postOut}" 
-                else failwithlog "error"
-            else 
-                pureJob
-                              
+                    if inParam.IsSome && outParam.IsNone then
+                        let post = getPostParam inParam.Value
+                        if post = "" then $"{pureJob}" else $"{pureJob}_IN{post}"
+                    elif inParam.IsSome && outParam.IsSome then
+                        let postIn = getPostParam inParam.Value
+                        let postOut = getPostParam outParam.Value
+                        if postIn = "" && postOut = "" 
+                        then $"{pureJob}"
+                        else $"{pureJob}_IN{postIn}_OUT{postOut}" 
+                    else failwithlog "error"
+                else 
+                    pureJob
+
+            match x.JobType with
+            | Some t -> 
+                if t = Normal  then jobName
+                else 
+                    $"{jobName}[{t.ToText()}]"
+            | None -> jobName   
+
+
         member x.UpdateCallDevParm(isRoot:bool) =
             rootNode <- Some isRoot
             if nodeType = CALL then

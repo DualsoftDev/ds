@@ -308,11 +308,10 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
     
 
 
-jobBlock: '[' 'jobs' ']' '=' '{' (callListing|linkListing)* '}';
+jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
         jobName '=' '{' (callApiDef ';')*'}' (SEMICOLON)?;
-    linkListing:
-        jobName '=' interfaceLink SEMICOLON;
+
     jobName: identifier1;
 
     callApiDef: (interfaceCall devParamInOut | interfaceCall);

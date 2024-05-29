@@ -1,15 +1,13 @@
 [sys] Handling = {
     [flow] Flow = {
-            R1; 
-            R2; 
-            R3; 
+        R1 <|> R2 <|> R3;
     }
     [interfaces] = {
-        HOME = { Flow.R1 ~ _ }
-        LOAD = { Flow.R2 ~ _ }
-        UNLOAD = { Flow.R3 ~ _ }
-        LOAD <||> HOME;
-        LOAD <||> UNLOAD;
-        HOME <||> UNLOAD;
+        HOME = { Flow.R1 ~ Flow.R1 }
+        LOAD = { Flow.R2 ~ Flow.R2 }
+        UNLOAD = { Flow.R3 ~ Flow.R3 }
     }
 }
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.8]

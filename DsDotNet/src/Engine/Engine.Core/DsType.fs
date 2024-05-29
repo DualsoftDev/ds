@@ -70,7 +70,16 @@ module DsType =
             match x with
             | MultiAction (_, cnt) -> cnt
             | _ -> 1
-        
+
+        member x.ToText() = 
+            match x with
+            | Normal   -> ""
+            | NoneRx  -> TextJobNoneRX
+            | NoneTx  -> TextJobNoneTX
+            | NoneTRx -> TextJobNoneTRX
+            | Push    -> TextJobPush
+            | MultiAction (_, cnt)-> $"{cnt}"
+
 
     [<Flags>]    
     type ScreenType =
@@ -132,10 +141,10 @@ module DsType =
 
         match endContents with
         | Some "-" -> JobActionType.Normal
-        | Some "XX" -> JobActionType.NoneTRx
-        | Some "XT" -> JobActionType.NoneTx
-        | Some "XR" -> JobActionType.NoneRx
-        | Some "P" -> JobActionType.Push
+        | Some TextJobNoneTRX-> JobActionType.NoneTRx
+        | Some TextJobNoneTX -> JobActionType.NoneTx
+        | Some TextJobNoneRX  -> JobActionType.NoneRx
+        | Some TextJobPush -> JobActionType.Push
         | Some s when isStringDigit s ->
                 if (int s) < 2 then
                     failWithLog $"MultiAction Count >= 2 : {name}"

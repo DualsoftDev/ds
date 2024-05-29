@@ -85,9 +85,9 @@ type VertexManager with
        
             let setRising  = fbRising [input] :> IExpression<bool>    
             let setFalling = fbFalling[input] :> IExpression<bool>
-
-            yield (checkCondi <&&>  rxReadyExpr <&&> setRising,  rst<||>v._sim.Expr)    ==| (v.ErrShort, getFuncName())
-            yield (checkCondi <&&>  rxFinishExpr <&&>setFalling,  rst<||>v._sim.Expr)   ==| (v.ErrOpen, getFuncName())
+            (*open short error*)
+            yield (checkCondi <&&>  rxReadyExpr <&&> setRising,  rst<||>v._sim.Expr)  ==| (v.ErrShort, getFuncName())
+            yield (checkCondi <&&>  rxFinishExpr<&&>setFalling,  rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
 
 
 

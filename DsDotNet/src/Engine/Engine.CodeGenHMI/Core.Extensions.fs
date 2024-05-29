@@ -74,7 +74,7 @@ module ConvertHMI =
     type Real with
         member private x.GetHMI()   =
 
-            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.ApiSystem.Name).Value
+            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.ApiSystem).Value
             let calls = x.Graph.Vertices.OfType<Call>()
             let tm = x.TagManager :?> VertexManager
             {

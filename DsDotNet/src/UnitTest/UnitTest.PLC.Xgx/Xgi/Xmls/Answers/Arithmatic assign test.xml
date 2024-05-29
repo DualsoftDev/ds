@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $b0 = 2.1 != 6.1
+                                        [0] bool b0 = !(2.1 == 6.1)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -67,7 +67,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $b1 = $pi != 6.1
+                                        [1] bool b1 = !($pi == 6.1)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -87,7 +87,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [2] $b2 = true &amp;&amp; $pi != 6.2
+                                        [2] bool b2 = true &amp;&amp; !($pi == 6.2)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -119,7 +119,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="17409">
-                                        [3] $b3 = $pi &gt; 6.23
+                                        [3] bool b3 = $pi &gt; 6.23
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -139,7 +139,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
-                                        [4] $b4 = $pi &lt;= 6.24
+                                        [4] bool b4 = !($pi &gt; 6.24)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

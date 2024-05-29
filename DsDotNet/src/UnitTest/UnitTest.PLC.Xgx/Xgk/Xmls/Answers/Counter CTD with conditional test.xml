@@ -95,7 +95,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] $cu3 = $cu1 || $cu2
+                                        [2] bool cu3 = $cu1 || $cu2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

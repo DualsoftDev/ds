@@ -1,4 +1,5 @@
 namespace rec Engine.Core
+
 open System
 open System.Linq
 open System.Runtime.CompilerServices
@@ -129,7 +130,9 @@ module ExpressionFunctionModule =
 
         | ("&&" | "and") -> fbLogicalAnd args
         | ("||" | "or")  -> fbLogicalOr  args
-        | ("!"  | "not") -> fbLogicalNot args        // 따로 or 같이??? neg 는 contact 이나 coil 하나만 받아서 rung 생성하는 용도, not 은 expression 을 받아서 평가하는 용도
+
+        // negateBool 이 현재 위치 이후에 정의되어 있지민, namespace 가 rec 로 정의되어 있어서 OK.
+        | ("!"  | "not") -> negateBool (args.ExactlyOne())        // 따로 or 같이??? neg 는 contact 이나 coil 하나만 받아서 rung 생성하는 용도, not 은 expression 을 받아서 평가하는 용도
 
         | ("&" | "&&&") -> fBitwiseAnd  args
         | ("|" | "|||") -> fBitwiseOr   args
@@ -164,6 +167,8 @@ module ExpressionFunctionModule =
         | "sin" -> fSin args |> iexpr
         | "cos" -> fCos args |> iexpr
         | "tan" -> fTan args |> iexpr
+
+        | "abs" -> fAbs args |> iexpr
 
         (* Timer/Counter
           - 실제로 function/expression 은 아니지만, parsing 편의를 고려해 function 처럼 취급.
@@ -485,3 +490,61 @@ module ExpressionFunctionModule =
         let fCastFloat64    args = cf _castToFloat64  "toFloat64" args
 
 
+        /// expression 내부에 변수가 하나도 없이 상수, 혹은 상수의 연산만으로 이루어진 경우에만 true 반환
+        let isLiteralizable exp : bool =
+            let rec visit (exp:IExpression) : bool =
+                match exp.Terminal, exp.FunctionName with
+                | Some terminal, _ ->
+                    terminal.Literal.IsSome
+                | None, Some _fn ->
+                    exp.FunctionArguments |> map visit |> Seq.forall id
+                | _ ->
+                    failwith "Invalid expression"
+            visit exp
+
+        // tryGetLiteralValue helper
+        let private tryGetLiteralValueT (expr:Expression<'T>) : obj =
+            if isLiteralizable expr then
+                expr.Evaluate() |> box 
+            else
+                null
+
+        /// 주어진 expression 에 대한 literal value 반환.  내부에 변수가 하나라도 포함되어 있으면 null 반환
+        let tryGetLiteralValue (expr:IExpression) =
+            match expr with
+            | :? Expression<bool>   as exp -> tryGetLiteralValueT exp
+            | :? Expression<int8>   as exp -> tryGetLiteralValueT exp
+            | :? Expression<uint8>  as exp -> tryGetLiteralValueT exp
+            | :? Expression<int16>  as exp -> tryGetLiteralValueT exp
+            | :? Expression<uint16> as exp -> tryGetLiteralValueT exp
+            | :? Expression<int32>  as exp -> tryGetLiteralValueT exp
+            | :? Expression<uint32> as exp -> tryGetLiteralValueT exp
+            | :? Expression<int64>  as exp -> tryGetLiteralValueT exp
+            | :? Expression<uint64> as exp -> tryGetLiteralValueT exp
+            | :? Expression<single> as exp -> tryGetLiteralValueT exp
+            | :? Expression<double> as exp -> tryGetLiteralValueT exp
+            | :? Expression<string> as exp -> tryGetLiteralValueT exp
+            | :? Expression<char>   as exp -> tryGetLiteralValueT exp
+            | _ -> null
+
+        /// 주어진 expression 에 대한 negated expression 반환
+        ///
+        /// - createUnaryExpression "!" expr 와 기능 유사
+        let negateBool (expr:IExpression) : Expression<bool> =
+            assert (expr.DataType = typedefof<bool>)
+            let boolExp = expr :?> Expression<bool>
+            match boolExp with
+            | DuTerminal(DuLiteral {Value = v}) ->
+                if v then Expression.False else Expression.True
+            //| DuFunction({Name="!"; Arguments=[expr]}) ->
+            //    expr
+            | _ ->
+                fbLogicalNot [expr]
+
+    type IExpression with
+        /// 주어진 Expression 을 negation : negateBool 함수와 동일
+        member exp.NegateBool() = negateBool exp
+        /// 주어진 expression 에 대한 literal value 반환.  내부에 변수가 하나라도 포함되어 있으면 null 반환
+        member exp.TryGetLiteralValue() = tryGetLiteralValue exp
+        /// expression 내부에 변수가 하나도 없이 상수, 혹은 상수의 연산만으로 이루어진 경우에만 true 반환
+        member exp.IsLiteralizable() = isLiteralizable exp

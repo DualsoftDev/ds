@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
@@ -26,24 +26,25 @@
         <None Include="formatXml.mjs" />
         <Compile Include="TestFixture.Xgx.fs" />
         <Compile Include="ExpressionVisitor.fs" />
-        <Compile Include="Arithmetic/XgxArithmeticTest.fs" />
-        <Compile Include="Comparison/XgxComparisonTest.fs" />
         <Compile Include="XgxTestCommon.fs" />
-        <Compile Include="Rung/XgxDrawing.fs" />
-        <Compile Include="Rung/XgxRungBasics.fs" />
-        <Compile Include="Rung/XgxGenTest.fs" />
-        <Compile Include="Rung/XgxLadderElementsTest.fs" />
         <Compile Include="XgxTimerTest.fs" />
         <Compile Include="XgxCounterTest.fs" />
-        <Compile Include="Comparison/XgxExpressionEqualityTest.fs" />
-        <Compile Include="POU/XgxPOU.Test.fs" />
-        <Compile Include="POU/XgxExistingXmlProjectAnalTest.fs" />
-        <Compile Include="Types/XgxExtendedTypes.fs" />
-        <Compile Include="Types/XgxRisingFallingTest.fs" />
         <Compile Include="AddressAllocatorTest.fs" />
         <Compile Include="XgxIQMapperTest.fs" />
         <Compile Include="XgxAutoMemoryAllocTest.fs" />
         <Compile Include="NameAddressValidatorTest.fs" />
+        <Compile Include="Arithmetic/XgxArithmeticTest.fs" />
+        <Compile Include="Comparison/XgxComparisonTest.fs" />
+        <Compile Include="Rung/XgxDrawing.fs" />
+        <Compile Include="Rung/XgxRungBasics.fs" />
+        <Compile Include="Rung/XgxGenTest.fs" />
+        <Compile Include="Rung/XgxLadderElementsTest.fs" />
+        <Compile Include="Comparison/XgxExpressionEqualityTest.fs" />
+        <Compile Include="Comparison\XgxNegationTest.fs" />
+        <Compile Include="POU/XgxPOU.Test.fs" />
+        <Compile Include="POU/XgxExistingXmlProjectAnalTest.fs" />
+        <Compile Include="Types/XgxExtendedTypes.fs" />
+        <Compile Include="Types/XgxRisingFallingTest.fs" />
         <None Include="App.config" />
         <Compile Include="Main.fs" />
     </ItemGroup>

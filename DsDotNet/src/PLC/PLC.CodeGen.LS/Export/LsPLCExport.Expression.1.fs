@@ -4,6 +4,8 @@ namespace PLC.CodeGen.LS
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
+open PLC.CodeGen.LS
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module LsPLCExportExpressionModule =
@@ -52,37 +54,57 @@ module LsPLCExportExpressionModule =
             | _ ->
                 failwith "Invalid expression"
 
+        member exp.IsLiteralizable() : bool =
+            let rec visit (exp:IExpression) : bool =
+                match exp.Terminal, exp.FunctionName with
+                | Some terminal, _ ->
+                    terminal.Literal.IsSome
+                | None, Some _fn ->
+                    exp.FunctionArguments |> map visit |> Seq.forall id
+                | _ ->
+                    failwith "Invalid expression"
+            visit exp
+
+
         /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
         /// Non-terminal negation 을 terminal negation 으로 변경
         member x.ApplyNegate() : IExpression =
-            let exp = x
-            let negate (expr:IExpression) : IExpression =
+            let self = x
+            let negate (expPath:IExpression list) (expr:IExpression) : IExpression =
                 match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None ->
-                        createUnaryExpression "!" expr
+                        if expr.DataType = typedefof<bool> then
+                            expr.NegateBool()
+                        else
+                            // 비교 연산 하에서의 argument negation 은 무시한다.  (e.g. !(a > b) => a <= b.  연산자만 변경하고, a 와 b 의 negation 은 무시됨.)
+                            assert(expPath.Head.FunctionName.Value |> isComparisonOperator)
+                            expr
                     | None, Some "!" -> expr.FunctionArguments.ExactlyOne()
-                    | None, Some _fn -> createUnaryExpression "!" expr
+                    | None, Some _fn -> expr.NegateBool()
                     | _ -> failwith "Invalid expression"
 
-            let rec visitArgs (negated:bool) (expr:IExpression) : IExpression =
+            let rec visitArgs (expPath:IExpression list) (negated:bool) (expr:IExpression) : IExpression =
                 match expr.Terminal, expr.FunctionName with
                 | Some _terminal, None ->
                     match negated with
-                    | true -> createUnaryExpression "!" expr
-                    | false -> expr
+                    // terminal 의 negation 은 bool type 에 한정한다.
+                    | true -> negate expPath expr
+                    | _-> expr
                 | None, Some _fn ->
-                    //let negated = negated <> (fn = "!")
-                    visitFunction negated expr
+                    visitFunction expPath negated expr
                 | _ -> failwith "Invalid expression"
 
-            and visitFunction (negated:bool) (expr:IExpression) : IExpression =
+            and visitFunction (expPath:IExpression list) (negated:bool) (expr:IExpression) : IExpression =
                 let args = expr.FunctionArguments
+                let newExpPath = expr::expPath
+                let visitFunction = visitFunction newExpPath
+                let visitArgs = visitArgs newExpPath
                 if negated then
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None ->
-                        negate expr//.FunctionArguments.ExactlyOne()
+                        negate newExpPath expr
                     | None, Some(IsComparisonOperator fn) ->
-                        let newArgs = args |> map (visitArgs false)
+                        let newArgs = args |> map (visitArgs true)
                         let reverseFn =
                             match fn with
                             | "==" -> "!="
@@ -95,7 +117,11 @@ module LsPLCExportExpressionModule =
                         createCustomFunctionExpression reverseFn newArgs
                     | None, Some("&&" | "||" as fn) ->
                         let newArgs = args |> map (visitArgs true)
-                        let reverseFn = if fn = "&&" then "||" else "&&"
+                        let reverseFn =
+                            match fn with
+                            | "&&" -> "||"
+                            | "||" -> "&&"
+                            | _ -> failwith "ERROR"
                         createCustomFunctionExpression reverseFn newArgs
                     | None, Some "!" ->
                         args.ExactlyOne() |> visitFunction false
@@ -104,14 +130,13 @@ module LsPLCExportExpressionModule =
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None -> expr
                     | None, Some "!" ->
-                        let newArgs = args |> map (visitArgs true)
-                        newArgs.ExactlyOne()
+                        args.ExactlyOne() |> visitArgs true 
                     | None, Some _fn ->
                         let newArgs = args |> map (visitArgs false)
                         expr.WithNewFunctionArguments newArgs
                     | _ -> failwith "Invalid expression"
 
-            visitFunction false exp
+            visitFunction [] false self
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.
@@ -131,6 +156,5 @@ module LsPLCExportExpressionModule =
                     newFn
                 | _ -> failwith "Invalid expression"
             traverse 0 exp resultStore
-
 
 

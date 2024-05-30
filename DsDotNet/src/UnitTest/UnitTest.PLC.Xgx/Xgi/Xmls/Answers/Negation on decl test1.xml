@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145730" Version="513" WksNodeCount="16">
-    Negations test4
+    Negation on decl test1
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
@@ -15,10 +15,11 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="2">
+                <GlobalVariable Version="Ver 1.0" Count="3">
                     <Symbols>
-                        <Symbol Name="ix" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.0" State="0"/>
-                        <Symbol Name="qx" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX0.1.0" State="0"/>
+                        <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -43,21 +44,27 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !(!(!(!($ix))))
+                                        [0] bool b3 = !(!($b1) != $b2)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
-                                        ix
+                                        _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        qx
+                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: EQ2_BOOL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 984&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200001, , 0&#xA;VAR_IN: IN2, 0x00200001, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="3073">
+                                        b1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="3079">
+                                        b3
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="4097">
+                                        b2
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="4097" Param="90"/>
-                                    <Element ElementType="33" Coordinate="4190" Param="END">
+                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -67,10 +74,11 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="2">
+                        <LocalVar Version="Ver 1.0" Count="3">
                             <Symbols>
-                                <Symbol Name="ix" Comment="" Device="I" Kind="8" State="0"/>
-                                <Symbol Name="qx" Comment="" Device="Q" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b3" Comment="" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

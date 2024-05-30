@@ -11,14 +11,11 @@
             "id": "f118e42fbfe406e6",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
-                "viewState": {
-                  "x": 0,
-                  "y": 0,
-                  "zoom": 0
-                }
+                "file": "TODO's.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
@@ -88,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
+                "file": "TODO's.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
+                "file": "TODO's.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas"
+                "file": "TODO's.md"
               }
             }
           }
@@ -151,8 +148,11 @@
   },
   "active": "f118e42fbfe406e6",
   "lastOpenFiles": [
-    "DsWebServer/HMI/Browser UI/WgtLampRGFH.canvas",
+    "사용자 정의 structure.md",
+    "User Defined Structure.md",
+    "TODO's.md",
     "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
+    "DsWebServer/HMI/Browser UI/WgtLampRGFH.canvas",
     "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
     "DsWebServer/HMI/Browser UI/CompHmiButtonColumn.md",
     "DsWebServer/HMI/HMI.md",
@@ -162,7 +162,6 @@
     "Others/Powerpoint Addin's.md",
     "DsWebServer/IOHub Web 연동.md",
     "Others",
-    "TODO's.md",
     "App Dll Hierarchy.canvas",
     "Core Dll hierarchy.canvas",
     "0. TOC.md",
@@ -186,7 +185,6 @@
     "IOHub/Server.md",
     "IOHub/IOHub TODO.md",
     "IOHub/Zmq/ZMQ client build.md",
-    "Stat/Info viewer.md",
     "Stat/Database/Schema.canvas",
     "Stat/Architecture.canvas",
     "QuerySet",

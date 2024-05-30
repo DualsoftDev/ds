@@ -31,6 +31,7 @@
         <Compile Include="TestFixture.Expression.fs" />
         <Compile Include="ExpressionTest.fs" />
         <Compile Include="ComparisonTest.fs" />
+        <Compile Include="LiteralTest.fs" />
         <Compile Include="CustomFunctionTest.fs" />
         <Compile Include="CodeTest.fs" />
         <Compile Include="CpuTest.fsx" />

@@ -218,9 +218,16 @@ module ExpressionModule =
     }
 
     type Statement =
-        | DuAssign of condition:IExpression<bool> option * expression:IExpression * target:IStorage
-        /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
+        /// 변수 선언.  e.g "int a = $pi + 3;"  초기값 처리에 주의
+        ///
+        /// XGI : 선언한 변수의 초기값으로 설정.  Rung 생성에는 관여되지 않음
+        /// XGK : _1ON 을 조건으로 한 대입문으로 rung 생성.  (XGK 에서는 변수 초기값이 지원되지 않음)
         | DuVarDecl of expression:IExpression * variable:IStorage
+
+        /// 대입문.  e.g "$a = $b + 3;"
+        ///
+        /// condition 조건이 만족할 경우, expression 을 target 에 대입.  condition None 인 경우, _ON 의 의미.
+        | DuAssign of condition:IExpression<bool> option * expression:IExpression * target:IStorage
 
         | DuTimer   of TimerStatement
         | DuCounter of CounterStatement
@@ -228,7 +235,7 @@ module ExpressionModule =
 
         /// PLC function (비교, 사칙연산, Move) 을 호출하는 statement
         ///
-        /// - 주로 XGI 에서 사용.  XGK 에서는 zipAndExpression 와 s2Ss 에서 사용.  s2Ss 사용은 DuAction(DuCopy...) 부분인데, 대체 가능함.
+        /// - 주로 XGI 에서 사용.  XGK 에서는 zipAndExpression 와 Statement.ToStatements() 에서 사용.  Statement.ToStatements() 사용은 DuAction(DuCopy...) 부분인데, 대체 가능함.
         | DuAugmentedPLCFunction of FunctionParameters
 
     /// 추가 가능한 Statement container

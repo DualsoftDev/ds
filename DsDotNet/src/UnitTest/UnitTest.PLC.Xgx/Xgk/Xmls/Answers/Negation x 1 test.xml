@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    Negation, comparision test1
+    Negation x 1 test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -42,8 +42,6 @@
                     <Symbols Count="2">
                         <Symbol Name="ix" Comment="" Device="P" DevicePos="0" Type="BIT"/>
                         <Symbol Name="qx" Comment="" Device="P" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="_t1_NE" Comment="2 != 3" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="_t2_LE" Comment="3.14 &lt;= 5.0" Device="M" DevicePos="1" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -67,69 +65,21 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !(2 == 3) &amp;&amp; !($ix != true) &amp;&amp; !(!(!(3.14 &gt; 5.0))) || !(true &amp;&amp; false) &amp;&amp; !(!(true || $ix))
+                                        [0] $qx = !($ix)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="2049" Param="D&lt;&gt;,2,3"/>
-                                    <Element ElementType="2" Coordinate="2058" Param="90"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        M00000
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="3073" Param="L&lt;=,3.14,5"/>
-                                    <Element ElementType="2" Coordinate="3082" Param="90"/>
-                                    <Element ElementType="14" Coordinate="3166">
-                                        M00001
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="4097">
-                                        M00000
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="4099"/>
-                                    <Element ElementType="7" Coordinate="4100">
+                                    <Element ElementType="7" Coordinate="2049">
                                         P00000
                                     </Element>
-                                    <Element ElementType="6" Coordinate="4103">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="4105"/>
-                                    <Element ElementType="6" Coordinate="4106">
-                                        M00001
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="4108"/>
-                                    <Element ElementType="2" Coordinate="4109" Param="78"/>
-                                    <Element ElementType="14" Coordinate="4190">
+                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="14" Coordinate="2142">
                                         P00001
                                     </Element>
-                                    <Element ElementType="6" Coordinate="5124">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="5127">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="5132"/>
-                                    <Element ElementType="6" Coordinate="6145">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="6147"/>
-                                    <Element ElementType="6" Coordinate="6148">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="6150"/>
-                                    <Element ElementType="2" Coordinate="6151" Param="3"/>
-                                    <Element ElementType="6" Coordinate="7169">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="7172">
-                                        P00000
-                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="9217" Param="90"/>
-                                    <Element ElementType="33" Coordinate="9310" Param="END">
+                                    <Element ElementType="2" Coordinate="4097" Param="90"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="END">
                                         END
                                     </Element>
                                 </Rung>

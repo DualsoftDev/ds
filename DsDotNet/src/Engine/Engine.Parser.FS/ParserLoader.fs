@@ -1,13 +1,9 @@
 namespace Engine.Parser.FS
 
 open System.IO
-open Newtonsoft.Json
 open Dual.Common.Core.FS
 open Engine.Core
 open System.Linq
-open System.Collections.Generic
-open System.Runtime.CompilerServices
-open PathManager
 
 
 [<AutoOpen>]

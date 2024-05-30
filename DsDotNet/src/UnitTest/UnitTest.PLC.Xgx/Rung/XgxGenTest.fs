@@ -295,80 +295,6 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
         ()
 
-    member __.``Atomic Negation test`` () =
-        let myTagA = createTag("tag0", "%IX0.0.0", false)
-        let myTagB = createTag("tag1", "%IX0.0.1", false)
-        let pulse, negated = None, false
-        let flatTerminal = FlatTerminal(myTagA, pulse, negated)
-        let negatedFlatTerminal = flatTerminal.Negate()
-        match negatedFlatTerminal with
-        | FlatTerminal(t, p, n) -> n === true
-        | _ -> failwithlog "ERROR"
-
-        (* ! (A & B) === ! A || ! B) test *)
-        let expAnd = FlatNary(And, [FlatTerminal(myTagA, pulse, negated); FlatTerminal(myTagB, pulse, negated)])
-        let negatedAnd = expAnd.Negate()
-        match negatedAnd with
-        | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
-            negated1 === true
-            negated2 === true
-        | _ -> failwithlog "ERROR"
-
-
-        (* ! (! A & B) === A || ! B) test *)
-        let expAnd = FlatNary(And, [FlatTerminal(myTagA, pulse, true); FlatTerminal(myTagB, pulse, negated)])
-        let negatedAnd = expAnd.Negate()
-        match negatedAnd with
-        | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
-            negated1 === false
-            negated2 === true
-        | _ -> failwithlog "ERROR"
-
-
-        (* ! (! A & B) === A || ! B) test *)
-        let expAnd = FlatNary(And, [FlatNary(Neg, [FlatTerminal(myTagA, None, false)]); FlatTerminal(myTagB, None, false)])
-        let negatedAnd = expAnd.Negate()
-        match negatedAnd with
-        | FlatNary(Or, [FlatTerminal(_, _, negated1); FlatTerminal(_, _, negated2)]) ->
-            negated1 === false
-            negated2 === true
-        | _ -> failwithlog "ERROR"
-
-        ()
-
-    member x.``Negation1 test`` () =
-        let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 2 + """
-            $x01 = ! $x00;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``Negation2 test`` () =
-        let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 6 + """
-            $x02 = ! ($x00 || $x01);
-            $x05 = ! ($x03 && $x04);
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-        ()
-
-
-    member x.``Negation3 test`` () =
-        let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 6 + """
-            $x02 = ! (! $x00 || $x01);
-            $x05 = ! ($x03 && ! $x04);
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
 
     member x.``Add test`` () =
         let storages = Storages()
@@ -455,10 +381,6 @@ type XgiGenerationTest() =
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
     [<Test>] member x.``OR variable length test`` () = base.``OR variable length test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
-    [<Test>] member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
-    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
-    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
-    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
     [<Test>] member x.``Add test`` () =  base.``Add test`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
 
@@ -480,10 +402,6 @@ type XgkGenerationTest() =
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
     [<Test>] member x.``OR variable length test`` () = base.``OR variable length test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
-    [<Test>] member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
-    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
-    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
-    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
     [<Test>] member x.``Add test`` () =  base.``Add test`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
 

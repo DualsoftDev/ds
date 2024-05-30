@@ -69,18 +69,18 @@ module LsPLCExportExpressionModule =
         /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
         /// Non-terminal negation 을 terminal negation 으로 변경
         member x.ApplyNegate() : IExpression =
-            let exp = x
+            let self = x
             let negate (expPath:IExpression list) (expr:IExpression) : IExpression =
                 match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None ->
                         if expr.DataType = typedefof<bool> then
-                            exp.NegateBool()
+                            expr.NegateBool()
                         else
                             // 비교 연산 하에서의 argument negation 은 무시한다.  (e.g. !(a > b) => a <= b.  연산자만 변경하고, a 와 b 의 negation 은 무시됨.)
                             assert(expPath.Head.FunctionName.Value |> isComparisonOperator)
                             expr
                     | None, Some "!" -> expr.FunctionArguments.ExactlyOne()
-                    | None, Some _fn -> exp.NegateBool()
+                    | None, Some _fn -> expr.NegateBool()
                     | _ -> failwith "Invalid expression"
 
             let rec visitArgs (expPath:IExpression list) (negated:bool) (expr:IExpression) : IExpression =
@@ -136,7 +136,7 @@ module LsPLCExportExpressionModule =
                         expr.WithNewFunctionArguments newArgs
                     | _ -> failwith "Invalid expression"
 
-            visitFunction [] false exp
+            visitFunction [] false self
 
 
         /// Expression 에 대해, 주어진 transformer 를 적용한 새로운 expression 을 반환한다.

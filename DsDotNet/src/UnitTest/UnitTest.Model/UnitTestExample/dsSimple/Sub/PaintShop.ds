@@ -1,0 +1,16 @@
+[sys] PaintShop = {
+    [flow] Flow = {
+        UNLOAD |> AUTOCLEAR;
+        UNLOAD |> end;
+        UNLOAD => AUTOCLEAR;
+        start => end;
+    }
+    [interfaces] = {
+        END = { Flow.end ~ Flow.end }
+        START = { Flow.start ~ Flow.end }
+        UNLOAD = { Flow.UNLOAD ~ Flow.UNLOAD }
+    }
+}
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.9]

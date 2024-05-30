@@ -12,7 +12,7 @@ module LoadConfigTestModule =
     type LoadConfigTest() =
         inherit EngineTestBaseClass()
 
-        let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/ImportOfficeExample/Sample"|])
+        let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/UnitTestExample/dsSimple"|])
         let configFile = PathManager.getFullPath  ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
         
         let loadConfigTest() =

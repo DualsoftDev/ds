@@ -1,0 +1,78 @@
+[sys] Factory = {
+    [flow] Flow = {
+        BodyShop1Buffer |> BodyShop1;
+        BodyShop2Buffer |> BodyShop2;
+        AssemblyShop |> UNLOAD;
+        AssemblyShop |> PaintShopBuffer2;
+        AssemblyShop |> PaintShopBuffer1;
+        Flow_START_ON_INTrue > PressShop => BodyShop1Buffer => BodyShop1;
+        PressShop_1 => BodyShop2Buffer => BodyShop2;
+        Flow_Paint_END_INTrue > AssemblyShop => UNLOAD;
+        Flow_Body2_END_INTrue > PaintShopBuffer2;
+        Flow_Body1_END_INTrue > PaintShopBuffer1;
+        PaintShopBuffer1 = {
+            Flow_Body1_UNLOAD > Flow_Paint_START;
+        }
+        PaintShopBuffer2 = {
+            Flow_Body2_UNLOAD > Flow_Paint_START;
+        }
+        AssemblyShop = {
+            Flow_Paint_UNLOAD; 
+        }
+        BodyShop1Buffer = {
+            Flow_Body1_START; 
+        }
+        BodyShop2Buffer = {
+            Flow_Body2_START; 
+        }
+        [aliases] = {
+            PressShop = { PressShop_1; }
+        }
+    }
+    [jobs] = {
+        Flow_Body1_END_INTrue(XX) = { Flow_Body1.END(-:Boolean:True, -); }
+        Flow_Body2_END_INTrue(XX) = { Flow_Body2.END(-:Boolean:True, -); }
+        Flow_Paint_END_INTrue(XX) = { Flow_Paint.END(-:Boolean:True, -); }
+        Flow_Body1_UNLOAD = { Flow_Body1.UNLOAD(P00001, P00041); }
+        Flow_Paint_START = { Flow_Paint.START(P00004, P00044); }
+        Flow_Paint_START = { Flow_Paint.START(P00004, P00044); }
+        Flow_Body2_UNLOAD = { Flow_Body2.UNLOAD(P00003, P00043); }
+        Flow_Paint_UNLOAD = { Flow_Paint.UNLOAD(P00005, P00045); }
+        Flow_Body1_START = { Flow_Body1.START(P00000, P00040); }
+        Flow_Body2_START = { Flow_Body2.START(P00002, P00042); }
+        Flow_START_ON_INTrue = { Flow_START.ON(P00006:Boolean:True, -); }
+    }
+    [buttons] = {
+        [a] = { AutoSelect(M00628, -) = { Flow; } }
+        [m] = { ManualSelect(M00629, -) = { Flow; } }
+        [d] = { DrivePushBtn(M0062A, -) = { Flow; } }
+        [e] = { EmergencyBtn(M0062D, -) = { Flow; } }
+        [p] = { PausePushBtn(M0062B, -) = { Flow; } }
+        [c] = { ClearPushBtn(M0062C, -) = { Flow; } }
+    }
+    [lamps] = {
+        [a] = { AutoModeLamp(-, M0062E) = {  } }
+        [m] = { ManualModeLamp(-, M0062F) = {  } }
+        [d] = { DriveLamp(-, M00634) = {  } }
+        [e] = { ErrorLamp(-, M00631) = {  } }
+        [r] = { ReadyStateLamp(-, M00633) = {  } }
+        [i] = { IdleModeLamp(-, M00630) = {  } }
+        [o] = { OriginStateLamp(-, M00632) = {  } }
+    }
+    [prop] = {
+        [layouts] = {
+            Flow_Body1 = (445, 542, 105, 49);
+            Flow_Body2 = (445, 763, 105, 49);
+            Flow_Paint = (1616, 565, 132, 49);
+            Flow_START = (27, 389, 121, 49);
+        }
+    }
+    [device file="./Sub/BodyShop.ds"] 
+        Flow_Body1,
+        Flow_Body2; 
+    [device file="./Sub/PaintShop.ds"] Flow_Paint; 
+    [device file="./dsLib/Part.ds"] Flow_START; 
+}
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.9]

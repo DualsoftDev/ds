@@ -1,0 +1,18 @@
+[sys] Double = {
+    [flow] Flow = {
+        RET <|> ADV;
+    }
+    [interfaces] = {
+        ADV = { Flow.ADV ~ Flow.ADV }
+        RET = { Flow.RET ~ Flow.RET }
+        RET <|> ADV;
+    }
+    [prop] = {
+        [finish] = {
+            Flow.RET;
+        }
+    }
+}
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.9]

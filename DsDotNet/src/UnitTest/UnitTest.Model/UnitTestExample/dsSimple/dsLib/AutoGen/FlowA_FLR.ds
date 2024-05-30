@@ -1,0 +1,12 @@
+[sys] FlowA_FLR = {
+    [flow] genFlow = {
+        genRealEND <|> genClearRealgenRealEND;
+        genRealEND > genClearRealgenRealEND;
+    }
+    [interfaces] = {
+        END = { genFlow.genRealEND ~ genFlow.genRealEND }
+    }
+}
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.9]

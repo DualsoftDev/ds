@@ -1,0 +1,12 @@
+[sys] tester = {
+    [flow] Flow = {
+        R1 <|> R2;
+    }
+    [interfaces] = {
+        Func1 = { Flow.R1 ~ Flow.R2 }
+        Func2 = { Flow.R2 ~ Flow.R2 }
+    }
+}
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.9]

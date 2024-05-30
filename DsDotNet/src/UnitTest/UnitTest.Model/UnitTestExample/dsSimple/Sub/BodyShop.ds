@@ -1,0 +1,59 @@
+[sys] BodyShop = {
+    [flow] FlowA = {
+        "SIDE LH" |> LH_LOAD;
+        "SIDE RH" |> RH_LOAD;
+        FLR |> "FLR _LOAD";
+        FlowA_SIDE_RH_END_INTrue > BB;
+        FlowA_SIDE_LH_END_INTrue > BB;
+        FlowA_FLR_END_INTrue > BB;
+        FLR |> RUN > FLR => "FLR _LOAD";
+        START => RUN > "SIDE LH" => LH_LOAD;
+        RUN > "SIDE RH" => RH_LOAD;
+        FLR = {
+            FlowA_Floor_RUN; 
+        }
+        "SIDE LH" = {
+            FlowA_SIDE_LH_RUN; 
+        }
+        "SIDE RH" = {
+            FlowA_SIDE_RH_RUN; 
+        }
+    }
+    [flow] FlowB = {
+        UNLOAD |> AUTOCLEAR;
+        UNLOAD |> BC4;
+        UNLOAD => AUTOCLEAR;
+        FlowA.BB > MOVING => "DOOR RH" => BC1 => BC2 => BC3 => BC4;
+        MOVING => "DOOR LH" => BC1;
+        FlowA.BB => BR => BC1;
+    }
+    [jobs] = {
+        FlowA_Floor_RUN = { FlowA_Floor.RUN(_, _); }
+        FlowA_FLR_END_INTrue = { FlowA_FLR.END(_, _); }
+        FlowA_SIDE_LH_RUN = { FlowA_SIDE_LH.RUN(_, _); }
+        FlowA_SIDE_RH_RUN = { FlowA_SIDE_RH.RUN(_, _); }
+        FlowA_SIDE_RH_END_INTrue = { FlowA_SIDE_RH.END(_:Boolean:True, _); }
+        FlowA_SIDE_LH_END_INTrue = { FlowA_SIDE_LH.END(_:Boolean:True, _); }
+    }
+    [interfaces] = {
+        START = { FlowA.START ~ FlowA.RUN }
+        END = { FlowB.BC4 ~ FlowB.BC4 }
+        UNLOAD = { FlowB.UNLOAD ~ FlowB.UNLOAD }
+    }
+    [prop] = {
+        [layouts] = {
+            FlowA_Floor = (632, 536, 122, 77);
+            FlowA_SIDE_LH = (1073, 652, 177, 68);
+            FlowA_SIDE_RH = (1073, 425, 177, 68);
+            FlowA_FLR = (1073, 543, 177, 68);
+        }
+    }
+    [device file="./Sub/Floor.ds"] FlowA_Floor; 
+    [device file="./Sub/Side.ds"] 
+        FlowA_SIDE_LH,
+        FlowA_SIDE_RH; 
+    [device file="../dsLib/AutoGen/FlowA_FLR.ds"] FlowA_FLR; 
+}
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.9]

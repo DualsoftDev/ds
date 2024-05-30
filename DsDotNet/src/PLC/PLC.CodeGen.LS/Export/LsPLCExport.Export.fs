@@ -236,17 +236,19 @@ module XgiExportModule =
                     simpleRung expr target
 
 
-                | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as _op
-                                           Arguments = args
-                                           OriginalExpression = originalExpr
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = ("&&" | "||") as _op
+                        Arguments = args
+                        OriginalExpression = originalExpr
+                        Output = output }) ->
                     let expr = originalExpr.WithNewFunctionArguments args
                     simpleRung expr output
 
-                | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _op
-                                           Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
-                                           OriginalExpression = _originalExpr
-                                           Output = destination }) when isXgk && source.DataType = typeof<bool> ->
+                | DuPLCFunction({
+                        FunctionName = XgiConstants.FunctionNameMove as _op
+                        Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
+                        OriginalExpression = _originalExpr
+                        Output = destination }) when isXgk && source.DataType = typeof<bool> ->
                     
                     moveCmdRungXgk condition source destination
                     //let rgiSub = rgiXgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
@@ -271,9 +273,10 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = (">"|">="|"<"|"<="|"=="|"!="|"<>") as op
-                                           Arguments = args
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = (">"|">="|"<"|"<="|"=="|"!="|"<>") as op
+                        Arguments = args
+                        Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
@@ -282,9 +285,10 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = ("+"|"-"|"*"|"/") as op
-                                           Arguments = args
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = ("+"|"-"|"*"|"/") as op
+                        Arguments = args
+                        Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
@@ -293,9 +297,10 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _func
-                                           Arguments = args
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = XgiConstants.FunctionNameMove as _func
+                        Arguments = args
+                        Output = output }) ->
                     let condition = args[0] :?> IExpression<bool>
                     let source = args[1]
                     let command = ActionCmd(Move(condition, source, output))

@@ -236,7 +236,7 @@ module ExpressionModule =
         /// PLC function (비교, 사칙연산, Move) 을 호출하는 statement
         ///
         /// - 주로 XGI 에서 사용.  XGK 에서는 zipAndExpression 와 Statement.ToStatements() 에서 사용.  Statement.ToStatements() 사용은 DuAction(DuCopy...) 부분인데, 대체 가능함.
-        | DuAugmentedPLCFunction of FunctionParameters
+        | DuPLCFunction of FunctionParameters
 
     /// 추가 가능한 Statement container
     type StatementContainer = ResizeArray<Statement>
@@ -253,7 +253,7 @@ module ExpressionModule =
              | DuAction (a:ActionStatement) ->
                 match a with
                 | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
-             | DuAugmentedPLCFunction (_f:FunctionParameters) ->  _f.FunctionName  // Function은 항상 false 함수에 따른다.
+             | DuPLCFunction (_f:FunctionParameters) ->  _f.FunctionName  // Function은 항상 false 함수에 따른다.
 
         member x.TargetValue    =
             match x.Statement with
@@ -264,7 +264,7 @@ module ExpressionModule =
             | DuAction (a:ActionStatement) ->
                 match a with
                 | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
-            | DuAugmentedPLCFunction (_f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
+            | DuPLCFunction (_f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
@@ -295,7 +295,7 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
-            | DuAugmentedPLCFunction _ ->
+            | DuPLCFunction _ ->
                 failwithlog "ERROR"
 
         member x.ToText() =
@@ -328,7 +328,7 @@ module ExpressionModule =
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
             | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
-            | DuAugmentedPLCFunction _ ->
+            | DuPLCFunction _ ->
                 failwithlog "ERROR"
 
         member x.ToConditionText() =
@@ -359,7 +359,7 @@ module ExpressionModule =
                 $"{functionName}({args})"
             | DuAction (DuCopy (condition, _, _)) ->
                 $"{condition.ToText()}"
-            | DuAugmentedPLCFunction _ ->
+            | DuPLCFunction _ ->
                 failwithlog "ERROR"
 
     type Terminal<'T when 'T:equality> with

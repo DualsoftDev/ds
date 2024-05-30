@@ -45,13 +45,13 @@ module StatementExtensionModule =
                 | _ -> failwithlog "ERROR"
 
             | DuAssign(condition, exp, target) ->
-                // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
+                // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some(IsArithmeticOrComparisionOperator op) ->
                     let exp = exp.FlattenArithmeticOperator(prjParam, augs, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
-                            DuAugmentedPLCFunction
+                            DuPLCFunction
                                 {   FunctionName = op
                                     Arguments = exp.FunctionArguments
                                     OriginalExpression = exp
@@ -61,12 +61,12 @@ module StatementExtensionModule =
                     let newExp = exp.CollectExpandedExpression(prjParam, augs)
                     DuAssign(condition, newExp, target) |> augs.Statements.Add 
 
-            | (DuTimer _ | DuCounter _ | DuAugmentedPLCFunction _) ->
+            | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->
                 augs.Statements.Add statement 
 
             | DuAction(DuCopy(condition, source, target)) ->
                 let funcName = XgiConstants.FunctionNameMove
-                DuAugmentedPLCFunction
+                DuPLCFunction
                     {   FunctionName = funcName
                         Arguments = [ condition; source ]
                         OriginalExpression = condition
@@ -104,9 +104,9 @@ module StatementExtensionModule =
                 let cond = (visitTop condition) :?> IExpression<bool>
                 DuAction(DuCopy(cond, visitTop source, target))
 
-            | DuAugmentedPLCFunction ({Arguments = args} as functionParameters) ->
+            | DuPLCFunction ({Arguments = args} as functionParameters) ->
                 let newArgs = args |> map (fun arg -> visitTop arg)
-                DuAugmentedPLCFunction { functionParameters with Arguments = newArgs }
+                DuPLCFunction { functionParameters with Arguments = newArgs }
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (visit:IExpression -> IExpression) : Statement =

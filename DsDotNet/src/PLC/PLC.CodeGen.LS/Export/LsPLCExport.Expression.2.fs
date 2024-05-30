@@ -131,7 +131,7 @@ module XgxExpressionConvertorModule =
                             prjParam.CreateAutoVariable("out", initValue, comment))
 
                     expandFunctionStatements.Add
-                    <| DuAugmentedPLCFunction
+                    <| DuPLCFunction
                         {   FunctionName = op
                             Arguments = args
                             OriginalExpression = functionExpression
@@ -167,7 +167,7 @@ module XgxExpressionConvertorModule =
                     exp.FunctionArguments
                     |> List.bind (fun arg -> arg.BinaryToNary(prjParam, augs, operatorsToChange, op) )
 
-                DuAugmentedPLCFunction
+                DuPLCFunction
                     { FunctionName = op
                       Arguments = args
                       OriginalExpression = exp
@@ -228,7 +228,7 @@ module XgxExpressionConvertorModule =
 
                         let outexp = out.ToExpression()
 
-                        DuAugmentedPLCFunction
+                        DuPLCFunction
                             { FunctionName = op
                               Arguments = args
                               OriginalExpression = exp
@@ -290,7 +290,7 @@ module XgxExpressionConvertorModule =
                               let out = prjParam.CreateTypedAutoVariable("split", false, $"{op} split output")
                               newLocalStorages.Add out
 
-                              DuAugmentedPLCFunction
+                              DuPLCFunction
                                   { FunctionName = op
                                     Arguments = max
                                     OriginalExpression = exp
@@ -302,7 +302,7 @@ module XgxExpressionConvertorModule =
                     let grandTotal = prjParam.CreateTypedAutoVariable("split", false, $"{op} split output")
                     newLocalStorages.Add grandTotal
 
-                    DuAugmentedPLCFunction
+                    DuPLCFunction
                         { FunctionName = op
                           Arguments = subSums @ remaining
                           OriginalExpression = exp
@@ -358,7 +358,7 @@ module XgxExpressionConvertorModule =
                         | XGK -> DuAssign(None, x, var)
                         | XGI ->
                             let newExp = x.FlattenArithmeticOperator(prjParam, augs, Some var)
-                            DuAugmentedPLCFunction {
+                            DuPLCFunction {
                                 FunctionName = fn
                                 Arguments = newExp.FunctionArguments
                                 OriginalExpression = newExp

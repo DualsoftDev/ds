@@ -13,23 +13,6 @@ module StatementExtensionModule =
         member internal x.ToStatements (prjParam: XgxProjectParams, augs:Augments) : unit =
             let statement = x
             match statement with
-            | DuAssign(condition, exp, target) ->
-                // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
-                match exp.FunctionName with
-                | Some(IsArithmeticOrComparisionOperator op) ->
-                    let exp = exp.FlattenArithmeticOperator(prjParam, augs, Some target)
-                    if exp.FunctionArguments.Any() then
-                        let augFunc =
-                            DuAugmentedPLCFunction
-                                {   FunctionName = op
-                                    Arguments = exp.FunctionArguments
-                                    OriginalExpression = exp
-                                    Output = target }
-                        augs.Statements.Add augFunc
-                | _ ->
-                    let newExp = exp.CollectExpandedExpression(prjParam, augs)
-                    DuAssign(condition, newExp, target) |> augs.Statements.Add 
-
             | DuVarDecl(exp, decl) ->
                 let _newExp =
                     augs.ExpressionStore <- Some decl
@@ -61,8 +44,24 @@ module StatementExtensionModule =
 
                 | _ -> failwithlog "ERROR"
 
-            | DuAugmentedPLCFunction _ 
-            | (DuTimer _ | DuCounter _) ->
+            | DuAssign(condition, exp, target) ->
+                // todo : "sum = tag1 + tag2" 의 처리 : DuAugmentedPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
+                match exp.FunctionName with
+                | Some(IsArithmeticOrComparisionOperator op) ->
+                    let exp = exp.FlattenArithmeticOperator(prjParam, augs, Some target)
+                    if exp.FunctionArguments.Any() then
+                        let augFunc =
+                            DuAugmentedPLCFunction
+                                {   FunctionName = op
+                                    Arguments = exp.FunctionArguments
+                                    OriginalExpression = exp
+                                    Output = target }
+                        augs.Statements.Add augFunc
+                | _ ->
+                    let newExp = exp.CollectExpandedExpression(prjParam, augs)
+                    DuAssign(condition, newExp, target) |> augs.Statements.Add 
+
+            | (DuTimer _ | DuCounter _ | DuAugmentedPLCFunction _) ->
                 augs.Statements.Add statement 
 
             | DuAction(DuCopy(condition, source, target)) ->

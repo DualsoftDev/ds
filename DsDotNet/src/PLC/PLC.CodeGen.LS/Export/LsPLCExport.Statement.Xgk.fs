@@ -22,7 +22,7 @@ module XgkTypeConvertorModule =
             match x with
             | DuAssign(condition, exp, target) ->
                 let numStatementsBefore = augs.Statements.Count
-                let exp2 = exp.AugmentXgk(prjParam, Some target, augs)
+                let exp2 = exp.AugmentXgk(prjParam, condition, Some target, augs)
                 let duplicated =
                     option {
                         // a := a 등의 형태 체크
@@ -31,18 +31,21 @@ module XgkTypeConvertorModule =
                         return variable = target
                     } |> Option.defaultValue false
 
-                if augs.Statements.Count = numStatementsBefore || (exp <> exp2 && not duplicated) then
+                let needAdd = augs.Statements.Count = numStatementsBefore || (exp <> exp2 && not duplicated)
+                if needAdd then
                     let assignStatement = DuAssign(condition, exp2, target)
                     assignStatement.ToStatements(prjParam, augs)
+                else
+                    ()
 
 
             // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
             // XGK 에서 다음과 같이 2개의 문장으로 분리한다.
             // bool b3;
             // b3 = $nn1 > $nn2;
-            | DuVarDecl(exp, decl) when exp.Terminal.IsNone ->
+            | DuVarDecl(exp, decl) ->
                 augs.Storages.Add decl
-                let stmt = DuAssign(Some systemOnRising, exp, decl)
+                let stmt = DuAssign(Some fake1OnExpression, exp, decl)
                 stmt.ToStatementsXgk(prjParam, augs)
 
             | DuTimer tmr ->

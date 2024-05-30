@@ -89,7 +89,7 @@ module StatementExtensionModule =
             | DuVarDecl(exp, var) ->
                 match exp.Terminal with
                 | Some _ -> DuVarDecl(visitTop exp, var)
-                | None -> DuAssign(None, visitTop exp, var)
+                | None -> DuAssign(Some fake1OnExpression, visitTop exp, var)
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
                 DuTimer { tmr with
                             RungInCondition = tryVisitTop rungIn

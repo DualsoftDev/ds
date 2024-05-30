@@ -228,10 +228,11 @@ module XgiExportModule =
                         | Some _, Some _ -> //when expr.DataType <> typeof<bool> ->
                             moveCmdRungXgk cond expr target
                         | _ ->
+                            //assert(condition.IsNone)
                             simpleRung expr target
 
                 | DuAssign(condition, expr, target) ->
-                    assert condition.IsNone
+                    //assert(condition.IsNone)
                     simpleRung expr target
 
 
@@ -642,13 +643,12 @@ module XgiExportModule =
 
             xdoc.Check targetType
 
-        [<Obsolete("이중코일 체크 필요")>]
         member x.SanityCheck() =
             let { GlobalStorages = globalStorages } = x
             let vars = globalStorages.Values |> toArray
 
             let checkDoubleCoil() =
-                // todo:
+                // todo: 이중 코일 체크: 불필요 한 듯.
                 // project level 의 double coil check
                 // - Global 변수 중에 non-terminal expression 을 사용한 경우를 찾아서 marking 해 두고, POU 에서 해당 변수 할당하는 경우를 찾아서 error 를 발생시킨다.
                 ()

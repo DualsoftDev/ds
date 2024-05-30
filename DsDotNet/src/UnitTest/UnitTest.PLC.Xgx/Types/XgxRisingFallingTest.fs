@@ -24,7 +24,12 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
 
     member x.``Equality test1`` () =
         let storages = Storages()
-        let code = baseCode + "$qx = $ix != true;"
+        let code = """
+        bool bTrue = true;
+        bool bFalse = !true;            // todo: ERROR: declaration 임에도 assign 문으로 생성됨 @ XGK 
+        bool b1 = $bTrue != true;
+        bool b2 = $bTrue == true;
+        """
 
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -104,13 +109,13 @@ type XgiRisingFallingTest() =
     [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
-    [<Test>] member x.``Equality test1`` () = base.``Equality test1`` ()
+    [<Test>] member x.``XEquality test1`` () = base.``Equality test1`` ()
 
 type XgkRisingFallingTest() =
     inherit XgxRisingFallingTest(XGK)
     [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
-    [<Test>] member x.``Equality test1`` () = base.``Equality test1`` ()
+    [<Test>] member x.``XEquality test1`` () = base.``Equality test1`` ()
 
      

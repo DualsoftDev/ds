@@ -129,7 +129,7 @@ module ExpressionFunctionModule =
 
         | ("&&" | "and") -> fbLogicalAnd args
         | ("||" | "or")  -> fbLogicalOr  args
-        | ("!"  | "not") -> fbLogicalNot args        // 따로 or 같이??? neg 는 contact 이나 coil 하나만 받아서 rung 생성하는 용도, not 은 expression 을 받아서 평가하는 용도
+        | ("!"  | "not") -> negateBool (args.ExactlyOne())        // 따로 or 같이??? neg 는 contact 이나 coil 하나만 받아서 rung 생성하는 용도, not 은 expression 을 받아서 평가하는 용도
 
         | ("&" | "&&&") -> fBitwiseAnd  args
         | ("|" | "|||") -> fBitwiseOr   args
@@ -485,3 +485,16 @@ module ExpressionFunctionModule =
         let fCastFloat64    args = cf _castToFloat64  "toFloat64" args
 
 
+        /// 주어진 expression 에 대한 negated expression 반환
+        ///
+        /// - createUnaryExpression "!" expr 와 기능 유사
+        let negateBool (expr:IExpression) : Expression<bool> =
+            assert (expr.DataType = typedefof<bool>)
+            let boolExp = expr :?> Expression<bool>
+            match boolExp with
+            | DuTerminal(DuLiteral {Value = v}) ->
+                if v then Expression.False else Expression.True
+            //| DuFunction({Name="!"; Arguments=[expr]}) ->
+            //    expr)
+            | _ ->
+                fbLogicalNot [expr]

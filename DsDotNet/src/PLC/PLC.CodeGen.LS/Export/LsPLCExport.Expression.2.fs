@@ -390,7 +390,7 @@ module XgxExpressionConvertorModule =
 
                     if (*isXgk &&*) lexpr.DataType = typeof<bool> && fn.IsOneOf("!=", "==", "<>") then
                         // XGK 에는 bit 의 비교 연산이 없다.  따라서, bool 타입의 비교 연산을 수행할 경우, 이를 OR, AND 로 변환한다.
-                        let l, r, nl, nr = lexpr, rexpr, fbLogicalNot [lexpr], fbLogicalNot [rexpr]
+                        let l, r, nl, nr = lexpr, rexpr, negateBool lexpr, negateBool rexpr
                         let newExp =
                             match fn with
                             | ("!=" | "<>") -> fbLogicalOr([fbLogicalAnd [l; nr]; fbLogicalAnd [nl; r]])

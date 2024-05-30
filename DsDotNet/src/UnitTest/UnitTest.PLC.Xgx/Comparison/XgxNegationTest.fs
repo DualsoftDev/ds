@@ -146,6 +146,19 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+    member x.``Negation bool test`` () =
+        let storages = Storages()
+        let code = """
+            bool b1 = !true;
+            bool b2 = !false;
+            """
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
     member x.``Negation x n test`` () =
         let storages = Storages()
         let testCode =
@@ -230,6 +243,7 @@ type XgiNegationTest() =
     [<Test>] member x.``Negation x 4 test`` () = base.``Negation x 4 test`` ()
     [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
     [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
+    [<Test>] member x.``Negation bool test`` () = base.``Negation bool test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
     [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
     [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()
@@ -248,6 +262,7 @@ type XgkNegationTest() =
     [<Test>] member x.``Negation x 4 test`` () = base.``Negation x 4 test`` ()
     [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
     [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
+    [<Test>] member x.``Negation bool test`` () = base.``Negation bool test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
     [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
     [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()

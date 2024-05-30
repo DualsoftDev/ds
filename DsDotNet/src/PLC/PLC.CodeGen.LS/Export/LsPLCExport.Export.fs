@@ -146,7 +146,7 @@ module XgiExportModule =
                                 None, Some (flatten condition)
                             | _ ->
                                 let t = fbLogicalAnd([condition; source]) |> flatten
-                                let f = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
+                                let f = fbLogicalAnd([condition; negateBool source]) |> flatten
                                 Some t, Some f
 
                         if condWithTrue.IsSome then

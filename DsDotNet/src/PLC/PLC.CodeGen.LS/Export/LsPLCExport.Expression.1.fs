@@ -59,7 +59,10 @@ module LsPLCExportExpressionModule =
             let negate (expr:IExpression) : IExpression =
                 match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None ->
-                        createUnaryExpression "!" expr
+                        if expr.DataType = typedefof<bool> then
+                            createUnaryExpression "!" expr
+                        else
+                            expr
                     | None, Some "!" -> expr.FunctionArguments.ExactlyOne()
                     | None, Some _fn -> createUnaryExpression "!" expr
                     | _ -> failwith "Invalid expression"
@@ -69,7 +72,7 @@ module LsPLCExportExpressionModule =
                 | Some _terminal, None ->
                     match negated with
                     // terminal 의 negation 은 bool type 에 한정한다.
-                    | true when expr.DataType = typedefof<bool> -> negate expr
+                    | true -> negate expr
                     | _-> expr
                 | None, Some _fn ->
                     visitFunction negated expr

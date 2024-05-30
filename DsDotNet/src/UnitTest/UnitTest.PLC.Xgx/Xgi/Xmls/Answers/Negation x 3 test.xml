@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145730" Version="513" WksNodeCount="16">
-    Negations test2
+    Negation x 3 test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
@@ -43,11 +43,11 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !(!($ix))
+                                        [0] $qx = !(!(!($ix)))
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
+                                    <Element ElementType="7" Coordinate="2049">
                                         ix
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="87"/>

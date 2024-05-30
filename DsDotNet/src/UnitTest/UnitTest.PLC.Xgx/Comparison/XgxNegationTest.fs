@@ -101,7 +101,7 @@ type XgxNegationTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
-    member x.``Negations test1`` () =
+    member x.``Negation x 1 test`` () =
         let storages = Storages()
         let code = baseCode + "$qx = !$ix;"
 
@@ -110,7 +110,7 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Negations test2`` () =
+    member x.``Negation x 2 test`` () =
         let storages = Storages()
         let code = baseCode + "$qx = !!$ix;"
 
@@ -119,7 +119,7 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Negations test3`` () =
+    member x.``Negation x 3 test`` () =
         let storages = Storages()
         let code = baseCode + "$qx = !!!$ix;"
 
@@ -128,7 +128,7 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Negations test4`` () =
+    member x.``Negation x 4 test`` () =
         let storages = Storages()
         let code = baseCode + "$qx = !!!!$ix;"
 
@@ -137,7 +137,7 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Negations test5`` () =
+    member x.``Negation x 5 test`` () =
         let storages = Storages()
         let code = baseCode + "$qx = !!!!!$ix;"
 
@@ -145,6 +145,23 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
+
+    member x.``Negation x n test`` () =
+        let storages = Storages()
+        let testCode =
+            """$qx =       !$ix
+                    &&    !!$ix
+                    &&   !!!$ix
+                    &&  !!!!$ix
+                    && !!!!!$ix;"""
+
+        let code = baseCode + testCode
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
 
     member x.``Negation, comparision test1`` () =
         let storages = Storages()
@@ -165,11 +182,12 @@ type XgiNegationTest() =
     [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
     [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
     [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
-    [<Test>] member x.``Negations test1`` () = base.``Negations test1`` ()
-    [<Test>] member x.``Negations test2`` () = base.``Negations test2`` ()
-    [<Test>] member x.``Negations test3`` () = base.``Negations test3`` ()
-    [<Test>] member x.``Negations test4`` () = base.``Negations test4`` ()
-    [<Test>] member x.``Negations test5`` () = base.``Negations test5`` ()
+    [<Test>] member x.``Negation x 1 test`` () = base.``Negation x 1 test`` ()
+    [<Test>] member x.``Negation x 2 test`` () = base.``Negation x 2 test`` ()
+    [<Test>] member x.``Negation x 3 test`` () = base.``Negation x 3 test`` ()
+    [<Test>] member x.``Negation x 4 test`` () = base.``Negation x 4 test`` ()
+    [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
+    [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
 
 
@@ -180,9 +198,10 @@ type XgkNegationTest() =
     [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
     [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
     [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
-    [<Test>] member x.``Negations test1`` () = base.``Negations test1`` ()
-    [<Test>] member x.``Negations test2`` () = base.``Negations test2`` ()
-    [<Test>] member x.``Negations test3`` () = base.``Negations test3`` ()
-    [<Test>] member x.``Negations test4`` () = base.``Negations test4`` ()
-    [<Test>] member x.``Negations test5`` () = base.``Negations test5`` ()
+    [<Test>] member x.``Negation x 1 test`` () = base.``Negation x 1 test`` ()
+    [<Test>] member x.``Negation x 2 test`` () = base.``Negation x 2 test`` ()
+    [<Test>] member x.``Negation x 3 test`` () = base.``Negation x 3 test`` ()
+    [<Test>] member x.``Negation x 4 test`` () = base.``Negation x 4 test`` ()
+    [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
+    [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()

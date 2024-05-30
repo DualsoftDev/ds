@@ -68,10 +68,10 @@ module LsPLCExportExpressionModule =
                 match expr.Terminal, expr.FunctionName with
                 | Some _terminal, None ->
                     match negated with
-                    | true -> createUnaryExpression "!" expr
-                    | false -> expr
+                    // terminal 의 negation 은 bool type 에 한정한다.
+                    | true when expr.DataType = typedefof<bool> -> negate expr
+                    | _-> expr
                 | None, Some _fn ->
-                    //let negated = negated <> (fn = "!")
                     visitFunction negated expr
                 | _ -> failwith "Invalid expression"
 
@@ -80,9 +80,9 @@ module LsPLCExportExpressionModule =
                 if negated then
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None ->
-                        negate expr//.FunctionArguments.ExactlyOne()
+                        negate expr
                     | None, Some(IsComparisonOperator fn) ->
-                        let newArgs = args |> map (visitArgs false)
+                        let newArgs = args |> map (visitArgs true)
                         let reverseFn =
                             match fn with
                             | "==" -> "!="
@@ -95,7 +95,11 @@ module LsPLCExportExpressionModule =
                         createCustomFunctionExpression reverseFn newArgs
                     | None, Some("&&" | "||" as fn) ->
                         let newArgs = args |> map (visitArgs true)
-                        let reverseFn = if fn = "&&" then "||" else "&&"
+                        let reverseFn =
+                            match fn with
+                            | "&&" -> "||"
+                            | "||" -> "&&"
+                            | _ -> failwith "ERROR"
                         createCustomFunctionExpression reverseFn newArgs
                     | None, Some "!" ->
                         args.ExactlyOne() |> visitFunction false
@@ -104,8 +108,7 @@ module LsPLCExportExpressionModule =
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None -> expr
                     | None, Some "!" ->
-                        let newArgs = args |> map (visitArgs true)
-                        newArgs.ExactlyOne()
+                        args.ExactlyOne() |> visitArgs true 
                     | None, Some _fn ->
                         let newArgs = args |> map (visitArgs false)
                         expr.WithNewFunctionArguments newArgs

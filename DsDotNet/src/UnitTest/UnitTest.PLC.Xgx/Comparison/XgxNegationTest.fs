@@ -175,6 +175,48 @@ type XgxNegationTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
+    member x.``Negation on decl test1`` () =
+        let storages = Storages()
+        let code = """
+bool b1 = true;
+bool b2 = false;
+bool b3 = !(!$b1 != $b2);       // ERROR on XGI
+"""
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
+    member x.``Negation on decl test`` () =
+        let storages = Storages()
+        let code = """
+bool b1 = 2 == 3;
+bool b2 = !(2 == 3);
+bool b3 = !(2 != 3);
+bool b4 = (2 > 3);
+bool b5 = !(2 > 3);
+bool b6 = !(2.1 > 3.14);
+bool b7 = (2 >= 3);
+bool b8 = !(2 >= 3);
+bool b9 = $b1 == $b2;
+bool b10 = $b1 != $b2;
+bool b11 = !($b1 == $b2);
+bool b12 = !($b1 != $b2);       // ERROR on XGI
+bool b13 = $b1 && $b2;
+bool b14 = !($b1 && $b2);
+bool b15 = $b1 || $b2;
+bool b17 = !($b1 || $b2);
+"""
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
+
 //[<Collection("SerialXgxExpEqualityTest")>]
 type XgiNegationTest() =
     inherit XgxNegationTest(XGI)
@@ -189,6 +231,8 @@ type XgiNegationTest() =
     [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
     [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
+    [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
+    [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()
 
 
 
@@ -205,3 +249,5 @@ type XgkNegationTest() =
     [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
     [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
+    [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
+    [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()

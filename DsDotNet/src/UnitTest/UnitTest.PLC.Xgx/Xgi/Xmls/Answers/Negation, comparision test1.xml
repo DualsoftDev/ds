@@ -66,14 +66,14 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="102" Coordinate="6148" Param="FNAME: EQ2_BOOL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 984&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200001, , 0&#xA;VAR_IN: IN2, 0x00200001, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="7169">
+                                    <Element ElementType="7" Coordinate="7169">
                                         ix
                                     </Element>
                                     <Element ElementType="70" Coordinate="7175">
                                         _t2_EQ
                                     </Element>
-                                    <Element ElementType="70" Coordinate="8193">
-                                        True
+                                    <Element ElementType="7" Coordinate="8193">
+                                        _ON
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -137,7 +137,7 @@ XckU4UJCOYh5CA==
                         <LocalVar Version="Ver 1.0" Count="5">
                             <Symbols>
                                 <Symbol Name="_t1_NE" Comment="2 != 3" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
-                                <Symbol Name="_t2_EQ" Comment="$ix == true" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="_t2_EQ" Comment="!($ix) == !(true)" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="_t3_LE" Comment="3.14 &lt;= 5.0" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
                                 <Symbol Name="ix" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="qx" Comment="" Device="Q" Kind="8" State="0"/>

@@ -183,10 +183,10 @@ module EdgeModule =
     let isStartEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Start)
 
     /// srcs로 인해서 시작가능한 reals 구하고 구해진 reals에 리셋으로 연결된 target reals 구한다
-    let private appendInterfaceReset (srcs: Real seq) : Real seq =
+    let private appendInterfaceReset (srcs: Vertex seq) : Real seq =
 
            // Recursive function to find all Real objects connected via Start edges
-        let rec getStartReals (src: Real) (visited: HashSet<Real>) : Real list =
+        let rec getStartReals (src: Vertex) (visited: HashSet<Real>) : Vertex list =
             let graphOrder = src.Parent.GetGraph().BuildPairwiseComparer()
             src.Parent.GetGraph().Edges
             |> Seq.filter isStartEdge
@@ -195,31 +195,31 @@ module EdgeModule =
             |> Seq.choose (function
                 | :? Real as real when not (visited.Contains real) ->
                     visited.Add real |> ignore
-                    Some real
+                    Some (real:>Vertex)
                 | :? RealExF as realexf when not (visited.Contains realexf.Real) ->
                     getStartReals realexf.Real visited |> ignore
-                    Some realexf.Real
+                    Some (realexf.Real:>Vertex)
                 | _ -> None)
             |> Seq.toList
+
         // Create a HashSet to keep track of visited Real objects
         let visited = HashSet<Real>()
         // Find all Real objects connected by Start edges to the source Reals
         let startLinkReals =
             srcs
-            |> Seq.collect (fun src -> getStartReals src visited)
-            |> Seq.append srcs
+            |> Seq.collect (fun src -> 
+                let stReals =  getStartReals src visited
+                [src]@stReals
+                |> Seq.collect (fun stReal -> [stReal]@stReal.GetSharedReal())
+            )
             |> Seq.distinct
 
         // Find all target Reals connected by a reset edge to the startLinkReals
         startLinkReals
         |> Seq.collect (fun link ->
             link.Parent.GetGraph().Edges
-            |> Seq.filter (fun e -> isResetEdge e && e.Source = link)
-            |> Seq.map (fun e -> e.Target)
-            |> Seq.choose (function
-                | :? Real as real -> Some real
-                | :? RealExF as realexf -> Some realexf.Real
-                | _ -> None)
+            |> Seq.filter (fun e -> isResetEdge e && e.Source.GetPure() = link.GetPure())
+            |> Seq.map (fun e -> e.Target.GetPureReal())
         )
         |> Seq.distinct
 
@@ -228,7 +228,7 @@ module EdgeModule =
         let apiNResetNodes =
             sys.ApiItems
             |> Seq.map (fun api ->
-                let resetAbleReals = appendInterfaceReset api.TXs
+                let resetAbleReals = appendInterfaceReset  (api.TXs.OfType<Vertex>())
                 api, resetAbleReals
             )
         apiNResetNodes

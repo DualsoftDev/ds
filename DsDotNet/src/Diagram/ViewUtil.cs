@@ -1,6 +1,7 @@
 using Diagram.View.MSAGL;
 using DocumentFormat.OpenXml.Presentation;
 using Dual.Common.Core;
+using Dual.Common.Winform;
 using Engine.CodeGenCPU;
 using Engine.Core;
 using Microsoft.Msagl.GraphViewerGdi;
@@ -32,9 +33,11 @@ namespace Diagram.View.MSAGL
         static IDisposable _Disposable;
         static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
-
+        static private DsSystem _sys = null;
+        
         public static List<ViewNode> CreateViews(DsSystem sys)
         {
+            _sys = sys;
             var flowViewNodes = ImportViewUtil.GetViewNodesLoadingsNThis(sys).ToList();
 
             ViewChangeSubject();
@@ -212,6 +215,8 @@ namespace Diagram.View.MSAGL
             {
                 n.DisplayNodes.Iter(node =>
                 {
+                    if (!IsThisSystem(node)) return;
+
                     var tags = n.TaskDevs.Cast<TaskDev>();
 
                     switch (ea.Tag.TagKind)
@@ -237,6 +242,7 @@ namespace Diagram.View.MSAGL
             });
         }
 
+
         private static void HandleApiItemEvent(EventApiItem api)
         {
             if (!DicMemoryTag.ContainsKey(api.Tag)) return;
@@ -247,6 +253,8 @@ namespace Diagram.View.MSAGL
             {
                 n.DisplayNodes.Iter(node =>
                 {
+                    if (!IsThisSystem(node)) return;
+
                     var tags = n.TaskDevs.Cast<TaskDev>().Select(w => w.ApiItem.TagManager).Cast<ApiItemManager>().Select(s => s.PE);
 
                     switch (api.Tag.TagKind)
@@ -256,14 +264,24 @@ namespace Diagram.View.MSAGL
                                 var off = tags
                                     .Select(s => Convert.ToUInt64(s.Value)).Any(w => w == 0);
                                 n.LampPlanEnd = !off;
-                                ucView?.UpdatePlanEndValue(node, !off);
+                                ucView.Do(() =>
+                                {
+                                    ucView?.UpdatePlanEndValue(node, !off);
+                                });
                                 break;
                             }
                     }
                 });
             });
         }
-
+        private static bool IsThisSystem(ViewNode node)
+        {
+            if (!node.IsVertex
+                || _sys != node.CoreVertex.Value.Parent.GetSystem())
+                return false;
+            else
+                return true;
+        }
     }
 }
     

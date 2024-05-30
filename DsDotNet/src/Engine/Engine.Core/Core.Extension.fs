@@ -178,7 +178,7 @@ module CoreExtensionModule =
 
             let resets = x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
 
-            resets.Select(fun s->x.ApiItems.Find(fun f->f.QualifiedName = $"{x.Name.QuoteOnDemand()}.{s.Value}"))
+            resets.Select(fun s->x.ApiItems.Find(fun f->f.QualifiedName = $"{x.Name.QuoteOnDemand()}.{s.Value.QuoteOnDemand()}"))
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)

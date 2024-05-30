@@ -55,7 +55,7 @@ module rec ViewModule =
                     | DuAliasTargetRealExFlow rf -> rf.Name, VREALEx
                 | :? Call as c -> c.Name, VCALL
                 | :? Real as c -> c.Name, VREAL
-                | :? RealExF as c -> c.Name, VREALEx
+                | :? RealExF as c -> c.Name, VREALEx 
                 | _ -> coreVertex.Name, VFLOW
 
             ViewNode(name, vType, Some(coreVertex), None, None, None)
@@ -129,8 +129,13 @@ module rec ViewModule =
 
         [<Browsable(false)>]
         member x.UIKey =
-            if coreVertex.IsSome then
-                $"{x.PureVertex.Value.Name};{coreVertex.Value.QualifiedName.GetHashCode()}"
+            if coreVertex.IsSome then   
+                let vKey = coreVertex.Value.QualifiedName.GetHashCode()
+                if coreVertex.Value :? RealExF 
+                then
+                    $"{name};{vKey}"
+                else
+                    $"{x.PureVertex.Value.Name};{vKey}"
             else
                 $"{name};{x.GetHashCode()}"
 

@@ -1,11 +1,16 @@
 [sys] Single = {
     [flow] Flow = {
-        SpringPower <|> ValveADV;
+        ValveADV <|> SpringPower;
     }
     [interfaces] = {
-        ADV = { Flow.ValveADV ~ Flow.ValveADV }
-        RET = { Flow.SpringPower ~ Flow.SpringPower }
-        RET <|> ADV;
+        RET = { Flow.ValveADV ~ Flow.ValveADV }
+        ADV = { Flow.SpringPower ~ Flow.SpringPower }
+        ADV <|> RET;
+    }
+    [prop] = {
+        [finish] = {
+            Flow.SpringPower;
+        }
     }
 }
 //DS Language Version = [1.0.0.1]

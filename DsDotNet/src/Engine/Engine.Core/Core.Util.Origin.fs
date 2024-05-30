@@ -53,7 +53,7 @@ module OriginModule =
     // 초기 유형을 얻습니다.
     let getInitialType (source: Vertex) (targets: Vertex seq) graphOrder =
         let getTypeForSingleTarget (v: bool option) =
-            match v with//뒤에서 리셋이오면 항상온 
+            match v with
             | Some fwd -> if fwd then InitialType.Off else InitialType.On
             | None -> InitialType.NotCare
 

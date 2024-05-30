@@ -225,7 +225,9 @@ type FindExtension =
     [<Extension>] static member TryFindRealVertex (x:DsSystem, flowName, realName) =  tryFindReal x [ flowName; realName ]
     [<Extension>] static member GetSharedReal (x:Real) = getVertexSharedReal x
     [<Extension>] static member GetSharedCall (x:Call) = getVertexSharedCall x
-    
+    [<Extension>] static member GetSharedReal(v:Vertex) = v |> getSharedReal
+    [<Extension>] static member GetSharedCall(v:Vertex) = v |> getSharedCall
+
     [<Extension>] static member GetPureReal  (v:Vertex) = v |> getPureReal
     [<Extension>] static member GetPureCall  (v:Vertex) = v |> getPureCall
     [<Extension>] static member GetPure (x:Vertex) = getPure x
@@ -238,7 +240,7 @@ type FindExtension =
 
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
-
+    
     [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
     [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =  
                     getVerticesOfSystem(x) |> ofCallForOperator
@@ -291,7 +293,4 @@ type FindExtension =
 
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
-
-    [<Extension>] static member GetSharedReal(v:Vertex) = v |> getSharedReal
-    [<Extension>] static member GetSharedCall(v:Vertex) = v |> getSharedCall
 

@@ -151,14 +151,14 @@ module XgiExportModule =
 
                         if condWithTrue.IsSome then
                             let cmd =
-                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
+                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"         // Byte OR
                                 XgkParamCmd(param, 5)
                             let rgiSub = rgiXmlRung condWithTrue (Some cmd) rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
                                         NextRungY = 1 + rgiSub.NextRungY }
                         if condWithFalse.IsSome then
                             let cmd =
-                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
+                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"      // Byte AND
                                 XgkParamCmd(param, 5)
                             let rgiSub = rgiXmlRung condWithFalse (Some cmd) rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls

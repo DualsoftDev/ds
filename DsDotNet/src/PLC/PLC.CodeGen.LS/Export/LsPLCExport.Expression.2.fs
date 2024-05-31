@@ -381,7 +381,12 @@ module XgxExpressionConvertorModule =
         ///     추가 storage : tmp2
         ///     최종 exp: "tmp1 > 4"
         ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
-        member x.AugmentXgk (prjParam: XgxProjectParams, assignCondition:IExpression<bool> option, expStore:IStorage option, augs:Augments) : IExpression =
+        member x.AugmentXgk (
+                prjParam: XgxProjectParams
+                , assignCondition:IExpression<bool> option
+                , expStore:IStorage option
+                , augs:Augments)
+          : IExpression =
             let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
                 match exp.FunctionName, exp.FunctionArguments with
                 | Some fn, l::r::[] ->

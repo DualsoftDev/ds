@@ -51,11 +51,12 @@ module StatementExtensionModule =
                     let exp = exp.FlattenArithmeticOperator(prjParam, augs, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
-                            DuPLCFunction
-                                {   FunctionName = op
-                                    Arguments = exp.FunctionArguments
-                                    OriginalExpression = exp
-                                    Output = target }
+                            DuPLCFunction {
+                                Condition = condition
+                                FunctionName = op
+                                Arguments = exp.FunctionArguments
+                                OriginalExpression = exp
+                                Output = target }
                         augs.Statements.Add augFunc
                 | _ ->
                     let newExp = exp.CollectExpandedExpression(prjParam, augs)
@@ -66,11 +67,13 @@ module StatementExtensionModule =
 
             | DuAction(DuCopy(condition, source, target)) ->
                 let funcName = XgiConstants.FunctionNameMove
-                DuPLCFunction
-                    {   FunctionName = funcName
-                        Arguments = [ condition; source ]
-                        OriginalExpression = condition
-                        Output = target } |> augs.Statements.Add
+                DuPLCFunction {
+                    Condition = Some condition
+                    FunctionName = funcName
+                    Arguments = [ condition; source ]
+                    OriginalExpression = condition
+                    Output = target
+                } |> augs.Statements.Add
 
 
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()

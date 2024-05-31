@@ -738,7 +738,7 @@ module internal rec Command =
     /// - expr 이 None 이면 그리지 않는다.
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rxiRung (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
+    let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
         let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
@@ -795,9 +795,9 @@ module internal rec Command =
             rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
 
         | _ ->
-            match prjParam.TargetType, expr, cmdExp with
+            match prjParam.TargetType, condition, cmdExp with
             | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
-                rxiRungImpl (x, y) expr cmdExp
+                rxiRungImpl (x, y) condition cmdExp
             | XGK, _, Some (FunctionBlockCmd(fbc)) ->
                 match fbc with
                 | CounterMode(counterStatement) when counterStatement.Counter.Type = CTUD ->
@@ -808,7 +808,7 @@ module internal rec Command =
                         | Some u, Some d -> u.GetTerminalString(prjParam), d.GetTerminalString(prjParam)
                         | _ -> failwithlog "ERROR"
                     let rungInCondition =
-                        match expr with
+                        match condition with
                         | Some expr -> expr
                         | _ -> (Expression.True :> IExpression).Flatten() :?> FlatExpression
                     let pv = counter.PRE.Value
@@ -842,4 +842,4 @@ module internal rec Command =
                             timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
                     rxiRungImpl (x, y) (Some exp) cmdExp
             | _, _, Some _ ->
-                    rxiRungImpl (x, y) expr cmdExp
+                    rxiRungImpl (x, y) condition cmdExp

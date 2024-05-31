@@ -210,6 +210,9 @@ module ExpressionModule =
     let private unsupported() = failwithlog "ERROR: not supported"
     
     type FunctionParameters = {
+        /// Enable bit
+        Condition:IExpression<bool> option
+
         FunctionName:string
         Arguments:Arguments
         OriginalExpression:IExpression

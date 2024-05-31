@@ -303,7 +303,7 @@ module internal rec Command =
             let plusHorizontalPadding = inputBlockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
 
             /// function start X
-            let fsx = inputBlockXmls.Max(fun (_, x) -> x.TotalSpanX) + plusHorizontalPadding
+            let fsx = x + inputBlockXmls.Max(fun (_, bxi) -> bxi.TotalSpanX) + plusHorizontalPadding
 
             let outputCellXmls =
                 [ for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
@@ -313,7 +313,7 @@ module internal rec Command =
             let tentacleXmls =
                 [ for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
                       let i = inputBlockIndex
-                      let bex = b.X + b.TotalSpanX // block end X
+                      let bex = x + b.X + b.TotalSpanX // block end X
                       let bey = b.Y
                       let c = coord (bex, bey)
                       let spanX = (fsx - bex)

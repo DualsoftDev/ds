@@ -19,10 +19,10 @@
                     <Symbols>
                         <Symbol Name="ICar" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX1.0.1" State="0"/>
                         <Symbol Name="QCar" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX1.0.1" State="0"/>
-                        <Symbol Name="iAvante" Comment="booliAvante=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="iSonata" Comment="booliSonata=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="qAvante" Comment="boolqAvante=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="qSonata" Comment="boolqSonata=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="iAvante" Comment="bool iAvante = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="iSonata" Comment="bool iSonata = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="qAvante" Comment="bool qAvante = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="qSonata" Comment="bool qSonata = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

@@ -17,34 +17,34 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="28">
                     <Symbols>
-                        <Symbol Name="b1" Comment="boolb1=$nn1&gt;$nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b10" Comment="boolb10=1L&lt;2L" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b11" Comment="boolb11=1L==2L" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b12" Comment="boolb12=1L&lt;&gt;2L" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="boolb2=$nn1&lt;$nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b3" Comment="boolb3=$nn1==$nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b4" Comment="boolb4=$nn1==$nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b5" Comment="boolb5=$nn1!=$nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b6" Comment="boolb6=$nn1&lt;&gt;$nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b7" Comment="boolb7=$nn1&gt;=$nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b8" Comment="boolb8=$nn1&lt;=$nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b9" Comment="boolb9=1L&gt;2L" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="nn1" Comment="int64nn1=1L" Device="" Kind="6" Type="LINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="int64nn2=2L" Device="" Kind="6" Type="LINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="ub1" Comment="boolub1=$unn1&gt;$unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="ub10" Comment="boolub10=1UL&lt;2UL" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="ub11" Comment="boolub11=1UL==2UL" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="ub12" Comment="boolub12=1UL&lt;&gt;2UL" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="ub2" Comment="boolub2=$unn1&lt;$unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="ub3" Comment="boolub3=$unn1==$unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="ub4" Comment="boolub4=$unn1==$unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="ub5" Comment="boolub5=$unn1!=$unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="ub6" Comment="boolub6=$unn1&lt;&gt;$unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="ub7" Comment="boolub7=$unn1&gt;=$unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="ub8" Comment="boolub8=$unn1&lt;=$unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="ub9" Comment="boolub9=1UL&gt;2UL" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="unn1" Comment="uint64unn1=1UL" Device="" Kind="6" Type="ULINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="unn2" Comment="uint64unn2=2UL" Device="" Kind="6" Type="ULINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = $nn1 &gt; $nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b10" Comment="bool b10 = 1L &lt; 2L" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b11" Comment="bool b11 = 1L == 2L" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b12" Comment="bool b12 = 1L != 2L" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = $nn1 &lt; $nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b3" Comment="bool b3 = $nn1 == $nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b4" Comment="bool b4 = $nn1 == $nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b5" Comment="bool b5 = $nn1 != $nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b6" Comment="bool b6 = $nn1 != $nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b7" Comment="bool b7 = $nn1 &gt;= $nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b8" Comment="bool b8 = $nn1 &lt;= $nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b9" Comment="bool b9 = 1L &gt; 2L" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int64 nn1 = 1L" Device="" Kind="6" Type="LINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int64 nn2 = 2L" Device="" Kind="6" Type="LINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="ub1" Comment="bool ub1 = $unn1 &gt; $unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="ub10" Comment="bool ub10 = 1UL &lt; 2UL" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub11" Comment="bool ub11 = 1UL == 2UL" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="ub12" Comment="bool ub12 = 1UL != 2UL" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub2" Comment="bool ub2 = $unn1 &lt; $unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub3" Comment="bool ub3 = $unn1 == $unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="ub4" Comment="bool ub4 = $unn1 == $unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="ub5" Comment="bool ub5 = $unn1 != $unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub6" Comment="bool ub6 = $unn1 != $unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub7" Comment="bool ub7 = $unn1 &gt;= $unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="ub8" Comment="bool ub8 = $unn1 &lt;= $unn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="ub9" Comment="bool ub9 = 1UL &gt; 2UL" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="unn1" Comment="uint64 unn1 = 1UL" Device="" Kind="6" Type="ULINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="unn2" Comment="uint64 unn2 = 2UL" Device="" Kind="6" Type="ULINT" InitValue="2" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

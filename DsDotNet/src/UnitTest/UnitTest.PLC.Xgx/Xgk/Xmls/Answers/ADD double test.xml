@@ -40,12 +40,12 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="6">
-                        <Symbol Name="div" Comment="doublediv=$nn1/$nn2" Device="M" DevicePos="20" Type="WORD"/>
-                        <Symbol Name="mul" Comment="doublemul=$nn1*$nn2" Device="M" DevicePos="16" Type="WORD"/>
-                        <Symbol Name="nn1" Comment="doublenn1=1.1" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="doublenn2=2.2" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="sub" Comment="doublesub=$nn1-$nn2" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="sum" Comment="doublesum=0.0" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="div" Comment="doublediv=$nn1/$nn2" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="mul" Comment="doublemul=$nn1*$nn2" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="doublenn1=1.1" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="doublenn2=2.2" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="sub" Comment="doublesub=$nn1-$nn2" Device="M" DevicePos="16" Type="WORD"/>
+                        <Symbol Name="sum" Comment="doublesum=0.0" Device="M" DevicePos="20" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -113,7 +113,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="11268" Param="81"/>
-                                    <Element ElementType="33" Coordinate="11358" Param="LADD,nn1,nn2,M0008"/>
+                                    <Element ElementType="33" Coordinate="11358" Param="LADD,nn1,nn2,M0020"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="12289">
@@ -125,7 +125,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="13316" Param="81"/>
-                                    <Element ElementType="33" Coordinate="13406" Param="LSUB,nn1,nn2,M0012"/>
+                                    <Element ElementType="33" Coordinate="13406" Param="LSUB,nn1,nn2,M0016"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="14337">
@@ -137,7 +137,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="15364" Param="81"/>
-                                    <Element ElementType="33" Coordinate="15454" Param="LMUL,nn1,nn2,M0016"/>
+                                    <Element ElementType="33" Coordinate="15454" Param="LMUL,nn1,nn2,M0004"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
@@ -149,7 +149,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="17412" Param="81"/>
-                                    <Element ElementType="33" Coordinate="17502" Param="LDIV,nn1,nn2,M0020"/>
+                                    <Element ElementType="33" Coordinate="17502" Param="LDIV,nn1,nn2,M0000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="19457" Param="90"/>

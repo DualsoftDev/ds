@@ -40,34 +40,34 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="28">
-                        <Symbol Name="b1" Comment="boolb1=$nn1&gt;$nn2" Device="M" DevicePos="64" Type="BIT"/>
-                        <Symbol Name="b10" Comment="boolb10=1s&lt;2s" Device="M" DevicePos="73" Type="BIT"/>
-                        <Symbol Name="b11" Comment="boolb11=1s==2s" Device="M" DevicePos="74" Type="BIT"/>
-                        <Symbol Name="b12" Comment="boolb12=1s&lt;&gt;2s" Device="M" DevicePos="75" Type="BIT"/>
-                        <Symbol Name="b2" Comment="boolb2=$nn1&lt;$nn2" Device="M" DevicePos="65" Type="BIT"/>
-                        <Symbol Name="b3" Comment="boolb3=$nn1==$nn2" Device="M" DevicePos="66" Type="BIT"/>
-                        <Symbol Name="b4" Comment="boolb4=$nn1==$nn2" Device="M" DevicePos="67" Type="BIT"/>
-                        <Symbol Name="b5" Comment="boolb5=$nn1!=$nn2" Device="M" DevicePos="68" Type="BIT"/>
-                        <Symbol Name="b6" Comment="boolb6=$nn1&lt;&gt;$nn2" Device="M" DevicePos="69" Type="BIT"/>
-                        <Symbol Name="b7" Comment="boolb7=$nn1&gt;=$nn2" Device="M" DevicePos="70" Type="BIT"/>
-                        <Symbol Name="b8" Comment="boolb8=$nn1&lt;=$nn2" Device="M" DevicePos="71" Type="BIT"/>
-                        <Symbol Name="b9" Comment="boolb9=1s&gt;2s" Device="M" DevicePos="72" Type="BIT"/>
-                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="ub1" Comment="boolub1=$unn1&gt;$unn2" Device="M" DevicePos="76" Type="BIT"/>
-                        <Symbol Name="ub10" Comment="boolub10=1us&lt;2us" Device="M" DevicePos="85" Type="BIT"/>
-                        <Symbol Name="ub11" Comment="boolub11=1us==2us" Device="M" DevicePos="86" Type="BIT"/>
-                        <Symbol Name="ub12" Comment="boolub12=1us&lt;&gt;2us" Device="M" DevicePos="87" Type="BIT"/>
-                        <Symbol Name="ub2" Comment="boolub2=$unn1&lt;$unn2" Device="M" DevicePos="77" Type="BIT"/>
-                        <Symbol Name="ub3" Comment="boolub3=$unn1==$unn2" Device="M" DevicePos="78" Type="BIT"/>
-                        <Symbol Name="ub4" Comment="boolub4=$unn1==$unn2" Device="M" DevicePos="79" Type="BIT"/>
-                        <Symbol Name="ub5" Comment="boolub5=$unn1!=$unn2" Device="M" DevicePos="80" Type="BIT"/>
-                        <Symbol Name="ub6" Comment="boolub6=$unn1&lt;&gt;$unn2" Device="M" DevicePos="81" Type="BIT"/>
-                        <Symbol Name="ub7" Comment="boolub7=$unn1&gt;=$unn2" Device="M" DevicePos="82" Type="BIT"/>
-                        <Symbol Name="ub8" Comment="boolub8=$unn1&lt;=$unn2" Device="M" DevicePos="83" Type="BIT"/>
-                        <Symbol Name="ub9" Comment="boolub9=1us&gt;2us" Device="M" DevicePos="84" Type="BIT"/>
-                        <Symbol Name="unn1" Comment="uint16unn1=1us" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="unn2" Comment="uint16unn2=2us" Device="M" DevicePos="3" Type="WORD"/>
+                        <Symbol Name="b1" Comment="boolb1=$nn1&gt;$nn2" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="b10" Comment="boolb10=1s&lt;2s" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="b11" Comment="boolb11=1s==2s" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="b12" Comment="boolb12=1s&lt;&gt;2s" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="b2" Comment="boolb2=$nn1&lt;$nn2" Device="M" DevicePos="4" Type="BIT"/>
+                        <Symbol Name="b3" Comment="boolb3=$nn1==$nn2" Device="M" DevicePos="5" Type="BIT"/>
+                        <Symbol Name="b4" Comment="boolb4=$nn1==$nn2" Device="M" DevicePos="6" Type="BIT"/>
+                        <Symbol Name="b5" Comment="boolb5=$nn1!=$nn2" Device="M" DevicePos="7" Type="BIT"/>
+                        <Symbol Name="b6" Comment="boolb6=$nn1&lt;&gt;$nn2" Device="M" DevicePos="8" Type="BIT"/>
+                        <Symbol Name="b7" Comment="boolb7=$nn1&gt;=$nn2" Device="M" DevicePos="9" Type="BIT"/>
+                        <Symbol Name="b8" Comment="boolb8=$nn1&lt;=$nn2" Device="M" DevicePos="10" Type="BIT"/>
+                        <Symbol Name="b9" Comment="boolb9=1s&gt;2s" Device="M" DevicePos="11" Type="BIT"/>
+                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="ub1" Comment="boolub1=$unn1&gt;$unn2" Device="M" DevicePos="12" Type="BIT"/>
+                        <Symbol Name="ub10" Comment="boolub10=1us&lt;2us" Device="M" DevicePos="13" Type="BIT"/>
+                        <Symbol Name="ub11" Comment="boolub11=1us==2us" Device="M" DevicePos="14" Type="BIT"/>
+                        <Symbol Name="ub12" Comment="boolub12=1us&lt;&gt;2us" Device="M" DevicePos="15" Type="BIT"/>
+                        <Symbol Name="ub2" Comment="boolub2=$unn1&lt;$unn2" Device="M" DevicePos="48" Type="BIT"/>
+                        <Symbol Name="ub3" Comment="boolub3=$unn1==$unn2" Device="M" DevicePos="49" Type="BIT"/>
+                        <Symbol Name="ub4" Comment="boolub4=$unn1==$unn2" Device="M" DevicePos="50" Type="BIT"/>
+                        <Symbol Name="ub5" Comment="boolub5=$unn1!=$unn2" Device="M" DevicePos="51" Type="BIT"/>
+                        <Symbol Name="ub6" Comment="boolub6=$unn1&lt;&gt;$unn2" Device="M" DevicePos="52" Type="BIT"/>
+                        <Symbol Name="ub7" Comment="boolub7=$unn1&gt;=$unn2" Device="M" DevicePos="53" Type="BIT"/>
+                        <Symbol Name="ub8" Comment="boolub8=$unn1&lt;=$unn2" Device="M" DevicePos="54" Type="BIT"/>
+                        <Symbol Name="ub9" Comment="boolub9=1us&gt;2us" Device="M" DevicePos="55" Type="BIT"/>
+                        <Symbol Name="unn1" Comment="uint16unn1=1us" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="unn2" Comment="uint16unn2=2us" Device="M" DevicePos="5" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -146,7 +146,7 @@
                                     <Element ElementType="33" Coordinate="14337" Param="&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="14346" Param="90"/>
                                     <Element ElementType="14" Coordinate="14430">
-                                        M00040
+                                        M00000
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -158,7 +158,7 @@
                                     <Element ElementType="33" Coordinate="16385" Param="&lt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="16394" Param="90"/>
                                     <Element ElementType="14" Coordinate="16478">
-                                        M00041
+                                        M00004
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -170,7 +170,7 @@
                                     <Element ElementType="33" Coordinate="18433" Param="=,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="18442" Param="90"/>
                                     <Element ElementType="14" Coordinate="18526">
-                                        M00042
+                                        M00005
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -182,7 +182,7 @@
                                     <Element ElementType="33" Coordinate="20481" Param="=,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="20490" Param="90"/>
                                     <Element ElementType="14" Coordinate="20574">
-                                        M00043
+                                        M00006
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -194,7 +194,7 @@
                                     <Element ElementType="33" Coordinate="22529" Param="&lt;&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="22538" Param="90"/>
                                     <Element ElementType="14" Coordinate="22622">
-                                        M00044
+                                        M00007
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -206,7 +206,7 @@
                                     <Element ElementType="33" Coordinate="24577" Param="&lt;&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="24586" Param="90"/>
                                     <Element ElementType="14" Coordinate="24670">
-                                        M00045
+                                        M00008
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -218,7 +218,7 @@
                                     <Element ElementType="33" Coordinate="26625" Param="&gt;=,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="26634" Param="90"/>
                                     <Element ElementType="14" Coordinate="26718">
-                                        M00046
+                                        M00009
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -230,7 +230,7 @@
                                     <Element ElementType="33" Coordinate="28673" Param="&lt;=,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="28682" Param="90"/>
                                     <Element ElementType="14" Coordinate="28766">
-                                        M00047
+                                        M0000A
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -242,7 +242,7 @@
                                     <Element ElementType="33" Coordinate="30721" Param="&gt;,1,2"/>
                                     <Element ElementType="2" Coordinate="30730" Param="90"/>
                                     <Element ElementType="14" Coordinate="30814">
-                                        M00048
+                                        M0000B
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -254,7 +254,7 @@
                                     <Element ElementType="33" Coordinate="32769" Param="&lt;,1,2"/>
                                     <Element ElementType="2" Coordinate="32778" Param="90"/>
                                     <Element ElementType="14" Coordinate="32862">
-                                        M00049
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -266,7 +266,7 @@
                                     <Element ElementType="33" Coordinate="34817" Param="=,1,2"/>
                                     <Element ElementType="2" Coordinate="34826" Param="90"/>
                                     <Element ElementType="14" Coordinate="34910">
-                                        M0004A
+                                        M00002
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -278,7 +278,7 @@
                                     <Element ElementType="33" Coordinate="36865" Param="&lt;&gt;,1,2"/>
                                     <Element ElementType="2" Coordinate="36874" Param="90"/>
                                     <Element ElementType="14" Coordinate="36958">
-                                        M0004B
+                                        M00003
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -290,7 +290,7 @@
                                     <Element ElementType="33" Coordinate="38913" Param="U&gt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="38922" Param="90"/>
                                     <Element ElementType="14" Coordinate="39006">
-                                        M0004C
+                                        M0000C
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -302,7 +302,7 @@
                                     <Element ElementType="33" Coordinate="40961" Param="U&lt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="40970" Param="90"/>
                                     <Element ElementType="14" Coordinate="41054">
-                                        M0004D
+                                        M00030
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -314,7 +314,7 @@
                                     <Element ElementType="33" Coordinate="43009" Param="U=,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="43018" Param="90"/>
                                     <Element ElementType="14" Coordinate="43102">
-                                        M0004E
+                                        M00031
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -326,7 +326,7 @@
                                     <Element ElementType="33" Coordinate="45057" Param="U=,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="45066" Param="90"/>
                                     <Element ElementType="14" Coordinate="45150">
-                                        M0004F
+                                        M00032
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -338,7 +338,7 @@
                                     <Element ElementType="33" Coordinate="47105" Param="U&lt;&gt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="47114" Param="90"/>
                                     <Element ElementType="14" Coordinate="47198">
-                                        M00050
+                                        M00033
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -350,7 +350,7 @@
                                     <Element ElementType="33" Coordinate="49153" Param="U&lt;&gt;,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="49162" Param="90"/>
                                     <Element ElementType="14" Coordinate="49246">
-                                        M00051
+                                        M00034
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -362,7 +362,7 @@
                                     <Element ElementType="33" Coordinate="51201" Param="U&gt;=,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="51210" Param="90"/>
                                     <Element ElementType="14" Coordinate="51294">
-                                        M00052
+                                        M00035
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -374,7 +374,7 @@
                                     <Element ElementType="33" Coordinate="53249" Param="U&lt;=,unn1,unn2"/>
                                     <Element ElementType="2" Coordinate="53258" Param="90"/>
                                     <Element ElementType="14" Coordinate="53342">
-                                        M00053
+                                        M00036
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -386,7 +386,7 @@
                                     <Element ElementType="33" Coordinate="55297" Param="U&gt;,1,2"/>
                                     <Element ElementType="2" Coordinate="55306" Param="90"/>
                                     <Element ElementType="14" Coordinate="55390">
-                                        M00054
+                                        M00037
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -398,7 +398,7 @@
                                     <Element ElementType="33" Coordinate="57345" Param="U&lt;,1,2"/>
                                     <Element ElementType="2" Coordinate="57354" Param="90"/>
                                     <Element ElementType="14" Coordinate="57438">
-                                        M00055
+                                        M0000D
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -410,7 +410,7 @@
                                     <Element ElementType="33" Coordinate="59393" Param="U=,1,2"/>
                                     <Element ElementType="2" Coordinate="59402" Param="90"/>
                                     <Element ElementType="14" Coordinate="59486">
-                                        M00056
+                                        M0000E
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -422,7 +422,7 @@
                                     <Element ElementType="33" Coordinate="61441" Param="U&lt;&gt;,1,2"/>
                                     <Element ElementType="2" Coordinate="61450" Param="90"/>
                                     <Element ElementType="14" Coordinate="61534">
-                                        M00057
+                                        M0000F
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

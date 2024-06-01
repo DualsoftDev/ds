@@ -17,14 +17,14 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="8">
                     <Symbols>
-                        <Symbol Name="cu1" Comment="boolcu1=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cu2" Comment="boolcu2=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cu3" Comment="boolcu3=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cu1" Comment="bool cu1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cu2" Comment="bool cu2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cu3" Comment="bool cu3 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="myCTU" Comment="COUNTER myCTU" Device="" Kind="6" Type="CTU_INT" Address="" State="0"/>
-                        <Symbol Name="res0" Comment="boolres0=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="res1" Comment="boolres1=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="res2" Comment="boolres2=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="xx7" Comment="boolxx7=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res0" Comment="bool res0 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res1" Comment="bool res1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res2" Comment="bool res2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="xx7" Comment="bool xx7 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

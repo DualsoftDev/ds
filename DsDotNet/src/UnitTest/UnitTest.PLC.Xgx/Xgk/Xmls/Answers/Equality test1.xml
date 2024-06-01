@@ -40,10 +40,10 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="4">
-                        <Symbol Name="b1" Comment="boolb1=$bTrue!=true" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="b2" Comment="boolb2=$bTrue==true" Device="M" DevicePos="3" Type="BIT"/>
-                        <Symbol Name="bFalse" Comment="boolbFalse=!true" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="bTrue" Comment="boolbTrue=true" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="b1" Comment="boolb1=$bTrue!=true" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="b2" Comment="boolb2=$bTrue==true" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="bFalse" Comment="boolbFalse=!true" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="bTrue" Comment="boolbTrue=true" Device="M" DevicePos="3" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -75,7 +75,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="75"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="BOR,M00000,1,M00000,1"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="BOR,M00000,8,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
@@ -87,7 +87,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="75"/>
-                                    <Element ElementType="33" Coordinate="5214" Param="BAND,M00000,253,M00000,1"/>
+                                    <Element ElementType="33" Coordinate="5214" Param="BAND,M00000,251,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
@@ -96,7 +96,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="8193">
-                                        M00000
+                                        M00003
                                     </Element>
                                     <Element ElementType="6" Coordinate="8196">
                                         _OFF
@@ -104,10 +104,10 @@
                                     <Element ElementType="0" Coordinate="8198"/>
                                     <Element ElementType="2" Coordinate="8199" Param="84"/>
                                     <Element ElementType="14" Coordinate="8286">
-                                        M00002
+                                        M00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="9217">
-                                        M00000
+                                        M00003
                                     </Element>
                                     <Element ElementType="6" Coordinate="9220">
                                         _ON
@@ -120,7 +120,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="11265">
-                                        M00000
+                                        M00003
                                     </Element>
                                     <Element ElementType="6" Coordinate="11268">
                                         _ON
@@ -128,10 +128,10 @@
                                     <Element ElementType="0" Coordinate="11270"/>
                                     <Element ElementType="2" Coordinate="11271" Param="84"/>
                                     <Element ElementType="14" Coordinate="11358">
-                                        M00003
+                                        M00001
                                     </Element>
                                     <Element ElementType="7" Coordinate="12289">
-                                        M00000
+                                        M00003
                                     </Element>
                                     <Element ElementType="6" Coordinate="12292">
                                         _OFF

@@ -42,10 +42,10 @@
                     <Symbols Count="8">
                         <Symbol Name="mybool" Comment="boolmybool=false" Device="M" DevicePos="0" Type="BIT"/>
                         <Symbol Name="mydouble" Comment="doublemydouble=3.14" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="myint16" Comment="int16myint16=16s" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="int32myint32=32" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="mysbyte" Comment="sbytemysbyte=1y" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="mysingle" Comment="singlemysingle=0.1f" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="myint16" Comment="int16myint16=16s" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="int32myint32=32" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="mysbyte" Comment="sbytemysbyte=1y" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="mysingle" Comment="singlemysingle=0.1f" Device="M" DevicePos="10" Type="WORD"/>
                         <Symbol Name="myuint16" Comment="uint16myuint16=16us" Device="M" DevicePos="9" Type="WORD"/>
                         <Symbol Name="myuint32" Comment="uint32myuint32=32u" Device="M" DevicePos="12" Type="WORD"/>
                     </Symbols>

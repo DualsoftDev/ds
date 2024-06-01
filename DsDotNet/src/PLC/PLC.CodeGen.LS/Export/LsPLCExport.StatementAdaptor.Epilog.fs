@@ -15,11 +15,9 @@ module XgxTypeConvertorModule =
             let augs = Augments(newLocalStorages, StatementContainer())
             match statement with
             | DuVarDecl(exp, var) when prjParam.TargetType = XGI ->
-                var.Comment <- statement.ToText()
+                var.Comment <- statement.ToText()                
                 var.BoxedValue <- exp.BoxedEvaluatedValue
                 augs.Storages.Add var
-                //let xxx = prjParam.CreateAutoVariable("decl", exp.BoxedEvaluatedValue, statement.ToText())
-                ()
             | _ ->
                 let pack = 
                     let kvs:array<string*obj> =

@@ -548,6 +548,25 @@ module XgiExportModule =
                         |> ignore
              
 
+
+            (* POU program 삽입 *)
+            do
+                let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
+                let mainScanName =
+                    if existingTaskPous.any() then
+                        existingTaskPous.First() |> fst
+                    else 
+                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
+                        task.FirstChild.OuterXml 
+
+
+                for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
+                    let mainScan =   if i = 0 then Some(mainScanName) else None
+                    // POU 단위로 xml rung 생성
+                    pou.GenerateXmlNode(x, mainScan)
+                    |> xnPrograms.AdoptChild
+                    |> ignore
+
             (* Global variables 삽입 *)
             do
                 let xPathGlobalVar = getXPathGlobalVariable targetType
@@ -623,24 +642,6 @@ module XgiExportModule =
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
-
-            (* POU program 삽입 *)
-            do
-                let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
-                let mainScanName =
-                    if existingTaskPous.any() then
-                        existingTaskPous.First() |> fst
-                    else 
-                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
-                        task.FirstChild.OuterXml 
-
-
-                for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
-                    let mainScan =   if i = 0 then Some(mainScanName) else None
-                    // POU 단위로 xml rung 생성
-                    pou.GenerateXmlNode(x, mainScan)
-                    |> xnPrograms.AdoptChild
-                    |> ignore
 
             if targetType = XGK then
                 xdoc.MovePOULocalSymbolsToGlobalForXgk()

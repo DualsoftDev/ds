@@ -17,10 +17,10 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="4">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="int16nn3=3s" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="int16sum=0s" Device="" Kind="6" Type="INT" InitValue="6" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="uint16 nn1 = 1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="uint16 nn2 = 2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn3" Comment="uint16 nn3 = 3s" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="uint16 sum = 0s" Device="" Kind="6" Type="INT" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

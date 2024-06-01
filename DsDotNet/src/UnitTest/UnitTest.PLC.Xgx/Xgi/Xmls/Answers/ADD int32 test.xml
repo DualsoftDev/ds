@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="6">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="intnn1=1" Device="" Kind="6" Type="DINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="intnn2=2" Device="" Kind="6" Type="DINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="intsum=0" Device="" Kind="6" Type="DINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="unn1" Comment="uintunn1=1u" Device="" Kind="6" Type="UDINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="unn2" Comment="uintunn2=2u" Device="" Kind="6" Type="UDINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="usum" Comment="uintusum=0u" Device="" Kind="6" Type="UDINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="" Kind="6" Type="DINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="" Kind="6" Type="DINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="int32 sum = 0" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="unn1" Comment="uint32 unn1 = 1u" Device="" Kind="6" Type="UDINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="unn2" Comment="uint32 unn2 = 2u" Device="" Kind="6" Type="UDINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="usum" Comment="uint32 usum = 0u" Device="" Kind="6" Type="UDINT" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

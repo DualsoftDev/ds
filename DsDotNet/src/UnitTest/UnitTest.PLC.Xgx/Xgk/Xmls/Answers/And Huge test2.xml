@@ -40,15 +40,15 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="49">
-                        <Symbol Name="nn1" Comment="int32nn1=1" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="int32nn2=2" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="nn3" Comment="int32nn3=3" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="nn4" Comment="int32nn4=4" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="nn5" Comment="int32nn5=5" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="nn6" Comment="int32nn6=6" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="nn7" Comment="int32nn7=7" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="nn8" Comment="int32nn8=8" Device="M" DevicePos="14" Type="WORD"/>
-                        <Symbol Name="nn9" Comment="int32nn9=9" Device="M" DevicePos="16" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="int32nn1=1" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int32nn2=2" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="nn3" Comment="int32nn3=3" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="nn4" Comment="int32nn4=4" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="nn5" Comment="int32nn5=5" Device="M" DevicePos="16" Type="WORD"/>
+                        <Symbol Name="nn6" Comment="int32nn6=6" Device="M" DevicePos="18" Type="WORD"/>
+                        <Symbol Name="nn7" Comment="int32nn7=7" Device="M" DevicePos="20" Type="WORD"/>
+                        <Symbol Name="nn8" Comment="int32nn8=8" Device="M" DevicePos="22" Type="WORD"/>
+                        <Symbol Name="nn9" Comment="int32nn9=9" Device="M" DevicePos="24" Type="WORD"/>
                         <Symbol Name="x00" Comment="" Device="P" DevicePos="0" Type="BIT"/>
                         <Symbol Name="x01" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                         <Symbol Name="x02" Comment="" Device="P" DevicePos="2" Type="BIT"/>
@@ -89,14 +89,14 @@
                         <Symbol Name="x37" Comment="" Device="P" DevicePos="37" Type="BIT"/>
                         <Symbol Name="x38" Comment="" Device="P" DevicePos="38" Type="BIT"/>
                         <Symbol Name="x39" Comment="" Device="P" DevicePos="39" Type="BIT"/>
-                        <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="18" Type="WORD"/>
-                        <Symbol Name="_t2_GT" Comment="$_t1_ADD &gt; $nn3" Device="M" DevicePos="320" Type="BIT"/>
-                        <Symbol Name="_t3_SUB" Comment="$nn4 - $nn5" Device="M" DevicePos="22" Type="WORD"/>
-                        <Symbol Name="_t4_ADD" Comment="$_t3_SUB + $nn6" Device="M" DevicePos="24" Type="WORD"/>
-                        <Symbol Name="_t5_GT" Comment="$_t4_ADD &gt; $nn7" Device="M" DevicePos="321" Type="BIT"/>
-                        <Symbol Name="_t6_GT" Comment="$nn1 &gt; $nn2" Device="M" DevicePos="322" Type="BIT"/>
-                        <Symbol Name="_t7_split" Comment="&amp;&amp; split output" Device="M" DevicePos="323" Type="BIT"/>
-                        <Symbol Name="_t8_split" Comment="&amp;&amp; split output" Device="M" DevicePos="324" Type="BIT"/>
+                        <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="_t2_GT" Comment="$_t1_ADD &gt; $nn3" Device="M" DevicePos="32" Type="BIT"/>
+                        <Symbol Name="_t3_SUB" Comment="$nn4 - $nn5" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="_t4_ADD" Comment="$_t3_SUB + $nn6" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="_t5_GT" Comment="$_t4_ADD &gt; $nn7" Device="M" DevicePos="33" Type="BIT"/>
+                        <Symbol Name="_t6_GT" Comment="$nn1 &gt; $nn2" Device="M" DevicePos="34" Type="BIT"/>
+                        <Symbol Name="_t7_split" Comment="&amp;&amp; split output" Device="M" DevicePos="35" Type="BIT"/>
+                        <Symbol Name="_t8_split" Comment="&amp;&amp; split output" Device="M" DevicePos="36" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -236,13 +236,13 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="29700" Param="81"/>
-                                    <Element ElementType="33" Coordinate="29790" Param="DADD,nn1,nn2,M0018"/>
+                                    <Element ElementType="33" Coordinate="29790" Param="DADD,nn1,nn2,M0000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="33" Coordinate="30721" Param="D&gt;,_t1_ADD,nn3"/>
                                     <Element ElementType="2" Coordinate="30730" Param="90"/>
                                     <Element ElementType="14" Coordinate="30814">
-                                        M00200
+                                        M00020
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -250,35 +250,35 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="31748" Param="81"/>
-                                    <Element ElementType="33" Coordinate="31838" Param="DSUB,nn4,nn5,M0022"/>
+                                    <Element ElementType="33" Coordinate="31838" Param="DSUB,nn4,nn5,M0004"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="32769">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="32772" Param="81"/>
-                                    <Element ElementType="33" Coordinate="32862" Param="DADD,_t3_SUB,nn6,M0024"/>
+                                    <Element ElementType="33" Coordinate="32862" Param="DADD,_t3_SUB,nn6,M0006"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="33" Coordinate="33793" Param="D&gt;,_t4_ADD,nn7"/>
                                     <Element ElementType="2" Coordinate="33802" Param="90"/>
                                     <Element ElementType="14" Coordinate="33886">
-                                        M00201
+                                        M00021
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="33" Coordinate="34817" Param="D&gt;,nn1,nn2"/>
                                     <Element ElementType="2" Coordinate="34826" Param="90"/>
                                     <Element ElementType="14" Coordinate="34910">
-                                        M00202
+                                        M00022
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="35841">
-                                        M00200
+                                        M00020
                                     </Element>
                                     <Element ElementType="6" Coordinate="35844">
-                                        M00201
+                                        M00021
                                     </Element>
                                     <Element ElementType="6" Coordinate="35847">
                                         P00000
@@ -368,12 +368,12 @@
                                         P0001C
                                     </Element>
                                     <Element ElementType="14" Coordinate="35934">
-                                        M00203
+                                        M00023
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="36865">
-                                        M00203
+                                        M00023
                                     </Element>
                                     <Element ElementType="6" Coordinate="36868">
                                         P0001D
@@ -382,7 +382,7 @@
                                         P0001E
                                     </Element>
                                     <Element ElementType="6" Coordinate="36874">
-                                        M00202
+                                        M00022
                                     </Element>
                                     <Element ElementType="6" Coordinate="36877">
                                         P00020
@@ -404,12 +404,12 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="36895" Param="60"/>
                                     <Element ElementType="14" Coordinate="36958">
-                                        M00204
+                                        M00024
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="37889">
-                                        M00204
+                                        M00024
                                     </Element>
                                     <Element ElementType="2" Coordinate="37892" Param="87"/>
                                     <Element ElementType="14" Coordinate="37982">

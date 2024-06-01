@@ -17,10 +17,10 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="4">
                     <Symbols>
-                        <Symbol Name="b1" Comment="boolb1=$bTrue!=true" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="boolb2=$bTrue==true" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="bFalse" Comment="boolbFalse=!true" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="bTrue" Comment="boolbTrue=true" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = $bTrue != true" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = $bTrue == true" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="bFalse" Comment="bool bFalse = !(true)" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="bTrue" Comment="bool bTrue = true" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

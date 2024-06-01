@@ -39,10 +39,14 @@
             return "ErrorOpen";
         else if ((bool)Real.ErrorShort.Value)
             return "ErrorShort";
-        else if ((bool)Real.ErrTimeOver.Value)
-            return "ErrTimeOver";
-        else if ((bool)Real.ErrTimeShortage.Value)
-            return "ErrTimeShortage";
+        else if ((bool)Real.ErrOnTimeOver.Value)
+            return "ErrOnTimeOver";
+        else if ((bool)Real.ErrOnTimeShortage.Value)
+            return "ErrOnTimeShortage";
+        else if ((bool)Real.ErrOffTimeOver.Value)
+            return "ErrOffTimeOver";
+        else if ((bool)Real.ErrOffTimeShortage.Value)
+            return "ErrOffTimeShortage";
         else if ((bool)Real.ReadyLamp.Value)
             return "Ready";
         else if ((bool)Real.GoingLamp.Value)
@@ -73,8 +77,10 @@
         TagWeb[] lampTags = [
             Real.ErrorOpen,
             Real.ErrorShort,
-            Real.ErrTimeOver,
-            Real.ErrTimeShortage,
+            Real.ErrOnTimeOver,
+            Real.ErrOnTimeShortage,
+            Real.ErrOffTimeOver,
+            Real.ErrOffTimeShortage,
             Real.ReadyLamp,
             Real.GoingLamp,
             Real.FinishLamp,

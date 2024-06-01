@@ -51,13 +51,15 @@ module DBLoggerApi =
                 callUseds |> Seq.iter (fun call ->
                     let errOpen = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrOpen)
                     let errShort = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrShort)
-                    let errTimeOver = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrTimeOver)
-                    let errTimeShortage = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrTimeShortage)
+                    let errOnTimeOver = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeOver)
+                    let errOnTimeShortage = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeShortage)
+                    let errOffTimeOver = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeOver)
+                    let errOffTimeShortage = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeShortage)
         
                     let err1 = if errOpen.HasValue && errOpen.Value         then $"{call.Name} 센서오프이상" else ""
                     let err2 = if errShort.HasValue && errShort.Value       then $"{call.Name} 센서감지이상" else ""
-                    let err3 = if errTimeOver.HasValue && errTimeOver.Value then $"{call.Name} 시간초과  이상" else ""
-                    let err4 = if errTimeShortage.HasValue && errTimeShortage.Value then $"{call.Name}  시간부족 이상" else ""
+                    let err3 = if errOnTimeOver.HasValue && errOnTimeOver.Value then $"{call.Name} 시간초과  이상" else ""
+                    let err4 = if errOnTimeShortage.HasValue && errOnTimeShortage.Value then $"{call.Name}  시간부족 이상" else ""
                     let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
                     info.ErrorMessages.AddRange errs
                     )

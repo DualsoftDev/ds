@@ -55,19 +55,27 @@ module TagManagerModule =
         let forceOffBit    = createTag "OFF" true VertexTag.forceOff
 
 
-        let txErrTimeShortage    = createTag "txErrTimeShortage"  true    VertexTag.txErrTimeShortage   
-        let txErrTimeOver    = createTag "txErrTimeOver"  true    VertexTag.txErrTimeOver   
-        let rxErrShort       = createTag "rxErrShort"     true    VertexTag.rxErrShort      
-        let rxErrOpen        = createTag "rxErrOpen"      true    VertexTag.rxErrOpen    
+        let txErrOnTimeShortage     = createTag "txErrOnTimeShortage"   true    VertexTag.txErrOnTimeShortage   
+        let txErrOnTimeOver         = createTag "txErrOnTimeOver"       true    VertexTag.txErrOnTimeOver  
+        let txErrOffTimeShortage    = createTag "txErrOffTimeShortage"  true    VertexTag.txErrOffTimeShortage   
+        let txErrOffTimeOver        = createTag "txErrOffTimeOver"      true    VertexTag.txErrOffTimeOver   
+        let rxErrShort              = createTag "rxErrShort"            true    VertexTag.rxErrShort      
+        let rxErrShortRising        = createTag "rxErrShortRising"      true    VertexTag.rxErrShortRising      
+        let rxErrOpen               = createTag "rxErrOpen"             true    VertexTag.rxErrOpen    
+        let rxErrOpenRising         = createTag "rxErrOpenRising"       true    VertexTag.rxErrOpenRising          
+        let rxErrOnTrend            = createTag "rxErrOnTrend"          true    VertexTag.rxErrOnTrend    
+        let rxErrOffTrend           = createTag "rxErrOffTrend"         true    VertexTag.rxErrOffTrend    
 
         let errorErrTRXBit = createTag "ErrTRX" false   VertexTag.errorTRx
 
         let errors = 
-            let err1 = if txErrTimeShortage.Value   then "시간부족" else ""
-            let err2 = if txErrTimeOver.Value   then "시간초과" else ""
-            let err3 = if rxErrShort.Value      then "센서감지" else ""
-            let err4 = if rxErrOpen.Value       then "센서오프" else ""
-            [err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
+            let err1 = if txErrOnTimeShortage.Value      then "감지시간부족" else ""
+            let err2 = if txErrOnTimeOver.Value          then "감지시간초과" else ""
+            let err3 = if txErrOffTimeShortage.Value     then "해지시간부족" else ""
+            let err4 = if txErrOffTimeOver.Value         then "해지시간초과" else ""
+            let err5 = if rxErrShort.Value      then "센서감지" else ""
+            let err6 = if rxErrOpen.Value       then "센서오프" else ""
+            [err1;err2;err3;err4;err5;err6]|> Seq.where(fun f->f <> "")
 
         interface ITagManager with
             member x.Target = v
@@ -124,11 +132,17 @@ module TagManagerModule =
         ///PAuse Monitor
         member _.PA         =  pauseBit
 
-        member _.ErrTimeShortage   = txErrTimeShortage 
-        member _.ErrTimeOver   =  txErrTimeOver 
-        member _.ErrShort       = rxErrShort    
-        member _.ErrOpen       =  rxErrOpen     
-     
+        member _.ErrOnTimeShortage = txErrOnTimeShortage 
+        member _.ErrOnTimeOver     = txErrOnTimeOver 
+        member _.ErrOffTimeShortage = txErrOffTimeShortage 
+        member _.ErrOffTimeOver     = txErrOffTimeOver 
+        member _.ErrShort        = rxErrShort    
+        member _.ErrShortRising  = rxErrShortRising    
+        member _.ErrOpen         = rxErrOpen     
+        member _.ErrOpenRising   = rxErrOpenRising     
+        member _.ErrOnTrend   = rxErrOnTrend     
+        member _.ErrOffTrend   = rxErrOffTrend     
+        
         member _.ErrTRX         =  errorErrTRXBit
         
         member _.CreateTag(name) = createTag name
@@ -145,14 +159,16 @@ module TagManagerModule =
             | VertexTag.origin              -> originBit           :> IStorage
             | VertexTag.pause               -> pauseBit            :> IStorage
 
-            | VertexTag.txErrTimeShortage       -> txErrTimeShortage   :> IStorage
-            | VertexTag.txErrTimeOver       -> txErrTimeOver   :> IStorage
+            | VertexTag.txErrOnTimeShortage    -> txErrOnTimeShortage   :> IStorage
+            | VertexTag.txErrOnTimeOver        -> txErrOnTimeOver   :> IStorage
+            | VertexTag.txErrOffTimeShortage   -> txErrOffTimeShortage   :> IStorage
+            | VertexTag.txErrOffTimeOver       -> txErrOffTimeOver   :> IStorage
             | VertexTag.rxErrShort          -> rxErrShort      :> IStorage
             | VertexTag.rxErrOpen           -> rxErrOpen       :> IStorage
+            | VertexTag.rxErrOnTrend        -> rxErrOnTrend       :> IStorage
+            | VertexTag.rxErrOffTrend       -> rxErrOffTrend       :> IStorage
+
             | VertexTag.errorTRx            -> errorErrTRXBit  :> IStorage
-                                      
-
-
 
             | VertexTag.forceStart          -> forceStartBit       :> IStorage
             | VertexTag.forceReset          -> forceResetBit       :> IStorage
@@ -192,7 +208,7 @@ module TagManagerModule =
         let dummyCoinSTs      = createTag "CoinAnyOnST"         false     VertexTag.dummyCoinSTs
         let dummyCoinRTs      = createTag "CoinAnyOnRT"         false     VertexTag.dummyCoinRTs
         let dummyCoinETs      = createTag "CoinAnyOnET"         false     VertexTag.dummyCoinETs
-        let originGoingErr      = createTag "OriginGoingErr"    false     VertexTag.OriginGoingErr
+        let originGoingErr    = createTag "OriginGoingErr"      false     VertexTag.workErrOriginGoing
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
         
         let realData  = 
@@ -241,12 +257,10 @@ module TagManagerModule =
         let callCommandEnd  = createTag "callCommandEnd" false VertexTag.callCommandEnd
         let callOperatorValue  = createTag "callOperatorValue" false VertexTag.callOperatorValue
    
-        let rxErrShortOn     = createTag "rxErrShortOn"      false VertexTag.rxErrShortOn    
+        let rxErrShort     = createTag "rxErrShortOn"      false VertexTag.rxErrShort    
         let rxErrShortRising = createTag "rxErrShortRising"  false VertexTag.rxErrShortRising
-        let rxErrShortTemp   = createTag "rxErrShortTemp"    false VertexTag.rxErrShortTemp  
-        let rxErrOpenOff     = createTag "rxErrOpenOff"      false VertexTag.rxErrOpenOff    
+        let rxErrOpen     = createTag "rxErrOpenOff"      false VertexTag.rxErrOpen    
         let rxErrOpenRising  = createTag "rxErrOpenRising"   false VertexTag.rxErrOpenRising 
-        let rxErrOpenTemp    = createTag "rxErrOpenTemp"     false VertexTag.rxErrOpenTemp   
         let timerTimeOutBit  = timer  s $"{v.Name}_TOUT" sys (sysManager.TargetType)
        
         ///Ring Counter
@@ -258,12 +272,10 @@ module TagManagerModule =
 
         member _.TOUT   = timerTimeOutBit
 
-        member _.RXErrOpenOff       = rxErrShortOn    
-        member _.RXErrOpenTemp      = rxErrShortRising
-        member _.RXErrOpenRising    = rxErrShortTemp  
-        member _.RXErrShortOn       = rxErrOpenOff    
-        member _.RXErrShortRising   = rxErrOpenRising 
-        member _.RXErrShortTemp     = rxErrOpenTemp   
+        member _.RXErrOpen       = rxErrOpen
+        member _.RXErrShort      = rxErrShort       
+        member _.RXErrOpenRising       = rxErrOpenRising
+        member _.RXErrShortRising      = rxErrShortRising   
         ///callCommandEnd
         member _.CallCommandEnd           =  callCommandEnd
         ///Call Operator 연산결과 값 (T/F)

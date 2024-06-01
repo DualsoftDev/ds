@@ -22,11 +22,11 @@ type Flow with
 
     member f.F3_FlowReadyCondition() =
         let set = f.HWReadyConditionsToAndElseOn
-        let rst = f.clear_btn.Expr
-        (set, rst) ==| (f.readyCondition, getFuncName())
+        let rst = f._off.Expr
+        (set, rst) --| (f.readyCondition, getFuncName())
 
     member f.F4_FlowDriveCondition() =
         let set = f.HWDriveConditionsToAndElseOn
-        let rst = f.clear_btn.Expr
-        (set, rst) ==| (f.driveCondition, getFuncName())
+        let rst = f._off.Expr
+        (set, rst) --| (f.driveCondition, getFuncName())
 

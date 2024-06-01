@@ -15,16 +15,23 @@ module HmiPackageModule =
     type HMICall = {
         Name : string
         
-        TimeShortageErrorLamp : HMILamp        
-        TimeOverErrorLamp : HMILamp        
+        TimeOnShortageErrorLamp : HMILamp        
+        TimeOnOverErrorLamp : HMILamp       
+        TimeOffShortageErrorLamp : HMILamp        
+        TimeOffOverErrorLamp : HMILamp      
         ShortErrorLamp    : HMILamp        
         OpenErrorLamp     : HMILamp        
-        ErrorTotalLamp    : HMILamp        
+        TrendOnErrorLamp  : HMILamp   
+        TrendOffErrorLamp  : HMILamp   
+        ErrorTotalLamp    : HMILamp   
+
     } with
         member x.CollectTags () =
             seq {
-                yield x.TimeShortageErrorLamp        
-                yield x.TimeOverErrorLamp        
+                yield x.TimeOnShortageErrorLamp        
+                yield x.TimeOnOverErrorLamp      
+                yield x.TimeOffShortageErrorLamp        
+                yield x.TimeOffOverErrorLamp    
                 yield x.ShortErrorLamp           
                 yield x.OpenErrorLamp          
                 yield x.ErrorTotalLamp   
@@ -69,9 +76,10 @@ module HmiPackageModule =
         PauseLamp        : HMILamp 
         ErrorOpen        : HMILamp 
         ErrorShort       : HMILamp
-        ErrTimeOver      : HMILamp 
-        ErrTimeShortage      : HMILamp
-
+        ErrOnTimeOver      : HMILamp 
+        ErrOnTimeShortage      : HMILamp
+        ErrOffTimeOver      : HMILamp 
+        ErrOffTimeShortage      : HMILamp
         Devices          : HMIDevice array //loaded system
         Jobs             : HMIJob array      
     } with
@@ -90,8 +98,10 @@ module HmiPackageModule =
                 yield x.PauseLamp   
                 yield x.ErrorOpen 
                 yield x.ErrorShort
-                yield x.ErrTimeShortage
-                yield x.ErrTimeOver  
+                yield x.ErrOnTimeShortage
+                yield x.ErrOnTimeOver  
+                yield x.ErrOffTimeShortage
+                yield x.ErrOffTimeOver  
                         //yield! x.Devices |> Seq.collect (fun d -> d.CollectTags())  필요시 HMIPackage Devices : string array 이름으로 별도로 찾아야함 
                 yield! x.Jobs |> Seq.collect (fun j -> j.CollectTags())
             }

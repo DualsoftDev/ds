@@ -115,8 +115,10 @@ module ConvertCpuVertex =
 
         member c.Errors       = 
                                 [
-                                    getVMCoin(c).ErrTimeOver
-                                    getVMCoin(c).ErrTimeShortage 
+                                    getVMCoin(c).ErrOnTimeOver
+                                    getVMCoin(c).ErrOnTimeShortage 
+                                    getVMCoin(c).ErrOffTimeOver
+                                    getVMCoin(c).ErrOffTimeShortage 
                                     getVMCoin(c).ErrShort 
                                     getVMCoin(c).ErrOpen 
                                 ]
@@ -156,11 +158,19 @@ module ConvertCpuVertex =
 
         member r.CoinAlloffExpr = !!r.V.CoinAnyOnST.Expr <&&> !!r.V.CoinAnyOnRT.Expr <&&> !!r.V.CoinAnyOnET.Expr
 
-        member r.ErrTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeOver) 
-        member r.ErrTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrTimeShortage) 
+        member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOnTimeOver) 
+        member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOnTimeShortage) 
+        
+        member r.ErrOffTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOffTimeOver) 
+        member r.ErrOffTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOffTimeShortage) 
+
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrShort) 
-        member r.Errors     = r.ErrTimeOvers @ r.ErrTimeShortages @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
+
+        member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeShortages 
+                            @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages 
+                            @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
+
         member r.SafetyExpr = getSafetyExpr(r.SafetyConditions.Choose(fun f->f.GetSafetyCall()), r.Parent.GetSystem())
 
 

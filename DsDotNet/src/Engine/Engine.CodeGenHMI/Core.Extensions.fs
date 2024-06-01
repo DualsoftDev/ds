@@ -45,11 +45,16 @@ module ConvertHMI =
             let tm = x.TagManager :?> VertexMCall
             {
                 Name = x.Name
-                TimeShortageErrorLamp  = getLamp  tm (VertexTag.txErrTimeShortage |>int)
-                TimeOverErrorLamp  = getLamp  tm (VertexTag.txErrTimeOver |>int)
-                ShortErrorLamp     = getLamp  tm (VertexTag.rxErrShort |>int)
-                OpenErrorLamp      = getLamp  tm (VertexTag.rxErrOpen |>int)
-                ErrorTotalLamp     = getLamp  tm (VertexTag.errorTRx |>int)
+                TimeOnShortageErrorLamp  = getLamp  tm (VertexTag.txErrOnTimeShortage |>int)
+                TimeOnOverErrorLamp      = getLamp  tm (VertexTag.txErrOnTimeOver |>int)
+                TimeOffShortageErrorLamp = getLamp  tm (VertexTag.txErrOffTimeShortage |>int)
+                TimeOffOverErrorLamp     = getLamp  tm (VertexTag.txErrOffTimeOver |>int)
+
+                ShortErrorLamp           = getLamp  tm (VertexTag.rxErrShort |>int)
+                OpenErrorLamp            = getLamp  tm (VertexTag.rxErrOpen |>int)
+                TrendOnErrorLamp         = getLamp  tm (VertexTag.rxErrOnTrend |>int)
+                TrendOffErrorLamp        = getLamp  tm (VertexTag.rxErrOffTrend |>int)
+                ErrorTotalLamp           = getLamp  tm (VertexTag.errorTRx |>int)
             }
 
     type LoadedSystem with
@@ -91,8 +96,10 @@ module ConvertHMI =
                 PauseLamp    = getLamp tm (VertexTag.pause |>int)  
                 ErrorOpen    = getLamp  tm (VertexTag.rxErrOpen |>int)  
                 ErrorShort   = getLamp  tm (VertexTag.rxErrShort |>int)  
-                ErrTimeOver  = getLamp  tm (VertexTag.txErrTimeOver |>int)  
-                ErrTimeShortage  = getLamp  tm (VertexTag.txErrTimeShortage |>int)  
+                ErrOnTimeOver  = getLamp  tm (VertexTag.txErrOnTimeOver |>int)  
+                ErrOnTimeShortage  = getLamp  tm (VertexTag.txErrOnTimeShortage |>int)  
+                ErrOffTimeOver  = getLamp  tm (VertexTag.txErrOffTimeOver |>int)  
+                ErrOffTimeShortage  = getLamp  tm (VertexTag.txErrOffTimeShortage |>int)  
                 
                 Devices      = calls
                                     .Where(fun c->c.IsJob)

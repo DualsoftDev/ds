@@ -124,13 +124,21 @@ module ConvertCpuDsSystem =
                 let cv =  call.TagManager :?> VertexMCall
                 cv.ErrShort.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
                 cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrTimeOver.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrTimeShortage.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrOnTimeOver.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrOnTimeShortage.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrOffTimeOver.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrOffTimeShortage.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrOnTrend.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                cv.ErrOffTrend.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
                 call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOn, cv.ErrShort:> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOff, cv.ErrOpen  :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeOver, cv.ErrTimeOver :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrTimeShortage :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeOver, cv.ErrOnTimeOver :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOnTimeShortage :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeOver, cv.ErrOffTimeOver :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOffTimeShortage :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOnTrend :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOffTrend :> IStorage) |>ignore
 
         member private x.GenerationRealAlarmMemory()  = 
             for real in x.GetVertices().OfType<Real>() |> Seq.sortBy (fun c -> c.Name) do

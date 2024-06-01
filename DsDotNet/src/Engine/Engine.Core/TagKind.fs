@@ -161,21 +161,22 @@ module TagKindList =
     |callCommandEnd            = 11030
     |callOperatorValue         = 11031
     
-    |txErrTimeShortage         = 11033
-    |txErrTimeOver             = 11034
-    |rxErrShort                = 11035
-    |rxErrShortOn              = 11036
-    |rxErrShortRising          = 11037
-    |rxErrShortTemp            = 11038
-    |rxErrOpen                 = 11039
-    |rxErrOpenOff              = 11040
-    |rxErrOpenRising           = 11041
-    |rxErrOpenTemp             = 11042
-    |OriginGoingErr            = 11043
+    |dummyCoinSTs              = 11032
+    |dummyCoinRTs              = 11033
+    |dummyCoinETs              = 11034
 
-    |dummyCoinSTs              = 11050
-    |dummyCoinRTs              = 11051
-    |dummyCoinETs              = 11052
+
+    |txErrOnTimeShortage        = 11050
+    |txErrOnTimeOver            = 11051
+    |txErrOffTimeShortage       = 11052
+    |txErrOffTimeOver           = 11053
+    |rxErrShort                 = 11054
+    |rxErrShortRising           = 11055
+    |rxErrOpen                  = 11056
+    |rxErrOpenRising            = 11057
+    |rxErrOnTrend               = 11058
+    |rxErrOffTrend              = 11059
+    |workErrOriginGoing         = 11060
 
     /// 12000 ~ 12999
     [<Flags>]

@@ -142,11 +142,18 @@ type TagKindExt =
     [<Extension>]
     static member IsVertexErrTag(x:TagDS) =
         match x with
-        |EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.errorTRx
+        |EventVertex (_, _, kind) ->  kind.IsOneOf(  
+                                                      VertexTag.errorTRx
                                                     , VertexTag.rxErrOpen
                                                     , VertexTag.rxErrShort
-                                                    , VertexTag.txErrTimeOver
-                                                    , VertexTag.txErrTimeShortage
+                                                    , VertexTag.rxErrOnTrend
+                                                    , VertexTag.rxErrOffTrend
+                                                    , VertexTag.workErrOriginGoing
+                                                    
+                                                    , VertexTag.txErrOnTimeOver
+                                                    , VertexTag.txErrOnTimeShortage  
+                                                    , VertexTag.txErrOffTimeOver
+                                                    , VertexTag.txErrOffTimeShortage
                                                     )
         |_->false
 
@@ -163,38 +170,35 @@ type TagKindExt =
 
     [<Extension>]
     static member IsNeedSaveDBLog(x:TagDS) =
-        match x with
-        |EventSystem (_, _, kind) ->  kind.IsOneOf(  
-                                                      SystemTag.autoMonitor     
-                                                    , SystemTag.manualMonitor   
-                                                    , SystemTag.driveMonitor    
-                                                    , SystemTag.errorMonitor     
-                                                    , SystemTag.emergencyMonitor      
-                                                    , SystemTag.testMonitor     
-                                                    , SystemTag.readyMonitor    
-                                                    , SystemTag.pauseMonitor
-                                                    , SystemTag.clear_btn)
+        if x.IsVertexErrTag()
+        then true
+        else 
+            match x with
+            |EventSystem (_, _, kind) ->  kind.IsOneOf(  
+                                                          SystemTag.autoMonitor     
+                                                        , SystemTag.manualMonitor   
+                                                        , SystemTag.driveMonitor    
+                                                        , SystemTag.errorMonitor     
+                                                        , SystemTag.emergencyMonitor      
+                                                        , SystemTag.testMonitor     
+                                                        , SystemTag.readyMonitor    
+                                                        , SystemTag.pauseMonitor
+                                                        , SystemTag.clear_btn)
 
-        |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_state
-                                                    , FlowTag.flowPause
-                                                    , FlowTag.flowStopError
-                                                    )
+            |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_state
+                                                        , FlowTag.flowPause
+                                                        , FlowTag.flowStopError
+                                                        )
 
-        |EventVertex (_, _, kind) ->  kind.IsOneOf(
-                                        //VertexTag.ready,
-                                        VertexTag.going       
-                                        //, VertexTag.finish       
-                                        //, VertexTag.homing       
-                                        , VertexTag.pause       
-                                        , VertexTag.errorTRx       
-                                        , VertexTag.rxErrOpen
-                                        , VertexTag.rxErrShort
-                                        , VertexTag.txErrTimeOver
-                                        , VertexTag.txErrTimeShortage
-                                        
-                                        )
+            |EventVertex (_, _, kind) ->  kind.IsOneOf(
+                                            //VertexTag.ready,
+                                            VertexTag.going       
+                                            //, VertexTag.finish       
+                                            //, VertexTag.homing       
+                                            , VertexTag.pause       
+                                            )
                                           
-        |EventApiItem (_, _, _) -> false
-        |EventAction (_, _, _) -> false
-        |EventHwSys  (_, _, _) -> false
-        |EventVariable  (_, _, _) -> true
+            |EventApiItem (_, _, _) -> false
+            |EventAction (_, _, _) -> false
+            |EventHwSys  (_, _, _) -> false
+            |EventVariable  (_, _, _) -> true

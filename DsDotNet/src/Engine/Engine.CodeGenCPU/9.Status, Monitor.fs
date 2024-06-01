@@ -61,9 +61,9 @@ type VertexManager with
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
 
             match RuntimeDS.Package with 
-            | Developer ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrTimeOver , getFuncName())
-            | Simulation -> yield (call._off.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
-            | _ ->          yield (v.TOUT.DN.Expr, rst) ==| (v.ErrTimeOver , getFuncName())
+            | Developer ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrOnTimeOver , getFuncName())
+            | Simulation -> yield (call._off.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
+            | _ ->          yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
         ]
 
     member v.M4_CallErrorRXMonitor() =
@@ -75,41 +75,22 @@ type VertexManager with
         [
             let using      = if call.HasSensor then v._on.Expr else  v._off.Expr 
             let input      = call.EndActionOnlyIO
-            let checkCondi = using <&&> dop <&&> real.V.G.Expr <&&>   call.V.G.Expr
+            let checkCondi = using <&&> dop <&&> real.V.G.Expr 
 
-            
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
        
-            let setRising  = fbRisingAfter [input] :> IExpression<bool>    
-            let setFalling = fbFallingAfter[input] :> IExpression<bool>
-            (*open short error*)
-            yield (checkCondi <&&>  rxReadyExpr <&&> setRising,  rst<||>v._sim.Expr)  ==| (v.ErrShort, getFuncName())
-            yield (checkCondi <&&>  rxFinishExpr<&&>setFalling,  rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
-
-
-
-            //let offSet     = callV.RXErrOpenOff
-            //let offRising  = callV.RXErrOpenRising
-            //let offTemp    = callV.RXErrOpenTemp
-                                
-            //let onSet      = callV.RXErrShortOn
-            //let onRising   = callV.RXErrShortRising
-            //let onTenmp    = callV.RXErrShortTemp
-
-            //let RxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
-            //let RxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
-       
-            //yield! (using <&&> input  , v.ErrShort.Expr)  --^ (onRising,   onSet, onTenmp, "RXErrShortOn")
-            //yield! (using <&&> !!input, v.ErrOpen.Expr)   --^ (offRising, offSet, offTemp, "RXErrOpenOff")
-
-            //yield (dop <&&> real.V.G.Expr <&&>   call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrTimeShortage, getFuncName())
-            //yield (dop <&&> real.V.G.Expr <&&> !!call.V.G.Expr <&&> onRising.Expr  <&&> RxReadyExpr,  rst<||>v._sim.Expr) ==| (v.ErrShort, getFuncName())
-            //if call.UsingTon
-            //then //단락 에레는 시간적용한 감지시 채터링 이슈로 Call Going 시 제외시키고 부모 Going일때만 체크
-            //    yield (dop <&&> real.V.G.Expr <&&>  !!call.V.G.Expr <&&>  offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
-            //else 
-            //    yield (dop <&&> real.V.G.Expr <&&>                      offRising.Expr  <&&> RxFinishExpr, rst<||>v._sim.Expr) ==| (v.ErrOpen,  getFuncName())
+            yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, getFuncName())
+            yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
+            
+            (* short error *)
+            yield (checkCondi <&&>  rxReadyExpr <&&> v.ErrShortRising.Expr,  rst<||>v._sim.Expr)  ==| (v.ErrShort, getFuncName())
+            (* open  error *)
+            if call.UsingTon
+            then
+                yield (checkCondi <&&>  rxFinishExpr <&&> !!call.V.G.Expr <&&> v.ErrOpenRising.Expr,   rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
+            else
+                yield (checkCondi <&&>  rxFinishExpr                      <&&> v.ErrOpenRising.Expr,   rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
         ]
         
 
@@ -119,8 +100,10 @@ type VertexManager with
         [
             (real.ErrOpens.ToOrElseOff(), rst)  --| (v.ErrOpen, getFuncName())
             (real.ErrShorts.ToOrElseOff(), rst) --| (v.ErrShort, getFuncName())
-            (real.ErrTimeShortages.ToOrElseOff(), rst) --| (v.ErrTimeShortage, getFuncName())
-            (real.ErrTimeOvers.ToOrElseOff(), rst) --| (v.ErrTimeOver, getFuncName())
+            (real.ErrOnTimeShortages.ToOrElseOff(), rst) --| (v.ErrOnTimeShortage, getFuncName())
+            (real.ErrOnTimeOvers.ToOrElseOff(), rst) --| (v.ErrOnTimeOver, getFuncName())
+            (real.ErrOffTimeShortages.ToOrElseOff(), rst) --| (v.ErrOffTimeShortage, getFuncName())
+            (real.ErrOffTimeOvers.ToOrElseOff(), rst) --| (v.ErrOffTimeOver, getFuncName())
             (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
         ]
 

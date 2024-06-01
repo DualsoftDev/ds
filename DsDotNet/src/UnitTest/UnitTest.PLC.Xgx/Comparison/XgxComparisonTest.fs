@@ -268,7 +268,7 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         if xgx = XGK then
             let addrPi = XgkAddress.FromAddress(pi.Address)
             let addrEu = XgkAddress.FromAddress(eu.Address)
-            abs(addrEu.WordOffset - addrPi.WordOffset) === 4 
+            abs(addrEu.WordOffset - addrPi.WordOffset) === 2 
 
         x.saveTestResult f xml
 

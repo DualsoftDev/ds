@@ -57,10 +57,10 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="4">
                             <Symbols>
-                                <Symbol Name="mybool" Comment="mybool comment" Device="" Kind="8" State="0"/>
-                                <Symbol Name="myint16" Comment="myint16 comment &lt;&gt; ! +-*/" Device="" Kind="8" State="0"/>
-                                <Symbol Name="myint32" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="myint64" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="mybool" Comment="bool mybool = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="myint16" Comment="uint16 myint16 = 16s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="myint32" Comment="int32 myint32 = 32" Device="" Kind="8" State="0"/>
+                                <Symbol Name="myint64" Comment="int64 myint64 = 64L" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

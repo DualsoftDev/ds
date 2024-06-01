@@ -430,12 +430,10 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="4">
+                        <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="xx0" Comment="" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="xx0" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="xx1" Comment="" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="xx1" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="xx0" Comment="bool xx0 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="xx1" Comment="bool xx1 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>
@@ -476,12 +474,10 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="4">
+                        <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="yy0" Comment="" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="yy0" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="yy1" Comment="" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="yy1" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="yy0" Comment="bool yy0 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="yy1" Comment="bool yy1 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>
@@ -522,12 +518,10 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="4">
+                        <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="zz0" Comment="" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="zz0" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="zz1" Comment="" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="zz1" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="zz0" Comment="bool zz0 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="zz1" Comment="bool zz1 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

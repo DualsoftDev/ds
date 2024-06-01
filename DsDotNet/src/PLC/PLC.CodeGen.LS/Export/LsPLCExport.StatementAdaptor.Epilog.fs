@@ -13,22 +13,30 @@ module XgxTypeConvertorModule =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
-            let pack = 
-                let kvs:array<string*obj> =
-                    [|
-                        ("projectParameter", prjParam)
-                        ("augments", augs)
-                    |]
-                kvs |> DynamicDictionary
+            match statement with
+            | DuVarDecl(exp, var) when prjParam.TargetType = XGI ->
+                var.Comment <- statement.ToText()
+                var.BoxedValue <- exp.BoxedEvaluatedValue
+                augs.Storages.Add var
+                //let xxx = prjParam.CreateAutoVariable("decl", exp.BoxedEvaluatedValue, statement.ToText())
+                ()
+            | _ ->
+                let pack = 
+                    let kvs:array<string*obj> =
+                        [|
+                            ("projectParameter", prjParam)
+                            ("augments", augs)
+                        |]
+                    kvs |> DynamicDictionary
 
-            let newStatement = statement.DistributeNegate(pack)
-            let newStatement = newStatement.FunctionToAssignStatement(pack)
-            let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
+                let newStatement = statement.DistributeNegate(pack)
+                let newStatement = newStatement.FunctionToAssignStatement(pack)
+                let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
 
-            match prjParam.TargetType with
-            | XGI -> newStatement.ToStatements(pack)
-            | XGK -> newStatement.ToStatementsXgk(pack)
-            | _ -> failwith "Not supported runtime target"
+                match prjParam.TargetType with
+                | XGI -> newStatement.ToStatements(pack)
+                | XGK -> newStatement.ToStatementsXgk(pack)
+                | _ -> failwith "Not supported runtime target"
 
             let rungComment =
                 [

@@ -136,14 +136,14 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="8">
                             <Symbols>
-                                <Symbol Name="cu1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cu2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cu3" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cu1" Comment="bool cu1 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cu2" Comment="bool cu2 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cu3" Comment="bool cu3 = false" Device="" Kind="8" State="0"/>
                                 <Symbol Name="myCTU" Comment="COUNTER myCTU" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res0" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="xx7" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res0" Comment="bool res0 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res1" Comment="bool res1 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res2" Comment="bool res2 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="xx7" Comment="bool xx7 = false" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

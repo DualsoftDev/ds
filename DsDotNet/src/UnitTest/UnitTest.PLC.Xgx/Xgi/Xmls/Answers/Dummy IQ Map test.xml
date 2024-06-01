@@ -107,10 +107,10 @@ XckU4UJCOYh5CA==
                             <Symbols>
                                 <Symbol Name="ICar" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="QCar" Comment="" Device="Q" Kind="8" State="0"/>
-                                <Symbol Name="iAvante" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="iSonata" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="qAvante" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="qSonata" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="iAvante" Comment="bool iAvante = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="iSonata" Comment="bool iSonata = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="qAvante" Comment="bool qAvante = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="qSonata" Comment="bool qSonata = false" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

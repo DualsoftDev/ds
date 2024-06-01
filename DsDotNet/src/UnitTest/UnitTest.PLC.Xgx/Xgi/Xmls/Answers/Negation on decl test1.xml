@@ -43,28 +43,8 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b3 = !(!($b1) != $b2)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: EQ2_BOOL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 984&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200001, , 0&#xA;VAR_IN: IN2, 0x00200001, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="3073">
-                                        b1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="3079">
-                                        b3
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="4097">
-                                        b2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="END">
+                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -76,9 +56,9 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="3">
                             <Symbols>
-                                <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b3" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="bool b1 = true" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="bool b2 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b3" Comment="bool b3 = !(!($b1) != $b2)" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

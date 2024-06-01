@@ -41,8 +41,8 @@ module LiteralTestModule =
         [<Test>]
         member __.``Literal test`` () =
             let storages = Storages()
-            storages.Add(  "b1", (createVariable "b1" ({Object = true}:BoxedObjectHolder))   )
-            storages.Add(  "pi", (createVariable "pi" ({Object = 3.14}:BoxedObjectHolder))   )
+            storages.Add(  "b1", (createVariable "b1" ({Object = true}:BoxedObjectHolder)) None   )
+            storages.Add(  "pi", (createVariable "pi" ({Object = 3.14}:BoxedObjectHolder)) None   )
             let tests: (string*obj) array =
                 [|
                     ("true", true)

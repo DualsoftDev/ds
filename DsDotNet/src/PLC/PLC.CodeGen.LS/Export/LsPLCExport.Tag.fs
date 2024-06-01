@@ -157,19 +157,23 @@ module XGITag = //IEC61131Tag =
         //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
 
         member x.GenerateXml (prjParam: XgxProjectParams) =
-            [ yield $"\t<Symbol {x.GetXmlArgs prjParam}>"
-              //// 사용되지 않지만, 필요한 XML children element 생성
-              //yield!
-              //    [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
-              //    |> Seq.map (sprintf "\t\t<Member%s/>")
-              yield "\t</Symbol>" ]
+            [
+                let xml = x.GetXmlArgs prjParam
+                yield $"\t<Symbol {xml}>"
+
+                //// 사용되지 않지만, 필요한 XML children element 생성
+                //yield!
+                //    [ "Addresses"; "Retains"; "InitValues"; "Comments" ]
+                //    |> Seq.map (sprintf "\t\t<Member%s/>")
+                yield "\t</Symbol>" ]
             |> String.concat "\r\n"
 
     /// Symbol variable 정의 구역 xml 의 string 을 생성
     let private generateSymbolVarDefinitionXml (prjParam: XgxProjectParams) (varType: string) (FList(symbols: SymbolInfo list)) =
-        let symbols:SymbolInfo list = symbols 
-                                        |> List.filter (fun s -> not(s.Name.Contains(xgkTimerCounterContactMarking)))
-                                        |> List.sortBy (fun s -> s.Name)
+        let symbols:SymbolInfo list =
+            symbols 
+            |> List.filter (fun s -> not(s.Name.Contains(xgkTimerCounterContactMarking)))
+            |> List.sortBy (fun s -> s.Name)
 
         [ yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
           yield "<Symbols>"

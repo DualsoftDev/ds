@@ -40,15 +40,15 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="9">
-                        <Symbol Name="cd1" Comment="" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="cd2" Comment="" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="cd3" Comment="" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="cd4" Comment="" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="cd1" Comment="boolcd1=false" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="cd2" Comment="boolcd2=false" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="cd3" Comment="boolcd3=false" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="cd4" Comment="boolcd4=false" Device="M" DevicePos="3" Type="BIT"/>
                         <Symbol Name="myCTR" Comment="COUNTER myCTR" Device="C" DevicePos="0" Type="BIT/WORD"/>
-                        <Symbol Name="res0" Comment="" Device="M" DevicePos="4" Type="BIT"/>
-                        <Symbol Name="res1" Comment="" Device="M" DevicePos="5" Type="BIT"/>
-                        <Symbol Name="res2" Comment="" Device="M" DevicePos="6" Type="BIT"/>
-                        <Symbol Name="xx7" Comment="" Device="M" DevicePos="7" Type="BIT"/>
+                        <Symbol Name="res0" Comment="boolres0=false" Device="M" DevicePos="4" Type="BIT"/>
+                        <Symbol Name="res1" Comment="boolres1=false" Device="M" DevicePos="5" Type="BIT"/>
+                        <Symbol Name="res2" Comment="boolres2=false" Device="M" DevicePos="6" Type="BIT"/>
+                        <Symbol Name="xx7" Comment="boolxx7=false" Device="M" DevicePos="7" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

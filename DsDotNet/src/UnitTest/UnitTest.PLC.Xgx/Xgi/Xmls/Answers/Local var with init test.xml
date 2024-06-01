@@ -17,18 +17,18 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="12">
                     <Symbols>
-                        <Symbol Name="mybool" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="mybyte" Comment="" Device="" Kind="6" Type="USINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="mychar" Comment="" Device="" Kind="6" Type="BYTE" InitValue="a" Address="" State="0"/>
-                        <Symbol Name="mydouble" Comment="" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
-                        <Symbol Name="myint16" Comment="" Device="" Kind="6" Type="INT" InitValue="16" Address="" State="0"/>
-                        <Symbol Name="myint32" Comment="" Device="" Kind="6" Type="DINT" InitValue="32" Address="" State="0"/>
-                        <Symbol Name="myint64" Comment="" Device="" Kind="6" Type="LINT" InitValue="64" Address="" State="0"/>
-                        <Symbol Name="mysbyte" Comment="" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="mysingle" Comment="" Device="" Kind="6" Type="REAL" InitValue="0.1" Address="" State="0"/>
-                        <Symbol Name="myuint16" Comment="" Device="" Kind="6" Type="UINT" InitValue="16" Address="" State="0"/>
-                        <Symbol Name="myuint32" Comment="" Device="" Kind="6" Type="UDINT" InitValue="32" Address="" State="0"/>
-                        <Symbol Name="myuint64" Comment="" Device="" Kind="6" Type="ULINT" InitValue="64" Address="" State="0"/>
+                        <Symbol Name="mybool" Comment="boolmybool=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="mybyte" Comment="bytemybyte=2uy" Device="" Kind="6" Type="USINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="mychar" Comment="charmychar='a'" Device="" Kind="6" Type="BYTE" InitValue="a" Address="" State="0"/>
+                        <Symbol Name="mydouble" Comment="doublemydouble=3.14" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
+                        <Symbol Name="myint16" Comment="int16myint16=16s" Device="" Kind="6" Type="INT" InitValue="16" Address="" State="0"/>
+                        <Symbol Name="myint32" Comment="int32myint32=32" Device="" Kind="6" Type="DINT" InitValue="32" Address="" State="0"/>
+                        <Symbol Name="myint64" Comment="int64myint64=64L" Device="" Kind="6" Type="LINT" InitValue="64" Address="" State="0"/>
+                        <Symbol Name="mysbyte" Comment="sbytemysbyte=1y" Device="" Kind="6" Type="SINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="mysingle" Comment="singlemysingle=0.1f" Device="" Kind="6" Type="REAL" InitValue="0.1" Address="" State="0"/>
+                        <Symbol Name="myuint16" Comment="uint16myuint16=16us" Device="" Kind="6" Type="UINT" InitValue="16" Address="" State="0"/>
+                        <Symbol Name="myuint32" Comment="uint32myuint32=32u" Device="" Kind="6" Type="UDINT" InitValue="32" Address="" State="0"/>
+                        <Symbol Name="myuint64" Comment="uint64myuint64=64UL" Device="" Kind="6" Type="ULINT" InitValue="64" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

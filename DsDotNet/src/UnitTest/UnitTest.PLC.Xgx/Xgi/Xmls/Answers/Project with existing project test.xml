@@ -18,7 +18,7 @@
                 <GlobalVariable Version="Ver 1.0" Count="2">
                     <Symbols>
                         <Symbol Name="gg0" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.1" State="0"/>
-                        <Symbol Name="gg1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="gg1" Comment="boolgg1=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

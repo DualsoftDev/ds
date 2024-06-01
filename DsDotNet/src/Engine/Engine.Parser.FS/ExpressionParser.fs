@@ -304,10 +304,6 @@ module rec ExpressionParser =
 
                     let variable =
                         let comment = match ctx.GetText() with | "" -> None | _ as cmt -> Some cmt
-
-                        // TODO
-                        let comment = None
-
                         declType.CreateVariable(storageName, exp.BoxedEvaluatedValue, comment)
                     storages.Add(storageName, variable)
                     Some <| DuVarDecl(exp, variable)

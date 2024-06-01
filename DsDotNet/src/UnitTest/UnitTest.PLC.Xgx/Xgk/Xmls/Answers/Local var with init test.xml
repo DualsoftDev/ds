@@ -40,14 +40,14 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="8">
-                        <Symbol Name="mybool" Comment="" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="mydouble" Comment="" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="myint16" Comment="" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="mysbyte" Comment="" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="mysingle" Comment="" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="myuint16" Comment="" Device="M" DevicePos="9" Type="WORD"/>
-                        <Symbol Name="myuint32" Comment="" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="mybool" Comment="boolmybool=false" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="mydouble" Comment="doublemydouble=3.14" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="myint16" Comment="int16myint16=16s" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="int32myint32=32" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="mysbyte" Comment="sbytemysbyte=1y" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="mysingle" Comment="singlemysingle=0.1f" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="myuint16" Comment="uint16myuint16=16us" Device="M" DevicePos="9" Type="WORD"/>
+                        <Symbol Name="myuint32" Comment="uint32myuint32=32u" Device="M" DevicePos="12" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

@@ -17,14 +17,14 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="8">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="sum2" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="unn1" Comment="" Device="" Kind="6" Type="UINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="unn2" Comment="" Device="" Kind="6" Type="UINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="usum" Comment="" Device="" Kind="6" Type="UINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="usum2" Comment="" Device="" Kind="6" Type="UINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="int16sum=0s" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="sum2" Comment="int16sum2=0s" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="unn1" Comment="uint16unn1=1us" Device="" Kind="6" Type="UINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="unn2" Comment="uint16unn2=2us" Device="" Kind="6" Type="UINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="usum" Comment="uint16usum=0us" Device="" Kind="6" Type="UINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="usum2" Comment="uint16usum2=0us" Device="" Kind="6" Type="UINT" InitValue="3" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

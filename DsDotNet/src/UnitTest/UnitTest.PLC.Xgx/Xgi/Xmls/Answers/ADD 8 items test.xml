@@ -17,15 +17,15 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="9">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="nn4" Comment="" Device="" Kind="6" Type="INT" InitValue="4" Address="" State="0"/>
-                        <Symbol Name="nn5" Comment="" Device="" Kind="6" Type="INT" InitValue="5" Address="" State="0"/>
-                        <Symbol Name="nn6" Comment="" Device="" Kind="6" Type="INT" InitValue="6" Address="" State="0"/>
-                        <Symbol Name="nn7" Comment="" Device="" Kind="6" Type="INT" InitValue="7" Address="" State="0"/>
-                        <Symbol Name="nn8" Comment="" Device="" Kind="6" Type="INT" InitValue="8" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="INT" InitValue="36" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn3" Comment="int16nn3=3s" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn4" Comment="int16nn4=4s" Device="" Kind="6" Type="INT" InitValue="4" Address="" State="0"/>
+                        <Symbol Name="nn5" Comment="int16nn5=5s" Device="" Kind="6" Type="INT" InitValue="5" Address="" State="0"/>
+                        <Symbol Name="nn6" Comment="int16nn6=6s" Device="" Kind="6" Type="INT" InitValue="6" Address="" State="0"/>
+                        <Symbol Name="nn7" Comment="int16nn7=7s" Device="" Kind="6" Type="INT" InitValue="7" Address="" State="0"/>
+                        <Symbol Name="nn8" Comment="int16nn8=8s" Device="" Kind="6" Type="INT" InitValue="8" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="int16sum=0s" Device="" Kind="6" Type="INT" InitValue="36" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

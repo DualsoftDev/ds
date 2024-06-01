@@ -42,7 +42,7 @@
                     <Symbols Count="3">
                         <Symbol Name="mybool" Comment="mybool comment" Device="M" DevicePos="0" Type="BIT"/>
                         <Symbol Name="myint16" Comment="myint16 comment &lt;&gt; ! +-*/" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="int32myint32=32" Device="M" DevicePos="2" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

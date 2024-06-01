@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="7">
                     <Symbols>
-                        <Symbol Name="nn0" Comment="" Device="" Kind="6" Type="INT" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="nn4" Comment="" Device="" Kind="6" Type="INT" InitValue="4" Address="" State="0"/>
-                        <Symbol Name="nn5" Comment="" Device="" Kind="6" Type="INT" InitValue="5" Address="" State="0"/>
+                        <Symbol Name="nn0" Comment="int16nn0=0s" Device="" Kind="6" Type="INT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn3" Comment="int16nn3=3s" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn4" Comment="int16nn4=4s" Device="" Kind="6" Type="INT" InitValue="4" Address="" State="0"/>
+                        <Symbol Name="nn5" Comment="int16nn5=5s" Device="" Kind="6" Type="INT" InitValue="5" Address="" State="0"/>
                         <Symbol Name="qq" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX0.1.0" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>

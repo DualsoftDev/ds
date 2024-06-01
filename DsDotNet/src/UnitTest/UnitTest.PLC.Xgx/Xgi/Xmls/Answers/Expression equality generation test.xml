@@ -17,10 +17,10 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="20">
                     <Symbols>
-                        <Symbol Name="result1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="result2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="result3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="result4" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result1" Comment="boolresult1=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result2" Comment="boolresult2=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result3" Comment="boolresult3=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result4" Comment="boolresult4=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="x00" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.0" State="0"/>
                         <Symbol Name="x01" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.1" State="0"/>
                         <Symbol Name="x02" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.2" State="0"/>

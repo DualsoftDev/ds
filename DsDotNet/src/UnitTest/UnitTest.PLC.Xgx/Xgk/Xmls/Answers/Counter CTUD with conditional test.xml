@@ -40,23 +40,23 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="17">
-                        <Symbol Name="cd1" Comment="" Device="M" DevicePos="4" Type="BIT"/>
-                        <Symbol Name="cd2" Comment="" Device="M" DevicePos="5" Type="BIT"/>
-                        <Symbol Name="cd3" Comment="" Device="M" DevicePos="6" Type="BIT"/>
-                        <Symbol Name="cd4" Comment="" Device="M" DevicePos="7" Type="BIT"/>
-                        <Symbol Name="cu1" Comment="" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="cu2" Comment="" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="cu3" Comment="" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="cu4" Comment="" Device="M" DevicePos="3" Type="BIT"/>
-                        <Symbol Name="load1" Comment="" Device="M" DevicePos="11" Type="BIT"/>
-                        <Symbol Name="load2" Comment="" Device="M" DevicePos="12" Type="BIT"/>
-                        <Symbol Name="load3" Comment="" Device="M" DevicePos="13" Type="BIT"/>
-                        <Symbol Name="load4" Comment="" Device="M" DevicePos="14" Type="BIT"/>
+                        <Symbol Name="cd1" Comment="boolcd1=false" Device="M" DevicePos="4" Type="BIT"/>
+                        <Symbol Name="cd2" Comment="boolcd2=false" Device="M" DevicePos="5" Type="BIT"/>
+                        <Symbol Name="cd3" Comment="boolcd3=false" Device="M" DevicePos="6" Type="BIT"/>
+                        <Symbol Name="cd4" Comment="boolcd4=false" Device="M" DevicePos="7" Type="BIT"/>
+                        <Symbol Name="cu1" Comment="boolcu1=false" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="cu2" Comment="boolcu2=false" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="cu3" Comment="boolcu3=false" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="cu4" Comment="boolcu4=false" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="load1" Comment="boolload1=false" Device="M" DevicePos="11" Type="BIT"/>
+                        <Symbol Name="load2" Comment="boolload2=false" Device="M" DevicePos="12" Type="BIT"/>
+                        <Symbol Name="load3" Comment="boolload3=false" Device="M" DevicePos="13" Type="BIT"/>
+                        <Symbol Name="load4" Comment="boolload4=false" Device="M" DevicePos="14" Type="BIT"/>
                         <Symbol Name="myCTUD" Comment="COUNTER myCTUD" Device="C" DevicePos="0" Type="BIT/WORD"/>
-                        <Symbol Name="res0" Comment="" Device="M" DevicePos="8" Type="BIT"/>
-                        <Symbol Name="res1" Comment="" Device="M" DevicePos="9" Type="BIT"/>
-                        <Symbol Name="res2" Comment="" Device="M" DevicePos="10" Type="BIT"/>
-                        <Symbol Name="xx7" Comment="" Device="M" DevicePos="15" Type="BIT"/>
+                        <Symbol Name="res0" Comment="boolres0=false" Device="M" DevicePos="8" Type="BIT"/>
+                        <Symbol Name="res1" Comment="boolres1=false" Device="M" DevicePos="9" Type="BIT"/>
+                        <Symbol Name="res2" Comment="boolres2=false" Device="M" DevicePos="10" Type="BIT"/>
+                        <Symbol Name="xx7" Comment="boolxx7=false" Device="M" DevicePos="15" Type="BIT"/>
                         <Symbol Name="_t1_OR" Comment="$cu1 &amp;&amp; $cu2 || $cu3 || $cu4" Device="M" DevicePos="16" Type="BIT"/>
                         <Symbol Name="_t2_OR" Comment="$cd1 || $cd2 || $cd3 &amp;&amp; $cd4" Device="M" DevicePos="17" Type="BIT"/>
                     </Symbols>

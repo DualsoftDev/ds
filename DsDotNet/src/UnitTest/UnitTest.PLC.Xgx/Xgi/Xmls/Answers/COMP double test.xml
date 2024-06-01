@@ -17,16 +17,16 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="10">
                     <Symbols>
-                        <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b4" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b5" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b6" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b7" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b8" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="eu" Comment="" Device="" Kind="6" Type="LREAL" InitValue="2.718" Address="" State="0"/>
-                        <Symbol Name="pi" Comment="" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="boolb1=$pi&gt;$eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="boolb2=$pi&lt;$eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b3" Comment="boolb3=$pi==$eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b4" Comment="boolb4=$pi==$eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b5" Comment="boolb5=$pi!=$eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b6" Comment="boolb6=$pi&lt;&gt;$eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b7" Comment="boolb7=$pi&gt;=$eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b8" Comment="boolb8=$pi&lt;=$eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="eu" Comment="doubleeu=2.718" Device="" Kind="6" Type="LREAL" InitValue="2.718" Address="" State="0"/>
+                        <Symbol Name="pi" Comment="doublepi=3.14" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

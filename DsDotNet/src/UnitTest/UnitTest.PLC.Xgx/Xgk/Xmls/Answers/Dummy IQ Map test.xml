@@ -42,10 +42,10 @@
                     <Symbols Count="6">
                         <Symbol Name="ICar" Comment="" Device="P" DevicePos="175" Type="BIT"/>
                         <Symbol Name="QCar" Comment="" Device="P" DevicePos="15" Type="BIT"/>
-                        <Symbol Name="iAvante" Comment="" Device="M" DevicePos="3" Type="BIT"/>
-                        <Symbol Name="iSonata" Comment="" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="qAvante" Comment="" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="qSonata" Comment="" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="iAvante" Comment="booliAvante=false" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="iSonata" Comment="booliSonata=false" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="qAvante" Comment="boolqAvante=false" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="qSonata" Comment="boolqSonata=false" Device="M" DevicePos="1" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

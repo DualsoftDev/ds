@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="6">
                     <Symbols>
-                        <Symbol Name="b0" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b4" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="pi" Comment="" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
+                        <Symbol Name="b0" Comment="boolb0=!(2.1==6.1)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="boolb1=!($pi==6.1)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="boolb2=true&amp;&amp;!($pi==6.2)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b3" Comment="boolb3=$pi&gt;6.23" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b4" Comment="boolb4=!($pi&gt;6.24)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="pi" Comment="doublepi=3.14" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>

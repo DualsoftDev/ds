@@ -19,6 +19,7 @@ module StatementExtensionModule =
 
             match statement with
             | DuVarDecl(exp, decl) ->
+                assert(prjParam.TargetType = XGK)
                 let _newExp =
                     augs.ExpressionStore <- Some decl
                     exp.CollectExpandedExpression(prjParam, augs)

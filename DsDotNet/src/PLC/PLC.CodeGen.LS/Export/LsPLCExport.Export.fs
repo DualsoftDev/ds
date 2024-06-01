@@ -55,7 +55,7 @@ module XgiExportModule =
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedStatements seq) : XmlOutput =
         let isXgi, isXgk = prjParam.TargetType = XGI, prjParam.TargetType = XGK
 
-        let rgiXmlRung (expr: FlatExpression option) (xgiCommand:CommandTypes option) (y:int) : RungGenerationInfo =
+        let rgiCommandRung (expr: FlatExpression option) (xgiCommand:CommandTypes) (y:int) : RungGenerationInfo =
             let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) expr xgiCommand
             let yy = c / 1024
 
@@ -69,7 +69,7 @@ module XgiExportModule =
             let xml = getCommentRungXml rgi.NextRungY prologComment
             rgi <- rgi.AddSingleLineXml(xml)
 
-        let simpleRung (expr: IExpression) (target: IStorage) : unit =
+        let simpleRung (*(condition:IExpression)*) (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOperators @ comparisonOperators) ->
             
@@ -101,7 +101,7 @@ module XgiExportModule =
 
                 let flatExpr = expr.Flatten() :?> FlatExpression
                 let command = CoilCmd(coil)
-                let rgiSub = rgiXmlRung (Some flatExpr) (Some command) rgi.NextRungY
+                let rgiSub = rgiCommandRung (Some flatExpr) command rgi.NextRungY
                 //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 rgi <-
                     { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -152,14 +152,14 @@ module XgiExportModule =
                             let cmd =
                                 let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"         // Byte OR
                                 XgkParamCmd(param, 5)
-                            let rgiSub = rgiXmlRung condWithTrue (Some cmd) rgi.NextRungY
+                            let rgiSub = rgiCommandRung condWithTrue cmd rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
                                         NextRungY = 1 + rgiSub.NextRungY }
                         if condWithFalse.IsSome then
                             let cmd =
                                 let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"      // Byte AND
                                 XgkParamCmd(param, 5)
-                            let rgiSub = rgiXmlRung condWithFalse (Some cmd) rgi.NextRungY
+                            let rgiSub = rgiCommandRung condWithFalse cmd rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
                                         NextRungY = 1 + rgiSub.NextRungY }
                         //let rgiSub =
@@ -185,7 +185,7 @@ module XgiExportModule =
                     failwith "ERROR: XGK Tag parsing error"
             else
                 let cmd = ActionCmd(Move(condition, srcTerminal :?> IExpression, destination))
-                let blockXml = rxiRung prjParam (x, y) (Some flatCondition) (Some cmd)
+                let blockXml = rxiRung prjParam (x, y) (Some flatCondition) cmd
                 let xml = wrapWithRung blockXml.Xml
                 rgi <- {   Xmls = xml::rgi.Xmls
                            NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
@@ -215,7 +215,7 @@ module XgiExportModule =
                         //    | Some _t, None -> ActionCmd(Move(cond, expr, target))
                         //    | None, Some fn -> FunctionCmd(Arithmetic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
                         //    | _ -> failwithlog "ERROR"
-                        let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
+                        let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                         rgi <-
                             {   Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -258,7 +258,7 @@ module XgiExportModule =
                 // <kwak> <timer>
                 | Statement.DuTimer timerStatement ->
                     let command = FunctionBlockCmd(TimerMode(timerStatement))
-                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -266,7 +266,7 @@ module XgiExportModule =
 
                 | Statement.DuCounter counterStatement ->
                     let command = FunctionBlockCmd(CounterMode(counterStatement))
-                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -278,7 +278,7 @@ module XgiExportModule =
                         Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
-                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -290,7 +290,7 @@ module XgiExportModule =
                         Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
-                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -303,7 +303,7 @@ module XgiExportModule =
                     let condition = args[0] :?> IExpression<bool>
                     let source = args[1]
                     let command = ActionCmd(Move(condition, source, output))
-                    let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
+                    let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
                         { Xmls = rgiSub.Xmls @ rgi.Xmls

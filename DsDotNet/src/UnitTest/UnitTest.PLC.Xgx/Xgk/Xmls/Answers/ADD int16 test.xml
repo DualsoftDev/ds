@@ -71,7 +71,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] uint16 nn1 = 1s
+                                        [0] int16 nn1 = 1s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -83,7 +83,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] uint16 nn2 = 2s
+                                        [1] int16 nn2 = 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -95,7 +95,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] uint16 sum = 0s
+                                        [2] int16 sum = 0s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -107,7 +107,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] uint16 sum2 = 0s
+                                        [3] int16 sum2 = 0s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

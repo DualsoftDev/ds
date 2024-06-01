@@ -40,7 +40,7 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="17">
-                        <Symbol Name="myTon" Comment="TIMER myTon" Device="T" DevicePos="1" Type="BIT/WORD"/>
+                        <Symbol Name="myTon" Comment="TIMER myTon" Device="T" DevicePos="0" Type="BIT/WORD"/>
                         <Symbol Name="x00" Comment="" Device="P" DevicePos="0" Type="BIT"/>
                         <Symbol Name="x01" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                         <Symbol Name="x02" Comment="" Device="P" DevicePos="2" Type="BIT"/>

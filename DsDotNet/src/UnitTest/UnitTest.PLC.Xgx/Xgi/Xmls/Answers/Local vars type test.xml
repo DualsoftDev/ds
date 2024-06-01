@@ -25,7 +25,7 @@
                         <Symbol Name="mybyte" Comment="uint8 mybyte = 2uy" Device="" Kind="6" Type="USINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="mychar" Comment="char mychar = 'a'" Device="" Kind="6" Type="BYTE" InitValue="a" Address="" State="0"/>
                         <Symbol Name="myeuler" Comment="float64 myeuler = 2.718" Device="" Kind="6" Type="LREAL" InitValue="2.718" Address="" State="0"/>
-                        <Symbol Name="myint16" Comment="uint16 myint16 = 16s" Device="" Kind="6" Type="INT" InitValue="16" Address="" State="0"/>
+                        <Symbol Name="myint16" Comment="int16 myint16 = 16s" Device="" Kind="6" Type="INT" InitValue="16" Address="" State="0"/>
                         <Symbol Name="myint32" Comment="int32 myint32 = 32" Device="" Kind="6" Type="DINT" InitValue="32" Address="" State="0"/>
                         <Symbol Name="myint64" Comment="int64 myint64 = 64L" Device="" Kind="6" Type="LINT" InitValue="64" Address="" State="0"/>
                         <Symbol Name="mypi" Comment="float64 mypi = 3.14" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
@@ -115,7 +115,7 @@ XckU4UJCOYh5CA==
                                 <Symbol Name="mybyte" Comment="uint8 mybyte = 2uy" Device="" Kind="8" State="0"/>
                                 <Symbol Name="mychar" Comment="char mychar = 'a'" Device="" Kind="8" State="0"/>
                                 <Symbol Name="myeuler" Comment="float64 myeuler = 2.718" Device="" Kind="8" State="0"/>
-                                <Symbol Name="myint16" Comment="uint16 myint16 = 16s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="myint16" Comment="int16 myint16 = 16s" Device="" Kind="8" State="0"/>
                                 <Symbol Name="myint32" Comment="int32 myint32 = 32" Device="" Kind="8" State="0"/>
                                 <Symbol Name="myint64" Comment="int64 myint64 = 64L" Device="" Kind="8" State="0"/>
                                 <Symbol Name="mypi" Comment="float64 mypi = 3.14" Device="" Kind="8" State="0"/>

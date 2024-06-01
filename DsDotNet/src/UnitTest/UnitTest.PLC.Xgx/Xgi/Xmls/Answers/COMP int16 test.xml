@@ -29,8 +29,8 @@
                         <Symbol Name="b7" Comment="bool b7 = $nn1 &gt;= $nn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="b8" Comment="bool b8 = $nn1 &lt;= $nn2" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="b9" Comment="bool b9 = 1s &gt; 2s" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="nn1" Comment="uint16 nn1 = 1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="uint16 nn2 = 2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int16 nn1 = 1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int16 nn2 = 2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="ub1" Comment="bool ub1 = $unn1 &gt; $unn2" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="ub10" Comment="bool ub10 = 1us &lt; 2us" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="ub11" Comment="bool ub11 = 1us == 2us" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
@@ -93,8 +93,8 @@ XckU4UJCOYh5CA==
                                 <Symbol Name="b7" Comment="bool b7 = $nn1 &gt;= $nn2" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b8" Comment="bool b8 = $nn1 &lt;= $nn2" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b9" Comment="bool b9 = 1s &gt; 2s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn1" Comment="uint16 nn1 = 1s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn2" Comment="uint16 nn2 = 2s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn1" Comment="int16 nn1 = 1s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn2" Comment="int16 nn2 = 2s" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub1" Comment="bool ub1 = $unn1 &gt; $unn2" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub10" Comment="bool ub10 = 1us &lt; 2us" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ub11" Comment="bool ub11 = 1us == 2us" Device="" Kind="8" State="0"/>

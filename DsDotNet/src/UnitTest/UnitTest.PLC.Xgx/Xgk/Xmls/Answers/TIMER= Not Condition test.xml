@@ -46,7 +46,7 @@
                         <Symbol Name="Clamp4_RET_I" Comment="" Device="P" DevicePos="14" Type="BIT"/>
                         <Symbol Name="ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo" Comment="" Device="P" DevicePos="10" Type="BIT"/>
                         <Symbol Name="IOP_ClampOperation" Comment="" Device="P" DevicePos="15" Type="BIT"/>
-                        <Symbol Name="myTon" Comment="TIMER myTon" Device="T" DevicePos="1" Type="BIT/WORD"/>
+                        <Symbol Name="myTon" Comment="TIMER myTon" Device="T" DevicePos="0" Type="BIT/WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

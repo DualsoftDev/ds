@@ -275,7 +275,6 @@ module ExpressionModule =
     let withExpressionComment (append:string) (statement: Statement) =
         CommentedStatement(append, statement)
 
-
     type Statement with
         member x.Do() =
             match x with
@@ -389,7 +388,7 @@ module ExpressionModule =
         member x.ToText() =
             match x with
             | DuVariable t -> "$" + t.Name
-            | DuLiteral v -> sprintf "%A" v.Value
+            | DuLiteral v -> literal2Text v.Value
 
     type Expression<'T when 'T:equality> with
         member x.GetBoxedRawObject() =  // return type:obj    return type 명시할 경우, 다음 compile error 발생:  error FS1198: 제네릭 멤버 'ToText'이(가) 이 프로그램 지점 전의 비균일 인스턴스화에 사용되었습니다. 이 멤버가 처음에 오도록 멤버들을 다시 정렬해 보세요. 또는, 인수 형식, 반환 형식 및 추가 제네릭 매개 변수와 제약 조건을 포함한 멤버의 전체 형식을 명시적으로 지정하세요.
@@ -433,15 +432,15 @@ module ExpressionModule =
             | CHAR    -> "char"
             | FLOAT32 -> "float32"
             | FLOAT64 -> "float64"
-            | INT16   -> "uint16"
+            | INT8    -> "int8"
+            | INT16   -> "int16"
             | INT32   -> "int32"
             | INT64   -> "int64"
-            | INT8    -> "int8"
-            | STRING  -> "string"
+            | UINT8   -> "uint8"
             | UINT16  -> "int16"
             | UINT32  -> "uint32"
             | UINT64  -> "uint64"
-            | UINT8   -> "uint8"
+            | STRING  -> "string"
             | _  -> failwithlog "ERROR"
 
 
@@ -452,14 +451,14 @@ module ExpressionModule =
             | CHAR    -> DuTerminal (DuVariable (x :?> TypedValueStorage<char>  )) :> IExpression
             | FLOAT32 -> DuTerminal (DuVariable (x :?> TypedValueStorage<single>)) :> IExpression
             | FLOAT64 -> DuTerminal (DuVariable (x :?> TypedValueStorage<double>)) :> IExpression
+            | INT8    -> DuTerminal (DuVariable (x :?> TypedValueStorage<int8>  )) :> IExpression
             | INT16   -> DuTerminal (DuVariable (x :?> TypedValueStorage<int16> )) :> IExpression
             | INT32   -> DuTerminal (DuVariable (x :?> TypedValueStorage<int32> )) :> IExpression
             | INT64   -> DuTerminal (DuVariable (x :?> TypedValueStorage<int64> )) :> IExpression
-            | INT8    -> DuTerminal (DuVariable (x :?> TypedValueStorage<int8>  )) :> IExpression
-            | STRING  -> DuTerminal (DuVariable (x :?> TypedValueStorage<string>)) :> IExpression
+            | UINT8   -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint8> )) :> IExpression
             | UINT16  -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint16>)) :> IExpression
             | UINT32  -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint32>)) :> IExpression
             | UINT64  -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint64>)) :> IExpression
-            | UINT8   -> DuTerminal (DuVariable (x :?> TypedValueStorage<uint8> )) :> IExpression
+            | STRING  -> DuTerminal (DuVariable (x :?> TypedValueStorage<string>)) :> IExpression
             | _       -> failwithlog "ERROR"
 

@@ -40,19 +40,19 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="13">
-                        <Symbol Name="myDoubleSum1" Comment="doublemyDoubleSum1=0.0" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="myDoubleSum2" Comment="doublemyDoubleSum2=0.0" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="myDoubleSum3" Comment="doublemyDoubleSum3=$mypi+$myeuler" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="myDoubleSum4" Comment="doublemyDoubleSum4=3.14+2.718" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="mybool" Comment="boolmybool=false" Device="M" DevicePos="256" Type="BIT"/>
-                        <Symbol Name="myeuler" Comment="doublemyeuler=2.718" Device="M" DevicePos="20" Type="WORD"/>
-                        <Symbol Name="myint16" Comment="int16myint16=16s" Device="M" DevicePos="17" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="int32myint32=32" Device="M" DevicePos="18" Type="WORD"/>
-                        <Symbol Name="mypi" Comment="doublemypi=3.14" Device="M" DevicePos="24" Type="WORD"/>
-                        <Symbol Name="mysbyte" Comment="sbytemysbyte=1y" Device="M" DevicePos="28" Type="WORD"/>
-                        <Symbol Name="mysingle" Comment="singlemysingle=0.1f" Device="M" DevicePos="30" Type="WORD"/>
-                        <Symbol Name="myuint16" Comment="uint16myuint16=16us" Device="M" DevicePos="29" Type="WORD"/>
-                        <Symbol Name="myuint32" Comment="uint32myuint32=32u" Device="M" DevicePos="32" Type="WORD"/>
+                        <Symbol Name="myDoubleSum1" Comment="doublemyDoubleSum1=0.0" Device="M" DevicePos="20" Type="WORD"/>
+                        <Symbol Name="myDoubleSum2" Comment="doublemyDoubleSum2=0.0" Device="M" DevicePos="24" Type="WORD"/>
+                        <Symbol Name="myDoubleSum3" Comment="doublemyDoubleSum3=$mypi+$myeuler" Device="M" DevicePos="28" Type="WORD"/>
+                        <Symbol Name="myDoubleSum4" Comment="doublemyDoubleSum4=3.14+2.718" Device="M" DevicePos="32" Type="WORD"/>
+                        <Symbol Name="mybool" Comment="boolmybool=false" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="myeuler" Comment="doublemyeuler=2.718" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="myint16" Comment="int16myint16=16s" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="int32myint32=32" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="mypi" Comment="doublemypi=3.14" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="mysbyte" Comment="sbytemysbyte=1y" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="mysingle" Comment="singlemysingle=0.1f" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="myuint16" Comment="uint16myuint16=16us" Device="M" DevicePos="13" Type="WORD"/>
+                        <Symbol Name="myuint32" Comment="uint32myuint32=32u" Device="M" DevicePos="16" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -84,7 +84,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="75"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="BAND,M00160,254,M00160,1"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="BAND,M00000,254,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
@@ -136,7 +136,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [5] uint16 myint16 = 16s
+                                        [5] int16 myint16 = 16s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -216,7 +216,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="35844" Param="81"/>
-                                    <Element ElementType="33" Coordinate="35934" Param="LADD,mypi,myeuler,M0008"/>
+                                    <Element ElementType="33" Coordinate="35934" Param="LADD,mypi,myeuler,M0028"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="36865">
@@ -228,7 +228,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="37892" Param="81"/>
-                                    <Element ElementType="33" Coordinate="37982" Param="LADD,3.14,2.718,M0012"/>
+                                    <Element ElementType="33" Coordinate="37982" Param="LADD,3.14,2.718,M0032"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="38913">
@@ -252,7 +252,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="43012" Param="81"/>
-                                    <Element ElementType="33" Coordinate="43102" Param="LADD,myDoubleSum1,myDoubleSum3,M0004"/>
+                                    <Element ElementType="33" Coordinate="43102" Param="LADD,myDoubleSum1,myDoubleSum3,M0024"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="45057" Param="90"/>

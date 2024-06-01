@@ -40,11 +40,11 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="4">
-                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="nn3" Comment="int16nn3=3s" Device="M" DevicePos="3" Type="WORD"/>
-                        <Symbol Name="quotient" Comment="int16quotient=0s" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="_t1_DIV" Comment="$nn1 / $nn2" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="int16nn1=1s" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int16nn2=2s" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="nn3" Comment="int16nn3=3s" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="quotient" Comment="int16quotient=0s" Device="M" DevicePos="3" Type="WORD"/>
+                        <Symbol Name="_t1_DIV" Comment="$nn1 / $nn2" Device="M" DevicePos="4" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -68,7 +68,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] uint16 nn1 = 1s
+                                        [0] int16 nn1 = 1s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -80,7 +80,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] uint16 nn2 = 2s
+                                        [1] int16 nn2 = 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -92,7 +92,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] uint16 nn3 = 3s
+                                        [2] int16 nn3 = 3s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -104,7 +104,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] uint16 quotient = 0s
+                                        [3] int16 quotient = 0s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -124,14 +124,14 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="14340" Param="81"/>
-                                    <Element ElementType="33" Coordinate="14430" Param="DIV,nn1,nn2,M0000"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="DIV,nn1,nn2,M0004"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="15361">
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="15364" Param="81"/>
-                                    <Element ElementType="33" Coordinate="15454" Param="DIV,_t1_DIV,nn3,M0004"/>
+                                    <Element ElementType="33" Coordinate="15454" Param="DIV,_t1_DIV,nn3,M0003"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="17409" Param="90"/>

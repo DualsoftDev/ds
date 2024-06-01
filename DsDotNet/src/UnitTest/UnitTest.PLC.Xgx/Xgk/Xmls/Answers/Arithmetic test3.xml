@@ -40,8 +40,8 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="1">
-                        <Symbol Name="b0" Comment="boolb0=false&amp;&amp;(2.1==6.1)" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="_t1_EQ" Comment="2.1 == 6.1" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="b0" Comment="boolb0=false&amp;&amp;(2.1==6.1)" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="_t1_EQ" Comment="2.1 == 6.1" Device="M" DevicePos="1" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -72,7 +72,7 @@
                                     <Element ElementType="33" Coordinate="2049" Param="L=,2.1,6.1"/>
                                     <Element ElementType="2" Coordinate="2058" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
-                                        M00000
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -80,11 +80,11 @@
                                         _OFF
                                     </Element>
                                     <Element ElementType="6" Coordinate="3076">
-                                        M00000
+                                        M00001
                                     </Element>
                                     <Element ElementType="2" Coordinate="3079" Param="84"/>
                                     <Element ElementType="14" Coordinate="3166">
-                                        M00001
+                                        M00000
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

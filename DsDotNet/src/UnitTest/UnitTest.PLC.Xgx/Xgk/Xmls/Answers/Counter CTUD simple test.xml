@@ -42,7 +42,7 @@
                     <Symbols Count="5">
                         <Symbol Name="cd" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                         <Symbol Name="cu" Comment="" Device="P" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="myCTUD" Comment="COUNTER myCTUD" Device="C" DevicePos="1" Type="BIT/WORD"/>
+                        <Symbol Name="myCTUD" Comment="COUNTER myCTUD" Device="C" DevicePos="0" Type="BIT/WORD"/>
                         <Symbol Name="r" Comment="" Device="P" DevicePos="2" Type="BIT"/>
                         <Symbol Name="xld" Comment="" Device="P" DevicePos="3" Type="BIT"/>
                     </Symbols>
@@ -76,7 +76,7 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="75"/>
-                                    <Element ElementType="33" Coordinate="2124" Param="CTUD,C0000,cu,cd,2000"/>
+                                    <Element ElementType="33" Coordinate="2124" Param="CTUD,C0001,cu,cd,2000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="4097">

@@ -43,7 +43,7 @@
                         <Symbol Name="cd1" Comment="boolcd1=false" Device="M" DevicePos="0" Type="BIT"/>
                         <Symbol Name="cd2" Comment="boolcd2=false" Device="M" DevicePos="1" Type="BIT"/>
                         <Symbol Name="cd3" Comment="boolcd3=false" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="myCTR" Comment="COUNTER myCTR" Device="C" DevicePos="1" Type="BIT/WORD"/>
+                        <Symbol Name="myCTR" Comment="COUNTER myCTR" Device="C" DevicePos="0" Type="BIT/WORD"/>
                         <Symbol Name="res0" Comment="boolres0=false" Device="M" DevicePos="3" Type="BIT"/>
                         <Symbol Name="res1" Comment="boolres1=false" Device="M" DevicePos="4" Type="BIT"/>
                         <Symbol Name="res2" Comment="boolres2=false" Device="M" DevicePos="5" Type="BIT"/>

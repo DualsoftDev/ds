@@ -78,7 +78,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] uint16 myint16 = 16s
+                                        [1] int16 myint16 = 16s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

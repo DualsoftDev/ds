@@ -41,21 +41,21 @@
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="16">
                         <Symbol Name="b1" Comment="boolb1=2==3" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="b10" Comment="boolb10=$b1!=$b2" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="b11" Comment="boolb11=!($b1==$b2)" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="b12" Comment="boolb12=!($b1!=$b2)" Device="M" DevicePos="3" Type="BIT"/>
-                        <Symbol Name="b13" Comment="boolb13=$b1&amp;&amp;$b2" Device="M" DevicePos="4" Type="BIT"/>
-                        <Symbol Name="b14" Comment="boolb14=!($b1&amp;&amp;$b2)" Device="M" DevicePos="5" Type="BIT"/>
-                        <Symbol Name="b15" Comment="boolb15=$b1||$b2" Device="M" DevicePos="6" Type="BIT"/>
-                        <Symbol Name="b17" Comment="boolb17=!($b1||$b2)" Device="M" DevicePos="7" Type="BIT"/>
-                        <Symbol Name="b2" Comment="boolb2=!(2==3)" Device="M" DevicePos="8" Type="BIT"/>
-                        <Symbol Name="b3" Comment="boolb3=!(2!=3)" Device="M" DevicePos="9" Type="BIT"/>
-                        <Symbol Name="b4" Comment="boolb4=(2&gt;3)" Device="M" DevicePos="10" Type="BIT"/>
-                        <Symbol Name="b5" Comment="boolb5=!(2&gt;3)" Device="M" DevicePos="11" Type="BIT"/>
-                        <Symbol Name="b6" Comment="boolb6=!(2.1&gt;3.14)" Device="M" DevicePos="12" Type="BIT"/>
-                        <Symbol Name="b7" Comment="boolb7=(2&gt;=3)" Device="M" DevicePos="13" Type="BIT"/>
-                        <Symbol Name="b8" Comment="boolb8=!(2&gt;=3)" Device="M" DevicePos="14" Type="BIT"/>
-                        <Symbol Name="b9" Comment="boolb9=$b1==$b2" Device="M" DevicePos="15" Type="BIT"/>
+                        <Symbol Name="b10" Comment="boolb10=$b1!=$b2" Device="M" DevicePos="9" Type="BIT"/>
+                        <Symbol Name="b11" Comment="boolb11=!($b1==$b2)" Device="M" DevicePos="10" Type="BIT"/>
+                        <Symbol Name="b12" Comment="boolb12=!($b1!=$b2)" Device="M" DevicePos="11" Type="BIT"/>
+                        <Symbol Name="b13" Comment="boolb13=$b1&amp;&amp;$b2" Device="M" DevicePos="12" Type="BIT"/>
+                        <Symbol Name="b14" Comment="boolb14=!($b1&amp;&amp;$b2)" Device="M" DevicePos="13" Type="BIT"/>
+                        <Symbol Name="b15" Comment="boolb15=$b1||$b2" Device="M" DevicePos="14" Type="BIT"/>
+                        <Symbol Name="b17" Comment="boolb17=!($b1||$b2)" Device="M" DevicePos="15" Type="BIT"/>
+                        <Symbol Name="b2" Comment="boolb2=!(2==3)" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="b3" Comment="boolb3=!(2!=3)" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="b4" Comment="boolb4=(2&gt;3)" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="b5" Comment="boolb5=!(2&gt;3)" Device="M" DevicePos="4" Type="BIT"/>
+                        <Symbol Name="b6" Comment="boolb6=!(2.1&gt;3.14)" Device="M" DevicePos="5" Type="BIT"/>
+                        <Symbol Name="b7" Comment="boolb7=(2&gt;=3)" Device="M" DevicePos="6" Type="BIT"/>
+                        <Symbol Name="b8" Comment="boolb8=!(2&gt;=3)" Device="M" DevicePos="7" Type="BIT"/>
+                        <Symbol Name="b9" Comment="boolb9=$b1==$b2" Device="M" DevicePos="8" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -98,7 +98,7 @@
                                     <Element ElementType="33" Coordinate="4097" Param="D&lt;&gt;,2,3"/>
                                     <Element ElementType="2" Coordinate="4106" Param="90"/>
                                     <Element ElementType="14" Coordinate="4190">
-                                        M00008
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -110,7 +110,7 @@
                                     <Element ElementType="33" Coordinate="6145" Param="D=,2,3"/>
                                     <Element ElementType="2" Coordinate="6154" Param="90"/>
                                     <Element ElementType="14" Coordinate="6238">
-                                        M00009
+                                        M00002
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -122,7 +122,7 @@
                                     <Element ElementType="33" Coordinate="8193" Param="D&gt;,2,3"/>
                                     <Element ElementType="2" Coordinate="8202" Param="90"/>
                                     <Element ElementType="14" Coordinate="8286">
-                                        M0000A
+                                        M00003
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -134,7 +134,7 @@
                                     <Element ElementType="33" Coordinate="10241" Param="D&lt;=,2,3"/>
                                     <Element ElementType="2" Coordinate="10250" Param="90"/>
                                     <Element ElementType="14" Coordinate="10334">
-                                        M0000B
+                                        M00004
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -146,7 +146,7 @@
                                     <Element ElementType="33" Coordinate="12289" Param="L&lt;=,2.1,3.14"/>
                                     <Element ElementType="2" Coordinate="12298" Param="90"/>
                                     <Element ElementType="14" Coordinate="12382">
-                                        M0000C
+                                        M00005
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -158,7 +158,7 @@
                                     <Element ElementType="33" Coordinate="14337" Param="D&gt;=,2,3"/>
                                     <Element ElementType="2" Coordinate="14346" Param="90"/>
                                     <Element ElementType="14" Coordinate="14430">
-                                        M0000D
+                                        M00006
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -170,7 +170,7 @@
                                     <Element ElementType="33" Coordinate="16385" Param="D&lt;,2,3"/>
                                     <Element ElementType="2" Coordinate="16394" Param="90"/>
                                     <Element ElementType="14" Coordinate="16478">
-                                        M0000E
+                                        M00007
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -183,18 +183,18 @@
                                         M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="18436">
-                                        M00008
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="18438"/>
                                     <Element ElementType="2" Coordinate="18439" Param="84"/>
                                     <Element ElementType="14" Coordinate="18526">
-                                        M0000F
+                                        M00008
                                     </Element>
                                     <Element ElementType="7" Coordinate="19457">
                                         M00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="19460">
-                                        M00008
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -207,18 +207,18 @@
                                         M00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="21508">
-                                        M00008
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="21510"/>
                                     <Element ElementType="2" Coordinate="21511" Param="84"/>
                                     <Element ElementType="14" Coordinate="21598">
-                                        M00001
+                                        M00009
                                     </Element>
                                     <Element ElementType="7" Coordinate="22529">
                                         M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="22532">
-                                        M00008
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -231,18 +231,18 @@
                                         M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="24580">
-                                        M00008
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="24582"/>
                                     <Element ElementType="2" Coordinate="24583" Param="84"/>
                                     <Element ElementType="14" Coordinate="24670">
-                                        M00002
+                                        M0000A
                                     </Element>
                                     <Element ElementType="6" Coordinate="25601">
                                         M00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="25604">
-                                        M00008
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -255,18 +255,18 @@
                                         M00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="27652">
-                                        M00008
+                                        M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="27654"/>
                                     <Element ElementType="2" Coordinate="27655" Param="84"/>
                                     <Element ElementType="14" Coordinate="27742">
-                                        M00003
+                                        M0000B
                                     </Element>
                                     <Element ElementType="6" Coordinate="28673">
                                         M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="28676">
-                                        M00008
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -279,11 +279,11 @@
                                         M00000
                                     </Element>
                                     <Element ElementType="6" Coordinate="30724">
-                                        M00008
+                                        M00001
                                     </Element>
                                     <Element ElementType="2" Coordinate="30727" Param="84"/>
                                     <Element ElementType="14" Coordinate="30814">
-                                        M00004
+                                        M0000C
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -298,10 +298,10 @@
                                     <Element ElementType="0" Coordinate="32771"/>
                                     <Element ElementType="2" Coordinate="32772" Param="87"/>
                                     <Element ElementType="14" Coordinate="32862">
-                                        M00005
+                                        M0000D
                                     </Element>
                                     <Element ElementType="7" Coordinate="33793">
-                                        M00008
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -316,10 +316,10 @@
                                     <Element ElementType="0" Coordinate="35843"/>
                                     <Element ElementType="2" Coordinate="35844" Param="87"/>
                                     <Element ElementType="14" Coordinate="35934">
-                                        M00006
+                                        M0000E
                                     </Element>
                                     <Element ElementType="6" Coordinate="36865">
-                                        M00008
+                                        M00001
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -332,11 +332,11 @@
                                         M00000
                                     </Element>
                                     <Element ElementType="7" Coordinate="38916">
-                                        M00008
+                                        M00001
                                     </Element>
                                     <Element ElementType="2" Coordinate="38919" Param="84"/>
                                     <Element ElementType="14" Coordinate="39006">
-                                        M00007
+                                        M0000F
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

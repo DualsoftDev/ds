@@ -43,7 +43,7 @@
                         <Symbol Name="cu1" Comment="boolcu1=false" Device="M" DevicePos="0" Type="BIT"/>
                         <Symbol Name="cu2" Comment="boolcu2=false" Device="M" DevicePos="1" Type="BIT"/>
                         <Symbol Name="cu3" Comment="boolcu3=false" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="myCTU" Comment="COUNTER myCTU" Device="C" DevicePos="1" Type="BIT/WORD"/>
+                        <Symbol Name="myCTU" Comment="COUNTER myCTU" Device="C" DevicePos="0" Type="BIT/WORD"/>
                         <Symbol Name="res0" Comment="boolres0=false" Device="M" DevicePos="3" Type="BIT"/>
                         <Symbol Name="res1" Comment="boolres1=false" Device="M" DevicePos="4" Type="BIT"/>
                         <Symbol Name="res2" Comment="boolres2=false" Device="M" DevicePos="5" Type="BIT"/>

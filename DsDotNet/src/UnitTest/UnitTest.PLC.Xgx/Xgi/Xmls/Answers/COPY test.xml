@@ -81,8 +81,8 @@
                         <Symbol Name="cond61" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX2713" State="0"/>
                         <Symbol Name="cond62" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX2714" State="0"/>
                         <Symbol Name="cond63" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX2715" State="0"/>
-                        <Symbol Name="src" Comment="uint16 src = 1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="tgt" Comment="uint16 tgt = 2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="src" Comment="int16 src = 1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="tgt" Comment="int16 tgt = 2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="x00" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX160" State="0"/>
                         <Symbol Name="x01" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX161" State="0"/>
                         <Symbol Name="x02" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX162" State="0"/>
@@ -1344,8 +1344,8 @@ XckU4UJCOYh5CA==
                                 <Symbol Name="cond61" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="cond62" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="cond63" Comment="" Device="M" Kind="8" State="0"/>
-                                <Symbol Name="src" Comment="uint16 src = 1s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="tgt" Comment="uint16 tgt = 2s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="src" Comment="int16 src = 1s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="tgt" Comment="int16 tgt = 2s" Device="" Kind="8" State="0"/>
                                 <Symbol Name="x00" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="x01" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="x02" Comment="" Device="M" Kind="8" State="0"/>

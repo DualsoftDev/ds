@@ -7,10 +7,9 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
-open Config.POU.Program.LDRoutine
-open Command
 open System
 open PLC.CodeGen.Common.K
+
 
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
@@ -549,27 +548,10 @@ module XgiExportModule =
              
 
 
-            (* POU program 삽입 *)
-            do
-                let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
-                let mainScanName =
-                    if existingTaskPous.any() then
-                        existingTaskPous.First() |> fst
-                    else 
-                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
-                        task.FirstChild.OuterXml 
-
-
-                for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
-                    let mainScan =   if i = 0 then Some(mainScanName) else None
-                    // POU 단위로 xml rung 생성
-                    pou.GenerateXmlNode(x, mainScan)
-                    |> xnPrograms.AdoptChild
-                    |> ignore
+            let xPathGlobalVar = getXPathGlobalVariable targetType
 
             (* Global variables 삽입 *)
             do
-                let xPathGlobalVar = getXPathGlobalVariable targetType
                 //let xnGlobalVar = xdoc.GetXmlNodeTheGlobalVariable(targetType)
                 //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
                 let xnGlobalSymbols = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol") |> List.ofSeq
@@ -642,6 +624,51 @@ module XgiExportModule =
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
+            (* POU program 삽입 *)
+            do
+                let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
+                let mainScanName =
+                    if existingTaskPous.any() then
+                        existingTaskPous.First() |> fst
+                    else 
+                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
+                        task.FirstChild.OuterXml 
+
+
+                for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
+                    let mainScan =   if i = 0 then Some(mainScanName) else None
+                    // POU 단위로 xml rung 생성
+                    pou.GenerateXmlNode(x, mainScan)
+                    |> xnPrograms.AdoptChild
+                    |> ignore
+
+            (* Local var 의 comment 및 초기값 global 에 반영 : hack *)
+            do
+                let xnGlobalVars = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
+                let localVars =
+                    let locals = x.POUs |> Seq.collect (fun p -> p.GlobalStorages.Values) |> distinct |> toArray
+                    let duplicated =
+                        locals
+                        |> groupBy (fun v -> v.Name)
+                        |> filter (fun (_, v) -> v.Length > 1)
+                    assert duplicated.IsEmpty()
+                    locals |> map (fun v -> v.Name, v) |> dict
+
+                for g in xnGlobalVars do
+                    let name = g.GetAttribute("Name")
+                    if localVars.ContainsKey name then
+                        let l = localVars.[name]
+                        let c, i = g.Attributes["Comment"], g.Attributes["InitValue"]
+                        if c <> null && l.Comment <> "" && l.Comment <> c.Value then
+                            let newComment = l.Comment //|> escapeXml
+                            c.Value <- newComment
+
+                        if targetType = XGI && i <> null && l.BoxedValue.ToString() <> i.Value then
+                            let initValue =
+                                match l.BoxedValue with
+                                | :? bool as b -> if b then "true" else "false"
+                                | _ as v -> v.ToString()
+                            i.Value <- initValue
 
             if targetType = XGK then
                 xdoc.MovePOULocalSymbolsToGlobalForXgk()

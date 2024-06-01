@@ -40,7 +40,7 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="1">
-                        <Symbol Name="myTon1" Comment="TIMER myTon1" Device="T" DevicePos="1" Type="BIT/WORD"/>
+                        <Symbol Name="myTon1" Comment="TIMER myTon1" Device="T" DevicePos="0" Type="BIT/WORD"/>
                         <Symbol Name="_t1_ADD" Comment="3.14 + 2.0" Device="M" DevicePos="0" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>

@@ -40,10 +40,10 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="20">
-                        <Symbol Name="result1" Comment="boolresult1=false" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="result2" Comment="boolresult2=false" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="result3" Comment="boolresult3=false" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="result4" Comment="boolresult4=false" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="result1" Comment="bool result1 = false" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="result2" Comment="bool result2 = false" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="result3" Comment="bool result3 = false" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="result4" Comment="bool result4 = false" Device="M" DevicePos="3" Type="BIT"/>
                         <Symbol Name="x00" Comment="" Device="P" DevicePos="0" Type="BIT"/>
                         <Symbol Name="x01" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                         <Symbol Name="x02" Comment="" Device="P" DevicePos="2" Type="BIT"/>

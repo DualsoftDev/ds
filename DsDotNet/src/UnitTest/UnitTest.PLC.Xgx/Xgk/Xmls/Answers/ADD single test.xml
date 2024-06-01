@@ -40,12 +40,12 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="6">
-                        <Symbol Name="div" Comment="singlediv=$nn1/$nn2" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="mul" Comment="singlemul=$nn1*$nn2" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="nn1" Comment="singlenn1=1.1f" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="singlenn2=2.2f" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="sub" Comment="singlesub=$nn1-$nn2" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="sum" Comment="singlesum=0.0f" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="div" Comment="float32 div = $nn1 / $nn2" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="mul" Comment="float32 mul = $nn1 * $nn2" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="float32 nn1 = 1.100000024f" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="float32 nn2 = 2.200000048f" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="sub" Comment="float32 sub = $nn1 - $nn2" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="sum" Comment="float32 sum = 0.0f" Device="M" DevicePos="4" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

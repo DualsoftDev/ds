@@ -104,8 +104,8 @@
                         <Symbol Name="cond61" Comment="" Device="M" DevicePos="445" Type="BIT"/>
                         <Symbol Name="cond62" Comment="" Device="M" DevicePos="446" Type="BIT"/>
                         <Symbol Name="cond63" Comment="" Device="M" DevicePos="447" Type="BIT"/>
-                        <Symbol Name="src" Comment="int16src=1s" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="tgt" Comment="int16tgt=2s" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="src" Comment="int16 src = 1s" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="tgt" Comment="int16 tgt = 2s" Device="M" DevicePos="1" Type="WORD"/>
                         <Symbol Name="x00" Comment="" Device="M" DevicePos="256" Type="BIT"/>
                         <Symbol Name="x01" Comment="" Device="M" DevicePos="257" Type="BIT"/>
                         <Symbol Name="x02" Comment="" Device="M" DevicePos="258" Type="BIT"/>

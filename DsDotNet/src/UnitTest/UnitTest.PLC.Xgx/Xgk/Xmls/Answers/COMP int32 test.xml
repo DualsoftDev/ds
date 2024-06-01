@@ -40,34 +40,34 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="28">
-                        <Symbol Name="b1" Comment="boolb1=$nn1&gt;$nn2" Device="M" DevicePos="128" Type="BIT"/>
-                        <Symbol Name="b10" Comment="boolb10=1&lt;2" Device="M" DevicePos="137" Type="BIT"/>
-                        <Symbol Name="b11" Comment="boolb11=1==2" Device="M" DevicePos="138" Type="BIT"/>
-                        <Symbol Name="b12" Comment="boolb12=1&lt;&gt;2" Device="M" DevicePos="139" Type="BIT"/>
-                        <Symbol Name="b2" Comment="boolb2=$nn1&lt;$nn2" Device="M" DevicePos="129" Type="BIT"/>
-                        <Symbol Name="b3" Comment="boolb3=$nn1==$nn2" Device="M" DevicePos="130" Type="BIT"/>
-                        <Symbol Name="b4" Comment="boolb4=$nn1==$nn2" Device="M" DevicePos="131" Type="BIT"/>
-                        <Symbol Name="b5" Comment="boolb5=$nn1!=$nn2" Device="M" DevicePos="132" Type="BIT"/>
-                        <Symbol Name="b6" Comment="boolb6=$nn1&lt;&gt;$nn2" Device="M" DevicePos="133" Type="BIT"/>
-                        <Symbol Name="b7" Comment="boolb7=$nn1&gt;=$nn2" Device="M" DevicePos="134" Type="BIT"/>
-                        <Symbol Name="b8" Comment="boolb8=$nn1&lt;=$nn2" Device="M" DevicePos="135" Type="BIT"/>
-                        <Symbol Name="b9" Comment="boolb9=1&gt;2" Device="M" DevicePos="136" Type="BIT"/>
-                        <Symbol Name="nn1" Comment="int32nn1=1" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="int32nn2=2" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="ub1" Comment="boolub1=$unn1&gt;$unn2" Device="M" DevicePos="140" Type="BIT"/>
-                        <Symbol Name="ub10" Comment="boolub10=1&lt;2" Device="M" DevicePos="149" Type="BIT"/>
-                        <Symbol Name="ub11" Comment="boolub11=1==2" Device="M" DevicePos="150" Type="BIT"/>
-                        <Symbol Name="ub12" Comment="boolub12=1&lt;&gt;2" Device="M" DevicePos="151" Type="BIT"/>
-                        <Symbol Name="ub2" Comment="boolub2=$unn1&lt;$unn2" Device="M" DevicePos="141" Type="BIT"/>
-                        <Symbol Name="ub3" Comment="boolub3=$unn1==$unn2" Device="M" DevicePos="142" Type="BIT"/>
-                        <Symbol Name="ub4" Comment="boolub4=$unn1==$unn2" Device="M" DevicePos="143" Type="BIT"/>
-                        <Symbol Name="ub5" Comment="boolub5=$unn1!=$unn2" Device="M" DevicePos="144" Type="BIT"/>
-                        <Symbol Name="ub6" Comment="boolub6=$unn1&lt;&gt;$unn2" Device="M" DevicePos="145" Type="BIT"/>
-                        <Symbol Name="ub7" Comment="boolub7=$unn1&gt;=$unn2" Device="M" DevicePos="146" Type="BIT"/>
-                        <Symbol Name="ub8" Comment="boolub8=$unn1&lt;=$unn2" Device="M" DevicePos="147" Type="BIT"/>
-                        <Symbol Name="ub9" Comment="boolub9=1&gt;2" Device="M" DevicePos="148" Type="BIT"/>
-                        <Symbol Name="unn1" Comment="uint32unn1=1u" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="unn2" Comment="uint32unn2=2u" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="b1" Comment="bool b1 = $nn1 &gt; $nn2" Device="M" DevicePos="128" Type="BIT"/>
+                        <Symbol Name="b10" Comment="bool b10 = 1 &lt; 2" Device="M" DevicePos="137" Type="BIT"/>
+                        <Symbol Name="b11" Comment="bool b11 = 1 == 2" Device="M" DevicePos="138" Type="BIT"/>
+                        <Symbol Name="b12" Comment="bool b12 = 1 != 2" Device="M" DevicePos="139" Type="BIT"/>
+                        <Symbol Name="b2" Comment="bool b2 = $nn1 &lt; $nn2" Device="M" DevicePos="129" Type="BIT"/>
+                        <Symbol Name="b3" Comment="bool b3 = $nn1 == $nn2" Device="M" DevicePos="130" Type="BIT"/>
+                        <Symbol Name="b4" Comment="bool b4 = $nn1 == $nn2" Device="M" DevicePos="131" Type="BIT"/>
+                        <Symbol Name="b5" Comment="bool b5 = $nn1 != $nn2" Device="M" DevicePos="132" Type="BIT"/>
+                        <Symbol Name="b6" Comment="bool b6 = $nn1 != $nn2" Device="M" DevicePos="133" Type="BIT"/>
+                        <Symbol Name="b7" Comment="bool b7 = $nn1 &gt;= $nn2" Device="M" DevicePos="134" Type="BIT"/>
+                        <Symbol Name="b8" Comment="bool b8 = $nn1 &lt;= $nn2" Device="M" DevicePos="135" Type="BIT"/>
+                        <Symbol Name="b9" Comment="bool b9 = 1 &gt; 2" Device="M" DevicePos="136" Type="BIT"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="ub1" Comment="bool ub1 = $unn1 &gt; $unn2" Device="M" DevicePos="140" Type="BIT"/>
+                        <Symbol Name="ub10" Comment="bool ub10 = 1 &lt; 2" Device="M" DevicePos="149" Type="BIT"/>
+                        <Symbol Name="ub11" Comment="bool ub11 = 1 == 2" Device="M" DevicePos="150" Type="BIT"/>
+                        <Symbol Name="ub12" Comment="bool ub12 = 1 != 2" Device="M" DevicePos="151" Type="BIT"/>
+                        <Symbol Name="ub2" Comment="bool ub2 = $unn1 &lt; $unn2" Device="M" DevicePos="141" Type="BIT"/>
+                        <Symbol Name="ub3" Comment="bool ub3 = $unn1 == $unn2" Device="M" DevicePos="142" Type="BIT"/>
+                        <Symbol Name="ub4" Comment="bool ub4 = $unn1 == $unn2" Device="M" DevicePos="143" Type="BIT"/>
+                        <Symbol Name="ub5" Comment="bool ub5 = $unn1 != $unn2" Device="M" DevicePos="144" Type="BIT"/>
+                        <Symbol Name="ub6" Comment="bool ub6 = $unn1 != $unn2" Device="M" DevicePos="145" Type="BIT"/>
+                        <Symbol Name="ub7" Comment="bool ub7 = $unn1 &gt;= $unn2" Device="M" DevicePos="146" Type="BIT"/>
+                        <Symbol Name="ub8" Comment="bool ub8 = $unn1 &lt;= $unn2" Device="M" DevicePos="147" Type="BIT"/>
+                        <Symbol Name="ub9" Comment="bool ub9 = 1 &gt; 2" Device="M" DevicePos="148" Type="BIT"/>
+                        <Symbol Name="unn1" Comment="uint32 unn1 = 1u" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="unn2" Comment="uint32 unn2 = 2u" Device="M" DevicePos="6" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

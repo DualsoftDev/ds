@@ -13,11 +13,17 @@ module XgxTypeConvertorModule =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
+
             match statement with
-            | DuVarDecl(exp, var) when prjParam.TargetType = XGI ->
+            | DuVarDecl(exp, var) ->
                 var.Comment <- statement.ToText()                
                 var.BoxedValue <- exp.BoxedEvaluatedValue
                 augs.Storages.Add var
+            | _ -> ()
+
+            match statement with
+            | DuVarDecl _ when prjParam.TargetType = XGI ->
+                ()
             | _ ->
                 let pack = 
                     let kvs:array<string*obj> =

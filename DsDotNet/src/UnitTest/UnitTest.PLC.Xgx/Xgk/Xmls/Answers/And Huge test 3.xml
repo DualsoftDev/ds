@@ -40,15 +40,15 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="49">
-                        <Symbol Name="nn1" Comment="int32nn1=1" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="int32nn2=2" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="nn3" Comment="int32nn3=3" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="nn4" Comment="int32nn4=4" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="nn5" Comment="int32nn5=5" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="nn6" Comment="int32nn6=6" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="nn7" Comment="int32nn7=7" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="nn8" Comment="int32nn8=8" Device="M" DevicePos="14" Type="WORD"/>
-                        <Symbol Name="nn9" Comment="int32nn9=9" Device="M" DevicePos="16" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="nn3" Comment="int32 nn3 = 3" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="nn4" Comment="int32 nn4 = 4" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="nn5" Comment="int32 nn5 = 5" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="nn6" Comment="int32 nn6 = 6" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="nn7" Comment="int32 nn7 = 7" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="nn8" Comment="int32 nn8 = 8" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="nn9" Comment="int32 nn9 = 9" Device="M" DevicePos="16" Type="WORD"/>
                         <Symbol Name="x00" Comment="" Device="P" DevicePos="0" Type="BIT"/>
                         <Symbol Name="x01" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                         <Symbol Name="x02" Comment="" Device="P" DevicePos="2" Type="BIT"/>

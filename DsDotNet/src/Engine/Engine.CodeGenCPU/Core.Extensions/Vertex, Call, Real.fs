@@ -13,12 +13,8 @@ module ConvertCpuVertex =
        
     let getSafetyExpr(xs:Call seq, sys:DsSystem) =    
         if xs.any()
-        then
-            (xs.Select(fun f->f.EndActionOnlyIO).ToAndElseOn() <&&> !!sys._sim.Expr)
-            <||> 
-            (xs.Select(fun f->f.EndPlan).ToAndElseOn() <&&> sys._sim.Expr)
-        else 
-            sys._on.Expr
+        then xs.Select(fun f->f.End).ToAnd()
+        else sys._on.Expr
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
@@ -54,6 +50,7 @@ module ConvertCpuVertex =
         member c.UsingTon  = c.TargetJob.OnDelayTime.IsSome
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
+
         member c.EndPlan =  
                     if c.IsPureCommand
                     then
@@ -64,14 +61,16 @@ module ConvertCpuVertex =
                     else 
                         c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
 
-        member c.EndActionOnlyIO = 
-                if c.HasSensor && c.TargetJob.ActionInExpr.IsSome
-                    then c.TargetJob.ActionInExpr.Value
-                    else c.EndPlan
+        member c.EndAction = c.TargetJob.ActionInExpr
+        member c.End = 
+                if c.EndAction.IsSome 
+                then c.EndAction.Value
+                else c.EndPlan
 
-        member c.EndAction = 
-                if c.UsingTon  then c.VC.TDON.DN.Expr
-                else c.EndActionOnlyIO
+        member c.EndWithTimer = 
+                if  c.UsingTon
+                then c.VC.TDON.DN.Expr
+                else c.End
 
         member c.GetEndAction(x:ApiItem) =
             let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
@@ -137,11 +136,13 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        f.h_st.Expr <&&> (// 실제에서는 수동일때만 h_st 가능 ,시뮬레이션은 자동수동 둘다가능
-                                     (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
-                                     <||>
-                                     (!!c.EndPlan <&&>  c.System._sim.Expr )
-                                     )   
+                        f.h_st.Expr <&&> !!c.End
+                        
+                        //(// 실제에서는 수동일때만 h_st 가능 ,시뮬레이션은 자동수동 둘다가능
+                        //             (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
+                        //             <||>
+                        //             (!!c.EndPlan <&&>  c.System._sim.Expr )
+                        //             )   
 
                     else c._off.Expr
             | _ ->  

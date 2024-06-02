@@ -28,19 +28,15 @@ type VertexManager with
         let v = v :?> VertexMReal
 
         let ons       = getOriginIOExprs     (v, InitialType.On)
-        let onSims    = getOriginSimPlanEnds (v, InitialType.On)
 
         let offs      = getOriginIOExprs     (v, InitialType.Off)
-        let offSims   = getOriginSimPlanEnds (v, InitialType.Off)
 
         let onExpr    = if ons.any() then ons.ToAndElseOff() else v._on.Expr
         let offExpr   = if offs.any() then offs.ToOrElseOn() else v._off.Expr
 
-        let onSimExpr    = onSims.ToAndElseOn()
-        let offSimExpr   = offSims.ToOrElseOff()
 
-        let set =   (onExpr     <&&> (!!offExpr)    <&&> v.SYNC.Expr)
-                <||>(onSimExpr  <&&> (!!offSimExpr) <&&> v._sim.Expr)
+        let set =   onExpr <&&> (!!offExpr) <&&> v.SYNC.Expr
+              
 
         (set, v._off.Expr) --| (v.OG, getFuncName())
 
@@ -57,7 +53,7 @@ type VertexManager with
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.clear_btn.Expr
         [
-            let running = v.MM.Expr <&&> !!call.EndActionOnlyIO <&&> !!iop
+            let running = v.MM.Expr <&&> !!call.End <&&> !!iop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
 
             match RuntimeDS.Package with 
@@ -74,7 +70,7 @@ type VertexManager with
         let rst = v.Flow.clear_btn.Expr
         [
             let using      = if call.HasSensor then v._on.Expr else  v._off.Expr 
-            let input      = call.EndActionOnlyIO
+            let input      = call.End
             let checkCondi = using <&&> dop <&&> real.V.G.Expr 
 
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()

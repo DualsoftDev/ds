@@ -26,11 +26,11 @@ type VertexManager with
             then
                 (v.TDON.DN.Expr  <&&> dop)
                             <||>
-                (call.EndActionOnlyIO <&&> mop)
+                (call.End <&&> mop)
             else
                 (call.EndPlan <&&> v._sim.Expr)
                             <||>
-                (call.EndAction <&&> !!v._sim.Expr)
+                (call.End <&&> !!v._sim.Expr)
 
 
         let parentReal = call.Parent.GetCore() :?> Vertex

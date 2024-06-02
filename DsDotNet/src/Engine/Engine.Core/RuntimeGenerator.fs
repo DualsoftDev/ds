@@ -17,7 +17,6 @@ module RuntimeGeneratorModule =
     type RuntimePackage = 
         | PC 
         | PLC 
-        | Emulation 
         | Simulation 
         | Developer 
     with
@@ -31,23 +30,17 @@ module RuntimeGeneratorModule =
             | PLC  -> true
             | _ -> false
 
-        member x.IsPackageEmulation() =
-            match x with
-            | Emulation  -> true
-            | _ -> false
-
         member x.IsPackageSIM() =
             match x with
             | Simulation | Developer -> true
             | _ -> false
 
-    let RuntimePackageList = [ PC; PLC; Emulation;  Simulation; Developer]
+    let RuntimePackageList = [ PC; PLC;  Simulation; Developer]
 
     let ToRuntimePackage s =
         match s with
         | "PC" -> PC
         | "PLC" -> PLC
-        | "Emulation" -> Emulation
         | "Simulation" -> Simulation
         | "Developer" -> Developer
         | _ -> failwithlogf $"Error {getFuncName()}"

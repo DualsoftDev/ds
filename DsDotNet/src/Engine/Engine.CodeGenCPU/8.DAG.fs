@@ -41,11 +41,7 @@ type VertexManager with
             for child in children do
                 let coin = child :?> VertexMCall
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
-                let setEnd =
-                    if call.UsingTon then 
-                        call.PEs.ToAndElseOn() <&&> coin.TDON.DN.Expr
-                    else 
-                        call.PEs.ToAndElseOn() <&&> (call.EndAction <||> coin._sim.Expr)
+                let setEnd = call.PEs.ToAndElseOn() <&&> call.End
 
                 let sets = 
                     if call.Disabled then 

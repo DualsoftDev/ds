@@ -96,7 +96,7 @@ module ConvertCPU =
             yield! s.Y5_SystemEmgAlramError()
             
 
-            if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageEmulation() then
+            if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageSIM() then
                 //yield! s.E1_PLCNotFunc(RuntimeDS.Package.IsPackageEmulation()) //test ahn  param 동작확인 필요
                 yield! s.E2_LightPLCOnly()
             else  
@@ -211,42 +211,31 @@ module ConvertCPU =
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
 
-  
-      
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then 
-             sys.GenerationOrigins()
-             sys.GenerationMemory()
-              //DsSystem 물리 IO 생성
-             sys.GenerationIO()
+           
+            sys.GenerationOrigins()
+            sys.GenerationMemory()
+            sys.GenerationIO()
 
-             // Package 타입별 에러체크
-             match   RuntimeDS.Package with
-             | PC  -> ()
-             | PLC 
-             | Emulation ->  
-                        checkDuplicatesNNullAddress sys
-                        checkErrExternalStartRealExist sys
-                        checkJobs sys
-             | Simulation -> () 
-             | Developer ->  ()      
-             
-             checkErrHWItem(sys)
-             checkErrApi(sys)
-
+            match RuntimeDS.Package with
+            | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당 및 체크 스킵
+            | _->  
+                checkDuplicatesNNullAddress sys
+                checkErrExternalStartRealExist sys
+                checkJobs sys
+                checkErrHWItem(sys)
+                checkErrApi(sys)
 
         else checkErrRealResetExist(sys)
-       
 
         [
-            match   RuntimeDS.Package with
-            | PC ->  ()
-            | PLC ->  ()
-            | Emulation ->  
-                           if isActive  then  yield! emulationDevice sys
-            | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당
-                            yield! sys.Y1_SystemBitSetFlow()
-            | Developer ->  ()
+            match  RuntimeDS.Package with
+            | Simulation   ->
+                if isActive then yield! emulationDevice sys
+                yield! sys.Y1_SystemBitSetFlow()
+
+            | _ ->  ()
 
             //Variables  적용 
             yield! applyVariables sys

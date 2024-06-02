@@ -16,11 +16,9 @@ module CodeConvertUtil =
             |> map fst
 
     let getOriginIOExprs(vr:VertexMReal, initialType:InitialType) =
-        getOriginCalls(vr, initialType).Select(fun d-> d.EndActionOnlyIO)
+        getOriginCalls(vr, initialType).Select(fun d-> d.End)
 
-    let getOriginSimPlanEnds(vr:VertexMReal, initialType:InitialType) =
-        getOriginCalls(vr, initialType).Select(fun c-> c.EndPlan)
-
+ 
    
     [<AutoOpen>]
     [<Extension>]

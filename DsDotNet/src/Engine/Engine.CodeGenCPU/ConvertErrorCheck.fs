@@ -152,6 +152,10 @@ module ConvertErrorCheck =
                          if b.InAddress.IsNullOrEmpty() then   b.InAddress <-TextAddrEmpty
                          if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <- TextAddrEmpty
                         )   
+        sys.HWConditions.ForEach(fun c->                                         
+                         if c.InAddress.IsNullOrEmpty() then   c.InAddress <-TextAddrEmpty
+                         if c.OutAddress.IsNullOrEmpty() then  c.OutAddress <- TextAddrEmpty
+                        )   
 
     let checkJobs(sys:DsSystem) = 
         for j in sys.Jobs do

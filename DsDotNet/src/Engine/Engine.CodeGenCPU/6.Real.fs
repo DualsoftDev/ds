@@ -18,7 +18,7 @@ type VertexMReal with
         let real = v.Vertex :?> Real
         [   
             let set = 
-                if v.IsFinished && (RuntimeDS.Package.IsPackageEmulation())
+                if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
                 then
                     (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !!v.SYNC.Expr
                 else                          

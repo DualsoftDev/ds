@@ -13,22 +13,22 @@ type DsSystem with
         let calls = s.GetVerticesOfJobCalls()
         let aliasCalls = s.GetVertices().GetAliasTypeCalls()
 
-        let ends (call:Call) = 
-            (call.EndPlan  <&&> call.VC._sim.Expr)
-            <||>
-            (call.EndActionOnlyIO <&&> !!call.VC._sim.Expr)
+        //let ends (call:Call) = 
+        //    (call.EndPlan  <&&> call.VC._sim.Expr)
+        //    <||>
+        //    (call.EndActionOnlyIO <&&> !!call.VC._sim.Expr)
           
         [
             for call in calls do
                 if call.UsingTon
                 then 
-                    let sets = call.V.ST.Expr <||>  call.V.SF.Expr <&&>  ends(call)
+                    let sets = call.V.ST.Expr <||>  call.V.SF.Expr <&&> call.End
                     yield (sets) --@ (call.VC.TDON, call.PresetTime, getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.Vertex.GetPureCall().Value
                 if call.UsingTon
                 then 
-                    let sets = alias.V.ST.Expr<||>  alias.V.SF.Expr  <&&> ends(call)
+                    let sets = alias.V.ST.Expr<||>  alias.V.SF.Expr  <&&> call.End
                     yield (sets) --@ (alias.VC.TDON, call.PresetTime, getFuncName())
         ]

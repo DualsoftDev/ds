@@ -7,10 +7,9 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
-open Config.POU.Program.LDRoutine
-open Command
 open System
 open PLC.CodeGen.Common.K
+
 
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
@@ -151,14 +150,14 @@ module XgiExportModule =
 
                         if condWithTrue.IsSome then
                             let cmd =
-                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
+                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"         // Byte OR
                                 XgkParamCmd(param, 5)
                             let rgiSub = rgiXmlRung condWithTrue (Some cmd) rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
                                         NextRungY = 1 + rgiSub.NextRungY }
                         if condWithFalse.IsSome then
                             let cmd =
-                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
+                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"      // Byte AND
                                 XgkParamCmd(param, 5)
                             let rgiSub = rgiXmlRung condWithFalse (Some cmd) rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -228,24 +227,27 @@ module XgiExportModule =
                         | Some _, Some _ -> //when expr.DataType <> typeof<bool> ->
                             moveCmdRungXgk cond expr target
                         | _ ->
+                            //assert(condition.IsNone)
                             simpleRung expr target
 
                 | DuAssign(condition, expr, target) ->
-                    assert condition.IsNone
+                    //assert(condition.IsNone)
                     simpleRung expr target
 
 
-                | DuAugmentedPLCFunction({ FunctionName = ("&&" | "||") as _op
-                                           Arguments = args
-                                           OriginalExpression = originalExpr
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = ("&&" | "||") as _op
+                        Arguments = args
+                        OriginalExpression = originalExpr
+                        Output = output }) ->
                     let expr = originalExpr.WithNewFunctionArguments args
                     simpleRung expr output
 
-                | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _op
-                                           Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
-                                           OriginalExpression = _originalExpr
-                                           Output = destination }) when isXgk && source.DataType = typeof<bool> ->
+                | DuPLCFunction({
+                        FunctionName = XgiConstants.FunctionNameMove as _op
+                        Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
+                        OriginalExpression = _originalExpr
+                        Output = destination }) when isXgk && source.DataType = typeof<bool> ->
                     
                     moveCmdRungXgk condition source destination
                     //let rgiSub = rgiXgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
@@ -270,9 +272,10 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = (">"|">="|"<"|"<="|"=="|"!="|"<>") as op
-                                           Arguments = args
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = (">"|">="|"<"|"<="|"=="|"!="|"<>") as op
+                        Arguments = args
+                        Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
@@ -281,9 +284,10 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = ("+"|"-"|"*"|"/") as op
-                                           Arguments = args
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = ("+"|"-"|"*"|"/") as op
+                        Arguments = args
+                        Output = output }) ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiXmlRung None (Some command) rgi.NextRungY
@@ -292,9 +296,10 @@ module XgiExportModule =
                         { Xmls = rgiSub.Xmls @ rgi.Xmls
                           NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAugmentedPLCFunction({ FunctionName = XgiConstants.FunctionNameMove as _func
-                                           Arguments = args
-                                           Output = output }) ->
+                | DuPLCFunction({
+                        FunctionName = XgiConstants.FunctionNameMove as _func
+                        Arguments = args
+                        Output = output }) ->
                     let condition = args[0] :?> IExpression<bool>
                     let source = args[1]
                     let command = ActionCmd(Move(condition, source, output))
@@ -542,9 +547,11 @@ module XgiExportModule =
                         |> ignore
              
 
+
+            let xPathGlobalVar = getXPathGlobalVariable targetType
+
             (* Global variables 삽입 *)
             do
-                let xPathGlobalVar = getXPathGlobalVariable targetType
                 //let xnGlobalVar = xdoc.GetXmlNodeTheGlobalVariable(targetType)
                 //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
                 let xnGlobalSymbols = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol") |> List.ofSeq
@@ -617,7 +624,6 @@ module XgiExportModule =
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
-
             (* POU program 삽입 *)
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
@@ -636,19 +642,46 @@ module XgiExportModule =
                     |> xnPrograms.AdoptChild
                     |> ignore
 
+            (* Local var 의 comment 및 초기값 global 에 반영 : hack *)
+            do
+                let xnGlobalVars = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
+                let localVars =
+                    let locals = x.POUs |> Seq.collect (fun p -> p.GlobalStorages.Values) |> distinct |> toArray
+                    let duplicated =
+                        locals
+                        |> groupBy (fun v -> v.Name)
+                        |> filter (fun (_, v) -> v.Length > 1)
+                    assert duplicated.IsEmpty()
+                    locals |> map (fun v -> v.Name, v) |> dict
+
+                for g in xnGlobalVars do
+                    let name = g.GetAttribute("Name")
+                    if localVars.ContainsKey name then
+                        let l = localVars.[name]
+                        let c, i = g.Attributes["Comment"], g.Attributes["InitValue"]
+                        if c <> null && l.Comment <> "" && l.Comment <> c.Value then
+                            let newComment = l.Comment //|> escapeXml
+                            c.Value <- newComment
+
+                        if targetType = XGI && i <> null && l.BoxedValue.ToString() <> i.Value then
+                            let initValue =
+                                match l.BoxedValue with
+                                | :? bool as b -> if b then "true" else "false"
+                                | _ as v -> v.ToString()
+                            i.Value <- initValue
+
             if targetType = XGK then
                 xdoc.MovePOULocalSymbolsToGlobalForXgk()
                 xdoc.SanityCheckVariableNameForXgk()
 
             xdoc.Check targetType
 
-        [<Obsolete("이중코일 체크 필요")>]
         member x.SanityCheck() =
             let { GlobalStorages = globalStorages } = x
             let vars = globalStorages.Values |> toArray
 
             let checkDoubleCoil() =
-                // todo:
+                // todo: 이중 코일 체크: 불필요 한 듯.
                 // project level 의 double coil check
                 // - Global 변수 중에 non-terminal expression 을 사용한 경우를 찾아서 marking 해 두고, POU 에서 해당 변수 할당하는 경우를 찾아서 error 를 발생시킨다.
                 ()

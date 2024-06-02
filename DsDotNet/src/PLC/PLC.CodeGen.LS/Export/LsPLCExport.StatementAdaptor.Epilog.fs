@@ -13,14 +13,34 @@ module XgxTypeConvertorModule =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
-            let newStatement = statement.DistributeNegate()
-            let newStatement = newStatement.FunctionToAssignStatement prjParam augs
-            let newStatement = newStatement.AugmentXgiFunctionParameters prjParam augs
 
-            match prjParam.TargetType with
-            | XGI -> newStatement.ToStatements(prjParam, augs)
-            | XGK -> newStatement.ToStatementsXgk(prjParam, augs)
-            | _ -> failwith "Not supported runtime target"
+            match statement with
+            | DuVarDecl(exp, var) ->
+                var.Comment <- statement.ToText()                
+                var.BoxedValue <- exp.BoxedEvaluatedValue
+                augs.Storages.Add var
+            | _ -> ()
+
+            match statement with
+            | DuVarDecl _ when prjParam.TargetType = XGI ->
+                ()
+            | _ ->
+                let pack = 
+                    let kvs:array<string*obj> =
+                        [|
+                            ("projectParameter", prjParam)
+                            ("augments", augs)
+                        |]
+                    kvs |> DynamicDictionary
+
+                let newStatement = statement.DistributeNegate(pack)
+                let newStatement = newStatement.FunctionToAssignStatement(pack)
+                let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
+
+                match prjParam.TargetType with
+                | XGI -> newStatement.ToStatements(pack)
+                | XGK -> newStatement.ToStatementsXgk(pack)
+                | _ -> failwith "Not supported runtime target"
 
             let rungComment =
                 [

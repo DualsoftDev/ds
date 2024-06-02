@@ -17,8 +17,8 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="2">
                     <Symbols>
-                        <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = !(true)" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = !(false)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -42,36 +42,8 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b1 = !(true)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        b1
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="3073">
-                                        [1] bool b2 = !(false)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="4097">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="87"/>
-                                    <Element ElementType="14" Coordinate="4190">
-                                        b2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="END">
+                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -83,8 +55,8 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="bool b1 = !(true)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="bool b2 = !(false)" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

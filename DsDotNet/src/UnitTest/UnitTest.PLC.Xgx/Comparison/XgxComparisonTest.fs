@@ -213,7 +213,7 @@ type XgxComparisonTest(xgx:PlatformTarget) =
             bool b2 = $pi < $eu;
             bool b3 = $pi == $eu;
             bool b4 = $pi == $eu;   
-                  bool b5 = $pi != $eu;     // 확장 notation. "<>"
+            bool b5 = $pi != $eu;     // 확장 notation. "<>"
             bool b6 = $pi <> $eu;
             bool b7 = $pi >= $eu;
             bool b8 = $pi <= $eu;
@@ -222,13 +222,19 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
 
+        ["pi"; "eu" ] @ [ for i in [1..8] -> $"b{i}" ]
+        |> List.iter (
+            fun key ->
+                let var = storages[key]
+                tracefn "%s %s=%s" var.DataType.Name key var.Address)
+
         let pi, eu = storages.["pi"], storages.["eu"]
         pi.DataType === typeof<double>
         eu.DataType === typeof<double>
         if xgx = XGK then
             let addrPi = XgkAddress.FromAddress(pi.Address)
             let addrEu = XgkAddress.FromAddress(eu.Address)
-            addrEu.WordOffset === addrPi.WordOffset + 4 
+            abs(addrEu.WordOffset - addrPi.WordOffset) === 4 
 
         x.saveTestResult f xml
 
@@ -250,13 +256,19 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
 
+        ["pi"; "eu" ] @ [ for i in [1..8] -> $"b{i}" ]
+        |> List.iter (
+            fun key ->
+                let var = storages[key]
+                tracefn "%s %s=%s" var.DataType.Name key var.Address)
+
         let pi, eu = storages.["pi"], storages.["eu"]
         pi.DataType === typeof<single>
         eu.DataType === typeof<single>
         if xgx = XGK then
             let addrPi = XgkAddress.FromAddress(pi.Address)
             let addrEu = XgkAddress.FromAddress(eu.Address)
-            addrEu.WordOffset === addrPi.WordOffset + 2
+            abs(addrEu.WordOffset - addrPi.WordOffset) === 2 
 
         x.saveTestResult f xml
 

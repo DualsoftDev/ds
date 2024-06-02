@@ -17,7 +17,7 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="1">
                     <Symbols>
-                        <Symbol Name="b0" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b0" Comment="bool b0 = false &amp;&amp; !(2.1 &lt;= 6.1)" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -41,40 +41,8 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b0 = false &amp;&amp; !(2.1 &lt;= 6.1)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: GT2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1272&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="3073">
-                                        2.1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="3079">
-                                        _t1_GT
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="4097">
-                                        6.1
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="6145">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="6148">
-                                        _t1_GT
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="6151" Param="84"/>
-                                    <Element ElementType="14" Coordinate="6238">
-                                        b0
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="8193" Param="90"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="END">
+                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -84,10 +52,9 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="2">
+                        <LocalVar Version="Ver 1.0" Count="1">
                             <Symbols>
-                                <Symbol Name="_t1_GT" Comment="2.1 &gt; 6.1" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="b0" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b0" Comment="bool b0 = false &amp;&amp; !(2.1 &lt;= 6.1)" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

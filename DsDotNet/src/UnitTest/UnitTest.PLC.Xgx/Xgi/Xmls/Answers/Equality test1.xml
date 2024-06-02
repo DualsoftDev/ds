@@ -17,10 +17,10 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="4">
                     <Symbols>
-                        <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="bFalse" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="bTrue" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = $bTrue != true" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = $bTrue == true" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="bFalse" Comment="bool bFalse = !(true)" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="bTrue" Comment="bool bTrue = true" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -44,62 +44,8 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="1025">
-                                        [0] bool bFalse = !(true)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        bFalse
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="3073">
-                                        [1] bool b1 = $bTrue != true
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="4097">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="4100" Param="FNAME: NE_BOOL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2277&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200001, , 0&#xA;VAR_IN: IN2, 0x00200001, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="5121">
-                                        bTrue
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="5127">
-                                        b1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="6145">
-                                        True
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="8193">
-                                        [2] bool b2 = $bTrue == true
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="9220" Param="FNAME: EQ2_BOOL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 984&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200001, , 0&#xA;VAR_IN: IN2, 0x00200001, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="10241">
-                                        bTrue
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="10247">
-                                        b2
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="11265">
-                                        True
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="14337" Param="90"/>
-                                    <Element ElementType="33" Coordinate="14430" Param="END">
+                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -111,10 +57,10 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="4">
                             <Symbols>
-                                <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="bFalse" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="bTrue" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="bool b1 = $bTrue != true" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="bool b2 = $bTrue == true" Device="" Kind="8" State="0"/>
+                                <Symbol Name="bFalse" Comment="bool bFalse = !(true)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="bTrue" Comment="bool bTrue = true" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

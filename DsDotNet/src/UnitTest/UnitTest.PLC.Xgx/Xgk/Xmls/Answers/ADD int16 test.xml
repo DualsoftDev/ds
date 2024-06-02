@@ -40,14 +40,14 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="8">
-                        <Symbol Name="nn1" Comment="" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="sum" Comment="" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="sum2" Comment="" Device="M" DevicePos="3" Type="WORD"/>
-                        <Symbol Name="unn1" Comment="" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="unn2" Comment="" Device="M" DevicePos="5" Type="WORD"/>
-                        <Symbol Name="usum" Comment="" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="usum2" Comment="" Device="M" DevicePos="7" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="int16 nn1 = 1s" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int16 nn2 = 2s" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="sum" Comment="int16 sum = 0s" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="sum2" Comment="int16 sum2 = 0s" Device="M" DevicePos="3" Type="WORD"/>
+                        <Symbol Name="unn1" Comment="int16 unn1 = 1us" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="unn2" Comment="int16 unn2 = 2us" Device="M" DevicePos="5" Type="WORD"/>
+                        <Symbol Name="usum" Comment="int16 usum = 0us" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="usum2" Comment="int16 usum2 = 0us" Device="M" DevicePos="7" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -71,7 +71,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] uint16 nn1 = 1s
+                                        [0] int16 nn1 = 1s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -83,7 +83,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] uint16 nn2 = 2s
+                                        [1] int16 nn2 = 2s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -95,7 +95,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] uint16 sum = 0s
+                                        [2] int16 sum = 0s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -107,7 +107,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] uint16 sum2 = 0s
+                                        [3] int16 sum2 = 0s
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

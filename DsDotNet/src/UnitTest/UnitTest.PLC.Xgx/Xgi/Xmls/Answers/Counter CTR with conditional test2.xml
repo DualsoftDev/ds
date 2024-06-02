@@ -17,15 +17,15 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="9">
                     <Symbols>
-                        <Symbol Name="cd1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cd2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cd3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cd4" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd1" Comment="bool cd1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd2" Comment="bool cd2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd3" Comment="bool cd3 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd4" Comment="bool cd4 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="myCTR" Comment="COUNTER myCTR" Device="" Kind="6" Type="CTR" Address="" State="0"/>
-                        <Symbol Name="res0" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="res1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="res2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="xx7" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res0" Comment="bool res0 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res1" Comment="bool res1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res2" Comment="bool res2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="xx7" Comment="bool xx7 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -145,15 +145,15 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="9">
                             <Symbols>
-                                <Symbol Name="cd1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cd2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cd3" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cd4" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd1" Comment="bool cd1 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd2" Comment="bool cd2 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd3" Comment="bool cd3 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd4" Comment="bool cd4 = false" Device="" Kind="8" State="0"/>
                                 <Symbol Name="myCTR" Comment="COUNTER myCTR" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res0" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="xx7" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res0" Comment="bool res0 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res1" Comment="bool res1 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res2" Comment="bool res2 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="xx7" Comment="bool xx7 = false" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

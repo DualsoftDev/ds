@@ -183,7 +183,7 @@ module POUParametersModule =
                     verifyM "CTR condition error" (up.IsNone && down.IsSome)
 
             | DuAction(_a:ActionStatement) -> ()
-            | DuAugmentedPLCFunction(_fbParam) -> ()
+            | DuPLCFunction(_fbParam) -> ()
 
 
     type XgxPOUParams with

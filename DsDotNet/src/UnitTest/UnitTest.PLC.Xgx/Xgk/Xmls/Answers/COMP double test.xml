@@ -40,16 +40,16 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="10">
-                        <Symbol Name="b1" Comment="" Device="M" DevicePos="128" Type="BIT"/>
-                        <Symbol Name="b2" Comment="" Device="M" DevicePos="129" Type="BIT"/>
-                        <Symbol Name="b3" Comment="" Device="M" DevicePos="130" Type="BIT"/>
-                        <Symbol Name="b4" Comment="" Device="M" DevicePos="131" Type="BIT"/>
-                        <Symbol Name="b5" Comment="" Device="M" DevicePos="132" Type="BIT"/>
-                        <Symbol Name="b6" Comment="" Device="M" DevicePos="133" Type="BIT"/>
-                        <Symbol Name="b7" Comment="" Device="M" DevicePos="134" Type="BIT"/>
-                        <Symbol Name="b8" Comment="" Device="M" DevicePos="135" Type="BIT"/>
-                        <Symbol Name="eu" Comment="" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="pi" Comment="" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="b1" Comment="bool b1 = $pi &gt; $eu" Device="M" DevicePos="128" Type="BIT"/>
+                        <Symbol Name="b2" Comment="bool b2 = $pi &lt; $eu" Device="M" DevicePos="129" Type="BIT"/>
+                        <Symbol Name="b3" Comment="bool b3 = $pi == $eu" Device="M" DevicePos="130" Type="BIT"/>
+                        <Symbol Name="b4" Comment="bool b4 = $pi == $eu" Device="M" DevicePos="131" Type="BIT"/>
+                        <Symbol Name="b5" Comment="bool b5 = $pi != $eu" Device="M" DevicePos="132" Type="BIT"/>
+                        <Symbol Name="b6" Comment="bool b6 = $pi != $eu" Device="M" DevicePos="133" Type="BIT"/>
+                        <Symbol Name="b7" Comment="bool b7 = $pi &gt;= $eu" Device="M" DevicePos="134" Type="BIT"/>
+                        <Symbol Name="b8" Comment="bool b8 = $pi &lt;= $eu" Device="M" DevicePos="135" Type="BIT"/>
+                        <Symbol Name="eu" Comment="float64 eu = 2.718" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="pi" Comment="float64 pi = 3.14" Device="M" DevicePos="0" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>

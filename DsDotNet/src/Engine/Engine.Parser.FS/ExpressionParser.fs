@@ -302,7 +302,9 @@ module rec ExpressionParser =
                     if exp.DataType <> declType then
                         failwith $"ERROR: Type mismatch in variable declaration {ctx.GetText()}"
 
-                    let variable = declType.CreateVariable(storageName, exp.BoxedEvaluatedValue)
+                    let variable =
+                        let comment = match ctx.GetText() with | "" -> None | _ as cmt -> Some cmt
+                        declType.CreateVariable(storageName, exp.BoxedEvaluatedValue, comment)
                     storages.Add(storageName, variable)
                     Some <| DuVarDecl(exp, variable)
 
@@ -383,8 +385,8 @@ module rec ExpressionParser =
 
     type System.Type with
 
-        member x.CreateVariable(name: string, boxedValue: obj) =
-            createVariable name ({ Object = boxedValue }: BoxedObjectHolder)
+        member x.CreateVariable(name: string, boxedValue: obj, comment:string option) =
+            createVariable name ({ Object = boxedValue }: BoxedObjectHolder) comment
 
         member x.CreateBridgeTag(name: string, address: string, boxedValue: obj) : ITag =
             let createParam () =

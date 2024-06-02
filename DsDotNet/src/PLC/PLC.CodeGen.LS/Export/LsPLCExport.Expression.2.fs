@@ -131,11 +131,12 @@ module XgxExpressionConvertorModule =
                             prjParam.CreateAutoVariable("out", initValue, comment))
 
                     expandFunctionStatements.Add
-                    <| DuAugmentedPLCFunction
-                        {   FunctionName = op
-                            Arguments = args
-                            OriginalExpression = functionExpression
-                            Output = var }
+                    <| DuPLCFunction {
+                        Condition = None
+                        FunctionName = op
+                        Arguments = args
+                        OriginalExpression = functionExpression
+                        Output = var }
 
                     newLocalStorages.Add var
                     var.ToExpression()
@@ -167,11 +168,12 @@ module XgxExpressionConvertorModule =
                     exp.FunctionArguments
                     |> List.bind (fun arg -> arg.BinaryToNary(prjParam, augs, operatorsToChange, op) )
 
-                DuAugmentedPLCFunction
-                    { FunctionName = op
-                      Arguments = args
-                      OriginalExpression = exp
-                      Output = out }
+                DuPLCFunction {
+                    Condition = None
+                    FunctionName = op
+                    Arguments = args
+                    OriginalExpression = exp
+                    Output = out }
                 |> augmentedStatementsStorage.Add
 
                 out.ToExpression()
@@ -228,11 +230,12 @@ module XgxExpressionConvertorModule =
 
                         let outexp = out.ToExpression()
 
-                        DuAugmentedPLCFunction
-                            { FunctionName = op
-                              Arguments = args
-                              OriginalExpression = exp
-                              Output = out }
+                        DuPLCFunction {
+                            Condition = None
+                            FunctionName = op
+                            Arguments = args
+                            OriginalExpression = exp
+                            Output = out }
                         |> augmentedStatementsStorage.Add
 
                         out |> newLocalStorages.Add
@@ -286,27 +289,30 @@ module XgxExpressionConvertorModule =
                     let maxs, remaining = List.fold folder ([], []) exp.FunctionArguments
 
                     let subSums =
-                        [ for max in maxs do
-                              let out = prjParam.CreateTypedAutoVariable("split", false, $"{op} split output")
-                              newLocalStorages.Add out
+                        [
+                            for max in maxs do
+                                let out = prjParam.CreateTypedAutoVariable("split", false, $"{op} split output")
+                                newLocalStorages.Add out
 
-                              DuAugmentedPLCFunction
-                                  { FunctionName = op
+                                DuPLCFunction {
+                                    Condition = None
+                                    FunctionName = op
                                     Arguments = max
                                     OriginalExpression = exp
                                     Output = out }
-                              |> expandFunctionStatements.Add
+                                |> expandFunctionStatements.Add
 
-                              var2expr out :> IExpression ]
+                                var2expr out :> IExpression ]
 
                     let grandTotal = prjParam.CreateTypedAutoVariable("split", false, $"{op} split output")
                     newLocalStorages.Add grandTotal
 
-                    DuAugmentedPLCFunction
-                        { FunctionName = op
-                          Arguments = subSums @ remaining
-                          OriginalExpression = exp
-                          Output = grandTotal }
+                    DuPLCFunction {
+                        Condition = None
+                        FunctionName = op
+                        Arguments = subSums @ remaining
+                        OriginalExpression = exp
+                        Output = grandTotal }
                     |> expandFunctionStatements.Add
 
                     var2expr grandTotal :> IExpression
@@ -349,7 +355,7 @@ module XgxExpressionConvertorModule =
             | Some fn when replacableFunctionNames.Contains fn ->
                 match fn with
                 | "==" | "<>" | "!=" when prjParam.TargetType = XGK && x.FunctionArguments[0].DataType = typedefof<bool> ->
-                    x.AugmentXgk(prjParam, None, augs)
+                    x.AugmentXgk(prjParam, None, None, augs)
                 | _ ->
                     let tmpNameHint = operatorToMnemonic fn
                     let var = prjParam.CreateAutoVariable(tmpNameHint, x.BoxedEvaluatedValue, $"{x.ToText()}")
@@ -358,7 +364,8 @@ module XgxExpressionConvertorModule =
                         | XGK -> DuAssign(None, x, var)
                         | XGI ->
                             let newExp = x.FlattenArithmeticOperator(prjParam, augs, Some var)
-                            DuAugmentedPLCFunction {
+                            DuPLCFunction {
+                                Condition = None
                                 FunctionName = fn
                                 Arguments = newExp.FunctionArguments
                                 OriginalExpression = newExp
@@ -381,7 +388,12 @@ module XgxExpressionConvertorModule =
         ///     추가 storage : tmp2
         ///     최종 exp: "tmp1 > 4"
         ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
-        member x.AugmentXgk (prjParam: XgxProjectParams, expStore:IStorage option, augs:Augments) : IExpression =
+        member x.AugmentXgk (
+                prjParam: XgxProjectParams
+                , assignCondition:IExpression<bool> option
+                , expStore:IStorage option
+                , augs:Augments)
+          : IExpression =
             let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
                 match exp.FunctionName, exp.FunctionArguments with
                 | Some fn, l::r::[] ->
@@ -414,7 +426,7 @@ module XgxExpressionConvertorModule =
                         match fn with
                         | IsArithmeticOrComparisionOperator _ ->
                             let stg = createTmpStorage()
-                            let stmt = DuAssign(None, newExp, stg)
+                            let stmt = DuAssign(assignCondition, newExp, stg)
                             let varExp = stg.ToExpression()
                             varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
                         | _ ->

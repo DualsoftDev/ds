@@ -301,6 +301,19 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
+    member x.``Arithmetic assign test1`` () =
+        let storages = Storages()
+        let code =
+            $"""
+                bool b0 = !(2.1 == 6.1);
+            """;
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
     member x.``Arithmetic assign test`` () =
         let storages = Storages()
         let code =
@@ -347,6 +360,7 @@ type XgiArithematicTest() =
     [<Test>] member __.``Arithmetic test4`` () = base.``Arithmetic test4``()
     [<Test>] member __.``Arithmetic test5`` () = base.``Arithmetic test5``()
     [<Test>] member __.``Arithmetic test6`` () = base.``Arithmetic test6``()
+    [<Test>] member __.``Arithmetic assign test1`` () = base.``Arithmetic assign test1``()
     [<Test>] member __.``Arithmetic assign test`` () = base.``Arithmetic assign test``()
 
 type XgkArithematicTest() =
@@ -372,6 +386,7 @@ type XgkArithematicTest() =
     [<Test>] member __.``Arithmetic test4`` () = base.``Arithmetic test4``()
     [<Test>] member __.``Arithmetic test5`` () = base.``Arithmetic test5``()
     [<Test>] member __.``Arithmetic test6`` () = base.``Arithmetic test6``()
+    [<Test>] member __.``Arithmetic assign test1`` () = base.``Arithmetic assign test1``()
     [<Test>] member __.``Arithmetic assign test`` () = base.``Arithmetic assign test``()
 
 

@@ -125,9 +125,14 @@ module TagVariableModule =
         abstract ToText : unit -> string
         abstract ToTextWithoutTypeSuffix: unit -> string
 
+    let literal2Text (x:obj) =
+        match x with
+        | :? bool as b -> if b then "true" else "false"
+        | _ -> sprintf "%A" x
+
     type LiteralHolder<'T when 'T:equality> = { Value: 'T }
         with
-            member x.ToText() = sprintf "%A" x.Value
+            member x.ToText() = literal2Text (box x.Value)
 
             interface IExpressionizableTerminal with
                 member x.ToText() = x.ToText()// sprintf "%A" x.Value

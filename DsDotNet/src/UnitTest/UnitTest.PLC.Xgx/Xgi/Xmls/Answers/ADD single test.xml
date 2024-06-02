@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="6">
                     <Symbols>
-                        <Symbol Name="div" Comment="" Device="" Kind="6" Type="REAL" InitValue="0.5" Address="" State="0"/>
-                        <Symbol Name="mul" Comment="" Device="" Kind="6" Type="REAL" InitValue="2.42" Address="" State="0"/>
-                        <Symbol Name="nn1" Comment="" Device="" Kind="6" Type="REAL" InitValue="1.1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="" Device="" Kind="6" Type="REAL" InitValue="2.2" Address="" State="0"/>
-                        <Symbol Name="sub" Comment="" Device="" Kind="6" Type="REAL" InitValue="-1.1" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="" Device="" Kind="6" Type="REAL" InitValue="3.3000002" Address="" State="0"/>
+                        <Symbol Name="div" Comment="float32 div = $nn1 / $nn2" Device="" Kind="6" Type="REAL" InitValue="0.5" Address="" State="0"/>
+                        <Symbol Name="mul" Comment="float32 mul = $nn1 * $nn2" Device="" Kind="6" Type="REAL" InitValue="2.42" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="float32 nn1 = 1.100000024f" Device="" Kind="6" Type="REAL" InitValue="1.1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="float32 nn2 = 2.200000048f" Device="" Kind="6" Type="REAL" InitValue="2.2" Address="" State="0"/>
+                        <Symbol Name="sub" Comment="float32 sub = $nn1 - $nn2" Device="" Kind="6" Type="REAL" InitValue="-1.1" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="float32 sum = 0.0f" Device="" Kind="6" Type="REAL" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -66,68 +66,8 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="6145">
-                                        [1] float32 sub = $nn1 - $nn2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="7169">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="7172" Param="FNAME: SUB&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 127&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="8193">
-                                        nn1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="8199">
-                                        sub
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="9217">
-                                        nn2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="11265">
-                                        [2] float32 mul = $nn1 * $nn2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="12289">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="12292" Param="FNAME: MUL2_REAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2071&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00202000, , 0&#xA;VAR_IN: IN2, 0x00202000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00002000, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="13313">
-                                        nn1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="13319">
-                                        mul
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="14337">
-                                        nn2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="16385">
-                                        [3] float32 div = $nn1 / $nn2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="17409">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="17412" Param="FNAME: DIV&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 99&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00207fe0, , 0&#xA;VAR_IN: IN2, 0x00207fe0, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00007fe0, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="18433">
-                                        nn1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="18439">
-                                        div
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="19457">
-                                        nn2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="22529" Param="90"/>
-                                    <Element ElementType="33" Coordinate="22622" Param="END">
+                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -139,12 +79,12 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="6">
                             <Symbols>
-                                <Symbol Name="div" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="mul" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="sub" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="sum" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="div" Comment="float32 div = $nn1 / $nn2" Device="" Kind="8" State="0"/>
+                                <Symbol Name="mul" Comment="float32 mul = $nn1 * $nn2" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn1" Comment="float32 nn1 = 1.100000024f" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn2" Comment="float32 nn2 = 2.200000048f" Device="" Kind="8" State="0"/>
+                                <Symbol Name="sub" Comment="float32 sub = $nn1 - $nn2" Device="" Kind="8" State="0"/>
+                                <Symbol Name="sum" Comment="float32 sum = 0.0f" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="6">
                     <Symbols>
-                        <Symbol Name="b0" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b1" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b3" Comment="" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b4" Comment="" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="pi" Comment="" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
+                        <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = !($pi == 6.1)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = true &amp;&amp; !($pi == 6.2)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b3" Comment="bool b3 = $pi &gt; 6.23" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b4" Comment="bool b4 = !($pi &gt; 6.24)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="pi" Comment="float64 pi = 3.14" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -46,120 +46,8 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b0 = !(2.1 == 6.1)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: NE_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2285&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="3073">
-                                        2.1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="3079">
-                                        b0
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="4097">
-                                        6.1
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="6145">
-                                        [1] bool b1 = !($pi == 6.1)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="7169">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="7172" Param="FNAME: NE_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2285&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="8193">
-                                        pi
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="8199">
-                                        b1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="9217">
-                                        6.1
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="11265">
-                                        [2] bool b2 = true &amp;&amp; !($pi == 6.2)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="12289">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="12292" Param="FNAME: NE_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2285&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="13313">
-                                        pi
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="13319">
-                                        _t1_NE
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="14337">
-                                        6.2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="16385">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="16388">
-                                        _t1_NE
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="16391" Param="84"/>
-                                    <Element ElementType="14" Coordinate="16478">
-                                        b2
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="17409">
-                                        [3] bool b3 = $pi &gt; 6.23
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="18433">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="18436" Param="FNAME: GT2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1272&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="19457">
-                                        pi
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="19463">
-                                        b3
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="20481">
-                                        6.23
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="22529">
-                                        [4] bool b4 = !($pi &gt; 6.24)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="23553">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="23556" Param="FNAME: LE2_LREAL&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1412&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00204000, , 0&#xA;VAR_IN: IN2, 0x00204000, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000001, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="24577">
-                                        pi
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="24583">
-                                        b4
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="25601">
-                                        6.24
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="28673" Param="90"/>
-                                    <Element ElementType="33" Coordinate="28766" Param="END">
+                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -169,15 +57,14 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="7">
+                        <LocalVar Version="Ver 1.0" Count="6">
                             <Symbols>
-                                <Symbol Name="_t1_NE" Comment="$pi != 6.2" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
-                                <Symbol Name="b0" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b1" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b3" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b4" Comment="" Device="" Kind="8" State="0"/>
-                                <Symbol Name="pi" Comment="" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="bool b1 = !($pi == 6.1)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="bool b2 = true &amp;&amp; !($pi == 6.2)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b3" Comment="bool b3 = $pi &gt; 6.23" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b4" Comment="bool b4 = !($pi &gt; 6.24)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="pi" Comment="float64 pi = 3.14" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

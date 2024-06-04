@@ -247,7 +247,9 @@ module DsAddressModule =
             //외부입력 전용 확인하여 출력 스킵 및 입력 선두주소 고정
             if dev.IsRootFlowDev(coins) 
             then
-                dev.InAddress  <- getExternalTempMemory target
+                if dev.InAddress = TextAddrEmpty
+                then
+                    dev.InAddress  <-  getExternalTempMemory target
                 dev.OutAddress <- TextSkip
             else 
                 let inSkip, outSkip =

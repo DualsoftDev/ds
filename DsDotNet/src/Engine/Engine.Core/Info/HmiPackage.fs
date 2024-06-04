@@ -74,12 +74,7 @@ module HmiPackageModule =
         HomingLamp       : HMILamp 
         OriginLamp       : HMILamp 
         PauseLamp        : HMILamp 
-        ErrorOpen        : HMILamp 
-        ErrorShort       : HMILamp
-        ErrOnTimeOver      : HMILamp 
-        ErrOnTimeShortage      : HMILamp
-        ErrOffTimeOver      : HMILamp 
-        ErrOffTimeShortage      : HMILamp
+        Error            : HMILamp 
         Devices          : HMIDevice array //loaded system
         Jobs             : HMIJob array      
     } with
@@ -96,12 +91,7 @@ module HmiPackageModule =
                 yield x.HomingLamp  
                 yield x.OriginLamp  
                 yield x.PauseLamp   
-                yield x.ErrorOpen 
-                yield x.ErrorShort
-                yield x.ErrOnTimeShortage
-                yield x.ErrOnTimeOver  
-                yield x.ErrOffTimeShortage
-                yield x.ErrOffTimeOver  
+                yield x.Error
                         //yield! x.Devices |> Seq.collect (fun d -> d.CollectTags())  필요시 HMIPackage Devices : string array 이름으로 별도로 찾아야함 
                 yield! x.Jobs |> Seq.collect (fun j -> j.CollectTags())
             }
@@ -117,7 +107,6 @@ module HmiPackageModule =
         ReadyPushLampMode        : HMIPushLampMode  
 
         ClearPushLamp            : HMIPushLamp     
-        HomePushLamp             : HMIPushLamp    
         PausePushLamp            : HMIPushLamp 
         
         IdleLampMode             : HMILamp 
@@ -135,7 +124,6 @@ module HmiPackageModule =
                 yield! getPushLampModeTags x.TestPushLampMode
                 yield! getPushLampModeTags x.ReadyPushLampMode
                 yield! getPushLampTags x.ClearPushLamp
-                yield! getPushLampTags x.HomePushLamp
                 yield! getPushLampTags x.PausePushLamp
                 yield x.IdleLampMode
                 yield x.OriginLampMode

@@ -83,7 +83,6 @@ module SystemManagerModule =
         let readyMonitor      = dsSysBit "readyMonitor"     true  sys   SystemTag.readyMonitor  
         let idleMonitor       = dsSysBit "idleMonitor"      true  sys   SystemTag.idleMonitor  
         let originMonitor     = dsSysBit "originMonitor"    true  sys   SystemTag.originMonitor  
-        let homingMonitor     = dsSysBit "homingMonitor"    true  sys   SystemTag.homingMonitor  
         let goingMonitor      = dsSysBit "goingMonitor"     true  sys   SystemTag.goingMonitor  
         
         let flicker20msec  = dsSysBit "_T20MS" true  sys   SystemTag.flicker20ms
@@ -171,7 +170,6 @@ module SystemManagerModule =
             | SystemTag.testMonitor          ->    testMonitor     
             | SystemTag.readyMonitor         ->    readyMonitor    
             | SystemTag.originMonitor        ->    originMonitor   
-            | SystemTag.homingMonitor        ->    homingMonitor   
             | SystemTag.goingMonitor         ->    goingMonitor    
             
             | SystemTag.flicker20ms     -> flicker20msec

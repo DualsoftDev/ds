@@ -4,6 +4,7 @@ module Engine.CodeGenCPU.ConvertButtonLamp
 open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
+open System.Linq
 
 type DsSystem with
     member s.B1_HWButtonOutput() = [
@@ -52,7 +53,11 @@ type DsSystem with
                 | DuTestDriveStateLamp -> s._testMonitor.Expr   
                 | DuReadyStateLamp     -> (s._readyMonitor.Expr  <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
                 | DuIdleModeLamp      ->  s._idleMonitor.Expr
-                | DuOriginStateLamp    -> s._originMonitor.Expr <||> (s._homingMonitor.Expr <&&> s._flicker200msec.Expr)
+                | DuOriginStateLamp    ->
+                        let originActions = s.GetVertices().OfType<Real>().Select(getVMReal)
+                                              .Select(fun r->r.OA).ToOrElseOff()
+                        
+                        s._originMonitor.Expr <||> (originActions <&&> s._flicker200msec.Expr) 
                 
             let sets = if sysLamp.InTag.IsNull()
                        then modeBit  
@@ -94,7 +99,6 @@ type DsSystem with
             yield (f.emg_btn.Expr   , s._off.Expr) --| (f.emg_lamp   , getFuncName())
             yield (f.test_btn.Expr  , s._off.Expr) --| (f.test_lamp  , getFuncName())
             yield (f.clear_btn.Expr , s._off.Expr) --| (f.clear_lamp , getFuncName())
-            yield (f.home_btn.Expr  , s._off.Expr) --| (f.home_lamp  , getFuncName())
             yield (f.ready_btn.Expr , s._off.Expr) --| (f.ready_lamp , getFuncName())
     ]
    

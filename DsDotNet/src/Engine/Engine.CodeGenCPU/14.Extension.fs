@@ -49,10 +49,7 @@ type DsSystem with
 
             for btn in s.DriveHWButtons do
                 let set = btn.ActionINFunc
-                //let tm = s.GetTempTimer(btn)
                 for flow in btn.SettingFlows do
-                    //yield set --@ (tm, 2000us, getFuncName())
-                    //yield (tm.DN.Expr , rst) --| (flow.test_btn, getFuncName())
                     yield (set, rst) --| (flow.drive_btn, getFuncName())
 
             for btn in s.PauseHWButtons do
@@ -67,7 +64,8 @@ type DsSystem with
 
                 for flow in btn.SettingFlows do
                     //누름 2초 유지시 _home_btn 동시 동작
-                    yield (tm.DN.Expr , rst) --| (flow.home_btn, getFuncName())
+                    for real in flow.GetVerticesOfFlow().OfType<Real>() do
+                        yield (tm.DN.Expr , rst) --| (real.VR.OA, getFuncName())
                     yield (set, rst) --| (flow.ready_btn, getFuncName())
                     yield (set, rst) --| (flow.clear_btn, getFuncName())
         ]

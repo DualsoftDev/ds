@@ -94,12 +94,7 @@ module ConvertHMI =
                 HomingLamp   = getLamp tm (VertexTag.homing |>int)  
                 OriginLamp   = getLamp tm (VertexTag.origin |>int)  
                 PauseLamp    = getLamp tm (VertexTag.pause |>int)  
-                ErrorOpen    = getLamp  tm (VertexTag.rxErrOpen |>int)  
-                ErrorShort   = getLamp  tm (VertexTag.rxErrShort |>int)  
-                ErrOnTimeOver  = getLamp  tm (VertexTag.txErrOnTimeOver |>int)  
-                ErrOnTimeShortage  = getLamp  tm (VertexTag.txErrOnTimeShortage |>int)  
-                ErrOffTimeOver  = getLamp  tm (VertexTag.txErrOffTimeOver |>int)  
-                ErrOffTimeShortage  = getLamp  tm (VertexTag.txErrOffTimeShortage |>int)  
+                Error        = getLamp tm (VertexTag.errorTRx |>int)  
                 
                 Devices      = calls
                                     .Where(fun c->c.IsJob)
@@ -124,7 +119,6 @@ module ConvertHMI =
                 TestPushLampMode         = getPushLampMode   tm (FlowTag.test_btn  |>int) (FlowTag.test_lamp  |>int)  (FlowTag.test_state  |>int)
                 ReadyPushLampMode        = getPushLampMode   tm (FlowTag.ready_btn |>int) (FlowTag.ready_lamp |>int)  (FlowTag.ready_state |>int)
                 ClearPushLamp            = getPushLamp       tm (FlowTag.clear_btn |>int) (FlowTag.clear_lamp |>int)
-                HomePushLamp             = getPushLamp       tm (FlowTag.home_btn  |>int) (FlowTag.home_lamp  |>int)
                 PausePushLamp            = getPushLamp       tm (FlowTag.pause_btn |>int) (FlowTag.pause_lamp  |>int)  
           
                 IdleLampMode        = getLamp   tm (FlowTag.idle_mode    |>int)

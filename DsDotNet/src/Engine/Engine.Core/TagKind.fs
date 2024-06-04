@@ -64,8 +64,7 @@ module TagKindList =
     | emergencyMonitor           = 0038
     | readyMonitor               = 0039
     | originMonitor              = 0040
-    | homingMonitor              = 0041
-    | goingMonitor               = 0042
+    | goingMonitor               = 0041
 
     ///flicker
     | flicker20ms               = 0100
@@ -91,7 +90,6 @@ module TagKindList =
     |clear_btn                 = 10006
     |emg_btn                   = 10007
     |test_btn                  = 10008
-    |home_btn                  = 10009
 
     |auto_lamp                 = 10021
     |manual_lamp               = 10022
@@ -122,8 +120,7 @@ module TagKindList =
     |emergency_state            = 10106
     |ready_state                = 10107
     |origin_state               = 10108
-    |homing_state               = 10109
-    |going_state                = 10110
+    |going_state                = 10109
 
     /// 11000 ~ 11999
     [<Flags>]
@@ -143,13 +140,15 @@ module TagKindList =
     |origin                    = 11010
     |pause                     = 11011
     |errorTRx                  = 11014
-    |realOriginAction          = 11016
-    |relayReal                 = 11017
-
-    |forceStart                = 11018
-    |forceReset                = 11019
-    |forceOn                   = 11020
-    |forceOff                  = 11021
+    |realOriginAction          = 11015
+    |realOriginInit            = 11016
+    |realOriginButton          = 11017
+    |relayReal                 = 11018
+    
+    |forceStart                = 11019
+    |forceReset                = 11020
+    |forceOn                   = 11021
+    |forceOff                  = 11022
 
     |counter                   = 11023
     |timerOnDelay              = 11024

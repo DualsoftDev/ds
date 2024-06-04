@@ -46,6 +46,12 @@ module ImportType =
         | DataType = 1
         | Address = 2
 
+    [<Flags>]
+    type AutoColumn =
+        | Name = 0
+        | DataType = 1
+        | Address = 2
+
 
     [<Flags>]
     type ManualColumn_ControlPanel =

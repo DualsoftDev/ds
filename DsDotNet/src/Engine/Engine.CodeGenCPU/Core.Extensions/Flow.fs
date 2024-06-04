@@ -30,9 +30,9 @@ module ConvertCpuFlow =
         /// IDLE operation mode
         member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_mode)
         /// AUTO operation mode
-        member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_mode     )
+        member f.aop    = getFM(f).GetFlowTag(FlowTag.auto_mode)
         /// MANUAL operation mode
-        member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_mode   )
+        member f.mop    = getFM(f).GetFlowTag(FlowTag.manual_mode)
 
 
 
@@ -42,18 +42,16 @@ module ConvertCpuFlow =
         member f.emg_st    = getFM(f).GetFlowTag(FlowTag.emergency_state)
         member f.r_st    = getFM(f).GetFlowTag(FlowTag.ready_state    )
         member f.o_st    = getFM(f).GetFlowTag(FlowTag.origin_state)
-        member f.h_st    = getFM(f).GetFlowTag(FlowTag.homing_state)
         member f.g_st    = getFM(f).GetFlowTag(FlowTag.going_state)
   
         member f.auto_btn   = getFM(f).GetFlowTag(FlowTag.auto_btn    )
         member f.manual_btn = getFM(f).GetFlowTag(FlowTag.manual_btn  )
         member f.drive_btn  = getFM(f).GetFlowTag(FlowTag.drive_btn   )
-        member f.pause_btn  = getFM(f).GetFlowTag(FlowTag.pause_btn    )
+        member f.pause_btn  = getFM(f).GetFlowTag(FlowTag.pause_btn   )
         member f.ready_btn  = getFM(f).GetFlowTag(FlowTag.ready_btn   )
         member f.clear_btn  = getFM(f).GetFlowTag(FlowTag.clear_btn   )
         member f.emg_btn    = getFM(f).GetFlowTag(FlowTag.emg_btn     )
         member f.test_btn   = getFM(f).GetFlowTag(FlowTag.test_btn    )
-        member f.home_btn   = getFM(f).GetFlowTag(FlowTag.home_btn    )
 
         member f.auto_lamp   = getFM(f).GetFlowTag(FlowTag.auto_lamp    )
         member f.manual_lamp = getFM(f).GetFlowTag(FlowTag.manual_lamp  )
@@ -63,7 +61,6 @@ module ConvertCpuFlow =
         member f.clear_lamp  = getFM(f).GetFlowTag(FlowTag.clear_lamp   )
         member f.emg_lamp    = getFM(f).GetFlowTag(FlowTag.emg_lamp     )
         member f.test_lamp   = getFM(f).GetFlowTag(FlowTag.test_lamp    )
-        member f.home_lamp   = getFM(f).GetFlowTag(FlowTag.home_lamp    )
 
         member f.stopError  = getFM(f).GetFlowTag(FlowTag.flowStopError    )
         member f.readyCondition= getFM(f).GetFlowTag(FlowTag.flowReadyCondition )
@@ -119,6 +116,5 @@ module ConvertCpuFlow =
                     FlowTag.clear_btn
                     FlowTag.emg_btn
                     FlowTag.test_btn
-                    FlowTag.home_btn
                 ]
             writeAble |> map (getFM(f).GetFlowTag)

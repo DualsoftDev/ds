@@ -90,10 +90,9 @@ module TagManagerModule =
         member _.ET         = endTagBit
 
         //Force
-        ///forceOnBit HMI
+        ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
         member _.ON         = forceOnBit
-        ///forceOffBit HMI
-        member _.OFF         = forceOffBit
+        
         ///forceStartBit HMI
         member _.SF         = forceStartBit
         ///forceResetBit HMI
@@ -112,7 +111,7 @@ module TagManagerModule =
         //Monitor
         ///Origin Monitor
         member _.OG         =  originBit
-        ///PAuse Monitor
+        ///Pause Monitor
         member _.PA         =  pauseBit
 
 
@@ -151,10 +150,12 @@ module TagManagerModule =
             | VertexTag.rxErrOnTrend         -> (v.TagManager:?> VertexMCall).ErrOnTrend         :> IStorage
             | VertexTag.rxErrOffTrend        -> (v.TagManager:?> VertexMCall).ErrOffTrend        :> IStorage
 
-            | VertexTag.realOriginAction    -> (v.TagManager:?> VertexMReal).RO    :> IStorage
-            | VertexTag.relayReal           -> (v.TagManager:?> VertexMReal).RR    :> IStorage
-            | VertexTag.goingRealy          -> (v.TagManager:?> VertexMReal).GG    :> IStorage
-
+            | VertexTag.realOriginInit       -> (v.TagManager:?> VertexMReal).RO    :> IStorage
+            | VertexTag.realOriginButton     -> (v.TagManager:?> VertexMReal).OB    :> IStorage
+            | VertexTag.realOriginAction     -> (v.TagManager:?> VertexMReal).OA    :> IStorage
+            | VertexTag.relayReal            -> (v.TagManager:?> VertexMReal).RR    :> IStorage
+            | VertexTag.goingRealy           -> (v.TagManager:?> VertexMReal).GG    :> IStorage
+                                             
             | VertexTag.counter             
             | VertexTag.timerOnDelay        -> failwithlog $"Error : Time Counter Type {vt} not support!!"
 
@@ -172,7 +173,10 @@ module TagManagerModule =
 
         let relayGoingBit     = createTag "GG"                  false     VertexTag.goingRealy
         let relayRealBit      = createTag "RR"                  false     VertexTag.relayReal
-        let realOriginAction  = createTag "RO"                  false     VertexTag.realOriginAction
+        let realOriginInit    = createTag "RO"                  false     VertexTag.realOriginInit
+        let realOriginButton  = createTag "OB"                  false     VertexTag.realOriginButton
+        let realOriginAction  = createTag "OA"                  false     VertexTag.realOriginAction
+        
         let realSync          = createTag "Sync"                false     VertexTag.realSync
         let dummyCoinSTs      = createTag "CoinAnyOnST"         false     VertexTag.dummyCoinSTs
         let dummyCoinRTs      = createTag "CoinAnyOnRT"         false     VertexTag.dummyCoinRTs
@@ -190,8 +194,13 @@ module TagManagerModule =
             with get() = originInfo
             and set(v) = originInfo <- v
 
+        /// Real Origin Init
+        member _.RO         = realOriginInit
+        /// Real Origin Btn
+        member _.OB         = realOriginButton
         /// Real Origin Action
-        member _.RO         = realOriginAction
+        member _.OA         = realOriginAction
+        
         ///Real Init Relay
         member _.RR         = relayRealBit
         ///Real Going Relay

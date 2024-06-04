@@ -142,14 +142,17 @@ module ExportIOTable =
                              |> Seq.distinctBy(fun (dev,j) -> dev)
 
                 for (dev, job) in  devJobSet do
-                        let coins = vs.GetVerticesOfJobCoins(job)
+                    let coins = vs.GetVerticesOfJobCoins(job)
                     
-                        //외부입력 전용 확인하여 출력 생성하지 않는다.
-                        if  dev.IsRootFlowDev(coins) 
+                    //외부입력 전용 확인하여 출력 생성하지 않는다.
+                    if  dev.IsRootFlowDev(coins) 
+                    then
+                        dev.OutAddress <- (TextSkip)
+                        if dev.InAddress = TextAddrEmpty
                         then
-                            dev.OutAddress <- (TextSkip)
+                            dev.InAddress  <-  getExternalTempMemory target
 
-                        yield rowIOItems (dev, job) target
+                    yield rowIOItems (dev, job) target
         }
 
         let dts = 
@@ -269,7 +272,7 @@ module ExportIOTable =
         let rowItems (name:string, address :string) =
             no <- no+1
             [ 
-              $"Alram{no}"
+              $"Alarm{no}"
               name
               address
                ]
@@ -301,7 +304,7 @@ module ExportIOTable =
         rows
 
     let ToErrorTable (sys: DsSystem)  : DataTable =
-        let dt = new System.Data.DataTable($"AlramTable")
+        let dt = new System.Data.DataTable($"AlarmTable")
         dt.Columns.Add($"{ErrorColumn.No}", typeof<string>) |> ignore
         dt.Columns.Add($"{ErrorColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ErrorColumn.ErrorAddress}", typeof<string>) |> ignore
@@ -315,7 +318,7 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let ToAlramTable (sys: DsSystem)  : DataTable =
+    let ToAlarmTable (sys: DsSystem)  : DataTable =
 
         let dt = new System.Data.DataTable($"알람 리스트")
         dt.Columns.Add($"{TextColumn.Name}", typeof<string>) |> ignore
@@ -342,9 +345,9 @@ module ExportIOTable =
                ]
 
 
-        let alramList = getErrorRows(sys)
+        let alarmList = getErrorRows(sys)
         let rows= 
-            alramList
+            alarmList
             |> Seq.map (fun err ->
                                 rowItems (err[ErrorColumn.Name|>int]) 
                         )
@@ -363,7 +366,7 @@ module ExportIOTable =
         devCallSet
         
 
-    let getDeviceTable(name:string) = 
+    let getLabelTable(name:string) = 
         let dt=  new System.Data.DataTable($"{name}")
         dt.Columns.Add($"{TextColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.Empty1}", typeof<string>) |> ignore
@@ -390,7 +393,7 @@ module ExportIOTable =
                ]
 
     let ToDevicesApiTable (sys: DsSystem)  : DataTable =
-        let dt = getDeviceTable "액션이름"
+        let dt = getLabelTable "액션이름"
 
         let rows =
             let devCallSet = getDevCallSet sys
@@ -402,9 +405,37 @@ module ExportIOTable =
         emptyLine ()
         dt
 
+
+    let ToFlowNamesTable (sys: DsSystem)  : DataTable =
+
+        let dt = getLabelTable "Flow이름"
+      
+        let rows =
+            sys.Flows.Select(fun flow -> rowDeviceItems flow.Name)
+
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
+     
+        emptyLine ()
+        dt
+
+
+    let ToWorkNamesTable (sys: DsSystem)  : DataTable =
+
+        let dt = getLabelTable "Work이름"
+      
+        let rows =
+            sys.Flows.SelectMany(fun f->f.GetVerticesOfFlow().OfType<Real>())
+                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}_{r.Name}")
+
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
+     
+        emptyLine ()
+        dt
     let ToDevicesTable (sys: DsSystem)  : DataTable =
 
-        let dt = getDeviceTable "디바이스이름"
+        let dt = getLabelTable "디바이스이름"
       
         let rows =
             let devCallSet = getDevCallSet sys
@@ -412,6 +443,97 @@ module ExportIOTable =
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
+     
+        emptyLine ()
+        dt
+
+    let getMemory target = getValidAddress(TextAddrEmpty, DuBOOL, "", false, IOType.Memory, target)
+
+
+    let ToAutoWorkTable (sys: DsSystem) target: DataTable =
+        let dt = new System.Data.DataTable("Work자동조작")
+        dt.Columns.Add($"{AutoColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{AutoColumn.DataType}", typeof<string>) |> ignore
+        dt.Columns.Add($"{AutoColumn.Address}", typeof<string>) |> ignore
+
+
+        let rowItems (name: string, addr:string) =
+            [ name;"bit";addr ]
+
+        let rows =
+            sys.GetVertices().OfType<Real>()
+            |> Seq.collect (fun real ->
+                let name = $"{real.Flow.Name}_{real.Name}"  
+                [   
+                    real.V.ON.Address     <- getMemory target
+                    real.V.RF.Address     <- getMemory target
+                    real.V.SF.Address     <- getMemory target
+                    real.V.OB.Address     <- getMemory target
+                    real.V.ErrTRX.Address <- getMemory target
+                    real.V.R.Address      <- getMemory target
+                    real.V.G.Address      <- getMemory target
+                    real.V.F.Address      <- getMemory target
+                    real.V.H.Address      <- getMemory target
+
+                    yield rowItems ($"{name}_SET", real.V.ON.Address)    
+                    yield rowItems ($"{name}_RESET", real.V.RF.Address)    
+                    yield rowItems ($"{name}_START", real.V.SF.Address)    
+                    yield rowItems ($"{name}_ORIGIN", real.V.OB.Address)    
+                    yield rowItems ($"{name}_ERROR", real.V.ErrTRX.Address)    
+                    yield rowItems ($"{name}_STATE_R", real.V.R.Address)    
+                    yield rowItems ($"{name}_STATE_G", real.V.G.Address)    
+                    yield rowItems ($"{name}_STATE_F", real.V.F.Address)    
+                    yield rowItems ($"{name}_STATE_H", real.V.H.Address)    
+                ]
+            )
+
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
+     
+        emptyLine ()
+        dt
+
+
+    let ToAutoFlowTable (sys: DsSystem)  target: DataTable =
+        let dt = new System.Data.DataTable("Flow자동조작")
+        dt.Columns.Add($"{AutoColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{AutoColumn.DataType}", typeof<string>) |> ignore
+        dt.Columns.Add($"{AutoColumn.Address}", typeof<string>) |> ignore
+
+        let rowItems (name: string, addr:string) =
+            [ name;"bit";addr ]
+
+        let rows =
+            sys.Flows
+            |> Seq.collect (fun flow ->
+                [   
+                    flow.auto_btn.Address      <- getMemory target
+                    flow.aop.Address           <- getMemory target
+                    flow.manual_btn.Address    <- getMemory target
+                    flow.mop.Address           <- getMemory target
+                    flow.ready_btn.Address     <- getMemory target
+                    flow.r_st.Address          <- getMemory target
+                    flow.drive_btn.Address     <- getMemory target
+                    flow.d_st.Address          <- getMemory target
+                    flow.pause_btn.Address     <- getMemory target
+                    flow.pause.Address         <- getMemory target
+
+
+                    yield rowItems ($"{flow.Name}_FlowAutoSelect", flow.auto_btn.Address)
+                    yield rowItems ($"{flow.Name}_FlowAutoLamp", flow.aop.Address)
+                    yield rowItems ($"{flow.Name}_FlowManualSelect", flow.manual_btn.Address)
+                    yield rowItems ($"{flow.Name}_FlowManualLamp", flow.mop.Address)
+                    yield rowItems ($"{flow.Name}_FlowReadyBtn", flow.ready_btn.Address)
+                    yield rowItems ($"{flow.Name}_FlowReadyLamp", flow.r_st.Address)
+                    yield rowItems ($"{flow.Name}_FlowDriveBtn", flow.drive_btn.Address)
+                    yield rowItems ($"{flow.Name}_FlowDriveLamp", flow.d_st.Address)
+                    yield rowItems ($"{flow.Name}_FlowPauseBtn", flow.pause_btn.Address)
+                    yield rowItems ($"{flow.Name}_FlowPauseLamp", flow.pause.Address)
+                ]
+            )
+
+        addRows rows dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
      
         emptyLine ()
         dt
@@ -562,15 +684,19 @@ module ExportIOTable =
 
             
         [<Extension>]
-        static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) =
+        static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) target=
             let dataTables = [|
-                                ToManualTable sys IOType.Memory    
-                                ToManualTable sys IOType.In
-                                ToManualTable sys IOType.Out
-                                ToManualTable_BtnLamp sys
-                                ToAlramTable sys
-                                ToDevicesTable sys
-                                ToDevicesApiTable sys
+                ToAutoFlowTable sys target
+                ToAutoWorkTable sys target
+                ToManualTable sys IOType.Memory    
+                ToManualTable sys IOType.In
+                ToManualTable sys IOType.Out
+                ToManualTable_BtnLamp sys
+                ToFlowNamesTable sys
+                ToWorkNamesTable sys
+                ToDevicesTable sys
+                ToDevicesApiTable sys
+                ToAlarmTable sys
                                 |]
             createSpreadsheet filePath dataTables 25.0 false
 

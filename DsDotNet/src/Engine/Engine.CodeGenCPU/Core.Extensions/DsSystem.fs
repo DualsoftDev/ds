@@ -59,7 +59,6 @@ module ConvertCpuDsSystem =
         member s._readyMonitor  = s.GetPv<bool>(SystemTag.readyMonitor  )
         member s._idleMonitor   = s.GetPv<bool>(SystemTag.idleMonitor  )
         member s._originMonitor = s.GetPv<bool>(SystemTag.originMonitor  )
-        member s._homingMonitor = s.GetPv<bool>(SystemTag.homingMonitor  )
         member s._goingMonitor  = s.GetPv<bool>(SystemTag.goingMonitor  )
 
         member s._tout        = s.GetPv<uint32>(SystemTag.timeout)

@@ -22,7 +22,6 @@ module FlowManagerModule =
         let f_r_st        = cpv $"R_ST_{fn}"     FlowTag.ready_state             // Ready  State
         let f_t_st        = cpv $"T_ST_{fn}"     FlowTag.test_state         // Test  Operation State (시운전)
         let f_o_st        = cpv $"O_ST_{fn}"     FlowTag.origin_state              // origin   State
-        let f_h_st        = cpv $"H_ST_{fn}"     FlowTag.homing_state              // homing State
         let f_g_st        = cpv $"G_ST_{fn}"     FlowTag.going_state              // going  State
         let f_emg_st        = cpv $"EMG_ST_{fn}"   FlowTag.emergency_state             // Emergency  State
 
@@ -34,7 +33,6 @@ module FlowManagerModule =
         let f_clear_btn      = cpv $"clear_btn_{fn}"   FlowTag.clear_btn
         let f_emg_btn        = cpv $"emg_btn_{fn}"     FlowTag.emg_btn
         let f_test_btn       = cpv $"test_btn_{fn}"    FlowTag.test_btn
-        let f_home_btn       = cpv $"home_btn_{fn}"    FlowTag.home_btn
 
         let f_auto_lamp      = cpv $"auto_lamp_{fn}"    FlowTag.auto_lamp       
         let f_manual_lamp    = cpv $"manual_lamp_{fn}"  FlowTag.manual_lamp     
@@ -66,7 +64,6 @@ module FlowManagerModule =
                 | FlowTag.error_state       -> f_e_st
                 | FlowTag.idle_mode         -> f_iop
                 | FlowTag.origin_state      -> f_o_st
-                | FlowTag.homing_state      -> f_h_st
                 | FlowTag.going_state       -> f_g_st
                 | FlowTag.emergency_state   -> f_emg_st
                 
@@ -79,7 +76,6 @@ module FlowManagerModule =
                 | FlowTag.clear_btn       -> f_clear_btn
                 | FlowTag.emg_btn         -> f_emg_btn
                 | FlowTag.test_btn        -> f_test_btn
-                | FlowTag.home_btn        -> f_home_btn
                 
                 | FlowTag.auto_lamp        -> f_auto_lamp
                 | FlowTag.manual_lamp      -> f_manual_lamp

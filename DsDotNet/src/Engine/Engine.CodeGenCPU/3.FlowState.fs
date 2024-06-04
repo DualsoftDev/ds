@@ -9,21 +9,21 @@ open Dual.Common.Core.FS
 
 type Flow with
 
-    member f.ST1_originState() =
+    member f.ST1_OriginState() =
         let set = f.Graph.Vertices.OfType<Real>().Select(getVM)
                    .Select(fun r-> r.OG).ToAndElseOn()
         let rst = f._off.Expr
 
         (set, rst) --| (f.o_st, getFuncName())   
 
-    member f.ST2_homingState() =
-        let set =(f.home_btn.Expr <||> f.HWBtnHomeExpr ) <&&> (f.mop.Expr <||> f._sim.Expr)
-        let rst = f._off.Expr
+        
+    member f.ST2_ReadyState() =  //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
+        let set = (f.ready_btn.Expr <||> f.HWBtnReadyExpr) <&&> f.readyCondition.Expr
+        let rst = f.e_st.Expr <||> f.emg_st.Expr <||> f.pause.Expr
 
-        (set, rst) --| (f.h_st, getFuncName())
+        (set, rst) ==| (f.r_st, getFuncName())
 
-
-    member f.ST3_goingState() =
+    member f.ST3_GoingState() =
         let set = f.Graph.Vertices.OfType<Real>().Select(getVM)
                    .Select(fun r-> r.G).ToOrElseOn()  <&&> f.d_st.Expr
         let rst = f.pause.Expr
@@ -56,9 +56,3 @@ type Flow with
         let rst = !!f.aop.Expr  <||> f.pause.Expr
 
         (set, rst) ==| (f.t_st, getFuncName())
-
-    member f.ST8_ReadyState() =  //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
-        let set = (f.ready_btn.Expr <||> f.HWBtnReadyExpr) <&&> f.readyCondition.Expr
-        let rst = f.e_st.Expr <||> f.emg_st.Expr <||> f.pause.Expr
-
-        (set, rst) ==| (f.r_st, getFuncName())

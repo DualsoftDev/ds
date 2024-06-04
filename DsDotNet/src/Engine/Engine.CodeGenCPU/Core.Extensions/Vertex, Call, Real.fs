@@ -82,7 +82,7 @@ module ConvertCpuVertex =
       
         member c.SyncExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
-                 !!rv.SYNC.Expr <&&> (rv.G.Expr <||> rv.Flow.h_st.Expr)
+                 !!rv.SYNC.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)
 
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.OnDelayTime.Value.ToString() |> CountUnitType.Parse
@@ -126,7 +126,6 @@ module ConvertCpuVertex =
         member c.SafetyExpr = getSafetyExpr(c.SafetyConditions.Choose(fun f->f.GetSafetyCall()), c.System)
 
         member c.StartPointExpr =
-            let f = c.Parent.GetFlow()
             match c.Parent.GetCore() with
             | :? Real as r ->
                 let rv = r.TagManager :?>  VertexMReal
@@ -136,7 +135,7 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        f.h_st.Expr <&&> !!c.End
+                        (r.VR.OB.Expr <||> r.VR.OA.Expr) <&&> !!c.End
                         
                         //(// 실제에서는 수동일때만 h_st 가능 ,시뮬레이션은 자동수동 둘다가능
                         //             (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    

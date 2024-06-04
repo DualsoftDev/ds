@@ -16,7 +16,6 @@ type DsSystem with
                 yield (s._emg_btn.Expr   , s._off.Expr) --| (flow.emg_btn,    getFuncName())
                 yield (s._test_btn.Expr  , s._off.Expr) --| (flow.test_btn,   getFuncName())
                 yield (s._clear_btn.Expr , s._off.Expr) --| (flow.clear_btn,  getFuncName())
-                yield (s._home_btn.Expr  , s._off.Expr) --| (flow.home_btn,   getFuncName())
                 yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
         ]
         
@@ -38,7 +37,6 @@ type DsSystem with
             (s.Flows.Select(fun f->f.t_st).ToAndElseOff(), s._off.Expr)     --| (s._testMonitor   , getFuncName())
             (s.Flows.Select(fun f->f.r_st).ToAndElseOff(), s._off.Expr)     --| (s._readyMonitor  , getFuncName())
             (s.Flows.Select(fun f->f.o_st).ToAndElseOff(), s._off.Expr)     --| (s._originMonitor , getFuncName())
-            (s.Flows.Select(fun f->f.h_st).ToOrElseOff() , s._off.Expr)     --| (s._homingMonitor , getFuncName())
             (s.Flows.Select(fun f->f.g_st).ToOrElseOff() , s._off.Expr)     --| (s._goingMonitor , getFuncName())
             
         ]

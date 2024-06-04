@@ -38,11 +38,11 @@ type VertexManager with
             else v._off.Expr
 
         let sets =  (
-                    (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr
+                        (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr
                     ) 
                     <||> 
                     (
-                    v.RF.Expr <||> real.Flow.h_st.Expr
+                        v.RF.Expr <||> real.VR.OB.Expr <||> real.VR.OA.Expr
                     )
 
         let rsts  = real.V.R.Expr

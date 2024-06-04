@@ -41,22 +41,11 @@ module ImportType =
         | Bold = 8
 
     [<Flags>]
-    type ManualColumn_I =
+    type ManualColumn =
         | Name = 0
         | DataType = 1
-        | Input = 2
+        | Address = 2
 
-    [<Flags>]
-    type ManualColumn_O =
-        | Name = 0
-        | DataType = 1
-        | Output = 2   
-
-    [<Flags>]
-    type ManualColumn_M =
-        | Name = 0
-        | DataType = 1
-        | Manual = 2
 
     [<Flags>]
     type ManualColumn_ControlPanel =

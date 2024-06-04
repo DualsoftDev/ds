@@ -355,9 +355,16 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let ToDevicesTable (sys: DsSystem)  : DataTable =
+    let getDevCallSet(sys:DsSystem) =
+        let calls = sys.GetVerticesHasJob()
+        let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
+                                    |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
+                                    |> Seq.filter (fun (dev, c) -> dev.OutAddress <> TextSkip)
+        devCallSet
+        
 
-        let dt = new System.Data.DataTable($"디바이스이름")
+    let getDeviceTable(name:string) = 
+        let dt=  new System.Data.DataTable($"{name}")
         dt.Columns.Add($"{TextColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.Empty1}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.Empty2}", typeof<string>) |> ignore
@@ -367,8 +374,9 @@ module ExportIOTable =
         dt.Columns.Add($"{TextColumn.UnderLine}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.StrikeOut}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.Bold}", typeof<string>) |> ignore
-      
-        let rowItems (no:int, dev: string) =
+        dt
+
+    let rowDeviceItems (dev: string) =
             [ 
               dev
               ""
@@ -381,19 +389,12 @@ module ExportIOTable =
               "On"
                ]
 
+    let ToDevicesApiTable (sys: DsSystem)  : DataTable =
+        let dt = getDeviceTable "액션이름"
+
         let rows =
-            let calls = sys.GetVerticesOfCoins().OfType<Call>()
-                           .Where(fun w->w.IsJob)
-                           .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
-                    
-            let devs  = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev))
-                                    |> Seq.map (fun dev -> dev.DeviceName) 
-                                    |> distinct
-                                    |> Seq.sortBy (id) 
-            devs
-                |> Seq.mapi (fun i dev ->
-                                    rowItems (i, dev) 
-                            )
+            let devCallSet = getDevCallSet sys
+            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.ApiItem.Name)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -401,94 +402,34 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let ToManualTable_IN (sys: DsSystem)  : DataTable =
+    let ToDevicesTable (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"센서(I)")
-        dt.Columns.Add($"{ManualColumn_I.Name}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn_I.DataType}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn_I.Input}", typeof<string>) |> ignore
+        let dt = getDeviceTable "디바이스이름"
       
-        let rowItems (dev: TaskDev, addr:string) =
-            [ 
-              dev.ApiName
-              dev.InDataType.ToPLCText()
-              addr 
-               ]
-
         let rows =
-            let calls = sys.GetVerticesOfCoins().OfType<Call>()
-                            .Where(fun w->w.IsJob)  
-                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
-            let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
-                                    |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
-            devCallSet
-                |> Seq.collect (fun (dev, call) ->
-                    [
-                        yield rowItems (dev, if dev.InAddress = TextSkip then "%HX0" else dev.InAddress) 
-                        if dev.ApiItem.ApiSystem.ApiItems.Count = 1
-                            then 
-                                yield rowItems (dev, "%HX0") 
-
-                    ]
-            )
+            let devCallSet = getDevCallSet sys
+            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.DeviceName)
 
         addRows rows dt
-        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_I>)) dt
-
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
      
         emptyLine ()
         dt
 
-    let ToManualTable_OUT (sys: DsSystem)  : DataTable =
 
-        let dt = new System.Data.DataTable($"출력(Q)")
-        dt.Columns.Add($"{ManualColumn_O.Name}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn_O.DataType}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn_O.Output}", typeof<string>) |> ignore
+    let ToManualTable (sys: DsSystem) (iomType:IOType) : DataTable =
+        let tableName =
+            match iomType with
+            | IOType.Memory  -> "액션(M)"
+            | IOType.In      -> "센서(I)"
+            | IOType.Out     -> "출력(Q)"
+            | _ -> failwith "Invalid action tag"
 
-      
-        let rowItems (dev: TaskDev, addr:string) =
-            [ 
-              dev.ApiName
-              dev.OutDataType.ToPLCText()
-              addr
-               ]
+        let dt = new System.Data.DataTable(tableName)
+        dt.Columns.Add($"{ManualColumn.Name}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.DataType}", typeof<string>) |> ignore
+        dt.Columns.Add($"{ManualColumn.Address}", typeof<string>) |> ignore
 
-        let rows =
-            let calls = sys.GetVerticesOfCoins().OfType<Call>()
-                            .Where(fun w->w.IsJob)
-                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
-            let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
-                                    |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
-            devCallSet
-                |> Seq.collect (fun  (dev, call) ->
-                            [
-                                yield rowItems (dev, if dev.OutAddress = TextSkip then "%HX0" else dev.OutAddress) 
-                                
-                                if dev.ApiItem.ApiSystem.ApiItems.Count = 1
-                                then 
-                                    yield rowItems (dev, "%HX0") 
-                            ]
-                )
-
-
-
-
-        addRows rows dt
-        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_O>)) dt
-
-     
-        emptyLine ()
-        dt
-
-    let ToManualTable_Memory (sys: DsSystem)  : DataTable =
-
-        let dt = new System.Data.DataTable($"명령(M)")
-        dt.Columns.Add($"{ManualColumn_M.Name}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn_M.DataType}", typeof<string>) |> ignore
-        dt.Columns.Add($"{ManualColumn_M.Manual}", typeof<string>) |> ignore
-
-      
         let rowItems ( dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
@@ -497,29 +438,30 @@ module ExportIOTable =
                ]
 
         let rows =
-            let calls = sys.GetVerticesOfCoins().OfType<Call>()
-                            .Where(fun w->w.IsJob)
-                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
-            let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
-                                    |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
+            let devCallSet = getDevCallSet sys
             devCallSet
-                |> Seq.collect (fun (dev, call) ->
-                    [   
+            |> Seq.collect (fun (dev, call) ->
+                [   
+                    match iomType with
+                    | IOType.Memory ->
                         yield rowItems (dev, call.ManualTag.Address)
+                    | IOType.In->
+                        yield rowItems (dev, dev.InAddress)
+                    | IOType.Out ->                            
+                        yield rowItems (dev, dev.OutAddress)
 
-                        if dev.ApiItem.ApiSystem.ApiItems.Count = 1
-                        then 
-                            yield rowItems (dev, "%HX0") 
-
-                    ]
-                ) 
+                    | _ -> failwith "Invalid action tag"
+                ]
+            ) 
 
         addRows rows dt
-        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
 
      
         emptyLine ()
         dt
+
+
 
     let ToManualTable_BtnLamp (sys: DsSystem)  : DataTable =
 
@@ -547,9 +489,9 @@ module ExportIOTable =
 
         addRows rows dt
 
-        addRows [[ "SimulationLamp"; "bool"; RuntimeDS.EmulationAddress]] dt
+        addRows [[ "SimulationLamp"; "bool"; RuntimeDS.EmulationAddress ]] dt
 
-        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn_M>)) dt
+        let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
      
         emptyLine ()
         dt
@@ -622,12 +564,13 @@ module ExportIOTable =
         [<Extension>]
         static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) =
             let dataTables = [|
-                                ToManualTable_Memory sys
-                                ToManualTable_IN sys
-                                ToManualTable_OUT sys
+                                ToManualTable sys IOType.Memory    
+                                ToManualTable sys IOType.In
+                                ToManualTable sys IOType.Out
                                 ToManualTable_BtnLamp sys
                                 ToAlramTable sys
                                 ToDevicesTable sys
+                                ToDevicesApiTable sys
                                 |]
             createSpreadsheet filePath dataTables 25.0 false
 

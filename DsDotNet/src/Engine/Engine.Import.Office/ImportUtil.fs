@@ -236,12 +236,10 @@ module ImportU =
                     | REALExF ->
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                         dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
-                    //| REALExS ->
-                    //    let realExS = createExSystemReal (mySys, node, dicFlow.[node.PageNum])
-                    //    dicVertex.Add(node.Key, realExS)
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                         real.Finished <- node.RealFinished
+                        real.NoTransData <- node.RealNoTrans
                         dicVertex.Add(node.Key, real))
 
             let calls =

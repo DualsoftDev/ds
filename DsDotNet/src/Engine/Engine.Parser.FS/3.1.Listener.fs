@@ -682,6 +682,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     else
                         failwith $"Couldn't find target real object name {getText (finished)}"
 
+        let fillNoTrans (system: DsSystem) (listCtx: List<dsParser.NotransBlockContext>) =
+            for notranCtx in listCtx do
+                let list = notranCtx.Descendants<NotransTargetContext>().ToList()
+
+                for notrans in list do
+                    let fqdn = collectNameComponents notrans // in array.. [0] : flow, [1] : real
+                    let real = tryFindReal system (fqdn |> List.ofArray)
+
+                    if not (real.IsNone) then
+                        real.Value.NoTransData <- true
+                    else
+                        failwith $"Couldn't find target real object name {getText (notrans)}"
+
         let fillDisabled (system: DsSystem) (listDisabledCtx: List<dsParser.DisableBlockContext>) =
             for disabledCtx in listDisabledCtx do
                 let listDisabled = disabledCtx.Descendants<DisableTargetContext>().ToList()
@@ -701,6 +714,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             ctx.Descendants<LayoutBlockContext>().ToList() |> fillXywh theSystem
             //Real에 finished 채우기
             ctx.Descendants<FinishBlockContext>().ToList() |> fillFinished theSystem
+            //Real에 noTransData 채우기
+            ctx.Descendants<NotransBlockContext>().ToList() |> fillNoTrans theSystem
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
 

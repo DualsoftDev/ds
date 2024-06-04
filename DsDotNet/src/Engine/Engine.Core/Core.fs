@@ -205,6 +205,8 @@ module CoreModule =
             member val SafetyConditions = HashSet<SafetyCondition>()
 
         member val Finished:bool = false with get, set
+        member val NoTransData:bool = false with get, set
+
         //member val RealData:byte[] = [||] with get, set
         member val RealData:byte = 0uy with get, set //array타입으로 향후 변경
 

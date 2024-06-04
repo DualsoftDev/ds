@@ -473,6 +473,7 @@ module PPTObjectModule =
         member x.JobInfos = jobInfos
         member x.JobCallNames = jobInfos.Keys
         member x.RealFinished = shape.IsUnderlined()
+        member x.RealNoTrans = shape.IsStrikethrough()
 
         member x.Safeties = safeties
 

@@ -182,6 +182,18 @@ module PPTUtil =
             )
 
         [<Extension>]
+        static member IsStrikethrough(shape: Shape) =
+            shape.Descendants<TextBody>()
+            |> Seq.collect (fun textBody -> textBody.Descendants<Paragraph>())
+            |> Seq.collect (fun paragraph -> paragraph.Descendants<DocumentFormat.OpenXml.Drawing.Run>())
+            |> Seq.exists (fun run ->
+                match run.RunProperties with
+                | null -> false
+                | runProps -> runProps.Strike <> null && runProps.Strike.InnerText = "sngStrike" //DocumentFormat.OpenXml.Drawing.TextStrikeValues.Single
+            )
+        
+
+        [<Extension>]
         static member ShapeID(shape: Shape) =
             let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault()
 

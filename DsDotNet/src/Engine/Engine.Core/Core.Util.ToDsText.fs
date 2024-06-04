@@ -385,14 +385,9 @@ module internal ToDsTextModule =
 
 
 
-            let finishedReals =
-                [
-                    for flow in system.Flows do
-                    for vert in flow.Graph.Vertices do
-                        match vert with
-                        | :? Real as real -> if real.Finished then yield real
-                        | _ -> ()
-                ]
+            let finishedReals = system.GetVertices().OfType<Real>().Filter(fun f->f.Finished)
+            let noTransDataReals =  system.GetVertices().OfType<Real>().Filter(fun f->f.NoTransData)
+
             let finished = 
                 [
                 if finishedReals.Any() then
@@ -401,6 +396,16 @@ module internal ToDsTextModule =
                         yield $"{tab3}{real.Flow.Name}.{real.Name};"
                     yield $"{tab2}{rb}"
                 ] |> combineLines
+
+            let noTransData = 
+                [
+                if noTransDataReals.Any() then
+                    yield $"{tab2}[notrans] = {lb}"
+                    for real in noTransDataReals do
+                        yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                    yield $"{tab2}{rb}"
+                ] |> combineLines
+
             let disabledVertices = 
                 [
                     for flow in system.Flows do
@@ -423,12 +428,15 @@ module internal ToDsTextModule =
                         yield $"{tab3}{compo[1]}.{compo[2]}.{compo[3]};"
                     yield $"{tab2}{rb}"
                 ] |> combineLines
-            if safeties.Any() || layouts.Any() || finished.Any() || disabled.Any() then
+
+            if safeties.Any() || layouts.Any() || finished.Any() || disabled.Any()|| noTransData.Any() then
                 yield $"{tab}[prop] = {lb}"
                 if safeties.Any()  then yield safeties
                 if layouts.Any()   then yield layouts
                 if finished.Any()  then yield finished
                 if disabled.Any()  then yield disabled
+                if noTransData.Any()  then yield noTransData
+                
                 yield $"{tab}{rb}"
             let commentDevice(absoluteFilePath:string) = if pCooment then  $"// {absoluteFilePath}" else "";
          

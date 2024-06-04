@@ -223,7 +223,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
         }
     }
  */
-propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableBlock)* '}';
+propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableBlock|notransBlock)* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyDef)* '}';    
         safetyDef: safetyKey '=' '{' safetyValues '}';
             // Real|Call = { ((Real|Call);)* }
@@ -241,6 +241,9 @@ propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableB
     finishBlock: '[' 'finish' ']' '=' '{' (finishListing)* '}';
         finishTarget: identifier2;
         finishListing: finishTarget (SEMICOLON finishTarget)* (SEMICOLON)?;
+    notransBlock: '[' 'notrans' ']' '=' '{' (notransListing)* '}';
+        notransTarget: identifier2;
+        notransListing: notransTarget (SEMICOLON notransTarget)* (SEMICOLON)?;
     disableBlock: '[' 'disable' ']' '=' '{' (disableListing)* '}';
         disableTarget: identifier23;
         disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;

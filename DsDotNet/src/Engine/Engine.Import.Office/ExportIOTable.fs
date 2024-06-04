@@ -686,17 +686,21 @@ module ExportIOTable =
         [<Extension>]
         static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) target=
             let dataTables = [|
-                ToAutoFlowTable sys target
-                ToAutoWorkTable sys target
+
                 ToManualTable sys IOType.Memory    
                 ToManualTable sys IOType.In
                 ToManualTable sys IOType.Out
                 ToManualTable_BtnLamp sys
+
+                ToAutoFlowTable sys target
+                ToAutoWorkTable sys target
+
                 ToFlowNamesTable sys
                 ToWorkNamesTable sys
                 ToDevicesTable sys
                 ToDevicesApiTable sys
                 ToAlarmTable sys
+
                                 |]
             createSpreadsheet filePath dataTables 25.0 false
 

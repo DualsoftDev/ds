@@ -1,5 +1,5 @@
 [<AutoOpen>]
-module Engine.CodeGenCPU.ConvertMonitor
+module Engine.CodeGenCPU.ConvertErrorMonitor
 
 open System.Linq
 open Engine.Core
@@ -8,45 +8,9 @@ open Dual.Common.Core.FS
 
 
 type VertexManager with
-    ///Status
-    member v.S1_RGFH() =
-            let r = v.R <==  (( (!!) v.ST.Expr                       <&&> (!!) v.ET.Expr) //    R      x   -   x
-                              <||> ( v.ST.Expr <&&>       v.RT.Expr  <&&> (!!) v.ET.Expr))//           o   o   x
-            let g = v.G <==        ( v.ST.Expr <&&>  (!!) v.RT.Expr  <&&> (!!) v.ET.Expr) //    G      o   x   x
-            let f = v.F <==        (                 (!!) v.RT.Expr  <&&>      v.ET.Expr) //    F      -   x   o
-            let h = v.H <==        (                      v.RT.Expr  <&&>      v.ET.Expr) //    H      -   o   o
-
-            [
-               withExpressionComment $"{getFuncName()}{v.Name}(Ready)"        r
-               withExpressionComment $"{getFuncName()}{v.Name}(Going)"        g
-               withExpressionComment $"{getFuncName()}{v.Name}(Finish)"       f
-               withExpressionComment $"{getFuncName()}{v.Name}(Homming)"      h
-            ]
-
-    ///Monitor
-    member v.M1_OriginMonitor() =
-        let v = v :?> VertexMReal
-
-        let ons       = getOriginIOExprs     (v, InitialType.On)
-
-        let offs      = getOriginIOExprs     (v, InitialType.Off)
-
-        let onExpr    = if ons.any() then ons.ToAndElseOff() else v._on.Expr
-        let offExpr   = if offs.any() then offs.ToOrElseOn() else v._off.Expr
 
 
-        let set =   onExpr <&&> (!!offExpr) <&&> v.SYNC.Expr
-              
-
-        (set, v._off.Expr) --| (v.OG, getFuncName())
-
-    member v.M2_PauseMonitor() =
-        let set = v.Flow.pause.Expr
-        let rst = v._off.Expr
-
-        (set, rst) --| (v.PA, getFuncName())
-
-    member v.M3_CallErrorTXMonitor() =
+    member v.E2_CallErrorTXMonitor() =
         let v= v :?> VertexMCall
         let call= v.Vertex.GetPure() :?> Call
         let real= call.Parent.GetCore() :?> Real
@@ -62,9 +26,10 @@ type VertexManager with
             | _ ->          yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
         ]
 
-    member v.M4_CallErrorRXMonitor() =
+    member v.E3_CallErrorRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
+        let v = v:?> VertexMCall
         
         let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.clear_btn.Expr
@@ -90,21 +55,14 @@ type VertexManager with
         ]
         
 
-    member v.M5_RealErrorTotalMonitor() =
+    member v.E4_RealErrorTotalMonitor() =
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
-        [
-            (real.ErrOpens.ToOrElseOff(), rst)  --| (v.ErrOpen, getFuncName())
-            (real.ErrShorts.ToOrElseOff(), rst) --| (v.ErrShort, getFuncName())
-            (real.ErrOnTimeShortages.ToOrElseOff(), rst) --| (v.ErrOnTimeShortage, getFuncName())
-            (real.ErrOnTimeOvers.ToOrElseOff(), rst) --| (v.ErrOnTimeOver, getFuncName())
-            (real.ErrOffTimeShortages.ToOrElseOff(), rst) --| (v.ErrOffTimeShortage, getFuncName())
-            (real.ErrOffTimeOvers.ToOrElseOff(), rst) --| (v.ErrOffTimeOver, getFuncName())
-            (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
-        ]
+         
+        (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
 
    
-    member v.M6_CallErrorTotalMonitor() =
+    member v.E5_CallErrorTotalMonitor() =
         let v= v :?> VertexMCall
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())

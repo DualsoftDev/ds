@@ -35,9 +35,9 @@
         <Compile Include="4.FlowMonitor.fs" />
         <Compile Include="5.FlowOperationMode.fs" />
         <Compile Include="6.Real.fs" />
-        <Compile Include="7.Call.fs" />
-        <Compile Include="8.DAG.fs" />
-        <Compile Include="9.Status, Monitor.fs" />
+        <Compile Include="7.Call, DAG.fs" />
+        <Compile Include="8.ErrorMonitor.fs" />
+        <Compile Include="9.Status, Origin.fs" />
         <Compile Include="10.Job.fs" />
         <Compile Include="11.Variable, ActionVariable.fs" />
         <Compile Include="12.System.fs" />

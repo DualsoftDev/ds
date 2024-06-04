@@ -244,6 +244,14 @@ type FindExtension =
     [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
     [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =  
                     getVerticesOfSystem(x) |> ofCallForOperator
+                    
+    [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
+    [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 
+                    let vs = x.GetVertices()
+                    let calls = vs.OfType<Call>().Cast<Vertex>()
+                    let aliases = vs.OfType<Alias>().Cast<Vertex>()
+                    (calls@aliases)
+                        .Where(fun c->c.Parent.GetCore() :? Real)     
 
     [<Extension>] static member GetVerticesHasJob(x:DsSystem) =  
                     getVerticesOfSystem(x)
@@ -255,13 +263,10 @@ type FindExtension =
                         .Choose(fun v -> v.GetPureCall())
                         .Where(fun v -> v.IsJob)
 
-    [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
-    [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 
-                    let vs = x.GetVertices()
-                    let calls = vs.OfType<Call>().Cast<Vertex>()
-                    let aliases = vs.OfType<Alias>().Cast<Vertex>()
-                    (calls@aliases)
-                        .Where(fun c->c.Parent.GetCore() :? Real)     
+    [<Extension>] static member GetVerticesHasJobInReal(x:DsSystem) =  
+                    x.GetVerticesOfCoins()
+                        .Choose(fun v -> v.GetPureCall())
+                        .Where(fun v -> v.IsJob)
         
     [<Extension>] static member GetApiCoinsSet(x:DsSystem) = 
                         let apis = x.GetDistinctApis()

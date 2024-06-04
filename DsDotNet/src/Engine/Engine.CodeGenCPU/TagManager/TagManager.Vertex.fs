@@ -55,27 +55,10 @@ module TagManagerModule =
         let forceOffBit    = createTag "OFF" true VertexTag.forceOff
 
 
-        let txErrOnTimeShortage     = createTag "txErrOnTimeShortage"   true    VertexTag.txErrOnTimeShortage   
-        let txErrOnTimeOver         = createTag "txErrOnTimeOver"       true    VertexTag.txErrOnTimeOver  
-        let txErrOffTimeShortage    = createTag "txErrOffTimeShortage"  true    VertexTag.txErrOffTimeShortage   
-        let txErrOffTimeOver        = createTag "txErrOffTimeOver"      true    VertexTag.txErrOffTimeOver   
-        let rxErrShort              = createTag "rxErrShort"            true    VertexTag.rxErrShort      
-        let rxErrShortRising        = createTag "rxErrShortRising"      true    VertexTag.rxErrShortRising      
-        let rxErrOpen               = createTag "rxErrOpen"             true    VertexTag.rxErrOpen    
-        let rxErrOpenRising         = createTag "rxErrOpenRising"       true    VertexTag.rxErrOpenRising          
-        let rxErrOnTrend            = createTag "rxErrOnTrend"          true    VertexTag.rxErrOnTrend    
-        let rxErrOffTrend           = createTag "rxErrOffTrend"         true    VertexTag.rxErrOffTrend    
 
         let errorErrTRXBit = createTag "ErrTRX" false   VertexTag.errorTRx
 
-        let errors = 
-            let err1 = if txErrOnTimeShortage.Value      then "감지시간부족" else ""
-            let err2 = if txErrOnTimeOver.Value          then "감지시간초과" else ""
-            let err3 = if txErrOffTimeShortage.Value     then "해지시간부족" else ""
-            let err4 = if txErrOffTimeOver.Value         then "해지시간초과" else ""
-            let err5 = if rxErrShort.Value      then "센서감지" else ""
-            let err6 = if rxErrOpen.Value       then "센서오프" else ""
-            [err1;err2;err3;err4;err5;err6]|> Seq.where(fun f->f <> "")
+        
 
         interface ITagManager with
             member x.Target = v
@@ -132,16 +115,7 @@ module TagManagerModule =
         ///PAuse Monitor
         member _.PA         =  pauseBit
 
-        member _.ErrOnTimeShortage = txErrOnTimeShortage 
-        member _.ErrOnTimeOver     = txErrOnTimeOver 
-        member _.ErrOffTimeShortage = txErrOffTimeShortage 
-        member _.ErrOffTimeOver     = txErrOffTimeOver 
-        member _.ErrShort        = rxErrShort    
-        member _.ErrShortRising  = rxErrShortRising    
-        member _.ErrOpen         = rxErrOpen     
-        member _.ErrOpenRising   = rxErrOpenRising     
-        member _.ErrOnTrend   = rxErrOnTrend     
-        member _.ErrOffTrend   = rxErrOffTrend     
+
         
         member _.ErrTRX         =  errorErrTRXBit
         
@@ -159,21 +133,23 @@ module TagManagerModule =
             | VertexTag.origin              -> originBit           :> IStorage
             | VertexTag.pause               -> pauseBit            :> IStorage
 
-            | VertexTag.txErrOnTimeShortage    -> txErrOnTimeShortage   :> IStorage
-            | VertexTag.txErrOnTimeOver        -> txErrOnTimeOver   :> IStorage
-            | VertexTag.txErrOffTimeShortage   -> txErrOffTimeShortage   :> IStorage
-            | VertexTag.txErrOffTimeOver       -> txErrOffTimeOver   :> IStorage
-            | VertexTag.rxErrShort          -> rxErrShort      :> IStorage
-            | VertexTag.rxErrOpen           -> rxErrOpen       :> IStorage
-            | VertexTag.rxErrOnTrend        -> rxErrOnTrend       :> IStorage
-            | VertexTag.rxErrOffTrend       -> rxErrOffTrend       :> IStorage
-
+            
             | VertexTag.errorTRx            -> errorErrTRXBit  :> IStorage
 
             | VertexTag.forceStart          -> forceStartBit       :> IStorage
             | VertexTag.forceReset          -> forceResetBit       :> IStorage
             | VertexTag.forceOn             -> forceOnBit          :> IStorage
             | VertexTag.forceOff            -> forceOffBit         :> IStorage
+
+
+            | VertexTag.txErrOnTimeShortage  -> (v.TagManager:?> VertexMCall).ErrOnTimeShortage  :> IStorage
+            | VertexTag.txErrOnTimeOver      -> (v.TagManager:?> VertexMCall).ErrOnTimeOver      :> IStorage
+            | VertexTag.txErrOffTimeShortage -> (v.TagManager:?> VertexMCall).ErrOffTimeShortage :> IStorage
+            | VertexTag.txErrOffTimeOver     -> (v.TagManager:?> VertexMCall).ErrOffTimeOver     :> IStorage
+            | VertexTag.rxErrShort           -> (v.TagManager:?> VertexMCall).ErrShort           :> IStorage
+            | VertexTag.rxErrOpen            -> (v.TagManager:?> VertexMCall).ErrOpen            :> IStorage
+            | VertexTag.rxErrOnTrend         -> (v.TagManager:?> VertexMCall).ErrOnTrend         :> IStorage
+            | VertexTag.rxErrOffTrend        -> (v.TagManager:?> VertexMCall).ErrOffTrend        :> IStorage
 
             | VertexTag.realOriginAction    -> (v.TagManager:?> VertexMReal).RO    :> IStorage
             | VertexTag.relayReal           -> (v.TagManager:?> VertexMReal).RR    :> IStorage
@@ -184,14 +160,7 @@ module TagManagerModule =
 
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
          
-        member _.ErrorList   =  errors
-        member _.ErrorText   = 
-            if errors.any()
-            then
-                let errText = String.Join(",", errors)
-                $"{_.Name} {errText} 이상"
-            else 
-                ""
+   
 
     and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
@@ -257,12 +226,37 @@ module TagManagerModule =
         let callCommandEnd  = createTag "callCommandEnd" false VertexTag.callCommandEnd
         let callOperatorValue  = createTag "callOperatorValue" false VertexTag.callOperatorValue
    
-        let rxErrShort     = createTag "rxErrShortOn"      false VertexTag.rxErrShort    
-        let rxErrShortRising = createTag "rxErrShortRising"  false VertexTag.rxErrShortRising
-        let rxErrOpen     = createTag "rxErrOpenOff"      false VertexTag.rxErrOpen    
-        let rxErrOpenRising  = createTag "rxErrOpenRising"   false VertexTag.rxErrOpenRising 
         let timerTimeOutBit  = timer  s $"{v.Name}_TOUT" sys (sysManager.TargetType)
        
+        let txErrOnTimeShortage     = createTag "txErrOnTimeShortage"   true    VertexTag.txErrOnTimeShortage   
+        let txErrOnTimeOver         = createTag "txErrOnTimeOver"       true    VertexTag.txErrOnTimeOver  
+        let txErrOffTimeShortage    = createTag "txErrOffTimeShortage"  true    VertexTag.txErrOffTimeShortage   
+        let txErrOffTimeOver        = createTag "txErrOffTimeOver"      true    VertexTag.txErrOffTimeOver   
+        let rxErrShort              = createTag "rxErrShort"            true    VertexTag.rxErrShort      
+        let rxErrShortRising        = createTag "rxErrShortRising"      true    VertexTag.rxErrShortRising      
+        let rxErrOpen               = createTag "rxErrOpen"             true    VertexTag.rxErrOpen    
+        let rxErrOpenRising         = createTag "rxErrOpenRising"       true    VertexTag.rxErrOpenRising          
+        let rxErrOnTrend            = createTag "rxErrOnTrend"          true    VertexTag.rxErrOnTrend    
+        let rxErrOffTrend           = createTag "rxErrOffTrend"         true    VertexTag.rxErrOffTrend    
+
+        let errors = 
+            let err1 = if txErrOnTimeShortage.Value      then "감지시간부족" else ""
+            let err2 = if txErrOnTimeOver.Value          then "감지시간초과" else ""
+            let err3 = if txErrOffTimeShortage.Value     then "해지시간부족" else ""
+            let err4 = if txErrOffTimeOver.Value         then "해지시간초과" else ""
+            let err5 = if rxErrShort.Value      then "센서감지" else ""
+            let err6 = if rxErrOpen.Value       then "센서오프" else ""
+            [err1;err2;err3;err4;err5;err6]|> Seq.where(fun f->f <> "")
+
+        member _.ErrorList   =  errors
+        member _.ErrorText   = 
+            if errors.any()
+            then
+                let errText = String.Join(",", errors)
+                $"{_.Name} {errText} 이상"
+            else 
+                ""
+
         ///Ring Counter
         member _.CTR     = counterBit
         ///Timer on delay
@@ -276,6 +270,19 @@ module TagManagerModule =
         member _.RXErrShort      = rxErrShort       
         member _.RXErrOpenRising       = rxErrOpenRising
         member _.RXErrShortRising      = rxErrShortRising   
+
+        member _.ErrOnTimeShortage = txErrOnTimeShortage 
+        member _.ErrOnTimeOver     = txErrOnTimeOver 
+        member _.ErrOffTimeShortage = txErrOffTimeShortage 
+        member _.ErrOffTimeOver     = txErrOffTimeOver 
+        member _.ErrShort        = rxErrShort    
+        member _.ErrShortRising  = rxErrShortRising    
+        member _.ErrOpen         = rxErrOpen     
+        member _.ErrOpenRising   = rxErrOpenRising     
+        member _.ErrOnTrend   = rxErrOnTrend     
+        member _.ErrOffTrend   = rxErrOffTrend     
+
+   
         ///callCommandEnd
         member _.CallCommandEnd           =  callCommandEnd
         ///Call Operator 연산결과 값 (T/F)

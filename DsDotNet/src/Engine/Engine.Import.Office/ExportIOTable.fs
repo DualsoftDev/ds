@@ -411,7 +411,9 @@ module ExportIOTable =
         let dt = getLabelTable "Flow이름"
       
         let rows =
-            sys.Flows.Select(fun flow -> rowDeviceItems flow.Name)
+            sys.Flows
+                .OrderBy(fun f->f.Name)  
+                .Select(fun flow -> rowDeviceItems flow.Name)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -426,7 +428,9 @@ module ExportIOTable =
       
         let rows =
             sys.Flows.SelectMany(fun f->f.GetVerticesOfFlow().OfType<Real>())
-                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}_{r.Name}")
+                     .Select(fun r-> $"{r.Flow.Name}_{r.Name}")  
+                     .OrderBy(fun rname->rname)  
+                     .Select(fun rname -> rowDeviceItems rname)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt

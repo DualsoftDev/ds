@@ -13,6 +13,7 @@ module ConvertCpuDsSystem =
         if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip
             then
                 failwithf $"{name} 해당 주소가 없습니다."
+    let getMemory name target = getValidAddress(TextAddrEmpty, DuBOOL, name, false, IOType.Memory, target)
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -121,14 +122,15 @@ module ConvertCpuDsSystem =
                             |> Seq.sortBy (fun c -> c.Name) do
 
                 let cv =  call.TagManager :?> VertexMCall
-                cv.ErrShort.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOpen.Address <- getValidAddress(TextAddrEmpty, DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOnTimeOver.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOnTimeShortage.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOffTimeOver.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOffTimeShortage.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOnTrend.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
-                cv.ErrOffTrend.Address <- getValidAddress(TextAddrEmpty,DuBOOL, call.Name, false, IOType.Memory, getTarget(x))
+                let target = getTarget(x)
+                cv.ErrShort.Address             <- getMemory call.Name  target 
+                cv.ErrOpen.Address              <- getMemory call.Name  target 
+                cv.ErrOnTimeOver.Address        <- getMemory call.Name  target 
+                cv.ErrOnTimeShortage.Address    <- getMemory call.Name  target 
+                cv.ErrOffTimeOver.Address       <- getMemory call.Name  target 
+                cv.ErrOffTimeShortage.Address   <- getMemory call.Name  target 
+                cv.ErrOnTrend.Address           <- getMemory call.Name  target 
+                cv.ErrOffTrend.Address          <- getMemory call.Name  target 
                 call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOn, cv.ErrShort:> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOff, cv.ErrOpen  :> IStorage) |>ignore
@@ -145,6 +147,39 @@ module ConvertCpuDsSystem =
                 rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty,DuBOOL, rm.Name, false, IOType.Memory, getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
+                
+        member private x.GenerationFlowHMIMemory()  = 
+                    x.Flows
+                    |> Seq.iter (fun flow ->
+                            let name = $"{flow.Name}"  
+                            let fm =  flow.TagManager :?> FlowManager
+                            let target = getTarget(x)
+                            fm.GetFlowTag(FlowTag.auto_btn).Address     <- getMemory name target
+                            fm.GetFlowTag(FlowTag.auto_mode).Address    <- getMemory name target
+                            fm.GetFlowTag(FlowTag.manual_btn).Address     <- getMemory name target
+                            fm.GetFlowTag(FlowTag.manual_mode).Address    <- getMemory name target
+                            fm.GetFlowTag(FlowTag.drive_btn).Address     <- getMemory name target
+                            fm.GetFlowTag(FlowTag.drive_state).Address    <- getMemory name target
+                            fm.GetFlowTag(FlowTag.pause_btn).Address     <- getMemory name target
+                            fm.GetFlowTag(FlowTag.flowPause).Address    <- getMemory name target
+                            )
+
+        member private x.GenerationRealHMIMemory()  = 
+                x.GetVertices().OfType<Real>()
+                    |> Seq.iter (fun real ->
+                            let name = $"{real.Flow.Name}_{real.Name}"  
+                            let rm =  real.TagManager :?> VertexMReal
+                            let target = getTarget(x)
+                            rm.ON.Address     <- getMemory name target
+                            rm.RF.Address     <- getMemory name target
+                            rm.SF.Address     <- getMemory name target
+                            rm.OB.Address     <- getMemory name target
+                            rm.ErrTRX.Address <- getMemory name target
+                            rm.R.Address      <- getMemory name target
+                            rm.G.Address      <- getMemory name target
+                            rm.F.Address      <- getMemory name target
+                            rm.H.Address      <- getMemory name target
+                            )
 
         member private x.GenerationTaskDevIO() =
             let jobDevices = x.Jobs |> Seq.map(fun j -> j, j.DeviceDefs) |> Seq.sortBy(fun (j,_)-> j.QualifiedName) 
@@ -181,6 +216,11 @@ module ConvertCpuDsSystem =
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
             x.GenerationCallManualMemory()
+
+            x.GenerationFlowHMIMemory()
+            x.GenerationRealHMIMemory()
+                                    
+
                                     
     
          

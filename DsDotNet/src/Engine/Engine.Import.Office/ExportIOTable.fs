@@ -451,7 +451,6 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let getMemory target = getValidAddress(TextAddrEmpty, DuBOOL, "", false, IOType.Memory, target)
 
 
     let ToAutoWorkTable (sys: DsSystem) target: DataTable =
@@ -469,16 +468,6 @@ module ExportIOTable =
             |> Seq.collect (fun real ->
                 let name = $"{real.Flow.Name}_{real.Name}"  
                 [   
-                    real.V.ON.Address     <- getMemory target
-                    real.V.RF.Address     <- getMemory target
-                    real.V.SF.Address     <- getMemory target
-                    real.V.OB.Address     <- getMemory target
-                    real.V.ErrTRX.Address <- getMemory target
-                    real.V.R.Address      <- getMemory target
-                    real.V.G.Address      <- getMemory target
-                    real.V.F.Address      <- getMemory target
-                    real.V.H.Address      <- getMemory target
-
                     yield rowItems ($"{name}_SET", real.V.ON.Address)    
                     yield rowItems ($"{name}_RESET", real.V.RF.Address)    
                     yield rowItems ($"{name}_START", real.V.SF.Address)    
@@ -511,24 +500,10 @@ module ExportIOTable =
             sys.Flows
             |> Seq.collect (fun flow ->
                 [   
-                    flow.auto_btn.Address      <- getMemory target
-                    flow.aop.Address           <- getMemory target
-                    flow.manual_btn.Address    <- getMemory target
-                    flow.mop.Address           <- getMemory target
-                    flow.ready_btn.Address     <- getMemory target
-                    flow.r_st.Address          <- getMemory target
-                    flow.drive_btn.Address     <- getMemory target
-                    flow.d_st.Address          <- getMemory target
-                    flow.pause_btn.Address     <- getMemory target
-                    flow.pause.Address         <- getMemory target
-
-
                     yield rowItems ($"{flow.Name}_FlowAutoSelect", flow.auto_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowAutoLamp", flow.aop.Address)
                     yield rowItems ($"{flow.Name}_FlowManualSelect", flow.manual_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowManualLamp", flow.mop.Address)
-                    yield rowItems ($"{flow.Name}_FlowReadyBtn", flow.ready_btn.Address)
-                    yield rowItems ($"{flow.Name}_FlowReadyLamp", flow.r_st.Address)
                     yield rowItems ($"{flow.Name}_FlowDriveBtn", flow.drive_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowDriveLamp", flow.d_st.Address)
                     yield rowItems ($"{flow.Name}_FlowPauseBtn", flow.pause_btn.Address)

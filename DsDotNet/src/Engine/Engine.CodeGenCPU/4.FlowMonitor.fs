@@ -16,7 +16,7 @@ type Flow with
         (set, rst) ==| (f.stopError, getFuncName())
     
     member f.F2_FlowPause() =
-        let set = f.pause_btn.Expr <||> f.HWBtnPauseExpr
+        let set = f.PauseHMIExpr <||> f.HWBtnPauseExpr
         let rst = f.clear_btn.Expr
         (set, rst) ==| (f.pause, getFuncName())
 

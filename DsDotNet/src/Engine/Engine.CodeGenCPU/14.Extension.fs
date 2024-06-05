@@ -37,25 +37,25 @@ type DsSystem with
             (*clear btn  => _ready_btn  동시 동작   /  누름 유지시 _home_btn 동작*)
         [
 
-            for btn in s.AutoHWButtons do
-                let set = btn.ActionINFunc
-                for flow in btn.SettingFlows do
-                    yield (set, rst) --| (flow.auto_btn, getFuncName())
+            //for btn in s.AutoHWButtons do
+            //    let set = btn.ActionINFunc
+            //    for flow in btn.SettingFlows do
+            //        yield (set, rst) --| (flow.auto_btn, getFuncName())
 
-            for btn in s.ManualHWButtons do
-                let set = btn.ActionINFunc
-                for flow in btn.SettingFlows do
-                    yield (set, rst) --| (flow.manual_btn, getFuncName())
+            //for btn in s.ManualHWButtons do
+            //    let set = btn.ActionINFunc
+            //    for flow in btn.SettingFlows do
+            //        yield (set, rst) --| (flow.manual_btn, getFuncName())
 
-            for btn in s.DriveHWButtons do
-                let set = btn.ActionINFunc
-                for flow in btn.SettingFlows do
-                    yield (set, rst) --| (flow.drive_btn, getFuncName())
+            //for btn in s.DriveHWButtons do
+            //    let set = btn.ActionINFunc
+            //    for flow in btn.SettingFlows do
+            //        yield (set, rst) --| (flow.drive_btn, getFuncName())
 
-            for btn in s.PauseHWButtons do
-                let set = btn.ActionINFunc
-                for flow in btn.SettingFlows do
-                    yield (set, rst) --| (flow.pause_btn, getFuncName())
+            //for btn in s.PauseHWButtons do
+            //    let set = btn.ActionINFunc
+            //    for flow in btn.SettingFlows do
+            //        yield (set, rst) --| (flow.pause_btn, getFuncName())
 
             for btn in s.ClearHWButtons do
                 let set = btn.ActionINFunc

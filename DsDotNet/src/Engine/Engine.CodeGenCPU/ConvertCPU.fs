@@ -231,7 +231,9 @@ module ConvertCPU =
         [
             match  RuntimeDS.Package with
             | Simulation   ->
-                if isActive then yield! emulationDevice sys
+                if isActive 
+                then yield! emulationDevice sys
+                
                 yield! sys.Y1_SystemBitSetFlow()
 
             | _ ->  ()

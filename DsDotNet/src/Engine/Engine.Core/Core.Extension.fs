@@ -192,7 +192,7 @@ module CoreExtensionModule =
                     then 
                         failwithlog $"dataType miss matching error {String.Join(',', types.Select(fun f->f.ToText()))}"
                     else
-                        xs.Select(fun f->f.DevType.Value).First()
+                        types.First()
 
                 else DuBOOL
 

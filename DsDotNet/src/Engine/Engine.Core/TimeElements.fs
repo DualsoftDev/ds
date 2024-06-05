@@ -1,0 +1,33 @@
+namespace Engine.Core
+
+open System
+
+[<AutoOpen>]
+module TimeElements =
+    
+    type TimeParam = {
+        Mean: float
+        StdDev: float  // Standard Deviation
+        USL: float  // Upper Specification Limit
+        LSL: float  // Lower Specification Limit
+    }
+    with
+        member x.CPK = 
+            let cpu = (x.USL - x.Mean) / (3.0 * x.StdDev)
+            let cpl = (x.Mean - x.LSL) / (3.0 * x.StdDev)
+            Math.Min(cpu, cpl)
+
+        member x.ToText() = 
+            $"Mean: {x.Mean}, StdDev: {x.StdDev}, USL: {x.USL}, LSL: {x.LSL}, CPK: {x.CPK}"
+  
+    let createTimeParamUsingMeanStd mean stdDev =
+        // 상한과 하한을 평균 기준으로 ±3σ(6σ)로 설정합니다.
+        let upsl = mean + 3.0 * stdDev
+        let losl = mean - 3.0 * stdDev
+        { Mean = mean; StdDev = stdDev; USL = upsl; LSL = losl }
+
+    let createTimeParamUsingMean mean =
+        // 평균의 10%를 기본 표준편차로 설정합니다.
+        let stdDev = mean * 0.1 
+        createTimeParamUsingMeanStd mean stdDev 
+        

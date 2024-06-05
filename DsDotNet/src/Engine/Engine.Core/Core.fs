@@ -102,6 +102,7 @@ module CoreModule =
                                                      else ScreenType.CCTV
                                     { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
 
+
         interface ISystem 
         member _.AddLoadedSystem(childSys) = 
             loadedSystems.Add(childSys)
@@ -193,7 +194,7 @@ module CoreModule =
 
     /// Segment (DS Basic Unit)
     [<DebuggerDisplay("{QualifiedName}")>]
-    type Real private (name:string, flow:Flow) =
+    type Real private (name:string, flow:Flow, timeParam:TimeParam option) =
         inherit Vertex([|name|], DuParentFlow flow)
 
         member val Graph = DsGraph()
@@ -201,6 +202,7 @@ module CoreModule =
         member val ExternalTags = HashSet<ExternalTagSet>()
         
         member _.Flow = flow
+        member _.TimeParam = timeParam
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
@@ -372,13 +374,20 @@ module CoreModule =
 
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
-    and ApiItem private (name:string, system:DsSystem) =
+    and ApiItem private (name:string, system:DsSystem, timeParam:TimeParam option) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
 
         member _.Name = name
         member _.ApiSystem = system
+        //member _.UpperTime = 
+        //            match timeParam with
+        //            | Some t -> t.USL
+        //            | None -> _.RXs.Fisrt().TimeParam.USL
+
+        member _.TimeParam = timeParam
+      
         member val TXs = createQualifiedNamedHashSet<Real>()
         member val RXs = createQualifiedNamedHashSet<Real>()
         override x.ToText() = 
@@ -497,7 +506,7 @@ module CoreModule =
             if (name.Contains ".")  then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
-            let real = Real(name, flow)
+            let real = Real(name, flow, None)
             flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
             real
 
@@ -590,7 +599,7 @@ module CoreModule =
         member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
         member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
-            let cp = ApiItem(name, system)
+            let cp = ApiItem(name, system, None)
             system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
             cp
         static member Create(name, system, txs, rxs) =

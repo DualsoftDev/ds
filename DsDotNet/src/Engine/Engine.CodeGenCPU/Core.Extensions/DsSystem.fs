@@ -149,23 +149,25 @@ module ConvertCpuDsSystem =
 
                 
         member private x.GenerationFlowHMIMemory()  = 
-                    x.Flows
+                    x.GetFlowsOrderByName()
                     |> Seq.iter (fun flow ->
                             let name = $"{flow.Name}"  
                             let fm =  flow.TagManager :?> FlowManager
                             let target = getTarget(x)
                             fm.GetFlowTag(FlowTag.auto_btn).Address     <- getMemory name target
                             fm.GetFlowTag(FlowTag.auto_mode).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.manual_btn).Address     <- getMemory name target
-                            fm.GetFlowTag(FlowTag.manual_mode).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.drive_btn).Address     <- getMemory name target
-                            fm.GetFlowTag(FlowTag.drive_state).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.pause_btn).Address     <- getMemory name target
+                            fm.GetFlowTag(FlowTag.manual_btn).Address   <- getMemory name target
+                            fm.GetFlowTag(FlowTag.manual_mode).Address  <- getMemory name target
+                            fm.GetFlowTag(FlowTag.ready_btn).Address    <- getMemory name target    //test ahn 삭제
+                            fm.GetFlowTag(FlowTag.ready_state).Address  <- getMemory name target    //test ahn 삭제
+                            fm.GetFlowTag(FlowTag.drive_btn).Address    <- getMemory name target
+                            fm.GetFlowTag(FlowTag.drive_state).Address  <- getMemory name target
+                            fm.GetFlowTag(FlowTag.pause_btn).Address    <- getMemory name target
                             fm.GetFlowTag(FlowTag.flowPause).Address    <- getMemory name target
                             )
 
         member private x.GenerationRealHMIMemory()  = 
-                x.GetVertices().OfType<Real>()
+                    x.GetVerticesOfRealOrderByName()
                     |> Seq.iter (fun real ->
                             let name = $"{real.Flow.Name}_{real.Name}"  
                             let rm =  real.TagManager :?> VertexMReal

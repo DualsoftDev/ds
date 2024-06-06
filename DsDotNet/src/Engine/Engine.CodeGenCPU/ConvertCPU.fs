@@ -96,9 +96,8 @@ module ConvertCPU =
             yield! s.Y5_SystemEmgAlramError()
             
 
-            if RuntimeDS.Package.IsPackagePLC() || RuntimeDS.Package.IsPackageSIM() then
-                //yield! s.E1_PLCNotFunc(RuntimeDS.Package.IsPackageEmulation()) //test ahn  param 동작확인 필요
-                yield! s.E2_LightPLCOnly()
+            if RuntimeDS.Package.IsPackagePLC() then
+                yield! s.E2_PLCOnly()
             else  
                 yield! s.B2_SWButtonOutput()
                 yield! s.B4_SWModeLamp() 
@@ -229,14 +228,13 @@ module ConvertCPU =
         else checkErrRealResetExist(sys)
 
         [
-            match  RuntimeDS.Package with
-            | Simulation   ->
-                if isActive 
-                then yield! emulationDevice sys
-                
-                yield! sys.Y1_SystemBitSetFlow()
+            if RuntimeDS.Package = Simulation
+            then
+                yield! sys.Y1_SystemSimulationForFlow()
 
-            | _ ->  ()
+            if isActive && (RuntimeDS.Package = Simulation || RuntimeDS.Package = PLCSIM)
+            then 
+                yield! emulationDevice sys
 
             //Variables  적용 
             yield! applyVariables sys

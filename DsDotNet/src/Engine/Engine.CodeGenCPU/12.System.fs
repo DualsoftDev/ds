@@ -7,7 +7,7 @@ open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 type DsSystem with
-    member s.Y1_SystemBitSetFlow() = [
+    member s.Y1_SystemSimulationForFlow() = [
             for flow in s.Flows do
                 yield (s._auto_btn.Expr  , s._off.Expr) --| (flow.auto_btn,   getFuncName())
                 yield (s._manual_btn.Expr, s._off.Expr) --| (flow.manual_btn, getFuncName())

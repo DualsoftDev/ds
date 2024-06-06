@@ -32,10 +32,22 @@ type DsSystem with
     //    ]
 
 
-    member s.E2_LightPLCOnly() =
+    member s.E2_PLCOnly() =
         let rst = s._off.Expr
             (*clear btn  => _ready_btn  동시 동작   /  누름 유지시 _home_btn 동작*)
-        [
+        [ 
+            
+            //let autoHWButtons = s.AutoHWButtons.Select(fun b->b.ActionINFunc).ToOrElseOff()
+            //yield (autoHWButtons, rst) --| (s._auto_btn, getFuncName())
+
+            //let manualHWButtons = s.ManualHWButtons.Select(fun b->b.ActionINFunc).ToOrElseOff()
+            //yield (manualHWButtons, rst) --| (s._manual_btn, getFuncName())
+
+            let driveHWButtons = s.DriveHWButtons.Select(fun b->b.ActionINFunc).ToOrElseOff()
+            yield (driveHWButtons, rst) --| (s._drive_btn, getFuncName())
+
+            let pauseHWButtons = s.PauseHWButtons.Select(fun b->b.ActionINFunc).ToOrElseOff()
+            yield (pauseHWButtons, rst) --| (s._pause_btn, getFuncName())
 
             //for btn in s.AutoHWButtons do
             //    let set = btn.ActionINFunc

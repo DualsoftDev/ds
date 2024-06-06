@@ -98,7 +98,8 @@ module ConvertCpuFlow =
                 let hmiAuto = f.AutoHMIExpr <&&> !!f.ManuHMIExpr
                 let hwAuto  = f.HwAutoExpr <&&> !!f.HwManuExpr
                 if f.HwAutoSelects.any() //반드시 a/m 쌍으로 존재함  checkErrHWItem 체크중
-                then (hwAuto <||> f._sim.Expr) <&&> hmiAuto //HW, HMI Select and 처리
+                then (hwAuto <||> f._sim.Expr) <||> hmiAuto //개별 flow 조작 때문에 HW, HMI Select or 처리
+                //then (hwAuto <||> f._sim.Expr) <&&> hmiAuto //HW, HMI Select and 처리
                 else hmiAuto
 
         member f.ManuExpr   =  

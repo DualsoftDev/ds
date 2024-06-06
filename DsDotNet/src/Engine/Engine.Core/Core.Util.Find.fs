@@ -245,6 +245,11 @@ type FindExtension =
     [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =  
                     getVerticesOfSystem(x) |> ofCallForOperator
                     
+    [<Extension>] static member GetVerticesOfRealOrderByName(x:DsSystem) = 
+                    x.GetVertices().OfType<Real>().OrderBy(fun r-> $"{r.Flow.Name}_{r.Name}" )
+    [<Extension>] static member GetFlowsOrderByName(x:DsSystem) = 
+                    x.Flows.OrderBy(fun f-> f.Name )
+                    
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
     [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 
                     let vs = x.GetVertices()

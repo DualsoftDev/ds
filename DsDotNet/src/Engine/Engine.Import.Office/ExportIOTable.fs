@@ -411,8 +411,7 @@ module ExportIOTable =
         let dt = getLabelTable "Flow이름"
       
         let rows =
-            sys.Flows
-                .OrderBy(fun f->f.Name)  
+            sys.GetFlowsOrderByName()
                 .Select(fun flow -> rowDeviceItems flow.Name)
 
         addRows rows dt
@@ -427,10 +426,8 @@ module ExportIOTable =
         let dt = getLabelTable "Work이름"
       
         let rows =
-            sys.Flows.SelectMany(fun f->f.GetVerticesOfFlow().OfType<Real>())
-                     .Select(fun r-> $"{r.Flow.Name}_{r.Name}")  
-                     .OrderBy(fun rname->rname)  
-                     .Select(fun rname -> rowDeviceItems rname)
+                  sys.GetVerticesOfRealOrderByName()
+                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}")
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -464,7 +461,7 @@ module ExportIOTable =
             [ name;"bit";addr ]
 
         let rows =
-            sys.GetVertices().OfType<Real>()
+            sys.GetVerticesOfRealOrderByName()
             |> Seq.collect (fun real ->
                 let name = $"{real.Flow.Name}_{real.Name}"  
                 [   
@@ -497,13 +494,15 @@ module ExportIOTable =
             [ name;"bit";addr ]
 
         let rows =
-            sys.Flows
+            sys.GetFlowsOrderByName()
             |> Seq.collect (fun flow ->
                 [   
                     yield rowItems ($"{flow.Name}_FlowAutoSelect", flow.auto_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowAutoLamp", flow.aop.Address)
                     yield rowItems ($"{flow.Name}_FlowManualSelect", flow.manual_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowManualLamp", flow.mop.Address)
+                    yield rowItems ($"{flow.Name}_FlowReadyBtn", flow.ready_btn.Address)  //test ahn 삭제
+                    yield rowItems ($"{flow.Name}_FlowReadyLamp", flow.r_st.Address)//test ahn 삭제
                     yield rowItems ($"{flow.Name}_FlowDriveBtn", flow.drive_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowDriveLamp", flow.d_st.Address)
                     yield rowItems ($"{flow.Name}_FlowPauseBtn", flow.pause_btn.Address)

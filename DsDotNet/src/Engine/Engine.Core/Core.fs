@@ -1,5 +1,5 @@
-// Copyright (c) Dual Inc.  All Rights Reserved.
-// Dual Inc.에 저작권이 있습니다. 모든 권한 보유.
+// Copyright (c) Dualsoft  All Rights Reserved.
+// Dualsoft에 저작권이 있습니다. 모든 권한 보유.
 
 namespace rec Engine.Core
 

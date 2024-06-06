@@ -1,4 +1,4 @@
-// Copyright (c) Dual Inc.  All Rights Reserved.
+// Copyright (c) Dualsoft  All Rights Reserved.
 namespace Engine.Import.Office
 
 open System.Linq

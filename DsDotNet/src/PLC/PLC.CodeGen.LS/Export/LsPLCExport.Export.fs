@@ -55,8 +55,8 @@ module XgiExportModule =
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedStatements seq) : XmlOutput =
         let isXgi, isXgk = prjParam.TargetType = XGI, prjParam.TargetType = XGK
 
-        let rgiCommandRung (expr: FlatExpression option) (xgiCommand:CommandTypes) (y:int) : RungGenerationInfo =
-            let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) expr xgiCommand
+        let rgiCommandRung (condition: FlatExpression option) (xgiCommand:CommandTypes) (y:int) : RungGenerationInfo =
+            let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) condition xgiCommand
             let yy = c / 1024
 
             { Xmls = [ wrapWithRung xml ]

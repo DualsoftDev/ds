@@ -346,16 +346,19 @@ module XgxExpressionConvertorModule =
             let newExp = newExp.ZipVisitor(prjParam, augs)
             newExp
 
+    type DynamicDictionary with
+        member x.Unpack() = x.Get<XgxProjectParams>("projectParameter"), x.Get<Augments>("augments")
 
     type ExpressionConversionResult = IExpression * IStorage list * Statement list
     type IExpression with
         /// expression 을 임시 auto 변수에 저장하는 statement 로 만들고, 그 statement 와 auto variable 를 반환
-        member x.ToAssignStatement (prjParam: XgxProjectParams) (augs:Augments) (replacableFunctionNames:string seq) : IExpression =
+        member x.ToAssignStatement (pack:DynamicDictionary, replacableFunctionNames:string seq) : IExpression =
+            let prjParam, augs = pack.Unpack()
             match x.FunctionName with
             | Some fn when replacableFunctionNames.Contains fn ->
                 match fn with
                 | "==" | "<>" | "!=" when prjParam.TargetType = XGK && x.FunctionArguments[0].DataType = typedefof<bool> ->
-                    x.AugmentXgk(prjParam, None, None, augs)
+                    x.AugmentXgk(pack, None, None)
                 | _ ->
                     let tmpNameHint = operatorToMnemonic fn
                     let var = prjParam.CreateAutoVariable(tmpNameHint, x.BoxedEvaluatedValue, $"{x.ToText()}")
@@ -389,11 +392,11 @@ module XgxExpressionConvertorModule =
         ///     최종 exp: "tmp1 > 4"
         ///     반환 : exp, [tmp2], [tmp1 = 2 + 3]
         member x.AugmentXgk (
-                prjParam: XgxProjectParams
+                pack:DynamicDictionary
                 , assignCondition:IExpression<bool> option
-                , expStore:IStorage option
-                , augs:Augments)
+                , expStore:IStorage option)
           : IExpression =
+            let prjParam, augs = pack.Unpack()
             let rec helper (nestLevel:int) (exp: IExpression, expStore:IStorage option) : ExpressionConversionResult =
                 match exp.FunctionName, exp.FunctionArguments with
                 | Some fn, l::r::[] ->

@@ -5,33 +5,55 @@
 	- REAL widht
 	- int age 
 - https://www.youtube.com/watch?v=StTWxmZ7xnA 참고
-				
-                </Programs>
+# Data type 선언부				
+<UserDataTypes>
 
-                <UserFunctions></UserFunctions>
+    <UserDataType Version="256" Attribute="0" Comment="" Find="1">Person<UserDataTypeVar Version="Ver 1.0" StructSize="320" StructSizeXGI="288" IncludeLibrary="0" MultiUserRunEdit="0" Count="3">
 
-                <UserDataTypes>
+        <Symbols><Symbol Name="Age" Kind="0" Type="INT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="272" TotalSize="16" OrderIndex="2" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
 
-                    <UserDataType Version="256" Attribute="0" Comment="" Find="1">MyData
+                <Symbol Name="Gender" Kind="0" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="256" TotalSize="1" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
 
-                        <UserDataTypeVar Version="Ver 1.0" StructSize="128" StructSizeXGI="80" IncludeLibrary="0" MultiUserRunEdit="0" Count="3">
+                <Symbol Name="Name" Kind="0" Type="STRING" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="0" TotalSize="256" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
 
-                            <Symbols>
+            </Symbols>
 
-                                <Symbol Name="age" Kind="0" Type="INT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="64" TotalSize="16" OrderIndex="2" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+        </UserDataTypeVar>
 
-                                <Symbol Name="height" Kind="0" Type="REAL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="0" TotalSize="32" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+    </UserDataType>
 
-                                <Symbol Name="width" Kind="0" Type="REAL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="32" TotalSize="32" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+</UserDataTypes>
 
-                            </Symbols>
 
-                        </UserDataTypeVar>
+# User Data 이용한 변수 선언
+<GlobalVariables>
 
-                    </UserDataType>
+    <GlobalVariable Version="Ver 1.0" EIPGUID="779c7551-5051-4122-9361-7b4fa47337ba"
 
-                </UserDataTypes>
+        EIPChangedID="0" HMIGUID="32483a8f-eb0d-4bcf-963b-3f2b1ecac46d" MultiUserRunEdit="0"
 
-                <UserLibrary></UserLibrary>
+        MotionGUID="7533d6d7-aad0-4cfe-970f-f1a0b46ab17c" Count="2">
 
-            </POU>
+        <Symbols>
+
+            <Symbol Name="Kim" Kind="6" Type="Person" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="0" TotalSize="320"
+
+                OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+
+            <Symbol Name="Park" Kind="6" Type="Person" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="320" TotalSize="320"
+
+                OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+
+        </Symbols>
+
+        <TempVar Count="0"></TempVar>
+
+        <HMIFlags></HMIFlags>
+
+        <DirectVarComment Count="0"></DirectVarComment>
+
+    </GlobalVariable>
+
+</GlobalVariables>
+
+- 

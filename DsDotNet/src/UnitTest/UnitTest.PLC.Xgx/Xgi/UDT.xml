@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project Attribute="3145730" Version="513" Comment="" WksNodeCount="19" GUID="3bff705d-6e12-49a7-aed1-4d52a7117661" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">UDT<NetworkConfiguration>
+		<NetworkList>
+			<Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
+		</NetworkList>
+	</NetworkConfiguration>
+	<SystemVariable HMIGUID=""></SystemVariable>
+	<Configurations>
+		<Configuration Version="259" Attribute="272152417" Comment="" Kind="1" Type="111" FindGlobal="1" FindSymbol="1" WriteSignature="773e53b3-4446-4204-b905-4558a1d0de61" Encrytption="" Encrytption_UDF="" UploadProhibit="75" GUID="628286c6-486e-43d3-a319-020d4a429930" SD_UploadProhibit="74" SD_Password="" SD_MacLimit="">NewPLC<Options Details="{&#xA;   &quot;m_nOptMultiUserRunEdit&quot; : 0,&#xA;   &quot;m_nOptNotUseExternalVar&quot; : 0,&#xA;   &quot;m_nOptNotUsedMCS&quot; : 0,&#xA;   &quot;m_nOptOnlineEditAllocSize&quot; : 400,&#xA;   &quot;m_nOptOnlineEditTypeK3&quot; : 0,&#xA;   &quot;m_nOptPartitionMode&quot; : 0,&#xA;   &quot;m_nOptPulsePercent&quot; : 10,&#xA;   &quot;m_nOptReservedAllocSize&quot; : 400,&#xA;   &quot;m_nOptTextEncoding&quot; : 0,&#xA;   &quot;m_nOptUseFBOnlineEdit&quot; : 0,&#xA;   &quot;m_nOptVariableStorage&quot; : 0&#xA;}&#xA;"></Options>
+			<Parameters>
+				<Parameter Type="BASIC PARAMETER"><XGIBasicParam bp_ver="100" head="1145128264" size="400" pmt_reserved1_0="0" pmt_reserved1_1="0" pmt_reserved1_2="0" pmt_reserved1_3="0" pmt_reserved1_4="0" OsVersion="1" CPUType="43009" STATIC_PERIOD_MODE="0" STATIC_PERIOD_TIME="10" RESTART_METHOD="43521" REMOTE_ACCESS_PERMIT="43522" RESET_DISABLE="0" O_RESET_DISABLE="0" DCLEAR_DISABLE="0" O_DCLEAR_DISABLE="0" BASIC_MOD_RESERVED_0="0" BASIC_MOD_RESERVED_1="0" BASIC_MOD_RESERVED_2="0" BASIC_MOD_RESERVED_3="0" BASIC_MOD_RESERVED_4="0" BASIC_MOD_RESERVED_5="0" BASIC_MOD_RESERVED_6="0" BASIC_MOD_RESERVED_7="0" BASIC_MOD_RESERVED_8="0" BASIC_MOD_RESERVED_9="0" SCAN_WD_TIME_0="500" SCAN_WD_TIME_1="500" SCAN_WD_TIME_2="500" SCAN_WD_TIME_3="500" STANDARD_INPUT_FILTER_TIME="3" BASIC_TIME_RESERVED_0="0" BASIC_TIME_RESERVED_1="0" BASIC_TIME_RESERVED_2="0" BASIC_TIME_RESERVED_3="0" BASIC_TIME_RESERVED_4="0" BASIC_TIME_RESERVED_5="0" BASIC_TIME_RESERVED_6="0" BASIC_TIME_RESERVED_7="0" BASIC_TIME_RESERVED_8="0" BASIC_TIME_RESERVED_9="0" BASIC_TIME_RESERVED_10="0" DEBUG_OUTPUT_PARAMETER="0" ERROR_MODE_OUTPUT_PARAMETER="0" RUN2STOP_OUTPUT_PARAMETER="0" STOP2RUN_OUTPUT_PARAMETER="0" ERROR_MODE_LATCH_PARAMETER="0" OUTPUT_PARAMETER_RESERVED_0="6328" OUTPUT_PARAMETER_RESERVED_1="0" OUTPUT_PARAMETER_RESERVED_2="0" OUTPUT_PARAMETER_RESERVED_3="46" OUTPUT_PARAMETER_RESERVED_4="2612" SOE_RETAIN_HISTORY="43544" SOE_PARAMETER_RESERVED_0="0" SOE_PARAMETER_RESERVED_1="0" SOE_PARAMETER_RESERVED_2="0" SOE_PARAMETER_RESERVED_3="0" SOE_PARAMETER_RESERVED_4="0" RETAIN_SET_MODE="0" M_AREA_INIT="0" M_AREA_SIZE_0="32" M_AREA_SIZE_1="32" M_AREA_SIZE_2="32" M_AREA_SIZE_3="32" M_AREA_LATCH1_START="0" M_AREA_LATCH1_END="8191" RETAIN_SET_G1_MODE="0" RESERVE_G1="0" M_AREA_LATCH_G1_START="0" M_AREA_LATCH_G1_END="8191" RETAIN_SET_G2_MODE="0" RESERVE_G2="0" M_AREA_LATCH_G2_START="0" M_AREA_LATCH_G2_END="0" RETAIN_SET_G3_MODE="0" RESERVE_G3="0" M_AREA_LATCH_G3_START="0" M_AREA_LATCH_G3_END="0" RETAIN_SET_G4_MODE="0" RESERVE_G4="0" M_AREA_LATCH_G4_START="0" M_AREA_LATCH_G4_END="0" BASIC_RETAIN_RESERVED_0="0" BASIC_RETAIN_RESERVED_1="0" BASIC_RETAIN_RESERVED_2="0" BASIC_RETAIN_RESERVED_3="0" BASIC_RETAIN_RESERVED_4="0" BASIC_RETAIN_RESERVED_5="0" BASIC_RETAIN_RESERVED_6="0" BASIC_RETAIN_RESERVED_7="0" BASIC_RETAIN_RESERVED_8="0" BASIC_RETAIN_RESERVED_9="0" BASIC_RETAIN_RESERVED_10="0" BASIC_RETAIN_RESERVED_11="0" BASIC_RETAIN_RESERVED_12="0" BASIC_RETAIN_RESERVED_13="0" BASIC_RETAIN_RESERVED_14="0" BASIC_RETAIN_RESERVED_15="0" BASIC_RETAIN_RESERVED_16="0" BASIC_RETAIN_RESERVED_17="0" BASIC_RETAIN_RESERVED_18="0" BASIC_RETAIN_RESERVED_19="0" BASIC_RETAIN_RESERVED_20="0" BASIC_RETAIN_RESERVED_21="0" BASIC_RETAIN_RESERVED_22="0" BASIC_RETAIN_RESERVED_23="0" BASIC_RETAIN_RESERVED_24="0" BASIC_RETAIN_RESERVED_25="0" TIMER_RANGE_RESERVED_0="0" TIMER_RANGE_RESERVED_1="0" TIMER_RANGE_RESERVED_2="0" TIMER_RANGE_RESERVED_3="0" TIMER_RANGE_RESERVED_4="0" TIMER_RANGE_RESERVED_5="0" TIMER_RANGE_RESERVED_6="0" TIMER_RANGE_RESERVED_7="0" TIMER_RANGE_RESERVED_8="0" TIMER_RANGE_RESERVED_9="0" TIMER_RANGE_RESERVED_10="0" TIMER_RANGE_RESERVED_11="0" TIMER_RANGE_RESERVED_12="0" TIMER_RANGE_RESERVED_13="0" TIMER_RANGE_RESERVED_14="0" TIMER_RANGE_RESERVED_15="0" CHECK_FUSE_ERROR="43572" FUSE_ERROR_MODE="43573" CHECK_IO_ERROR="43574" IO_ERROR_MODE="43575" CHECK_EXT_BASE_ERROR="0" EXT_BASE_ERROR_MODE="0" ERROR_REACTION_RESERVED_0="0" ERROR_REACTION_RESERVED_1="0" ERROR_REACTION_RESERVED_2="0" ERROR_REACTION_RESERVED_3="0" ERROR_REACTION_RESERVED_4="0" ERROR_REACTION_RESERVED_5="0" ERROR_REACTION_RESERVED_6="0" ERROR_REACTION_RESERVED_7="0" ERROR_REACTION_RESERVED_8="0" ERROR_REACTION_RESERVED_9="0" ERROR_REACTION_RESERVED_10="0" ERROR_REACTION_RESERVED_11="0" ERROR_REACTION_RESERVED_12="0" ERROR_REACTION_RESERVED_13="0" ERROR_REACTION_RESERVED_14="0" ERROR_REACTION_RESERVED_15="0" ERROR_REACTION_RESERVED_16="0" ERROR_REACTION_RESERVED_17="0" ERROR_REACTION_RESERVED_18="0" ERROR_REACTION_RESERVED_19="0" ERROR_REACTION_RESERVED_20="0" ERROR_REACTION_RESERVED_21="0" CHECK_SP_ERROR="43576" SP_ERROR_MODE="43577" CHECK_CP_ERROR="43578" CP_ERROR_MODE="43579" MODBUS_STATION="63" MODBUS_BAUDRATE="4434" MODBUS_DATABIT="43592" MODBUS_PARITY="43602" MODBUS_STOPBIT="43617" MODBUS_TRX_MODE="43632" DI_START_DEVICE_TYPE="73" DO_START_DEVICE_TYPE="81" AI_START_DEVICE_TYPE="77" AO_START_DEVICE_TYPE="77" DI_DEVICE_OFFSET="0" DO_DEVICE_OFFSET="0" AI_DEVICE_OFFSET="2000" AO_DEVICE_OFFSET="4000" pmt_reserved2_0="0" pmt_reserved2_1="0" pmt_reserved2_2="0" pmt_reserved2_3="0" pmt_reserved2_4="0" pmt_reserved2_5="0" check_sum="3576168238" tail="1414483782"></XGIBasicParam>
+				</Parameter>
+				<Parameter Type="FENET PARAMETER"><Safety_Comm RcvWaitTime="15" RetransTime="100" GlofaSocketCnt="3" DriverType="2" IPAddress="1861920960" Gateway="33204416" Subnet="16777215" EnableHostTable="0"><Safety_Comm_DI DeviceType="73" DataType="88" Size="0" Addr="0"></Safety_Comm_DI>
+						<Safety_Comm_DO DeviceType="81" DataType="88" Size="0" Addr="0"></Safety_Comm_DO>
+						<Safety_Comm_AI DeviceType="77" DataType="87" Size="0" Addr="0"></Safety_Comm_AI>
+						<Safety_Comm_AO DeviceType="77" DataType="87" Size="0" Addr="100"></Safety_Comm_AO>
+						<Safety_Comm_HostIp></Safety_Comm_HostIp>
+					</Safety_Comm>
+				</Parameter>
+				<Parameter Type="IO PARAMETER"><BaseInfo>
+						<Base Base="0" SlotCount="12"></Base>
+						<Base Base="1" SlotCount="12"></Base>
+						<Base Base="2" SlotCount="12"></Base>
+						<Base Base="3" SlotCount="12"></Base>
+						<Base Base="4" SlotCount="12"></Base>
+						<Base Base="5" SlotCount="12"></Base>
+						<Base Base="6" SlotCount="12"></Base>
+						<Base Base="7" SlotCount="12"></Base>
+					</BaseInfo>
+					<MotionParamInfo Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWeHQde4AAADAAMAAAAGgACGYGYT4WF3JFOFCQ4dB17g=</MotionParamInfo>
+				</Parameter>
+			</Parameters>
+			<GlobalVariables>
+				<GlobalVariable Version="Ver 1.0" EIPGUID="779c7551-5051-4122-9361-7b4fa47337ba" EIPChangedID="0" HMIGUID="32483a8f-eb0d-4bcf-963b-3f2b1ecac46d" MultiUserRunEdit="0" MotionGUID="7533d6d7-aad0-4cfe-970f-f1a0b46ab17c" Count="1"><Symbols><Symbol Name="People" Kind="6" Type="ARRAY[0..10] OF Person" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="640" TotalSize="3520" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+					</Symbols>
+					<TempVar Count="0"></TempVar>
+					<HMIFlags></HMIFlags>
+					<DirectVarComment Count="0"></DirectVarComment>
+				</GlobalVariable>
+			</GlobalVariables>
+			<Tasks>
+				<Task Version="257" Type="0" Attribute="2" Kind="0" Priority="0" TaskIndex="0" Device="" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">Scan Program</Task>
+			</Tasks>
+			<POU>
+				<Programs>
+					<Program Task="Scan Program" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" ObjectId="b2077b71-b40a-44c7-81e9-317e78cf60d1" FindProgram="1" FindVar="1" Encrytption="">DsLogic<Body>
+							<LDRoutine>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="1">Test</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="1025">People[0] 초기화</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="2049">_ON</Element>
+									<Element ElementType="102" Coordinate="2052" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="2" Coordinate="2055" Param="3"></Element>
+									<Element ElementType="102" Coordinate="2061" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="2" Coordinate="2064" Param="3"></Element>
+									<Element ElementType="102" Coordinate="2070" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="70" Coordinate="3073">'Zero'</Element>
+									<Element ElementType="70" Coordinate="3079">People[0].Name</Element>
+									<Element ElementType="70" Coordinate="3082">20</Element>
+									<Element ElementType="70" Coordinate="3088">People[0].Age</Element>
+									<Element ElementType="70" Coordinate="3091">_OFF</Element>
+									<Element ElementType="70" Coordinate="3097">People[0].Gender</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="63" Coordinate="6145">People[0] -&gt; People[1] 복사</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="7169">_ON</Element>
+									<Element ElementType="102" Coordinate="7172" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="2" Coordinate="7175" Param="3"></Element>
+									<Element ElementType="102" Coordinate="7181" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="2" Coordinate="7184" Param="3"></Element>
+									<Element ElementType="102" Coordinate="7190" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="70" Coordinate="8193">People[0].Name</Element>
+									<Element ElementType="70" Coordinate="8199">People[1].Name</Element>
+									<Element ElementType="70" Coordinate="8202">People[0].Age</Element>
+									<Element ElementType="70" Coordinate="8208">People[1].Age</Element>
+									<Element ElementType="70" Coordinate="8211">People[0].Gender</Element>
+									<Element ElementType="70" Coordinate="8217">People[1].Gender</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="11265">_ON</Element>
+									<Element ElementType="102" Coordinate="11268" Param="FNAME: ADD2_INT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1686&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200040, , 0&#xA;VAR_IN: IN2, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x00000040, &#xA;"></Element>
+									<Element ElementType="70" Coordinate="12289">People[1].Age</Element>
+									<Element ElementType="70" Coordinate="12295">People[1].Age</Element>
+									<Element ElementType="70" Coordinate="13313">1</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="6" Coordinate="16385">_ON</Element>
+									<Element ElementType="102" Coordinate="16388" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="2" Coordinate="16391" Param="3"></Element>
+									<Element ElementType="102" Coordinate="16397" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="2" Coordinate="16400" Param="3"></Element>
+									<Element ElementType="102" Coordinate="16406" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x022fffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001, &#xA;VAR_OUT: OUT, 0x020fffff, ARRAY[0..-1] OF ANY&#xA;"></Element>
+									<Element ElementType="70" Coordinate="17409">People[0].Name</Element>
+									<Element ElementType="70" Coordinate="17415">People[2].Name</Element>
+									<Element ElementType="70" Coordinate="17418">People[0].Age</Element>
+									<Element ElementType="70" Coordinate="17424">People[2].Age</Element>
+									<Element ElementType="70" Coordinate="17427">People[0].Gender</Element>
+									<Element ElementType="70" Coordinate="17433">People[2].Gender</Element>
+								</Rung>
+								<Rung BlockMask="0"><Element ElementType="2" Coordinate="20481" Param="90"></Element>
+									<Element ElementType="33" Coordinate="20574" Param="END">END</Element>
+								</Rung>
+								<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWVtRRAwAAj1////2f+x/+//r/3Rfe9f8/Qb9d1055S8t/nxeeoIe1x9DwAI8
+BttlBEUmNRoaA0AaGJoNBoABpoNAaGho00GQBoGjQ0ABoDTTTQAMhoaBkxqEKanpQNB6h6ga
+DIA0ABo0NAA0GgAGgAANGmgAADQ0APUAAAaAgyaZAYRkNDIMgYJk0GAQ000ZABgJkyZMQaNG
+QMENAaaaNAyaDRiGgZAkkSYjU01PUNNog0NNAGgaDQBoGh6nqADQGgDIAAAAaADQAAAAA5AU
+ZSmq7p0MkSAbdOSHskFqgYnEVy/ihxnCOqX2o9/OraMQBTsE8RPThMynOFUzICFqhgcMJUGE
+5teysGLJgSjZRMIxzJZ5MWjU4XlVSfGo3TIZSZQqAcxSLMdkhrEqievZBSN5pydgsCxXK7LR
+EumGB8Aw68ESm+eBBMZBR1zkRFlg/nLUZbtTA2jljVjOSCYmEXEYWEW/QHRgrIuo1wwiJMmV
+JwHo2dB6Jvxe+ztnWwMIr0PCR87KUOlQkTV+Fco0dbsyK5vQPlTWEWlS0iUrQP8CgTygYJ4n
+i5ekGjFsFHdJUN80Z8WLVfOAnHCcMTn2JyuFMifCpowIM4z75CfauC4Eekx6R6tYsEAAqHla
+GgiWothUur1NnTr7I5cRarc4wFWZNy7vXhH1bQsPGrmMftfv+unleTin+QxNjJalvpCVAGlR
+EITnSRqZc3Sj6/MOtINGt94cqwhGT/lohD1Y1CdrIBog8gBgmCMQxN3Ok7KsTgR6hpn60mWb
+INuDEro7wquQ8FaZfgbdZoQcmnX6to/ryGQpI4PvTKNlmacG1Pj0iWCaY50iOAMmXFXCauC0
+aMImJKCCAZlABMAkbQOQVL4K0UGbIv50kbaqgUKSiATBiH640wgAKlif4dYGkXMyJUysgeKh
+1LYr3yfT9ylOzsUNDTG5KFKMJ7NAHzzWryqWuJI82pRz9g74lH8XoEbD2ovxiDxL+mAN3w9+
+CQO5B2hYmgjfrqOYkoeYQEN4uofmWlv6xXeVonP9r6AyXV+T8vZsmrMY+818Hk6eIe/c5UpE
+5Con8bsxgkBayR/4u5IpwoSC2oogYA==</OnlineUploadData>
+							</LDRoutine>
+						</Body>
+						<LocalVar Version="Ver 1.0" NotUseExternalVar="0" ProgramKind="1" MultiUserRunEdit="0" Count="3"><Symbols><Symbol Name="One" Kind="1" Type="INT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="4192" TotalSize="16" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+								<Symbol Name="People" Kind="8" Type="ARRAY[0..10] OF Person" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="640" TotalSize="3520" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+								<Symbol Name="Two" Kind="1" Type="INT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="4208" TotalSize="16" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+							</Symbols>
+							<TempVar Count="0"></TempVar>
+						</LocalVar>
+						<RungTable>
+							<Entry Edit="2" IntCodeOffset="0" IntCodeSize="1" ExeCodeOffset="0" ExeCodeSize="0"></Entry>
+							<Entry Edit="2" IntCodeOffset="1" IntCodeSize="1" ExeCodeOffset="0" ExeCodeSize="0"></Entry>
+							<Entry Edit="2" IntCodeOffset="2" IntCodeSize="22" ExeCodeOffset="0" ExeCodeSize="43"></Entry>
+							<Entry Edit="2" IntCodeOffset="24" IntCodeSize="1" ExeCodeOffset="43" ExeCodeSize="0"></Entry>
+							<Entry Edit="2" IntCodeOffset="25" IntCodeSize="14" ExeCodeOffset="43" ExeCodeSize="19"></Entry>
+							<Entry Edit="2" IntCodeOffset="39" IntCodeSize="7" ExeCodeOffset="62" ExeCodeSize="6"></Entry>
+							<Entry Edit="2" IntCodeOffset="46" IntCodeSize="14" ExeCodeOffset="68" ExeCodeSize="19"></Entry>
+							<Entry Edit="2" IntCodeOffset="60" IntCodeSize="2" ExeCodeOffset="87" ExeCodeSize="1"></Entry>
+						</RungTable>
+					</Program>
+				</Programs>
+				<UserFunctions></UserFunctions>
+				<UserDataTypes>
+					<UserDataType Version="256" Attribute="0" Comment="" Find="1">Person<UserDataTypeVar Version="Ver 1.0" StructSize="320" StructSizeXGI="288" IncludeLibrary="0" MultiUserRunEdit="0" Count="3"><Symbols><Symbol Name="Age" Kind="0" Type="INT" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="272" TotalSize="16" OrderIndex="2" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+								<Symbol Name="Gender" Kind="0" Type="BOOL" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="256" TotalSize="1" OrderIndex="1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+								<Symbol Name="Name" Kind="0" Type="STRING" State="0" Address="" Trigger="" InitValue="" Comment="" Device="T" DevicePos="0" TotalSize="256" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+							</Symbols>
+						</UserDataTypeVar>
+					</UserDataType>
+				</UserDataTypes>
+				<UserLibrary></UserLibrary>
+			</POU>
+			<OnlineElements>
+				<ProgramTable Type="2" Version="0"></ProgramTable>
+				<NCProgramTable></NCProgramTable>
+				<TaskTable></TaskTable>
+				<UploadTable>
+					<Element Position="0" Size="24" CheckSum="0"></Element>
+					<Element Position="24" Size="766" CheckSum="0"></Element>
+					<Element Position="790" Size="8" CheckSum="0"></Element>
+					<Element Position="798" Size="8" CheckSum="0"></Element>
+					<Element Position="806" Size="8" CheckSum="0"></Element>
+					<Element Position="814" Size="8" CheckSum="0"></Element>
+					<Element Position="822" Size="1088" CheckSum="0"></Element>
+					<Element Position="1910" Size="120" CheckSum="0"></Element>
+					<Element Position="2030" Size="0" CheckSum="0"></Element>
+					<Element Position="2030" Size="0" CheckSum="0"></Element>
+					<Element Position="2030" Size="661" CheckSum="0"></Element>
+				</UploadTable>
+				<LabelCodeTable></LabelCodeTable>
+				<UsedFunctionCodeTable>
+					<Element Index="3584" Info="4027056119"></Element>
+					<Element Index="3585" Info="4027056117"></Element>
+					<Element Index="3586" Info="4027056116"></Element>
+					<Element Index="3587" Info="4027056093"></Element>
+					<Element Index="3588" Info="4027056084"></Element>
+					<Element Index="3589" Info="4027056079"></Element>
+					<Element Index="3590" Info="4027056073"></Element>
+					<Element Index="3591" Info="4027056067"></Element>
+					<Element Index="3592" Info="4027056061"></Element>
+					<Element Index="3593" Info="4027056053"></Element>
+					<Element Index="3594" Info="4027056046"></Element>
+					<Element Index="629" Info="4027056036"></Element>
+					<Element Index="626" Info="4027056030"></Element>
+					<Element Index="624" Info="4027056023"></Element>
+					<Element Index="417" Info="4027056012"></Element>
+				</UsedFunctionCodeTable>
+				<ForNextCodeTable></ForNextCodeTable>
+				<SubroutineAllocationTable>
+					<StringTable></StringTable>
+				</SubroutineAllocationTable>
+				<LabelAllocationTable>
+					<StringTable></StringTable>
+				</LabelAllocationTable>
+				<PulseAllocationTable>
+					<PulseTable></PulseTable>
+				</PulseAllocationTable>
+				<ForAllocationTable>
+					<PulseTable></PulseTable>
+				</ForAllocationTable>
+				<XGCommSettings Connnections="0100FF07010188130000010100C20100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000D20700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000">
+					<SafetySignature dt:dt="bin.base64" Compressed="1" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWesUlJwAAALIAMQAQAAAASAAISGgzTTWAg8XckU4UJDrFJScAAAA</SafetySignature>
+					<RWItem_StateMemento dt:dt="bin.base64" Compressed="1" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWYdcqVUAAgP//+wmM9BsY/CCe+fdToIEBMQAAkAAAEcs/HHFeiBABARBsAF5
+bAETVDTT1MIHqANAAAaPUAAAAAAAhFHpqAeoaNGgAAAAA0AAAAACRKCRoxCNGamj1PQTGppm
+piYQ0ep6nqGNAxNDak/3NZllGDGjLcDQxIrs9bLBYGm9FtQoiR2jc15p1NuFnbLM5NNwIWcC
+n3nGYiYLebt8NrdQs+anJbLNppKqLqFOdUQBEz0ro9YyZm7kgEM7QZtRAiKCSYiIgALg5Oaq
+QybIUXBASs2iCCkQELymKJgAr5IQYqNTpqWDi4IR0ofqDPiuJZqFxIVSBlg82hdj2mYXh65F
+zuVIpDSG5UEGL5QdEc85gkgp0wGsWAyyZJjTa7hDi+CjraFIysDbCmqzbTgQLkaEHa0gCq0r
+n6vfvi3ZN67Su/m5mY0DAFVxBAl6MYi7JpIHe8YvgqEF4v3wt+XxxIMAi0HaIztarPUEUeUE
+JbWrWaRld+EyBjx+HhkYHGFGojUEXNegN8RkQcFeWwA0H1EUHGkvNJTqhpH/F3JFOFCQh1yp
+VQAAAA==</RWItem_StateMemento>
+				</XGCommSettings>
+				<TrendMonitoring>
+					<TraceConfiguration MaxSample="1000" MaxDisplaySample="1000" SamplingFrequency="1000">
+						<BitDeviceList></BitDeviceList>
+						<TrendDeviceList></TrendDeviceList>
+						<XYDeviceList></XYDeviceList>
+					</TraceConfiguration>
+					<GraphConfiguration ShowGrid="1" AxisOption="65807" BitLegendPos="1" TrendLegendPos="1" XYLegendPos="1" MinValue="0.0000000000000000" MaxValue="100.0000000000000000">
+						<BitGraphGroup></BitGraphGroup>
+						<TrendGraphGroup></TrendGraphGroup>
+					</GraphConfiguration>
+					<WindowConfiguration ViewGraph="7" ViewBitValue="0" ViewTrendValue="0" VieXYValue="0"></WindowConfiguration>
+				</TrendMonitoring>
+				<DataRepository></DataRepository>
+				<UsedLibraryForPlatV2 Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWeOe3YsAAABAAEAQIAAhAIKDF3JFOFCQ457diw==</UsedLibraryForPlatV2>
+				<RetainValue Compressed="0" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">//7/BlYAZQByADEALgAwAAAAAAAAAAAA</RetainValue>
+			</OnlineElements>
+			<XGPD>
+				<XGPD_CONFIG_INFO_GROUP></XGPD_CONFIG_INFO_GROUP>
+				<XGPD_HS_LINK_GROUP></XGPD_HS_LINK_GROUP>
+				<XGPD_P2P_GROUP></XGPD_P2P_GROUP>
+			</XGPD>
+			<Properties Value=""></Properties>
+		</Configuration>
+	</Configurations>
+	<SpecialModules></SpecialModules>
+</Project>

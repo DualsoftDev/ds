@@ -19,12 +19,11 @@ module XgkTypeConvertorModule =
     type Statement with
         /// XGK 전용 Statement 확장
         member internal x.ToStatementsXgk(pack:DynamicDictionary) : unit =
-            let prjParam = pack.Get<XgxProjectParams>("projectParameter")
-            let augs = pack.Get<Augments>("augments")
+            let prjParam, augs = pack.Unpack()
             match x with
             | DuAssign(condition, exp, target) ->
                 let numStatementsBefore = augs.Statements.Count
-                let exp2 = exp.AugmentXgk(prjParam, condition, Some target, augs)
+                let exp2 = exp.AugmentXgk(pack, condition, Some target)
                 let duplicated =
                     option {
                         // a := a 등의 형태 체크
@@ -77,7 +76,7 @@ module XgkTypeConvertorModule =
                     let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
                         let ldVarExp =
                             let operators = [|"&&"; "||"; "!"|] @ K.arithmaticOrComparisionOperators
-                            cond.ToAssignStatement prjParam augs operators :?> IExpression<bool>
+                            cond.ToAssignStatement(pack, operators) :?> IExpression<bool>
                         statements[0] <- newStatementGenerator(ldVarExp)
                         match statements[0] with
                         | DuCounter ctr -> newCtr <- ctr

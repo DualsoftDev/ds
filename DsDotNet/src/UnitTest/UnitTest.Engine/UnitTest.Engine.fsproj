@@ -32,6 +32,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="Time\TimeSystemTester.fs" />
+		<Compile Include="Time\TimeTester.fs" />
 		<Compile Include="TestFixture.Engine.fs" />
 		<Compile Include="ImportOffice\pptTest.fs" />
 		<Compile Include="Miscs\MiscTests.fs" />

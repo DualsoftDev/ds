@@ -9,8 +9,8 @@ module ConvertCpuApiItem =
     
     let getLimitFromReals(api:ApiItem) = 
 
-        let g = api.ApiSystem.MergeFlowGraphs()
-        let reals = api.TXs.GetPathReals(g)
+        let systemGraph = api.ApiSystem.MergeFlowGraphs()
+        let reals = api.TXs.GetPathReals(systemGraph)
         
         let timeout = reals.Sum(fun r->r.TimeParam.Value.USL)
         let timeShort = reals.Sum(fun r->r.TimeParam.Value.LSL)

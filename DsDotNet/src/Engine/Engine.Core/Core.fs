@@ -381,11 +381,6 @@ module CoreModule =
 
         member _.Name = name
         member _.ApiSystem = system
-        //member _.UpperTime = 
-        //            match timeParam with
-        //            | Some t -> t.USL
-        //            | None -> _.RXs.Fisrt().TimeParam.USL
-
         member _.TimeParam = timeParam
       
         member val TXs = createQualifiedNamedHashSet<Real>()

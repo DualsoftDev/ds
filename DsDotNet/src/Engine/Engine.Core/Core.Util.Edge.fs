@@ -181,54 +181,85 @@ module EdgeModule =
 
     let isResetEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Reset)
     let isStartEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Start)
+    
 
-    /// srcs로 인해서 시작가능한 reals 구하고 구해진 reals에 리셋으로 연결된 target reals 구한다
-    let private appendInterfaceReset (srcs: Vertex seq) : Real seq =
+    let mergeGraphs (graphs:  Graph<Vertex, Edge> seq) : Graph<Vertex, Edge>  =
+        
+        let g =new  Graph<Vertex, Edge>()
 
-           // Recursive function to find all Real objects connected via Start edges
-        let rec getStartReals (src: Vertex) (visited: HashSet<Real>) : Vertex list =
-            let graphOrder = src.Parent.GetGraph().BuildPairwiseComparer()
-            src.Parent.GetGraph().Edges
+        for graph in graphs do
+            for vertex in graph.Islands do
+                g.Vertices.Add (vertex) |>ignore
+
+            for edge in graph.Edges do
+                Edge.Create(g, edge.Source, edge.Target, edge.EdgeType) |> ignore
+        g
+
+
+    let changeRealGraph (graph: Graph<Vertex, Edge>) : Graph<Vertex, Edge>  =
+        
+        let g = Graph<Vertex, Edge>()
+       
+        for vertex in graph.Islands do
+            g.Vertices.Add (vertex.GetPureReal():>Vertex) |>ignore
+
+        for edge in graph.Edges do
+            if edge.Source.GetPureCall().IsNone  //flow에서 조건으로 Call은 제외
+            then Edge.Create(g, edge.Source.GetPureReal(), edge.Target.GetPureReal(), edge.EdgeType) |> ignore 
+                
+        g
+
+
+    // Recursive function to find all Real objects connected via Start edges
+    let getPathReals (graph: Graph<Vertex,Edge>) (srcs: Vertex seq) : Real seq =
+        let graphOrder = graph.BuildPairwiseComparer()
+    
+        let getStartReals (src: Vertex, visited: HashSet<Real>) : Real seq =
+            graph.Edges
             |> Seq.filter isStartEdge
             |> Seq.collect (fun e -> [e.Source; e.Target])
             |> Seq.filter (fun n -> graphOrder src n = Some true)
-            |> Seq.choose (function
-                | :? Real as real when not (visited.Contains real) ->
-                    visited.Add real |> ignore
-                    Some (real:>Vertex)
-                | :? RealExF as realexf when not (visited.Contains realexf.Real) ->
-                    getStartReals realexf.Real visited |> ignore
-                    Some (realexf.Real:>Vertex)
-                | _ -> None)
-            |> Seq.toList
+            |> Seq.choose (fun r ->
+                match r with
+                | :? Real as real -> 
+                    if not (visited.Contains real) 
+                    then 
+                        visited.Add real |> ignore
+                        Some(real)
+                    else 
+                        None
+                | _ -> failwithlog $"{r.QualifiedName} is not real vertex"
+                )
 
         // Create a HashSet to keep track of visited Real objects
-        let visited = HashSet<Real>()
+        let allVisited = HashSet<Real>()
+
+        srcs |> Seq.collect (fun f-> getStartReals(f, allVisited))
+
+    /// srcs로 인해서 시작가능한 reals 구하고 구해진 reals에 리셋으로 연결된 target reals 구한다
+    let private appendInterfaceReset (graph: Graph<Vertex,Edge>) (srcs: Vertex seq) : Real seq =
         // Find all Real objects connected by Start edges to the source Reals
         let startLinkReals =
-            srcs
-            |> Seq.collect (fun src -> 
-                let stReals =  getStartReals src visited
-                [src]@stReals
-                |> Seq.collect (fun stReal -> [stReal]@stReal.GetSharedReal())
-            )
+            (srcs @ (getPathReals graph srcs).OfType<Vertex>())
             |> Seq.distinct
 
         // Find all target Reals connected by a reset edge to the startLinkReals
         startLinkReals
         |> Seq.collect (fun link ->
-            link.Parent.GetGraph().Edges
-            |> Seq.filter (fun e -> isResetEdge e && e.Source.GetPure() = link.GetPure())
+            graph.Edges
+            |> Seq.filter isResetEdge
+            |> Seq.filter (fun e -> e.Source.GetPure() = link.GetPure())
             |> Seq.map (fun e -> e.Target.GetPureReal())
         )
         |> Seq.distinct
 
     /// Automatically append mutual reset information
-    let autoAppendInterfaceReset (sys: DsSystem) = 
+    let autoAppendInterfaceReset (sys: DsSystem) =
+        let graph = sys.Flows.Select(fun f->f.Graph) |>  mergeGraphs |> changeRealGraph
         let apiNResetNodes =
             sys.ApiItems
             |> Seq.map (fun api ->
-                let resetAbleReals = appendInterfaceReset  (api.TXs.OfType<Vertex>())
+                let resetAbleReals = appendInterfaceReset  graph (api.TXs.OfType<Vertex>())
                 api, resetAbleReals
             )
         apiNResetNodes
@@ -240,7 +271,8 @@ module EdgeModule =
             )
         )
 
-    
+
+
     let getResetRootEdges (v:Vertex) =
         let es = getResetStrongEdgeSources(v)
         let ew = getResetWeakEdgeSources(v)
@@ -295,3 +327,9 @@ type EdgeExt =
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
     [<Extension>] static member OfNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotStrongResetEdge edges
 
+    [<Extension>] static member MergeGraphs(graphs:  Graph<Vertex, Edge> seq) : Graph<Vertex, Edge> =  mergeGraphs graphs
+    [<Extension>] static member MergeFlowGraphs(x:DsSystem) : Graph<Vertex, Edge> = 
+                         x.Flows.Select(fun f->f.Graph) |> mergeGraphs |> changeRealGraph
+   
+    [<Extension>] static member GetPathReals(inits:Real seq, g:Graph<Vertex,Edge>) : Real seq = getPathReals g (inits.OfType<Vertex>())
+    

@@ -240,5 +240,71 @@ module ModelTests1 =
             let systemRepo = ShareableSystemRepository()
             let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-            //ADV <|> RET, ADV |> RET, RET |> ADV;  => 기존 인과에 추가되서 생성
-            helper.TheSystem.ApiResetInfos.Count === 3
+            //ADV <|> RET, ADV |> RET, RET |> ADV;  => 기존 인과 존재하면 추가 안함
+            helper.TheSystem.ApiResetInfos.Count === 1
+
+
+        [<Test>]
+        member __.``Interlock extract external Flow test`` () =
+            logInfo "=== Interlock extract"
+            let testCode = """
+            [sys] DoubleCylinder = {
+                [flow] FLOW = {
+                    ADV > RET;
+                    ADV <|> FLOWEx.RET;
+                }
+                [flow] FLOWEx = {
+                    RET;
+                }
+                [interfaces] = {
+                    "+" = { FLOW.ADV ~ FLOW.ADV }
+                    "-" = { FLOWEx.RET ~ FLOWEx.RET }
+                }
+            }
+            """
+
+            let systemRepo = ShareableSystemRepository()
+            let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+
+
+            helper.TheSystem.ApiResetInfos.Count === 2
+
+        [<Test>]
+        member __.``Interlock extract alias test`` () =
+            logInfo "=== Interlock extract"
+            let testCode = """
+            [sys] DoubleCylinder = {
+                
+                [flow] F1 = {
+                    R1 > R3;
+                    R2 > R3;
+                    R3 > ExR2;
+                    [aliases] = {
+                        F2.R2 = { ExR2; }
+                    }
+                }
+                [flow] F2 = {
+                    R2 > Copy1_R3;
+                    R1 > R3;
+                    R3 > F1.R1;
+                    F1.R3 <|> R3;
+                    [aliases] = {
+                        R3 = { Copy1_R3; }
+                    }
+                }
+                
+                [interfaces] = {
+                    "+" = { F1.R1 ~ F1.R3 }
+                    "-" = { F2.R1 ~ F2.R3 }
+                }
+            }
+            """
+
+            let systemRepo = ShareableSystemRepository()
+            let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+
+
+            helper.TheSystem.ApiResetInfos.Count === 2
+  

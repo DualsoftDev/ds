@@ -38,8 +38,15 @@ module GraphModule =
                 member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target && x.EdgeType = y.EdgeType
                 member _.GetHashCode(x) = x.Source.GetHashCode()/2 + x.Target.GetHashCode()/2
         }
+
+        let vertexComparer = {
+            new IEqualityComparer<'V> with
+                member _.Equals(x:'V, y:'V) = x = y
+                member _.GetHashCode(x) = x.GetHashCode()
+         }
+
         let vertices = vertices_ @ edges_.Collect(fun e -> [e.Source; e.Target]).Distinct()
-        let vs = new HashSet<'V>(vertices, nameComparer<'V>())
+        let vs = new HashSet<'V>(vertices, vertexComparer)
         let es = new HashSet<'E>(edges_, edgeComparer)
         new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
         member _.Vertices = vs

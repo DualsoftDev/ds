@@ -65,8 +65,8 @@ module CoreExtensionModule =
             match a.TargetWrapper.GetTarget() with
             | :? Real as real -> real
             | :? RealExF as rf -> rf.Real
-            | _ -> failwithlog "Error"
-        |_ -> failwithlog "Error"
+            | _ -> failwithlog $"{v.Name} is not real!!"
+        |_ -> failwithlog $"{v.Name} is not real!!"
 
     let getPure(v:Vertex) : Vertex =
         match v with

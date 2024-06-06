@@ -14,6 +14,8 @@ type VertexManager with
         let v= v :?> VertexMCall
         let call= v.Vertex.GetPure() :?> Call
         let real= call.Parent.GetCore() :?> Real
+
+
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.clear_btn.Expr
         [

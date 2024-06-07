@@ -13,6 +13,13 @@ module XgxTypeConvertorModule =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
+            let pack = 
+                let kvs:array<string*obj> =
+                    [|
+                        ("projectParameter", prjParam)
+                        ("augments", augs)
+                    |]
+                kvs |> DynamicDictionary
 
             match statement with
             | DuVarDecl(exp, var) ->
@@ -29,13 +36,6 @@ module XgxTypeConvertorModule =
                 // XGI 에서는 변수 선언에 해당하는 부분을 변수의 초기값으로 할당하고 끝내므로, 더이상의 ladder 생성을 하지 않는다.
                 ()
             | _ ->
-                let pack = 
-                    let kvs:array<string*obj> =
-                        [|
-                            ("projectParameter", prjParam)
-                            ("augments", augs)
-                        |]
-                    kvs |> DynamicDictionary
 
                 let newStatement = statement.DistributeNegate(pack)
                 let newStatement = newStatement.FunctionToAssignStatement(pack)

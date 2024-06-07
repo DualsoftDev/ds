@@ -21,6 +21,16 @@ module XgxTypeConvertorModule =
                     |]
                 kvs |> DynamicDictionary
 
+            let procStatement (statement:Statement) =
+                let newStatement = statement.DistributeNegate(pack)
+                let newStatement = newStatement.FunctionToAssignStatement(pack)
+                let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
+
+                match prjParam.TargetType with
+                | XGI -> newStatement.ToStatements(pack)
+                | XGK -> newStatement.ToStatementsXgk(pack)
+                | _ -> failwith "Not supported runtime target"                
+
             match statement with
             | DuVarDecl(exp, var) ->
                 // 변수 선언문에서 정확한 초기 값 및 주석 값을 가져온다.
@@ -29,22 +39,12 @@ module XgxTypeConvertorModule =
                 var.Comment <- statement.ToText()                
                 var.BoxedValue <- exp.BoxedEvaluatedValue
                 augs.Storages.Add var
-            | _ -> ()
-
-            match statement with
-            | DuVarDecl _ when prjParam.TargetType = XGI ->
-                // XGI 에서는 변수 선언에 해당하는 부분을 변수의 초기값으로 할당하고 끝내므로, 더이상의 ladder 생성을 하지 않는다.
-                ()
-            | _ ->
-
-                let newStatement = statement.DistributeNegate(pack)
-                let newStatement = newStatement.FunctionToAssignStatement(pack)
-                let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
-
                 match prjParam.TargetType with
-                | XGI -> newStatement.ToStatements(pack)
-                | XGK -> newStatement.ToStatementsXgk(pack)
+                | XGK -> procStatement statement
+                | XGI -> () // XGI 에서는 변수 선언에 해당하는 부분을 변수의 초기값으로 할당하고 끝내므로, 더이상의 ladder 생성을 하지 않는다.
                 | _ -> failwith "Not supported runtime target"
+            | _ ->
+                procStatement statement
 
             let rungComment =
                 [

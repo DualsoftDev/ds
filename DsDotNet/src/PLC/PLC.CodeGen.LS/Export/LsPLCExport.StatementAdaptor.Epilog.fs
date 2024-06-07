@@ -61,10 +61,13 @@ module XgxTypeConvertorModule =
                     let exp = exp.Visit([], visitor)
 
                     match exp.FunctionName, exp.Terminal with
-                    | Some fn, None ->
-                        DuAssign(Some fake1OnExpression, exp, var) |> augs.Statements.Add
-                    | None, Some t ->
-                        DuAction (DuCopy (fake1OnExpression, exp, var)) |> augs.Statements.Add
+                    | Some _, None ->
+                        DuAssign(Some fake1OnExpression, exp, var)
+                    | None, Some _ ->
+                        DuAction (DuCopy (fake1OnExpression, exp, var))
+                    | _ -> failwith "ERROR"
+                    |> augs.Statements.Add
+
                 | XGI -> () // XGI 에서는 변수 선언에 해당하는 부분을 변수의 초기값으로 할당하고 끝내므로, 더이상의 ladder 생성을 하지 않는다.
                 | _ -> failwith "Not supported runtime target"
             | _ ->

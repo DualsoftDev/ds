@@ -19,7 +19,7 @@ module XgkTypeConvertorModule =
     type Statement with
         /// XGK 전용 Statement 확장
         member internal x.ToStatementsXgk(pack:DynamicDictionary) : unit =
-            let prjParam, augs = pack.Unpack()
+            let _prjParam, augs = pack.Unpack()
             match x with
             | DuAssign(condition, exp, target) ->
                 let numStatementsBefore = augs.Statements.Count
@@ -39,15 +39,6 @@ module XgkTypeConvertorModule =
                 else
                     ()
 
-
-            // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
-            // XGK 에서 다음과 같이 2개의 문장으로 분리한다.
-            // bool b3;
-            // b3 = $nn1 > $nn2;
-            | DuVarDecl(exp, decl) ->
-                augs.Storages.Add decl
-                let stmt = DuAssign(Some fake1OnExpression, exp, decl)
-                stmt.ToStatementsXgk(pack)
 
             | DuTimer tmr ->
                 match tmr.ResetCondition with
@@ -100,6 +91,8 @@ module XgkTypeConvertorModule =
                     | _ -> ()
 
                 augs.Statements.AddRange(statements)
+
+            | DuVarDecl _ -> failwith "ERROR: DuVarDecl in statement"
 
             | _ ->
                 // 공용 처리

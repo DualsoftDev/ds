@@ -143,7 +143,7 @@ module LsPLCExportExpressionModule =
             | _ -> failwithlog "ERROR"
 
         member x.CreateAutoVariableWithFunctionExpression(pack:DynamicDictionary, exp:IExpression) =
-            let var = x.CreateAutoVariableWithFunctionExpression(exp) :?> IStorage
+            let var = x.CreateAutoVariableWithFunctionExpression(exp) :> IStorage
             let augs = pack["augments"] :?> Augments
             augs.Storages.Add var
             DuAssign(None, exp, var) |> augs.Statements.Add

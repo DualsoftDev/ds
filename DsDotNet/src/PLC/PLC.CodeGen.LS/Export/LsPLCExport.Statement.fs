@@ -14,41 +14,10 @@ module StatementExtensionModule =
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
         member internal x.ToStatements (pack:DynamicDictionary) : unit =
             let statement = x
-            let prjParam, augs = pack.Unpack()
+            let _prjParam, augs = pack.Unpack()
 
             match statement with
-            | DuVarDecl(exp, decl) ->
-                assert(prjParam.TargetType = XGK)
-                let _newExp =
-                    augs.ExpressionStore <- Some decl
-                    exp.CollectExpandedExpression(pack)
-
-                (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
-                augs.Storages.Remove decl |> ignore
-
-                match decl with
-                | :? IXgxVar as loc ->
-                    let si = loc.SymbolInfo
-                    let comment = loc.Comment.DefaultValue $"[local var in code] {si.Comment}"
-                    let initValue = exp.BoxedEvaluatedValue
-
-                    let _typ = initValue.GetType()
-                    let var = createXgxVariable decl.Name initValue comment
-                    augs.Storages.Add var
-
-                | (:? IVariable | :? ITag) when decl.IsGlobal ->
-                    augs.Storages.Add decl
-                    assert(exp.Terminal.IsSome)
-                    if prjParam.TargetType = XGK then
-                        DuAssign(Some fake1OnExpression, exp, decl) |> augs.Statements.Add
-                    else
-                        ()
-                | (:? IVariable | :? ITag) ->
-                    let var = createXgxVariable decl.Name decl.BoxedValue decl.Comment
-                    augs.Storages.Add var
-
-                | _ -> failwithlog "ERROR"
-
+            | DuVarDecl _ -> failwith "ERROR: DuVarDecl in statement"
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
@@ -94,22 +63,6 @@ module StatementExtensionModule =
 
             match statement with
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
-            | DuVarDecl(exp, var) ->
-                match exp.Terminal with
-                | Some _ -> DuVarDecl(visitTop exp, var)
-                | None -> DuAssign(Some fake1OnExpression, visitTop exp, var)
-
-            //| DuVarDecl(exp, var) ->
-            //    let exp = visitTop exp
-            //    match exp.Terminal with
-            //    | Some _ -> DuVarDecl(exp, var)
-            //    | None ->
-            //        // TODO : 여기 수정
-            //        let exp2 = exp.AugmentXgk(pack, None, None)
-            //        DuVarDecl(exp2, var)
-            //        //DuAssign(Some fake1OnExpression, exp, var)
-
-
 
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
                 DuTimer { tmr with
@@ -128,6 +81,8 @@ module StatementExtensionModule =
             | DuPLCFunction ({Arguments = args} as functionParameters) ->
                 let newArgs = args |> map (fun arg -> visitTop arg)
                 DuPLCFunction { functionParameters with Arguments = newArgs }
+
+            | DuVarDecl _ -> failwith "ERROR: DuVarDecl in statement"
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (pack:DynamicDictionary, visit:IExpression -> IExpression) : Statement =

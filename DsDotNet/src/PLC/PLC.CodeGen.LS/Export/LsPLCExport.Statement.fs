@@ -21,7 +21,7 @@ module StatementExtensionModule =
                 assert(prjParam.TargetType = XGK)
                 let _newExp =
                     augs.ExpressionStore <- Some decl
-                    exp.CollectExpandedExpression(prjParam, augs)
+                    exp.CollectExpandedExpression(pack)
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 augs.Storages.Remove decl |> ignore
@@ -53,7 +53,7 @@ module StatementExtensionModule =
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some(IsArithmeticOrComparisionOperator op) ->
-                    let exp = exp.FlattenArithmeticOperator(prjParam, augs, Some target)
+                    let exp = exp.FlattenArithmeticOperator(pack, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
                             DuPLCFunction {
@@ -64,7 +64,7 @@ module StatementExtensionModule =
                                 Output = target }
                         augs.Statements.Add augFunc
                 | _ ->
-                    let newExp = exp.CollectExpandedExpression(prjParam, augs)
+                    let newExp = exp.CollectExpandedExpression(pack)
                     DuAssign(condition, newExp, target) |> augs.Statements.Add 
 
             | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->

@@ -23,8 +23,9 @@ module XgxExpressionConvertorModule =
         ///
         ///   * 새로 생성되는 expression 을 반환한다.
         member internal exp.ReplaceInnerArithmeticOrComparisionToFunctionStatements
-            (prjParam: XgxProjectParams, augs: Augments) 
+            (pack:DynamicDictionary) 
           : IExpression =
+            let prjParam, augs = pack.Unpack()
             let newLocalStorages, expandFunctionStatements, expStore =
                 augs.Storages, augs.Statements, augs.ExpressionStore
 
@@ -55,11 +56,11 @@ module XgxExpressionConvertorModule =
 
 
         member internal exp.BinaryToNary
-          ( prjParam: XgxProjectParams
-            , augs: Augments
+          ( pack:DynamicDictionary
             , operatorsToChange: string list
             , currentOp: string
           ) : IExpression list =
+            let prjParam, augs = pack.Unpack()
             let storage, augmentedStatementsStorage = augs.Storages, augs.Statements
             let withAugmentedPLCFunction (exp: IExpression) =
                 let out = prjParam.CreateAutoVariableWithFunctionExpression(exp)
@@ -68,7 +69,7 @@ module XgxExpressionConvertorModule =
 
                 let args =
                     exp.FunctionArguments
-                    |> List.bind (fun arg -> arg.BinaryToNary(prjParam, augs, operatorsToChange, op) )
+                    |> List.bind (fun arg -> arg.BinaryToNary(pack, operatorsToChange, op) )
 
                 DuPLCFunction {
                     Condition = None
@@ -88,7 +89,7 @@ module XgxExpressionConvertorModule =
                               match arg.Terminal, arg.FunctionName with
                               | Some _, _ -> yield arg
                               | None, Some("-" | "/") -> yield withAugmentedPLCFunction arg
-                              | None, Some _fn -> yield! arg.BinaryToNary(prjParam, augs, operatorsToChange, op)
+                              | None, Some _fn -> yield! arg.BinaryToNary(pack, operatorsToChange, op)
                               | _ -> failwithlog "ERROR" ]
 
                     args
@@ -102,17 +103,17 @@ module XgxExpressionConvertorModule =
         ///     * '+' or '*' 연산에서 argument 갯수가 8 개 이상이면 분할해서 PLC function 생성 (XGI function block 의 다릿발 갯수 제한 때문)
         /// - a + (b * c) + d => +[a; x; d], *[b; c] 두개의 expression 으로 변환.  부가적으로 생성된 *[b;c] 는 새로운 statement 를 생성해서 augmentedStatementsStorage 에 추가된다.
         member internal exp.FlattenArithmeticOperator
-          (  prjParam: XgxProjectParams
-             , augs: Augments
+          (  pack:DynamicDictionary
              , outputStore: IStorage option
           ) : IExpression =
+            let prjParam, augs = pack.Unpack()
             let newLocalStorages, augmentedStatementsStorage, _expStore =
                 augs.Storages, augs.Statements, augs.ExpressionStore
 
             match exp.FunctionName with
             | Some(IsArithmeticOperator op) ->
                 let newArgs =
-                    exp.BinaryToNary(prjParam, augs, [ "+"; "-"; "*"; "/" ], op)
+                    exp.BinaryToNary(pack, [ "+"; "-"; "*"; "/" ], op)
 
                 match op with
                 | "+"
@@ -151,24 +152,25 @@ module XgxExpressionConvertorModule =
                     exp.WithNewFunctionArguments newArgs
 
             | Some(">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "&&"|"||" as op) ->
-                let newArgs = exp.BinaryToNary(prjParam, augs, [ op ], op)
+                let newArgs = exp.BinaryToNary(pack, [ op ], op)
                 exp.WithNewFunctionArguments newArgs
 
             | _ ->
                 exp
 
-        member internal exp.ZipAndExpression (prjParam: XgxProjectParams, augs: Augments, allowCallback:bool) : IExpression =
+        member internal exp.ZipAndExpression (pack:DynamicDictionary, allowCallback:bool) : IExpression =
+            let prjParam, augs = pack.Unpack()
             let newLocalStorages, expandFunctionStatements = augs.Storages, augs.Statements
 
             let flatExpression = exp.Flatten() :?> FlatExpression
             let w, _h = flatExpression |> precalculateSpan
 
             if w > maxNumHorizontalContact then
-                let exp = if allowCallback then exp.ZipVisitor(prjParam, augs) else exp
+                let exp = if allowCallback then exp.ZipVisitor(pack) else exp
 
                 match exp.FunctionName with
                 | Some op when op.IsOneOf("||") ->
-                    exp.ZipVisitor(prjParam, augs)
+                    exp.ZipVisitor(pack)
                 | Some op when op = "&&" ->
                     let mutable partSpanX = 0
                     let maxX = maxNumHorizontalContact
@@ -221,30 +223,30 @@ module XgxExpressionConvertorModule =
             else
                 exp
 
-        member private exp.ZipVisitor (prjParam: XgxProjectParams, augs: Augments) : IExpression =
-            let exp = exp.FlattenArithmeticOperator(prjParam, augs, None)
+        member private exp.ZipVisitor (pack:DynamicDictionary) : IExpression =
+            let exp = exp.FlattenArithmeticOperator(pack, None)
             let w, _h = exp.Flatten() :?> FlatExpression |> precalculateSpan
 
             if w > maxNumHorizontalContact && exp.FunctionName.IsSome && exp.FunctionName.Value.IsOneOf("&&", "||") then
                 if exp.FunctionArguments.Any(fun e -> e.Flatten() :?> FlatExpression |> precalculateSpan |> fst >= 20 ) then
                     let args = [
                         for arg in exp.FunctionArguments do
-                            arg.ZipAndExpression(prjParam, augs, true)
+                            arg.ZipAndExpression(pack, true)
                     ]
 
                     exp.WithNewFunctionArguments args
 
                 else
                     let allowCallback = false
-                    exp.ZipAndExpression(prjParam, augs, allowCallback)
+                    exp.ZipAndExpression(pack, allowCallback)
             else
                 exp
 
-        member internal exp.CollectExpandedExpression (prjParam: XgxProjectParams, augs: Augments) : IExpression =
+        member internal exp.CollectExpandedExpression (pack:DynamicDictionary) : IExpression =
             let newExp =
-                exp.ReplaceInnerArithmeticOrComparisionToFunctionStatements(prjParam, augs)
+                exp.ReplaceInnerArithmeticOrComparisionToFunctionStatements(pack)
 
-            let newExp = newExp.ZipVisitor(prjParam, augs)
+            let newExp = newExp.ZipVisitor(pack)
             newExp
 
     type ExpressionConversionResult = IExpression * IStorage list * Statement list
@@ -263,7 +265,7 @@ module XgxExpressionConvertorModule =
                         match prjParam.TargetType with
                         | XGK -> DuAssign(None, x, var)
                         | XGI ->
-                            let newExp = x.FlattenArithmeticOperator(prjParam, augs, Some var)
+                            let newExp = x.FlattenArithmeticOperator(pack, Some var)
                             DuPLCFunction {
                                 Condition = None
                                 FunctionName = fn

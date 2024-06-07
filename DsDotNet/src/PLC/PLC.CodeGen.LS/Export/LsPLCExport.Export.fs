@@ -59,8 +59,8 @@ module XgiExportModule =
             let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) condition xgiCommand
             let yy = c / 1024
 
-            { Xmls = [ wrapWithRung xml ]
-              NextRungY = yy }
+            {   Xmls = [ wrapWithRung xml ]
+                NextRungY = yy }
 
         let mutable rgi: RungGenerationInfo = { Xmls = []; NextRungY = 0 }
 
@@ -104,8 +104,8 @@ module XgiExportModule =
                 let rgiSub = rgiCommandRung (Some flatExpr) command rgi.NextRungY
                 //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 rgi <-
-                    { Xmls = rgiSub.Xmls @ rgi.Xmls
-                      NextRungY = rgiSub.NextRungY }
+                    {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                        NextRungY = rgiSub.NextRungY }
 
         /// XGK 용 MOV : MOV,S,D
         let moveCmdRungXgk (condition:IExpression<bool>) (source: IExpression) (destination: IStorage) : unit =
@@ -261,16 +261,16 @@ module XgiExportModule =
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
-                        { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          NextRungY = 1 + rgiSub.NextRungY }
+                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                            NextRungY = 1 + rgiSub.NextRungY }
 
                 | Statement.DuCounter counterStatement ->
                     let command = FunctionBlockCmd(CounterMode(counterStatement))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
-                        { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          NextRungY = 1 + rgiSub.NextRungY }
+                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                            NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuPLCFunction({
                         FunctionName = (">"|">="|"<"|"<="|"=="|"!="|"<>") as op
@@ -281,8 +281,8 @@ module XgiExportModule =
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
-                        { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          NextRungY = 1 + rgiSub.NextRungY }
+                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                            NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuPLCFunction({
                         FunctionName = ("+"|"-"|"*"|"/") as op
@@ -293,8 +293,8 @@ module XgiExportModule =
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
-                        { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          NextRungY = 1 + rgiSub.NextRungY }
+                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                            NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuPLCFunction({
                         FunctionName = XgiConstants.FunctionNameMove as _func
@@ -306,8 +306,8 @@ module XgiExportModule =
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                     rgi <-
-                        { Xmls = rgiSub.Xmls @ rgi.Xmls
-                          NextRungY = 1 + rgiSub.NextRungY }
+                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                            NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuAction(DuCopy(condition, source, target)) when isXgk ->
                     moveCmdRungXgk condition source target
@@ -373,12 +373,12 @@ module XgiExportModule =
 
         /// POU 단위로 xml rung 생성
         member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
-            let { TaskName = taskName
-                  POUName = pouName
-                  Comment = prologComment
-                  GlobalStorages = globalStorages
-                  LocalStorages = localStorages
-                  CommentedStatements = commentedStatements } =
+            let {   TaskName = taskName
+                    POUName = pouName
+                    Comment = prologComment
+                    GlobalStorages = globalStorages
+                    LocalStorages = localStorages
+                    CommentedStatements = commentedStatements } =
                 x
 
             let newLocalStorages, newCommentedXgiStatements =
@@ -386,23 +386,23 @@ module XgiExportModule =
 
             let globalStoragesRefereces =
                 [
-                  // POU 에 사용된 모든 storages (global + local 모두 포함)
-                  let allUsedStorages =
-                      [ for cstmt in commentedStatements do
-                            yield! cstmt.CollectStorages() ]
-                      |> List.distinct
+                    // POU 에 사용된 모든 storages (global + local 모두 포함)
+                    let allUsedStorages =
+                        [ for cstmt in commentedStatements do
+                              yield! cstmt.CollectStorages() ]
+                        |> List.distinct
 
-                  yield! newLocalStorages.Where(fun s -> s.IsGlobal)
+                    yield! newLocalStorages.Where(fun s -> s.IsGlobal)
 
-                  for stg in allUsedStorages.Except(newLocalStorages) do
-                      (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
-                      match stg.Name with
-                      | RegexPattern @"(^[^\.]+)\.(.*)$" [ structName; _tail ] ->
-                          if globalStorages.ContainsKey structName then
-                              yield globalStorages[structName]
-                          else
-                              logWarn $"Unknown struct name {structName}"
-                      | _ -> yield stg ]
+                    for stg in allUsedStorages.Except(newLocalStorages) do
+                        (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
+                        match stg.Name with
+                        | RegexPattern @"(^[^\.]+)\.(.*)$" [ structName; _tail ] ->
+                            if globalStorages.ContainsKey structName then
+                                yield globalStorages[structName]
+                            else
+                                logWarn $"Unknown struct name {structName}"
+                        | _ -> yield stg ]
                 |> distinct
                 |> getGlobalTagSkipSysTag
                 |> Seq.sortBy (fun stg -> stg.Name)
@@ -480,12 +480,12 @@ module XgiExportModule =
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
             prjParam.SanityCheck()
 
-            let { ProjectName = projName
-                  TargetType = targetType
-                  ProjectComment = projComment
-                  GlobalStorages = globalStorages
-                  EnableXmlComment = enableXmlComment
-                  POUs = pous } =
+            let {   ProjectName = projName
+                    TargetType = targetType
+                    ProjectComment = projComment
+                    GlobalStorages = globalStorages
+                    EnableXmlComment = enableXmlComment
+                    POUs = pous } =
                 prjParam
 
             // todo : 사전에 처리 되었어야...
@@ -500,10 +500,10 @@ module XgiExportModule =
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
             
             let existingTaskPous =
-                    [ for p in programs do
-                          let taskName = p.GetAttribute("Task")
-                          let pouName = p.FirstChild.OuterXml
-                          taskName, pouName ]
+                    [   for p in programs do
+                            let taskName = p.GetAttribute("Task")
+                            let pouName = p.FirstChild.OuterXml
+                            taskName, pouName ]
 
 
             (* validation : POU 중복 이름 체크 *)

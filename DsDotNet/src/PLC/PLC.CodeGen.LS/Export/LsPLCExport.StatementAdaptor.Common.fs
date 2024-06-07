@@ -85,9 +85,9 @@ module ConvertorPrologModule =
     type XgxVar<'T when 'T: equality>(param: StorageCreationParams<'T>) =
         inherit VariableBase<'T>(param)
 
-        let { Name = name
-              Value = initValue
-              Comment = comment } =
+        let {   Name = name
+                Value = initValue
+                Comment = comment } =
             param
 
         let symbolInfo =
@@ -138,9 +138,9 @@ module ConvertorPrologModule =
         | _ -> ()
 
         let createParam () =
-            { defaultStorageCreationParams (unbox initValue) (VariableTag.PlcUserVariable|>int) with
-                Name = name
-                Comment = Some comment }
+            {   defaultStorageCreationParams (unbox initValue) (VariableTag.PlcUserVariable|>int) with
+                    Name = name
+                    Comment = Some comment }
 
         let typ = initValue.GetType()
 
@@ -160,9 +160,9 @@ module ConvertorPrologModule =
         | UINT8   -> XgxVar<uint8> (createParam ())
         | "DuFunction" ->
             let defaultBool = 
-                { defaultStorageCreationParams false (VariableTag.PlcUserVariable|>int) with
-                    Name = name
-                    Comment = Some comment }
+                {   defaultStorageCreationParams false (VariableTag.PlcUserVariable|>int) with
+                        Name = name
+                        Comment = Some comment }
 
             XgxVar<bool>(defaultBool)
         | _ -> failwithlog "ERROR"

@@ -1,12 +1,11 @@
 namespace PLC.CodeGen.LS
 
 
+open System
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
 open PLC.CodeGen.LS
-open Dual.Common.Core.FS
-open System
 
 [<AutoOpen>]
 module LsPLCExportExpressionModule =
@@ -130,9 +129,9 @@ module LsPLCExportExpressionModule =
             let name = getTmpName nameHint n
 
             let param =
-                { defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
-                    Name = name
-                    Comment = Some comment }
+                {   defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
+                        Name = name
+                        Comment = Some comment }
 
             XgxVar(param)
         member x.CreateAutoVariableWithFunctionExpression(exp:IExpression) =

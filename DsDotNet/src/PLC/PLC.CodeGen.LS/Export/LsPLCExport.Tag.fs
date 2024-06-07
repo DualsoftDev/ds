@@ -1,11 +1,8 @@
 namespace PLC.CodeGen.LS
 
-open System.Diagnostics
 
 open Dual.Common.Core.FS
-open System.Security
 open Engine.Core
-open System
 
 // IEC-61131 Addressing
 // http://www.microshadow.com/ladderdip/html/basic_iec_addressing.htm
@@ -89,17 +86,17 @@ module XGITag = //IEC61131Tag =
 
     /// name, comment, plcType, kind 를 받아서 SymbolInfo 를 생성한다.
     let createSymbolInfo name comment plcType kind (initValue: BoxedObjectHolder) =
-        { defaultSymbolInfo with
-            Name = name
-            Comment = escapeXml comment
-            Type = plcType
-            Kind = kind
-            InitValue = initValue.Object }
+        {   defaultSymbolInfo with
+                Name = name
+                Comment = escapeXml comment
+                Type = plcType
+                Kind = kind
+                InitValue = initValue.Object }
 
     let copyLocal2GlobalSymbol (s: SymbolInfo) =
-        { s with
-            Kind = int Variable.Kind.VAR_GLOBAL
-            State = 0 }
+        {   s with
+                Kind = int Variable.Kind.VAR_GLOBAL
+                State = 0 }
 
     type SymbolInfo with
 
@@ -175,12 +172,12 @@ module XGITag = //IEC61131Tag =
             |> List.filter (fun s -> not(s.Name.Contains(xgkTimerCounterContactMarking)))
             |> List.sortBy (fun s -> s.Name)
 
-        [ yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
-          yield "<Symbols>"
-          yield! symbols |> map (fun s -> s.GenerateXml prjParam)
-          yield "</Symbols>"
-          yield "<TempVar Count=\"0\"></TempVar>"
-          yield $"</{varType}>" ]
+        [   yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
+            yield "<Symbols>"
+            yield! symbols |> map (fun s -> s.GenerateXml prjParam)
+            yield "</Symbols>"
+            yield "<TempVar Count=\"0\"></TempVar>"
+            yield $"</{varType}>" ]
         |> String.concat "\r\n"
 
     let generateLocalSymbolsXml (prjParam: XgxProjectParams) symbols =

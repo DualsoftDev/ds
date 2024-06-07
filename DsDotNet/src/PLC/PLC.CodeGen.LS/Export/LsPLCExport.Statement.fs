@@ -65,15 +65,17 @@ module StatementExtensionModule =
             | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
 
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
-                DuTimer { tmr with
-                            RungInCondition = tryVisitTop rungIn
-                            ResetCondition  = tryVisitTop reset }
+                DuTimer {
+                    tmr with
+                        RungInCondition = tryVisitTop rungIn
+                        ResetCondition  = tryVisitTop reset }
             | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
-                DuCounter {ctr with
-                            UpCondition    = tryVisitTop up 
-                            DownCondition  = tryVisitTop down
-                            ResetCondition = tryVisitTop reset
-                            LoadCondition  = tryVisitTop load }
+                DuCounter {
+                    ctr with
+                        UpCondition    = tryVisitTop up 
+                        DownCondition  = tryVisitTop down
+                        ResetCondition = tryVisitTop reset
+                        LoadCondition  = tryVisitTop load }
             | DuAction(DuCopy(condition, source, target)) ->
                 let cond = (visitTop condition) :?> IExpression<bool>
                 DuAction(DuCopy(cond, visitTop source, target))
@@ -108,15 +110,18 @@ module StatementExtensionModule =
             match prjParam.TargetType, x with
             | XGK, _ -> x
             | XGI, DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
-                DuTimer { tmr with
-                            RungInCondition = toAssignOndemand rungIn
-                            ResetCondition  = toAssignOndemand reset }
-            | XGI, DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
-                DuCounter {ctr with
-                            UpCondition    = toAssignOndemand up 
-                            DownCondition  = toAssignOndemand down
-                            ResetCondition = toAssignOndemand reset
-                            LoadCondition  = toAssignOndemand load }
+                DuTimer {
+                    tmr with
+                        RungInCondition = toAssignOndemand rungIn
+                        ResetCondition  = toAssignOndemand reset }
+            | XGI, DuCounter ({
+                UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
+                DuCounter {
+                    ctr with
+                        UpCondition    = toAssignOndemand up 
+                        DownCondition  = toAssignOndemand down
+                        ResetCondition = toAssignOndemand reset
+                        LoadCondition  = toAssignOndemand load }
             | _ -> x
 
 

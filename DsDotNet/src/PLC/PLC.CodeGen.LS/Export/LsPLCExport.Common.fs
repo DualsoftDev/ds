@@ -3,7 +3,6 @@ namespace PLC.CodeGen.LS
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine
 open FB
-open System.Runtime.CompilerServices
 open Engine.Core
 
 [<AutoOpen>]
@@ -11,21 +10,21 @@ module internal Common =
     let systemOnRising = fRising([Expression.True]) :?> IExpression<bool>
 
     let bxiRungXmlInfosToBlockXmlInfo (rungXmlInfos: RungXmlInfo list) : BlockXmlInfo =
-        let xs = rungXmlInfos
-        let xys = xs |> List.map (fun e -> xyOfCoord e.Coordinate |> fst)
+        let xs   = rungXmlInfos
+        let xys  = xs  |> List.map (fun e -> xyOfCoord e.Coordinate |> fst)
         let minX = xys |> List.map fst |> List.min
         let minY = xys |> List.map snd |> List.min
-        let maxX = xs |> List.map (fun e -> xOfCoord e.Coordinate + e.SpanX) |> List.max
-        let maxY = xs |> List.map (fun e -> yOfCoord e.Coordinate + e.SpanY) |> List.max
+        let maxX = xs  |> List.map (fun e -> xOfCoord e.Coordinate + e.SpanX) |> List.max
+        let maxY = xs  |> List.map (fun e -> yOfCoord e.Coordinate + e.SpanY) |> List.max
 
         let totalSpanX = maxX - minX
         let totalSpanY = maxY - minY
 
-        { X = minX
-          Y = minY
-          TotalSpanX = totalSpanX
-          TotalSpanY = totalSpanY
-          XmlElements = xs }
+        {   X = minX
+            Y = minY
+            TotalSpanX = totalSpanX
+            TotalSpanY = totalSpanY
+            XmlElements = xs }
 
     let dq = "\""
 

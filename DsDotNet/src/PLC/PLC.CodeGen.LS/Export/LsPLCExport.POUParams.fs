@@ -108,13 +108,13 @@ module POUParametersModule =
             | XGI -> defaultXGIProjectParams
             | XGK -> defaultXGKProjectParams
             | _ -> failwithf "Invalid target type: %A" targetType
-        { getProjectParams with 
-            ProjectName = projectName; TargetType = targetType;
-            MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
-            TimerCounterGenerator   = counterGeneratorWithExclusionList 0 []
-            CounterCounterGenerator = counterGeneratorWithExclusionList 0 []
-            AutoVariableCounter     = counterGenerator 1
-            RungCounter             = counterGenerator 0
+        {   getProjectParams with 
+                ProjectName = projectName; TargetType = targetType;
+                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
+                TimerCounterGenerator   = counterGeneratorWithExclusionList 0 []
+                CounterCounterGenerator = counterGeneratorWithExclusionList 0 []
+                AutoVariableCounter     = counterGenerator 1
+                RungCounter             = counterGenerator 0
         }
 
 

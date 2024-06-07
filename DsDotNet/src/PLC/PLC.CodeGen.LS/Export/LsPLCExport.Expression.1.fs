@@ -60,6 +60,9 @@ module LsPLCExportExpressionModule =
         | "-"  -> "SUB"
         | "*"  -> "MUL"
         | "/"  -> "DIV"
+        | "&&"  -> "AND"
+        | "||"  -> "OR"
+        | "!"  -> "NOT"
         | _ -> failwithlog "ERROR"
 
 
@@ -139,6 +142,14 @@ module LsPLCExportExpressionModule =
                 x.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
             | _ -> failwithlog "ERROR"
 
+        member x.CreateAutoVariableWithFunctionExpression(pack:DynamicDictionary, exp:IExpression) =
+            let var = x.CreateAutoVariableWithFunctionExpression(exp) :?> IStorage
+            let augs = pack["augments"] :?> Augments
+            augs.Storages.Add var
+            DuAssign(None, exp, var) |> augs.Statements.Add
+            var
+
+
     type IExpression with
         /// 주어진 Expression 을 multi-line text 형태로 변환한다.
         member exp.ToTextFormat() : string =
@@ -168,6 +179,16 @@ module LsPLCExportExpressionModule =
             | None, Some _fn ->
                 let args = exp.FunctionArguments |> map f
                 exp.WithNewFunctionArguments args |> f
+            | _ ->
+                failwith "Invalid expression"
+
+        member exp.Visit (expPath:IExpression list, f: IExpression list -> IExpression -> IExpression) : IExpression =
+            match exp.Terminal, exp.FunctionName with
+            | Some _terminal, None ->
+                f expPath exp
+            | None, Some _fn ->
+                let args = exp.FunctionArguments |> map (fun a -> f (exp::expPath) a)
+                exp.WithNewFunctionArguments args |> f expPath
             | _ ->
                 failwith "Invalid expression"
 

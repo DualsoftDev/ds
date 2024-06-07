@@ -2,6 +2,7 @@ namespace PLC.CodeGen.LS
 
 open Engine.Core
 open Dual.Common.Core.FS
+open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module XgxTypeConvertorModule =
@@ -13,7 +14,7 @@ module XgxTypeConvertorModule =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
-            let pack = 
+            let createPack (prjParam:XgxProjectParams) (augs:Augments) =
                 let kvs:array<string*obj> =
                     [|
                         ("projectParameter", prjParam)
@@ -21,7 +22,9 @@ module XgxTypeConvertorModule =
                     |]
                 kvs |> DynamicDictionary
 
-            let procStatement (statement:Statement) =
+            let pack = createPack prjParam augs
+
+            let procStatement (pack:DynamicDictionary) (statement:Statement) =
                 let newStatement = statement.DistributeNegate(pack)
                 let newStatement = newStatement.FunctionToAssignStatement(pack)
                 let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
@@ -39,12 +42,33 @@ module XgxTypeConvertorModule =
                 var.Comment <- statement.ToText()                
                 var.BoxedValue <- exp.BoxedEvaluatedValue
                 augs.Storages.Add var
+
                 match prjParam.TargetType with
-                | XGK -> procStatement statement
+                | XGK ->
+                    let exp = exp.ApplyNegate()
+                    let visitor (expPath:IExpression list) (ex:IExpression) : IExpression =
+                        match ex.FunctionName, expPath with
+                        | Some (IsComparisonOperator op), _  when op.IsOneOf("==", "!=", "<>") && ex.FunctionArguments[0].DataType = typeof<bool> ->
+                            let ex = ex.AugmentXgk(pack, Some fake1OnExpression, None)
+                            let auto = prjParam.CreateAutoVariableWithFunctionExpression(pack, ex)
+                            auto.ToExpression()
+                        | Some ("&&" | "||" | "!"), []
+                        | Some (IsArithmeticOperator _), _  // ::[]
+                        | Some (IsComparisonOperator _), _ ->
+                            let auto = prjParam.CreateAutoVariableWithFunctionExpression(pack, ex)
+                            auto.ToExpression()
+                        | _ -> ex
+                    let exp = exp.Visit([], visitor)
+
+                    match exp.FunctionName, exp.Terminal with
+                    | Some fn, None ->
+                        DuAssign(Some fake1OnExpression, exp, var) |> augs.Statements.Add
+                    | None, Some t ->
+                        DuAction (DuCopy (fake1OnExpression, exp, var)) |> augs.Statements.Add
                 | XGI -> () // XGI 에서는 변수 선언에 해당하는 부분을 변수의 초기값으로 할당하고 끝내므로, 더이상의 ladder 생성을 하지 않는다.
                 | _ -> failwith "Not supported runtime target"
             | _ ->
-                procStatement statement
+                procStatement pack statement
 
             let rungComment =
                 [

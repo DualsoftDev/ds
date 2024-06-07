@@ -42,6 +42,7 @@
                     <Symbols Count="1">
                         <Symbol Name="b0" Comment="bool b0 = false &amp;&amp; 2.1 == 6.1" Device="M" DevicePos="0" Type="BIT"/>
                         <Symbol Name="_t1_EQ" Comment="2.1 == 6.1" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="_t2_AND" Comment="false &amp;&amp; $_t1_EQ" Device="M" DevicePos="2" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -84,12 +85,32 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="3079" Param="84"/>
                                     <Element ElementType="14" Coordinate="3166">
-                                        M00000
+                                        M00002
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="5121" Param="90"/>
-                                    <Element ElementType="33" Coordinate="5214" Param="END">
+                                    <Element ElementType="6" Coordinate="4097">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="6" Coordinate="4100">
+                                        M00002
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="4103" Param="72"/>
+                                    <Element ElementType="33" Coordinate="4190" Param="BOR,M00000,1,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="6145">
+                                        _1ON
+                                    </Element>
+                                    <Element ElementType="7" Coordinate="6148">
+                                        M00002
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="6151" Param="72"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="BAND,M00000,254,M00000,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="9217" Param="90"/>
+                                    <Element ElementType="33" Coordinate="9310" Param="END">
                                         END
                                     </Element>
                                 </Rung>

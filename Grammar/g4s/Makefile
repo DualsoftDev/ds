@@ -4,8 +4,8 @@ jar = antlr4-4.13.0-complete.jar
 jarPath = /usr/local/lib/$(jar)
 
 antlr4=java -Xmx500M -cp $(jarPath) org.antlr.v4.Tool
-grun=java -Xmx500M -cp $(jarPath):. org.antlr.v4.gui.TestRig
-
+# grun=java -Xmx500M -cp $(jarPath):. org.antlr.v4.gui.TestRig
+grun=antlr4-parse
 grun:
 	java -version
 	$(antlr4) dsLexer.g4
@@ -21,7 +21,7 @@ tokens:
 cli:
 	echo "[sys] A = {}" | $(grun) ds model -tokens
 gui:
-	$(grun) ds model -gui < g4test/prop.ds
+	$(grun) ds.g4 system -gui g4test/prop.ds
 
 test:
 	@export CLASSPATH=".:$(jarPath):$$CLASSPATH"
@@ -93,3 +93,6 @@ java-install:
 	cd /usr/local/lib
 	curl -O $(antlrjar)
 	# https://download.oracle.com/java/20/latest/jdk-20_windows-x64_bin.exe
+
+	# test it
+	# antlr4-parse ds.g4 system -gui g4test/flow.ds

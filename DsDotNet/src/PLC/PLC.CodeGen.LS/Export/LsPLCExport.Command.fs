@@ -738,8 +738,8 @@ module internal rec Command =
     /// - expr 이 None 이면 그리지 않는다.
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
-        let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
+    let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+        let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
                 | Some expr ->
@@ -749,30 +749,26 @@ module internal rec Command =
                 | _ -> 0, 0, []
 
             let cmdSpanX, cmdSpanY, cmdXmls =
-                match cmdExp with
-                | Some cmdExp ->
-                    let nx = x + exprSpanX
+                let nx = x + exprSpanX
 
-                    let cmdXmls1 =
-                        match cmdExp with
-                        | CoilCmd _cc ->
-                            let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
-                                match prjParam.TargetType, cmdExp.CoilTerminalTag with
-                                | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
-                                | _ -> cmdExp.CoilTerminalTag.StorageName
-                            bxiCoil (nx - 1, y) cmdExp coilText
-                        | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                            bxiCommand prjParam (nx, y) cmdExp
+                let cmdXmls1 =
+                    match cmdExp with
+                    | CoilCmd _cc ->
+                        let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
+                            match prjParam.TargetType, cmdExp.CoilTerminalTag with
+                            | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
+                            | _ -> cmdExp.CoilTerminalTag.StorageName
+                        bxiCoil (nx - 1, y) cmdExp coilText
+                    | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
+                        bxiCommand prjParam (nx, y) cmdExp
 
-                    let cmdXmls2 =
-                        { cmdXmls1 with
-                            XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
+                let cmdXmls2 =
+                    { cmdXmls1 with
+                        XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
 
-                    let spanX = exprSpanX + cmdXmls2.TotalSpanX
-                    let spanY = max exprSpanY cmdXmls2.TotalSpanY
-                    spanX, spanY, cmdXmls2
-                | None ->
-                    0, 0, { X = x; Y = y; TotalSpanX = 0; TotalSpanY = 0; XmlElements = [] }
+                let spanX = exprSpanX + cmdXmls2.TotalSpanX
+                let spanY = max exprSpanY cmdXmls2.TotalSpanY
+                spanX, spanY, cmdXmls2
 
             let xml = (exprXmls @ cmdXmls.XmlElements).MergeXmls()
 
@@ -783,7 +779,7 @@ module internal rec Command =
             {   Xml = xml; Coordinate = c; SpanX = spanX; SpanY = spanY; }
 
         match prjParam.TargetType, cmdExp with
-        | XGK, Some (ActionCmd(Move(condition, source, target))) when source.Terminal.IsSome ->
+        | XGK, ActionCmd(Move(condition, source, target)) when source.Terminal.IsSome ->
             let fbParam, fbWidth =
                 let s, d = source.GetTerminalString(prjParam), target.Name
                 let mov =
@@ -796,9 +792,9 @@ module internal rec Command =
 
         | _ ->
             match prjParam.TargetType, condition, cmdExp with
-            | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
+            | (XGI, _, _) | (_, Some _, _) ->        // prjParam.TargetType = XGI || condition.IsSome
                 rxiRungImpl (x, y) condition cmdExp
-            | XGK, _, Some (FunctionBlockCmd(fbc)) ->
+            | XGK, _, FunctionBlockCmd(fbc) ->
                 match fbc with
                 | CounterMode(counterStatement) when counterStatement.Counter.Type = CTUD ->
                     let counter = counterStatement.Counter
@@ -841,5 +837,5 @@ module internal rec Command =
                         | TimerMode(timerStatement) ->
                             timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
                     rxiRungImpl (x, y) (Some exp) cmdExp
-            | _, _, Some _ ->
+            | _ ->
                     rxiRungImpl (x, y) condition cmdExp

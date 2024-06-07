@@ -14,14 +14,14 @@ module StatementExtensionModule =
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
         member internal x.ToStatements (pack:DynamicDictionary) : unit =
             let statement = x
-            let prjParam = pack.Get<XgxProjectParams>("projectParameter")
-            let augs = pack.Get<Augments>("augments")
+            let prjParam, augs = pack.Unpack()
 
             match statement with
             | DuVarDecl(exp, decl) ->
+                assert(prjParam.TargetType = XGK)
                 let _newExp =
                     augs.ExpressionStore <- Some decl
-                    exp.CollectExpandedExpression(prjParam, augs)
+                    exp.CollectExpandedExpression(pack)
 
                 (* 일반 변수 선언 부분을 xgi local variable 로 치환한다. *)
                 augs.Storages.Remove decl |> ignore
@@ -53,7 +53,7 @@ module StatementExtensionModule =
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some(IsArithmeticOrComparisionOperator op) ->
-                    let exp = exp.FlattenArithmeticOperator(prjParam, augs, Some target)
+                    let exp = exp.FlattenArithmeticOperator(pack, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
                             DuPLCFunction {
@@ -64,7 +64,7 @@ module StatementExtensionModule =
                                 Output = target }
                         augs.Statements.Add augFunc
                 | _ ->
-                    let newExp = exp.CollectExpandedExpression(prjParam, augs)
+                    let newExp = exp.CollectExpandedExpression(pack)
                     DuAssign(condition, newExp, target) |> augs.Statements.Add 
 
             | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->
@@ -98,6 +98,19 @@ module StatementExtensionModule =
                 match exp.Terminal with
                 | Some _ -> DuVarDecl(visitTop exp, var)
                 | None -> DuAssign(Some fake1OnExpression, visitTop exp, var)
+
+            //| DuVarDecl(exp, var) ->
+            //    let exp = visitTop exp
+            //    match exp.Terminal with
+            //    | Some _ -> DuVarDecl(exp, var)
+            //    | None ->
+            //        // TODO : 여기 수정
+            //        let exp2 = exp.AugmentXgk(pack, None, None)
+            //        DuVarDecl(exp2, var)
+            //        //DuAssign(Some fake1OnExpression, exp, var)
+
+
+
             | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
                 DuTimer { tmr with
                             RungInCondition = tryVisitTop rungIn
@@ -119,7 +132,7 @@ module StatementExtensionModule =
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (pack:DynamicDictionary, visit:IExpression -> IExpression) : Statement =
             let statement = x
-            let visit2 pack _ (exp:IExpression) = visit exp
+            let visit2 _pack _ (exp:IExpression) = visit exp
             statement.VisitExpression (pack, visit2)
 
         /// Expression 을 flattern 할 수 있는 형태로 변환 : e.g !(a>b) => (a<=b)
@@ -133,10 +146,9 @@ module StatementExtensionModule =
         ///
         /// - 현재, 구현 편의상 XGI Timer/Counter 의 다릿발에는 boolean expression 만 수용하므로 사칙/비교 연산을 assign statement 로 변환한다.
         member x.AugmentXgiFunctionParameters (pack:DynamicDictionary) : Statement =
-            let prjParam = pack.Get<XgxProjectParams>("projectParameter")
-            let augs = pack.Get<Augments>("augments")
+            let prjParam, _augs = pack.Unpack()
             let toAssignOndemand (exp:IExpression<bool> option) : IExpression<bool> option =
-                exp |> map (fun exp -> exp.ToAssignStatement prjParam augs K.arithmaticOrComparisionOperators :?> IExpression<bool>)
+                exp |> map (fun exp -> exp.ToAssignStatement(pack, K.arithmaticOrComparisionOperators) :?> IExpression<bool>)
 
             match prjParam.TargetType, x with
             | XGK, _ -> x
@@ -155,8 +167,7 @@ module StatementExtensionModule =
 
         /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙/비교연산을 assign statement 로 변환한다.
         member x.FunctionToAssignStatement (pack:DynamicDictionary) : Statement =
-            let prjParam = pack.Get<XgxProjectParams>("projectParameter")
-            let augs = pack.Get<Augments>("augments")
+            let prjParam, _augs = pack.Unpack()
             let rec visitor (pack:DynamicDictionary) (expPath:IExpression list) (exp:IExpression): IExpression =
                 if exp.Terminal.IsSome then
                     exp
@@ -175,7 +186,7 @@ module StatementExtensionModule =
                                 false
 
                         if augment then
-                            newExp.ToAssignStatement prjParam augs K.arithmaticOrComparisionOperators
+                            newExp.ToAssignStatement(pack, K.arithmaticOrComparisionOperators)
                         else
                             newExp
                     | _ ->

@@ -13,26 +13,15 @@ module XgxTypeConvertorModule =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
+            let pack = 
+                let kvs:array<string*obj> =
+                    [|
+                        ("projectParameter", prjParam)
+                        ("augments", augs)
+                    |]
+                kvs |> DynamicDictionary
 
-            match statement with
-            | DuVarDecl(exp, var) ->
-                var.Comment <- statement.ToText()                
-                var.BoxedValue <- exp.BoxedEvaluatedValue
-                augs.Storages.Add var
-            | _ -> ()
-
-            match statement with
-            | DuVarDecl _ when prjParam.TargetType = XGI ->
-                ()
-            | _ ->
-                let pack = 
-                    let kvs:array<string*obj> =
-                        [|
-                            ("projectParameter", prjParam)
-                            ("augments", augs)
-                        |]
-                    kvs |> DynamicDictionary
-
+            let procStatement (statement:Statement) =
                 let newStatement = statement.DistributeNegate(pack)
                 let newStatement = newStatement.FunctionToAssignStatement(pack)
                 let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
@@ -40,7 +29,22 @@ module XgxTypeConvertorModule =
                 match prjParam.TargetType with
                 | XGI -> newStatement.ToStatements(pack)
                 | XGK -> newStatement.ToStatementsXgk(pack)
+                | _ -> failwith "Not supported runtime target"                
+
+            match statement with
+            | DuVarDecl(exp, var) ->
+                // 변수 선언문에서 정확한 초기 값 및 주석 값을 가져온다.
+                // Local/Global 공유되는 변수에 대해, global 변수가 parser context 에서 부정확한 주석을 얻으므로, 추후에 이를 보정하기 위함이다.
+                // - GenerateXmlDocument @ LsPLCExport.Export.fs 참고
+                var.Comment <- statement.ToText()                
+                var.BoxedValue <- exp.BoxedEvaluatedValue
+                augs.Storages.Add var
+                match prjParam.TargetType with
+                | XGK -> procStatement statement
+                | XGI -> () // XGI 에서는 변수 선언에 해당하는 부분을 변수의 초기값으로 할당하고 끝내므로, 더이상의 ladder 생성을 하지 않는다.
                 | _ -> failwith "Not supported runtime target"
+            | _ ->
+                procStatement statement
 
             let rungComment =
                 [

@@ -227,11 +227,11 @@ module XgiExportModule =
                         | Some _, Some _ -> //when expr.DataType <> typeof<bool> ->
                             moveCmdRungXgk cond expr target
                         | _ ->
-                            //assert(condition.IsNone)
+                            assert(condition.IsNone)
                             simpleRung expr target
 
                 | DuAssign(condition, expr, target) ->
-                    //assert(condition.IsNone)
+                    assert(condition.IsNone)
                     simpleRung expr target
 
 

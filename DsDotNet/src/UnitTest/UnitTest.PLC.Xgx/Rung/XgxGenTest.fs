@@ -15,40 +15,21 @@ open PLC.CodeGen.Common.FlatExpressionModule
 type XgxGenerationTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
-    member x.``OR simple test`` () =
+    member x.``Add test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 3 + """
-            $x02 = ($x00 || $x01);
-"""
-        let statements = parseCodeForTarget storages code XGI 
-        storages.Count === 3
-        statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+        let qAddress = if xgx = XGI then "%QX0.1.0" else "P00001"
+        let code = $"""
+            int16 nn0 = 0s;
+            int16 nn1 = 1s;
+            int16 nn2 = 2s;
+            int16 nn3 = 3s;
+            int16 nn4 = 4s;
+            int16 nn5 = 5s;
+            bool qq = createTag({dq}{qAddress}{dq}, false);
 
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``AndOr simple test`` () =
-        let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 4 + """
-            $x03 = ($x00 || $x01) && $x02;
-"""
-        let statements = parseCodeForTarget storages code XGI 
-        storages.Count === 4
-        statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
-
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
-    member x.``And Many test`` () =
-        let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            $x15 =
-                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 && $x10 &&
-                $x11 && $x12 && $x13 && $x14
-                ;
+            //$qq = add($nn1, $nn2) > 3s;
+            //$qq = ($nn1 + $nn2) * 9s + $nn3 > 3s;
+            $qq = true && (($nn1 + $nn2) * 9s + $nn3 > 3s);
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -76,23 +57,6 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         let code = generateLargeVariableDeclarations xgx + """
             $x16 =
                 ($nn1 > $nn2) &&
-                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
-                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
-                $x30 && ($nn1 > $nn2) &&
-                $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
-                ;
-        """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``And Huge test2`` () =
-        let storages = Storages()
-        let code = generateLargeVariableDeclarations xgx + """
-            $x16 =
-                (($nn1 + $nn2) > $nn3) && (($nn4 - $nn5 + $nn6) > $nn7) &&
                 $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
                 $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
                 $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
@@ -144,12 +108,132 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``OR Many test`` () =
+    member x.``And Huge test2`` () =
+        let storages = Storages()
+        let code = generateLargeVariableDeclarations xgx + """
+            $x16 =
+                (($nn1 + $nn2) > $nn3) && (($nn4 - $nn5 + $nn6) > $nn7) &&
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
+                $x30 && ($nn1 > $nn2) &&
+                $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                ;
+        """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``And Many test`` () =
         let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x15 =
-                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 ||
-                $x10 || $x11 || $x12 || $x13 || $x14
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 && $x10 &&
+                $x11 && $x12 && $x13 && $x14
+                ;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``AndOr simple test`` () =
+        let storages = Storages()
+        let code = generateBitTagVariableDeclarations xgx 0 4 + """
+            $x03 = ($x00 || $x01) && $x02;
+"""
+        let statements = parseCodeForTarget storages code XGI 
+        storages.Count === 4
+        statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
+
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``AndOr2 test`` () =
+        let storages = Storages()
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
+            $x07 =    (($x00 || $x01) && $x02)
+                        ||  $x03
+                        || ($x04 && $x05 && $x06)
+                        ;
+            $x15 =    (($x08 && $x09) || $x10)
+                        && $x11
+                        && ($x12 || $x13 || $x14)
+                        ;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+        ()
+
+    member x.``COPY test`` () =
+        let storages = Storages()
+
+        let code =
+            let ands (x:string) = [0..63] |> map (fun i -> sprintf "$%s%02d" x i) |> String.concat " && "
+            let start = 256     // 임시 변수 사용 공간 회피 시작 주소
+            let copyIfs =
+                [
+                    for i in [0..9] @ [15..17] @ [30..33] do
+                        yield sprintf "copyIf($cond%02d, $x%02d, $y%02d);" i i i
+                ] |> String.concat "\n"
+            let addressPrefix =
+                match xgx with
+                | XGI -> "MX"
+                | XGK -> "M"
+                | _ -> failwith "Not supported runtime target"
+            generateNamedBitTagVariableDeclarations xgx "x" addressPrefix (start+0) 64 +
+            generateNamedBitTagVariableDeclarations xgx "y" addressPrefix (start+64) 64 +
+            generateNamedBitTagVariableDeclarations xgx "cond" addressPrefix (start+128) 64 +
+            $"""
+            $x63 = {ands "x"};
+            $y63 = {ands "y"};
+            $cond63 = {ands "cond"};
+
+            int16 src = 1s;
+            int16 tgt = 2s;
+            copyIf($cond50, $src, $tgt);
+
+            copyIf($cond51, true, $y51);
+            copyIf($cond52, false, $y52);
+
+            {copyIfs}
+
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``OR Block test`` () =
+        let storages = Storages()
+        let code = generateBitTagVariableDeclarations xgx 0 16 + """
+            $x15 =
+                $x01 && ($x02 || ($x03 && ($x04 || $x05 || $x06 || $x07) && $x08 && ($x09 || $x10))) 
+                ;
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``OR Block test2`` () =
+        let storages = Storages()
+        let code = generateBitTagVariableDeclarations xgx 0 32  + """
+            $x31 =
+                $x02
+                && ($x03 || $x04 || $x05)
+                && ($x06 || $x07)
+                && $x08
+                && ($x09
+                      || ($x10 && ( $x11
+                                    || $x12
+                                    || ($x13 && $x14 && $x15)
+                                    || !($x16 && $x17 && $x18))
+                               && $x19) )
                 ;
 """
         let statements = parseCodeForWindows storages code
@@ -173,12 +257,12 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``OR variable length 역삼각형 test`` () =
+    member x.``OR Many test`` () =
         let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x15 =
-                $x00
-                || ( ( $x01 || $x02 ) && $x03 )
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 ||
+                $x10 || $x11 || $x12 || $x13 || $x14
                 ;
 """
         let statements = parseCodeForWindows storages code
@@ -186,36 +270,15 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``OR Block test`` () =
+    member x.``OR simple test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            $x15 =
-                $x01 && ($x02 || ($x03 && ($x04 || $x05 || $x06 || $x07) && $x08 && ($x09 || $x10))) 
-                ;
+        let code = generateBitTagVariableDeclarations xgx 0 3 + """
+            $x02 = ($x00 || $x01);
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        let statements = parseCodeForTarget storages code XGI 
+        storages.Count === 3
+        statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
-
-    member x.``OR Block test2`` () =
-        let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 32  + """
-            $x31 =
-                $x02
-                && ($x03 || $x04 || $x05)
-                && ($x06 || $x07)
-                && $x08
-                && ($x09
-                      || ($x10 && ( $x11
-                                    || $x12
-                                    || ($x13 && $x14 && $x15)
-                                    || !($x16 && $x17 && $x18))
-                               && $x19) )
-                ;
-"""
-        let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -276,41 +339,13 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-
-    member x.``AndOr2 test`` () =
+    member x.``OR variable length 역삼각형 test`` () =
         let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 16 + """
-            $x07 =    (($x00 || $x01) && $x02)
-                        ||  $x03
-                        || ($x04 && $x05 && $x06)
-                        ;
-            $x15 =    (($x08 && $x09) || $x10)
-                        && $x11
-                        && ($x12 || $x13 || $x14)
-                        ;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-        ()
-
-
-    member x.``Add test`` () =
-        let storages = Storages()
-        let qAddress = if xgx = XGI then "%QX0.1.0" else "P00001"
-        let code = $"""
-            int16 nn0 = 0s;
-            int16 nn1 = 1s;
-            int16 nn2 = 2s;
-            int16 nn3 = 3s;
-            int16 nn4 = 4s;
-            int16 nn5 = 5s;
-            bool qq = createTag({dq}{qAddress}{dq}, false);
-
-            //$qq = add($nn1, $nn2) > 3s;
-            //$qq = ($nn1 + $nn2) * 9s + $nn3 > 3s;
-            $qq = true && (($nn1 + $nn2) * 9s + $nn3 > 3s);
+            $x15 =
+                $x00
+                || ( ( $x01 || $x02 ) && $x03 )
+                ;
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
@@ -319,44 +354,8 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 
 
 
-    member x.``COPY test`` () =
-        let storages = Storages()
 
-        let code =
-            let ands (x:string) = [0..63] |> map (fun i -> sprintf "$%s%02d" x i) |> String.concat " && "
-            let start = 256     // 임시 변수 사용 공간 회피 시작 주소
-            let copyIfs =
-                [
-                    for i in [0..9] @ [15..17] @ [30..33] do
-                        yield sprintf "copyIf($cond%02d, $x%02d, $y%02d);" i i i
-                ] |> String.concat "\n"
-            let addressPrefix =
-                match xgx with
-                | XGI -> "MX"
-                | XGK -> "M"
-                | _ -> failwith "Not supported runtime target"
-            generateNamedBitTagVariableDeclarations xgx "x" addressPrefix (start+0) 64 +
-            generateNamedBitTagVariableDeclarations xgx "y" addressPrefix (start+64) 64 +
-            generateNamedBitTagVariableDeclarations xgx "cond" addressPrefix (start+128) 64 +
-            $"""
-            $x63 = {ands "x"};
-            $y63 = {ands "y"};
-            $cond63 = {ands "cond"};
 
-            int16 src = 1s;
-            int16 tgt = 2s;
-            copyIf($cond50, $src, $tgt);
-
-            copyIf($cond51, true, $y51);
-            copyIf($cond52, false, $y52);
-
-            {copyIfs}
-
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
 
 
 
@@ -366,42 +365,42 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 type XgiGenerationTest() =
     inherit XgxGenerationTest(XGI)
 
-    [<Test>] member x.``OR simple test`` () = base.``OR simple test`` ()
-    [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
-    [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
+    [<Test>] member x.``Add test`` () =  base.``Add test`` ()
     [<Test>] member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
     [<Test>] member x.``And Huge test`` () = base.``And Huge test`` ()
-    [<Test>] member x.``And Huge test2`` () = base.``And Huge test2`` ()
     [<Test>] member x.``And Huge test 3`` () = base.``And Huge test 3`` ()
     [<Test>] member x.``And Huge test 4`` () = base.``And Huge test 4`` ()
-    [<Test>] member x.``OR Many test`` () = base.``OR Many test`` ()
-    [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
-    [<Test>] member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
+    [<Test>] member x.``And Huge test2`` () = base.``And Huge test2`` ()
+    [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
+    [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
+    [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
     [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
+    [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
+    [<Test>] member x.``OR Many test`` () = base.``OR Many test`` ()
+    [<Test>] member x.``OR simple test`` () = base.``OR simple test`` ()
     [<Test>] member x.``OR variable length test`` () = base.``OR variable length test`` ()
-    [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
-    [<Test>] member x.``Add test`` () =  base.``Add test`` ()
-    [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
+    [<Test>] member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
 
 type XgkGenerationTest() =
     inherit XgxGenerationTest(XGK)
 
-    [<Test>] member x.``OR simple test`` () = base.``OR simple test`` ()
-    [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
-    [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
+    [<Test>] member x.``Add test`` () =  base.``Add test`` ()
     [<Test>] member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
     [<Test>] member x.``And Huge test`` () = base.``And Huge test`` ()
-    [<Test>] member x.``And Huge test2`` () = base.``And Huge test2`` ()
     [<Test>] member x.``And Huge test 3`` () = base.``And Huge test 3`` ()
     [<Test>] member x.``And Huge test 4`` () = base.``And Huge test 4`` ()
-    [<Test>] member x.``OR Many test`` () = base.``OR Many test`` ()
-    [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
-    [<Test>] member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
+    [<Test>] member x.``And Huge test2`` () = base.``And Huge test2`` ()
+    [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
+    [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
+    [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
     [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
+    [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
+    [<Test>] member x.``OR Many test`` () = base.``OR Many test`` ()
+    [<Test>] member x.``OR simple test`` () = base.``OR simple test`` ()
     [<Test>] member x.``OR variable length test`` () = base.``OR variable length test`` ()
-    [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
-    [<Test>] member x.``Add test`` () =  base.``Add test`` ()
-    [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
+    [<Test>] member x.``OR variable length 역삼각형 test`` () = base.``OR variable length 역삼각형 test`` ()
 

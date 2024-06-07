@@ -1,115 +1,16 @@
 namespace PLC.CodeGen.LS
 
 open System.Linq
-open System.Security
 
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
-open System
 
 
 [<AutoOpen>]
 module XgxExpressionConvertorModule =
-    /// '_ON' 에 대한 flat expression
-    let fakeAlwaysOnFlatExpression =
-        let on =
-            {   new System.Object() with
-                    member x.Finalize() = ()
-                interface IExpressionizableTerminal with
-                    member x.ToText() = "_ON"
-                    member x.DataType = typedefof<bool>
-                interface ITerminal with
-                    member x.Variable = None
-                    member x.Literal = Some(x:?>IExpressionizableTerminal)
-                  }
-
-        FlatTerminal(on, None, false)
-
-    /// '_ON' 에 대한 expression
-    let fakeAlwaysOnExpression: Expression<bool> =
-        let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
-        DuTerminal(DuVariable on)
-
-    /// '_1ON' 에 대한 expression
-    let fake1OnExpression: Expression<bool> =
-        let on = createXgxVariable "_1ON" true "가짜 _1ON" :?> XgxVar<bool>
-        DuTerminal(DuVariable on)
-
-
-    let operatorToXgiFunctionName =
-        function
-        | ">"  -> "GT"
-        | ">=" -> "GE"
-        | "<"  -> "LT"
-        | "<=" -> "LE"
-        | "==" -> "EQ"
-        | "!=" -> "NE"
-        | "+"  -> "ADD"
-        | "-"  -> "SUB"
-        | "*"  -> "MUL"
-        | "/"  -> "DIV"
-        | _ -> failwithlog "ERROR"
-
-
-    /// {prefix}{Op}{suffix} 형태로 반환.  e.g "DADDU" : "{D}{ADD}{U}" => DWORD ADD UNSIGNED
-    ///
-    /// - prefix: "D" for DWORD, "R" for REAL, "L" for LONG REAL, "$" for STRING
-    ///
-    /// suffix: "U" for UNSIGNED
-    let operatorToXgkFunctionName (op:string) (typ:Type) : string =
-        let isComparison = (|IsComparisonOperator|_|) op |> Option.isSome
-        let prefix =
-            match typ with
-            | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
-                failwith $"byte (sint) type operation {op} is not supported in XGK"     // byte 연산 지원 여부 확인 필요
-            | _ when typ.IsOneOf(typeof<int32>, typeof<uint32>) -> "D"
-            | _ when typ = typeof<single> -> "R"     //"R" for real
-            | _ when typ = typeof<double> -> "L"     //"L" for long real
-            | _ when typ = typeof<string> -> "$"     //"$" for string
-            | _ when typ.IsOneOf(typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
-            | _ -> ""
-
-        let unsigned =
-            match typ with
-            | _ when typ.IsOneOf(typeof<uint16>, typeof<uint32>) && op <> "MOV" -> "U"  // MOVE 는 "MOVU" 등이 없다.  size 만 중요하지 unsigned 여부는 중요하지 않다.
-            | _ -> ""
-
-        let opName =
-            match op with
-            | "+"  -> "ADD"
-            | "-"  -> "SUB"
-            | "*"  -> "MUL"
-            | "/"  -> "DIV"
-            | "!=" -> "<>"
-            | "==" -> "="
-            | "MOV" -> "MOV"
-            | _ when isComparison -> op
-            | _ -> failwithlog "ERROR"
-
-        if isComparison then
-            $"{unsigned}{prefix}{opName}"       // e.g "UD<="
-        else
-            $"{prefix}{opName}{unsigned}"
-
-    let operatorToMnemonic op =
-        try
-            operatorToXgiFunctionName op
-        with ex ->
-            match op with
-            | "||" -> "OR"
-            | "&&" -> "AND"
-            | "<>" -> "NE"
-            | _ -> failwithlog "ERROR"
-
-    type XgxProjectParams with
-        member x.CreateAutoVariableWithFunctionExpression(exp:IExpression) =
-            match exp.FunctionName with
-            | Some op ->
-                let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
-                x.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
-            | _ -> failwithlog "ERROR"
-
+    type DynamicDictionary with
+        member x.Unpack() = x.Get<XgxProjectParams>("projectParameter"), x.Get<Augments>("augments")
 
     type IExpression with
         /// expression 내부의 비교 및 사칙 연산을 xgi/xgk function 으로 대체
@@ -345,9 +246,6 @@ module XgxExpressionConvertorModule =
 
             let newExp = newExp.ZipVisitor(prjParam, augs)
             newExp
-
-    type DynamicDictionary with
-        member x.Unpack() = x.Get<XgxProjectParams>("projectParameter"), x.Get<Augments>("augments")
 
     type ExpressionConversionResult = IExpression * IStorage list * Statement list
     type IExpression with

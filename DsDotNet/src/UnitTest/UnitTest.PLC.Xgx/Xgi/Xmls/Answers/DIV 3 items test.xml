@@ -92,7 +92,7 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="5">
                             <Symbols>
-                                <Symbol Name="_t1_DIV" Comment="/ output" Device="" Kind="1" Type="INT" InitValue="0" Address="" State="0"/>
+                                <Symbol Name="_t1_DIV" Comment="$nn1 / $nn2" Device="" Kind="1" Type="INT" InitValue="0" Address="" State="0"/>
                                 <Symbol Name="nn1" Comment="int16 nn1 = 1s" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn2" Comment="int16 nn2 = 2s" Device="" Kind="8" State="0"/>
                                 <Symbol Name="nn3" Comment="int16 nn3 = 3s" Device="" Kind="8" State="0"/>

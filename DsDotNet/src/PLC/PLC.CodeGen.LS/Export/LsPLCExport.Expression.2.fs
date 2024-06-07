@@ -102,6 +102,13 @@ module XgxExpressionConvertorModule =
             | "<>" -> "NE"
             | _ -> failwithlog "ERROR"
 
+    type XgxProjectParams with
+        member x.CreateAutoVariableWithFunctionExpression(exp:IExpression) =
+            match exp.FunctionName with
+            | Some op ->
+                let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
+                x.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
+            | _ -> failwithlog "ERROR"
 
 
     type IExpression with
@@ -125,10 +132,8 @@ module XgxExpressionConvertorModule =
                 | Some(IsArithmeticOrComparisionOperator op) -> //when level <> 0 ->
                     let args = functionExpression.FunctionArguments
                     let var:IStorage =
-                        expStore |> Option.defaultWith (fun () -> 
-                            let initValue = functionExpression.BoxedEvaluatedValue
-                            let comment = args |> map (fun a -> a.ToText()) |> String.concat $" {op} "
-                            prjParam.CreateAutoVariable("out", initValue, comment))
+                        expStore
+                        |> Option.defaultWith (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(functionExpression))
 
                     expandFunctionStatements.Add
                     <| DuPLCFunction {
@@ -156,13 +161,9 @@ module XgxExpressionConvertorModule =
           ) : IExpression list =
             let storage, augmentedStatementsStorage = augs.Storages, augs.Statements
             let withAugmentedPLCFunction (exp: IExpression) =
-                let op = exp.FunctionName.Value
-
-                let out =
-                    let tmpNameHint = operatorToMnemonic op
-                    prjParam.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, $"{op} output")
-
+                let out = prjParam.CreateAutoVariableWithFunctionExpression(exp)
                 storage.Add out
+                let op = exp.FunctionName.Value
 
                 let args =
                     exp.FunctionArguments
@@ -225,8 +226,7 @@ module XgxExpressionConvertorModule =
                             if argsRemaining.IsEmpty then
                                 outputStore.Value
                             else
-                                let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
-                                prjParam.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
+                                prjParam.CreateAutoVariableWithFunctionExpression(exp)
 
                         let outexp = out.ToExpression()
 
@@ -360,8 +360,7 @@ module XgxExpressionConvertorModule =
                 | "==" | "<>" | "!=" when prjParam.TargetType = XGK && x.FunctionArguments[0].DataType = typedefof<bool> ->
                     x.AugmentXgk(pack, None, None)
                 | _ ->
-                    let tmpNameHint = operatorToMnemonic fn
-                    let var = prjParam.CreateAutoVariable(tmpNameHint, x.BoxedEvaluatedValue, $"{x.ToText()}")
+                    let var = prjParam.CreateAutoVariableWithFunctionExpression(x)
                     let stmt =
                         match prjParam.TargetType with
                         | XGK -> DuAssign(None, x, var)
@@ -419,12 +418,8 @@ module XgxExpressionConvertorModule =
                         let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
                         let createTmpStorage =
                             fun () -> 
-                                match expStore with
-                                | Some stg -> stg
-                                | None ->
-                                    let tmpNameHint = operatorToMnemonic fn
-                                    let tmpVar = prjParam.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, $"{exp.ToText()}")
-                                    tmpVar :> IStorage
+                                expStore
+                                |> Option.defaultWith (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(exp))
 
                         match fn with
                         | IsArithmeticOrComparisionOperator _ ->

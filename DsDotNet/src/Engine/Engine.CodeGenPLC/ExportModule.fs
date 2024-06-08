@@ -11,6 +11,8 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
+    /// 실제 구동용.  Generate XML file for XGI or XGK PLC.
+    /// UnitTest 용은 generateXmlForTest 참고
     let generateXmlXGX
         (plcType:PlatformTarget) (system: DsSystem) (globalStorages:Storages)
         (localStorages:Storages) (pous: PouGen seq) (existingLSISprj:string option)
@@ -28,7 +30,8 @@ module ExportModule =
                 Comment = "DsLogic Automatically generate"
                 LocalStorages = localStorages
                 GlobalStorages = globalStorages
-                CommentedStatements = pouGens.Collect(fun p -> p.CommentedStatements()) |> Seq.toList }
+                CommentedStatements = pouGens.Collect(fun p -> p.CommentedStatements()) |> Seq.toList
+                }
 
             pouParams
 

@@ -13,7 +13,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.10" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.11" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
         <PackageReference Include="FsUnit" Version="5.0.4" />
@@ -53,6 +53,8 @@
     <ItemGroup>
 
         <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
+
+        <ProjectReference Include="..\..\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />
 
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />

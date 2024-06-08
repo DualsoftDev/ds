@@ -93,6 +93,7 @@ module XgxFixtures =
         disposable { runtimeTarget <- runtimeTargetBackup }
 
  
+    /// Unit test 용 PLC XML 생성 함수.  실제 runtime 환경에서는 generateXmlXGX 사용
     let private generateXmlForTest (xgx:PlatformTarget) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
 

@@ -9,6 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open System
 open PLC.CodeGen.Common.K
+open Dual.Common.Core.FS
 
 
 [<AutoOpen>]
@@ -371,6 +372,36 @@ module XgiExportModule =
 
         member x.GenerateXmlString(prjParam: XgxProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
 
+        member private x.GroupStatementsByUdtDeclaration() =
+            x.CommentedStatements
+            |> groupBy (fun cs ->
+                match cs.Statement with
+                | DuUdtDecl _ -> "udt-decl"
+                | DuUdtInstances _ -> "udt-instances"
+                | _ -> "non-udt")
+            |> Tuple.toDictionary
+
+        /// XgxPOUParams 의 commented statements 중에서 UDT 선언을 제외한 나머지를 복사하여 반환
+        member x.DuplicateExcludingUdtDeclarations() : XgxPOUParams =
+            let g = x.GroupStatementsByUdtDeclaration()
+            { x with CommentedStatements = g.TryFindIt("non-udt").DefaultValue([]) }
+
+        /// XgxPOUParams 의 commented statements 중에서 UDT 선언문 반환
+        member x.GetUdtDeclarations() : UdtDecl list =
+            x.GroupStatementsByUdtDeclaration()["udt-decl"]
+            |> map (fun cs ->
+                match cs.Statement with
+                | DuUdtDecl udt -> udt
+                | _ -> failwith "Not a UDT declaration")
+
+        /// XgxPOUParams 의 commented statements 중에서 UDT 변수 정의문 반환
+        member x.GetUdtInstances() : UdtInstance list =
+            x.GroupStatementsByUdtDeclaration()["udt-instances"]
+            |> map (fun cs ->
+                match cs.Statement with
+                | DuUdtInstances udt -> udt
+                | _ -> failwith "Not a UDT declaration")
+
         /// POU 단위로 xml rung 생성
         member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
             let {   TaskName = taskName
@@ -624,6 +655,27 @@ module XgiExportModule =
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
+            (* UDT 정의 삽입*)
+            do
+                let udtDecl =
+                    pous
+                    |> collect(fun pou -> pou.GetUdtDeclarations())
+                    |> exactlyOne   // 일단, 전체 project 에 걸쳐 하나의 UDT 만 정의되도록 제한 한다.
+                tracefn "%A" udtDecl
+
+                let xnUdts = xdoc.GetXmlNode("//POU/UserDataTypes")
+                udtDecl.GenerateXmlNode() |> xnUdts.AdoptChild |> ignore
+
+                let udtInstances =
+                    pous
+                    |> collect(fun pou -> pou.GetUdtInstances())
+                    |> toArray
+                tracefn "%A" udtInstances
+
+                let x = udtDecl, udtInstances, xnUdts
+                ()
+
+
             (* POU program 삽입 *)
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
@@ -638,7 +690,9 @@ module XgiExportModule =
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
                     let mainScan =   if i = 0 then Some(mainScanName) else None
                     // POU 단위로 xml rung 생성
-                    pou.GenerateXmlNode(x, mainScan)
+                    pou
+                        .DuplicateExcludingUdtDeclarations()
+                        .GenerateXmlNode(x, mainScan)
                     |> xnPrograms.AdoptChild
                     |> ignore
 
@@ -703,7 +757,38 @@ module XgiExportModule =
             checkDoubleCoil()
             checkLWordUsage()
 
+    and UdtDecl with
+        member x.GenerateXmlNode() : XmlNode =
+            let udt = $"<UserDataType>{x.TypeName}</UserDataType>" |> DualXmlNode.ofString
+            let udtVar = $"<UserDataTypeVar></UserDataTypeVar>" |> DualXmlNode.ofString
+            let symbols = $"<Symbols></Symbols>" |> DualXmlNode.ofString
+            let mutable devicePos = 0
+            for m in x.Members do
+                let symbol = $"<Symbol></Symbol>" |> DualXmlNode.ofString
+                symbol.AddAttributes([
+                    "Name", m.Name
+                    "Type", m.Type      // todo: ds type 과 PLC type 간 변환 필요.  int -> DINT, int16 -> int
+                    "DevicePos", toString devicePos
+                ]) |> ignore
 
+                // get type length 
+                let dt = textToDataType m.Type
+                let bitLength = dt.ToPLCBitSize()
+                devicePos <- devicePos + bitLength
+
+                symbols.AdoptChild symbol |> ignore
+
+            udt.AddAttribute("Version", "256") |> ignore
+            udtVar.AddAttributes([
+                "Version",          "Ver 1.0"
+                //"StructureSize",    ((devicePos + 31) / 32) * 32 |> toString        // 정확한 산식을 모름
+                //"StructureSizeXgi", ((devicePos + 15) / 16) * 16 |> toString        // 정확한 산식을 모름
+                "Count",            x.Members.Length |> toString
+                ]) |> ignore
+
+            udtVar.AdoptChild symbols |> ignore
+            udt.AdoptChild udtVar |> ignore
+            udt
 
     let IsXg5kXGT(xmlProjectFilePath:string) =
         let xdoc = DualXmlDocument.loadFromFile xmlProjectFilePath

@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open type exprParser
 open Antlr4.Runtime.Tree
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module rec ExpressionParser =
@@ -272,7 +273,7 @@ module rec ExpressionParser =
 
     let tryCreateStatement (storages: Storages) (ctx: StatementContext) : Statement option =
         assert (ctx.ChildCount = 1)
-        let storageName = ctx.Descendants<StorageNameContext>().First().GetText()
+        let getStorageName = fun () -> ctx.Descendants<StorageNameContext>().First().GetText()
 
         let optStatement =
             match ctx.children[0] with
@@ -282,6 +283,7 @@ module rec ExpressionParser =
                 let declType =
                     ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
 
+                let storageName = getStorageName()
                 if storages.ContainsKey storageName then
                     failwith $"ERROR: Duplicated variable declaration {storageName}"
 
@@ -309,6 +311,7 @@ module rec ExpressionParser =
                     Some <| DuVarDecl(exp, variable)
 
             | :? AssignContext as assignCtx ->
+                let storageName = getStorageName()
                 if not <| storages.ContainsKey storageName then
                     failwith $"ERROR: Failed to assign into non existing storage {storageName}"
 
@@ -338,15 +341,28 @@ module rec ExpressionParser =
                 let target = storages[target.Replace("$", "")]
                 Some <| DuAction(DuCopy(condition, source, target))
 
-            | :? UdtDeclContext as udtDeclCtx ->
-                let typeName = udtDeclCtx.udtType().GetText()
+            | :? UdtDeclContext as ctx ->
+                let typeName = ctx.udtType().GetText()
                 let members =
-                    udtDeclCtx.Descendants<VarDeclContext>()
+                    ctx.Descendants<VarDeclContext>()
                         .Select(fun ctx -> {
                             Type = ctx.``type``().GetText()
-                            Name =ctx.storageName().GetText() } )
+                            Name = ctx.storageName().GetText() } )
                         .ToFSharpList()
                 Some <| DuUdtDecl(typeName, members)
+            | :? UdtInstancesContext as ctx ->
+                let t = ctx.udtType().GetText()
+                let v = ctx.udtVar().GetText()
+                let n =
+                    let arrDecl = ctx.arrayDecl()
+                    if isNull arrDecl then
+                        1
+                    else
+                        let arrText = arrDecl.children[0].GetText()
+                        match Regex.Replace(arrText, @"\s+", "") with
+                        | RegexPattern @"^\[(\d+)\]$" [ Int32Pattern arraySize ] -> arraySize
+                        | _ -> failwithlog "ERROR: Invalid array declaration"
+                Some <| DuUdtInstances(t, v, n)
             | _ -> failwithlog "ERROR: Not yet statement"
 
         optStatement.Iter(fun st -> st.Do())

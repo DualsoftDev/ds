@@ -102,11 +102,11 @@ module XgxFixtures =
         let localStorages = Storages()
 
         let pouParams:XgxPOUParams = {
-            /// POU name.  "DsLogic"
+            // POU name.  "DsLogic"
             POUName = "DsLogic"
-            /// POU container task name
+            // POU container task name
             TaskName = "Scan Program"
-            /// POU ladder 최상단의 comment
+            // POU ladder 최상단의 comment
             Comment = "DS Logic for XGI"
             LocalStorages = localStorages
             GlobalStorages = globalStorages

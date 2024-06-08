@@ -119,7 +119,7 @@ module POUParametersModule =
 
 
     type Statement with
-        member x.SanityCheck(_prjParam: XgxProjectParams) =
+        member x.SanityCheck(prjParam: XgxProjectParams) =
             match x with
             | DuAssign(_, _expr, _target) -> ()
             | DuVarDecl(_expr, _variable) -> ()
@@ -182,6 +182,9 @@ module POUParametersModule =
                 | CTR ->
                     verifyM "CTR condition error" (up.IsNone && down.IsSome)
 
+            | (DuUdtDecl _ | DuUdtInstances _) ->
+                if prjParam.TargetType <> XGI then
+                    failwith "UDT declaration is not supported in XGK"
             | DuAction(_a:ActionStatement) -> ()
             | DuPLCFunction(_fbParam) -> ()
 

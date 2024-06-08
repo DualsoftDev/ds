@@ -7,26 +7,28 @@ open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
-open System
 open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ExportModule =
-    let generateXmlXGX (plcType:PlatformTarget) (system: DsSystem) globalStorages localStorages (pous: PouGen seq) existingLSISprj startMemory startTimer startCounter  : string =
+    let generateXmlXGX
+        (plcType:PlatformTarget) (system: DsSystem) (globalStorages:Storages)
+        (localStorages:Storages) (pous: PouGen seq) (existingLSISprj:string option)
+        (startMemory:int) (startTimer:int) (startCounter:int)
+      : string =
         let projName = system.Name
         
         let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
-            let pouParams: XgxPOUParams =
-                {
-                  /// POU name.  "DsLogic"
-                  POUName = pouName
-                  /// POU container task name
-                  TaskName = taskName
-                  /// POU ladder 최상단의 comment
-                  Comment = "DsLogic Automatically generate"
-                  LocalStorages = localStorages
-                  GlobalStorages = globalStorages
-                  CommentedStatements = pouGens.Collect(fun p -> p.CommentedStatements()) |> Seq.toList }
+            let pouParams: XgxPOUParams = {
+                // POU name.  "DsLogic"
+                POUName = pouName
+                // POU container task name
+                TaskName = taskName
+                // POU ladder 최상단의 comment
+                Comment = "DsLogic Automatically generate"
+                LocalStorages = localStorages
+                GlobalStorages = globalStorages
+                CommentedStatements = pouGens.Collect(fun p -> p.CommentedStatements()) |> Seq.toList }
 
             pouParams
 
@@ -97,11 +99,11 @@ module ExportModule =
                 CounterCounterGenerator = counterGeneratorWithExclusionList startCounter usedByteIndices
                 AutoVariableCounter = counterGenerator 0
 
-                POUs =
-                    [ yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
-                      yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices" "Devices"
-                      for p in pous.Where(fun f -> f.IsExternal) do
-                          yield getXgxPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ] ] }
+                POUs = [
+                    yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
+                    yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices" "Devices"
+                    for p in pous.Where(fun f -> f.IsExternal) do
+                        yield getXgxPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ] ] }
 
         prjParam.GenerateXmlString()
 

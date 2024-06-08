@@ -86,8 +86,9 @@ statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl 
 
     udtDecl: 'struct' udtType '{' varDecl (';' varDecl)* ';' '}';
         udtType: IDENTIFIER;
-        udtInstances: udtType IDENTIFIER (arrayDecl)?;
+    udtInstances: udtType udtVar (arrayDecl)?;
         arrayDecl:ARRAYDECL;
+        udtVar: IDENTIFIER;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels

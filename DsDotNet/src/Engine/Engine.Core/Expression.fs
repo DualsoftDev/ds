@@ -234,8 +234,11 @@ module ExpressionModule =
         /// Ladder 생성 시점에는 DuVarDecl statement 는 존재하지 않는다.  변수 선언 혹은 assign 문으로 사전에 변환된다.
         | DuVarDecl of expression:IExpression * variable:IStorage
 
-        /// User Defined Type (structure) 선언.
+        /// User Defined Type (structure) 선언.  e.g "struct Person { string name; int age; };"
         | DuUdtDecl of name:string * members:UdtMember list
+
+        /// UDT instances 정의.  e.g "Person peopole[10];"
+        | DuUdtInstances of udtTypeName:string * name:string * arraySize:int
 
         /// 대입문.  e.g "$a = $b + 3;"
         ///
@@ -307,7 +310,7 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
-            | DuUdtDecl _ ->
+            | (DuUdtDecl _ | DuUdtInstances _) ->
                 ()
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
@@ -342,6 +345,8 @@ module ExpressionModule =
                 $"{typ.ToLower()} {c.Name} = {functionName}({args})"
             | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
+
+            | (DuUdtDecl _ | DuUdtInstances _) -> sprintf "%A" x
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 

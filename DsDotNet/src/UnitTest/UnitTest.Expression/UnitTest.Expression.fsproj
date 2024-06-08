@@ -39,6 +39,7 @@
         <Compile Include="CounterTest.fs" />
         <Compile Include="StatementTest.fs" />
         <Compile Include="DeclarationTest.fs" />
+        <Compile Include="UdtTest.fs" />
         <None Include="App.config" />
         <Compile Include="Main.fs" />
     </ItemGroup>

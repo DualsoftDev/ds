@@ -759,9 +759,16 @@ module XgiExportModule =
 
     and UdtDecl with
         member x.GenerateXmlNode() : XmlNode =
-            let udt = $"<UserDataType>{x.TypeName}</UserDataType>" |> DualXmlNode.ofString
-            let udtVar = $"<UserDataTypeVar></UserDataTypeVar>" |> DualXmlNode.ofString
-            let symbols = $"<Symbols></Symbols>" |> DualXmlNode.ofString
+            let udt = $"""
+                <UserDataType Version="256">
+                    {x.TypeName}
+                    <UserDataTypeVar Version="Ver 1.0" Count="{x.Members.Length}">
+                        <Symbols>
+                        </Symbols>
+                    </UserDataTypeVar>
+                </UserDataType>
+                """ |> DualXmlNode.ofString
+            let symbols = udt.GetXmlNode "UserDataTypeVar/Symbols"
             let mutable devicePos = 0
             for m in x.Members do
                 let symbol = $"<Symbol></Symbol>" |> DualXmlNode.ofString
@@ -772,22 +779,12 @@ module XgiExportModule =
                 ]) |> ignore
 
                 // get type length 
-                let dt = textToDataType m.Type
-                let bitLength = dt.ToPLCBitSize()
-                devicePos <- devicePos + bitLength
+                devicePos <-
+                    let dt = textToDataType m.Type
+                    let bitLength = dt.ToPLCBitSize()
+                    devicePos + bitLength
 
                 symbols.AdoptChild symbol |> ignore
-
-            udt.AddAttribute("Version", "256") |> ignore
-            udtVar.AddAttributes([
-                "Version",          "Ver 1.0"
-                //"StructureSize",    ((devicePos + 31) / 32) * 32 |> toString        // 정확한 산식을 모름
-                //"StructureSizeXgi", ((devicePos + 15) / 16) * 16 |> toString        // 정확한 산식을 모름
-                "Count",            x.Members.Length |> toString
-                ]) |> ignore
-
-            udtVar.AdoptChild symbols |> ignore
-            udt.AdoptChild udtVar |> ignore
             udt
 
     let IsXg5kXGT(xmlProjectFilePath:string) =

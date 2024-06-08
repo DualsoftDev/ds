@@ -120,7 +120,7 @@ module DsDataType =
             | DuINT32   -> 32
             | DuINT64   -> 64
             | DuINT8    -> 8
-            | DuSTRING  -> 32
+            | DuSTRING  -> (32*8)
             | DuUINT16  -> 16
             | DuUINT32  -> 32
             | DuUINT64  -> 64

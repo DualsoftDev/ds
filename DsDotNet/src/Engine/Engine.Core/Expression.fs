@@ -225,6 +225,17 @@ module ExpressionModule =
         Name:string
     }
 
+    type UdtDecl = {
+        TypeName:string
+        Members:UdtMember list
+    }
+
+    type UdtInstance = {
+        TypeName:string
+        VarName:string
+        ArraySize:int
+    }
+
     type Statement =
         /// 변수 선언.  e.g "int a = $pi + 3;"  초기값 처리에 주의
         ///
@@ -235,10 +246,10 @@ module ExpressionModule =
         | DuVarDecl of expression:IExpression * variable:IStorage
 
         /// User Defined Type (structure) 선언.  e.g "struct Person { string name; int age; };"
-        | DuUdtDecl of name:string * members:UdtMember list
+        | DuUdtDecl of UdtDecl
 
         /// UDT instances 정의.  e.g "Person peopole[10];"
-        | DuUdtInstances of udtTypeName:string * name:string * arraySize:int
+        | DuUdtInstances of UdtInstance
 
         /// 대입문.  e.g "$a = $b + 3;"
         ///

@@ -29,11 +29,14 @@ Person people[10];
             let statements = udt |> parseCodeForWindows storages;
             statements |> List.iteri (fun i st -> tracefn "[%d] %A" i st)
 
-            statements[0] === DuUdtDecl ("Person", [
-                                            { Type = "string"; Name = "name" };
-                                            { Type = "int"; Name = "age" }])
-            statements[1] === DuUdtInstances ("Person", "hong", 1)
-            statements[2] === DuUdtInstances ("Person", "people", 10)
+            statements[0] === DuUdtDecl {
+                        TypeName = "Person";
+                        Members = [
+                            { Type = "string"; Name = "name" };
+                            { Type = "int"; Name = "age" }
+                        ]}
+            statements[1] === DuUdtInstances { TypeName = "Person"; VarName="hong";   ArraySize=1 }
+            statements[2] === DuUdtInstances { TypeName = "Person"; VarName="people"; ArraySize=10 }
 
 
 

@@ -45,8 +45,8 @@
                 <Task Version="257" Attribute="2">Scan Program</Task>
             </Tasks>
             <POU>
-                <Programs>
-                </Programs>
+                <Programs></Programs>
+                <UserDataTypes></UserDataTypes>
             </POU>
         </Configuration>
     </Configurations>

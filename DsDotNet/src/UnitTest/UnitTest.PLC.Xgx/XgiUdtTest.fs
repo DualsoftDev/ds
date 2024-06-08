@@ -7,6 +7,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
+open Engine.CodeGenPLC
 
 
 [<AutoOpen>]
@@ -32,8 +33,8 @@ module XgiUdtTestModule =
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
 
-        //[<Test>]
-        //member x.``xgi udt decl plc gen`` () =
-        //    let result = exportXMLforLSPLC(XGI, sys, "XXXXXXXXX", None, 0, 0, 0)
-        //    ()
+        [<Test>]
+        member x.``xgi udt decl plc gen`` () =
+            let result = exportXMLforLSPLC(XGI, sys, "XXXXXXXXX", None, 0, 0, 0)
+            ()
 

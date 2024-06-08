@@ -349,7 +349,8 @@ module rec ExpressionParser =
                             Type = ctx.``type``().GetText()
                             Name = ctx.storageName().GetText() } )
                         .ToFSharpList()
-                Some <| DuUdtDecl(typeName, members)
+                Some <| DuUdtDecl {TypeName = typeName; Members = members}
+
             | :? UdtInstancesContext as ctx ->
                 let t = ctx.udtType().GetText()
                 let v = ctx.udtVar().GetText()
@@ -362,7 +363,8 @@ module rec ExpressionParser =
                         match Regex.Replace(arrText, @"\s+", "") with
                         | RegexPattern @"^\[(\d+)\]$" [ Int32Pattern arraySize ] -> arraySize
                         | _ -> failwithlog "ERROR: Invalid array declaration"
-                Some <| DuUdtInstances(t, v, n)
+                Some <| DuUdtInstances { TypeName = t; VarName = v; ArraySize = n }
+
             | _ -> failwithlog "ERROR: Not yet statement"
 
         optStatement.Iter(fun st -> st.Do())

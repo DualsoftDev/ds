@@ -23,6 +23,9 @@ cli:
 gui:
 	$(grun) ds.g4 system -gui g4test/prop.ds
 
+udt:
+	$(grun) expr.g4 toplevels -gui g4test/udt.ds
+
 test:
 	@export CLASSPATH=".:$(jarPath):$$CLASSPATH"
 #	for f in g4test/*; do

@@ -46,7 +46,7 @@ terminal: storage | tag | literal;
 toplevels: toplevel (';' toplevel)* ';';
     toplevel: expr|statement;
 
-statement: assign | varDecl | timerDecl | counterDecl | copyStatement;
+statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl | udtInstances;
     assign: normalAssign | risingAssign | fallingAssign;
     normalAssign: '$' storageName '=' expr;
     // risingAssign: 'rising' '(' '$' storageName ')' '==' expr;
@@ -83,6 +83,11 @@ statement: assign | varDecl | timerDecl | counterDecl | copyStatement;
         copyCondition: expr;
         copySource: expr;
         copyTarget: storage | tag;
+
+    udtDecl: 'struct' udtType '{' varDecl (';' varDecl)* ';' '}';
+        udtType: IDENTIFIER;
+        udtInstances: udtType IDENTIFIER (arrayDecl)?;
+        arrayDecl:ARRAYDECL;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels
@@ -166,6 +171,8 @@ fragment NUMBER: ((DIGITS)? ('.' DIGITS)) | ( (DIGITS) '.' (DIGITS)?);
     INT64:SIGN? DIGITS 'L';
     UINT64:DIGITS 'UL';
 
+ARRAYDECL: LBRACKET DIGITS RBRACKET;
+
 //fragment UNSIGNED_INTEGER: ('0' .. '9')+;
 
 CHAR: QuotedCharLiteral;
@@ -178,8 +185,8 @@ STRING: QuotedStringLiteral;
 
 LPAREN : '(' ;
 RPAREN : ')' ;
-LBACKET : '[' ;
-RBACKET : ']' ;
+LBRACKET : '[' ;
+RBRACKET : ']' ;
 PLUS : '+' ;
 MINUS : '-' ;
 TIMES : '*' ;

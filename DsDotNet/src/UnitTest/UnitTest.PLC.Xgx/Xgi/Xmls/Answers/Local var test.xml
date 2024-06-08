@@ -60,6 +60,7 @@
                         <RungTable/>
                     </Program>
                 </Programs>
+                <UserDataTypes></UserDataTypes>
             </POU>
         </Configuration>
     </Configurations>

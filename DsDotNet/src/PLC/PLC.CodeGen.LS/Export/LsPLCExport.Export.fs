@@ -388,19 +388,23 @@ module XgiExportModule =
 
         /// XgxPOUParams 의 commented statements 중에서 UDT 선언문 반환
         member x.GetUdtDeclarations() : UdtDecl list =
-            x.GroupStatementsByUdtDeclaration()["udt-decl"]
-            |> map (fun cs ->
+            let g = x.GroupStatementsByUdtDeclaration()
+            match g.TryFindIt("non-decl") with
+            | Some decl -> decl |> map (fun cs ->
                 match cs.Statement with
                 | DuUdtDecl udt -> udt
                 | _ -> failwith "Not a UDT declaration")
+            | None -> []
 
         /// XgxPOUParams 의 commented statements 중에서 UDT 변수 정의문 반환
         member x.GetUdtInstances() : UdtInstance list =
-            x.GroupStatementsByUdtDeclaration()["udt-instances"]
-            |> map (fun cs ->
+            let g = x.GroupStatementsByUdtDeclaration()
+            match g.TryFindIt("udt-instances") with
+            | Some inst -> inst |> map (fun cs ->
                 match cs.Statement with
                 | DuUdtInstances udt -> udt
                 | _ -> failwith "Not a UDT declaration")
+            | None -> []
 
         /// POU 단위로 xml rung 생성
         member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
@@ -583,8 +587,6 @@ module XgiExportModule =
 
             (* Global variables 삽입 *)
             do
-                //let xnGlobalVar = xdoc.GetXmlNodeTheGlobalVariable(targetType)
-                //let xnGlobalVarSymbols = xnGlobalVar.GetXmlNode "Symbols"
                 let xnGlobalSymbols = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol") |> List.ofSeq
 
                 let countExistingGlobal = xnGlobalSymbols.Length
@@ -655,25 +657,21 @@ module XgiExportModule =
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
+                (* UDT instance 삽입 : <Symbol> xml node 삽입 *)
+                pous
+                |> collect(fun pou -> pou.GetUdtInstances())
+                |> map (fun udt -> udt.GenerateXmlNode())
+                |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
+
             (* UDT 정의 삽입*)
             do
-                let udtDecl =
-                    pous
-                    |> collect(fun pou -> pou.GetUdtDeclarations())
-                    |> exactlyOne   // 일단, 전체 project 에 걸쳐 하나의 UDT 만 정의되도록 제한 한다.
-                tracefn "%A" udtDecl
-
-                let xnUdts = xdoc.GetXmlNode("//POU/UserDataTypes")
-                udtDecl.GenerateXmlNode() |> xnUdts.AdoptChild |> ignore
-
-                let udtInstances =
-                    pous
-                    |> collect(fun pou -> pou.GetUdtInstances())
-                    |> toArray
-                tracefn "%A" udtInstances
-
-                let x = udtDecl, udtInstances, xnUdts
-                ()
+                let udtDecls = pous |> collect(fun pou -> pou.GetUdtDeclarations()) |> List.ofSeq
+                match udtDecls with
+                | [] -> ()
+                | udtDecl::[] ->
+                    let xnUdts = xdoc.GetXmlNode("//POU/UserDataTypes")
+                    udtDecl.GenerateXmlNode() |> xnUdts.AdoptChild |> ignore
+                | _ -> failwith "Only one UDT declaration is allowed"
 
 
             (* POU program 삽입 *)
@@ -775,7 +773,7 @@ module XgiExportModule =
                 symbol.AddAttributes([
                     "Name", m.Name
                     "Type", m.Type      // todo: ds type 과 PLC type 간 변환 필요.  int -> DINT, int16 -> int
-                    "DevicePos", toString devicePos
+                    "DevicePos", devicePos
                 ]) |> ignore
 
                 // get type length 
@@ -786,6 +784,30 @@ module XgiExportModule =
 
                 symbols.AdoptChild symbol |> ignore
             udt
+    and UdtInstance with
+        /// UDT instance 정의문에 해당하는 <Symbol> xml node 를 생성해서 반환
+        member x.GenerateXmlNode() : XmlNode =
+            let typ =
+                match x.ArraySize with
+                | 1 -> x.TypeName
+                | n when n > 1 -> $"ARRAY[0..{n-1}] OF {x.TypeName}"
+                | _ as n -> failwith $"Invalid array size: {n}"
+            let xmlSymbol =
+                $"""<Symbol Name="{x.VarName}" Kind="6" Type="{typ}" Device="A" ></Symbol>"""
+                |> DualXmlNode.ofString
+            xmlSymbol
+        (* UDT array 초기화 방법 *)
+        (*
+	        <Symbol Name="people" Kind="6" Type="ARRAY[0..9] OF Person" State="0" Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0">
+		        <MemberInitValues>
+			        <Member MemberName="people[0].age" MemberValue="0"></Member>
+			        <Member MemberName="people[1].age" MemberValue="1"></Member>
+			        <Member MemberName="people[0].name" MemberValue="'zero'"></Member>
+			        <Member MemberName="people[1].name" MemberValue="'one'"></Member>
+		        </MemberInitValues>
+	        </Symbol>
+        *)
+
 
     let IsXg5kXGT(xmlProjectFilePath:string) =
         let xdoc = DualXmlDocument.loadFromFile xmlProjectFilePath

@@ -220,6 +220,11 @@ module ExpressionModule =
         Output:IStorage
     }
 
+    type UdtMember = {
+        Type:string
+        Name:string
+    }
+
     type Statement =
         /// 변수 선언.  e.g "int a = $pi + 3;"  초기값 처리에 주의
         ///
@@ -228,6 +233,9 @@ module ExpressionModule =
         ///
         /// Ladder 생성 시점에는 DuVarDecl statement 는 존재하지 않는다.  변수 선언 혹은 assign 문으로 사전에 변환된다.
         | DuVarDecl of expression:IExpression * variable:IStorage
+
+        /// User Defined Type (structure) 선언.
+        | DuUdtDecl of name:string * members:UdtMember list
 
         /// 대입문.  e.g "$a = $b + 3;"
         ///
@@ -299,6 +307,8 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
+            | DuUdtDecl _ ->
+                ()
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 

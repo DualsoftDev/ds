@@ -338,6 +338,15 @@ module rec ExpressionParser =
                 let target = storages[target.Replace("$", "")]
                 Some <| DuAction(DuCopy(condition, source, target))
 
+            | :? UdtDeclContext as udtDeclCtx ->
+                let typeName = udtDeclCtx.udtType().GetText()
+                let members =
+                    udtDeclCtx.Descendants<VarDeclContext>()
+                        .Select(fun ctx -> {
+                            Type = ctx.``type``().GetText()
+                            Name =ctx.storageName().GetText() } )
+                        .ToFSharpList()
+                Some <| DuUdtDecl(typeName, members)
             | _ -> failwithlog "ERROR: Not yet statement"
 
         optStatement.Iter(fun st -> st.Do())

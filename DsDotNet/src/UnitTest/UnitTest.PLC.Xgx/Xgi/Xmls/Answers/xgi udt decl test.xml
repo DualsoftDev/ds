@@ -60,7 +60,17 @@ XckU4UJCOYh5CA==
                         <RungTable/>
                     </Program>
                 </Programs>
-                <UserDataTypes></UserDataTypes>
+                <UserDataTypes>
+                    <UserDataType Version="256">
+                        Person
+                        <UserDataTypeVar Version="Ver 1.0" Count="2">
+                            <Symbols>
+                                <Symbol Name="name" Type="string" DevicePos="0"/>
+                                <Symbol Name="age" Type="int" DevicePos="256"/>
+                            </Symbols>
+                        </UserDataTypeVar>
+                    </UserDataType>
+                </UserDataTypes>
             </POU>
         </Configuration>
     </Configurations>

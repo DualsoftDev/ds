@@ -22,20 +22,19 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
                 """
             | _ -> failwith "Not supported plc type"
 
-    member x.``Equality test1`` () =
+
+    member x.``Negation, Rising, Falling contact test`` () =
         let storages = Storages()
-        let code = """
-        bool bTrue = true;
-        bool bFalse = !true;            // todo: ERROR: declaration 임에도 assign 문으로 생성됨 @ XGK 
-        bool b1 = $bTrue != true;
-        bool b2 = $bTrue == true;
-        """
+        let testCode = "$qx = rising(!($ix)) && falling(!($ix));"
+        let code = baseCode +  testCode
 
         let statements = parseCodeForWindows storages code
+        statements.Length === 1
+        statements[0].ToText() === testCode.TrimEnd(';')
+
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
-
 
     member x.``Normal, Rising, Falling contact test`` () =
         let storages = Storages() //확인필요 !(!($ix)) ==> !($ix) PLC 내려갈때 처리되고 있습니다.
@@ -56,20 +55,6 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
-
-    member x.``Negation, Rising, Falling contact test`` () =
-        let storages = Storages()
-        let testCode = "$qx = rising(!($ix)) && falling(!($ix));"
-        let code = baseCode +  testCode
-
-        let statements = parseCodeForWindows storages code
-        statements.Length === 1
-        statements[0].ToText() === testCode.TrimEnd(';')
-
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
 
     member x.``RisingAfter, FallingAfter contact test`` () =
         let storages = Storages()
@@ -103,18 +88,32 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+    member x.``Equality test1`` () =
+        let storages = Storages()
+        let code = """
+        bool bTrue = true;
+        bool bFalse = !true;            // todo: ERROR: declaration 임에도 assign 문으로 생성됨 @ XGK 
+        bool b1 = $bTrue != true;
+        bool b2 = $bTrue == true;
+        """
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
  
 type XgiRisingFallingTest() =
     inherit XgxRisingFallingTest(XGI)
-    [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
+    [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
     [<Test>] member x.``XEquality test1`` () = base.``Equality test1`` ()
 
 type XgkRisingFallingTest() =
     inherit XgxRisingFallingTest(XGK)
-    [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
+    [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
     [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
     [<Test>] member x.``XEquality test1`` () = base.``Equality test1`` ()
 

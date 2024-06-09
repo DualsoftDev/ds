@@ -1,11 +1,11 @@
 namespace PLC.CodeGen.LS
 
 
+open System
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
 open PLC.CodeGen.LS
-open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module LsPLCExportExpressionModule =
@@ -20,6 +20,133 @@ module LsPLCExportExpressionModule =
         member val Storages = storages        // ResizeArray<IStorage>
         member val Statements = statements    // ResizeArray<Statement>
         member val ExpressionStore:IStorage option = None with get, set
+
+    /// '_ON' 에 대한 flat expression
+    let fakeAlwaysOnFlatExpression =
+        let on =
+            {   new System.Object() with
+                    member x.Finalize() = ()
+                interface IExpressionizableTerminal with
+                    member x.ToText() = "_ON"
+                    member x.DataType = typedefof<bool>
+                interface ITerminal with
+                    member x.Variable = None
+                    member x.Literal = Some(x:?>IExpressionizableTerminal)
+                  }
+
+        FlatTerminal(on, None, false)
+
+    /// '_ON' 에 대한 expression
+    let fakeAlwaysOnExpression: Expression<bool> =
+        let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
+        DuTerminal(DuVariable on)
+
+    /// '_1ON' 에 대한 expression
+    let fake1OnExpression: Expression<bool> =
+        let on = createXgxVariable "_1ON" true "가짜 _1ON" :?> XgxVar<bool>
+        DuTerminal(DuVariable on)
+
+
+    let operatorToXgiFunctionName =
+        function
+        | ">"  -> "GT"
+        | ">=" -> "GE"
+        | "<"  -> "LT"
+        | "<=" -> "LE"
+        | "==" -> "EQ"
+        | "!=" -> "NE"
+        | "+"  -> "ADD"
+        | "-"  -> "SUB"
+        | "*"  -> "MUL"
+        | "/"  -> "DIV"
+        | "&&"  -> "AND"
+        | "||"  -> "OR"
+        | "!"  -> "NOT"
+        | _ -> failwithlog "ERROR"
+
+
+    /// {prefix}{Op}{suffix} 형태로 반환.  e.g "DADDU" : "{D}{ADD}{U}" => DWORD ADD UNSIGNED
+    ///
+    /// - prefix: "D" for DWORD, "R" for REAL, "L" for LONG REAL, "$" for STRING
+    ///
+    /// suffix: "U" for UNSIGNED
+    let operatorToXgkFunctionName (op:string) (typ:Type) : string =
+        let isComparison = (|IsComparisonOperator|_|) op |> Option.isSome
+        let prefix =
+            match typ with
+            | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
+                failwith $"byte (sint) type operation {op} is not supported in XGK"     // byte 연산 지원 여부 확인 필요
+            | _ when typ.IsOneOf(typeof<int32>, typeof<uint32>) -> "D"
+            | _ when typ = typeof<single> -> "R"     //"R" for real
+            | _ when typ = typeof<double> -> "L"     //"L" for long real
+            | _ when typ = typeof<string> -> "$"     //"$" for string
+            | _ when typ.IsOneOf(typeof<char>, typeof<int64>, typeof<uint64>) -> failwith "ERROR: type mismatch for XGK"
+            | _ -> ""
+
+        let unsigned =
+            match typ with
+            | _ when typ.IsOneOf(typeof<uint16>, typeof<uint32>) && op <> "MOV" -> "U"  // MOVE 는 "MOVU" 등이 없다.  size 만 중요하지 unsigned 여부는 중요하지 않다.
+            | _ -> ""
+
+        let opName =
+            match op with
+            | "+"  -> "ADD"
+            | "-"  -> "SUB"
+            | "*"  -> "MUL"
+            | "/"  -> "DIV"
+            | "!=" -> "<>"
+            | "==" -> "="
+            | "MOV" -> "MOV"
+            | _ when isComparison -> op
+            | _ -> failwithlog "ERROR"
+
+        if isComparison then
+            $"{unsigned}{prefix}{opName}"       // e.g "UD<="
+        else
+            $"{prefix}{opName}{unsigned}"
+
+    let operatorToMnemonic op =
+        try
+            operatorToXgiFunctionName op
+        with ex ->
+            match op with
+            | "||" -> "OR"
+            | "&&" -> "AND"
+            | "<>" -> "NE"
+            | _ -> failwithlog "ERROR"
+
+
+    let private getTmpName (nameHint: string) (n:int) = $"_t{n}_{nameHint}"
+    type XgxProjectParams with
+        /// 반환 객체가 실제 XgxVar<'T> 이긴 하나, 'T 를 인자로 받지 않아서 드러나지 않아서 IXgxVar 로 반환한다.
+        member x.CreateAutoVariable(nameHint: string, initValue: obj, comment) : IXgxVar =
+            let n = x.AutoVariableCounter()
+            let name = getTmpName nameHint n
+            createXgxVariable name initValue comment
+
+        member x.CreateTypedAutoVariable(nameHint: string, initValue: 'T, comment) : XgxVar<'T> =
+            let n = x.AutoVariableCounter()
+            let name = getTmpName nameHint n
+
+            let param =
+                {   defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
+                        Name = name
+                        Comment = Some comment }
+
+            XgxVar(param)
+        member x.CreateAutoVariableWithFunctionExpression(exp:IExpression) =
+            match exp.FunctionName with
+            | Some op ->
+                let tmpNameHint, comment = operatorToMnemonic op, exp.ToText()
+                x.CreateAutoVariable(tmpNameHint, exp.BoxedEvaluatedValue, comment)
+            | _ -> failwithlog "ERROR"
+
+        member x.CreateAutoVariableWithFunctionExpression(pack:DynamicDictionary, exp:IExpression) =
+            let var = x.CreateAutoVariableWithFunctionExpression(exp) :> IStorage
+            let augs = pack["augments"] :?> Augments
+            augs.Storages.Add var
+            DuAssign(None, exp, var) |> augs.Statements.Add
+            var
 
 
     type IExpression with
@@ -51,6 +178,16 @@ module LsPLCExportExpressionModule =
             | None, Some _fn ->
                 let args = exp.FunctionArguments |> map f
                 exp.WithNewFunctionArguments args |> f
+            | _ ->
+                failwith "Invalid expression"
+
+        member exp.Visit (expPath:IExpression list, f: IExpression list -> IExpression -> IExpression) : IExpression =
+            match exp.Terminal, exp.FunctionName with
+            | Some _terminal, None ->
+                f expPath exp
+            | None, Some _fn ->
+                let args = exp.FunctionArguments |> map (fun a -> f (exp::expPath) a)
+                exp.WithNewFunctionArguments args |> f expPath
             | _ ->
                 failwith "Invalid expression"
 

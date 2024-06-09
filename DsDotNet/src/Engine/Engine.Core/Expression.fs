@@ -225,6 +225,8 @@ module ExpressionModule =
         ///
         /// XGI : 선언한 변수의 초기값으로 설정.  Rung 생성에는 관여되지 않음
         /// XGK : _1ON 을 조건으로 한 대입문으로 rung 생성.  (XGK 에서는 변수 초기값이 지원되지 않음)
+        ///
+        /// Ladder 생성 시점에는 DuVarDecl statement 는 존재하지 않는다.  변수 선언 혹은 assign 문으로 사전에 변환된다.
         | DuVarDecl of expression:IExpression * variable:IStorage
 
         /// 대입문.  e.g "$a = $b + 3;"

@@ -1,6 +1,5 @@
 namespace PLC.CodeGen.LS
 
-open System
 open System.Linq
 
 open PLC.CodeGen.Common
@@ -9,7 +8,6 @@ open Dual.Common.Core.FS
 open Engine.Core
 open FB
 open ConvertorPrologModule
-open Engine.Core.ExpressionModule
 
 [<AutoOpen>]
 module internal rec Command =
@@ -62,18 +60,6 @@ module internal rec Command =
             | (PredicateCmd _ | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _) -> ElementType.VertFBMode
             | _ -> failwith "ERROR"
 
-    //   /// Coil의 부정 Command를 반환한다.
-    //member x.``ReverseCmd 사용안함`` () =
-    //   match cmdType with
-    //   | CoilCmd (cc) ->
-    //       match cc with
-    //       | COMCoil(tag) -> CoilCmd(CoilOutputMode.COMClosedCoil(tag))
-    //       | COMClosedCoil(tag) -> CoilCmd(CoilOutputMode.COMCoil(tag))
-    //       | _ ->
-    //           failwithlogf "This ReverseCmd is not support"
-    //   | _ ->
-    //       failwithlogf "This ReverseCmd is not support"
-
     //let createOutputCoil(tag)    = CoilCmd(CoilOutputMode.COMCoil(tag))
     //let createOutputCoilNot(tag) = CoilCmd(CoilOutputMode.COMClosedCoil(tag))
     //let createOutputSet(tag)     = CoilCmd(CoilOutputMode.COMSetCoil(tag))
@@ -105,11 +91,11 @@ module internal rec Command =
         let time: int = int ts.Timer.PRE.Value
 
         let inputParameters =
-            [ "PT", (literal2expr $"T#{time}MS") :> IExpression
-              "IN", obe2e ts.RungInCondition
-              match typ with
-              | TMR -> "RST", obe2e ts.ResetCondition
-              | _ -> () ]
+            [   "PT", (literal2expr $"T#{time}MS") :> IExpression
+                "IN", obe2e ts.RungInCondition
+                match typ with
+                | TMR -> "RST", obe2e ts.ResetCondition
+                | _ -> () ]
 
         let outputParameters = []
 
@@ -127,22 +113,22 @@ module internal rec Command =
         let typ = cs.Counter.Type
 
         let inputParameters =
-            [ "PV", (literal2expr pv) :> IExpression
-              match typ with
-              | CTU -> // cu, r, pv,       q, cv
-                  "CU", obe2e cs.UpCondition
-                  "R", obe2e cs.ResetCondition
-              | CTD -> // cd, ld, pv,       q, cv
-                  "CD", obe2e cs.DownCondition
-                  "LD", obe2e cs.LoadCondition
-              | CTUD -> // cu, cd, r, ld, pv,       qu, qd, cv
-                  "CU", obe2e cs.UpCondition
-                  "CD", obe2e cs.DownCondition
-                  "R", obe2e cs.ResetCondition
-                  "LD", obe2e cs.LoadCondition
-              | CTR -> // cd, pv, rst,       q, cv
-                  "CD", obe2e cs.DownCondition
-                  "RST", obe2e cs.ResetCondition ]
+            [   "PV", (literal2expr pv) :> IExpression
+                match typ with
+                | CTU -> // cu, r, pv,       q, cv
+                    "CU", obe2e cs.UpCondition
+                    "R", obe2e cs.ResetCondition
+                | CTD -> // cd, ld, pv,       q, cv
+                    "CD", obe2e cs.DownCondition
+                    "LD", obe2e cs.LoadCondition
+                | CTUD -> // cu, cd, r, ld, pv,       qu, qd, cv
+                    "CU", obe2e cs.UpCondition
+                    "CD", obe2e cs.DownCondition
+                    "R", obe2e cs.ResetCondition
+                    "LD", obe2e cs.LoadCondition
+                | CTR -> // cd, pv, rst,       q, cv
+                    "CD", obe2e cs.DownCondition
+                    "RST", obe2e cs.ResetCondition ]
 
         let outputParameters = []
 
@@ -250,7 +236,7 @@ module internal rec Command =
                 namedInputParameters.Length = inputSpecs.Length
                 |> verifyM "ERROR: Function input parameter mismatch."
 
-                [| for s in inputSpecs do
+                [|  for s in inputSpecs do
                        let exp = iDic[s.Name]
                        let exprDataType = systemTypeToXgxType exp.DataType
 
@@ -268,16 +254,16 @@ module internal rec Command =
                 /// e.g ["ENO, 0x00200001, , 0"; "OUT, 0x00200001, , 0";]
                 let outputSpecs = getFunctionOutputSpecs functionName |> Array.ofSeq
 
-                [ for (i, s) in outputSpecs.Indexed() do
-                      option {
-                          let! terminal = oDic.TryFind(s.Name)
+                [   for (i, s) in outputSpecs.Indexed() do
+                        option {
+                            let! terminal = oDic.TryFind(s.Name)
 
-                          match terminal with
-                          | :? IStorage as storage -> s.CheckType.HasFlag(systemTypeToXgxType storage.DataType) |> verify
-                          | _ -> ()
+                            match terminal with
+                            | :? IStorage as storage -> s.CheckType.HasFlag(systemTypeToXgxType storage.DataType) |> verify
+                            | _ -> ()
 
-                          return s.Name, i, terminal, s.CheckType
-                      } ]
+                            return s.Name, i, terminal, s.CheckType
+                        } ]
                 |> List.choose id
 
             let (x, y) = (rungStartX, rungStartY)
@@ -287,17 +273,17 @@ module internal rec Command =
             let mutable sy = 0
 
             let inputBlockXmls =
-                [ for (portOffset, (_name, exp, checkType)) in alignedInputParameters.Indexed() do
-                      if portOffset > 0 && exp.Terminal.IsSome then
-                          (y + portOffset, exp) |> reservedLiteralInputParam.Add
-                          sy <- sy + 1
-                      else
-                          checkType.HasFlag CheckType.BOOL
-                          |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
+                [   for (portOffset, (_name, exp, checkType)) in alignedInputParameters.Indexed() do
+                        if portOffset > 0 && exp.Terminal.IsSome then
+                            (y + portOffset, exp) |> reservedLiteralInputParam.Add
+                            sy <- sy + 1
+                        else
+                            checkType.HasFlag CheckType.BOOL
+                            |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
 
-                          let blockXml = bxiFunctionInputLadderBlock prjParam (x, y + sy) (flatten exp)
-                          portOffset, blockXml
-                          sy <- sy + blockXml.TotalSpanY ]
+                            let blockXml = bxiFunctionInputLadderBlock prjParam (x, y + sy) (flatten exp)
+                            portOffset, blockXml
+                            sy <- sy + blockXml.TotalSpanY ]
 
             /// 입력 parameter 를 그렸을 때, 1 줄을 넘는 것들의 갯수 만큼 horizontal line spacing 필요
             let plusHorizontalPadding = inputBlockXmls.Count(fun (_, x) -> x.TotalSpanY > 1)
@@ -306,81 +292,81 @@ module internal rec Command =
             let fsx = x + inputBlockXmls.Max(fun (_, bxi) -> bxi.TotalSpanX) + plusHorizontalPadding
 
             let outputCellXmls =
-                [ for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
-                      rxiFBParameter (fsx + 1, y + yoffset) terminal.StorageName ]
+                [   for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
+                        rxiFBParameter (fsx + 1, y + yoffset) terminal.StorageName ]
 
             /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
             let tentacleXmls =
-                [ for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
-                      let i = inputBlockIndex
-                      let bex = x + b.X + b.TotalSpanX // block end X
-                      let bey = b.Y
-                      let c = coord (bex, bey)
-                      let spanX = (fsx - bex)
+                [   for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
+                        let i = inputBlockIndex
+                        let bex = x + b.X + b.TotalSpanX // block end X
+                        let bey = b.Y
+                        let c = coord (bex, bey)
+                        let spanX = (fsx - bex)
 
-                      if b.TotalSpanX > 1 then
-                          /// 'S' shape 의 하단부 수평선 끝점 x 좌표
-                          let hEndX = if i = 0 then fsx - 1 else bex + i - 1
+                        if b.TotalSpanX > 1 then
+                            /// 'S' shape 의 하단부 수평선 끝점 x 좌표
+                            let hEndX = if i = 0 then fsx - 1 else bex + i - 1
 
-                          yield!
-                              tryHlineTo (bex, bey) (hEndX)
-                              |> map (fun xml ->
-                                  tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
+                            yield!
+                                tryHlineTo (bex, bey) (hEndX)
+                                |> map (fun xml ->
+                                    tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
 
-                                  { Coordinate = c
-                                    Xml = xml
-                                    SpanX = spanX
-                                    SpanY = 1 })
+                                    { Coordinate = c
+                                      Xml = xml
+                                      SpanX = spanX
+                                      SpanY = 1 })
 
-                          if i > 0 then
-                              let bexi = bex + i
-                              let yi = y + portOffset
-                              tracefn $"V: ({bexi - 1}, {bey}) -> [({bexi - 1}, {yi})]"
-                              // 'S' shape 의 세로선 그리기
-                              yield! rxisVLineUpTo (bexi - 1, bey) yi
+                            if i > 0 then
+                                let bexi = bex + i
+                                let yi = y + portOffset
+                                tracefn $"V: ({bexi - 1}, {bey}) -> [({bexi - 1}, {yi})]"
+                                // 'S' shape 의 세로선 그리기
+                                yield! rxisVLineUpTo (bexi - 1, bey) yi
 
-                              // 'S' shape 의 상단부 수평선 그리기
-                              yield!
-                                  tryHlineTo (bexi, yi) (fsx - 1)
-                                  |> map (fun xml ->
-                                      tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
+                                // 'S' shape 의 상단부 수평선 그리기
+                                yield!
+                                    tryHlineTo (bexi, yi) (fsx - 1)
+                                    |> map (fun xml ->
+                                        tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
 
-                                      let c2 = coord (bexi, yi)
-                                      { Coordinate = c2
-                                        Xml = xml
-                                        SpanX = spanX
-                                        SpanY = 1 }) ]
+                                        let c2 = coord (bexi, yi)
+                                        { Coordinate = c2
+                                          Xml = xml
+                                          SpanX = spanX
+                                          SpanY = 1 }) ]
 
             let allXmls =
                 [
-                  (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
-                  for (ry, rexp) in reservedLiteralInputParam do
-                      let literal =
-                          match rexp.Terminal with
-                          | Some terminal ->
-                              match terminal.Literal, terminal.Variable with
-                              | Some(:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
-                              | Some literal, None -> literal.ToText()
-                              | None, Some variable -> variable.Name
-                              | _ -> failwithlog "ERROR"
-                          | _ -> failwithlog "ERROR"
+                    (* Timer 의 PT, Counter 의 PV 등의 상수 값을 입력 모선에서 연결하지 않고, function cell 에 바로 입력 하기 위함*)
+                    for (ry, rexp) in reservedLiteralInputParam do
+                        let literal =
+                            match rexp.Terminal with
+                            | Some terminal ->
+                                match terminal.Literal, terminal.Variable with
+                                | Some(:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
+                                | Some literal, None -> literal.ToText()
+                                | None, Some variable -> variable.Name
+                                | _ -> failwithlog "ERROR"
+                            | _ -> failwithlog "ERROR"
 
-                      rxiFBParameter (x + fsx - 1, ry) literal
+                        rxiFBParameter (x + fsx - 1, ry) literal
 
-                  yield! inputBlockXmls |> bind (fun (_, bx) -> bx.XmlElements)
-                  yield! outputCellXmls
-                  yield! tentacleXmls
-                  let x, y = rungStartX, rungStartY
+                    yield! inputBlockXmls |> bind (fun (_, bx) -> bx.XmlElements)
+                    yield! outputCellXmls
+                    yield! tentacleXmls
+                    let x, y = rungStartX, rungStartY
 
-                  //Command 결과출력
-                  rxiFunctionAt (functionName, functionName) instanceName (x + fsx, y) ]
+                    //Command 결과출력
+                    rxiFunctionAt (functionName, functionName) instanceName (x + fsx, y) ]
 
 
-            { X = x
-              Y = y
-              TotalSpanX = fsx + 3
-              TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
-              XmlElements = allXmls |> List.sortBy (fun x -> x.Coordinate) }
+            {   X = x
+                Y = y
+                TotalSpanX = fsx + 3
+                TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
+                XmlElements = allXmls |> List.sortBy (fun x -> x.Coordinate) }
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
@@ -416,24 +402,24 @@ module internal rec Command =
                     let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                     let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-                    { Coordinate = c
-                      Xml = xml
-                      SpanX = spanX
-                      SpanY = 1 }
+                    {   Coordinate = c
+                        Xml = xml
+                        SpanX = spanX
+                        SpanY = 1 }
 
                 let c = coord (coilCellX, y)
                 let xml = elementBody (int cmdExp.LDEnum) c coilText        // coilText: XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
 
-                { Coordinate = c
-                  Xml = xml
-                  SpanX = 1
-                  SpanY = 1 } ]
+                {   Coordinate = c
+                    Xml = xml
+                    SpanX = 1
+                    SpanY = 1 } ]
 
-        { X = x
-          Y = y
-          TotalSpanX = 31
-          TotalSpanY = 1
-          XmlElements = xmls }
+        {   X = x
+            Y = y
+            TotalSpanX = 31
+            TotalSpanY = 1
+            XmlElements = xmls }
 
 
     let bxiXgkFBCommandWithParam (x, y) (cmdParam: string, cmdWidth:int) : BlockXmlInfo =
@@ -445,22 +431,22 @@ module internal rec Command =
                   let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                   elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-                { Coordinate = coord (x, y)
-                  Xml = xml
-                  SpanX = spanX
-                  SpanY = 1 }
+                {   Coordinate = coord (x, y)
+                    Xml = xml
+                    SpanX = spanX
+                    SpanY = 1 }
 
                 let xy = (coilCellX, y)
-                { Coordinate = coord xy
-                  Xml = xgkFBAt cmdParam xy
-                  SpanX = cmdWidth
-                  SpanY = 1 } ]
+                {   Coordinate = coord xy
+                    Xml = xgkFBAt cmdParam xy
+                    SpanX = cmdWidth
+                    SpanY = 1 } ]
 
-        { X = x
-          Y = y
-          TotalSpanX = 31
-          TotalSpanY = 1
-          XmlElements = xmls }
+        {   X = x
+            Y = y
+            TotalSpanX = 31
+            TotalSpanY = 1
+            XmlElements = xmls }
 
     let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
         let cmdWidth = 3
@@ -558,14 +544,14 @@ module internal rec Command =
                 let c = coord (x, b.Y)
                 let xml = hlineStartMarkAt (x, b.Y)
 
-                { Coordinate = c
-                  Xml = xml
-                  SpanX = 1
-                  SpanY = 1 }
+                {   Coordinate = c
+                    Xml = xml
+                    SpanX = 1
+                    SpanY = 1 }
 
-            { blockXml with
-                TotalSpanX = b.TotalSpanX + 1
-                XmlElements = b.XmlElements +++ lineXml }
+            {   blockXml with
+                    TotalSpanX = b.TotalSpanX + 1
+                    XmlElements = b.XmlElements +++ lineXml }
 
     /// x y 위치에서 expression 표현하기 위한 정보 반환
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
@@ -623,11 +609,11 @@ module internal rec Command =
             let spanY = blockedExprXmls.Max(fun x -> x.TotalSpanY)
             let exprXmls = blockedExprXmls |> List.collect (fun x -> x.XmlElements)
 
-            { XmlElements = exprXmls
-              X = x
-              Y = y
-              TotalSpanX = spanX
-              TotalSpanY = spanY }
+            {   XmlElements = exprXmls
+                X = x
+                Y = y
+                TotalSpanX = spanX
+                TotalSpanY = spanY }
 
 
         | FlatNary(Or, exprs) ->
@@ -647,7 +633,7 @@ module internal rec Command =
                 [   yield! exprXmls
 
                     let auxLineXmls =
-                        [ for ri in blockedExprXmls do
+                        [   for ri in blockedExprXmls do
                               if ri.TotalSpanX < spanX then
                                   let span = (spanX - ri.TotalSpanX - 1)
                                   let param = $"Param={dq}{span * 3}{dq}"
@@ -676,11 +662,11 @@ module internal rec Command =
 
             let xmls = xmls |> List.distinct // dirty hacking!
 
-            { XmlElements = xmls
-              X = x
-              Y = y
-              TotalSpanX = spanX
-              TotalSpanY = spanY }
+            {   XmlElements = xmls
+                X = x
+                Y = y
+                TotalSpanX = spanX
+                TotalSpanY = spanY }
 
         | FlatNary(OpArithmetic _, _exprs) when isXgk ->
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
@@ -721,10 +707,10 @@ module internal rec Command =
             let xx, yy = x + blockXml.TotalSpanX, y
             let c = coord (xx, yy)
             let xml = elementFull mode c "" ""
-            { blockXml with
-                TotalSpanX = blockXml.TotalSpanX + 1
-                X = x; Y = y;
-                XmlElements = blockXml.XmlElements +++ { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } }
+            {   blockXml with
+                    TotalSpanX = blockXml.TotalSpanX + 1
+                    X = x; Y = y;
+                    XmlElements = blockXml.XmlElements +++ { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } }
 
         | _ -> failwithlog "Unknown FlatExpression case"
 
@@ -738,8 +724,8 @@ module internal rec Command =
     /// - expr 이 None 이면 그리지 않는다.
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
-        let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes option) : RungXmlInfo =
+    let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+        let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
                 | Some expr ->
@@ -749,30 +735,26 @@ module internal rec Command =
                 | _ -> 0, 0, []
 
             let cmdSpanX, cmdSpanY, cmdXmls =
-                match cmdExp with
-                | Some cmdExp ->
-                    let nx = x + exprSpanX
+                let nx = x + exprSpanX
 
-                    let cmdXmls1 =
-                        match cmdExp with
-                        | CoilCmd _cc ->
-                            let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
-                                match prjParam.TargetType, cmdExp.CoilTerminalTag with
-                                | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
-                                | _ -> cmdExp.CoilTerminalTag.StorageName
-                            bxiCoil (nx - 1, y) cmdExp coilText
-                        | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                            bxiCommand prjParam (nx, y) cmdExp
+                let cmdXmls1 =
+                    match cmdExp with
+                    | CoilCmd _cc ->
+                        let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
+                            match prjParam.TargetType, cmdExp.CoilTerminalTag with
+                            | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
+                            | _ -> cmdExp.CoilTerminalTag.StorageName
+                        bxiCoil (nx - 1, y) cmdExp coilText
+                    | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
+                        bxiCommand prjParam (nx, y) cmdExp
 
-                    let cmdXmls2 =
-                        { cmdXmls1 with
+                let cmdXmls2 =
+                    {   cmdXmls1 with
                             XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
 
-                    let spanX = exprSpanX + cmdXmls2.TotalSpanX
-                    let spanY = max exprSpanY cmdXmls2.TotalSpanY
-                    spanX, spanY, cmdXmls2
-                | None ->
-                    0, 0, { X = x; Y = y; TotalSpanX = 0; TotalSpanY = 0; XmlElements = [] }
+                let spanX = exprSpanX + cmdXmls2.TotalSpanX
+                let spanY = max exprSpanY cmdXmls2.TotalSpanY
+                spanX, spanY, cmdXmls2
 
             let xml = (exprXmls @ cmdXmls.XmlElements).MergeXmls()
 
@@ -783,7 +765,7 @@ module internal rec Command =
             {   Xml = xml; Coordinate = c; SpanX = spanX; SpanY = spanY; }
 
         match prjParam.TargetType, cmdExp with
-        | XGK, Some (ActionCmd(Move(condition, source, target))) when source.Terminal.IsSome ->
+        | XGK, ActionCmd(Move(condition, source, target)) when source.Terminal.IsSome ->
             let fbParam, fbWidth =
                 let s, d = source.GetTerminalString(prjParam), target.Name
                 let mov =
@@ -796,9 +778,9 @@ module internal rec Command =
 
         | _ ->
             match prjParam.TargetType, condition, cmdExp with
-            | (XGI, _, _) | (_, Some _, _) | (_, _, None) ->        // prjParam.TargetType = XGI || expr.IsSome || cmdExp.IsNone
+            | (XGI, _, _) | (_, Some _, _) ->        // prjParam.TargetType = XGI || condition.IsSome
                 rxiRungImpl (x, y) condition cmdExp
-            | XGK, _, Some (FunctionBlockCmd(fbc)) ->
+            | XGK, _, FunctionBlockCmd(fbc) ->
                 match fbc with
                 | CounterMode(counterStatement) when counterStatement.Counter.Type = CTUD ->
                     let counter = counterStatement.Counter
@@ -841,5 +823,5 @@ module internal rec Command =
                         | TimerMode(timerStatement) ->
                             timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
                     rxiRungImpl (x, y) (Some exp) cmdExp
-            | _, _, Some _ ->
+            | _ ->
                     rxiRungImpl (x, y) condition cmdExp

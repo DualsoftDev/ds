@@ -14,13 +14,13 @@ module XgiXmlProjectAnalyzerModule =
     let xmlSymbolNodeToSymbolInfo (xnSymbol: XmlNode) : SymbolInfo =
         let dic = xnSymbol.GetAttributes()
 
-        { defaultSymbolInfo with
-            Name = dic["Name"]
-            Comment = dic["Comment"]
-            Address = dic.TryFindIt("Address") |> Option.toString
-            Device = dic.TryFindIt("Device") |> Option.toString
-            DevicePos = dic.TryFindIt("DevicePos") |> Option.bind Parse.Int |> Option.defaultValue(-1)
-            Kind = dic.TryFindIt("Kind") |> Option.bind Parse.Int |> Option.defaultValue(-1)
+        {   defaultSymbolInfo with
+                Name = dic["Name"]
+                Comment = dic["Comment"]
+                Address = dic.TryFindIt("Address") |> Option.toString
+                Device = dic.TryFindIt("Device") |> Option.toString
+                DevicePos = dic.TryFindIt("DevicePos") |> Option.bind Parse.Int |> Option.defaultValue(-1)
+                Kind = dic.TryFindIt("Kind") |> Option.bind Parse.Int |> Option.defaultValue(-1)
         }
 
     let collectByteIndices target (addresses: string seq) : int list =

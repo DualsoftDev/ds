@@ -55,7 +55,36 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
         | XGI -> x.saveTestResult (getFuncName()) xml
         | _ -> ()
 
+    member x.``Local var with comment and init test`` () =
+        let storages = Storages()
+        let code = """
+            bool    mybool   = false;
+            int16   myint16  = 16s;
+            int32   myint32  = 32;
+"""
+        let code =
+            match xgx with
+            | XGK -> code
+            | XGI -> code + """
+            int64   myint64  = 64L;
+"""
+            | _ -> failwith "Not supported plc type"
 
+        let statements = parseCodeForWindows storages code
+        storages["mybool"].Comment <- "mybool comment"
+        storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``Local var with init string err test`` () =
+        let storages = Storages()
+        let code = """
+            string  mystring = "hello";     // not working for string
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        (fun () ->  x.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
 
     member x.``Local var with init test`` () =
         let storages = Storages()
@@ -84,51 +113,21 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Local var with init string err test`` () =
-        let storages = Storages()
-        let code = """
-            string  mystring = "hello";     // not working for string
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        (fun () ->  x.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
 
 
-
-    member x.``Local var with comment and init test`` () =
-        let storages = Storages()
-        let code = """
-            bool    mybool   = false;
-            int16   myint16  = 16s;
-            int32   myint32  = 32;
-"""
-        let code =
-            match xgx with
-            | XGK -> code
-            | XGI -> code + """
-            int64   myint64  = 64L;
-"""
-            | _ -> failwith "Not supported plc type"
-
-        let statements = parseCodeForWindows storages code
-        storages["mybool"].Comment <- "mybool comment"
-        storages["myint16"].Comment <- "myint16 comment <> ! +-*/"
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
 
 
 type XgiLadderElementTest() =
     inherit XgxLadderElementTest(XGI)
     [<Test>] member x.``Local var test``() = base.``Local var test``()
-    [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
-    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
     [<Test>] member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()
+    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
+    [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
 
 type XgkLadderElementTest() =
     inherit XgxLadderElementTest(XGK)
     [<Test>] member x.``Local var test``() = base.``Local var test``()
-    [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
-    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
     [<Test>] member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()
+    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
+    [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
 

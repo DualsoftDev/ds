@@ -81,21 +81,21 @@ module internal XgiSymbolsModule =
         match targetType with
         | XGI ->
             match tryParseXGITag address with
-            |Some tag -> 
+            | Some tag -> 
                 address, tag.Device.ToString()
                 , if tag.DataType = PLCHwModel.DataType.Bit then tag.BitOffset else tag.ByteOffset    
-            |None ->
+            | None ->
                 failwithlog $"tryParse{targetType} {name} {address} error"
 
         | XGK ->    
             match tryParseXGKTag address with
-            |Some tag -> 
+            | Some tag -> 
                 match tag.DataType with
                 | PLCHwModel.DataType.Bit -> address, tag.Device.ToString(), tag.BitOffset
                 | PLCHwModel.DataType.Word -> address, tag.Device.ToString(), tag.ByteOffset / 2
                 | _-> failwithlog $"XGK Not supported plc {tag.DataType} type"
                          
-            |None ->
+            | None ->
                 failwithlog $"tryParse{targetType} {name} {address} error"
 
         | _ -> failwithlog $"Not supported plc {targetType} type"
@@ -119,15 +119,15 @@ module internal XgiSymbolsModule =
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
 
-            { defaultSymbolInfo with
-                Name = name
-                Comment = comment
-                Type = plcType
-                Address = address
-                DevicePos = devPos
-                Device = device.ToString()
-                InitValue = initValue
-                Kind = kindVar }
+            {   defaultSymbolInfo with
+                    Name = name
+                    Comment = comment
+                    Type = plcType
+                    Address = address
+                    DevicePos = devPos
+                    Device = device.ToString()
+                    InitValue = initValue
+                    Kind = kindVar }
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
@@ -157,15 +157,15 @@ module internal XgiSymbolsModule =
                         failwithf "Invalid target type: %A" prjParam.TargetType
 
 
-                { defaultSymbolInfo with
-                    Name = t.Name
-                    Comment = comment
-                    Type = plcType
-                    Device = device
-                    Address = address // xgk address 는 xml에 저장 안됨 devPos 처리
-                    DevicePos = devPos
-                    InitValue = t.BoxedValue
-                    Kind = kindVar }
+                {   defaultSymbolInfo with
+                        Name = t.Name
+                        Comment = comment
+                        Type = plcType
+                        Device = device
+                        Address = address // xgk address 는 xml에 저장 안됨 devPos 처리
+                        DevicePos = devPos
+                        InitValue = t.BoxedValue
+                        Kind = kindVar }
 
             symbolInfo
         //DuXgxVar ?
@@ -174,9 +174,9 @@ module internal XgiSymbolsModule =
             | XGI ->
                 if kindVar = int Variable.Kind.VAR_GLOBAL then
                 // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
-                    { xgx.SymbolInfo with
-                        Kind = kindVar
-                        Address = xgx.Address }
+                    {   xgx.SymbolInfo with
+                            Kind = kindVar
+                            Address = xgx.Address }
                 else
                      xgx.SymbolInfo
             | XGK ->
@@ -185,11 +185,11 @@ module internal XgiSymbolsModule =
 
                 autoAllocatorAdress xgx prjParam
                 let address, device, devPos = getXGXTagInfo prjParam.TargetType xgx.Address xgx.Name
-                { xgx.SymbolInfo with
-                    Kind = kindVar
-                    Address = address
-                    Device = device
-                    DevicePos = devPos }
+                {   xgx.SymbolInfo with
+                        Kind = kindVar
+                        Address = address
+                        Device = device
+                        DevicePos = devPos }
             | _ ->
                     failwithf "Invalid target type: %A" prjParam.TargetType
 
@@ -208,14 +208,14 @@ module internal XgiSymbolsModule =
             let plcType = timer.Type.ToString() 
             let name, comment = timer.Name, $"TIMER {timer.Name}"
 
-            { defaultSymbolInfo with
-                Name = name
-                Comment = comment
-                Type = plcType
-                Address = addr
-                Device = device
-                DevicePos = devicePos
-                Kind = kindVar }
+            {   defaultSymbolInfo with
+                    Name = name
+                    Comment = comment
+                    Type = plcType
+                    Address = addr
+                    Device = device
+                    DevicePos = devicePos
+                    Kind = kindVar }
 
         | DuCounter counter ->
             let device, addr, devicePos  =
@@ -236,14 +236,14 @@ module internal XgiSymbolsModule =
 
             let name, comment = counter.Name, $"COUNTER {counter.Name}"
 
-            { defaultSymbolInfo with
-                Name = name
-                Comment = comment
-                Type = plcType
-                Address = addr
-                Device = device
-                DevicePos = devicePos
-                Kind = kindVar }
+            {   defaultSymbolInfo with
+                    Name = name
+                    Comment = comment
+                    Type = plcType
+                    Address = addr
+                    Device = device
+                    DevicePos = devicePos
+                    Kind = kindVar }
 
     let private xgxSymbolsToSymbolInfos
         (prjParam: XgxProjectParams)
@@ -264,8 +264,8 @@ module internal XgiSymbolsModule =
         (globalStoragesRefereces: IStorage seq)
       : string =
         let symbolInfos =
-            [ yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR) localStorages
-              yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
+            [   yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR) localStorages
+                yield! storagesToSymbolInfos prjParam (int Variable.Kind.VAR_EXTERNAL) globalStoragesRefereces ]
 
         XGITag.generateLocalSymbolsXml prjParam symbolInfos
 

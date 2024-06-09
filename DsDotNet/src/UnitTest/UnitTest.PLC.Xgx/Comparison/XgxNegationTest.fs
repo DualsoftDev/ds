@@ -66,40 +66,56 @@ type XgxNegationTest(xgx:PlatformTarget) =
 
         ()
 
-    member x.``Negation1 test`` () =
+    member x.``Negation bool test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 2 + """
-            $x01 = ! $x00;
-"""
+        let code = """
+            bool b1 = !true;
+            bool b2 = !false;
+            """
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Negation2 test`` () =
+    member x.``Negation on decl test`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 6 + """
-            $x02 = ! ($x00 || $x01);
-            $x05 = ! ($x03 && $x04);
+        let code = """
+bool b1 = 2 == 3;
+bool b2 = !(2 == 3);
+bool b3 = !(2 != 3);
+bool b4 = (2 > 3);
+bool b5 = !(2 > 3);
+bool b6 = !(2.1 > 3.14);
+bool b7 = (2 >= 3);
+bool b8 = !(2 >= 3);
+bool b9 = $b1 == $b2;
+bool b10 = $b1 != $b2;
+bool b11 = !($b1 == $b2);
+bool b12 = !($b1 != $b2);       // ERROR on XGI
+bool b13 = $b1 && $b2;
+bool b14 = !($b1 && $b2);
+bool b15 = $b1 || $b2;
+bool b17 = !($b1 || $b2);
 """
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
-        ()
 
-
-    member x.``Negation3 test`` () =
+    member x.``Negation on decl test1`` () =
         let storages = Storages()
-        let code = generateBitTagVariableDeclarations xgx 0 6 + """
-            $x02 = ! (! $x00 || $x01);
-            $x05 = ! ($x03 && ! $x04);
+        let code = """
+bool b1 = true;
+bool b2 = false;
+bool b3 = !(!$b1 != $b2);       // ERROR on XGI
 """
+
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
-
 
     member x.``Negation x 1 test`` () =
         let storages = Storages()
@@ -146,19 +162,6 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``Negation bool test`` () =
-        let storages = Storages()
-        let code = """
-            bool b1 = !true;
-            bool b2 = !false;
-            """
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
     member x.``Negation x n test`` () =
         let storages = Storages()
         let testCode =
@@ -175,7 +178,6 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-
     member x.``Negation, comparision test1`` () =
         let storages = Storages()
         let code = baseCode + """$qx =
@@ -187,46 +189,42 @@ type XgxNegationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-
-    member x.``Negation on decl test1`` () =
+    member x.``Negation1 test`` () =
         let storages = Storages()
-        let code = """
-bool b1 = true;
-bool b2 = false;
-bool b3 = !(!$b1 != $b2);       // ERROR on XGI
+        let code = generateBitTagVariableDeclarations xgx 0 2 + """
+            $x01 = ! $x00;
 """
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
+    member x.``Negation2 test`` () =
+        let storages = Storages()
+        let code = generateBitTagVariableDeclarations xgx 0 6 + """
+            $x02 = ! ($x00 || $x01);
+            $x05 = ! ($x03 && $x04);
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+        ()
+
+    member x.``Negation3 test`` () =
+        let storages = Storages()
+        let code = generateBitTagVariableDeclarations xgx 0 6 + """
+            $x02 = ! (! $x00 || $x01);
+            $x05 = ! ($x03 && ! $x04);
+"""
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
 
-    member x.``Negation on decl test`` () =
-        let storages = Storages()
-        let code = """
-bool b1 = 2 == 3;
-bool b2 = !(2 == 3);
-bool b3 = !(2 != 3);
-bool b4 = (2 > 3);
-bool b5 = !(2 > 3);
-bool b6 = !(2.1 > 3.14);
-bool b7 = (2 >= 3);
-bool b8 = !(2 >= 3);
-bool b9 = $b1 == $b2;
-bool b10 = $b1 != $b2;
-bool b11 = !($b1 == $b2);
-bool b12 = !($b1 != $b2);       // ERROR on XGI
-bool b13 = $b1 && $b2;
-bool b14 = !($b1 && $b2);
-bool b15 = $b1 || $b2;
-bool b17 = !($b1 || $b2);
-"""
 
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+
 
 
 
@@ -234,35 +232,36 @@ bool b17 = !($b1 || $b2);
 type XgiNegationTest() =
     inherit XgxNegationTest(XGI)
     [<Test>] member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
-    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
-    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
-    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
+    [<Test>] member x.``Negation bool test`` () = base.``Negation bool test`` ()
+    [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()
+    [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
     [<Test>] member x.``Negation x 1 test`` () = base.``Negation x 1 test`` ()
     [<Test>] member x.``Negation x 2 test`` () = base.``Negation x 2 test`` ()
     [<Test>] member x.``Negation x 3 test`` () = base.``Negation x 3 test`` ()
     [<Test>] member x.``Negation x 4 test`` () = base.``Negation x 4 test`` ()
     [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
     [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
-    [<Test>] member x.``Negation bool test`` () = base.``Negation bool test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
-    [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
-    [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()
+    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
+    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
+    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
 
 
 
 type XgkNegationTest() =
     inherit XgxNegationTest(XGK)
     [<Test>] member __.``Atomic Negation test`` () = base.``Atomic Negation test`` ()
-    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
-    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
-    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
+    [<Test>] member x.``Negation bool test`` () = base.``Negation bool test`` ()
+    [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()
+    [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
     [<Test>] member x.``Negation x 1 test`` () = base.``Negation x 1 test`` ()
     [<Test>] member x.``Negation x 2 test`` () = base.``Negation x 2 test`` ()
     [<Test>] member x.``Negation x 3 test`` () = base.``Negation x 3 test`` ()
     [<Test>] member x.``Negation x 4 test`` () = base.``Negation x 4 test`` ()
     [<Test>] member x.``Negation x 5 test`` () = base.``Negation x 5 test`` ()
     [<Test>] member x.``Negation x n test`` () = base.``Negation x n test`` ()
-    [<Test>] member x.``Negation bool test`` () = base.``Negation bool test`` ()
     [<Test>] member x.``Negation, comparision test1`` () = base.``Negation, comparision test1`` ()
-    [<Test>] member x.``Negation on decl test1`` () = base.``Negation on decl test1`` ()
-    [<Test>] member x.``Negation on decl test`` () = base.``Negation on decl test`` ()
+    [<Test>] member x.``Negation1 test`` () = base.``Negation1 test`` ()
+    [<Test>] member x.``Negation2 test`` () = base.``Negation2 test`` ()
+    [<Test>] member x.``Negation3 test`` () = base.``Negation3 test`` ()
+

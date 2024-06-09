@@ -85,9 +85,9 @@ module ConvertorPrologModule =
     type XgxVar<'T when 'T: equality>(param: StorageCreationParams<'T>) =
         inherit VariableBase<'T>(param)
 
-        let { Name = name
-              Value = initValue
-              Comment = comment } =
+        let {   Name = name
+                Value = initValue
+                Comment = comment } =
             param
 
         let symbolInfo =
@@ -117,19 +117,6 @@ module ConvertorPrologModule =
         | :? IValue as value -> value.ObjValue.GetType()
         | _ -> failwithlog "ERROR"
 
-
-[<AutoOpen>]
-module rec TypeConvertorModule =
-    type IXgiStatement =
-        interface
-        end
-
-    type CommentedStatements = CommentedStatements of comment: string * statements: Statement list
-
-    let (|CommentAndStatements|) = function | CommentedStatements(x, ys) -> x, ys
-
-    let commentAndStatements = (|CommentAndStatements|)
-
     let createXgxVariable (name: string) (initValue: obj) comment : IXgxVar =
         (*
             "n0" is an incorrect variable.
@@ -151,9 +138,9 @@ module rec TypeConvertorModule =
         | _ -> ()
 
         let createParam () =
-            { defaultStorageCreationParams (unbox initValue) (VariableTag.PlcUserVariable|>int) with
-                Name = name
-                Comment = Some comment }
+            {   defaultStorageCreationParams (unbox initValue) (VariableTag.PlcUserVariable|>int) with
+                    Name = name
+                    Comment = Some comment }
 
         let typ = initValue.GetType()
 
@@ -173,32 +160,24 @@ module rec TypeConvertorModule =
         | UINT8   -> XgxVar<uint8> (createParam ())
         | "DuFunction" ->
             let defaultBool = 
-                { defaultStorageCreationParams false (VariableTag.PlcUserVariable|>int) with
-                    Name = name
-                    Comment = Some comment }
+                {   defaultStorageCreationParams false (VariableTag.PlcUserVariable|>int) with
+                        Name = name
+                        Comment = Some comment }
 
             XgxVar<bool>(defaultBool)
         | _ -> failwithlog "ERROR"
 
-    let private getTmpName (nameHint: string) (n:int) = $"_t{n}_{nameHint}"
-    type XgxProjectParams with
-        /// 반환 객체가 실제 XgxVar<'T> 이긴 하나, 'T 를 인자로 받지 않아서 드러나지 않아서 IXgxVar 로 반환한다.
-        member x.CreateAutoVariable(nameHint: string, initValue: obj, comment) : IXgxVar =
-            let n = x.AutoVariableCounter()
-            let name = getTmpName nameHint n
-            createXgxVariable name initValue comment
+[<AutoOpen>]
+module rec TypeConvertorModule =
+    type IXgiStatement =
+        interface
+        end
 
-        member x.CreateTypedAutoVariable(nameHint: string, initValue: 'T, comment) : XgxVar<'T> =
-            let n = x.AutoVariableCounter()
-            let name = getTmpName nameHint n
+    type CommentedStatements = CommentedStatements of comment: string * statements: Statement list
 
-            let param =
-                { defaultStorageCreationParams (initValue) (VariableTag.PlcUserVariable|>int) with
-                    Name = name
-                    Comment = Some comment }
+    let (|CommentAndStatements|) = function | CommentedStatements(x, ys) -> x, ys
 
-            XgxVar(param)
-
+    let commentAndStatements = (|CommentAndStatements|)
 
     /// FunctionBlocks은 Timer와 같은 현재 측정 시간을 저장하는 Instance가 필요있는 Command 해당
     type FunctionBlock =

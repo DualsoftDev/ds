@@ -1,9 +1,7 @@
 namespace PLC.CodeGen.LS
 
-
 open Engine.Core
 open Dual.Common.Core.FS
-open System
 open PLC.CodeGen.Common
 
 [<AutoOpen>]
@@ -19,12 +17,11 @@ module XgkTypeConvertorModule =
     type Statement with
         /// XGK 전용 Statement 확장
         member internal x.ToStatementsXgk(pack:DynamicDictionary) : unit =
-            let prjParam = pack.Get<XgxProjectParams>("projectParameter")
-            let augs = pack.Get<Augments>("augments")
+            let _prjParam, augs = pack.Unpack()
             match x with
             | DuAssign(condition, exp, target) ->
                 let numStatementsBefore = augs.Statements.Count
-                let exp2 = exp.AugmentXgk(prjParam, condition, Some target, augs)
+                let exp2 = exp.AugmentXgk(pack, condition, Some target)
                 let duplicated =
                     option {
                         // a := a 등의 형태 체크
@@ -40,15 +37,6 @@ module XgkTypeConvertorModule =
                 else
                     ()
 
-
-            // e.g: XGK 에서 bool b3 = $nn1 > $nn2; 와 같은 선언의 처리.
-            // XGK 에서 다음과 같이 2개의 문장으로 분리한다.
-            // bool b3;
-            // b3 = $nn1 > $nn2;
-            | DuVarDecl(exp, decl) ->
-                augs.Storages.Add decl
-                let stmt = DuAssign(Some fake1OnExpression, exp, decl)
-                stmt.ToStatementsXgk(pack)
 
             | DuTimer tmr ->
                 match tmr.ResetCondition with
@@ -77,7 +65,7 @@ module XgkTypeConvertorModule =
                     let replaceComplexCondition (_ctr: CounterStatement) (cond:IExpression<bool>) (newStatementGenerator:IExpression<bool> -> Statement) =
                         let ldVarExp =
                             let operators = [|"&&"; "||"; "!"|] @ K.arithmaticOrComparisionOperators
-                            cond.ToAssignStatement prjParam augs operators :?> IExpression<bool>
+                            cond.ToAssignStatement(pack, operators) :?> IExpression<bool>
                         statements[0] <- newStatementGenerator(ldVarExp)
                         match statements[0] with
                         | DuCounter ctr -> newCtr <- ctr
@@ -101,6 +89,8 @@ module XgkTypeConvertorModule =
                     | _ -> ()
 
                 augs.Statements.AddRange(statements)
+
+            | DuVarDecl _ -> failwith "ERROR: DuVarDecl in statement"
 
             | _ ->
                 // 공용 처리

@@ -13,86 +13,6 @@ type XgxDrawingTest(xgx:PlatformTarget) =
 
     let span width = width*3
 
-    member x.``Box drawing test``() =
-        let rungsXml = $"""
-<Rung BlockMask="0">
-    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 0)}">Test boxes</Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(0, 1)}" Param="{span 0}"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 1) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(0, 2)}" Param="{span 0}"></Element>
-</Rung>
-
-
-<Rung BlockMask="0">
-    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 3)}">Another boxes</Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 4) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 4)}" Param="{span 0}"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(1, 4) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 5)}" Param="{span 0}"></Element>
-</Rung>
-
-<Rung BlockMask="0">
-    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 6)}">Another 1x2 boxes</Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 7) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 7)}" Param="{span 1}"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(2, 7) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 8)}" Param="{span 1}"></Element>
-</Rung>
-
-<Rung BlockMask="0">
-    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 9)}">Another 1x3 boxes</Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 10) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 10)}" Param="{span 2}"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(3, 10) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 11)}" Param="{span 2}"></Element>
-</Rung>
-
-<Rung BlockMask="0">
-    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 12)}">Another 2x3 boxes</Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 13) + 2}"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 14) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 13)}" Param="{span 2}"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(3, 13) + 2}"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(3, 14) + 2}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 15)}" Param="{span 2}"></Element>
-</Rung>
-
-"""
-        let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
-            wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
-        x.saveTestResult (getFuncName ()) xml
-
-
-    member x.``Vertical line drawing test``() =
-        let rungsXml =
-            [
-                let x, y = 1, 1
-                $"""
-<Rung BlockMask="0">
-    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, y-1)}">({x}, {y}) 에서 시작하는 'ㄱ'</Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(x, y)}" Param="0"></Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(x, y) + 2}"></Element>
-</Rung>
-"""
-
-                let x, y = 4, 4
-                $"""
-<Rung BlockMask="0">
-    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, y-1)}">({x}-, {y}) 에서 시작하는 'ㄴ'</Element>
-	<Element ElementType="{VertLineMode}"      Coordinate="{coord(x, y) - 1}"></Element>
-	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(x, y+1)}" Param="0"></Element>
-</Rung>
-"""
-
-            ] |> String.concat "\r\n"
-
-
-        let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
-            wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
-        x.saveTestResult (getFuncName ()) xml
-
     member __.``ADD function details test``() =
         (* Function/FunctionBlock 정보 :
             - function 의 가로 너비 : COL_PROP
@@ -157,7 +77,6 @@ type XgxDrawingTest(xgx:PlatformTarget) =
 
         ()
 
-
     member x.``ADD function drawing test``() =
         let { Coordinate = c; Xml = elementAddXml } = rxiFunctionAt ("ADD2_INT", "ADD") "" (3, 2)
         (* '&#xA' = '&#10' = '\n' 의 HTML encoding *)
@@ -195,14 +114,93 @@ type XgxDrawingTest(xgx:PlatformTarget) =
             wrapWithXml prjParam rungsXml symbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
+    member x.``Box drawing test``() =
+        let rungsXml = $"""
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 0)}">Test boxes</Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(0, 1)}" Param="{span 0}"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 1) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(0, 2)}" Param="{span 0}"></Element>
+</Rung>
+
+
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 3)}">Another boxes</Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 4) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 4)}" Param="{span 0}"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(1, 4) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 5)}" Param="{span 0}"></Element>
+</Rung>
+
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 6)}">Another 1x2 boxes</Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 7) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 7)}" Param="{span 1}"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(2, 7) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 8)}" Param="{span 1}"></Element>
+</Rung>
+
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 9)}">Another 1x3 boxes</Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 10) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 10)}" Param="{span 2}"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(3, 10) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 11)}" Param="{span 2}"></Element>
+</Rung>
+
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, 12)}">Another 2x3 boxes</Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 13) + 2}"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(0, 14) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 13)}" Param="{span 2}"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(3, 13) + 2}"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(3, 14) + 2}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(1, 15)}" Param="{span 2}"></Element>
+</Rung>
+
+"""
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
+        x.saveTestResult (getFuncName ()) xml
+
+    member x.``Vertical line drawing test``() =
+        let rungsXml =
+            [
+                let x, y = 1, 1
+                $"""
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, y-1)}">({x}, {y}) 에서 시작하는 'ㄱ'</Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(x, y)}" Param="0"></Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(x, y) + 2}"></Element>
+</Rung>
+"""
+
+                let x, y = 4, 4
+                $"""
+<Rung BlockMask="0">
+    <Element ElementType="{RungCommentMode}"   Coordinate="{coord(0, y-1)}">({x}-, {y}) 에서 시작하는 'ㄴ'</Element>
+	<Element ElementType="{VertLineMode}"      Coordinate="{coord(x, y) - 1}"></Element>
+	<Element ElementType="{MultiHorzLineMode}" Coordinate="{coord(x, y+1)}" Param="0"></Element>
+</Rung>
+"""
+
+            ] |> String.concat "\r\n"
+
+
+        let xml =
+            let prjParam = getXgxProjectParams xgx (getFuncName())
+            wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
+        x.saveTestResult (getFuncName ()) xml
+
 
 
 type XgiDrawingTest() =
     inherit XgxDrawingTest(XGI)
-    [<Test>] member x.``Box drawing test``() = base.``Box drawing test``()
-    [<Test>] member x.``Vertical line drawing test``() = base.``Vertical line drawing test``()
     [<Test>] member __.``ADD function details test``() = base.``ADD function details test``()
-    [<Test>] member x.``ADD function drawing test``() = base.``ADD function drawing test``()
+    [<Test>] member __.``ADD function drawing test``() = base.``ADD function drawing test``()
+    [<Test>] member __.``Box drawing test``() = base.``Box drawing test``()
+    [<Test>] member __.``Vertical line drawing test``() = base.``Vertical line drawing test``()
 
 
 

@@ -51,81 +51,6 @@ type XgxTimerTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
-    member x.``TIMER= Many1 AND RungIn Condition test`` () =
-        let storages = Storages()
-        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
-        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
-            ton myTon = {ton}(2000u,
-                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
-                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-    member x.``TIMER= Many2 AND RungIn Condition test`` () =
-        let storages = Storages()
-        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
-        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
-            ton myTon = {ton}(2000u,
-                // 산전 limit : 가로로 31개
-                //let coilCellX = 31
-                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
-                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 &&
-
-                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 &&
-                $x08 &&
-                $x09 &&
-                $x10 &&
-                $x11 &&
-                //$x12 &&
-                //$x13 &&
-
-                $x14    );
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
-    member x.``TIMER= Many1 OR RungIn Condition test`` () =
-        let storages = Storages()
-        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
-        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
-            ton myTon = {ton}(2000u,
-                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
-    member x.``TIMER= Many2 OR RungIn Condition test`` () =
-        let storages = Storages()
-        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
-        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
-            ton myTon = {ton}(2000u,
-                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
-
-                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
-
-                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
-                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14
-
-                );
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
     member x.``TIMER= Many And, OR RungIn Condition test`` () =
         let storages = Storages()
         let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
@@ -174,6 +99,98 @@ type XgxTimerTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+    member x.``TIMER= Many1 AND RungIn Condition test`` () =
+        let storages = Storages()
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
+                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 && $x14    );
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``TIMER= Many1 OR RungIn Condition test`` () =
+        let storages = Storages()
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14    );
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``TIMER= Many2 AND RungIn Condition test`` () =
+        let storages = Storages()
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
+                // 산전 limit : 가로로 31개
+                //let coilCellX = 31
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07
+                && $x08 && $x09 && $x10 && $x11 && $x12 && $x13 &&
+
+                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 &&
+                $x08 &&
+                $x09 &&
+                $x10 &&
+                $x11 &&
+                //$x12 &&
+                //$x13 &&
+
+                $x14    );
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``TIMER= Many2 OR RungIn Condition test`` () =
+        let storages = Storages()
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code = generateBitTagVariableDeclarations xgx 0 16 + $"""
+            ton myTon = {ton}(2000u,
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
+
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14 ||
+
+                $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07
+                || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14
+
+                );
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+    member x.``TIMER= Not BOOLEAN ENABLE Condition test`` () =
+        let storages = Storages()
+        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
+        let code =
+            $"""
+                //double pi = 3.14;
+                //bool b0 = !(2.1 == 6.1);
+                //bool b1 = !($pi == 6.1);
+                //bool b2 = true && !($pi == 6.2);
+                //bool b3 = $pi > 6.23;
+                //bool b4 = !($pi > 6.24);
+                //ton myTon0 = {ton}(15000u, 3.14 > 6.25);
+                ton myTon1 = {ton}(15000u, (3.14 + 2.0) > 6.25);
+                //ton myTon2 = {ton}(15000u, $pi > 6.25);
+            """;
+
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``TIMER= Not Condition test`` () =
         let storages = Storages()
@@ -244,26 +261,6 @@ type XgxTimerTest(xgx:PlatformTarget) =
         x.saveTestResult f xml
 
 
-    member x.``TIMER= Not BOOLEAN ENABLE Condition test`` () =
-        let storages = Storages()
-        let ton = if xgx = XGI then "createXgiTON" else "createXgkTON"
-        let code =
-            $"""
-                //double pi = 3.14;
-                //bool b0 = !(2.1 == 6.1);
-                //bool b1 = !($pi == 6.1);
-                //bool b2 = true && !($pi == 6.2);
-                //bool b3 = $pi > 6.23;
-                //bool b4 = !($pi > 6.24);
-                //ton myTon0 = {ton}(15000u, 3.14 > 6.25);
-                ton myTon1 = {ton}(15000u, (3.14 + 2.0) > 6.25);
-                //ton myTon2 = {ton}(15000u, $pi > 6.25);
-            """;
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
 
 
 
@@ -271,26 +268,26 @@ type XgxTimerTest(xgx:PlatformTarget) =
 type XgiTimerTest() =
     inherit XgxTimerTest(XGI)
     [<Test>] member __.``Timer test`` () = base.``Timer test``()
-    [<Test>] member __.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
     [<Test>] member __.``TIMER= Many And, OR RungIn Condition test`` () = base.``TIMER= Many And, OR RungIn Condition test``()
     [<Test>] member __.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
+    [<Test>] member __.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
+    [<Test>] member __.``TIMER= Not BOOLEAN ENABLE Condition test`` () = base.``TIMER= Not BOOLEAN ENABLE Condition test``()
     [<Test>] member __.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
     [<Test>] member __.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()
-    [<Test>] member __.``TIMER= Not BOOLEAN ENABLE Condition test`` () = base.``TIMER= Not BOOLEAN ENABLE Condition test``()
 
 [<Collection("SeparatedTestGroup")>]
 type XgkTimerTest() =
     inherit XgxTimerTest(XGK)
     [<Test>] member __.``Timer test`` () = base.``Timer test``()
-    [<Test>] member __.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
     [<Test>] member __.``TIMER= Many And, OR RungIn Condition test`` () = base.``TIMER= Many And, OR RungIn Condition test``()
     [<Test>] member __.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
+    [<Test>] member __.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
+    [<Test>] member __.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
+    [<Test>] member __.``TIMER= Not BOOLEAN ENABLE Condition test`` () = base.``TIMER= Not BOOLEAN ENABLE Condition test``()
     [<Test>] member __.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
     [<Test>] member __.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()
-    [<Test>] member __.``TIMER= Not BOOLEAN ENABLE Condition test`` () = base.``TIMER= Not BOOLEAN ENABLE Condition test``()

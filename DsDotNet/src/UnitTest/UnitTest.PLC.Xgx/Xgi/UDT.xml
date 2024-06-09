@@ -31,7 +31,9 @@
 				</Parameter>
 			</Parameters>
 			<GlobalVariables>
-				<GlobalVariable Version="Ver 1.0" EIPGUID="779c7551-5051-4122-9361-7b4fa47337ba" EIPChangedID="0" HMIGUID="32483a8f-eb0d-4bcf-963b-3f2b1ecac46d" MultiUserRunEdit="0" MotionGUID="7533d6d7-aad0-4cfe-970f-f1a0b46ab17c" Count="1"><Symbols><Symbol Name="People" Kind="6" Type="ARRAY[0..10] OF Person" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="640" TotalSize="3520" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
+				<GlobalVariable Version="Ver 1.0" EIPGUID="779c7551-5051-4122-9361-7b4fa47337ba" EIPChangedID="0" HMIGUID="32483a8f-eb0d-4bcf-963b-3f2b1ecac46d" MultiUserRunEdit="0" MotionGUID="7533d6d7-aad0-4cfe-970f-f1a0b46ab17c" Count="1">
+					<Symbols>
+						<Symbol Name="People" Kind="6" Type="ARRAY[0..10] OF Person" State="0" Address="" Trigger="" InitValue="" Comment="" Device="A" DevicePos="640" TotalSize="3520" OrderIndex="-1" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0" PtrType="" Motion="0"></Symbol>
 					</Symbols>
 					<TempVar Count="0"></TempVar>
 					<HMIFlags></HMIFlags>

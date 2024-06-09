@@ -310,6 +310,8 @@ module rec ExpressionParser =
                     storages.Add(storageName, variable)
                     Some <| DuVarDecl(exp, variable)
 
+            | :? CtxUdtMemberAssignContext as assign ->
+                failwith "NOT yet"
             | :? AssignContext as assignCtx ->
                 let storageName = getStorageName()
                 if not <| storages.ContainsKey storageName then

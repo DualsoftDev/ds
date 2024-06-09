@@ -47,10 +47,15 @@ toplevels: toplevel (';' toplevel)* ';';
     toplevel: expr|statement;
 
 statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl | udtInstances;
-    assign: normalAssign | risingAssign | fallingAssign;
+    assign:
+        udtMemberAssign     # CtxUdtMemberAssign
+        | normalAssign      # CtxNormalAssign
+        | risingAssign      # CtxRisingAssign
+        | fallingAssign     # CtxFallingAssign
+        ;
     normalAssign: '$' storageName '=' expr;
-    // risingAssign: 'rising' '(' '$' storageName ')' '==' expr;
-    // fallingAssign: 'falling' '(' '$' storageName ')' '==' expr;
+    udtMemberAssign: '$' udtStorageName  '=' expr;
+        udtStorageName: IDENTIFIER ARRAYDECL '.' IDENTIFIER;      // people[10].name
     risingAssign: 'ppulse' '(' '$' storageName ')' '==' expr;
     fallingAssign: 'npulse' '(' '$' storageName ')' '==' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
@@ -157,6 +162,7 @@ fragment VALID_ID_CHAR: VALID_ID_START | ('0' .. '9') | HangulChar;
 fragment DIGIT: ('0' .. '9');
 fragment DIGITS: DIGIT+;
 fragment HangulChar: [\u3131-\u314E\u314F-\u3163|\uAC00-\uD7A3]+;
+fragment SPACES: [ \t\r\n]+;
 
 fragment SCIENTIFIC_NUMBER: SIGN? NUMBER (E SIGN? DIGITS)?;
 fragment NUMBER: ((DIGITS)? ('.' DIGITS)) | ( (DIGITS) '.' (DIGITS)?);
@@ -172,7 +178,7 @@ fragment NUMBER: ((DIGITS)? ('.' DIGITS)) | ( (DIGITS) '.' (DIGITS)?);
     INT64:SIGN? DIGITS 'L';
     UINT64:DIGITS 'UL';
 
-ARRAYDECL: LBRACKET DIGITS RBRACKET;
+ARRAYDECL: LBRACKET SPACES? DIGITS SPACES? RBRACKET;
 
 //fragment UNSIGNED_INTEGER: ('0' .. '9')+;
 

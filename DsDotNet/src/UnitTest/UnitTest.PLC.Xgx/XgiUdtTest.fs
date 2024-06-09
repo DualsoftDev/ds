@@ -37,8 +37,13 @@ module XgiUdtTestModule =
         member x.``xgi udt member assign test`` () =
             let storages = Storages()
             let code = udtBaseCode + """
+<<<<<<< HEAD
             //$hong.name = "Hong";
             //$hong.age = 20;
+=======
+            $hong.name = "Hong";
+            $hong.age = 20;
+>>>>>>> 5139b66cf211a2112ff199284a3db8c9cc32413d
             $people[0].name = "Kim";
             $people[0].age = 30;
             """

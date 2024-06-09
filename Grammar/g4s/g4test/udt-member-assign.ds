@@ -1,0 +1,13 @@
+struct Person {
+    string name;
+    int age;
+};
+
+Person hong;
+Person people[10];
+
+$hong.name = "홍길동";
+
+$people[0].name = "전우치";
+$people[0].age = 25;
+

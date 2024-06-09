@@ -389,7 +389,7 @@ module XgiExportModule =
         /// XgxPOUParams 의 commented statements 중에서 UDT 선언문 반환
         member x.GetUdtDeclarations() : UdtDecl list =
             let g = x.GroupStatementsByUdtDeclaration()
-            match g.TryFindIt("non-decl") with
+            match g.TryFindIt("udt-decl") with
             | Some decl -> decl |> map (fun cs ->
                 match cs.Statement with
                 | DuUdtDecl udt -> udt

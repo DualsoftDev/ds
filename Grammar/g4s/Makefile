@@ -25,6 +25,8 @@ gui:
 
 udt:
 	$(grun) expr.g4 toplevels -gui g4test/udt.ds
+udt2:
+	$(grun) expr.g4 toplevels -gui g4test/udt-member-assign.ds
 
 test:
 	@export CLASSPATH=".:$(jarPath):$$CLASSPATH"

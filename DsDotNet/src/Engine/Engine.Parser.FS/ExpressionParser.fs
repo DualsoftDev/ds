@@ -28,12 +28,17 @@ module rec ExpressionParserModule =
         member x.IsUdtMemberVariable (name:string) =
             option {
                 match name with
-                | RegexPattern @"^(\w+)\.(\w+)$" [udtInstanceName; udtMemberVar] ->
+                | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [udtInstanceName; _; udtMemberVar] ->
                     let! decl = x.UdtInstances |> filter (fun udt -> udt.VarName = udtInstanceName) |> Seq.tryExactlyOne
                     let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
                     return matchingDecl.Members |> Seq.exists (fun m -> m.Name = udtMemberVar)                   
                 | _ -> None
             } |> Option.defaultValue false
+        member x.IsTimerOrCounterMemberVariable (name:string) =
+            match name with
+            | RegexPattern @"^(\w+)\.(\w+)$" [instanceName; memberVar] ->
+                x.TimerCounterInstances.Contains instanceName
+            | _ -> false
 
     //type DynamicDictionary with
     //    member x.UnpackParser() = x.Get<Storages>("storages"), x.Get<Augments>("augments")
@@ -311,13 +316,36 @@ module rec ExpressionParserModule =
         | None -> fail ()
 
 
+    let createMemberVariable (name:string) (expr:IExpression) (comment:string option) : IVariable =
+        let v = expr.BoxedEvaluatedValue
+        let createParam () =
+            {
+                defaultStorageCreationParams(unbox v) (VariableTag.PcUserVariable|>int) with
+                    Name=name; Comment=comment}
+        match v.GetType().Name with
+        | BOOL   -> new MemberVariable<bool>   (createParam())
+        | CHAR   -> new MemberVariable<char>   (createParam())
+        | FLOAT32-> new MemberVariable<single> (createParam())
+        | FLOAT64-> new MemberVariable<double> (createParam())
+        | INT16  -> new MemberVariable<int16>  (createParam())
+        | INT32  -> new MemberVariable<int32>  (createParam())
+        | INT64  -> new MemberVariable<int64>  (createParam())
+        | INT8   -> new MemberVariable<int8>   (createParam())
+        | STRING -> new MemberVariable<string> (createParam())
+        | UINT16 -> new MemberVariable<uint16> (createParam())
+        | UINT32 -> new MemberVariable<uint32> (createParam())
+        | UINT64 -> new MemberVariable<uint64> (createParam())
+        | UINT8  -> new MemberVariable<uint8>  (createParam())
+        | _  -> failwithlog "ERROR"
+
     let tryCreateStatement (parserData:ParserData) (ctx: StatementContext) : Statement option =
         let storages:Storages = parserData.Storages
         assert (ctx.ChildCount = 1)
         let getStorageName = fun () -> ctx.Descendants<StorageNameContext>().First().GetText()
 
         let optStatement =
-            match ctx.children[0] with
+            let fstChild = ctx.children[0] 
+            match fstChild with
             | :? VarDeclContext as varDeclCtx ->
                 let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
 
@@ -351,25 +379,37 @@ module rec ExpressionParserModule =
                     storages.Add(storageName, variable)
                     Some <| DuVarDecl(exp, variable)
 
-            | :? CtxUdtArrayMemberAssignContext as assign ->
-                failwith "NOT yet"
             | :? AssignContext as assignCtx ->
-                let storageName = getStorageName()
-
-                let isUdtMemberVariable = parserData.IsUdtMemberVariable storageName
-                if not <| storages.ContainsKey storageName then
-                    if isUdtMemberVariable then
-                        ()
-                    failwith $"ERROR: Failed to assign into non existing storage {storageName}"
-
-                let storage = storages[storageName]
-
                 let createExp ctx =
                     createExpression storages (getFirstChildExpressionContext ctx)
+                let children = assignCtx.children.ToFSharpList()
 
-                match assignCtx.children.ToFSharpList() with
-                | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(None, createExp ctx, storage)
-                | _ -> failwithlog "ERROR"
+                match assignCtx with
+                | :? CtxStructMemberAssignContext as assign ->
+                    let storageName = ctx.Descendants<StructStorageNameContext>().First().GetText()
+                    let isUdtMemberVariable = parserData.IsUdtMemberVariable storageName
+                    let isTimerOrCounterMemberVariable = parserData.IsTimerOrCounterMemberVariable storageName
+                    if not (isUdtMemberVariable || isTimerOrCounterMemberVariable) then
+                        failwith $"ERROR: Failed to assign into non existing member variable {storageName}"
+                    let exp = createExp (children[0] :?> StructMemberAssignContext)
+                    let pseudoMemberVar =
+                        match storages.TryFind storageName with
+                        | Some v -> v
+                        | None ->
+                            let v = createMemberVariable storageName exp (Some (exp.ToText()))
+                            storages[v.Name] <- v
+                            v
+                    Some <| DuAssign(None, exp, pseudoMemberVar)
+                | _ ->
+                    let storageName = getStorageName()
+                    if not <| storages.ContainsKey storageName then
+                        failwith $"ERROR: Failed to assign into non existing storage {storageName}"
+
+                    let storage = storages[storageName]
+
+                    match children with
+                    | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(None, createExp ctx, storage)
+                    | _ -> failwithlog "ERROR"
 
             | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement parserData counterDeclCtx
 

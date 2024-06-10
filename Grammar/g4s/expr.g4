@@ -48,24 +48,18 @@ toplevels: toplevel (';' toplevel)* ';';
 
 statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl | udtInstances;
     assign:
-        udtArrayMemberAssign    # CtxUdtArrayMemberAssign
+        structMemberAssign      # CtxStructMemberAssign
         | normalAssign          # CtxNormalAssign
         | risingAssign          # CtxRisingAssign
         | fallingAssign         # CtxFallingAssign
         ;
     normalAssign: '$' storageName '=' expr;
-    udtArrayMemberAssign: '$' udtStorageName  '=' expr;
-        udtStorageName: IDENTIFIER ARRAYDECL '.' IDENTIFIER;      // people[10].name
+    structMemberAssign: '$' structStorageName  '=' expr;
+        structStorageName: IDENTIFIER (ARRAYDECL)? '.' IDENTIFIER;      // myTon.Q, people[10].name
     risingAssign: 'ppulse' '(' '$' storageName ')' '==' expr;
     fallingAssign: 'npulse' '(' '$' storageName ')' '==' expr;
     varDecl:   type storageName ('=' expr)? ;//';';
-
-        // 1. 일반 변수: myBool
-        // 1. Timer/Counter 의 멤버 변수: myTon.RST
-        // 1. UDT 의 멤버 변수: person.name
-        //
-        // Timer/Counter 는 별도 구조체를 정의하지 않고 사용하므로 UDT 에 귀속시킬 수 없다.  Timer/Counter 를 처리해야 하므로 IDENTIFIER.IDENTIFIER 를 허용할 수 밖에 없다.
-        storageName: IDENTIFIER ('.' IDENTIFIER )*;
+        storageName: IDENTIFIER;
     type:
         'int8' | 'sbyte'
         | 'uint8' | 'byte'

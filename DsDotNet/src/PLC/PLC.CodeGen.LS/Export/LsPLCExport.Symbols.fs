@@ -101,9 +101,10 @@ module internal XgiSymbolsModule =
         | _ -> failwithlog $"Not supported plc {targetType} type"
         
 
-    let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo =
+    let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo option =
 
         match xgxSymbol with
+        | DuStorage(:? IMemberVariable as t) -> None
         | DuStorage(:? ITag as t) ->
             let name = t.Name
             //전처리  XGI % 생략시 자동 붙히기
@@ -127,7 +128,7 @@ module internal XgiSymbolsModule =
                     DevicePos = devPos
                     Device = device.ToString()
                     InitValue = initValue
-                    Kind = kindVar }
+                    Kind = kindVar } |> Some
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
         | DuStorage t ->
@@ -167,7 +168,7 @@ module internal XgiSymbolsModule =
                         InitValue = t.BoxedValue
                         Kind = kindVar }
 
-            symbolInfo
+            Some symbolInfo
         //DuXgxVar ?
         | DuXgiVar xgx ->
             match prjParam.TargetType with
@@ -192,7 +193,7 @@ module internal XgiSymbolsModule =
                         DevicePos = devPos }
             | _ ->
                     failwithf "Invalid target type: %A" prjParam.TargetType
-
+            |> Some
 
 
 
@@ -215,7 +216,7 @@ module internal XgiSymbolsModule =
                     Address = addr
                     Device = device
                     DevicePos = devicePos
-                    Kind = kindVar }
+                    Kind = kindVar } |> Some
 
         | DuCounter counter ->
             let device, addr, devicePos  =
@@ -243,14 +244,14 @@ module internal XgiSymbolsModule =
                     Address = addr
                     Device = device
                     DevicePos = devicePos
-                    Kind = kindVar }
+                    Kind = kindVar } |> Some
 
     let private xgxSymbolsToSymbolInfos
         (prjParam: XgxProjectParams)
         (kindVar: int)
         (xgxSymbols: XgxSymbol seq)
       : SymbolInfo list =
-        xgxSymbols |> map (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
+        xgxSymbols |> choose (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
 
 
     let private storagesToSymbolInfos (prjParam: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =

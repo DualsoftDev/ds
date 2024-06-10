@@ -169,7 +169,7 @@ module MemoryAllocator =
             | INT32 -> 32
             | INT64 -> 64
             | INT8 -> 8
-            | STRING -> failwithlog "ERROR"
+            | STRING -> (32*8)
             | UINT16 -> 16
             | UINT32 -> 32
             | UINT64 -> 64

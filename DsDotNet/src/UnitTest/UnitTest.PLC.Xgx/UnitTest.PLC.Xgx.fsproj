@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
@@ -33,7 +33,7 @@
         <Compile Include="XgxIQMapperTest.fs" />
         <Compile Include="XgxAutoMemoryAllocTest.fs" />
         <Compile Include="NameAddressValidatorTest.fs" />
-        <Compile Include="XgiUdtTest.fs" />
+        <Compile Include="XgxUdtTest.fs" />
         <Compile Include="Arithmetic/XgxArithmeticTest.fs" />
         <Compile Include="Comparison/XgxComparisonTest.fs" />
         <Compile Include="Rung/XgxDrawing.fs" />

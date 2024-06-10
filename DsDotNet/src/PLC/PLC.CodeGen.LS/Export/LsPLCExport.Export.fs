@@ -31,16 +31,8 @@ XckU4UJCOYh5CA==</OnlineUploadData>
 
     /// Task 부분 Xml string 반환: <Task Version=..>taskNameName
     let createXmlStringTask taskName kind priority index device=
-        sprintf
-            """
-            <Task Version="257" Type="0" Attribute="2" Kind="%d" Priority="%d" TaskIndex="%d"
-                Device="%d" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">%s</Task>"""
-            kind
-            priority
-            index
-            device
-            taskName
-
+        $"""<Task Version="257" Type="0" Attribute="2" Kind="{kind}" Priority="{priority}" TaskIndex="{index}"
+                Device="{device}" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">{taskName}</Task>"""
 
 
 [<AutoOpen>]

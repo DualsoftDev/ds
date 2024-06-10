@@ -104,7 +104,7 @@ module internal XgiSymbolsModule =
     let xgxSymbolToSymbolInfo (prjParam: XgxProjectParams) (kindVar: int) (xgxSymbol: XgxSymbol) : SymbolInfo option =
 
         match xgxSymbol with
-        | DuStorage(:? IMemberVariable as t) -> None
+        | DuStorage(:? IMemberVariable) -> None
         | DuStorage(:? ITag as t) ->
             let name = t.Name
             //전처리  XGI % 생략시 자동 붙히기

@@ -54,7 +54,10 @@ XckU4UJCOYh5CA==
                             </LDRoutine>
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="0">
-                            <Symbols/>
+                            <Symbols>
+                                <Symbol Name="hong" Kind="8" Type="Person" Device="A"/>
+                                <Symbol Name="people" Kind="8" Type="ARRAY[0..9] OF Person" Device="A"/>
+                            </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>
                         <RungTable/>

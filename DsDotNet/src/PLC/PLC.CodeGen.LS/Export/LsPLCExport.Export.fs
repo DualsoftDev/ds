@@ -9,7 +9,6 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open System
 open PLC.CodeGen.Common.K
-open Dual.Common.Core.FS
 
 
 [<AutoOpen>]
@@ -660,7 +659,7 @@ module XgiExportModule =
                 (* UDT instance 삽입 : <Symbol> xml node 삽입 *)
                 pous
                 |> collect(fun pou -> pou.GetUdtInstances())
-                |> map (fun udt -> udt.GenerateXmlNode())
+                |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_GLOBAL))
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
             (* UDT 정의 삽입*)
@@ -688,11 +687,17 @@ module XgiExportModule =
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
                     let mainScan =   if i = 0 then Some(mainScanName) else None
                     // POU 단위로 xml rung 생성
-                    pou
-                        .DuplicateExcludingUdtDeclarations()
-                        .GenerateXmlNode(x, mainScan)
-                    |> xnPrograms.AdoptChild
-                    |> ignore
+                    let programXml =
+                        pou
+                            .DuplicateExcludingUdtDeclarations()
+                            .GenerateXmlNode(x, mainScan)
+
+                    let xnLocalVarSymbols = programXml.GetXmlNode("//LocalVar/Symbols")
+                    pou.GetUdtInstances()
+                    |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_EXTERNAL))
+                    |> iter (xnLocalVarSymbols.AdoptChild >> ignore)
+
+                    xnPrograms.AdoptChild programXml |> ignore
 
             (* Local var 의 comment 및 초기값 global 에 반영 : hack *)
             do
@@ -786,14 +791,15 @@ module XgiExportModule =
             udt
     and UdtInstance with
         /// UDT instance 정의문에 해당하는 <Symbol> xml node 를 생성해서 반환
-        member x.GenerateXmlNode() : XmlNode =
+        // kind: <GlobalVariable> tag 내에서의 symbol 인 경우 6, <LocalVar> tag 내에서의 symbol 인 경우 8
+        member x.GenerateXmlNode(kind:int) : XmlNode =
             let typ =
                 match x.ArraySize with
                 | 1 -> x.TypeName
                 | n when n > 1 -> $"ARRAY[0..{n-1}] OF {x.TypeName}"
                 | _ as n -> failwith $"Invalid array size: {n}"
             let xmlSymbol =
-                $"""<Symbol Name="{x.VarName}" Kind="6" Type="{typ}" Device="A" ></Symbol>"""
+                $"""<Symbol Name="{x.VarName}" Kind="{kind}" Type="{typ}" Device="A" ></Symbol>"""
                 |> DualXmlNode.ofString
             xmlSymbol
         (* UDT array 초기화 방법 *)

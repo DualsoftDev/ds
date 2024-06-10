@@ -141,7 +141,12 @@ module TagVariableModule =
                 member x.Literal = Some(x:>IExpressionizableTerminal)
 
             interface ILiteralHolder with
-                member x.ToTextWithoutTypeSuffix() = $"{x.Value}"
+                member x.ToTextWithoutTypeSuffix() =
+                    match box x.Value with
+                    | :? string as s when not <| s.ToUpper().StartsWith("T#") ->
+                        // string 이면서, timer 의 preset 값인 "T#1s" 와 같은 형태가 아니면, single quote 로 감싼다.
+                        $"'{x.Value}'"
+                    | _ -> $"{x.Value}"
                 member x.ToText() = x.ToText()// sprintf "%A" x.Value
             interface IValue<'T> with
                 member x.Value with get() = x.Value and set(_v) = failwithlog "ERROR: unsupported."

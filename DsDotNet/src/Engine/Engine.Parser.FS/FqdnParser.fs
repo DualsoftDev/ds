@@ -4,9 +4,9 @@ open Antlr4.Runtime
 open Dual.Common.Core.FS
 open Engine.Core
 
-module FqdnParser =
+module FqdnParserModule =
     let parseFqdn (text: string) =
-        let createParser (text: string) =
+        let createParser (text: string) : fqdnParser =
             let inputStream = new AntlrInputStream(text)
             let lexer = fqdnLexer (inputStream)
             let tokenStream = CommonTokenStream(lexer)

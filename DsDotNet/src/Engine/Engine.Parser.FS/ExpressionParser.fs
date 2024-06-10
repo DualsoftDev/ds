@@ -10,8 +10,8 @@ open Antlr4.Runtime.Tree
 open System.Text.RegularExpressions
 
 [<AutoOpen>]
-module rec ExpressionParser =
-    let private createParser (text: string) =
+module rec ExpressionParserModule =
+    let internal createParser (text: string) : exprParser =
         let inputStream = new AntlrInputStream(text)
         let lexer = exprLexer (inputStream)
         let tokenStream = CommonTokenStream(lexer)
@@ -371,15 +371,6 @@ module rec ExpressionParser =
 
         optStatement.Iter(fun st -> st.Do())
         optStatement
-
-    let tryParseStatement (storages: Storages) (text: string) : Statement option =
-        try
-            let parser = createParser (text)
-            let ctx = parser.statement ()
-
-            tryCreateStatement storages ctx
-        with exn ->
-            failwith $"Failed to parse Statement: {text}\r\n{exn}"
 
 
     let parseCodeForTarget (storages: Storages) (text: string) (target:PlatformTarget): Statement list =

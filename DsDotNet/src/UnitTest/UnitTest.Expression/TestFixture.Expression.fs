@@ -6,8 +6,19 @@ open Dual.Common.Core.FS
 open Engine.Core
 open Engine.Parser.FS
 
+
 [<AutoOpen>]
 module ExpressionFixtures =
+    let tryParseStatement4UnitTest (storages: Storages) (text: string) : Statement option =
+        try
+            let parser = ExpressionParserModule.createParser (text)
+            let ctx = parser.statement ()
+
+            tryCreateStatement storages ctx
+        with exn ->
+            failwith $"Failed to parse Statement: {text}\r\n{exn}"
+
+
     let sys = DsSystem("testSys")
     let mutable runtimeTarget = WINDOWS
     let setRuntimeTarget(target:PlatformTarget) =

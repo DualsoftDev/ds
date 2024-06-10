@@ -10,7 +10,7 @@ module FqdnParseTestModule =
     let toString x = x.ToString()
     type FqdnParseTest() =
         inherit EngineTestBaseClass()
-        let parseFqdn = FqdnParser.parseFqdn
+        let parseFqdn = FqdnParserModule.parseFqdn
 
         [<Test>]
         member __.``Fqdn parse test`` () =

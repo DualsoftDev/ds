@@ -242,7 +242,7 @@ module TimerTestModule =
 """
 
             let statement = parseCodeForTarget storages code AB
-            [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)
+            [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)       // TimerStruct.Create() 에서 storage 에 추가함.
             [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)
 
         [<Test>]

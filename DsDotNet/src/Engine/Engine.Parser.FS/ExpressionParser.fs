@@ -8,9 +8,36 @@ open Engine.Core
 open type exprParser
 open Antlr4.Runtime.Tree
 open System.Text.RegularExpressions
+open System.Collections.Generic
 
 [<AutoOpen>]
 module rec ExpressionParserModule =
+    /// Parsing 과정에 필요한 데이터를 담고 있는 클래스
+    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option, udtDecls:UdtDecl seq, udtInstances:UdtInstance seq) =
+        new() = ParserData(WINDOWS, Storages(), None, [], [])
+        member x.TargetType:PlatformTarget = target
+        member x.Storages: Storages = storages
+        member x.ExprParser: exprParser option = exprParser
+        member val UdtDecls = ResizeArray<UdtDecl>(udtDecls)
+        member val UdtInstances = ResizeArray<UdtInstance>(udtInstances)
+        member val TimerCounterInstances = HashSet<string>()
+
+    type ParserData with
+        member x.TryGetUdtDecl (typ:string) = x.UdtDecls.TryFind(fun d -> d.TypeName = typ)
+        member x.IsUdtType (typ:string) = x.TryGetUdtDecl typ |> Option.isSome
+        member x.IsUdtMemberVariable (name:string) =
+            option {
+                match name with
+                | RegexPattern @"^(\w+)\.(\w+)$" [udtInstanceName; udtMemberVar] ->
+                    let! decl = x.UdtInstances |> filter (fun udt -> udt.VarName = udtInstanceName) |> Seq.tryExactlyOne
+                    let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
+                    return matchingDecl.Members |> Seq.exists (fun m -> m.Name = udtMemberVar)                   
+                | _ -> None
+            } |> Option.defaultValue false
+
+    //type DynamicDictionary with
+    //    member x.UnpackParser() = x.Get<Storages>("storages"), x.Get<Augments>("augments")
+
     let internal createParser (text: string) : exprParser =
         let inputStream = new AntlrInputStream(text)
         let lexer = exprLexer (inputStream)
@@ -169,7 +196,7 @@ module rec ExpressionParserModule =
 
     let private (|BoolExp|) (x: IExpression) = x :?> IExpression<bool>
 
-    let private parseCounterStatement (storages: Storages) (ctx: CounterDeclContext) : Statement =
+    let private parseCounterStatement (parserData:ParserData) (ctx: CounterDeclContext) : Statement =
         let typ =
             ctx.Descendants<CounterTypeContext>().First().GetText().ToUpper()
             |> DU.fromString<CounterType>
@@ -179,10 +206,17 @@ module rec ExpressionParserModule =
 
         match typ with
         | Some typ ->
+            let storages = parserData.Storages
             let exp = createExpression storages (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Counter>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
 
+            parserData.TimerCounterInstances.Add(name) |> ignore
+
+            // e.g "ctd myCTD = createXgiCTD(2000u, $cd, $xload);"
+            // typ = CTD
+            // exp = createXgiCTD(2000u, $cd, $xload)
+            // name = myCTD
             match exp with
             | DuFunction { Name = functionName
                            Arguments = args } -> // functionName = "createCTU"
@@ -228,7 +262,7 @@ module rec ExpressionParserModule =
             | _ -> fail ()
         | None -> fail ()
 
-    let private parseTimerStatement (storages: Storages) (ctx: TimerDeclContext) : Statement =
+    let private parseTimerStatement (parserData:ParserData) (ctx: TimerDeclContext) : Statement =
         let typ =
             ctx.Descendants<TimerTypeContext>().First().GetText().ToUpper()
             |> DU.fromString<TimerType>
@@ -238,9 +272,15 @@ module rec ExpressionParserModule =
 
         match typ with
         | Some typ ->
+            let storages = parserData.Storages
             let exp = createExpression storages (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Timer>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
+            // e.g "ton myTon = createXgiTON(2000u, $myQBit0);"
+            // typ = TON
+            // exp = createXgiTON(2000u, $myQBit0)
+            // name = myTon
+            parserData.TimerCounterInstances.Add(name) |> ignore
 
             match exp with
             | DuFunction { Name = functionName
@@ -271,7 +311,8 @@ module rec ExpressionParserModule =
         | None -> fail ()
 
 
-    let tryCreateStatement (storages: Storages) (ctx: StatementContext) : Statement option =
+    let tryCreateStatement (parserData:ParserData) (ctx: StatementContext) : Statement option =
+        let storages:Storages = parserData.Storages
         assert (ctx.ChildCount = 1)
         let getStorageName = fun () -> ctx.Descendants<StorageNameContext>().First().GetText()
 
@@ -310,11 +351,15 @@ module rec ExpressionParserModule =
                     storages.Add(storageName, variable)
                     Some <| DuVarDecl(exp, variable)
 
-            | :? CtxUdtMemberAssignContext as assign ->
+            | :? CtxUdtArrayMemberAssignContext as assign ->
                 failwith "NOT yet"
             | :? AssignContext as assignCtx ->
                 let storageName = getStorageName()
+
+                let isUdtMemberVariable = parserData.IsUdtMemberVariable storageName
                 if not <| storages.ContainsKey storageName then
+                    if isUdtMemberVariable then
+                        ()
                     failwith $"ERROR: Failed to assign into non existing storage {storageName}"
 
                 let storage = storages[storageName]
@@ -326,9 +371,9 @@ module rec ExpressionParserModule =
                 | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(None, createExp ctx, storage)
                 | _ -> failwithlog "ERROR"
 
-            | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement storages counterDeclCtx
+            | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement parserData counterDeclCtx
 
-            | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement storages timerDeclCtx
+            | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement parserData timerDeclCtx
 
             | :? CopyStatementContext as copyStatementCtx ->
                 let expr ctx =
@@ -351,10 +396,14 @@ module rec ExpressionParserModule =
                             Type = ctx.``type``().GetText()
                             Name = ctx.storageName().GetText() } )
                         .ToFSharpList()
-                Some <| DuUdtDecl {TypeName = typeName; Members = members}
+                let udtDecl = { TypeName = typeName; Members = members }
+                parserData.UdtDecls.Add udtDecl
+                Some <| DuUdtDecl udtDecl
 
             | :? UdtInstancesContext as ctx ->
                 let t = ctx.udtType().GetText()
+                if not <| parserData.IsUdtType t then
+                    failwith $"ERROR: UDT type {t} is not declared"
                 let v = ctx.udtVar().GetText()
                 let n =
                     let arrDecl = ctx.arrayDecl()
@@ -365,7 +414,10 @@ module rec ExpressionParserModule =
                         match Regex.Replace(arrText, @"\s+", "") with
                         | RegexPattern @"^\[(\d+)\]$" [ Int32Pattern arraySize ] -> arraySize
                         | _ -> failwithlog "ERROR: Invalid array declaration"
-                Some <| DuUdtInstances { TypeName = t; VarName = v; ArraySize = n }
+                let udtInstance = { TypeName = t; VarName = v; ArraySize = n }
+                parserData.UdtInstances.Add udtInstance
+                Some <| DuUdtInstances udtInstance
+
 
             | _ -> failwithlog "ERROR: Not yet statement"
 
@@ -377,6 +429,7 @@ module rec ExpressionParserModule =
         try
             ParserUtil.runtimeTarget  <- target
             let parser = createParser (text)
+            let parserData = new ParserData(target, storages, Some parser, [], [])
 
             let children = parser.toplevels().children
 
@@ -394,7 +447,7 @@ module rec ExpressionParserModule =
                     assert (t.ChildCount = 1)
 
                     match t.children[0] with
-                    | :? StatementContext as stmt -> tryCreateStatement storages stmt
+                    | :? StatementContext as stmt -> tryCreateStatement parserData stmt
                     | _ -> failwith $"ERROR: {text}: expect statements" ]
             |> List.choose id
         with exn ->

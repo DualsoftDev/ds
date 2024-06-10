@@ -9,12 +9,13 @@ open Engine.Parser.FS
 
 [<AutoOpen>]
 module ExpressionFixtures =
-    let tryParseStatement4UnitTest (storages: Storages) (text: string) : Statement option =
+    let tryParseStatement4UnitTest (targetType:PlatformTarget) (storages: Storages) (text: string) : Statement option =
         try
             let parser = ExpressionParserModule.createParser (text)
             let ctx = parser.statement ()
+            let parserData = new ParserData(targetType, storages, Some parser, [], [])
 
-            tryCreateStatement storages ctx
+            tryCreateStatement parserData ctx
         with exn ->
             failwith $"Failed to parse Statement: {text}\r\n{exn}"
 

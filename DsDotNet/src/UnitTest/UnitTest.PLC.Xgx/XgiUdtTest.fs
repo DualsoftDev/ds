@@ -8,6 +8,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Engine.CodeGenPLC
+open Dual.UnitTest.Common.FS
 
 
 [<AutoOpen>]
@@ -34,16 +35,33 @@ module XgiUdtTestModule =
             x.saveTestResult f xml
 
         [<Test>]
+        member x.``xgi udt decl nonexisting test`` () =
+            let f = fun () ->
+                let storages = Storages()
+                let code = udtBaseCode + "NonExistingType nonExisting;"
+                let statements = parseCodeForWindows storages code
+                let f = getFuncName()
+                x.generateXmlForTest f storages (map withNoComment statements) |> ignore
+            
+            f |> ShouldFailWithSubstringT "ERROR: UDT type NonExistingType is not declared"
+
+        [<Test>]
+        member x.``timer struct member assign test`` () =
+            let storages = Storages()
+            let code = """
+ton myTon = createXgkTON(20u, true);
+$myTon.PRE = 30u;
+"""
+            let statements = parseCodeForWindows storages code
+            let f = getFuncName()
+            x.generateXmlForTest f storages (map withNoComment statements) |> ignore
+            
+        [<Test>]
         member x.``xgi udt member assign test`` () =
             let storages = Storages()
             let code = udtBaseCode + """
-<<<<<<< HEAD
-            //$hong.name = "Hong";
-            //$hong.age = 20;
-=======
             $hong.name = "Hong";
             $hong.age = 20;
->>>>>>> 5139b66cf211a2112ff199284a3db8c9cc32413d
             $people[0].name = "Kim";
             $people[0].age = 30;
             """

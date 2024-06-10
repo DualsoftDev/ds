@@ -14,7 +14,7 @@ module XgxTypeConvertorModule =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
             let augs = Augments(newLocalStorages, StatementContainer())
-            let createPack (prjParam:XgxProjectParams) (augs:Augments) =
+            let createPack (prjParam:XgxProjectParams) (augs:Augments) : DynamicDictionary =
                 let kvs:array<string*obj> =
                     [|
                         ("projectParameter", prjParam)

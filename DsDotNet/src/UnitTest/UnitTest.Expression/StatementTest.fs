@@ -28,11 +28,12 @@ type StatementTest() =
     [<Test>]
     member __.``CTU/TON AB parsing test`` () =
         use _ = setRuntimeTarget AB
-        let coutnerStatement:Statement = "ctu myCounter = createAbCTU(100u, false)" |> tryParseStatement4UnitTest storages |> Option.get
+        let tryParse = tryParseStatement4UnitTest AB storages >> Option.get
+        let coutnerStatement:Statement = "ctu myCounter = createAbCTU(100u, false)" |> tryParse
         let counter = toCounter coutnerStatement
-        let timerStatement2:Statement = "ton myTimer = createAbTON(100u, false)" |> tryParseStatement4UnitTest storages |> Option.get
+        let timerStatement2:Statement = "ton myTimer = createAbTON(100u, false)" |> tryParse
 
-        let cs2:Statement = "ton mytimerAB = createAbTON(1000u, $tag1 || $tag2)" |> tryParseStatement4UnitTest storages |> Option.get
+        let cs2:Statement = "ton mytimerAB = createAbTON(1000u, $tag1 || $tag2)" |> tryParse
         let timer = toTimer cs2
 
 
@@ -43,7 +44,7 @@ type StatementTest() =
             "ton mytimer3 = createAbTON(1000u, $tag1 || $tag2)"
         ]
         for s in statements do
-            (tryParseStatement4UnitTest storages s |> Option.get).ToText() === s
+            (tryParse s).ToText() === s
 
         let fails = [
             "Counter declaration error"      , "ctu myCtu1 = createAbCTR(100u, $tag1, $tag2)"                  // 'Counter declaration error: ctu myCounter = createCTU(100us, $tag1, $tag1, $tag1, $tag1)'
@@ -56,7 +57,7 @@ type StatementTest() =
         for (expectedFailMessage, failText) in fails do
             (fun () ->
                 tracefn $"Checking {expectedFailMessage} for {failText}"
-                failText |> tryParseStatement4UnitTest storages |> ignore
+                tryParse failText |> ignore
             ) |> ShouldFailWithSubstringT expectedFailMessage
 
 
@@ -68,11 +69,12 @@ type StatementTest() =
 
         //let storages = storages.ToArray() |> map Tuple.ofKeyValuePair |> Tuple.toDictionary
         use _ = setRuntimeTarget WINDOWS
-        let coutnerStatement:Statement = "ctu myCounter = createWinCTU(100u, false, false)" |> tryParseStatement4UnitTest storages|> Option.get
+        let tryParse = tryParseStatement4UnitTest WINDOWS storages >> Option.get
+        let coutnerStatement:Statement = "ctu myCounter = createWinCTU(100u, false, false)" |> tryParse
         let counter = toCounter coutnerStatement
-        let timerStatement2:Statement = "ton myTimer = createWinTON(100u, false)" |> tryParseStatement4UnitTest storages|> Option.get
+        let timerStatement2:Statement = "ton myTimer = createWinTON(100u, false)" |> tryParse
 
-        let cs2:Statement = "ton mytimerWin = createWinTON(1000u, $tag1 || $tag2)" |> tryParseStatement4UnitTest storages |> Option.get
+        let cs2:Statement = "ton mytimerWin = createWinTON(1000u, $tag1 || $tag2)" |> tryParse
         let timer = toTimer cs2
 
 
@@ -84,7 +86,7 @@ type StatementTest() =
             //"ton mytimer4 = createWinTON(1000u, $tag1 || $tag2, $tag3)"
         ]
         for s in statements do
-            (tryParseStatement4UnitTest storages s |> Option.get).ToText() === s
+            (tryParse s).ToText() === s
 
         let fails = [
             "Counter declaration error"      , "ctu myCtu1 = createWinCTU(100u, $tag1, $tag1, $tag1, $tag1)"    // 'Counter declaration error: ctu myCounter = createCTU(100u, $tag1, $tag1, $tag1, $tag1)'
@@ -99,7 +101,7 @@ type StatementTest() =
         for (expectedFailMessage, failText) in fails do
             (fun () ->
                 tracefn $"Checking {expectedFailMessage} for {failText}"
-                failText |> tryParseStatement4UnitTest storages |> ignore
+                tryParse failText |> ignore
             ) |> ShouldFailWithSubstringT expectedFailMessage
     [<Test>]
     member __.``COPY statement parsing test`` () =
@@ -109,7 +111,7 @@ type StatementTest() =
         storages.Add(tCond.Name, tCond)
         storages.Add(tTarget.Name, tTarget)
         let text = "copyIf($tagCondition, 100us, $tag1)"
-        let copyStatement:Statement = text |> tryParseStatement4UnitTest storages |> Option.get
+        let copyStatement:Statement = text |> tryParseStatement4UnitTest WINDOWS storages |> Option.get
         copyStatement.ToText() === text
 
         copyStatement.Do()

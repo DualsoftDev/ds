@@ -66,7 +66,7 @@ double myDouble = 0.0;
                 "Type mismatch", "int myInt2 = 0.0;"
             ]
             for (expectedFailMessage, failText) in fails do
-                (fun () -> failText |> tryParseStatement4UnitTest storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
+                (fun () -> failText |> tryParseStatement4UnitTest WINDOWS storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
 
             ()
 
@@ -147,7 +147,7 @@ double myDouble = 3.14 + 3.14;
             let statements =
                 [
                     for s in declarations do
-                        let statement = tryParseStatement4UnitTest storages s  |> Option.get
+                        let statement = tryParseStatement4UnitTest WINDOWS storages s  |> Option.get
                         statement.ToText() === s
                         yield statement
                 ]

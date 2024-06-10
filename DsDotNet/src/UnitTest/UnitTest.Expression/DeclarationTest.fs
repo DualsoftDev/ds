@@ -33,7 +33,7 @@ open Engine.Core
                 //"ton myton2 = createWinTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statementTexts do
-                let statement = tryParseStatement4UnitTest storages s
+                let statement = tryParseStatement4UnitTest AB storages s
                 match statement with
                 | Some stmt -> stmt.ToText() === s
                 | None -> ()

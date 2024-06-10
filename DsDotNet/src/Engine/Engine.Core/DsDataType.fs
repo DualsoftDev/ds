@@ -126,6 +126,22 @@ module DsDataType =
             | DuUINT64  -> 64
             | DuUINT8   -> 8
 
+         member x.ToPLCType() =
+            match x with
+            | DuBOOL    -> "BOOL"
+            | DuCHAR    -> "CHAR"
+            | DuFLOAT32 -> "REAL"
+            | DuFLOAT64 -> "LREAL"
+            | DuINT8    -> "SINT"
+            | DuINT16   -> "INT"
+            | DuINT32   -> "DINT"
+            | DuINT64   -> "LINT"
+            | DuSTRING  -> "STRING"
+            | DuUINT16  -> "UINT"
+            | DuUINT32  -> "UDINT"
+            | DuUINT64  -> "ULINT"
+            | DuUINT8   -> "BYTE"
+
 
          member x.ToStringValue (value: obj) =
             match x, value with
@@ -290,8 +306,10 @@ module DsDataType =
         | _ -> None
 
 
-    let textToDataType(typeName:string) =
+    let textToDataType(typeName:string) : DataType =
         match tryTextToDataType typeName with
         |Some v -> v
         | _ -> failwithf $"'{typeName}' DataToType Error check type"
 
+    let textToSystemType(typeName:string) : System.Type =
+        textToDataType typeName |> fun x -> x.ToType()

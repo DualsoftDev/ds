@@ -28,17 +28,30 @@ module rec ExpressionParserModule =
         member x.IsUdtMemberVariable (name:string) =
             option {
                 match name with
-                | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [udtInstanceName; _; udtMemberVar] ->
-                    let! decl = x.UdtInstances |> filter (fun udt -> udt.VarName = udtInstanceName) |> Seq.tryExactlyOne
+                | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [instanceName; _; memberVar] ->
+                    let! decl = x.UdtInstances |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
                     let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
-                    return matchingDecl.Members |> Seq.exists (fun m -> m.Name = udtMemberVar)                   
-                | _ -> None
+                    return matchingDecl.Members |> Seq.exists (fun m -> m.Name = memberVar)                   
+                | _ -> ()
             } |> Option.defaultValue false
         member x.IsTimerOrCounterMemberVariable (name:string) =
             match name with
             | RegexPattern @"^(\w+)\.(\w+)$" [instanceName; memberVar] ->
                 x.TimerCounterInstances.Contains instanceName
             | _ -> false
+        member x.TryGetMemberVariableDataType (name:string) =
+            assert (x.IsUdtMemberVariable name)
+            option {
+                match name with
+                | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [instanceName; _; memberVar] ->
+                    let! decl = x.UdtInstances |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
+                    let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
+                    let! matchingMember = matchingDecl.Members |> filter (fun m -> m.Name = memberVar) |> Seq.tryExactlyOne
+                    return matchingMember.Type
+                | _ ->
+                    ()
+            }
+
 
     //type DynamicDictionary with
     //    member x.UnpackParser() = x.Get<Storages>("storages"), x.Get<Augments>("augments")
@@ -389,9 +402,13 @@ module rec ExpressionParserModule =
                     let storageName = ctx.Descendants<StructStorageNameContext>().First().GetText()
                     let isUdtMemberVariable = parserData.IsUdtMemberVariable storageName
                     let isTimerOrCounterMemberVariable = parserData.IsTimerOrCounterMemberVariable storageName
+                    if parserData.TargetType = XGK && isUdtMemberVariable then
+                        failwith $"ERROR: UDT declaration is not supported in XGK"
+
                     if not (isUdtMemberVariable || isTimerOrCounterMemberVariable) then
                         failwith $"ERROR: Failed to assign into non existing member variable {storageName}"
                     let exp = createExp (children[0] :?> StructMemberAssignContext)
+                    let stgType = parserData.TryGetMemberVariableDataType storageName
                     let pseudoMemberVar =
                         match storages.TryFind storageName with
                         | Some v -> v
@@ -399,6 +416,8 @@ module rec ExpressionParserModule =
                             let v = createMemberVariable storageName exp (Some (exp.ToText()))
                             storages[v.Name] <- v
                             v
+                    if stgType.Value <> pseudoMemberVar.DataType then
+                        failwith $"ERROR: Type mismatch in member variable assignment {ctx.GetText()}"
                     Some <| DuAssign(None, exp, pseudoMemberVar)
                 | _ ->
                     let storageName = getStorageName()
@@ -433,7 +452,7 @@ module rec ExpressionParserModule =
                 let members =
                     ctx.Descendants<VarDeclContext>()
                         .Select(fun ctx -> {
-                            Type = ctx.``type``().GetText()
+                            Type = ctx.``type``().GetText() |> textToSystemType
                             Name = ctx.storageName().GetText() } )
                         .ToFSharpList()
                 let udtDecl = { TypeName = typeName; Members = members }

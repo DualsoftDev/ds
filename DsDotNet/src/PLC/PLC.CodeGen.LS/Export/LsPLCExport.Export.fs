@@ -767,16 +767,16 @@ module XgiExportModule =
             let mutable devicePos = 0
             for m in x.Members do
                 let symbol = $"<Symbol></Symbol>" |> DualXmlNode.ofString
+                let dataType = m.Type |> getDataType
                 symbol.AddAttributes([
                     "Name", m.Name
-                    "Type", m.Type      // todo: ds type 과 PLC type 간 변환 필요.  int -> DINT, int16 -> int
+                    "Type", dataType.ToPLCType()      // todo: ds type 과 PLC type 간 변환 필요.  int -> DINT, int16 -> int
                     "DevicePos", devicePos
                 ]) |> ignore
 
                 // get type length 
                 devicePos <-
-                    let dt = textToDataType m.Type
-                    let bitLength = dt.ToPLCBitSize()
+                    let bitLength = dataType.ToPLCBitSize()
                     devicePos + bitLength
 
                 symbols.AdoptChild symbol |> ignore

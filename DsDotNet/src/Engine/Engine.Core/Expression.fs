@@ -221,7 +221,7 @@ module ExpressionModule =
     }
 
     type UdtMember = {
-        Type:string
+        Type:System.Type
         Name:string
     }
 

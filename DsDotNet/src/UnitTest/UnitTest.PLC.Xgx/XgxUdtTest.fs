@@ -24,16 +24,6 @@ Person hong;
 Person people[10];
 """
 
-    member x.``timer struct member assign test`` () =
-        let storages = Storages()
-        let code = """
-ton myTon = createXgkTON(20u, true);
-$myTon.PRE = 30u;
-"""
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        x.generateXmlForTest f storages (map withNoComment statements) |> ignore
-            
     member x.``UDT decl test`` () =
         let f = getFuncName()
         let doit() =
@@ -43,7 +33,7 @@ $myTon.PRE = 30u;
             x.saveTestResult f xml
         match xgx with
         | XGI -> doit()
-        | XGK -> (fun () -> doit()) |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
+        | XGK -> doit |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
         | _ -> failwith "Not supported runtime target"
 
     member x.``UDT decl nonexisting test`` () =
@@ -55,6 +45,17 @@ $myTon.PRE = 30u;
             x.generateXmlForTest f storages (map withNoComment statements) |> ignore
             
         doit |> ShouldFailWithSubstringT "ERROR: UDT type NonExistingType is not declared"
+
+
+    member x.``UDT invalid member assign test`` () =
+        let f = getFuncName()
+        let doit = fun () ->
+            let storages = Storages()
+            let code = udtBaseCode + "$hong.name = 1;"
+            let statements = parseCodeForWindows storages code
+            x.generateXmlForTest f storages (map withNoComment statements) |> ignore
+            
+        doit |> ShouldFailWithSubstringT "ERROR: Type mismatch in member variable assignment"
 
     member x.``UDT member assign test`` () =
         let f = getFuncName()
@@ -72,7 +73,7 @@ $myTon.PRE = 30u;
             x.saveTestResult f xml
         match xgx with
         | XGI -> doit()
-        | XGK -> (fun () -> doit()) |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
+        | XGK -> doit |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
         | _ -> failwith "Not supported runtime target"
 
     member x.``UDT decl plc gen`` () =
@@ -83,17 +84,17 @@ $myTon.PRE = 30u;
 
 type XgiUdtTest() =
     inherit XgxUdtTest(XGI)
-    [<Test>] member __.``timer struct member assign test`` () = base.``timer struct member assign test``()
     [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
     [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
+    [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()
     [<Test>] member __.``UDT member assign test`` () = base.``UDT member assign test``()
     [<Test>] member __.``UDT decl plc gen`` () = base.``UDT decl plc gen``()
 
 
 type XgkUdtTest() =
     inherit XgxUdtTest(XGK)
-    [<Test>] member __.``timer struct member assign test`` () = base.``timer struct member assign test``()
     [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
     [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
+    [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()
     [<Test>] member __.``UDT member assign test`` () = base.``UDT member assign test``()
     [<Test>] member __.``UDT decl plc gen`` () = base.``UDT decl plc gen``()

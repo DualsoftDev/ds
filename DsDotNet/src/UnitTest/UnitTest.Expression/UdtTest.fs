@@ -32,8 +32,8 @@ Person people[10];
             statements[0] === DuUdtDecl {
                         TypeName = "Person";
                         Members = [
-                            { Type = "string"; Name = "name" };
-                            { Type = "int"; Name = "age" }
+                            { Type = typedefof<string>; Name = "name" };
+                            { Type = typedefof<int>; Name = "age" }
                         ]}
             statements[1] === DuUdtInstances { TypeName = "Person"; VarName="hong";   ArraySize=1 }
             statements[2] === DuUdtInstances { TypeName = "Person"; VarName="people"; ArraySize=10 }

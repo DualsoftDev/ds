@@ -90,7 +90,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
                 ctr myCTR = createXgiCTR(2000u, $cd, $res);
                 //int x7 = createTag("%QX0.1", 0);
                 //$x7 = $myCTR.CV;
-                $myCTR.RST = $cd;
+                //$myCTR.RST = $cd;
                 """
             | XGK -> """
                 bool cd = createTag("P00000", false);

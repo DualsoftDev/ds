@@ -68,8 +68,8 @@ XckU4UJCOYh5CA==
                         Person
                         <UserDataTypeVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="name" Type="string" DevicePos="0"/>
-                                <Symbol Name="age" Type="int" DevicePos="256"/>
+                                <Symbol Name="name" Type="STRING" DevicePos="0"/>
+                                <Symbol Name="age" Type="DINT" DevicePos="256"/>
                             </Symbols>
                         </UserDataTypeVar>
                     </UserDataType>

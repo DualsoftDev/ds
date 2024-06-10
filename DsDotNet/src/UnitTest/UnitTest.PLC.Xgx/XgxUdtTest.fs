@@ -25,7 +25,11 @@ Person people[10];
         let f = getFuncName()
         let doit() =
             let storages = Storages()
-            let code = udtBaseCode + "copyStructIf(true, $people[0], $people[1]);"
+            let code = udtBaseCode + """
+copyStructIf(true, $hong, $people[0]);
+copyStructIf(true, $people[0], $people[1]);
+copyStructIf(true, $people[1], $hong);
+"""
             let statements = parseCodeForWindows storages code
             let xml = x.generateXmlForTest f storages (map withNoComment statements)
             x.saveTestResult f xml
@@ -34,6 +38,22 @@ Person people[10];
         | XGK -> doit |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
         | _ -> failwith "Not supported runtime target"
 
+    member x.``UDT copy test2`` () =
+        let f = getFuncName()
+        let doit() =
+            let storages = Storages()
+            let code = udtBaseCode + """
+copyStructIf(2 > 3, $hong, $people[0]);
+copyStructIf(2 + 3 > 10, $people[0], $people[1]);
+copyStructIf(true, $people[1], $hong);
+"""
+            let statements = parseCodeForWindows storages code
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
+        match xgx with
+        | XGI -> doit()
+        | XGK -> doit |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
+        | _ -> failwith "Not supported runtime target"
 
     member x.``UDT decl test`` () =
         let f = getFuncName()
@@ -66,7 +86,7 @@ Person people[10];
             let statements = parseCodeForWindows storages code
             x.generateXmlForTest f storages (map withNoComment statements) |> ignore
             
-        doit |> ShouldFailWithSubstringT "ERROR: Type mismatch in member variable assignment"
+        doit |> ShouldFailWithSubstringT "Type mismatch"
 
     member x.``UDT member assign test`` () =
         let f = getFuncName()
@@ -96,6 +116,7 @@ Person people[10];
 type XgiUdtTest() =
     inherit XgxUdtTest(XGI)
     [<Test>] member __.``UDT copy test`` () = base.``UDT copy test``()
+    [<Test>] member __.``UDT copy test2`` () = base.``UDT copy test2``()
     [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
     [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
     [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()
@@ -106,6 +127,7 @@ type XgiUdtTest() =
 type XgkUdtTest() =
     inherit XgxUdtTest(XGK)
     [<Test>] member __.``UDT copy test`` () = base.``UDT copy test``()
+    [<Test>] member __.``UDT copy test2`` () = base.``UDT copy test2``()
     [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
     [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
     [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()

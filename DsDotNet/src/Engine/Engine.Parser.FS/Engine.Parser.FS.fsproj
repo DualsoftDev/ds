@@ -22,6 +22,7 @@
         <Compile Include="1.ErrorListener.fs" />
         <Compile Include="1.ParserUtility.fs" />
         <Compile Include="FqdnParser.fs" />
+        <Compile Include="ParserData.fs" />
         <Compile Include="ExpressionParser.fs" />
         <Compile Include="1.ContextInformation.fs" />
         <Compile Include="3.0.ListenerUtil.fs" />

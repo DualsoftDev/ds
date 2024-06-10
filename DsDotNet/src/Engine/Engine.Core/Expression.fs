@@ -304,11 +304,13 @@ module ExpressionModule =
         member x.Do() =
             match x with
             | DuAssign (_, expr, target) ->
-                assert(target.DataType = expr.DataType)
+                if target.DataType <> expr.DataType then
+                    failwith "ERROR: Type mismatch in assignment statement"
                 target.BoxedValue <- expr.BoxedEvaluatedValue
 
             | DuVarDecl (expr, target) ->
-                assert(target.DataType = expr.DataType)
+                if target.DataType <> expr.DataType then
+                    failwith "ERROR: Type mismatch in assignment statement"
                 target.BoxedValue <- expr.BoxedEvaluatedValue
 
             | DuTimer timerStatement ->

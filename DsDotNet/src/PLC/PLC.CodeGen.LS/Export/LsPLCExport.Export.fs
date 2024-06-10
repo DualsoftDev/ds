@@ -302,7 +302,16 @@ module XgiExportModule =
                             NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuAction (DuCopyUdt (udtDecl, condition, source, target)) when isXgi ->
-                    failwith "Not Yet"
+                    for m in udtDecl.Members do
+                        let s, t = $"{source}.{m.Name}", $"{target}.{m.Name}"
+                        let s, t = prjParam.GlobalStorages[s], prjParam.GlobalStorages[t]
+
+                        let command = ActionCmd(Move(condition, s.ToExpression(), t))
+                        let rgiSub = rgiCommandRung None command rgi.NextRungY
+
+                        rgi <-
+                            {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                                NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuAction(DuCopy(condition, source, target)) when isXgk ->
                     moveCmdRungXgk condition source target

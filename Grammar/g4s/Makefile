@@ -29,6 +29,8 @@ udt2:
 	$(grun) expr.g4 udtStorageName -gui g4test/udt-storage.ds
 udt3:
 	$(grun) expr.g4 toplevels -gui g4test/udt-member-assign.ds
+udt4:
+	$(grun) expr.g4 toplevels -gui g4test/udt-copy.ds
 
 test:
 	@export CLASSPATH=".:$(jarPath):$$CLASSPATH"

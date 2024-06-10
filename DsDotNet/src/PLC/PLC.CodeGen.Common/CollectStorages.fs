@@ -30,11 +30,13 @@ module CollectStoragesModule =
     type ActionStatement with
 
         member x.CollectStorages() : IStorage list =
-            [ match x with
-              | DuCopy(cond, src, tgt) ->
-                  yield! cond.CollectStorages()
-                  yield! src.CollectStorages()
-                  yield tgt ]
+            [   match x with
+                | DuCopy(cond, src, tgt) ->
+                    yield! cond.CollectStorages()
+                    yield! src.CollectStorages()
+                    yield tgt
+                | DuCopyUdt(_, cond, src, tgt) ->
+                    yield! cond.CollectStorages() ]
 
     type Statement with
 

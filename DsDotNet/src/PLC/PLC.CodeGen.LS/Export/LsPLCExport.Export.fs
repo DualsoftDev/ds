@@ -301,6 +301,9 @@ module XgiExportModule =
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
+                | DuAction (DuCopyUdt (udtDecl, condition, source, target)) when isXgi ->
+                    failwith "Not Yet"
+
                 | DuAction(DuCopy(condition, source, target)) when isXgk ->
                     moveCmdRungXgk condition source target
 
@@ -368,7 +371,7 @@ module XgiExportModule =
             |> groupBy (fun cs ->
                 match cs.Statement with
                 | DuUdtDecl _ -> "udt-decl"
-                | DuUdtInstances _ -> "udt-instances"
+                | DuUdtDefinitions _ -> "udt-instances"
                 | _ -> "non-udt")
             |> Tuple.toDictionary
 
@@ -388,12 +391,12 @@ module XgiExportModule =
             | None -> []
 
         /// XgxPOUParams 의 commented statements 중에서 UDT 변수 정의문 반환
-        member x.GetUdtInstances() : UdtInstance list =
+        member x.GetUdtDefinitions() : UdtDefinition list =
             let g = x.GroupStatementsByUdtDeclaration()
             match g.TryFindIt("udt-instances") with
             | Some inst -> inst |> map (fun cs ->
                 match cs.Statement with
-                | DuUdtInstances udt -> udt
+                | DuUdtDefinitions udt -> udt
                 | _ -> failwith "Not a UDT declaration")
             | None -> []
 
@@ -650,7 +653,7 @@ module XgiExportModule =
 
                 (* UDT instance 삽입 : <Symbol> xml node 삽입 *)
                 pous
-                |> collect(fun pou -> pou.GetUdtInstances())
+                |> collect(fun pou -> pou.GetUdtDefinitions())
                 |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_GLOBAL))
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
@@ -685,7 +688,7 @@ module XgiExportModule =
                             .GenerateXmlNode(x, mainScan)
 
                     let xnLocalVarSymbols = programXml.GetXmlNode("//LocalVar/Symbols")
-                    pou.GetUdtInstances()
+                    pou.GetUdtDefinitions()
                     |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_EXTERNAL))
                     |> iter (xnLocalVarSymbols.AdoptChild >> ignore)
 
@@ -781,7 +784,7 @@ module XgiExportModule =
 
                 symbols.AdoptChild symbol |> ignore
             udt
-    and UdtInstance with
+    and UdtDefinition with
         /// UDT instance 정의문에 해당하는 <Symbol> xml node 를 생성해서 반환
         // kind: <GlobalVariable> tag 내에서의 symbol 인 경우 6, <LocalVar> tag 내에서의 symbol 인 경우 8
         member x.GenerateXmlNode(kind:int) : XmlNode =

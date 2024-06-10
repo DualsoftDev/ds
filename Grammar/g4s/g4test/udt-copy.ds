@@ -1,0 +1,1 @@
+copyStructIf(true, $people[0], $people[1]);

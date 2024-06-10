@@ -4,6 +4,7 @@ open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
+open System
 
 [<AutoOpen>]
 module StatementExtensionModule =
@@ -12,6 +13,7 @@ module StatementExtensionModule =
 
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
+        [<Obsolete("DuCopyUdt case 처리")>]
         member internal x.ToStatements (pack:DynamicDictionary) : unit =
             let statement = x
             let _prjParam, augs = pack.Unpack()
@@ -50,6 +52,19 @@ module StatementExtensionModule =
                 } |> augs.Statements.Add
 
 
+            | DuAction(DuCopyUdt(udtDecl, condition, source, target)) ->
+                //let funcName = XgiConstants.FunctionNameMove
+                //for m in udtDecl.Members do
+                //    DuPLCFunction {
+                //        Condition = Some condition
+                //        FunctionName = funcName
+                //        Arguments = [ condition; source ]
+                //        OriginalExpression = condition
+                //        Output = target
+                //    } |> augs.Statements.Add
+                statement |> augs.Statements.Add
+
+
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
         /// visit: [상위로부터 부모까지의 expression 경로] -> 자신 expression -> 반환 expression : 아래의 FunctionToAssignStatement 샘플 참고
         member x.VisitExpression (pack:DynamicDictionary, visit:ExpressionVisitor) : Statement =
@@ -79,6 +94,10 @@ module StatementExtensionModule =
             | DuAction(DuCopy(condition, source, target)) ->
                 let cond = (visitTop condition) :?> IExpression<bool>
                 DuAction(DuCopy(cond, visitTop source, target))
+
+            | DuAction (DuCopyUdt (udtDecl, condition, source, target)) ->
+                let cond = (visitTop condition) :?> IExpression<bool>
+                DuAction(DuCopyUdt(udtDecl, cond, source, target))
 
             | DuPLCFunction ({Arguments = args} as functionParameters) ->
                 let newArgs = args |> map (fun arg -> visitTop arg)

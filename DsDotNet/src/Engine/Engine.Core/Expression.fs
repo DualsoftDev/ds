@@ -205,6 +205,7 @@ module ExpressionModule =
 
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
+        | DuCopyUdt of udtDecl:UdtDecl * condition:IExpression<bool> * source:string * target:string
 
    
     let private unsupported() = failwithlog "ERROR: not supported"
@@ -230,7 +231,7 @@ module ExpressionModule =
         Members:UdtMember list
     }
 
-    type UdtInstance = {
+    type UdtDefinition = {
         TypeName:string
         VarName:string
         ArraySize:int
@@ -249,7 +250,7 @@ module ExpressionModule =
         | DuUdtDecl of UdtDecl
 
         /// UDT instances 정의.  e.g "Person peopole[10];"
-        | DuUdtInstances of UdtInstance
+        | DuUdtDefinitions of UdtDefinition
 
         /// 대입문.  e.g "$a = $b + 3;"
         ///
@@ -321,8 +322,10 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
-            | (DuUdtDecl _ | DuUdtInstances _) ->
-                ()
+
+            | DuAction (DuCopyUdt _) -> ()
+            | (DuUdtDecl _ | DuUdtDefinitions _) -> ()
+
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 
@@ -357,7 +360,10 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
 
-            | (DuUdtDecl _ | DuUdtInstances _) -> sprintf "%A" x
+            | DuAction (DuCopyUdt (udtDecl, condition, source, target)) ->
+                $"copyStructIf({condition.ToText()}, {source}, {target})"
+
+            | (DuUdtDecl _ | DuUdtDefinitions _) -> sprintf "%A" x
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 

@@ -5,8 +5,6 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open PLC.CodeGen.LS
-open PLC.CodeGen.Common
 open Engine.CodeGenPLC
 open Dual.UnitTest.Common.FS
 
@@ -23,6 +21,19 @@ struct Person {
 Person hong;
 Person people[10];
 """
+    member x.``UDT copy test`` () =
+        let f = getFuncName()
+        let doit() =
+            let storages = Storages()
+            let code = udtBaseCode + "copyStructIf(true, $people[0], $people[1]);"
+            let statements = parseCodeForWindows storages code
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
+        match xgx with
+        | XGI -> doit()
+        | XGK -> doit |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
+        | _ -> failwith "Not supported runtime target"
+
 
     member x.``UDT decl test`` () =
         let f = getFuncName()
@@ -84,6 +95,7 @@ Person people[10];
 
 type XgiUdtTest() =
     inherit XgxUdtTest(XGI)
+    [<Test>] member __.``UDT copy test`` () = base.``UDT copy test``()
     [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
     [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
     [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()
@@ -93,6 +105,7 @@ type XgiUdtTest() =
 
 type XgkUdtTest() =
     inherit XgxUdtTest(XGK)
+    [<Test>] member __.``UDT copy test`` () = base.``UDT copy test``()
     [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
     [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
     [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()

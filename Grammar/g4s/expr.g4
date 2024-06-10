@@ -46,7 +46,7 @@ terminal: storage | tag | literal;
 toplevels: toplevel (';' toplevel)* ';';
     toplevel: expr|statement;
 
-statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl | udtInstances;
+statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl | udtDefinitions | copyStructStatement;
     assign:
         structMemberAssign      # CtxStructMemberAssign
         | normalAssign          # CtxNormalAssign
@@ -88,11 +88,15 @@ statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl 
         copyCondition: expr;
         copySource: expr;
         copyTarget: storage | tag;
+    copyStructStatement: 'copyStructIf' '(' copyCondition ',' udtInstanceSource ',' udtInstanceTarget ')';
+        udtInstanceSource: '$' udtInstance;
+        udtInstanceTarget: '$' udtInstance;
 
     udtDecl: 'struct' udtType '{' varDecl (';' varDecl)* ';' '}';
         udtType: IDENTIFIER;
-    udtInstances: udtType udtVar (arrayDecl)?;
+    udtDefinitions: udtType udtInstance;
         arrayDecl:ARRAYDECL;
+        udtInstance: udtVar (arrayDecl)?;
         udtVar: IDENTIFIER;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive

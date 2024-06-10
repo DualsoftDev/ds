@@ -13,44 +13,57 @@ open System.Collections.Generic
 [<AutoOpen>]
 module rec ExpressionParserModule =
     /// Parsing 과정에 필요한 데이터를 담고 있는 클래스
-    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option, udtDecls:UdtDecl seq, udtInstances:UdtInstance seq) =
+    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option, udtDecls:UdtDecl seq, udtDefinitions:UdtDefinition seq) =
         new() = ParserData(WINDOWS, Storages(), None, [], [])
         member x.TargetType:PlatformTarget = target
         member x.Storages: Storages = storages
         member x.ExprParser: exprParser option = exprParser
         member val UdtDecls = ResizeArray<UdtDecl>(udtDecls)
-        member val UdtInstances = ResizeArray<UdtInstance>(udtInstances)
+        member val UdtDefinitions = ResizeArray<UdtDefinition>(udtDefinitions)
         member val TimerCounterInstances = HashSet<string>()
 
     type ParserData with
-        member x.TryGetUdtDecl (typ:string) = x.UdtDecls.TryFind(fun d -> d.TypeName = typ)
-        member x.IsUdtType (typ:string) = x.TryGetUdtDecl typ |> Option.isSome
+        member x.TryGetUdtDecl (typ:string) : UdtDecl option =
+            x.UdtDecls.TryFind(fun d -> d.TypeName = typ)
+        member x.IsUdtType (typ:string) =
+            x.TryGetUdtDecl typ |> Option.isSome
         member x.IsUdtMemberVariable (name:string) =
             option {
                 match name with
                 | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [instanceName; _; memberVar] ->
-                    let! decl = x.UdtInstances |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
+                    let! decl = x.UdtDefinitions |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
                     let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
                     return matchingDecl.Members |> Seq.exists (fun m -> m.Name = memberVar)                   
                 | _ -> ()
             } |> Option.defaultValue false
+
         member x.IsTimerOrCounterMemberVariable (name:string) =
             match name with
             | RegexPattern @"^(\w+)\.(\w+)$" [instanceName; memberVar] ->
                 x.TimerCounterInstances.Contains instanceName
             | _ -> false
-        member x.TryGetMemberVariableDataType (name:string) =
+
+        /// e.g "people[0].name" => typeof<string>
+        member x.TryGetMemberVariableDataType (name:string) : System.Type option =
             assert (x.IsUdtMemberVariable name)
             option {
                 match name with
                 | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [instanceName; _; memberVar] ->
-                    let! decl = x.UdtInstances |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
+                    let! decl = x.UdtDefinitions |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
                     let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
                     let! matchingMember = matchingDecl.Members |> filter (fun m -> m.Name = memberVar) |> Seq.tryExactlyOne
                     return matchingMember.Type
                 | _ ->
                     ()
             }
+
+        /// UDT 변수 => UDT Type.  e.g {"kim", "people[0]", or "people[1].name"} => Person
+        member x.TryGetUdtTypeName (name:string) : string option =
+            match name with
+                | RegexPattern @"^(\w+)(\[\d+\])?(\.\w+)?$" [instanceName; _; _] ->
+                    x.UdtDefinitions |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne |> Option.map (fun udt -> udt.TypeName)
+                | _ -> None
+            
 
 
     //type DynamicDictionary with
@@ -392,12 +405,12 @@ module rec ExpressionParserModule =
                     storages.Add(storageName, variable)
                     Some <| DuVarDecl(exp, variable)
 
-            | :? AssignContext as assignCtx ->
+            | :? AssignContext as ctx ->
                 let createExp ctx =
                     createExpression storages (getFirstChildExpressionContext ctx)
-                let children = assignCtx.children.ToFSharpList()
+                let children = ctx.children.ToFSharpList()
 
-                match assignCtx with
+                match ctx with
                 | :? CtxStructMemberAssignContext as assign ->
                     let storageName = ctx.Descendants<StructStorageNameContext>().First().GetText()
                     let isUdtMemberVariable = parserData.IsUdtMemberVariable storageName
@@ -430,22 +443,38 @@ module rec ExpressionParserModule =
                     | [ (:? NormalAssignContext as ctx) ] -> Some <| DuAssign(None, createExp ctx, storage)
                     | _ -> failwithlog "ERROR"
 
-            | :? CounterDeclContext as counterDeclCtx -> Some <| parseCounterStatement parserData counterDeclCtx
+            | :? CounterDeclContext as ctx -> Some <| parseCounterStatement parserData ctx
 
-            | :? TimerDeclContext as timerDeclCtx -> Some <| parseTimerStatement parserData timerDeclCtx
+            | :? TimerDeclContext as ctx -> Some <| parseTimerStatement parserData ctx
 
-            | :? CopyStatementContext as copyStatementCtx ->
-                let expr ctx =
-                    ctx |> getFirstChildExpressionContext |> createExpression storages
+            | :? CopyStatementContext as ctx ->
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
-                let condition =
-                    copyStatementCtx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
-
-                let source = copyStatementCtx.Descendants<CopySourceContext>().First() |> expr
-                let target = copyStatementCtx.Descendants<CopyTargetContext>().First().GetText()
+                let source = ctx.Descendants<CopySourceContext>().First() |> expr
+                let target = ctx.Descendants<CopyTargetContext>().First().GetText()
                 assert (target.StartsWith("$"))
                 let target = storages[target.Replace("$", "")]
                 Some <| DuAction(DuCopy(condition, source, target))
+
+            | :? CopyStructStatementContext as ctx ->
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
+
+                let sourceInstance = ctx.Descendants<UdtInstanceSourceContext>().First().udtInstance()
+                let targetInstance = ctx.Descendants<UdtInstanceTargetContext>().First().udtInstance()
+                let sourceVar = sourceInstance.udtVar().GetText()
+                let targetVar = targetInstance.udtVar().GetText()
+                let source, target = sourceInstance.GetText(), targetInstance.GetText()
+                let sourceType = parserData.TryGetUdtTypeName(source)
+                let targetType = parserData.TryGetUdtTypeName(target)
+                match sourceType, targetType with
+                | Some s, Some t ->
+                    if s <> t then failwith $"Type mismatch: {s} <> {t}"
+                | _ -> failwith $"ERROR: Used undefined UDT type."
+
+                let udtDecl = parserData.TryGetUdtDecl(sourceType.Value).Value
+                Some <| DuAction(DuCopyUdt(udtDecl, condition, source, target))
 
             | :? UdtDeclContext as ctx ->
                 let typeName = ctx.udtType().GetText()
@@ -459,13 +488,15 @@ module rec ExpressionParserModule =
                 parserData.UdtDecls.Add udtDecl
                 Some <| DuUdtDecl udtDecl
 
-            | :? UdtInstancesContext as ctx ->
+            | :? UdtDefinitionsContext as ctx ->
                 let t = ctx.udtType().GetText()
                 if not <| parserData.IsUdtType t then
                     failwith $"ERROR: UDT type {t} is not declared"
-                let v = ctx.udtVar().GetText()
+
+                let udtInstance = ctx.udtInstance()
+                let v = udtInstance.udtVar().GetText()
                 let n =
-                    let arrDecl = ctx.arrayDecl()
+                    let arrDecl = udtInstance.arrayDecl()
                     if isNull arrDecl then
                         1
                     else
@@ -473,9 +504,9 @@ module rec ExpressionParserModule =
                         match Regex.Replace(arrText, @"\s+", "") with
                         | RegexPattern @"^\[(\d+)\]$" [ Int32Pattern arraySize ] -> arraySize
                         | _ -> failwithlog "ERROR: Invalid array declaration"
-                let udtInstance = { TypeName = t; VarName = v; ArraySize = n }
-                parserData.UdtInstances.Add udtInstance
-                Some <| DuUdtInstances udtInstance
+                let udtDefinition = { TypeName = t; VarName = v; ArraySize = n }
+                parserData.UdtDefinitions.Add udtDefinition
+                Some <| DuUdtDefinitions udtDefinition
 
 
             | _ -> failwithlog "ERROR: Not yet statement"

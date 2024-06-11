@@ -168,6 +168,8 @@ module StatementExtensionModule =
                             newExp.ToAssignStatement(pack, K.arithmaticOrComparisionOperators)
                         else
                             newExp
+                    | Some (IsComparisonOperator fn) when prjParam.TargetType = XGI ->
+                        newExp.ToAssignStatement(pack, K.comparisonOperators)
                     | _ ->
                         newExp
 

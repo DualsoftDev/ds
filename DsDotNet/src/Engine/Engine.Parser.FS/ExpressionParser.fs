@@ -331,7 +331,7 @@ module rec ExpressionParserModule =
                 let children = ctx.children.ToFSharpList()
 
                 match ctx with
-                | :? CtxStructMemberAssignContext as assign ->
+                | :? CtxStructMemberAssignContext ->
                     let storageName = ctx.Descendants<StructStorageNameContext>().First().GetText()
                     let isUdtMemberVariable = parserData.IsUdtMemberVariable storageName
                     let isTimerOrCounterMemberVariable = parserData.IsTimerOrCounterMemberVariable storageName
@@ -384,8 +384,8 @@ module rec ExpressionParserModule =
 
                 let sourceInstance = ctx.Descendants<UdtInstanceSourceContext>().First().udtInstance()  // e.g "hong"
                 let targetInstance = ctx.Descendants<UdtInstanceTargetContext>().First().udtInstance()  // e.g "people[0]"
-                let sourceVar = sourceInstance.udtVar().GetText()   // e.g "hong"
-                let targetVar = targetInstance.udtVar().GetText()   // e.g "people"
+                let _sourceVar = sourceInstance.udtVar().GetText()   // e.g "hong"
+                let _targetVar = targetInstance.udtVar().GetText()   // e.g "people"
                 let source, target = sourceInstance.GetText(), targetInstance.GetText()
                 let sourceType = parserData.TryGetUdtTypeName(source)   // e.g Some "Person"
                 let targetType = parserData.TryGetUdtTypeName(target)   // e.g Some "Person"

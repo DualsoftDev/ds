@@ -97,7 +97,9 @@ module TagModule =
             | DuTimer timerStatement -> [timerStatement.Timer.DN ]
             | DuCounter counterStatement -> [counterStatement.Counter.DN ]
             | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
+            | DuAction (DuCopyUdt _) -> []
             | DuPLCFunction _ -> [] //test ahn DuPLCFunction target 찾기
+            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
         member x.GetSourceStorages() =
             match x with
@@ -115,7 +117,10 @@ module TagModule =
                     yield! s.GetSourceStorages() ]
             | DuAction (DuCopy (condition, source, _target)) ->
                 condition.CollectStorages()@source.CollectStorages()
+            | DuAction (DuCopyUdt (_parserData, _udtDecl, condition, _source, _target)) ->
+                condition.CollectStorages()
             | DuPLCFunction _ -> []//test ahn DuPLCFunction source 찾기
+            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
       
 

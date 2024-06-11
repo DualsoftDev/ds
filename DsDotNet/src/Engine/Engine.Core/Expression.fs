@@ -282,17 +282,19 @@ module ExpressionModule =
         | CommentedStatement of comment:string * statement:Statement
         member x.Statement = match x with | CommentedStatement (_c, s) -> s
         member x.TargetName =
-             match x.Statement with
-             | DuAssign (_, _expression, target) -> target.Name
-             | DuVarDecl (_expression,variable) -> variable.Name
-             | DuTimer (t:TimerStatement) -> t.Timer.Name
-             | DuCounter (c:CounterStatement) -> c.Counter.Name
-             | DuAction (a:ActionStatement) ->
-                match a with
-                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
-             | DuPLCFunction (_f:FunctionParameters) ->  _f.FunctionName  // Function은 항상 false 함수에 따른다.
+            match x.Statement with
+            | DuAssign (_, _expression, target) -> target.Name
+            | DuVarDecl (_expression,variable) -> variable.Name
+            | DuTimer (t:TimerStatement) -> t.Timer.Name
+            | DuCounter (c:CounterStatement) -> c.Counter.Name
+            | DuAction (a:ActionStatement) ->
+               match a with
+               | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
+               | DuCopyUdt (_parserData, _udtDecl, _condition, _source, target) -> target
+            | DuPLCFunction { FunctionName = fn } -> fn
+            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
-        member x.TargetValue    =
+        member x.TargetValue =
             match x.Statement with
             | DuAssign (_, _expression, target) -> target.BoxedValue
             | DuVarDecl (_expression,variable) -> variable.BoxedValue
@@ -301,7 +303,9 @@ module ExpressionModule =
             | DuAction (a:ActionStatement) ->
                 match a with
                 | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
-            | DuPLCFunction (_f:FunctionParameters) ->  false  // Function은 항상 false 함수에 따른다.
+                | DuCopyUdt _ -> failwith "ERROR: Invalid value reference"
+            | DuPLCFunction { OriginalExpression = exp } ->  exp.BoxedEvaluatedValue
+            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
@@ -374,41 +378,10 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
 
-            | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) ->
+            | DuAction (DuCopyUdt (_parserDataObj, _udtDecl, condition, source, target)) ->
                 $"copyStructIf({condition.ToText()}, {source}, {target})"
 
             | (DuUdtDecl _ | DuUdtDefinitions _) -> sprintf "%A" x
-            | DuPLCFunction _ ->
-                failwithlog "ERROR"
-
-        member x.ToConditionText() =
-            match x with
-            | DuAssign (_condition, expr, _) -> $"{expr.ToText()}" 
-            | DuVarDecl (expr, _) -> $"{expr.ToText()}"
-            | DuTimer timerStatement ->
-                let ts, t = timerStatement, timerStatement.Timer
-                let functionName = ts.FunctionName  // e.g "createTON"
-                let args = [    // [preset; rung-in-condition; (reset-condition)]
-                    sprintf "%A" t.PRE.Value
-                    match ts.RungInCondition with | Some c -> c.ToText() | None -> ()
-                    match ts.ResetCondition  with | Some c -> c.ToText() | None -> () ]
-                let args = String.Join(", ", args)
-                $"{functionName}({args})"
-
-            | DuCounter counterStatement ->
-                let cs, c = counterStatement, counterStatement.Counter
-                let functionName = cs.FunctionName  // e.g "createCTU"
-                let args = [    // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
-                    sprintf "%A" c.PRE.Value
-                    match cs.UpCondition    with | Some c -> c.ToText() | None -> ()
-                    match cs.DownCondition  with | Some c -> c.ToText() | None -> ()
-                    match cs.ResetCondition with | Some c -> c.ToText() | None -> ()
-                    if c.ACC.Value <> 0u then
-                        sprintf "%A" c.ACC.Value ]
-                let args = String.Join(", ", args)
-                $"{functionName}({args})"
-            | DuAction (DuCopy (condition, _, _)) ->
-                $"{condition.ToText()}"
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 

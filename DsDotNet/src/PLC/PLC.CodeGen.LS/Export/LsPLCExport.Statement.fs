@@ -52,16 +52,7 @@ module StatementExtensionModule =
                 } |> augs.Statements.Add
 
 
-            | DuAction(DuCopyUdt(parserDataObj, udtDecl, condition, source, target)) ->
-                //let funcName = XgiConstants.FunctionNameMove
-                //for m in udtDecl.Members do
-                //    DuPLCFunction {
-                //        Condition = Some condition
-                //        FunctionName = funcName
-                //        Arguments = [ condition; source ]
-                //        OriginalExpression = condition
-                //        Output = target
-                //    } |> augs.Statements.Add
+            | DuAction(DuCopyUdt _) ->
                 statement |> augs.Statements.Add
 
 

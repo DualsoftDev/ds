@@ -35,7 +35,7 @@ module CollectStoragesModule =
                     yield! cond.CollectStorages()
                     yield! src.CollectStorages()
                     yield tgt
-                | DuCopyUdt(_, _, cond, src, tgt) ->
+                | DuCopyUdt(_, _, cond, _src, _tgt) ->
                     yield! cond.CollectStorages() ]
 
     type Statement with
@@ -60,8 +60,9 @@ module CollectStoragesModule =
                 | DuCounter stmt -> yield! stmt.CollectStorages()
                 | DuAction stmt -> yield! stmt.CollectStorages()
 
-                | DuPLCFunction _functionParameters -> failwithlog "ERROR" ]
-
+                | DuPLCFunction _functionParameters -> failwithlog "ERROR"
+                | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            ]
     type CommentedStatement with
 
         member x.CollectStorages() : IStorage list = x.Statement.CollectStorages()

@@ -68,7 +68,7 @@ module ParserDataModule =
 
         member x.IsTimerOrCounterMemberVariable (name:string) =
             match name with
-            | RegexPattern @"^(\w+)\.(\w+)$" [instanceName; memberVar] ->
+            | RegexPattern @"^(\w+)\.(\w+)$" [instanceName; _memberVar] ->
                 x.TimerCounterInstances.Contains instanceName
             | _ -> false
 
@@ -108,9 +108,3 @@ module ParserDataModule =
                     let exp = m.Type |> typeDefaultValue |> literal2expr
                     let v = createMemberVariable name exp None
                     x.Storages[name] <- v
-                    let xxx = v
-                    ()
-
-    //type DynamicDictionary with
-    //    member x.UnpackParser() = x.Get<Storages>("storages"), x.Get<Augments>("augments")
-

@@ -13,13 +13,12 @@ module StatementExtensionModule =
 
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
-        [<Obsolete("DuCopyUdt case 처리")>]
         member internal x.ToStatements (pack:DynamicDictionary) : unit =
             let statement = x
             let _prjParam, augs = pack.Unpack()
 
             match statement with
-            | DuVarDecl _ -> failwith "ERROR: DuVarDecl in statement"
+            | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
@@ -94,7 +93,7 @@ module StatementExtensionModule =
                 let newArgs = args |> map (fun arg -> visitTop arg)
                 DuPLCFunction { functionParameters with Arguments = newArgs }
 
-            | DuVarDecl _ -> failwith "ERROR: DuVarDecl in statement"
+            | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (pack:DynamicDictionary, visit:IExpression -> IExpression) : Statement =
@@ -159,7 +158,7 @@ module StatementExtensionModule =
                             newExp.ToAssignStatement(pack, K.arithmaticOrComparisionOperators)
                         else
                             newExp
-                    | Some (IsComparisonOperator fn) when prjParam.TargetType = XGI ->
+                    | Some (IsComparisonOperator _fn) when prjParam.TargetType = XGI && expPath.Any() ->
                         newExp.ToAssignStatement(pack, K.comparisonOperators)
                     | _ ->
                         newExp

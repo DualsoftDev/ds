@@ -194,10 +194,12 @@ module ExportIOTable =
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
                 $"{functionName}({args})"
-            | DuAction (DuCopy (condition, _, _)) ->
-                $"{condition.ToText()}"
+            | DuAction (DuCopy (condition, _, _)) -> $"{condition.ToText()}"
+            | DuAction (DuCopyUdt (_parserData, udtDecl, condition, source, target)) -> $"{condition.ToText()}"
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
+            | (DuUdtDecl _ | DuUdtDefinitions _) ->
+                failwith "Unsupported"
 
     let ToFuncVariTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
 

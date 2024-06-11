@@ -52,7 +52,7 @@ module StatementExtensionModule =
                 } |> augs.Statements.Add
 
 
-            | DuAction(DuCopyUdt(udtDecl, condition, source, target)) ->
+            | DuAction(DuCopyUdt(parserDataObj, udtDecl, condition, source, target)) ->
                 //let funcName = XgiConstants.FunctionNameMove
                 //for m in udtDecl.Members do
                 //    DuPLCFunction {
@@ -95,9 +95,9 @@ module StatementExtensionModule =
                 let cond = (visitTop condition) :?> IExpression<bool>
                 DuAction(DuCopy(cond, visitTop source, target))
 
-            | DuAction (DuCopyUdt (udtDecl, condition, source, target)) ->
+            | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) ->
                 let cond = (visitTop condition) :?> IExpression<bool>
-                DuAction(DuCopyUdt(udtDecl, cond, source, target))
+                DuAction(DuCopyUdt(parserDataObj, udtDecl, cond, source, target))
 
             | DuPLCFunction ({Arguments = args} as functionParameters) ->
                 let newArgs = args |> map (fun arg -> visitTop arg)

@@ -301,7 +301,7 @@ module XgiExportModule =
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAction (DuCopyUdt (udtDecl, condition, source, target)) when isXgi ->
+                | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) when isXgi ->
                     for m in udtDecl.Members do
                         let s, t = $"{source}.{m.Name}", $"{target}.{m.Name}"
                         let s, t = prjParam.GlobalStorages[s], prjParam.GlobalStorages[t]

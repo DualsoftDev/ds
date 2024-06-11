@@ -378,23 +378,24 @@ module rec ExpressionParserModule =
                 Some <| DuAction(DuCopy(condition, source, target))
 
             | :? CopyStructStatementContext as ctx ->
+                // e.g copyStructIf(true, $hong, $people[0]);
                 let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
                 let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
-                let sourceInstance = ctx.Descendants<UdtInstanceSourceContext>().First().udtInstance()
-                let targetInstance = ctx.Descendants<UdtInstanceTargetContext>().First().udtInstance()
-                let sourceVar = sourceInstance.udtVar().GetText()
-                let targetVar = targetInstance.udtVar().GetText()
+                let sourceInstance = ctx.Descendants<UdtInstanceSourceContext>().First().udtInstance()  // e.g "hong"
+                let targetInstance = ctx.Descendants<UdtInstanceTargetContext>().First().udtInstance()  // e.g "people[0]"
+                let sourceVar = sourceInstance.udtVar().GetText()   // e.g "hong"
+                let targetVar = targetInstance.udtVar().GetText()   // e.g "people"
                 let source, target = sourceInstance.GetText(), targetInstance.GetText()
-                let sourceType = parserData.TryGetUdtTypeName(source)
-                let targetType = parserData.TryGetUdtTypeName(target)
+                let sourceType = parserData.TryGetUdtTypeName(source)   // e.g Some "Person"
+                let targetType = parserData.TryGetUdtTypeName(target)   // e.g Some "Person"
                 match sourceType, targetType with
                 | Some s, Some t ->
                     if s <> t then failwith $"Type mismatch: {s} <> {t}"
                 | _ -> failwith $"ERROR: Used undefined UDT type."
 
                 let udtDecl = parserData.TryGetUdtDecl(sourceType.Value).Value
-                Some <| DuAction(DuCopyUdt(udtDecl, condition, source, target))
+                Some <| DuAction(DuCopyUdt(parserData, udtDecl, condition, source, target))
 
             | :? UdtDeclContext as ctx ->
                 let typeName = ctx.udtType().GetText()

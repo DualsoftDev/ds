@@ -208,6 +208,19 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
 
+
+    member x.``COPY test2`` () =
+        let storages = Storages()
+        let code = """
+bool b1 = false;
+bool b2 = false;
+copyIf(2 > 3, $b1, $b2);
+"""
+        let statements = parseCodeForWindows storages code
+        let f = getFuncName()
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
     member x.``OR Block test`` () =
         let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 16 + """
@@ -375,6 +388,7 @@ type XgiGenerationTest() =
     [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
+    [<Test>] member x.``COPY test2`` () = base.``COPY test2`` ()
     [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
     [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
@@ -396,6 +410,7 @@ type XgkGenerationTest() =
     [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
+    [<Test>] member x.``COPY test2`` () = base.``COPY test2`` ()
     [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
     [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()

@@ -43,7 +43,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] copyStructIf(true, hong, people[0])
+                                        [0] $hong.name = "Hong"
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -52,85 +52,119 @@
                                     </Element>
                                     <Element ElementType="102" Coordinate="2052" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
                                     <Element ElementType="70" Coordinate="3073">
-                                        hong.name
+                                        'Hong'
                                     </Element>
                                     <Element ElementType="70" Coordinate="3079">
-                                        people[0].name
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="5121">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="5124" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="6145">
-                                        hong.age
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="6151">
-                                        people[0].age
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="8193">
-                                        [1] copyStructIf(true, people[0], people[1])
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="9220" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="10241">
-                                        people[0].name
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="10247">
-                                        people[1].name
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="12289">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="12292" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="13313">
-                                        people[0].age
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="13319">
-                                        people[1].age
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="15361">
-                                        [2] copyStructIf(true, people[1], hong)
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="16385">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="16388" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="17409">
-                                        people[1].name
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="17415">
                                         hong.name
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="19457">
+                                    <Element ElementType="63" Coordinate="5121">
+                                        [1] $hong.age = 20
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="6145">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="19460" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="20481">
-                                        people[1].age
+                                    <Element ElementType="102" Coordinate="6148" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="7169">
+                                        20
                                     </Element>
-                                    <Element ElementType="70" Coordinate="20487">
+                                    <Element ElementType="70" Coordinate="7175">
                                         hong.age
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="23553" Param="90"/>
-                                    <Element ElementType="33" Coordinate="23646" Param="END">
+                                    <Element ElementType="63" Coordinate="9217">
+                                        [2] copyStructIf(true, hong, people[0])
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="10241">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="10244" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="11265">
+                                        hong.name
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="11271">
+                                        people[0].name
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="13313">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="13316" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="14337">
+                                        hong.age
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="14343">
+                                        people[0].age
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="16385">
+                                        [3] copyStructIf(true, people[0], people[1])
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="17409">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="17412" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="18433">
+                                        people[0].name
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="18439">
+                                        people[1].name
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="20481">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="20484" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="21505">
+                                        people[0].age
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="21511">
+                                        people[1].age
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="23553">
+                                        [4] copyStructIf(true, people[1], hong)
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="24577">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="24580" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="25601">
+                                        people[1].name
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="25607">
+                                        hong.name
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="27649">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="27652" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="28673">
+                                        people[1].age
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="28679">
+                                        hong.age
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="31745" Param="90"/>
+                                    <Element ElementType="33" Coordinate="31838" Param="END">
                                         END
                                     </Element>
                                 </Rung>

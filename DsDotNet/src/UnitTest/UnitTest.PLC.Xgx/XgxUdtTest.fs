@@ -26,6 +26,8 @@ Person people[10];
         let doit() =
             let storages = Storages()
             let code = udtBaseCode + """
+$hong.name = "Hong";
+$hong.age = 20;
 copyStructIf(true, $hong, $people[0]);
 copyStructIf(true, $people[0], $people[1]);
 copyStructIf(true, $people[1], $hong);

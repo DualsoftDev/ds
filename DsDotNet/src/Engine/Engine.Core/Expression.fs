@@ -203,9 +203,14 @@ module ExpressionModule =
         member x.GetUpOrDownCondition() : IExpression<bool> = [x.DownCondition; x.UpCondition] |> List.choose id |> List.exactlyOne
 
 
+    type IParserData =
+        /// UDT 구조체 멤버 값 복사.  source 및 target 이 string 으로 주어진다. (e.g "people[0]", "hong")
+        /// PC 버젼에서 UDT 변수 복사에 대한 실제 실행문.
+        abstract member CopyUdt: UdtDecl * string * string -> unit
+
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
-        | DuCopyUdt of udtDecl:UdtDecl * condition:IExpression<bool> * source:string * target:string
+        | DuCopyUdt of parserData:IParserData * udtDecl:UdtDecl * condition:IExpression<bool> * source:string * target:string
 
    
     let private unsupported() = failwithlog "ERROR: not supported"
@@ -221,19 +226,23 @@ module ExpressionModule =
         Output:IStorage
     }
 
+    /// e.g 가령 Person UDT 에서 "int age";
     type UdtMember = {
         Type:System.Type
         Name:string
     }
 
+    // e.g struct Person { string name; int age; };
     type UdtDecl = {
         TypeName:string
         Members:UdtMember list
     }
 
+    // e.g Person people[10];
     type UdtDefinition = {
         TypeName:string
         VarName:string
+        /// Array 가 아닌 경우, 1 의 값을 가짐.  array 인 경우 1보다 큰 값.  array index 는 0 부터 시작
         ArraySize:int
     }
 
@@ -325,7 +334,10 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
 
-            | DuAction (DuCopyUdt _) -> ()
+            | DuAction (DuCopyUdt (parserData, udtDecl, condition, source, target)) ->
+                if condition.EvaluatedValue then
+                    // 구조체 멤버 복사
+                    parserData.CopyUdt(udtDecl, source, target)
             | (DuUdtDecl _ | DuUdtDefinitions _) -> ()
 
             | DuPLCFunction _ ->
@@ -362,7 +374,7 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
 
-            | DuAction (DuCopyUdt (udtDecl, condition, source, target)) ->
+            | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) ->
                 $"copyStructIf({condition.ToText()}, {source}, {target})"
 
             | (DuUdtDecl _ | DuUdtDefinitions _) -> sprintf "%A" x

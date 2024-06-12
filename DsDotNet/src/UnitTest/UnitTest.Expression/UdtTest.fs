@@ -35,8 +35,8 @@ Person people[10];
                             { Type = typedefof<string>; Name = "name" };
                             { Type = typedefof<int>; Name = "age" }
                         ]}
-            statements[1] === DuUdtDefinitions { TypeName = "Person"; VarName="hong";   ArraySize=1 }
-            statements[2] === DuUdtDefinitions { TypeName = "Person"; VarName="people"; ArraySize=10 }
+            statements[1] === DuUdtDef { TypeName = "Person"; VarName="hong";   ArraySize=1 }
+            statements[2] === DuUdtDef { TypeName = "Person"; VarName="people"; ArraySize=10 }
 
 
 

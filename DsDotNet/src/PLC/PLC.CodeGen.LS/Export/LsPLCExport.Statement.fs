@@ -18,7 +18,7 @@ module StatementExtensionModule =
             let _prjParam, augs = pack.Unpack()
 
             match statement with
-            | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
+            | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _) -> failwith "Should have been processed in early stage"
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
@@ -95,7 +95,7 @@ module StatementExtensionModule =
                     let newArgs = args |> map (fun arg -> visitTop arg)
                     DuPLCFunction { functionParameters with Arguments = newArgs }
 
-                | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
+                | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _) -> failwith "Should have been processed in early stage"
 
             pack.Remove("statement") |> ignore
             newStatement

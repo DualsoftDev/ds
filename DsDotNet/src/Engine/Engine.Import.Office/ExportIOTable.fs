@@ -198,7 +198,7 @@ module ExportIOTable =
             | DuAction (DuCopyUdt (_parserData, udtDecl, condition, source, target)) -> $"{condition.ToText()}"
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
-            | (DuUdtDecl _ | DuUdtDefinitions _) ->
+            | (DuUdtDecl _ | DuUdtDef _) ->
                 failwith "Unsupported"
 
     let ToFuncVariTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =

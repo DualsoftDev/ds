@@ -182,7 +182,7 @@ module POUParametersModule =
                 | CTR ->
                     verifyM "CTR condition error" (up.IsNone && down.IsSome)
 
-            | (DuUdtDecl _ | DuUdtDefinitions _) ->
+            | (DuUdtDecl _ | DuUdtDef _) ->
                 if prjParam.TargetType <> XGI then
                     failwith "UDT declaration is not supported in XGK"
             | DuAction(_a:ActionStatement) -> ()

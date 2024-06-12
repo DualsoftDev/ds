@@ -30,7 +30,7 @@ module ParserDataModule =
 
 
     /// Parsing 과정에 필요한 데이터를 담고 있는 클래스
-    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option, udtDecls:UdtDecl seq, udtDefinitions:UdtDefinition seq) =
+    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option, udtDecls:UdtDecl seq, udtDefinitions:UdtDef seq) =
         new() = ParserData(WINDOWS, Storages(), None, [], [])
         interface IParserData with
             /// UDT 구조체 멤버 값 복사.  source 및 target 이 string 으로 주어진다. (e.g "people[0]", "hong")
@@ -48,7 +48,7 @@ module ParserDataModule =
         /// UDT 선언.  type 선언
         member val UdtDecls = ResizeArray<UdtDecl>(udtDecls)
         /// UDT 정의.  UDT 변수 정의
-        member val UdtDefinitions = ResizeArray<UdtDefinition>(udtDefinitions)
+        member val UdtDefs = ResizeArray<UdtDef>(udtDefinitions)
         member val TimerCounterInstances = HashSet<string>()
 
     type ParserData with
@@ -60,7 +60,7 @@ module ParserDataModule =
             option {
                 match name with
                 | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [instanceName; _; memberVar] ->
-                    let! decl = x.UdtDefinitions |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
+                    let! decl = x.UdtDefs |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
                     let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
                     return matchingDecl.Members |> Seq.exists (fun m -> m.Name = memberVar)                   
                 | _ -> ()
@@ -78,7 +78,7 @@ module ParserDataModule =
             option {
                 match name with
                 | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [instanceName; _; memberVar] ->
-                    let! decl = x.UdtDefinitions |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
+                    let! decl = x.UdtDefs |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
                     let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
                     let! matchingMember = matchingDecl.Members |> filter (fun m -> m.Name = memberVar) |> Seq.tryExactlyOne
                     return matchingMember.Type
@@ -90,11 +90,11 @@ module ParserDataModule =
         member x.TryGetUdtTypeName (name:string) : string option =
             match name with
                 | RegexPattern @"^(\w+)(\[\d+\])?(\.\w+)?$" [instanceName; _; _] ->
-                    x.UdtDefinitions |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne |> Option.map (fun udt -> udt.TypeName)
+                    x.UdtDefs |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne |> Option.map (fun udt -> udt.TypeName)
                 | _ -> None
             
-        member x.AddUdtDefinitions (udtDef:UdtDefinition) =
-            x.UdtDefinitions.Add(udtDef)
+        member x.AddUdtDefs (udtDef:UdtDef) =
+            x.UdtDefs.Add(udtDef)
 
             /// UDT 변수 정의 부분을 풀어서 실제 변수(MemberVariable<T> type)들을 생성해서 storage 에 추가한다.
             /// PC 버젼에서는 PLC 와 달리, 실제 UDT 변수들을 필요로 한다.

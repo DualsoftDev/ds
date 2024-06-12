@@ -140,8 +140,8 @@ double myDouble = 3.14 + 3.14;
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let declarations = [
-                $"string myString = {dq}Hello, world{dq}"
-                "char myChar = 'x'"
+                $"string myString = {dq}Hello, world{dq};"
+                "char myChar = 'x';"
             ]
 
             let statements =

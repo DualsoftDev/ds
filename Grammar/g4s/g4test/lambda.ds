@@ -1,0 +1,10 @@
+int sum(int a, int b) => $a + $b;
+int diff(int a, int b) => $a - $b;
+
+void mark(int age)
+{
+    $ageSum = $ageSum + $age;
+    $difference = diff($age, 3);
+    //return $age;
+}
+

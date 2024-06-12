@@ -256,7 +256,7 @@ module ExpressionModule =
     }
 
     // e.g Person people[10];
-    type UdtDefinition = {
+    type UdtDef = {
         TypeName:string
         VarName:string
         /// Array 가 아닌 경우, 1 의 값을 가짐.  array 인 경우 1보다 큰 값.  array index 는 0 부터 시작
@@ -276,7 +276,7 @@ module ExpressionModule =
         | DuUdtDecl of UdtDecl
 
         /// UDT instances 정의.  e.g "Person peopole[10];"
-        | DuUdtDefinitions of UdtDefinition
+        | DuUdtDef of UdtDef
 
         /// 대입문.  e.g "$a = $b + 3;"
         ///
@@ -309,7 +309,7 @@ module ExpressionModule =
                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
                | DuCopyUdt (_parserData, _udtDecl, _condition, _source, target) -> target
             | DuPLCFunction { FunctionName = fn } -> fn
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
 
         member x.TargetValue =
             match x.Statement with
@@ -322,7 +322,7 @@ module ExpressionModule =
                 | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
                 | DuCopyUdt _ -> failwith "ERROR: Invalid value reference"
             | DuPLCFunction { OriginalExpression = exp } ->  exp.BoxedEvaluatedValue
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
@@ -359,15 +359,15 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     // 구조체 멤버 복사
                     parserData.CopyUdt(udtDecl, source, target)
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> ()
+            | (DuUdtDecl _ | DuUdtDef _) -> ()
 
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 
         member x.ToText() =
             match x with
-            | DuAssign (_condition, expr, target) -> $"{target.ToText()} = {expr.ToText()}"    // todo: condition 을 totext 에 포함할지 여부
-            | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()}"
+            | DuAssign (_condition, expr, target) -> $"{target.ToText()} = {expr.ToText()};"    // todo: condition 을 totext 에 포함할지 여부
+            | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()};"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
@@ -377,7 +377,7 @@ module ExpressionModule =
                     match ts.RungInCondition with | Some c -> c.ToText() | None -> ()
                     match ts.ResetCondition  with | Some c -> c.ToText() | None -> () ]
                 let args = String.Join(", ", args)
-                $"{typ.ToLower()} {t.Name} = {functionName}({args})"
+                $"{typ.ToLower()} {t.Name} = {functionName}({args});"
 
             | DuCounter counterStatement ->
                 let cs, c = counterStatement, counterStatement.Counter
@@ -391,14 +391,15 @@ module ExpressionModule =
                     if c.ACC.Value <> 0u then
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
-                $"{typ.ToLower()} {c.Name} = {functionName}({args})"
+                $"{typ.ToLower()} {c.Name} = {functionName}({args});"
             | DuAction (DuCopy (condition, source, target)) ->
-                $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
+                $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()});"
 
             | DuAction (DuCopyUdt (_parserDataObj, _udtDecl, condition, source, target)) ->
-                $"copyStructIf({condition.ToText()}, {source}, {target})"
+                $"copyStructIf({condition.ToText()}, {source}, {target});"
 
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> sprintf "%A" x
+            | DuUdtDecl _ -> sprintf "%A" x
+            | DuUdtDef _ -> sprintf "%A;" x
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 

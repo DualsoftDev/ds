@@ -99,7 +99,7 @@ module TagModule =
             | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
             | DuAction (DuCopyUdt _) -> []
             | DuPLCFunction _ -> [] //test ahn DuPLCFunction target 찾기
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
 
         member x.GetSourceStorages() =
             match x with
@@ -120,7 +120,7 @@ module TagModule =
             | DuAction (DuCopyUdt (_parserData, _udtDecl, condition, _source, _target)) ->
                 condition.CollectStorages()
             | DuPLCFunction _ -> []//test ahn DuPLCFunction source 찾기
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
 
       
 

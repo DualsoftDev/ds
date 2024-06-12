@@ -383,7 +383,7 @@ module XgiExportModule =
             |> groupBy (fun cs ->
                 match cs.Statement with
                 | DuUdtDecl _ -> "udt-decl"
-                | DuUdtDefinitions _ -> "udt-instances"
+                | DuUdtDef _ -> "udt-instances"
                 | _ -> "non-udt")
             |> Tuple.toDictionary
 
@@ -403,12 +403,12 @@ module XgiExportModule =
             | None -> []
 
         /// XgxPOUParams 의 commented statements 중에서 UDT 변수 정의문 반환
-        member x.GetUdtDefinitions() : UdtDefinition list =
+        member x.GetUdtDefs() : UdtDef list =
             let g = x.GroupStatementsByUdtDeclaration()
             match g.TryFindIt("udt-instances") with
             | Some inst -> inst |> map (fun cs ->
                 match cs.Statement with
-                | DuUdtDefinitions udt -> udt
+                | DuUdtDef udt -> udt
                 | _ -> failwith "Not a UDT declaration")
             | None -> []
 
@@ -665,7 +665,7 @@ module XgiExportModule =
 
                 (* UDT instance 삽입 : <Symbol> xml node 삽입 *)
                 pous
-                |> collect(fun pou -> pou.GetUdtDefinitions())
+                |> collect(fun pou -> pou.GetUdtDefs())
                 |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_GLOBAL))
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
@@ -700,7 +700,7 @@ module XgiExportModule =
                             .GenerateXmlNode(x, mainScan)
 
                     let xnLocalVarSymbols = programXml.GetXmlNode("//LocalVar/Symbols")
-                    pou.GetUdtDefinitions()
+                    pou.GetUdtDefs()
                     |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_EXTERNAL))
                     |> iter (xnLocalVarSymbols.AdoptChild >> ignore)
 
@@ -796,7 +796,7 @@ module XgiExportModule =
 
                 symbols.AdoptChild symbol |> ignore
             udt
-    and UdtDefinition with
+    and UdtDef with
         /// UDT instance 정의문에 해당하는 <Symbol> xml node 를 생성해서 반환
         // kind: <GlobalVariable> tag 내에서의 symbol 인 경우 6, <LocalVar> tag 내에서의 symbol 인 경우 8
         member x.GenerateXmlNode(kind:int) : XmlNode =

@@ -15,26 +15,30 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="19">
+                <GlobalVariable Version="Ver 1.0" Count="23">
                     <Symbols>
                         <Symbol Name="bn1" Comment="uint8 bn1 = 8uy &amp;&amp;&amp; 255uy" Device="" Kind="6" Type="USINT" InitValue="8" Address="" State="0"/>
                         <Symbol Name="bn2" Comment="uint8 bn2 = 8uy ||| 255uy" Device="" Kind="6" Type="USINT" InitValue="255" Address="" State="0"/>
                         <Symbol Name="bn3" Comment="uint8 bn3 = 8uy ^^^ 255uy" Device="" Kind="6" Type="USINT" InitValue="247" Address="" State="0"/>
                         <Symbol Name="bn4" Comment="uint8 bn4 = ~~~(255uy)" Device="" Kind="6" Type="USINT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="bn5" Comment="uint8 bn5 = 1uy &lt;&lt;&lt; 1" Device="" Kind="6" Type="USINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="falsy" Comment="bool falsy = (8 &amp;&amp;&amp; 255) == 3" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="sn1" Comment="int16 sn1 = 8us &amp;&amp;&amp; 255us" Device="" Kind="6" Type="UINT" InitValue="8" Address="" State="0"/>
                         <Symbol Name="sn2" Comment="int16 sn2 = 8us ||| 255us" Device="" Kind="6" Type="UINT" InitValue="255" Address="" State="0"/>
                         <Symbol Name="sn3" Comment="int16 sn3 = 8us ^^^ 255us" Device="" Kind="6" Type="UINT" InitValue="247" Address="" State="0"/>
                         <Symbol Name="sn4" Comment="int16 sn4 = ~~~(255us)" Device="" Kind="6" Type="UINT" InitValue="65280" Address="" State="0"/>
+                        <Symbol Name="sn5" Comment="int16 sn5 = 1us &lt;&lt;&lt; 1" Device="" Kind="6" Type="UINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="truth" Comment="bool truth = (8 &amp;&amp;&amp; 255) == 8" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                         <Symbol Name="ul1" Comment="uint64 ul1 = 8UL &amp;&amp;&amp; 255UL" Device="" Kind="6" Type="ULINT" InitValue="8" Address="" State="0"/>
                         <Symbol Name="ul2" Comment="uint64 ul2 = 8UL ||| 255UL" Device="" Kind="6" Type="ULINT" InitValue="255" Address="" State="0"/>
                         <Symbol Name="ul3" Comment="uint64 ul3 = 8UL ^^^ 255UL" Device="" Kind="6" Type="ULINT" InitValue="247" Address="" State="0"/>
                         <Symbol Name="ul4" Comment="uint64 ul4 = ~~~(255UL)" Device="" Kind="6" Type="ULINT" InitValue="18446744073709551360" Address="" State="0"/>
+                        <Symbol Name="ul5" Comment="uint64 ul5 = 1UL &lt;&lt;&lt; 1" Device="" Kind="6" Type="ULINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="un1" Comment="uint32 un1 = 8u &amp;&amp;&amp; 255u" Device="" Kind="6" Type="UDINT" InitValue="8" Address="" State="0"/>
                         <Symbol Name="un2" Comment="uint32 un2 = 8u ||| 255u" Device="" Kind="6" Type="UDINT" InitValue="255" Address="" State="0"/>
                         <Symbol Name="un3" Comment="uint32 un3 = 8u ^^^ 255u" Device="" Kind="6" Type="UDINT" InitValue="247" Address="" State="0"/>
                         <Symbol Name="un4" Comment="uint32 un4 = ~~~(255u)" Device="" Kind="6" Type="UDINT" InitValue="4294967040" Address="" State="0"/>
+                        <Symbol Name="un5" Comment="uint32 un5 = 1u &lt;&lt;&lt; 1" Device="" Kind="6" Type="UDINT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="un999" Comment="uint32 un999 = 0u" Device="" Kind="6" Type="UDINT" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
@@ -207,39 +211,39 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="38913">
-                                        [6] $sn1 = 8us &amp;&amp;&amp; 255us
+                                        [6] $bn5 = 1uy &lt;&lt;&lt; 1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="39937">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="39940" Param="FNAME: AND2_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1762&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200004, , 0&#xA;VAR_IN: IN2, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="39940" Param="FNAME: SHL_BYTE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2436&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200002, , 0&#xA;VAR_IN: N, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000002, &#xA;"/>
                                     <Element ElementType="70" Coordinate="40961">
-                                        8
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="40967">
-                                        sn1
+                                        bn5
                                     </Element>
                                     <Element ElementType="70" Coordinate="41985">
-                                        255
+                                        1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="44033">
-                                        [7] $sn2 = 8us ||| 255us
+                                        [7] $sn1 = 8us &amp;&amp;&amp; 255us
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="45057">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="45060" Param="FNAME: OR2_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2311&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200004, , 0&#xA;VAR_IN: IN2, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="45060" Param="FNAME: AND2_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1762&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200004, , 0&#xA;VAR_IN: IN2, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
                                     <Element ElementType="70" Coordinate="46081">
                                         8
                                     </Element>
                                     <Element ElementType="70" Coordinate="46087">
-                                        sn2
+                                        sn1
                                     </Element>
                                     <Element ElementType="70" Coordinate="47105">
                                         255
@@ -247,19 +251,19 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="49153">
-                                        [8] $sn3 = 8us ^^^ 255us
+                                        [8] $sn2 = 8us ||| 255us
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="50177">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="50180" Param="FNAME: XOR2_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2540&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200004, , 0&#xA;VAR_IN: IN2, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="50180" Param="FNAME: OR2_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2311&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200004, , 0&#xA;VAR_IN: IN2, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
                                     <Element ElementType="70" Coordinate="51201">
                                         8
                                     </Element>
                                     <Element ElementType="70" Coordinate="51207">
-                                        sn3
+                                        sn2
                                     </Element>
                                     <Element ElementType="70" Coordinate="52225">
                                         255
@@ -267,76 +271,76 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="54273">
-                                        [9] $sn4 = ~~~(255us)
+                                        [9] $sn3 = 8us ^^^ 255us
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="55297">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="55300" Param="FNAME: NOT_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2303&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="55300" Param="FNAME: XOR2_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2540&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200004, , 0&#xA;VAR_IN: IN2, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
                                     <Element ElementType="70" Coordinate="56321">
-                                        255
+                                        8
                                     </Element>
                                     <Element ElementType="70" Coordinate="56327">
+                                        sn3
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="57345">
+                                        255
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="59393">
+                                        [10] $sn4 = ~~~(255us)
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="60417">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="60420" Param="FNAME: NOT_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2303&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200004, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="61441">
+                                        255
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="61447">
                                         sn4
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="58369">
-                                        [10] $un1 = 8u &amp;&amp;&amp; 255u
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="59393">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="59396" Param="FNAME: AND2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1760&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="60417">
-                                        8
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="60423">
-                                        un1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="61441">
-                                        255
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="63489">
-                                        [11] $un2 = 8u ||| 255u
+                                        [11] $sn5 = 1us &lt;&lt;&lt; 1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="64513">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="64516" Param="FNAME: OR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2309&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="64516" Param="FNAME: SHL_WORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2439&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200004, , 0&#xA;VAR_IN: N, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000004, &#xA;"/>
                                     <Element ElementType="70" Coordinate="65537">
-                                        8
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="65543">
-                                        un2
+                                        sn5
                                     </Element>
                                     <Element ElementType="70" Coordinate="66561">
-                                        255
+                                        1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="68609">
-                                        [12] $un3 = 8u ^^^ 255u
+                                        [12] $un1 = 8u &amp;&amp;&amp; 255u
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="69633">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="69636" Param="FNAME: XOR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2538&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="69636" Param="FNAME: AND2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1760&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
                                     <Element ElementType="70" Coordinate="70657">
                                         8
                                     </Element>
                                     <Element ElementType="70" Coordinate="70663">
-                                        un3
+                                        un1
                                     </Element>
                                     <Element ElementType="70" Coordinate="71681">
                                         255
@@ -344,175 +348,255 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="73729">
-                                        [13] $un4 = ~~~(255u)
+                                        [13] $un2 = 8u ||| 255u
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="74753">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="74756" Param="FNAME: NOT_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2301&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="74756" Param="FNAME: OR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2309&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
                                     <Element ElementType="70" Coordinate="75777">
-                                        255
+                                        8
                                     </Element>
                                     <Element ElementType="70" Coordinate="75783">
+                                        un2
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="76801">
+                                        255
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="78849">
+                                        [14] $un3 = 8u ^^^ 255u
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="79873">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="79876" Param="FNAME: XOR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2538&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="80897">
+                                        8
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="80903">
+                                        un3
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="81921">
+                                        255
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="83969">
+                                        [15] $un4 = ~~~(255u)
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="84993">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="84996" Param="FNAME: NOT_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2301&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="86017">
+                                        255
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="86023">
                                         un4
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="77825">
-                                        [14] $ul1 = 8UL &amp;&amp;&amp; 255UL
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="78849">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="78852" Param="FNAME: AND2_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1761&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200010, , 0&#xA;VAR_IN: IN2, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="79873">
-                                        8
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="79879">
-                                        ul1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="80897">
-                                        255
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="82945">
-                                        [15] $ul2 = 8UL ||| 255UL
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="83969">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="83972" Param="FNAME: OR2_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2310&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200010, , 0&#xA;VAR_IN: IN2, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="84993">
-                                        8
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="84999">
-                                        ul2
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="86017">
-                                        255
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="88065">
-                                        [16] $ul3 = 8UL ^^^ 255UL
+                                        [16] $un5 = 1u &lt;&lt;&lt; 1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="89089">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="89092" Param="FNAME: XOR2_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2539&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200010, , 0&#xA;VAR_IN: IN2, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="89092" Param="FNAME: SHL_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2437&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200008, , 0&#xA;VAR_IN: N, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
                                     <Element ElementType="70" Coordinate="90113">
-                                        8
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="90119">
-                                        ul3
+                                        un5
                                     </Element>
                                     <Element ElementType="70" Coordinate="91137">
-                                        255
+                                        1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="93185">
-                                        [17] $ul4 = ~~~(255UL)
+                                        [17] $ul1 = 8UL &amp;&amp;&amp; 255UL
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="94209">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="94212" Param="FNAME: NOT_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2302&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="94212" Param="FNAME: AND2_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1761&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200010, , 0&#xA;VAR_IN: IN2, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
                                     <Element ElementType="70" Coordinate="95233">
-                                        255
+                                        8
                                     </Element>
                                     <Element ElementType="70" Coordinate="95239">
-                                        ul4
+                                        ul1
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="96257">
+                                        255
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="97281">
-                                        [18] $un999 = ~~~(8u &amp;&amp;&amp; 255u ||| ~~~(8u ^^^ 255u))
+                                    <Element ElementType="63" Coordinate="98305">
+                                        [18] $ul2 = 8UL ||| 255UL
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="98305">
+                                    <Element ElementType="6" Coordinate="99329">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="98308" Param="FNAME: AND2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1760&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="99329">
-                                        8
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="99335">
-                                        _t3_AND
-                                    </Element>
+                                    <Element ElementType="102" Coordinate="99332" Param="FNAME: OR2_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2310&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200010, , 0&#xA;VAR_IN: IN2, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
                                     <Element ElementType="70" Coordinate="100353">
-                                        255
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="102401">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="102404" Param="FNAME: XOR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2538&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="103425">
                                         8
                                     </Element>
-                                    <Element ElementType="70" Coordinate="103431">
-                                        _t4_XOR
+                                    <Element ElementType="70" Coordinate="100359">
+                                        ul2
                                     </Element>
-                                    <Element ElementType="70" Coordinate="104449">
+                                    <Element ElementType="70" Coordinate="101377">
                                         255
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="106497">
+                                    <Element ElementType="63" Coordinate="103425">
+                                        [19] $ul3 = 8UL ^^^ 255UL
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="104449">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="106500" Param="FNAME: NOT_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2301&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="107521">
-                                        _t4_XOR
+                                    <Element ElementType="102" Coordinate="104452" Param="FNAME: XOR2_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2539&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200010, , 0&#xA;VAR_IN: IN2, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="105473">
+                                        8
                                     </Element>
-                                    <Element ElementType="70" Coordinate="107527">
-                                        _t5_NOT
+                                    <Element ElementType="70" Coordinate="105479">
+                                        ul3
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="106497">
+                                        255
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="108545">
+                                        [20] $ul4 = ~~~(255UL)
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="109569">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="109572" Param="FNAME: OR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2309&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="109572" Param="FNAME: NOT_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2302&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200010, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
                                     <Element ElementType="70" Coordinate="110593">
-                                        _t3_AND
+                                        255
                                     </Element>
                                     <Element ElementType="70" Coordinate="110599">
-                                        _t6_OR
+                                        ul4
                                     </Element>
-                                    <Element ElementType="70" Coordinate="111617">
-                                        _t5_NOT
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="112641">
+                                        [21] $ul5 = 1UL &lt;&lt;&lt; 1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="113665">
                                         _ON
                                     </Element>
-                                    <Element ElementType="102" Coordinate="113668" Param="FNAME: NOT_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2301&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="102" Coordinate="113668" Param="FNAME: SHL_LWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2438&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200010, , 0&#xA;VAR_IN: N, 0x00200040, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000010, &#xA;"/>
                                     <Element ElementType="70" Coordinate="114689">
-                                        _t6_OR
+                                        1
                                     </Element>
                                     <Element ElementType="70" Coordinate="114695">
+                                        ul5
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="115713">
+                                        1
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="117761">
+                                        [22] $un999 = ~~~(8u &amp;&amp;&amp; 255u ||| ~~~(8u ^^^ 255u))
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="118785">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="118788" Param="FNAME: AND2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1760&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="119809">
+                                        8
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="119815">
+                                        _t3_AND
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="120833">
+                                        255
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="122881">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="122884" Param="FNAME: XOR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2538&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="123905">
+                                        8
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="123911">
+                                        _t4_XOR
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="124929">
+                                        255
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="126977">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="126980" Param="FNAME: NOT_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2301&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="128001">
+                                        _t4_XOR
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="128007">
+                                        _t5_NOT
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="130049">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="130052" Param="FNAME: OR2_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2309&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200008, , 0&#xA;VAR_IN: IN2, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="131073">
+                                        _t3_AND
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="131079">
+                                        _t6_OR
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="132097">
+                                        _t5_NOT
+                                    </Element>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="134145">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="102" Coordinate="134148" Param="FNAME: NOT_DWORD&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 2301&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x00200008, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000008, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="135169">
+                                        _t6_OR
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="135175">
                                         un999
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="117761" Param="90"/>
-                                    <Element ElementType="33" Coordinate="117854" Param="END">
+                                    <Element ElementType="2" Coordinate="138241" Param="90"/>
+                                    <Element ElementType="33" Coordinate="138334" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -522,7 +606,7 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="25">
+                        <LocalVar Version="Ver 1.0" Count="29">
                             <Symbols>
                                 <Symbol Name="_t1_AND" Comment="8 &amp;&amp;&amp; 255" Device="" Kind="1" Type="DINT" InitValue="8" Address="" State="0"/>
                                 <Symbol Name="_t2_AND" Comment="8 &amp;&amp;&amp; 255" Device="" Kind="1" Type="DINT" InitValue="8" Address="" State="0"/>
@@ -534,20 +618,24 @@ XckU4UJCOYh5CA==
                                 <Symbol Name="bn2" Comment="uint8 bn2 = 8uy ||| 255uy" Device="" Kind="8" State="0"/>
                                 <Symbol Name="bn3" Comment="uint8 bn3 = 8uy ^^^ 255uy" Device="" Kind="8" State="0"/>
                                 <Symbol Name="bn4" Comment="uint8 bn4 = ~~~(255uy)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="bn5" Comment="uint8 bn5 = 1uy &lt;&lt;&lt; 1" Device="" Kind="8" State="0"/>
                                 <Symbol Name="falsy" Comment="bool falsy = (8 &amp;&amp;&amp; 255) == 3" Device="" Kind="8" State="0"/>
                                 <Symbol Name="sn1" Comment="int16 sn1 = 8us &amp;&amp;&amp; 255us" Device="" Kind="8" State="0"/>
                                 <Symbol Name="sn2" Comment="int16 sn2 = 8us ||| 255us" Device="" Kind="8" State="0"/>
                                 <Symbol Name="sn3" Comment="int16 sn3 = 8us ^^^ 255us" Device="" Kind="8" State="0"/>
                                 <Symbol Name="sn4" Comment="int16 sn4 = ~~~(255us)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="sn5" Comment="int16 sn5 = 1us &lt;&lt;&lt; 1" Device="" Kind="8" State="0"/>
                                 <Symbol Name="truth" Comment="bool truth = (8 &amp;&amp;&amp; 255) == 8" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ul1" Comment="uint64 ul1 = 8UL &amp;&amp;&amp; 255UL" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ul2" Comment="uint64 ul2 = 8UL ||| 255UL" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ul3" Comment="uint64 ul3 = 8UL ^^^ 255UL" Device="" Kind="8" State="0"/>
                                 <Symbol Name="ul4" Comment="uint64 ul4 = ~~~(255UL)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="ul5" Comment="uint64 ul5 = 1UL &lt;&lt;&lt; 1" Device="" Kind="8" State="0"/>
                                 <Symbol Name="un1" Comment="uint32 un1 = 8u &amp;&amp;&amp; 255u" Device="" Kind="8" State="0"/>
                                 <Symbol Name="un2" Comment="uint32 un2 = 8u ||| 255u" Device="" Kind="8" State="0"/>
                                 <Symbol Name="un3" Comment="uint32 un3 = 8u ^^^ 255u" Device="" Kind="8" State="0"/>
                                 <Symbol Name="un4" Comment="uint32 un4 = ~~~(255u)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="un5" Comment="uint32 un5 = 1u &lt;&lt;&lt; 1" Device="" Kind="8" State="0"/>
                                 <Symbol Name="un999" Comment="uint32 un999 = 0u" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>

@@ -170,12 +170,19 @@ module internal rec Command =
     let bxiXgiFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockXmlInfo =
         match func with
         | Arithmetic(name, output, args) ->
+            // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
+            let arity = args.Length
             let namedInputParameters =
                 [
                     yield "EN", fakeAlwaysOnExpression :> IExpression
                     match name with
                     | "NOT" ->  // Signle input case
-                        yield "IN", args.[0]
+                        assert(arity = 1)
+                        yield "IN", args[0]
+                    | "SHL" | "SHR" -> // Double input case
+                        assert(arity = 2)
+                        yield "IN", args[0]
+                        yield "N", args[1]
                     | _ ->
                         yield! args |> List.indexed |> List.map1st (fun n -> $"IN{n + 1}")
                 ]
@@ -186,8 +193,6 @@ module internal rec Command =
             let plcFuncType = systemTypeToXgxTypeName target outputType
 
             let func =
-                // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
-                let arity = args.Length
                 let plcSizeType = systemTypeToXgiSizeTypeName outputType
 
                 match name with
@@ -195,7 +200,7 @@ module internal rec Command =
                 | ("SUB" | "DIV") -> name // DIV 는 DIV, DIV2 만 존재함
 
                 | ("AND" | "OR" | "XOR" ) -> $"{name}{arity}_{plcSizeType}"
-                | "NOT" -> $"{name}_{plcSizeType}"
+                | ("NOT" | "SHL" | "SHR") -> $"{name}_{plcSizeType}"
                 | _ -> failwithlog "NOT YET"
 
             bxiXgiBox prjParam (x, y) func namedInputParameters outputParameters ""
@@ -250,7 +255,7 @@ module internal rec Command =
                        let exp = iDic[s.Name]
                        let exprDataType = systemTypeToXgxType exp.DataType
 
-                       let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ] @ ["AND2"; "OR2"; "XOR2"; "NOT"]
+                       let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ] @ ["AND2"; "OR2"; "XOR2"; "NOT"] @ ["SHL"; "SHR"]
 
                        if (typeCheckExcludes.Any(fun ex -> functionName = ex || functionName.StartsWith($"{ex}_"))) then
                            () // xxx: timer, counter 에 대해서는 일단, type check skip
@@ -264,7 +269,7 @@ module internal rec Command =
                 /// e.g ["ENO, 0x00200001, , 0"; "OUT, 0x00200001, , 0";]
                 let outputSpecs = getFunctionOutputSpecs functionName |> Array.ofSeq
                 
-                let typeCheckExcludes = [| "AND2"; "OR2"; "XOR2"; "NOT" |] |> HashSet
+                let typeCheckExcludes = [| "AND2"; "OR2"; "XOR2"; "NOT" |] @ [|"SHL"; "SHR"|] |> HashSet
 
                 [   for (i, s) in outputSpecs.Indexed() do
                         option {

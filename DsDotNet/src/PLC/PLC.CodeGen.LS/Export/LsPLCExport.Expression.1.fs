@@ -65,6 +65,10 @@ module LsPLCExportExpressionModule =
         | "|" | "|||" -> "OR"
         | "^" | "^^^" -> "XOR"
         | "~" | "~~~" -> "NOT"
+
+        | "<<" | "<<<" -> "SHL"
+        | ">>" | ">>>" -> "SHR"
+
         | _ -> failwithlog "ERROR"
 
 

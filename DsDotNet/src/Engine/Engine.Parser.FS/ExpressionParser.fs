@@ -437,6 +437,20 @@ module rec ExpressionParserModule =
                 Some <| DuUdtDef udtDefinition
 
             | :? LambdaDeclContext as ctx ->
+                let typ, name = ctx.``type``().GetText()|> textToSystemType, ctx.lambdaName().GetText()
+                let args =
+                    [   for a in ctx.Descendants<ArgDeclContext>() do
+                            let t = a.``type``().GetText() |> textToSystemType
+                            let v = a.argName().GetText()
+                            yield { Type = t; Name = v }
+                    ]
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let stmt =
+                    Some <| DuLambdaDecl {
+                        Prototype = { Type = typ; Name = name }
+                        Arguments = args
+                        Body = ctx.Descendants<ExprContext>().First() |> expr
+                        }
                 failwithlog "ERROR: Not yet lambda statement"
             | :? ProcDeclContext as ctx ->
                 failwithlog "ERROR: Not yet proc decl statement"

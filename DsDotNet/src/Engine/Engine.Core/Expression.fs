@@ -243,8 +243,8 @@ module ExpressionModule =
         Output:IStorage
     }
 
-    /// e.g 가령 Person UDT 에서 "int age";
-    type UdtMember = {
+    /// e.g 가령 Person UDT 에서 "int age", 혹은 Labmda function 의 arg list;
+    type TypeDecl = {
         Type:System.Type
         Name:string
     }
@@ -252,7 +252,7 @@ module ExpressionModule =
     // e.g struct Person { string name; int age; };
     type UdtDecl = {
         TypeName:string
-        Members:UdtMember list
+        Members:TypeDecl list
     }
 
     // e.g Person people[10];
@@ -261,6 +261,17 @@ module ExpressionModule =
         VarName:string
         /// Array 가 아닌 경우, 1 의 값을 가짐.  array 인 경우 1보다 큰 값.  array index 는 0 부터 시작
         ArraySize:int
+    }
+
+    type LambdaDecl = {
+        Prototype:TypeDecl
+        Arguments:TypeDecl list
+        Body:IExpression
+    }
+    type ProcDecl = {
+        Prototype:TypeDecl
+        Arguments:TypeDecl list
+        Bodies:StatementContainer
     }
 
     type Statement =
@@ -274,6 +285,8 @@ module ExpressionModule =
 
         /// User Defined Type (structure) 선언.  e.g "struct Person { string name; int age; };"
         | DuUdtDecl of UdtDecl
+
+        | DuLambdaDecl of LambdaDecl
 
         /// UDT instances 정의.  e.g "Person peopole[10];"
         | DuUdtDef of UdtDef

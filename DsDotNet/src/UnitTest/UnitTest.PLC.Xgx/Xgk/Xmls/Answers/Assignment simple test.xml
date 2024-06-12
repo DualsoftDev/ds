@@ -43,7 +43,6 @@
                         <Symbol Name="nn1" Comment="int16 nn1 = 1s" Device="M" DevicePos="0" Type="WORD"/>
                         <Symbol Name="nn2" Comment="int16 nn2 = 2s" Device="M" DevicePos="1" Type="WORD"/>
                         <Symbol Name="sum" Comment="int16 sum = $nn1 + $nn2" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="_t1_ADD" Comment="$nn1 + $nn2" Device="M" DevicePos="3" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -96,21 +95,14 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="8193">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8286" Param="ADD,nn1,nn2,M0003"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9220" Param="81"/>
-                                    <Element ElementType="33" Coordinate="9298" Param="MOV,_t1_ADD,sum"/>
+                                    <Element ElementType="2" Coordinate="8196" Param="81"/>
+                                    <Element ElementType="33" Coordinate="8274" Param="MOV,3,sum"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="12289" Param="90"/>
-                                    <Element ElementType="33" Coordinate="12382" Param="END">
+                                    <Element ElementType="2" Coordinate="11265" Param="90"/>
+                                    <Element ElementType="33" Coordinate="11358" Param="END">
                                         END
                                     </Element>
                                 </Rung>

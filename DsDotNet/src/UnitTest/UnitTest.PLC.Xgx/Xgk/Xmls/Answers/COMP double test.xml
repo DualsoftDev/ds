@@ -50,14 +50,6 @@
                         <Symbol Name="b8" Comment="bool b8 = $pi &lt;= $eu" Device="M" DevicePos="135" Type="BIT"/>
                         <Symbol Name="eu" Comment="float64 eu = 2.718" Device="M" DevicePos="4" Type="WORD"/>
                         <Symbol Name="pi" Comment="float64 pi = 3.14" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="_t1_GT" Comment="$pi &gt; $eu" Device="M" DevicePos="136" Type="BIT"/>
-                        <Symbol Name="_t2_LT" Comment="$pi &lt; $eu" Device="M" DevicePos="137" Type="BIT"/>
-                        <Symbol Name="_t3_EQ" Comment="$pi == $eu" Device="M" DevicePos="138" Type="BIT"/>
-                        <Symbol Name="_t4_EQ" Comment="$pi == $eu" Device="M" DevicePos="139" Type="BIT"/>
-                        <Symbol Name="_t5_NE" Comment="$pi != $eu" Device="M" DevicePos="140" Type="BIT"/>
-                        <Symbol Name="_t6_NE" Comment="$pi != $eu" Device="M" DevicePos="141" Type="BIT"/>
-                        <Symbol Name="_t7_GE" Comment="$pi &gt;= $eu" Device="M" DevicePos="142" Type="BIT"/>
-                        <Symbol Name="_t8_LE" Comment="$pi &lt;= $eu" Device="M" DevicePos="143" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -109,259 +101,99 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="8193" Param="L&gt;,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="8202" Param="90"/>
-                                    <Element ElementType="14" Coordinate="8286">
-                                        M00088
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
+                                    <Element ElementType="6" Coordinate="8193">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="9220">
-                                        M00088
+                                    <Element ElementType="2" Coordinate="8196" Param="75"/>
+                                    <Element ElementType="33" Coordinate="8286" Param="BOR,M00080,1,M00080,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="10241">
+                                        [3] bool b2 = $pi &lt; $eu
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9223" Param="72"/>
-                                    <Element ElementType="33" Coordinate="9310" Param="BOR,M00080,1,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="11265">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="7" Coordinate="11268">
-                                        M00088
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="11271" Param="72"/>
-                                    <Element ElementType="33" Coordinate="11358" Param="BAND,M00080,254,M00080,1"/>
+                                    <Element ElementType="2" Coordinate="11268" Param="75"/>
+                                    <Element ElementType="33" Coordinate="11358" Param="BAND,M00080,253,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [3] bool b2 = $pi &lt; $eu
+                                        [4] bool b3 = $pi == $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="14337" Param="L&lt;,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="14346" Param="90"/>
-                                    <Element ElementType="14" Coordinate="14430">
-                                        M00089
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="15361">
+                                    <Element ElementType="6" Coordinate="14337">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="15364">
-                                        M00089
+                                    <Element ElementType="2" Coordinate="14340" Param="75"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="BAND,M00080,251,M00080,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="16385">
+                                        [5] bool b4 = $pi == $eu
                                     </Element>
-                                    <Element ElementType="2" Coordinate="15367" Param="72"/>
-                                    <Element ElementType="33" Coordinate="15454" Param="BOR,M00080,2,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="17409">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="7" Coordinate="17412">
-                                        M00089
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="17415" Param="72"/>
-                                    <Element ElementType="33" Coordinate="17502" Param="BAND,M00080,253,M00080,1"/>
+                                    <Element ElementType="2" Coordinate="17412" Param="75"/>
+                                    <Element ElementType="33" Coordinate="17502" Param="BAND,M00080,247,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [4] bool b3 = $pi == $eu
+                                        [6] bool b5 = $pi != $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="20481" Param="L=,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="20490" Param="90"/>
-                                    <Element ElementType="14" Coordinate="20574">
-                                        M0008A
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="21505">
+                                    <Element ElementType="6" Coordinate="20481">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="21508">
-                                        M0008A
+                                    <Element ElementType="2" Coordinate="20484" Param="75"/>
+                                    <Element ElementType="33" Coordinate="20574" Param="BOR,M00080,16,M00080,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="22529">
+                                        [7] bool b6 = $pi != $eu
                                     </Element>
-                                    <Element ElementType="2" Coordinate="21511" Param="72"/>
-                                    <Element ElementType="33" Coordinate="21598" Param="BOR,M00080,4,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="23553">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="7" Coordinate="23556">
-                                        M0008A
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="23559" Param="72"/>
-                                    <Element ElementType="33" Coordinate="23646" Param="BAND,M00080,251,M00080,1"/>
+                                    <Element ElementType="2" Coordinate="23556" Param="75"/>
+                                    <Element ElementType="33" Coordinate="23646" Param="BOR,M00080,32,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="25601">
-                                        [5] bool b4 = $pi == $eu
+                                        [8] bool b7 = $pi &gt;= $eu
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="26625" Param="L=,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="26634" Param="90"/>
-                                    <Element ElementType="14" Coordinate="26718">
-                                        M0008B
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="27649">
+                                    <Element ElementType="6" Coordinate="26625">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="27652">
-                                        M0008B
+                                    <Element ElementType="2" Coordinate="26628" Param="75"/>
+                                    <Element ElementType="33" Coordinate="26718" Param="BOR,M00080,64,M00080,1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="63" Coordinate="28673">
+                                        [9] bool b8 = $pi &lt;= $eu
                                     </Element>
-                                    <Element ElementType="2" Coordinate="27655" Param="72"/>
-                                    <Element ElementType="33" Coordinate="27742" Param="BOR,M00080,8,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="29697">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="7" Coordinate="29700">
-                                        M0008B
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="29703" Param="72"/>
-                                    <Element ElementType="33" Coordinate="29790" Param="BAND,M00080,247,M00080,1"/>
+                                    <Element ElementType="2" Coordinate="29700" Param="75"/>
+                                    <Element ElementType="33" Coordinate="29790" Param="BAND,M00080,127,M00080,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="31745">
-                                        [6] bool b5 = $pi != $eu
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="32769" Param="L&lt;&gt;,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="32778" Param="90"/>
-                                    <Element ElementType="14" Coordinate="32862">
-                                        M0008C
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="33793">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="33796">
-                                        M0008C
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="33799" Param="72"/>
-                                    <Element ElementType="33" Coordinate="33886" Param="BOR,M00080,16,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="35841">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="35844">
-                                        M0008C
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="35847" Param="72"/>
-                                    <Element ElementType="33" Coordinate="35934" Param="BAND,M00080,239,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="37889">
-                                        [7] bool b6 = $pi != $eu
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="38913" Param="L&lt;&gt;,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="38922" Param="90"/>
-                                    <Element ElementType="14" Coordinate="39006">
-                                        M0008D
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="39937">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="39940">
-                                        M0008D
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="39943" Param="72"/>
-                                    <Element ElementType="33" Coordinate="40030" Param="BOR,M00080,32,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="41985">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="41988">
-                                        M0008D
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="41991" Param="72"/>
-                                    <Element ElementType="33" Coordinate="42078" Param="BAND,M00080,223,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="44033">
-                                        [8] bool b7 = $pi &gt;= $eu
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="45057" Param="L&gt;=,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="45066" Param="90"/>
-                                    <Element ElementType="14" Coordinate="45150">
-                                        M0008E
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="46081">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="46084">
-                                        M0008E
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="46087" Param="72"/>
-                                    <Element ElementType="33" Coordinate="46174" Param="BOR,M00080,64,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="48129">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="48132">
-                                        M0008E
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="48135" Param="72"/>
-                                    <Element ElementType="33" Coordinate="48222" Param="BAND,M00080,191,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="50177">
-                                        [9] bool b8 = $pi &lt;= $eu
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="33" Coordinate="51201" Param="L&lt;=,pi,eu"/>
-                                    <Element ElementType="2" Coordinate="51210" Param="90"/>
-                                    <Element ElementType="14" Coordinate="51294">
-                                        M0008F
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="52225">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="52228">
-                                        M0008F
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="52231" Param="72"/>
-                                    <Element ElementType="33" Coordinate="52318" Param="BOR,M00080,128,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="54273">
-                                        _1ON
-                                    </Element>
-                                    <Element ElementType="7" Coordinate="54276">
-                                        M0008F
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="54279" Param="72"/>
-                                    <Element ElementType="33" Coordinate="54366" Param="BAND,M00080,127,M00080,1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="57345" Param="90"/>
-                                    <Element ElementType="33" Coordinate="57438" Param="END">
+                                    <Element ElementType="2" Coordinate="32769" Param="90"/>
+                                    <Element ElementType="33" Coordinate="32862" Param="END">
                                         END
                                     </Element>
                                 </Rung>

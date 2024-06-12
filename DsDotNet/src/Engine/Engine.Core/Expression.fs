@@ -117,6 +117,23 @@ module ExpressionModule =
         else
             failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 
+    let any2expr (value:obj) : IExpression =
+        let inline toExpr v = literal2expr v :> IExpression
+        match value with
+        | :? bool   as v -> toExpr v
+        | :? byte   as v -> toExpr v
+        | :? double as v -> toExpr v
+        | :? int16  as v -> toExpr v
+        | :? int32  as v -> toExpr v
+        | :? int64  as v -> toExpr v
+        | :? sbyte  as v -> toExpr v
+        | :? single as v -> toExpr v
+        | :? uint16 as v -> toExpr v
+        | :? uint32 as v -> toExpr v
+        | :? uint64 as v -> toExpr v
+        | _ ->
+            failwith "ERROR"
+
     /// Tag<'T> or Variable<'T> 로부터 Expression<'T> 생성
     let var2expr (t: TypedValueStorage<'T>): Expression<'T> = DuTerminal (DuVariable t)
 

@@ -59,9 +59,11 @@ module LsPLCExportExpressionModule =
         | "-"  -> "SUB"
         | "*"  -> "MUL"
         | "/"  -> "DIV"
-        | "&&"  -> "AND"
-        | "||"  -> "OR"
-        | "!"  -> "NOT"
+
+        | "&" | "&&&" -> "AND"
+        | "|" | "|||" -> "OR"
+        | "^" | "^^^" -> "XOR"
+        | "~" | "~~~" -> "NOT"
         | _ -> failwithlog "ERROR"
 
 
@@ -71,7 +73,7 @@ module LsPLCExportExpressionModule =
     ///
     /// suffix: "U" for UNSIGNED
     let operatorToXgkFunctionName (op:string) (typ:Type) : string =
-        let isComparison = (|IsComparisonOperator|_|) op |> Option.isSome
+        let isComparison = (|IsOpC|_|) op |> Option.isSome
         let prefix =
             match typ with
             | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
@@ -214,7 +216,7 @@ module LsPLCExportExpressionModule =
                             expr.NegateBool()
                         else
                             // 비교 연산 하에서의 argument negation 은 무시한다.  (e.g. !(a > b) => a <= b.  연산자만 변경하고, a 와 b 의 negation 은 무시됨.)
-                            assert(expPath.Head.FunctionName.Value |> isComparisonOperator)
+                            assert(expPath.Head.FunctionName.Value |> isOpC)
                             expr
                     | None, Some "!" -> expr.FunctionArguments.ExactlyOne()
                     | None, Some _fn -> expr.NegateBool()
@@ -240,7 +242,7 @@ module LsPLCExportExpressionModule =
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None ->
                         negate newExpPath expr
-                    | None, Some(IsComparisonOperator fn) ->
+                    | None, Some(IsOpC fn) ->
                         let newArgs = args |> map (visitArgs true)
                         let reverseFn =
                             match fn with

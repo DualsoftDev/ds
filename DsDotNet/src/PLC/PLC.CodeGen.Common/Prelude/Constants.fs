@@ -112,22 +112,31 @@ module K =
     let ErrAddressIsNullOrEmpty = "Address is null or empty."
 
 
-    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"
-    let comparisonOperators = [|">";">=";"<";"<=";"==";"!=";"<>";|]
     /// "+"|"-"|"*"|"/"
     let arithmaticOperators = [|"+"; "-"; "*"; "/"|]
+    /// "&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<"
+    let bitwiseOperators = [| "&";"&&&"; "|";"|||"; "^";"^^^";  "~";"~~~"; ">>";">>>"; "<<";"<<<" |]
+    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"
+    let comparisonOperators = [|">";">=";"<";"<=";"==";"!=";"<>";|]
     /// ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
     let arithmaticOrComparisionOperators = comparisonOperators @ arithmaticOperators
 
+    let arithmaticOrBitwiseOrComparisionOperators = comparisonOperators @ arithmaticOperators @ bitwiseOperators
+
 [<AutoOpen>]
 module OperatorActivePatterns =
-    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"
-    let (|IsComparisonOperator|_|) (op:string) = if K.comparisonOperators |> Array.contains op then Some op else None
-    /// "+"|"-"|"*"|"/"
-    let (|IsArithmeticOperator|_|) (op:string) = if K.arithmaticOperators |> Array.contains op then Some op else None
-    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
-    let (|IsArithmeticOrComparisionOperator|_|) (op:string) = if K.arithmaticOrComparisionOperators |> Array.contains op then Some op else None
+    /// IsArithmeticOperator: "+"|"-"|"*"|"/"
+    let (|IsOpA|_|) (op:string) = if K.arithmaticOperators |> Array.contains op then Some op else None
+    /// IsBitwiseOperator: "&";"&&&"; "|";"|||"; "^";"^^^";  "~";"~~~"; ">>";">>>"; "<<";"<<<"
+    let (|IsOpB|_|) (op:string) = if K.bitwiseOperators    |> Array.contains op then Some op else None
+    /// IsComparisonOperator: ">"|">="|"<"|"<="|"=="|"!="|"<>"
+    let (|IsOpC|_|) (op:string) = if K.comparisonOperators |> Array.contains op then Some op else None
+    /// IsArithmeticOrBitwiseOperator: ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
+    let (|IsOpAC|_|) (op:string) = if K.arithmaticOrComparisionOperators |> Array.contains op then Some op else None
+    /// IsArithmeticOrBitwiseOrComparisonOperator
+    let (|IsOpABC|_|) (op:string) = if K.arithmaticOrBitwiseOrComparisionOperators |> Array.contains op then Some op else None
 
-    let isComparisonOperator op = (|IsComparisonOperator|_|) op |> Option.isSome
-    let isArithmeticOperator op = (|IsArithmeticOperator|_|) op |> Option.isSome
-    let isArithmeticOrComparisionOperator op = (|IsArithmeticOrComparisionOperator|_|) op |> Option.isSome
+    let isOpC op = (|IsOpC|_|) op |> Option.isSome
+    let isOpA op = (|IsOpA|_|) op |> Option.isSome
+    let isOpB op = (|IsOpB|_|) op |> Option.isSome
+    let isOpAC op = (|IsOpAC|_|) op |> Option.isSome

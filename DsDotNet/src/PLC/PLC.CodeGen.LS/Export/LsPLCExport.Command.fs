@@ -8,6 +8,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open FB
 open ConvertorPrologModule
+open System.Collections.Generic
 
 [<AutoOpen>]
 module internal rec Command =
@@ -175,9 +176,8 @@ module internal rec Command =
 
             let outputParameters = [ "OUT", output ]
 
-            let plcFuncType =
-                let outputType = getType output
-                systemTypeToXgxTypeName target outputType
+            let outputType = getType output
+            let plcFuncType = systemTypeToXgxTypeName target outputType
 
             let func =
                 // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
@@ -186,6 +186,10 @@ module internal rec Command =
                 match name with
                 | ("ADD" | "MUL") -> $"{name}{arity}_{plcFuncType}"
                 | ("SUB" | "DIV") -> name // DIV 는 DIV, DIV2 만 존재함
+
+                | ("AND" | "OR" | "XOR") ->
+                    let plcSizeType = systemTypeToXgiSizeTypeName outputType
+                    $"{name}{arity}_{plcSizeType}"
                 | _ -> failwithlog "NOT YET"
 
             bxiXgiBox prjParam (x, y) func namedInputParameters outputParameters ""
@@ -240,7 +244,7 @@ module internal rec Command =
                        let exp = iDic[s.Name]
                        let exprDataType = systemTypeToXgxType exp.DataType
 
-                       let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ]
+                       let typeCheckExcludes = [ "TON"; "TOF"; "RTO"; "CTU"; "CTD"; "CTUD"; "CTR" ] @ ["AND2"; "OR2"; "XOR2"; "NOT"]
 
                        if (typeCheckExcludes.Any(fun ex -> functionName = ex || functionName.StartsWith($"{ex}_"))) then
                            () // xxx: timer, counter 에 대해서는 일단, type check skip
@@ -253,13 +257,19 @@ module internal rec Command =
             let alignedOutputParameters =
                 /// e.g ["ENO, 0x00200001, , 0"; "OUT, 0x00200001, , 0";]
                 let outputSpecs = getFunctionOutputSpecs functionName |> Array.ofSeq
+                
+                let typeCheckExcludes = [| "AND2"; "OR2"; "XOR2"; "NOT" |] |> HashSet
 
                 [   for (i, s) in outputSpecs.Indexed() do
                         option {
                             let! terminal = oDic.TryFind(s.Name)
 
                             match terminal with
-                            | :? IStorage as storage -> s.CheckType.HasFlag(systemTypeToXgxType storage.DataType) |> verify
+                            | :? IStorage as storage ->
+                                if (typeCheckExcludes.Any(fun ex -> functionName.StartsWith(ex))) then
+                                    ()
+                                else
+                                    s.CheckType.HasFlag(systemTypeToXgxType storage.DataType) |> verify
                             | _ -> ()
 
                             return s.Name, i, terminal, s.CheckType

@@ -66,6 +66,18 @@ module ConvertorPrologModule =
 
         | _ -> failwithlog "ERROR"
 
+    let systemTypeToXgiSizeTypeName (typ: System.Type) =
+        match typ.Name with
+        | BOOL -> "BOOL"
+        | CHAR | INT8 | UINT8 -> "BYTE"
+        | INT16 | UINT16 -> "WORD"
+        | INT32 | UINT32 -> "DWORD"
+        | INT64 | UINT64 -> "LWORD"
+        | FLOAT32 -> "REAL"
+        | FLOAT64 -> "LREAL"
+        | STRING -> "STRING" // 32 byte
+        | _ -> failwithlog "ERROR"
+
     let systemTypeToXgxTypeName (target:PlatformTarget) (typ: System.Type) =
         match target with
         | XGI -> systemTypeToXgiTypeName typ 

@@ -31,7 +31,7 @@ module XgxExpressionConvertorModule =
 
             let functionTransformer (_level:int, functionExpression:IExpression, expStore:IStorage option) =
                 match functionExpression.FunctionName with
-                | Some(IsArithmeticOrComparisionOperator op) -> //when level <> 0 ->
+                | Some(IsOpAC op) -> //when level <> 0 ->
                     let args = functionExpression.FunctionArguments
                     let var:IStorage =
                         expStore
@@ -57,7 +57,7 @@ module XgxExpressionConvertorModule =
 
         member internal exp.BinaryToNary
           ( pack:DynamicDictionary
-            , operatorsToChange: string list
+            , operatorsToChange: string seq
             , currentOp: string
           ) : IExpression list =
             let prjParam, augs = pack.Unpack()
@@ -111,9 +111,9 @@ module XgxExpressionConvertorModule =
                 augs.Storages, augs.Statements, augs.ExpressionStore
 
             match exp.FunctionName with
-            | Some(IsArithmeticOperator op) ->
+            | Some(IsOpA op | IsOpB op) ->
                 let newArgs =
-                    exp.BinaryToNary(pack, [ "+"; "-"; "*"; "/" ], op)
+                    exp.BinaryToNary(pack, K.arithmaticOperators @ K.bitwiseOperators, op)
 
                 match op with
                 | "+"
@@ -322,7 +322,7 @@ module XgxExpressionConvertorModule =
                                 |> Option.defaultWith (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(exp))
 
                         match fn with
-                        | IsArithmeticOrComparisionOperator _ ->
+                        | IsOpAC _ ->
                             let stg = createTmpStorage()
                             let stmt = DuAssign(assignCondition, newExp, stg)
                             let varExp = stg.ToExpression()

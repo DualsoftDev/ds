@@ -22,7 +22,7 @@ module StatementExtensionModule =
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
-                | Some(IsArithmeticOrComparisionOperator op) ->
+                | Some(IsOpABC op) ->
                     let exp = exp.FlattenArithmeticOperator(pack, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
@@ -114,7 +114,7 @@ module StatementExtensionModule =
         member x.AugmentXgiFunctionParameters (pack:DynamicDictionary) : Statement =
             let prjParam, _augs = pack.Unpack()
             let toAssignOndemand (exp:IExpression<bool> option) : IExpression<bool> option =
-                exp |> map (fun exp -> exp.ToAssignStatement(pack, K.arithmaticOrComparisionOperators) :?> IExpression<bool>)
+                exp |> map (fun exp -> exp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators) :?> IExpression<bool>)
 
             match prjParam.TargetType, x with
             | XGK, _ -> x
@@ -146,7 +146,7 @@ module StatementExtensionModule =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
                     match newExp.FunctionName with
-                    | Some (IsArithmeticOrComparisionOperator fn) when expPath.Any() ->
+                    | Some (IsOpABC fn) when expPath.Any() ->
                         let augment =
                             match prjParam.TargetType, expPath with
                             | XGK, _head::_ -> true
@@ -155,10 +155,10 @@ module StatementExtensionModule =
                                 false
 
                         if augment then
-                            newExp.ToAssignStatement(pack, K.arithmaticOrComparisionOperators)
+                            newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
                         else
                             newExp
-                    | Some (IsComparisonOperator _fn) when prjParam.TargetType = XGI && expPath.Any() ->
+                    | Some (IsOpC _fn) when prjParam.TargetType = XGI && expPath.Any() ->
                         newExp.ToAssignStatement(pack, K.comparisonOperators)
                     | _ ->
                         newExp

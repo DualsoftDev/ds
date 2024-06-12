@@ -38,13 +38,14 @@ module XgxTypeConvertorModule =
                     let exp = exp.ApplyNegate()
                     let visitor (expPath:IExpression list) (ex:IExpression) : IExpression =
                         match ex.FunctionName, expPath with
-                        | Some (IsComparisonOperator op), _  when op.IsOneOf("==", "!=", "<>") && ex.FunctionArguments[0].DataType = typeof<bool> ->
+                        | Some (IsOpC op), _  when op.IsOneOf("==", "!=", "<>") && ex.FunctionArguments[0].DataType = typeof<bool> ->
                             let ex = ex.AugmentXgk(pack, Some fake1OnExpression, None)
                             let auto = prjParam.CreateAutoVariableWithFunctionExpression(pack, ex)
                             auto.ToExpression()
                         | Some ("&&" | "||" | "!"), []
-                        | Some (IsArithmeticOperator _), _  // ::[]
-                        | Some (IsComparisonOperator _), _ ->
+                        | Some (IsOpB _), _
+                        | Some (IsOpA _), _  // ::[]
+                        | Some (IsOpC _), _ ->
                             let auto = prjParam.CreateAutoVariableWithFunctionExpression(pack, ex)
                             auto.ToExpression()
                         | _ -> ex

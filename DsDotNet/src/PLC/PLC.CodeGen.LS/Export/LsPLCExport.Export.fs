@@ -277,7 +277,7 @@ module XgiExportModule =
                             NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuPLCFunction({
-                        FunctionName = ("+"|"-"|"*"|"/") as op
+                        FunctionName = ("+"|"-"|"*"|"/"  | "&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<") as op
                         Arguments = args
                         Output = output }) ->
                     let fn = operatorToXgiFunctionName op

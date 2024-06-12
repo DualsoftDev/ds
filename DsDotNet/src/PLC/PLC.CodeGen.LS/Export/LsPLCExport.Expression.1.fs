@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.Common
 open PLC.CodeGen.LS
 
+
 [<AutoOpen>]
 module LsPLCExportExpressionModule =
     type ExpressionTransformers = {
@@ -73,7 +74,6 @@ module LsPLCExportExpressionModule =
     ///
     /// suffix: "U" for UNSIGNED
     let operatorToXgkFunctionName (op:string) (typ:Type) : string =
-        let isComparison = (|IsOpC|_|) op |> Option.isSome
         let prefix =
             match typ with
             | _ when typ = typeof<byte> ->  // "S"       //"S" for short (1byte)
@@ -99,10 +99,18 @@ module LsPLCExportExpressionModule =
             | "!=" -> "<>"
             | "==" -> "="
             | "MOV" -> "MOV"
-            | _ when isComparison -> op
+
+            | "&" | "&&&" -> "BAND"
+            | "|" | "|||" -> "BOR"
+            | "^" | "^^^" -> "BXOR"
+            | "~" | "~~~" -> failwith "Not binary operation"
+
+            | _ when isOpC op -> op
             | _ -> failwithlog "ERROR"
 
-        if isComparison then
+        if isOpB op then
+            opName
+        else if isOpC op then
             $"{unsigned}{prefix}{opName}"       // e.g "UD<="
         else
             $"{prefix}{opName}{unsigned}"

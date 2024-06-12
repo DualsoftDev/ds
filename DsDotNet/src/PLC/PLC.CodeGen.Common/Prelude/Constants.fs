@@ -146,8 +146,9 @@ module OperatorActivePatterns =
     /// IsArithmeticOrBitwiseOrComparisonOperator: ("+"|"-"|"*"|"/")  |  ("&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<")  |  (">"|">="|"<"|"<="|"=="|"!="|"<>")
     let (|IsOpABC|_|) (op:string) = contains op K.arithmaticOrBitwiseOrComparisionOperators
 
-    let isOpC  op = (|IsOpC|_|)  op |> Option.isSome
-    let isOpA  op = (|IsOpA|_|)  op |> Option.isSome
-    let isOpB  op = (|IsOpB|_|)  op |> Option.isSome
-    let isOpAB op = (|IsOpAB|_|) op |> Option.isSome
-    let isOpAC op = (|IsOpAC|_|) op |> Option.isSome
+    let isOpC   op = (|IsOpC|_|)   op |> Option.isSome
+    let isOpA   op = (|IsOpA|_|)   op |> Option.isSome
+    let isOpB   op = (|IsOpB|_|)   op |> Option.isSome
+    let isOpAB  op = (|IsOpAB|_|)  op |> Option.isSome
+    let isOpAC  op = (|IsOpAC|_|)  op |> Option.isSome
+    let isOpABC op = (|IsOpABC|_|) op |> Option.isSome

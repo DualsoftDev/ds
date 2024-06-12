@@ -63,7 +63,7 @@ module XgiExportModule =
 
         let simpleRung (*(condition:IExpression)*) (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when isOpAC funName ->
+            | XGK, Some funName, l::r::[] when isOpABC funName ->
             
                 let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
@@ -72,6 +72,9 @@ module XgiExportModule =
                     let targetContact = if target.Address.IsNullOrEmpty() then target.Name else target.Address
                     if isOpA funName then
                         let param = $"Param={dq}{op},{ls},{rs},{targetContact}{dq}"        // XGK 에서는 직접변수를 사용
+                        xmlXgkFBRight xy param
+                    elif isOpB funName then
+                        let param = $"Param={dq}{op},{ls},{rs},{targetContact},1{dq}"        // XGK 에서는 직접변수를 사용
                         xmlXgkFBRight xy param
                     elif isOpC funName then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"

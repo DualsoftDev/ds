@@ -171,8 +171,14 @@ module internal rec Command =
         match func with
         | Arithmetic(name, output, args) ->
             let namedInputParameters =
-                [ "EN", fakeAlwaysOnExpression :> IExpression ]
-                @ (args |> List.indexed |> List.map1st (fun n -> $"IN{n + 1}"))
+                [
+                    yield "EN", fakeAlwaysOnExpression :> IExpression
+                    match name with
+                    | "NOT" ->  // Signle input case
+                        yield "IN", args.[0]
+                    | _ ->
+                        yield! args |> List.indexed |> List.map1st (fun n -> $"IN{n + 1}")
+                ]
 
             let outputParameters = [ "OUT", output ]
 
@@ -182,14 +188,14 @@ module internal rec Command =
             let func =
                 // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
                 let arity = args.Length
+                let plcSizeType = systemTypeToXgiSizeTypeName outputType
 
                 match name with
                 | ("ADD" | "MUL") -> $"{name}{arity}_{plcFuncType}"
                 | ("SUB" | "DIV") -> name // DIV 는 DIV, DIV2 만 존재함
 
-                | ("AND" | "OR" | "XOR") ->
-                    let plcSizeType = systemTypeToXgiSizeTypeName outputType
-                    $"{name}{arity}_{plcSizeType}"
+                | ("AND" | "OR" | "XOR" ) -> $"{name}{arity}_{plcSizeType}"
+                | "NOT" -> $"{name}_{plcSizeType}"
                 | _ -> failwithlog "NOT YET"
 
             bxiXgiBox prjParam (x, y) func namedInputParameters outputParameters ""

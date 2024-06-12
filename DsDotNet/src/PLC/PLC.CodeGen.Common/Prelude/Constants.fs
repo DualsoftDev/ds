@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.Common
 open Dual.Common.Core.FS
+open System.Collections.Generic
 
 /// Konstants (Constants) collection
 
@@ -112,31 +113,41 @@ module K =
     let ErrAddressIsNullOrEmpty = "Address is null or empty."
 
 
-    /// "+"|"-"|"*"|"/"
-    let arithmaticOperators = [|"+"; "-"; "*"; "/"|]
-    /// "&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<"
-    let bitwiseOperators = [| "&";"&&&"; "|";"|||"; "^";"^^^";  "~";"~~~"; ">>";">>>"; "<<";"<<<" |]
-    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"
-    let comparisonOperators = [|">";">=";"<";"<=";"==";"!=";"<>";|]
-    /// ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
-    let arithmaticOrComparisionOperators = comparisonOperators @ arithmaticOperators
+    /// A: "+"|"-"|"*"|"/"
+    let arithmaticOperators = HashSet([|"+"; "-"; "*"; "/"|])
+    /// B: "&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<"
+    let bitwiseOperators    = HashSet([| "&";"&&&"; "|";"|||"; "^";"^^^";  "~";"~~~"; ">>";">>>"; "<<";"<<<" |])
+    /// C: ">"|">="|"<"|"<="|"=="|"!="|"<>"
+    let comparisonOperators = HashSet([|">";">=";"<";"<=";"==";"!=";"<>";|])
 
-    let arithmaticOrBitwiseOrComparisionOperators = comparisonOperators @ arithmaticOperators @ bitwiseOperators
+    /// AB: ("+"|"-"|"*"|"/")  |  ("&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<")
+    let arithmaticOrBitwiseOperators = HashSet(arithmaticOperators @ bitwiseOperators)
+
+    /// AC: ("+"|"-"|"*"|"/")  |  (">"|">="|"<"|"<="|"=="|"!="|"<>")
+    let arithmaticOrComparisionOperators = HashSet(arithmaticOperators @ comparisonOperators)
+
+    /// ABC: ("+"|"-"|"*"|"/")  |  ("&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<")  |  (">"|">="|"<"|"<="|"=="|"!="|"<>")
+    let arithmaticOrBitwiseOrComparisionOperators = HashSet(arithmaticOperators @ bitwiseOperators @ comparisonOperators)
 
 [<AutoOpen>]
 module OperatorActivePatterns =
+    let private contains (op:string) (set:HashSet<string>) = if set.Contains op then Some op else None
     /// IsArithmeticOperator: "+"|"-"|"*"|"/"
-    let (|IsOpA|_|) (op:string) = if K.arithmaticOperators |> Array.contains op then Some op else None
+    let (|IsOpA|_|) (op:string) = contains op K.arithmaticOperators
     /// IsBitwiseOperator: "&";"&&&"; "|";"|||"; "^";"^^^";  "~";"~~~"; ">>";">>>"; "<<";"<<<"
-    let (|IsOpB|_|) (op:string) = if K.bitwiseOperators    |> Array.contains op then Some op else None
+    let (|IsOpB|_|) (op:string) = contains op K.bitwiseOperators
     /// IsComparisonOperator: ">"|">="|"<"|"<="|"=="|"!="|"<>"
-    let (|IsOpC|_|) (op:string) = if K.comparisonOperators |> Array.contains op then Some op else None
-    /// IsArithmeticOrBitwiseOperator: ">"|">="|"<"|"<="|"=="|"!="|"<>"  |  "+"|"-"|"*"|"/"
-    let (|IsOpAC|_|) (op:string) = if K.arithmaticOrComparisionOperators |> Array.contains op then Some op else None
-    /// IsArithmeticOrBitwiseOrComparisonOperator
-    let (|IsOpABC|_|) (op:string) = if K.arithmaticOrBitwiseOrComparisionOperators |> Array.contains op then Some op else None
+    let (|IsOpC|_|) (op:string) = contains op K.comparisonOperators
 
-    let isOpC op = (|IsOpC|_|) op |> Option.isSome
-    let isOpA op = (|IsOpA|_|) op |> Option.isSome
-    let isOpB op = (|IsOpB|_|) op |> Option.isSome
+    /// IsArithmeticOrBitwiseOperator: ("+"|"-"|"*"|"/")  |  ("&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<")
+    let (|IsOpAB|_|) (op:string) = contains op K.arithmaticOrBitwiseOperators
+    /// IsArithmeticOrBitwiseOperator: ("+"|"-"|"*"|"/")  |  (">"|">="|"<"|"<="|"=="|"!="|"<>")
+    let (|IsOpAC|_|) (op:string) = contains op K.arithmaticOrComparisionOperators
+    /// IsArithmeticOrBitwiseOrComparisonOperator: ("+"|"-"|"*"|"/")  |  ("&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<")  |  (">"|">="|"<"|"<="|"=="|"!="|"<>")
+    let (|IsOpABC|_|) (op:string) = contains op K.arithmaticOrBitwiseOrComparisionOperators
+
+    let isOpC  op = (|IsOpC|_|)  op |> Option.isSome
+    let isOpA  op = (|IsOpA|_|)  op |> Option.isSome
+    let isOpB  op = (|IsOpB|_|)  op |> Option.isSome
+    let isOpAB op = (|IsOpAB|_|) op |> Option.isSome
     let isOpAC op = (|IsOpAC|_|) op |> Option.isSome

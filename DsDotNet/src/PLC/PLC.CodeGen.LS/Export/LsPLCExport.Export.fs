@@ -63,17 +63,17 @@ module XgiExportModule =
 
         let simpleRung (*(condition:IExpression)*) (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
-            | XGK, Some funName, l::r::[] when funName.IsOneOf(arithmaticOperators @ comparisonOperators) ->
+            | XGK, Some funName, l::r::[] when isOpAC funName ->
             
                 let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
                     let xy = (0, rgi.NextRungY)
                     let targetContact = if target.Address.IsNullOrEmpty() then target.Name else target.Address
-                    if funName.IsOneOf(arithmaticOperators) then
+                    if isOpA funName then
                         let param = $"Param={dq}{op},{ls},{rs},{targetContact}{dq}"        // XGK 에서는 직접변수를 사용
                         xmlXgkFBRight xy param
-                    elif funName.IsOneOf(comparisonOperators) then
+                    elif isOpC funName then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
                         xmlXgkFBLeft xy param targetContact
                     else
@@ -264,10 +264,7 @@ module XgiExportModule =
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuPLCFunction({
-                        FunctionName = (">"|">="|"<"|"<="|"=="|"!="|"<>") as op
-                        Arguments = args
-                        Output = output }) ->
+                | DuPLCFunction({ FunctionName = op; Arguments = args; Output = output }) when isOpC op ->
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
@@ -276,10 +273,7 @@ module XgiExportModule =
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuPLCFunction({
-                        FunctionName = ("+"|"-"|"*"|"/"  | "&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<") as op
-                        Arguments = args
-                        Output = output }) ->
+                | DuPLCFunction({ FunctionName = op; Arguments = args; Output = output }) when isOpAB op ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY

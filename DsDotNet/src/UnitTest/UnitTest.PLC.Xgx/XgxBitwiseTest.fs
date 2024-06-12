@@ -5,7 +5,6 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open Engine.CodeGenPLC
 open Dual.UnitTest.Common.FS
 
 
@@ -24,9 +23,14 @@ $nn1 = 8u &&& 255u;
 $nn2 = 8u ||| 255u;
 """
         let f = getFuncName()
-        let statements = parseCodeForWindows storages code
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        let doit() =
+            let statements = parseCodeForWindows storages code
+            let xml = x.generateXmlForTest f storages (map withNoComment statements)
+            x.saveTestResult f xml
+        match xgx with
+        | XGI -> doit()
+        | XGK -> doit |> ShouldFailWithSubstringT "XGK Bitwise operator not supported"
+        | _ -> failwith "Not supported runtime target"
 
 
 type XgiBitwiseTest() =

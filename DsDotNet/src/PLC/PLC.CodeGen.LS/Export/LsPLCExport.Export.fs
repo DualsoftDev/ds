@@ -74,7 +74,13 @@ module XgiExportModule =
                         let param = $"Param={dq}{op},{ls},{rs},{targetContact}{dq}"        // XGK 에서는 직접변수를 사용
                         xmlXgkFBRight xy param
                     elif isOpB funName then
-                        let param = $"Param={dq}{op},{ls},{rs},{targetContact},1{dq}"        // XGK 에서는 직접변수를 사용
+                        let wordCount = 1
+                        match l.Terminal with
+                        | Some t when t.Literal.IsSome ->
+                            failwith "ERROR: 1st argument of XGK BAND does not allow literal value."
+                        | _ -> ()
+
+                        let param = $"Param={dq}{op},{ls},{rs},{targetContact},{wordCount}{dq}"
                         xmlXgkFBRight xy param
                     elif isOpC funName then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"

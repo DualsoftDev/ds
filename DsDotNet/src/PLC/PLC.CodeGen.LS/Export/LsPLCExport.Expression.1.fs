@@ -100,10 +100,11 @@ module LsPLCExportExpressionModule =
             | "==" -> "="
             | "MOV" -> "MOV"
 
-            | "&" | "&&&" -> "BAND"
-            | "|" | "|||" -> "BOR"
-            | "^" | "^^^" -> "BXOR"
-            | "~" | "~~~" -> failwith "Not binary operation"
+            | IsOpB _ -> failwith "XGK Bitwise operator not supported: op"
+            //| "&" | "&&&" -> "BAND"
+            //| "|" | "|||" -> "BOR"
+            //| "^" | "^^^" -> "BXOR"
+            //| "~" | "~~~" -> failwith "Not binary operation"
 
             | _ when isOpC op -> op
             | _ -> failwithlog "ERROR"

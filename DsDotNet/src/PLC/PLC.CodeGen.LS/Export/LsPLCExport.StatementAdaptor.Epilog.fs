@@ -43,9 +43,7 @@ module XgxTypeConvertorModule =
                             let auto = prjParam.CreateAutoVariableWithFunctionExpression(pack, ex)
                             auto.ToExpression()
                         | Some ("&&" | "||" | "!"), []
-                        | Some (IsOpB _), _
-                        | Some (IsOpA _), _  // ::[]
-                        | Some (IsOpC _), _ ->
+                        | Some (IsOpABC _), _ ->
                             let auto = prjParam.CreateAutoVariableWithFunctionExpression(pack, ex)
                             auto.ToExpression()
                         | _ -> ex

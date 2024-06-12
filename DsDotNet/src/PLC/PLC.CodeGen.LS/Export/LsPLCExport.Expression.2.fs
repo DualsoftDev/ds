@@ -111,7 +111,7 @@ module XgxExpressionConvertorModule =
                 augs.Storages, augs.Statements, augs.ExpressionStore
 
             match exp.FunctionName with
-            | Some(IsOpA op | IsOpB op) ->
+            | Some (IsOpAB op) ->
                 let newArgs =
                     exp.BinaryToNary(pack, K.arithmaticOperators @ K.bitwiseOperators, op)
 
@@ -316,14 +316,10 @@ module XgxExpressionConvertorModule =
                         // XGI 에는 사칙 연산을 중간 expression 으로 이용은 가능하나, ladder 그리는 로직이 너무 복잡해 지므로, 
                         // 수식 내에 포함된 사칙 연산이나 비교 연산을 따로 빼내어서 임시 변수에 대입하는 assign 문장으로 으로 변환한다.
                         let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
-                        let createTmpStorage =
-                            fun () -> 
-                                expStore
-                                |> Option.defaultWith (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(exp))
 
                         match fn with
-                        | IsOpAC _ ->
-                            let stg = createTmpStorage()
+                        | IsOpABC _ ->
+                            let stg = expStore |> Option.defaultWith (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(exp))
                             let stmt = DuAssign(assignCondition, newExp, stg)
                             let varExp = stg.ToExpression()
                             varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])

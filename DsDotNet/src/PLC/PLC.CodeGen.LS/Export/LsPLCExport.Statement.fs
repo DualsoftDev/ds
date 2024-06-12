@@ -66,34 +66,39 @@ module StatementExtensionModule =
             let visitTop exp = visit pack [] exp
             let tryVisitTop exp = tryVisit [] exp
 
-            match statement with
-            | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)                
+            pack.["statement"] <- x
+            let newStatement =
+                match statement with
+                | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)
 
-            | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
-                DuTimer {
-                    tmr with
-                        RungInCondition = tryVisitTop rungIn
-                        ResetCondition  = tryVisitTop reset }
-            | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
-                DuCounter {
-                    ctr with
-                        UpCondition    = tryVisitTop up 
-                        DownCondition  = tryVisitTop down
-                        ResetCondition = tryVisitTop reset
-                        LoadCondition  = tryVisitTop load }
-            | DuAction(DuCopy(condition, source, target)) ->
-                let cond = (visitTop condition) :?> IExpression<bool>
-                DuAction(DuCopy(cond, visitTop source, target))
+                | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
+                    DuTimer {
+                        tmr with
+                            RungInCondition = tryVisitTop rungIn
+                            ResetCondition  = tryVisitTop reset }
+                | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
+                    DuCounter {
+                        ctr with
+                            UpCondition    = tryVisitTop up
+                            DownCondition  = tryVisitTop down
+                            ResetCondition = tryVisitTop reset
+                            LoadCondition  = tryVisitTop load }
+                | DuAction(DuCopy(condition, source, target)) ->
+                    let cond = (visitTop condition) :?> IExpression<bool>
+                    DuAction(DuCopy(cond, visitTop source, target))
 
-            | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) ->
-                let cond = (visitTop condition) :?> IExpression<bool>
-                DuAction(DuCopyUdt(parserDataObj, udtDecl, cond, source, target))
+                | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) ->
+                    let cond = (visitTop condition) :?> IExpression<bool>
+                    DuAction(DuCopyUdt(parserDataObj, udtDecl, cond, source, target))
 
-            | DuPLCFunction ({Arguments = args} as functionParameters) ->
-                let newArgs = args |> map (fun arg -> visitTop arg)
-                DuPLCFunction { functionParameters with Arguments = newArgs }
+                | DuPLCFunction ({Arguments = args} as functionParameters) ->
+                    let newArgs = args |> map (fun arg -> visitTop arg)
+                    DuPLCFunction { functionParameters with Arguments = newArgs }
 
-            | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
+                | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
+
+            pack.Remove("statement") |> ignore
+            newStatement
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (pack:DynamicDictionary, visit:IExpression -> IExpression) : Statement =
@@ -145,6 +150,13 @@ module StatementExtensionModule =
                     let newExp =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
+
+                    let statement = pack.Get<Statement>("statement")
+                    let isAssignStatement =
+                        match statement with
+                        | DuAssign _ -> true
+                        | _ -> false
+
                     match newExp.FunctionName with
                     | Some (IsOpABC fn) when expPath.Any() ->
                         let augment =
@@ -158,7 +170,7 @@ module StatementExtensionModule =
                             newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
                         else
                             newExp
-                    | Some (IsOpC _fn) when prjParam.TargetType = XGI && expPath.Any() ->
+                    | Some (IsOpC _fn) when prjParam.TargetType = XGI && (expPath.Any() || not isAssignStatement) ->
                         newExp.ToAssignStatement(pack, K.comparisonOperators)
                     | _ ->
                         newExp

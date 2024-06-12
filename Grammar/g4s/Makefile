@@ -30,6 +30,8 @@ udt2:
 udt3:
 	$(grun) expr.g4 toplevels -gui g4test/udt-member-assign.ds
 udt4:
+	$(grun) expr.g4 toplevels -gui g4test/udt-member-referece.ds
+udt5:
 	$(grun) expr.g4 toplevels -gui g4test/udt-copy.ds
 
 test:

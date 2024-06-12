@@ -121,16 +121,23 @@ module rec ExpressionParserModule =
                     //iexpr <| tag (storages[text])
 
                     | :? StorageContext as sctx ->
-                        let storage =
-                            option {
-                                let! storageCtx = sctx.TryFindFirstChild<StorageNameContext>()
-                                let name = storageCtx.GetText()
-                                return! storages.TryFind(name)
-                            }
+                        let name =
+                            match sctx.TryFindFirstChild<StorageNameContext>(), sctx.TryFindFirstChild<UdtMemberContext>() with
+                            | Some stg, None -> stg.GetText()
+                            | None, Some udt -> udt.GetText()
+                            | _ -> failwithlog "ERROR"
+                        storages[name].ToBoxedExpression() :?> IExpression
 
-                        match storage with
-                        | Some strg -> strg.ToBoxedExpression() :?> IExpression
-                        | None -> failwith $"Failed to find variable/tag name in {sctx.GetText()}"
+                        //let storage =
+                        //    option {
+                        //        let! storageCtx = sctx.TryFindFirstChild<StorageNameContext>()
+                        //        let name = storageCtx.GetText()
+                        //        return! storages.TryFind(name)
+                        //    }
+
+                        //match storage with
+                        //| Some strg -> strg.ToBoxedExpression() :?> IExpression
+                        //| None -> failwith $"Failed to find variable/tag name in {sctx.GetText()}"
 
                     | _ -> failwithlog "ERROR"
 

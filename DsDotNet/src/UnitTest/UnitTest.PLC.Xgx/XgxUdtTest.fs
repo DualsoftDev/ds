@@ -109,6 +109,20 @@ copyStructIf(true, $people[1], $hong);
         | XGK -> doit |> ShouldFailWithSubstringT "UDT declaration is not supported in XGK"
         | _ -> failwith "Not supported runtime target"
 
+    member x.``UDT member reference test`` () =
+        let f = getFuncName()
+        let storages = Storages()
+        let code = udtBaseCode + """
+        $people[0].age = 13;
+        int ages = $people[0].age + $people[1].age;
+        $ages = 1 + $people[0].age * $people[1].age;
+        """
+
+        let statements = parseCodeForWindows storages code
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
+
+
     member x.``UDT decl plc gen`` () =
         let result = exportXMLforLSPLC(XGI, sys, "XXXXXXXXX", None, 0, 0, 0)
         ()
@@ -122,6 +136,7 @@ type XgiUdtTest() =
     [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
     [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
     [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()
+    [<Test>] member __.``UDT member reference test`` () = base.``UDT member reference test``()
     [<Test>] member __.``UDT member assign test`` () = base.``UDT member assign test``()
     [<Test>] member __.``UDT decl plc gen`` () = base.``UDT decl plc gen``()
 

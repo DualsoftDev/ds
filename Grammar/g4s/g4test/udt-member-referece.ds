@@ -1,0 +1,8 @@
+struct Person {
+    string name;
+    int age;
+};
+
+Person people[10];
+
+int ages = $people[0].age + $people[1].age;

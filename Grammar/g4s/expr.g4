@@ -10,7 +10,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 identifier : IDENTIFIER;
     tag: TAG;
     TAG: '%' IDENTIFIER;
-    storage: '$' storageName;
+    storage: '$' (storageName | udtMember);
     functionName: identifier | binaryOperator;
 
 terminal: storage | tag | literal;
@@ -56,9 +56,9 @@ statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl 
     normalAssign: '$' storageName '=' expr;
     structMemberAssign: '$' structStorageName  '=' expr;
         structStorageName: IDENTIFIER (ARRAYDECL)? '.' IDENTIFIER;      // myTon.Q, people[10].name
-    risingAssign: 'ppulse' '(' '$' storageName ')' '==' expr;
-    fallingAssign: 'npulse' '(' '$' storageName ')' '==' expr;
-    varDecl:   type storageName ('=' expr)? ;//';';
+    risingAssign: 'ppulse' '(' '$' storageName ')' '=' expr;
+    fallingAssign: 'npulse' '(' '$' storageName ')' '=' expr;
+    varDecl:   type storageName ('=' expr)?;
         storageName: IDENTIFIER;
     type:
         'int8' | 'sbyte'
@@ -98,6 +98,7 @@ statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl 
         arrayDecl:ARRAYDECL;
         udtInstance: udtVar (arrayDecl)?;
         udtVar: IDENTIFIER;
+        udtMember: udtInstance '.' udtVar;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels

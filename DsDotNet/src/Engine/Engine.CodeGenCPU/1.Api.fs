@@ -29,7 +29,7 @@ type ApiItemManager with
         let sets =
             if input.IsSome
             then
-                coins.Select(fun c->c.SyncExpr).ToOrElseOff()
+                coins.Select(fun c->c.LinkExpr).ToOrElseOff()
                 <&&>  
                 (input.Value <&&> !!a.PE.Expr <&&> !!a.SL2.Expr)
             else 
@@ -43,7 +43,7 @@ type ApiItemManager with
         let sets = 
             if input.IsSome
             then
-                coins.Select(fun c->c.SyncExpr).ToOrElseOff()
+                coins.Select(fun c->c.LinkExpr).ToOrElseOff()
                 <&&>( 
                           (  input.Value <&&> a.PE.Expr)
                      <||> (!!input.Value <&&> !!a.PE.Expr)

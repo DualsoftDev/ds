@@ -177,7 +177,7 @@ module TagManagerModule =
         let realOriginButton  = createTag "OB"                  false     VertexTag.realOriginButton
         let realOriginAction  = createTag "OA"                  false     VertexTag.realOriginAction
         
-        let realSync          = createTag "Sync"                false     VertexTag.realSync
+        let realLink          = createTag "Link"                false     VertexTag.realLink
         let dummyCoinSTs      = createTag "CoinAnyOnST"         false     VertexTag.dummyCoinSTs
         let dummyCoinRTs      = createTag "CoinAnyOnRT"         false     VertexTag.dummyCoinRTs
         let dummyCoinETs      = createTag "CoinAnyOnET"         false     VertexTag.dummyCoinETs
@@ -207,8 +207,8 @@ module TagManagerModule =
         member _.GG         = relayGoingBit
         ///Real Data
         member _.RD         = realData
-        ///Synchronized with physical sensors
-        member _.SYNC       = realSync
+        ///link with physical sensors
+        member _.Link       = realLink
         ///GoingOriginErr
         member _.ErrGoingOrigin         = originGoingErr
 

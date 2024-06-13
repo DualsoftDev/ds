@@ -35,7 +35,7 @@ type VertexManager with
         let offExpr   = if offs.any() then offs.ToOrElseOn() else v._off.Expr
 
 
-        let set =   onExpr <&&> (!!offExpr) <&&> v.SYNC.Expr
+        let set =   onExpr <&&> (!!offExpr) <&&> v.Link.Expr
               
 
         (set, v._off.Expr) --| (v.OG, getFuncName())

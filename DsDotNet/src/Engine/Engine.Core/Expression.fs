@@ -226,9 +226,17 @@ module ExpressionModule =
         abstract member CopyUdt: UdtDecl * string * string -> unit
         abstract member Storages: Storages with get
 
+    type CopyUdtStatement = {
+        ParserData:IParserData
+        UdtDecl:UdtDecl
+        Condition:IExpression<bool>
+        Source:string
+        Target:string
+    }
+
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
-        | DuCopyUdt of parserData:IParserData * udtDecl:UdtDecl * condition:IExpression<bool> * source:string * target:string
+        | DuCopyUdt of CopyUdtStatement
 
    
     let private unsupported() = failwithlog "ERROR: not supported"
@@ -308,7 +316,7 @@ module ExpressionModule =
             | DuAction (a:ActionStatement) ->
                match a with
                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
-               | DuCopyUdt (_parserData, _udtDecl, _condition, _source, target) -> target
+               | DuCopyUdt { Target = target } -> target
             | DuPLCFunction { FunctionName = fn } -> fn
             | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
@@ -356,7 +364,7 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
 
-            | DuAction (DuCopyUdt (parserData, udtDecl, condition, source, target)) ->
+            | DuAction (DuCopyUdt { ParserData=parserData; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) ->
                 if condition.EvaluatedValue then
                     // 구조체 멤버 복사
                     parserData.CopyUdt(udtDecl, source, target)
@@ -396,7 +404,7 @@ module ExpressionModule =
             | DuAction (DuCopy (condition, source, target)) ->
                 $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
 
-            | DuAction (DuCopyUdt (_parserDataObj, _udtDecl, condition, source, target)) ->
+            | DuAction (DuCopyUdt { Condition=condition; Source=source; Target=target}) ->
                 $"copyStructIf({condition.ToText()}, {source}, {target})"
 
             | (DuUdtDecl _ | DuUdtDefinitions _) -> sprintf "%A" x

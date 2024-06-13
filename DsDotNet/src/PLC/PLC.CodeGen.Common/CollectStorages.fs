@@ -35,7 +35,7 @@ module CollectStoragesModule =
                     yield! cond.CollectStorages()
                     yield! src.CollectStorages()
                     yield tgt
-                | DuCopyUdt(_, _, cond, _src, _tgt) ->
+                | DuCopyUdt { Condition=cond } ->
                     yield! cond.CollectStorages() ]
 
     type Statement with

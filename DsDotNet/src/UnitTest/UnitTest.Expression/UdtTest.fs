@@ -25,7 +25,7 @@ struct Person {
 Person hong;
 Person people[10];
 
-copyStructIf(true, hong, people[0]);
+//copyStructIf(true, hong, people[0]);
 
 """
             let statements = udt |> parseCodeForWindows storages;

@@ -87,9 +87,9 @@ module StatementExtensionModule =
                     let cond = (visitTop condition) :?> IExpression<bool>
                     DuAction(DuCopy(cond, visitTop source, target))
 
-                | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) ->
+                | DuAction (DuCopyUdt ({ ParserData=parserDataObj; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target} as udt)) ->
                     let cond = (visitTop condition) :?> IExpression<bool>
-                    DuAction(DuCopyUdt(parserDataObj, udtDecl, cond, source, target))
+                    DuAction(DuCopyUdt {udt with Condition = cond})
 
                 | DuPLCFunction ({Arguments = args} as functionParameters) ->
                     let newArgs = args |> map (fun arg -> visitTop arg)

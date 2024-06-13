@@ -195,7 +195,7 @@ module ExportIOTable =
                 let args = String.Join(", ", args)
                 $"{functionName}({args})"
             | DuAction (DuCopy (condition, _, _)) -> $"{condition.ToText()}"
-            | DuAction (DuCopyUdt (_parserData, udtDecl, condition, source, target)) -> $"{condition.ToText()}"
+            | DuAction (DuCopyUdt {Condition=condition}) -> $"{condition.ToText()}"
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
             | (DuUdtDecl _ | DuUdtDefinitions _) ->

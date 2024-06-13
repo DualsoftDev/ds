@@ -43,7 +43,6 @@ module InterfaceClass =
     type ViewType =
         | VFLOW
         | VREAL
-        | VREALEx
         | VCALL
         | VIF
         | VCOPY_DEV

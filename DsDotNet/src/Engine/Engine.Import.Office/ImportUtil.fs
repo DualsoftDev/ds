@@ -235,7 +235,7 @@ module ImportU =
                     match node.NodeType with
                     | REALExF ->
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
-                        dicVertex.Add(node.Key, RealExF.Create(real, DuParentFlow dicFlow.[node.PageNum]))
+                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum]))
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                         real.Finished <- node.RealFinished
@@ -273,7 +273,15 @@ module ImportU =
                     let segOrg = dicVertex.[node.Alias.Value.Key]
                     
                     let alias =
-                        if dicChildParent.ContainsKey(node) then
+                        if node.NodeType = REALExF then
+                            let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
+                            Alias.Create(
+                                real.ParentNPureNames.Combine(),
+                                DuAliasTargetReal(real),
+                                DuParentReal(real)
+                            )
+
+                        elif dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
 
@@ -286,12 +294,6 @@ module ImportU =
                             let flow = dicFlow.[node.PageNum]
 
                             match segOrg with
-                            | :? RealExF as ex ->
-                                Alias.Create(
-                                    $"{ex.Name}_{node.AliasNumber}",
-                                    DuAliasTargetRealExFlow(ex),
-                                    DuParentFlow(flow)
-                                )
                             | :? Real as rt ->
                                 Alias.Create(
                                     $"{rt.Name}_{node.AliasNumber}",

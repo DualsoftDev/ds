@@ -94,7 +94,9 @@ module internal ToDsTextModule =
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (DuParentFlow flow) (indent+1)
 
-            let aliasDefs = flow.AliasDefs.Values
+            let aliasDefs = flow.AliasDefs.Values //aliasKey가 2개인 외부 Flow는 생략
+                                .Where(fun a->not(a.AliasTarget.Value.RealTarget().IsSome &&  a.AliasKey.Length = 2))
+
             if aliasDefs.Any() then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
@@ -105,7 +107,6 @@ module internal ToDsTextModule =
                         match a.AliasTarget with
                         | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
                         | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
-                        | Some(DuAliasTargetRealExFlow rf) -> rf.Real.GetAliasTargetToDs(flow) |> getName
                         | None -> failwithlog "ERROR"
 
                     yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
@@ -328,12 +329,10 @@ module internal ToDsTextModule =
                     match sc with
                     | DuSafetyConditionReal real       -> real.ParentNPureNames.Combine()
                     | DuSafetyConditionCall call       -> getCallName call
-                    | DuSafetyConditionRealExFlow rf   -> rf.ParentNPureNames.Combine()
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()
                     | :? Call as call -> getCallName call
-                    | :? RealOtherFlow as realExF -> realExF.ParentNPureNames.Combine()
                     | _ -> failwithlog "ERROR"
 
                 [

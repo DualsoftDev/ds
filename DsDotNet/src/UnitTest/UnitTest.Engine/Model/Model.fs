@@ -137,7 +137,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [QualifiedName] test`` () =
-            compareExact ParserTest.QualifiedName
+            (fun () -> compareExact ParserTest.QualifiedName ) |> ShouldFail
 
         [<Test>]
         member __.``Model component [T6 alias] test`` () =

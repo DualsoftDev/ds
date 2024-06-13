@@ -118,7 +118,7 @@ module ModelBuildupTests1 =
 
             let flow2 = Flow.Create("F2", system)
 
-            let real2 = RealOtherFlow.Create(real, DuParentFlow flow2)
+            let real2 = Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow flow2)
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore

@@ -410,11 +410,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                         Call.Create(job, parent) |> ignore
                                 | None -> ()
                             
-                            | 1, realorFlow :: [ cr ] when
-                                not <| isAliasMnemonic (parent, name)
+                            //| 1, realorFlow :: [ cr ] //when not <| isAliasMnemonic (parent, name)
+                            | 2, realorFlow :: [ cr ] 
                                 ->
                                 let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
-                                RealOtherFlow.Create(otherFlowReal, parent) |> ignore
+                                //RealOtherFlow.Create(otherFlowReal, parent) |> ignore
+                                Alias.Create(name, DuAliasTargetReal otherFlowReal, parent) |> ignore
                                 debugfn $"{realorFlow}.{cr} should already have been created."
 
                             | 2, [ q ] when isAliasMnemonic (parent, name) ->

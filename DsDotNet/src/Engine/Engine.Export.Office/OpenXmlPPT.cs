@@ -56,7 +56,7 @@ namespace Engine.Export.Office
 
         private static string GetName(Vertex v)
         {
-            if (v is Real || v is RealOtherFlow) return v.Name;
+            if (v is Real) return v.Name;
             if (v is Call c)
             {
                 var flowName = c.Parent.GetFlow().Name;

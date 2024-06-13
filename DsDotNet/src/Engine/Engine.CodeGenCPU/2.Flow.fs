@@ -53,7 +53,6 @@ type VertexManager with
         let sets =
             match v.Vertex  with
             | :? Alias   as rf -> rf.V.Vertex.GetPure().V.ET.Expr
-            | :? RealExF as rf -> rf.V.Vertex.GetPure().V.ET.Expr
             | _ ->
                 failwithlog "Error"
 

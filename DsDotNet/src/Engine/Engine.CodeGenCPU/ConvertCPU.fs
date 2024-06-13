@@ -56,8 +56,8 @@ module ConvertCPU =
                 yield! vm.D3_DAGCoinEnd()
                 yield! vm.D4_DAGCoinReset()
 
-                yield! vm.F1_RootStart()
-                yield! vm.F2_RootReset()
+                yield vm.F1_RootStart()
+                yield vm.F2_RootReset()
                 yield vm.F5_HomeCommand()
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then

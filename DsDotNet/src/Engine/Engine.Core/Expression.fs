@@ -387,7 +387,7 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     // 구조체 멤버 복사
                     copyUdt storages udtDecl source target
-            | (DuUdtDecl _ | DuUdtDef _) -> ()
+            | (DuUdtDecl _ | DuUdtDef _ | DuLambdaDecl _) -> ()
 
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
@@ -428,6 +428,9 @@ module ExpressionModule =
 
             | DuUdtDecl _ -> sprintf "%A" x
             | DuUdtDef _ -> sprintf "%A;" x
+            | DuLambdaDecl { Prototype=proto; Arguments=args;Body = exp} ->
+                let argLists = args |> map (fun arg -> $"{arg.Type.Name} {arg.Name}") |> joinWith ", "
+                $"{proto.Type.Name} {proto.Name}({argLists} => {exp.ToText()})"
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 

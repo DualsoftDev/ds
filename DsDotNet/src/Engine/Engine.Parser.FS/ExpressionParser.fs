@@ -23,7 +23,14 @@ module rec ExpressionParserModule =
         parser.AddErrorListener(listener_parser)
         parser
 
-    let createExpression (storages: Storages) (ctx: ExprContext) : IExpression =
+    /// storage 이름이 주어졌을 때, 그 이름에 해당하는 storage 를 반환하는 함수의 type 
+    type StorageFinder = string -> IStorage option
+
+    /// storages 에서 name 을 찾는 기본 함수
+    let defaultStorageFinder (storages: Storages) (name: string) : IStorage option =
+        storages.TryFind name
+
+    let createExpression (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =
             let text = ctx.GetText()
@@ -129,7 +136,7 @@ module rec ExpressionParserModule =
                                 | Some stg, None -> stg.GetText() |> Some
                                 | None, Some udt -> udt.GetText() |> Some
                                 | _ -> None
-                            let! storage = storages.TryFind(name)
+                            let! storage = storageFinder name
                             return storage.ToBoxedExpression() :?> IExpression
                         } |> Option.defaultWith (fun () -> failwith $"Failed to find variable/tag name in {sctx.GetText()}")
 
@@ -155,7 +162,7 @@ module rec ExpressionParserModule =
             let parser = createParser (text)
             let ctx = parser.expr ()
 
-            createExpression storages ctx
+            createExpression (defaultStorageFinder storages) ctx
         with exn ->
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
 
@@ -181,7 +188,7 @@ module rec ExpressionParserModule =
         match typ with
         | Some typ ->
             let storages = parserData.Storages
-            let exp = createExpression storages (getFirstChildExpressionContext ctx)
+            let exp = createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Counter>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
 
@@ -247,7 +254,7 @@ module rec ExpressionParserModule =
         match typ with
         | Some typ ->
             let storages = parserData.Storages
-            let exp = createExpression storages (getFirstChildExpressionContext ctx)
+            let exp = createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Timer>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             // e.g "ton myTon = createXgiTON(2000u, $myQBit0);"
@@ -294,7 +301,7 @@ module rec ExpressionParserModule =
             let fstChild = ctx.children[0] 
             match fstChild with
             | :? VarDeclContext as varDeclCtx ->
-                let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
+                let exp = createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext varDeclCtx)
 
                 let declType =
                     ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
@@ -328,7 +335,7 @@ module rec ExpressionParserModule =
 
             | :? AssignContext as ctx ->
                 let createExp ctx =
-                    createExpression storages (getFirstChildExpressionContext ctx)
+                    createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
                 let children = ctx.children.ToFSharpList()
 
                 match ctx with
@@ -369,7 +376,7 @@ module rec ExpressionParserModule =
             | :? TimerDeclContext as ctx -> Some <| parseTimerStatement parserData ctx
 
             | :? CopyStatementContext as ctx ->
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression (defaultStorageFinder storages)
                 let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
                 let source = ctx.Descendants<CopySourceContext>().First() |> expr
@@ -380,7 +387,7 @@ module rec ExpressionParserModule =
 
             | :? CopyStructStatementContext as ctx ->
                 // e.g copyStructIf(true, $hong, $people[0]);
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression (defaultStorageFinder storages)
                 let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
                 let sourceInstance = ctx.Descendants<UdtInstanceSourceContext>().First().udtInstance()  // e.g "hong"
@@ -450,14 +457,18 @@ module rec ExpressionParserModule =
                         let defaultValue = { Object = typeDefaultValue a.Type }: BoxedObjectHolder
                         createVariable localVarName defaultValue (Some comment)
                     storages.Add(localVarName, localVar)
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
-                let stmt =
-                    Some <| DuLambdaDecl {
-                        Prototype = { Type = typ; Name = funName }
-                        Arguments = args
-                        Body = ctx.Descendants<ExprContext>().First() |> expr
-                        }
-                failwithlog "ERROR: Not yet lambda statement"
+                let storageFinder (stgName:string): IStorage option =
+                    let localStgName = $"_local_{funName}_{stgName}"
+                    storages.TryFind localStgName
+                    |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
+                    
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storageFinder
+                Some <| DuLambdaDecl {
+                    Prototype = { Type = typ; Name = funName }
+                    Arguments = args
+                    Body = ctx.Descendants<LambdaBodyExprContext>().First() |> expr
+                    }
+
             | :? ProcDeclContext as ctx ->
                 failwithlog "ERROR: Not yet proc decl statement"
 

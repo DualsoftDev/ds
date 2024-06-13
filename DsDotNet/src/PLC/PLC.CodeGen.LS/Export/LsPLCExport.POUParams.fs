@@ -185,6 +185,7 @@ module POUParametersModule =
             | (DuUdtDecl _ | DuUdtDef _) ->
                 if prjParam.TargetType <> XGI then
                     failwith "UDT declaration is not supported in XGK"
+            | DuLambdaDecl _ -> ()
             | DuAction(_a:ActionStatement) -> ()
             | DuPLCFunction(_fbParam) -> ()
 

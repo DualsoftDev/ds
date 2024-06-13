@@ -61,11 +61,12 @@ statement: (
         | risingAssign          # CtxRisingAssign
         | fallingAssign         # CtxFallingAssign
         ;
-    lambdaDecl: type lambdaName '(' argDecls? ')' '=>' expr;
+    lambdaDecl: type lambdaName '(' argDecls? ')' '=>' lambdaBodyExpr;
         lambdaName: IDENTIFIER;
         argDecls: argDecl (',' argDecl)*;
         argDecl: type argName;
         argName: IDENTIFIER;
+        lambdaBodyExpr: expr;
     procDecl: 'void' procName '(' argDecls? ')' '{' toplevels '}';
         procName: IDENTIFIER;
     returnStatement: 'return' expr;

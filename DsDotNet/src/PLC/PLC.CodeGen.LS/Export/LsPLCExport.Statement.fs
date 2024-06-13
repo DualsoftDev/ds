@@ -53,6 +53,7 @@ module StatementExtensionModule =
 
             | DuAction(DuCopyUdt _) ->
                 statement |> augs.Statements.Add
+            | DuLambdaDecl _ -> ()
 
 
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
@@ -69,15 +70,15 @@ module StatementExtensionModule =
             pack.["statement"] <- x
             let newStatement =
                 match statement with
-                | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)
+                | DuAssign(condition, exp, tgt) -> Some <| DuAssign(tryVisitTop condition, visitTop exp, tgt)
 
                 | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
-                    DuTimer {
+                    Some <| DuTimer {
                         tmr with
                             RungInCondition = tryVisitTop rungIn
                             ResetCondition  = tryVisitTop reset }
                 | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
-                    DuCounter {
+                    Some <| DuCounter {
                         ctr with
                             UpCondition    = tryVisitTop up
                             DownCondition  = tryVisitTop down
@@ -85,20 +86,21 @@ module StatementExtensionModule =
                             LoadCondition  = tryVisitTop load }
                 | DuAction(DuCopy(condition, source, target)) ->
                     let cond = (visitTop condition) :?> IExpression<bool>
-                    DuAction(DuCopy(cond, visitTop source, target))
+                    Some <| DuAction(DuCopy(cond, visitTop source, target))
 
                 | DuAction (DuCopyUdt ({ Condition=condition; } as udt)) ->
                     let cond = (visitTop condition) :?> IExpression<bool>
-                    DuAction(DuCopyUdt {udt with Condition = cond})
+                    Some <| DuAction(DuCopyUdt {udt with Condition = cond})
 
                 | DuPLCFunction ({Arguments = args} as functionParameters) ->
                     let newArgs = args |> map (fun arg -> visitTop arg)
-                    DuPLCFunction { functionParameters with Arguments = newArgs }
+                    Some <| DuPLCFunction { functionParameters with Arguments = newArgs }
+                | DuLambdaDecl _ -> None
+                | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _ ) -> failwith "Should have been processed in early stage"
 
-                | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _) -> failwith "Should have been processed in early stage"
 
             pack.Remove("statement") |> ignore
-            newStatement
+            newStatement |> Option.defaultValue x
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (pack:DynamicDictionary, visit:IExpression -> IExpression) : Statement =

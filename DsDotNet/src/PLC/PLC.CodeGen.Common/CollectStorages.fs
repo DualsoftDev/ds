@@ -61,6 +61,7 @@ module CollectStoragesModule =
                 | DuAction stmt -> yield! stmt.CollectStorages()
 
                 | DuPLCFunction _functionParameters -> failwithlog "ERROR"
+                | DuLambdaDecl _ -> ()
                 | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
             ]
     type CommentedStatement with

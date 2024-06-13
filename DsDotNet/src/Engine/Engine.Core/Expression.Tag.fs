@@ -98,16 +98,17 @@ module TagModule =
             | DuCounter counterStatement -> [counterStatement.Counter.DN ]
             | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
             | DuAction (DuCopyUdt _) -> []
-            | DuPLCFunction _ -> [] //test ahn DuPLCFunction target 찾기
+            | DuPLCFunction { Output=target } -> [target]
             | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
         member x.GetSourceStorages() =
             match x with
             | DuAssign (condi, expr, _target) ->
-                        if condi.IsSome
-                        then expr.CollectStorages()@condi.Value.CollectStorages()
-                        else expr.CollectStorages()
-                        
+                [
+                    yield! expr.CollectStorages()
+                    if condi.IsSome then
+                        yield! condi.Value.CollectStorages()
+                ]                        
             | DuVarDecl (expr, _var) -> expr.CollectStorages()
             | DuTimer timerStatement -> 
                 [ for s in timerStatement.Timer.InputEvaluateStatements do
@@ -119,7 +120,12 @@ module TagModule =
                 condition.CollectStorages()@source.CollectStorages()
             | DuAction (DuCopyUdt (_parserData, _udtDecl, condition, _source, _target)) ->
                 condition.CollectStorages()
-            | DuPLCFunction _ -> []//test ahn DuPLCFunction source 찾기
+            | DuPLCFunction {Condition = condi; Arguments=args} ->
+                [
+                    if condi.IsSome then
+                        yield! condi.Value.CollectStorages()
+                        yield! args |> collect(fun arg -> arg.CollectStorages())
+                ]
             | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
       

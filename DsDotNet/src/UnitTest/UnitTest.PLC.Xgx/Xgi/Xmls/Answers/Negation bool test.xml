@@ -17,8 +17,8 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="2">
                     <Symbols>
-                        <Symbol Name="b1" Comment="bool b1 = !(true)" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="bool b2 = !(false)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = !(true);" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = !(false);" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -55,8 +55,8 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="b1" Comment="bool b1 = !(true)" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="bool b2 = !(false)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="bool b1 = !(true);" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="bool b2 = !(false);" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

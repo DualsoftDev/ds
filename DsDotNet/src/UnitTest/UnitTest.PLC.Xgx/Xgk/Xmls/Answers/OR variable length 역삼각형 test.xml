@@ -79,7 +79,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x15 = $x00 || ($x01 || $x02) &amp;&amp; $x03
+                                        [0] $x15 = $x00 || ($x01 || $x02) &amp;&amp; $x03;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

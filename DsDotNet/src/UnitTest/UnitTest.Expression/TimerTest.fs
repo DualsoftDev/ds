@@ -80,7 +80,7 @@ module TimerTestModule =
             let storages = Storages()
             storages.Add(t1.Name, t1)
 
-            let statement:Statement = "ton myTon = createWinTON(200u, $my_timer_control_tag)" |> tryParseStatement4UnitTest WINDOWS storages |> Option.get
+            let statement:Statement = "ton myTon = createWinTON(200u, $my_timer_control_tag);" |> tryParseStatement4UnitTest WINDOWS storages |> Option.get
             let timer = toTimer statement
 
             timer.TT.Value === false

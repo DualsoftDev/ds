@@ -40,9 +40,9 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="3">
-                        <Symbol Name="mybool" Comment="bool mybool = false" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="myint16" Comment="int16 myint16 = 16s" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="int32 myint32 = 32" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="mybool" Comment="bool mybool = false;" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="myint16" Comment="int16 myint16 = 16s;" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="int32 myint32 = 32;" Device="M" DevicePos="2" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -66,7 +66,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool mybool = false
+                                        [0] bool mybool = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -78,7 +78,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] int16 myint16 = 16s
+                                        [1] int16 myint16 = 16s;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -90,7 +90,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] int32 myint32 = 32
+                                        [2] int32 myint32 = 32;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -30,7 +30,7 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
 
         let statements = parseCodeForWindows storages code
         statements.Length === 1
-        statements[0].ToText() === testCode.TrimEnd(';')
+        statements[0].ToText() === testCode
 
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)

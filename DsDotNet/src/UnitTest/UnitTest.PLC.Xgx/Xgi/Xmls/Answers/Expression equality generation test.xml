@@ -17,10 +17,10 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="20">
                     <Symbols>
-                        <Symbol Name="result1" Comment="bool result1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="result2" Comment="bool result2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="result3" Comment="bool result3 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="result4" Comment="bool result4 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result1" Comment="bool result1 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result2" Comment="bool result2 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result3" Comment="bool result3 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="result4" Comment="bool result4 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="x00" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.0" State="0"/>
                         <Symbol Name="x01" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.1" State="0"/>
                         <Symbol Name="x02" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.2" State="0"/>
@@ -61,7 +61,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $result1 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01
+                                        [0] $result1 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -130,7 +130,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="8193">
-                                        [1] $result2 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [1] $result2 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -199,7 +199,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
-                                        [2] $result3 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01
+                                        [2] $result3 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -268,7 +268,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
-                                        [3] $result4 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [3] $result4 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -349,10 +349,10 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="19">
                             <Symbols>
-                                <Symbol Name="result1" Comment="bool result1 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="result2" Comment="bool result2 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="result3" Comment="bool result3 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="result4" Comment="bool result4 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="result1" Comment="bool result1 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="result2" Comment="bool result2 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="result3" Comment="bool result3 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="result4" Comment="bool result4 = false;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="x00" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="x01" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="x02" Comment="" Device="I" Kind="8" State="0"/>

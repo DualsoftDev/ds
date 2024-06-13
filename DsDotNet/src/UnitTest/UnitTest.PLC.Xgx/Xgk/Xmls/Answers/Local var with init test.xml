@@ -40,14 +40,14 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="8">
-                        <Symbol Name="mybool" Comment="bool mybool = false" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="mydouble" Comment="float64 mydouble = 3.14" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="myint16" Comment="int16 myint16 = 16s" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="myint32" Comment="int32 myint32 = 32" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="mysbyte" Comment="int8 mysbyte = 1y" Device="M" DevicePos="1" Type="WORD"/>
-                        <Symbol Name="mysingle" Comment="float32 mysingle = 0.1000000015f" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="myuint16" Comment="int16 myuint16 = 16us" Device="M" DevicePos="9" Type="WORD"/>
-                        <Symbol Name="myuint32" Comment="uint32 myuint32 = 32u" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="mybool" Comment="bool mybool = false;" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="mydouble" Comment="float64 mydouble = 3.14;" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="myint16" Comment="int16 myint16 = 16s;" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="myint32" Comment="int32 myint32 = 32;" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="mysbyte" Comment="int8 mysbyte = 1y;" Device="M" DevicePos="1" Type="WORD"/>
+                        <Symbol Name="mysingle" Comment="float32 mysingle = 0.1000000015f;" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="myuint16" Comment="int16 myuint16 = 16us;" Device="M" DevicePos="9" Type="WORD"/>
+                        <Symbol Name="myuint32" Comment="uint32 myuint32 = 32u;" Device="M" DevicePos="12" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -71,7 +71,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool mybool = false
+                                        [0] bool mybool = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -83,7 +83,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] float32 mysingle = 0.1000000015f
+                                        [1] float32 mysingle = 0.1000000015f;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -95,7 +95,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] float64 mydouble = 3.14
+                                        [2] float64 mydouble = 3.14;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -107,7 +107,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] int8 mysbyte = 1y
+                                        [3] int8 mysbyte = 1y;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -119,7 +119,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] int16 myint16 = 16s
+                                        [4] int16 myint16 = 16s;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -131,7 +131,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [5] int16 myuint16 = 16us
+                                        [5] int16 myuint16 = 16us;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -143,7 +143,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [6] int32 myint32 = 32
+                                        [6] int32 myint32 = 32;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -155,7 +155,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
-                                        [7] uint32 myuint32 = 32u
+                                        [7] uint32 myuint32 = 32u;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

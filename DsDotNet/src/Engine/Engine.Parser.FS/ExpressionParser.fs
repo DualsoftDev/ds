@@ -287,7 +287,7 @@ module rec ExpressionParserModule =
 
     let tryCreateStatement (parserData:ParserData) (ctx: StatementContext) : Statement option =
         let storages:Storages = parserData.Storages
-        assert (ctx.ChildCount = 1)
+        assert (ctx.ChildCount = 1 || (ctx.ChildCount = 2 && ctx.children[1].GetText() = ";"))
         let getStorageName = fun () -> ctx.Descendants<StorageNameContext>().First().GetText()
 
         let optStatement =
@@ -410,7 +410,7 @@ module rec ExpressionParserModule =
                 parserData.UdtDecls.Add udtDecl
                 Some <| DuUdtDecl udtDecl
 
-            | :? UdtDefinitionsContext as ctx ->
+            | :? UdtDefContext as ctx ->
                 let t = ctx.udtType().GetText()
                 if not <| parserData.IsUdtType t then
                     failwith $"ERROR: UDT type {t} is not declared"
@@ -427,9 +427,27 @@ module rec ExpressionParserModule =
                         | RegexPattern @"^\[(\d+)\]$" [ Int32Pattern arraySize ] -> arraySize
                         | _ -> failwithlog "ERROR: Invalid array declaration"
                 let udtDefinition = { TypeName = t; VarName = v; ArraySize = n }
-                parserData.AddUdtDefinitions(udtDefinition)
-                Some <| DuUdtDefinitions udtDefinition
+                parserData.AddUdtDefs(udtDefinition)
+                Some <| DuUdtDef udtDefinition
 
+            | :? LambdaDeclContext as ctx ->
+                let typ, name = ctx.``type``().GetText()|> textToSystemType, ctx.lambdaName().GetText()
+                let args =
+                    [   for a in ctx.Descendants<ArgDeclContext>() do
+                            let t = a.``type``().GetText() |> textToSystemType
+                            let v = a.argName().GetText()
+                            yield { Type = t; Name = v }
+                    ]
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let stmt =
+                    Some <| DuLambdaDecl {
+                        Prototype = { Type = typ; Name = name }
+                        Arguments = args
+                        Body = ctx.Descendants<ExprContext>().First() |> expr
+                        }
+                failwithlog "ERROR: Not yet lambda statement"
+            | :? ProcDeclContext as ctx ->
+                failwithlog "ERROR: Not yet proc decl statement"
 
             | _ -> failwithlog "ERROR: Not yet statement"
 

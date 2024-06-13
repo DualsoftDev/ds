@@ -40,15 +40,15 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="49">
-                        <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="nn3" Comment="int32 nn3 = 3" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="nn4" Comment="int32 nn4 = 4" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="nn5" Comment="int32 nn5 = 5" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="nn6" Comment="int32 nn6 = 6" Device="M" DevicePos="10" Type="WORD"/>
-                        <Symbol Name="nn7" Comment="int32 nn7 = 7" Device="M" DevicePos="12" Type="WORD"/>
-                        <Symbol Name="nn8" Comment="int32 nn8 = 8" Device="M" DevicePos="14" Type="WORD"/>
-                        <Symbol Name="nn9" Comment="int32 nn9 = 9" Device="M" DevicePos="16" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = 1;" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int32 nn2 = 2;" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="nn3" Comment="int32 nn3 = 3;" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="nn4" Comment="int32 nn4 = 4;" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="nn5" Comment="int32 nn5 = 5;" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="nn6" Comment="int32 nn6 = 6;" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="nn7" Comment="int32 nn7 = 7;" Device="M" DevicePos="12" Type="WORD"/>
+                        <Symbol Name="nn8" Comment="int32 nn8 = 8;" Device="M" DevicePos="14" Type="WORD"/>
+                        <Symbol Name="nn9" Comment="int32 nn9 = 9;" Device="M" DevicePos="16" Type="WORD"/>
                         <Symbol Name="x00" Comment="" Device="P" DevicePos="0" Type="BIT"/>
                         <Symbol Name="x01" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                         <Symbol Name="x02" Comment="" Device="P" DevicePos="2" Type="BIT"/>
@@ -114,7 +114,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] int32 nn1 = 1
+                                        [0] int32 nn1 = 1;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -126,7 +126,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] int32 nn2 = 2
+                                        [1] int32 nn2 = 2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -138,7 +138,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] int32 nn3 = 3
+                                        [2] int32 nn3 = 3;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -150,7 +150,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] int32 nn4 = 4
+                                        [3] int32 nn4 = 4;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -162,7 +162,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] int32 nn5 = 5
+                                        [4] int32 nn5 = 5;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -174,7 +174,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [5] int32 nn6 = 6
+                                        [5] int32 nn6 = 6;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -186,7 +186,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [6] int32 nn7 = 7
+                                        [6] int32 nn7 = 7;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -198,7 +198,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
-                                        [7] int32 nn8 = 8
+                                        [7] int32 nn8 = 8;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -210,7 +210,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="25601">
-                                        [8] int32 nn9 = 9
+                                        [8] int32 nn9 = 9;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -222,7 +222,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="28673">
-                                        [9] $x15 = ($x00 || $x01 || $x02 || $x03) &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; ($x10 &amp;&amp; $x11 || $x12 &amp;&amp; $x13) &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $x31 &amp;&amp; ($x32 || $x33 &amp;&amp; $x34 || $x35) &amp;&amp; $x36 &amp;&amp; $x37 &amp;&amp; $x38 &amp;&amp; $x39 &amp;&amp; ($x00 || $x01 || $x02 || $x03) &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; ($x10 &amp;&amp; $x11 || $x12 &amp;&amp; $x13) &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19
+                                        [9] $x15 = ($x00 || $x01 || $x02 || $x03) &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; ($x10 &amp;&amp; $x11 || $x12 &amp;&amp; $x13) &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $x31 &amp;&amp; ($x32 || $x33 &amp;&amp; $x34 || $x35) &amp;&amp; $x36 &amp;&amp; $x37 &amp;&amp; $x38 &amp;&amp; $x39 &amp;&amp; ($x00 || $x01 || $x02 || $x03) &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; ($x10 &amp;&amp; $x11 || $x12 &amp;&amp; $x13) &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

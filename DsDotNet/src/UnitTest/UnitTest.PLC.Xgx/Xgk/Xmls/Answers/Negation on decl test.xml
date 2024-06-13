@@ -40,22 +40,22 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="16">
-                        <Symbol Name="b1" Comment="bool b1 = 2 == 3" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="b10" Comment="bool b10 = $b1 != $b2" Device="M" DevicePos="9" Type="BIT"/>
-                        <Symbol Name="b11" Comment="bool b11 = !($b1 == $b2)" Device="M" DevicePos="10" Type="BIT"/>
-                        <Symbol Name="b12" Comment="bool b12 = !($b1 != $b2)" Device="M" DevicePos="11" Type="BIT"/>
-                        <Symbol Name="b13" Comment="bool b13 = $b1 &amp;&amp; $b2" Device="M" DevicePos="12" Type="BIT"/>
-                        <Symbol Name="b14" Comment="bool b14 = !($b1 &amp;&amp; $b2)" Device="M" DevicePos="13" Type="BIT"/>
-                        <Symbol Name="b15" Comment="bool b15 = $b1 || $b2" Device="M" DevicePos="14" Type="BIT"/>
-                        <Symbol Name="b17" Comment="bool b17 = !($b1 || $b2)" Device="M" DevicePos="15" Type="BIT"/>
-                        <Symbol Name="b2" Comment="bool b2 = !(2 == 3)" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="b3" Comment="bool b3 = !(2 != 3)" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="b4" Comment="bool b4 = 2 &gt; 3" Device="M" DevicePos="3" Type="BIT"/>
-                        <Symbol Name="b5" Comment="bool b5 = !(2 &gt; 3)" Device="M" DevicePos="4" Type="BIT"/>
-                        <Symbol Name="b6" Comment="bool b6 = !(2.1 &gt; 3.14)" Device="M" DevicePos="5" Type="BIT"/>
-                        <Symbol Name="b7" Comment="bool b7 = 2 &gt;= 3" Device="M" DevicePos="6" Type="BIT"/>
-                        <Symbol Name="b8" Comment="bool b8 = !(2 &gt;= 3)" Device="M" DevicePos="7" Type="BIT"/>
-                        <Symbol Name="b9" Comment="bool b9 = $b1 == $b2" Device="M" DevicePos="8" Type="BIT"/>
+                        <Symbol Name="b1" Comment="bool b1 = 2 == 3;" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="b10" Comment="bool b10 = $b1 != $b2;" Device="M" DevicePos="9" Type="BIT"/>
+                        <Symbol Name="b11" Comment="bool b11 = !($b1 == $b2);" Device="M" DevicePos="10" Type="BIT"/>
+                        <Symbol Name="b12" Comment="bool b12 = !($b1 != $b2);" Device="M" DevicePos="11" Type="BIT"/>
+                        <Symbol Name="b13" Comment="bool b13 = $b1 &amp;&amp; $b2;" Device="M" DevicePos="12" Type="BIT"/>
+                        <Symbol Name="b14" Comment="bool b14 = !($b1 &amp;&amp; $b2);" Device="M" DevicePos="13" Type="BIT"/>
+                        <Symbol Name="b15" Comment="bool b15 = $b1 || $b2;" Device="M" DevicePos="14" Type="BIT"/>
+                        <Symbol Name="b17" Comment="bool b17 = !($b1 || $b2);" Device="M" DevicePos="15" Type="BIT"/>
+                        <Symbol Name="b2" Comment="bool b2 = !(2 == 3);" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="b3" Comment="bool b3 = !(2 != 3);" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="b4" Comment="bool b4 = 2 &gt; 3;" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="b5" Comment="bool b5 = !(2 &gt; 3);" Device="M" DevicePos="4" Type="BIT"/>
+                        <Symbol Name="b6" Comment="bool b6 = !(2.1 &gt; 3.14);" Device="M" DevicePos="5" Type="BIT"/>
+                        <Symbol Name="b7" Comment="bool b7 = 2 &gt;= 3;" Device="M" DevicePos="6" Type="BIT"/>
+                        <Symbol Name="b8" Comment="bool b8 = !(2 &gt;= 3);" Device="M" DevicePos="7" Type="BIT"/>
+                        <Symbol Name="b9" Comment="bool b9 = $b1 == $b2;" Device="M" DevicePos="8" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -79,7 +79,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b1 = 2 == 3
+                                        [0] bool b1 = 2 == 3;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -91,7 +91,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] bool b2 = !(2 == 3)
+                                        [1] bool b2 = !(2 == 3);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -103,7 +103,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] bool b3 = !(2 != 3)
+                                        [2] bool b3 = !(2 != 3);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -115,7 +115,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] bool b4 = 2 &gt; 3
+                                        [3] bool b4 = 2 &gt; 3;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -127,7 +127,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] bool b5 = !(2 &gt; 3)
+                                        [4] bool b5 = !(2 &gt; 3);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -139,7 +139,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [5] bool b6 = !(2.1 &gt; 3.14)
+                                        [5] bool b6 = !(2.1 &gt; 3.14);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -151,7 +151,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [6] bool b7 = 2 &gt;= 3
+                                        [6] bool b7 = 2 &gt;= 3;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -163,7 +163,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
-                                        [7] bool b8 = !(2 &gt;= 3)
+                                        [7] bool b8 = !(2 &gt;= 3);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -175,7 +175,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="25601">
-                                        [8] bool b9 = $b1 == $b2
+                                        [8] bool b9 = $b1 == $b2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -187,7 +187,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="28673">
-                                        [9] bool b10 = $b1 != $b2
+                                        [9] bool b10 = $b1 != $b2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -199,7 +199,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="31745">
-                                        [10] bool b11 = !($b1 == $b2)
+                                        [10] bool b11 = !($b1 == $b2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -211,7 +211,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="34817">
-                                        [11] bool b12 = !($b1 != $b2)
+                                        [11] bool b12 = !($b1 != $b2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -223,7 +223,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="37889">
-                                        [12] bool b13 = $b1 &amp;&amp; $b2
+                                        [12] bool b13 = $b1 &amp;&amp; $b2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -235,7 +235,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="40961">
-                                        [13] bool b14 = !($b1 &amp;&amp; $b2)
+                                        [13] bool b14 = !($b1 &amp;&amp; $b2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -247,7 +247,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="44033">
-                                        [14] bool b15 = $b1 || $b2
+                                        [14] bool b15 = $b1 || $b2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -259,7 +259,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="47105">
-                                        [15] bool b17 = !($b1 || $b2)
+                                        [15] bool b17 = !($b1 || $b2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

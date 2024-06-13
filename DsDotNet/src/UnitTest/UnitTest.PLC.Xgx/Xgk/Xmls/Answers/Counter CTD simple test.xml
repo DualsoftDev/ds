@@ -68,7 +68,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctd myCTD = createXgiCTD(2000u, $cd)
+                                        [0] ctd myCTD = createXgiCTD(2000u, $cd);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -89,7 +89,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="5121">
-                                        [1] ctd myCTD1 = createXgiCTD(2000u, $cd)
+                                        [1] ctd myCTD1 = createXgiCTD(2000u, $cd);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -110,7 +110,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="9217">
-                                        [2] ctd myCTD2 = createXgiCTD(2000u, $cd)
+                                        [2] ctd myCTD2 = createXgiCTD(2000u, $cd);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

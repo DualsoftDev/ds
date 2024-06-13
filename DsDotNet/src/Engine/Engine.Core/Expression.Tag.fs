@@ -102,7 +102,7 @@ module TagModule =
                 udtDecl.Members |> map (fun m -> storages[$"{target}.{m.Name}"] )
 
             | DuPLCFunction { Output=target } -> [target]
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
 
         member x.GetSourceStorages() =
             match x with
@@ -133,7 +133,7 @@ module TagModule =
                         yield! condi.Value.CollectStorages()
                         yield! args |> collect(fun arg -> arg.CollectStorages())
                 ]
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
 
       
 

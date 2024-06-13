@@ -65,7 +65,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ton myTon1 = createXgkTON(15000u, 3.14 + 2.0 &gt; 6.25)
+                                        [0] ton myTon1 = createXgkTON(15000u, 3.14 + 2.0 &gt; 6.25);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

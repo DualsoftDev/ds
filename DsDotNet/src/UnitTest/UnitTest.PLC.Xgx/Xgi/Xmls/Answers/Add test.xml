@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="7">
                     <Symbols>
-                        <Symbol Name="nn0" Comment="int16 nn0 = 0s" Device="" Kind="6" Type="INT" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="nn1" Comment="int16 nn1 = 1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="int16 nn2 = 2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="int16 nn3 = 3s" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="nn4" Comment="int16 nn4 = 4s" Device="" Kind="6" Type="INT" InitValue="4" Address="" State="0"/>
-                        <Symbol Name="nn5" Comment="int16 nn5 = 5s" Device="" Kind="6" Type="INT" InitValue="5" Address="" State="0"/>
+                        <Symbol Name="nn0" Comment="int16 nn0 = 0s;" Device="" Kind="6" Type="INT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int16 nn1 = 1s;" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int16 nn2 = 2s;" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn3" Comment="int16 nn3 = 3s;" Device="" Kind="6" Type="INT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn4" Comment="int16 nn4 = 4s;" Device="" Kind="6" Type="INT" InitValue="4" Address="" State="0"/>
+                        <Symbol Name="nn5" Comment="int16 nn5 = 5s;" Device="" Kind="6" Type="INT" InitValue="5" Address="" State="0"/>
                         <Symbol Name="qq" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX0.1.0" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
@@ -48,7 +48,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qq = true &amp;&amp; ($nn1 + $nn2) * 9s + $nn3 &gt; 3s
+                                        [0] $qq = true &amp;&amp; ($nn1 + $nn2) * 9s + $nn3 &gt; 3s;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -141,12 +141,12 @@ XckU4UJCOYh5CA==
                                 <Symbol Name="_t2_MUL" Comment="$_t1_ADD * 9s" Device="" Kind="1" Type="INT" InitValue="27" Address="" State="0"/>
                                 <Symbol Name="_t3_ADD" Comment="$_t2_MUL + $nn3" Device="" Kind="1" Type="INT" InitValue="30" Address="" State="0"/>
                                 <Symbol Name="_t4_GT" Comment="$_t3_ADD &gt; 3s" Device="" Kind="1" Type="BOOL" InitValue="true" Address="" State="0"/>
-                                <Symbol Name="nn0" Comment="int16 nn0 = 0s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn1" Comment="int16 nn1 = 1s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn2" Comment="int16 nn2 = 2s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn3" Comment="int16 nn3 = 3s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn4" Comment="int16 nn4 = 4s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn5" Comment="int16 nn5 = 5s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn0" Comment="int16 nn0 = 0s;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn1" Comment="int16 nn1 = 1s;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn2" Comment="int16 nn2 = 2s;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn3" Comment="int16 nn3 = 3s;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn4" Comment="int16 nn4 = 4s;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn5" Comment="int16 nn5 = 5s;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="qq" Comment="" Device="Q" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>

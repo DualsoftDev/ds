@@ -43,7 +43,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $hong.name = "Hong"
+                                        [0] $hong.name = "Hong";
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -60,7 +60,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="5121">
-                                        [1] $hong.age = 20
+                                        [1] $hong.age = 20;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -77,7 +77,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="9217">
-                                        [2] $people[0].name = "Kim"
+                                        [2] $people[0].name = "Kim";
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -94,7 +94,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [3] $people[0].age = 30
+                                        [3] $people[0].age = 30;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

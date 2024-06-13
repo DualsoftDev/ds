@@ -140,8 +140,8 @@ double myDouble = 3.14 + 3.14;
             use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let declarations = [
-                $"string myString = {dq}Hello, world{dq}"
-                "char myChar = 'x'"
+                $"string myString = {dq}Hello, world{dq};"
+                "char myChar = 'x';"
             ]
 
             let statements =
@@ -186,8 +186,8 @@ double myDouble = 3.14 + 3.14;
 """
             let system = parseText ds
             system.Functions.Count === 1
-            system.Functions[0].Statements[0].ToText() ==="float32 myFloat32 = 3.140000105f + 3.140000105f"
-            system.Functions[0].Statements[1].ToText() ==="float32 mySingle = 3.140000105f + 3.140000105f"
+            system.Functions[0].Statements[0].ToText() ==="float32 myFloat32 = 3.140000105f + 3.140000105f;"
+            system.Functions[0].Statements[1].ToText() ==="float32 mySingle = 3.140000105f + 3.140000105f;"
 
             let text = system.ToDsText(true)
             ds =~= text

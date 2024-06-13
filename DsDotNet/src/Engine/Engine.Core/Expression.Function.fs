@@ -105,8 +105,76 @@ module ExpressionFunctionModule =
         | _ ->
             failwith $"Undefined operator for createUnaryExpression({op})"
 
+
+    let predefinedFunctionNames =
+        [|
+            "+"; "add";
+            "-"; "sub";
+            "*"; "mul";
+            "/"; "div";
+
+            ">" ; "gt";
+            ">="; "gte";
+            "<" ; "lt";
+            "<="; "lte";
+
+            "==" ; "equal";
+            "==" ; "equal";
+            "!="; "<>"; "notEqual"       
+            "!="; "<>"; "^^"; "notEqual"
+
+            "<<"; "<<<"; "shiftLeft"     
+            ">>"; ">>>"; "shiftRight"    
+
+            "&&"; "and"                   
+            "||"; "or"                    
+
+            "!" ; "not";
+            "&"; "&&&" ;
+            "|"; "|||" ;
+            "^"; "^^^" ;
+            "~"; "~~~" ;
+
+            FunctionNameRising;
+            FunctionNameFalling;
+
+
+            FunctionNameRisingAfter;
+            FunctionNameFallingAfter;
+
+
+            "bool"  ; "toBool";
+            "sbyte" ; "toSByte"; "toInt8";
+            "byte"  ; "toByte" ; "toUInt8";
+            "short" ; "toShort"; "toInt16";
+            "ushort"; "toUShort"; "toUInt16";
+            "int"   ; "toInt"  ; "toInt32";
+            "uint"  ; "toUInt" ; "toUInt32";
+            "long"  ; "toLong" ; "toInt64";
+            "ulong" ; "toULong"; "toUInt64";
+
+            "single"; "float"; "float32"; "toSingle"; "toFloat"; "toFloat32";
+            "double"; "float64"; "toDouble"; "toFloat64";
+
+            "sin";
+            "cos";
+            "tan";
+            "abs";
+
+            "createXgiCTU"; "createXgiCTD"; "createXgiCTUD"; "createXgiCTR";
+            "createXgkCTU"; "createXgkCTD"; "createXgkCTUD"; "createXgkCTR";
+            "createWinCTU"; "createWinCTD"; "createWinCTUD"; "createWinCTR";
+            "createAbCTU" ; "createAbCTD" ; "createAbCTUD" ; "createAbCTR";
+            "createXgiTON"; "createXgiTOF"; "createXgiCRTO";
+            "createXgkTON"; "createXgkTOF"; "createXgkCRTO";
+            "createWinTON"; "createWinTOF"; "createWinCRTO";
+            "createAbTON" ; "createAbTOF" ; "createAbCRTO";
+            "createTag"
+        |] |> HashSet
+
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
         verifyArgumentsTypes funName args
+        predefinedFunctionNames.Contains(funName) |> verifyM $"Undefined function: {funName}"
         let t = args[0].DataType.Name
 
         match funName with

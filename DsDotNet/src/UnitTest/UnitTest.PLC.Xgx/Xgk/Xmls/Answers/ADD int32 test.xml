@@ -40,12 +40,12 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="6">
-                        <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="sum" Comment="int32 sum = 0" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="unn1" Comment="uint32 unn1 = 1u" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="unn2" Comment="uint32 unn2 = 2u" Device="M" DevicePos="8" Type="WORD"/>
-                        <Symbol Name="usum" Comment="uint32 usum = 0u" Device="M" DevicePos="10" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = 1;" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="nn2" Comment="int32 nn2 = 2;" Device="M" DevicePos="2" Type="WORD"/>
+                        <Symbol Name="sum" Comment="int32 sum = 0;" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="unn1" Comment="uint32 unn1 = 1u;" Device="M" DevicePos="6" Type="WORD"/>
+                        <Symbol Name="unn2" Comment="uint32 unn2 = 2u;" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="usum" Comment="uint32 usum = 0u;" Device="M" DevicePos="10" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -69,7 +69,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] int32 nn1 = 1
+                                        [0] int32 nn1 = 1;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -81,7 +81,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] int32 nn2 = 2
+                                        [1] int32 nn2 = 2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -93,7 +93,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] int32 sum = 0
+                                        [2] int32 sum = 0;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -105,7 +105,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] $sum = $nn1 + $nn2
+                                        [3] $sum = $nn1 + $nn2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -117,7 +117,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="12289">
-                                        [4] uint32 unn1 = 1u
+                                        [4] uint32 unn1 = 1u;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -129,7 +129,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
-                                        [5] uint32 unn2 = 2u
+                                        [5] uint32 unn2 = 2u;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -141,7 +141,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="18433">
-                                        [6] uint32 usum = 0u
+                                        [6] uint32 usum = 0u;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -153,7 +153,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="21505">
-                                        [7] $usum = $unn1 + $unn2
+                                        [7] $usum = $unn1 + $unn2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

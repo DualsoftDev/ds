@@ -17,8 +17,8 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="2">
                     <Symbols>
-                        <Symbol Name="b1" Comment="bool b1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="bool b2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -43,7 +43,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] copyIf(2 &gt; 3, $b1, $b2)
+                                        [0] copyIf(2 &gt; 3, $b1, $b2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -88,8 +88,8 @@ XckU4UJCOYh5CA==
                         <LocalVar Version="Ver 1.0" Count="3">
                             <Symbols>
                                 <Symbol Name="_t1_GT" Comment="2 &gt; 3" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="b1" Comment="bool b1 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="bool b2 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="bool b1 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="bool b2 = false;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

@@ -40,8 +40,8 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="2">
-                        <Symbol Name="b1" Comment="bool b1 = false" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="b2" Comment="bool b2 = false" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="b1" Comment="bool b1 = false;" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="b2" Comment="bool b2 = false;" Device="M" DevicePos="1" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -65,7 +65,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b1 = false
+                                        [0] bool b1 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -77,7 +77,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] bool b2 = false
+                                        [1] bool b2 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -89,7 +89,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] copyIf(2 &gt; 3, $b1, $b2)
+                                        [2] copyIf(2 &gt; 3, $b1, $b2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

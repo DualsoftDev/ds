@@ -69,7 +69,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x02 = !(!($x00) || $x01)
+                                        [0] $x02 = !(!($x00) || $x01);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -86,7 +86,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="3073">
-                                        [1] $x05 = !($x03 &amp;&amp; !($x04))
+                                        [1] $x05 = !($x03 &amp;&amp; !($x04));
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

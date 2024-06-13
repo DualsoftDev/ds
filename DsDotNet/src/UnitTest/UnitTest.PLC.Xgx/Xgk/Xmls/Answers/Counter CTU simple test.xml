@@ -66,7 +66,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctu myCTU = createXgiCTU(2000u, $cu, $res)
+                                        [0] ctu myCTU = createXgiCTU(2000u, $cu, $res);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

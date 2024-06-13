@@ -17,7 +17,7 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="1">
                     <Symbols>
-                        <Symbol Name="ages" Comment="int32 ages = $people[0].age + $people[1].age" Device="" Kind="6" Type="DINT" InitValue="13" Address="" State="0"/>
+                        <Symbol Name="ages" Comment="int32 ages = $people[0].age + $people[1].age;" Device="" Kind="6" Type="DINT" InitValue="13" Address="" State="0"/>
                         <Symbol Name="hong" Kind="6" Type="Person" Device="A"/>
                         <Symbol Name="people" Kind="6" Type="ARRAY[0..9] OF Person" Device="A"/>
                     </Symbols>
@@ -44,7 +44,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $people[0].age = 13
+                                        [0] $people[0].age = 13;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -61,7 +61,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="5121">
-                                        [1] $ages = 1 + $people[0].age * $people[1].age
+                                        [1] $ages = 1 + $people[0].age * $people[1].age;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -109,7 +109,7 @@ XckU4UJCOYh5CA==
                         <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
                                 <Symbol Name="_t1_MUL" Comment="$people[0].age * $people[1].age" Device="" Kind="1" Type="DINT" InitValue="0" Address="" State="0"/>
-                                <Symbol Name="ages" Comment="int32 ages = $people[0].age + $people[1].age" Device="" Kind="8" State="0"/>
+                                <Symbol Name="ages" Comment="int32 ages = $people[0].age + $people[1].age;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="hong" Kind="8" Type="Person" Device="A"/>
                                 <Symbol Name="people" Kind="8" Type="ARRAY[0..9] OF Person" Device="A"/>
                             </Symbols>

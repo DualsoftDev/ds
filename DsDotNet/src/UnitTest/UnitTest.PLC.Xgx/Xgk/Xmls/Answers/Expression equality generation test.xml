@@ -40,10 +40,10 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="20">
-                        <Symbol Name="result1" Comment="bool result1 = false" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="result2" Comment="bool result2 = false" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="result3" Comment="bool result3 = false" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="result4" Comment="bool result4 = false" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="result1" Comment="bool result1 = false;" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="result2" Comment="bool result2 = false;" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="result3" Comment="bool result3 = false;" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="result4" Comment="bool result4 = false;" Device="M" DevicePos="3" Type="BIT"/>
                         <Symbol Name="x00" Comment="" Device="P" DevicePos="0" Type="BIT"/>
                         <Symbol Name="x01" Comment="" Device="P" DevicePos="1" Type="BIT"/>
                         <Symbol Name="x02" Comment="" Device="P" DevicePos="2" Type="BIT"/>
@@ -83,7 +83,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool result1 = false
+                                        [0] bool result1 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -95,7 +95,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] bool result2 = false
+                                        [1] bool result2 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -107,7 +107,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] bool result3 = false
+                                        [2] bool result3 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -119,7 +119,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] bool result4 = false
+                                        [3] bool result4 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -131,7 +131,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] $result1 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01
+                                        [4] $result1 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -200,7 +200,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="20481">
-                                        [5] $result2 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [5] $result2 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -269,7 +269,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="27649">
-                                        [6] $result3 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01
+                                        [6] $result3 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x01;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -338,7 +338,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="34817">
-                                        [7] $result4 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [7] $result4 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

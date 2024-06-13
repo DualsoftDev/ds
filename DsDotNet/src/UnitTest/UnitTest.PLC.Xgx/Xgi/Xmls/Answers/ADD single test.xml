@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="6">
                     <Symbols>
-                        <Symbol Name="div" Comment="float32 div = $nn1 / $nn2" Device="" Kind="6" Type="REAL" InitValue="0.5" Address="" State="0"/>
-                        <Symbol Name="mul" Comment="float32 mul = $nn1 * $nn2" Device="" Kind="6" Type="REAL" InitValue="2.42" Address="" State="0"/>
-                        <Symbol Name="nn1" Comment="float32 nn1 = 1.100000024f" Device="" Kind="6" Type="REAL" InitValue="1.1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="float32 nn2 = 2.200000048f" Device="" Kind="6" Type="REAL" InitValue="2.2" Address="" State="0"/>
-                        <Symbol Name="sub" Comment="float32 sub = $nn1 - $nn2" Device="" Kind="6" Type="REAL" InitValue="-1.1" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="float32 sum = 0.0f" Device="" Kind="6" Type="REAL" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="div" Comment="float32 div = $nn1 / $nn2;" Device="" Kind="6" Type="REAL" InitValue="0.5" Address="" State="0"/>
+                        <Symbol Name="mul" Comment="float32 mul = $nn1 * $nn2;" Device="" Kind="6" Type="REAL" InitValue="2.42" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="float32 nn1 = 1.100000024f;" Device="" Kind="6" Type="REAL" InitValue="1.1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="float32 nn2 = 2.200000048f;" Device="" Kind="6" Type="REAL" InitValue="2.2" Address="" State="0"/>
+                        <Symbol Name="sub" Comment="float32 sub = $nn1 - $nn2;" Device="" Kind="6" Type="REAL" InitValue="-1.1" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="float32 sum = 0.0f;" Device="" Kind="6" Type="REAL" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $sum = $nn1 + $nn2
+                                        [0] $sum = $nn1 + $nn2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -79,12 +79,12 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="6">
                             <Symbols>
-                                <Symbol Name="div" Comment="float32 div = $nn1 / $nn2" Device="" Kind="8" State="0"/>
-                                <Symbol Name="mul" Comment="float32 mul = $nn1 * $nn2" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn1" Comment="float32 nn1 = 1.100000024f" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn2" Comment="float32 nn2 = 2.200000048f" Device="" Kind="8" State="0"/>
-                                <Symbol Name="sub" Comment="float32 sub = $nn1 - $nn2" Device="" Kind="8" State="0"/>
-                                <Symbol Name="sum" Comment="float32 sum = 0.0f" Device="" Kind="8" State="0"/>
+                                <Symbol Name="div" Comment="float32 div = $nn1 / $nn2;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="mul" Comment="float32 mul = $nn1 * $nn2;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn1" Comment="float32 nn1 = 1.100000024f;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn2" Comment="float32 nn2 = 2.200000048f;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="sub" Comment="float32 sub = $nn1 - $nn2;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="sum" Comment="float32 sum = 0.0f;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

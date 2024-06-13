@@ -9,7 +9,7 @@
             </Rung>
             <Rung BlockMask="0">
                 <Element ElementType="63" Coordinate="1025">
-                    [0] $xx1 = $xx0
+                    [0] $xx1 = $xx0;
                 </Element>
             </Rung>
             <Rung BlockMask="0">
@@ -35,8 +35,8 @@ XckU4UJCOYh5CA==
     </Body>
     <LocalVar Version="Ver 1.0" Count="2">
         <Symbols>
-            <Symbol Name="xx0" Comment="bool xx0 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-            <Symbol Name="xx1" Comment="bool xx1 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+            <Symbol Name="xx0" Comment="bool xx0 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+            <Symbol Name="xx1" Comment="bool xx1 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
         </Symbols>
         <TempVar Count="0"/>
     </LocalVar>

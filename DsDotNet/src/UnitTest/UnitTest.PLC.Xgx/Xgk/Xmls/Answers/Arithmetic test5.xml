@@ -40,7 +40,7 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="1">
-                        <Symbol Name="b0" Comment="bool b0 = false &amp;&amp; !(2.1 &lt;= 6.1)" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="b0" Comment="bool b0 = false &amp;&amp; !(2.1 &lt;= 6.1);" Device="M" DevicePos="0" Type="BIT"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -64,7 +64,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool b0 = false &amp;&amp; !(2.1 &lt;= 6.1)
+                                        [0] bool b0 = false &amp;&amp; !(2.1 &lt;= 6.1);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

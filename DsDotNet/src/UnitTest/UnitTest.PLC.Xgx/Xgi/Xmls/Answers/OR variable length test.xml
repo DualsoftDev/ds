@@ -57,7 +57,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x07 = ($x00 || $x01) &amp;&amp; $x02 || $x03 || $x04 &amp;&amp; $x05 &amp;&amp; $x06
+                                        [0] $x07 = ($x00 || $x01) &amp;&amp; $x02 || $x03 || $x04 &amp;&amp; $x05 &amp;&amp; $x06;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -95,7 +95,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $x15 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [1] $x15 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -164,7 +164,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [2] $x15 = $x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [2] $x15 = $x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -266,7 +266,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="23553">
-                                        [3] $x15 = ($x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00) &amp;&amp; ($x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00)
+                                        [3] $x15 = ($x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00) &amp;&amp; ($x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -69,7 +69,7 @@ type VertexMReal with
 
     member v.R7_RealGoingOriginError() =
         let dop = v.Flow.d_st.Expr
-        let rst = v.Flow.clear_btn.Expr
+        let rst = v.Flow.ClearExpr
         [
             if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
             then 
@@ -80,7 +80,7 @@ type VertexMReal with
     //member v.R7_RealOriginTimeOut() =
     //    let real = v.Vertex :?> Real
     //    let dop = v.Flow.d_st.Expr
-    //    let rst = v.Flow.clear_btn.Expr
+    //    let rst = v.Flow.ClearExpr
     //    [
     //        if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
     //        then 

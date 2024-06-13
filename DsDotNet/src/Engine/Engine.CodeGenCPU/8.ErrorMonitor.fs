@@ -17,7 +17,7 @@ type VertexManager with
 
 
         let iop = call.V.Flow.iop.Expr
-        let rst = v.Flow.clear_btn.Expr
+        let rst = v.Flow.ClearExpr
         [
             let running = v.MM.Expr <&&> !!call.End <&&> !!iop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
@@ -34,7 +34,7 @@ type VertexManager with
         let v = v:?> VertexMCall
         
         let dop = call.V.Flow.d_st.Expr
-        let rst = v.Flow.clear_btn.Expr
+        let rst = v.Flow.ClearExpr
         [
             let using      = if call.HasSensor then v._on.Expr else  v._off.Expr 
             let input      = call.End

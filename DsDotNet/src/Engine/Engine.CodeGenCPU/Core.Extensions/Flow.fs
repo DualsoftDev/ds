@@ -89,30 +89,16 @@ module ConvertCpuFlow =
         member f.HWDriveConditionsToAndElseOn = getConditionsToAndElseOn(f, f.System.HWConditions.Where(fun f->f.ConditionType = DuDriveState))
            
 
-        member f.AutoHMIExpr   =  f.auto_btn.Expr   <||> f.System._auto_btn.Expr
-        member f.ManuHMIExpr   =  f.manual_btn.Expr <||> f.System._manual_btn.Expr
-        member f.DriveHMIExpr  =  f.drive_btn.Expr  <||> f.System._drive_btn.Expr
-        member f.PauseHMIExpr  =  f.pause_btn.Expr  <||> f.System._pause_btn.Expr
+        member f.AutoSelectExpr   =  f.auto_btn.Expr   <||> f.System._auto_btn.Expr     <||> f.HwAutoExpr
+        member f.ManuSelectExpr   =  f.manual_btn.Expr <||> f.System._manual_btn.Expr   <||> f.HwManuExpr
 
-        member f.ReadyHMIExpr  =  f.ready_btn.Expr  <||> f.System._ready_btn.Expr
-        member f.ClearHMIExpr  =  f.clear_btn.Expr  <||> f.System._clear_btn.Expr
-
-
-        member f.AutoExpr   =  
-                let hmiAuto = f.AutoHMIExpr <&&> !!f.ManuHMIExpr
-                let hwAuto  = f.HwAutoExpr <&&> !!f.HwManuExpr
-                if f.HwAutoSelects.any() //반드시 a/m 쌍으로 존재함  checkErrHWItem 체크중
-                then (hwAuto <||> f._sim.Expr) <||> hmiAuto //개별 flow 조작 때문에 HW, HMI Select or 처리
-                //then (hwAuto <||> f._sim.Expr) <&&> hmiAuto //HW, HMI Select and 처리
-                else hmiAuto
-
-        member f.ManuExpr   =  
-                let hmiManu = !!f.AutoHMIExpr <&&> f.ManuHMIExpr
-                let hwManu  = !!f.HwAutoExpr <&&> f.HwManuExpr
-                if f.HwManuSelects.any() 
-                then hwManu <||> hmiManu //HW, HMI Select or 처리
-                else hmiManu
-
+        member f.DriveExpr  =  f.drive_btn.Expr  <||> f.System._drive_btn.Expr    <||> f.HWBtnDriveExpr
+        member f.PauseExpr  =  f.pause_btn.Expr  <||> f.System._pause_btn.Expr    <||> f.HWBtnPauseExpr
+        member f.ReadyExpr  =  f.ready_btn.Expr  <||> f.System._ready_btn.Expr    <||> f.HWBtnReadyExpr
+        member f.ClearExpr  =  f.clear_btn.Expr  <||> f.System._clear_btn.Expr    <||> f.HWBtnClearExpr
+        member f.AutoExpr   =  f.AutoSelectExpr <&&> !!f.ManuSelectExpr
+        member f.ManuExpr   =  !!f.AutoSelectExpr <&&> f.ManuSelectExpr
+               
         member f.GetReadAbleTags() =
             FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()
                   .Select(getFM(f).GetFlowTag)

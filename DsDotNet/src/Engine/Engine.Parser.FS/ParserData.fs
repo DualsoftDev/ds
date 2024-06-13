@@ -30,16 +30,20 @@ module ParserDataModule =
 
 
     /// Parsing 과정에 필요한 데이터를 담고 있는 클래스
-    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option, udtDecls:UdtDecl seq, udtDefinitions:UdtDef seq) =
-        new() = ParserData(WINDOWS, Storages(), None, [], [])
+    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option) =
+        new() = ParserData(WINDOWS, Storages(), None)
 
         member x.TargetType:PlatformTarget = target
         member x.Storages: Storages = storages
         member x.ExprParser: exprParser option = exprParser
         /// UDT 선언.  type 선언
-        member val UdtDecls = ResizeArray<UdtDecl>(udtDecls)
+        member val UdtDecls = ResizeArray<UdtDecl>()
         /// UDT 정의.  UDT 변수 정의
-        member val UdtDefs = ResizeArray<UdtDef>(udtDefinitions)
+        member val UdtDefs = ResizeArray<UdtDef>()
+
+        /// Lambda 함수 정의
+        member val LambdaDefs = ResizeArray<LambdaDecl>()
+
         member val TimerCounterInstances = HashSet<string>()
 
     type ParserData with

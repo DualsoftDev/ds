@@ -13,7 +13,7 @@ module ExpressionFixtures =
         try
             let parser = ExpressionParserModule.createParser (text)
             let ctx = parser.statement ()
-            let parserData = new ParserData(targetType, storages, Some parser, [], [])
+            let parserData = new ParserData(targetType, storages, Some parser)
 
             tryCreateStatement parserData ctx
         with exn ->

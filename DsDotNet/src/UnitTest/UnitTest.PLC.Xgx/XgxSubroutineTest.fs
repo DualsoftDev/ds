@@ -15,6 +15,7 @@ type XgxSubroutineTest(xgx:PlatformTarget) =
 
     let code = """
 int sum(int a, int b) => $a + $b;
+int nn1 = sum(1, 2);
 """
 
     member x.``Subroutine test`` () =

@@ -463,11 +463,12 @@ module rec ExpressionParserModule =
                     |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
                     
                 let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storageFinder
-                Some <| DuLambdaDecl {
+                let lambdaDecl = {
                     Prototype = { Type = typ; Name = funName }
                     Arguments = args
-                    Body = ctx.Descendants<LambdaBodyExprContext>().First() |> expr
-                    }
+                    Body = ctx.Descendants<LambdaBodyExprContext>().First() |> expr }
+                parserData.LambdaDefs.Add(lambdaDecl)
+                Some <| DuLambdaDecl lambdaDecl
 
             | :? ProcDeclContext as ctx ->
                 failwithlog "ERROR: Not yet proc decl statement"
@@ -482,7 +483,7 @@ module rec ExpressionParserModule =
         try
             ParserUtil.runtimeTarget  <- target
             let parser = createParser (text)
-            let parserData = new ParserData(target, storages, Some parser, [], [])
+            let parserData = new ParserData(target, storages, Some parser)
 
             let children = parser.toplevels().children
 

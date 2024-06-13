@@ -97,8 +97,7 @@ module TagModule =
             | DuTimer timerStatement -> [timerStatement.Timer.DN ]
             | DuCounter counterStatement -> [counterStatement.Counter.DN ]
             | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
-            | DuAction (DuCopyUdt { ParserData=parserData; UdtDecl=udtDecl; Target=target}) ->
-                let storages = parserData.Storages
+            | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Target=target}) ->
                 udtDecl.Members |> map (fun m -> storages[$"{target}.{m.Name}"] )
 
             | DuPLCFunction { Output=target } -> [target]
@@ -121,8 +120,7 @@ module TagModule =
                     yield! s.GetSourceStorages() ]
             | DuAction (DuCopy (condition, source, _target)) ->
                 condition.CollectStorages()@source.CollectStorages()
-            | DuAction (DuCopyUdt { ParserData=parserData; UdtDecl=udtDecl; Condition=condition; Source=source}) ->
-                let storages = parserData.Storages
+            | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Condition=condition; Source=source}) ->
                 [
                     yield! condition.CollectStorages()
                     yield! udtDecl.Members |> map (fun m -> storages[$"{source}.{m.Name}"] )

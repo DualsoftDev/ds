@@ -224,10 +224,9 @@ module ExpressionModule =
         /// UDT 구조체 멤버 값 복사.  source 및 target 이 string 으로 주어진다. (e.g "people[0]", "hong")
         /// PC 버젼에서 UDT 변수 복사에 대한 실제 실행문.
         abstract member CopyUdt: UdtDecl * string * string -> unit
-        abstract member Storages: Storages with get
 
     type CopyUdtStatement = {
-        ParserData:IParserData
+        Storages:Storages
         UdtDecl:UdtDecl
         Condition:IExpression<bool>
         Source:string
@@ -352,6 +351,13 @@ module ExpressionModule =
     let withExpressionComment (append:string) (statement: Statement) =
         CommentedStatement(append, statement)
 
+    /// UDT 구조체 멤버 값 복사.  source 및 target 이 string 으로 주어진다. (e.g "people[0]", "hong")
+    /// PC 버젼에서는 UDT 변수 복사에 대한 실제 실행문.
+    let copyUdt (storages:Storages) (decl:UdtDecl) (source:string) (target:string): unit =
+        for m in decl.Members do
+            let s, t = $"{source}.{m.Name}", $"{target}.{m.Name}"
+            storages[t].BoxedValue <- storages[s].BoxedValue
+
     type Statement with
         member x.Do() =
             match x with
@@ -377,10 +383,10 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
 
-            | DuAction (DuCopyUdt { ParserData=parserData; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) ->
+            | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) ->
                 if condition.EvaluatedValue then
                     // 구조체 멤버 복사
-                    parserData.CopyUdt(udtDecl, source, target)
+                    copyUdt storages udtDecl source target
             | (DuUdtDecl _ | DuUdtDef _) -> ()
 
             | DuPLCFunction _ ->

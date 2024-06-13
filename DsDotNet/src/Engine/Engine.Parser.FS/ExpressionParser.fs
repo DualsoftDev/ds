@@ -396,7 +396,7 @@ module rec ExpressionParserModule =
                 | _ -> failwith $"ERROR: Used undefined UDT type."
 
                 let udtDecl = parserData.TryGetUdtDecl(sourceType.Value).Value
-                Some <| DuAction(DuCopyUdt { ParserData=parserData; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target})
+                Some <| DuAction(DuCopyUdt { Storages=parserData.Storages; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target})
 
             | :? UdtDeclContext as ctx ->
                 let typeName = ctx.udtType().GetText()

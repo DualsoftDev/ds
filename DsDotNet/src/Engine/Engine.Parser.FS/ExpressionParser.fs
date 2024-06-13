@@ -93,18 +93,18 @@ module rec ExpressionParserModule =
                         let lit2exp x = literal2expr x |> iexpr
 
                         match exp.children[0] with
-                        | :? LiteralSbyteContext ->  text.Replace("y", "")  |> System.SByte.Parse |> lit2exp
-                        | :? LiteralByteContext  ->  text.Replace("uy", "") |> System.Byte.Parse  |> lit2exp
-                        | :? LiteralInt16Context ->  text.Replace("s", "")  |> System.Int16.Parse |> lit2exp
-                        | :? LiteralUint16Context -> text.Replace("us", "") |> System.UInt16.Parse |> lit2exp
-                        | :? LiteralInt32Context ->  text |> System.Int32.Parse |> lit2exp
-                        | :? LiteralUint32Context -> text.Replace("u", "") |> System.UInt32.Parse |> lit2exp
-                        | :? LiteralInt64Context ->  text.Replace("L", "") |> System.Int64.Parse |> lit2exp
-                        | :? LiteralUint64Context -> text.Replace("UL", "") |> System.UInt64.Parse |> lit2exp
-                        | :? LiteralSingleContext -> text.Replace("f", "") |> System.Single.Parse |> lit2exp
-                        | :? LiteralDoubleContext -> text |> System.Double.Parse  |> lit2exp
-                        | :? LiteralBoolContext ->   text |> System.Boolean.Parse |> lit2exp
-                        | :? LiteralStringContext -> text |> deQuoteOnDemand      |> lit2exp
+                        | :? LiteralSbyteContext ->  text.Replace("y", "")  |> System.SByte.Parse   |> lit2exp
+                        | :? LiteralByteContext  ->  text.Replace("uy", "") |> System.Byte.Parse    |> lit2exp
+                        | :? LiteralInt16Context ->  text.Replace("s", "")  |> System.Int16.Parse   |> lit2exp
+                        | :? LiteralUint16Context -> text.Replace("us", "") |> System.UInt16.Parse  |> lit2exp
+                        | :? LiteralInt32Context ->  text                   |> System.Int32.Parse   |> lit2exp
+                        | :? LiteralUint32Context -> text.Replace("u", "")  |> System.UInt32.Parse  |> lit2exp
+                        | :? LiteralInt64Context ->  text.Replace("L", "")  |> System.Int64.Parse   |> lit2exp
+                        | :? LiteralUint64Context -> text.Replace("UL", "") |> System.UInt64.Parse  |> lit2exp
+                        | :? LiteralSingleContext -> text.Replace("f", "")  |> System.Single.Parse  |> lit2exp
+                        | :? LiteralDoubleContext -> text                   |> System.Double.Parse  |> lit2exp
+                        | :? LiteralBoolContext ->   text                   |> System.Boolean.Parse |> lit2exp
+                        | :? LiteralStringContext -> text                   |> deQuoteOnDemand      |> lit2exp
                         | :? LiteralCharContext ->
                             // text : "'a'" 의 형태
                             let dq, sq = "\"", "'"
@@ -431,17 +431,29 @@ module rec ExpressionParserModule =
                 Some <| DuUdtDef udtDefinition
 
             | :? LambdaDeclContext as ctx ->
-                let typ, name = ctx.``type``().GetText()|> textToSystemType, ctx.lambdaName().GetText()
-                let args =
+                // e.g: int sum(int a, int b) => $a + $b;
+                let typ, funName = ctx.``type``().GetText()|> textToSystemType, ctx.lambdaName().GetText()
+
+                if predefinedFunctionNames.Contains(funName) then
+                    failwith $"ERROR: {funName} is predefined function name"
+
+                let args =  // (int a, int b)
                     [   for a in ctx.Descendants<ArgDeclContext>() do
                             let t = a.``type``().GetText() |> textToSystemType
                             let v = a.argName().GetText()
                             yield { Type = t; Name = v }
                     ]
+                for a in args do
+                    let localVarName = $"_local_{funName}_{a.Name}"
+                    let localVar =
+                        let comment = $"{funName}({a.Type} {a.Name})"
+                        let defaultValue = { Object = typeDefaultValue a.Type }: BoxedObjectHolder
+                        createVariable localVarName defaultValue (Some comment)
+                    storages.Add(localVarName, localVar)
                 let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
                 let stmt =
                     Some <| DuLambdaDecl {
-                        Prototype = { Type = typ; Name = name }
+                        Prototype = { Type = typ; Name = funName }
                         Arguments = args
                         Body = ctx.Descendants<ExprContext>().First() |> expr
                         }

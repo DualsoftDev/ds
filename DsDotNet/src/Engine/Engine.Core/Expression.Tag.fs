@@ -97,7 +97,10 @@ module TagModule =
             | DuTimer timerStatement -> [timerStatement.Timer.DN ]
             | DuCounter counterStatement -> [counterStatement.Counter.DN ]
             | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
-            | DuAction (DuCopyUdt _) -> []
+            | DuAction (DuCopyUdt (parserData, udtDecl, _condition, _source, target)) ->
+                let storages = parserData.Storages
+                udtDecl.Members |> map (fun m -> storages[$"{target}.{m.Name}"] )
+
             | DuPLCFunction { Output=target } -> [target]
             | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
 
@@ -118,8 +121,12 @@ module TagModule =
                     yield! s.GetSourceStorages() ]
             | DuAction (DuCopy (condition, source, _target)) ->
                 condition.CollectStorages()@source.CollectStorages()
-            | DuAction (DuCopyUdt (_parserData, _udtDecl, condition, _source, _target)) ->
-                condition.CollectStorages()
+            | DuAction (DuCopyUdt (parserData, udtDecl, condition, source, _target)) ->
+                let storages = parserData.Storages
+                [
+                    yield! condition.CollectStorages()
+                    yield! udtDecl.Members |> map (fun m -> storages[$"{source}.{m.Name}"] )
+                ]
             | DuPLCFunction {Condition = condi; Arguments=args} ->
                 [
                     if condi.IsSome then

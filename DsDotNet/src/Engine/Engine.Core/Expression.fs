@@ -224,6 +224,7 @@ module ExpressionModule =
         /// UDT 구조체 멤버 값 복사.  source 및 target 이 string 으로 주어진다. (e.g "people[0]", "hong")
         /// PC 버젼에서 UDT 변수 복사에 대한 실제 실행문.
         abstract member CopyUdt: UdtDecl * string * string -> unit
+        abstract member Storages: Storages with get
 
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage

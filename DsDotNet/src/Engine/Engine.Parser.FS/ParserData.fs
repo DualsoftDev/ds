@@ -40,6 +40,7 @@ module ParserDataModule =
                 for m in decl.Members do
                     let s, t = $"{source}.{m.Name}", $"{target}.{m.Name}"
                     storages[t].BoxedValue <- storages[s].BoxedValue
+            member x.Storages = storages
 
 
         member x.TargetType:PlatformTarget = target

@@ -18,7 +18,7 @@ type Flow with
 
         
     member f.ST2_ReadyState() =  //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
-        let set = (f.ready_btn.Expr <||> f.HWBtnReadyExpr) <&&> f.readyCondition.Expr
+        let set = f.ReadyHMIExpr <&&> f.readyCondition.Expr
         let rst = f.e_st.Expr <||> f.emg_st.Expr <||> f.pause.Expr
 
         (set, rst) ==| (f.r_st, getFuncName())
@@ -32,7 +32,7 @@ type Flow with
 
     member f.ST4_EmergencyState() =
         let set = f.emg_btn.Expr <||> f.HWBtnEmgExpr
-        let rst = f.clear_btn.Expr
+        let rst = f.ClearHMIExpr
 
         (set, rst) --| (f.emg_st, getFuncName())
 
@@ -41,7 +41,7 @@ type Flow with
                                 |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
         let setConditionError = !!f.readyCondition.Expr <&&> !!f._sim.Expr //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
         let set =  setDeviceError<||> setConditionError
-        let rst = f.clear_btn.Expr
+        let rst = f.ClearHMIExpr
            
         (set, rst) ==| (f.e_st, getFuncName())
 

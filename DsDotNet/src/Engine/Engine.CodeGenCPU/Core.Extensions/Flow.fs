@@ -91,8 +91,12 @@ module ConvertCpuFlow =
 
         member f.AutoHMIExpr   =  f.auto_btn.Expr   <||> f.System._auto_btn.Expr
         member f.ManuHMIExpr   =  f.manual_btn.Expr <||> f.System._manual_btn.Expr
-        member f.DriveHMIExpr  =  f.drive_btn.Expr <||> f.System._drive_btn.Expr
-        member f.PauseHMIExpr  =  f.pause_btn.Expr <||> f.System._pause_btn.Expr
+        member f.DriveHMIExpr  =  f.drive_btn.Expr  <||> f.System._drive_btn.Expr
+        member f.PauseHMIExpr  =  f.pause_btn.Expr  <||> f.System._pause_btn.Expr
+
+        member f.ReadyHMIExpr  =  f.ready_btn.Expr  <||> f.System._ready_btn.Expr
+        member f.ClearHMIExpr  =  f.ClearHMIExpr  <||> f.System._clear_btn.Expr
+
 
         member f.AutoExpr   =  
                 let hmiAuto = f.AutoHMIExpr <&&> !!f.ManuHMIExpr

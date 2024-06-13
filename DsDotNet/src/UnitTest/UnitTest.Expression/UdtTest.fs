@@ -25,6 +25,8 @@ struct Person {
 Person hong;
 Person people[10];
 
+copyStructIf(true, hong, people[0]);
+
 """
             let statements = udt |> parseCodeForWindows storages;
             statements |> List.iteri (fun i st -> tracefn "[%d] %A" i st)
@@ -37,6 +39,7 @@ Person people[10];
                         ]}
             statements[1] === DuUdtDefinitions { TypeName = "Person"; VarName="hong";   ArraySize=1 }
             statements[2] === DuUdtDefinitions { TypeName = "Person"; VarName="people"; ArraySize=10 }
+            //statements[3] === DuAction(DuCopyUdt( { TypeName = "Person"; VarName="people"; ArraySize=10 }
 
 
 

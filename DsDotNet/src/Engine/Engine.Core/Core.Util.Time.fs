@@ -18,57 +18,59 @@ module TimeModule =
                     dfs(graph, edge.Target, target, visited, timeAcc + edge.Target.Time.Value, maxTime)
             visited.Remove(current) |> ignore
 
-    let find_max_path_time (graph: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<int> =
-        if src.Time.IsNone || tgt.Time.IsNone then
-            None
-        elif src = tgt then
-            Some src.Time.Value
-        else
-            let maxTime = ref -1
-            let visited = HashSet<Vertex>()
 
-            dfs(graph, src, tgt, visited, src.Time.Value, maxTime)
 
-            if maxTime.Value > -1 then Some maxTime.Value else None
+    let find_max_path_time (graph: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<int> =
+        let find_time (graph: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<int> =
+            if src.Time.IsNone || tgt.Time.IsNone then
+                None
+            elif src = tgt then
+                Some src.Time.Value
+            else
+                let maxTime = ref -1
+                let visited = HashSet<Vertex>()
 
-    let find_max_path_time_multi (graph: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<int> =
-            let getDummyAliasTarget name vertex =
-                let aliasTarget = 
-                    match getPure(vertex) with
-                    | :? Call as c -> DuAliasTargetCall c 
-                    | :? Real as r -> DuAliasTargetReal r 
-                    | _ -> failWithLog "Invalid source vertex type"
+                dfs(graph, src, tgt, visited, src.Time.Value, maxTime)
 
-                let alias = Alias.Create(name, aliasTarget, vertex.Parent)
-                alias.Time <- Some 0
-                alias
+                if maxTime.Value > -1 then Some maxTime.Value else None
 
-            let dummySrc = getDummyAliasTarget "dummySrc"  (srcs.First())
-            let dummyTgt = getDummyAliasTarget "dummyTgt"  (tgts.First())
-            let dummyEdges = HashSet<Edge>()
+        let getDummyAliasTarget name vertex =
+            let aliasTarget = 
+                match getPure(vertex) with
+                | :? Call as c -> DuAliasTargetCall c 
+                | :? Real as r -> DuAliasTargetReal r 
+                | _ -> failWithLog "Invalid source vertex type"
 
-            for src in srcs do
-                Edge.Create(graph, dummySrc, src, EdgeType.Start) |> dummyEdges.Add |> ignore
-            for tgt in tgts do
-                Edge.Create(graph, tgt, dummyTgt, EdgeType.Start) |> dummyEdges.Add |> ignore
+            let alias = Alias.Create(name, aliasTarget, vertex.Parent)
+            alias.Time <- Some 0
+            alias
 
-            let time = find_max_path_time(graph, dummySrc :> Vertex, dummyTgt :> Vertex)
+        let dummySrc = getDummyAliasTarget "dummySrc"  (srcs.First())
+        let dummyTgt = getDummyAliasTarget "dummyTgt"  (tgts.First())
+        let dummyEdges = HashSet<Edge>()
 
-            graph.RemoveEdges dummyEdges |> ignore
-            graph.RemoveVertex(dummySrc :> Vertex) |> ignore
-            graph.RemoveVertex(dummyTgt :> Vertex) |> ignore
+        for src in srcs do
+            Edge.Create(graph, dummySrc, src, EdgeType.Start) |> dummyEdges.Add |> ignore
+        for tgt in tgts do
+            Edge.Create(graph, tgt, dummyTgt, EdgeType.Start) |> dummyEdges.Add |> ignore
 
-            time    
+        let time = find_time(graph, dummySrc :> Vertex, dummyTgt :> Vertex)
+
+        graph.RemoveEdges dummyEdges |> ignore
+        graph.RemoveVertex(dummySrc :> Vertex) |> ignore
+        graph.RemoveVertex(dummyTgt :> Vertex) |> ignore
+
+        time    
 
     [<Extension>]
     type TimeExt() =
         [<Extension>]
         static member GetDuration(g: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<int> =
-            find_max_path_time(g, src, tgt)
+            find_max_path_time(g, [src], [tgt])
 
         [<Extension>]
         static member GetDuration(g: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<int> =
-            find_max_path_time_multi (g, srcs, tgts)
+            find_max_path_time (g, srcs, tgts)
 
         [<Extension>]
         static member GetDuration(api:ApiItem) : option<int> =

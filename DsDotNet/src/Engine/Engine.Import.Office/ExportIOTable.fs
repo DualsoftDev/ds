@@ -533,8 +533,6 @@ module ExportIOTable =
                     yield rowItems ($"{flow.Name}_FlowAutoLamp", flow.aop.Address)
                     yield rowItems ($"{flow.Name}_FlowManualSelect", flow.manual_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowManualLamp", flow.mop.Address)
-                    yield rowItems ($"{flow.Name}_FlowReadyBtn", flow.ready_btn.Address)  //test ahn 삭제
-                    yield rowItems ($"{flow.Name}_FlowReadyLamp", flow.r_st.Address)//test ahn 삭제
                     yield rowItems ($"{flow.Name}_FlowDriveBtn", flow.drive_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowDriveLamp", flow.d_st.Address)
                     yield rowItems ($"{flow.Name}_FlowPauseBtn", flow.pause_btn.Address)

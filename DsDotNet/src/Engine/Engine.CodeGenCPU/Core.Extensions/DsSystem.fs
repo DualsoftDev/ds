@@ -158,12 +158,10 @@ module ConvertCpuDsSystem =
                             fm.GetFlowTag(FlowTag.auto_mode).Address    <- getMemory name target
                             fm.GetFlowTag(FlowTag.manual_btn).Address   <- getMemory name target
                             fm.GetFlowTag(FlowTag.manual_mode).Address  <- getMemory name target
-                            fm.GetFlowTag(FlowTag.ready_btn).Address    <- getMemory name target    //test ahn 삭제
-                            fm.GetFlowTag(FlowTag.ready_state).Address  <- getMemory name target    //test ahn 삭제
                             fm.GetFlowTag(FlowTag.drive_btn).Address    <- getMemory name target
                             fm.GetFlowTag(FlowTag.drive_state).Address  <- getMemory name target
                             fm.GetFlowTag(FlowTag.pause_btn).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.flowPause).Address    <- getMemory name target
+                            fm.GetFlowTag(FlowTag.pause_state).Address  <- getMemory name target
                             )
 
         member private x.GenerationRealHMIMemory()  = 

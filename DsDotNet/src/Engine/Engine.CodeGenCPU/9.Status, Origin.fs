@@ -42,7 +42,7 @@ type VertexManager with
 
 
     member v.M2_PauseMonitor() =
-        let set = v.Flow.pause.Expr
+        let set = v.Flow.p_st.Expr
         let rst = v._off.Expr
 
         (set, rst) --| (v.PA, getFuncName())

@@ -16,9 +16,9 @@ type Flow with
         (set, rst) ==| (f.stopError, getFuncName())
     
     member f.F2_FlowPause() =
-        let set = f.PauseExpr <||> f.HWBtnPauseExpr
+        let set = f.PauseExpr
         let rst = f.ClearExpr
-        (set, rst) ==| (f.pause, getFuncName())
+        (set, rst) ==| (f.p_st, getFuncName())
 
     member f.F3_FlowReadyCondition() =
         let set = f.HWReadyConditionsToAndElseOn

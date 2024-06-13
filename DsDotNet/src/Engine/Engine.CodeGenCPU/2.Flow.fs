@@ -70,3 +70,8 @@ type VertexManager with
 
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())
+
+    member v.F5_HomeCommand() =
+        let real = v.Vertex :?> Real
+        (real.Flow.HomeExpr , v._off.Expr) --| (real.VR.OA, getFuncName())
+        

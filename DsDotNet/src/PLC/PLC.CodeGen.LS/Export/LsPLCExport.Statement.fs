@@ -146,7 +146,9 @@ module StatementExtensionModule =
                 if exp.Terminal.IsSome then
                     exp
                 else
+#if DEBUG
                     tracefn $"exp: {exp.ToText()}"
+#endif
                     let newExp =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
                         exp.WithNewFunctionArguments args

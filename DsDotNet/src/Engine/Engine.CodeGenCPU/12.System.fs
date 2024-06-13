@@ -15,6 +15,7 @@ type DsSystem with
                 yield (s._pause_btn.Expr , s._off.Expr) --| (flow.pause_btn,   getFuncName())
                 yield (s._emg_btn.Expr   , s._off.Expr) --| (flow.emg_btn,    getFuncName())
                 yield (s._test_btn.Expr  , s._off.Expr) --| (flow.test_btn,   getFuncName())
+                yield (s._home_btn.Expr  , s._off.Expr) --| (flow.home_btn,   getFuncName())
                 yield (s._clear_btn.Expr , s._off.Expr) --| (flow.clear_btn,  getFuncName())
                 yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
         ]
@@ -22,7 +23,7 @@ type DsSystem with
   
 
     member s.Y2_SystemPause() =
-        let sets =  s.Flows.Select(fun f->f.pause).ToOrElseOff()
+        let sets =  s.Flows.Select(fun f->f.p_st).ToOrElseOff()
         (sets, s._off.Expr) --| (s._pause, getFuncName())
 
 

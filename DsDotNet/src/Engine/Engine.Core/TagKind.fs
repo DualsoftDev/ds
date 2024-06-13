@@ -90,6 +90,7 @@ module TagKindList =
     | clear_btn                 = 10006
     | emg_btn                   = 10007
     | test_btn                  = 10008
+    | home_btn                  = 10009
 
     | auto_lamp                 = 10021
     | manual_lamp               = 10022
@@ -101,7 +102,6 @@ module TagKindList =
     | test_lamp                 = 10028
     | home_lamp                 = 10029
     
-    | flowPause                 = 10040
     | flowStopError             = 10041
     | flowReadyCondition        = 10042
     | flowDriveCondition        = 10043
@@ -121,6 +121,7 @@ module TagKindList =
     | ready_state                = 10107
     | origin_state               = 10108
     | going_state                = 10109
+    | pause_state                = 10110
 
     /// 11000 ~ 11999
     [<Flags>]

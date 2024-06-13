@@ -58,6 +58,7 @@ module ConvertCPU =
 
                 yield! vm.F1_RootStart()
                 yield! vm.F2_RootReset()
+                yield vm.F5_HomeCommand()
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
                     yield vm.F3_VertexEndWithOutReal()    

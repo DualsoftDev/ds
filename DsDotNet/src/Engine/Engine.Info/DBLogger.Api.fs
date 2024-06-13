@@ -100,7 +100,7 @@ module DBLoggerApi =
 
     let getInfoFlow (x:Flow) : InfoFlow = 
         let info = InfoFlow.Create(x)
-        updateInfoBase (info, x.QualifiedName, FlowTag.drive_state|>int,  FlowTag.flowStopError|>int, FlowTag.flowPause|>int)
+        updateInfoBase (info, x.QualifiedName, FlowTag.drive_state|>int,  FlowTag.flowStopError|>int, FlowTag.pause_state|>int)
         let infoReals = x.GetVerticesOfFlow().OfType<Real>().Select(getInfoReal)
         info.InfoReals.AddRange(infoReals) |>ignore
         info

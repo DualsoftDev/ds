@@ -536,7 +536,7 @@ module ExportIOTable =
                     yield rowItems ($"{flow.Name}_FlowDriveBtn", flow.drive_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowDriveLamp", flow.d_st.Address)
                     yield rowItems ($"{flow.Name}_FlowPauseBtn", flow.pause_btn.Address)
-                    yield rowItems ($"{flow.Name}_FlowPauseLamp", flow.pause.Address)
+                    yield rowItems ($"{flow.Name}_FlowPauseLamp", flow.p_st.Address)
                 ]
             )
 

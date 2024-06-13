@@ -23,21 +23,23 @@ module FlowManagerModule =
         let f_t_st        = cpv $"T_ST_{fn}"     FlowTag.test_state         // Test  Operation State (시운전)
         let f_o_st        = cpv $"O_ST_{fn}"     FlowTag.origin_state              // origin   State
         let f_g_st        = cpv $"G_ST_{fn}"     FlowTag.going_state              // going  State
-        let f_emg_st        = cpv $"EMG_ST_{fn}"   FlowTag.emergency_state             // Emergency  State
+        let f_emg_st      = cpv $"EMG_ST_{fn}"   FlowTag.emergency_state             // Emergency  State
+        let f_p_st        = cpv $"P_ST_{fn}"     FlowTag.pause_state             // pause  State
 
         let f_auto_btn       = cpv $"auto_btn_{fn}"    FlowTag.auto_btn       
         let f_manual_btn     = cpv $"manual_btn_{fn}"  FlowTag.manual_btn     
         let f_drive_btn      = cpv $"drive_btn_{fn}"   FlowTag.drive_btn
-        let f_pause_btn       = cpv $"pause_btn_{fn}"    FlowTag.pause_btn
+        let f_pause_btn      = cpv $"pause_btn_{fn}"   FlowTag.pause_btn
         let f_ready_btn      = cpv $"ready_btn_{fn}"   FlowTag.ready_btn
         let f_clear_btn      = cpv $"clear_btn_{fn}"   FlowTag.clear_btn
         let f_emg_btn        = cpv $"emg_btn_{fn}"     FlowTag.emg_btn
         let f_test_btn       = cpv $"test_btn_{fn}"    FlowTag.test_btn
-
+        let f_home_btn       = cpv $"home_btn_{fn}"    FlowTag.home_btn
+        
         let f_auto_lamp      = cpv $"auto_lamp_{fn}"    FlowTag.auto_lamp       
         let f_manual_lamp    = cpv $"manual_lamp_{fn}"  FlowTag.manual_lamp     
         let f_drive_lamp     = cpv $"drive_lamp_{fn}"   FlowTag.drive_lamp
-        let f_pause_lamp      = cpv $"pause_lamp_{fn}"    FlowTag.pause_lamp
+        let f_pause_lamp     = cpv $"pause_lamp_{fn}"   FlowTag.pause_lamp
         let f_ready_lamp     = cpv $"ready_lamp_{fn}"   FlowTag.ready_lamp
         let f_clear_lamp     = cpv $"clear_lamp_{fn}"   FlowTag.clear_lamp
         let f_emg_lamp       = cpv $"emg_lamp_{fn}"     FlowTag.emg_lamp
@@ -45,7 +47,6 @@ module FlowManagerModule =
         let f_home_lamp      = cpv $"home_lamp_{fn}"    FlowTag.home_lamp
 
         let f_stop_error      = cpv $"error_{fn}"   FlowTag.flowStopError
-        let f_pause           = cpv $"pause_{fn}"   FlowTag.flowPause
         let f_stop_readyCondition   = cpv $"condiReady_{fn}"   FlowTag.flowReadyCondition
         let f_stop_driveCondition   = cpv $"condiDrive_{fn}"   FlowTag.flowDriveCondition
        
@@ -66,6 +67,7 @@ module FlowManagerModule =
                 | FlowTag.origin_state      -> f_o_st
                 | FlowTag.going_state       -> f_g_st
                 | FlowTag.emergency_state   -> f_emg_st
+                | FlowTag.pause_state       -> f_p_st
                 
                 
                 | FlowTag.auto_btn        -> f_auto_btn
@@ -76,6 +78,7 @@ module FlowManagerModule =
                 | FlowTag.clear_btn       -> f_clear_btn
                 | FlowTag.emg_btn         -> f_emg_btn
                 | FlowTag.test_btn        -> f_test_btn
+                | FlowTag.home_btn        -> f_home_btn
                 
                 | FlowTag.auto_lamp        -> f_auto_lamp
                 | FlowTag.manual_lamp      -> f_manual_lamp
@@ -90,6 +93,5 @@ module FlowManagerModule =
                 | FlowTag.flowStopError         -> f_stop_error
                 | FlowTag.flowReadyCondition    -> f_stop_readyCondition
                 | FlowTag.flowDriveCondition    -> f_stop_driveCondition
-                | FlowTag.flowPause             -> f_pause
                 | _ -> failwithlog $"Error : GetFlowTag {ft} type not support!!"
             t :?> PlanVar<bool>

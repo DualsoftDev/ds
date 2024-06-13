@@ -174,22 +174,6 @@ module ImportViewModule =
         if newNode.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore
 
-    //let UpdateApiItems (system: DsSystem, page: int, pptNodes: pptNode seq, node: ViewNode) =
-
-    //    let newNode = ViewNode("Interface", VIF)
-
-    //    system.ApiItems
-    //    |> Seq.iter (fun api ->
-
-    //        let findApiNode = pptNodes.Where(fun f -> f.Name = api.Name && f.PageNum = page)
-
-    //        if findApiNode.Count() > 0 then
-    //            newNode.AddSingles(ViewNode(api.ToText(), VIF)) |> ignore
-
-    //    )
-
-    //    if newNode.GetSingles().Count() > 0 then
-    //        node.AddSingles(newNode) |> ignore
 
     let UpdateApi (system: DsSystem, node: ViewNode) =
 
@@ -197,7 +181,7 @@ module ImportViewModule =
 
         let flowApis =
             system.ApiItems
-            |> Seq.where (fun api -> (api.TXs @ api.RXs) |> Seq.head |> (fun f -> f.Flow = node.Flow.Value))
+            |> Seq.where (fun api -> [api.TX; api.RX].Select(fun r->r.Flow).Contains(node.Flow.Value))
 
         let flowApiNodes =
             flowApis.Map(fun f -> ViewNode(f.ToText(), VIF)).ToDictionary(fun f -> f.Name)

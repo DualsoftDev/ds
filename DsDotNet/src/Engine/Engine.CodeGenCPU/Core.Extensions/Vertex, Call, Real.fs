@@ -104,12 +104,12 @@ module ConvertCpuVertex =
 
         member c.TXs = 
             if c.IsJob
-            then c.TargetJob.DeviceDefs |>Seq.collect(fun j -> j.ApiItem.TXs)
+            then c.TargetJob.DeviceDefs |>Seq.map(fun j -> j.ApiItem.TX)
             else []
 
         member c.RXs = 
             if c.IsJob
-            then c.TargetJob.DeviceDefs |>Seq.collect(fun j -> j.ApiItem.RXs)
+            then c.TargetJob.DeviceDefs |>Seq.map(fun j -> j.ApiItem.RX)
             else []
 
         member c.Errors       = 

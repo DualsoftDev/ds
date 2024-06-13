@@ -17,9 +17,7 @@ type ApiItemManager with
 
     member a.A2_PlanReceive(activeSys:DsSystem) =
 
-        let sets =  a.ApiItem.RxETs
-                     .ToAnd() 
-
+        let sets =  a.ApiItem.RxET.Expr
         (sets, activeSys._off.Expr) --| (a.PE, getFuncName())
 
     member a.A3_SensorLinking(activeSys:DsSystem, coins:Call seq) =

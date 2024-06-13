@@ -434,14 +434,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let createAliasVertex = tokenCreator 2
 
         let fillInterfaceDef (system: DsSystem) (ctx: InterfaceDefContext) =
-            let findSegments (fqdns: Fqdn[]) : Real[] =
-                fqdns
-                    .Where(fun fqdn -> fqdn <> null)
-                    .Select(fun s -> tryFindReal system (s |> List.ofArray)) // in fqdn.. [0] : system, [1] : flow, [2] : real, [3] call...
-                    .Tap(fun x -> assert (x.IsSome))
-                    .Choose(id)
-                    .ToArray()
-
+               
             let collectCallComponents (ctx: CallComponentsContext) : Fqdn[] =
                 ctx.Descendants<Identifier123Context>().Select(collectNameComponents).ToArray()
 
@@ -466,11 +459,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             
                 let n = ser.Length
-
+                let findSegment (fqdn: Fqdn) : Real = tryFindReal system (fqdn |> List.ofArray) |> Option.get
                 match n with
                 | 2 ->
-                    api.AddTXs(findSegments (ser[0])) |> ignore
-                    api.AddRXs(findSegments (ser[1])) |> ignore
+                    api.TX <- findSegment (ser[0].Head())
+                    api.RX <- findSegment (ser[1].Head()) 
                 | _ -> failWithLog $"ERROR {api.Name} [startWork ~ endWork]"
             }
             |> ignore

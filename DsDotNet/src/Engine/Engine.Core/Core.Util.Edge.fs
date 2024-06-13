@@ -258,13 +258,13 @@ module EdgeModule =
         let apiNResetNodes =
             sys.ApiItems
             |> Seq.map (fun api ->
-                let resetAbleReals = appendInterfaceReset  graph (api.TXs.OfType<Vertex>())
+                let resetAbleReals = appendInterfaceReset  graph [api.TX]
                 api, resetAbleReals
             )
         apiNResetNodes
         |> Seq.iter (fun (api, resetAbleReals) ->
             sys.ApiItems
-                .Where(fun f -> f <> api && f.RXs.Overlaps(resetAbleReals))
+                .Where(fun f -> f <> api && resetAbleReals.Contains(f.RX))
                 .Iter (fun f -> 
                         ApiResetInfo.Create(sys, api.Name, "|>"|> toModelEdge ,f.Name, true) |> ignore
             )

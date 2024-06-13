@@ -51,7 +51,7 @@ module CoreCreateModule =
                 // Create a new Real
                 let newReal = Real.Create(realName, flow)
                   // Create and add a new ApiItem
-                let newApi = ApiItem.Create(apiName, sys, [newReal], [newReal])
+                let newApi = ApiItem.Create(apiName, sys, newReal, newReal)
                 sys.ApiItems.Add newApi |> ignore
              
                 if flow.Graph.Vertices.OfType<Real>().Count() > 1   //2개 부터 인터락 리셋처리

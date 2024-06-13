@@ -211,10 +211,9 @@ module internal ToDsTextModule =
                 for item in system.ApiItems do
                     let ser =
                         let getFlowAndRealName (r:Real) = [r.Flow.Name; r.Name].Combine()
-                        let qNames (xs:Real seq) = xs.Select(getFlowAndRealName) |> String.concat(", ")
                         let coverWithUnderScore (x:string) = if x.IsNullOrEmpty() then "_" else x
-                        let s = qNames(item.TXs) |> coverWithUnderScore
-                        let e = qNames(item.RXs) |> coverWithUnderScore
+                        let s = getFlowAndRealName(item.TX) |> coverWithUnderScore
+                        let e = getFlowAndRealName(item.RX) |> coverWithUnderScore
                         $"{s} ~ {e}"
                     yield $"{tab2}{item.Name.QuoteOnDemand()} = {lb} {ser} {rb}"
 

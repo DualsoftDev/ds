@@ -264,8 +264,8 @@ module PPTObjectModule =
         let mutable rootNode:bool option = None
         let mutable disableCall = false
         let mutable devParam:(DevParam option*DevParam option) option = None
-        let mutable ifTXs = HashSet<string>()
-        let mutable ifRXs = HashSet<string>()
+        let mutable ifTX = ""
+        let mutable ifRX = ""
         let mutable nodeType: NodeType = NodeType.REAL
 
   
@@ -305,35 +305,23 @@ module PPTObjectModule =
             match GetSquareBrackets(shape.InnerText, false) with
             | Some txrx ->
                 if (txrx.Contains('~')) then
-                    let txs = (txrx.Split('~')[0])
-                    let rxs = (txrx.Split('~')[1])
+                    let tx = (txrx.Split('~')[0])
+                    let rx = (txrx.Split('~')[1])
 
-                    let getRealName (xs: string) =
-                        let ifs = xs.Split(';').Where(fun f -> f = "" |> not) |> trimStartEndSeq
-                        if ifs.Contains("_") || ifs.IsEmpty()
+                    let getRealName (apiReal: string) =
+                        if apiReal.Contains("_") || apiReal.IsEmpty()
                         then 
                             failWithLog ErrID._43
-                        ifs |> HashSet
+                        apiReal
 
-                    ifTXs <- getRealName txs
-                    ifRXs <- getRealName rxs
+                    ifTX <- getRealName tx |> trimSpace
+                    ifRX <- getRealName rx |> trimSpace
                 else
                             failWithLog ErrID._43
             | None -> 
                 failWithLog ErrID._53
                 
-        let updateLinkIF (text: string) =
-            ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
-            let txrx = GetSquareBrackets(shape.InnerText, false)
-
-            if (txrx.IsSome) then
-                ifTXs <-
-                    txrx.Value.Split(';').Where(fun f -> f = "" |> not)
-                    |> trimStartEndSeq
-                    |> Seq.filter (fun f -> f = "_" |> not)
-                    |> HashSet
-            else
-                shape.ErrorName(ErrID._53, iPage)
+      
 
         let getBracketItems (name: string) =
             name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")
@@ -478,8 +466,8 @@ module PPTObjectModule =
         member x.Safeties = safeties
 
         member x.IfName = ifName
-        member x.IfTXs = ifTXs
-        member x.IfRXs = ifRXs
+        member x.IfTX = ifTX
+        member x.IfRX = ifRX
         member x.NodeType = nodeType
         member x.DisableCall = disableCall
         

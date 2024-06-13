@@ -75,4 +75,4 @@ module TimeModule =
         [<Extension>]
         static member GetDuration(api:ApiItem) : option<int> =
             let g = api.ApiSystem.Flows.Select(fun f -> f.Graph) |> mergeGraphs |> changeRealGraph
-            g.GetDuration(api.TXs.OfType<Vertex>(), api.RXs.OfType<Vertex>())
+            g.GetDuration(api.TX, api.RX)

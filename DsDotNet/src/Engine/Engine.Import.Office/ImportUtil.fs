@@ -507,11 +507,11 @@ module ImportU =
                     //| _ -> failwithlog "Error "
                     vertex.Value
 
-                let txs = node.IfTXs |> map findReal
-                let rxs = node.IfRXs |> map findReal
-                api.AddTXs(txs) |> ignore
-                api.AddRXs(rxs) |> ignore)
-
+                let tx = node.IfTX |>  findReal
+                let rx = node.IfRX |>  findReal
+                api.TX <- tx 
+                api.RX <- rx 
+                )
         [<Extension>]
         static member UpdateActionIO(doc: pptDoc, sys: DsSystem, autoIO:bool) =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)

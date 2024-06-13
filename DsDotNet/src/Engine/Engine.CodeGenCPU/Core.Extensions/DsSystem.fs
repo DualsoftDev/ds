@@ -236,8 +236,8 @@ module ConvertCpuDsSystem =
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send
-        member x.GetPSs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.PS)
-        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.SL1)
+        member x.GetPSs(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.PS)
+        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.SL1)
 
         member x.GetReadAbleTags() =
             SystemTag.GetValues(typeof<SystemTag>)

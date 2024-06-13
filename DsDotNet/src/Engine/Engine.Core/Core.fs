@@ -380,12 +380,10 @@ module CoreModule =
         member _.ApiSystem = system
         member _.TimeParam = timeParam
       
-        member val TXs = createQualifiedNamedHashSet<Real>()
-        member val RXs = createQualifiedNamedHashSet<Real>()
+        member val TX = getNull<Real>() with get, set
+        member val RX = getNull<Real>() with get, set
         override x.ToText() = 
-            let txs = x.TXs.Select(fun r->r.Name) |> String.concat(", ")
-            let rxs = x.RXs.Select(fun r->r.Name) |> String.concat(", ")
-            $"{name}\r\n[{txs} ~ {rxs}]"
+            $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
                  
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
@@ -565,16 +563,14 @@ module CoreModule =
             alias
 
     type ApiItem with
-        member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
-        member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiItem(name, system, None)
             system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
             cp
-        static member Create(name, system, txs, rxs) =
+        static member Create(name, system, tx, rx) =
             let ai4e = ApiItem.Create(name, system)
-            ai4e.AddTXs txs |> ignore
-            ai4e.AddRXs rxs |> ignore
+            ai4e.TX <-  tx
+            ai4e.RX <-  rx
             ai4e
 
 

@@ -95,7 +95,7 @@ module ConvertCpuFlow =
         member f.PauseHMIExpr  =  f.pause_btn.Expr  <||> f.System._pause_btn.Expr
 
         member f.ReadyHMIExpr  =  f.ready_btn.Expr  <||> f.System._ready_btn.Expr
-        member f.ClearHMIExpr  =  f.ClearHMIExpr  <||> f.System._clear_btn.Expr
+        member f.ClearHMIExpr  =  f.clear_btn.Expr  <||> f.System._clear_btn.Expr
 
 
         member f.AutoExpr   =  

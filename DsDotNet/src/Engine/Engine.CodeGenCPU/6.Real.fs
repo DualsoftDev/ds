@@ -93,7 +93,7 @@ type VertexManager with
     member v.R1_RealInitialStart() = (v :?> VertexMReal).R1_RealInitialStart()
     member v.R2_RealJobComplete() : CommentedStatement seq = (v :?> VertexMReal).R2_RealJobComplete()
     member v.R3_RealStartPoint()  = (v :?> VertexMReal).R3_RealStartPoint()
-    member v.R4_RealSync()  = (v :?> VertexMReal).R4_RealSync()
+    member v.R4_RealLink()  = (v :?> VertexMReal).R4_RealLink()
     member v.R5_DummyDAGCoils()  = (v :?> VertexMReal).R5_DummyDAGCoils()
     member v.R6_RealDataMove()  = (v :?> VertexMReal).R6_RealDataMove()
     member v.R7_RealGoingOriginError()  = (v :?> VertexMReal).R7_RealGoingOriginError()

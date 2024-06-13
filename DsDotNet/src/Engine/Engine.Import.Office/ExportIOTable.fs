@@ -411,13 +411,13 @@ module ExportIOTable =
         dt.Columns.Add($"{TextColumn.Bold}", typeof<string>) |> ignore
         dt
 
-    let rowDeviceItems (dev: string) =
+    let rowDeviceItems (dev: string) (isAction:bool) =
             [ 
               dev
               ""
               ""
               ""
-              "16777215"
+              if isAction then "0" else "16777215"
               "Off"
               "Off"
               "Off"
@@ -429,7 +429,7 @@ module ExportIOTable =
 
         let rows =
             let devCallSet = getDevCallSet sys
-            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.ApiItem.Name)
+            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.ApiItem.Name true)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -444,7 +444,7 @@ module ExportIOTable =
       
         let rows =
             sys.GetFlowsOrderByName()
-                .Select(fun flow -> rowDeviceItems flow.Name)
+                .Select(fun flow -> rowDeviceItems flow.Name false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -459,7 +459,7 @@ module ExportIOTable =
       
         let rows =
                   sys.GetVerticesOfRealOrderByName()
-                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}")
+                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}" false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -472,7 +472,7 @@ module ExportIOTable =
       
         let rows =
             let devCallSet = getDevCallSet sys
-            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.DeviceName)
+            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.DeviceName false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt

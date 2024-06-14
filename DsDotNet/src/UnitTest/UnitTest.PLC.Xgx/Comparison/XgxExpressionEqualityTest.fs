@@ -135,8 +135,8 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 """
         let exprCode = "$result = $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;"
         let statements_ = parseCodeForWindows storages code
-        let expr1 = parseExpression storages exprCode :?> Expression<bool>
-        let expr2 = parseExpression storages exprCode :?> Expression<bool>
+        let expr1 = parseExpression4UnitTest storages exprCode :?> Expression<bool>
+        let expr2 = parseExpression4UnitTest storages exprCode :?> Expression<bool>
         expr1.IsEqual expr2 |> ShouldBeTrue
 
     member x.``XOR test`` () =

@@ -5,8 +5,6 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open Engine.CodeGenPLC
-open Dual.UnitTest.Common.FS
 
 
 
@@ -14,8 +12,9 @@ type XgxSubroutineTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     let code = """
-int sum(int a, int b) => $a + $b;
+int sum(int a, int b) => 2 * ($a + $b);
 int nn1 = sum(1, 2);
+$nn1 = sum(1, 2);
 """
 
     member x.``Subroutine test`` () =

@@ -67,6 +67,6 @@ module LiteralTestModule =
                 |]
 
             for (str, answer) in tests do
-                str |> parseExpression storages |> tryGetLiteralValue === answer
+                str |> parseExpression4UnitTest storages |> tryGetLiteralValue === answer
 
             ()

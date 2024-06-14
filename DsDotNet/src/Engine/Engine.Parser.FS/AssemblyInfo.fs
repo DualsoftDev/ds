@@ -24,6 +24,7 @@ open Antlr4.Runtime
 [<assembly: InternalsVisibleTo("UnitTest.Engine")>]
 [<assembly: InternalsVisibleTo("UnitTest.Expression")>]
 [<assembly: InternalsVisibleTo("UnitTest.Server")>]
+[<assembly: InternalsVisibleTo("UnitTest.PLC.Xgx")>]
 [<assembly: InternalsVisibleTo("Engine.Sample")>]
 [<assembly: DebuggerDisplay("[Text={GetText()}]", Target = typeof<RuleContext>)>]
 

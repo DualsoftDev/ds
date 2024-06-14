@@ -30,7 +30,7 @@ module rec ExpressionParserModule =
     let defaultStorageFinder (storages: Storages) (name: string) : IStorage option =
         storages.TryFind name
 
-    let createExpression (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
+    let createExpression (parserData:ParserData) (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =
             let text = ctx.GetText()
@@ -47,8 +47,12 @@ module rec ExpressionParserModule =
                               for exprCtx in exprListCtx.children.OfType<ExprContext>() do
                                   helper exprCtx
                           | None -> () ]
-
-                    createCustomFunctionExpression funName args
+                    if predefinedFunctionNames.Contains funName then
+                        createCustomFunctionExpression funName args
+                    else
+                        match parserData.LambdaDefs.TryFind(fun lmbd -> lmbd.Prototype.Name = funName) with
+                        | Some lambdaDecl -> lambdaDecl.Body
+                        | None -> failwith "ERROR"
 
                 | :? CastingExprContext as exp -> // '(' type ')' expr
                     debugfn $"Casting: {text}"
@@ -156,16 +160,6 @@ module rec ExpressionParserModule =
             expr
 
         helper ctx
-
-    let parseExpression (storages: Storages) (text: string) : IExpression =
-        try
-            let parser = createParser (text)
-            let ctx = parser.expr ()
-
-            createExpression (defaultStorageFinder storages) ctx
-        with exn ->
-            failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
-
                 
     let private getFirstChildExpressionContext (ctx: ParserRuleContext) : ExprContext =
         ctx.children.OfType<ExprContext>().First()
@@ -188,7 +182,7 @@ module rec ExpressionParserModule =
         match typ with
         | Some typ ->
             let storages = parserData.Storages
-            let exp = createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
+            let exp = createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Counter>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
 
@@ -254,7 +248,7 @@ module rec ExpressionParserModule =
         match typ with
         | Some typ ->
             let storages = parserData.Storages
-            let exp = createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
+            let exp = createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Timer>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             // e.g "ton myTon = createXgiTON(2000u, $myQBit0);"
@@ -301,7 +295,7 @@ module rec ExpressionParserModule =
             let fstChild = ctx.children[0] 
             match fstChild with
             | :? VarDeclContext as varDeclCtx ->
-                let exp = createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext varDeclCtx)
+                let exp = createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext varDeclCtx)
 
                 let declType =
                     ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
@@ -335,7 +329,7 @@ module rec ExpressionParserModule =
 
             | :? AssignContext as ctx ->
                 let createExp ctx =
-                    createExpression (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
+                    createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
                 let children = ctx.children.ToFSharpList()
 
                 match ctx with
@@ -376,7 +370,7 @@ module rec ExpressionParserModule =
             | :? TimerDeclContext as ctx -> Some <| parseTimerStatement parserData ctx
 
             | :? CopyStatementContext as ctx ->
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression (defaultStorageFinder storages)
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData (defaultStorageFinder storages)
                 let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
                 let source = ctx.Descendants<CopySourceContext>().First() |> expr
@@ -387,7 +381,7 @@ module rec ExpressionParserModule =
 
             | :? CopyStructStatementContext as ctx ->
                 // e.g copyStructIf(true, $hong, $people[0]);
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression (defaultStorageFinder storages)
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData (defaultStorageFinder storages)
                 let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
                 let sourceInstance = ctx.Descendants<UdtInstanceSourceContext>().First().udtInstance()  // e.g "hong"
@@ -462,7 +456,7 @@ module rec ExpressionParserModule =
                     storages.TryFind localStgName
                     |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
                     
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storageFinder
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData storageFinder
                 let lambdaDecl = {
                     Prototype = { Type = typ; Name = funName }
                     Arguments = args

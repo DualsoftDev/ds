@@ -51,7 +51,7 @@ module ExpressionModule =
 
             member x.FunctionName = None
             member x.FunctionArguments = []
-            member x.LambdaDecl = None
+            member x.LambdaBody = None
             member x.WithNewFunctionArguments _args = failwithlog "ERROR"
             member x.Terminal = Some x
             member x.EvaluatedValue = x.Evaluate()
@@ -81,7 +81,7 @@ module ExpressionModule =
             (* 'T type DU 를 접근하기 위한 members *)
             member x.FunctionName = x.FunctionName
             member x.FunctionArguments = x.FunctionArguments
-            member x.LambdaDecl = x.LambdaDecl
+            member x.LambdaBody = x.LambdaBody
             member x.Terminal = match x with | DuTerminal t -> Some t | _ -> None
             member x.WithNewFunctionArguments(args) =
                 match x with
@@ -95,11 +95,11 @@ module ExpressionModule =
                     | DuLiteral literal -> literal.Value.GetType()
                     | _ -> typedefof<'T>
                 | _ -> typedefof<'T>
-        member x.LambdaDecl =
+        member x.LambdaBody =
             match x with
             | DuFunction fs ->
-                match fs.LambdaDecl with        // |> Option.cast<ILambdaDecl>
-                | Some lambdaDecl -> lambdaDecl :> ILambdaDecl |> Some
+                match fs.LambdaDecl with        // |> Option.cast<ILambdaBody>
+                | Some lambdaDecl -> lambdaDecl :> ILambdaBody |> Some
                 | _ -> None
             | _ -> None
          
@@ -277,7 +277,7 @@ module ExpressionModule =
         {   Prototype:TypeDecl
             Arguments:TypeDecl list
             mutable Body:IExpression }
-        interface ILambdaDecl
+        interface ILambdaBody
 
     type ProcDecl = {
         Prototype:TypeDecl

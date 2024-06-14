@@ -8,6 +8,7 @@ open Engine.Core
 open type exprParser
 open Antlr4.Runtime.Tree
 open System.Text.RegularExpressions
+open System
 
 [<AutoOpen>]
 module rec ExpressionParserModule =
@@ -30,6 +31,8 @@ module rec ExpressionParserModule =
     let defaultStorageFinder (storages: Storages) (name: string) : IStorage option =
         storages.TryFind name
 
+    [<Obsolete("임시")>]
+    let createLambdaCallExpression exp args = exp
     let createExpression (parserData:ParserData) (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =

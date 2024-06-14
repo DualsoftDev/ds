@@ -149,7 +149,7 @@ module StatementExtensionModule =
                     exp
                 else
                     tracefn $"exp: {exp.ToText()}"
-                    match exp.FunctionName, exp.LambdaDecl with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
+                    match exp.FunctionName, exp.LambdaBody with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
                     | Some fn, Some (:? LambdaDecl as lambdaDecl) ->
                         for t in lambdaDecl.Arguments do
                             let v = $"_local_{lambdaDecl.Prototype.Name}_{t.Name}"      // e.g "_local_sum_a"

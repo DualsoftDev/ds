@@ -451,7 +451,18 @@ module ExpressionModule =
         member x.Evaluate(): 'T =
             match x with
             | DuTerminal b -> b.Evaluate()
-            | DuFunction fs -> fs.FunctionBody fs.Arguments
+            | DuFunction fs ->
+                match fs.LambdaApplication with
+                | Some la ->
+                    // Lambda 식 평가는, formal parameter 에 해당하는 값에 actual parameter 값을 저장한 후 수행
+                    // e.g "int sum(int a, int b) => $a + $b;  $all = sum(1, 2);"
+                    //      => _local_sum_a = 1, _local_+sum_b = 2 의 값을 storage 에 저장 한 후 sum 함수 실행
+                    let funName = la.LambdaDecl.Prototype.Name
+                    assert (la.Arguments.Length = la.LambdaDecl.Arguments.Length)
+                    for i in [0..la.Arguments.Length-1] do
+                        la.Storages[$"_local_{funName}_{la.LambdaDecl.Arguments[i].Name}"].BoxedValue <- la.Arguments.[i].BoxedEvaluatedValue
+                | None -> ()
+                fs.FunctionBody fs.Arguments
 
         member x.FunctionName =
             match x with

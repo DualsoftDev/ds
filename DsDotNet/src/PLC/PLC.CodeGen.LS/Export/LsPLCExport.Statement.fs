@@ -193,3 +193,6 @@ module StatementExtensionModule =
 
             // visitor 를 이용해서 statement 내의 모든 expression 을 변환한다.
             x.VisitExpression(pack, visitor)
+
+        member x.ApplyLambda (pack:DynamicDictionary) : Statement =
+            x

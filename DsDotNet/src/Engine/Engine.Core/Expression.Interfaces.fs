@@ -41,7 +41,8 @@ module rec ExpressionForwardDeclModule =
 
     type LambdaApplication = {
         LambdaDecl:LambdaDecl
-        Arguments:IExpression list }
+        Arguments:IExpression list
+        Storages:Storages }
 
     type Arg       = IExpression
     type Arguments = IExpression list
@@ -50,6 +51,7 @@ module rec ExpressionForwardDeclModule =
     type IFunctionSpec =
         abstract LambdaDecl: LambdaDecl option with get, set
         abstract LambdaApplication: LambdaApplication option with get, set
+        abstract Duplicate: unit -> IFunctionSpec
 
     type FunctionSpec<'T> =
         {
@@ -62,6 +64,7 @@ module rec ExpressionForwardDeclModule =
         interface IFunctionSpec with
             member x.LambdaDecl with get() = x.LambdaDecl and set v = x.LambdaDecl <- v
             member x.LambdaApplication with get() = x.LambdaApplication and set v = x.LambdaApplication <- v
+            member x.Duplicate() = { x with Name = x.Name } :> IFunctionSpec
 
 
     // Interface for objects that can be terminal expressions with names (excluding Literals)

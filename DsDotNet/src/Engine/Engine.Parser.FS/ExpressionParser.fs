@@ -32,8 +32,29 @@ module rec ExpressionParserModule =
         storages.TryFind name
 
     [<Obsolete("임시")>]
-    let createLambdaCallExpression (funName:string) args (exp: IExpression) =
-        exp
+    let createLambdaCallExpression (storages:Storages) args (exp: IExpression) =
+        let newExp =
+            match exp.FunctionSpec with
+            | Some fs ->
+                let newFs:IFunctionSpec = fs.Duplicate()
+                newFs.LambdaApplication <- Some { LambdaDecl = fs.LambdaDecl.Value; Arguments = args; Storages=storages }
+                match newFs with
+                | :? FunctionSpec<bool>   as fs -> DuFunction fs :> IExpression
+                | :? FunctionSpec<int8>   as fs -> DuFunction fs
+                | :? FunctionSpec<uint8>  as fs -> DuFunction fs
+                | :? FunctionSpec<int16>  as fs -> DuFunction fs
+                | :? FunctionSpec<uint16> as fs -> DuFunction fs
+                | :? FunctionSpec<int32>  as fs -> DuFunction fs
+                | :? FunctionSpec<uint32> as fs -> DuFunction fs
+                | :? FunctionSpec<int64>  as fs -> DuFunction fs
+                | :? FunctionSpec<uint64> as fs -> DuFunction fs
+                | :? FunctionSpec<single> as fs -> DuFunction fs
+                | :? FunctionSpec<double> as fs -> DuFunction fs
+                | :? FunctionSpec<string> as fs -> DuFunction fs
+                | :? FunctionSpec<char>   as fs -> DuFunction fs
+                | _ -> failwith "ERROR"
+
+        newExp
     let createExpression (parserData:ParserData) (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =
@@ -55,7 +76,7 @@ module rec ExpressionParserModule =
                         createCustomFunctionExpression funName args
                     else
                         match parserData.LambdaDefs.TryFind(fun lmbd -> lmbd.Prototype.Name = funName) with
-                        | Some lambdaDecl -> createLambdaCallExpression funName args lambdaDecl.Body 
+                        | Some lambdaDecl -> createLambdaCallExpression parserData.Storages args lambdaDecl.Body 
                         | None -> failwith "ERROR"
 
                 | :? CastingExprContext as exp -> // '(' type ')' expr

@@ -55,19 +55,11 @@ module ExpressionModule =
             member x.Terminal = Some x
             member x.EvaluatedValue = x.Evaluate()
 
-    type IFunctionSpec =
-        abstract Name: string
-        abstract Arguments: Arguments
-
     type FunctionSpec<'T> = {
         FunctionBody: Arguments -> 'T
         Name        : string
         Arguments   : Arguments
     }
-    with
-        interface IFunctionSpec with
-            member x.Name      = x.Name
-            member x.Arguments = x.Arguments
 
     [<DebuggerDisplay("{ToText(true)}")>]
     type Expression<'T when 'T:equality> =
@@ -251,7 +243,7 @@ module ExpressionModule =
         Output:IStorage
     }
 
-    /// e.g 가령 Person UDT 에서 "int age", 혹은 Labmda function 의 arg list;
+    /// e.g 가령 Person UDT 에서 "int age", 혹은 Lambda function 의 arg list;
     type TypeDecl = {
         Type:System.Type
         Name:string

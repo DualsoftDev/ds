@@ -149,12 +149,16 @@ module StatementExtensionModule =
                     exp
                 else
                     tracefn $"exp: {exp.ToText()}"
-                    match exp.FunctionName, exp.LambdaBody with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
-                    | Some fn, Some (:? LambdaDecl as lambdaDecl) ->
-                        for t in lambdaDecl.Arguments do
-                            let v = $"_local_{lambdaDecl.Prototype.Name}_{t.Name}"      // e.g "_local_sum_a"
-                            let xxx = prjParam.GlobalStorages[v]
-                            let yy = xxx
+                    match exp.FunctionName, exp.FunctionSpec with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
+                    | Some fn, Some fs ->
+                        match fs.LambdaDecl with
+                        | Some lambdaDecl ->
+                            for t in lambdaDecl.Arguments do
+                                let v = $"_local_{lambdaDecl.Prototype.Name}_{t.Name}"      // e.g "_local_sum_a"
+                                let xxx = prjParam.GlobalStorages[v]
+                                let yy = xxx
+                                ()
+                        | None ->
                             ()
                         ()
                     | _ -> ()

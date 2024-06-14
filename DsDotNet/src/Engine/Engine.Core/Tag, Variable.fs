@@ -159,8 +159,8 @@ module TagVariableModule =
                 member x.ToText() = x.ToText()
                 member x.ToText(_withParenthesis:bool) = x.ToText()
                 member x.FunctionName = None
+                member x.FunctionSpec = None
                 member x.FunctionArguments = []
-                member x.LambdaBody = None
                 member x.WithNewFunctionArguments(_args) = failwithlog "ERROR: unsupported."
                 member x.Terminal = None
                 member x.CollectStorages() = []
@@ -170,10 +170,6 @@ module TagVariableModule =
 
 [<AutoOpen>]
 module ExpressionPrologModule =
-    type Arg       = IExpression
-    type Arguments = IExpression list
-    type Args      = Arguments
-
     let mutable internal fwdSerializeFunctionNameAndBoxedArguments =
         let dummy (_functionName:string) (_args:Args) (_withParenthesis:bool): string =
             failwithlog "Should be reimplemented."

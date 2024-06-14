@@ -31,6 +31,8 @@ open ExpressionModule
 
 [<AutoOpen>]
 module ExpressionModule =
+    let private unsupported() = failwithlog "ERROR: not supported"
+    
 
     [<DebuggerDisplay("{ToText()}")>]
     type Terminal<'T when 'T:equality> =
@@ -50,18 +52,11 @@ module ExpressionModule =
             member x.IsEqual y = match x with | DuVariable v -> v.Value = unbox y.BoxedEvaluatedValue | DuLiteral l -> l.Value = unbox y.BoxedEvaluatedValue
 
             member x.FunctionName = None
+            member x.FunctionSpec = None
             member x.FunctionArguments = []
-            member x.LambdaBody = None
             member x.WithNewFunctionArguments _args = failwithlog "ERROR"
             member x.Terminal = Some x
             member x.EvaluatedValue = x.Evaluate()
-
-    type FunctionSpec<'T> = {
-        FunctionBody: Arguments -> 'T
-        Name        : string
-        Arguments   : Arguments
-        LambdaDecl  : LambdaDecl option
-    }
 
     [<DebuggerDisplay("{ToText(true)}")>]
     type Expression<'T when 'T:equality> =
@@ -81,7 +76,7 @@ module ExpressionModule =
             (* 'T type DU 를 접근하기 위한 members *)
             member x.FunctionName = x.FunctionName
             member x.FunctionArguments = x.FunctionArguments
-            member x.LambdaBody = x.LambdaBody
+            member x.FunctionSpec = x.FunctionSpec
             member x.Terminal = match x with | DuTerminal t -> Some t | _ -> None
             member x.WithNewFunctionArguments(args) =
                 match x with
@@ -95,14 +90,11 @@ module ExpressionModule =
                     | DuLiteral literal -> literal.Value.GetType()
                     | _ -> typedefof<'T>
                 | _ -> typedefof<'T>
-        member x.LambdaBody =
+        member x.FunctionSpec =
             match x with
-            | DuFunction fs ->
-                match fs.LambdaDecl with        // |> Option.cast<ILambdaBody>
-                | Some lambdaDecl -> lambdaDecl :> ILambdaBody |> Some
-                | _ -> None
+            | DuFunction fs -> Some (fs :> IFunctionSpec)
             | _ -> None
-         
+
         /// expression 의 type 이 동일한 경우 ToString() 결과가 같으면 동일한 것으로 간주
         /// type 이 다르면 항상 false 반환
         member x.IsEqual (y:IExpression) =
@@ -240,8 +232,6 @@ module ExpressionModule =
         | DuCopyUdt of CopyUdtStatement
 
    
-    let private unsupported() = failwithlog "ERROR: not supported"
-    
     type FunctionParameters = {
         /// Enable bit
         Condition:IExpression<bool> option
@@ -251,12 +241,6 @@ module ExpressionModule =
         OriginalExpression:IExpression
         /// Function output store target
         Output:IStorage
-    }
-
-    /// e.g 가령 Person UDT 에서 "int age", 혹은 Lambda function 의 arg list;
-    type TypeDecl = {
-        Type:System.Type
-        Name:string
     }
 
     // e.g struct Person { string name; int age; };
@@ -273,11 +257,6 @@ module ExpressionModule =
         ArraySize:int
     }
 
-    type LambdaDecl =
-        {   Prototype:TypeDecl
-            Arguments:TypeDecl list
-            mutable Body:IExpression }
-        interface ILambdaBody
 
     type ProcDecl = {
         Prototype:TypeDecl

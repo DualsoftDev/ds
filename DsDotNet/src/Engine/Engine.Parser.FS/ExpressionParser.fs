@@ -32,7 +32,8 @@ module rec ExpressionParserModule =
         storages.TryFind name
 
     [<Obsolete("임시")>]
-    let createLambdaCallExpression exp args = exp
+    let createLambdaCallExpression (funName:string) args (exp: IExpression) =
+        exp
     let createExpression (parserData:ParserData) (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =
@@ -54,7 +55,7 @@ module rec ExpressionParserModule =
                         createCustomFunctionExpression funName args
                     else
                         match parserData.LambdaDefs.TryFind(fun lmbd -> lmbd.Prototype.Name = funName) with
-                        | Some lambdaDecl -> createLambdaCallExpression lambdaDecl.Body args
+                        | Some lambdaDecl -> createLambdaCallExpression funName args lambdaDecl.Body 
                         | None -> failwith "ERROR"
 
                 | :? CastingExprContext as exp -> // '(' type ')' expr
@@ -464,24 +465,26 @@ module rec ExpressionParserModule =
                     Prototype = { Type = typ; Name = funName }
                     Arguments = args
                     Body = bodyExp }
+                bodyExp.FunctionSpec.Value.LambdaDecl <- Some lambdaDecl
 
-                let newBody =
-                    match bodyExp with
-                    | :? Expression<bool>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} : IExpression | _ -> failwith "ERROR"
-                    | :? Expression<int8>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<uint8>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<int16>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<uint16> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<int32>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<uint32> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<int64>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<uint64> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<single> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<double> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<string> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | :? Expression<char>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                    | _ -> failwith "ERROR"
-                lambdaDecl.Body <- newBody
+                //bodyExp.LambdaBody <- Some lambdaDecl
+                //let newBody =
+                //    match bodyExp with
+                //    | :? Expression<bool>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} : IExpression | _ -> failwith "ERROR"
+                //    | :? Expression<int8>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<uint8>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<int16>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<uint16> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<int32>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<uint32> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<int64>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<uint64> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<single> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<double> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<string> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | :? Expression<char>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                //    | _ -> failwith "ERROR"
+                //lambdaDecl.Body <- newBody
 
 
                 parserData.LambdaDefs.Add(lambdaDecl)

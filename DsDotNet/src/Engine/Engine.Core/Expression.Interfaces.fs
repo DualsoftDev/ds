@@ -1,7 +1,7 @@
 namespace Engine.Core
 
 [<AutoOpen>]
-module ExpressionForwardDeclModule =
+module rec ExpressionForwardDeclModule =
 
     type IValue<'T> =
         inherit IValue
@@ -27,7 +27,42 @@ module ExpressionForwardDeclModule =
 
     // Interface for PLC generation module
     type IFlatExpression = interface end
-    type ILambdaBody = interface end
+
+    /// e.g 가령 Person UDT 에서 "int age", 혹은 Lambda function 의 arg list;
+    type TypeDecl = {
+        Type:System.Type
+        Name:string
+    }
+
+    type LambdaDecl = {
+        Prototype:TypeDecl
+        Arguments:TypeDecl list
+        Body:IExpression }
+
+    type LambdaApplication = {
+        LambdaDecl:LambdaDecl
+        Arguments:IExpression list }
+
+    type Arg       = IExpression
+    type Arguments = IExpression list
+    type Args      = Arguments
+
+    type IFunctionSpec =
+        abstract LambdaDecl: LambdaDecl option with get, set
+        abstract LambdaApplication: LambdaApplication option with get, set
+
+    type FunctionSpec<'T> =
+        {
+            FunctionBody: Arguments -> 'T
+            Name        : string
+            Arguments   : Arguments
+            mutable LambdaDecl  : LambdaDecl option
+            mutable LambdaApplication  : LambdaApplication option
+        }
+        interface IFunctionSpec with
+            member x.LambdaDecl with get() = x.LambdaDecl and set v = x.LambdaDecl <- v
+            member x.LambdaApplication with get() = x.LambdaApplication and set v = x.LambdaApplication <- v
+
 
     // Interface for objects that can be terminal expressions with names (excluding Literals)
     type INamedExpressionizableTerminal =
@@ -50,7 +85,9 @@ module ExpressionForwardDeclModule =
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
 
-        abstract LambdaBody: ILambdaBody option
+        abstract FunctionSpec:IFunctionSpec option
+        //abstract LambdaBody: LambdaDecl option  with get, set
+        //abstract LambdaApplication: LambdaApplication option with get, set
         abstract WithNewFunctionArguments: IExpression list -> IExpression
         abstract Terminal: ITerminal option
         abstract CollectStorages: unit -> IStorage list

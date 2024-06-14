@@ -51,6 +51,7 @@ module ExpressionModule =
 
             member x.FunctionName = None
             member x.FunctionArguments = []
+            member x.LambdaDecl = None
             member x.WithNewFunctionArguments _args = failwithlog "ERROR"
             member x.Terminal = Some x
             member x.EvaluatedValue = x.Evaluate()
@@ -59,6 +60,7 @@ module ExpressionModule =
         FunctionBody: Arguments -> 'T
         Name        : string
         Arguments   : Arguments
+        LambdaDecl  : LambdaDecl option
     }
 
     [<DebuggerDisplay("{ToText(true)}")>]
@@ -79,6 +81,7 @@ module ExpressionModule =
             (* 'T type DU 를 접근하기 위한 members *)
             member x.FunctionName = x.FunctionName
             member x.FunctionArguments = x.FunctionArguments
+            member x.LambdaDecl = x.LambdaDecl
             member x.Terminal = match x with | DuTerminal t -> Some t | _ -> None
             member x.WithNewFunctionArguments(args) =
                 match x with
@@ -92,6 +95,13 @@ module ExpressionModule =
                     | DuLiteral literal -> literal.Value.GetType()
                     | _ -> typedefof<'T>
                 | _ -> typedefof<'T>
+        member x.LambdaDecl =
+            match x with
+            | DuFunction fs ->
+                match fs.LambdaDecl with        // |> Option.cast<ILambdaDecl>
+                | Some lambdaDecl -> lambdaDecl :> ILambdaDecl |> Some
+                | _ -> None
+            | _ -> None
          
         /// expression 의 type 이 동일한 경우 ToString() 결과가 같으면 동일한 것으로 간주
         /// type 이 다르면 항상 false 반환
@@ -263,11 +273,12 @@ module ExpressionModule =
         ArraySize:int
     }
 
-    type LambdaDecl = {
-        Prototype:TypeDecl
-        Arguments:TypeDecl list
-        Body:IExpression
-    }
+    type LambdaDecl =
+        {   Prototype:TypeDecl
+            Arguments:TypeDecl list
+            mutable Body:IExpression }
+        interface ILambdaDecl
+
     type ProcDecl = {
         Prototype:TypeDecl
         Arguments:TypeDecl list

@@ -35,7 +35,7 @@ module rec ExpressionParserModule =
         let rec helper (ctx: ExprContext) : IExpression =
             let text = ctx.GetText()
 
-            let expr =
+            let expr : IExpression =
                 match ctx with
                 | :? FunctionCallExprContext as exp -> // functionName '(' arguments? ')'
                     debugfn $"FunctionCall: {text}"
@@ -51,7 +51,7 @@ module rec ExpressionParserModule =
                         createCustomFunctionExpression funName args
                     else
                         match parserData.LambdaDefs.TryFind(fun lmbd -> lmbd.Prototype.Name = funName) with
-                        | Some lambdaDecl -> lambdaDecl.Body
+                        | Some lambdaDecl -> createLambdaCallExpression lambdaDecl.Body args
                         | None -> failwith "ERROR"
 
                 | :? CastingExprContext as exp -> // '(' type ')' expr
@@ -456,11 +456,31 @@ module rec ExpressionParserModule =
                     storages.TryFind localStgName
                     |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
                     
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData storageFinder
+                let bodyExp = ctx.Descendants<LambdaBodyExprContext>().First() |> getFirstChildExpressionContext |> createExpression parserData storageFinder
                 let lambdaDecl = {
                     Prototype = { Type = typ; Name = funName }
                     Arguments = args
-                    Body = ctx.Descendants<LambdaBodyExprContext>().First() |> expr }
+                    Body = bodyExp }
+
+                let newBody =
+                    match bodyExp with
+                    | :? Expression<bool>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} : IExpression | _ -> failwith "ERROR"
+                    | :? Expression<int8>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<uint8>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<int16>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<uint16> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<int32>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<uint32> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<int64>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<uint64> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<single> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<double> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<string> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | :? Expression<char>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
+                    | _ -> failwith "ERROR"
+                lambdaDecl.Body <- newBody
+
+
                 parserData.LambdaDefs.Add(lambdaDecl)
                 Some <| DuLambdaDecl lambdaDecl
 

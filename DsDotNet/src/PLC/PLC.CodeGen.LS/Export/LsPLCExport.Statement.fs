@@ -149,6 +149,16 @@ module StatementExtensionModule =
                     exp
                 else
                     tracefn $"exp: {exp.ToText()}"
+                    match exp.FunctionName, exp.LambdaDecl with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
+                    | Some fn, Some (:? LambdaDecl as lambdaDecl) ->
+                        for t in lambdaDecl.Arguments do
+                            let v = $"_local_{lambdaDecl.Prototype.Name}_{t.Name}"      // e.g "_local_sum_a"
+                            let xxx = prjParam.GlobalStorages[v]
+                            let yy = xxx
+                            ()
+                        ()
+                    | _ -> ()
+
                     let newExp =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
                         exp.WithNewFunctionArguments args

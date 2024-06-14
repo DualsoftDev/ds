@@ -246,20 +246,20 @@ module ExpressionFunctionModule =
             | "createXgkCTU" | "createXgkCTD" | "createXgkCTUD" | "createXgkCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
-                DuFunction { FunctionBody=NullFunction<Counter>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Counter>; Name=funName; Arguments=args; LambdaDecl=None }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
             | "createXgkTON" | "createXgkTOF" | "createXgkCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
-                DuFunction { FunctionBody=NullFunction<Timer>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Timer>; Name=funName; Arguments=args; LambdaDecl=None }
         | "createTag" ->
-                DuFunction { FunctionBody=NullFunction<ITag>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<ITag>; Name=funName; Arguments=args; LambdaDecl=None }
 
         | _ -> failwith $"NOT yet: {funName}"
 
     /// Create function expression
     let private cf (f:Args->'T) (name:string) (args:Args) =
-        DuFunction { FunctionBody=f; Name=name; Arguments=args}
+        DuFunction { FunctionBody=f; Name=name; Arguments=args; LambdaDecl=None}
 
     [<AutoOpen>]
     module internal FunctionImpl =

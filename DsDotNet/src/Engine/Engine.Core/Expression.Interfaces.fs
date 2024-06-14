@@ -27,6 +27,7 @@ module ExpressionForwardDeclModule =
 
     // Interface for PLC generation module
     type IFlatExpression = interface end
+    type ILambdaDecl = interface end
 
     // Interface for objects that can be terminal expressions with names (excluding Literals)
     type INamedExpressionizableTerminal =
@@ -48,6 +49,8 @@ module ExpressionForwardDeclModule =
 
         /// Function expression 인 경우 function args 반환.  terminal 이거나 argument 없으면 empty list 반환
         abstract FunctionArguments: IExpression list
+
+        abstract LambdaDecl: ILambdaDecl option
         abstract WithNewFunctionArguments: IExpression list -> IExpression
         abstract Terminal: ITerminal option
         abstract CollectStorages: unit -> IStorage list

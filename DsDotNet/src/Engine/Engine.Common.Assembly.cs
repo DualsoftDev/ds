@@ -7,8 +7,8 @@ using System.Reflection;
 [assembly: AssemblyConfiguration("Release")]
 #endif
 
-[assembly: AssemblyCompany("Dual INC.")]
-[assembly: AssemblyCopyright("Copyright © Dual INC. 2016")]
+[assembly: AssemblyCompany("Dualsoft")]
+[assembly: AssemblyCopyright("Copyright © Dualsoft 2016")]
 [assembly: AssemblyTitle("Dualsoft Engine packages")]
 [assembly: AssemblyProduct("DS Engine")]
 
@@ -17,4 +17,4 @@ using System.Reflection;
 ///DS Language Version (Language Parser 수정시만 변경 Ver : 1.0.0.1)
 [assembly: AssemblyInformationalVersion("1.0.0.1")]
 ///DS Engine Version
-[assembly: AssemblyFileVersion("0.9.8.15")]
+[assembly: AssemblyFileVersion("0.9.8.16")]

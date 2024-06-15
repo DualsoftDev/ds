@@ -189,7 +189,6 @@ module XgiExportModule =
                         match condition with
                         | Some c -> c
                         | None -> Expression.True
-                    // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                     if isXgi then
                         let command = ActionCmd(Move(cond, expr, target))
                         let rgiSub = rgiCommandRung None command rgi.NextRungY
@@ -198,6 +197,7 @@ module XgiExportModule =
                             {   Xmls = rgiSub.Xmls @ rgi.Xmls
                                 NextRungY = 1 + rgiSub.NextRungY }
                     else
+                        // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                         match condition, expr.Terminal with
                         | _, Some _ when expr.DataType <> typeof<bool> ->
                             moveCmdRungXgk cond expr target

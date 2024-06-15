@@ -8,9 +8,46 @@ open System
 
 [<AutoOpen>]
 module StatementExtensionModule =
+    let rec functionToAssignStatementVisitor (pack:DynamicDictionary) (expPath:IExpression list) (exp:IExpression): IExpression =
+        let prjParam, _augs = pack.Unpack()
+        if exp.Terminal.IsSome then
+            exp
+        else
+            tracefn $"exp: {exp.ToText()}"
+            let newExp =
+                let args = exp.FunctionArguments |> map (fun ex -> functionToAssignStatementVisitor pack (ex::expPath) ex)
+                exp.WithNewFunctionArguments args
+
+            let statement = pack.Get<Statement>("statement")
+            let isXgi = prjParam.TargetType = XGI
+            let mutable isAssignStatement = false
+            let mutable isVarDeclStatement = false
+            match statement with
+            | DuAssign _ -> isAssignStatement <- true
+            | DuVarDecl _ -> isVarDeclStatement <- true
+            | _ -> ()
+
+            match newExp.FunctionName with
+            | Some (IsOpAB fn) when isVarDeclStatement && isXgi && expPath.IsEmpty ->
+                newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOperators)
+            | Some (IsOpABC fn) when expPath.Any() ->
+                let augment =
+                    match prjParam.TargetType, expPath with
+                    | XGK, _head::_ -> true
+                    | XGI, _head::_ when _head.FunctionName <> Some fn -> true
+                    | _ ->
+                        false
+
+                if augment then
+                    newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
+                else
+                    newExp
+            | Some (IsOpC _fn) when isXgi && (expPath.Any() || not isAssignStatement) ->
+                newExp.ToAssignStatement(pack, K.comparisonOperators)
+            | _ ->
+                newExp
 
     type ExpressionVisitor = DynamicDictionary -> IExpression list -> IExpression -> IExpression
-
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
         member internal x.ToStatements (pack:DynamicDictionary) : unit =
@@ -146,42 +183,8 @@ module StatementExtensionModule =
 
         /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙/비교연산을 assign statement 로 변환한다.
         member x.FunctionToAssignStatement (pack:DynamicDictionary) : Statement =
-            let prjParam, _augs = pack.Unpack()
-            let rec visitor (pack:DynamicDictionary) (expPath:IExpression list) (exp:IExpression): IExpression =
-                if exp.Terminal.IsSome then
-                    exp
-                else
-                    tracefn $"exp: {exp.ToText()}"
-                    let newExp =
-                        let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
-                        exp.WithNewFunctionArguments args
-
-                    let statement = pack.Get<Statement>("statement")
-                    let isAssignStatement =
-                        match statement with
-                        | DuAssign _ -> true
-                        | _ -> false
-
-                    match newExp.FunctionName with
-                    | Some (IsOpABC fn) when expPath.Any() ->
-                        let augment =
-                            match prjParam.TargetType, expPath with
-                            | XGK, _head::_ -> true
-                            | XGI, _head::_ when _head.FunctionName <> Some fn -> true
-                            | _ ->
-                                false
-
-                        if augment then
-                            newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
-                        else
-                            newExp
-                    | Some (IsOpC _fn) when prjParam.TargetType = XGI && (expPath.Any() || not isAssignStatement) ->
-                        newExp.ToAssignStatement(pack, K.comparisonOperators)
-                    | _ ->
-                        newExp
-
             // visitor 를 이용해서 statement 내의 모든 expression 을 변환한다.
-            x.VisitExpression(pack, visitor)
+            x.VisitExpression(pack, functionToAssignStatementVisitor)
 
         member x.ApplyLambda (pack:DynamicDictionary) : Statement =
             let prjParam, _augs = pack.Unpack()
@@ -202,8 +205,17 @@ module StatementExtensionModule =
                             let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
                             let value = la.Arguments.[i].BoxedEvaluatedValue |> any2expr
                             DuAssign(None, value, stgVar) |> _augs.Statements.Add
-                        let result = prjParam.CreateAutoVariableWithFunctionExpression(pack, exp)
-                        result.ToExpression()
+                        match prjParam.TargetType with
+                        | XGK ->
+                            let newExp = functionToAssignStatementVisitor pack expPath exp
+                            match newExp.FunctionName with
+                            | Some _ ->
+                                let result = prjParam.CreateAutoVariableWithFunctionExpression(pack, newExp)
+                                result.ToExpression()
+                            | None ->
+                                newExp
+                        | XGI -> exp
+                        | _ -> failwith "Not supported runtime target"
                     | None ->
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
                         exp.WithNewFunctionArguments args

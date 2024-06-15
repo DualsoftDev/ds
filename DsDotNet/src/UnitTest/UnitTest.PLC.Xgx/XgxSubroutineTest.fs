@@ -12,9 +12,11 @@ type XgxSubroutineTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     let code = """
+//int nn1 = 0;
+//$nn1 = 1 + 2;
 int sum(int a, int b) => 2 * ($a + $b);
 int nn1 = sum(1, 2);
-//$nn1 = sum(1, 2);
+$nn1 = sum(1, 2);
 """
 
     member x.``Subroutine test`` () =

@@ -488,26 +488,6 @@ module rec ExpressionParserModule =
                     Body = bodyExp }
                 bodyExp.FunctionSpec.Value.LambdaDecl <- Some lambdaDecl
 
-                //bodyExp.LambdaBody <- Some lambdaDecl
-                //let newBody =
-                //    match bodyExp with
-                //    | :? Expression<bool>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} : IExpression | _ -> failwith "ERROR"
-                //    | :? Expression<int8>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<uint8>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<int16>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<uint16> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<int32>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<uint32> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<int64>  as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<uint64> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<single> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<double> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<string> as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | :? Expression<char>   as exp -> match exp with | DuFunction fs -> DuFunction { fs with LambdaDecl = Some lambdaDecl} | _ -> failwith "ERROR"
-                //    | _ -> failwith "ERROR"
-                //lambdaDecl.Body <- newBody
-
-
                 parserData.LambdaDefs.Add(lambdaDecl)
                 Some <| DuLambdaDecl lambdaDecl
 

@@ -457,13 +457,14 @@ module ExpressionModule =
                     // Lambda 식 평가는, formal parameter 에 해당하는 값에 actual parameter 값을 저장한 후 수행
                     // e.g "int sum(int a, int b) => $a + $b;  $all = sum(1, 2);"
                     //      => _local_sum_a = 1, _local_+sum_b = 2 의 값을 storage 에 저장 한 후 sum 함수 실행
-                    let funName = la.LambdaDecl.Prototype.Name
-                    assert (la.Arguments.Length = la.LambdaDecl.Arguments.Length)
+                    let ld = la.LambdaDecl
+                    let funName = ld.Prototype.Name
+                    assert (la.Arguments.Length = ld.Arguments.Length)
                     for i in [0..la.Arguments.Length-1] do
-                        let declVarName = la.LambdaDecl.Arguments[i].Name   // a
-                        let formalParamName = getFormalParameterName funName declVarName    // _local_sum_a
+                        let declVarName = ld.Arguments[i].Name   // a
+                        let encryptedFormalParamName = getFormalParameterName funName declVarName    // _local_sum_a
                         let actualParamValue = la.Arguments.[i].BoxedEvaluatedValue
-                        la.Storages[formalParamName].BoxedValue <- actualParamValue
+                        la.Storages[encryptedFormalParamName].BoxedValue <- actualParamValue
                 | None ->
                     ()
 

@@ -470,12 +470,12 @@ module rec ExpressionParserModule =
                             yield { Type = t; Name = v }
                     ]
                 for a in args do
-                    let formalParamName = getFormalParameterName funName a.Name
+                    let encryptedFormalParamName = getFormalParameterName funName a.Name
                     let localVar =
                         let comment = $"{funName}({a.Type} {a.Name})"
                         let defaultValue = { Object = typeDefaultValue a.Type }: BoxedObjectHolder
-                        createVariable formalParamName defaultValue (Some comment)
-                    storages.Add(formalParamName, localVar)
+                        createVariable encryptedFormalParamName defaultValue (Some comment)
+                    storages.Add(encryptedFormalParamName, localVar)
                 let storageFinder (stgName:string): IStorage option =
                     let localStgName = getFormalParameterName funName stgName
                     storages.TryFind localStgName

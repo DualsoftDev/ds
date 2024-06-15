@@ -149,19 +149,25 @@ module StatementExtensionModule =
                     exp
                 else
                     tracefn $"exp: {exp.ToText()}"
-                    match exp.FunctionName, exp.FunctionSpec with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
-                    | Some fn, Some fs ->
-                        match fs.LambdaDecl with
-                        | Some lambdaDecl ->
-                            for t in lambdaDecl.Arguments do
-                                let v = getFormalParameterName lambdaDecl.Prototype.Name t.Name      // e.g "_local_sum_a"
-                                let xxx = prjParam.GlobalStorages[v]
-                                let yy = xxx
-                                ()
-                        | None ->
-                            ()
-                        ()
-                    | _ -> ()
+                    let exp =
+                        match exp.FunctionSpec with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
+                        | Some fs ->
+                            match fs.LambdaApplication with
+                            | Some la ->
+                                let ld = la.LambdaDecl
+                                let funName = ld.Prototype.Name
+                                for i in [0..la.Arguments.Length-1] do
+                                    let declVarName = ld.Arguments[i].Name   // a
+                                    let encryptedFormalParamName = getFormalParameterName funName declVarName      // e.g "_local_sum_a"
+                                    let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
+                                    let value = la.Arguments.[i].BoxedEvaluatedValue |> any2expr
+                                    DuAssign(None, value, stgVar) |> _augs.Statements.Add
+                                let result = prjParam.CreateAutoVariableWithFunctionExpression(pack, exp)
+                                result.ToExpression()
+                                //exp
+                            | None ->
+                                exp
+                        | _ -> exp
 
                     let newExp =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)

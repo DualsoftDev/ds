@@ -218,7 +218,7 @@ module ConvertCPU =
             | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당 및 체크 스킵
             | _->  
                 checkDuplicatesNNullAddress sys
-                checkErrExternalStartRealExist sys
+                //checkErrExternalStartRealExist sys //hmi 시작 가능
                 checkJobs sys
                 checkErrHWItem(sys)
                 checkErrApi(sys)

@@ -53,8 +53,10 @@ module DsType =
         | ManualTag
         | ErrorSensorOn 
         | ErrorSensorOff 
-        | ErrorTimeOver 
-        | ErrorTimeShortage
+        | ErrorOnTimeOver 
+        | ErrorOnTimeShortage
+        | ErrorOffTimeOver 
+        | ErrorOffTimeShortage
         | ErrGoingOrigin
 
     type ExternalTagSet = ExternalTag * IStorage

@@ -146,8 +146,6 @@ type TagKindExt =
                                                       VertexTag.errorTRx
                                                     , VertexTag.rxErrOpen
                                                     , VertexTag.rxErrShort
-                                                    , VertexTag.rxErrOnTrend
-                                                    , VertexTag.rxErrOffTrend
                                                     , VertexTag.workErrOriginGoing
                                                     
                                                     , VertexTag.txErrOnTimeOver

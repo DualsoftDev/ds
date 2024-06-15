@@ -275,6 +275,11 @@ type FindExtension =
             
 
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
+    [<Extension>] static member GetAlarmCalls(x:DsSystem) = 
+                                        x.GetVerticesOfJobCalls()
+                                            //.Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)  
+                                            .Where(fun w->w.Parent.GetCore() :? Real)  
+                                            .OrderBy(fun c->c.Name)
 
     [<Extension>] static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) = 
                         xs.Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외

@@ -171,8 +171,6 @@ module TagKindList =
     | rxErrShortRising           = 11055
     | rxErrOpen                  = 11056
     | rxErrOpenRising            = 11057
-    | rxErrOnTrend               = 11058
-    | rxErrOffTrend              = 11059
     | workErrOriginGoing         = 11060
 
     /// 12000 ~ 12999

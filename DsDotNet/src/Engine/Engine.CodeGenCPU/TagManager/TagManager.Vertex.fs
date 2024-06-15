@@ -147,8 +147,6 @@ module TagManagerModule =
             | VertexTag.txErrOffTimeOver     -> (v.TagManager:?> VertexMCall).ErrOffTimeOver     :> IStorage
             | VertexTag.rxErrShort           -> (v.TagManager:?> VertexMCall).ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> (v.TagManager:?> VertexMCall).ErrOpen            :> IStorage
-            | VertexTag.rxErrOnTrend         -> (v.TagManager:?> VertexMCall).ErrOnTrend         :> IStorage
-            | VertexTag.rxErrOffTrend        -> (v.TagManager:?> VertexMCall).ErrOffTrend        :> IStorage
 
             | VertexTag.realOriginInit       -> (v.TagManager:?> VertexMReal).RO    :> IStorage
             | VertexTag.realOriginButton     -> (v.TagManager:?> VertexMReal).OB    :> IStorage
@@ -245,8 +243,6 @@ module TagManagerModule =
         let rxErrShortRising        = createTag "rxErrShortRising"      true    VertexTag.rxErrShortRising      
         let rxErrOpen               = createTag "rxErrOpen"             true    VertexTag.rxErrOpen    
         let rxErrOpenRising         = createTag "rxErrOpenRising"       true    VertexTag.rxErrOpenRising          
-        let rxErrOnTrend            = createTag "rxErrOnTrend"          true    VertexTag.rxErrOnTrend    
-        let rxErrOffTrend           = createTag "rxErrOffTrend"         true    VertexTag.rxErrOffTrend    
 
         let errors = 
             let err1 = if txErrOnTimeShortage.Value      then "감지시간부족" else ""
@@ -288,8 +284,6 @@ module TagManagerModule =
         member _.ErrShortRising  = rxErrShortRising    
         member _.ErrOpen         = rxErrOpen     
         member _.ErrOpenRising   = rxErrOpenRising     
-        member _.ErrOnTrend   = rxErrOnTrend     
-        member _.ErrOffTrend   = rxErrOffTrend     
 
    
         ///callCommandEnd

@@ -58,9 +58,11 @@ module DBLoggerApi =
         
                     let err1 = if errOpen.HasValue && errOpen.Value         then $"{call.Name} 센서오프이상" else ""
                     let err2 = if errShort.HasValue && errShort.Value       then $"{call.Name} 센서감지이상" else ""
-                    let err3 = if errOnTimeOver.HasValue && errOnTimeOver.Value then $"{call.Name} 시간초과  이상" else ""
-                    let err4 = if errOnTimeShortage.HasValue && errOnTimeShortage.Value then $"{call.Name}  시간부족 이상" else ""
-                    let errs =[err1;err2;err3;err4]|> Seq.where(fun f->f <> "")
+                    let err3 = if errOnTimeOver.HasValue && errOnTimeOver.Value then $"{call.Name} 감지시간초과  이상" else ""
+                    let err4 = if errOnTimeShortage.HasValue && errOnTimeShortage.Value then $"{call.Name}  감지시간부족 이상" else "" 
+                    let err5 = if errOffTimeOver.HasValue && errOffTimeOver.Value then $"{call.Name} 해지시간초과  이상" else ""
+                    let err6 = if errOffTimeShortage.HasValue && errOffTimeShortage.Value then $"{call.Name}  해지시간부족 이상" else ""
+                    let errs =[err1;err2;err3;err4;err5;err6]|> Seq.where(fun f->f <> "")
                     info.ErrorMessages.AddRange errs
                     )
 

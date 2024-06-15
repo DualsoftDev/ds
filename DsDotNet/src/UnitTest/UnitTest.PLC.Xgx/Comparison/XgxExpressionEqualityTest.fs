@@ -16,20 +16,15 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Assignment simple test`` () =
-        let storages = Storages()
         let code = """
             int16 nn1 = 1s;
             int16 nn2 = 2s;
             int16 sum = $nn1 + $nn2;
 
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Assignment test`` () =
-        let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             bool b1 = false;
             bool b2 = true;
@@ -44,27 +39,19 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
             bool b8 = $nn1 + $nn2 > 3s;
 
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
 
     member x.``Comparision, Arithmetic, OR test`` () =
-        let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
             bool result = false;
 
             $result = $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
         """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Comparision, Arithmetic, OR test2`` () =
-        let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             bool cond1 = false;
             int16 sum = 0s;
@@ -72,13 +59,9 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
 
             $result = $cond1 && $nn1 + $nn2 * $nn3 > 2s || $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
         """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Expression equality generation test`` () =
-        let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 16 + """
             bool result1 = false;
             bool result2 = false;
@@ -121,10 +104,7 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
                 || $x00
                 ;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member __.``Expression equality test`` () =
         let storages = Storages()
@@ -140,17 +120,13 @@ type XgxExpEqualityTest(xgx:PlatformTarget) =
         expr1.IsEqual expr2 |> ShouldBeTrue
 
     member x.``XOR test`` () =
-        let storages = Storages()
         let code = """
             bool b1 = false;
             bool b2 = false;
             bool b3 = false;
             $b3 = $b1 <> $b2;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
 
 //[<Collection("SerialXgxExpEqualityTest")>]

@@ -12,19 +12,14 @@ type XgxArithematicTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``ADD 10 items test`` () =
-        let storages = Storages()
         let code = generateInt16VariableDeclarations 1 10 + """
 
             int16 sum = 0s;
             $sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8 + $nn9 + $nn10;
         """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD 3 items test`` () =
-        let storages = Storages()
         let code = """
             int16 nn1 = 1s;
             int16 nn2 = 2s;
@@ -32,23 +27,16 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             $sum = $nn1 + $nn2 + $nn3;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD 7 items test`` () =
-        let storages = Storages()
         let code =
             generateInt16VariableDeclarations 1 8 + """
 
             int16 sum = 0s;
             $sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD 8 items test`` () =
         let storages = Storages()
@@ -56,13 +44,9 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 sum = 0s;
             $sum = $nn1 + $nn2 + $nn3 + $nn4 + $nn5 + $nn6 + $nn7 + $nn8;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD double test`` () =
-        let storages = Storages()
         let code = """
             double nn1 = 1.1;
             double nn2 = 2.2;
@@ -72,14 +56,10 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             double mul = $nn1 * $nn2;
             double div = $nn1 / $nn2;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
 
     member x.``ADD int16 test`` () =
-        let storages = Storages()
         let code = """
             int16 nn1 = 1s;
             int16 nn2 = 2s;
@@ -95,13 +75,9 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             $usum = $unn1 + $unn2;
             $usum2 = $usum;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD int32 test`` () =
-        let storages = Storages()
         let code = """
             int nn1 = 1;
             int nn2 = 2;
@@ -113,10 +89,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             uint usum = 0u;
             $usum = $unn1 + $unn2;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD int64 test`` () =
         let storages = Storages()
@@ -178,31 +151,22 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         | _ -> failwith "Not supported plc type"
 
     member x.``ADD MUL 3 items test`` () =
-        let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
             $sum = $nn1 + $nn2 * $nn3 + $nn4 + $nn5 * $nn6 / $nn7 - $nn8;
         """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD simple test`` () =
-        let storages = Storages()
         let code = """
             int16 nn1 = 1s;
             int16 nn2 = 2s;
             int16 sum = 0s;
             $sum = $nn1 + $nn2;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``ADD single test`` () =
-        let storages = Storages()
         let code = """
             single nn1 = 1.1f;
             single nn2 = 2.2f;
@@ -212,13 +176,9 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             single mul = $nn1 * $nn2;
             single div = $nn1 / $nn2;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic assign test`` () =
-        let storages = Storages()
         let code =
             $"""
                 double pi = 3.14;
@@ -229,95 +189,46 @@ type XgxArithematicTest(xgx:PlatformTarget) =
                 bool b4 = !($pi > 6.24);
             """;
 
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic assign test1`` () =
-        let storages = Storages()
-        let code =
-            $"""
-                bool b0 = !(2.1 == 6.1);
-            """;
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
+        "bool b0 = !(2.1 == 6.1);"
+        |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic test1`` () =
-        let storages = Storages()
-        let code = "bool b0 = !(2.1 == 6.1);";
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        "bool b0 = !(2.1 == 6.1);"
+        |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic test2`` () =
-        let storages = Storages()
-        let code = "bool b0 = true && (2.1 == 6.1);";
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        "bool b0 = true && (2.1 == 6.1);"
+        |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic test3`` () =
-        let storages = Storages()
-        let code = "bool b0 = false && (2.1 == 6.1);";
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        "bool b0 = false && (2.1 == 6.1);"
+        |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic test4`` () =
-        let storages = Storages()
-        let code = "bool b0 = !(2.1 > 6.1);";
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        "bool b0 = !(2.1 > 6.1);"
+        |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic test5`` () =
-        let storages = Storages()
-        let code = "bool b0 = false && !(2.1 <= 6.1);";
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        "bool b0 = false && !(2.1 <= 6.1);"
+        |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Arithmetic test6`` () =
-        let storages = Storages()
-        let code = "bool b0 = false && !(2.1 == 6.1);";
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
+        "bool b0 = false && !(2.1 == 6.1);"
+        |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Comparision, Arithmetic, AND test`` () =
-        let storages = Storages()
         let code = generateInt16VariableDeclarations 1 8 + """
             int16 sum = 0s;
             bool result = false;
 
             $result = $nn1 + $nn2 * $nn3 > 2s && $nn4 + $nn5 * $nn6 / $nn7 - $nn8 > 5s;
         """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``DIV 3 items test`` () =
-        let storages = Storages()
         let code = """
             int16 nn1 = 1s;
             int16 nn2 = 2s;
@@ -326,10 +237,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
             int16 quotient = 0s;
             $quotient = $nn1 / $nn2 / $nn3;
         """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
 
 

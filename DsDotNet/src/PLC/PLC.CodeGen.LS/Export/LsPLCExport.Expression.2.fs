@@ -260,7 +260,14 @@ module XgxExpressionConvertorModule =
                 | "==" | "<>" | "!=" when prjParam.TargetType = XGK && x.FunctionArguments[0].DataType = typedefof<bool> ->
                     x.AugmentXgk(pack, None, None)
                 | _ ->
-                    let var = prjParam.CreateAutoVariableWithFunctionExpression(x)
+                    let var =
+                        match pack.TryGet<Statement>("statement") with
+                        | Some (DuAssign(_cond, exp, stg)) when exp = x -> stg
+                        | _ ->
+                            let var = prjParam.CreateAutoVariableWithFunctionExpression(x)
+                            augs.Storages.Add var
+                            var
+
                     let stmt =
                         match prjParam.TargetType with
                         | XGK -> DuAssign(None, x, var)
@@ -275,7 +282,6 @@ module XgxExpressionConvertorModule =
                         | _ -> failwithlog "ERROR"
 
                     augs.Statements.Add <| stmt
-                    augs.Storages.Add var
                     var.ToExpression()
             | _ -> x
 

@@ -15,21 +15,27 @@ module StatementExtensionModule =
         else
             tracefn $"exp: {exp.ToText()}"
             let newExp =
-                let args = exp.FunctionArguments |> map (fun ex -> functionToAssignStatementVisitor pack (ex::expPath) ex)
+                let args =
+                    exp.FunctionArguments
+                    |> map (fun ex ->
+                        functionToAssignStatementVisitor pack (exp::expPath) ex)
                 exp.WithNewFunctionArguments args
 
             let statement = pack.Get<Statement>("statement")
             let isXgi = prjParam.TargetType = XGI
-            let mutable isAssignStatement = false
-            let mutable isVarDeclStatement = false
-            match statement with
-            | DuAssign _ -> isAssignStatement <- true
-            | DuVarDecl _ -> isVarDeclStatement <- true
-            | _ -> ()
+            let isAssignStatement =
+                match statement with
+                | DuAssign _ -> true
+                | _ -> false
 
             match newExp.FunctionName with
-            | Some (IsOpAB fn) when isVarDeclStatement && isXgi && expPath.IsEmpty ->
-                newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOperators)
+            | Some (IsOpAB fn) when isXgi && expPath.IsEmpty ->
+                match statement with
+                | DuAssign(_, e, t) when e = exp ->
+                    newExp
+                | _ ->
+                    newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOperators)
+
             | Some (IsOpABC fn) when expPath.Any() ->
                 let augment =
                     match prjParam.TargetType, expPath with
@@ -107,7 +113,8 @@ module StatementExtensionModule =
             pack.["statement"] <- x
             let newStatement =
                 match statement with
-                | DuAssign(condition, exp, tgt) -> Some <| DuAssign(tryVisitTop condition, visitTop exp, tgt)
+                | DuAssign(condition, exp, tgt) ->
+                    Some <| DuAssign(tryVisitTop condition, visitTop exp, tgt)
 
                 | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
                     Some <| DuTimer {

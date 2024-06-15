@@ -413,7 +413,11 @@ module ExpressionModule =
             | DuLambdaDecl { Prototype=proto; Arguments=args;Body = exp} ->
                 let argLists = args |> map (fun arg -> $"{arg.Type.Name} {arg.Name}") |> joinWith ", "
                 $"{proto.Type.Name} {proto.Name}({argLists} => {exp.ToText()})"
-            | DuPLCFunction _ ->
+
+            | DuPLCFunction {FunctionName = fn; Arguments=Args; Output=output } ->
+                let args = Args |> map (fun arg -> arg.ToText()) |> joinWith ", "
+                $"PLCFunction {output.ToText()} = {fn}({args})"
+            | _ ->
                 failwithlog "ERROR"
 
     type Terminal<'T when 'T:equality> with

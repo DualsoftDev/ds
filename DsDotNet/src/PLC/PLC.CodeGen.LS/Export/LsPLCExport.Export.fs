@@ -183,6 +183,7 @@ module XgiExportModule =
                 rgi <- rgi.AddSingleLineXml(xml)
 
             for stmt in stmts do
+                //tracefn $"Generating statement::{stmt.ToText()}"
                 match stmt with
                 | DuAssign(condition, expr, target) when isXgk || expr.DataType <> typeof<bool> ->
                     let cond =

@@ -11,19 +11,34 @@ type XgxBitwiseTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Bitwise shift test`` () =
-        let storages = Storages()
-        let f = getFuncName()
-        let code = "uint8   bn5 = 1uy <<< 1;"
         let code = """
 uint8 bn5 = 0uy;
 $bn5 = 1uy <<< 1;"""
-        let statements = parseCodeForWindows storages code
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        let storages, statements = code |> x.TestCode (getFuncName())
+        ()
+
+    member x.``Bitwise operation test1`` () =
+        let code = """
+int nn1 = 8 &&& 255;
+$nn1 = 9 &&& 255;
+"""
+        let storages, statements = code |> x.TestCode (getFuncName())
+        storages["nn1"].BoxedValue === 8
+        statements[1].Do()
+        storages["nn1"].BoxedValue === 9
+
+    member x.``Bitwise operation test2`` () =
+        let code = """
+bool truth = 8 &&& 255 == 8;
+$truth = 9 &&& 255 == 8;
+"""
+        let storages, statements = code |> x.TestCode (getFuncName())
+        storages["truth"].BoxedValue === true
+        statements[1].Do()
+        storages["truth"].BoxedValue === false
+
 
     member x.``Bitwise operation test`` () =
-        let storages = Storages()
-
         // XGK 에서는 8byte int type (LWORD) 를 지원하지 않음
         let eightByteCodes = """
 uint64  ul1 = 8UL &&& 255UL;
@@ -87,19 +102,24 @@ uint32 un999 = 0u;
 $un999 = ~~~ ((8u &&& 255u) ||| ~~~(8u ^^^ 255u));
 """
         let f = getFuncName()
-        let doit() =
-            let statements = parseCodeForWindows storages code
-            let xml = x.generateXmlForTest f storages (map withNoComment statements)
-            x.saveTestResult f xml
+        let doit() =  code |> x.TestCode f
         match xgx with
-        | XGI -> doit()
-        | XGK -> doit |> ShouldFailWithSubstringT "XGK Bitwise operator not supported"
+        | XGI ->
+            let storages, statements = doit()
+            storages["truth"].BoxedValue === true
+            storages["un4"]  .BoxedValue === ~~~255u
+            storages["falsy"].BoxedValue === false
+
+            ()
+        | XGK -> (doit >> ignore) |> ShouldFailWithSubstringT "XGK Bitwise operator not supported"
         | _ -> failwith "Not supported runtime target"
 
 
 type XgiBitwiseTest() =
     inherit XgxBitwiseTest(XGI)
     [<Test>] member __.``Bitwise operation test`` () = base.``Bitwise operation test``()
+    [<Test>] member __.``Bitwise operation test1`` () = base.``Bitwise operation test1``()
+    [<Test>] member __.``Bitwise operation test2`` () = base.``Bitwise operation test2``()
     [<Test>] member __.``Bitwise shift test`` () = base.``Bitwise shift test``()
 
 

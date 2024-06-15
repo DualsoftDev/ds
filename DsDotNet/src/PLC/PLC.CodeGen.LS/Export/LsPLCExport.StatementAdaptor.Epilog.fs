@@ -13,6 +13,7 @@ module XgxTypeConvertorModule =
         member internal x.ToCommentedStatements (prjParam: XgxProjectParams, newLocalStorages: XgxStorage) : CommentedStatements =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
+            tracefn $"Statement:: {originalComment}"
             let augs = Augments(newLocalStorages, StatementContainer())
             let createPack (prjParam:XgxProjectParams) (augs:Augments) : DynamicDictionary =
                 let kvs:array<string*obj> =
@@ -26,6 +27,7 @@ module XgxTypeConvertorModule =
 
             let statement = statement.ApplyLambda(pack)
 
+            //statement.Do()
             match statement with
             | DuVarDecl(exp, var) ->
                 // 변수 선언문에서 정확한 초기 값 및 주석 값을 가져온다.

@@ -186,6 +186,16 @@ module XgxFixtures =
             // 포맷된 XML 반환
             output.Replace("\r\n", "\n").Replace("\n", "\r\n")
 
+        /// 주어진 ds expression 코드를 파싱해서 PLC 코드 생성
+        ///
+        /// 부산물인 storages 와 statements 를 반환
+        member x.TestCode (funcName:string) (code:string) =
+            let storages = Storages()
+            let statements = parseCodeForWindows storages code
+            let xml = x.generateXmlForTest funcName storages (map withNoComment statements)
+            x.saveTestResult funcName xml
+            storages, statements
+
         [<SetUp>]
         member x.Setup () =
             RuntimeDS.System <- sys

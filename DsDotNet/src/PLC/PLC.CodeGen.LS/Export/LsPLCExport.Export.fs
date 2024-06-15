@@ -163,25 +163,6 @@ module XgiExportModule =
                             let rgiSub = rgiCommandRung condWithFalse cmd rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
                                         NextRungY = 1 + rgiSub.NextRungY }
-                        //let rgiSub =
-                        //    let cmd =
-                        //        let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
-                        //        XgkParamCmd(param, 5)
-                        //    let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
-                        //    rgiXmlRung (Some sourceTrueCondition) (Some cmd) rgi.NextRungY
-                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                        //            NextRungY = 1 + rgiSub.NextRungY }
-
-                        //let rgiSub =
-                        //    let cmd =
-                        //        let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
-                        //        XgkParamCmd(param, 5)
-                        //    let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
-                        //    rgiXmlRung (Some sourceFalseCondition) (Some cmd) rgi.NextRungY
-                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                        //            NextRungY = 1 + rgiSub.NextRungY }
-
-
                 | _ ->
                     failwith "ERROR: XGK Tag parsing error"
             else
@@ -211,11 +192,6 @@ module XgiExportModule =
                     // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                     if isXgi then
                         let command = ActionCmd(Move(cond, expr, target))
-                        //let command =
-                        //    match expr.Terminal, expr.FunctionName with
-                        //    | Some _t, None -> ActionCmd(Move(cond, expr, target))
-                        //    | None, Some fn -> FunctionCmd(Arithmetic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
-                        //    | _ -> failwithlog "ERROR"
                         let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                         rgi <-

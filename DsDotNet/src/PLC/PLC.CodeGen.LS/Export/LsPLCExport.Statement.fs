@@ -96,6 +96,9 @@ module StatementExtensionModule =
                     let newArgs = args |> map (fun arg -> visitTop arg)
                     Some <| DuPLCFunction { functionParameters with Arguments = newArgs }
                 | DuLambdaDecl _ -> None
+                | DuVarDecl (exp, stg) when pack.Get<bool>("visit-vardecl-statement") ->
+                    let newExp = visitTop exp
+                    Some <| DuVarDecl (newExp, stg)
                 | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _ ) -> failwith "Should have been processed in early stage"
 
 
@@ -149,26 +152,6 @@ module StatementExtensionModule =
                     exp
                 else
                     tracefn $"exp: {exp.ToText()}"
-                    let exp =
-                        match exp.FunctionSpec with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
-                        | Some fs ->
-                            match fs.LambdaApplication with
-                            | Some la ->
-                                let ld = la.LambdaDecl
-                                let funName = ld.Prototype.Name
-                                for i in [0..la.Arguments.Length-1] do
-                                    let declVarName = ld.Arguments[i].Name   // a
-                                    let encryptedFormalParamName = getFormalParameterName funName declVarName      // e.g "_local_sum_a"
-                                    let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
-                                    let value = la.Arguments.[i].BoxedEvaluatedValue |> any2expr
-                                    DuAssign(None, value, stgVar) |> _augs.Statements.Add
-                                let result = prjParam.CreateAutoVariableWithFunctionExpression(pack, exp)
-                                result.ToExpression()
-                                //exp
-                            | None ->
-                                exp
-                        | _ -> exp
-
                     let newExp =
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
@@ -201,4 +184,33 @@ module StatementExtensionModule =
             x.VisitExpression(pack, visitor)
 
         member x.ApplyLambda (pack:DynamicDictionary) : Statement =
-            x
+            let prjParam, _augs = pack.Unpack()
+            let rec visitor (pack:DynamicDictionary) (expPath:IExpression list) (exp:IExpression): IExpression =
+                if exp.Terminal.IsSome then
+                    exp
+                else
+                    tracefn $"ApplyLambda:: exp: {exp.ToText()}"
+                    // exp 이 FunctionSpec 값을 가지면서, FunctionSpec 내부에 LambdaApplication 이 존재하면
+                    // 해당 LambdaApplication 적용 결과를 임시 변수에 저장하고, 그 값을 반환한다.
+                    match exp.FunctionSpec |> bind (fun fs -> fs.LambdaApplication) with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
+                    | Some la ->
+                        let ld = la.LambdaDecl
+                        let funName = ld.Prototype.Name
+                        for i in [0..la.Arguments.Length-1] do
+                            let declVarName = ld.Arguments[i].Name   // a
+                            let encryptedFormalParamName = getFormalParameterName funName declVarName      // e.g "_local_sum_a"
+                            let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
+                            let value = la.Arguments.[i].BoxedEvaluatedValue |> any2expr
+                            DuAssign(None, value, stgVar) |> _augs.Statements.Add
+                        let result = prjParam.CreateAutoVariableWithFunctionExpression(pack, exp)
+                        result.ToExpression()
+                    | None ->
+                        let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
+                        exp.WithNewFunctionArguments args
+
+            // visitor 를 이용해서 statement 내의 모든 expression 을 변환한다.
+            pack["visit-vardecl-statement"] <- true
+            let newStatement = x.VisitExpression(pack, visitor)
+            pack["visit-vardecl-statement"] <- false
+            newStatement
+

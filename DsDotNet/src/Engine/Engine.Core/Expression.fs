@@ -460,8 +460,13 @@ module ExpressionModule =
                     let funName = la.LambdaDecl.Prototype.Name
                     assert (la.Arguments.Length = la.LambdaDecl.Arguments.Length)
                     for i in [0..la.Arguments.Length-1] do
-                        la.Storages[$"_local_{funName}_{la.LambdaDecl.Arguments[i].Name}"].BoxedValue <- la.Arguments.[i].BoxedEvaluatedValue
-                | None -> ()
+                        let declVarName = la.LambdaDecl.Arguments[i].Name   // a
+                        let formalParamName = getFormalParameterName funName declVarName    // _local_sum_a
+                        let actualParamValue = la.Arguments.[i].BoxedEvaluatedValue
+                        la.Storages[formalParamName].BoxedValue <- actualParamValue
+                | None ->
+                    ()
+
                 fs.FunctionBody fs.Arguments
 
         member x.FunctionName =

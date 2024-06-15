@@ -44,6 +44,9 @@ module rec ExpressionForwardDeclModule =
         Arguments:IExpression list
         Storages:Storages }
 
+    /// e.g "int sum(int a,int b) = ..." 에서 a 에 해당하는 formal parameter name 은 "_local_sum_a" 이다.
+    let getFormalParameterName (funName:string) (varName:string) = $"_local_{funName}_{varName}"
+
     type Arg       = IExpression
     type Arguments = IExpression list
     type Args      = Arguments

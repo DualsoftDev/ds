@@ -470,14 +470,14 @@ module rec ExpressionParserModule =
                             yield { Type = t; Name = v }
                     ]
                 for a in args do
-                    let localVarName = $"_local_{funName}_{a.Name}"
+                    let formalParamName = getFormalParameterName funName a.Name
                     let localVar =
                         let comment = $"{funName}({a.Type} {a.Name})"
                         let defaultValue = { Object = typeDefaultValue a.Type }: BoxedObjectHolder
-                        createVariable localVarName defaultValue (Some comment)
-                    storages.Add(localVarName, localVar)
+                        createVariable formalParamName defaultValue (Some comment)
+                    storages.Add(formalParamName, localVar)
                 let storageFinder (stgName:string): IStorage option =
-                    let localStgName = $"_local_{funName}_{stgName}"
+                    let localStgName = getFormalParameterName funName stgName
                     storages.TryFind localStgName
                     |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
                     

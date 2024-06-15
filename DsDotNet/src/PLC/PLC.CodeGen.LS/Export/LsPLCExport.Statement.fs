@@ -154,7 +154,7 @@ module StatementExtensionModule =
                         match fs.LambdaDecl with
                         | Some lambdaDecl ->
                             for t in lambdaDecl.Arguments do
-                                let v = $"_local_{lambdaDecl.Prototype.Name}_{t.Name}"      // e.g "_local_sum_a"
+                                let v = getFormalParameterName lambdaDecl.Prototype.Name t.Name      // e.g "_local_sum_a"
                                 let xxx = prjParam.GlobalStorages[v]
                                 let yy = xxx
                                 ()

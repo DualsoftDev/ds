@@ -489,7 +489,7 @@ module ExpressionModule =
             match x with
             | DuTerminal b -> b.ToText()
             | DuFunction fs ->
-                let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesis
+                let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments fs.LambdaApplication withParenthesis
                 text
 
         member x.CollectStorages() : IStorage list =

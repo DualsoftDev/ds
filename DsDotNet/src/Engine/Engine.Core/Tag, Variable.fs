@@ -171,7 +171,7 @@ module TagVariableModule =
 [<AutoOpen>]
 module ExpressionPrologModule =
     let mutable internal fwdSerializeFunctionNameAndBoxedArguments =
-        let dummy (_functionName:string) (_args:Args) (_withParenthesis:bool): string =
+        let dummy (_functionName:string) (_args:Args) (_lambdaApplication:LambdaApplication option) (_withParenthesis:bool): string =
             failwithlog "Should be reimplemented."
         dummy
 

@@ -52,8 +52,6 @@ module ConvertHMI =
 
                 ShortErrorLamp           = getLamp  tm (VertexTag.rxErrShort |>int)
                 OpenErrorLamp            = getLamp  tm (VertexTag.rxErrOpen |>int)
-                TrendOnErrorLamp         = getLamp  tm (VertexTag.rxErrOnTrend |>int)
-                TrendOffErrorLamp        = getLamp  tm (VertexTag.rxErrOffTrend |>int)
                 ErrorTotalLamp           = getLamp  tm (VertexTag.errorTRx |>int)
             }
 

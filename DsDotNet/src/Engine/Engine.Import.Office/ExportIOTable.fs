@@ -311,17 +311,17 @@ module ExportIOTable =
                ]
 
         let rows =
-            let calls = sys.GetVerticesOfCoins().OfType<Call>()
-                            .Where(fun w->w.IsJob)   
-                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
+            let calls = sys.GetAlarmCalls()
                         
             seq {
                 //1. call, real 부터
                 for call in calls |> Seq.sortBy (fun c -> c.Name) do
                     yield rowItems ($"{call.Name}_센서쇼트이상", call.ErrorSensorOn.Address)
                     yield rowItems ($"{call.Name}_센서단락이상", call.ErrorSensorOff.Address)
-                    yield rowItems ($"{call.Name}_시간초과이상", call.ErrorTimeOver.Address)
-                    yield rowItems ($"{call.Name}_시간부족이상", call.ErrorTimeShortage.Address)
+                    yield rowItems ($"{call.Name}_감지시간초과이상", call.ErrorOnTimeOver.Address)
+                    yield rowItems ($"{call.Name}_감지시간부족이상", call.ErrorOnTimeShortage.Address)
+                    yield rowItems ($"{call.Name}_해지시간초과이상", call.ErrorOffTimeOver.Address)
+                    yield rowItems ($"{call.Name}_해지시간부족이상", call.ErrorOffTimeShortage.Address)
 
                 for real in sys.GetVertices().OfType<Real>() |> Seq.sortBy (fun r -> r.Name) do
                     yield rowItems ($"{real.Name}_작업원위치이상", real.ErrGoingOrigin.Address)
@@ -537,7 +537,7 @@ module ExportIOTable =
                     yield rowItems ($"{flow.Name}_FlowDriveBtn", flow.drive_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowDriveLamp", flow.d_st.Address)
                     yield rowItems ($"{flow.Name}_FlowPauseBtn", flow.pause_btn.Address)
-                    yield rowItems ($"{flow.Name}_FlowPauseLamp", flow.pause.Address)
+                    yield rowItems ($"{flow.Name}_FlowPauseLamp", flow.p_st.Address)
                 ]
             )
 

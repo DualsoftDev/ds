@@ -14,7 +14,6 @@ module ConvertCPU =
         let isValidVertex =
             match v with
             | :? Real            -> aliasNoSpec && vaild.HasFlag(RealInFlow)
-            | :? RealExF         -> aliasNoSpec && vaild.HasFlag(RealExFlow)
             | :? Call as c  ->
                 match c.Parent with
                 | DuParentFlow _ -> aliasNoSpec && vaild.HasFlag(CallInFlow)
@@ -25,12 +24,10 @@ module ConvertCPU =
                  | DuParentFlow _ ->
                      match a.TargetWrapper with
                      |  DuAliasTargetReal _         -> aliasSpec && vaild.HasFlag(RealInFlow)
-                     |  DuAliasTargetRealExFlow _   -> aliasSpec && vaild.HasFlag(RealExFlow)
                      |  DuAliasTargetCall _         -> aliasSpec && vaild.HasFlag(CallInFlow)
                  | DuParentReal _ ->
                      match a.TargetWrapper with
                      | DuAliasTargetReal _         -> failwithlog $"Error {getFuncName()}"
-                     | DuAliasTargetRealExFlow _   -> failwithlog $"Error {getFuncName()}"
                      | DuAliasTargetCall _         -> aliasSpec &&  vaild.HasFlag(CallInReal)
             |_ -> failwithlog $"Error {getFuncName()}"
 
@@ -48,7 +45,7 @@ module ConvertCPU =
                 yield vm.R1_RealInitialStart()
                 yield! vm.R2_RealJobComplete()
                 yield vm.R3_RealStartPoint()
-                yield vm.R4_RealSync() 
+                yield vm.R4_RealLink() 
                 yield! vm.R5_DummyDAGCoils() 
                 //yield vm.R6_RealDataMove() 
                 yield! vm.R7_RealGoingOriginError() 
@@ -59,8 +56,9 @@ module ConvertCPU =
                 yield! vm.D3_DAGCoinEnd()
                 yield! vm.D4_DAGCoinReset()
 
-                yield! vm.F1_RootStart()
-                yield! vm.F2_RootReset()
+                yield vm.F1_RootStart()
+                yield vm.F2_RootReset()
+                yield vm.F5_HomeCommand()
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
                     yield vm.F3_VertexEndWithOutReal()    
@@ -220,7 +218,7 @@ module ConvertCPU =
             | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당 및 체크 스킵
             | _->  
                 checkDuplicatesNNullAddress sys
-                checkErrExternalStartRealExist sys
+                //checkErrExternalStartRealExist sys //hmi 시작 가능
                 checkJobs sys
                 checkErrHWItem(sys)
                 checkErrApi(sys)

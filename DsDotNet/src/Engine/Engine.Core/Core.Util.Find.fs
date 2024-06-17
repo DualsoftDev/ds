@@ -130,11 +130,7 @@ module internal ModelFindModule =
         xs.OfType<Alias>()
         |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
 
-    let ofAliasForRealExVertex (xs:Vertex seq) =
-        xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.RealExFlowTarget().IsSome)
-
-
+    
     
     let getVerticesOfSystem(system:DsSystem) =
         let realVertices = system.Flows.SelectMany(fun f ->
@@ -167,20 +163,12 @@ module internal ModelFindModule =
                                 .Distinct()
 
     let getVertexSharedReal(real:Real) =
-        let vs = real.Flow.System |> getVerticesOfSystem
         let sharedAlias =
             let reals = (real.Flow.Graph.Vertices |> ofAliasForRealVertex)
-            let realExs = (real.Flow.Graph.Vertices |> ofAliasForRealExVertex)
-            (reals@realExs).Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
+            reals.Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
                 .Cast<Vertex>()
 
-        let sharedRealExFlow =
-                vs
-                 .OfType<RealExF>()
-                 .Where(fun w-> w.Real = real)
-                 .Cast<Vertex>()
-
-        sharedAlias @ sharedRealExFlow
+        sharedAlias 
 
     let getVertexSharedCall(call:Call) =
         let sharedAlias =
@@ -233,7 +221,6 @@ type FindExtension =
     [<Extension>] static member GetPure (x:Vertex) = getPure x
       
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
-    [<Extension>] static member GetAliasTypeRealExs(xs:Vertex seq) = ofAliasForRealExVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
     [<Extension>] static member GetFlowEdges(x:DsSystem) = x.Flows.Collect(fun f-> f.Graph.Edges)
 
@@ -288,6 +275,11 @@ type FindExtension =
             
 
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
+    [<Extension>] static member GetAlarmCalls(x:DsSystem) = 
+                                        x.GetVerticesOfJobCalls()
+                                            //.Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)  
+                                            .Where(fun w->w.Parent.GetCore() :? Real)  
+                                            .OrderBy(fun c->c.Name)
 
     [<Extension>] static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) = 
                         xs.Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외

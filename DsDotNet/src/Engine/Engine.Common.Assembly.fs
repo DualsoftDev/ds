@@ -9,8 +9,8 @@ open System.Reflection
 #endif
 
 
-[<assembly: AssemblyCompany("Dual INC.")>]
-[<assembly: AssemblyCopyright("Copyright © Dual INC. 2016")>]
+[<assembly: AssemblyCompany("Dualsoft")>]
+[<assembly: AssemblyCopyright("Copyright © Dualsoft 2016")>]
 [<assembly: AssemblyCulture("")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyTitle("Dualsoft Engine packages")>]
@@ -22,5 +22,5 @@ open System.Reflection
 ///DS Language Version (Language Parser 수정시만 변경 Ver : 1.0.0.1)
 [<assembly: AssemblyInformationalVersion($"1.0.0.1")>]
 ///DS Engine Version
-[<assembly: AssemblyFileVersion($"0.9.8.13")>]
+[<assembly: AssemblyFileVersion($"0.9.8.18")>]
 do ()

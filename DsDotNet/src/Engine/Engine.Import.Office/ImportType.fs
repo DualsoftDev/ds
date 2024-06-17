@@ -52,7 +52,6 @@ module ImportType =
         | DataType = 1
         | Address = 2
 
-
     [<Flags>]
     type ManualColumn_ControlPanel =
         | Name = 0

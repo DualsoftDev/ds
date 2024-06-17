@@ -60,23 +60,19 @@ module CoreExtensionModule =
     let getPureReal(v:Vertex)  : Real =
         match v with
         | :? Real   as r  -> r
-        | :? RealExF as rf -> rf.Real
         | :? Alias  as a  ->
             match a.TargetWrapper.GetTarget() with
             | :? Real as real -> real
-            | :? RealExF as rf -> rf.Real
             | _ -> failwithlog $"{v.Name} is not real!!"
         |_ -> failwithlog $"{v.Name} is not real!!"
 
     let getPure(v:Vertex) : Vertex =
         match v with
         | :? Real   as r  -> r:> Vertex 
-        | :? RealExF as rf -> rf.Real:> Vertex 
         | :? Call  as c  -> c :> Vertex 
         | :? Alias  as a  ->
             match a.TargetWrapper.GetTarget() with
             | :? Real as real -> real:> Vertex 
-            | :? RealExF as rf -> rf.Real:> Vertex 
             | :? Call as call -> call :> Vertex 
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
@@ -230,8 +226,10 @@ module CoreExtensionModule =
         member x.ManualTag = x.ExternalTags.First(fun (t,_)-> t = ManualTag)|> snd
         member x.ErrorSensorOn = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)|> snd
         member x.ErrorSensorOff = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)|> snd
-        member x.ErrorTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorTimeOver)|> snd
-        member x.ErrorTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorTimeShortage)|> snd
+        member x.ErrorOnTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeOver)|> snd
+        member x.ErrorOnTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeShortage)|> snd
+        member x.ErrorOffTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeOver)|> snd
+        member x.ErrorOffTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeShortage)|> snd
 
     let inValidActionTags (x:DsSystem) = 
                     x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)

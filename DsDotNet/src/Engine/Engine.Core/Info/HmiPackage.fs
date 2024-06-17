@@ -21,8 +21,6 @@ module HmiPackageModule =
         TimeOffOverErrorLamp : HMILamp      
         ShortErrorLamp    : HMILamp        
         OpenErrorLamp     : HMILamp        
-        TrendOnErrorLamp  : HMILamp   
-        TrendOffErrorLamp  : HMILamp   
         ErrorTotalLamp    : HMILamp   
 
     } with

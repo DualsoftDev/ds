@@ -98,6 +98,7 @@ type DsSystem with
             yield (f.pause_btn.Expr , s._off.Expr) --| (f.pause_lamp , getFuncName())
             yield (f.emg_btn.Expr   , s._off.Expr) --| (f.emg_lamp   , getFuncName())
             yield (f.test_btn.Expr  , s._off.Expr) --| (f.test_lamp  , getFuncName())
+            yield (f.home_btn.Expr  , s._off.Expr) --| (f.home_lamp  , getFuncName())
             yield (f.clear_btn.Expr , s._off.Expr) --| (f.clear_lamp , getFuncName())
             yield (f.ready_btn.Expr , s._off.Expr) --| (f.ready_lamp , getFuncName())
     ]

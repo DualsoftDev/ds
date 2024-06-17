@@ -146,8 +146,6 @@ type TagKindExt =
                                                       VertexTag.errorTRx
                                                     , VertexTag.rxErrOpen
                                                     , VertexTag.rxErrShort
-                                                    , VertexTag.rxErrOnTrend
-                                                    , VertexTag.rxErrOffTrend
                                                     , VertexTag.workErrOriginGoing
                                                     
                                                     , VertexTag.txErrOnTimeOver
@@ -186,7 +184,7 @@ type TagKindExt =
                                                         , SystemTag.clear_btn)
 
             |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_state
-                                                        , FlowTag.flowPause
+                                                        , FlowTag.pause_state
                                                         , FlowTag.flowStopError
                                                         )
 

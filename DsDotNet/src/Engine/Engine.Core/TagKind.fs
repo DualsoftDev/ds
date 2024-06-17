@@ -82,138 +82,126 @@ module TagKindList =
     /// 10000 ~ 10999
     [<Flags>]
     type FlowTag    =  
-    |auto_btn                  = 10001
-    |manual_btn                = 10002
-    |drive_btn                 = 10003
-    |pause_btn                 = 10004
-    |ready_btn                 = 10005
-    |clear_btn                 = 10006
-    |emg_btn                   = 10007
-    |test_btn                  = 10008
+    | auto_btn                  = 10001
+    | manual_btn                = 10002
+    | drive_btn                 = 10003
+    | pause_btn                 = 10004
+    | ready_btn                 = 10005
+    | clear_btn                 = 10006
+    | emg_btn                   = 10007
+    | test_btn                  = 10008
+    | home_btn                  = 10009
 
-    |auto_lamp                 = 10021
-    |manual_lamp               = 10022
-    |drive_lamp                = 10023
-    |pause_lamp                = 10024
-    |ready_lamp                = 10025
-    |clear_lamp                = 10026
-    |emg_lamp                  = 10027
-    |test_lamp                 = 10028
-    |home_lamp                 = 10029
+    | auto_lamp                 = 10021
+    | manual_lamp               = 10022
+    | drive_lamp                = 10023
+    | pause_lamp                = 10024
+    | ready_lamp                = 10025
+    | clear_lamp                = 10026
+    | emg_lamp                  = 10027
+    | test_lamp                 = 10028
+    | home_lamp                 = 10029
     
-    |flowPause                 = 10040
-    |flowStopError             = 10041
-    |flowReadyCondition        = 10042
-    |flowDriveCondition        = 10043
+    | flowStopError             = 10041
+    | flowReadyCondition        = 10042
+    | flowDriveCondition        = 10043
 
 
 
       //복수 mode  존재 불가
-    |idle_mode                 = 10100
-    |auto_mode                 = 10101
-    |manual_mode               = 10102
+    | idle_mode                 = 10100
+    | auto_mode                 = 10101
+    | manual_mode               = 10102
 
     //복수 state  존재 가능
-    |drive_state                = 10103
-    |test_state                 = 10104
-    |error_state                = 10105
-    |emergency_state            = 10106
-    |ready_state                = 10107
-    |origin_state               = 10108
-    |going_state                = 10109
+    | drive_state                = 10103
+    | test_state                 = 10104
+    | error_state                = 10105
+    | emergency_state            = 10106
+    | ready_state                = 10107
+    | origin_state               = 10108
+    | going_state                = 10109
+    | pause_state                = 10110
 
     /// 11000 ~ 11999
     [<Flags>]
     type VertexTag  =
-    |startTag                  = 11000
-    |resetTag                  = 11001
-    |endTag                    = 11002
+    | startTag                  = 11000
+    | resetTag                  = 11001
+    | endTag                    = 11002
     
-    //|spare                   = 11003
-    //|spare                   = 11004
-    //|spare                   = 11005
 
-    |ready                     = 11006
-    |going                     = 11007
-    |finish                    = 11008
-    |homing                    = 11009
-    |origin                    = 11010
-    |pause                     = 11011
-    |errorTRx                  = 11014
-    |realOriginAction          = 11015
-    |realOriginInit            = 11016
-    |realOriginButton          = 11017
-    |relayReal                 = 11018
+    | ready                     = 11006
+    | going                     = 11007
+    | finish                    = 11008
+    | homing                    = 11009
+    | origin                    = 11010
+    | pause                     = 11011
+    | errorTRx                  = 11014
+    | realOriginAction          = 11015
+    | realOriginInit            = 11016
+    | realOriginButton          = 11017
+    | relayReal                 = 11018
     
-    |forceStart                = 11019
-    |forceReset                = 11020
-    |forceOn                   = 11021
-    |forceOff                  = 11022
+    | forceStart                = 11019
+    | forceReset                = 11020
+    | forceOn                   = 11021
+    | forceOff                  = 11022
 
-    |counter                   = 11023
-    |timerOnDelay              = 11024
-    |goingRealy                = 11025
-    |realData                  = 11026
-    |realSync                  = 11027
-    |callMemo                  = 11028
+    | counter                   = 11023
+    | timerOnDelay              = 11024
+    | goingRealy                = 11025
+    | realData                  = 11026
+    | realLink                  = 11027
+    | callMemo                  = 11028
 
-    |callCommandEnd            = 11030
-    |callOperatorValue         = 11031
+    | callCommandEnd            = 11030
+    | callOperatorValue         = 11031
     
-    |dummyCoinSTs              = 11032
-    |dummyCoinRTs              = 11033
-    |dummyCoinETs              = 11034
+    | dummyCoinSTs              = 11032
+    | dummyCoinRTs              = 11033
+    | dummyCoinETs              = 11034
 
 
-    |txErrOnTimeShortage        = 11050
-    |txErrOnTimeOver            = 11051
-    |txErrOffTimeShortage       = 11052
-    |txErrOffTimeOver           = 11053
-    |rxErrShort                 = 11054
-    |rxErrShortRising           = 11055
-    |rxErrOpen                  = 11056
-    |rxErrOpenRising            = 11057
-    |rxErrOnTrend               = 11058
-    |rxErrOffTrend              = 11059
-    |workErrOriginGoing         = 11060
+    | txErrOnTimeShortage        = 11050
+    | txErrOnTimeOver            = 11051
+    | txErrOffTimeShortage       = 11052
+    | txErrOffTimeOver           = 11053
+    | rxErrShort                 = 11054
+    | rxErrShortRising           = 11055
+    | rxErrOpen                  = 11056
+    | rxErrOpenRising            = 11057
+    | workErrOriginGoing         = 11060
 
     /// 12000 ~ 12999
     [<Flags>]
     type ApiItemTag =
-    |planSet                   = 12000
-    //|planRst                   = 12001  //not use
-    |planEnd                   = 12002
-    |sensorLinking             = 12003
-    |sensorLinked              = 12004
-  
-    
-
-    /// 13000 ~ 13999
-    [<Flags>]
-    type LinkTag    =
-    |LinkStart                 = 13000
-    |LintReset                 = 13001
+    | planSet                   = 12000
+    | planEnd                   = 12002
+    | sensorLinking             = 12003
+    | sensorLinked              = 12004
+      
 
     /// 14000 ~ 14999
     [<Flags>]
     type ActionTag    =
-    |ActionIn                 = 14000
-    |ActionOut                = 14001
-    |ActionMemory             = 14002
+    | ActionIn                 = 14000
+    | ActionOut                = 14001
+    | ActionMemory             = 14002
 
     /// 15000 ~ 14999
     [<Flags>]
     type HwSysTag    =
-    |HwSysIn                     = 15000
-    |HwSysOut                    = 15001
-    |HwStopConditionErrLamp      = 15010
-    |HwStopEmergencyErrLamp      = 15011
+    | HwSysIn                     = 15000
+    | HwSysOut                    = 15001
+    | HwStopConditionErrLamp      = 15010
+    | HwStopEmergencyErrLamp      = 15011
     
     /// 16000 ~ 16999
     [<Flags>]
     type VariableTag    =
-    |PcSysVariable                = 16000
-    |PcUserVariable               = 16001
-    |PlcSysVariable               = 16002
-    |PlcUserVariable              = 16003
+    | PcSysVariable                = 16000
+    | PcUserVariable               = 16001
+    | PlcSysVariable               = 16002
+    | PlcUserVariable              = 16003
     

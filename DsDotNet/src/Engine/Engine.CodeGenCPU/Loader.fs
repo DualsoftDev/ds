@@ -49,7 +49,6 @@ module CpuLoader =
         for edge in rootEdges do
             match edge.Target with
             | :? Real            -> ()
-            | :? RealExF         -> ()
             | :? Call as c  ->
                 match c.Parent with
                 | DuParentReal _ -> ()
@@ -61,7 +60,6 @@ module CpuLoader =
                     | DuParentFlow _ ->
                         match a.TargetWrapper with
                         | DuAliasTargetReal _         -> ()
-                        | DuAliasTargetRealExFlow _   -> ()
                         | DuAliasTargetCall _ -> ()//failwithlog $"AliasCall vertex can't using Target [check : {edge.ToText()}]"
 
             |_ -> failwithlog $"Error {getFuncName()}"
@@ -82,7 +80,7 @@ module CpuLoader =
                 match v with
                 | :? Real
                     ->  v.TagManager <- VertexMReal(v)
-                | (:? Call | :? RealExF | :? Alias)
+                | (:? Call | :? Alias)
                     -> v.TagManager <-  VertexMCall(v)
                 | _ -> failwithlog (getFuncName()))
 

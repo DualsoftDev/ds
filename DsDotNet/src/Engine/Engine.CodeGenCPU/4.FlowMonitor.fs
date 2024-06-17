@@ -12,13 +12,13 @@ type Flow with
 
     member f.F1_FlowError() =
         let set = f.Graph.Vertices.OfType<Real>().SelectMany(fun r->r.Errors).ToOrElseOff()
-        let rst = f.clear_btn.Expr
+        let rst = f.ClearExpr
         (set, rst) ==| (f.stopError, getFuncName())
     
     member f.F2_FlowPause() =
-        let set = f.PauseHMIExpr <||> f.HWBtnPauseExpr
-        let rst = f.clear_btn.Expr
-        (set, rst) ==| (f.pause, getFuncName())
+        let set = f.PauseExpr
+        let rst = f.ClearExpr
+        (set, rst) ==| (f.p_st, getFuncName())
 
     member f.F3_FlowReadyCondition() =
         let set = f.HWReadyConditionsToAndElseOn

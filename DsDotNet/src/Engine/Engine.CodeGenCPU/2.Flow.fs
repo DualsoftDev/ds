@@ -20,11 +20,12 @@ type VertexManager with
             then shareds.Select(fun s -> s.Vertex.GetWeakStartRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
-        let sets = (startCausals <||> wsShareds <||> v.SF.Expr <||>  plans <||> actionLinks)
+        let semiAuto = v.SF.Expr  <&&> v.Flow.d_st.Expr  
+        let sets = (startCausals <||> wsShareds <||>  plans <||> actionLinks <||> semiAuto)
                    <&&> real.SafetyExpr
 
         let rsts  = (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
-        [ (sets, rsts) ==| (v.ST, getFuncName()) ]//조건에 의한 릴레이
+        (sets, rsts) ==| (v.ST, getFuncName())//조건에 의한 릴레이
 
 
     member v.F2_RootReset()  =
@@ -46,14 +47,13 @@ type VertexManager with
                     )
 
         let rsts  = real.V.R.Expr
-        [(sets, rsts) ==| (v.RT, getFuncName())]//조건에 의한 릴레이
+        (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이
 
 
     member v.F3_VertexEndWithOutReal() =
         let sets =
             match v.Vertex  with
             | :? Alias   as rf -> rf.V.Vertex.GetPure().V.ET.Expr
-            | :? RealExF as rf -> rf.V.Vertex.GetPure().V.ET.Expr
             | _ ->
                 failwithlog "Error"
 
@@ -71,3 +71,8 @@ type VertexManager with
 
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())
+
+    member v.F5_HomeCommand() =
+        let real = v.Vertex :?> Real
+        (real.Flow.HomeExpr , v._off.Expr) --| (real.VR.OA, getFuncName())
+        

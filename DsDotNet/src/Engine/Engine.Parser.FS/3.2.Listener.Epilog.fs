@@ -219,7 +219,6 @@ module EtcListenerModule =
                             match vertex with
                             | :? Real as r -> return DuSafetyConditionReal r
                             | :? Call as c -> return DuSafetyConditionCall c
-                            | :? RealOtherFlow as o -> return DuSafetyConditionRealExFlow o
                             | _ -> failwithlog "Error"
 
                         | None ->

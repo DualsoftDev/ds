@@ -117,9 +117,9 @@ module ConvertCpuDsSystem =
             
          
         member private x.GenerationCallAlarmMemory()  = 
-            for call in x.GetVerticesOfJobCalls()
-                            .Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)   
-                            |> Seq.sortBy (fun c -> c.Name) do
+            let calls = x.GetAlarmCalls()
+
+            for call in calls do
 
                 let cv =  call.TagManager :?> VertexMCall
                 let target = getTarget(x)
@@ -129,17 +129,13 @@ module ConvertCpuDsSystem =
                 cv.ErrOnTimeShortage.Address    <- getMemory call.Name  target 
                 cv.ErrOffTimeOver.Address       <- getMemory call.Name  target 
                 cv.ErrOffTimeShortage.Address   <- getMemory call.Name  target 
-                cv.ErrOnTrend.Address           <- getMemory call.Name  target 
-                cv.ErrOffTrend.Address          <- getMemory call.Name  target 
-                call.ExternalTags.Add(ManualTag, cv.SF :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOn, cv.ErrShort:> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOff, cv.ErrOpen  :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeOver, cv.ErrOnTimeOver :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOnTimeShortage :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeOver, cv.ErrOffTimeOver :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOffTimeShortage :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOnTrend :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorTimeShortage, cv.ErrOffTrend :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorOnTimeOver, cv.ErrOnTimeOver :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorOnTimeShortage, cv.ErrOnTimeShortage :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorOffTimeOver, cv.ErrOffTimeOver :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorOffTimeShortage, cv.ErrOffTimeShortage :> IStorage) |>ignore
+         
 
         member private x.GenerationRealAlarmMemory()  = 
             for real in x.GetVertices().OfType<Real>() |> Seq.sortBy (fun c -> c.Name) do
@@ -147,7 +143,7 @@ module ConvertCpuDsSystem =
                 rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty,DuBOOL, rm.Name, false, IOType.Memory, getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
-                
+                 
         member private x.GenerationFlowHMIMemory()  = 
                     x.GetFlowsOrderByName()
                     |> Seq.iter (fun flow ->
@@ -158,12 +154,10 @@ module ConvertCpuDsSystem =
                             fm.GetFlowTag(FlowTag.auto_mode).Address    <- getMemory name target
                             fm.GetFlowTag(FlowTag.manual_btn).Address   <- getMemory name target
                             fm.GetFlowTag(FlowTag.manual_mode).Address  <- getMemory name target
-                            fm.GetFlowTag(FlowTag.ready_btn).Address    <- getMemory name target    //test ahn 삭제
-                            fm.GetFlowTag(FlowTag.ready_state).Address  <- getMemory name target    //test ahn 삭제
                             fm.GetFlowTag(FlowTag.drive_btn).Address    <- getMemory name target
                             fm.GetFlowTag(FlowTag.drive_state).Address  <- getMemory name target
                             fm.GetFlowTag(FlowTag.pause_btn).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.flowPause).Address    <- getMemory name target
+                            fm.GetFlowTag(FlowTag.pause_state).Address  <- getMemory name target
                             )
 
         member private x.GenerationRealHMIMemory()  = 
@@ -238,8 +232,8 @@ module ConvertCpuDsSystem =
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send
-        member x.GetPSs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.PS)
-        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TXs.Contains(r)).Select(fun api -> api.SL1)
+        member x.GetPSs(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.PS)
+        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.SL1)
 
         member x.GetReadAbleTags() =
             SystemTag.GetValues(typeof<SystemTag>)

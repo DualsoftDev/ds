@@ -20,12 +20,11 @@ type VertexMReal with
             let set = 
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
                 then
-                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !!v.SYNC.Expr
+                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !!v.Link.Expr
                 else                          
                     (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr  
 
-            let rst = v.RT.Expr <&&> real.CoinAlloffExpr  //test ahn 아래형식 테스트 필요
-            //let rst = (v.RT.Expr <||> v.OFF.Expr) <&&> !!real.CoinAllContacts.ToOrElseOff()
+            let rst = v.RT.Expr <&&> real.CoinAlloffExpr  
 
             //수식 순서 중요
             // 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
@@ -37,13 +36,13 @@ type VertexMReal with
         ]
 
     member v.R3_RealStartPoint() =
-        let set = (v.G.Expr <&&> !!v.RR.Expr<&&> v.SYNC.Expr)
+        let set = (v.G.Expr <&&> !!v.RR.Expr<&&> v.Link.Expr)
         let rst = v._off.Expr
 
         (set, rst) --| (v.RO, getFuncName())   
 
 
-    member v.R4_RealSync() =
+    member v.R4_RealLink() =
         let real = v.Vertex :?> Real
         let set = real.Graph.Vertices.OfType<Call>()
                       .Where(fun call -> call.IsJob)
@@ -51,7 +50,7 @@ type VertexMReal with
                       .Select(fun api-> api.SL2).ToAndElseOn()
 
         let rst = v._off.Expr
-        (set, rst) --| (v.SYNC, getFuncName())
+        (set, rst) --| (v.Link, getFuncName())
       
     member v.R5_DummyDAGCoils() =
         let real = v.Vertex :?> Real
@@ -70,7 +69,7 @@ type VertexMReal with
 
     member v.R7_RealGoingOriginError() =
         let dop = v.Flow.d_st.Expr
-        let rst = v.Flow.clear_btn.Expr
+        let rst = v.Flow.ClearExpr
         [
             if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
             then 
@@ -78,23 +77,14 @@ type VertexMReal with
                 yield (checking, rst) ==| (v.ErrGoingOrigin , getFuncName())
         ]
         
-    //member v.R7_RealOriginTimeOut() =
-    //    let real = v.Vertex :?> Real
-    //    let dop = v.Flow.d_st.Expr
-    //    let rst = v.Flow.clear_btn.Expr
-    //    [
-    //        if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
-    //        then 
-    //            let running = v.G.Expr <&&> !!v.RR.Expr <&&> dop
-    //            yield running --@ (v.TOUTOrigin, v.System._tout.Value, getFuncName())
-    //            yield (v.TOUTOrigin.DN.Expr, rst) ==| (v.TOUTOriginErr , getFuncName())
-    //    ]
+ 
 
 type VertexManager with
     member v.R1_RealInitialStart() = (v :?> VertexMReal).R1_RealInitialStart()
     member v.R2_RealJobComplete() : CommentedStatement seq = (v :?> VertexMReal).R2_RealJobComplete()
     member v.R3_RealStartPoint()  = (v :?> VertexMReal).R3_RealStartPoint()
-    member v.R4_RealSync()  = (v :?> VertexMReal).R4_RealSync()
+    member v.R4_RealLink()  = (v :?> VertexMReal).R4_RealLink()
     member v.R5_DummyDAGCoils()  = (v :?> VertexMReal).R5_DummyDAGCoils()
     member v.R6_RealDataMove()  = (v :?> VertexMReal).R6_RealDataMove()
     member v.R7_RealGoingOriginError()  = (v :?> VertexMReal).R7_RealGoingOriginError()
+    

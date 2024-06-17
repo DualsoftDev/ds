@@ -52,10 +52,8 @@ module rec ViewModule =
                     match a.TargetWrapper with
                     | DuAliasTargetReal r -> r.Name, VREAL
                     | DuAliasTargetCall c -> c.Name, VCALL
-                    | DuAliasTargetRealExFlow rf -> rf.Name, VREALEx
                 | :? Call as c -> c.Name, VCALL
                 | :? Real as c -> c.Name, VREAL
-                | :? RealExF as c -> c.Name, VREALEx 
                 | _ -> coreVertex.Name, VFLOW
 
             ViewNode(name, vType, Some(coreVertex), None, None, None)
@@ -77,7 +75,6 @@ module rec ViewModule =
         member x.IsVertex =
             viewType = ViewType.VREAL
             || viewType = ViewType.VCALL
-            || viewType = ViewType.VREALEx
 
         member x.GetEdges() = edges.ToArray()
 
@@ -131,11 +128,12 @@ module rec ViewModule =
         member x.UIKey =
             if coreVertex.IsSome then   
                 let vKey = coreVertex.Value.QualifiedName.GetHashCode()
-                if coreVertex.Value :? RealExF 
-                then
-                    $"{name};{vKey}"
-                else
-                    $"{x.PureVertex.Value.Name};{vKey}"
+                match coreVertex.Value with
+                | :? Alias as a ->
+                    if a.IsOtherFlowReal 
+                    then $"{a.Name};{vKey}"  
+                    else  $"{name};{vKey}"
+                | _ -> $"{x.PureVertex.Value.Name};{vKey}"
             else
                 $"{name};{x.GetHashCode()}"
 

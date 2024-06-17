@@ -213,12 +213,6 @@ module CoreModule =
         //member val RealData:byte[] = [||] with get, set
         member val RealData:byte = 0uy with get, set //array타입으로 향후 변경
 
-    and RealOtherFlow private (names:Fqdn, target:Real, parent)  =
-        inherit Indirect(names, parent)
-        member _.Real = target
-        interface ISafetyConditoinHolder with
-            member val SafetyConditions = HashSet<SafetyCondition>()
-
     type CallOptions =
         | JobType of Job
         | CommadFuncType of CommandFunction
@@ -276,9 +270,11 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    and Alias private (name:string, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
-        inherit Indirect(name, parent)
+    and Alias private (names:string seq, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
+        inherit Indirect(names, parent)
         member _.TargetWrapper = target
+        member _.IsOtherFlowReal = match target.RealTarget() with
+                                   | Some (r: Real) -> r.Flow <> parent.GetFlow() | _ -> false
 
     type InOutDataType = DataType*DataType
 
@@ -384,12 +380,10 @@ module CoreModule =
         member _.ApiSystem = system
         member _.TimeParam = timeParam
       
-        member val TXs = createQualifiedNamedHashSet<Real>()
-        member val RXs = createQualifiedNamedHashSet<Real>()
+        member val TX = getNull<Real>() with get, set
+        member val RX = getNull<Real>() with get, set
         override x.ToText() = 
-            let txs = x.TXs.Select(fun r->r.Name) |> String.concat(", ")
-            let rxs = x.RXs.Select(fun r->r.Name) |> String.concat(", ")
-            $"{name}\r\n[{txs} ~ {rxs}]"
+            $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
                  
     /// API 의 reset 정보:  "+" <||> "-";
     and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
@@ -424,38 +418,27 @@ module CoreModule =
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call
-        | DuAliasTargetRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
         member x.RealTarget() =
             match x with | DuAliasTargetReal   r -> Some r |_ -> None
         member x.CallTarget() =
             match x with | DuAliasTargetCall   c -> Some c |_ -> None
-        member x.RealExFlowTarget() =
-            match x with | DuAliasTargetRealExFlow rx -> Some rx |_ -> None
    
     and SafetyCondition =
         | DuSafetyConditionReal of Real
         | DuSafetyConditionCall of Call
-        | DuSafetyConditionRealExFlow of RealOtherFlow    // MyFlow or RealOtherFlow 의 Real 일 수 있다.
 
     type SafetyCondition with
         member x.GetSafetyCall() =
             match x with
             | DuSafetyConditionReal _ -> None
             | DuSafetyConditionCall c -> Some c
-            | DuSafetyConditionRealExFlow _ -> None
 
         member x.GetSafetyReal() =
             match x with
             | DuSafetyConditionReal r -> Some r
             | DuSafetyConditionCall _ -> None 
-            | DuSafetyConditionRealExFlow _ -> None
 
-        member x.GetSafetyRealExFlow() =
-            match x with
-            | DuSafetyConditionReal _ -> None
-            | DuSafetyConditionCall _ -> None
-            | DuSafetyConditionRealExFlow rf -> Some rf
-
+  
           ///Vertex의 부모의 타입을 구분한다.
     type ParentWrapper =
         | DuParentFlow of Flow //Real/Call/Alias 의 부모
@@ -488,14 +471,12 @@ module CoreModule =
             match x with
             | DuSafetyConditionReal real -> real
             | DuSafetyConditionCall call -> call
-            | DuSafetyConditionRealExFlow  realOtherFlow -> realOtherFlow
 
     type AliasTargetWrapper with
         member x.GetTarget() : Vertex =
             match x with
             | DuAliasTargetReal real -> real
             | DuAliasTargetCall call -> call
-            | DuAliasTargetRealExFlow otherFlowReal -> otherFlowReal
 
     type Real with
         static member Create(name: string, flow) =
@@ -525,15 +506,6 @@ module CoreModule =
             cmd.CommandCode <- excuteCode
             cmd 
 
-    type RealExF = RealOtherFlow
-    type RealOtherFlow with
-        static member Create(otherFlowReal:Real, parent:ParentWrapper) =
-            let ofn, ofrn = otherFlowReal.Flow.Name, otherFlowReal.Name
-            let ofr = RealOtherFlow( [| ofn; ofrn |], otherFlowReal, parent)
-            parent.GetGraph().AddVertex(ofr) |> verifyM $"중복 other flow real call [{ofn}.{ofrn}]"
-            ofr
-
-        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
 
     let addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
     type Call with
@@ -575,33 +547,30 @@ module CoreModule =
                     match target with
                     | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow)
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs()
-                    | DuAliasTargetRealExFlow rf -> rf.Real.GetAliasTargetToDs(flow)
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.Mnemonics.AddIfNotContains(name) |> ignore
                 | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
 
             createAliasDefOnDemand()
-            let alias = Alias(name, target, parent)
+            let alias = Alias(name.DeQuoteOnDemand().SplitBy('.'), target, parent)
             if parent.GetCore() :? Real
             then
-                (target.RealTarget().IsNone && target.RealExFlowTarget().IsNone)
+                target.RealTarget().IsNone
                 |> verifyM $"Vertex {name} children type error"
 
             parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{name}]"
             alias
 
     type ApiItem with
-        member x.AddTXs(txs:Real seq) = txs |> Seq.forall(fun tx -> x.TXs.Add(tx))
-        member x.AddRXs(rxs:Real seq) = rxs |> Seq.forall(fun rx -> x.RXs.Add(rx))
         static member Create(name, system) =
             let cp = ApiItem(name, system, None)
             system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
             cp
-        static member Create(name, system, txs, rxs) =
+        static member Create(name, system, tx, rx) =
             let ai4e = ApiItem.Create(name, system)
-            ai4e.AddTXs txs |> ignore
-            ai4e.AddRXs rxs |> ignore
+            ai4e.TX <-  tx
+            ai4e.RX <-  rx
             ai4e
 
 

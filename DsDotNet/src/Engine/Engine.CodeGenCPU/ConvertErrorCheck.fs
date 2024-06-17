@@ -40,9 +40,9 @@ module ConvertErrorCheck =
           for coin in sys.GetVerticesOfJobCalls() do
                 for td in coin.TargetJob.DeviceDefs do
                     let api = td.ApiItem
-                    if api.RXs.IsEmpty() then
+                    if api.RX.IsNull() then
                         failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
-                    if api.TXs.IsEmpty() then
+                    if api.TX.IsNull() then
                         failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
                     if td.OutAddress <> TextSkip && coin.TargetJob.ActionType = JobActionType.Push 

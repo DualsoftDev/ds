@@ -12,8 +12,7 @@ module ValidateMoudle =
 
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) =
         let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
-                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome
-                                        || a.TargetWrapper.RealExFlowTarget().IsSome)
+                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
 
         if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
 
@@ -23,7 +22,6 @@ module ValidateMoudle =
             .Iter(fun edge ->
                     match getPure edge.Target with 
                     | :? Real    -> ()
-                    | :? RealExF -> ()
                     | _ -> failwithlog $"Reset 연결은 Work 타입에만 연결가능합니다. \t[{edge.Source.Name} |> {edge.Target.Name}]"
                     //| _ -> failwithlog $"ResetEdge can only be used on Type Work \t[{edge.Source.Name} |> {edge.Target.Name}]"
             )
@@ -35,7 +33,6 @@ module ValidateMoudle =
                 .Iter(fun edge ->
                     match getPure edge.Target with 
                     | :? Real    -> ()
-                    | :? RealExF -> ()
                     | _ -> failwithlog $"Action 시작 연결은 Work 내에서만 가능합니다. Work-Action 그룹작업이 필요합니다. [{edge.Source.Name} > {edge.Target.Name}]"
                     //| _ -> failwithlog $"The 'Action' start command must occur within the 'Work'. ((Work-Action Group work is required.))[{edge.Source.Name} > {edge.Target.Name}]"
                 )

@@ -118,7 +118,7 @@ module ModelBuildupTests1 =
 
             let flow2 = Flow.Create("F2", system)
 
-            let real2 = RealOtherFlow.Create(real, DuParentFlow flow2)
+            let real2 = Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow flow2)
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
@@ -147,8 +147,8 @@ module ModelBuildupTests1 =
         member __.``Model with export api test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
             let real2 = Real.Create("Main2", flow)
-            let adv = ApiItem.Create("Adv", system, [real], [real])
-            let ret = ApiItem.Create("Ret", system, [real2], [real2])
+            let adv = ApiItem.Create("Adv", system, real, real)
+            let ret = ApiItem.Create("Ret", system, real2, real2)
             [ adv; ret; ].Iter(system.ApiItems.Add >> ignore)
 
             ApiResetInfo.Create(system, "Adv", ModelingEdgeType.InterlockWeak, "Ret", false) |> ignore

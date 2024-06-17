@@ -99,7 +99,9 @@ module MemoryAllocator =
                             getXgkBitText(typ, bitIndex)
                         else
                             failwithlog "ERROR"
+#if DEBUG
                     logDebug "Address %s allocated" address
+#endif
                     address
 
 

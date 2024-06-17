@@ -7,14 +7,14 @@ open ConvertCoreExtUtils
 [<AutoOpen>]
 module ConvertCpuApiItem =
     
-    let getLimitFromReals(api:ApiItem) = 
+    //let getLimitFromReals(api:ApiItem) = 
 
-        let systemGraph = api.ApiSystem.MergeFlowGraphs()
-        let reals = api.TXs.GetPathReals(systemGraph)
+    //    let systemGraph = api.ApiSystem.MergeFlowGraphs()
+    //    let reals = api.TXs.GetPathReals(systemGraph)
         
-        let timeout = reals.Sum(fun r->r.TimeParam.Value.USL)
-        let timeShort = reals.Sum(fun r->r.TimeParam.Value.LSL)
-        timeout, timeShort
+    //    let timeout = reals.Sum(fun r->r.TimeParam.Value.USL)
+    //    let timeShort = reals.Sum(fun r->r.TimeParam.Value.LSL)
+    //    timeout, timeShort
 
 
     type ApiItem with
@@ -25,8 +25,8 @@ module ConvertCpuApiItem =
         ///sensorLinked
         member a.SL2     = getAM(a).SL2
     
-        member a.RxETs       = a.RXs |> Seq.map getVMReal |> Seq.map(fun f->f.ET)
-        member a.TxSTs       = a.TXs |> Seq.map getVMReal |> Seq.map(fun f->f.ST)
+        member a.RxET    = getVMReal(a.RX).ET 
+        member a.TxST    = getVMReal(a.TX).ST 
         //member a.UpperLimit =
         //    match a.TimeParam with
         //    |Some t -> t.USL 

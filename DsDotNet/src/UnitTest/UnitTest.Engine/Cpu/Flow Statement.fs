@@ -18,12 +18,12 @@ type Spec02_FlowStatement() =
     [<Test>]
     member __.``F1 Root Start`` () =
         for real in t.Reals do
-            real.F1_RootStart() |> doChecks
+            real.F1_RootStart() |> doCheck
 
     [<Test>]
     member __.``F2 Root Reset`` () =
         for real in t.Reals do
-            real.F2_RootReset() |> doChecks
+            real.F2_RootReset() |> doCheck
 
     [<Test>]
     member __.``F3 VertexEnd WithOutReal`` () =

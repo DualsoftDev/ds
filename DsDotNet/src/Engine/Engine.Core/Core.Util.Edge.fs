@@ -85,8 +85,7 @@ module EdgeModule =
 
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) =
         let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
-                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome
-                                        || a.TargetWrapper.RealExFlowTarget().IsSome)
+                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
 
         if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
 
@@ -259,13 +258,13 @@ module EdgeModule =
         let apiNResetNodes =
             sys.ApiItems
             |> Seq.map (fun api ->
-                let resetAbleReals = appendInterfaceReset  graph (api.TXs.OfType<Vertex>())
+                let resetAbleReals = appendInterfaceReset  graph [api.TX]
                 api, resetAbleReals
             )
         apiNResetNodes
         |> Seq.iter (fun (api, resetAbleReals) ->
             sys.ApiItems
-                .Where(fun f -> f <> api && f.RXs.Overlaps(resetAbleReals))
+                .Where(fun f -> f <> api && resetAbleReals.Contains(f.RX))
                 .Iter (fun f -> 
                         ApiResetInfo.Create(sys, api.Name, "|>"|> toModelEdge ,f.Name, true) |> ignore
             )
@@ -287,14 +286,11 @@ module EdgeModule =
     let checkRealEdgeErrExist (sys:DsSystem) (bStart:bool)  =
         let vs = sys.GetVertices()
         let reals = vs.OfType<Real>()
-        //let callOperator = vs.OfType<Call>().Where(fun f -> f.IsOperator).Cast<Vertex>()
         let errors = System.Collections.Generic.List<Real>()
 
         for real in reals do
             let realAlias_ = vs.GetAliasTypeReals().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
-            let realExs_ = vs.OfType<RealExF>().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
-            let realExAlias_ = vs.GetAliasTypeRealExs().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
-            let checkList = ([real:>Vertex] @ realAlias_ @ realExs_ @ realExAlias_)
+            let checkList = ([real:>Vertex] @ realAlias_ )
 
             let checks = if bStart then checkList |> Seq.collect(fun f -> getStartRootEdges(f))
                                    else checkList |> Seq.collect(fun f -> getResetRootEdges(f))

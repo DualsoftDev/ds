@@ -339,7 +339,7 @@
                                     <Element ElementType="6" Coordinate="30733">
                                         P00022
                                     </Element>
-                                    <Element ElementType="2" Coordinate="30736" Param="75"/>
+                                    <Element ElementType="2" Coordinate="30736" Param="78"/>
                                     <Element ElementType="14" Coordinate="30814">
                                         M00181
                                     </Element>
@@ -348,7 +348,7 @@
                                     <Element ElementType="6" Coordinate="31745">
                                         M00181
                                     </Element>
-                                    <Element ElementType="2" Coordinate="31748" Param="87"/>
+                                    <Element ElementType="2" Coordinate="31748" Param="90"/>
                                     <Element ElementType="14" Coordinate="31838">
                                         P0000F
                                     </Element>

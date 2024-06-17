@@ -181,7 +181,7 @@
                                     <Element ElementType="6" Coordinate="26628">
                                         M00005
                                     </Element>
-                                    <Element ElementType="2" Coordinate="26631" Param="84"/>
+                                    <Element ElementType="2" Coordinate="26631" Param="87"/>
                                     <Element ElementType="17" Coordinate="26718">
                                         myCTR
                                     </Element>
@@ -205,7 +205,7 @@
                                     <Element ElementType="6" Coordinate="29703">
                                         M00000
                                     </Element>
-                                    <Element ElementType="2" Coordinate="29706" Param="81"/>
+                                    <Element ElementType="2" Coordinate="29706" Param="84"/>
                                     <Element ElementType="14" Coordinate="29790">
                                         M00006
                                     </Element>

@@ -402,7 +402,7 @@
                                     <Element ElementType="6" Coordinate="36892">
                                         P00025
                                     </Element>
-                                    <Element ElementType="2" Coordinate="36895" Param="60"/>
+                                    <Element ElementType="2" Coordinate="36895" Param="63"/>
                                     <Element ElementType="14" Coordinate="36958">
                                         M00204
                                     </Element>
@@ -411,7 +411,7 @@
                                     <Element ElementType="6" Coordinate="37889">
                                         M00204
                                     </Element>
-                                    <Element ElementType="2" Coordinate="37892" Param="87"/>
+                                    <Element ElementType="2" Coordinate="37892" Param="90"/>
                                     <Element ElementType="14" Coordinate="37982">
                                         P00010
                                     </Element>

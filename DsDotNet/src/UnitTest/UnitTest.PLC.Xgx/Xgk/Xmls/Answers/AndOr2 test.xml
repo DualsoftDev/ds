@@ -92,7 +92,7 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="2055" Param="0"/>
                                     <Element ElementType="0" Coordinate="2057"/>
-                                    <Element ElementType="2" Coordinate="2058" Param="81"/>
+                                    <Element ElementType="2" Coordinate="2058" Param="84"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         P00007
                                     </Element>
@@ -136,7 +136,7 @@
                                         P0000C
                                     </Element>
                                     <Element ElementType="0" Coordinate="7180"/>
-                                    <Element ElementType="2" Coordinate="7181" Param="78"/>
+                                    <Element ElementType="2" Coordinate="7181" Param="81"/>
                                     <Element ElementType="14" Coordinate="7262">
                                         P0000F
                                     </Element>

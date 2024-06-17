@@ -211,7 +211,9 @@ module StatementExtensionModule =
                             let encryptedFormalParamName = getFormalParameterName funName declVarName      // e.g "_local_sum_a"
                             let value =
                                 let arg = visitor pack (exp::expPath) la.Arguments.[i]
-                                arg.BoxedEvaluatedValue |> any2expr
+                                match arg.Terminal with
+                                | Some t -> arg
+                                | None -> arg.BoxedEvaluatedValue |> any2expr
                             let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
                             DuAssign(None, value, stgVar) |> _augs.Statements.Add
                         match prjParam.TargetType with

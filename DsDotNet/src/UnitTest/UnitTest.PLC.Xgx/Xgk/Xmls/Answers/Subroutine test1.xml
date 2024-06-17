@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    Subroutine test
+    Subroutine test1
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -39,12 +39,9 @@
             </Parameters>
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
-                    <Symbols Count="3">
-                        <Symbol Name="_local_sum_a" Comment="sum(System.Int32 a)" Device="M" DevicePos="0" Type="WORD"/>
-                        <Symbol Name="_local_sum_b" Comment="sum(System.Int32 b)" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="nn1" Comment="int32 nn1 = $_t1_ADD;" Device="M" DevicePos="4" Type="WORD"/>
-                        <Symbol Name="_t1_ADD" Comment="sum(1, 2)" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="_t2_ADD" Comment="sum(1, 2)" Device="M" DevicePos="8" Type="WORD"/>
+                    <Symbols Count="1">
+                        <Symbol Name="pp" Comment="float64 pp = $_t1_ADD;" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="_t1_ADD" Comment="pi()" Device="M" DevicePos="4" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -68,7 +65,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] int32 nn1 = sum(1, 2);
+                                        [0] float64 pp = pi();
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -76,65 +73,18 @@
                                         _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2130" Param="DMOV,1,_local_sum_a"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="LADD,3,0.14,M0004"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="4097">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="81"/>
-                                    <Element ElementType="33" Coordinate="4178" Param="DMOV,2,_local_sum_b"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="6145">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="6148" Param="81"/>
-                                    <Element ElementType="33" Coordinate="6238" Param="DADD,_local_sum_a,_local_sum_b,M0006"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="7169">
+                                    <Element ElementType="6" Coordinate="3073">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="7172" Param="81"/>
-                                    <Element ElementType="33" Coordinate="7250" Param="DMOV,_t1_ADD,nn1"/>
+                                    <Element ElementType="2" Coordinate="3076" Param="81"/>
+                                    <Element ElementType="33" Coordinate="3154" Param="LMOV,_t1_ADD,pp"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="9217">
-                                        [1] $nn1 = sum(1, 2);
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="10241">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="10244" Param="81"/>
-                                    <Element ElementType="33" Coordinate="10322" Param="DMOV,1,_local_sum_a"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="12289">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="12292" Param="81"/>
-                                    <Element ElementType="33" Coordinate="12370" Param="DMOV,2,_local_sum_b"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="14337">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="14340" Param="81"/>
-                                    <Element ElementType="33" Coordinate="14430" Param="DADD,_local_sum_a,_local_sum_b,M0008"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="15361">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="2" Coordinate="15364" Param="81"/>
-                                    <Element ElementType="33" Coordinate="15442" Param="DMOV,_t2_ADD,nn1"/>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="18433" Param="90"/>
-                                    <Element ElementType="33" Coordinate="18526" Param="END">
+                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="END">
                                         END
                                     </Element>
                                 </Rung>

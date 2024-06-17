@@ -23,7 +23,9 @@ $nn1 = sum(1, 2);
 int nn2 = sum(sum(1, 2), 3);
 """
         let storages, statements = code |> x.TestCode (getFuncName())
+        statements[1].Do()
         storages["nn1"].BoxedValue === 6
+        statements[3].Do()
         storages["nn2"].BoxedValue === 18
 
 type XgiSubroutineTest() =

@@ -39,22 +39,22 @@ module rec ExpressionParserModule =
                 let newFs:IFunctionSpec = fs.Duplicate()
                 newFs.LambdaApplication <- Some { LambdaDecl = fs.LambdaDecl.Value; Arguments = args; Storages=storages }
                 match newFs with
-                | :? FunctionSpec<bool>   as fs -> DuFunction fs :> IExpression
-                | :? FunctionSpec<int8>   as fs -> DuFunction fs
-                | :? FunctionSpec<uint8>  as fs -> DuFunction fs
-                | :? FunctionSpec<int16>  as fs -> DuFunction fs
-                | :? FunctionSpec<uint16> as fs -> DuFunction fs
-                | :? FunctionSpec<int32>  as fs -> DuFunction fs
-                | :? FunctionSpec<uint32> as fs -> DuFunction fs
-                | :? FunctionSpec<int64>  as fs -> DuFunction fs
-                | :? FunctionSpec<uint64> as fs -> DuFunction fs
-                | :? FunctionSpec<single> as fs -> DuFunction fs
-                | :? FunctionSpec<double> as fs -> DuFunction fs
-                | :? FunctionSpec<string> as fs -> DuFunction fs
-                | :? FunctionSpec<char>   as fs -> DuFunction fs
+                | :? FunctionSpec<bool>   as newFs -> DuFunction newFs :> IExpression
+                | :? FunctionSpec<int8>   as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint8>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<int16>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint16> as newFs -> DuFunction newFs
+                | :? FunctionSpec<int32>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint32> as newFs -> DuFunction newFs
+                | :? FunctionSpec<int64>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint64> as newFs -> DuFunction newFs
+                | :? FunctionSpec<single> as newFs -> DuFunction newFs
+                | :? FunctionSpec<double> as newFs -> DuFunction newFs
+                | :? FunctionSpec<string> as newFs -> DuFunction newFs
+                | :? FunctionSpec<char>   as newFs -> DuFunction newFs
                 | _ -> failwith "ERROR"
-
         newExp
+
     let createExpression (parserData:ParserData) (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =
@@ -518,7 +518,7 @@ module rec ExpressionParserModule =
 
             [   for t in topLevels do
                     let text = t.GetOriginalText()
-                    //debugfn $"Toplevel: {text}"
+                    tracefn $"Toplevel: {text}"
                     assert (t.ChildCount = 1)
 
                     match t.children[0] with

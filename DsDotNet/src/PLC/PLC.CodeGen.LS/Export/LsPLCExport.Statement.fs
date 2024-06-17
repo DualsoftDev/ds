@@ -209,8 +209,10 @@ module StatementExtensionModule =
                         for i in [0..la.Arguments.Length-1] do
                             let declVarName = ld.Arguments[i].Name   // a
                             let encryptedFormalParamName = getFormalParameterName funName declVarName      // e.g "_local_sum_a"
+                            let value =
+                                let arg = visitor pack (exp::expPath) la.Arguments.[i]
+                                arg.BoxedEvaluatedValue |> any2expr
                             let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
-                            let value = la.Arguments.[i].BoxedEvaluatedValue |> any2expr
                             DuAssign(None, value, stgVar) |> _augs.Statements.Add
                         match prjParam.TargetType with
                         | XGK ->

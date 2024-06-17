@@ -62,7 +62,9 @@ module CollectStoragesModule =
 
                 | DuPLCFunction _functionParameters -> failwithlog "ERROR"
                 | DuLambdaDecl _ -> ()
-                | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
+                | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+                | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                    failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
             ]
     type CommentedStatement with
 

@@ -37,7 +37,7 @@ module XgxTypeConvertorModule =
                 var.Comment <- statement.ToText()
                 let exp =
                     match exp.Terminal with
-                    | Some t -> exp
+                    | Some _ -> exp
                     | None ->
                         exp.BoxedEvaluatedValue |> any2expr
                 var.BoxedValue <- exp.BoxedEvaluatedValue

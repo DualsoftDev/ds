@@ -29,9 +29,9 @@ module StatementExtensionModule =
                 | _ -> false
 
             match newExp.FunctionName with
-            | Some (IsOpAB fn) when isXgi && expPath.IsEmpty ->
+            | Some (IsOpAB _fn) when isXgi && expPath.IsEmpty ->
                 match statement with
-                | DuAssign(_, e, t) when e = exp ->
+                | DuAssign(_, e, _t) when e = exp ->
                     newExp
                 | _ ->
                     newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOperators)
@@ -96,7 +96,8 @@ module StatementExtensionModule =
 
             | DuAction(DuCopyUdt _) ->
                 statement |> augs.Statements.Add
-            | DuLambdaDecl _ -> ()
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
 
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
@@ -139,11 +140,14 @@ module StatementExtensionModule =
                 | DuPLCFunction ({Arguments = args} as functionParameters) ->
                     let newArgs = args |> map (fun arg -> visitTop arg)
                     Some <| DuPLCFunction { functionParameters with Arguments = newArgs }
-                | DuLambdaDecl _ -> None
                 | DuVarDecl (exp, stg) when pack.Get<bool>("visit-vardecl-statement") ->
                     let newExp = visitTop exp
                     Some <| DuVarDecl (newExp, stg)
                 | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _ ) -> failwith "Should have been processed in early stage"
+
+                | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                    failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
+                //| DuLambdaDecl _ -> None
 
 
             pack.Remove("statement") |> ignore
@@ -212,7 +216,7 @@ module StatementExtensionModule =
                             let value =
                                 let arg = visitor pack (exp::expPath) la.Arguments.[i]
                                 match arg.Terminal with
-                                | Some t -> arg
+                                | Some _ -> arg
                                 | None -> arg.BoxedEvaluatedValue |> any2expr
                             let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
                             

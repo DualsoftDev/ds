@@ -101,7 +101,9 @@ module TagModule =
                 udtDecl.Members |> map (fun m -> storages[$"{target}.{m.Name}"] )
 
             | DuPLCFunction { Output=target } -> [target]
-            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
         member x.GetSourceStorages() =
             match x with
@@ -131,7 +133,9 @@ module TagModule =
                         yield! condi.Value.CollectStorages()
                         yield! args |> collect(fun arg -> arg.CollectStorages())
                 ]
-            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
       
 

@@ -185,10 +185,11 @@ module POUParametersModule =
             | (DuUdtDecl _ | DuUdtDef _) ->
                 if prjParam.TargetType <> XGI then
                     failwith "UDT declaration is not supported in XGK"
-            | DuLambdaDecl _ -> ()
             | DuAction(_a:ActionStatement) -> ()
             | DuPLCFunction(_fbParam) -> ()
 
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
     type XgxPOUParams with
         member x.SanityCheck(prjParam: XgxProjectParams) =

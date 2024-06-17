@@ -198,8 +198,9 @@ module ExportIOTable =
             | DuAction (DuCopyUdt {Condition=condition}) -> $"{condition.ToText()}"
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
-            | (DuUdtDecl _ | DuUdtDef _) ->
-                failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
     let ToFuncVariTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
 

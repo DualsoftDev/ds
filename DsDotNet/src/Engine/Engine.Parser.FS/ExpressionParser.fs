@@ -12,6 +12,7 @@ open System
 
 [<AutoOpen>]
 module rec ExpressionParserModule =
+    let enableSubroutine = false
     let internal createParser (text: string) : exprParser =
         let inputStream = new AntlrInputStream(text)
         let lexer = exprLexer (inputStream)
@@ -31,7 +32,6 @@ module rec ExpressionParserModule =
     let defaultStorageFinder (storages: Storages) (name: string) : IStorage option =
         storages.TryFind name
 
-    [<Obsolete("임시")>]
     let createLambdaCallExpression (storages:Storages) args (exp: IExpression) =
         let newExp =
             match exp.FunctionSpec with
@@ -53,6 +53,7 @@ module rec ExpressionParserModule =
                 | :? FunctionSpec<string> as newFs -> DuFunction newFs
                 | :? FunctionSpec<char>   as newFs -> DuFunction newFs
                 | _ -> failwith "ERROR"
+            | _ -> failwith "ERROR"
         newExp
 
     let createExpression (parserData:ParserData) (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
@@ -457,6 +458,9 @@ module rec ExpressionParserModule =
                 Some <| DuUdtDef udtDefinition
 
             | _ when (fstChild :? LambdaDeclContext || fstChild :? ProcDeclContext) ->
+                if not <| enableSubroutine then
+                    failwith $"ERROR: Subroutine is not supported yet"
+
                 let storageFinder (funName:string) (stgName:string): IStorage option =
                     let localStgName = getFormalParameterName funName stgName
                     storages.TryFind localStgName
@@ -466,6 +470,7 @@ module rec ExpressionParserModule =
                     match fstChild with
                     | :? LambdaDeclContext as ctx -> ctx.lambdaName().GetText()
                     | :? ProcDeclContext as ctx -> ctx.procName().GetText()
+                    | _ -> failwith "ERROR"
 
                 if predefinedFunctionNames.Contains(funName) then
                     failwith $"ERROR: {funName} is predefined function name"
@@ -511,8 +516,11 @@ module rec ExpressionParserModule =
                     }
                     parserData.ProcDefs.Add(procDecl)
                     Some <| DuProcDecl procDecl
+                | _ -> failwith "ERROR"
 
             | :? ProcCallStatementContext as ctx ->
+                if not <| enableSubroutine then
+                    failwith $"ERROR: Subroutine is not supported yet"
                 let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData (defaultStorageFinder storages)
                 let call = ctx.funcCall()
                 let funcName = call.functionName().GetText()

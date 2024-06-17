@@ -319,7 +319,9 @@ module ExpressionModule =
                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
                | DuCopyUdt { Target = target } -> target
             | DuPLCFunction { FunctionName = fn } -> fn
-            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
         member x.TargetValue =
             match x.Statement with
@@ -332,7 +334,9 @@ module ExpressionModule =
                 | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
                 | DuCopyUdt _ -> failwith "ERROR: Invalid value reference"
             | DuPLCFunction { OriginalExpression = exp } ->  exp.BoxedEvaluatedValue
-            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
@@ -425,8 +429,8 @@ module ExpressionModule =
                 let argLists = args |> map (fun arg -> $"{arg.Type.Name} {arg.Name}") |> joinWith ", "
                 $"{proto.Type.Name} {proto.Name}({argLists} => {exp.ToText()})"
 
-            | DuPLCFunction {FunctionName = fn; Arguments=Args; Output=output } ->
-                let args = Args |> map (fun arg -> arg.ToText()) |> joinWith ", "
+            | DuPLCFunction {FunctionName = fn; Arguments=fargs; Output=output } ->
+                let args = fargs |> map (fun arg -> arg.ToText()) |> joinWith ", "
                 $"PLCFunction {output.ToText()} = {fn}({args})"
             | _ ->
                 failwithlog "ERROR"

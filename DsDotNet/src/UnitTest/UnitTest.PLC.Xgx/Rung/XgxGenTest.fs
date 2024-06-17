@@ -14,6 +14,13 @@ open PLC.CodeGen.Common.FlatExpressionModule
 
 type XgxGenerationTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
+    let newline = "\r\n"
+    let and28 = """
+        $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
+        $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
+        $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28
+"""
+    let and30 = $"{and28} && $x29 && $x30"
 
     member x.``Add test`` () =
         let qAddress = if xgx = XGI then "%QX0.1.0" else "P00001"
@@ -32,14 +39,35 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 """
         code |> x.TestCode (getFuncName()) |> ignore
 
+    member x.``And Huge28 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and28};"
+        code |> x.TestCode (getFuncName()) |> ignore
+    member x.``And Huge29 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and28} && $x29;"
+        code |> x.TestCode (getFuncName()) |> ignore
+    member x.``And Huge30 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and30};"
+        code |> x.TestCode (getFuncName()) |> ignore
+    member x.``And Huge31 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and30} && $x31;"
+        code |> x.TestCode (getFuncName()) |> ignore
+    member x.``And Huge32 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and30} && $x31&& $x32;"
+        code |> x.TestCode (getFuncName()) |> ignore
+    member x.``And Huge33 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and30} && $x31 && $x32 && $x33;"
+        code |> x.TestCode (getFuncName()) |> ignore
+    member x.``And Huge34 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and30} && $x31 && $x32 && $x33 && $x34;"
+        code |> x.TestCode (getFuncName()) |> ignore
+    member x.``And Huge35 test`` () =
+        let code = generateLargeVariableDeclarations xgx + $"{newline}$x15 = {and30} && $x31 && $x32 && $x33 && $x34 && $x35;"
+        code |> x.TestCode (getFuncName()) |> ignore
+
     member x.``And Huge simple test`` () =
-        let code = generateLargeVariableDeclarations xgx + """
+        let code = generateLargeVariableDeclarations xgx + $"""
             $x15 =
-                $x00 && $x01 && $x02 && $x03 && $x04 && $x05 && $x06 && $x07 && $x08 && $x09 &&
-                $x10 && $x11 && $x12 && $x13 && $x14 && $x15 && $x16 && $x17 && $x18 && $x19 &&
-                $x20 && $x21 && $x22 && $x23 && $x24 && $x25 && $x26 && $x27 && $x28 && $x29 &&
-                $x30 && $x31 &&
-                $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
+                {and30} && $x31 && $x32 && $x33 && $x34 && $x35 && $x36 && $x37 //&& $x38 && $x39
                 ;
     """
         code |> x.TestCode (getFuncName()) |> ignore
@@ -314,6 +342,14 @@ type XgiGenerationTest() =
     inherit XgxGenerationTest(XGI)
 
     [<Test>] member x.``Add test`` () =  base.``Add test`` ()
+    [<Test>] member x.``And Huge28 test`` () = base.``And Huge28 test`` ()
+    [<Test>] member x.``And Huge29 test`` () = base.``And Huge29 test`` ()
+    [<Test>] member x.``And Huge30 test`` () = base.``And Huge30 test`` ()
+    [<Test>] member x.``And Huge31 test`` () = base.``And Huge31 test`` ()
+    [<Test>] member x.``And Huge32 test`` () = base.``And Huge32 test`` ()
+    [<Test>] member x.``And Huge33 test`` () = base.``And Huge33 test`` ()
+    [<Test>] member x.``And Huge34 test`` () = base.``And Huge34 test`` ()
+    [<Test>] member x.``And Huge35 test`` () = base.``And Huge35 test`` ()
     [<Test>] member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
     [<Test>] member x.``And Huge test`` () = base.``And Huge test`` ()
     [<Test>] member x.``And Huge test 3`` () = base.``And Huge test 3`` ()
@@ -336,6 +372,14 @@ type XgkGenerationTest() =
     inherit XgxGenerationTest(XGK)
 
     [<Test>] member x.``Add test`` () =  base.``Add test`` ()
+    [<Test>] member x.``And Huge28 test`` () = base.``And Huge28 test`` ()
+    [<Test>] member x.``And Huge29 test`` () = base.``And Huge29 test`` ()
+    [<Test>] member x.``And Huge30 test`` () = base.``And Huge30 test`` ()
+    [<Test>] member x.``And Huge31 test`` () = base.``And Huge31 test`` ()
+    [<Test>] member x.``And Huge32 test`` () = base.``And Huge32 test`` ()
+    [<Test>] member x.``And Huge33 test`` () = base.``And Huge33 test`` ()
+    [<Test>] member x.``And Huge34 test`` () = base.``And Huge34 test`` ()
+    [<Test>] member x.``And Huge35 test`` () = base.``And Huge35 test`` ()
     [<Test>] member x.``And Huge simple test`` () = base.``And Huge simple test`` ()
     [<Test>] member x.``And Huge test`` () = base.``And Huge test`` ()
     [<Test>] member x.``And Huge test 3`` () = base.``And Huge test 3`` ()

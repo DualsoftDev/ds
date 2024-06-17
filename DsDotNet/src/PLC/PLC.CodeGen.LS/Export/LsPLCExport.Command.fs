@@ -438,7 +438,7 @@ module internal rec Command =
 
         {   X = x
             Y = y
-            TotalSpanX = 31
+            TotalSpanX = coilCellX
             TotalSpanY = 1
             XmlElements = xmls }
 
@@ -465,7 +465,7 @@ module internal rec Command =
 
         {   X = x
             Y = y
-            TotalSpanX = 31
+            TotalSpanX = coilCellX
             TotalSpanY = 1
             XmlElements = xmls }
 

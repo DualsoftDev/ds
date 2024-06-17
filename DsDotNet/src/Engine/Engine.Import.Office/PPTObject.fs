@@ -305,17 +305,17 @@ module PPTObjectModule =
             match GetSquareBrackets(shape.InnerText, false) with
             | Some txrx ->
                 if (txrx.Contains('~')) then
-                    let tx = (txrx.Split('~')[0])
-                    let rx = (txrx.Split('~')[1])
+                    let tx = (txrx.Split('~')[0])  |> trimSpace
+                    let rx = (txrx.Split('~')[1])  |> trimSpace
 
                     let getRealName (apiReal: string) =
-                        if apiReal.Contains("_") || apiReal.IsEmpty()
+                        if apiReal = "_" || apiReal.IsEmpty()
                         then 
                             failWithLog ErrID._43
                         apiReal
 
-                    ifTX <- getRealName tx |> trimSpace
-                    ifRX <- getRealName rx |> trimSpace
+                    ifTX <- getRealName tx 
+                    ifRX <- getRealName rx 
                 else
                             failWithLog ErrID._43
             | None -> 

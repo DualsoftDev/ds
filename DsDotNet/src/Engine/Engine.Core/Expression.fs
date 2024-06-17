@@ -420,6 +420,8 @@ module ExpressionModule =
             | _ ->
                 failwithlog "ERROR"
 
+        member x.IsDuCaseVarDecl() = match x with | DuVarDecl _ -> true | _ -> false
+
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =
             match x with

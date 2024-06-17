@@ -215,7 +215,12 @@ module StatementExtensionModule =
                                 | Some t -> arg
                                 | None -> arg.BoxedEvaluatedValue |> any2expr
                             let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
-                            DuAssign(None, value, stgVar) |> _augs.Statements.Add
+                            
+                            prjParam.GlobalStorages[encryptedFormalParamName].BoxedValue <- value.BoxedEvaluatedValue
+                            if prjParam.TargetType = XGI && pack.Get<Statement>("original-statement").IsDuCaseVarDecl() then
+                                ()
+                            else
+                                DuAssign(None, value, stgVar) |> _augs.Statements.Add
                         match prjParam.TargetType with
                         | XGK ->
                             let newExp = functionToAssignStatementVisitor pack expPath exp

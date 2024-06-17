@@ -456,12 +456,20 @@ module rec ExpressionParserModule =
                 parserData.AddUdtDefs(udtDefinition)
                 Some <| DuUdtDef udtDefinition
 
-            | :? LambdaDeclContext as ctx ->
-                // e.g: int sum(int a, int b) => $a + $b;
-                let typ, funName = ctx.``type``().GetText()|> textToSystemType, ctx.lambdaName().GetText()
+            | _ when (fstChild :? LambdaDeclContext || fstChild :? ProcDeclContext) ->
+                let storageFinder (funName:string) (stgName:string): IStorage option =
+                    let localStgName = getFormalParameterName funName stgName
+                    storages.TryFind localStgName
+                    |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
+
+                let funName =
+                    match fstChild with
+                    | :? LambdaDeclContext as ctx -> ctx.lambdaName().GetText()
+                    | :? ProcDeclContext as ctx -> ctx.procName().GetText()
 
                 if predefinedFunctionNames.Contains(funName) then
                     failwith $"ERROR: {funName} is predefined function name"
+
 
                 let args =  // (int a, int b)
                     [   for a in ctx.Descendants<ArgDeclContext>() do
@@ -476,24 +484,43 @@ module rec ExpressionParserModule =
                         let defaultValue = { Object = typeDefaultValue a.Type }: BoxedObjectHolder
                         createVariable encryptedFormalParamName defaultValue (Some comment)
                     storages.Add(encryptedFormalParamName, localVar)
-                let storageFinder (stgName:string): IStorage option =
-                    let localStgName = getFormalParameterName funName stgName
-                    storages.TryFind localStgName
-                    |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
+
+                match fstChild with
+                | :? LambdaDeclContext as ctx ->
+                    // e.g: int sum(int a, int b) => $a + $b;
+                    let typ = ctx.``type``().GetText() |> textToSystemType
                     
-                let bodyExp = ctx.Descendants<LambdaBodyExprContext>().First() |> getFirstChildExpressionContext |> createExpression parserData storageFinder
-                let lambdaDecl = {
-                    Prototype = { Type = typ; Name = funName }
-                    Arguments = args
-                    Body = bodyExp }
-                bodyExp.FunctionSpec.Value.LambdaDecl <- Some lambdaDecl
+                    let bodyExp = ctx.Descendants<LambdaBodyExprContext>().First() |> getFirstChildExpressionContext |> createExpression parserData (storageFinder funName)
+                    let lambdaDecl = {
+                        Prototype = { Type = typ; Name = funName }
+                        Arguments = args
+                        Body = bodyExp }
+                    bodyExp.FunctionSpec.Value.LambdaDecl <- Some lambdaDecl
 
-                parserData.LambdaDefs.Add(lambdaDecl)
-                Some <| DuLambdaDecl lambdaDecl
+                    parserData.LambdaDefs.Add(lambdaDecl)
+                    Some <| DuLambdaDecl lambdaDecl
 
-            | :? ProcDeclContext as ctx ->
-                failwithlog "ERROR: Not yet proc decl statement"
+                | :? ProcDeclContext as ctx ->
+                    let bodies =
+                        [   for stmtCtx in ctx.Descendants<StatementContext>() do
+                                tryCreateStatement parserData stmtCtx ] |> List.choose id
+                    let procDecl = {
+                        ProcName = funName
+                        Arguments = args
+                        Bodies = ResizeArray(bodies)
+                    }
+                    parserData.ProcDefs.Add(procDecl)
+                    Some <| DuProcDecl procDecl
 
+            | :? ProcCallStatementContext as ctx ->
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData (defaultStorageFinder storages)
+                let call = ctx.funcCall()
+                let funcName = call.functionName().GetText()
+                let args = call.arguments()
+                let args = if isNull args then [] else args.children.OfType<ExprContext>().ToFSharpList()
+                let args = args |> map expr
+                let decl = parserData.ProcDefs |> Seq.find(fun p -> p.ProcName = funcName)
+                Some <| DuProcCall { ProcDecl = decl; ActuralPrameters = args }
             | _ -> failwithlog "ERROR: Not yet statement"
 
         optStatement.Iter(fun st -> st.Do())

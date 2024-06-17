@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145730" Version="513" WksNodeCount="16">
-    Subroutine test1
+    Subroutine lambda test3
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
@@ -15,9 +15,11 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="1">
+                <GlobalVariable Version="Ver 1.0" Count="3">
                     <Symbols>
-                        <Symbol Name="pp" Comment="float64 pp = pi();" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
+                        <Symbol Name="_local_sum_a" Comment="sum(System.Int32 a)" Device="" Kind="6" Type="DINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="_local_sum_b" Comment="sum(System.Int32 b)" Device="" Kind="6" Type="DINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = sum(sum(1, 2), 3);" Device="" Kind="6" Type="DINT" InitValue="6" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -52,9 +54,11 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="1">
+                        <LocalVar Version="Ver 1.0" Count="3">
                             <Symbols>
-                                <Symbol Name="pp" Comment="float64 pp = pi();" Device="" Kind="8" State="0"/>
+                                <Symbol Name="_local_sum_a" Comment="sum(System.Int32 a)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="_local_sum_b" Comment="sum(System.Int32 b)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn1" Comment="int32 nn1 = sum(sum(1, 2), 3);" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

@@ -44,6 +44,9 @@ module ParserDataModule =
         /// Lambda 함수 정의
         member val LambdaDefs = ResizeArray<LambdaDecl>()
 
+        /// Proc 정의
+        member val ProcDefs = ResizeArray<ProcDecl>()
+
         member val TimerCounterInstances = HashSet<string>()
 
     type ParserData with

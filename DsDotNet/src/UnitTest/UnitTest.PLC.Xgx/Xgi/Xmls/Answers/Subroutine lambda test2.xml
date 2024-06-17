@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145730" Version="513" WksNodeCount="16">
-    Subroutine test
+    Subroutine lambda test2
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
@@ -43,52 +43,8 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="63" Coordinate="1025">
-                                        [0] $nn1 = sum(1, 2);
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="3073">
-                                        1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="3079">
-                                        _local_sum_a
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="5121">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="5124" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="6145">
-                                        2
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="6151">
-                                        _local_sum_b
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="8193">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="8196" Param="FNAME: ADD2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1685&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000080, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="9217">
-                                        _local_sum_a
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="9223">
-                                        nn1
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="10241">
-                                        _local_sum_b
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="13313" Param="90"/>
-                                    <Element ElementType="33" Coordinate="13406" Param="END">
+                                    <Element ElementType="2" Coordinate="2049" Param="90"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="END">
                                         END
                                     </Element>
                                 </Rung>

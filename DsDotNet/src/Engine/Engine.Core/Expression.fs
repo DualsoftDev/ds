@@ -259,9 +259,14 @@ module ExpressionModule =
 
 
     type ProcDecl = {
-        Prototype:TypeDecl
+        ProcName:string
         Arguments:TypeDecl list
         Bodies:StatementContainer
+    }
+
+    type ProcCall = {
+        ProcDecl:ProcDecl
+        ActuralPrameters:Arguments
     }
 
     type Statement =
@@ -277,6 +282,8 @@ module ExpressionModule =
         | DuUdtDecl of UdtDecl
 
         | DuLambdaDecl of LambdaDecl
+        | DuProcDecl of ProcDecl
+        | DuProcCall of ProcCall
 
         /// UDT instances 정의.  e.g "Person peopole[10];"
         | DuUdtDef of UdtDef
@@ -369,7 +376,11 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     // 구조체 멤버 복사
                     copyUdt storages udtDecl source target
-            | (DuUdtDecl _ | DuUdtDef _ | DuLambdaDecl _) -> ()
+
+            | (DuUdtDecl _ | DuUdtDef _ | DuLambdaDecl _ | DuProcDecl _) -> ()  // OK: Noting todo
+
+            | DuProcCall _ ->
+                failwithlog "ERROR: Procedure call not yet implemented."
 
             | DuPLCFunction _ ->
                 failwithlog "ERROR"

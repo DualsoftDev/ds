@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145729" Version="513" Comment="" WksNodeCount="13" GUID="86429700-892f-4647-aa57-738ff1fe08a9" FileVer="4.77.99.1" FileLastWriteTime="2024-02-06 16:32:08">
-    Subroutine test3
+    Subroutine lambda test
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="기본 네트워크" NetworkType=""></Network>
@@ -42,9 +42,9 @@
                     <Symbols Count="3">
                         <Symbol Name="_local_sum_a" Comment="sum(System.Int32 a)" Device="M" DevicePos="0" Type="WORD"/>
                         <Symbol Name="_local_sum_b" Comment="sum(System.Int32 b)" Device="M" DevicePos="2" Type="WORD"/>
-                        <Symbol Name="nn1" Comment="int32 nn1 = $_t2_ADD;" Device="M" DevicePos="4" Type="WORD"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = $_t1_ADD;" Device="M" DevicePos="4" Type="WORD"/>
                         <Symbol Name="_t1_ADD" Comment="sum(1, 2)" Device="M" DevicePos="6" Type="WORD"/>
-                        <Symbol Name="_t2_ADD" Comment="sum(sum(1, 2), 3)" Device="M" DevicePos="8" Type="WORD"/>
+                        <Symbol Name="_t2_ADD" Comment="sum(1, 2)" Device="M" DevicePos="8" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -68,7 +68,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] int32 nn1 = sum(sum(1, 2), 3);
+                                        [0] int32 nn1 = sum(1, 2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -94,35 +94,47 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="7169">
-                                        _ON
+                                        _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="81"/>
-                                    <Element ElementType="33" Coordinate="7250" Param="DMOV,_t1_ADD,_local_sum_a"/>
+                                    <Element ElementType="33" Coordinate="7250" Param="DMOV,_t1_ADD,nn1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="9217">
-                                        _ON
+                                    <Element ElementType="63" Coordinate="9217">
+                                        [1] $nn1 = sum(1, 2);
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9220" Param="81"/>
-                                    <Element ElementType="33" Coordinate="9298" Param="DMOV,3,_local_sum_b"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="11265">
+                                    <Element ElementType="6" Coordinate="10241">
                                         _ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="11268" Param="81"/>
-                                    <Element ElementType="33" Coordinate="11358" Param="DADD,_local_sum_a,_local_sum_b,M0008"/>
+                                    <Element ElementType="2" Coordinate="10244" Param="81"/>
+                                    <Element ElementType="33" Coordinate="10322" Param="DMOV,1,_local_sum_a"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="12289">
-                                        _1ON
+                                        _ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="12292" Param="81"/>
-                                    <Element ElementType="33" Coordinate="12370" Param="DMOV,_t2_ADD,nn1"/>
+                                    <Element ElementType="33" Coordinate="12370" Param="DMOV,2,_local_sum_b"/>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="15361" Param="90"/>
-                                    <Element ElementType="33" Coordinate="15454" Param="END">
+                                    <Element ElementType="6" Coordinate="14337">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="14340" Param="81"/>
+                                    <Element ElementType="33" Coordinate="14430" Param="DADD,_local_sum_a,_local_sum_b,M0008"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="6" Coordinate="15361">
+                                        _ON
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="15364" Param="81"/>
+                                    <Element ElementType="33" Coordinate="15442" Param="DMOV,_t2_ADD,nn1"/>
+                                </Rung>
+                                <Rung BlockMask="0">
+                                    <Element ElementType="2" Coordinate="18433" Param="90"/>
+                                    <Element ElementType="33" Coordinate="18526" Param="END">
                                         END
                                     </Element>
                                 </Rung>

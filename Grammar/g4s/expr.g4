@@ -51,7 +51,8 @@ statement: (
     // semicolon 을 필요로하는 문장
     (   assign | varDecl | timerDecl | counterDecl | copyStatement
         | udtDef | copyStructStatement
-        | lambdaDecl | udtDecl ) ';')       // C++ 의 struct 정의는 마지막 brace 닫힘 이후 semicolon 필요로 함.  C# 은 아님.
+        | lambdaDecl | procCallStatement
+        | udtDecl ) ';')       // C++ 의 struct 정의는 마지막 brace 닫힘 이후 semicolon 필요로 함.  C# 은 아님.
     // semicolon 을 필요로하지 않는 문장
     | procDecl;
 
@@ -67,7 +68,8 @@ statement: (
         argDecl: type argName;
         argName: IDENTIFIER;
         lambdaBodyExpr: expr;
-    procDecl: 'void' procName '(' argDecls? ')' '{' toplevels '}';
+    procDecl: 'void' procName '(' argDecls? ')' '{' procBodies '}';
+        procBodies: statement*;
         procName: IDENTIFIER;
     returnStatement: 'return' expr;
 
@@ -118,6 +120,7 @@ statement: (
         udtInstance: udtVar (arrayDecl)?;
         udtVar: IDENTIFIER;
         udtMember: udtInstance '.' udtVar;
+    procCallStatement: funcCall;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels

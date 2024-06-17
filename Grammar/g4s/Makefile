@@ -37,6 +37,8 @@ udt5:
 lambda:
 	$(grun) expr.g4 toplevels -gui g4test/lambda.ds
 
+proc:
+	$(grun) expr.g4 toplevels -gui g4test/proc.ds
 
 test:
 	@export CLASSPATH=".:$(jarPath):$$CLASSPATH"

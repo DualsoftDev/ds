@@ -62,12 +62,12 @@ module DsType =
     type ExternalTagSet = ExternalTag * IStorage
         
     type JobActionType = 
-        | Normal  ///RXs(ActionIn) 인터페이스가 관찰될때까지 ON
-        | NoneRx  //인터페이스 관찰 없는 타입
-        | NoneTx  //인터페이스 지시 없는 타입
-        | NoneTRx //인터페이스 지시관찰 없는 타입
+        | Normal  // RXs(ActionIn) 인터페이스가 관찰될때까지 ON
+        | NoneRx  // 인터페이스 관찰 없는 타입
+        | NoneTx  // 인터페이스 지시 없는 타입
+        | NoneTRx // 인터페이스 지시관찰 없는 타입
         | Push    // reset 인터페이스(Plan Out) 관찰될때까지 ON 
-        | MultiAction  of string*int // 동시동작 개수 받기
+        | MultiAction of string*int // 동시동작 개수 받기
         member x.DeviceCount = 
             match x with
             | MultiAction (_, cnt) -> cnt
@@ -127,6 +127,11 @@ module DsType =
         GetLastBracketRelaceName((name |> GetHeadBracketRemoveName), "")
 
 
+    /// 이 함수는 입력 문자열 name에서 대괄호로 감싸인 부분을 추출합니다.
+    ///
+    /// - bHead가 true이면 첫 번째 대괄호 부분을, false이면 마지막 대괄호 부분을 반환합니다.
+    ///
+    /// - 반환값은 Some string 또는 None일 수 있습니다.
     let GetSquareBrackets (name: string, bHead: bool): string option =
         let pattern = "(?<=\[).*?(?=\])"  // 대괄호 안에 내용은 무조건 가져온다
         let matches = System.Text.RegularExpressions.Regex.Matches(name, pattern)
@@ -135,8 +140,8 @@ module DsType =
         else
             if name.EndsWith("]") && name.Contains("[") then Some matches.[matches.Count - 1].Value else None
 
-    let isStringDigit (str: string) = 
-            str |> Seq.forall Char.IsDigit
+    let isStringDigit (str: string) =
+        str |> Seq.forall Char.IsDigit
 
     let getJobActionType (name: string) =
         let nameContents = GetBracketsRemoveName(name)
@@ -151,16 +156,16 @@ module DsType =
                 false
               
         match endContents with
-        | Some e when e = TextJobNoneTRX-> JobActionType.NoneTRx
-        | Some e when e = TextJobNoneTX -> JobActionType.NoneTx
+        | Some e when e = TextJobNoneTRX -> JobActionType.NoneTRx
+        | Some e when e = TextJobNoneTX  -> JobActionType.NoneTx
         | Some e when e = TextJobNoneRX  -> JobActionType.NoneRx
-        | Some e when e = TextJobPush -> JobActionType.Push
-        | Some s when s |> isMultiActionString  ->
-                let cnt = s.Substring(1) |> int
-                if cnt < 2 then
-                    failWithLog $"MultiAction Count >= 2 : {name}"
+        | Some e when e = TextJobPush    -> JobActionType.Push
+        | Some s when s |> isMultiActionString ->
+            let cnt = s.Substring(1) |> int
+            if cnt < 2 then
+                failWithLog $"MultiAction Count >= 2 : {name}"
 
-                JobActionType.MultiAction (nameContents, cnt) // 숫자일 경우 MultiAction으로 변환
+            JobActionType.MultiAction (nameContents, cnt) // 숫자일 경우 MultiAction으로 변환
         | Some t -> failwithf "Unknown ApiActionType: %s" t
         | None -> JobActionType.Normal
 

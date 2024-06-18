@@ -510,56 +510,54 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             for jobName, jobOption, apiDefCtxs in callListings do
                 let apiItems =
-                    [ for apiDefCtx in apiDefCtxs do
-                          let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
-                          let devName = String.Join("_", apiPath.ToArray())
-                          let inParam, outParm =
-                                    match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
-                                    |Some devParam -> 
-                                        commonDeviceParamExtractor devParam 
-                                    |None ->
-                                        TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
+                    [   for apiDefCtx in apiDefCtxs do
+                            let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
+                            let devName = String.Join("_", apiPath.ToArray())
+                            let inParam, outParm =
+                                match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
+                                | Some devParam -> 
+                                    commonDeviceParamExtractor devParam 
+                                | None ->
+                                    TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
 
                    
-                          match apiPath with
-                          | device :: [ api ] ->
-                              let apiItem =
-                                  option {
-                                      let! apiPoint =
+                            match apiPath with
+                            | device :: [ api ] ->
+                                let apiItem =
+                                    option {
+                                        let! apiPoint =
                                             let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice 
                                             match tryFindCallingApiItem system device api allowAutoGenDevice with
                                             | Some api -> Some api
                                             | None ->  
-                                                      if allowAutoGenDevice &&
-                                                         x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
-                                                      then x.CreateLoadedDeivce(device)
-                                                      None
+                                                if allowAutoGenDevice &&
+                                                    x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
+                                                then x.CreateLoadedDeivce(device)
+                                                None
+                                 
+                                        debugfn $"TX={inParam} RX={outParm}"
+                                        let taskDev = TaskDev(apiPoint, jobName, inParam, outParm, device)
+                                        return getTaskDev jobName taskDev inParam outParm
+                                    }
 
-                               
-                                      debugfn $"TX={inParam} RX={outParm}"
-                                      let taskDev = TaskDev(apiPoint, jobName, inParam, outParm, device)
-                                      return getTaskDev jobName taskDev inParam outParm
-                                  }
-
-                              match apiItem with
-                              | Some apiItem -> yield apiItem
-                              | _ -> 
+                                match apiItem with
+                                | Some apiItem -> yield apiItem
+                                | _ -> 
                                     match tryFindLoadedSystem system device with
-                                    |Some dev->
-                                            let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) jobName device api (inParam, outParm) 
-                                            yield getTaskDev jobName taskDev inParam outParm
-                                             
-                                    |None -> failwithlog $"device({device}) api({api}) is not exist"
+                                    | Some dev->
+                                        let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) jobName device api (inParam, outParm) 
+                                        yield getTaskDev jobName taskDev inParam outParm
+                                               
+                                    | None -> failwithlog $"device({device}) api({api}) is not exist"
 
-                          | _ -> 
-                                    let errText = String.Join(", ", apiPath.ToArray())
-                                    failwithlog $"loading type error ({errText})device"
+                            | _ -> 
+                                      let errText = String.Join(", ", apiPath.ToArray())
+                                      failwithlog $"loading type error ({errText})device"
 
 
-                          createDeviceVariable system inParam $"{devName}_I"
-                          createDeviceVariable system outParm $"{devName}_O"
-
-                          ]
+                            createDeviceVariable system inParam $"{devName}_I"
+                            createDeviceVariable system outParm $"{devName}_O"
+                    ]
 
 
                 assert (apiItems.Any())

@@ -268,8 +268,7 @@ module internal ToDsTextModule =
 
 
             if btns.Any() then
-                yield $"{tab}[buttons] = {lb}"
-                
+                yield $"{tab}[buttons] = {lb}"                
                 yield HwSystemToDs("a", system.AutoHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("m", system.ManualHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("d", system.DriveHWButtons.Cast<HwSystemDef>())
@@ -363,22 +362,17 @@ module internal ToDsTextModule =
                             $"({xywh.X}, {xywh.Y});"
                     $"{tab3}{name} = {posi}"
                 [
-                    if layoutList.any()
-                    then
+                    for file in layoutList do
+                        if file = TextEmtpyChannel 
+                        then
+                            yield $"{tab2}[layouts] = {lb}"
+                        else 
+                            yield $"{tab2}[layouts file={quote file}] = {lb}"
 
-                        for file in layoutList do
-                            if file = TextEmtpyChannel 
-                            then
-                                yield $"{tab2}[layouts] = {lb}"
-                            else 
-                                yield $"{tab2}[layouts file={quote file}] = {lb}"
+                        for device, _, xy in layoutPointDic[file] do
+                            yield makeList device xy
 
-                            for device, _, xy in layoutPointDic[file] do
-                                yield makeList device xy
-
-                            yield $"{tab2}{rb}"
-
-                  
+                        yield $"{tab2}{rb}"                  
                 ] |> combineLines
 
 
@@ -388,20 +382,20 @@ module internal ToDsTextModule =
 
             let finished = 
                 [
-                if finishedReals.Any() then
-                    yield $"{tab2}[finish] = {lb}"
-                    for real in finishedReals do
-                        yield $"{tab3}{real.Flow.Name}.{real.Name};"
-                    yield $"{tab2}{rb}"
+                    if finishedReals.Any() then
+                        yield $"{tab2}[finish] = {lb}"
+                        for real in finishedReals do
+                            yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                        yield $"{tab2}{rb}"
                 ] |> combineLines
 
             let noTransData = 
                 [
-                if noTransDataReals.Any() then
-                    yield $"{tab2}[notrans] = {lb}"
-                    for real in noTransDataReals do
-                        yield $"{tab3}{real.Flow.Name}.{real.Name};"
-                    yield $"{tab2}{rb}"
+                    if noTransDataReals.Any() then
+                        yield $"{tab2}[notrans] = {lb}"
+                        for real in noTransDataReals do
+                            yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                        yield $"{tab2}{rb}"
                 ] |> combineLines
 
             let disabledVertices = 
@@ -419,12 +413,12 @@ module internal ToDsTextModule =
                 ]
             let disabled = 
                 [
-                if disabledVertices.Any() then
-                    yield $"{tab2}[disable] = {lb}"
-                    for vert in disabledVertices do
-                        let compo = vert.NameComponents
-                        yield $"{tab3}{compo[1]}.{compo[2]}.{compo[3]};"
-                    yield $"{tab2}{rb}"
+                    if disabledVertices.Any() then
+                        yield $"{tab2}[disable] = {lb}"
+                        for vert in disabledVertices do
+                            let compo = vert.NameComponents
+                            yield $"{tab3}{compo[1]}.{compo[2]}.{compo[3]};"
+                        yield $"{tab2}{rb}"
                 ] |> combineLines
 
             if safeties.Any() || layouts.Any() || finished.Any() || disabled.Any()|| noTransData.Any() then

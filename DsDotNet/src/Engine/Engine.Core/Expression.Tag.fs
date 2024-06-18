@@ -2,7 +2,6 @@ namespace Engine.Core
 
 open Dual.Common.Core.FS
 open System.Linq
-open System.Reactive.Linq
 
 [<AutoOpen>]
 module TagModule =

@@ -25,7 +25,8 @@ module RuntimeTest =
    
     [<Fact>]
     let ``Runtime Running Test`` () = 
-
+        
+        File.Delete("Logger.sqlite3") //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
         (*시뮬레이션 구동 테스트*)
         let systems = [| runtimeModel.System|]
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));

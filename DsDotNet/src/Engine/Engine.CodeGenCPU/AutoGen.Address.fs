@@ -190,12 +190,13 @@ module DsAddressModule =
             elif addr = TextSkip then TextSkip 
                 
             else
-                if iec then addr
-                else
+                if target = PlatformTarget.XGK
+                then
                     match tryParseXGKTagByBitType addr (dataType = DuBOOL) with
                     | Some (t) -> t |> getXgKTextByTag
                                   
                     | _ -> failwithf $"주소가 잘못되었습니다. {addr} (dataType:{dataType})"
+                else addr
      
         newAddr
 

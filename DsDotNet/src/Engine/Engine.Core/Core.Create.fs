@@ -36,13 +36,13 @@ module CoreCreateModule =
             // Check if the API already exists
             if sys.ApiItems.Any(fun w -> w.Name = apiName)
             then
-                failwithf $"api {apiName} 중복 생성에러"
+                failwithf $"system {sys.Name} api {apiName} 중복 생성에러"
             else
                 // Add a default flow if no flows exist
                 if sys.Flows.IsEmpty() then
                     sys.Flows.Add(Flow.Create("genFlow", sys)) |> ignore
 
-                let realName = $"genReal{apiName}"
+                let realName = $"gen{apiName}"
                 let flow = sys.Flows.Head()
                 let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
                 if reals.Any(fun w -> w.Name = realName) then

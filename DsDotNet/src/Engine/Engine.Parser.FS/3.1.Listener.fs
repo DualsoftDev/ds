@@ -135,8 +135,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         
     member private x.CreateLoadedDeivce(loadedName:string) =
         let file = $"./dsLib/AutoGen/{loadedName}.ds"
-
         let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
+
+        if File.Exists absoluteFilePath then
+            File.Delete absoluteFilePath        //자동생성은 매번 다시만듬
+
         x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)    |> ignore
 
 
@@ -387,8 +390,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                        ||ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
                          && existing.IsNone
                     then
-                        let func = tryFindFunc system (ctxInfo.Names.CombineQuoteOnDemand()) |> Option.get
-                        Call.Create(func, parent) |> ignore
+                        let opCmd = ctxInfo.Names.CombineQuoteOnDemand()
+                        match tryFindFunc system opCmd with
+                        | Some func -> Call.Create(func, parent) |> ignore
+                        | _ -> 
+                            if ctxInfo.ContextType = typeof<IdentifierCommandNameContext> then
+                                failwithlog $"Command({opCmd}) is not exist"
+                            elif ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> then
+                                failwithlog $"Operator({opCmd}) is not exist"
+                            else
+                                failwithlog $"ERROR Command/Operator parsing [{opCmd}]"
                     else
                         match existing with
                         | Some v -> debugfn $"{v.Name} already exists.  Skip creating it."

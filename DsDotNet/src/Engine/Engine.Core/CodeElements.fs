@@ -41,7 +41,7 @@ module rec CodeElements =
         | DuOPTimer
         member x.ToText() =
             match x  with
-            | DuOPUnDefined|DuOPCode -> ""
+            | (DuOPUnDefined | DuOPCode) -> ""
             | DuOPNot -> "$not"
             | DuOPTimer -> "$time"
      
@@ -91,16 +91,10 @@ module rec CodeElements =
         DevValue: obj option
         DevTime: int option  //기본 ms 단위 parsing을 위해 끝에 ms 필수
     } with
-        member x.Value = match x.DevValue with 
-                              |Some (v)->  v
-                              |None -> null
-        member x.Type = match x.DevType with 
-                              |Some (t)-> t
-                              |None -> DuBOOL     //기본 타입 bool   
-        member x.Name = match x.DevName with 
-                              |Some (n)-> n
-                              |None -> "" 
-        member x.Time = x.DevTime 
+        member x.Value = x.DevValue |> Option.toObj
+        member x.Type  = x.DevType  |> Option.defaultValue DuBOOL //기본 타입 bool   
+        member x.Name  = x.DevName  |> Option.defaultValue ""
+        member x.Time  = x.DevTime 
        
         
 
@@ -113,14 +107,17 @@ module rec CodeElements =
             DevTime = None
         }
 
-    let changeDevParam (x:DevParam) (address:string) (symbol:string option) = 
+    let createDevParam (address:string) (nametype:string option) (dutype:DataType option) (v:obj option)  (t:int option) = 
         { 
           DevAddress = address
-          DevName =  symbol
-          DevType = x.DevType 
-          DevValue = x.DevValue 
-          DevTime = x.DevTime
+          DevName = nametype
+          DevType = dutype
+          DevValue =v
+          DevTime =t
     }
+    
+    let changeDevParam (x:DevParam) (address:string) (symbol:string option) =
+        createDevParam address symbol x.DevType x.DevValue x.DevTime
     
     let addOrUpdateParam(jobName:string, paramDic:Dictionary<string, DevParam>, newParam :DevParam) = 
             paramDic.Remove jobName |> ignore
@@ -133,16 +130,6 @@ module rec CodeElements =
             paramDic.Add (jobName, changedDevParam)
 
 
-
-
-    let createDevParam (address:string) (nametype:string option) (dutype:DataType option) (v:obj option)  (t:int option) = 
-        { 
-          DevAddress = address
-          DevName = nametype
-          DevType = dutype
-          DevValue =v
-          DevTime =t
-    }
 
     
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
@@ -211,7 +198,7 @@ module rec CodeElements =
                 if timeOpt.IsSome then failwithlog $"Duplicate time part detected: {part}"
                 timeOpt <- Some time
 
-            | _,Some duType,_ ->
+            | _, Some duType, _ ->
                 if typeOpt.IsSome then checkType typeOpt.Value duType
                 typeOpt <- Some duType
             | _, _, Some (value, ty) ->

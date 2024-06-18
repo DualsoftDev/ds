@@ -25,7 +25,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "User Defined Structure.md",
+                "file": "Engine.Core/DsSystem.md",
                 "mode": "source",
                 "source": false
               }
@@ -98,7 +98,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "User Defined Structure.md",
+                "file": "Engine.Core/DsSystem.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -115,7 +115,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "User Defined Structure.md",
+                "file": "Engine.Core/DsSystem.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -138,7 +138,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "User Defined Structure.md"
+                "file": "Engine.Core/DsSystem.md"
               }
             }
           }
@@ -161,11 +161,18 @@
   },
   "active": "4da6d47efee0d28b",
   "lastOpenFiles": [
+    "Engine.Core/DsCPU.md",
+    "Engine.Core/DsSystem.md",
+    "Engine.Core/Untitled.canvas",
+    "Engine.Core/Core 자료 구조.md",
+    "Engine.Core/Core Dll hierarchy.canvas",
+    "App Dll Hierarchy.canvas",
+    "Global/Common assembly.md",
+    "User Defined Structure.md",
     "Others/PLC 생성.md",
     "Others/Powerpoint Addin's.md",
     "TODO's.md",
     "사용자 정의 structure.md",
-    "User Defined Structure.md",
     "DsWebServer/HMI/Browser UI/WgtGridLampReal.canvas",
     "DsWebServer/HMI/Browser UI/WgtLampRGFH.canvas",
     "DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
@@ -173,11 +180,8 @@
     "DsWebServer/HMI/HMI.md",
     "DsWebServer/HMI/TagWeb.md",
     "DsWebServer/HMI/Browser UI",
-    "Engine.Core/DsCPU.md",
     "DsWebServer/IOHub Web 연동.md",
     "Others",
-    "App Dll Hierarchy.canvas",
-    "Core Dll hierarchy.canvas",
     "0. TOC.md",
     "DsWebServer/Controller.md",
     "DsWebServer/DsWebServer.canvas",
@@ -192,12 +196,8 @@
     "IOHub/IOHub.md",
     "IOHub/IO Spec/IO Spec.md",
     "IOHub/IO Spec/IO settings json.md",
-    "Dll hierarchy.md",
     "Engine.Core",
-    "DsWebServer/HMI.md",
     "DsWebServer",
-    "IOHub/Server.md",
-    "IOHub/IOHub TODO.md",
     "Stat/Database/Schema.canvas",
     "Stat/Architecture.canvas",
     "QuerySet",

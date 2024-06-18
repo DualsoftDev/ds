@@ -307,9 +307,8 @@ module DsDataType =
 
 
     let textToDataType(typeName:string) : DataType =
-        match tryTextToDataType typeName with
-        |Some v -> v
-        | _ -> failwithf $"'{typeName}' DataToType Error check type"
+        tryTextToDataType typeName
+        |> Option.defaultWith(fun () -> failwithf $"'{typeName}' DataToType Error check type")
 
     let textToSystemType(typeName:string) : System.Type =
         textToDataType typeName |> fun x -> x.ToType()

@@ -21,15 +21,14 @@ module TimerStatementModule =
 
         let timer = new Timer(ts.Type, ts)
         let statements = StatementContainer()
-        match tParams.RungConditionIn with
-        | Some cond ->
+        tParams.RungConditionIn
+        |> iter(fun cond ->
             let rungInStatement = DuAssign (None, cond, ts.EN)
             rungInStatement.Do()
-            statements.Add rungInStatement
-        | None -> ()
+            statements.Add rungInStatement)
 
-        match tParams.ResetCondition with
-        | Some cond ->
+        tParams.ResetCondition
+        |> iter(fun cond ->
             if not (isInUnitTest()) then
                 // unit test 에 한해, reset condition 허용
                 failwith <| "Reset condition is not supported for XGK compatibility"
@@ -42,8 +41,7 @@ module TimerStatementModule =
 
             let resetStatement = DuAssign (None, cond, ts.RES)
             resetStatement.Do()
-            statements.Add resetStatement
-        | None -> ()
+            statements.Add resetStatement)
 
         timer.InputEvaluateStatements <- statements.ToFSharpList()
         DuTimer ({ Timer=timer; RungInCondition = tParams.RungConditionIn; ResetCondition = tParams.ResetCondition; FunctionName=tParams.FunctionName }:TimerStatement)

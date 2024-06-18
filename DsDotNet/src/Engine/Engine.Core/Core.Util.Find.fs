@@ -182,22 +182,20 @@ module internal ModelFindModule =
     let getSharedReal(v:Vertex) : Vertex seq =
             (v :?> Real) |> getVertexSharedReal
 
-        ///Call 자신을 공용으로 사용하는 Vertex들
+    ///Call 자신을 공용으로 사용하는 Vertex들
     let getSharedCall(v:Vertex) : Vertex seq =
             (v :?> Call) |> getVertexSharedCall
 
  
 
     type DsSystem with
-        member x.TryFindGraphVertex(Fqdn(fqdn)) = tryFindGraphVertex x fqdn
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
+        member x.TryFindGraphVertex(Fqdn(fqdn))      = tryFindGraphVertex x fqdn
         member x.TryFindExportApiItem(Fqdn(apiPath)) = tryFindExportApiItem x apiPath
-        member x.TryFindCall(callPath:Fqdn) = tryFindCall x callPath
-        member x.TryFindFlow(flowName:string) = tryFindFlow x flowName
-        member x.TryFindJob (jobName:string) =  tryFindJob  x jobName
-        member x.TryFindReal (path:string list) =  tryFindReal x path
-        member x.TryFindLoadedSystem     (system:DsSystem)  name = tryFindLoadedSystem system name
-        member x.TryFindReferenceSystem  (system:DsSystem)  name = tryFindReferenceSystem system name
+        member x.TryFindCall(callPath:Fqdn)          = tryFindCall x callPath
+        member x.TryFindFlow(flowName:string)        = tryFindFlow x flowName
+        member x.TryFindJob (jobName:string)         = tryFindJob  x jobName
+        member x.TryFindReal (path:string list)      = tryFindReal x path
 
 [<Extension>]
 type FindExtension =

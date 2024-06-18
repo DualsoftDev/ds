@@ -40,28 +40,30 @@ module DsConstants =
         | RevStartReset -> true
         | _ -> false
 
+    let private modelingEdgeTypeAndStrings =
+        [
+            StartEdge,          TextStartEdge          // ">"
+            ResetEdge,          TextResetEdge          // "|>"
+            StartReset,         TextStartReset         // "=>"
+            InterlockWeak,      TextInterlockWeak      // "<|>"
+            InterlockStrong,    TextInterlockStrong    // "<||>"
+            RevStartEdge,       TextStartEdgeRev       // "<"
+            RevResetEdge,       TextResetEdgeRev       // "<|"
+            RevStartReset,      TextStartResetRev      // "<="
+        ]
+
     let toTextModelEdge(edgeType:ModelingEdgeType) =
-        match edgeType with
-        | StartEdge       ->    TextStartEdge
-        | ResetEdge       ->    TextResetEdge
-        | StartReset      ->    TextStartReset
-        | InterlockWeak   ->    TextInterlockWeak
-        | InterlockStrong ->    TextInterlockStrong
-        | RevStartEdge ->    TextStartEdgeRev   
-        | RevResetEdge ->    TextResetEdgeRev   
-        | RevStartReset ->   TextStartResetRev  
+        modelingEdgeTypeAndStrings |> filter( fst >> (=) edgeType) |> Seq.head |> snd
 
     let toModelEdge(edgeText:string) =
-        match edgeText with
-        | TextStartEdge       ->    StartEdge
-        | TextResetEdge       ->    ResetEdge
-        | TextStartReset      ->    StartReset
-        | TextInterlockWeak   ->    InterlockWeak
-        | TextInterlockStrong ->    InterlockStrong
-        | TextStartEdgeRev ->    RevStartEdge
-        | TextResetEdgeRev ->    RevResetEdge
-        | TextStartResetRev ->    RevStartReset
-        |_ -> failwithf $"'{edgeText}' is not modelEdgeType"
+        let result =
+            modelingEdgeTypeAndStrings
+            |> filter( snd >> (=) edgeText)
+            |> Seq.tryExactlyOne
+            |> Option.map fst
+        match result with
+        | Some modelingEdge -> modelingEdge
+        | _ -> failwithf $"'{edgeText}' is not modelEdgeType"
 
     type ModelingEdgeInfo<'v>(sources:'v seq, edgeSymbol:string, targets:'v seq) =
         new(source, edgeSymbol, target) = ModelingEdgeInfo([source], edgeSymbol, [target])

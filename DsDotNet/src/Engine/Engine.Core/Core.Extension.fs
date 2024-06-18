@@ -68,20 +68,19 @@ module CoreExtensionModule =
 
     let getPure(v:Vertex) : Vertex =
         match v with
-        | :? Real   as r  -> r:> Vertex 
-        | :? Call  as c  -> c :> Vertex 
+        | ( :? Real | :? Call) -> v
         | :? Alias  as a  ->
-            match a.TargetWrapper.GetTarget() with
-            | :? Real as real -> real:> Vertex 
-            | :? Call as call -> call :> Vertex 
+            let target = a.TargetWrapper.GetTarget()
+            match target with
+            | ( :? Real | :? Call) -> target
             | _ -> failwithlog "Error"
         |_ -> failwithlog "Error"
-    type DsSystem with
 
-                    
-        member x.HWButtons = x.HwSystemDefs.OfType<ButtonDef>()
+
+    type DsSystem with
+        member x.HWButtons    = x.HwSystemDefs.OfType<ButtonDef>()
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
-        member x.HWLamps = x.HwSystemDefs.OfType<LampDef>()
+        member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
 
         member x.AddButton(btnType:BtnType, btnName:string, inDevParam:DevParam, outDevParam:DevParam, flow:Flow) =
             checkSystem(x, flow, btnName)

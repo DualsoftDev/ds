@@ -9,10 +9,10 @@ module CounterStatementModule =
         Type: CounterType
         Name: string
         Preset: CountUnitType
-        CountUpCondition: IExpression<bool> option
+        CountUpCondition  : IExpression<bool> option
         CountDownCondition: IExpression<bool> option
-        ResetCondition: IExpression<bool> option
-        LoadCondition: IExpression<bool> option
+        ResetCondition    : IExpression<bool> option
+        LoadCondition     : IExpression<bool> option
         FunctionName:string
     }
 
@@ -20,37 +20,34 @@ module CounterStatementModule =
         let counter = new Counter   (cParams.Type, cs)
 
         let statements = StatementContainer()
-        match cParams.CountUpCondition with
-        | Some up->
+        cParams.CountUpCondition
+        |> iter (fun up ->
             let statement = DuAssign (None, up, cs.CU)
             statement.Do()
-            statements.Add statement
-        | None -> ()
-        match cParams.CountDownCondition with
-        | Some down ->
+            statements.Add statement)
+
+        cParams.CountDownCondition
+        |> iter (fun down ->
             let statement = DuAssign (None, down, cs.CD)
             statement.Do()
-            statements.Add statement
-        | None -> ()
+            statements.Add statement)
 
         if not <| isItNull cs.RES then
-            match cParams.ResetCondition  with
-            | Some reset ->
+            cParams.ResetCondition
+            |> iter(fun reset ->
                 let statement = DuAssign (None, reset, cs.RES)
                 statement.Do()
-                statements.Add statement
-            | None -> ()
+                statements.Add statement)
 
-        match cParams.LoadCondition with
-        | Some load ->
+        cParams.LoadCondition
+        |> iter(fun load ->
             if not (isInUnitTest()) then
                 // unit test 에 한해, reset condition 허용
                 failwith <| "Load condition is not supported for XGK compatibility"
 
             let statement = DuAssign (None, load, cs.LD)
             statement.Do()
-            statements.Add statement
-        | None -> ()
+            statements.Add statement)
 
         counter.InputEvaluateStatements <- statements.ToFSharpList()
         let counterStatement:CounterStatement =
@@ -62,10 +59,10 @@ module CounterStatementModule =
     let (*private*) createCounterStatement (storages:Storages) (cParams:CounterCreateParams) (target:PlatformTarget): Statement =
         let accum = 0u
         let cs =    // counter structure
-            let typ = cParams.Type
-            let name = cParams.Name
+            let typ    = cParams.Type
+            let name   = cParams.Name
             let preset = cParams.Preset
-            let sys = RuntimeDS.System
+            let sys    = RuntimeDS.System
             match typ with
             | CTU  -> CTUStruct.Create (typ, storages, name, preset, accum, sys, target) :> CounterBaseStruct
             | CTD  -> CTDStruct.Create (typ, storages, name, preset, accum, sys, target)
@@ -74,30 +71,28 @@ module CounterStatementModule =
 
         generateCounterStatement (cs, cParams)
 
+    let defaultCounterCreateParam = {
+        Type              = CTU
+        Name              = ""
+        Preset            = 0u
+        CountUpCondition  = None
+        CountDownCondition= None
+        ResetCondition    = None
+        LoadCondition     = None
+        FunctionName      = ""
+    }
+
     let private createCTRStatement (cs :CTRStruct, rungInCondition)  : Statement =
-        let cParams =
-                    {
-                        Type = cs.Type
-                        Name = cs.Name
-                        Preset= cs.PRE.Value
-                        CountUpCondition =  rungInCondition
-                        CountDownCondition = None
-                        ResetCondition = None
-                        LoadCondition= None
-                        FunctionName = "createWinCTR"
-                    }
+        let cParams = {
+            defaultCounterCreateParam with
+                Type = cs.Type
+                Name = cs.Name
+                Preset= cs.PRE.Value
+                CountUpCondition =  rungInCondition
+                FunctionName = "createWinCTR" }
+
         generateCounterStatement (cs, cParams)
 
-    let defaultCounterCreateParam = {
-        Type=CTU
-        Name=""
-        Preset=0u
-        CountUpCondition=None
-        CountDownCondition=None
-        ResetCondition=None
-        LoadCondition=None
-        FunctionName=""
-    }
 
     type CounterStatement =
         static member CreateAbCTU(tcParams:TCConstructionParams) =

@@ -43,14 +43,14 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !($ix)
+                                        [0] $qx = !($ix);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="7" Coordinate="2049">
                                         ix
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         qx
                                     </Element>

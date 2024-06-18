@@ -48,7 +48,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ton myTon = createXgiTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo &amp;&amp; (!($Clamp1_RET_I) || !($Clamp2_RET_I) || !($Clamp3_RET_I) || !($Clamp4_RET_I)) &amp;&amp; !($IOP_ClampOperation))
+                                        [0] ton myTon = createXgiTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo &amp;&amp; (!($Clamp1_RET_I) || !($Clamp2_RET_I) || !($Clamp3_RET_I) || !($Clamp4_RET_I)) &amp;&amp; !($IOP_ClampOperation));
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

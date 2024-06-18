@@ -11,17 +11,17 @@ open T
 
 [<AutoOpen>]
 module Exp =
-    let evalExpr storages (text:string) = (parseExpression storages text).BoxedEvaluatedValue
-    let evalExpr2 (storages:Storages) (text:string) = (parseExpression storages text).BoxedEvaluatedValue
+    let evalExpr storages (text:string) = (parseExpression4UnitTest storages text).BoxedEvaluatedValue
+    let evalExpr2 (storages:Storages) (text:string) = (parseExpression4UnitTest storages text).BoxedEvaluatedValue
     let v = ExpressionModule.literal2expr
     let evaluate (exp:IExpression) = exp.BoxedEvaluatedValue
     let dq = "\""
     /// Parse And Serialize
     let pns storages (text:string) =
-        let expr = parseExpression storages text
+        let expr = parseExpression4UnitTest storages text
         expr.ToText()
     let pns2 (storages:Storages) (text:string) =
-        let expr = parseExpression storages text
+        let expr = parseExpression4UnitTest storages text
         expr.ToText()
 
     let toText (exp:IExpression) = exp.ToText()
@@ -85,7 +85,7 @@ module Exp =
             (t1 <== fAdd [v 3; v 4]).Do()
             t1.Value === 7
 
-            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression storages :?> Expression<string>
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression4UnitTest storages :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
             let tString = createTag("1", "%M1.1", "1")
@@ -279,7 +279,7 @@ module Exp =
             target.ToText() === "$target"
 
             let stmt = DuAssign (None, expr, target)
-            stmt.ToText() === "$target = *(2, 3, 4)"
+            stmt.ToText() === "$target = *(2, 3, 4);"
 
 
             let storages = Storages()
@@ -478,7 +478,7 @@ module Exp =
             // Invalid assignment: won't compile.  OK!
             // t1.Value <- 2.0
 
-            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression storages :?> Expression<string>
+            let exp = $"{dq}hello{dq} + {dq}world{dq}" |> parseExpression4UnitTest storages :?> Expression<string>
             // Invalid assignment: won't compile.  OK!
             // (t1 <== exp)
 

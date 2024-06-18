@@ -19,10 +19,10 @@
                     <Symbols>
                         <Symbol Name="ICar" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX1.0.1" State="0"/>
                         <Symbol Name="QCar" Comment="" Device="Q" Kind="6" Type="BOOL" Address="%QX1.0.1" State="0"/>
-                        <Symbol Name="iAvante" Comment="bool iAvante = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="iSonata" Comment="bool iSonata = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="qAvante" Comment="bool qAvante = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="qSonata" Comment="bool qSonata = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="iAvante" Comment="bool iAvante = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="iSonata" Comment="bool iSonata = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="qAvante" Comment="bool qAvante = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="qSonata" Comment="bool qSonata = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $QCar = $qAvante || $qSonata
+                                        [0] $QCar = $qAvante || $qSonata;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -55,7 +55,7 @@
                                         qAvante
                                     </Element>
                                     <Element ElementType="0" Coordinate="2051"/>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         QCar
                                     </Element>
@@ -65,28 +65,28 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] $iAvante = $ICar
+                                        [1] $iAvante = $ICar;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="5121">
                                         ICar
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5124" Param="87"/>
+                                    <Element ElementType="2" Coordinate="5124" Param="90"/>
                                     <Element ElementType="14" Coordinate="5214">
                                         iAvante
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [2] $iSonata = $ICar
+                                        [2] $iSonata = $ICar;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="7169">
                                         ICar
                                     </Element>
-                                    <Element ElementType="2" Coordinate="7172" Param="87"/>
+                                    <Element ElementType="2" Coordinate="7172" Param="90"/>
                                     <Element ElementType="14" Coordinate="7262">
                                         iSonata
                                     </Element>
@@ -107,10 +107,10 @@ XckU4UJCOYh5CA==
                             <Symbols>
                                 <Symbol Name="ICar" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="QCar" Comment="" Device="Q" Kind="8" State="0"/>
-                                <Symbol Name="iAvante" Comment="bool iAvante = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="iSonata" Comment="bool iSonata = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="qAvante" Comment="bool qAvante = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="qSonata" Comment="bool qSonata = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="iAvante" Comment="bool iAvante = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="iSonata" Comment="bool iSonata = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="qAvante" Comment="bool qAvante = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="qSonata" Comment="bool qSonata = false;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

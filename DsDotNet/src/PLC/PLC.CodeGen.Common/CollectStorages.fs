@@ -35,7 +35,7 @@ module CollectStoragesModule =
                     yield! cond.CollectStorages()
                     yield! src.CollectStorages()
                     yield tgt
-                | DuCopyUdt(_, _, cond, _src, _tgt) ->
+                | DuCopyUdt { Condition=cond } ->
                     yield! cond.CollectStorages() ]
 
     type Statement with
@@ -61,7 +61,10 @@ module CollectStoragesModule =
                 | DuAction stmt -> yield! stmt.CollectStorages()
 
                 | DuPLCFunction _functionParameters -> failwithlog "ERROR"
-                | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+                | DuLambdaDecl _ -> ()
+                | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+                | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                    failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
             ]
     type CommentedStatement with
 

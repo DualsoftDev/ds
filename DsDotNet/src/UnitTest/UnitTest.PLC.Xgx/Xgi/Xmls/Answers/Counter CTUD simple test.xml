@@ -46,7 +46,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r)
+                                        [0] ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -17,15 +17,15 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="49">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="" Kind="6" Type="DINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="" Kind="6" Type="DINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="int32 nn3 = 3" Device="" Kind="6" Type="DINT" InitValue="3" Address="" State="0"/>
-                        <Symbol Name="nn4" Comment="int32 nn4 = 4" Device="" Kind="6" Type="DINT" InitValue="4" Address="" State="0"/>
-                        <Symbol Name="nn5" Comment="int32 nn5 = 5" Device="" Kind="6" Type="DINT" InitValue="5" Address="" State="0"/>
-                        <Symbol Name="nn6" Comment="int32 nn6 = 6" Device="" Kind="6" Type="DINT" InitValue="6" Address="" State="0"/>
-                        <Symbol Name="nn7" Comment="int32 nn7 = 7" Device="" Kind="6" Type="DINT" InitValue="7" Address="" State="0"/>
-                        <Symbol Name="nn8" Comment="int32 nn8 = 8" Device="" Kind="6" Type="DINT" InitValue="8" Address="" State="0"/>
-                        <Symbol Name="nn9" Comment="int32 nn9 = 9" Device="" Kind="6" Type="DINT" InitValue="9" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = 1;" Device="" Kind="6" Type="DINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int32 nn2 = 2;" Device="" Kind="6" Type="DINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="nn3" Comment="int32 nn3 = 3;" Device="" Kind="6" Type="DINT" InitValue="3" Address="" State="0"/>
+                        <Symbol Name="nn4" Comment="int32 nn4 = 4;" Device="" Kind="6" Type="DINT" InitValue="4" Address="" State="0"/>
+                        <Symbol Name="nn5" Comment="int32 nn5 = 5;" Device="" Kind="6" Type="DINT" InitValue="5" Address="" State="0"/>
+                        <Symbol Name="nn6" Comment="int32 nn6 = 6;" Device="" Kind="6" Type="DINT" InitValue="6" Address="" State="0"/>
+                        <Symbol Name="nn7" Comment="int32 nn7 = 7;" Device="" Kind="6" Type="DINT" InitValue="7" Address="" State="0"/>
+                        <Symbol Name="nn8" Comment="int32 nn8 = 8;" Device="" Kind="6" Type="DINT" InitValue="8" Address="" State="0"/>
+                        <Symbol Name="nn9" Comment="int32 nn9 = 9;" Device="" Kind="6" Type="DINT" InitValue="9" Address="" State="0"/>
                         <Symbol Name="x00" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.0" State="0"/>
                         <Symbol Name="x01" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.1" State="0"/>
                         <Symbol Name="x02" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.2" State="0"/>
@@ -90,7 +90,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x16 = $nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $nn1 &gt; $nn2 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36 &amp;&amp; $x37
+                                        [0] $x16 = $nn1 &gt; $nn2 &amp;&amp; $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $nn1 &gt; $nn2 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36 &amp;&amp; $x37;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -249,7 +249,7 @@
                                     <Element ElementType="6" Coordinate="11289">
                                         x37
                                     </Element>
-                                    <Element ElementType="2" Coordinate="11292" Param="63"/>
+                                    <Element ElementType="2" Coordinate="11292" Param="66"/>
                                     <Element ElementType="14" Coordinate="11358">
                                         _t4_split
                                     </Element>
@@ -258,7 +258,7 @@
                                     <Element ElementType="6" Coordinate="12289">
                                         _t4_split
                                     </Element>
-                                    <Element ElementType="2" Coordinate="12292" Param="87"/>
+                                    <Element ElementType="2" Coordinate="12292" Param="90"/>
                                     <Element ElementType="14" Coordinate="12382">
                                         x16
                                     </Element>
@@ -281,15 +281,15 @@ XckU4UJCOYh5CA==
                                 <Symbol Name="_t2_GT" Comment="$nn1 &gt; $nn2" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="_t3_split" Comment="&amp;&amp; split output" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                                 <Symbol Name="_t4_split" Comment="&amp;&amp; split output" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn3" Comment="int32 nn3 = 3" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn4" Comment="int32 nn4 = 4" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn5" Comment="int32 nn5 = 5" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn6" Comment="int32 nn6 = 6" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn7" Comment="int32 nn7 = 7" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn8" Comment="int32 nn8 = 8" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn9" Comment="int32 nn9 = 9" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn1" Comment="int32 nn1 = 1;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn2" Comment="int32 nn2 = 2;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn3" Comment="int32 nn3 = 3;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn4" Comment="int32 nn4 = 4;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn5" Comment="int32 nn5 = 5;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn6" Comment="int32 nn6 = 6;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn7" Comment="int32 nn7 = 7;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn8" Comment="int32 nn8 = 8;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn9" Comment="int32 nn9 = 9;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="x00" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="x01" Comment="" Device="I" Kind="8" State="0"/>
                                 <Symbol Name="x02" Comment="" Device="I" Kind="8" State="0"/>

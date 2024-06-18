@@ -67,7 +67,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !(2 == 3) &amp;&amp; !($ix != true) &amp;&amp; !(!(!(3.14 &gt; 5.0))) || !(true &amp;&amp; false) &amp;&amp; !(!(true || $ix))
+                                        [0] $qx = !(2 == 3) &amp;&amp; !($ix != true) &amp;&amp; !(!(!(3.14 &gt; 5.0))) || !(true &amp;&amp; false) &amp;&amp; !(!(true || $ix));
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -100,7 +100,7 @@
                                         M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="4108"/>
-                                    <Element ElementType="2" Coordinate="4109" Param="78"/>
+                                    <Element ElementType="2" Coordinate="4109" Param="81"/>
                                     <Element ElementType="14" Coordinate="4190">
                                         P00001
                                     </Element>

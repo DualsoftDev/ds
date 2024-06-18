@@ -17,23 +17,23 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="17">
                     <Symbols>
-                        <Symbol Name="cd1" Comment="bool cd1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cd2" Comment="bool cd2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cd3" Comment="bool cd3 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cd4" Comment="bool cd4 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cu1" Comment="bool cu1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cu2" Comment="bool cu2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cu3" Comment="bool cu3 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="cu4" Comment="bool cu4 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="load1" Comment="bool load1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="load2" Comment="bool load2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="load3" Comment="bool load3 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="load4" Comment="bool load4 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd1" Comment="bool cd1 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd2" Comment="bool cd2 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd3" Comment="bool cd3 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cd4" Comment="bool cd4 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cu1" Comment="bool cu1 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cu2" Comment="bool cu2 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cu3" Comment="bool cu3 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="cu4" Comment="bool cu4 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="load1" Comment="bool load1 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="load2" Comment="bool load2 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="load3" Comment="bool load3 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="load4" Comment="bool load4 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                         <Symbol Name="myCTUD" Comment="COUNTER myCTUD" Device="" Kind="6" Type="CTUD_INT" Address="" State="0"/>
-                        <Symbol Name="res0" Comment="bool res0 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="res1" Comment="bool res1 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="res2" Comment="bool res2 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="xx7" Comment="bool xx7 = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res0" Comment="bool res0 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res1" Comment="bool res1 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="res2" Comment="bool res2 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="xx7" Comment="bool xx7 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -58,7 +58,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctud myCTUD = createXgiCTUD(2000u, $cu1 &amp;&amp; $cu2 || $cu3 || $cu4, $cd1 || $cd2 || $cd3 &amp;&amp; $cd4, $res0 || $res1 &amp;&amp; $res2)
+                                        [0] ctud myCTUD = createXgiCTUD(2000u, $cu1 &amp;&amp; $cu2 || $cu3 || $cu4, $cd1 || $cd2 || $cd3 &amp;&amp; $cd4, $res0 || $res1 &amp;&amp; $res2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -164,23 +164,23 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="17">
                             <Symbols>
-                                <Symbol Name="cd1" Comment="bool cd1 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cd2" Comment="bool cd2 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cd3" Comment="bool cd3 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cd4" Comment="bool cd4 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cu1" Comment="bool cu1 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cu2" Comment="bool cu2 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cu3" Comment="bool cu3 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="cu4" Comment="bool cu4 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="load1" Comment="bool load1 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="load2" Comment="bool load2 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="load3" Comment="bool load3 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="load4" Comment="bool load4 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd1" Comment="bool cd1 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd2" Comment="bool cd2 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd3" Comment="bool cd3 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cd4" Comment="bool cd4 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cu1" Comment="bool cu1 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cu2" Comment="bool cu2 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cu3" Comment="bool cu3 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cu4" Comment="bool cu4 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="load1" Comment="bool load1 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="load2" Comment="bool load2 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="load3" Comment="bool load3 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="load4" Comment="bool load4 = false;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="myCTUD" Comment="COUNTER myCTUD" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res0" Comment="bool res0 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res1" Comment="bool res1 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="res2" Comment="bool res2 = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="xx7" Comment="bool xx7 = false" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res0" Comment="bool res0 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res1" Comment="bool res1 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="res2" Comment="bool res2 = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="xx7" Comment="bool xx7 = false;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

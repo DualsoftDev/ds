@@ -27,9 +27,9 @@ open Engine.Core
 
             let percent = "%"
             let statementTexts = [
-                "ctu myCtu1 = createAbCTU(100u, false)"
-                $"int8 myByte = createTag({dq}{percent}M9.9{dq}, 123y)"
-                "ton myton1 = createAbTON(1000u, $tag1 || $tag2)"
+                "ctu myCtu1 = createAbCTU(100u, false);"
+                $"int8 myByte = createTag({dq}{percent}M9.9{dq}, 123y);"
+                "ton myton1 = createAbTON(1000u, $tag1 || $tag2);"
                 //"ton myton2 = createWinTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statementTexts do

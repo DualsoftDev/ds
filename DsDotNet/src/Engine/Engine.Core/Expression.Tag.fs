@@ -97,9 +97,13 @@ module TagModule =
             | DuTimer timerStatement -> [timerStatement.Timer.DN ]
             | DuCounter counterStatement -> [counterStatement.Counter.DN ]
             | DuAction (DuCopy (_condition, _source, target)) -> [ target ]
-            | DuAction (DuCopyUdt _) -> []
+            | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Target=target}) ->
+                udtDecl.Members |> map (fun m -> storages[$"{target}.{m.Name}"] )
+
             | DuPLCFunction { Output=target } -> [target]
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
         member x.GetSourceStorages() =
             match x with
@@ -118,15 +122,20 @@ module TagModule =
                     yield! s.GetSourceStorages() ]
             | DuAction (DuCopy (condition, source, _target)) ->
                 condition.CollectStorages()@source.CollectStorages()
-            | DuAction (DuCopyUdt (_parserData, _udtDecl, condition, _source, _target)) ->
-                condition.CollectStorages()
+            | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Condition=condition; Source=source}) ->
+                [
+                    yield! condition.CollectStorages()
+                    yield! udtDecl.Members |> map (fun m -> storages[$"{source}.{m.Name}"] )
+                ]
             | DuPLCFunction {Condition = condi; Arguments=args} ->
                 [
                     if condi.IsSome then
                         yield! condi.Value.CollectStorages()
                         yield! args |> collect(fun arg -> arg.CollectStorages())
                 ]
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
       
 

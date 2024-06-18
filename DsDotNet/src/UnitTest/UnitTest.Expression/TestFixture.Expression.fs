@@ -13,7 +13,7 @@ module ExpressionFixtures =
         try
             let parser = ExpressionParserModule.createParser (text)
             let ctx = parser.statement ()
-            let parserData = new ParserData(targetType, storages, Some parser, [], [])
+            let parserData = new ParserData(targetType, storages, Some parser)
 
             tryCreateStatement parserData ctx
         with exn ->
@@ -28,6 +28,17 @@ module ExpressionFixtures =
             runtimeTarget <- target
             ParserUtil.runtimeTarget <-target
             disposable { runtimeTarget <- runtimeTargetBackup }
+
+    let parseExpression4UnitTest (storages: Storages) (text: string) : IExpression =
+        try
+            let parser = createParser (text)
+            let ctx = parser.expr ()
+            let parserData = ParserData(WINDOWS, Storages(), None)
+
+            createExpression parserData (defaultStorageFinder storages) ctx
+        with exn ->
+            failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
+
 
     [<AbstractClass>]
     type ExpressionTestBaseClass() =

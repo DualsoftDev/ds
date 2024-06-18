@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx1 = $ix1 &amp;&amp; risingAfter($ix2 &amp;&amp; !($ix3))
+                                        [0] $qx1 = $ix1 &amp;&amp; risingAfter($ix2 &amp;&amp; !($ix3));
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -61,14 +61,14 @@
                                         ix3
                                     </Element>
                                     <Element ElementType="72" Coordinate="2058"/>
-                                    <Element ElementType="2" Coordinate="2061" Param="78"/>
+                                    <Element ElementType="2" Coordinate="2061" Param="81"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         qx1
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="3073">
-                                        [1] $qx2 = $ix1 || fallingAfter($ix2 &amp;&amp; !($ix3))
+                                        [1] $qx2 = $ix1 || fallingAfter($ix2 &amp;&amp; !($ix3));
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -77,7 +77,7 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="3"/>
                                     <Element ElementType="0" Coordinate="4105"/>
-                                    <Element ElementType="2" Coordinate="4106" Param="81"/>
+                                    <Element ElementType="2" Coordinate="4106" Param="84"/>
                                     <Element ElementType="14" Coordinate="4190">
                                         qx2
                                     </Element>
@@ -91,7 +91,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [2] $qx3 = fallingAfter($ix1 || !($ix2)) &amp;&amp; $ix3 || fallingAfter($ix1)
+                                        [2] $qx3 = fallingAfter($ix1 || !($ix2)) &amp;&amp; $ix3 || fallingAfter($ix1);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -104,7 +104,7 @@
                                         ix3
                                     </Element>
                                     <Element ElementType="0" Coordinate="7177"/>
-                                    <Element ElementType="2" Coordinate="7178" Param="81"/>
+                                    <Element ElementType="2" Coordinate="7178" Param="84"/>
                                     <Element ElementType="14" Coordinate="7262">
                                         qx3
                                     </Element>

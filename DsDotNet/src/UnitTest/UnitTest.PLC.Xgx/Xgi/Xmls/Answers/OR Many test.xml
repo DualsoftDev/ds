@@ -57,7 +57,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x15 = $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14
+                                        [0] $x15 = $x00 || $x01 || $x02 || $x03 || $x04 || $x05 || $x06 || $x07 || $x08 || $x09 || $x10 || $x11 || $x12 || $x13 || $x14;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -65,7 +65,7 @@
                                         x00
                                     </Element>
                                     <Element ElementType="0" Coordinate="2051"/>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         x15
                                     </Element>

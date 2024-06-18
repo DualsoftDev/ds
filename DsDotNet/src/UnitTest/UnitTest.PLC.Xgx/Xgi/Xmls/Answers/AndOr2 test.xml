@@ -57,7 +57,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x07 = ($x00 || $x01) &amp;&amp; $x02 || $x03 || $x04 &amp;&amp; $x05 &amp;&amp; $x06
+                                        [0] $x07 = ($x00 || $x01) &amp;&amp; $x02 || $x03 || $x04 &amp;&amp; $x05 &amp;&amp; $x06;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -70,7 +70,7 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="2055" Param="0"/>
                                     <Element ElementType="0" Coordinate="2057"/>
-                                    <Element ElementType="2" Coordinate="2058" Param="81"/>
+                                    <Element ElementType="2" Coordinate="2058" Param="84"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         x07
                                     </Element>
@@ -95,7 +95,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $x15 = ($x08 &amp;&amp; $x09 || $x10) &amp;&amp; $x11 &amp;&amp; ($x12 || $x13 || $x14)
+                                        [1] $x15 = ($x08 &amp;&amp; $x09 || $x10) &amp;&amp; $x11 &amp;&amp; ($x12 || $x13 || $x14);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -114,7 +114,7 @@
                                         x12
                                     </Element>
                                     <Element ElementType="0" Coordinate="7180"/>
-                                    <Element ElementType="2" Coordinate="7181" Param="78"/>
+                                    <Element ElementType="2" Coordinate="7181" Param="81"/>
                                     <Element ElementType="14" Coordinate="7262">
                                         x15
                                     </Element>

@@ -17,16 +17,16 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="10">
                     <Symbols>
-                        <Symbol Name="b1" Comment="bool b1 = $pi &gt; $eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="bool b2 = $pi &lt; $eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b3" Comment="bool b3 = $pi == $eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b4" Comment="bool b4 = $pi == $eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b5" Comment="bool b5 = $pi != $eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b6" Comment="bool b6 = $pi != $eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b7" Comment="bool b7 = $pi &gt;= $eu" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
-                        <Symbol Name="b8" Comment="bool b8 = $pi &lt;= $eu" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="eu" Comment="float64 eu = 2.718" Device="" Kind="6" Type="LREAL" InitValue="2.718" Address="" State="0"/>
-                        <Symbol Name="pi" Comment="float64 pi = 3.14" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
+                        <Symbol Name="b1" Comment="bool b1 = $pi &gt; $eu;" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b2" Comment="bool b2 = $pi &lt; $eu;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b3" Comment="bool b3 = $pi == $eu;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b4" Comment="bool b4 = $pi == $eu;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="b5" Comment="bool b5 = $pi != $eu;" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b6" Comment="bool b6 = $pi != $eu;" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b7" Comment="bool b7 = $pi &gt;= $eu;" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b8" Comment="bool b8 = $pi &lt;= $eu;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="eu" Comment="float64 eu = 2.718;" Device="" Kind="6" Type="LREAL" InitValue="2.718" Address="" State="0"/>
+                        <Symbol Name="pi" Comment="float64 pi = 3.14;" Device="" Kind="6" Type="LREAL" InitValue="3.14" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -63,16 +63,16 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="10">
                             <Symbols>
-                                <Symbol Name="b1" Comment="bool b1 = $pi &gt; $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="bool b2 = $pi &lt; $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b3" Comment="bool b3 = $pi == $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b4" Comment="bool b4 = $pi == $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b5" Comment="bool b5 = $pi != $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b6" Comment="bool b6 = $pi != $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b7" Comment="bool b7 = $pi &gt;= $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b8" Comment="bool b8 = $pi &lt;= $eu" Device="" Kind="8" State="0"/>
-                                <Symbol Name="eu" Comment="float64 eu = 2.718" Device="" Kind="8" State="0"/>
-                                <Symbol Name="pi" Comment="float64 pi = 3.14" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b1" Comment="bool b1 = $pi &gt; $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b2" Comment="bool b2 = $pi &lt; $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b3" Comment="bool b3 = $pi == $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b4" Comment="bool b4 = $pi == $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b5" Comment="bool b5 = $pi != $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b6" Comment="bool b6 = $pi != $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b7" Comment="bool b7 = $pi &gt;= $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b8" Comment="bool b8 = $pi &lt;= $eu;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="eu" Comment="float64 eu = 2.718;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="pi" Comment="float64 pi = 3.14;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

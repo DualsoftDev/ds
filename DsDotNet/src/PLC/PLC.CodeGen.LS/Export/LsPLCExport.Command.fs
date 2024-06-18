@@ -414,7 +414,7 @@ module internal rec Command =
 
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
     let bxiCoil (x, y) (cmdExp: CommandTypes) (coilText:string) : BlockXmlInfo =
-        let spanX = max 0 (coilCellX - x - 2)
+        let spanX = max 0 (coilCellX - x - 1)
 
         let xmls =
             [
@@ -438,7 +438,7 @@ module internal rec Command =
 
         {   X = x
             Y = y
-            TotalSpanX = 31
+            TotalSpanX = coilCellX
             TotalSpanY = 1
             XmlElements = xmls }
 
@@ -465,7 +465,7 @@ module internal rec Command =
 
         {   X = x
             Y = y
-            TotalSpanX = 31
+            TotalSpanX = coilCellX
             TotalSpanY = 1
             XmlElements = xmls }
 

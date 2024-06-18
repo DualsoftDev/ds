@@ -163,25 +163,6 @@ module XgiExportModule =
                             let rgiSub = rgiCommandRung condWithFalse cmd rgi.NextRungY
                             rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
                                         NextRungY = 1 + rgiSub.NextRungY }
-                        //let rgiSub =
-                        //    let cmd =
-                        //        let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"
-                        //        XgkParamCmd(param, 5)
-                        //    let sourceTrueCondition = fbLogicalAnd([condition; source]) |> flatten
-                        //    rgiXmlRung (Some sourceTrueCondition) (Some cmd) rgi.NextRungY
-                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                        //            NextRungY = 1 + rgiSub.NextRungY }
-
-                        //let rgiSub =
-                        //    let cmd =
-                        //        let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"
-                        //        XgkParamCmd(param, 5)
-                        //    let sourceFalseCondition = fbLogicalAnd([condition; fbLogicalNot [source]]) |> flatten
-                        //    rgiXmlRung (Some sourceFalseCondition) (Some cmd) rgi.NextRungY
-                        //rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                        //            NextRungY = 1 + rgiSub.NextRungY }
-
-
                 | _ ->
                     failwith "ERROR: XGK Tag parsing error"
             else
@@ -202,26 +183,22 @@ module XgiExportModule =
                 rgi <- rgi.AddSingleLineXml(xml)
 
             for stmt in stmts do
+                //tracefn $"Generating statement::{stmt.ToText()}"
                 match stmt with
                 | DuAssign(condition, expr, target) when isXgk || expr.DataType <> typeof<bool> ->
                     let cond =
                         match condition with
                         | Some c -> c
                         | None -> Expression.True
-                    // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                     if isXgi then
                         let command = ActionCmd(Move(cond, expr, target))
-                        //let command =
-                        //    match expr.Terminal, expr.FunctionName with
-                        //    | Some _t, None -> ActionCmd(Move(cond, expr, target))
-                        //    | None, Some fn -> FunctionCmd(Arithmetic(operatorToXgiFunctionName fn, target :?> INamedExpressionizableTerminal, expr.FunctionArguments))
-                        //    | _ -> failwithlog "ERROR"
                         let rgiSub = rgiCommandRung None command rgi.NextRungY
 
                         rgi <-
                             {   Xmls = rgiSub.Xmls @ rgi.Xmls
                                 NextRungY = 1 + rgiSub.NextRungY }
                     else
+                        // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                         match condition, expr.Terminal with
                         | _, Some _ when expr.DataType <> typeof<bool> ->
                             moveCmdRungXgk cond expr target
@@ -304,7 +281,7 @@ module XgiExportModule =
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuAction (DuCopyUdt (_parserData, udtDecl, condition, source, target)) when isXgi ->
+                | DuAction (DuCopyUdt {UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) when isXgi ->
                     for m in udtDecl.Members do
                         let s, t = $"{source}.{m.Name}", $"{target}.{m.Name}"
                         let s, t = prjParam.GlobalStorages[s], prjParam.GlobalStorages[t]
@@ -383,7 +360,7 @@ module XgiExportModule =
             |> groupBy (fun cs ->
                 match cs.Statement with
                 | DuUdtDecl _ -> "udt-decl"
-                | DuUdtDefinitions _ -> "udt-instances"
+                | DuUdtDef _ -> "udt-instances"
                 | _ -> "non-udt")
             |> Tuple.toDictionary
 
@@ -403,12 +380,12 @@ module XgiExportModule =
             | None -> []
 
         /// XgxPOUParams 의 commented statements 중에서 UDT 변수 정의문 반환
-        member x.GetUdtDefinitions() : UdtDefinition list =
+        member x.GetUdtDefs() : UdtDef list =
             let g = x.GroupStatementsByUdtDeclaration()
             match g.TryFindIt("udt-instances") with
             | Some inst -> inst |> map (fun cs ->
                 match cs.Statement with
-                | DuUdtDefinitions udt -> udt
+                | DuUdtDef udt -> udt
                 | _ -> failwith "Not a UDT declaration")
             | None -> []
 
@@ -665,7 +642,7 @@ module XgiExportModule =
 
                 (* UDT instance 삽입 : <Symbol> xml node 삽입 *)
                 pous
-                |> collect(fun pou -> pou.GetUdtDefinitions())
+                |> collect(fun pou -> pou.GetUdtDefs())
                 |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_GLOBAL))
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
 
@@ -700,7 +677,7 @@ module XgiExportModule =
                             .GenerateXmlNode(x, mainScan)
 
                     let xnLocalVarSymbols = programXml.GetXmlNode("//LocalVar/Symbols")
-                    pou.GetUdtDefinitions()
+                    pou.GetUdtDefs()
                     |> map (fun udt -> udt.GenerateXmlNode(int Variable.Kind.VAR_EXTERNAL))
                     |> iter (xnLocalVarSymbols.AdoptChild >> ignore)
 
@@ -796,7 +773,7 @@ module XgiExportModule =
 
                 symbols.AdoptChild symbol |> ignore
             udt
-    and UdtDefinition with
+    and UdtDef with
         /// UDT instance 정의문에 해당하는 <Symbol> xml node 를 생성해서 반환
         // kind: <GlobalVariable> tag 내에서의 symbol 인 경우 6, <LocalVar> tag 내에서의 symbol 인 경우 8
         member x.GenerateXmlNode(kind:int) : XmlNode =

@@ -40,12 +40,12 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="6">
-                        <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1)" Device="M" DevicePos="64" Type="BIT"/>
-                        <Symbol Name="b1" Comment="bool b1 = !($pi == 6.1)" Device="M" DevicePos="65" Type="BIT"/>
-                        <Symbol Name="b2" Comment="bool b2 = true &amp;&amp; !($pi == 6.2)" Device="M" DevicePos="66" Type="BIT"/>
-                        <Symbol Name="b3" Comment="bool b3 = $pi &gt; 6.23" Device="M" DevicePos="67" Type="BIT"/>
-                        <Symbol Name="b4" Comment="bool b4 = !($pi &gt; 6.24)" Device="M" DevicePos="68" Type="BIT"/>
-                        <Symbol Name="pi" Comment="float64 pi = 3.14" Device="M" DevicePos="0" Type="WORD"/>
+                        <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1);" Device="M" DevicePos="64" Type="BIT"/>
+                        <Symbol Name="b1" Comment="bool b1 = !($pi == 6.1);" Device="M" DevicePos="65" Type="BIT"/>
+                        <Symbol Name="b2" Comment="bool b2 = true &amp;&amp; !($pi == 6.2);" Device="M" DevicePos="66" Type="BIT"/>
+                        <Symbol Name="b3" Comment="bool b3 = $pi &gt; 6.23;" Device="M" DevicePos="67" Type="BIT"/>
+                        <Symbol Name="b4" Comment="bool b4 = !($pi &gt; 6.24);" Device="M" DevicePos="68" Type="BIT"/>
+                        <Symbol Name="pi" Comment="float64 pi = 3.14;" Device="M" DevicePos="0" Type="WORD"/>
                     </Symbols>
                     <EIPTags Count="0"></EIPTags>
                     <HMIFlags></HMIFlags>
@@ -69,7 +69,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] float64 pi = 3.14
+                                        [0] float64 pi = 3.14;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -81,7 +81,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] bool b0 = !(2.1 == 6.1)
+                                        [1] bool b0 = !(2.1 == 6.1);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -93,7 +93,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] bool b1 = !($pi == 6.1)
+                                        [2] bool b1 = !($pi == 6.1);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -105,7 +105,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] bool b2 = true &amp;&amp; !($pi == 6.2)
+                                        [3] bool b2 = true &amp;&amp; !($pi == 6.2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -117,7 +117,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] bool b3 = $pi &gt; 6.23
+                                        [4] bool b3 = $pi &gt; 6.23;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -129,7 +129,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [5] bool b4 = !($pi &gt; 6.24)
+                                        [5] bool b4 = !($pi &gt; 6.24);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x02 = !(!($x00) || $x01)
+                                        [0] $x02 = !(!($x00) || $x01);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -57,14 +57,14 @@
                                     <Element ElementType="7" Coordinate="2052">
                                         x01
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2055" Param="84"/>
+                                    <Element ElementType="2" Coordinate="2055" Param="87"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         x02
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="3073">
-                                        [1] $x05 = !($x03 &amp;&amp; !($x04))
+                                        [1] $x05 = !($x03 &amp;&amp; !($x04));
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -72,7 +72,7 @@
                                         x03
                                     </Element>
                                     <Element ElementType="0" Coordinate="4099"/>
-                                    <Element ElementType="2" Coordinate="4100" Param="87"/>
+                                    <Element ElementType="2" Coordinate="4100" Param="90"/>
                                     <Element ElementType="14" Coordinate="4190">
                                         x05
                                     </Element>

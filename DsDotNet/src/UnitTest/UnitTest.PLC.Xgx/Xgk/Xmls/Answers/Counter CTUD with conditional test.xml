@@ -40,23 +40,23 @@
             <GlobalVariables>
                 <VariableComment Version="Ver 1.1" EIPGUID="b5375a54-4656-4667-a4a8-a8babe7ae9e2" EIPChangedID="0" HMIGUID="722557e5-3e68-4b1b-b69c-16f30072620f">
                     <Symbols Count="17">
-                        <Symbol Name="cd1" Comment="bool cd1 = false" Device="M" DevicePos="4" Type="BIT"/>
-                        <Symbol Name="cd2" Comment="bool cd2 = false" Device="M" DevicePos="5" Type="BIT"/>
-                        <Symbol Name="cd3" Comment="bool cd3 = false" Device="M" DevicePos="6" Type="BIT"/>
-                        <Symbol Name="cd4" Comment="bool cd4 = false" Device="M" DevicePos="7" Type="BIT"/>
-                        <Symbol Name="cu1" Comment="bool cu1 = false" Device="M" DevicePos="0" Type="BIT"/>
-                        <Symbol Name="cu2" Comment="bool cu2 = false" Device="M" DevicePos="1" Type="BIT"/>
-                        <Symbol Name="cu3" Comment="bool cu3 = false" Device="M" DevicePos="2" Type="BIT"/>
-                        <Symbol Name="cu4" Comment="bool cu4 = false" Device="M" DevicePos="3" Type="BIT"/>
-                        <Symbol Name="load1" Comment="bool load1 = false" Device="M" DevicePos="11" Type="BIT"/>
-                        <Symbol Name="load2" Comment="bool load2 = false" Device="M" DevicePos="12" Type="BIT"/>
-                        <Symbol Name="load3" Comment="bool load3 = false" Device="M" DevicePos="13" Type="BIT"/>
-                        <Symbol Name="load4" Comment="bool load4 = false" Device="M" DevicePos="14" Type="BIT"/>
+                        <Symbol Name="cd1" Comment="bool cd1 = false;" Device="M" DevicePos="4" Type="BIT"/>
+                        <Symbol Name="cd2" Comment="bool cd2 = false;" Device="M" DevicePos="5" Type="BIT"/>
+                        <Symbol Name="cd3" Comment="bool cd3 = false;" Device="M" DevicePos="6" Type="BIT"/>
+                        <Symbol Name="cd4" Comment="bool cd4 = false;" Device="M" DevicePos="7" Type="BIT"/>
+                        <Symbol Name="cu1" Comment="bool cu1 = false;" Device="M" DevicePos="0" Type="BIT"/>
+                        <Symbol Name="cu2" Comment="bool cu2 = false;" Device="M" DevicePos="1" Type="BIT"/>
+                        <Symbol Name="cu3" Comment="bool cu3 = false;" Device="M" DevicePos="2" Type="BIT"/>
+                        <Symbol Name="cu4" Comment="bool cu4 = false;" Device="M" DevicePos="3" Type="BIT"/>
+                        <Symbol Name="load1" Comment="bool load1 = false;" Device="M" DevicePos="11" Type="BIT"/>
+                        <Symbol Name="load2" Comment="bool load2 = false;" Device="M" DevicePos="12" Type="BIT"/>
+                        <Symbol Name="load3" Comment="bool load3 = false;" Device="M" DevicePos="13" Type="BIT"/>
+                        <Symbol Name="load4" Comment="bool load4 = false;" Device="M" DevicePos="14" Type="BIT"/>
                         <Symbol Name="myCTUD" Comment="COUNTER myCTUD" Device="C" DevicePos="0" Type="BIT/WORD"/>
-                        <Symbol Name="res0" Comment="bool res0 = false" Device="M" DevicePos="8" Type="BIT"/>
-                        <Symbol Name="res1" Comment="bool res1 = false" Device="M" DevicePos="9" Type="BIT"/>
-                        <Symbol Name="res2" Comment="bool res2 = false" Device="M" DevicePos="10" Type="BIT"/>
-                        <Symbol Name="xx7" Comment="bool xx7 = false" Device="M" DevicePos="15" Type="BIT"/>
+                        <Symbol Name="res0" Comment="bool res0 = false;" Device="M" DevicePos="8" Type="BIT"/>
+                        <Symbol Name="res1" Comment="bool res1 = false;" Device="M" DevicePos="9" Type="BIT"/>
+                        <Symbol Name="res2" Comment="bool res2 = false;" Device="M" DevicePos="10" Type="BIT"/>
+                        <Symbol Name="xx7" Comment="bool xx7 = false;" Device="M" DevicePos="15" Type="BIT"/>
                         <Symbol Name="_t1_OR" Comment="$cu1 &amp;&amp; $cu2 || $cu3 || $cu4" Device="M" DevicePos="16" Type="BIT"/>
                         <Symbol Name="_t2_OR" Comment="$cd1 || $cd2 || $cd3 &amp;&amp; $cd4" Device="M" DevicePos="17" Type="BIT"/>
                     </Symbols>
@@ -82,7 +82,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] bool cu1 = false
+                                        [0] bool cu1 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -94,7 +94,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
-                                        [1] bool cu2 = false
+                                        [1] bool cu2 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -106,7 +106,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
-                                        [2] bool cu3 = false
+                                        [2] bool cu3 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -118,7 +118,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
-                                        [3] bool cu4 = false
+                                        [3] bool cu4 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -130,7 +130,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] bool cd1 = false
+                                        [4] bool cd1 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -142,7 +142,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [5] bool cd2 = false
+                                        [5] bool cd2 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -154,7 +154,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
-                                        [6] bool cd3 = false
+                                        [6] bool cd3 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -166,7 +166,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
-                                        [7] bool cd4 = false
+                                        [7] bool cd4 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -178,7 +178,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="25601">
-                                        [8] bool res0 = false
+                                        [8] bool res0 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -190,7 +190,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="28673">
-                                        [9] bool res1 = false
+                                        [9] bool res1 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -202,7 +202,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="31745">
-                                        [10] bool res2 = false
+                                        [10] bool res2 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -214,7 +214,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="34817">
-                                        [11] bool load1 = false
+                                        [11] bool load1 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -226,7 +226,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="37889">
-                                        [12] bool load2 = false
+                                        [12] bool load2 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -238,7 +238,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="40961">
-                                        [13] bool load3 = false
+                                        [13] bool load3 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -250,7 +250,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="44033">
-                                        [14] bool load4 = false
+                                        [14] bool load4 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -262,7 +262,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="47105">
-                                        [15] bool xx7 = false
+                                        [15] bool xx7 = false;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -274,7 +274,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="50177">
-                                        [16] ctud myCTUD = createXgkCTUD(2000u, $cu1 &amp;&amp; $cu2 || $cu3 || $cu4, $cd1 || $cd2 || $cd3 &amp;&amp; $cd4, $res0 || $res1 &amp;&amp; $res2)
+                                        [16] ctud myCTUD = createXgkCTUD(2000u, $cu1 &amp;&amp; $cu2 || $cu3 || $cu4, $cd1 || $cd2 || $cd3 &amp;&amp; $cd4, $res0 || $res1 &amp;&amp; $res2);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -285,7 +285,7 @@
                                         M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="51206"/>
-                                    <Element ElementType="2" Coordinate="51207" Param="84"/>
+                                    <Element ElementType="2" Coordinate="51207" Param="87"/>
                                     <Element ElementType="14" Coordinate="51294">
                                         M00010
                                     </Element>
@@ -306,7 +306,7 @@
                                     <Element ElementType="0" Coordinate="54275"/>
                                     <Element ElementType="2" Coordinate="54276" Param="0"/>
                                     <Element ElementType="0" Coordinate="54278"/>
-                                    <Element ElementType="2" Coordinate="54279" Param="84"/>
+                                    <Element ElementType="2" Coordinate="54279" Param="87"/>
                                     <Element ElementType="14" Coordinate="54366">
                                         M00011
                                     </Element>
@@ -334,7 +334,7 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="59396" Param="0"/>
                                     <Element ElementType="0" Coordinate="59398"/>
-                                    <Element ElementType="2" Coordinate="59399" Param="84"/>
+                                    <Element ElementType="2" Coordinate="59399" Param="87"/>
                                     <Element ElementType="17" Coordinate="59486">
                                         myCTUD
                                     </Element>

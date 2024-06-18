@@ -79,7 +79,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x07 = ($x00 || $x01) &amp;&amp; $x02 || $x03 || $x04 &amp;&amp; $x05 &amp;&amp; $x06
+                                        [0] $x07 = ($x00 || $x01) &amp;&amp; $x02 || $x03 || $x04 &amp;&amp; $x05 &amp;&amp; $x06;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -92,7 +92,7 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="2055" Param="0"/>
                                     <Element ElementType="0" Coordinate="2057"/>
-                                    <Element ElementType="2" Coordinate="2058" Param="81"/>
+                                    <Element ElementType="2" Coordinate="2058" Param="84"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         P00007
                                     </Element>
@@ -117,7 +117,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $x15 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [1] $x15 = $x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -126,7 +126,7 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="9"/>
                                     <Element ElementType="0" Coordinate="7183"/>
-                                    <Element ElementType="2" Coordinate="7184" Param="75"/>
+                                    <Element ElementType="2" Coordinate="7184" Param="78"/>
                                     <Element ElementType="14" Coordinate="7262">
                                         P0000F
                                     </Element>
@@ -186,7 +186,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [2] $x15 = $x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00
+                                        [2] $x15 = $x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -195,7 +195,7 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="14340" Param="9"/>
                                     <Element ElementType="0" Coordinate="14351"/>
-                                    <Element ElementType="2" Coordinate="14352" Param="75"/>
+                                    <Element ElementType="2" Coordinate="14352" Param="78"/>
                                     <Element ElementType="14" Coordinate="14430">
                                         P0000F
                                     </Element>
@@ -288,7 +288,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="23553">
-                                        [3] $x15 = ($x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00) &amp;&amp; ($x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00)
+                                        [3] $x15 = ($x00 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00) &amp;&amp; ($x00 || $x01 &amp;&amp; $x02 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 || $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 || $x03 &amp;&amp; $x04 &amp;&amp; $x05 || $x01 &amp;&amp; $x02 || $x00);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -308,7 +308,7 @@
                                     <Element ElementType="0" Coordinate="24603"/>
                                     <Element ElementType="2" Coordinate="24604" Param="0"/>
                                     <Element ElementType="0" Coordinate="24606"/>
-                                    <Element ElementType="2" Coordinate="24607" Param="60"/>
+                                    <Element ElementType="2" Coordinate="24607" Param="63"/>
                                     <Element ElementType="14" Coordinate="24670">
                                         P0000F
                                     </Element>

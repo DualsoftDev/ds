@@ -92,7 +92,16 @@ module XgxFixtures =
         runtimeTarget <- target
         disposable { runtimeTarget <- runtimeTargetBackup }
 
- 
+    let parseExpression4UnitTest (storages: Storages) (text: string) : IExpression =
+        try
+            let parser = createParser (text)
+            let ctx = parser.expr ()
+            let parserData = ParserData(WINDOWS, Storages(), None)
+
+            createExpression parserData (defaultStorageFinder storages) ctx
+        with exn ->
+            failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
+
     /// Unit test 용 PLC XML 생성 함수.  실제 runtime 환경에서는 generateXmlXGX 사용
     let private generateXmlForTest (xgx:PlatformTarget) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
@@ -176,6 +185,16 @@ module XgxFixtures =
 
             // 포맷된 XML 반환
             output.Replace("\r\n", "\n").Replace("\n", "\r\n")
+
+        /// 주어진 ds expression 코드를 파싱해서 PLC 코드 생성
+        ///
+        /// 부산물인 storages 와 statements 를 반환
+        member x.TestCode (funcName:string) (code:string) =
+            let storages = Storages()
+            let statements = parseCodeForWindows storages code
+            let xml = x.generateXmlForTest funcName storages (map withNoComment statements)
+            x.saveTestResult funcName xml
+            storages, statements
 
         [<SetUp>]
         member x.Setup () =

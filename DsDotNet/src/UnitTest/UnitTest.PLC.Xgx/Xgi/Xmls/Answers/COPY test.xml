@@ -81,8 +81,8 @@
                         <Symbol Name="cond61" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX2713" State="0"/>
                         <Symbol Name="cond62" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX2714" State="0"/>
                         <Symbol Name="cond63" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX2715" State="0"/>
-                        <Symbol Name="src" Comment="int16 src = 1s" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="tgt" Comment="int16 tgt = 2s" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="src" Comment="int16 src = 1s;" Device="" Kind="6" Type="INT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="tgt" Comment="int16 tgt = 2s;" Device="" Kind="6" Type="INT" InitValue="2" Address="" State="0"/>
                         <Symbol Name="x00" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX160" State="0"/>
                         <Symbol Name="x01" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX161" State="0"/>
                         <Symbol Name="x02" Comment="" Device="M" Kind="6" Type="BOOL" Address="%MX162" State="0"/>
@@ -235,7 +235,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $x63 = $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $x31 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36 &amp;&amp; $x37 &amp;&amp; $x38 &amp;&amp; $x39 &amp;&amp; $x40 &amp;&amp; $x41 &amp;&amp; $x42 &amp;&amp; $x43 &amp;&amp; $x44 &amp;&amp; $x45 &amp;&amp; $x46 &amp;&amp; $x47 &amp;&amp; $x48 &amp;&amp; $x49 &amp;&amp; $x50 &amp;&amp; $x51 &amp;&amp; $x52 &amp;&amp; $x53 &amp;&amp; $x54 &amp;&amp; $x55 &amp;&amp; $x56 &amp;&amp; $x57 &amp;&amp; $x58 &amp;&amp; $x59 &amp;&amp; $x60 &amp;&amp; $x61 &amp;&amp; $x62 &amp;&amp; $x63
+                                        [0] $x63 = $x00 &amp;&amp; $x01 &amp;&amp; $x02 &amp;&amp; $x03 &amp;&amp; $x04 &amp;&amp; $x05 &amp;&amp; $x06 &amp;&amp; $x07 &amp;&amp; $x08 &amp;&amp; $x09 &amp;&amp; $x10 &amp;&amp; $x11 &amp;&amp; $x12 &amp;&amp; $x13 &amp;&amp; $x14 &amp;&amp; $x15 &amp;&amp; $x16 &amp;&amp; $x17 &amp;&amp; $x18 &amp;&amp; $x19 &amp;&amp; $x20 &amp;&amp; $x21 &amp;&amp; $x22 &amp;&amp; $x23 &amp;&amp; $x24 &amp;&amp; $x25 &amp;&amp; $x26 &amp;&amp; $x27 &amp;&amp; $x28 &amp;&amp; $x29 &amp;&amp; $x30 &amp;&amp; $x31 &amp;&amp; $x32 &amp;&amp; $x33 &amp;&amp; $x34 &amp;&amp; $x35 &amp;&amp; $x36 &amp;&amp; $x37 &amp;&amp; $x38 &amp;&amp; $x39 &amp;&amp; $x40 &amp;&amp; $x41 &amp;&amp; $x42 &amp;&amp; $x43 &amp;&amp; $x44 &amp;&amp; $x45 &amp;&amp; $x46 &amp;&amp; $x47 &amp;&amp; $x48 &amp;&amp; $x49 &amp;&amp; $x50 &amp;&amp; $x51 &amp;&amp; $x52 &amp;&amp; $x53 &amp;&amp; $x54 &amp;&amp; $x55 &amp;&amp; $x56 &amp;&amp; $x57 &amp;&amp; $x58 &amp;&amp; $x59 &amp;&amp; $x60 &amp;&amp; $x61 &amp;&amp; $x62 &amp;&amp; $x63;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -447,7 +447,7 @@
                                     <Element ElementType="6" Coordinate="4106">
                                         x63
                                     </Element>
-                                    <Element ElementType="2" Coordinate="4109" Param="78"/>
+                                    <Element ElementType="2" Coordinate="4109" Param="81"/>
                                     <Element ElementType="14" Coordinate="4190">
                                         _t3_split
                                     </Element>
@@ -456,14 +456,14 @@
                                     <Element ElementType="6" Coordinate="5121">
                                         _t3_split
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5124" Param="87"/>
+                                    <Element ElementType="2" Coordinate="5124" Param="90"/>
                                     <Element ElementType="14" Coordinate="5214">
                                         x63
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $y63 = $y00 &amp;&amp; $y01 &amp;&amp; $y02 &amp;&amp; $y03 &amp;&amp; $y04 &amp;&amp; $y05 &amp;&amp; $y06 &amp;&amp; $y07 &amp;&amp; $y08 &amp;&amp; $y09 &amp;&amp; $y10 &amp;&amp; $y11 &amp;&amp; $y12 &amp;&amp; $y13 &amp;&amp; $y14 &amp;&amp; $y15 &amp;&amp; $y16 &amp;&amp; $y17 &amp;&amp; $y18 &amp;&amp; $y19 &amp;&amp; $y20 &amp;&amp; $y21 &amp;&amp; $y22 &amp;&amp; $y23 &amp;&amp; $y24 &amp;&amp; $y25 &amp;&amp; $y26 &amp;&amp; $y27 &amp;&amp; $y28 &amp;&amp; $y29 &amp;&amp; $y30 &amp;&amp; $y31 &amp;&amp; $y32 &amp;&amp; $y33 &amp;&amp; $y34 &amp;&amp; $y35 &amp;&amp; $y36 &amp;&amp; $y37 &amp;&amp; $y38 &amp;&amp; $y39 &amp;&amp; $y40 &amp;&amp; $y41 &amp;&amp; $y42 &amp;&amp; $y43 &amp;&amp; $y44 &amp;&amp; $y45 &amp;&amp; $y46 &amp;&amp; $y47 &amp;&amp; $y48 &amp;&amp; $y49 &amp;&amp; $y50 &amp;&amp; $y51 &amp;&amp; $y52 &amp;&amp; $y53 &amp;&amp; $y54 &amp;&amp; $y55 &amp;&amp; $y56 &amp;&amp; $y57 &amp;&amp; $y58 &amp;&amp; $y59 &amp;&amp; $y60 &amp;&amp; $y61 &amp;&amp; $y62 &amp;&amp; $y63
+                                        [1] $y63 = $y00 &amp;&amp; $y01 &amp;&amp; $y02 &amp;&amp; $y03 &amp;&amp; $y04 &amp;&amp; $y05 &amp;&amp; $y06 &amp;&amp; $y07 &amp;&amp; $y08 &amp;&amp; $y09 &amp;&amp; $y10 &amp;&amp; $y11 &amp;&amp; $y12 &amp;&amp; $y13 &amp;&amp; $y14 &amp;&amp; $y15 &amp;&amp; $y16 &amp;&amp; $y17 &amp;&amp; $y18 &amp;&amp; $y19 &amp;&amp; $y20 &amp;&amp; $y21 &amp;&amp; $y22 &amp;&amp; $y23 &amp;&amp; $y24 &amp;&amp; $y25 &amp;&amp; $y26 &amp;&amp; $y27 &amp;&amp; $y28 &amp;&amp; $y29 &amp;&amp; $y30 &amp;&amp; $y31 &amp;&amp; $y32 &amp;&amp; $y33 &amp;&amp; $y34 &amp;&amp; $y35 &amp;&amp; $y36 &amp;&amp; $y37 &amp;&amp; $y38 &amp;&amp; $y39 &amp;&amp; $y40 &amp;&amp; $y41 &amp;&amp; $y42 &amp;&amp; $y43 &amp;&amp; $y44 &amp;&amp; $y45 &amp;&amp; $y46 &amp;&amp; $y47 &amp;&amp; $y48 &amp;&amp; $y49 &amp;&amp; $y50 &amp;&amp; $y51 &amp;&amp; $y52 &amp;&amp; $y53 &amp;&amp; $y54 &amp;&amp; $y55 &amp;&amp; $y56 &amp;&amp; $y57 &amp;&amp; $y58 &amp;&amp; $y59 &amp;&amp; $y60 &amp;&amp; $y61 &amp;&amp; $y62 &amp;&amp; $y63;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -675,7 +675,7 @@
                                     <Element ElementType="6" Coordinate="9226">
                                         y63
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9229" Param="78"/>
+                                    <Element ElementType="2" Coordinate="9229" Param="81"/>
                                     <Element ElementType="14" Coordinate="9310">
                                         _t6_split
                                     </Element>
@@ -684,14 +684,14 @@
                                     <Element ElementType="6" Coordinate="10241">
                                         _t6_split
                                     </Element>
-                                    <Element ElementType="2" Coordinate="10244" Param="87"/>
+                                    <Element ElementType="2" Coordinate="10244" Param="90"/>
                                     <Element ElementType="14" Coordinate="10334">
                                         y63
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="11265">
-                                        [2] $cond63 = $cond00 &amp;&amp; $cond01 &amp;&amp; $cond02 &amp;&amp; $cond03 &amp;&amp; $cond04 &amp;&amp; $cond05 &amp;&amp; $cond06 &amp;&amp; $cond07 &amp;&amp; $cond08 &amp;&amp; $cond09 &amp;&amp; $cond10 &amp;&amp; $cond11 &amp;&amp; $cond12 &amp;&amp; $cond13 &amp;&amp; $cond14 &amp;&amp; $cond15 &amp;&amp; $cond16 &amp;&amp; $cond17 &amp;&amp; $cond18 &amp;&amp; $cond19 &amp;&amp; $cond20 &amp;&amp; $cond21 &amp;&amp; $cond22 &amp;&amp; $cond23 &amp;&amp; $cond24 &amp;&amp; $cond25 &amp;&amp; $cond26 &amp;&amp; $cond27 &amp;&amp; $cond28 &amp;&amp; $cond29 &amp;&amp; $cond30 &amp;&amp; $cond31 &amp;&amp; $cond32 &amp;&amp; $cond33 &amp;&amp; $cond34 &amp;&amp; $cond35 &amp;&amp; $cond36 &amp;&amp; $cond37 &amp;&amp; $cond38 &amp;&amp; $cond39 &amp;&amp; $cond40 &amp;&amp; $cond41 &amp;&amp; $cond42 &amp;&amp; $cond43 &amp;&amp; $cond44 &amp;&amp; $cond45 &amp;&amp; $cond46 &amp;&amp; $cond47 &amp;&amp; $cond48 &amp;&amp; $cond49 &amp;&amp; $cond50 &amp;&amp; $cond51 &amp;&amp; $cond52 &amp;&amp; $cond53 &amp;&amp; $cond54 &amp;&amp; $cond55 &amp;&amp; $cond56 &amp;&amp; $cond57 &amp;&amp; $cond58 &amp;&amp; $cond59 &amp;&amp; $cond60 &amp;&amp; $cond61 &amp;&amp; $cond62 &amp;&amp; $cond63
+                                        [2] $cond63 = $cond00 &amp;&amp; $cond01 &amp;&amp; $cond02 &amp;&amp; $cond03 &amp;&amp; $cond04 &amp;&amp; $cond05 &amp;&amp; $cond06 &amp;&amp; $cond07 &amp;&amp; $cond08 &amp;&amp; $cond09 &amp;&amp; $cond10 &amp;&amp; $cond11 &amp;&amp; $cond12 &amp;&amp; $cond13 &amp;&amp; $cond14 &amp;&amp; $cond15 &amp;&amp; $cond16 &amp;&amp; $cond17 &amp;&amp; $cond18 &amp;&amp; $cond19 &amp;&amp; $cond20 &amp;&amp; $cond21 &amp;&amp; $cond22 &amp;&amp; $cond23 &amp;&amp; $cond24 &amp;&amp; $cond25 &amp;&amp; $cond26 &amp;&amp; $cond27 &amp;&amp; $cond28 &amp;&amp; $cond29 &amp;&amp; $cond30 &amp;&amp; $cond31 &amp;&amp; $cond32 &amp;&amp; $cond33 &amp;&amp; $cond34 &amp;&amp; $cond35 &amp;&amp; $cond36 &amp;&amp; $cond37 &amp;&amp; $cond38 &amp;&amp; $cond39 &amp;&amp; $cond40 &amp;&amp; $cond41 &amp;&amp; $cond42 &amp;&amp; $cond43 &amp;&amp; $cond44 &amp;&amp; $cond45 &amp;&amp; $cond46 &amp;&amp; $cond47 &amp;&amp; $cond48 &amp;&amp; $cond49 &amp;&amp; $cond50 &amp;&amp; $cond51 &amp;&amp; $cond52 &amp;&amp; $cond53 &amp;&amp; $cond54 &amp;&amp; $cond55 &amp;&amp; $cond56 &amp;&amp; $cond57 &amp;&amp; $cond58 &amp;&amp; $cond59 &amp;&amp; $cond60 &amp;&amp; $cond61 &amp;&amp; $cond62 &amp;&amp; $cond63;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -903,7 +903,7 @@
                                     <Element ElementType="6" Coordinate="14346">
                                         cond63
                                     </Element>
-                                    <Element ElementType="2" Coordinate="14349" Param="78"/>
+                                    <Element ElementType="2" Coordinate="14349" Param="81"/>
                                     <Element ElementType="14" Coordinate="14430">
                                         _t9_split
                                     </Element>
@@ -912,14 +912,14 @@
                                     <Element ElementType="6" Coordinate="15361">
                                         _t9_split
                                     </Element>
-                                    <Element ElementType="2" Coordinate="15364" Param="87"/>
+                                    <Element ElementType="2" Coordinate="15364" Param="90"/>
                                     <Element ElementType="14" Coordinate="15454">
                                         cond63
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="16385">
-                                        [3] copyIf($cond50, $src, $tgt)
+                                        [3] copyIf($cond50, $src, $tgt);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -936,7 +936,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="20481">
-                                        [4] copyIf($cond51, true, $y51)
+                                        [4] copyIf($cond51, true, $y51);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -953,7 +953,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="24577">
-                                        [5] copyIf($cond52, false, $y52)
+                                        [5] copyIf($cond52, false, $y52);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -970,7 +970,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="28673">
-                                        [6] copyIf($cond00, $x00, $y00)
+                                        [6] copyIf($cond00, $x00, $y00);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -987,7 +987,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="32769">
-                                        [7] copyIf($cond01, $x01, $y01)
+                                        [7] copyIf($cond01, $x01, $y01);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1004,7 +1004,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="36865">
-                                        [8] copyIf($cond02, $x02, $y02)
+                                        [8] copyIf($cond02, $x02, $y02);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1021,7 +1021,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="40961">
-                                        [9] copyIf($cond03, $x03, $y03)
+                                        [9] copyIf($cond03, $x03, $y03);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1038,7 +1038,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="45057">
-                                        [10] copyIf($cond04, $x04, $y04)
+                                        [10] copyIf($cond04, $x04, $y04);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1055,7 +1055,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="49153">
-                                        [11] copyIf($cond05, $x05, $y05)
+                                        [11] copyIf($cond05, $x05, $y05);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1072,7 +1072,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="53249">
-                                        [12] copyIf($cond06, $x06, $y06)
+                                        [12] copyIf($cond06, $x06, $y06);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1089,7 +1089,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="57345">
-                                        [13] copyIf($cond07, $x07, $y07)
+                                        [13] copyIf($cond07, $x07, $y07);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1106,7 +1106,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="61441">
-                                        [14] copyIf($cond08, $x08, $y08)
+                                        [14] copyIf($cond08, $x08, $y08);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1123,7 +1123,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="65537">
-                                        [15] copyIf($cond09, $x09, $y09)
+                                        [15] copyIf($cond09, $x09, $y09);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1140,7 +1140,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="69633">
-                                        [16] copyIf($cond15, $x15, $y15)
+                                        [16] copyIf($cond15, $x15, $y15);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1157,7 +1157,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="73729">
-                                        [17] copyIf($cond16, $x16, $y16)
+                                        [17] copyIf($cond16, $x16, $y16);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1174,7 +1174,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="77825">
-                                        [18] copyIf($cond17, $x17, $y17)
+                                        [18] copyIf($cond17, $x17, $y17);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1191,7 +1191,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="81921">
-                                        [19] copyIf($cond30, $x30, $y30)
+                                        [19] copyIf($cond30, $x30, $y30);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1208,7 +1208,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="86017">
-                                        [20] copyIf($cond31, $x31, $y31)
+                                        [20] copyIf($cond31, $x31, $y31);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1225,7 +1225,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="90113">
-                                        [21] copyIf($cond32, $x32, $y32)
+                                        [21] copyIf($cond32, $x32, $y32);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1242,7 +1242,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="94209">
-                                        [22] copyIf($cond33, $x33, $y33)
+                                        [22] copyIf($cond33, $x33, $y33);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -1344,8 +1344,8 @@ XckU4UJCOYh5CA==
                                 <Symbol Name="cond61" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="cond62" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="cond63" Comment="" Device="M" Kind="8" State="0"/>
-                                <Symbol Name="src" Comment="int16 src = 1s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="tgt" Comment="int16 tgt = 2s" Device="" Kind="8" State="0"/>
+                                <Symbol Name="src" Comment="int16 src = 1s;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="tgt" Comment="int16 tgt = 2s;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="x00" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="x01" Comment="" Device="M" Kind="8" State="0"/>
                                 <Symbol Name="x02" Comment="" Device="M" Kind="8" State="0"/>

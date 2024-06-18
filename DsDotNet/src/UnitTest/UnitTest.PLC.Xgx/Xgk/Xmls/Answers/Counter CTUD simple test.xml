@@ -68,7 +68,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctud myCTUD = createXgkCTUD(2000u, $cu, $cd, $r)
+                                        [0] ctud myCTUD = createXgkCTUD(2000u, $cu, $cd, $r);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -82,7 +82,7 @@
                                     <Element ElementType="6" Coordinate="4097">
                                         P00002
                                     </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="87"/>
+                                    <Element ElementType="2" Coordinate="4100" Param="90"/>
                                     <Element ElementType="17" Coordinate="4190">
                                         myCTUD
                                     </Element>

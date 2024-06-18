@@ -8,9 +8,52 @@ open System
 
 [<AutoOpen>]
 module StatementExtensionModule =
+    let rec functionToAssignStatementVisitor (pack:DynamicDictionary) (expPath:IExpression list) (exp:IExpression): IExpression =
+        let prjParam, _augs = pack.Unpack()
+        if exp.Terminal.IsSome then
+            exp
+        else
+            tracefn $"exp: {exp.ToText()}"
+            let newExp =
+                let args =
+                    exp.FunctionArguments
+                    |> map (fun ex ->
+                        functionToAssignStatementVisitor pack (exp::expPath) ex)
+                exp.WithNewFunctionArguments args
+
+            let statement = pack.Get<Statement>("statement")
+            let isXgi = prjParam.TargetType = XGI
+            let isAssignStatement =
+                match statement with
+                | DuAssign _ -> true
+                | _ -> false
+
+            match newExp.FunctionName with
+            | Some (IsOpAB _fn) when isXgi && expPath.IsEmpty ->
+                match statement with
+                | DuAssign(_, e, _t) when e = exp ->
+                    newExp
+                | _ ->
+                    newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOperators)
+
+            | Some (IsOpABC fn) when expPath.Any() ->
+                let augment =
+                    match prjParam.TargetType, expPath with
+                    | XGK, _head::_ -> true
+                    | XGI, _head::_ when _head.FunctionName <> Some fn -> true
+                    | _ ->
+                        false
+
+                if augment then
+                    newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
+                else
+                    newExp
+            | Some (IsOpC _fn) when isXgi && (expPath.Any() || not isAssignStatement) ->
+                newExp.ToAssignStatement(pack, K.comparisonOperators)
+            | _ ->
+                newExp
 
     type ExpressionVisitor = DynamicDictionary -> IExpression list -> IExpression -> IExpression
-
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
         member internal x.ToStatements (pack:DynamicDictionary) : unit =
@@ -18,7 +61,7 @@ module StatementExtensionModule =
             let _prjParam, augs = pack.Unpack()
 
             match statement with
-            | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
+            | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _) -> failwith "Should have been processed in early stage"
             | DuAssign(condition, exp, target) ->
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
@@ -53,6 +96,8 @@ module StatementExtensionModule =
 
             | DuAction(DuCopyUdt _) ->
                 statement |> augs.Statements.Add
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
 
         /// statement 내부에 존재하는 모든 expression 을 visit 함수를 이용해서 변환한다.   visit 의 예: exp.MakeFlatten()
@@ -69,15 +114,16 @@ module StatementExtensionModule =
             pack.["statement"] <- x
             let newStatement =
                 match statement with
-                | DuAssign(condition, exp, tgt) -> DuAssign(tryVisitTop condition, visitTop exp, tgt)
+                | DuAssign(condition, exp, tgt) ->
+                    Some <| DuAssign(tryVisitTop condition, visitTop exp, tgt)
 
                 | DuTimer ({ RungInCondition = rungIn; ResetCondition = reset } as tmr) ->
-                    DuTimer {
+                    Some <| DuTimer {
                         tmr with
                             RungInCondition = tryVisitTop rungIn
                             ResetCondition  = tryVisitTop reset }
                 | DuCounter ({UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
-                    DuCounter {
+                    Some <| DuCounter {
                         ctr with
                             UpCondition    = tryVisitTop up
                             DownCondition  = tryVisitTop down
@@ -85,20 +131,27 @@ module StatementExtensionModule =
                             LoadCondition  = tryVisitTop load }
                 | DuAction(DuCopy(condition, source, target)) ->
                     let cond = (visitTop condition) :?> IExpression<bool>
-                    DuAction(DuCopy(cond, visitTop source, target))
+                    Some <| DuAction(DuCopy(cond, visitTop source, target))
 
-                | DuAction (DuCopyUdt (parserDataObj, udtDecl, condition, source, target)) ->
+                | DuAction (DuCopyUdt ({ Condition=condition; } as udt)) ->
                     let cond = (visitTop condition) :?> IExpression<bool>
-                    DuAction(DuCopyUdt(parserDataObj, udtDecl, cond, source, target))
+                    Some <| DuAction(DuCopyUdt {udt with Condition = cond})
 
                 | DuPLCFunction ({Arguments = args} as functionParameters) ->
                     let newArgs = args |> map (fun arg -> visitTop arg)
-                    DuPLCFunction { functionParameters with Arguments = newArgs }
+                    Some <| DuPLCFunction { functionParameters with Arguments = newArgs }
+                | DuVarDecl (exp, stg) when pack.Get<bool>("visit-vardecl-statement") ->
+                    let newExp = visitTop exp
+                    Some <| DuVarDecl (newExp, stg)
+                | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _ ) -> failwith "Should have been processed in early stage"
 
-                | (DuVarDecl _ | DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Should have been processed in early stage"
+                | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                    failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
+                //| DuLambdaDecl _ -> None
+
 
             pack.Remove("statement") |> ignore
-            newStatement
+            newStatement |> Option.defaultValue x
 
         /// expression 의 parent 정보 없이 visit 함수를 이용해서 모든 expression 을 변환한다.
         member x.VisitExpression (pack:DynamicDictionary, visit:IExpression -> IExpression) : Statement =
@@ -141,41 +194,55 @@ module StatementExtensionModule =
 
         /// x 로 주어진 XGK statement 내의 expression 들을 모두 검사해서 사칙/비교연산을 assign statement 로 변환한다.
         member x.FunctionToAssignStatement (pack:DynamicDictionary) : Statement =
+            // visitor 를 이용해서 statement 내의 모든 expression 을 변환한다.
+            x.VisitExpression(pack, functionToAssignStatementVisitor)
+
+        member x.ApplyLambda (pack:DynamicDictionary) : Statement =
             let prjParam, _augs = pack.Unpack()
             let rec visitor (pack:DynamicDictionary) (expPath:IExpression list) (exp:IExpression): IExpression =
                 if exp.Terminal.IsSome then
                     exp
                 else
-#if DEBUG
-                    tracefn $"exp: {exp.ToText()}"
-#endif
-                    let newExp =
+                    tracefn $"ApplyLambda:: exp: {exp.ToText()}"
+                    // exp 이 FunctionSpec 값을 가지면서, FunctionSpec 내부에 LambdaApplication 이 존재하면
+                    // 해당 LambdaApplication 적용 결과를 임시 변수에 저장하고, 그 값을 반환한다.
+                    match exp.FunctionSpec |> bind (fun fs -> fs.LambdaApplication) with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
+                    | Some la ->
+                        let ld = la.LambdaDecl
+                        let funName = ld.Prototype.Name
+                        for i in [0..la.Arguments.Length-1] do
+                            let declVarName = ld.Arguments[i].Name   // a
+                            let encryptedFormalParamName = getFormalParameterName funName declVarName      // e.g "_local_sum_a"
+                            let value =
+                                let arg = visitor pack (exp::expPath) la.Arguments.[i]
+                                match arg.Terminal with
+                                | Some _ -> arg
+                                | None -> arg.BoxedEvaluatedValue |> any2expr
+                            let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
+                            
+                            prjParam.GlobalStorages[encryptedFormalParamName].BoxedValue <- value.BoxedEvaluatedValue
+                            if prjParam.TargetType = XGI && pack.Get<Statement>("original-statement").IsDuCaseVarDecl() then
+                                ()
+                            else
+                                DuAssign(None, value, stgVar) |> _augs.Statements.Add
+                        match prjParam.TargetType with
+                        | XGK ->
+                            let newExp = functionToAssignStatementVisitor pack expPath exp
+                            match newExp.FunctionName with
+                            | Some _ ->
+                                let result = prjParam.CreateAutoVariableWithFunctionExpression(pack, newExp)
+                                result.ToExpression()
+                            | None ->
+                                newExp
+                        | XGI -> exp
+                        | _ -> failwith "Not supported runtime target"
+                    | None ->
                         let args = exp.FunctionArguments |> map (fun ex -> visitor pack (exp::expPath) ex)
                         exp.WithNewFunctionArguments args
 
-                    let statement = pack.Get<Statement>("statement")
-                    let isAssignStatement =
-                        match statement with
-                        | DuAssign _ -> true
-                        | _ -> false
-
-                    match newExp.FunctionName with
-                    | Some (IsOpABC fn) when expPath.Any() ->
-                        let augment =
-                            match prjParam.TargetType, expPath with
-                            | XGK, _head::_ -> true
-                            | XGI, _head::_ when _head.FunctionName <> Some fn -> true
-                            | _ ->
-                                false
-
-                        if augment then
-                            newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
-                        else
-                            newExp
-                    | Some (IsOpC _fn) when prjParam.TargetType = XGI && (expPath.Any() || not isAssignStatement) ->
-                        newExp.ToAssignStatement(pack, K.comparisonOperators)
-                    | _ ->
-                        newExp
-
             // visitor 를 이용해서 statement 내의 모든 expression 을 변환한다.
-            x.VisitExpression(pack, visitor)
+            pack["visit-vardecl-statement"] <- true
+            let newStatement = x.VisitExpression(pack, visitor)
+            pack["visit-vardecl-statement"] <- false
+            newStatement
+

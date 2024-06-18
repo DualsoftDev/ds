@@ -44,7 +44,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctd myCTD = createXgiCTD(2000u, $cd)
+                                        [0] ctd myCTD = createXgiCTD(2000u, $cd);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

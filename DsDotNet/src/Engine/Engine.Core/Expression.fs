@@ -31,6 +31,8 @@ open ExpressionModule
 
 [<AutoOpen>]
 module ExpressionModule =
+    let private unsupported() = failwithlog "ERROR: not supported"
+    
 
     [<DebuggerDisplay("{ToText()}")>]
     type Terminal<'T when 'T:equality> =
@@ -50,24 +52,11 @@ module ExpressionModule =
             member x.IsEqual y = match x with | DuVariable v -> v.Value = unbox y.BoxedEvaluatedValue | DuLiteral l -> l.Value = unbox y.BoxedEvaluatedValue
 
             member x.FunctionName = None
+            member x.FunctionSpec = None
             member x.FunctionArguments = []
             member x.WithNewFunctionArguments _args = failwithlog "ERROR"
             member x.Terminal = Some x
             member x.EvaluatedValue = x.Evaluate()
-
-    type IFunctionSpec =
-        abstract Name: string
-        abstract Arguments: Arguments
-
-    type FunctionSpec<'T> = {
-        FunctionBody: Arguments -> 'T
-        Name        : string
-        Arguments   : Arguments
-    }
-    with
-        interface IFunctionSpec with
-            member x.Name      = x.Name
-            member x.Arguments = x.Arguments
 
     [<DebuggerDisplay("{ToText(true)}")>]
     type Expression<'T when 'T:equality> =
@@ -87,6 +76,7 @@ module ExpressionModule =
             (* 'T type DU 를 접근하기 위한 members *)
             member x.FunctionName = x.FunctionName
             member x.FunctionArguments = x.FunctionArguments
+            member x.FunctionSpec = x.FunctionSpec
             member x.Terminal = match x with | DuTerminal t -> Some t | _ -> None
             member x.WithNewFunctionArguments(args) =
                 match x with
@@ -100,7 +90,11 @@ module ExpressionModule =
                     | DuLiteral literal -> literal.Value.GetType()
                     | _ -> typedefof<'T>
                 | _ -> typedefof<'T>
-         
+        member x.FunctionSpec =
+            match x with
+            | DuFunction fs -> Some (fs :> IFunctionSpec)
+            | _ -> None
+
         /// expression 의 type 이 동일한 경우 ToString() 결과가 같으면 동일한 것으로 간주
         /// type 이 다르면 항상 false 반환
         member x.IsEqual (y:IExpression) =
@@ -225,13 +219,19 @@ module ExpressionModule =
         /// PC 버젼에서 UDT 변수 복사에 대한 실제 실행문.
         abstract member CopyUdt: UdtDecl * string * string -> unit
 
+    type CopyUdtStatement = {
+        Storages:Storages
+        UdtDecl:UdtDecl
+        Condition:IExpression<bool>
+        Source:string
+        Target:string
+    }
+
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
-        | DuCopyUdt of parserData:IParserData * udtDecl:UdtDecl * condition:IExpression<bool> * source:string * target:string
+        | DuCopyUdt of CopyUdtStatement
 
    
-    let private unsupported() = failwithlog "ERROR: not supported"
-    
     type FunctionParameters = {
         /// Enable bit
         Condition:IExpression<bool> option
@@ -243,24 +243,30 @@ module ExpressionModule =
         Output:IStorage
     }
 
-    /// e.g 가령 Person UDT 에서 "int age";
-    type UdtMember = {
-        Type:System.Type
-        Name:string
-    }
-
     // e.g struct Person { string name; int age; };
     type UdtDecl = {
         TypeName:string
-        Members:UdtMember list
+        Members:TypeDecl list
     }
 
     // e.g Person people[10];
-    type UdtDefinition = {
+    type UdtDef = {
         TypeName:string
         VarName:string
         /// Array 가 아닌 경우, 1 의 값을 가짐.  array 인 경우 1보다 큰 값.  array index 는 0 부터 시작
         ArraySize:int
+    }
+
+
+    type ProcDecl = {
+        ProcName:string
+        Arguments:TypeDecl list
+        Bodies:StatementContainer
+    }
+
+    type ProcCall = {
+        ProcDecl:ProcDecl
+        ActuralPrameters:Arguments
     }
 
     type Statement =
@@ -275,8 +281,12 @@ module ExpressionModule =
         /// User Defined Type (structure) 선언.  e.g "struct Person { string name; int age; };"
         | DuUdtDecl of UdtDecl
 
+        | DuLambdaDecl of LambdaDecl
+        | DuProcDecl of ProcDecl
+        | DuProcCall of ProcCall
+
         /// UDT instances 정의.  e.g "Person peopole[10];"
-        | DuUdtDefinitions of UdtDefinition
+        | DuUdtDef of UdtDef
 
         /// 대입문.  e.g "$a = $b + 3;"
         ///
@@ -307,9 +317,11 @@ module ExpressionModule =
             | DuAction (a:ActionStatement) ->
                match a with
                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
-               | DuCopyUdt (_parserData, _udtDecl, _condition, _source, target) -> target
+               | DuCopyUdt { Target = target } -> target
             | DuPLCFunction { FunctionName = fn } -> fn
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
         member x.TargetValue =
             match x.Statement with
@@ -322,13 +334,22 @@ module ExpressionModule =
                 | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
                 | DuCopyUdt _ -> failwith "ERROR: Invalid value reference"
             | DuPLCFunction { OriginalExpression = exp } ->  exp.BoxedEvaluatedValue
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> failwith "Unsupported"
+            | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
+                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
     let (|CommentAndStatement|) = function | CommentedStatement(x, y) -> x, y
     let commentAndStatement = (|CommentAndStatement|)
     let withNoComment statement = CommentedStatement("", statement)
     let withExpressionComment (append:string) (statement: Statement) =
         CommentedStatement(append, statement)
+
+    /// UDT 구조체 멤버 값 복사.  source 및 target 이 string 으로 주어진다. (e.g "people[0]", "hong")
+    /// PC 버젼에서는 UDT 변수 복사에 대한 실제 실행문.
+    let copyUdt (storages:Storages) (decl:UdtDecl) (source:string) (target:string): unit =
+        for m in decl.Members do
+            let s, t = $"{source}.{m.Name}", $"{target}.{m.Name}"
+            storages[t].BoxedValue <- storages[s].BoxedValue
 
     type Statement with
         member x.Do() =
@@ -355,19 +376,23 @@ module ExpressionModule =
                 if condition.EvaluatedValue then
                     target.BoxedValue <- source.BoxedEvaluatedValue
 
-            | DuAction (DuCopyUdt (parserData, udtDecl, condition, source, target)) ->
+            | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) ->
                 if condition.EvaluatedValue then
                     // 구조체 멤버 복사
-                    parserData.CopyUdt(udtDecl, source, target)
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> ()
+                    copyUdt storages udtDecl source target
+
+            | (DuUdtDecl _ | DuUdtDef _ | DuLambdaDecl _ | DuProcDecl _) -> ()  // OK: Noting todo
+
+            | DuProcCall _ ->
+                failwithlog "ERROR: Procedure call not yet implemented."
 
             | DuPLCFunction _ ->
                 failwithlog "ERROR"
 
         member x.ToText() =
             match x with
-            | DuAssign (_condition, expr, target) -> $"{target.ToText()} = {expr.ToText()}"    // todo: condition 을 totext 에 포함할지 여부
-            | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()}"
+            | DuAssign (_condition, expr, target) -> $"{target.ToText()} = {expr.ToText()};"    // todo: condition 을 totext 에 포함할지 여부
+            | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()};"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
@@ -377,7 +402,7 @@ module ExpressionModule =
                     match ts.RungInCondition with | Some c -> c.ToText() | None -> ()
                     match ts.ResetCondition  with | Some c -> c.ToText() | None -> () ]
                 let args = String.Join(", ", args)
-                $"{typ.ToLower()} {t.Name} = {functionName}({args})"
+                $"{typ.ToLower()} {t.Name} = {functionName}({args});"
 
             | DuCounter counterStatement ->
                 let cs, c = counterStatement, counterStatement.Counter
@@ -391,16 +416,26 @@ module ExpressionModule =
                     if c.ACC.Value <> 0u then
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
-                $"{typ.ToLower()} {c.Name} = {functionName}({args})"
+                $"{typ.ToLower()} {c.Name} = {functionName}({args});"
             | DuAction (DuCopy (condition, source, target)) ->
-                $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()})"
+                $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()});"
 
-            | DuAction (DuCopyUdt (_parserDataObj, _udtDecl, condition, source, target)) ->
+            | DuAction (DuCopyUdt { Condition=condition; Source=source; Target=target}) ->
                 $"copyStructIf({condition.ToText()}, {source}, {target})"
 
-            | (DuUdtDecl _ | DuUdtDefinitions _) -> sprintf "%A" x
-            | DuPLCFunction _ ->
+            | DuUdtDecl _ -> sprintf "%A" x
+            | DuUdtDef _ -> sprintf "%A;" x
+            | DuLambdaDecl { Prototype=proto; Arguments=args;Body = exp} ->
+                let argLists = args |> map (fun arg -> $"{arg.Type.Name} {arg.Name}") |> joinWith ", "
+                $"{proto.Type.Name} {proto.Name}({argLists} => {exp.ToText()})"
+
+            | DuPLCFunction {FunctionName = fn; Arguments=fargs; Output=output } ->
+                let args = fargs |> map (fun arg -> arg.ToText()) |> joinWith ", "
+                $"PLCFunction {output.ToText()} = {fn}({args})"
+            | _ ->
                 failwithlog "ERROR"
+
+        member x.IsDuCaseVarDecl() = match x with | DuVarDecl _ -> true | _ -> false
 
     type Terminal<'T when 'T:equality> with
         member x.TryGetStorage(): IStorage option =
@@ -437,7 +472,24 @@ module ExpressionModule =
         member x.Evaluate(): 'T =
             match x with
             | DuTerminal b -> b.Evaluate()
-            | DuFunction fs -> fs.FunctionBody fs.Arguments
+            | DuFunction fs ->
+                match fs.LambdaApplication with
+                | Some la ->
+                    // Lambda 식 평가는, formal parameter 에 해당하는 값에 actual parameter 값을 저장한 후 수행
+                    // e.g "int sum(int a, int b) => $a + $b;  $all = sum(1, 2);"
+                    //      => _local_sum_a = 1, _local_+sum_b = 2 의 값을 storage 에 저장 한 후 sum 함수 실행
+                    let ld = la.LambdaDecl
+                    let funName = ld.Prototype.Name
+                    assert (la.Arguments.Length = ld.Arguments.Length)
+                    for i in [0..la.Arguments.Length-1] do
+                        let declVarName = ld.Arguments[i].Name   // a
+                        let encryptedFormalParamName = getFormalParameterName funName declVarName    // _local_sum_a
+                        let actualParamValue = la.Arguments.[i].BoxedEvaluatedValue
+                        la.Storages[encryptedFormalParamName].BoxedValue <- actualParamValue
+                | None ->
+                    ()
+
+                fs.FunctionBody fs.Arguments
 
         member x.FunctionName =
             match x with
@@ -454,7 +506,7 @@ module ExpressionModule =
             match x with
             | DuTerminal b -> b.ToText()
             | DuFunction fs ->
-                let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments withParenthesis
+                let text = fwdSerializeFunctionNameAndBoxedArguments fs.Name fs.Arguments fs.LambdaApplication withParenthesis
                 text
 
         member x.CollectStorages() : IStorage list =

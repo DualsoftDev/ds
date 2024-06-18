@@ -31,8 +31,8 @@ module internal Common =
 
 
     /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
-    let coilCellX = 31
     let maxNumHorizontalContact = 31
+    let coilCellX = maxNumHorizontalContact
     /// 최소기본 FB 위치 : 가로로  9 포인트
     let minFBCellX = 9
 

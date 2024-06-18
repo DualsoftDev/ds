@@ -43,16 +43,37 @@ terminal: storage | tag | literal;
         literalString :STRING;
         literalBool   :'true' | 'false';
 
-toplevels: toplevel (';' toplevel)* ';';
+toplevels: toplevel*;
     toplevel: expr|statement;
 
-statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl | udtDefinitions | copyStructStatement;
+
+statement: (
+    // semicolon 을 필요로하는 문장
+    (   assign | varDecl | timerDecl | counterDecl | copyStatement
+        | udtDef | copyStructStatement
+        | lambdaDecl | procCallStatement
+        | udtDecl ) ';')       // C++ 의 struct 정의는 마지막 brace 닫힘 이후 semicolon 필요로 함.  C# 은 아님.
+    // semicolon 을 필요로하지 않는 문장
+    | procDecl;
+
     assign:
         structMemberAssign      # CtxStructMemberAssign
         | normalAssign          # CtxNormalAssign
         | risingAssign          # CtxRisingAssign
         | fallingAssign         # CtxFallingAssign
         ;
+    lambdaDecl: type lambdaName '(' argDecls? ')' '=>' lambdaBodyExpr;
+        lambdaName: IDENTIFIER;
+        argDecls: argDecl (',' argDecl)*;
+        argDecl: type argName;
+        argName: IDENTIFIER;
+        lambdaBodyExpr: expr;
+    procDecl: 'void' procName '(' argDecls? ')' '{' procBodies '}';
+        procBodies: statement*;
+        procName: IDENTIFIER;
+    returnStatement: 'return' expr;
+
+
     normalAssign: '$' storageName '=' expr;
     structMemberAssign: '$' structStorageName  '=' expr;
         structStorageName: IDENTIFIER (ARRAYDECL)? '.' IDENTIFIER;      // myTon.Q, people[10].name
@@ -94,15 +115,16 @@ statement: assign | varDecl | timerDecl | counterDecl | copyStatement | udtDecl 
 
     udtDecl: 'struct' udtType '{' varDecl (';' varDecl)* ';' '}';
         udtType: IDENTIFIER;
-    udtDefinitions: udtType udtInstance;
+    udtDef: udtType udtInstance;
         arrayDecl:ARRAYDECL;
         udtInstance: udtVar (arrayDecl)?;
         udtVar: IDENTIFIER;
         udtMember: udtInstance '.' udtVar;
+    procCallStatement: funcCall;
 
 // https://stackoverflow.com/questions/41017948/antlr4-the-following-sets-of-rules-are-mutually-left-recursive
 // https://github.com/antlr/antlr4/blob/master/doc/parser-rules.md#alternative-labels
-expr: functionName '(' arguments? ')'                 # FunctionCallExpr    // func call like f(), f(x), f(1,2)
+expr: funcCall                                        # FunctionCallExpr    // func call like f(), f(x), f(1,2)
     | '(' type ')' expr                               # CastingExpr
     | storage ('[' expr ']')+                         # ArrayReferenceExpr  // array index like $a[i], $a[i][j]
     | unaryOperator expr                              # UnaryExpr           // unary minus, boolean not
@@ -124,6 +146,7 @@ expr: functionName '(' arguments? ')'                 # FunctionCallExpr    // f
     | '(' expr ')'                                    #ParenthesisExpr
     ;
 
+    funcCall: functionName '(' arguments? ')';
     arguments: exprList;
     exprList : expr (',' expr)* ;   // arg list
     unaryOperator:

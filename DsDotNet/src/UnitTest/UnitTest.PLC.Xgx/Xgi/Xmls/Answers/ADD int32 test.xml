@@ -17,12 +17,12 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="6">
                     <Symbols>
-                        <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="" Kind="6" Type="DINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="" Kind="6" Type="DINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="sum" Comment="int32 sum = 0" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
-                        <Symbol Name="unn1" Comment="uint32 unn1 = 1u" Device="" Kind="6" Type="UDINT" InitValue="1" Address="" State="0"/>
-                        <Symbol Name="unn2" Comment="uint32 unn2 = 2u" Device="" Kind="6" Type="UDINT" InitValue="2" Address="" State="0"/>
-                        <Symbol Name="usum" Comment="uint32 usum = 0u" Device="" Kind="6" Type="UDINT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="nn1" Comment="int32 nn1 = 1;" Device="" Kind="6" Type="DINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="nn2" Comment="int32 nn2 = 2;" Device="" Kind="6" Type="DINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="sum" Comment="int32 sum = 0;" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="unn1" Comment="uint32 unn1 = 1u;" Device="" Kind="6" Type="UDINT" InitValue="1" Address="" State="0"/>
+                        <Symbol Name="unn2" Comment="uint32 unn2 = 2u;" Device="" Kind="6" Type="UDINT" InitValue="2" Address="" State="0"/>
+                        <Symbol Name="usum" Comment="uint32 usum = 0u;" Device="" Kind="6" Type="UDINT" InitValue="0" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $sum = $nn1 + $nn2
+                                        [0] $sum = $nn1 + $nn2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -67,7 +67,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
-                                        [1] $usum = $unn1 + $unn2
+                                        [1] $usum = $unn1 + $unn2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -99,12 +99,12 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="6">
                             <Symbols>
-                                <Symbol Name="nn1" Comment="int32 nn1 = 1" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn2" Comment="int32 nn2 = 2" Device="" Kind="8" State="0"/>
-                                <Symbol Name="sum" Comment="int32 sum = 0" Device="" Kind="8" State="0"/>
-                                <Symbol Name="unn1" Comment="uint32 unn1 = 1u" Device="" Kind="8" State="0"/>
-                                <Symbol Name="unn2" Comment="uint32 unn2 = 2u" Device="" Kind="8" State="0"/>
-                                <Symbol Name="usum" Comment="uint32 usum = 0u" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn1" Comment="int32 nn1 = 1;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="nn2" Comment="int32 nn2 = 2;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="sum" Comment="int32 sum = 0;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="unn1" Comment="uint32 unn1 = 1u;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="unn2" Comment="uint32 unn2 = 2u;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="usum" Comment="uint32 usum = 0u;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

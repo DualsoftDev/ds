@@ -43,7 +43,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $qx = !(2 == 3) &amp;&amp; !($ix != true) &amp;&amp; !(!(!(3.14 &gt; 5.0))) || !(true &amp;&amp; false) &amp;&amp; !(!(true || $ix))
+                                        [0] $qx = !(2 == 3) &amp;&amp; !($ix != true) &amp;&amp; !(!(!(3.14 &gt; 5.0))) || !(true &amp;&amp; false) &amp;&amp; !(!(true || $ix));
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -102,7 +102,7 @@
                                         _t3_LE
                                     </Element>
                                     <Element ElementType="0" Coordinate="14345"/>
-                                    <Element ElementType="2" Coordinate="14346" Param="81"/>
+                                    <Element ElementType="2" Coordinate="14346" Param="84"/>
                                     <Element ElementType="14" Coordinate="14430">
                                         qx
                                     </Element>

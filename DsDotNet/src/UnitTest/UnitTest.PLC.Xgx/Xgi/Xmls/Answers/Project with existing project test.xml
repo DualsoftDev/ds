@@ -18,7 +18,7 @@
                 <GlobalVariable Version="Ver 1.0" Count="2">
                     <Symbols>
                         <Symbol Name="gg0" Comment="" Device="I" Kind="6" Type="BOOL" Address="%IX0.0.1" State="0"/>
-                        <Symbol Name="gg1" Comment="boolgg1=false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="gg1" Comment="boolgg1=false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -46,14 +46,14 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] $xx1 = $xx0
+                                        [0] $xx1 = $xx0;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
                                         xx0
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         xx1
                                     </Element>
@@ -72,8 +72,8 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="xx0" Comment="bool xx0 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="xx1" Comment="bool xx1 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="xx0" Comment="bool xx0 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="xx1" Comment="bool xx1 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>
@@ -90,14 +90,14 @@ XckU4UJCOYh5CA==
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [1] $yy1 = $yy0
+                                        [1] $yy1 = $yy0;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
                                         yy0
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         yy1
                                     </Element>
@@ -116,8 +116,8 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="yy0" Comment="bool yy0 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="yy1" Comment="bool yy1 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="yy0" Comment="bool yy0 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="yy1" Comment="bool yy1 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>
@@ -134,14 +134,14 @@ XckU4UJCOYh5CA==
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [2] $zz1 = $zz0
+                                        [2] $zz1 = $zz0;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="2049">
                                         zz0
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="87"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         zz1
                                     </Element>
@@ -160,8 +160,8 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="2">
                             <Symbols>
-                                <Symbol Name="zz0" Comment="bool zz0 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
-                                <Symbol Name="zz1" Comment="bool zz1 = false" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="zz0" Comment="bool zz0 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
+                                <Symbol Name="zz1" Comment="bool zz1 = false;" Device="" Kind="1" Type="BOOL" InitValue="false" Address="" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

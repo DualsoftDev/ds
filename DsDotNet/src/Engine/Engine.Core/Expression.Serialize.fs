@@ -49,31 +49,37 @@ module rec ExpressionSerializeModule =
         fun (name:string) -> hash.Contains (name)
 
 
-    let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (withParenthesis:bool) =
-        let isBinary = isBinaryOperator name
-        if isBinary && args.Length = 2 then
-            (* 2 + (3 * 4) => sea:'+', island:'*' *)
-            let needParenthesis (seaName:string) (island:Arg) =
-                option {
-                    let! islandName = island.FunctionName
-                    if operatorPrecedenceMap.ContainsKey(seaName) && operatorPrecedenceMap.ContainsKey(islandName) then
-                        let nSea = operatorPrecedenceMap.[seaName]
-                        let nIsland = operatorPrecedenceMap.[islandName]
-                        let needParen = nIsland > nSea        // precedence 값이 큰 것이 우선 순위가 낮다.
-                        return needParen
-                } |> Option.defaultValue false
+    let serializeFunctionNameAndBoxedArguments (name:string) (args:Args) (lambdaApplication:LambdaApplication option) (withParenthesis:bool) =
+        match lambdaApplication with
+        | Some la ->
+            let ld = la.LambdaDecl
+            let auctualParams = la.Arguments |> map (fun a -> a.ToText(false)) |> joinWith(", ")
+            $"{ld.Prototype.Name}({auctualParams})"
+        | None ->
+            let isBinary = isBinaryOperator name
+            if isBinary && args.Length = 2 then
+                (* 2 + (3 * 4) => sea:'+', island:'*' *)
+                let needParenthesis (seaName:string) (island:Arg) =
+                    option {
+                        let! islandName = island.FunctionName
+                        if operatorPrecedenceMap.ContainsKey(seaName) && operatorPrecedenceMap.ContainsKey(islandName) then
+                            let nSea = operatorPrecedenceMap.[seaName]
+                            let nIsland = operatorPrecedenceMap.[islandName]
+                            let needParen = nIsland > nSea        // precedence 값이 큰 것이 우선 순위가 낮다.
+                            return needParen
+                    } |> Option.defaultValue false
 
-            let lWithParenthesis = needParenthesis name args[0]
-            let rWithParenthesis = needParenthesis name args[1]
-            let l = args[0].ToText(lWithParenthesis)
-            let r = args[1].ToText(rWithParenthesis)
-            let text = $"{l} {name} {r}"
-            if withParenthesis then $"({text})" else text
-        else
-            let args =
-                [   for a in args do
-                    let withParenthesis = args.Length >= 2
-                    a.ToText(withParenthesis)
-                ] |> String.concat ", "
-            $"{name}({args})"
+                let lWithParenthesis = needParenthesis name args[0]
+                let rWithParenthesis = needParenthesis name args[1]
+                let l = args[0].ToText(lWithParenthesis)
+                let r = args[1].ToText(rWithParenthesis)
+                let text = $"{l} {name} {r}"
+                if withParenthesis then $"({text})" else text
+            else
+                let args =
+                    [   for a in args do
+                        let withParenthesis = args.Length >= 2
+                        a.ToText(withParenthesis)
+                    ] |> String.concat ", "
+                $"{name}({args})"
 

@@ -66,7 +66,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ctr myCTR = createXgiCTR(2000u, $cd, $res)
+                                        [0] ctr myCTR = createXgiCTR(2000u, $cd, $res);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -80,7 +80,7 @@
                                     <Element ElementType="6" Coordinate="4097">
                                         P00001
                                     </Element>
-                                    <Element ElementType="2" Coordinate="4100" Param="87"/>
+                                    <Element ElementType="2" Coordinate="4100" Param="90"/>
                                     <Element ElementType="17" Coordinate="4190">
                                         myCTR
                                     </Element>

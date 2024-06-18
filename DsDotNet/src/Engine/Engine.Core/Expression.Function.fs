@@ -105,8 +105,76 @@ module ExpressionFunctionModule =
         | _ ->
             failwith $"Undefined operator for createUnaryExpression({op})"
 
+
+    let predefinedFunctionNames =
+        [|
+            "+"; "add";
+            "-"; "sub";
+            "*"; "mul";
+            "/"; "div";
+
+            ">" ; "gt";
+            ">="; "gte";
+            "<" ; "lt";
+            "<="; "lte";
+
+            "==" ; "equal";
+            "==" ; "equal";
+            "!="; "<>"; "notEqual"       
+            "!="; "<>"; "^^"; "notEqual"
+
+            "<<"; "<<<"; "shiftLeft"     
+            ">>"; ">>>"; "shiftRight"    
+
+            "&&"; "and"                   
+            "||"; "or"                    
+
+            "!" ; "not";
+            "&"; "&&&" ;
+            "|"; "|||" ;
+            "^"; "^^^" ;
+            "~"; "~~~" ;
+
+            FunctionNameRising;
+            FunctionNameFalling;
+
+
+            FunctionNameRisingAfter;
+            FunctionNameFallingAfter;
+
+
+            "bool"  ; "toBool";
+            "sbyte" ; "toSByte"; "toInt8";
+            "byte"  ; "toByte" ; "toUInt8";
+            "short" ; "toShort"; "toInt16";
+            "ushort"; "toUShort"; "toUInt16";
+            "int"   ; "toInt"  ; "toInt32";
+            "uint"  ; "toUInt" ; "toUInt32";
+            "long"  ; "toLong" ; "toInt64";
+            "ulong" ; "toULong"; "toUInt64";
+
+            "single"; "float"; "float32"; "toSingle"; "toFloat"; "toFloat32";
+            "double"; "float64"; "toDouble"; "toFloat64";
+
+            "sin";
+            "cos";
+            "tan";
+            "abs";
+
+            "createXgiCTU"; "createXgiCTD"; "createXgiCTUD"; "createXgiCTR";
+            "createXgkCTU"; "createXgkCTD"; "createXgkCTUD"; "createXgkCTR";
+            "createWinCTU"; "createWinCTD"; "createWinCTUD"; "createWinCTR";
+            "createAbCTU" ; "createAbCTD" ; "createAbCTUD" ; "createAbCTR";
+            "createXgiTON"; "createXgiTOF"; "createXgiCRTO";
+            "createXgkTON"; "createXgkTOF"; "createXgkCRTO";
+            "createWinTON"; "createWinTOF"; "createWinCRTO";
+            "createAbTON" ; "createAbTOF" ; "createAbCRTO";
+            "createTag"
+        |] |> HashSet
+
     let createCustomFunctionExpression (funName:string) (args:Args) : IExpression =
         verifyArgumentsTypes funName args
+        predefinedFunctionNames.Contains(funName) |> verifyM $"Undefined function: {funName}"
         let t = args[0].DataType.Name
 
         match funName with
@@ -178,20 +246,20 @@ module ExpressionFunctionModule =
             | "createXgkCTU" | "createXgkCTD" | "createXgkCTUD" | "createXgkCTR"
             | "createWinCTU" | "createWinCTD" | "createWinCTUD" | "createWinCTR"
             | "createAbCTU"  | "createAbCTD"  | "createAbCTUD"  | "createAbCTR" ) ->
-                DuFunction { FunctionBody=NullFunction<Counter>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Counter>; Name=funName; Arguments=args; LambdaDecl=None; LambdaApplication=None }
         | (   "createXgiTON" | "createXgiTOF" | "createXgiCRTO"
             | "createXgkTON" | "createXgkTOF" | "createXgkCRTO"
             | "createWinTON" | "createWinTOF" | "createWinCRTO"
             | "createAbTON"  | "createAbTOF"  | "createAbCRTO") ->
-                DuFunction { FunctionBody=NullFunction<Timer>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<Timer>; Name=funName; Arguments=args; LambdaDecl=None; LambdaApplication=None }
         | "createTag" ->
-                DuFunction { FunctionBody=NullFunction<ITag>; Name=funName; Arguments=args }
+                DuFunction { FunctionBody=NullFunction<ITag>; Name=funName; Arguments=args; LambdaDecl=None; LambdaApplication=None }
 
         | _ -> failwith $"NOT yet: {funName}"
 
     /// Create function expression
     let private cf (f:Args->'T) (name:string) (args:Args) =
-        DuFunction { FunctionBody=f; Name=name; Arguments=args}
+        DuFunction { FunctionBody=f; Name=name; Arguments=args; LambdaDecl=None; LambdaApplication=None}
 
     [<AutoOpen>]
     module internal FunctionImpl =

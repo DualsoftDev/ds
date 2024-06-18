@@ -17,10 +17,10 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="4">
                     <Symbols>
-                        <Symbol Name="mybool" Comment="bool mybool = false" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="myint16" Comment="int16 myint16 = 16s" Device="" Kind="6" Type="INT" InitValue="16" Address="" State="0"/>
-                        <Symbol Name="myint32" Comment="int32 myint32 = 32" Device="" Kind="6" Type="DINT" InitValue="32" Address="" State="0"/>
-                        <Symbol Name="myint64" Comment="int64 myint64 = 64L" Device="" Kind="6" Type="LINT" InitValue="64" Address="" State="0"/>
+                        <Symbol Name="mybool" Comment="bool mybool = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
+                        <Symbol Name="myint16" Comment="int16 myint16 = 16s;" Device="" Kind="6" Type="INT" InitValue="16" Address="" State="0"/>
+                        <Symbol Name="myint32" Comment="int32 myint32 = 32;" Device="" Kind="6" Type="DINT" InitValue="32" Address="" State="0"/>
+                        <Symbol Name="myint64" Comment="int64 myint64 = 64L;" Device="" Kind="6" Type="LINT" InitValue="64" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -57,10 +57,10 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="4">
                             <Symbols>
-                                <Symbol Name="mybool" Comment="bool mybool = false" Device="" Kind="8" State="0"/>
-                                <Symbol Name="myint16" Comment="int16 myint16 = 16s" Device="" Kind="8" State="0"/>
-                                <Symbol Name="myint32" Comment="int32 myint32 = 32" Device="" Kind="8" State="0"/>
-                                <Symbol Name="myint64" Comment="int64 myint64 = 64L" Device="" Kind="8" State="0"/>
+                                <Symbol Name="mybool" Comment="bool mybool = false;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="myint16" Comment="int16 myint16 = 16s;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="myint32" Comment="int32 myint32 = 32;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="myint64" Comment="int64 myint64 = 64L;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

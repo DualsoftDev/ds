@@ -47,7 +47,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] ton myTon = createXgiTON(2000u, $myQBit0)
+                                        [0] ton myTon = createXgiTON(2000u, $myQBit0);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -63,7 +63,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="5121">
-                                        [1] $x7 = ($x0 || $x1) &amp;&amp; $x2
+                                        [1] $x7 = ($x0 || $x1) &amp;&amp; $x2;
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -74,7 +74,7 @@
                                     <Element ElementType="6" Coordinate="6148">
                                         x2
                                     </Element>
-                                    <Element ElementType="2" Coordinate="6151" Param="84"/>
+                                    <Element ElementType="2" Coordinate="6151" Param="87"/>
                                     <Element ElementType="14" Coordinate="6238">
                                         x7
                                     </Element>

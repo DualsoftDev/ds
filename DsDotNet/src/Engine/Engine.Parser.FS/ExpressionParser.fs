@@ -8,9 +8,11 @@ open Engine.Core
 open type exprParser
 open Antlr4.Runtime.Tree
 open System.Text.RegularExpressions
+open System
 
 [<AutoOpen>]
 module rec ExpressionParserModule =
+    let enableSubroutine = false
     let internal createParser (text: string) : exprParser =
         let inputStream = new AntlrInputStream(text)
         let lexer = exprLexer (inputStream)
@@ -23,12 +25,43 @@ module rec ExpressionParserModule =
         parser.AddErrorListener(listener_parser)
         parser
 
-    let createExpression (storages: Storages) (ctx: ExprContext) : IExpression =
+    /// storage 이름이 주어졌을 때, 그 이름에 해당하는 storage 를 반환하는 함수의 type 
+    type StorageFinder = string -> IStorage option
+
+    /// storages 에서 name 을 찾는 기본 함수
+    let defaultStorageFinder (storages: Storages) (name: string) : IStorage option =
+        storages.TryFind name
+
+    let createLambdaCallExpression (storages:Storages) args (exp: IExpression) =
+        let newExp =
+            match exp.FunctionSpec with
+            | Some fs ->
+                let newFs:IFunctionSpec = fs.Duplicate()
+                newFs.LambdaApplication <- Some { LambdaDecl = fs.LambdaDecl.Value; Arguments = args; Storages=storages }
+                match newFs with
+                | :? FunctionSpec<bool>   as newFs -> DuFunction newFs :> IExpression
+                | :? FunctionSpec<int8>   as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint8>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<int16>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint16> as newFs -> DuFunction newFs
+                | :? FunctionSpec<int32>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint32> as newFs -> DuFunction newFs
+                | :? FunctionSpec<int64>  as newFs -> DuFunction newFs
+                | :? FunctionSpec<uint64> as newFs -> DuFunction newFs
+                | :? FunctionSpec<single> as newFs -> DuFunction newFs
+                | :? FunctionSpec<double> as newFs -> DuFunction newFs
+                | :? FunctionSpec<string> as newFs -> DuFunction newFs
+                | :? FunctionSpec<char>   as newFs -> DuFunction newFs
+                | _ -> failwith "ERROR"
+            | _ -> failwith "ERROR"
+        newExp
+
+    let createExpression (parserData:ParserData) (storageFinder:StorageFinder) (ctx: ExprContext) : IExpression =
 
         let rec helper (ctx: ExprContext) : IExpression =
             let text = ctx.GetText()
 
-            let expr =
+            let expr : IExpression =
                 match ctx with
                 | :? FunctionCallExprContext as exp -> // functionName '(' arguments? ')'
                     debugfn $"FunctionCall: {text}"
@@ -40,8 +73,12 @@ module rec ExpressionParserModule =
                               for exprCtx in exprListCtx.children.OfType<ExprContext>() do
                                   helper exprCtx
                           | None -> () ]
-
-                    createCustomFunctionExpression funName args
+                    if predefinedFunctionNames.Contains funName then
+                        createCustomFunctionExpression funName args
+                    else
+                        match parserData.LambdaDefs.TryFind(fun lmbd -> lmbd.Prototype.Name = funName) with
+                        | Some lambdaDecl -> createLambdaCallExpression parserData.Storages args lambdaDecl.Body 
+                        | None -> failwith "ERROR"
 
                 | :? CastingExprContext as exp -> // '(' type ')' expr
                     debugfn $"Casting: {text}"
@@ -93,18 +130,18 @@ module rec ExpressionParserModule =
                         let lit2exp x = literal2expr x |> iexpr
 
                         match exp.children[0] with
-                        | :? LiteralSbyteContext ->  text.Replace("y", "")  |> System.SByte.Parse |> lit2exp
-                        | :? LiteralByteContext  ->  text.Replace("uy", "") |> System.Byte.Parse  |> lit2exp
-                        | :? LiteralInt16Context ->  text.Replace("s", "")  |> System.Int16.Parse |> lit2exp
-                        | :? LiteralUint16Context -> text.Replace("us", "") |> System.UInt16.Parse |> lit2exp
-                        | :? LiteralInt32Context ->  text |> System.Int32.Parse |> lit2exp
-                        | :? LiteralUint32Context -> text.Replace("u", "") |> System.UInt32.Parse |> lit2exp
-                        | :? LiteralInt64Context ->  text.Replace("L", "") |> System.Int64.Parse |> lit2exp
-                        | :? LiteralUint64Context -> text.Replace("UL", "") |> System.UInt64.Parse |> lit2exp
-                        | :? LiteralSingleContext -> text.Replace("f", "") |> System.Single.Parse |> lit2exp
-                        | :? LiteralDoubleContext -> text |> System.Double.Parse  |> lit2exp
-                        | :? LiteralBoolContext ->   text |> System.Boolean.Parse |> lit2exp
-                        | :? LiteralStringContext -> text |> deQuoteOnDemand      |> lit2exp
+                        | :? LiteralSbyteContext ->  text.Replace("y", "")  |> System.SByte.Parse   |> lit2exp
+                        | :? LiteralByteContext  ->  text.Replace("uy", "") |> System.Byte.Parse    |> lit2exp
+                        | :? LiteralInt16Context ->  text.Replace("s", "")  |> System.Int16.Parse   |> lit2exp
+                        | :? LiteralUint16Context -> text.Replace("us", "") |> System.UInt16.Parse  |> lit2exp
+                        | :? LiteralInt32Context ->  text                   |> System.Int32.Parse   |> lit2exp
+                        | :? LiteralUint32Context -> text.Replace("u", "")  |> System.UInt32.Parse  |> lit2exp
+                        | :? LiteralInt64Context ->  text.Replace("L", "")  |> System.Int64.Parse   |> lit2exp
+                        | :? LiteralUint64Context -> text.Replace("UL", "") |> System.UInt64.Parse  |> lit2exp
+                        | :? LiteralSingleContext -> text.Replace("f", "")  |> System.Single.Parse  |> lit2exp
+                        | :? LiteralDoubleContext -> text                   |> System.Double.Parse  |> lit2exp
+                        | :? LiteralBoolContext ->   text                   |> System.Boolean.Parse |> lit2exp
+                        | :? LiteralStringContext -> text                   |> deQuoteOnDemand      |> lit2exp
                         | :? LiteralCharContext ->
                             // text : "'a'" 의 형태
                             let dq, sq = "\"", "'"
@@ -129,7 +166,7 @@ module rec ExpressionParserModule =
                                 | Some stg, None -> stg.GetText() |> Some
                                 | None, Some udt -> udt.GetText() |> Some
                                 | _ -> None
-                            let! storage = storages.TryFind(name)
+                            let! storage = storageFinder name
                             return storage.ToBoxedExpression() :?> IExpression
                         } |> Option.defaultWith (fun () -> failwith $"Failed to find variable/tag name in {sctx.GetText()}")
 
@@ -149,16 +186,6 @@ module rec ExpressionParserModule =
             expr
 
         helper ctx
-
-    let parseExpression (storages: Storages) (text: string) : IExpression =
-        try
-            let parser = createParser (text)
-            let ctx = parser.expr ()
-
-            createExpression storages ctx
-        with exn ->
-            failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
-
                 
     let private getFirstChildExpressionContext (ctx: ParserRuleContext) : ExprContext =
         ctx.children.OfType<ExprContext>().First()
@@ -181,7 +208,7 @@ module rec ExpressionParserModule =
         match typ with
         | Some typ ->
             let storages = parserData.Storages
-            let exp = createExpression storages (getFirstChildExpressionContext ctx)
+            let exp = createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Counter>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
 
@@ -247,7 +274,7 @@ module rec ExpressionParserModule =
         match typ with
         | Some typ ->
             let storages = parserData.Storages
-            let exp = createExpression storages (getFirstChildExpressionContext ctx)
+            let exp = createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
             let exp = exp :?> Expression<Timer>
             let name = ctx.Descendants<StorageNameContext>().First().GetText()
             // e.g "ton myTon = createXgiTON(2000u, $myQBit0);"
@@ -287,14 +314,14 @@ module rec ExpressionParserModule =
 
     let tryCreateStatement (parserData:ParserData) (ctx: StatementContext) : Statement option =
         let storages:Storages = parserData.Storages
-        assert (ctx.ChildCount = 1)
+        assert (ctx.ChildCount = 1 || (ctx.ChildCount = 2 && ctx.children[1].GetText() = ";"))
         let getStorageName = fun () -> ctx.Descendants<StorageNameContext>().First().GetText()
 
         let optStatement =
             let fstChild = ctx.children[0] 
             match fstChild with
             | :? VarDeclContext as varDeclCtx ->
-                let exp = createExpression storages (getFirstChildExpressionContext varDeclCtx)
+                let exp = createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext varDeclCtx)
 
                 let declType =
                     ctx.Descendants<TypeContext>().First().GetText() |> System.Type.FromString
@@ -328,7 +355,7 @@ module rec ExpressionParserModule =
 
             | :? AssignContext as ctx ->
                 let createExp ctx =
-                    createExpression storages (getFirstChildExpressionContext ctx)
+                    createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext ctx)
                 let children = ctx.children.ToFSharpList()
 
                 match ctx with
@@ -369,7 +396,7 @@ module rec ExpressionParserModule =
             | :? TimerDeclContext as ctx -> Some <| parseTimerStatement parserData ctx
 
             | :? CopyStatementContext as ctx ->
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData (defaultStorageFinder storages)
                 let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
                 let source = ctx.Descendants<CopySourceContext>().First() |> expr
@@ -380,7 +407,7 @@ module rec ExpressionParserModule =
 
             | :? CopyStructStatementContext as ctx ->
                 // e.g copyStructIf(true, $hong, $people[0]);
-                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression storages
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData (defaultStorageFinder storages)
                 let condition = ctx.Descendants<CopyConditionContext>().First() |> expr :?> IExpression<bool>
 
                 let sourceInstance = ctx.Descendants<UdtInstanceSourceContext>().First().udtInstance()  // e.g "hong"
@@ -396,7 +423,7 @@ module rec ExpressionParserModule =
                 | _ -> failwith $"ERROR: Used undefined UDT type."
 
                 let udtDecl = parserData.TryGetUdtDecl(sourceType.Value).Value
-                Some <| DuAction(DuCopyUdt(parserData, udtDecl, condition, source, target))
+                Some <| DuAction(DuCopyUdt { Storages=parserData.Storages; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target})
 
             | :? UdtDeclContext as ctx ->
                 let typeName = ctx.udtType().GetText()
@@ -410,7 +437,7 @@ module rec ExpressionParserModule =
                 parserData.UdtDecls.Add udtDecl
                 Some <| DuUdtDecl udtDecl
 
-            | :? UdtDefinitionsContext as ctx ->
+            | :? UdtDefContext as ctx ->
                 let t = ctx.udtType().GetText()
                 if not <| parserData.IsUdtType t then
                     failwith $"ERROR: UDT type {t} is not declared"
@@ -427,10 +454,81 @@ module rec ExpressionParserModule =
                         | RegexPattern @"^\[(\d+)\]$" [ Int32Pattern arraySize ] -> arraySize
                         | _ -> failwithlog "ERROR: Invalid array declaration"
                 let udtDefinition = { TypeName = t; VarName = v; ArraySize = n }
-                parserData.AddUdtDefinitions(udtDefinition)
-                Some <| DuUdtDefinitions udtDefinition
+                parserData.AddUdtDefs(udtDefinition)
+                Some <| DuUdtDef udtDefinition
+
+            | _ when (fstChild :? LambdaDeclContext || fstChild :? ProcDeclContext) ->
+                if not <| enableSubroutine then
+                    failwith $"ERROR: Subroutine is not supported yet"
+
+                let storageFinder (funName:string) (stgName:string): IStorage option =
+                    let localStgName = getFormalParameterName funName stgName
+                    storages.TryFind localStgName
+                    |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
+
+                let funName =
+                    match fstChild with
+                    | :? LambdaDeclContext as ctx -> ctx.lambdaName().GetText()
+                    | :? ProcDeclContext as ctx -> ctx.procName().GetText()
+                    | _ -> failwith "ERROR"
+
+                if predefinedFunctionNames.Contains(funName) then
+                    failwith $"ERROR: {funName} is predefined function name"
 
 
+                let args =  // (int a, int b)
+                    [   for a in ctx.Descendants<ArgDeclContext>() do
+                            let t = a.``type``().GetText() |> textToSystemType
+                            let v = a.argName().GetText()
+                            yield { Type = t; Name = v }
+                    ]
+                for a in args do
+                    let encryptedFormalParamName = getFormalParameterName funName a.Name
+                    let localVar =
+                        let comment = $"{funName}({a.Type} {a.Name})"
+                        let defaultValue = { Object = typeDefaultValue a.Type }: BoxedObjectHolder
+                        createVariable encryptedFormalParamName defaultValue (Some comment)
+                    storages.Add(encryptedFormalParamName, localVar)
+
+                match fstChild with
+                | :? LambdaDeclContext as ctx ->
+                    // e.g: int sum(int a, int b) => $a + $b;
+                    let typ = ctx.``type``().GetText() |> textToSystemType
+                    
+                    let bodyExp = ctx.Descendants<LambdaBodyExprContext>().First() |> getFirstChildExpressionContext |> createExpression parserData (storageFinder funName)
+                    let lambdaDecl = {
+                        Prototype = { Type = typ; Name = funName }
+                        Arguments = args
+                        Body = bodyExp }
+                    bodyExp.FunctionSpec.Value.LambdaDecl <- Some lambdaDecl
+
+                    parserData.LambdaDefs.Add(lambdaDecl)
+                    Some <| DuLambdaDecl lambdaDecl
+
+                | :? ProcDeclContext as ctx ->
+                    let bodies =
+                        [   for stmtCtx in ctx.Descendants<StatementContext>() do
+                                tryCreateStatement parserData stmtCtx ] |> List.choose id
+                    let procDecl = {
+                        ProcName = funName
+                        Arguments = args
+                        Bodies = ResizeArray(bodies)
+                    }
+                    parserData.ProcDefs.Add(procDecl)
+                    Some <| DuProcDecl procDecl
+                | _ -> failwith "ERROR"
+
+            | :? ProcCallStatementContext as ctx ->
+                if not <| enableSubroutine then
+                    failwith $"ERROR: Subroutine is not supported yet"
+                let expr ctx = ctx |> getFirstChildExpressionContext |> createExpression parserData (defaultStorageFinder storages)
+                let call = ctx.funcCall()
+                let funcName = call.functionName().GetText()
+                let args = call.arguments()
+                let args = if isNull args then [] else args.children.OfType<ExprContext>().ToFSharpList()
+                let args = args |> map expr
+                let decl = parserData.ProcDefs |> Seq.find(fun p -> p.ProcName = funcName)
+                Some <| DuProcCall { ProcDecl = decl; ActuralPrameters = args }
             | _ -> failwithlog "ERROR: Not yet statement"
 
         optStatement.Iter(fun st -> st.Do())
@@ -441,7 +539,7 @@ module rec ExpressionParserModule =
         try
             ParserUtil.runtimeTarget  <- target
             let parser = createParser (text)
-            let parserData = new ParserData(target, storages, Some parser, [], [])
+            let parserData = new ParserData(target, storages, Some parser)
 
             let children = parser.toplevels().children
 
@@ -455,7 +553,7 @@ module rec ExpressionParserModule =
 
             [   for t in topLevels do
                     let text = t.GetOriginalText()
-                    //debugfn $"Toplevel: {text}"
+                    tracefn $"Toplevel: {text}"
                     assert (t.ChildCount = 1)
 
                     match t.children[0] with

@@ -17,7 +17,7 @@
             <GlobalVariables>
                 <GlobalVariable Version="Ver 1.0" Count="1">
                     <Symbols>
-                        <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1)" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1);" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -54,7 +54,7 @@ XckU4UJCOYh5CA==
                         </Body>
                         <LocalVar Version="Ver 1.0" Count="1">
                             <Symbols>
-                                <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1)" Device="" Kind="8" State="0"/>
+                                <Symbol Name="b0" Comment="bool b0 = !(2.1 == 6.1);" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

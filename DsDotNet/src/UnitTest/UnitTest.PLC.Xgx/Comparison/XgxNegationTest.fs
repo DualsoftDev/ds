@@ -67,19 +67,13 @@ type XgxNegationTest(xgx:PlatformTarget) =
         ()
 
     member x.``Negation bool test`` () =
-        let storages = Storages()
         let code = """
             bool b1 = !true;
             bool b2 = !false;
             """
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation on decl test`` () =
-        let storages = Storages()
         let code = """
 bool b1 = 2 == 3;
 bool b2 = !(2 == 3);
@@ -98,72 +92,37 @@ bool b14 = !($b1 && $b2);
 bool b15 = $b1 || $b2;
 bool b17 = !($b1 || $b2);
 """
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation on decl test1`` () =
-        let storages = Storages()
         let code = """
 bool b1 = true;
 bool b2 = false;
 bool b3 = !(!$b1 != $b2);       // ERROR on XGI
 """
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation x 1 test`` () =
-        let storages = Storages()
         let code = baseCode + "$qx = !$ix;"
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation x 2 test`` () =
-        let storages = Storages()
         let code = baseCode + "$qx = !!$ix;"
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation x 3 test`` () =
-        let storages = Storages()
         let code = baseCode + "$qx = !!!$ix;"
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation x 4 test`` () =
-        let storages = Storages()
         let code = baseCode + "$qx = !!!!$ix;"
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation x 5 test`` () =
-        let storages = Storages()
         let code = baseCode + "$qx = !!!!!$ix;"
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation x n test`` () =
-        let storages = Storages()
         let testCode =
             """$qx =       !$ix
                     &&    !!$ix
@@ -172,59 +131,33 @@ bool b3 = !(!$b1 != $b2);       // ERROR on XGI
                     && !!!!!$ix;"""
 
         let code = baseCode + testCode
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation, comparision test1`` () =
-        let storages = Storages()
         let code = baseCode + """$qx =
         ( !(2 == 3) && !($ix != true) && !!!(3.14 > 5.0) )
             || ( !(true && false) && !!(true || $ix)  ) ;"""
-
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation1 test`` () =
-        let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 2 + """
             $x01 = ! $x00;
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation2 test`` () =
-        let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 6 + """
             $x02 = ! ($x00 || $x01);
             $x05 = ! ($x03 && $x04);
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-        ()
+        code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``Negation3 test`` () =
-        let storages = Storages()
         let code = generateBitTagVariableDeclarations xgx 0 6 + """
             $x02 = ! (! $x00 || $x01);
             $x05 = ! ($x03 && ! $x04);
 """
-        let statements = parseCodeForWindows storages code
-        let f = getFuncName()
-        let xml = x.generateXmlForTest f storages (map withNoComment statements)
-        x.saveTestResult f xml
-
-
-
-
+        code |> x.TestCode (getFuncName()) |> ignore
 
 
 

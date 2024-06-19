@@ -17,7 +17,7 @@ namespace Engine.TestSimulator
     {
         public static bool Do(DsCPU dsCpu, int checkTime = 2000)
         {
-            RuntimeDS.Package = RuntimePackage.Simulation;
+            RuntimeDS.Package = RuntimePackage.PCSIM;
             bool resultMoving = false;    
             Task.Run(async () => {
 

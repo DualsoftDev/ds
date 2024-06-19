@@ -195,7 +195,7 @@ module CoreModule =
 
     /// Segment (DS Basic Unit)
     [<DebuggerDisplay("{QualifiedName}")>]
-    type Real private (name:string, flow:Flow, timeParam:TimeParam option) =
+    type Real private (name:string, flow:Flow, dsTime:DsTime) =
         inherit Vertex([|name|], DuParentFlow flow)
 
         member val Graph = DsGraph()
@@ -203,7 +203,9 @@ module CoreModule =
         member val ExternalTags = HashSet<ExternalTagSet>()
         
         member _.Flow = flow
-        member _.TimeParam = timeParam
+        member _.Path3D = dsTime.Path3D
+        member _.Script = dsTime.Script
+        //member _.TimeParam = dsTime.AVG
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
@@ -487,7 +489,7 @@ module CoreModule =
             if (name.Contains ".")  then
                 logWarn $"Suspicious segment name [{name}]. Check it."
 
-            let real = Real(name, flow, None)
+            let real = Real(name, flow, DsTime())
             flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
             real
 

@@ -24,11 +24,9 @@ public class ServerSettings
 public enum RuntimePackageCs
 {
     PC,
+    PCSIM,
     PLC,
-    LightPC,
-    LightPLC,
-    Simulation,
-    Developer,
+    PLCSIM,
 }
 
 
@@ -45,8 +43,8 @@ public static class ServerSettingsExtensions
         {
                 RuntimePackageCs.PC => RuntimePackage.PC,
                 RuntimePackageCs.PLC => RuntimePackage.PLC,
-                RuntimePackageCs.Simulation => RuntimePackage.Simulation,
-                RuntimePackageCs.Developer => RuntimePackage.Developer,
+                RuntimePackageCs.PCSIM => RuntimePackage.PCSIM,
+                RuntimePackageCs.PLCSIM => RuntimePackage.PLCSIM,
                 _ => RuntimePackage.PC,
         };
     public static RuntimePackageCs ToRuntimePackageCs(this RuntimePackage runtimePackage)
@@ -55,10 +53,10 @@ public static class ServerSettingsExtensions
             return RuntimePackageCs.PC;
         else if (runtimePackage == RuntimePackage.PLC)
             return RuntimePackageCs.PLC;
-        else if (runtimePackage == RuntimePackage.Simulation)
-            return RuntimePackageCs.Simulation;
-        else if (runtimePackage == RuntimePackage.Developer)
-            return RuntimePackageCs.Simulation;
+        else if (runtimePackage == RuntimePackage.PCSIM)
+            return RuntimePackageCs.PCSIM;
+        else if (runtimePackage == RuntimePackage.PLCSIM)
+            return RuntimePackageCs.PLCSIM;
         else
             throw new NotImplementedException();        
     }

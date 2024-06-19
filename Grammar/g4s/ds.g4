@@ -25,7 +25,7 @@ COPY_SYSTEM: 'copy_system';
 LAYOUTS: 'layouts';
 ADDRESSES: 'addresses';
 PROP: 'prop';
-SAFETY: 'safety';
+
 FLOW: 'flow';
 INTERFACES: 'interfaces';
 ALIASES: 'aliases';
@@ -215,15 +215,32 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
 
 
 /*
-// global safety property
+// global  property
     [prop] = {
         [safety] = {
             F.Main = { F.Ap; F.Am; }
             F.Ap = { F.Main; }
         }
+
+        [times] = {
+            F.WorkA = {M:1000, S:200, D:30}; // average, std, onDelay msec
+            F.WorkB = {M:1000, S:200, D:30}; // average, std, onDelay msec
+        }
+        [actions] = {
+            F.WorkA  = {./Assets/dsLib/Cylinder/Robot.fbx:Load};
+            F.WorkB  = {./Assets/dsLib/Cylinder/Robot.obj:Unload};
+            F.WorkC  = {./Assets/dsLib/Cylinder/Robot.obj:Home};
+            F.Work1  = {./Assets/dsLib/Cylinder/DoubleType.obj:ADV};
+            F.Work2  = {./Assets/dsLib/Cylinder/DoubleType.obj:RET};
+        }
+        [scripts] = {                                         
+            F.WorkA = {ThirdParty.AddressInfo.Provider.testFunc1()}; // 
+            F.WorkB = {ThirdParty.AddressInfo.Provider.testFunc2()}; // 
+        }
     }
+
  */
-propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableBlock|notransBlock)* '}';
+propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|actionsBlock|scriptsBlock)* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyDef)* '}';    
         safetyDef: safetyKey '=' '{' safetyValues '}';
             // Real|Call = { ((Real|Call);)* }
@@ -248,12 +265,29 @@ propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableB
         disableTarget: identifier23;
         disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;
 
+    timesBlock: '[' 'times' ']' '=' '{' (timeDef)* '}';
+    timeDef: timeKey '{' timeParams '}' SEMICOLON;
+    timeKey: identifier23;
+    timeParams: timeParamList;
+    timeParamList: (timeParam (COMMA timeParam)*)?;
+    timeParam: ('M' ':' INTEGER | 'S' ':' INTEGER | 'D' ':' INTEGER); // average, std, onDelay msec
+
+    actionsBlock: '[' 'actions' ']' '=' '{' (actionDef)* '}';
+    actionDef: actionKey '{' actionParams '}' SEMICOLON;
+    actionKey: identifier23;
+    actionParams: content ':' identifier1;
+
+    scriptsBlock: '[' 'scripts' ']' '=' '{' (scriptDef)* '}';
+    scriptDef: scriptKey '{' scriptParams '}' SEMICOLON;
+    scriptKey: identifier23;
+    scriptParams: content;
+
+
 flowBlock
     : '[' 'flow' ']' identifier1 '=' '{' (
         causal | parentingBlock 
         | nonCausal | nonCausals 
         | aliasBlock
-        // | safetyBlock
         )* '}'  (SEMICOLON)?   // |flowTask|callDef
     ;
     parentingBlock: identifier1 '=' '{' (causal | nonCausal | nonCausals)* '}';
@@ -397,7 +431,7 @@ causal: causalPhrase SEMICOLON;
     lexerTokenIdentifierCandidate:
         SYS | EXTERNAL_SYSTEM | IP | HOST
         | FILE | DEVICE | COPY_SYSTEM
-        | LAYOUTS | ADDRESSES | PROP | SAFETY | FLOW
+        | LAYOUTS | ADDRESSES | PROP | FLOW
         | INTERFACES | ALIASES | VARIABLES
         | JOBS | BUTTONS | LAMPS | CONDITIONS
         | E_IN | E | A_IN | A | D_IN | D

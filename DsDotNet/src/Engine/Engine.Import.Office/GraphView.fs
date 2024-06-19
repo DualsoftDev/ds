@@ -130,8 +130,8 @@ module rec ViewModule =
             if coreVertex.IsSome then   
                 let vKey = coreVertex.Value.QualifiedName.GetHashCode()
                 let safeties = match coreVertex.Value.GetPure() with
-                               | :? Real as r -> String.Join(";", r.SafetyConditions.Select(fun f->f.Name))
-                               | :? Call as c -> String.Join(";", c.SafetyConditions.Select(fun f->f.Name))
+                               | :? Real as r -> String.Join(", ", r.SafetyConditions.Select(fun f->f.Name))
+                               | :? Call as c -> String.Join(", ", c.SafetyConditions.Select(fun f->f.Name))
                                |_-> failwithlog $"Error {coreVertex.Value.Name}"
                 let safeName = if safeties.Length > 0 then $"[{safeties}]\r\n" else ""
                 match coreVertex.Value with

@@ -197,29 +197,17 @@ module PPTObjectModule =
         let checkDotErr () =
             if nodeType <> REALExF && name.Contains(".") then
                 failwithlog ErrID._19
-        let checkSafetyErr() =
-            match GetSquareBrackets(shape.InnerText, true) with
-                | Some text -> //safety 체크
-                        text.Split(';').Iter(fun f->
-                             if not(f.Contains("."))
-                             then 
-                                shape.ErrorName(ErrID._68, iPage)
-                        )
-                        
-                | None -> ()
+        
 
         match nodeType with
-        | REAL -> checkSafetyErr();checkDotErr();
+        | REAL -> checkDotErr();
         | REALExF ->
             if name.Contains(".") |> not then
                 failwithlog ErrID._54
-            checkSafetyErr();
         | CALL ->
             if not(namePure.Contains(".")) &&  namePure <> nameNFunc  // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
             then
                 failwithlog ErrID._70
-
-            checkSafetyErr();
 
         | OPEN_EXSYS_CALL
         | OPEN_EXSYS_LINK
@@ -281,7 +269,11 @@ module PPTObjectModule =
         let updateSafety (barckets: string) =
             barckets.Split(';')
                 |> Seq.iter (fun f ->
-                        safeties.Add(f) |> ignore
+                        if f.Split('.').Length  > 1 
+                        then
+                            safeties.Add(f) |> ignore
+                        else
+                            failwithf $"{ErrID._74}"
                     )
 
         let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =

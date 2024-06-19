@@ -82,8 +82,10 @@ module internal ToDsTextModule =
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
             if notMentioned.any() 
             then 
+                let spliter = if notMentioned.Head() :? Real then "; " else ", "
+                
                 let comment  = if pCooment then "// island"  else ""
-                let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(", ")
+                let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(spliter)
                 yield $"{getTab (indent)}{isLandCommas}; {comment}"
         ]
 
@@ -241,10 +243,6 @@ module internal ToDsTextModule =
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
                 let getHwInfo(hw:HwSystemDef) = 
                     let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
-                    //let items = 
-                    //    if hw.OperatorFunction.IsSome 
-                    //    then [printFunc hw.OperatorFunction.Value]  @ flows else flows
-                                
                     let itemText = if flows.any() then (flows |> String.concat "; ") + ";" else ""
                     let inAddr =  addressPrint  hw.InAddress  
                     let outAddr = addressPrint  hw.OutAddress 

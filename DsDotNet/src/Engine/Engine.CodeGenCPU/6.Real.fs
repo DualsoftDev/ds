@@ -24,7 +24,11 @@ type VertexMReal with
                 else                          
                     (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr  
 
-            let rst = v.RT.Expr <&&> real.CoinAlloffExpr  
+            let rst = 
+                if real.Graph.Vertices.any()
+                then v.RT.Expr <&&> real.CoinAlloffExpr  
+                else v.RT.Expr 
+                
 
             //수식 순서 중요
             // 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)

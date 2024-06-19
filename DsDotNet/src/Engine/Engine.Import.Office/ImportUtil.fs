@@ -446,17 +446,33 @@ module ImportU =
                     |> dict
 
                 let safeName (safety: string) =
-                    let dev = (safety.Split('.')[0]).Trim()
-                    let api = (safety.Split('.')[1]).Trim()
+                    if safety.Split('.').Length  = 2
+                    then
+                        let dev = (safety.Split('.')[0]).Trim()
+                        let api = (safety.Split('.')[1]).Trim()
 
-                    $"{flow.Name}_{dev}_{api}"
+                        $"{flow.Name}_{dev}_{api}"
+
+                    elif safety.Split('.').Length  = 3
+                    then
+                        let flow = (safety.Split('.')[0]).Trim()
+                        let dev = (safety.Split('.')[1]).Trim()
+                        let api = (safety.Split('.')[2]).Trim()
+
+                        $"{flow}_{dev}_{api}"
+                    else 
+                        failWithLog $"error safety name format ({safety})"
+
 
                 let safeties = node.Safeties |> map safeName |> toArray
 
                 safeties //세이프티 입력 미등록 이름오류 체크
                 |> iter (fun safeFullName ->
                     if not (mySys.Jobs.Select(fun f -> f.Name).Contains safeFullName) then
-                        node.Shape.ErrorName(ErrID._28, node.PageNum))
+                        node.Shape.ErrorName($"{ErrID._28}(err:{safeFullName})", node.PageNum)
+                        
+                        
+                        )
 
                 safeties
                 |> map (fun safeFullName -> dicQualifiedNameSegs.[safeFullName])

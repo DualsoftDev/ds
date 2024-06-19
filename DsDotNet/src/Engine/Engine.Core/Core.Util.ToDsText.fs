@@ -82,10 +82,8 @@ module internal ToDsTextModule =
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
             if notMentioned.any() 
             then 
-                let spliter = if notMentioned.Head() :? Real then "; " else ", "
-                
                 let comment  = if pCooment then "// island"  else ""
-                let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(spliter)
+                let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(", ")
                 yield $"{getTab (indent)}{isLandCommas}; {comment}"
         ]
 

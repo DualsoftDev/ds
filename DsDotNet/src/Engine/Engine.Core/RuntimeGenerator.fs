@@ -13,7 +13,11 @@ module RuntimeGeneratorModule =
         | XGK 
         | AB 
         | MELSEC
-
+    //type RuntimePackage = 
+    //    | PC 
+    //    | PCSIM 
+    //    | PLC
+    //    | PLCSIM 
     type RuntimePackage = 
         | PC 
         | PLC 

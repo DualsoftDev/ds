@@ -183,7 +183,7 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()
 
-    // Subclasses = {Call | Real | RealOtherFlow}
+    // Subclasses = {Call | Real}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
 
@@ -471,6 +471,10 @@ module CoreModule =
             match x with
             | DuSafetyConditionReal real -> real
             | DuSafetyConditionCall call -> call
+        member x.Name:string =
+            match x with
+            | DuSafetyConditionReal real -> real.Name
+            | DuSafetyConditionCall call -> call.Name
 
     type AliasTargetWrapper with
         member x.GetTarget() : Vertex =

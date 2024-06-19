@@ -13,6 +13,7 @@ open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Linq
 open System.ComponentModel
+open System
 
 [<AutoOpen>]
 module rec ViewModule =
@@ -128,12 +129,17 @@ module rec ViewModule =
         member x.UIKey =
             if coreVertex.IsSome then   
                 let vKey = coreVertex.Value.QualifiedName.GetHashCode()
+                let safeties = match coreVertex.Value.GetPure() with
+                               | :? Real as r -> String.Join(";", r.SafetyConditions.Select(fun f->f.Name))
+                               | :? Call as c -> String.Join(";", c.SafetyConditions.Select(fun f->f.Name))
+                               |_-> failwithlog $"Error {coreVertex.Value.Name}"
+                let safeName = if safeties.Length > 0 then $"[{safeties}]\r\n" else ""
                 match coreVertex.Value with
                 | :? Alias as a ->
                     if a.IsOtherFlowReal 
-                    then $"{a.Name};{vKey}"  
-                    else  $"{name};{vKey}"
-                | _ -> $"{x.PureVertex.Value.Name};{vKey}"
+                    then $"{safeName}{a.Name};{vKey}"  
+                    else  $"{safeName}{name};{vKey}"
+                | _ -> $"{safeName}{x.PureVertex.Value.Name};{vKey}"
             else
                 $"{name};{x.GetHashCode()}"
 

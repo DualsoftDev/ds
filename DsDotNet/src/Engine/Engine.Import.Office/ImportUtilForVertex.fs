@@ -68,7 +68,7 @@ module ImportUtilVertex =
                     Call.Create(job, parentWrapper)
                 else 
                     let ableApis = String.Join(", ", device.ReferenceSystem.ApiItems.Select(fun a->a.Name))
-                    failwithlog $"Loading system ({loadSysName}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
+                    failwithlog $"Loading system ({loadSysName}:{device.AbsoluteFilePath}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
 
     let getCallFromMultiLoadedSys (sys: DsSystem) (node: pptNode) (loadSysName: string) (apiName: string) parentWrapper =
 

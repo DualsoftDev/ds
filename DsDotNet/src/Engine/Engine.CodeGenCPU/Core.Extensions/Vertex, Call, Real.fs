@@ -47,7 +47,7 @@ module ConvertCpuVertex =
             | false -> false
             
 
-        member c.UsingTon  = c.TargetJob.OnDelayTime.IsSome
+        member c.UsingTon  = (*c.IsJob &&*) c.TargetJob.OnDelayTime.IsSome
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 
@@ -61,7 +61,11 @@ module ConvertCpuVertex =
                     else 
                         c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
 
-        member c.EndAction = c.TargetJob.ActionInExpr
+        member c.EndAction = 
+                    if c.IsJob 
+                    then c.TargetJob.ActionInExpr 
+                    else None   
+                        
         member c.End = 
                 if c.EndAction.IsSome 
                 then c.EndAction.Value

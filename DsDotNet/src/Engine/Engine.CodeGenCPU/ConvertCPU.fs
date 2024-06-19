@@ -192,10 +192,7 @@ module ConvertCPU =
         [
             yield s.SetFlagForEmulation()
 
-            let coins = s.GetVerticesOfCoins()  
-            let jobs = coins.OfType<Call>()
-                            .Select(fun c-> c.TargetJob).Distinct()
-            for job, devs in jobs.Select(fun j-> j, j.DeviceDefs) do
+            for job, devs in s.Jobs.Select(fun j-> j, j.DeviceDefs) do
                 for dev in devs do
                     if dev.InTag.IsNonNull() then  
                         yield dev.SensorEmulation(s, job)

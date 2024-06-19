@@ -213,14 +213,14 @@ module CoreModule =
         //member val RealData:byte[] = [||] with get, set
         member val RealData:byte = 0uy with get, set //array타입으로 향후 변경
 
-    type CallOptions =
+    type CallType =
         | JobType of Job
         | CommadFuncType of CommandFunction
         | OperatorFuncType of OperatorFunction
 
-    type Call(targetOption: CallOptions, parent) =
+    type Call(callType: CallType, parent) =
         inherit Indirect
-            (match targetOption with
+            (match callType with
             | JobType job -> job.Name
             | CommadFuncType func -> func.Name
             | OperatorFuncType func -> func.Name
@@ -238,29 +238,29 @@ module CoreModule =
             | OperatorFuncType _ -> true
             | _ -> false
             
-        member _.TargetJob =
-            match targetOption with
+        member x.TargetJob =
+            match callType with
             | JobType job -> job
-            | _ -> failwith "TargetJob is only available for JobType or JobFuncType."
+            | _ -> failwithlog $"{x.QualifiedName} is not JobType."
 
-        member _.TargetFunc =
-            match targetOption with
+        member x.TargetFunc =
+            match callType with
             | CommadFuncType func -> func :> Func
             | OperatorFuncType func -> func :> Func
-            | _ -> failwith "TargetFunc is only available for FuncType or JobFuncType."
+            | _ -> failwithlog $"{x.QualifiedName} is not FunctionType."
 
         /// Indicates if the target includes a job.
-        member _.IsJob = isJob targetOption 
-        member _.IsPureCommand = isCommand targetOption  
-        member _.IsPureOperator = isOperator targetOption  
+        member _.IsJob = isJob callType 
+        member _.IsPureCommand = isCommand callType  
+        member _.IsPureOperator = isOperator callType  
         member _.CallOperatorType  = 
-            match targetOption with
+            match callType with
             | JobType _ -> DuOPUnDefined
             | CommadFuncType _ -> DuOPUnDefined
             | OperatorFuncType func -> func.OperatorType
 
         member _.CallCommandType  = 
-            match targetOption with
+            match callType with
             | JobType _ -> DuCMDUnDefined
             | CommadFuncType func -> func.CommandType
             | OperatorFuncType _ -> DuCMDUnDefined

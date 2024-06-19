@@ -14,7 +14,7 @@ type VertexMReal with
 
         (set, rst) ==| (v.RR, getFuncName())
 
-    member v.R2_RealJobComplete(): CommentedStatement seq=
+    member v.R2_RealJobComplete(): CommentedStatement list =
         let real = v.Vertex :?> Real
         [   
             let set = 
@@ -56,9 +56,9 @@ type VertexMReal with
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
         [
-            (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, getFuncName())
-            (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, getFuncName())
-            (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, getFuncName())
+            (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, getFuncName())     // S
+            (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, getFuncName())     // R
+            (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, getFuncName())     // E
         ]
 
 
@@ -80,11 +80,11 @@ type VertexMReal with
  
 
 type VertexManager with
-    member v.R1_RealInitialStart() = (v :?> VertexMReal).R1_RealInitialStart()
-    member v.R2_RealJobComplete() : CommentedStatement seq = (v :?> VertexMReal).R2_RealJobComplete()
-    member v.R3_RealStartPoint()  = (v :?> VertexMReal).R3_RealStartPoint()
-    member v.R4_RealLink()  = (v :?> VertexMReal).R4_RealLink()
-    member v.R5_DummyDAGCoils()  = (v :?> VertexMReal).R5_DummyDAGCoils()
-    member v.R6_RealDataMove()  = (v :?> VertexMReal).R6_RealDataMove()
-    member v.R7_RealGoingOriginError()  = (v :?> VertexMReal).R7_RealGoingOriginError()
+    member v.R1_RealInitialStart()    : CommentedStatement        = (v :?> VertexMReal).R1_RealInitialStart()
+    member v.R2_RealJobComplete()     : CommentedStatement list   = (v :?> VertexMReal).R2_RealJobComplete()
+    member v.R3_RealStartPoint()      : CommentedStatement        = (v :?> VertexMReal).R3_RealStartPoint()
+    member v.R4_RealLink()            : CommentedStatement        = (v :?> VertexMReal).R4_RealLink()
+    member v.R5_DummyDAGCoils()       : CommentedStatement list   = (v :?> VertexMReal).R5_DummyDAGCoils()
+    member v.R6_RealDataMove()        : unit                      = (v :?> VertexMReal).R6_RealDataMove()
+    member v.R7_RealGoingOriginError(): CommentedStatement list   = (v :?> VertexMReal).R7_RealGoingOriginError()
     

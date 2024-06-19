@@ -13,6 +13,18 @@ module ExpressionExtension =
     let inline unaryOp  f exp = f [exp]
     
     /// logical AND for expression 
+    //let (<&&>) (left:IExpression) (right:IExpression) =
+    //    let l, r = left.ToText(), right.ToText()
+    //    match l, r with
+    //    | "$_ON", _  -> right :?> Expression<bool>
+    //    | _, "$_ON"  -> left  :?> Expression<bool>
+    //    | "$_OFF", _ -> left  :?> Expression<bool>
+    //    | _, "$_OFF" -> right :?> Expression<bool>
+    //    | _ ->
+    //        binaryOp fbLogicalAnd left right
+
+
+    /// logical AND for expression 
     let (<&&>) left right = binaryOp fbLogicalAnd left right
     /// logical OR for expression 
     let (<||>) left right = binaryOp fbLogicalOr left right
@@ -103,7 +115,7 @@ module ExpressionExtension =
         [<Extension>] static member ToAndElseOn  (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<&&>) else onExpr()
         [<Extension>] static member ToAndElseOff (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<&&>) else offExpr()
 
-        [<Extension>] static member ToOr        (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr  else failwithlog "error empty 'or' expression " 
+        [<Extension>] static member ToOr        (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else failwithlog "error empty 'or' expression " 
         [<Extension>] static member ToOrElseOn  (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else onExpr()
         [<Extension>] static member ToOrElseOff (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else offExpr()
         [<Extension>] static member ToOr        (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<||>) else failwithlog "error empty 'or' expression "

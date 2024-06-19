@@ -2,18 +2,9 @@ namespace rec Engine.Parser.FS
 
 open System
 open System.Linq
-open System.IO
-
-open Antlr4.Runtime.Tree
-open Antlr4.Runtime
-
 open Dual.Common.Core.FS
-open Engine.Parser
 open Engine.Core
-open Engine.Core.DsText
 open type Engine.Parser.dsParser
-open type DsParser
-open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -30,39 +21,38 @@ module ListnerCommonFunctionGeneratorUtil =
                 Some (system.Functions.Cast<OperatorFunction>().First(fun f->f.Name = funcName))
             else None 
 
-    let getCode (excuteCode:String)=
-        // 처음과 끝의 "${" 와 "}" 제외
-        let pureCode = excuteCode.Substring(2, excuteCode.Length - 2).TrimEnd('}') 
+    let getCode (executeCode:String) =
+        assert( (executeCode.StartsWith("${") || executeCode.StartsWith("#{")) && executeCode.EndsWith("}"))
+        // 처음 "#{" or "${"와 끝의  "}" 제외
+        let pureCode = executeCode.Substring(2, executeCode.Length - 2).TrimEnd('}') 
         pureCode.Split(';')
                 .Map(fun s->s.Trim().Trim([|'\r';'\n'|]))
                 .JoinWith(";\r\n").Trim([|'\r';'\n'|])
 
     let commonFunctionCommandExtractor (fDef: CommandDefContext)=
         // 함수 호출과 관련된 매개변수 추출
-        let excuteCode = fDef.command().GetText()
-        excuteCode |> getCode
+        let executeCode = fDef.command().GetText()
+        executeCode |> getCode
 
     let commonFunctionOperatorExtractor (fDef: OperatorDefContext)=
         // 함수 호출과 관련된 매개변수 추출
-        let excuteCode = fDef.operator().GetText()
-        excuteCode |> getCode
+        let executeCode = fDef.operator().GetText()
+        executeCode |> getCode
 
-    let commonDeviceParamExtractor (devCtx: DevParamInOutContext) =
-        match devCtx.TryFindFirstChild<DevParamInOutBodyContext>() with
-        |Some ctx -> 
-            getDevParamInOut $"{ctx.GetText()}"
-        |None ->
-            failWithLog "commonDeviceParamExtractor error"
+    let commonDeviceParamExtractor (devCtx: DevParamInOutContext) : DevParam * DevParam =
+        devCtx.TryFindFirstChild<DevParamInOutBodyContext>()
+        |> Option.map (fun ctx -> getDevParamInOut $"{ctx.GetText()}")
+        |> Option.defaultWith(fun () -> failWithLog "commonDeviceParamExtractor error")
+
     
     let commonCallParamExtractor (ctx: JobBlockContext) =
         let callListings = ctx.Descendants<CallListingContext>().ToArray()
         [
             for callList in callListings do
                 let jobName = callList.TryFindFirstChild<JobNameContext>().Value.GetText().DeQuoteOnDemand()     
-                let jobOption = match callList.TryFindFirstChild<JobTypeOptionContext>()
-                                with
-                                | Some ctx -> ctx.GetText().DeQuoteOnDemand() |> Some
-                                | None -> None      
+                let jobOption =
+                    callList.TryFindFirstChild<JobTypeOptionContext>()
+                    |> Option.map (fun ctx -> ctx.GetText().DeQuoteOnDemand())
 
                 let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
                 yield jobName, jobOption, apiDefCtxs

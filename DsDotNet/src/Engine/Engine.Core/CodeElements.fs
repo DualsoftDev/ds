@@ -21,9 +21,9 @@ module rec CodeElements =
         member x.Type = varType
         member x.VariableType = variableType
         member x.ToDsText() = 
-                match variableType with
-                | Mutable ->  $"{varType.ToText()} {name}"
-                | Immutable -> $"const {varType.ToText()} {name} = {x.InitValue}"
+            match variableType with
+            | Mutable ->  $"{varType.ToText()} {name}"
+            | Immutable -> $"const {varType.ToText()} {name} = {x.InitValue}"
         member val InitValue = getNull<string>() with get, set
          
     //action 주소를 가지는 변수
@@ -120,14 +120,14 @@ module rec CodeElements =
         createDevParam address symbol x.DevType x.DevValue x.DevTime
     
     let addOrUpdateParam(jobName:string, paramDic:Dictionary<string, DevParam>, newParam :DevParam) = 
-            paramDic.Remove jobName |> ignore
-            paramDic.Add (jobName, newParam)
+        paramDic.Remove jobName |> ignore
+        paramDic.Add (jobName, newParam)
             
         
     let changeParam(jobName:string, paramDic:Dictionary<string, DevParam>, address:string, symbol:string option) = 
-            let changedDevParam = changeDevParam paramDic[jobName] address symbol
-            paramDic.Remove(jobName) |> ignore
-            paramDic.Add (jobName, changedDevParam)
+        let changedDevParam = changeDevParam paramDic[jobName] address symbol
+        paramDic.Remove(jobName) |> ignore
+        paramDic.Add (jobName, changedDevParam)
 
 
 
@@ -136,10 +136,10 @@ module rec CodeElements =
 
     let toTextDevParam (x:DevParam) = 
         let address = addressPrint x.DevAddress
-        let name   = x.DevName |> Option.defaultValue ""
-        let typ    = x.DevType |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
+        let name  = x.DevName  |> Option.defaultValue ""
+        let typ   = x.DevType  |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
         let value = x.DevValue |> Option.map (fun v -> x.Type.ToStringValue(v)) |> Option.defaultValue ""
-        let time   = x.DevTime |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
+        let time  = x.DevTime  |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
 
         let parts = [ address; name; typ; value; time ]
         let result = parts |> List.filter (fun s -> not (String.IsNullOrEmpty(s))) |> String.concat ":"

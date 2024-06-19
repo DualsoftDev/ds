@@ -159,7 +159,7 @@ module ImportIOTable =
                     
                     if isConst && isConst <> constVari
                     then
-                        failwithlog $"상수 {name} Input영약에 상수 값 입력이 필요합니다."
+                        failwithlog $"상수 {name} Input 영역에 상수 값 입력이 필요합니다."
 
                     let variableData = VariableData(name, dataType|> textToDataType, if constVari then Immutable else Mutable )
 

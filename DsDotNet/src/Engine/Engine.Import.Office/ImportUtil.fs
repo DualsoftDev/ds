@@ -521,6 +521,8 @@ module ImportU =
             then  failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
             
             pageTables
+            |> Seq.filter (fun (_, table) -> table.Rows.Count > 0)
+            |> Seq.filter (fun (_, table) -> table.Rows[0].ItemArray[(int) IOColumn.Case] = $"{IOColumn.Case}")
             |> Seq.collect (fun (pageIndex, table) ->
                 table.Rows
                     .Cast<DataRow>()

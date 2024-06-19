@@ -119,18 +119,17 @@ module internal ModelFindModule =
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonics.Contains(aliasMnemonic))
 
-    let ofAliasForCallVertex (xs:Vertex seq) =
-        xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)  
-
     let ofCallForOperator (xs:Vertex seq) =
         xs.OfType<Call>().Where(fun f -> f.Parent.GetCore() :? Flow).Cast<Vertex>()
         
     let ofAliasForRealVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
         |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
-
     
+    let ofAliasForCallVertex (xs:Vertex seq) =
+        xs.OfType<Alias>()
+        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)  
+
     
     let getVerticesOfSystem(system:DsSystem) =
         let realVertices = system.Flows.SelectMany(fun f ->
@@ -163,30 +162,23 @@ module internal ModelFindModule =
                                 .Distinct()
 
     let getVertexSharedReal(real:Real) =
-        let sharedAlias =
-            let reals = (real.Flow.Graph.Vertices |> ofAliasForRealVertex)
-            reals.Where(fun a -> a.TargetWrapper.RealTarget().Value = real)
-                .Cast<Vertex>()
-
-        sharedAlias 
+        let vs = real.Parent.GetSystem() |> getVerticesOfSystem
+        vs.OfType<Alias>().Where(fun a->a.TargetWrapper.RealTarget().IsSome && a.TargetWrapper.RealTarget().Value = real)
 
     let getVertexSharedCall(call:Call) =
         let sharedAlias =
             (call.Parent.GetFlow() |> getVerticesOfFlow |> ofAliasForCallVertex)
               .Where(fun a -> a.TargetWrapper.CallTarget().Value = call)
-              .Cast<Vertex>()
 
         sharedAlias
 
     ///Real 자신을 공용으로 사용하는 Vertex들
-    let getSharedReal(v:Vertex) : Vertex seq =
+    let getSharedReal(v:Vertex) : Alias seq =
             (v :?> Real) |> getVertexSharedReal
 
     ///Call 자신을 공용으로 사용하는 Vertex들
-    let getSharedCall(v:Vertex) : Vertex seq =
+    let getSharedCall(v:Vertex) : Alias seq =
             (v :?> Call) |> getVertexSharedCall
-
- 
 
     type DsSystem with
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn

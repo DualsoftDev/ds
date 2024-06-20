@@ -20,7 +20,9 @@
         <Compile Include="MessgeError.fs" />
         <Compile Include="PPTUtil.fs" />
         <Compile Include="ImportType.fs" />
-        <Compile Include="PPTObject.fs" />
+        <Compile Include="PPTObjectModule.fs" />
+        <Compile Include="PPTNode.fs" />
+        <Compile Include="PPTGroup.fs" />
         <Compile Include="PPTDummy.fs" />
         <Compile Include="PPTDoc.fs" />
         <Compile Include="GraphView.fs" />

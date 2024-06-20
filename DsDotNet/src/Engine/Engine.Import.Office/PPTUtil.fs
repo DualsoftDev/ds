@@ -10,6 +10,7 @@ open DocumentFormat.OpenXml.Drawing
 open System.IO
 open Engine.Core
 open System.Collections.Generic
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module PPTUtil =
@@ -35,6 +36,51 @@ module PPTUtil =
     type SlideId = Presentation.SlideId
     type GroupShape = Presentation.GroupShape
     type TextBody = Presentation.TextBody
+
+    let Objkey (iPage, Id) = $"{iPage}page{Id}"
+    let TrimSpace (name: string) = name.TrimStart(' ').TrimEnd(' ')
+
+    let CopyName (name: string, cnt) =
+        sprintf "Copy%d_%s" cnt (name.Replace(".", "_"))
+
+    let GetSysNFlow (fileName: string, name: string, pageNum: int) =
+        if (name.StartsWith("$")) then
+            if name.Contains(".") then
+                (TrimSpace(name.Split('.').[0]).TrimStart('$')), TrimSpace(name.Split('.').[1])
+            else
+                (TrimSpace(name.TrimStart('$'))), "_"
+        elif (name = "") then
+            fileName, sprintf "Page%d" pageNum
+        else
+            fileName, TrimSpace(name)
+
+
+            
+    let GetAliasNumber (names: string seq) =
+        let usedNames = HashSet<string>()
+
+        seq {
+
+            let Number (testName) =
+                if names |> Seq.filter (fun name -> name = testName) |> Seq.length = 1 then
+                    usedNames.Add(testName) |> ignore
+                    0
+                else
+                    let mutable cnt = 0
+                    let mutable copy = testName
+
+                    while usedNames.Contains(copy) do
+                        if (cnt > 0) then
+                            copy <- CopyName(testName, cnt)
+
+                        cnt <- cnt + 1
+
+                    usedNames.Add(copy) |> ignore
+                    cnt
+
+            for name in names do
+                yield name, Number(name) - 1
+        }
 
 
 

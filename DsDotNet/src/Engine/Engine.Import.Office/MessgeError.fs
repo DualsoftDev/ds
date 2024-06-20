@@ -88,7 +88,7 @@ module ErrID =
     let _70 = "내부 함수 호출은 이름만 입력해야합니다."
     let _71 = "Flow에 존재하는 Action은 반드시 연결이 필요합니다."
     let _72 = "Multi Device 각 API호출 갯수는 같아야 합니다."
-    let _73 = "이름에는 영역 구분자 속성 '.'은 최소 한개 입니다."
+    let _73 = "Action 이름에는 영역 구분자 속성 '.'은 두개 이하 입니다."
     let _74 = "Safety 정의는 Device.Api 또는 Flow.Device.Api 형식으로 입력해야 합니다."
    
     // IO Mapping Error (1001 ~ )

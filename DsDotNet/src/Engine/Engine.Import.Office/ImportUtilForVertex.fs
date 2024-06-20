@@ -91,8 +91,7 @@ module ImportUtilVertex =
                 Call.Create(job, parentWrapper)
 
     let getCallFromNewSys (sys: DsSystem) (node: pptNode)  parentWrapper =
-        let apiName = node.CallApiName
-        let loadedName = node.CallName
+        let loadedName, apiName = node.CallDevNApi
 
         let apiNameForLib = GetBracketsRemoveName(apiName).Trim()
         let libAbsolutePath, autoGenSys = getLibraryPath sys loadedName apiNameForLib
@@ -112,7 +111,7 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+                let sysName, apiName = node.CallDevNApi
                 let loadedSys = mySys.LoadedSystems.Select(fun d -> d.Name)
       
                 let multiName = getMultiDeviceName sysName (node.JobOption.DeviceCount)

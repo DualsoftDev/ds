@@ -195,10 +195,10 @@ module ImportU =
                 match node.JobOption with
                 | MultiAction (_,cnt) -> 
                     for i in [1..cnt] do 
-                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallName i))
+                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallDevName i))
                         addChannelPoints dev node
                 | _ ->
-                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallName)
+                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallDevName)
                     addChannelPoints dev node
                     )
 

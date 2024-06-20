@@ -2,10 +2,27 @@
  - hiredis 라이브러리는 기본적으로 스레드 안전하지 않으며, 여러 스레드에서 동시에 사용될 수 없습니다. 
    이를 해결하기 위해 두 개의 별도 Redis 연결을 사용하여 하나는 구독에, 다른 하나는 발행에 사용.
 */
+
 #include <iostream>
 #include <hiredis/hiredis.h>
 #include <string>
 #include <thread>
+
+// Redis 서버에 연결하는 함수
+redisContext* connectToRedis(const std::string& hostname, int port) {
+    redisContext* context = redisConnect(hostname.c_str(), port);
+    if (context == NULL || context->err) {
+        if (context) {
+            std::cerr << "Connection error: " << context->errstr << std::endl;
+            redisFree(context);
+        }
+        else {
+            std::cerr << "Connection error: can't allocate redis context" << std::endl;
+        }
+        return NULL;
+    }
+    return context;
+}
 
 // 메시지를 수신하고 재전송하는 함수
 void handleMessage(redisContext* publishContext, const std::string& publishChannel, const std::string& message) {
@@ -37,35 +54,21 @@ void subscribeThread(redisContext* subscribeContext, redisContext* publishContex
 }
 
 int main() {
-    // Redis 서버에 연결 (구독용)
-    redisContext* subscribeContext = redisConnect("127.0.0.1", 6379);
-    if (subscribeContext == NULL || subscribeContext->err) {
-        if (subscribeContext) {
-            std::cerr << "Connection error: " << subscribeContext->errstr << std::endl;
-            redisFree(subscribeContext);
-        }
-        else {
-            std::cerr << "Connection error: can't allocate redis context" << std::endl;
-        }
+    // Redis 서버에 연결
+    redisContext* subscribeContext = connectToRedis("127.0.0.1", 6379);
+    if (subscribeContext == NULL) {
         return 1;
     }
 
-    // Redis 서버에 연결 (발행용)
-    redisContext* publishContext = redisConnect("127.0.0.1", 6379);
-    if (publishContext == NULL || publishContext->err) {
-        if (publishContext) {
-            std::cerr << "Connection error: " << publishContext->errstr << std::endl;
-            redisFree(publishContext);
-        }
-        else {
-            std::cerr << "Connection error: can't allocate redis context" << std::endl;
-        }
+    redisContext* publishContext = connectToRedis("127.0.0.1", 6379);
+    if (publishContext == NULL) {
+        redisFree(subscribeContext);
         return 1;
     }
 
     // 구독할 채널 및 발행할 채널 설정
-    std::string subscribeChannel = "toConsumer";
-    std::string publishChannel = "toProducer";
+    std::string subscribeChannel = "d2g";
+    std::string publishChannel = "g2d";
 
     // 구독을 처리하는 쓰레드 생성
     std::thread subThread(subscribeThread, subscribeContext, publishContext, subscribeChannel, publishChannel);
@@ -82,7 +85,6 @@ int main() {
     redisFree(publishContext);
     return 0;
 }
-
 
 
 //

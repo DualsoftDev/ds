@@ -14,7 +14,7 @@ namespace RedisProducer
             var sub = redis.GetSubscriber();
 
             // 메시지 수신 이벤트 핸들러 설정
-            sub.Subscribe("toProducer", (channel, message) =>
+            sub.Subscribe("g2d", (channel, message) =>
             {
                 Console.WriteLine($" [x] Received from Consumer: {message}");
             });
@@ -26,7 +26,7 @@ namespace RedisProducer
                 string input = Console.ReadLine();
                 if (input.ToLower() == "exit") break;
 
-                await sub.PublishAsync("toConsumer", input);
+                await sub.PublishAsync("d2g", input);
                 Console.WriteLine($" [x] Sent to Consumer: {input}");
             }
         }

@@ -8,6 +8,11 @@
 #include <string>
 #include <thread>
 
+// 구독할 채널 및 발행할 채널 설정
+std::string subscribeChannel = "d2g";
+std::string publishChannel = "g2d";
+
+
 // Redis 서버에 연결하는 함수
 redisContext* connectToRedis(const std::string& hostname, int port) {
     redisContext* context = redisConnect(hostname.c_str(), port);
@@ -25,16 +30,16 @@ redisContext* connectToRedis(const std::string& hostname, int port) {
 }
 
 // 메시지를 수신하고 재전송하는 함수
-void handleMessage(redisContext* publishContext, const std::string& publishChannel, const std::string& message) {
-    std::cout << "Received message: " << message << " from channel: toConsumer" << std::endl;
+void handleMessage(redisContext* publishContext, const std::string& message) {
+    std::cout << "Received [" << message << "] from channel " << subscribeChannel << std::endl;
 
     // 동일 메시지를 producer에게 재전송
     redisCommand(publishContext, "PUBLISH %s %s", publishChannel.c_str(), message.c_str());
-    std::cout << "Sent back message: " << message << " to channel: toProducer" << std::endl;
+    std::cout << "Sent back [" << message << "] to channel " << publishChannel << std::endl;
 }
 
 // 구독을 처리하는 함수
-void subscribeThread(redisContext* subscribeContext, redisContext* publishContext, const std::string& subscribeChannel, const std::string& publishChannel) {
+void subscribeThread(redisContext* subscribeContext, redisContext* publishContext) {
     redisReply* reply;
     reply = (redisReply*)redisCommand(subscribeContext, "SUBSCRIBE %s", subscribeChannel.c_str());
     freeReplyObject(reply);
@@ -46,7 +51,7 @@ void subscribeThread(redisContext* subscribeContext, redisContext* publishContex
             std::string message = reply->element[2]->str;
 
             if (message_type == "message" && channel == subscribeChannel) {
-                handleMessage(publishContext, publishChannel, message);
+                handleMessage(publishContext, message);
             }
         }
         freeReplyObject(reply);
@@ -66,16 +71,11 @@ int main() {
         return 1;
     }
 
-    // 구독할 채널 및 발행할 채널 설정
-    std::string subscribeChannel = "d2g";
-    std::string publishChannel = "g2d";
-
     // 구독을 처리하는 쓰레드 생성
-    std::thread subThread(subscribeThread, subscribeContext, publishContext, subscribeChannel, publishChannel);
+    std::thread subThread(subscribeThread, subscribeContext, publishContext);
 
-    // 메인 쓰레드에서 메시지 발행
-    std::this_thread::sleep_for(std::chrono::seconds(1)); // 잠시 대기
-    redisCommand(publishContext, "PUBLISH %s %s", publishChannel.c_str(), "Hello, Producer!");
+    // 메인 쓰레드에서 메시지 발행 test
+    redisCommand(publishContext, "PUBLISH %s %s", publishChannel.c_str(), "HELO");
 
     // 구독 쓰레드가 종료될 때까지 대기
     subThread.join();

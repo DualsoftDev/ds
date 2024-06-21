@@ -47,17 +47,38 @@ module PPTDocModule =
             |> Seq.map (fun page -> page.PageNum, pptNodes |> Seq.filter (fun node -> node.PageNum = page.PageNum))
             |> dict
 
-        let settingAlias (nodes: pptNode seq) =
-            let nodes = nodes.OrderByDescending(fun o -> parents.ContainsKey(o)) //부모지정
-            let names = nodes |> Seq.map (fun f -> f.NameOrg)
-            let nameNums= GetAliasNumber(names)
-            (nodes, nameNums)
+        let updateAlias (aliasCheckNodes: pptNode seq) (allNodes: pptNode seq) (nameNums: (string*int) seq) (isExFlow:bool) =
+            (aliasCheckNodes, nameNums)
             ||> Seq.map2 (fun node nameSet -> node, nameSet)
             |> Seq.iter (fun (node, (name, aliasNumber)) ->
                 if (aliasNumber > 0) then
-                    let orgNode = nodes |> Seq.filter (fun f -> f.Name = name) |> Seq.head
+                    let orgNode = 
+                        if isExFlow
+                        then
+                             match  allNodes.TryFind(fun f -> $"{f.PageTitle}.{f.Name}" = name) with
+                             | Some f -> f
+                             | None -> failWithLog $"{name} 해당 Flow.Work를 찾을 수 없습니다."
+
+                        else aliasCheckNodes |> Seq.filter (fun f -> f.Name = name) |> Seq.head
+
                     node.Alias <- Some(orgNode)
                     node.AliasNumber <- aliasNumber)
+
+        let settingAlias (nodes: pptNode seq) (exFlowReal:bool) =
+            let nodes = nodes.OrderByDescending(fun o -> parents.ContainsKey(o)) 
+            let filterNodes, allNodes = 
+                let findNodes =
+                    if  exFlowReal
+                    then nodes |> Seq.filter (fun f -> f.NodeType = REALExF) 
+                    else nodes |> Seq.filter (fun f -> f.NodeType <> REALExF) 
+
+                if  not(exFlowReal)
+                then findNodes, findNodes
+                else findNodes, nodes
+
+            let nameNums= GetAliasNumber(filterNodes|> Seq.map (fun f -> f.Name))
+            updateAlias filterNodes allNodes nameNums exFlowReal
+
 
         let children = parents |> Seq.collect (fun parentSet -> parentSet.Value)
 
@@ -80,9 +101,10 @@ module PPTDocModule =
                 |> Seq.filter (fun node -> node.NodeType.IsCall)
                 |> Seq.filter (fun node -> parents.[real].Contains(node)))
 
-        realSet |> Seq.iter settingAlias
-        callInFlowSet |> Seq.iter settingAlias
-        callInRealSet |> Seq.iter settingAlias
+        realSet |> Seq.iter(fun f-> settingAlias f false)
+        realSet |> Seq.collect(fun xs-> xs) |> fun f-> settingAlias f true
+        callInFlowSet |> Seq.iter(fun f-> settingAlias f false)
+        callInRealSet |> Seq.iter(fun f-> settingAlias f false)
 
     let getGroupParentsChildren (page: int, subG: GroupShape, nodes: Dictionary<string, pptNode>) =
 
@@ -271,6 +293,7 @@ module PPTDocModule =
             pages.Values |> Seq.find (fun p -> p.PageNum = pageNum)
 
         member val Pages = pages.Values |> Seq.sortBy (fun p -> p.PageNum)
+        member val PageNames = pages.Values.Select(fun f -> f.Title)
         member val NodesHeadPage = nodes.Values |> Seq.filter (fun p -> p.PageNum = pptHeadPage)
         member val Nodes = nodes.Values |> Seq.filter (fun p -> p.PageNum <> pptHeadPage) |> Seq.sortBy (fun p -> p.PageNum)
         member val Edges = edges |> Seq.sortBy (fun p -> p.PageNum)
@@ -299,7 +322,17 @@ type PPTDocExt =
         let callJobDic = 
             doc.Nodes
             |> Seq.filter (fun node -> node.IsCall && not (node.IsFunction))
-            |> Seq.map (fun node -> node.CallName, node.JobOption)
+            |> Seq.map (fun node ->
+                    if doc.PageNames.Contains(node.FlowName) then
+                        let flowNodes = doc.Nodes
+                                           .Where(fun f->f.PageTitle = node.FlowName)
+                                           .Where(fun f->f.NodeType = CALL)
+                        if flowNodes.Any(fun n->n.CallDevName = node.CallDevName) then
+                            node.CallName, node.JobOption
+                        else
+                            failWithLog $"{node.CallDevName} 해당 디바이스가 없습니다."
+                    else
+                        failWithLog $"{node.FlowName} 해당 페이지가 없습니다.")
             |> dict
 
         let getDevCount (devName) = 

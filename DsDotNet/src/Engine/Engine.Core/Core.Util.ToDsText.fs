@@ -93,23 +93,26 @@ module internal ToDsTextModule =
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (DuParentFlow flow) (indent+1)
-
-            let aliasDefs = flow.AliasDefs.Values //aliasKey가 2개인 외부 Flow는 생략
-                                .Where(fun a->not(a.AliasTarget.Value.RealTarget().IsSome &&  a.AliasKey.Length = 2))
-
-            if aliasDefs.Any() then
+            let aliasDefExist = flow.AliasDefs.Values  //외부 Flow Alias 외에 하나라도 있으면
+                                    .Where(fun a-> a.AliasTexts.Count <> a.AliasTexts.Where(fun w->w.Contains('.')).length())
+                                    .any()     
+                                
+            if aliasDefExist then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
-                for a in aliasDefs do
-                    let mnemonics = (a.Mnemonics.Select(fun f->f.QuoteOnDemand()) |> String.concat "; ") + ";"
-                    let tab = getTab (indent+2)
-                    let aliasKey =
-                        match a.AliasTarget with
-                        | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
-                        | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
-                        | None -> failwithlog "ERROR"
+                for a in flow.AliasDefs.Values do
+                    let toTextAlias = a.AliasTexts.Where(fun f->not(f.Contains('.'))).ToArray()
+                    if toTextAlias.any()
+                    then
+                        let aliasTexts = (toTextAlias.Select(fun f->f.QuoteOnDemand()) |> String.concat "; ") + ";"
+                        let tab = getTab (indent+2)
+                        let aliasKey =
+                            match a.AliasTarget with
+                            | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
+                            | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
+                            | None -> failwithlog "ERROR"
 
-                    yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
+                        yield $"{tab}{aliasKey} = {lb} {aliasTexts} {rb}"
                 yield $"{tab}{rb}"
 
             yield $"{tab}{rb}"

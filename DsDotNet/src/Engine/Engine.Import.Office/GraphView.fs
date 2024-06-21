@@ -130,7 +130,7 @@ module rec ViewModule =
                 let safeName = if safeties.Length > 0 then $"[{safeties}]\r\n" else ""
                 match coreVertex.Value with
                 | :? Alias as a ->
-                    if a.IsOtherFlowReal 
+                    if a.IsOtherFlowRealAlias || not(a.IsSameFlow)
                     then $"{safeName}{a.Name};{vKey}"  
                     else  $"{safeName}{name};{vKey}"
                 | _ -> $"{safeName}{x.PureVertex.Value.Name};{vKey}"

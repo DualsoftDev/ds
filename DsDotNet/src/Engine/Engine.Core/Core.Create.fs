@@ -61,8 +61,8 @@ module CoreCreateModule =
                          .Iter(fun r -> 
                                 let exAliasName = $"{r.Name}Alias_{newReal.Name}"
                                 let myAliasName = $"{newReal.Name}Alias_{r.Name}"
-                                let exAlias = Alias.Create(exAliasName, DuAliasTargetReal r, DuParentFlow flow)
-                                let myAlias = Alias.Create(myAliasName, DuAliasTargetReal newReal, DuParentFlow flow)
+                                let exAlias = Alias.Create(exAliasName, DuAliasTargetReal r, DuParentFlow flow, false)
+                                let myAlias = Alias.Create(myAliasName, DuAliasTargetReal newReal, DuParentFlow flow, false)
                     
                                 // Create an edge between myAlias and exAlias
                                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)

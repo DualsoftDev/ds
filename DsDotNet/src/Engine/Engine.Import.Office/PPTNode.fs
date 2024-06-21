@@ -234,7 +234,7 @@ module PPTNodeModule =
             else "" |> defaultDevParam     
 
         member x.JobName =
-            let dev, Api = x.CallDevNApi
+            let flow, dev, Api = x.CallFlowNDevNApi
             let pureJob = $"{dev}_{Api}"
             let jobName =
                 if x.IsCallDevParam then
@@ -278,7 +278,7 @@ module PPTNodeModule =
                     d.AddOrUpdateOutParam(x.JobName , (x.DevParam.Value |> snd).Value)
                 )
       
-        member x.CallDevNApi = 
+        member x.CallFlowNDevNApi = 
                 
             if (nodeType <> CALL) then
                 shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
@@ -289,23 +289,27 @@ module PPTNodeModule =
             | 2 -> 
                 let dev = $"{pageTitle}_{TrimSpace(parts.[0])}"
                 let api = GetBracketsRemoveName(TrimSpace(parts.[1]))
-                dev, api
+                pageTitle, dev, api
             | 3 -> 
                 let dev = $"{TrimSpace(parts.[0])}_{TrimSpace(parts.[1])}"
                 let api = GetBracketsRemoveName(TrimSpace(parts.[2]))
-                dev, api
+                parts.[0], dev, api
             | _ -> failwith "Invalid format in name"
 
 
         member x.CallName = 
         
-            let dev, api = x.CallDevNApi
+            let flow, dev, api = x.CallFlowNDevNApi
             $"{dev}_{api}"
 
 
         member x.CallDevName = 
-            let dev, api = x.CallDevNApi
-            dev
+            let flow, dev, api = x.CallFlowNDevNApi
+            dev    
+            
+        member x.FlowName = 
+            let flow, dev, api = x.CallFlowNDevNApi
+            flow
 
         member x.JobOption =
             if (nodeType <> CALL || x.IsFunction) then
@@ -331,7 +335,6 @@ module PPTNodeModule =
         member val Id = shape.GetId()
         member val Key = Objkey(iPage, shape.GetId())
         member val Name = name with get, set
-        member val NameOrg = shape.InnerText
         member x.IsAlias: bool = x.Alias.IsSome
         member val Alias: pptNode option = None with get, set
         member val AliasNumber: int = 0 with get, set

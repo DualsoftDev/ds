@@ -86,7 +86,7 @@ module ModelBuildupTests1 =
         member __.``Model with alias test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Alias.Create("Main2", DuAliasTargetReal real, DuParentFlow flow)
+            let vCallP = Alias.Create("Main2", DuAliasTargetReal real, DuParentFlow flow, false)
             let call2 = Call.Create(callAp, DuParentFlow flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, "<", call2)) |> ignore
@@ -118,7 +118,7 @@ module ModelBuildupTests1 =
 
             let flow2 = Flow.Create("F2", system)
 
-            let real2 = Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow flow2)
+            let real2 = Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow flow2, false)
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
@@ -140,8 +140,6 @@ module ModelBuildupTests1 =
 """
             logDebug $"{generated}"
             compare generated answer
-
-
 
         [<Test>]
         member __.``Model with export api test`` () =

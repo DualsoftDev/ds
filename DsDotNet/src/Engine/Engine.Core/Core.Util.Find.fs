@@ -112,12 +112,12 @@ module internal ModelFindModule =
 
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values
-            .Where(fun ad -> ad.Mnemonics.Contains(aliasMnemonic))
+            .Where(fun ad -> ad.AliasTexts.Contains(aliasMnemonic))
             .TryExactlyOne()
             .Bind(fun ad -> ad.AliasTarget)
 
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
-        flow.AliasDefs.Values.TryFind(fun ad -> ad.Mnemonics.Contains(aliasMnemonic))
+        flow.AliasDefs.Values.TryFind(fun ad -> ad.AliasTexts.Contains(aliasMnemonic))
 
     let ofCallForOperator (xs:Vertex seq) =
         xs.OfType<Call>().Where(fun f -> f.Parent.GetCore() :? Flow).Cast<Vertex>()

@@ -41,7 +41,7 @@ module TimeModule =
                 | :? Real as r -> DuAliasTargetReal r 
                 | _ -> failWithLog "Invalid source vertex type"
 
-            let alias = Alias.Create(name, aliasTarget, vertex.Parent)
+            let alias = Alias.Create(name, aliasTarget, vertex.Parent, false)
             alias.Time <- Some 0
             alias
 

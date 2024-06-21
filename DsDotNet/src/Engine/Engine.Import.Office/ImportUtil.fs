@@ -226,16 +226,17 @@ module ImportU =
                 |> dict
 
             let createReal () =
-                pptNodes
-                |> Seq.filter (fun node -> node.Alias.IsNone)
-                |> Seq.filter (fun node -> node.NodeType.IsReal)
-                |> Seq.filter (fun node -> dicChildParent.ContainsKey(node) |> not)
-                |> Seq.sortBy (fun node -> node.NodeType = REALExF) //real 부터 생성 후 realExF 처리
-                |> Seq.iter (fun node ->
+                let reals = pptNodes
+                            |> Seq.filter (fun node -> node.Alias.IsNone)
+                            |> Seq.filter (fun node -> node.NodeType.IsReal)
+                            |> Seq.filter (fun node -> dicChildParent.ContainsKey(node) |> not)
+                            |> Seq.sortBy (fun node -> node.NodeType = REALExF) //real 부터 생성 후 realExF 처리
+
+                reals |> Seq.iter (fun node ->
                     match node.NodeType with
-                    | REALExF ->
+                    | REALExF -> // isOtherFlowRealAlias is false  (외부 플로우에 있을뿐 Or Alias가 아님)
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
-                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum]))
+                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                         real.Finished <- node.RealFinished
@@ -273,12 +274,13 @@ module ImportU =
                     let segOrg = dicVertex.[node.Alias.Value.Key]
                     
                     let alias =
-                        if node.NodeType = REALExF then
+                        let flow = dicFlow.[node.PageNum]
+                        if node.NodeType = REALExF then // isOtherFlowRealAlias is true
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                             Alias.Create(
-                                real.ParentNPureNames.Combine(),
+                                String.Join("_", real.ParentNPureNames),
                                 DuAliasTargetReal(real),
-                                DuParentReal(real)
+                                DuParentFlow(flow), true
                             )
 
                         elif dicChildParent.ContainsKey(node) then
@@ -288,23 +290,22 @@ module ImportU =
                             Alias.Create(
                                 $"{call.Name}_{node.AliasNumber}",
                                 DuAliasTargetCall(segOrg :?> Call),
-                                DuParentReal(real)
+                                DuParentReal(real), false
                             )
                         else
-                            let flow = dicFlow.[node.PageNum]
 
                             match segOrg with
                             | :? Real as rt ->
                                 Alias.Create(
                                     $"{rt.Name}_{node.AliasNumber}",
                                     DuAliasTargetReal(rt),
-                                    DuParentFlow(flow)
+                                    DuParentFlow(flow) , false
                                 )
                             | :? Call as ct ->
                                 Alias.Create(
                                     $"{ct.Name}_{node.AliasNumber}",
                                     DuAliasTargetCall(ct),
-                                    DuParentFlow(flow)
+                                    DuParentFlow(flow) , false
                                 )
                             | _ -> failwithf "Error type"
 

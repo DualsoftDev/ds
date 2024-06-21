@@ -243,6 +243,7 @@ module DsAddressModule =
                             |> Seq.sortBy (fun (dev,_) ->dev.ApiName)
 
         let vs = sys.GetVerticesOfCoins()
+        let mutable extCnt = 0
         for (dev, job) in devJobSet  do
             let coins = vs.GetVerticesOfJobCoins(job)
             //외부입력 전용 확인하여 출력 스킵 및 입력 선두주소 고정
@@ -250,7 +251,8 @@ module DsAddressModule =
             then
                 if dev.InAddress = TextAddrEmpty
                 then
-                    dev.InAddress  <-  getExternalTempMemory target
+                    dev.InAddress  <-  getExternalTempMemory(target, extCnt)
+                    extCnt <- extCnt+1
                 dev.OutAddress <- TextSkip
             else 
                 let inSkip, outSkip =

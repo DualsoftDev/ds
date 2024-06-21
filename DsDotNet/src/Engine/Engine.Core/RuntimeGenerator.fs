@@ -54,14 +54,15 @@ module RuntimeGeneratorModule =
 
     let InitStartMemory = 1000
     let BufferAlramSize = 1000
-    let ExternalTempMemory =  "M0.0"
-    let ExternalTempIECMemory =  "%MX0"
-    let ExternalTempNoIECMemory =  "M00000"
-    let getExternalTempMemory (target:PlatformTarget) =
+    let ExternalTempMemory =  "M"
+    let ExternalTempIECMemory =  "%MX"
+    let ExternalTempNoIECMemory =  "M"
+
+    let getExternalTempMemory (target:PlatformTarget, index:int) =
         match target with
-        | XGI -> ExternalTempIECMemory
-        | XGK -> ExternalTempNoIECMemory
-        | WINDOWS  -> ExternalTempMemory
+        | XGI -> ExternalTempIECMemory+index.ToString()
+        | XGK -> ExternalTempNoIECMemory+index.ToString()
+        | WINDOWS  -> ExternalTempMemory+($"{index/8}.{index%8}")
         | AB 
         | MELSEC  -> failwithlog $"{target} not support"
    

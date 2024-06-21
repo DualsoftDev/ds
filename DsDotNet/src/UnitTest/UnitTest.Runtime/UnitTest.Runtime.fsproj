@@ -39,8 +39,10 @@
       <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
       <ProjectReference Include="..\Engine.TestSimulator\Engine.TestSimulator.csproj" />
     </ItemGroup>
-	
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="xcopy /s /e /y $(SolutionDir)Apps\OfficeAddIn\PowerPointAddInHelper\dsLib\*.* $(TargetDir)dsLib\" />
 	</Target>
+
+
 </Project>

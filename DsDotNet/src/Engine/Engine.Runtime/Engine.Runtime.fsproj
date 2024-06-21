@@ -8,6 +8,7 @@
 		<OtherFlags>--warnon:1182</OtherFlags>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<OutputType>Library</OutputType>
 
 	</PropertyGroup>
 

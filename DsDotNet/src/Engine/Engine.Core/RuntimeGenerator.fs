@@ -61,7 +61,7 @@ module RuntimeGeneratorModule =
     let getExternalTempMemory (target:PlatformTarget, index:int) =
         match target with
         | XGI -> ExternalTempIECMemory+index.ToString()
-        | XGK -> ExternalTempNoIECMemory+index.ToString()
+        | XGK -> ExternalTempNoIECMemory+index.ToString("00000")
         | WINDOWS  -> ExternalTempMemory+($"{index/8}.{index%8}")
         | AB 
         | MELSEC  -> failwithlog $"{target} not support"

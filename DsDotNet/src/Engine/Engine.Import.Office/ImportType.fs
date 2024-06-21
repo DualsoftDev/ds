@@ -64,7 +64,7 @@ module ImportType =
         let flowName = row.[(int) IOColumn.Flow]
         if flowName <> "" && flowName <> TextSkip
         then
-            $"{flowName}_{row.[(int) IOColumn.Name]}"
+            $"{flowName}__{row.[(int) IOColumn.Name]}"
         else 
             $"{row.[(int) IOColumn.Name]}"
 

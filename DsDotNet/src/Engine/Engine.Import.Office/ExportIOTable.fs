@@ -102,8 +102,8 @@ module ExportIOTable =
 
 
     let splitNameForRow(name:string) = 
-        let head = name.Split('_')[0];   //test ahn flow '_' 금지 ?
-        let tail = name[head.Length+1..]
+        let head = name.Split("__")[0];   
+        let tail = name[head.Length+2..]
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
@@ -116,14 +116,13 @@ module ExportIOTable =
                 |NoneTx -> false,true
                 |NoneTRx -> true,true
                 |_ ->  false,false
-
             let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
             [ TextXlsAddress
               flow
               name
               getPPTTDevDataTypeText (dev)
-              getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target )
-              getValidAddress(dev.OutAddress,  dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
+              getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
+              getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
               inSym
               outSym
               ]

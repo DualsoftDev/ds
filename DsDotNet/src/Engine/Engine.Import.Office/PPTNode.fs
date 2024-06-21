@@ -217,8 +217,8 @@ module PPTNodeModule =
         member x.DisableCall = disableCall
         member x.PageTitle = pageTitle
         member x.Position = shape.GetPosition(slieSize)
-        member x.OperatorName = pageTitle+"_"+name.Replace(".", "_")
-        member x.CommandName  = pageTitle+"_"+name.Replace(".", "_")
+        member x.OperatorName = pageTitle+"__"+name.Replace(".", "_")
+        member x.CommandName  = pageTitle+"__"+name.Replace(".", "_")
         member x.IsCall = nodeType = CALL
         member x.IsCallDevParam = nodeType = CALL && devParam.IsSome 
         member x.IsRootNode = rootNode
@@ -287,11 +287,11 @@ module PPTNodeModule =
             let parts = name.Split('.')
             match parts.Length with
             | 2 -> 
-                let dev = $"{pageTitle}_{TrimSpace(parts.[0])}"
+                let dev = $"{pageTitle}__{TrimSpace(parts.[0])}"
                 let api = GetBracketsRemoveName(TrimSpace(parts.[1]))
                 pageTitle, dev, api
             | 3 -> 
-                let dev = $"{TrimSpace(parts.[0])}_{TrimSpace(parts.[1])}"
+                let dev = $"{TrimSpace(parts.[0])}__{TrimSpace(parts.[1])}"
                 let api = GetBracketsRemoveName(TrimSpace(parts.[2]))
                 parts.[0], dev, api
             | _ -> failwith "Invalid format in name"

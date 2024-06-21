@@ -384,7 +384,7 @@ module internal ToDsTextModule =
                     if finishedReals.Any() then
                         yield $"{tab2}[finish] = {lb}"
                         for real in finishedReals do
-                            yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -393,7 +393,7 @@ module internal ToDsTextModule =
                     if noTransDataReals.Any() then
                         yield $"{tab2}[notrans] = {lb}"
                         for real in noTransDataReals do
-                            yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -416,7 +416,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}[disable] = {lb}"
                         for vert in disabledVertices do
                             let compo = vert.NameComponents
-                            yield $"{tab3}{compo[1]}.{compo[2]}.{compo[3]};"
+                            yield $"{tab3}{compo[1].QuoteOnDemand()}.{compo[2].QuoteOnDemand()}.{compo[3].QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 

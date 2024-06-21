@@ -47,9 +47,13 @@ module CoreCreateModule =
                 let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
                 if reals.Any(fun w -> w.Name = realName) then
                     failwithf $"real {realName} 중복 생성에러"
-
+               
                 // Create a new Real
                 let newReal = Real.Create(realName, flow)
+                //if flow.Graph.Vertices.OfType<Real>().length() = 1
+                //then
+                //    newReal.Finished <- true    //처음 Real이 원위치
+                 
                   // Create and add a new ApiItem
                 let newApi = ApiItem.Create(apiName, sys, newReal, newReal)
                 sys.ApiItems.Add newApi |> ignore

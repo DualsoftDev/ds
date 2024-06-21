@@ -99,7 +99,7 @@ module ImportU =
 
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 let flowName = if page.PageNum = pptHeadPage then $"{sysName}_Page1" else flowName
-                if flowName.Contains(".") then
+                if flowName.Contains(".")||flowName.Contains("__") then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._20, page.Title, page.PageNum, 0u, "")
 
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
@@ -452,7 +452,7 @@ module ImportU =
                         let dev = (safety.Split('.')[0]).Trim()
                         let api = (safety.Split('.')[1]).Trim()
 
-                        $"{flow.Name}_{dev}_{api}"
+                        $"{flow.Name}__{dev}_{api}"
 
                     elif safety.Split('.').Length  = 3
                     then
@@ -460,7 +460,7 @@ module ImportU =
                         let dev = (safety.Split('.')[1]).Trim()
                         let api = (safety.Split('.')[2]).Trim()
 
-                        $"{flow}_{dev}_{api}"
+                        $"{flow}__{dev}_{api}"
                     else 
                         failWithLog $"error safety name format ({safety})"
 

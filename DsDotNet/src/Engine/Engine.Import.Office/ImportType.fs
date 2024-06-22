@@ -61,12 +61,21 @@ module ImportType =
     type DevParamRawItem  = string*DataType*string //address, dataType, func
 
     let getDevName (row: Data.DataRow) = 
-        let flowName = row.[(int) IOColumn.Flow]
-        if flowName <> "" && flowName <> TextSkip
+        let flowName = row.[(int) IOColumn.Flow].ToString()
+        let name = row.[(int) IOColumn.Name].ToString()
+        
+        if row.[(int) IOColumn.Case].ToString() = TextXlsAddress
         then
-            $"{flowName}__{row.[(int) IOColumn.Name]}"
+
+            if name.Split(".").Length <> 2 then
+                failwithlog ErrID._75
+            else 
+                let devName = row.[(int) IOColumn.Name].ToString().Split(".")[0]  
+                let apiName = row.[(int) IOColumn.Name].ToString().Split(".")[1]  
+        
+                $"{flowName}__{devName}".QuoteOnDemand() + "." + apiName.QuoteOnDemand()
         else 
-            $"{row.[(int) IOColumn.Name]}"
+            name
 
     let getMultiDeviceName (loadedName:string) index = 
             //index 2자리로 표현

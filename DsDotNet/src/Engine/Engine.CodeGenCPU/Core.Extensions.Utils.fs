@@ -50,7 +50,7 @@ module ConvertCoreExtUtils =
                 elif Convert.ToBoolean(x.Value) 
                     then  devTag.ToExpression()
                 else 
-                    !!(devTag.ToExpression():?> Expression<bool>) :> IExpression
+                    !@(devTag.ToExpression():?> Expression<bool>) :> IExpression
             else // bool 타입아닌 경우 비교문 생성
                 createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value ;devTag.ToExpression()]   
 

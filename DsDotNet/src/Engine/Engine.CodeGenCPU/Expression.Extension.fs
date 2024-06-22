@@ -29,7 +29,7 @@ module ExpressionExtension =
     /// logical OR for expression 
     let (<||>) left right = binaryOp fbLogicalOr left right
     /// logical NOT for expression 
-    let (!!) exp = unaryOp fbLogicalNot exp
+    let (!@) exp = unaryOp fbLogicalNot exp
     /// storage 에 expression assign 하는 statement 생성
     let (<==) storage exp  = DuAssign(None, exp, storage)
     /// storage 에 expression rising 값을 assign 하는 statement 생성
@@ -52,9 +52,9 @@ module ExpressionExtension =
 
 
     /// set 조건, reset 조건을 받아서 --> 추가적으로 coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
-    let (--|) (sets, rsts) = coilOp (fun s r c -> c <== (s <&&> (!! r))) sets rsts
+    let (--|) (sets, rsts) = coilOp (fun s r c -> c <== (s <&&> (!@ r))) sets rsts
     /// set 조건, 조건을 받아서 --> 추가적으로 자기 유지되는 reset coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
-    let (==|) (sets, rsts) = coilOp (fun s r c -> c <== ((s <||> var2expr c) <&&> (!! r))) sets rsts
+    let (==|) (sets, rsts) = coilOp (fun s r c -> c <== ((s <||> var2expr c) <&&> (!@ r))) sets rsts
 
     /// Create Add Statement   //test ahn  Add 함수로 변경 필요
     let (--+) (sets) = coilAdd(fun s c -> c <== s) sets
@@ -67,9 +67,9 @@ module ExpressionExtension =
     /// Create One Scan Relay Coils Statement
     let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (rising: TypedValueStorage<bool>, risingRelay: TypedValueStorage<bool>, risingTemp : TypedValueStorage<bool>, comment:string) =
         [
-            rising      <== (sets <&&> !!rsts <&&> !!(var2expr risingRelay)) |> withExpressionComment comment
+            rising      <== (sets <&&> !@rsts <&&> !@(var2expr risingRelay)) |> withExpressionComment comment
             risingTemp  <== (sets) |> withExpressionComment comment
-            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&> var2expr risingTemp <&&> !!rsts) |> withExpressionComment comment
+            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&> var2expr risingTemp <&&> !@rsts) |> withExpressionComment comment
         ]
 
     /// Create Timer Coil Statement

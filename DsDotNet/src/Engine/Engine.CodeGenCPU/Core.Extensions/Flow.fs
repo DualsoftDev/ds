@@ -21,7 +21,7 @@ module ConvertCpuFlow =
         let tags = condis
                     .Where(fun c -> c.SettingFlows.Contains(flow))
                     .Where(fun c ->c.InTag.IsNonNull())
-                    .Select(fun c -> !!c.ActionINFunc)
+                    .Select(fun c -> !@c.ActionINFunc)
         tags.ToAndElseOn()
 
     type Flow with
@@ -101,8 +101,8 @@ module ConvertCpuFlow =
         member f.PauseExpr  =  f.pause_btn.Expr  <||> f.System._pause_btn.Expr    <||> f.HWBtnPauseExpr
         member f.ReadyExpr  =  f.ready_btn.Expr  <||> f.System._ready_btn.Expr    <||> f.HWBtnReadyExpr
         member f.ClearExpr  =  f.clear_btn.Expr  <||> f.System._clear_btn.Expr    <||> f.HWBtnClearExpr
-        member f.AutoExpr   =  f.AutoSelectExpr <&&> !!f.ManuSelectExpr
-        member f.ManuExpr   =  !!f.AutoSelectExpr <&&> f.ManuSelectExpr
+        member f.AutoExpr   =  f.AutoSelectExpr <&&> !@f.ManuSelectExpr
+        member f.ManuExpr   =  !@f.AutoSelectExpr <&&> f.ManuSelectExpr
                
         member f.GetReadAbleTags() =
             FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()

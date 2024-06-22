@@ -18,7 +18,7 @@ type TaskDev with
         then 
             let setBool = if inParam.Value.IsNull() || (inParam.Value |> Convert.ToBoolean)
                           then set 
-                          else !!set
+                          else !@set
 
             (setBool, rst) --| (d.InTag, getFuncName())
         else 

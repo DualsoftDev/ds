@@ -30,11 +30,11 @@ type VertexManager with
             else
                 (call.EndPlan <&&> v._sim.Expr)
                             <||>
-                (call.End <&&> !!v._sim.Expr)
+                (call.End <&&> !@v._sim.Expr)
 
 
         let parentReal = call.Parent.GetCore() :?> Vertex
-        let rsts = rst <||> !!call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
+        let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
 
         
         if call.Disabled 
@@ -95,7 +95,7 @@ type VertexManager with
         [
             for child in children do
                 let child = child :?> VertexMCall
-                let sets = real.V.RT.Expr // <&&> !!real.V.G.Expr
+                let sets = real.V.RT.Expr // <&&> !@real.V.G.Expr
                 let rsts = child.R.Expr
                 yield (sets, rsts) ==| (child.RT, getFuncName() )
         ]

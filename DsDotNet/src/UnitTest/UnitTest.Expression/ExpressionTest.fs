@@ -356,8 +356,8 @@ module Exp =
         member __.``8 Operator test`` () =
             let t = fCastBool [v true]
             let f = fCastBool [v false]
-            !! t |> evaluate === false
-            !! f |> evaluate === true
+            !@ t |> evaluate === false
+            !@ f |> evaluate === true
             t <&&> t |> evaluate === true
             t <&&> f |> evaluate === false
             f <&&> t |> evaluate === false

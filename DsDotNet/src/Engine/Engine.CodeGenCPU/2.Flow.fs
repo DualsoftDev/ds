@@ -64,7 +64,7 @@ type VertexManager with
         let sets =
             match v.Vertex  with
             | :? Call as call when call.IsOperator ->  
-                    call.VC.CallOperatorValue.Expr  <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !!v.RF.Expr)
+                    call.VC.CallOperatorValue.Expr  <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !@v.RF.Expr)
             | _ ->
                 failwithlog "Error"
              

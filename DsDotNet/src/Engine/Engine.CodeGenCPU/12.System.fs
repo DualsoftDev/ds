@@ -45,7 +45,7 @@ type DsSystem with
     member s.Y4_SystemConditionError() =
         [
             for condi in  s.HWConditions do
-                yield (!!condi.ActionINFunc , s._off.Expr) --| (condi.ErrorCondition,   getFuncName())
+                yield (!@condi.ActionINFunc , s._off.Expr) --| (condi.ErrorCondition,   getFuncName())
         ]
         
     member s.Y5_SystemEmgAlramError() =

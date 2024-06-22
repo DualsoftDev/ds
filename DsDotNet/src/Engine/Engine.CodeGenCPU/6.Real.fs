@@ -20,7 +20,7 @@ type VertexMReal with
             let set = 
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
                 then
-                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !!v.Link.Expr
+                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !@v.Link.Expr
                 else                          
                     (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr  
 
@@ -40,7 +40,7 @@ type VertexMReal with
         ]
 
     member v.R3_RealStartPoint() =
-        let set = (v.G.Expr <&&> !!v.RR.Expr<&&> v.Link.Expr)
+        let set = (v.G.Expr <&&> !@v.RR.Expr<&&> v.Link.Expr)
         let rst = v._off.Expr
 
         (set, rst) --| (v.RO, getFuncName())   
@@ -77,7 +77,7 @@ type VertexMReal with
         [
             if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
             then 
-                let checking = v.G.Expr <&&> !!v.OG.Expr <&&> !!v.RR.Expr <&&> dop
+                let checking = v.G.Expr <&&> !@v.OG.Expr <&&> !@v.RR.Expr <&&> dop
                 yield (checking, rst) ==| (v.ErrGoingOrigin , getFuncName())
         ]
         

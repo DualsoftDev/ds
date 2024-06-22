@@ -19,7 +19,7 @@ type VertexManager with
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
         [
-            let running = v.MM.Expr <&&> !!call.End <&&> !!iop
+            let running = v.MM.Expr <&&> !@call.End <&&> !@iop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
 
             match RuntimeDS.Package with 
@@ -51,7 +51,7 @@ type VertexManager with
             (* open  error *)
             if call.UsingTon
             then
-                yield (checkCondi <&&>  rxFinishExpr <&&> !!call.V.G.Expr <&&> v.ErrOpenRising.Expr,   rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
+                yield (checkCondi <&&>  rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr,   rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
             else
                 yield (checkCondi <&&>  rxFinishExpr                      <&&> v.ErrOpenRising.Expr,   rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
         ]

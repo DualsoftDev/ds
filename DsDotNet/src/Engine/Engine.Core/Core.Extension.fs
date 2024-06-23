@@ -156,7 +156,7 @@ module CoreExtensionModule =
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =
                 match apiInfo.Operator with
-                | ModelingEdgeType.InterlockWeak -> 
+                | ModelingEdgeType.Interlock  -> 
                     match src.Name.QuoteOnDemand() = apiInfo.Operand1, src.Name.QuoteOnDemand() = apiInfo.Operand2 with
                     |true, false -> Some apiInfo.Operand2
                     |false, true -> Some apiInfo.Operand1

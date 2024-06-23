@@ -14,11 +14,12 @@ module DsConstants =
         | StartEdge          (*  ">"    *)
         | ResetEdge          (*  "|>"   *)
         | StartReset         (*  "=>"   *)
-        | InterlockWeak      (*  "<|>"  *)
-        | InterlockStrong    (*  "<||>" *)
+        | SelfReset          (*  "=|>"  *)
+        | Interlock          (*  "<|>"  *)
         | RevStartEdge       (*  "<"    *)
         | RevResetEdge       (*  "<|"   *)
         | RevStartReset      (*  "<="   *)
+        | RevSelfReset       (*  "<|="  *)
 
     /// Runtime Edge Types
     [<Flags>]
@@ -26,7 +27,7 @@ module DsConstants =
         | None                       = 0b00000000    // Invalid state
         | Start                      = 0b00000001    // Start, Weak
         | Reset                      = 0b00000010    // else start
-        | Strong                     = 0b00000100    // else weak
+        | Strong                     = 0b00000100    // else weak  
         | AugmentedTransitiveClosure = 0b00001000    // 강한 상호 reset 관계 확장 edge
 
     type internal MET = ModelingEdgeType
@@ -37,7 +38,9 @@ module DsConstants =
         match modelingEdgeType with
         | RevStartEdge
         | RevResetEdge
-        | RevStartReset -> true
+        | RevStartReset
+        | RevSelfReset
+            -> true
         | _ -> false
 
     let private modelingEdgeTypeAndStrings =
@@ -45,11 +48,12 @@ module DsConstants =
             StartEdge,          TextStartEdge          // ">"
             ResetEdge,          TextResetEdge          // "|>"
             StartReset,         TextStartReset         // "=>"
-            InterlockWeak,      TextInterlockWeak      // "<|>"
-            InterlockStrong,    TextInterlockStrong    // "<||>"
+            SelfReset,          TextSelfReset          // "=|>"
+            Interlock,          TextInterlock          // "<|>"
             RevStartEdge,       TextStartEdgeRev       // "<"
             RevResetEdge,       TextResetEdgeRev       // "<|"
             RevStartReset,      TextStartResetRev      // "<="
+            RevSelfReset,       TextSelfResetRev       // "<|="
         ]
 
     let toTextModelEdge(edgeType:ModelingEdgeType) =
@@ -86,11 +90,16 @@ module DsConstants =
                     | (* "|>"   *) TextResetEdge     -> [(s, RET.Reset, t)]
 
                     | (* "=>"   *) TextStartReset    -> [(s, RET.Start, t); (t, RET.Reset, s)]
-                    | (* "<|>"  *) TextInterlockWeak -> [(s, RET.Reset, t); (t, RET.Reset, s)]
-                    | (* "<||>" *) TextInterlockStrong     -> [(s, RET.Reset ||| RET.Strong, t); (t, RET.Reset ||| RET.Strong, s)]
+                    | (* "=|>"  *) TextSelfReset     -> [(s, RET.Start, t); (s, RET.Reset, t); (t, RET.Reset, s)]
+
+
+                    | (* "<|>"  *) TextInterlock     -> [(s, RET.Reset, t); (t, RET.Reset, s)]
+
+
                     | (* "<"    *) TextStartEdgeRev  -> [(t, RET.Start, s)]
                     | (* "<|"   *) TextResetEdgeRev  -> [(t, RET.Reset, s)]
                     | (* "<="   *) TextStartResetRev -> [(t, RET.Start, s); (s, RET.Reset, t); ]
+                    | (* "<|="   *)TextSelfResetRev  -> [(t, RET.Start, s); (t, RET.Reset, s);  (s, RET.Reset, t); ]
 
                     | _
                         -> failwithf "Unknown causal edge type: %s" edgeSymbol

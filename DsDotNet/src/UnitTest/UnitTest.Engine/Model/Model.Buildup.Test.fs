@@ -149,7 +149,7 @@ module ModelBuildupTests1 =
             let ret = ApiItem.Create("Ret", system, real2, real2)
             [ adv; ret; ].Iter(system.ApiItems.Add >> ignore)
 
-            ApiResetInfo.Create(system, "Adv", ModelingEdgeType.InterlockWeak, "Ret", false) |> ignore
+            ApiResetInfo.Create(system, "Adv", ModelingEdgeType.Interlock, "Ret", false) |> ignore
 
             let generated = system.ToDsText(true)
             let answer = """

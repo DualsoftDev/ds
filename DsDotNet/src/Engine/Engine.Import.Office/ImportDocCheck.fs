@@ -36,10 +36,9 @@ module ImportDocCheck =
         |> ignore
 
 
-        flow.ModelingEdges.Add(ModelingEdgeInfo(v ("ETC"), TextInterlockStrong, v ("상호행위간섭")))
-        |> ignore
-
         flow.ModelingEdges.Add(ModelingEdgeInfo(v ("ETC"), TextStartReset, v ("시작후행리셋")))
+        |> ignore
+        flow.ModelingEdges.Add(ModelingEdgeInfo(v ("ETC2"), TextSelfReset, v ("셀프리셋")))
         |> ignore
 
         sys

@@ -149,6 +149,7 @@ CabPipe: '<|';
 OabPipePipeCab: '<|>';
 CabOabPipe: '><|';
 EqualCab: '=>';
+EqualPipeCab: '=|>';
 CabPipeCab: '>|>';
 PipeCabCab: '|>>';
 OabOabPipe: '<<|';
@@ -382,7 +383,7 @@ causal: causalPhrase SEMICOLON;
         | '<'   // CAUSAL_BWD
         | '<<|' | '<|<'
         | '|><'         // CAUSAL_BWD_AND_RESET_FWD
-        | '><|' | '=>'
+        | '><|' | '=>'| '=|>'
         | causalOperatorReset
         ;
     causalOperatorReset

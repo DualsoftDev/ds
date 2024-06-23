@@ -99,26 +99,30 @@ module PPTObjectModule =
             conn.ErrorConnect(ErrID._6, startName, endName, iPage)
 
         if (existHead && existTail) then
-            if (not dashLine) then
-                if (headArrow && tailArrow) then
-                    conn.ErrorConnect(ErrID._8, startName, endName, iPage)
+            if (headArrow && tailArrow) then
+                conn.ErrorConnect(ErrID._8, startName, endName, iPage)
 
-                if ((headArrow || tailArrow) |> not) then
-                    conn.ErrorConnect(ErrID._9, startName, endName, iPage)
+            if ((headArrow || tailArrow) |> not) then
+                conn.ErrorConnect(ErrID._9, startName, endName, iPage)
 
-                if (not headArrow && not tailArrow) then
-                    conn.ErrorConnect(ErrID._10, startName, endName, iPage)
+            if (not headArrow && not tailArrow) then
+                conn.ErrorConnect(ErrID._10, startName, endName, iPage)
 
 
         //인과 타입과 <START, END> 역전여부
         match existHead, existTail, dashLine with
-        | true, true, true -> InterlockWeak, false
+        | true, true, true -> 
+             if (not headArrow && tailArrow) then
+                SelfReset, false
+             else if (headArrow && not tailArrow) then
+                SelfReset, true //반대로 뒤집기 필요
+             else 
+                Interlock, false
         | true, true, false ->
             if (not headArrow && tailArrow) then
                 StartReset, false
             else
                 StartReset, true //반대로 뒤집기 필요
-        // dashLine 점선라인, single 한줄라인
         | _ ->
             match single, tailArrow, dashLine with
             | true, true, false -> StartEdge, isChangeHead

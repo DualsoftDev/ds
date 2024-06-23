@@ -13,19 +13,18 @@ type VertexManager with
     member v.E2_CallErrorTXMonitor() =
         let v= v :?> VertexMCall
         let call= v.Vertex.GetPure() :?> Call
-        let real= call.Parent.GetCore() :?> Real
-
+        let vOff = v._off.Expr
 
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
         [
             let running = v.MM.Expr <&&> !@call.End <&&> !@iop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
-
-            match RuntimeDS.Package with 
-            | Developer ->  yield (v.TOUT.DN.Expr <||> (real.V.RF.Expr <&&> v._sim.Expr), rst) ==| (v.ErrOnTimeOver , getFuncName())
-            | Simulation -> yield (call._off.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
-            | _ ->          yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
+            if RuntimeDS.Package.IsPackageSIM()   
+            then
+                yield(vOff, rst) ==| (v.ErrOnTimeOver , getFuncName())
+            else 
+                yield(v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
         ]
 
     member v.E3_CallErrorRXMonitor() =

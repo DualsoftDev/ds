@@ -10,10 +10,10 @@ open Dual.Common.Core.FS
 type VertexManager with
     ///Status
     member v.S1_RGFH() =
-            let r = v.R <==  (( (!!) v.ST.Expr                       <&&> (!!) v.ET.Expr) //    R      x   -   x
-                              <||> ( v.ST.Expr <&&>       v.RT.Expr  <&&> (!!) v.ET.Expr))//           o   o   x
-            let g = v.G <==        ( v.ST.Expr <&&>  (!!) v.RT.Expr  <&&> (!!) v.ET.Expr) //    G      o   x   x
-            let f = v.F <==        (                 (!!) v.RT.Expr  <&&>      v.ET.Expr) //    F      -   x   o
+            let r = v.R <==  (( (!@) v.ST.Expr                       <&&> (!@) v.ET.Expr) //    R      x   -   x
+                              <||> ( v.ST.Expr <&&>       v.RT.Expr  <&&> (!@) v.ET.Expr))//           o   o   x
+            let g = v.G <==        ( v.ST.Expr <&&>  (!@) v.RT.Expr  <&&> (!@) v.ET.Expr) //    G      o   x   x
+            let f = v.F <==        (                 (!@) v.RT.Expr  <&&>      v.ET.Expr) //    F      -   x   o
             let h = v.H <==        (                      v.RT.Expr  <&&>      v.ET.Expr) //    H      -   o   o
 
             [
@@ -35,7 +35,7 @@ type VertexManager with
         let offExpr   = if offs.any() then offs.ToOrElseOn() else v._off.Expr
 
 
-        let set =   onExpr <&&> (!!offExpr) <&&> v.Link.Expr
+        let set =   onExpr <&&> (!@offExpr) <&&> v.Link.Expr
               
 
         (set, v._off.Expr) --| (v.OG, getFuncName())

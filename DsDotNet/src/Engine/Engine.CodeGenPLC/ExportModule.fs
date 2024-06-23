@@ -13,7 +13,7 @@ open Engine.CodeGenCPU
 module ExportModule =
     /// 실제 구동용.  Generate XML file for XGI or XGK PLC.
     /// UnitTest 용은 generateXmlForTest 참고
-    let generateXmlXGX
+    let private generateXmlXGX
         (plcType:PlatformTarget) (system: DsSystem) (globalStorages:Storages)
         (localStorages:Storages) (pous: PouGen seq) (existingLSISprj:string option)
         (startMemory:int) (startTimer:int) (startCounter:int)

@@ -61,12 +61,21 @@ module ImportType =
     type DevParamRawItem  = string*DataType*string //address, dataType, func
 
     let getDevName (row: Data.DataRow) = 
-        let flowName = row.[(int) IOColumn.Flow]
-        if flowName <> "" && flowName <> TextSkip
+        let flowName = row.[(int) IOColumn.Flow].ToString()
+        let name = row.[(int) IOColumn.Name].ToString()
+        
+        if row.[(int) IOColumn.Case].ToString() = TextXlsAddress
         then
-            $"{flowName}_{row.[(int) IOColumn.Name]}"
+
+            if name.Split(".").Length <> 2 then
+                failwithlog ErrID._75
+            else 
+                let devName = row.[(int) IOColumn.Name].ToString().Split(".")[0]  
+                let apiName = row.[(int) IOColumn.Name].ToString().Split(".")[1]  
+        
+                $"{flowName}__{devName}".QuoteOnDemand() + "." + apiName.QuoteOnDemand()
         else 
-            $"{row.[(int) IOColumn.Name]}"
+            name
 
     let getMultiDeviceName (loadedName:string) index = 
             //index 2자리로 표현
@@ -129,3 +138,48 @@ module ImportType =
 
         checkDataType hwDev.Name hwDev.InParam.Type inDataType   
         checkDataType hwDev.Name hwDev.OutParam.Type outDataType
+        
+            
+    let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, namePure:string, nameNFunc:string) =
+        let name = GetBracketsRemoveName(shape.InnerText) |> trimSpace
+        
+        if not(nodeType.IsLoadSys) && name.Split(".").Length > 3 then
+                failwithlog ErrID._73
+
+        if name.Contains(";") then
+                failwithlog ErrID._18
+
+        //REAL other flow 아니면 이름에 '.' 불가
+        let checkDotErr () =
+            if nodeType <> REALExF && name.Contains(".") then
+                failwithlog ErrID._19
+        
+
+        match nodeType with
+        | REAL -> checkDotErr();
+        | REALExF ->
+            if name.Contains(".") |> not then
+                failwithlog ErrID._54
+        | CALL ->
+            if not(namePure.Contains(".")) &&  namePure <> nameNFunc  // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
+            then
+                failwithlog ErrID._70
+
+        | OPEN_EXSYS_CALL
+        | OPEN_EXSYS_LINK
+        | COPY_DEV ->
+            let name, number = GetTailNumber(shape.InnerText)
+
+            if GetSquareBrackets(name, false).IsNone then
+                failwithlog ErrID._7
+            try
+                GetBracketsRemoveName(name) + ".pptx" |> PathManager.getValidFile |> ignore
+            with ex ->
+                shape.ErrorName(ex.Message, iPage)
+
+        | IF_DEVICE
+        | DUMMY
+        | BUTTON
+        | CONDITION
+        | LAYOUT
+        | LAMP -> checkDotErr()

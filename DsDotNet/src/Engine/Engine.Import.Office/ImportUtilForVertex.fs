@@ -2,7 +2,7 @@ namespace Engine.Import.Office
 
 open System.Linq
 open System.Collections.Generic
-open PPTObjectModule
+open PPTConnectionModule
 open Dual.Common.Core.FS
 open Engine.Core
 open System
@@ -91,8 +91,7 @@ module ImportUtilVertex =
                 Call.Create(job, parentWrapper)
 
     let getCallFromNewSys (sys: DsSystem) (node: pptNode)  parentWrapper =
-        let apiName = node.CallApiName
-        let loadedName = node.CallName
+        let flow, loadedName, apiName = node.CallFlowNDevNApi
 
         let apiNameForLib = GetBracketsRemoveName(apiName).Trim()
         let libAbsolutePath, autoGenSys = getLibraryPath sys loadedName apiNameForLib
@@ -112,7 +111,7 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                let sysName, apiName = GetSysNApi(node.PageTitle, node.Name)
+                let flow, sysName, apiName = node.CallFlowNDevNApi
                 let loadedSys = mySys.LoadedSystems.Select(fun d -> d.Name)
       
                 let multiName = getMultiDeviceName sysName (node.JobOption.DeviceCount)

@@ -213,23 +213,31 @@ public partial class UcView : UserControl
             updateRowSource(et == ModelingEdgeType.RevResetEdge);
         }
 
-        else if (et == ModelingEdgeType.InterlockWeak)
+        else if (et == ModelingEdgeType.Interlock)
         {
             gEdge.Attr.AddStyle(Style.Dashed);
             gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
         }
-        else if (et == ModelingEdgeType.InterlockStrong)
-        {
-            gEdge.Attr.AddStyle(Style.Dashed);
-            gEdge.Attr.LineWidth = edge_attr_linewidthStrong;
-            gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
-            gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
-        }
+        
         else if (et == ModelingEdgeType.StartReset|| et == ModelingEdgeType.RevStartReset)
         {
             gEdge.Attr.AddStyle(Style.Solid);
             if (et == ModelingEdgeType.RevStartReset)
+            {
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Tee;
+            }
+            else
+            {
+                gEdge.Attr.ArrowheadAtSource = ArrowStyle.Tee;
+                gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
+            }
+        }
+        else if (et == ModelingEdgeType.SelfReset || et == ModelingEdgeType.RevSelfReset)
+        {
+            gEdge.Attr.AddStyle(Style.Dashed);
+            if (et == ModelingEdgeType.RevSelfReset)
             {
                 gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Tee;

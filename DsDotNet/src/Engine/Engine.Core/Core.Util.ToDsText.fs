@@ -93,23 +93,26 @@ module internal ToDsTextModule =
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (DuParentFlow flow) (indent+1)
-
-            let aliasDefs = flow.AliasDefs.Values //aliasKey가 2개인 외부 Flow는 생략
-                                .Where(fun a->not(a.AliasTarget.Value.RealTarget().IsSome &&  a.AliasKey.Length = 2))
-
-            if aliasDefs.Any() then
+            let aliasDefExist = flow.AliasDefs.Values  //외부 Flow Alias 외에 하나라도 있으면
+                                    .Where(fun a-> a.AliasTexts.Count <> a.AliasTexts.Where(fun w->w.Contains('.')).length())
+                                    .any()     
+                                
+            if aliasDefExist then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
-                for a in aliasDefs do
-                    let mnemonics = (a.Mnemonics.Select(fun f->f.QuoteOnDemand()) |> String.concat "; ") + ";"
-                    let tab = getTab (indent+2)
-                    let aliasKey =
-                        match a.AliasTarget with
-                        | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
-                        | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
-                        | None -> failwithlog "ERROR"
+                for a in flow.AliasDefs.Values do
+                    let toTextAlias = a.AliasTexts.Where(fun f->not(f.Contains('.'))).ToArray()
+                    if toTextAlias.any()
+                    then
+                        let aliasTexts = (toTextAlias.Select(fun f->f.QuoteOnDemand()) |> String.concat "; ") + ";"
+                        let tab = getTab (indent+2)
+                        let aliasKey =
+                            match a.AliasTarget with
+                            | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
+                            | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
+                            | None -> failwithlog "ERROR"
 
-                    yield $"{tab}{aliasKey} = {lb} {mnemonics} {rb}"
+                        yield $"{tab}{aliasKey} = {lb} {aliasTexts} {rb}"
                 yield $"{tab}{rb}"
 
             yield $"{tab}{rb}"
@@ -241,10 +244,6 @@ module internal ToDsTextModule =
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
                 let getHwInfo(hw:HwSystemDef) = 
                     let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
-                    //let items = 
-                    //    if hw.OperatorFunction.IsSome 
-                    //    then [printFunc hw.OperatorFunction.Value]  @ flows else flows
-                                
                     let itemText = if flows.any() then (flows |> String.concat "; ") + ";" else ""
                     let inAddr =  addressPrint  hw.InAddress  
                     let outAddr = addressPrint  hw.OutAddress 
@@ -385,7 +384,7 @@ module internal ToDsTextModule =
                     if finishedReals.Any() then
                         yield $"{tab2}[finish] = {lb}"
                         for real in finishedReals do
-                            yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -394,7 +393,7 @@ module internal ToDsTextModule =
                     if noTransDataReals.Any() then
                         yield $"{tab2}[notrans] = {lb}"
                         for real in noTransDataReals do
-                            yield $"{tab3}{real.Flow.Name}.{real.Name};"
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -417,7 +416,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}[disable] = {lb}"
                         for vert in disabledVertices do
                             let compo = vert.NameComponents
-                            yield $"{tab3}{compo[1]}.{compo[2]}.{compo[3]};"
+                            yield $"{tab3}{compo[1].QuoteOnDemand()}.{compo[2].QuoteOnDemand()}.{compo[3].QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 

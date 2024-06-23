@@ -149,6 +149,7 @@ CabPipe: '<|';
 OabPipePipeCab: '<|>';
 CabOabPipe: '><|';
 EqualCab: '=>';
+EqualPipeCab: '=|>';
 CabPipeCab: '>|>';
 PipeCabCab: '|>>';
 OabOabPipe: '<<|';
@@ -291,7 +292,7 @@ flowBlock
         )* '}'  (SEMICOLON)?   // |flowTask|callDef
     ;
     parentingBlock: identifier1 '=' '{' (causal | nonCausal | nonCausals)* '}';
-    nonCausal : (identifier1 | identifierCommand);
+    nonCausal : (identifier1 | identifier12 | identifierCommand);
     nonCausals: (nonCausal (COMMA nonCausal)*)?  SEMICOLON;     // A, B(), C;
         
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
@@ -416,7 +417,7 @@ causal: causalPhrase SEMICOLON;
         | '<'   // CAUSAL_BWD
         | '<<|' | '<|<'
         | '|><'         // CAUSAL_BWD_AND_RESET_FWD
-        | '><|' | '=>'
+        | '><|' | '=>'| '=|>'
         | causalOperatorReset
         ;
     causalOperatorReset

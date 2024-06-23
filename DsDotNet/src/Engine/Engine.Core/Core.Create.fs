@@ -47,9 +47,13 @@ module CoreCreateModule =
                 let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
                 if reals.Any(fun w -> w.Name = realName) then
                     failwithf $"real {realName} 중복 생성에러"
-
+               
                 // Create a new Real
                 let newReal = Real.Create(realName, flow)
+                //if flow.Graph.Vertices.OfType<Real>().length() = 1
+                //then
+                //    newReal.Finished <- true    //처음 Real이 원위치
+                 
                   // Create and add a new ApiItem
                 let newApi = ApiItem.Create(apiName, sys, newReal, newReal)
                 sys.ApiItems.Add newApi |> ignore
@@ -61,8 +65,8 @@ module CoreCreateModule =
                          .Iter(fun r -> 
                                 let exAliasName = $"{r.Name}Alias_{newReal.Name}"
                                 let myAliasName = $"{newReal.Name}Alias_{r.Name}"
-                                let exAlias = Alias.Create(exAliasName, DuAliasTargetReal r, DuParentFlow flow)
-                                let myAlias = Alias.Create(myAliasName, DuAliasTargetReal newReal, DuParentFlow flow)
+                                let exAlias = Alias.Create(exAliasName, DuAliasTargetReal r, DuParentFlow flow, false)
+                                let myAlias = Alias.Create(myAliasName, DuAliasTargetReal newReal, DuParentFlow flow, false)
                     
                                 // Create an edge between myAlias and exAlias
                                 flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)

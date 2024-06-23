@@ -25,18 +25,18 @@ module PPTDummyModule =
         member x.Members = vertices
 
         member x.GetVertex(name: string) =
-            dicVertex |> Seq.tryFind (fun (d) -> d.Key = name)
+            dicVertex |> Seq.tryFind (fun kvp -> kvp.Key = name)
 
         member x.AddOutEdge(edgeType: ModelingEdgeType, target: string) =
-            dummyEdges.Add(ModelingEdgeInfo<string>(dummyNode, edgeType.ToText(), target))
-            |> ignore
+            dummyEdges.Add(ModelingEdgeInfo<string>(dummyNode, edgeType.ToText(), target)) |> ignore
 
         member x.AddInEdge(edgeType: ModelingEdgeType, source: string) =
-            dummyEdges.Add(ModelingEdgeInfo<string>(source, edgeType.ToText(), dummyNode))
-            |> ignore
+            dummyEdges.Add(ModelingEdgeInfo<string>(source, edgeType.ToText(), dummyNode)) |> ignore
 
-        member x.GetParent() = vertices.First().Parent
-        member val internal Items = pptNodes
+        member x.GetParent() =
+            vertices.First().Parent
+
+        member val Items = pptNodes
 
         member x.Update(dic: Dictionary<string, Vertex>) =
             dicVertex <- dic
@@ -44,13 +44,14 @@ module PPTDummyModule =
 
 [<Extension>]
 type PPTDummyExt =
+
     [<Extension>]
     static member TryFindDummy(dummys: HashSet<pptDummy>, pptNode: pptNode) =
         dummys |> Seq.tryFind (fun w -> w.Items.Contains(pptNode))
 
     [<Extension>]
     static member IsMember(dummys: HashSet<pptDummy>, pptNode: pptNode) =
-        dummys.TryFindDummy(pptNode).IsNonNull()
+        dummys.TryFindDummy(pptNode).IsSome
 
     [<Extension>]
     static member GetMembers(dummys: HashSet<pptDummy>, pptNode: pptNode) =
@@ -59,18 +60,17 @@ type PPTDummyExt =
         | None -> HashSet<pptNode>()
 
     [<Extension>]
-    static member AddDummys(dummys: HashSet<pptDummy>, srcNode: pptNode , tgtNode: pptNode ) =
+    static member AddDummys(dummys: HashSet<pptDummy>, srcNode: pptNode, tgtNode: pptNode) =
         match dummys.TryFindDummy(srcNode), dummys.TryFindDummy(tgtNode) with
-        | Some srcDummy, Some tgtDummy -> 
-                                 srcDummy.Items.AddRange [srcNode;tgtNode] |>ignore
-                                 srcDummy.Items.AddRange tgtDummy.Items    |>ignore
-                                 dummys.Remove(tgtDummy)|>ignore
-        | Some srcDummy, None -> srcDummy.Items.AddRange [srcNode;tgtNode] |>ignore
-        | None, Some tgtDummy -> tgtDummy.Items.AddRange [srcNode;tgtNode] |>ignore  
-        | None, None ->  
-            let newDummy = pptDummy (srcNode.Shape.ShapeName(), srcNode.PageNum)
+        | Some srcDummy, Some tgtDummy ->
+            srcDummy.Items.UnionWith tgtDummy.Items
+            dummys.Remove(tgtDummy) |> ignore
+        | Some srcDummy, None ->
+            srcDummy.Items.Add(tgtNode) |> ignore
+        | None, Some tgtDummy ->
+            tgtDummy.Items.Add(srcNode) |> ignore
+        | None, None ->
+            let newDummy = pptDummy(srcNode.Shape.ShapeName(), srcNode.PageNum)
             newDummy.Items.Add(srcNode) |> ignore
             newDummy.Items.Add(tgtNode) |> ignore
             dummys.Add(newDummy) |> ignore
-
-        

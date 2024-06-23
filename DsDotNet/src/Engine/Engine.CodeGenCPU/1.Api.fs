@@ -29,7 +29,7 @@ type ApiItemManager with
             then
                 coins.Select(fun c->c.LinkExpr).ToOrElseOff()
                 <&&>  
-                (input.Value <&&> !!a.PE.Expr <&&> !!a.SL2.Expr)
+                (input.Value <&&> !@a.PE.Expr <&&> !@a.SL2.Expr)
             else 
                 (activeSys._off.Expr)
 
@@ -44,7 +44,7 @@ type ApiItemManager with
                 coins.Select(fun c->c.LinkExpr).ToOrElseOff()
                 <&&>( 
                           (  input.Value <&&> a.PE.Expr)
-                     <||> (!!input.Value <&&> !!a.PE.Expr)
+                     <||> (!@input.Value <&&> !@a.PE.Expr)
                      <||> activeSys._sim.Expr
                      )
             else 

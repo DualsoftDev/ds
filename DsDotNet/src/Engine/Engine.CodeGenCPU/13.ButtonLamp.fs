@@ -42,7 +42,7 @@ type DsSystem with
                                     let test = s._testMonitor.Expr 
                                     let going = s._goingMonitor.Expr 
 
-                                    (drive <&&> !!going) 
+                                    (drive <&&> !@going) 
                                     <||> 
                                     (drive <&&> s._goingMonitor.Expr <&&> s._flicker1sec.Expr)
                                     <||> 
@@ -51,7 +51,7 @@ type DsSystem with
 
                 | DuErrorStateLamp      -> s._emgState.Expr <||> (s._errorMonitor.Expr <&&> s._flicker1sec.Expr)
                 | DuTestDriveStateLamp -> s._testMonitor.Expr   
-                | DuReadyStateLamp     -> (s._readyMonitor.Expr  <&&> !!s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
+                | DuReadyStateLamp     -> (s._readyMonitor.Expr  <&&> !@s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
                 | DuIdleModeLamp      ->  s._idleMonitor.Expr
                 | DuOriginStateLamp    ->
                         let originActions = s.GetVertices().OfType<Real>().Select(getVMReal)

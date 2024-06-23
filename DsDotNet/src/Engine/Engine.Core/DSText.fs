@@ -18,11 +18,12 @@ module DsText =
     let [<Literal>] TextStartEdge         = ">"
     let [<Literal>] TextResetEdge         = "|>"
     let [<Literal>] TextStartReset        = "=>"
-    let [<Literal>] TextInterlockWeak     = "<|>"
-    let [<Literal>] TextInterlockStrong   = "<||>"
+    let [<Literal>] TextSelfReset         = "=|>"
+    let [<Literal>] TextInterlock         = "<|>"
     let [<Literal>] TextStartEdgeRev      = "<"
     let [<Literal>] TextResetEdgeRev      = "<|"
     let [<Literal>] TextStartResetRev     = "<="
+    let [<Literal>] TextSelfResetRev      = "<|="
 
 
     let [<Literal>] TextJobNoneRX = "XR"

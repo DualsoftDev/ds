@@ -86,7 +86,7 @@ module ConvertCpuVertex =
       
         member c.LinkExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
-                 !!rv.Link.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)
+                 !@rv.Link.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)
 
         member c.PresetTime =   if c.UsingTon
                                 then c.TargetJob.OnDelayTime.Value.ToString() |> CountUnitType.Parse
@@ -139,12 +139,12 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        (r.VR.OB.Expr <||> r.VR.OA.Expr) <&&> !!c.End
+                        (r.VR.OB.Expr <||> r.VR.OA.Expr) <&&> !@c.End
                         
                         //(// 실제에서는 수동일때만 h_st 가능 ,시뮬레이션은 자동수동 둘다가능
-                        //             (!!c.EndActionOnlyIO <&&> !!c.System._sim.Expr)    
+                        //             (!@c.EndActionOnlyIO <&&> !@c.System._sim.Expr)    
                         //             <||>
-                        //             (!!c.EndPlan <&&>  c.System._sim.Expr )
+                        //             (!@c.EndPlan <&&>  c.System._sim.Expr )
                         //             )   
 
                     else c._off.Expr
@@ -160,7 +160,7 @@ module ConvertCpuVertex =
         member r.CoinETContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
         member r.CoinAllContacts = r.Graph.Vertices.Select(getVMCoin)|>Seq.collect(fun f->[f.ST;f.RT;f.ET])
 
-        member r.CoinAlloffExpr = !!r.V.CoinAnyOnST.Expr <&&> !!r.V.CoinAnyOnRT.Expr <&&> !!r.V.CoinAnyOnET.Expr
+        member r.CoinAlloffExpr = !@r.V.CoinAnyOnST.Expr <&&> !@r.V.CoinAnyOnRT.Expr <&&> !@r.V.CoinAnyOnET.Expr
 
         member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOnTimeOver) 
         member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOnTimeShortage) 

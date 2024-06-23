@@ -163,10 +163,11 @@ module CoreModule =
 
 
 
-    and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, mnemonics: string []) =
+    and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, aliasTexts: string [], isOtherFlowRealAlias:bool) =
         member _.AliasKey = aliasKey
+        member _.IsOtherFlowRealAlias = isOtherFlowRealAlias // 다른 플로우의 Real 이며 내부에서 Alias로 Or 사용하는 경우
         member val AliasTarget = target with get, set
-        member val Mnemonics = mnemonics |> ResizeArray
+        member val AliasTexts = aliasTexts |> ResizeArray
 
     /// leaf or stem(parenting)
     /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
@@ -272,11 +273,12 @@ module CoreModule =
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
 
-    and Alias private (names:string seq, target:AliasTargetWrapper, parent) = // target : Real or Call or OtherFlowReal
+    and Alias private (names:string seq, target:AliasTargetWrapper, parent, isOtherFlowRealAlias) = // target : Real or Call or OtherFlowReal
         inherit Indirect(names, parent)
         member _.TargetWrapper = target
-        member _.IsOtherFlowReal = match target.RealTarget() with
-                                   | Some (r: Real) -> r.Flow <> parent.GetFlow() | _ -> false
+        member _.IsOtherFlowRealAlias = isOtherFlowRealAlias
+        member _.IsSameFlow = target.GetTarget() 
+                              |> fun v -> v.Parent.GetFlow() = parent.GetFlow() 
 
     type InOutDataType = DataType*DataType
 
@@ -543,8 +545,8 @@ module CoreModule =
 
 
     type Alias with
-        static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper) =
-            let createAliasDefOnDemand() =
+        static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isOtherFlowRealAlias) =
+            let createAliasDefOnDemand(isOtherFlowReal) =
                 (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
                  * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
                  *)
@@ -555,11 +557,11 @@ module CoreModule =
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs()
                 let ads = flow.AliasDefs
                 match ads.TryFind(aliasKey) with
-                | Some ad -> ad.Mnemonics.AddIfNotContains(name) |> ignore
-                | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
+                | Some ad -> ad.AliasTexts.AddIfNotContains(name) |> ignore
+                | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|], isOtherFlowReal))
 
-            createAliasDefOnDemand()
-            let alias = Alias(name.DeQuoteOnDemand().SplitBy('.'), target, parent)
+            createAliasDefOnDemand(isOtherFlowRealAlias)
+            let alias = Alias(name.DeQuoteOnDemand().SplitBy('.'), target, parent, isOtherFlowRealAlias)
             if parent.GetCore() :? Real
             then
                 target.RealTarget().IsNone

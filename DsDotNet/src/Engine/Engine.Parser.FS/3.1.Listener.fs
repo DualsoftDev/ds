@@ -426,13 +426,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 ->
                                 let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
                                 //RealOtherFlow.Create(otherFlowReal, parent) |> ignore
-                                Alias.Create(name, DuAliasTargetReal otherFlowReal, parent) |> ignore
+                                Alias.Create(name, DuAliasTargetReal otherFlowReal, parent, false) |> ignore
                                 debugfn $"{realorFlow}.{cr} should already have been created."
 
                             | 2, [ q ] when isAliasMnemonic (parent, name) ->
                                 let flow = parent.GetFlow()
                                 let aliasDef = tryFindAliasDefWithMnemonic flow (q.QuoteOnDemand()) |> Option.get
-                                Alias.Create(q, aliasDef.AliasTarget.Value, parent) |> ignore
+                                let exFlow = aliasDef.AliasKey.length() = 2
+                                Alias.Create(q, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
 
                             | _, [ _q ] -> ()
                             | _, _ofn :: [ _ofrn ] -> ()
@@ -623,7 +624,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let! flow = tryFindFlow system ci.Flow.Value
                 let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
                 let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
-                let ad = AliasDef(aliasKeys, None, mnemonics)
+                let isOtherFlowRealAlias = aliasKeys.Length = 2   //flowA.Real1
+                let ad = AliasDef(aliasKeys, None, mnemonics, isOtherFlowRealAlias)
                 flow.AliasDefs.Add(aliasKeys, ad)
                 return ad
             }

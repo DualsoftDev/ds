@@ -3,7 +3,7 @@ namespace Engine.Import.Office
 
 open System.Linq
 open System.Collections.Concurrent
-open PPTObjectModule
+open PPTConnectionModule
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Dual.Common.Core.FS
@@ -36,7 +36,7 @@ module ImportU =
                 if (src.NodeType.IsIF && src.NodeType = tgt.NodeType |> not) then
                     Office.ErrorConnect(edge.ConnectionShape, ErrID._37, src.Name, tgt.Name, edge.PageNum)
                 if
-                    (edge.Causal = InterlockStrong||edge.Causal = InterlockWeak) //인터락 AugmentedTransitiveClosure 타입 만들기 재료
+                    (edge.Causal = Interlock) //인터락 AugmentedTransitiveClosure 타입 만들기 재료
                 then
                     resets.Add(src.Name, tgt.Name) |> ignore
                 else
@@ -55,7 +55,7 @@ module ImportU =
                 | None -> dicIL.Add(dicIL.length (), [ src; tgt ] |> HashSet)
 
             let createInterlockInfos (src, tgt) =
-                let mei = ApiResetInfo.Create(sys, src, InterlockWeak, tgt, false)
+                let mei = ApiResetInfo.Create(sys, src, Interlock, tgt, false)
                 sys.ApiResetInfos.Add(mei) |> ignore
 
             resets.ForEach updateILInfo
@@ -99,7 +99,7 @@ module ImportU =
 
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 let flowName = if page.PageNum = pptHeadPage then $"{sysName}_Page1" else flowName
-                if flowName.Contains(".") then
+                if flowName.Contains(".")||flowName.Contains("__") then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._20, page.Title, page.PageNum, 0u, "")
 
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
@@ -195,10 +195,10 @@ module ImportU =
                 match node.JobOption with
                 | MultiAction (_,cnt) -> 
                     for i in [1..cnt] do 
-                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallName i))
+                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallDevName i))
                         addChannelPoints dev node
                 | _ ->
-                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallName)
+                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallDevName)
                     addChannelPoints dev node
                     )
 
@@ -226,16 +226,17 @@ module ImportU =
                 |> dict
 
             let createReal () =
-                pptNodes
-                |> Seq.filter (fun node -> node.Alias.IsNone)
-                |> Seq.filter (fun node -> node.NodeType.IsReal)
-                |> Seq.filter (fun node -> dicChildParent.ContainsKey(node) |> not)
-                |> Seq.sortBy (fun node -> node.NodeType = REALExF) //real 부터 생성 후 realExF 처리
-                |> Seq.iter (fun node ->
+                let reals = pptNodes
+                            |> Seq.filter (fun node -> node.Alias.IsNone)
+                            |> Seq.filter (fun node -> node.NodeType.IsReal)
+                            |> Seq.filter (fun node -> dicChildParent.ContainsKey(node) |> not)
+                            |> Seq.sortBy (fun node -> node.NodeType = REALExF) //real 부터 생성 후 realExF 처리
+
+                reals |> Seq.iter (fun node ->
                     match node.NodeType with
-                    | REALExF ->
+                    | REALExF -> // isOtherFlowRealAlias is false  (외부 플로우에 있을뿐 Or Alias가 아님)
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
-                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum]))
+                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
                         real.Finished <- node.RealFinished
@@ -273,12 +274,13 @@ module ImportU =
                     let segOrg = dicVertex.[node.Alias.Value.Key]
                     
                     let alias =
-                        if node.NodeType = REALExF then
+                        let flow = dicFlow.[node.PageNum]
+                        if node.NodeType = REALExF then // isOtherFlowRealAlias is true
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                             Alias.Create(
-                                real.ParentNPureNames.Combine(),
+                                String.Join("_", real.ParentNPureNames),
                                 DuAliasTargetReal(real),
-                                DuParentReal(real)
+                                DuParentFlow(flow), true
                             )
 
                         elif dicChildParent.ContainsKey(node) then
@@ -288,23 +290,22 @@ module ImportU =
                             Alias.Create(
                                 $"{call.Name}_{node.AliasNumber}",
                                 DuAliasTargetCall(segOrg :?> Call),
-                                DuParentReal(real)
+                                DuParentReal(real), false
                             )
                         else
-                            let flow = dicFlow.[node.PageNum]
 
                             match segOrg with
                             | :? Real as rt ->
                                 Alias.Create(
                                     $"{rt.Name}_{node.AliasNumber}",
                                     DuAliasTargetReal(rt),
-                                    DuParentFlow(flow)
+                                    DuParentFlow(flow) , false
                                 )
                             | :? Call as ct ->
                                 Alias.Create(
                                     $"{ct.Name}_{node.AliasNumber}",
                                     DuAliasTargetCall(ct),
-                                    DuParentFlow(flow)
+                                    DuParentFlow(flow) , false
                                 )
                             | _ -> failwithf "Error type"
 
@@ -446,17 +447,33 @@ module ImportU =
                     |> dict
 
                 let safeName (safety: string) =
-                    let dev = (safety.Split('.')[0]).Trim()
-                    let api = (safety.Split('.')[1]).Trim()
+                    if safety.Split('.').Length  = 2
+                    then
+                        let dev = (safety.Split('.')[0]).Trim()
+                        let api = (safety.Split('.')[1]).Trim()
 
-                    $"{flow.Name}_{dev}_{api}"
+                        $"{flow.Name}__{dev}_{api}"
+
+                    elif safety.Split('.').Length  = 3
+                    then
+                        let flow = (safety.Split('.')[0]).Trim()
+                        let dev = (safety.Split('.')[1]).Trim()
+                        let api = (safety.Split('.')[2]).Trim()
+
+                        $"{flow}__{dev}_{api}"
+                    else 
+                        failWithLog $"error safety name format ({safety})"
+
 
                 let safeties = node.Safeties |> map safeName |> toArray
 
                 safeties //세이프티 입력 미등록 이름오류 체크
                 |> iter (fun safeFullName ->
                     if not (mySys.Jobs.Select(fun f -> f.Name).Contains safeFullName) then
-                        node.Shape.ErrorName(ErrID._28, node.PageNum))
+                        node.Shape.ErrorName($"{ErrID._28}(err:{safeFullName})", node.PageNum)
+                        
+                        
+                        )
 
                 safeties
                 |> map (fun safeFullName -> dicQualifiedNameSegs.[safeFullName])
@@ -521,6 +538,8 @@ module ImportU =
             then  failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
             
             pageTables
+            |> Seq.filter (fun (_, table) -> table.Rows.Count > 0)
+            |> Seq.filter (fun (_, table) -> table.Rows[0].ItemArray[(int) IOColumn.Case] = $"{IOColumn.Case}")
             |> Seq.collect (fun (pageIndex, table) ->
                 table.Rows
                     .Cast<DataRow>()

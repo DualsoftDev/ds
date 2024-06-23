@@ -39,7 +39,7 @@ type Flow with
     member f.ST5_ErrorState() =
         let setDeviceError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
                                 |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
-        let setConditionError = !!f.readyCondition.Expr <&&> f.r_st.Expr //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
+        let setConditionError = !@f.readyCondition.Expr <&&> f.r_st.Expr //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
         let set =  setDeviceError<||> setConditionError
         let rst = f.ClearExpr
            
@@ -47,12 +47,12 @@ type Flow with
 
     member f.ST6_DriveState () =
         let set = f.DriveExpr <&&> f.driveCondition.Expr
-        let rst = !!f.aop.Expr <||> f.t_st.Expr  <||> f.p_st.Expr
+        let rst = !@f.aop.Expr <||> f.t_st.Expr  <||> f.p_st.Expr
          
         (set, rst) ==| (f.d_st, getFuncName())
 
     member f.ST7_TestState () =
         let set = f.TestExpr
-        let rst = !!f.aop.Expr  <||> f.p_st.Expr
+        let rst = !@f.aop.Expr  <||> f.p_st.Expr
 
         (set, rst) ==| (f.t_st, getFuncName())

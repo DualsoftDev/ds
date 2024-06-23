@@ -43,15 +43,16 @@ module ImportUtilForLib =
                     getParams (libFilePath, libRelPath, name, mySys, DuDevice, ShareableSystemRepository())
 
                 let apiPureName = GetBracketsRemoveName(apiName).Trim()
-                
-                let devOrg, _ = ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget
+                //test ahn
+                let devOrg = //기존에 ADV 디바이스 로딩되어있으면 mySys 사용, 아니면 새로 로딩
+                        ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
                 if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
                     node.Shape.ErrorName(ErrID._49, node.PageNum)
 
                 let tasks = HashSet<TaskDev>()
                 match  node.JobOption with
                 | MultiAction (_, cnt) ->  
-                    for i in [1..cnt] do
+                    for i in [1..cnt] do //기존에 ADV 디바이스 로딩되어있으면 mySys 사용, 아니면 새로 로딩
                         let devOrg = if i = 1 then devOrg
                                         else ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
 

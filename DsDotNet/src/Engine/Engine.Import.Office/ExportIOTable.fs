@@ -102,8 +102,8 @@ module ExportIOTable =
 
 
     let splitNameForRow(name:string) = 
-        let head = name.Split('_')[0];
-        let tail = name[head.Length+1..]
+        let head = name.Split("__")[0];   
+        let tail = name[head.Length+2..]
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
@@ -116,14 +116,13 @@ module ExportIOTable =
                 |NoneTx -> false,true
                 |NoneTRx -> true,true
                 |_ ->  false,false
-
-            let flow, name = splitNameForRow dev.ApiName
+            let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
             [ TextXlsAddress
               flow
               name
               getPPTTDevDataTypeText (dev)
-              getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target )
-              getValidAddress(dev.OutAddress,  dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
+              getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
+              getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
               inSym
               outSym
               ]
@@ -141,6 +140,7 @@ module ExportIOTable =
                              |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
                              |> Seq.distinctBy(fun (dev,j) -> dev)
 
+                let mutable extCnt = 0
                 for (dev, job) in  devJobSet do
                     let coins = vs.GetVerticesOfJobCoins(job)
                     
@@ -150,7 +150,8 @@ module ExportIOTable =
                         dev.OutAddress <- (TextSkip)
                         if dev.InAddress = TextAddrEmpty
                         then
-                            dev.InAddress  <-  getExternalTempMemory target
+                            dev.InAddress  <-  getExternalTempMemory (target, extCnt)
+                            extCnt <- extCnt+1
 
                     yield rowIOItems (dev, job) target
         }

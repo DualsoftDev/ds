@@ -22,7 +22,7 @@ type Job with
                     let rstMemos = jobCoins.SelectMany(fun coin->coin.MutualResetCoins.Select(fun c->c.VC.MM))
                     let sets =
                         if RuntimeDS.Package.IsPackageSIM() then _off
-                        else api.PE.Expr <&&> api.PS.Expr <&&> !!rstMemos.ToOrElseOff()
+                        else api.PE.Expr <&&> api.PS.Expr <&&> !@rstMemos.ToOrElseOff()
 
 
                     let outParam = td.GetOutParam(j.Name)

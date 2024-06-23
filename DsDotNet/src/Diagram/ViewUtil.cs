@@ -74,14 +74,18 @@ namespace Diagram.View.MSAGL
                         UpdateDicActionTag(t.OutTag, viewVertex);
                         UpdateDicApiTag(t.ApiItem, viewVertex);
                     });
-
-                    if (v.GetPure() is Real real)
-                    {
-                        var og = (real.TagManager as VertexManager).OG;
-                        UpdateOriginVertexTag(og, viewVertex);
-                    }
                 }
             });
+
+
+            _sys.GetVertices().OfType<Real>().Iter(real =>
+            {
+                var og = (real.TagManager as VertexManager).OG;
+                UpdateOriginVertexTag(og, DicNode[real]);
+
+                real.GetSharedReal().Iter(alias => UpdateOriginVertexTag(og, DicNode[alias]));
+            });
+             
 
             return flowViewNodes;
 
@@ -191,14 +195,16 @@ namespace Diagram.View.MSAGL
             {
                 if (!DicMemoryTag.ContainsKey(ev.Tag)) return;
                 var viewNodes = DicMemoryTag[ev.Tag];
-                var ucView = UcViews
-                    .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
+                //var ucView = UcViews.FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
+
                 viewNodes.Iter(n =>
                 {
                     n.DisplayNodes.Iter(node =>
                     {
+                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+
                         var on = Convert.ToBoolean(ev.Tag.BoxedValue);
-                        n.LampOrigin= on;
+                        n.LampOrigin = on;
                         ucView?.UpdateOriginValue(node, on);
                     });
                 });

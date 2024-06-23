@@ -204,7 +204,13 @@ module EdgeModule =
 
         for edge in graph.Edges do
             if edge.Source.GetPureCall().IsNone  //flow에서 조건으로 Call은 제외
-            then Edge.Create(g, edge.Source.GetPureReal(), edge.Target.GetPureReal(), edge.EdgeType) |> ignore 
+            then 
+                if not(g.Edges.any(fun (e:Edge)->   
+                        e.EdgeType = edge.EdgeType
+                        && e.Source = edge.Source.GetPureReal() 
+                        && e.Target = edge.Target.GetPureReal()))
+                then
+                    Edge.Create(g, edge.Source.GetPureReal(), edge.Target.GetPureReal(), edge.EdgeType) |> ignore 
                 
         g
 

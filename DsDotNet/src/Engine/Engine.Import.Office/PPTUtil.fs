@@ -617,14 +617,14 @@ module PPTUtil =
                 slidePart, show, page)
             |> Seq.sortBy (fun (slidePart, show, page) -> page)
 
-        ///슬라이드 Master 페이지를 반환
-        [<Extension>]
-        static member SlidesMasterAll(doc: PresentationDocument) =
-            doc.PresentationPart.SlideMasterParts
-            |> Seq.collect (fun slideMasterPart ->
-                slideMasterPart.SlideLayoutParts
-                |> Seq.map (fun slidePart -> slidePart.SlideMasterPart.SlideMaster))
-
+        /////슬라이드 Master 페이지를 반환 : 사용 안함
+        //[<Obsolete("Unused")>]
+        //[<Extension>]
+        //static member _slidesMasterAll(doc: PresentationDocument) =
+        //    doc.PresentationPart.SlideMasterParts
+        //    |> Seq.collect (fun slideMasterPart ->
+        //        slideMasterPart.SlideLayoutParts
+        //        |> Seq.map (fun slidePart -> slidePart.SlideMasterPart.SlideMaster))
 
         [<Extension>]
         static member SlidesSkipHide(doc: PresentationDocument) =
@@ -656,7 +656,7 @@ module PPTUtil =
             |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
             |> Seq.map (fun shape ->
                 let geometry =
-                    shape.Descendants<Drawing.PresetGeometry>().FirstOrDefault().Preset.Value
+                    shape.Descendants<Drawing.PresetGeometry>().First().Preset.Value
 
                 shape, page, geometry)
 

@@ -161,9 +161,9 @@
   },
   "active": "4da6d47efee0d28b",
   "lastOpenFiles": [
-    "Engine.Core/DsCPU.md",
-    "Engine.Core/DsSystem.md",
     "Engine.Core/Untitled.canvas",
+    "Engine.Core/DsSystem.md",
+    "Engine.Core/DsCPU.md",
     "Engine.Core/Core 자료 구조.md",
     "Engine.Core/Core Dll hierarchy.canvas",
     "App Dll Hierarchy.canvas",

@@ -12,6 +12,7 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module PPTDummyModule =
 
+    /// 방향성 없는 edge 로 연결된 node 의 표현????
     type pptDummy(shapeName: string, page: int) =
         let pptNodes = HashSet<pptNode>()
         let vertices = HashSet<Vertex>()

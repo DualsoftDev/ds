@@ -138,28 +138,29 @@ module PPTDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
-    // Save subgroups to dicUsedSub recursively
-    let rec SubGroup (page, subG: GroupShape, dicUsedSub: HashSet<GroupShape>) =
-        subG.Descendants<GroupShape>()
-        |> Seq.iter (fun childGroup ->
-            dicUsedSub.Add(childGroup) |> ignore
-            SubGroup(page, childGroup, dicUsedSub))
+    (* 사용 안함 *)
+    //// Save subgroups to dicUsedSub recursively
+    //let rec SubGroup (page, subG: GroupShape, dicUsedSub: HashSet<GroupShape>) =
+    //    subG.Descendants<GroupShape>()
+    //    |> Seq.iter (fun childGroup ->
+    //        dicUsedSub.Add(childGroup) |> ignore
+    //        SubGroup(page, childGroup, dicUsedSub))
 
     type pptDoc(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument) =
 
         let pages = Dictionary<SlidePart, pptPage>()
-        let masterPages = Dictionary<int, SlideMaster>()
         let nodes = Dictionary<string, pptNode>()
         let parents = Dictionary<pptNode, seq<pptNode>>()
         let dummys = HashSet<pptDummy>()
         let edges = HashSet<pptEdge>()
 
-        do
-            let slideSize = Office.SlideSize(doc)
-            let SlideMasters = Office.SlidesMasterAll(doc)
+        //let _masterPages = Dictionary<int, SlideMaster>()
 
-            SlideMasters
-            |> Seq.iter (fun slideMaster -> masterPages.Add(masterPages.Count + 1, slideMaster) |> ignore)
+        do
+            (* 사용 안함 *)
+            //let _slideMasters = Office._slidesMasterAll(doc)
+            //_slideMasters
+            //|> Seq.iter (fun slideMaster -> _masterPages.Add(_masterPages.Count + 1, slideMaster) |> ignore)
 
             let validSlidesAll =  
                 Office.SlidesSkipHide(doc)
@@ -207,6 +208,7 @@ module PPTDocModule =
                     dicShape.Add(page, HashSet<Shape>()) |> ignore
                 dicShape.[page].Add(shape) |> ignore)
 
+            let slideSize = Office.SlideSize(doc)
             shapes
             |> Seq.iter (fun (shape, page, _) ->
                 let pagePPT = pages.Values |> Seq.find (fun w -> w.PageNum = page)
@@ -258,30 +260,28 @@ module PPTDocModule =
                 |> Seq.iter (fun (conn, Id, startId, endId) ->
                     let iPage = pages.[slide].PageNum
 
-                    if startId = 0u && endId = 0u then
-                        conn.ErrorConnect(ErrID._4, "", "", iPage)
-                         
-                    if startId = 0u then
+                    match startId, endId with
+                    | 0u, 0u -> conn.ErrorConnect(ErrID._4, "", "", iPage)                         
+                    | 0u, _ ->
                         conn.ErrorConnect(ErrID._15, "", $"{nodes.[Objkey(iPage, endId)].Name}", iPage)
+                    | _, 0u ->
+                        conn.ErrorConnect(ErrID._15, $"{nodes.[Objkey(iPage, startId)].Name}", "", iPage)
+                    | _ ->
+                        let sNode = nodes.[Objkey(iPage, startId)]
+                        let eNode = nodes.[Objkey(iPage, endId)]
+                        let sName = if nodes.ContainsKey(sNode.Key) then sNode.Name else ""
+                        let eName = if nodes.ContainsKey(eNode.Key) then eNode.Name else ""
 
-                    if endId = 0u then
-                        conn.ErrorConnect(ErrID._16, $"{nodes.[Objkey(iPage, startId)].Name}", "", iPage)
+                        if not (nodes.ContainsKey(sNode.Key)) then
+                            conn.ErrorConnect(ErrID._14, sName, "", iPage)
 
-                    let sNode = nodes.[Objkey(iPage, startId)]
-                    let eNode = nodes.[Objkey(iPage, endId)]
-                    let sName = if nodes.ContainsKey(sNode.Key) then sNode.Name else ""
-                    let eName = if nodes.ContainsKey(eNode.Key) then eNode.Name else ""
+                        if not (nodes.ContainsKey(eNode.Key)) then
+                            conn.ErrorConnect(ErrID._14, eName, "", iPage)
 
-                    if not (nodes.ContainsKey(sNode.Key)) then
-                        conn.ErrorConnect(ErrID._14, sName, "", iPage)
-
-                    if not (nodes.ContainsKey(eNode.Key)) then
-                        conn.ErrorConnect(ErrID._14, eName, "", iPage)
-
-                    if conn.IsNonDirectional() then
-                        dummys.AddDummys(sNode, eNode)
-                    else
-                        edges.Add(pptEdge (conn, Id, iPage, sNode, eNode)) |> ignore))
+                        if conn.IsNonDirectional() then
+                            dummys.AddDummys(sNode, eNode)
+                        else
+                            edges.Add(pptEdge (conn, Id, iPage, sNode, eNode)) |> ignore))
 
             updateAliasPPT (nodes, pages, parents)
 

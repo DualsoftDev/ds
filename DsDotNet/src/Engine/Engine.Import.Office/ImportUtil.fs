@@ -3,7 +3,7 @@ namespace Engine.Import.Office
 
 open System.Linq
 open System.Collections.Concurrent
-open PPTObjectModule
+open PPTConnectionModule
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Dual.Common.Core.FS

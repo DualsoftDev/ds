@@ -15,7 +15,7 @@ open Engine.Core
 open System.Runtime.CompilerServices
 
 [<AutoOpen>]
-module PPTObjectModule =
+module PPTConnectionModule =
 
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections (doc: PresentationDocument) =
@@ -99,14 +99,8 @@ module PPTObjectModule =
             conn.ErrorConnect(ErrID._6, startName, endName, iPage)
 
         if (existHead && existTail) then
-            if (headArrow && tailArrow) then
-                conn.ErrorConnect(ErrID._8, startName, endName, iPage)
-
-            if ((headArrow || tailArrow) |> not) then
+            if (not(headArrow || tailArrow)) then
                 conn.ErrorConnect(ErrID._9, startName, endName, iPage)
-
-            if (not headArrow && not tailArrow) then
-                conn.ErrorConnect(ErrID._10, startName, endName, iPage)
 
 
         //인과 타입과 <START, END> 역전여부

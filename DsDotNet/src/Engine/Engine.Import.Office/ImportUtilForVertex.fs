@@ -2,7 +2,7 @@ namespace Engine.Import.Office
 
 open System.Linq
 open System.Collections.Generic
-open PPTObjectModule
+open PPTConnectionModule
 open Dual.Common.Core.FS
 open Engine.Core
 open System

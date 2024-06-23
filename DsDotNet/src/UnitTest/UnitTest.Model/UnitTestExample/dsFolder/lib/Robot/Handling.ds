@@ -8,8 +8,8 @@
         HOME = { Flow.R1 ~ Flow.R1 }
         LOAD = { Flow.R2 ~ Flow.R2 }
         UNLOAD = { Flow.R3 ~ Flow.R3 }
-        LOAD <||> HOME;
-        LOAD <||> UNLOAD;
-        HOME <||> UNLOAD;
+        LOAD <|> HOME;
+        LOAD <|> UNLOAD;
+        HOME <|> UNLOAD;
     }
 }

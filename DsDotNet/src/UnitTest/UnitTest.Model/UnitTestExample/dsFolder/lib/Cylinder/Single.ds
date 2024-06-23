@@ -1,10 +1,10 @@
 [sys] Single = {
     [flow] Flow = {
-        SpringPower <||> ValveADV;
+        SpringPower <|> ValveADV;
     }
     [interfaces] = {
         ADV = { Flow.ValveADV ~ Flow.ValveADV }
         RET = { Flow.SpringPower ~ Flow.SpringPower }
-        RET <||> ADV;
+        RET <|> ADV;
     }
 }

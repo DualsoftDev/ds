@@ -650,18 +650,14 @@ module ImportU =
                                 
          
         [<Extension>]
-        static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =
+        static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
             
             doc.MakeFlows(sys) |> ignore
 
             //자동생성
-            if activeSys.IsSome && activeSys.Value = sys && not(isLib)
-            then 
-                            
-                if sys.HWButtons.IsEmpty() && sys.HWLamps.IsEmpty()
-                then
-                    sys.CreateGenBtnLamp()
-
+            if activeSys.IsSome && activeSys.Value = sys && not(isLib) && isCreateBtnLLib
+            then                 
+                sys.CreateGenBtnLamp()
             //수동생성
             //doc.MakeButtons(sys)
             //doc.MakeLamps(sys)

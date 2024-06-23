@@ -17,7 +17,7 @@ module RuntimeTest =
     let testPPT =  @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/testA/testMy/my.pptx"
     RuntimeDS.IP  <- "192.168.9.100"
     RuntimeDS.Package <- RuntimePackage.PCSIM
-    let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true}
+    let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateBtnLamp = false}
 
     let zipPath = ImportPPT.GetRuntimeZipFromPPT (testPPT, pptParms)
     let runtimeModel = new RuntimeModel(zipPath, pptParms.TargetType)

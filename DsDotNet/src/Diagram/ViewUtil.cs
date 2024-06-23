@@ -78,7 +78,7 @@ namespace Diagram.View.MSAGL
             });
 
 
-            _sys.GetVertices().OfType<Real>().Iter(real =>
+            _sys.GetRealVertices().Iter(real =>
             {
                 var og = (real.TagManager as VertexManager).OG;
                 UpdateOriginVertexTag(og, DicNode[real]);

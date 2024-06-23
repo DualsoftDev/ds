@@ -274,12 +274,12 @@ propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableB
     timeParam: ('M' ':' INTEGER | 'S' ':' INTEGER | 'D' ':' INTEGER); // average, std, onDelay msec
 
     actionsBlock: '[' 'actions' ']' '=' '{' (actionDef)* '}';
-    actionDef: actionKey '{' actionParams '}' SEMICOLON;
+    actionDef: actionKey '=' '{' actionParams '}' SEMICOLON;
     actionKey: identifier23;
-    actionParams: content ':' identifier1;
+    actionParams: content;
 
     scriptsBlock: '[' 'scripts' ']' '=' '{' (scriptDef)* '}';
-    scriptDef: scriptKey '{' scriptParams '}' SEMICOLON;
+    scriptDef: scriptKey '=' '{' scriptParams '}' SEMICOLON;
     scriptKey: identifier23;
     scriptParams: content;
 

@@ -375,9 +375,29 @@ module internal ToDsTextModule =
                 ] |> combineLines
 
 
+            let reals = system.GetRealVertices()
+            let finishedReals = reals.Filter(fun f->f.Finished)
+            let noTransDataReals =  reals.Filter(fun f->f.NoTransData)
+            let path3DReals = reals.Where(fun f->f.Path3D.IsSome)
+            let scriptReals = reals.Where(fun f->f.Script.IsSome)
 
-            let finishedReals = system.GetVertices().OfType<Real>().Filter(fun f->f.Finished)
-            let noTransDataReals =  system.GetVertices().OfType<Real>().Filter(fun f->f.NoTransData)
+            let path3Ds = 
+                [
+                    if path3DReals.Any() then
+                        yield $"{tab2}[actions] = {lb}"
+                        for real in path3DReals do
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{real.Path3D.Value}{rb};"
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
+
+            let scripts = 
+                [
+                    if scriptReals.Any() then
+                        yield $"{tab2}[scripts] = {lb}"
+                        for real in scriptReals do
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{real.Script.Value}{rb};"
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
 
             let finished = 
                 [
@@ -424,6 +444,9 @@ module internal ToDsTextModule =
                 yield $"{tab}[prop] = {lb}"
                 if safeties.Any()  then yield safeties
                 if layouts.Any()   then yield layouts
+
+                if path3Ds.Any()  then yield path3Ds
+                if scripts.Any()  then yield scripts
                 if finished.Any()  then yield finished
                 if disabled.Any()  then yield disabled
                 if noTransData.Any()  then yield noTransData

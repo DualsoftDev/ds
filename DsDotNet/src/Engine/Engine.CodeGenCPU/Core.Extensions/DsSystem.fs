@@ -138,7 +138,7 @@ module ConvertCpuDsSystem =
          
 
         member private x.GenerationRealAlarmMemory()  = 
-            for real in x.GetVertices().OfType<Real>() |> Seq.sortBy (fun c -> c.Name) do
+            for real in x.GetRealVertices() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> VertexMReal
                 rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty,DuBOOL, rm.Name, false, IOType.Memory, getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
@@ -222,13 +222,13 @@ module ConvertCpuDsSystem =
          
         member x.GenerationOrigins() =
             let getOriginInfos(sys:DsSystem) =
-                let reals = sys.GetVertices().OfType<Real>()
+                let reals = sys.GetRealVertices()
                 reals.Select(fun r->
                        let info = OriginHelper.GetOriginInfo r
                        r, info)
                        |> Tuple.toDictionary
             let origins = getOriginInfos x
-            for (rv: VertexMReal) in x.GetVertices().OfType<Real>().Select(fun f->f.TagManager :?> VertexMReal) do
+            for (rv: VertexMReal) in x.GetRealVertices().Select(fun f->f.TagManager :?> VertexMReal) do
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send

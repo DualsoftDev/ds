@@ -217,13 +217,14 @@ type FindExtension =
 
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
+    [<Extension>] static member GetRealVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Real>()
     
     [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
     [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =  
                     getVerticesOfSystem(x) |> ofCallForOperator
                     
     [<Extension>] static member GetVerticesOfRealOrderByName(x:DsSystem) = 
-                    x.GetVertices().OfType<Real>().OrderBy(fun r-> $"{r.Flow.Name}_{r.Name}" )
+                    x.GetRealVertices().OrderBy(fun r-> $"{r.Flow.Name}_{r.Name}" )
     [<Extension>] static member GetFlowsOrderByName(x:DsSystem) = 
                     x.Flows.OrderBy(fun f-> f.Name )
                     

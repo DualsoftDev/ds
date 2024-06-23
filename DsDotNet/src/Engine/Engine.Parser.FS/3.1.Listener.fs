@@ -713,6 +713,27 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     else
                         failwith $"Couldn't find target coin object name {getText (disabled)}"
 
+        let fillActions (system: DsSystem) (listActionCtx: List<dsParser.ActionsBlockContext>) =
+            for ctx in listActionCtx do
+                let list = ctx.Descendants<ActionDefContext>().ToList()
+                for defs in list do
+                    let v = defs.TryFindFirstChild<ActionKeyContext>() |> Option.get
+                    let fqdn = collectNameComponents v |> List.ofArray
+                    let real = (tryFindSystemInner system fqdn).Value :?> Real
+                    let path = defs.TryFindFirstChild<ActionParamsContext>() |> Option.get
+                    real.DsTime.Path3D <- path.GetText()|>Some
+
+        let fillScripts (system: DsSystem) (listScriptCtx: List<dsParser.ScriptsBlockContext>) =
+            for ctx in listScriptCtx do
+                let list = ctx.Descendants<ScriptDefContext>().ToList()
+                for defs in list do
+                    let v = defs.TryFindFirstChild<ScriptKeyContext>() |> Option.get
+                    let fqdn = collectNameComponents v |> List.ofArray
+                    let real = (tryFindSystemInner system fqdn).Value :?> Real
+                    let script = defs.TryFindFirstChild<ScriptParamsContext>() |> Option.get
+                    real.DsTime.Script <- script.GetText()|>Some
+
+
         let fillProperties (x: DsParserListener) (ctx: PropsBlockContext) =
             let theSystem = x.TheSystem
             //device, call에 layout xywh 채우기
@@ -721,6 +742,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             ctx.Descendants<FinishBlockContext>().ToList() |> fillFinished theSystem
             //Real에 noTransData 채우기
             ctx.Descendants<NotransBlockContext>().ToList() |> fillNoTrans theSystem
+            //Real에 actionsBlock 채우기
+            ctx.Descendants<ActionsBlockContext>().ToList() |> fillActions theSystem
+            //Real에 scripts 채우기
+            ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts theSystem
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
 

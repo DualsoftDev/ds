@@ -32,7 +32,7 @@ module PPTNodeModule =
 
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable devParam: (DevParam option * DevParam option) option = None
+        let mutable devParam: (DevParam option * DevParam option) option = None     // Input/Output param
         let mutable ifTX = ""
         let mutable ifRX = ""
         let mutable realGoingTime:float option = None   
@@ -46,8 +46,8 @@ module PPTNodeModule =
         let namePure = GetLastParenthesesReplaceName(nameNFunc, "") |> trimSpaceNewLine
         let nameTrim = String.Join('.', namePure.Split('.').Select(trimSpace)) |> trimSpaceNewLine
 
-        let getPostParam(x:DevParam) =
-            match x.DevValue, x.DevTime with 
+        let getPostParam(param:DevParam) =
+            match param.DevValue, param.DevTime with 
             | Some v, None -> $"{v}"
             | Some v, Some t -> $"{v}_{t}ms"
             | None, Some t -> $"{t}ms"

@@ -36,6 +36,7 @@
 		<Compile Include="Time\TimeTester.fs" />
 		<Compile Include="TestFixture.Engine.fs" />
 		<Compile Include="ImportOffice\pptTest.fs" />
+		<Compile Include="ImportOffice\HelloDSTest.fs" />
 		<Compile Include="Miscs\MiscTests.fs" />
 		<Compile Include="Model\Answers.fs" />
 		<Compile Include="Model\Model.fs" />

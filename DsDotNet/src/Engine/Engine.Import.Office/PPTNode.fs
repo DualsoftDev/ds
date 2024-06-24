@@ -1,12 +1,9 @@
 namespace Engine.Import.Office
 
-open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Packaging
 open System
 open System.Linq
 open DocumentFormat.OpenXml
-open DocumentFormat.OpenXml.Drawing
-open System.IO
 open Engine.Core
 open System.Collections.Generic
 open Microsoft.FSharp.Core
@@ -32,14 +29,11 @@ module PPTNodeModule =
         let condiHeadPageDefs = Dictionary<string, ConditionType>()
         let condiDefs = Dictionary<string, ConditionType>()
 
-        let mutable name = ""
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable disableCall = false
         let mutable devParam: (DevParam option * DevParam option) option = None
         let mutable ifTX = ""
         let mutable ifRX = ""
-        let mutable nodeType: NodeType = NodeType.REAL
 
         let trimNewLine (text: string) = text.Replace("\n", "")
         let trimSpace (text: string) = text.TrimStart(' ').TrimEnd(' ')
@@ -49,75 +43,13 @@ module PPTNodeModule =
         let namePure = GetLastParenthesesReplaceName(nameNFunc, "") |> trimSpaceNewLine
         let nameTrim = String.Join('.', namePure.Split('.').Select(trimSpace)) |> trimSpaceNewLine
 
-        let updateSafety (barckets: string) =
-            barckets.Split(';')
-                |> Seq.iter (fun f ->
-                    if f.Split('.').Length > 1 then
-                        safeties.Add(f) |> ignore
-                    else
-                        failwithf $"{ErrID._74}"
-                )
+        let getPostParam(x:DevParam) =
+            match x.DevValue, x.DevTime with 
+            | Some v, None -> $"{v}"
+            | Some v, Some t -> $"{v}_{t}ms"
+            | None, Some t -> $"{t}ms"
+            | None, None -> $""
 
-        let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
-            if (groupJob > 0) then
-                shape.ErrorName(ErrID._19, iPage)
-            else
-                let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
-                let copys = copyRows.Select(fun sys -> $"{pageTitle}_{sys}")
-
-                if copys.Distinct().length() <> copys.length() then
-                    Office.ErrorName(shape, ErrID._33, iPage)
-
-                copys
-                |> Seq.iter (fun copy ->
-                    copySystems.Add(copy, orgiSysName)
-                    jobInfos.Add(copy, [ copy ] |> HashSet))
-
-        let updateDeviceIF (text: string) =
-            ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
-
-            match GetSquareBrackets(shape.InnerText, false) with
-            | Some txrx ->
-                if (txrx.Contains('~')) then
-                    let tx = (txrx.Split('~')[0]) |> trimSpace
-                    let rx = (txrx.Split('~')[1]) |> trimSpace
-
-                    let getRealName (apiReal: string) =
-                        if apiReal = "_" || apiReal.IsEmpty() then
-                            failWithLog ErrID._43
-                        apiReal
-
-                    ifTX <- getRealName tx
-                    ifRX <- getRealName rx
-                else
-                    failWithLog ErrID._43
-            | None ->
-                failWithLog ErrID._53
-
-        let getBracketItems (name: string) =
-            name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")
-            |> Seq.map (fun f ->
-                match GetSquareBrackets("[" + f, true) with
-                | Some item -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), item
-                | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
-
-        let getNodeType() =
-            let nameNfunc = GetBracketsRemoveName(shape.InnerText)
-            let name = GetLastParenthesesReplaceName(nameNfunc, "")
-
-            match shape with
-            | s when s.CheckRectangle() ->
-                if name.Contains(".") then REALExF else REAL
-            | s when s.CheckHomePlate() -> IF_DEVICE
-            | s when s.CheckFoldedCornerPlate() -> OPEN_EXSYS_CALL
-            | s when s.CheckFoldedCornerRound() -> COPY_DEV
-            | s when s.CheckEllipse() -> CALL
-            | s when s.CheckBevelShapePlate() -> LAMP
-            | s when s.CheckBevelShapeRound() -> BUTTON
-            | s when s.CheckBevelShapeMaxRound() -> CONDITION
-            | s when s.CheckLayout() -> shape.ErrorName(ErrID._62, iPage)
-            | _ ->
-                failWithLog ErrID._1
 
         let getOperatorParam (name:string) = 
             try
@@ -153,22 +85,87 @@ module PPTNodeModule =
             match GetSquareBrackets(nameTrim, false) with
             | Some text -> 
                 let pureName = nameTrim |> GetBracketsRemoveName |> trimSpaceNewLine
-                if shape.CheckHomePlate() then pureName //AA [xxx ~ yyy] 
+                if shape.IsHomePlate() then pureName //AA [xxx ~ yyy] 
                 else $"{pureName}[{text}]"   //AA[4] 
             | None -> nameTrim
 
-        let getPostParam(x:DevParam) =
-            match x.DevValue, x.DevTime with 
-            | Some v, None -> $"{v}"
-            | Some v, Some t -> $"{v}_{t}ms"
-            | None, Some t -> $"{t}ms"
-            | None, None -> $""
+        let getNodeType() =
+            let nameNfunc = GetBracketsRemoveName(shape.InnerText)
+            let name = GetLastParenthesesReplaceName(nameNfunc, "")
+
+            match shape with
+            | s when s.IsRectangle() ->
+                if name.Contains(".") then REALExF else REAL
+            | s when s.IsHomePlate() -> IF_DEVICE
+            | s when s.IsFoldedCornerPlate() -> OPEN_EXSYS_CALL
+            | s when s.IsFoldedCornerRound() -> COPY_DEV
+            | s when s.IsEllipse() -> CALL
+            | s when s.IsBevelShapePlate() -> LAMP
+            | s when s.IsBevelShapeRound() -> BUTTON
+            | s when s.IsBevelShapeMaxRound() -> CONDITION
+            | s when s.IsLayout() -> shape.ErrorName(ErrID._62, iPage)
+            | _ ->
+                failWithLog ErrID._1
+
+        let nodeType = getNodeType()
+        let disableCall = shape.IsDashShape()
+        let name = getTrimName nameTrim
 
         do
+            let updateSafety (barckets: string) =
+                barckets.Split(';')
+                    |> Seq.iter (fun f ->
+                        if f.Split('.').Length > 1 then
+                            safeties.Add(f) |> ignore
+                        else
+                            failwithf $"{ErrID._74}"
+                    )
+
+            let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
+                if (groupJob > 0) then
+                    shape.ErrorName(ErrID._19, iPage)
+                else
+                    let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
+                    let copys = copyRows.Select(fun sys -> $"{pageTitle}_{sys}")
+
+                    if copys.Distinct().length() <> copys.length() then
+                        Office.ErrorName(shape, ErrID._33, iPage)
+
+                    copys
+                    |> Seq.iter (fun copy ->
+                        copySystems.Add(copy, orgiSysName)
+                        jobInfos.Add(copy, [ copy ] |> HashSet))
+
+            let updateDeviceIF (text: string) =
+                ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
+
+                match GetSquareBrackets(shape.InnerText, false) with
+                | Some txrx ->
+                    if (txrx.Contains('~')) then
+                        let tx = (txrx.Split('~')[0]) |> trimSpace
+                        let rx = (txrx.Split('~')[1]) |> trimSpace
+
+                        let getRealName (apiReal: string) =
+                            if apiReal = "_" || apiReal.IsEmpty() then
+                                failWithLog ErrID._43
+                            apiReal
+
+                        ifTX <- getRealName tx
+                        ifRX <- getRealName rx
+                    else
+                        failWithLog ErrID._43
+                | None ->
+                    failWithLog ErrID._53
+
+            let getBracketItems (name: string) =
+                name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")
+                |> Seq.map (fun f ->
+                    match GetSquareBrackets("[" + f, true) with
+                    | Some item -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), item
+                    | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
+
+
             try 
-                nodeType <- getNodeType() 
-                disableCall <- shape.IsDashShape()
-                name <- getTrimName nameTrim
                 nameCheck (shape, nodeType, iPage, namePure, nameNFunc)
                 match nodeType with
                 | CALL
@@ -209,9 +206,11 @@ module PPTNodeModule =
         member x.RealFinished = shape.IsUnderlined()
         member x.RealNoTrans = shape.IsStrikethrough()
         member x.Safeties = safeties
+
         member x.IfName = ifName
         member x.IfTX = ifTX
         member x.IfRX = ifRX
+
         member x.NodeType = nodeType
         member x.DisableCall = disableCall
         member x.PageTitle = pageTitle
@@ -333,14 +332,8 @@ module PPTNodeModule =
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)
 
     and pptEdge(conn: Presentation.ConnectionShape, iEdge: UInt32Value, iPage: int, sNode: pptNode, eNode: pptNode) =
-        let mutable reverse = false
-        let mutable causal: ModelingEdgeType = ModelingEdgeType.StartEdge
 
-        do
-            GetCausal(conn, iPage, sNode.Name, eNode.Name)
-            |> fun (c, r) ->
-                causal <- c
-                reverse <- r
+        let (causal:ModelingEdgeType), (reverse:bool) = GetCausal(conn, iPage, sNode.Name, eNode.Name)
 
         member x.PageNum = iPage
         member x.ConnectionShape = conn
@@ -355,16 +348,14 @@ module PPTNodeModule =
 
         member x.Text =
             let sName =
-                if sNode.Alias.IsSome then
-                    sNode.Alias.Value.Name
-                else
-                    sNode.Name
+                match sNode.Alias with
+                | Some a -> a.Name
+                | None -> sNode.Name
 
             let eName =
-                if eNode.Alias.IsSome then
-                    eNode.Alias.Value.Name
-                else
-                    eNode.Name
+                match eNode.Alias with
+                | Some a -> a.Name
+                | None -> eNode.Name
 
             if (reverse) then
                 $"{iPage};{eName}{causal.ToText()}{sName}"

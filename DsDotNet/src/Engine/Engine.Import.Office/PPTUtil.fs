@@ -197,23 +197,21 @@ module PPTUtil =
 
                 head = LineEndValues.None && tail = LineEndValues.None
 
+        /// shape 하부 속성 중에 outline 혹은 style 설정 되어 있고, geometry 가 있는지 여부 반환
         [<Extension>]
         static member CheckShape(shape: Shape) =
             let shapeProperties = shape.Descendants<ShapeProperties>().FirstOrDefault()
 
             shapeProperties <> null
-            && (shapeProperties.Descendants<Drawing.Outline>().FirstOrDefault() <> null
+            && (shapeProperties.Descendants<Drawing.Outline>().Any()
                 || shape.Descendants<ShapeStyle>().Any())
             && (shapeProperties.Descendants<Drawing.Transform2D>().Any()
                 || shapeProperties.Descendants<Drawing.PresetGeometry>().Any())
 
         [<Extension>]
         static member ShapeName(shape: Shape) =
-            let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault()
-
-            let prop =
-                shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault()
-
+            let shapeProperties = shape.Descendants<NonVisualShapeProperties>().First()
+            let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().First()
             prop.Name.Value
 
         [<Extension>]
@@ -297,7 +295,7 @@ module PPTUtil =
             System.Drawing.Rectangle(x, y, w, h)
 
         [<Extension>]
-        static member CheckRound(geometry: #Drawing.PresetGeometry) =
+        static member IsRound(geometry: #Drawing.PresetGeometry) =
             let shapeGuide =
                 geometry
                     .Descendants<Drawing.AdjustValueList>()
@@ -321,7 +319,7 @@ module PPTUtil =
                     .Descendants<Drawing.ShapeGuide>()
 
         [<Extension>]
-        static member CheckBevelShapeRound(shape: Shape) =
+        static member IsBevelShapeRound(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -340,7 +338,7 @@ module PPTUtil =
                
                     
         [<Extension>]
-        static member CheckBevelShapeMaxRound(shape: Shape) =
+        static member IsBevelShapeMaxRound(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -358,7 +356,7 @@ module PPTUtil =
                 else false
 
         [<Extension>]
-        static member CheckBevelShapePlate(shape: Shape) =
+        static member IsBevelShapePlate(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -376,10 +374,10 @@ module PPTUtil =
                 else false
 
         [<Extension>]
-        static member CheckBevelShape(shape: Shape) =
-                      shape.CheckBevelShapePlate()
-                      || shape.CheckBevelShapeRound()
-                      || shape.CheckBevelShapeMaxRound()
+        static member IsBevelShape(shape: Shape) =
+                      shape.IsBevelShapePlate()
+                      || shape.IsBevelShapeRound()
+                      || shape.IsBevelShapeMaxRound()
 
         [<Extension>]
         static member CheckDonutShape(shape: Shape) =
@@ -394,7 +392,7 @@ module PPTUtil =
 
 
         [<Extension>]
-        static member CheckEllipse(shape: Shape) =
+        static member IsEllipse(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -402,7 +400,7 @@ module PPTUtil =
                 if geometry = null 
                 then false
                 else 
-                    let round =  geometry.CheckRound() 
+                    let round =  geometry.IsRound() 
 
 
                     (geometry.Preset.Value = Drawing.ShapeTypeValues.Ellipse
@@ -413,7 +411,7 @@ module PPTUtil =
 
 
         [<Extension>]
-        static member CheckRectangle(shape: Shape) =
+        static member IsRectangle(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -421,7 +419,7 @@ module PPTUtil =
                 if geometry = null 
                 then false
                 else 
-                    let round =  geometry.CheckRound() 
+                    let round =  geometry.IsRound() 
                     (geometry.Preset.Value = Drawing.ShapeTypeValues.Rectangle
                         || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartProcess
                         || (geometry.Preset.Value = Drawing.ShapeTypeValues.RoundRectangle && round|> not)
@@ -429,7 +427,7 @@ module PPTUtil =
                         )
 
         [<Extension>] 
-        static member CheckFoldedCornerPlate(shape: Shape) =
+        static member IsFoldedCornerPlate(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -437,11 +435,11 @@ module PPTUtil =
                 if geometry = null 
                 then false
                 else 
-                    let round =  geometry.CheckRound() 
+                    let round =  geometry.IsRound() 
                     (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && not <| round)
 
         [<Extension>]
-        static member CheckFoldedCornerRound(shape: Shape) =
+        static member IsFoldedCornerRound(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -449,11 +447,11 @@ module PPTUtil =
                 if geometry = null 
                 then false
                 else 
-                    let round =  geometry.CheckRound() 
+                    let round =  geometry.IsRound() 
                     (geometry.Preset.Value = Drawing.ShapeTypeValues.FoldedCorner && round)
 
         [<Extension>]
-        static member CheckHomePlate(shape: Shape) =
+        static member IsHomePlate(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -461,7 +459,7 @@ module PPTUtil =
                 if geometry = null 
                 then false
                 else 
-                    let round =  geometry.CheckRound() 
+                    let round =  geometry.IsRound() 
 
                     (geometry.Preset.Value = Drawing.ShapeTypeValues.HomePlate && round
                      || geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartOffpageConnector)
@@ -483,7 +481,7 @@ module PPTUtil =
         //        geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartDecision
 
         [<Extension>]
-        static member CheckFlowChartPreparation(shape: Shape) =
+        static member IsFlowChartPreparation(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -502,7 +500,7 @@ module PPTUtil =
 
         // Layout  정의 블록
         [<Extension>]
-        static member CheckLayout(shape: Shape) =
+        static member IsLayout(shape: Shape) =
             if (Office.CheckShape(shape) |> not) then
                 false
             else
@@ -574,7 +572,7 @@ module PPTUtil =
 
 
         [<Extension>]
-        static member IsSlideLayoutBlanckType(slidePart: #SlidePart) =
+        static member IsSlideLayoutBlankType(slidePart: #SlidePart) =
             let slideLayoutType = slidePart.SlideLayoutPart.SlideLayout.Type
 
             if slideLayoutType = null then
@@ -617,15 +615,6 @@ module PPTUtil =
                 slidePart, show, page)
             |> Seq.sortBy (fun (slidePart, show, page) -> page)
 
-        /////슬라이드 Master 페이지를 반환 : 사용 안함
-        //[<Obsolete("Unused")>]
-        //[<Extension>]
-        //static member _slidesMasterAll(doc: PresentationDocument) =
-        //    doc.PresentationPart.SlideMasterParts
-        //    |> Seq.collect (fun slideMasterPart ->
-        //        slideMasterPart.SlideLayoutParts
-        //        |> Seq.map (fun slidePart -> slidePart.SlideMasterPart.SlideMaster))
-
         [<Extension>]
         static member SlidesSkipHide(doc: PresentationDocument) =
             Office.SlidesAll(doc)
@@ -635,30 +624,31 @@ module PPTUtil =
 
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
-        static member IsAbleShape(shape: Shape) =
-            (shape.CheckRectangle() //real
-             || shape.CheckEllipse() //call
-             || shape.CheckBevelShapeMaxRound() //condition
-             || shape.CheckBevelShapeRound() //btn
-             || shape.CheckBevelShapePlate() //lamp
-             || shape.CheckFoldedCornerRound() //COPY_DEV
-             || shape.CheckFoldedCornerPlate() //OPEN_EXSYS_LINK
-             || shape.CheckHomePlate() //interface
-             || shape.CheckFlowChartPreparation() //CallRX
-             || shape.CheckLayout())
+        static member IsValidShape(shape: Shape) =
+            (shape.IsRectangle() //real
+             || shape.IsEllipse() //call
+             || shape.IsBevelShapeMaxRound() //condition
+             || shape.IsBevelShapeRound() //btn
+             || shape.IsBevelShapePlate() //lamp
+             || shape.IsFoldedCornerRound() //COPY_DEV
+             || shape.IsFoldedCornerPlate() //OPEN_EXSYS_LINK
+             || shape.IsHomePlate() //interface
+             || shape.IsFlowChartPreparation() //CallRX
+             || shape.IsLayout())
 
+        /// 전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
-        static member Shapes(page: int, commonSlideData: CommonSlideData) =
+        static member GetShapeAndGeometries(commonSlideData: CommonSlideData) : (Shape * ShapeTypeValues) seq =
             let shapes = commonSlideData.ShapeTree.Descendants<Shape>()
 
             shapes
-            |> Seq.filter (fun shape -> shape.IsAbleShape())
+            |> Seq.filter (fun shape -> shape.IsValidShape())
             |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
             |> Seq.map (fun shape ->
                 let geometry =
                     shape.Descendants<Drawing.PresetGeometry>().First().Preset.Value
 
-                shape, page, geometry)
+                shape, geometry)
 
       
 
@@ -669,7 +659,8 @@ module PPTUtil =
             Office.SlidesSkipHide(doc)
             |> Seq.collect (fun (slidePart,_) ->
                 let page = slidePart |> Office.GetPage
-                Office.Shapes(page, slidePart.Slide.CommonSlideData))
+                Office.GetShapeAndGeometries(slidePart.Slide.CommonSlideData)
+                |> map(fun (shape, geometry) -> shape, page, geometry))
        
        ///전체 사용된 에러 체크 반환 (Text box 제외)
         [<Extension>]
@@ -738,7 +729,7 @@ module PPTUtil =
             let getShapes (slidePart:SlidePart) = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
             let layoutPages =
                 Office.SlidesSkipHide(doc)
-                |> Seq.filter (fun (slidePart ,_) -> getShapes(slidePart).Where(fun s->s.CheckLayout()).Any())
+                |> Seq.filter (fun (slidePart ,_) -> getShapes(slidePart).Where(fun s->s.IsLayout()).Any())
             layoutPages
 
 
@@ -763,7 +754,7 @@ module PPTUtil =
                         else 
                             layoutList.Add  layout|>ignore
 
-                        shapes.Where(fun s-> s.CheckLayout())        
+                        shapes.Where(fun s-> s.IsLayout())        
                               .Select(fun s-> layout, path, s.InnerText, s.GetPosition(doc.SlideSize()))
                     else
                         Office.ErrorPPT(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)

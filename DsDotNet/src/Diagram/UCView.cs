@@ -46,7 +46,6 @@ public partial class UcView : UserControl
     int node_attr_linewidthL = 1;
     int edge_attr_linewidthWeek = 1;
     int edge_attr_HeadSize = 6;
-    int edge_attr_linewidthStrong = 2;
     int nnode_label_fontsize = 6;
 
     private readonly Dictionary<string, Node> _dicDrawing = new();

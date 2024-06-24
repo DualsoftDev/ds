@@ -390,7 +390,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                        ||ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
                          && existing.IsNone
                     then
-                        let opCmd = ctxInfo.Names.CombineQuoteOnDemand()
+                        let opCmd = ctxInfo.Names.Combine()
                         match tryFindFunc system opCmd with
                         | Some func -> Call.Create(func, parent) |> ignore
                         | _ -> 
@@ -480,14 +480,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             }
             |> ignore
 
-        let createDeviceVariable (system: DsSystem) (devParam:DevParam) (jobName:string) =
+        let createDeviceVariable (system: DsSystem) (devParam:DevParam) (devName:string) =
             match devParam.DevName with
             | Some name ->
                 let address = devParam.DevAddress
                 let dataType = devParam.Type
                 let variable = createVariableByType name dataType
 
-                system.AddActionVariables (ActionVariable(name, address, jobName, dataType)) |> ignore
+                system.AddActionVariables (ActionVariable(name, address, devName, dataType)) |> ignore
                 options.Storages.Add(name, variable) |> ignore
 
             | None -> ()
@@ -556,16 +556,20 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                       failwithlog $"loading type error ({errText})device"
 
 
-                            createDeviceVariable system inParam $"{devName}_I"
-                            createDeviceVariable system outParm $"{devName}_O"
+                            let plcName_I = getPlcTagAbleName $"{devName}_I" options.Storages
+                            let plcName_O = getPlcTagAbleName $"{devName}_O" options.Storages
+
+
+                            createDeviceVariable system inParam plcName_I
+                            createDeviceVariable system outParm plcName_O
                     ]
 
 
                 assert (apiItems.Any())
                 
                 let jobParam = if jobOption.IsSome 
-                                 then getParserJobType jobOption.Value
-                                 else defaultJobParam
+                                 then getParserJobType $"{jobName}[{jobOption.Value}]"  
+                                 else JobParam(ActionNormal, JobTypeMulti.Single)
 
                 let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList)
                 job.UpdateJobParam(jobParam)

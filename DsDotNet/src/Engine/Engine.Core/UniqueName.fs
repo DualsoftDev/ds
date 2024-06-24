@@ -20,6 +20,18 @@ module UniqueName =
         Regex.Replace(name, $"^{prefix}", prefix, RegexOptions.IgnoreCase)
 
     let resetAll() = genDict.Clear()
+    
+[<AutoOpen>]
+module UniquePlcTagName =
+    let getPlcTagAbleName (name:string) (storages:Storages) =
+
+        let rec generateUntilValid(inputName:string) =
+            if storages.ContainsKey inputName then
+                generateUntilValid(UniqueName.generate inputName)
+            else
+                inputName
+
+        name.GetValidStorageName()|> generateUntilValid
 
 [<Extension>]
 type UniqueNameExt =

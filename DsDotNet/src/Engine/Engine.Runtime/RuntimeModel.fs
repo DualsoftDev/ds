@@ -9,7 +9,6 @@ open System.Collections.Generic
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open Engine.CodeGenHMI.ConvertHMI
-open DsStreamingModule
 type FilePath = string
 
 
@@ -19,7 +18,6 @@ type RuntimeModel(zipDsPath:FilePath, target)  =
     let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU model.System target
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
    
-    let dsStreaming = DsStreaming(model.System, PathManager.getDirectoryName(jsonPath|>DsFile))
     interface IDisposable with
         member x.Dispose() = x.Dispose()
 
@@ -27,7 +25,6 @@ type RuntimeModel(zipDsPath:FilePath, target)  =
     member x.SourceDsZipPath = zipDsPath
     member x.TagKindDescriptions = kindDescriptions
     member x.JsonPath = jsonPath
-    member x.DsStreaming = dsStreaming
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU

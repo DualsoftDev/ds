@@ -163,7 +163,7 @@ module internal ToDsTextModule =
                     then
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
                     else 
-                        yield $"{tab2}{c.Name.QuoteOnDemand()}({c.JobParam.ToText()}) = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{c.Name.QuoteOnDemand()}[{c.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
 
                 yield $"{tab}{rb}"
             elif system.Functions.Any() then
@@ -319,17 +319,17 @@ module internal ToDsTextModule =
             let safeties =
                 let getCallName (call:Call) =
                     match call.Parent with
-                    | DuParentReal r-> $"{r.Flow.Name}.{call.ParentNPureNames.Combine()}"
+                    | DuParentReal r-> $"{r.Flow.Name.QuoteOnDemand()}.{call.ParentNPureNames.Combine()}"
                     | DuParentFlow _ -> call.ParentNPureNames.Combine()
 
                 let safetyConditionName (sc:SafetyCondition) =
                     match sc with
                     | DuSafetyConditionReal real       -> real.ParentNPureNames.Combine()
-                    | DuSafetyConditionCall call       -> getCallName call
+                    | DuSafetyConditionCall call       -> (getCallName call)
                 let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
                     match sch with
                     | :? Real as real -> real.ParentNPureNames.Combine()
-                    | :? Call as call -> getCallName call
+                    | :? Call as call -> (getCallName call)
                     | _ -> failwithlog "ERROR"
 
                 [

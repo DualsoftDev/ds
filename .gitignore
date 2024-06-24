@@ -74,3 +74,4 @@ Grammar/CsParser/bin/
 *.osts
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/SetupRelease/data/Data.msi
 
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/dsLib/Cylinder/DoubleCylinder.ds

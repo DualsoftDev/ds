@@ -78,12 +78,13 @@ module ImportUtilForLib =
         | Single -> handleSingleJob tasks param
         | MultiAction (_, _, _, _) -> handleMultiActionJob tasks param
 
-        let job = Job(jobName, param.MySys, tasks |> Seq.toList)
-        job.UpdateJobParam(param.Node.JobParam)
-
+  
         let jobForCall =
-            match param.MySys.Jobs.TryFind(fun f -> f.Name = job.Name) with
-            | None -> param.MySys.Jobs.Add(job); job
+            match param.MySys.Jobs.TryFind(fun f -> f.Name = jobName) with
             | Some existingJob -> existingJob
+            | None -> 
+                let job = Job(jobName, param.MySys, tasks |> Seq.toList)
+                job.UpdateJobParam(param.Node.JobParam)
+                param.MySys.Jobs.Add(job); job
 
         Call.Create(jobForCall, param.Parent)

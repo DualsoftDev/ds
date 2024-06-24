@@ -30,9 +30,9 @@
         }
     }
     [jobs] = {
-        Flow_Body1_END_INTrue(XX) = { Flow_Body1.END(-:Boolean:True, -); }
-        Flow_Body2_END_INTrue(XX) = { Flow_Body2.END(-:Boolean:True, -); }
-        Flow_Paint_END_INTrue(XX) = { Flow_Paint.END(-:Boolean:True, -); }
+        Flow_Body1_END_INTrue = { Flow_Body1.END(-:Boolean:True, -); }
+        Flow_Body2_END_INTrue = { Flow_Body2.END(-:Boolean:True, -); }
+        Flow_Paint_END_INTrue = { Flow_Paint.END(-:Boolean:True, -); }
         Flow_Body1_UNLOAD = { Flow_Body1.UNLOAD(P00001, P00041); }
         Flow_Paint_START = { Flow_Paint.START(P00004, P00044); }
         Flow_Paint_START = { Flow_Paint.START(P00004, P00044); }

@@ -118,11 +118,18 @@ module ImportIOTable =
 
             let extractHardwareData (row: Data.DataRow) =
                 let name = $"{row.[(int) IOColumn.Name]}".Trim()
+                let flow = $"{row.[(int) IOColumn.Flow]}".Trim()
                 let inOutDataType = $"{row.[(int) IOColumn.DataType]}".Trim()
                 let inSymbol = $"{row.[(int) IOColumn.InSymbol]}".Trim()
                 let outSymbol = $"{row.[(int) IOColumn.OutSymbol]}".Trim()
                 let inAddress = $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAddress = $"{row.[(int) IOColumn.Output]}".Trim()
+                let name =
+                    if $"{TextXlsAllFlow}" = flow
+                    then name
+        
+                    else $"{flow}{TextFlowSplit}{name}"  
+
                 (name, inOutDataType, getSymbol inSymbol, getSymbol outSymbol, inAddress, outAddress)
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
@@ -187,17 +194,12 @@ module ImportIOTable =
                 if func = "" then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
 
-                if not(func.Contains("=="))
-                then 
-                    failWithLog $"연산자 함수는 비교(==) 구문이 있어야 합니다. {name} {func}"
-
-           
                 getFunctionNUpdate (name, name, func,   false,  page) |> ignore
 
 
             let updateBtn (row: Data.DataRow, btntype: BtnType, tableIO: Data.DataTable, page) =
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
-
+               
 
                 match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some btn ->

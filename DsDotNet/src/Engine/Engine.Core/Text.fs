@@ -52,6 +52,14 @@ module TextImpl =
            | [ n ] -> n
            | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
 
+    let validStorageName devName =
+                        devName
+                        |> Seq.map (fun c ->
+                                        match c with
+                                        | _ when Char.IsNumber(c) 
+                                                || isValidIdentifier(c.ToString())-> c.ToString()
+                                        | _ -> "_")
+                        |> String.concat ""
 // Extension methods for string manipulation
 [<Extension>]
 type TextExt =
@@ -63,3 +71,4 @@ type TextExt =
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier
     [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator nameComponents
     [<Extension>] static member CombineQuoteOnDemand (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator (nameComponents.Select(quoteOnDemand))
+    [<Extension>] static member GetValidStorageName (identifier:string) = validStorageName identifier

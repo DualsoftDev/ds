@@ -14,6 +14,9 @@ module DsText =
     let [<Literal>] TextFuncNotUsed= "NotUsed"  //함수 사용안함
     let [<Literal>] TextSkip      = "-"  //주소 스킵 처리
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
+    let [<Literal>] TextFlowSplit = "__" //PPT Table 정보 Flow Device 파싱 기준
+
+
     //edge
     let [<Literal>] TextStartEdge         = ">"
     let [<Literal>] TextResetEdge         = "|>"
@@ -28,6 +31,9 @@ module DsText =
 
     let [<Literal>] TextJobPush = "P"
     let [<Literal>] TextJobMulti = "N"
+
+                 
+
 
 [<AutoOpen>]
 module DsTextExport =
@@ -58,6 +64,7 @@ module DsTextExport =
     let [<Literal>] TextXlsHomingLamp        = "원위치중램프"
     let [<Literal>] TextXlsConditionReady    = "준비조건"
 
+    let [<Literal>] TextXlsAllFlow =  "ALL"
 [<AutoOpen>]
 module DsTextProperty =
 

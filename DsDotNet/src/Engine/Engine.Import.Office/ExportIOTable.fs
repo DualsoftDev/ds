@@ -100,9 +100,8 @@ module ExportIOTable =
 
         dt
 
-
     let splitNameForRow(name:string) = 
-        let head = name.Split("__")[0];   
+        let head = name.Split(TextFlowSplit)[0];   
         let tail = name[head.Length+2..]
         head, tail
 
@@ -110,7 +109,7 @@ module ExportIOTable =
             let inSym  =  dev.GetInParam(job.Name).Name
             let outSym =  dev.GetOutParam(job.Name).Name
             let devIndex =
-                let lastPart = dev.Name.Split("_").Last()
+                let lastPart = dev.DeviceName.Split("_").Last()
                 match System.Int32.TryParse(lastPart) with
                 | (true, value) -> value-1
                 | (false, _) -> 0
@@ -268,7 +267,7 @@ module ExportIOTable =
         let variRows = sys.Variables.Map(fun vari->
                 [ 
                   TextXlsVariable
-                  "ALL"
+                  TextXlsAllFlow
                   vari.Name
                   vari.Type.ToText()
                   if vari.VariableType = Mutable then  TextSkip else vari.InitValue 

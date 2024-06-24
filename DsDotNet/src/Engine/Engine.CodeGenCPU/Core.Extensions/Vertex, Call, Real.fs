@@ -47,7 +47,7 @@ module ConvertCpuVertex =
             | false -> false
             
 
-        member c.UsingTon  = (*c.IsJob &&*) c.TargetJob.OnDelayTime.IsSome
+        member c.UsingTon  = c.IsJob && c.TargetJob.OnDelayTime.IsSome //test ahn  real 의 타임으로 변경
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 

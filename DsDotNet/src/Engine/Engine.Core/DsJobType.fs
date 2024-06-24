@@ -44,21 +44,18 @@ module DsJobType =
                 let outAddrCnt = if outCnt.IsSome then outCnt.Value else arrayCnt
                 $"{TextJobMulti}{arrayCnt}({inAddrCnt}, {outAddrCnt})"
 
+    type JobParam(action: JobTypeAction, multi: JobTypeMulti) =
+        member val JobAction = action with get
+        member val JobMulti = multi with get
 
-    type JobParam = {
-        mutable JobAction: JobTypeAction 
-        mutable JobMulti: JobTypeMulti    
-    }
-    with 
-        member x.ToText() = 
+        member x.ToText() =
             let actionText = x.JobAction.ToText()
             let multiText = x.JobMulti.ToText()
             let parts = [actionText; multiText] |> List.filter (fun part -> not (String.IsNullOrEmpty(part)))
             String.Join("; ", parts)
 
-        member x.DeviceCount =  x.JobMulti.DeviceCount
-    
-    let defaultJobParam = { JobAction = ActionNormal; JobMulti = Single }
+        member x.DeviceCount =
+            x.JobMulti.DeviceCount
 
     let getJobTypeAction (name: string) =
         let endContents = GetSquareBrackets(name, false)
@@ -68,37 +65,36 @@ module DsJobType =
 
     let getJobTypeMulti (name: string) =
         let nameContents = GetBracketsRemoveName(name)
-        let endContents = GetSquareBrackets(name, false)
+        let endContents  = GetSquareBrackets(name, false)
+        if endContents.IsNone
+        then 
+            JobTypeMulti.Single
+        else 
+            let parseMultiActionString (str: string) =
+                let mainPart, optionalPart =
+                    if str.Contains("(") then
+                        let parts = str.Split([| '('; ')' |], System.StringSplitOptions.RemoveEmptyEntries)
+                        (parts.[0].TrimStart(TextJobMulti.ToCharArray()), if parts.Length > 1 then Some(parts.[1]) else None)
+                    else
+                        (str, None)
 
+                let cnt = mainPart |> int
+                let inCnt, outCnt =
+                    match optionalPart with
+                    | Some optPart ->
+                        let values = optPart.Split(',')
+                        let inCnt = if values.Length > 0 then Some(values.[0] |> int) else None
+                        let outCnt = if values.Length > 1 then Some(values.[1] |> int) else None
+                        (inCnt, outCnt)
+                    | None -> (None, None)
 
-        let parseMultiActionString (str: string) =
-            let mainPart, optionalPart =
-                if str.Contains("(") then
-                    let parts = str.Split([| '('; ')' |], System.StringSplitOptions.RemoveEmptyEntries)
-                    (parts.[0], if parts.Length > 1 then Some(parts.[1]) else None)
-                else
-                    (str, None)
+                cnt, inCnt, outCnt
 
-            let cnt = mainPart |> int
-            let inCnt, outCnt =
-                match optionalPart with
-                | Some optPart ->
-                    let values = optPart.Split(',')
-                    let inCnt = if values.Length > 0 then Some(values.[0] |> int) else None
-                    let outCnt = if values.Length > 1 then Some(values.[1] |> int) else None
-                    (inCnt, outCnt)
-                | None -> (None, None)
-
-            cnt, inCnt, outCnt
-
-        match endContents with
-        | Some s  ->
-            let cnt, inCnt, outCnt = parseMultiActionString s
+            let cnt, inCnt, outCnt = parseMultiActionString endContents.Value
             if cnt < 1 then
                 failWithLog $"MultiAction Count >= 1 : {name}"
 
             JobTypeMulti.MultiAction (nameContents, cnt, inCnt, outCnt)
-        | _ -> JobTypeMulti.Single
 
 
     let getParserJobType(name: string) =
@@ -113,4 +109,5 @@ module DsJobType =
             else
                 jobTypeAction <- getJobTypeAction trimmedName
 
-        { JobAction = jobTypeAction; JobMulti = jobTypeMulti }
+
+        JobParam(jobTypeAction, jobTypeMulti)

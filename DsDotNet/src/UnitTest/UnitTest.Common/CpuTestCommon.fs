@@ -16,50 +16,6 @@ open System.Linq
 module CpuTestUtil =
 
 
-    type CpuTestSample() =
-        let LoadSampleSystem()  =
-            let systemRepo   = ShareableSystemRepository ()
-            let referenceDir = @$"{__SOURCE_DIRECTORY__}/../UnitTest.Model"
-            let sys = parseText systemRepo referenceDir Program.CpuTestText
-            RuntimeDS.System <- sys
-            applyTagManager (sys, Storages(), WINDOWS)
-            sys
-
-        let sys               = LoadSampleSystem()
-        let vertices          = sys.GetVertices()
-        let flow              = sys.Flows.Find(fun f->f.Name = "MyFlow")
-        let realInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Seg1") :?> Real
-        let callInFlow        = flow.Graph.Vertices.First(fun f->f.Name = "Ap") :?> Call
-        let callInReal        = realInFlow.Graph.Vertices.First(fun f->f.Name = "Am") :?> Call
-
-        let aliasCallInReal   = realInFlow.Graph.Vertices.First(fun f->f.Name = "aliasCallInReal") :?> Alias
-        let aliasCallInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasCallInFlow") :?> Alias
-        let aliasRealInFlow   = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealInFlow") :?> Alias
-        let aliasRealExInFlow = flow.Graph.Vertices.First(fun f->f.Name = "aliasRealExInFlow") :?> Alias
-
-        let callTypeAll       = vertices.OfType<Call>().Cast<Vertex>()
-        let coinTypeAll       = vertices.Except(vertices.OfType<Real>().Cast<Vertex>())
-        let realTypeAll       = vertices.OfType<Real>()
-        let vertexAll         = vertices
-        do
-            sys.GenerationIO()
-            sys.GenerationOrigins()
-
-        member x.Sys    =  sys
-        member x.Flows  =  sys.Flows
-        member x.RInF   =  realInFlow.V
-        member x.CInF   =  callInFlow.V
-        member x.CInR   =  callInReal.V
-        member x.ACinR  =  aliasCallInReal.V
-        member x.ACInF  =  aliasCallInFlow.V
-        member x.ARInF  =  aliasRealInFlow.V
-        member x.AREInF =  aliasRealExInFlow.V
-        member x.Coins  =  coinTypeAll.Select(getVM)
-        member x.Reals  =  realTypeAll.Select(getVM)
-        member x.Calls  =  callTypeAll.Select(getVM)
-        member x.ALL    =  vertexAll.Select(getVM)
-        member x.GenerationIO() =  sys.GenerationIO()
-
     let doCheck (commentedStatement:CommentedStatement) =
         let st = commentedStatement.Statement
         st.GetSourceStorages()

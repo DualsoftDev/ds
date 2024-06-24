@@ -297,6 +297,7 @@ module CoreModule =
         member x.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member x.ApiName = (x:>FqdnObject).QualifiedName
+        member x.ApiStgName = $"{deviceName}_{api.Name}"
         member x.DeviceName = deviceName
 
         member x.InParams = inParams 
@@ -319,12 +320,11 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (name:string, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
-        member x.JobParam:JobParam = defaultJobParam 
-        member x.UpdateJobParam(jobParam:JobParam) = 
-            x.JobParam.JobAction <- jobParam.JobAction
-            x.JobParam.JobMulti <- jobParam.JobMulti
+        let mutable jobParam = JobParam(ActionNormal, JobTypeMulti.Single)
+        member x.JobParam = jobParam
+        member x.UpdateJobParam(newJobParam: JobParam) =
+            jobParam <- newJobParam
 
-        member x.Upda:JobParam = defaultJobParam 
         member x.ActionType = x.JobParam.JobAction 
         member x.AddressInCount = x.JobParam.JobMulti.AddressInCount
         member x.AddressOutCount = x.JobParam.JobMulti.AddressOutCount

@@ -108,6 +108,7 @@ module InterfaceClass =
         match txt.ToLower() with
         | TextXlsAddress -> XlsAddress
         | TextXlsVariable -> XlsVariable
+        | TextXlsConst -> XlsConst
         | TextXlsCommand -> XlsCommand
         | TextXlsOperator -> XlsOperator
         | TextXlsAutoBTN -> XlsAutoBTN

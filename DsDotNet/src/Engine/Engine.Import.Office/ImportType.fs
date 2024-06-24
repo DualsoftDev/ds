@@ -73,7 +73,7 @@ module ImportType =
                 let devName = row.[(int) IOColumn.Name].ToString().Split(".")[0]  
                 let apiName = row.[(int) IOColumn.Name].ToString().Split(".")[1]  
         
-                $"{flowName}__{devName}".QuoteOnDemand() + "." + apiName.QuoteOnDemand()
+                $"{flowName}{TextFlowSplit}{devName}".QuoteOnDemand() + "." + apiName.QuoteOnDemand()
         else 
             name
 

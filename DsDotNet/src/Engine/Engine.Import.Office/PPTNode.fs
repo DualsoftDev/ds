@@ -265,8 +265,8 @@ module PPTNodeModule =
         member x.DisableCall = disableCall
         member x.PageTitle = pageTitle
         member x.Position = shape.GetPosition(slieSize)
-        member x.OperatorName = pageTitle+"__"+name.Replace(".", "_")
-        member x.CommandName  = pageTitle+"__"+name.Replace(".", "_")
+        member x.OperatorName = pageTitle+TextFlowSplit+name.Replace(".", "_")
+        member x.CommandName  = pageTitle+TextFlowSplit+name.Replace(".", "_")
         member x.IsCall = nodeType = CALL
         member x.IsCallDevParam = nodeType = CALL && devParam.IsSome 
         member x.IsRootNode = rootNode
@@ -334,14 +334,14 @@ module PPTNodeModule =
             let parts = GetLastParenthesesReplaceName(name, "").Split('.')  
             match parts.Length with
             | 2 -> 
-                let job = $"{pageTitle}__{TrimSpace(parts.[0])}"  |> GetBracketsRemoveName
+                let job = $"{pageTitle}{TextFlowSplit}{TrimSpace(parts.[0])}"  |> GetBracketsRemoveName
                 let api = TrimSpace(parts.[1]) |> GetBracketsRemoveName
                 pageTitle, job, api
             | 3 -> 
-                let job = $"{TrimSpace(parts.[0])}__{TrimSpace(parts.[1])}"  |> GetBracketsRemoveName
+                let job = $"{TrimSpace(parts.[0])}{TextFlowSplit}{TrimSpace(parts.[1])}"  |> GetBracketsRemoveName
                 let api = TrimSpace(parts.[2]) |> GetBracketsRemoveName
                 parts.[0], job, api
-            | _ -> failwith "Invalid format in name"
+            | _ -> shape.ErrorShape("Action이름 규격을 확인하세요.", iPage)  
 
 
         member x.CallName = 
@@ -364,8 +364,7 @@ module PPTNodeModule =
             let flow, job, api = x.CallFlowNJobNApi
             let jobTypeAction = getJobTypeAction (api) 
             let jobTypeMulti  = getJobTypeMulti (name.Substring(0, (name.Length-api.Length-1)))
-            
-            { JobAction = jobTypeAction; JobMulti = jobTypeMulti}
+            JobParam (jobTypeAction, jobTypeMulti)
       
         member val Id = shape.GetId()
         member val Key = Objkey(iPage, shape.GetId())

@@ -303,12 +303,14 @@ type PPTDocExt =
 
         let callJobDic = 
             doc.Nodes
-            |> Seq.filter (fun node -> node.IsCall && not (node.IsFunction))
+            |> Seq.filter (fun node -> node.IsCall)
+            |> Seq.filter (fun node -> not (node.IsFunction))
             |> Seq.map (fun node ->
                     if doc.PageNames.Contains(node.FlowName) then
                         let flowNodes = doc.Nodes
                                            .Where(fun f->f.PageTitle = node.FlowName)
                                            .Where(fun f->f.NodeType = CALL)
+                                           .Where(fun f->f.IsFunction|>not)
                         if flowNodes.Any(fun n->n.CallDevName = node.CallDevName) then
                             node.CallName, node.JobParam.JobMulti.DeviceCount
                         else

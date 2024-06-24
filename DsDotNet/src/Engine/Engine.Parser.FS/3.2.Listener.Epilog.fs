@@ -163,8 +163,8 @@ module EtcListenerModule =
                                           .Tap(fun flowName ->
                                               verifyM
                                                   $"Flow [{flowName}] not exists!"
-                                                  (system.Flows.Any(fun f -> f.Name = flowName)))
-                                          .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName))
+                                                  (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
+                                          .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
                                           .ToHashSet()
 
                                   return targetCndType, cndName, inParam, outParam, flows

@@ -99,7 +99,7 @@ module ImportU =
 
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 let flowName = if page.PageNum = pptHeadPage then $"{sysName}_Page1" else flowName
-                if flowName.Contains(".")||flowName.Contains("__") then
+                if flowName.Contains(".")||flowName.Contains(TextFlowSplit) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._20, page.Title, page.PageNum, 0u, "")
 
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
@@ -115,7 +115,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}_{b.Key}", "", "", flow)))
+                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}{TextFlowSplit}{b.Key}", "", "", flow)))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
@@ -149,7 +149,7 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}_{l.Key}", "", "", Some flow)))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}{TextFlowSplit}{l.Key}", "", "", Some flow)))
             
             headPageLamps
             |> Seq.iter (fun node ->
@@ -162,8 +162,13 @@ module ImportU =
             doc.Nodes
             |> Seq.filter (fun node -> node.CondiDefs.any())
             |> Seq.iter (fun node ->
-                let flow = dicFlow.[node.PageNum]
-                node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow)))
+                try
+
+                    let flow = dicFlow.[node.PageNum]
+                    node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow))
+                with _ -> 
+                    Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
+                    )
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.CondiHeadPageDefs.any())
@@ -203,13 +208,7 @@ module ImportU =
                     addChannelPoints dev node
                     )
 
-            doc.Nodes
-            |> Seq.filter (fun node -> node.IsFunction)
-            |> Seq.filter (fun node -> mySys.LoadedSystems.any(fun f->f.Name = node.CallName))
-            |> Seq.iter (fun node ->
-                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallName)
-                    addChannelPoints dev node
-            )
+           
 
         //real call alias  만들기
         [<Extension>]
@@ -457,7 +456,7 @@ module ImportU =
                         let dev = (safety.Split('.')[0]).Trim()
                         let api = (safety.Split('.')[1]).Trim()
 
-                        $"{flow.Name}__{dev}_{api}"
+                        $"{flow.Name}{TextFlowSplit}{dev}_{api}"
 
                     elif safety.Split('.').Length  = 3
                     then
@@ -465,7 +464,7 @@ module ImportU =
                         let dev = (safety.Split('.')[1]).Trim()
                         let api = (safety.Split('.')[2]).Trim()
 
-                        $"{flow}__{dev}_{api}"
+                        $"{flow}{TextFlowSplit}{dev}_{api}"
                     else 
                         failWithLog $"error safety name format ({safety})"
 
@@ -476,16 +475,15 @@ module ImportU =
                 |> iter (fun safeFullName ->
                     if not (mySys.Jobs.Select(fun f -> f.Name).Contains safeFullName) then
                         node.Shape.ErrorName($"{ErrID._28}(err:{safeFullName})", node.PageNum)
-                        
-                        
                         )
 
                 safeties
                 |> map (fun safeFullName -> dicQualifiedNameSegs.[safeFullName])
                 |> iter (fun safeCondV ->
-                    match dicVertex.[node.Key] |> box with
+                    match dicVertex.[node.Key].GetPure() |> box with
                     | :? ISafetyConditoinHolder as holder -> holder.SafetyConditions.Add(DuSafetyConditionCall(safeCondV)) |> ignore
-                    | _ -> failwithlog "Error"))
+                    | _ -> node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
+                    )
 
         [<Extension>]
         static member MakeApiTxRx(doc: pptDoc) =
@@ -664,9 +662,10 @@ module ImportU =
             if activeSys.IsSome && activeSys.Value = sys && not(isLib) && isCreateBtnLLib
             then                 
                 sys.CreateGenBtnLamp()
+
             //수동생성
-            //doc.MakeButtons(sys)
-            //doc.MakeLamps(sys)
+            doc.MakeButtons(sys)
+            doc.MakeLamps(sys)
 
             doc.MakeConditions(sys)
             //segment 리스트 만들기

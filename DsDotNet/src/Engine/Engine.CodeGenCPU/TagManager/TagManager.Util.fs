@@ -11,24 +11,6 @@ module TagManagerUtil =
 
     let addressExist address = address  <> TextSkip && address <> TextAddrEmpty
 
-    let getPlcTagAbleName (name:string) (storages:Storages) =
-        let getValidName (name:string) =
-            name 
-            |> Seq.map (fun c ->
-                match c with
-                | _ when Char.IsNumber(c) 
-                        || c.IsValidIdentifier() -> c.ToString()
-                        //|| ['['; ']'].ToResizeArray().Contains(c)   //arrayType 오인
-                | _ -> "_")
-            |> String.concat ""
-
-        let rec generateUntilValid(inputName:string) =
-            if storages.ContainsKey inputName then
-                generateUntilValid(UniqueName.generate inputName)
-            else
-                inputName
-
-        name |> getValidName |> generateUntilValid
 
 
     /// fillAutoAddress : PLC 에 내릴 때, 자동으로 주소를 할당할 지의 여부
@@ -82,25 +64,24 @@ module TagManagerUtil =
         then None
         else
             let name =
-                let nameValid = name.Replace(".", "_")
                 match bridgeType with
                 | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
                 | Device ->   match DU.tryGetEnumValue<ActionTag>(tagKind).Value with
-                              | ActionTag.ActionIn     -> $"{nameValid}_I"
-                              | ActionTag.ActionOut    -> $"{nameValid}_O"
+                              | ActionTag.ActionIn     -> $"{name}_I"
+                              | ActionTag.ActionOut    -> $"{name}_O"
                               | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
                               | _ -> failwithlog "error: ActionTag create "
 
                 | Button | Lamp | Condition
                     ->   match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with
-                              | HwSysTag.HwSysIn      -> $"{nameValid}_I"
-                              | HwSysTag.HwSysOut     -> $"{nameValid}_O"
+                              | HwSysTag.HwSysIn      -> $"{name}_I"
+                              | HwSysTag.HwSysOut     -> $"{name}_O"
                               | _ -> failwithlog "error: HwSysTag create "
-       
-            if stg.ContainsKey name       
-            then stg[name] :?> ITag  |> Some
+
+            let plcName = getPlcTagAbleName name stg
+            if stg.ContainsKey plcName       
+            then stg[plcName] :?> ITag  |> Some
             else 
-                let plcAddrName= getPlcTagAbleName name stg
-                let t = createTagByBoxedValue plcAddrName {Object = duType.DefaultValue()} tagKind address sys fqdn
+                let t = createTagByBoxedValue plcName {Object = duType.DefaultValue()} tagKind address sys fqdn
                 stg.Add(t.Name, t)
                 Some t

@@ -348,10 +348,10 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
-        jobName ('('jobTypeOption')')? '=' '{' (callApiDef ';')*'}' (SEMICOLON)?;
+        jobName ('['jobTypeOption']')? '=' '{' (callApiDef ';')*'}' (SEMICOLON)?;
 
     jobName: identifier1;
-    jobTypeOption : identifier1;
+    jobTypeOption : content;
 
     callApiDef: (interfaceCall devParamInOut | interfaceCall);
 

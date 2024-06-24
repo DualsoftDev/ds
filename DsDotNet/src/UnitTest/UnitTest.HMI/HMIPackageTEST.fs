@@ -14,7 +14,8 @@ module HMIPackageTEST =
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
     [<Fact>]
     let ``HMIPackage Create Test`` () = 
-        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true}
+        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateBtnLamp = true}
+        
         
         clearNFullSlotHwSlotDataTypes()
         let dsPPT = ImportPPT.GetDSFromPPTWithLib (testPath, false, pptParms)

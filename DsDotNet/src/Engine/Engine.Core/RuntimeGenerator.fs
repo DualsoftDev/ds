@@ -13,17 +13,11 @@ module RuntimeGeneratorModule =
         | XGK 
         | AB 
         | MELSEC
-    //type RuntimePackage = 
-    //    | PC 
-    //    | PCSIM 
-    //    | PLC
-    //    | PLCSIM 
     type RuntimePackage = 
         | PC 
-        | PLC 
+        | PCSIM 
+        | PLC
         | PLCSIM 
-        | Simulation 
-        | Developer 
     with
         member x.IsPackagePC() =
             match x with
@@ -38,18 +32,17 @@ module RuntimeGeneratorModule =
 
         member x.IsPackageSIM() =
             match x with
-            | Simulation | Developer -> true
+            | PCSIM | PLCSIM -> true
             | _ -> false
 
-    let RuntimePackageList = [ PC; PLC; PLCSIM;  Simulation; Developer]
+    let RuntimePackageList = [ PC;PCSIM; PLC; PLCSIM;  ]
 
     let ToRuntimePackage s =
         match s with
         | "PC" -> PC
+        | "PCSIM" -> PCSIM
         | "PLC" -> PLC
         | "PLCSIM" -> PLCSIM
-        | "Simulation" -> Simulation
-        | "Developer" -> Developer
         | _ -> failwithlogf $"Error {getFuncName()}"
 
     let InitStartMemory = 1000
@@ -67,7 +60,7 @@ module RuntimeGeneratorModule =
         | MELSEC  -> failwithlog $"{target} not support"
    
     type RuntimeDS() =
-        static let mutable runtimePackage = Simulation
+        static let mutable runtimePackage = PCSIM
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
         static let mutable callTimeout = 15000u

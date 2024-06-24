@@ -212,7 +212,7 @@ module ConvertCPU =
             sys.GenerationIO()
 
             match RuntimeDS.Package with
-            | Simulation -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당 및 체크 스킵
+            | PCSIM -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당 및 체크 스킵
             | _->  
                 checkDuplicatesNNullAddress sys
                 //checkErrExternalStartRealExist sys //hmi 시작 가능
@@ -223,11 +223,11 @@ module ConvertCPU =
         else checkErrRealResetExist(sys)
 
         [
-            if RuntimeDS.Package = Simulation
+            if RuntimeDS.Package = PCSIM
             then
                 yield! sys.Y1_SystemSimulationForFlow()
 
-            if isActive && (RuntimeDS.Package = Simulation || RuntimeDS.Package = PLCSIM)
+            if isActive && RuntimeDS.Package.IsPackageSIM()
             then 
                 yield! emulationDevice sys
 

@@ -82,7 +82,14 @@ module ImportUtilVertex =
                 | Single when mySys.LoadedSystems.TryFind(fun d -> d.Name = jobName).IsSome -> 
                     getCallFromLoadedSys mySys node jobName apiName parentWrapper
                 | _  ->
-                    addNewCall(jobName, apiName, mySys, parentWrapper, node)
+                    let callParams = {
+                        MySys = mySys
+                        Node = node
+                        JobName = jobName
+                        ApiName = apiName
+                        Parent = parentWrapper
+                        }
+                    addNewCall callParams
 
 
         node.UpdateCallProperty(call)

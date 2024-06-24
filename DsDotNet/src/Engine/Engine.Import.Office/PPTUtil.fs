@@ -661,15 +661,18 @@ module PPTUtil =
                 let page = slidePart |> Office.GetPage
                 Office.GetShapeAndGeometries(slidePart.Slide.CommonSlideData)
                 |> map(fun (shape, geometry) -> shape, page, geometry))
-       
+
+
        ///전체 사용된 에러 체크 반환 (Text box 제외)
         [<Extension>]
         static member CheckValidShapes(slidePart:SlidePart, page :int, ableShapes :Shape seq) =
+            // Assume IsTextBox is a method that determines if a shape is a text box
+            let isNonTextShape (shape: Shape) =
+                not (shape.IsTitleBox()) && not (shape.Descendants<TextBody>().Any())
 
             let allShapes = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
             allShapes
-                |> Seq.filter (fun f -> f.IsTitleBox() |> not)
-                |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
+                |> Seq.filter isNonTextShape
                 |> Seq.except (ableShapes)
                 |> Seq.iter   (fun f -> f.ErrorShape(ErrID._39, page))
 

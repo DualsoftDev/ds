@@ -240,6 +240,10 @@ module ImportU =
                         dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
+                        if node.RealGoingTime.IsSome then 
+                            real.DsTime.AGV <- node.RealGoingTime.Value
+                        if node.RealDelayTime.IsSome then 
+                            real.DsTime.TON <- node.RealDelayTime.Value
                         real.Finished <- node.RealFinished
                         real.NoTransData <- node.RealNoTrans
                         dicVertex.Add(node.Key, real))

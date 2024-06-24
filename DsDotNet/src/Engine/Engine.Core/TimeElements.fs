@@ -6,9 +6,9 @@ open System
 module TimeElements =
     
     type DsTime() =
-        member val AGV = 1.0f with get, set //  Average msec
-        member val STD = 0.1f with get, set //  Standard Deviation msec
-        member val TON = 0.0f with get, set //  On Delay msec
+        member val AGV = 1.0 with get, set //  Average msec
+        member val STD = 0.1 with get, set //  Standard Deviation msec
+        member val TON = 0.0 with get, set //  On Delay msec
         member val Script:string option= None with get, set //EXTERNAL SCRIPT
         member val Path3D:string option= None with get, set //3D PATH
 

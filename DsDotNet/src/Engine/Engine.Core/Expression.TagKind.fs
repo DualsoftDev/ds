@@ -189,11 +189,11 @@ type TagKindExt =
                                                         )
 
             |EventVertex (_, _, kind) ->  kind.IsOneOf(
-                                            //VertexTag.ready,
-                                            VertexTag.going       
-                                            //, VertexTag.finish       
-                                            //, VertexTag.homing       
-                                            , VertexTag.pause       
+                                            VertexTag.ready,
+                                            VertexTag.going ,       
+                                            VertexTag.finish,        
+                                            VertexTag.homing,       
+                                            VertexTag.pause       
                                             )
                                           
             |EventApiItem (_, _, _) -> false

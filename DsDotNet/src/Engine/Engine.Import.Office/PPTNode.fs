@@ -8,6 +8,7 @@ open Engine.Core
 open System.Collections.Generic
 open Microsoft.FSharp.Core
 open Dual.Common.Core.FS
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module PPTNodeModule =
@@ -34,6 +35,8 @@ module PPTNodeModule =
         let mutable devParam: (DevParam option * DevParam option) option = None
         let mutable ifTX = ""
         let mutable ifRX = ""
+        let mutable realGoingTime:float option = None   
+        let mutable realDelayTime:float option = None   
 
         let trimNewLine (text: string) = text.Replace("\n", "")
         let trimSpace (text: string) = text.TrimStart(' ').TrimEnd(' ')
@@ -119,7 +122,50 @@ module PPTNodeModule =
                             safeties.Add(f) |> ignore
                         else
                             failwithf $"{ErrID._74}"
-                    )
+                    )    
+
+          
+            
+
+            let updateRealTime (contents: string) =
+                let parseMilliseconds (timeStr: string) : float option =
+                    let msPattern = @"(\d+(\.\d+)?)ms"
+                    let secPattern = @"(\d+(\.\d+)?)sec"
+                    let minPattern = @"(\d+(\.\d+)?)min"
+
+                    let matchRegex pattern =
+                        let m = Regex.Match(timeStr, pattern)
+                        if m.Success then
+                            let value = m.Groups.[1].Value |> float
+                            Some value
+                        else None
+
+                    match matchRegex msPattern with
+                    | Some ms -> Some ms
+                    | None ->
+                        match matchRegex secPattern with
+                        | Some sec -> Some (sec * 1000.0)
+                        | None ->
+                            match matchRegex minPattern with
+                            | Some min -> Some (min * 60.0 * 1000.0)
+                            | None -> None
+
+                let parts = (GetLastParenthesesContents contents).Split(',')
+                let goingT, delayT = 
+                    match parts.Length with
+                    | 1 ->
+                        let firstTime = parts.[0].Trim() |> parseMilliseconds
+                        (firstTime, None)
+                    | 2 ->
+                        let firstTime = parts.[0].Trim() |> parseMilliseconds
+                        let secondTime = parts.[1].Trim() |> parseMilliseconds
+                        (firstTime, secondTime)
+                    | _ -> (None, None)
+    
+                // Assume realGoingTime and realDelayTime are defined elsewhere as mutable variables
+                realGoingTime <- goingT
+                realDelayTime <- delayT
+
 
             let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
                 if (groupJob > 0) then
@@ -173,6 +219,8 @@ module PPTNodeModule =
                     match GetSquareBrackets(shape.InnerText, true) with
                     | Some text -> updateSafety text
                     | None -> ()
+                    if nodeType = REAL then
+                        updateRealTime shape.InnerText
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
                 | OPEN_EXSYS_CALL
                 | OPEN_EXSYS_LINK
@@ -207,6 +255,8 @@ module PPTNodeModule =
         member x.RealNoTrans = shape.IsStrikethrough()
         member x.Safeties = safeties
 
+        member x.RealGoingTime = realGoingTime
+        member x.RealDelayTime = realDelayTime
         member x.IfName = ifName
         member x.IfTX = ifTX
         member x.IfRX = ifRX

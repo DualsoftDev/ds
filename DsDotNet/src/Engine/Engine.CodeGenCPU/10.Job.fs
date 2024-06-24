@@ -26,7 +26,7 @@ type Job with
 
 
                     let outParam = td.GetOutParam(j.Name)
-                    if j.ActionType = JobActionType.Push 
+                    if j.ActionType = Push 
                     then 
                         if td.ExistOutput
                         then yield (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, getFuncName())

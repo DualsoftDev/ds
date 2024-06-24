@@ -70,7 +70,7 @@ namespace Engine.Export.Office
                     callName = $"{deviceName}\n.{c.TargetJob.DeviceDefs.First().ApiItem.Name}";
 
 
-                if (c.TargetJob.ActionType.IsMultiAction)
+                if (c.TargetJob.JobParam.JobMulti.IsMultiAction)
                     return $"{callName}[{c.TargetJob.DeviceDefs.Count()}]";
                 else
                     return callName;

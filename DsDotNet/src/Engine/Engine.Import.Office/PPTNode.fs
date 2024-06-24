@@ -205,7 +205,6 @@ module PPTNodeModule =
         member x.PageNum = iPage
         member x.Shape = shape
         member x.CopySys = copySystems
-        member x.JobInfos = jobInfos
         member x.JobCallNames = jobInfos.Keys
         member x.RealFinished = shape.IsUnderlined()
         member x.RealNoTrans = shape.IsStrikethrough()
@@ -234,8 +233,8 @@ module PPTNodeModule =
             else "" |> defaultDevParam     
 
         member x.JobName =
-            let flow, dev, Api = x.CallFlowNDevNApi
-            let pureJob = $"{dev}_{Api}"
+            let flow, job, Api = x.CallFlowNJobNApi
+            let pureJob = $"{job}_{Api}"
             let jobName =
                 if x.IsCallDevParam then
                     let inParam = devParam.Value |> fst 
@@ -278,60 +277,47 @@ module PPTNodeModule =
                     d.AddOrUpdateOutParam(x.JobName , (x.DevParam.Value |> snd).Value)
                 )
       
-        member x.CallFlowNDevNApi = 
+        member x.CallFlowNJobNApi = 
                 
             if (nodeType <> CALL) then
                 shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
 
-
-            let parts = name.Split('.')
+            let parts = GetLastParenthesesReplaceName(name, "").Split('.')  
             match parts.Length with
             | 2 -> 
-                let dev = $"{pageTitle}__{TrimSpace(parts.[0])}"
-                let api = GetBracketsRemoveName(TrimSpace(parts.[1]))
-                pageTitle, dev, api
+                let job = $"{pageTitle}__{TrimSpace(parts.[0])}"  |> GetBracketsRemoveName
+                let api = TrimSpace(parts.[1]) |> GetBracketsRemoveName
+                pageTitle, job, api
             | 3 -> 
-                let dev = $"{TrimSpace(parts.[0])}__{TrimSpace(parts.[1])}"
-                let api = GetBracketsRemoveName(TrimSpace(parts.[2]))
-                parts.[0], dev, api
+                let job = $"{TrimSpace(parts.[0])}__{TrimSpace(parts.[1])}"  |> GetBracketsRemoveName
+                let api = TrimSpace(parts.[2]) |> GetBracketsRemoveName
+                parts.[0], job, api
             | _ -> failwith "Invalid format in name"
 
 
         member x.CallName = 
         
-            let flow, dev, api = x.CallFlowNDevNApi
-            $"{dev}_{api}"
+            let flow, job, api = x.CallFlowNJobNApi
+            $"{job}_{api}"
 
 
         member x.CallDevName = 
-            let flow, dev, api = x.CallFlowNDevNApi
-            dev    
+            let flow, job, api = x.CallFlowNJobNApi
+            job    
             
         member x.FlowName = 
-            let flow, dev, api = x.CallFlowNDevNApi
+            let flow, job, api = x.CallFlowNJobNApi
             flow
 
-        member x.JobOption =
+        member x.JobParam = 
             if (nodeType <> CALL || x.IsFunction) then
                 shape.ErrorName($"JobOption not support {nodeType}({name}) type", iPage)
-            let name = name.Split('.')[1] |> trimSpace
-            match GetSquareBrackets(name, false) with
-            | Some apiType ->
-                match apiType with
-                | TextJobNoneRX -> JobActionType.NoneRx
-                | TextJobNoneTX -> JobActionType.NoneTx
-                | TextJobNoneTRX -> JobActionType.NoneTRx
-                | TextJobPush -> JobActionType.Push
-                | _ -> if isStringDigit apiType then JobActionType.MultiAction(name.Split('[')[0], int apiType)
-                       else JobActionType.Normal
-            | None -> JobActionType.Normal
-
-        member x.CallApiName =
-            if (nodeType = CALL && x.IsFunction) then
-                shape.ErrorName($"not support {nodeType}({name}) type", iPage)
-            let apiName = name.Split('.')[1] |> trimSpace
-            apiName
-
+            let flow, job, api = x.CallFlowNJobNApi
+            let jobTypeAction = getJobTypeAction (api) 
+            let jobTypeMulti  = getJobTypeMulti (name.Substring(0, (name.Length-api.Length-1)))
+            
+            { JobAction = jobTypeAction; JobMulti = jobTypeMulti}
+      
         member val Id = shape.GetId()
         member val Key = Objkey(iPage, shape.GetId())
         member val Name = name with get, set

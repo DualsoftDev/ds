@@ -26,9 +26,6 @@ module DsText =
     let [<Literal>] TextSelfResetRev      = "<|="
 
 
-    let [<Literal>] TextJobNoneRX = "XR"
-    let [<Literal>] TextJobNoneTX = "XT"
-    let [<Literal>] TextJobNoneTRX = "XX"
     let [<Literal>] TextJobPush = "P"
     let [<Literal>] TextJobMulti = "N"
 

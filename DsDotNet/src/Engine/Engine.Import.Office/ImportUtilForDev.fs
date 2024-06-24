@@ -55,7 +55,7 @@ module ImportUtilForDev =
             dev
 
 
-    let getLibraryPath (mySys:DsSystem) loadedName apiName =
+    let getNewDevice (mySys:DsSystem) loadedName apiName =
         let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
         let curDir = currentFileName  |> Path.GetDirectoryName
 
@@ -104,7 +104,7 @@ module ImportUtilForDev =
     let getAutoGenDevTask  (autoGenSys:LoadedSystem) loadedName jobName apiName = 
         let referenceSystem = autoGenSys.ReferenceSystem
         let defaultParams = "" |> defaultDevParam, "" |> defaultDevParam
-        Some (createTaskDevUsingApiName referenceSystem jobName loadedName apiName defaultParams)
+        createTaskDevUsingApiName referenceSystem jobName loadedName apiName defaultParams
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
         let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams

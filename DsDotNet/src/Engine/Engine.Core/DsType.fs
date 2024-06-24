@@ -60,29 +60,7 @@ module DsType =
         | ErrGoingOrigin
 
     type ExternalTagSet = ExternalTag * IStorage
-        
-    type JobActionType = 
-        | Normal  // RXs(ActionIn) 인터페이스가 관찰될때까지 ON
-        | NoneRx  // 인터페이스 관찰 없는 타입
-        | NoneTx  // 인터페이스 지시 없는 타입
-        | NoneTRx // 인터페이스 지시관찰 없는 타입
-        | Push    // reset 인터페이스(Plan Out) 관찰될때까지 ON 
-        | MultiAction of string*int // 동시동작 개수 받기
-        member x.DeviceCount = 
-            match x with
-            | MultiAction (_, cnt) -> cnt
-            | _ -> 1
-
-        member x.ToText() = 
-            match x with
-            | Normal   -> ""
-            | NoneRx  -> TextJobNoneRX
-            | NoneTx  -> TextJobNoneTX
-            | NoneTRx -> TextJobNoneTRX
-            | Push    -> TextJobPush
-            | MultiAction (_, cnt)-> $"{TextJobMulti}{cnt}"
-
-
+    
     [<Flags>]    
     type ScreenType =
         | CCTV = 0
@@ -142,30 +120,3 @@ module DsType =
 
     let isStringDigit (str: string) =
         str |> Seq.forall Char.IsDigit
-
-    let getJobActionType (name: string) =
-        let nameContents = GetBracketsRemoveName(name)
-        let endContents = GetSquareBrackets(name, false)
-
-        let isMultiActionString (str: string) =
-            if str.Length > 1 then
-                let head = str[0].ToString()
-                let tail = str.Substring(1)
-                head = TextJobMulti && tail |> isStringDigit
-            else
-                false
-              
-        match endContents with
-        | Some e when e = TextJobNoneTRX -> JobActionType.NoneTRx
-        | Some e when e = TextJobNoneTX  -> JobActionType.NoneTx
-        | Some e when e = TextJobNoneRX  -> JobActionType.NoneRx
-        | Some e when e = TextJobPush    -> JobActionType.Push
-        | Some s when s |> isMultiActionString ->
-            let cnt = s.Substring(1) |> int
-            if cnt < 2 then
-                failWithLog $"MultiAction Count >= 2 : {name}"
-
-            JobActionType.MultiAction (nameContents, cnt) // 숫자일 경우 MultiAction으로 변환
-        | Some t -> failwithf "Unknown ApiActionType: %s" t
-        | None -> JobActionType.Normal
-

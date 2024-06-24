@@ -239,30 +239,25 @@ module DsAddressModule =
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
             
-        let devJobSet = sys.Jobs.SelectMany(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
-                            |> Seq.sortBy (fun (dev,_) ->dev.ApiName)
-
         let vs = sys.GetVerticesOfCoins()
         let mutable extCnt = 0
-        for (dev, job) in devJobSet  do
-            let coins = vs.GetVerticesOfJobCoins(job)
-            //외부입력 전용 확인하여 출력 스킵 및 입력 선두주소 고정
-            if dev.IsRootFlowDev(coins) 
-            then
-                if dev.InAddress = TextAddrEmpty
-                then
-                    dev.InAddress  <-  getExternalTempMemory(target, extCnt)
-                    extCnt <- extCnt+1
-                dev.OutAddress <- TextSkip
-            else 
-                let inSkip, outSkip =
-                    match job.ActionType with
-                    |NoneRx -> true,false
-                    |NoneTx -> false,true
-                    |NoneTRx -> true,true
-                    |_ ->  false,false
+        for job in sys.Jobs do
+            job.DeviceDefs |> Seq.iteri(fun i dev ->
+                let inSkip = job.JobParam.JobMulti.AddressInCount > i |>not
+                let outSkip = job.JobParam.JobMulti.AddressOutCount > i |>not
                 dev.InAddress  <- getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target)
                 dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
+                    
+                let coins = vs.GetVerticesOfJobCoins(job)
+                if dev.IsRootFlowDev(coins) 
+                then
+                    if dev.InAddress = TextAddrEmpty && not(inSkip)
+                    then
+                        dev.InAddress  <-  getExternalTempMemory(target, extCnt)
+                        extCnt <- extCnt+1
+
+                    dev.OutAddress <- TextSkip
+            )
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

@@ -328,7 +328,7 @@ type PPTDocExt =
                                            .Where(fun f->f.PageTitle = node.FlowName)
                                            .Where(fun f->f.NodeType = CALL)
                         if flowNodes.Any(fun n->n.CallDevName = node.CallDevName) then
-                            node.CallName, node.JobOption
+                            node.CallName, node.JobParam.JobMulti.DeviceCount
                         else
                             failWithLog $"{node.CallDevName} 해당 디바이스가 없습니다."
                     else
@@ -337,7 +337,7 @@ type PPTDocExt =
 
         let getDevCount (devName) = 
             if callJobDic.ContainsKey(devName) 
-            then callJobDic.[devName].DeviceCount 
+            then callJobDic.[devName] 
             else 1
             
         doc.Nodes

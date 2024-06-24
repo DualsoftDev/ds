@@ -158,12 +158,12 @@ module internal ToDsTextModule =
                         c.DeviceDefs
                         |> Seq.map (fun d-> printDev d (c.Name))
                           
-                    let jobItemText =  jobItems.JoinWith("; ") + ";"
-                    if c.ActionType = JobActionType.Normal
+                    let jobItemText = jobItems.JoinWith("; ") + ";"
+                    if c.JobParam.ToText() = ""
                     then
                         yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
                     else 
-                        yield $"{tab2}{c.Name.QuoteOnDemand()}({c.ActionType.ToText()}) = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{c.Name.QuoteOnDemand()}({c.JobParam.ToText()}) = {lb} {jobItemText} {rb}"  
 
                 yield $"{tab}{rb}"
             elif system.Functions.Any() then

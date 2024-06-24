@@ -317,9 +317,17 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, system:DsSystem, tasks:TaskDev seq, jobActionType:JobActionType) =
+    type Job (name:string, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
-        member x.ActionType:JobActionType = jobActionType
+        member x.JobParam:JobParam = defaultJobParam 
+        member x.UpdateJobParam(jobParam:JobParam) = 
+            x.JobParam.JobAction <- jobParam.JobAction
+            x.JobParam.JobMulti <- jobParam.JobMulti
+
+        member x.Upda:JobParam = defaultJobParam 
+        member x.ActionType = x.JobParam.JobAction 
+        member x.AddressInCount = x.JobParam.JobMulti.AddressInCount
+        member x.AddressOutCount = x.JobParam.JobMulti.AddressOutCount
         member x.System = system
         member x.DeviceDefs = tasks
         member x.OnDelayTime = 

@@ -562,13 +562,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 assert (apiItems.Any())
+                
+                let jobParam = if jobOption.IsSome 
+                                 then getParserJobType jobOption.Value
+                                 else defaultJobParam
 
+                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList)
+                job.UpdateJobParam(jobParam)
 
-                let jobType= if jobOption.IsSome 
-                             then getJobActionType $"{jobName}[{jobOption.Value}]"
-                             else JobActionType.Normal
-
-                let job = Job(jobName, system, apiItems.Cast<TaskDev>() |> Seq.toList, jobType)
                 job |> system.Jobs.Add
 
 

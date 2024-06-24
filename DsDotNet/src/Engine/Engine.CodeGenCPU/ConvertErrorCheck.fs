@@ -45,7 +45,7 @@ module ConvertErrorCheck =
                     if api.TX.IsNull() then
                         failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
-                    if td.OutAddress <> TextSkip && coin.TargetJob.ActionType = JobActionType.Push 
+                    if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction = Push 
                     then 
                         if coin.MutualResetCoins.isEmpty()
                         then 
@@ -163,7 +163,7 @@ module ConvertErrorCheck =
                 if td.ExistOutput
                 then 
                     let outParam = td.GetOutParam(j.Name)
-                    if j.ActionType = JobActionType.Push 
+                    if j.ActionType = Push 
                     then 
                         if outParam.Type = DuBOOL
                             then 

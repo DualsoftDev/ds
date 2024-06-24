@@ -192,10 +192,11 @@ module ImportU =
             |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.filter (fun node -> not(node.IsFunction))
             |> Seq.iter (fun node ->
-                match node.JobOption with
-                | MultiAction (_,cnt) -> 
+                match node.JobParam.JobMulti with
+                | JobTypeMulti.MultiAction(_,cnt,_,_) -> 
                     for i in [1..cnt] do 
-                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = (getMultiDeviceName node.CallDevName i))
+                        let multiName = getMultiDeviceName node.CallDevName  i
+                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = multiName)
                         addChannelPoints dev node
                 | _ ->
                     let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallDevName)
@@ -580,8 +581,9 @@ module ImportU =
             calls
                 .Where(fun call -> not (loads.Contains(call.CallName)))
                 .Select(fun call ->
+                    let flow, job, api = call.CallFlowNJobNApi
                     { DevName = call.CallName
-                      ApiName = call.CallApiName })
+                      ApiName = api })
 
 
         [<Extension>]
@@ -640,7 +642,7 @@ module ImportU =
                                 .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
                                 .GroupBy(fun n -> n.CallName)
             calls.Iter(fun call -> 
-                let callEachCounts = call.Select(fun f->f.JobOption.DeviceCount)
+                let callEachCounts = call.Select(fun f->f.JobParam.DeviceCount)
                 if callEachCounts.Distinct().Count() > 1
                 then
                     let errNode = call.Select(fun f->f).First() 

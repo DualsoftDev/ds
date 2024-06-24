@@ -109,13 +109,15 @@ module ExportIOTable =
     let rowIOItems (dev: TaskDev, job: Job) target =
             let inSym  =  dev.GetInParam(job.Name).Name
             let outSym =  dev.GetOutParam(job.Name).Name
-               
-            let inSkip, outSkip =
-                match job.ActionType with
-                |NoneRx -> true,false
-                |NoneTx -> false,true
-                |NoneTRx -> true,true
-                |_ ->  false,false
+            let devIndex =
+                let lastPart = dev.Name.Split("_").Last()
+                match System.Int32.TryParse(lastPart) with
+                | (true, value) -> value-1
+                | (false, _) -> 0
+
+            let inSkip =  job.AddressInCount > devIndex |>not
+            let outSkip =  job.AddressOutCount > devIndex |>not
+
             let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
             [ TextXlsAddress
               flow

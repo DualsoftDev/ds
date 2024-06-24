@@ -1,4 +1,3 @@
-// Copyright (c) Dualsoft  All Rights Reserved.
 namespace Engine.Import.Office
 
 open System.Collections.Generic
@@ -14,64 +13,67 @@ open LibraryLoaderModule
 [<AutoOpen>]
 module ImportUtilForLib =
 
-    let addLibraryNCall
-        (
-            libFilePath,
-            loadedName,
-            apiName,
-            mySys: DsSystem,
-            parentWrapper:ParentWrapper,
-            node: pptNode,
-            autoTaskDev: TaskDev option
-        ) =
+    let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) =
+        match mySys.LoadedSystems.TryFind(fun f -> f.Name = name) with
+        | Some f -> f.ReferenceSystem
+        | None -> ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
 
-        let parent =parentWrapper
+    let processSingleTask (tasks: HashSet<TaskDev>) (mySys: DsSystem) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (devParams: DeviceLoadParameters) (node: pptNode) (jobName: string) =
+        tasks.Add(getLoadedTasks mySys devOrg loadedName apiPureName devParams node jobName) |> ignore
+
+    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string) =
+        match autoGenSys with
+        | Some autoGenSys -> getAutoGenDevTask autoGenSys loadedName jobName apiName |> Some
+        | None -> None
+
+    let addSingleJobTask (tasks: HashSet<TaskDev>) (task: TaskDev option) =
+        match task with
+        | Some t ->
+            t.InAddress <- ""
+            t.OutAddress <- ""
+            tasks.Add(t) |> ignore
+        | None -> ()
+
+    let getLibraryPathsAndParams (mySys: DsSystem) (loadedName: string) (apiNameForLib: string) =
+        let libFilePath, autoGenSys = getNewDevice mySys loadedName apiNameForLib
+        let libRelPath = PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
+        let getDevParams name = getParams (libFilePath, libRelPath, name, mySys, DuDevice, ShareableSystemRepository())
+        (libFilePath, autoGenSys, getDevParams)
+
+    let processTask (tasks: HashSet<TaskDev>) (mySys: DsSystem) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getDevParams: string -> DeviceLoadParameters) (apiPureName: string) (node: pptNode) =
+        let devOrg = getDeviceOrganization mySys libFilePath loadedName
+        let devParams = getDevParams loadedName
+        let task = getTaskDev autoGenSys loadedName node.JobName apiPureName
+        addSingleJobTask tasks task
+        if task.IsNone then
+            processSingleTask tasks mySys devOrg loadedName apiPureName devParams node node.JobName
+
+    let handleSingleJob (tasks: HashSet<TaskDev>) (mySys: DsSystem) (loadedName: string) (apiPureName: string) (node: pptNode) =
+        let libFilePath, autoGenSys, getDevParams = getLibraryPathsAndParams mySys loadedName apiPureName
+        processTask tasks mySys loadedName libFilePath autoGenSys getDevParams apiPureName node
+
+    let handleMultiActionJob (tasks: HashSet<TaskDev>) (mySys: DsSystem) (loadedName: string) (apiPureName: string) (node: pptNode) =
+        for devIndex in 1 .. node.JobParam.DeviceCount do
+            let devName = getMultiDeviceName loadedName devIndex
+            let libFilePath, autoGenSys, getDevParams = getLibraryPathsAndParams mySys devName apiPureName
+            processTask tasks mySys devName libFilePath autoGenSys getDevParams apiPureName node
+
+    let addNewCall (loadedName: string, apiName: string, mySys: DsSystem, parent: ParentWrapper, node: pptNode) =
         let jobName = node.JobName
-        let job =
-            if autoTaskDev.IsSome
-            then
-                let tasks = HashSet<TaskDev>()
-                autoTaskDev.Value.InAddress <- ("")
-                autoTaskDev.Value.OutAddress<- ("")
-                tasks.Add(autoTaskDev.Value)|>ignore
-                Job(jobName, mySys, tasks |> Seq.toList, JobActionType.Normal)
-            else 
-                let libRelPath =
-                    PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
+        let apiNameForLib = GetBracketsRemoveName(apiName).Trim()
+        let apiPureName = GetBracketsRemoveName(apiName).Trim()
+        let tasks = HashSet<TaskDev>()
 
-                let getDevParams(name) =
-                    getParams (libFilePath, libRelPath, name, mySys, DuDevice, ShareableSystemRepository())
+        match node.JobParam.JobMulti with
+        | Single -> handleSingleJob tasks mySys loadedName apiPureName node
+        | MultiAction (_, _, _, _) -> handleMultiActionJob tasks mySys loadedName apiPureName node
 
-                let apiPureName = GetBracketsRemoveName(apiName).Trim()
-                //test ahn
-                let devOrg = //기존에 ADV 디바이스 로딩되어있으면 mySys 사용, 아니면 새로 로딩
-                        ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
-                if not (devOrg.ApiItems.any (fun f -> f.Name = apiPureName)) then
-                    node.Shape.ErrorName(ErrID._49, node.PageNum)
-
-                let tasks = HashSet<TaskDev>()
-                match  node.JobOption with
-                | MultiAction (_, cnt) ->  
-                    for i in [1..cnt] do //기존에 ADV 디바이스 로딩되어있으면 mySys 사용, 아니면 새로 로딩
-                        let devOrg = if i = 1 then devOrg
-                                        else ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
-
-                        let mutiName = getMultiDeviceName loadedName i
-                        let devParams = getDevParams mutiName
-
-                        tasks.Add(getLoadedTasks mySys devOrg mutiName apiPureName devParams node jobName)|>ignore
-                | _->
-                    tasks.Add(getLoadedTasks mySys devOrg loadedName apiPureName (getDevParams(loadedName)) node jobName)|>ignore
-                Job(jobName, mySys, tasks |> Seq.toList, node.JobOption)
+        let job = Job(jobName, mySys, tasks |> Seq.toList)
+        job.UpdateJobParam(node.JobParam)
 
         let jobForCall =
-            let tempJob = mySys.Jobs.FirstOrDefault(fun f->f.Name = job.Name)
-            if tempJob.IsNull()
-            then mySys.Jobs.Add(job);job
-            else tempJob
-        
-        Call.Create(jobForCall, parent)
+            match mySys.Jobs.TryFind(fun f -> f.Name = job.Name) with
+            | None -> mySys.Jobs.Add(job); job
+            | Some existingJob -> existingJob
 
-                
-        
-         
+        Call.Create(jobForCall, parent)

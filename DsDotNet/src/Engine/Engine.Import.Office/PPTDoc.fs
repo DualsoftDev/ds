@@ -19,7 +19,7 @@ open DocumentFormat.OpenXml.Presentation
 [<AutoOpen>]
 module PPTDocModule =
 
-    let pptHeadPage = 1
+    let [<Literal>] pptHeadPage = 1
 
     let getSystemName (name: string) =
         let fileName = PathManager.getFileNameWithoutExtension (name.ToFile())
@@ -111,9 +111,9 @@ module PPTDocModule =
         // Recursively get IDs of real and call shapes used in the group and its subgroups
         let rec getGroupMembers (subG: GroupShape, shapeIds: HashSet<uint32>) =
             subG.Descendants<Shape>()
-            |> Seq.filter (fun shape -> shape.CheckRectangle() 
-                                        || shape.CheckEllipse() 
-                                        || shape.CheckFlowChartPreparation())
+            |> Seq.filter (fun shape -> shape.IsRectangle() 
+                                        || shape.IsEllipse() 
+                                        || shape.IsFlowChartPreparation())
             |> Seq.iter (fun shape -> shapeIds.Add(shape.GetId().Value) |> ignore)
 
             subG.Descendants<GroupShape>()
@@ -138,14 +138,6 @@ module PPTDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
-    (* 사용 안함 *)
-    //// Save subgroups to dicUsedSub recursively
-    //let rec SubGroup (page, subG: GroupShape, dicUsedSub: HashSet<GroupShape>) =
-    //    subG.Descendants<GroupShape>()
-    //    |> Seq.iter (fun childGroup ->
-    //        dicUsedSub.Add(childGroup) |> ignore
-    //        SubGroup(page, childGroup, dicUsedSub))
-
     type pptDoc(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument) =
 
         let pages = Dictionary<SlidePart, pptPage>()
@@ -154,24 +146,17 @@ module PPTDocModule =
         let dummys = HashSet<pptDummy>()
         let edges = HashSet<pptEdge>()
 
-        //let _masterPages = Dictionary<int, SlideMaster>()
-
         do
-            (* 사용 안함 *)
-            //let _slideMasters = Office._slidesMasterAll(doc)
-            //_slideMasters
-            //|> Seq.iter (fun slideMaster -> _masterPages.Add(_masterPages.Count + 1, slideMaster) |> ignore)
-
+            // 숨김 페이지, blank page 제외한 모든 페이지
             let validSlidesAll =  
                 Office.SlidesSkipHide(doc)
-                |> Seq.filter (fun (s, _) -> not (s.IsSlideLayoutBlanckType()))
+                |> Seq.filter (fun (s, _) -> not (s.IsSlideLayoutBlankType()))
             
 
             if validSlidesAll |> Seq.exists (fun (slidePart, page) -> page = pptHeadPage) |> not then
                 Office.ErrorPPT(Page, ErrID._12, "Title Slide", 0, 0u)
 
-            let headSlide = validSlidesAll |> Seq.find (fun (slidePart, page) -> page = pptHeadPage) |> fst
-
+            // pages 구성 (및 제목 누락 페이지 에러)
             validSlidesAll 
             |> Seq.iter (fun (slidePart, page) ->
                 if slidePart.PageTitle() = "" then
@@ -179,6 +164,7 @@ module PPTDocModule =
                 else 
                     pages.Add(slidePart, pptPage (slidePart, page, true)) |> ignore)
 
+            // 페이지 별 group 정보
             let allGroups =
                 Groups(doc)
                 |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
@@ -186,9 +172,11 @@ module PPTDocModule =
 
             let shapes =
                 Office.PageShapes(doc)
-                |> Seq.filter (fun (shape, page, _) -> 
-                    page <> pptHeadPage && pages.Values |> Seq.exists (fun w -> w.PageNum = page)
-                    || page = pptHeadPage && shape.CheckBevelShape())
+                |> Seq.filter (fun (shape, page, _) ->
+                    if page = pptHeadPage then
+                        shape.IsBevelShape()
+                    else
+                        pages.Values |> Seq.exists (fun w -> w.PageNum = page))
 
             pages.Values
             |> Seq.iter (fun pptPage -> 
@@ -200,15 +188,9 @@ module PPTDocModule =
                 |> Seq.filter (fun (slide, _) -> slide.GetPage() <> pptHeadPage)
                 |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
             
-            let dicShape = Dictionary<int, HashSet<Shape>>()
-
-            shapes 
-            |> Seq.iter (fun (shape, page, _) ->
-                if not (dicShape.ContainsKey(page)) then
-                    dicShape.Add(page, HashSet<Shape>()) |> ignore
-                dicShape.[page].Add(shape) |> ignore)
-
             let slideSize = Office.SlideSize(doc)
+            let headSlide = validSlidesAll |> Seq.find (fun (slidePart, page) -> page = pptHeadPage) |> fst
+
             shapes
             |> Seq.iter (fun (shape, page, _) ->
                 let pagePPT = pages.Values |> Seq.find (fun w -> w.PageNum = page)

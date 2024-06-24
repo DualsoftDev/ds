@@ -106,16 +106,16 @@ module PPTNodeModule =
             let name = GetLastParenthesesReplaceName(nameNfunc, "")
 
             match shape with
-            | s when s.CheckRectangle() ->
+            | s when s.IsRectangle() ->
                 if name.Contains(".") then REALExF else REAL
-            | s when s.CheckHomePlate() -> IF_DEVICE
-            | s when s.CheckFoldedCornerPlate() -> OPEN_EXSYS_CALL
-            | s when s.CheckFoldedCornerRound() -> COPY_DEV
-            | s when s.CheckEllipse() -> CALL
-            | s when s.CheckBevelShapePlate() -> LAMP
-            | s when s.CheckBevelShapeRound() -> BUTTON
-            | s when s.CheckBevelShapeMaxRound() -> CONDITION
-            | s when s.CheckLayout() -> shape.ErrorName(ErrID._62, iPage)
+            | s when s.IsHomePlate() -> IF_DEVICE
+            | s when s.IsFoldedCornerPlate() -> OPEN_EXSYS_CALL
+            | s when s.IsFoldedCornerRound() -> COPY_DEV
+            | s when s.IsEllipse() -> CALL
+            | s when s.IsBevelShapePlate() -> LAMP
+            | s when s.IsBevelShapeRound() -> BUTTON
+            | s when s.IsBevelShapeMaxRound() -> CONDITION
+            | s when s.IsLayout() -> shape.ErrorName(ErrID._62, iPage)
             | _ ->
                 failWithLog ErrID._1
 
@@ -153,7 +153,7 @@ module PPTNodeModule =
             match GetSquareBrackets(nameTrim, false) with
             | Some text -> 
                 let pureName = nameTrim |> GetBracketsRemoveName |> trimSpaceNewLine
-                if shape.CheckHomePlate() then pureName //AA [xxx ~ yyy] 
+                if shape.IsHomePlate() then pureName //AA [xxx ~ yyy] 
                 else $"{pureName}[{text}]"   //AA[4] 
             | None -> nameTrim
 

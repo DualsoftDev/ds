@@ -91,6 +91,7 @@ module ErrID =
     let _73 = "Action 이름에는 영역 구분자 속성 '.'은 두개 이하 입니다."
     let _74 = "Safety 정의는 Device.Api 또는 Flow.Device.Api 형식으로 입력해야 합니다."
     let _75 = "Table Device 이름규격은 dev.Api 입니다."
+    let _76 = "Work 설정시간이 중복 정의 되었습니다."
    
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

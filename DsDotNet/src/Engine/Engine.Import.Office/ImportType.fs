@@ -141,7 +141,7 @@ module ImportType =
         
             
     let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, namePure:string, nameNFunc:string) =
-        let name = GetBracketsRemoveName(shape.InnerText) |> trimSpace
+        let name = GetLastParenthesesReplaceName(GetBracketsRemoveName(shape.InnerText) , "") |> trimSpace
         
         if not(nodeType.IsLoadSys) && name.Split(".").Length > 3 then
                 failwithlog ErrID._73

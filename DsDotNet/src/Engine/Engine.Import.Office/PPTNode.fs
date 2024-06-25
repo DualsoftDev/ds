@@ -38,84 +38,10 @@ module PPTNodeModule =
         let mutable realGoingTime:float option = None   
         let mutable realDelayTime:float option = None   
 
-        let trimNewLine (text: string) = text.Replace("\n", "")
-        let trimSpace (text: string) = text.TrimStart(' ').TrimEnd(' ')
-        let trimSpaceNewLine (text: string) = text |> trimSpace |> trimNewLine
-        let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
-        let nameNFunc = shape.InnerText.Replace("”", "\"").Replace("“", "\"") |> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
-        let namePure = GetLastParenthesesReplaceName(nameNFunc, "") |> trimSpaceNewLine
-        let nameTrim = String.Join('.', namePure.Split('.').Select(trimSpace)) |> trimSpaceNewLine
-
-        let getPostParam(param:DevParam) =
-            match param.DevValue, param.DevTime with 
-            | Some v, None -> $"{v}"
-            | Some v, Some t -> $"{v}_{t}ms"
-            | None, Some t -> $"{t}ms"
-            | None, None -> $""
-
-
-        let getOperatorParam (name:string) = 
-            try
-                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-                if func.Contains(",") then 
-                    failwithf $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력) 규격 입니다"
-                $"{'-'}:{func}" |> getDevParam
-            with _ ->
-                shape.ErrorName(ErrID._70, iPage)
-
-        let getCoinParam (name:string) = 
-            let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
-            try
-                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-                if not(func.Contains(",")) then 
-                    failwithlog (error())
-
-                let inFunc, outFunc =
-                    func.Split(",").Head() |> trimSpaceNewLine,
-                    func.Split(",").Last() |> trimSpaceNewLine
-
-                let getParam x = 
-                    if x = TextSkip then 
-                        "" |> getDevParam
-                    else 
-                        $":{x}" |> getDevParam
-
-                getParam inFunc, getParam outFunc
-            with _ ->
-                shape.ErrorName((error()), iPage)
-
-        let getTrimName(nameTrim:string) =
-            match GetSquareBrackets(nameTrim, false) with
-            | Some text -> 
-                let pureName = nameTrim |> GetBracketsRemoveName |> trimSpaceNewLine
-                if shape.IsHomePlate() then pureName //AA [xxx ~ yyy] 
-                else $"{pureName}[{text}]"   //AA[4] 
-            | None -> nameTrim
-
-        let getNodeType() =
-            let nameNfunc = GetBracketsRemoveName(shape.InnerText)
-            let name = GetLastParenthesesReplaceName(nameNfunc, "")
-
-            match shape with
-            | s when s.IsRectangle() ->
-                if name.Contains(".") then REALExF else REAL
-            | s when s.IsHomePlate() -> IF_DEVICE
-            | s when s.IsFoldedCornerPlate() -> OPEN_EXSYS_CALL
-            | s when s.IsFoldedCornerRound() -> COPY_DEV
-            | s when s.IsEllipse() -> CALL
-            | s when s.IsBevelShapePlate() -> LAMP
-            | s when s.IsBevelShapeRound() -> BUTTON
-            | s when s.IsBevelShapeMaxRound() -> CONDITION
-            | s when s.IsLayout() -> shape.ErrorName(ErrID._62, iPage)
-            | _ ->
-                failWithLog ErrID._1
-
-        let nodeType = getNodeType()
+        let nodeType = getNodeType(shape, iPage)
         let disableCall = shape.IsDashShape()
-        let name = getTrimName nameTrim
-
-        do
-            let updateSafety (barckets: string) =
+        let name = GetLastParenthesesReplaceName( nameTrim(shape) |> getTrimName shape,  "")
+        let updateSafety (barckets: string) =
                 barckets.Split(';')
                     |> Seq.iter (fun f ->
                         if f.Split('.').Length > 1 then
@@ -124,50 +50,7 @@ module PPTNodeModule =
                             failwithf $"{ErrID._74}"
                     )    
 
-          
-            
-
-            let updateRealTime (contents: string) =
-                let parseMilliseconds (timeStr: string) : float option =
-                    let msPattern = @"(\d+(\.\d+)?)ms"
-                    let secPattern = @"(\d+(\.\d+)?)sec"
-                    let minPattern = @"(\d+(\.\d+)?)min"
-
-                    let matchRegex pattern =
-                        let m = Regex.Match(timeStr, pattern)
-                        if m.Success then
-                            let value = m.Groups.[1].Value |> float
-                            Some value
-                        else None
-
-                    match matchRegex msPattern with
-                    | Some ms -> Some ms
-                    | None ->
-                        match matchRegex secPattern with
-                        | Some sec -> Some (sec * 1000.0)
-                        | None ->
-                            match matchRegex minPattern with
-                            | Some min -> Some (min * 60.0 * 1000.0)
-                            | None -> None
-
-                let parts = (GetLastParenthesesContents contents).Split(',')
-                let goingT, delayT = 
-                    match parts.Length with
-                    | 1 ->
-                        let firstTime = parts.[0].Trim() |> parseMilliseconds
-                        (firstTime, None)
-                    | 2 ->
-                        let firstTime = parts.[0].Trim() |> parseMilliseconds
-                        let secondTime = parts.[1].Trim() |> parseMilliseconds
-                        (firstTime, secondTime)
-                    | _ -> (None, None)
-    
-                // Assume realGoingTime and realDelayTime are defined elsewhere as mutable variables
-                realGoingTime <- goingT
-                realDelayTime <- delayT
-
-
-            let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
+        let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
                 if (groupJob > 0) then
                     shape.ErrorName(ErrID._19, iPage)
                 else
@@ -182,45 +65,45 @@ module PPTNodeModule =
                         copySystems.Add(copy, orgiSysName)
                         jobInfos.Add(copy, [ copy ] |> HashSet))
 
-            let updateDeviceIF (text: string) =
-                ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
+        let updateDeviceIF (text: string) =
+            ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
 
-                match GetSquareBrackets(shape.InnerText, false) with
-                | Some txrx ->
-                    if (txrx.Contains('~')) then
-                        let tx = (txrx.Split('~')[0]) |> trimSpace
-                        let rx = (txrx.Split('~')[1]) |> trimSpace
+            match GetSquareBrackets(shape.InnerText, false) with
+            | Some txrx ->
+                if (txrx.Contains('~')) then
+                    let tx = (txrx.Split('~')[0]) |> trimSpace
+                    let rx = (txrx.Split('~')[1]) |> trimSpace
 
-                        let getRealName (apiReal: string) =
-                            if apiReal = "_" || apiReal.IsEmpty() then
-                                failWithLog ErrID._43
-                            apiReal
+                    let getRealName (apiReal: string) =
+                        if apiReal = "_" || apiReal.IsEmpty() then
+                            failWithLog ErrID._43
+                        apiReal
 
-                        ifTX <- getRealName tx
-                        ifRX <- getRealName rx
-                    else
-                        failWithLog ErrID._43
-                | None ->
-                    failWithLog ErrID._53
+                    ifTX <- getRealName tx
+                    ifRX <- getRealName rx
+                else
+                    failWithLog ErrID._43
+            | None ->
+                failWithLog ErrID._53
 
-            let getBracketItems (name: string) =
-                name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")
-                |> Seq.map (fun f ->
-                    match GetSquareBrackets("[" + f, true) with
-                    | Some item -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), item
-                    | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
+        let updateTime() = 
+            let goingT, delayT = updateRealTime shape.InnerText
+            realGoingTime <- goingT
+            realDelayTime <- delayT
+
+        do
+
 
 
             try 
-                nameCheck (shape, nodeType, iPage, namePure, nameNFunc)
+                nameCheck (shape, nodeType, iPage, namePure(shape), nameNFunc(shape))
                 match nodeType with
                 | CALL
                 | REAL ->
                     match GetSquareBrackets(shape.InnerText, true) with
                     | Some text -> updateSafety text
                     | None -> ()
-                    if nodeType = REAL then
-                        updateRealTime shape.InnerText
+                    if nodeType = REAL then updateTime()
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
                 | OPEN_EXSYS_CALL
                 | OPEN_EXSYS_LINK
@@ -241,7 +124,8 @@ module PPTNodeModule =
                     let addDic = if isHeadPage then condiHeadPageDefs else condiDefs
                     getBracketItems(shape.InnerText)
                         .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getConditionType))
-                | REALExF
+                        
+                | REALExF -> updateTime()
                 | LAYOUT
                 | DUMMY -> ()
             with ex ->  
@@ -300,20 +184,33 @@ module PPTNodeModule =
                 else pureJob
             jobName
 
+        member x.UpdateTime(real: Real) =
+            let checkAndUpdateTime (newTime: float option) getField setField =
+                match newTime with
+                | Some newValue ->
+                    match getField() with
+                    | Some currentValue when currentValue <> newValue ->
+                        shape.ErrorName(ErrID._76, iPage)
+                    | _ -> setField(Some newValue)
+                | None -> ()
+
+            checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AGV) (fun v -> real.DsTime.AGV <- v)
+            checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
+
         member x.UpdateCallDevParm(isRoot: bool) =
             rootNode <- Some isRoot
             if nodeType = CALL then
                 let isDevCall = name.Contains(".")
-                let hasDevParam = GetLastParenthesesReplaceName(nameNFunc, "") <> nameNFunc
+                let hasDevParam = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
                 match isRoot, isDevCall with
                 | true, true -> //root dev call
                     let inParam = 
-                        if hasDevParam then getOperatorParam nameNFunc
+                        if hasDevParam then getOperatorParam (shape, nameNFunc(shape), iPage)
                         else createDevParam "" None (Some(DuBOOL)) (Some(true)) None
                     devParam <- Some(Some(inParam), None)
                 | false, true -> //real dev call
                     if hasDevParam then
-                        let inParam, outParam = getCoinParam nameNFunc
+                        let inParam, outParam = getCoinParam (shape, nameNFunc(shape), iPage)
                         devParam <- Some(Some(inParam), Some(outParam))
                 | _ ->  
                     if hasDevParam then failWithLog "function call 'devParam' not support"

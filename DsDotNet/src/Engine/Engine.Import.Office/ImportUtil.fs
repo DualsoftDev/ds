@@ -237,12 +237,10 @@ module ImportU =
                     | REALExF -> // isOtherFlowRealAlias is false  (외부 플로우에 있을뿐 Or Alias가 아님)
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                         dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
+                        node.UpdateTime(real)
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
-                        if node.RealGoingTime.IsSome then 
-                            real.DsTime.AGV <- node.RealGoingTime.Value
-                        if node.RealDelayTime.IsSome then 
-                            real.DsTime.TON <- node.RealDelayTime.Value
+                        node.UpdateTime(real)
                         real.Finished <- node.RealFinished
                         real.NoTransData <- node.RealNoTrans
                         dicVertex.Add(node.Key, real))
@@ -281,6 +279,7 @@ module ImportU =
                         let flow = dicFlow.[node.PageNum]
                         if node.NodeType = REALExF then // isOtherFlowRealAlias is true
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
+                            node.UpdateTime(real)
                             Alias.Create(
                                 String.Join("_", real.ParentNPureNames),
                                 DuAliasTargetReal(real),

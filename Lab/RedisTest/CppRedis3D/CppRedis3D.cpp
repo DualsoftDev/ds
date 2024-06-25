@@ -1,6 +1,6 @@
-/*
- - hiredis ¶óÀÌºê·¯¸®´Â ±âº»ÀûÀ¸·Î ½º·¹µå ¾ÈÀüÇÏÁö ¾ÊÀ¸¸ç, ¿©·¯ ½º·¹µå¿¡¼­ µ¿½Ã¿¡ »ç¿ëµÉ ¼ö ¾ø½À´Ï´Ù. 
-   ÀÌ¸¦ ÇØ°áÇÏ±â À§ÇØ µÎ °³ÀÇ º°µµ Redis ¿¬°áÀ» »ç¿ëÇÏ¿© ÇÏ³ª´Â ±¸µ¶¿¡, ´Ù¸¥ ÇÏ³ª´Â ¹ßÇà¿¡ »ç¿ë.
+ï»¿/*
+ - hiredis ë¼ì´ë¸ŒëŸ¬ë¦¬ëŠ” ê¸°ë³¸ì ìœ¼ë¡œ ìŠ¤ë ˆë“œ ì•ˆì „í•˜ì§€ ì•Šìœ¼ë©°, ì—¬ëŸ¬ ìŠ¤ë ˆë“œì—ì„œ ë™ì‹œì— ì‚¬ìš©ë  ìˆ˜ ì—†ìŠµë‹ˆë‹¤. 
+   ì´ë¥¼ í•´ê²°í•˜ê¸° ìœ„í•´ ë‘ ê°œì˜ ë³„ë„ Redis ì—°ê²°ì„ ì‚¬ìš©í•˜ì—¬ í•˜ë‚˜ëŠ” êµ¬ë…ì—, ë‹¤ë¥¸ í•˜ë‚˜ëŠ” ë°œí–‰ì— ì‚¬ìš©.
 */
 
 #include <iostream>
@@ -8,12 +8,12 @@
 #include <string>
 #include <thread>
 
-// ±¸µ¶ÇÒ Ã¤³Î ¹× ¹ßÇàÇÒ Ã¤³Î ¼³Á¤
+// êµ¬ë…í•  ì±„ë„ ë° ë°œí–‰í•  ì±„ë„ ì„¤ì •
 std::string subscribeChannel = "d2g";
 std::string publishChannel = "g2d";
 
 
-// Redis ¼­¹ö¿¡ ¿¬°áÇÏ´Â ÇÔ¼ö
+// Redis ì„œë²„ì— ì—°ê²°í•˜ëŠ” í•¨ìˆ˜
 redisContext* connectToRedis(const std::string& hostname, int port) {
     redisContext* context = redisConnect(hostname.c_str(), port);
     if (context == NULL || context->err) {
@@ -29,18 +29,18 @@ redisContext* connectToRedis(const std::string& hostname, int port) {
     return context;
 }
 
-// ¸Ş½ÃÁö¸¦ ¼ö½ÅÇÏ°í ÀçÀü¼ÛÇÏ´Â ÇÔ¼ö
+// ë©”ì‹œì§€ë¥¼ ìˆ˜ì‹ í•˜ê³  ì¬ì „ì†¡í•˜ëŠ” í•¨ìˆ˜
 void handleMessage(redisContext* publishContext, const std::string& message) {
     std::cout << "Received [" << message << "] from channel " << subscribeChannel << std::endl;
 
-    std::this_thread::sleep_for(std::chrono::seconds(3)); // 3ÃÊ ´ë±â
+    std::this_thread::sleep_for(std::chrono::seconds(3)); // 3ì´ˆ ëŒ€ê¸°
 
-    // µ¿ÀÏ ¸Ş½ÃÁö¸¦ producer¿¡°Ô ÀçÀü¼Û
+    // ë™ì¼ ë©”ì‹œì§€ë¥¼ producerì—ê²Œ ì¬ì „ì†¡
     redisCommand(publishContext, "PUBLISH %s %s", publishChannel.c_str(), message.c_str());
     std::cout << "Sent back [" << message << "] to channel " << publishChannel << std::endl;
 }
 
-// ±¸µ¶À» Ã³¸®ÇÏ´Â ÇÔ¼ö
+// êµ¬ë…ì„ ì²˜ë¦¬í•˜ëŠ” í•¨ìˆ˜
 void subscribeThread(redisContext* subscribeContext, redisContext* publishContext) {
     redisReply* reply;
     reply = (redisReply*)redisCommand(subscribeContext, "SUBSCRIBE %s", subscribeChannel.c_str());
@@ -63,7 +63,7 @@ void subscribeThread(redisContext* subscribeContext, redisContext* publishContex
 }
 
 int main() {
-    // Redis ¼­¹ö¿¡ ¿¬°á
+    // Redis ì„œë²„ì— ì—°ê²°
     redisContext* subscribeContext = connectToRedis("127.0.0.1", 6379);
     if (subscribeContext == NULL) {
         return 1;
@@ -75,16 +75,16 @@ int main() {
         return 1;
     }
 
-    // ±¸µ¶À» Ã³¸®ÇÏ´Â ¾²·¹µå »ı¼º
+    // êµ¬ë…ì„ ì²˜ë¦¬í•˜ëŠ” ì“°ë ˆë“œ ìƒì„±
     std::thread subThread(subscribeThread, subscribeContext, publishContext);
 
-    // ¸ŞÀÎ ¾²·¹µå¿¡¼­ ¸Ş½ÃÁö ¹ßÇà test
+    // ë©”ì¸ ì“°ë ˆë“œì—ì„œ ë©”ì‹œì§€ ë°œí–‰ test
     redisCommand(publishContext, "PUBLISH %s %s", publishChannel.c_str(), "HELO");
 
-    // ±¸µ¶ ¾²·¹µå°¡ Á¾·áµÉ ¶§±îÁö ´ë±â
+    // êµ¬ë… ì“°ë ˆë“œê°€ ì¢…ë£Œë  ë•Œê¹Œì§€ ëŒ€ê¸°
     subThread.join();
 
-    // ¿¬°á ÇØÁ¦
+    // ì—°ê²° í•´ì œ
     redisFree(subscribeContext);
     redisFree(publishContext);
     return 0;
@@ -98,7 +98,7 @@ int main() {
 //#include <hiredis/hiredis.h>
 //
 //int main() {
-//    // Redis ¼­¹ö¿¡ ¿¬°á
+//    // Redis ì„œë²„ì— ì—°ê²°
 //    redisContext* c = redisConnect("127.0.0.1", 6379);
 //    if (c == NULL || c->err) {
 //        if (c) {
@@ -111,22 +111,22 @@ int main() {
 //        return 1;
 //    }
 //
-//    // PING ¸í·É¾î Àü¼Û ¹× ÀÀ´ä È®ÀÎ
+//    // PING ëª…ë ¹ì–´ ì „ì†¡ ë° ì‘ë‹µ í™•ì¸
 //    redisReply* reply = (redisReply*)redisCommand(c, "PING");
 //    std::cout << "PING: " << reply->str << std::endl;
 //    freeReplyObject(reply);
 //
-//    // SET ¸í·É¾î·Î Å°-°ª ÀúÀå
+//    // SET ëª…ë ¹ì–´ë¡œ í‚¤-ê°’ ì €ì¥
 //    reply = (redisReply*)redisCommand(c, "SET %s %s", "foo", "bar");
 //    std::cout << "SET: " << reply->str << std::endl;
 //    freeReplyObject(reply);
 //
-//    // GET ¸í·É¾î·Î Å°ÀÇ °ª °¡Á®¿À±â
+//    // GET ëª…ë ¹ì–´ë¡œ í‚¤ì˜ ê°’ ê°€ì ¸ì˜¤ê¸°
 //    reply = (redisReply*)redisCommand(c, "GET %s", "foo");
 //    std::cout << "GET foo: " << reply->str << std::endl;
 //    freeReplyObject(reply);
 //
-//    // ¿¬°á ÇØÁ¦
+//    // ì—°ê²° í•´ì œ
 //    redisFree(c);
 //    return 0;
 //}

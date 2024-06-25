@@ -21,10 +21,15 @@ module ExportConfigsMoudle =
         WorkType: string
         WorkInfo: string
         Address: string
+        Station: string
         Device: string
+        Action: string
         LibraryPath: string
-        ParentFlow: string
-        ParentCall: string
+        Motion: string
+    }
+    
+    type InterfaceSimpleConfig = {
+        MotionSync: (int*string)[]
     }
 
     let private jsonSettings = JsonSerializerSettings()
@@ -37,14 +42,16 @@ module ExportConfigsMoudle =
         let json = JsonConvert.SerializeObject(interfaceConfig, Formatting.Indented, jsonSettings)
         File.WriteAllText(path, json)
 
-    
+    let SaveInterfaceSimpleConfig (path: string) (interfaceSimpleConfig:InterfaceSimpleConfig) =
+        let json = JsonConvert.SerializeObject(interfaceSimpleConfig, Formatting.Indented, jsonSettings)
+        File.WriteAllText(path, json)
+
     let GetDsInterfaces (sys: DsSystem) =
         let ifs = HashSet<DsInterface>()
 
         sys.GetVerticesHasJob()
            |> Seq.iter(fun v -> 
-               let job = v.TargetJob
-               job.DeviceDefs
+               v.TargetJob.DeviceDefs
                |> Seq.filter(fun dev -> dev.ApiItem.TX.Path3D.IsSome)
                |> Seq.iter(fun dev ->
 
@@ -55,10 +62,11 @@ module ExportConfigsMoudle =
                             WorkType = "Sync"
                             WorkInfo = dev.ApiItem.TX.Path3D.Value
                             Address = dev.ApiItem.TX.ActionSyncTag.Address
+                            Station = v.Parent.GetFlow().Name
                             Device = dev.DeviceName
-                            LibraryPath = sys.LoadedSystems.TryFindWithName(dev.DeviceName).Value.AbsoluteFilePath
-                            ParentFlow = v.Parent.GetFlow().Name
-                            ParentCall = v.Name
+                            Action = dev.ApiItem.Name
+                            LibraryPath = sys.LoadedSystems.TryFindWithName(dev.DeviceName).Value.RelativeFilePath
+                            Motion = dev.ApiStgName
                         }
                     ifs.Add dataSync |> ignore
 
@@ -74,7 +82,6 @@ module ExportConfigsMoudle =
 
 
 
-
 [<AutoOpen>]
 type ExportConfigsExt =
 
@@ -82,5 +89,13 @@ type ExportConfigsExt =
     static member ExportDSInterface (sys:DsSystem, exportPath:string) =
         let dsInterfaces = GetDsInterfaces(sys)
         let interfaceConfig = {SystemName = sys.Name; DsInterfaces = dsInterfaces}
-        ExportConfigsMoudle.SaveInterfaceConfig exportPath interfaceConfig
+        SaveInterfaceConfig exportPath interfaceConfig
+
+        let dsSimpleInterfaces = dsInterfaces
+                                    .Where(fun f-> f.WorkType = "Sync")
+                                    .Select(fun f-> f.Id, f.Motion).ToArray() 
+
+        let interfaceSimpleConifg = {MotionSync = dsSimpleInterfaces}
+        let exportSimplePath =  PathManager.changeExtension (DsFile(exportPath)) "dsConfigMoiton"
+        SaveInterfaceSimpleConfig exportSimplePath interfaceSimpleConifg
 

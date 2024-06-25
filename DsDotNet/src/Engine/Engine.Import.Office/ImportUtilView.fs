@@ -176,38 +176,24 @@ module ImportViewModule =
 
 
     let UpdateApi (system: DsSystem, node: ViewNode) =
-
         let newNode = ViewNode("Interface", VIF)
 
         let flowApis =
             system.ApiItems
-            |> Seq.where (fun api -> [api.TX; api.RX].Select(fun r->r.Flow).Contains(node.Flow.Value))
+            |> Seq.filter (fun api -> [api.TX; api.RX].Any(fun r -> r.Flow = node.Flow.Value))
 
         let flowApiNodes =
-            flowApis.Map(fun f -> ViewNode(f.ToText(), VIF)).ToDictionary(fun f -> f.Name)
+            flowApis
+            |> Seq.map (fun api -> api.Name, ViewNode(api.ToText(), VIF))
+            |> dict
 
-        flowApis |> Seq.iter (fun api -> newNode.AddSingles(flowApiNodes[api.ToText()]))
+        flowApis |> Seq.iter (fun api -> newNode.AddSingles(flowApiNodes.[api.Name]))
 
-
-        let resetAddings = HashSet<string>()
-
-        flowApis
-        |> Seq.iter (fun api ->
-
-            if not (resetAddings.Contains api.Name) then
-                let mts = system.GetMutualResetApis(api)
-
-                mts.Iter(fun f ->
-                    if not (resetAddings.Contains f.Name) then
-                        resetAddings.Add(f.Name) |> ignore
-
-                        newNode.AddEdge(
-                            ModelingEdgeInfo<ViewNode>(flowApiNodes[api.ToText()], TextInterlock, flowApiNodes[f.ToText()])
-                        )
-                        |> ignore)
-
-                resetAddings.Add(api.Name) |> ignore)
-
+        system.ApiResetInfos |> Seq.iter (fun i ->
+            let operand1Node = flowApiNodes.[i.Operand1]
+            let operand2Node = flowApiNodes.[i.Operand2]
+            newNode.AddEdge(ModelingEdgeInfo<ViewNode>(operand1Node, i.Operator.ToText(), operand2Node))
+        )
         if newNode.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore
 

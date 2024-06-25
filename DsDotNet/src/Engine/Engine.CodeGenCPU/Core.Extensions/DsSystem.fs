@@ -136,12 +136,22 @@ module ConvertCpuDsSystem =
                 call.ExternalTags.Add(ErrorOffTimeOver, cv.ErrOffTimeOver :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorOffTimeShortage, cv.ErrOffTimeShortage :> IStorage) |>ignore
          
-
+         
         member private x.GenerationRealAlarmMemory()  = 
             for real in x.GetRealVertices() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> VertexMReal
-                rm.ErrGoingOrigin.Address <- getValidAddress(TextAddrEmpty,DuBOOL, rm.Name, false, IOType.Memory, getTarget(x))
+                rm.ErrGoingOrigin.Address <- getMemory rm.Name (getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
+
+        member  x.GenerationRealActionMemory()  = 
+            for real in x.GetRealVertices() |> Seq.sortBy (fun c -> c.Name) do
+                let rm =  real.TagManager :?> VertexMReal
+                rm.ActionSync.Address     <- getMemory rm.Name (getTarget(x))
+                rm.ActionStart.Address    <- getMemory rm.Name (getTarget(x))
+                rm.ActionEnd.Address      <- getMemory rm.Name (getTarget(x))
+                real.ExternalTags.Add(ActionSync,   rm.ActionSync  :> IStorage) |>ignore
+                real.ExternalTags.Add(ActionStart,  rm.ActionStart :> IStorage) |>ignore
+                real.ExternalTags.Add(ActionEnd,    rm.ActionEnd   :> IStorage) |>ignore
 
                  
         member private x.GenerationFlowHMIMemory()  = 
@@ -203,6 +213,7 @@ module ConvertCpuDsSystem =
             x.GenerationCondition()
 
 
+        
         member x.GenerationMemory() =
 
             x.GenerationEmulationMemory()

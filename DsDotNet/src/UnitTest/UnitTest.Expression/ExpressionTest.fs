@@ -166,7 +166,7 @@ module Exp =
 
         [<Test>]
         member __.``31 Rising, Falling test`` () =
-            let t = createTag("t2", "%M1.1", 2)
+            let t = createTag("t2", "%M1.1", false)
             fbFalling [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
             fbRising [var2expr t] |> evaluate |> ignore     // todo : rising/falling evaluation
 

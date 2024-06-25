@@ -15,6 +15,8 @@ open System.IO
 open System.Data
 open LibraryLoaderModule
 open System.Reflection
+open Engine.Parser.FS
+open Engine.Parser.FS.ModelParser
 
 [<AutoOpen>]
 module ImportU =
@@ -208,6 +210,7 @@ module ImportU =
                     addChannelPoints dev node
                     )
 
+         
            
 
         //real call alias  만들기
@@ -651,7 +654,36 @@ module ImportU =
             )
 
                                 
-         
+           
+        [<Extension>]
+        static member MakeRealProperty(doc: pptDoc, mySys: DsSystem) =
+            let processProperty (mySys: DsSystem) (prop: DsProperty) =
+                if prop.FQDN.Length <> 2 then
+                    failwithf "Error: Name format Flow.Work: %s" (String.concat "." prop.FQDN)
+        
+                match mySys.TryFindRealVertex(prop.FQDN.[0], prop.FQDN.[1]) with
+                | Some real ->
+                    match prop.Type with
+                    | "Action" -> real.DsTime.Path3D <- Some prop.Value
+                    | "Script" -> real.DsTime.Script <- Some prop.Value
+                    | _ -> failwithf "Error: %s Type not found" prop.Type
+                | None -> 
+                    failwithf "Error: Real not found: %s" (String.concat "." prop.FQDN)
+
+            let processPage (doc: pptDoc) (mySys: DsSystem) (systemRepo: ShareableSystemRepository) (page: pptPage) =
+                match Office.GetSlideNoteText(doc.Doc, page.PageNum) with
+                | note when note <> "" ->
+                    let dsText = $"[sys] temp = {{ [prop] = {{{note}}}}}"
+                    let dsProperties = WalkProperty(dsText, ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuName", None, DuNone))
+                    dsProperties |> Seq.iter (processProperty mySys)
+                | _ -> ()
+
+
+            let systemRepo = ShareableSystemRepository()
+            doc.Pages 
+                |> Seq.filter (fun page -> page.PageNum <> 1)
+                |> Seq.iter (processPage doc mySys systemRepo)
+
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
             
@@ -677,6 +709,11 @@ module ImportU =
             doc.MakeApiTxRx()
             //AnimationPoint  만들기
             doc.MakeAnimationPoint(sys)
+
+            //RealTime속성 만들기
+            doc.MakeRealProperty(sys)
+
+
 
             doc.ValidatePPTSystem(sys)
             doc.IsBuilded <- true

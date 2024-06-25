@@ -58,6 +58,9 @@ module DsType =
         | ErrorOffTimeOver 
         | ErrorOffTimeShortage
         | ErrGoingOrigin
+        | ActionSync
+        | ActionStart
+        | ActionEnd
 
     type ExternalTagSet = ExternalTag * IStorage
     

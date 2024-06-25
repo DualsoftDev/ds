@@ -53,8 +53,9 @@ module TagManagerModule =
         let forceResetBit  = createTag "RF"  true VertexTag.forceReset
         let forceOnBit     = createTag "ON"  true VertexTag.forceOn
         let forceOffBit    = createTag "OFF" true VertexTag.forceOff
-
-
+        let actionSync     = createTag "actionSync" true VertexTag.actionSync
+        let actionStart    = createTag "actionStart" true VertexTag.actionStart
+        let actionEnd      = createTag "actionEnd" true VertexTag.actionEnd
 
         let errorErrTRXBit = createTag "ErrTRX" false   VertexTag.errorTRx
 
@@ -113,8 +114,9 @@ module TagManagerModule =
         member _.OG         =  originBit
         ///Pause Monitor
         member _.PA         =  pauseBit
-
-
+        member _.ActionSync     =  actionSync
+        member _.ActionStart    =  actionStart
+        member _.ActionEnd      =  actionEnd
         
         member _.ErrTRX         =  errorErrTRXBit
         

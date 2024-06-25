@@ -220,7 +220,9 @@ module ConvertCPU =
                 checkErrHWItem(sys)
                 checkErrApi(sys)
 
-        else checkErrRealResetExist(sys)
+        else 
+            checkErrRealResetExist(sys)
+            sys.GenerationRealActionMemory()
 
         [
             if RuntimeDS.Package = PCSIM

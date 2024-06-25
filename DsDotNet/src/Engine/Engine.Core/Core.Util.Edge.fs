@@ -45,7 +45,6 @@ module EdgeModule =
         | DuEssWeak ws when ws.Any() -> ws
         | _ -> []
 
-        | _ -> []
     /// returns reset incoming/outgoing edges for target
     let getResetEdgeSources(target:Vertex) =
         match getEdgeSources (target.Parent.GetGraph(), target, false) with

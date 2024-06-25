@@ -162,6 +162,9 @@ module TagKindList =
     | dummyCoinRTs              = 11033
     | dummyCoinETs              = 11034
 
+    | actionSync                = 11035
+    | actionStart               = 11036
+    | actionEnd                 = 11037
 
     | txErrOnTimeShortage        = 11050
     | txErrOnTimeOver            = 11051

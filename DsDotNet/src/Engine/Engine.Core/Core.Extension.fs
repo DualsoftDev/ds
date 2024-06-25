@@ -216,7 +216,9 @@ module CoreExtensionModule =
 
     type Real with
         member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  
-        
+        member x.ActionSyncTag  = x.ExternalTags.First(fun (t,_)-> t = ActionSync)|> snd  
+        member x.ActionStartTag = x.ExternalTags.First(fun (t,_)-> t = ActionStart)|> snd  
+        member x.ActionEndTag   = x.ExternalTags.First(fun (t,_)-> t = ActionEnd)|> snd  
 
     type Call with
         member x.IsOperator = (x.Parent.GetCore() :? Flow)

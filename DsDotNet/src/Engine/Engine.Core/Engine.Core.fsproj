@@ -64,6 +64,7 @@
         <Compile Include="EntryPoint.fs" />
         <Compile Include="ModelLoader.fs" />
         <Compile Include="LibraryLoader.fs" />
+        <Compile Include="ExportConfigs.fs" />
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Info\Expression.TagWeb.fs" />
         <Compile Include="Info\HmiPackage.fs" />

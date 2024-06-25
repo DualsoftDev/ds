@@ -5,10 +5,32 @@ open System.Linq
 open Dual.Common.Core.FS
 open Engine.Core
 open type Engine.Parser.dsParser
-
+open Engine.Parser
+open System.Collections.Generic
 
 [<AutoOpen>]
 module ListnerCommonFunctionGeneratorUtil =
+
+    let getActions  (listActionCtx: List<dsParser.ActionsBlockContext>) =
+                seq {
+                    for ctx in listActionCtx do
+                    let list = ctx.Descendants<ActionDefContext>().ToList()
+                    for defs in list do
+                        let v = defs.TryFindFirstChild<ActionKeyContext>() |> Option.get
+                        let fqdn = collectNameComponents v |> List.ofArray
+                        let path = defs.TryFindFirstChild<ActionParamsContext>() |> Option.get
+                        yield fqdn, path.GetText()
+                }
+    let getScripts (listScriptsCtx: List<dsParser.ScriptsBlockContext>) =
+                seq {
+                    for ctx in listScriptsCtx do
+                    let list = ctx.Descendants<ScriptDefContext>().ToList()
+                    for defs in list do
+                        let v = defs.TryFindFirstChild<ScriptKeyContext>() |> Option.get
+                        let fqdn = collectNameComponents v |> List.ofArray
+                        let script = defs.TryFindFirstChild<ScriptParamsContext>() |> Option.get
+                        yield fqdn, script.GetText()
+                }
 
     let commonOpFunctionExtractor (funcCallCtxs: FuncCallContext array) (callName:string) (system:DsSystem) =
         if funcCallCtxs.Length > 1 

@@ -83,6 +83,16 @@ module PPTUtil =
         }
 
 
+    let getSlideNotes (slidePart: SlidePart option) (pathOrPage: string) (pageNum:int)=
+        match slidePart with
+        | Some page when page.NotesSlidePart <> null ->
+            page.NotesSlidePart.NotesSlide.InnerText
+                .Replace("&nbsp", "")
+                .Replace("\u00A0", "")
+                .TrimEnd(pageNum.ToString().ToCharArray()) // Remove the trailing '1' which is a page number
+        | _ -> 
+            ""
+
 
     [<Extension>]
     type Office =
@@ -801,20 +811,26 @@ module PPTUtil =
 
 
         [<Extension>]
-        static member getFirstSlideNote(path: string) =
-            let doc = Office.Open(path) 
+        static member GetFirstSlideNote(path: string) =
+            let doc = Office.Open(path)
             
             let firstSlidePart = 
                 doc.PresentationPart.SlideParts 
-                |> Seq.sortBy(fun f->Office.GetPage (f))
+                |> Seq.sortBy(fun f -> Office.GetPage f)
                 |> Seq.tryHead
 
-            match firstSlidePart with
-            |Some (page) when  page.NotesSlidePart <> null -> 
+            getSlideNotes firstSlidePart $"path:{path}" 1
 
-                page.NotesSlidePart.NotesSlide.InnerText
-                    .Replace("&nbsp", "")
-                    .Replace("\u00A0", "")
-                    .TrimEnd('1') //첫페이지 NotesSlide 끝에 붙는데 1 이붙는데 페이지 번호임
-            |_ ->
-                Office.ErrorPPT(ErrorCase.Page, ErrID._69, $"path:{path}", 0, 0u)
+
+        [<Extension>]
+        static member GetSlideNoteText(doc: PresentationDocument, iPage: int):string =
+            let slideParts = 
+                doc.PresentationPart.SlideParts 
+                |> Seq.sortBy(fun f -> Office.GetPage f)
+            
+            let slidePart = 
+                slideParts 
+                |> Seq.skip (iPage - 1) 
+                |> Seq.tryHead
+
+            getSlideNotes slidePart $"iPage:{iPage}" iPage

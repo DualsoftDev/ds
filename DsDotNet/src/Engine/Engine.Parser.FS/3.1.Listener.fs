@@ -717,27 +717,20 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         (coin.Value :?> Call).Disabled <- true
                     else
                         failwith $"Couldn't find target coin object name {getText (disabled)}"
+        
+        
 
-        let fillActions (system: DsSystem) (listActionCtx: List<dsParser.ActionsBlockContext>) =
-            for ctx in listActionCtx do
-                let list = ctx.Descendants<ActionDefContext>().ToList()
-                for defs in list do
-                    let v = defs.TryFindFirstChild<ActionKeyContext>() |> Option.get
-                    let fqdn = collectNameComponents v |> List.ofArray
-                    let real = (tryFindSystemInner system fqdn).Value :?> Real
-                    let path = defs.TryFindFirstChild<ActionParamsContext>() |> Option.get
-                    real.DsTime.Path3D <- path.GetText()|>Some
+        let fillActions (system: DsSystem) (listActionCtx: List<dsParser.ActionsBlockContext> ) =
+            let fqdnPath = getActions listActionCtx
+            for fqdn, path in fqdnPath do
+                let real = (tryFindSystemInner system fqdn).Value :?> Real
+                real.DsTime.Path3D <- path|>Some
 
         let fillScripts (system: DsSystem) (listScriptCtx: List<dsParser.ScriptsBlockContext>) =
-            for ctx in listScriptCtx do
-                let list = ctx.Descendants<ScriptDefContext>().ToList()
-                for defs in list do
-                    let v = defs.TryFindFirstChild<ScriptKeyContext>() |> Option.get
-                    let fqdn = collectNameComponents v |> List.ofArray
-                    let real = (tryFindSystemInner system fqdn).Value :?> Real
-                    let script = defs.TryFindFirstChild<ScriptParamsContext>() |> Option.get
-                    real.DsTime.Script <- script.GetText()|>Some
-
+            let fqdnPath = getScripts listScriptCtx
+            for fqdn, script in fqdnPath do
+                let real = (tryFindSystemInner system fqdn).Value :?> Real
+                real.DsTime.Script <- script|>Some
 
         let fillProperties (x: DsParserListener) (ctx: PropsBlockContext) =
             let theSystem = x.TheSystem

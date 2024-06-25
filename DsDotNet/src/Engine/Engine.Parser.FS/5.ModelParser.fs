@@ -8,6 +8,7 @@ open Engine.Parser
 open Engine.Core
 open type Engine.Parser.dsParser
 open System
+open System.Linq
 
 module ModelParser =
     let Walk (parser: dsParser, options: ParserOptions) =
@@ -38,12 +39,38 @@ module ModelParser =
 
         listener
 
+    type DsProperty = {
+        Type: string
+        FQDN: string list
+        Value: string
+    }
+
+    let WalkProperty (text: string, options: ParserOptions) =
+        let (parser, _errors) = DsParser.FromDocument(text)
+        let listener = new DsParserListener(parser, options)
+        let sysctx = parser.system ()
+        ParseTreeWalker.Default.Walk(listener, sysctx)
+        debugfn ("--- End of skeleton listener")
+        parser.Reset()
+        seq{
+            for ctx in sysctx.Descendants<PropsBlockContext>() do
+                let actions = ctx.Descendants<ActionsBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getActions 
+                yield! actions.Select(fun (fqdn, value)-> {Type = "Action"; FQDN = fqdn; Value = value})
+
+            for ctx in sysctx.Descendants<PropsBlockContext>() do
+                let scripts = ctx.Descendants<ScriptsBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getScripts 
+                yield! scripts.Select(fun (fqdn, value)-> {Type = "Script"; FQDN = fqdn; Value = value})
+        }
+
+
+       
+
     let ParseFromString2 (text: string, options: ParserOptions) : DsParserListener =
         let (parser, _errors) = DsParser.FromDocument(text)
         let listener = Walk(parser, options)
 
         let system = listener.TheSystem
-        system.CreateMRIEdgesTransitiveClosure()
+        system.CreateMRIEdgesTransitiveClosure()    
         if system.ApiResetInfos.IsEmpty()
         then
             system.AutoAppendInterfaceReset()

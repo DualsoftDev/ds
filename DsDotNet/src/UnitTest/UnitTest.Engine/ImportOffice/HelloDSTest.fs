@@ -63,5 +63,7 @@ module HelloDSTestModule =
             let callInReal2Names = callsInReal2 |> map (fun c -> c.Name) |> toArray
             SeqEq callInReal2Names [||]
 
+            let callDev1Adv = callsInReal1[0]
+            callDev1Adv.Name === "STN1__Device1_ADV"
             ()
 

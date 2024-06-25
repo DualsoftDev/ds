@@ -30,9 +30,19 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "b21145a5e7e0785a",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.6.3"
+              }
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -159,7 +169,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "4da6d47efee0d28b",
+  "active": "b21145a5e7e0785a",
   "lastOpenFiles": [
     "Engine.Core/Untitled.canvas",
     "Engine.Core/DsSystem.md",

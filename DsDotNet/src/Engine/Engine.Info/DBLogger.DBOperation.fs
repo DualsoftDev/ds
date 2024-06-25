@@ -79,7 +79,8 @@ module internal DBLoggerImpl =
             if logs.any () then
                 x.LastLog <- logs |> Seq.tryLast
 
-    let mutable interval = Observable.Interval(TimeSpan.FromSeconds(3))
+    // 여기 설정치는 loggerDBSettings.SyncIntervalSeconds 에 의해서 overwrite 됨
+    let mutable interval = Observable.Interval(TimeSpan.FromSeconds(30))
 
     let mutable logSet = getNull<LogSet> ()
 
@@ -172,7 +173,7 @@ module internal DBLoggerImpl =
                 let newLogs = drainQueueToArray (queue)
 
                 if newLogs.any () then
-                    logDebug $"Writing {newLogs.length ()} new logs."
+                    logDebug $"{DateTime.Now}: Writing {newLogs.length ()} new logs."
                     use conn = createConnection ()
                     use! tr = conn.BeginTransactionAsync()
 

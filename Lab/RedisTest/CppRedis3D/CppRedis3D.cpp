@@ -33,6 +33,8 @@ redisContext* connectToRedis(const std::string& hostname, int port) {
 void handleMessage(redisContext* publishContext, const std::string& message) {
     std::cout << "Received [" << message << "] from channel " << subscribeChannel << std::endl;
 
+    std::this_thread::sleep_for(std::chrono::seconds(3)); // 3초 대기
+
     // 동일 메시지를 producer에게 재전송
     redisCommand(publishContext, "PUBLISH %s %s", publishChannel.c_str(), message.c_str());
     std::cout << "Sent back [" << message << "] to channel " << publishChannel << std::endl;
@@ -51,7 +53,9 @@ void subscribeThread(redisContext* subscribeContext, redisContext* publishContex
             std::string message = reply->element[2]->str;
 
             if (message_type == "message" && channel == subscribeChannel) {
-                handleMessage(publishContext, message);
+                std::thread t(handleMessage, publishContext, message);
+                t.detach();
+                //handleMessage(publishContext, message);
             }
         }
         freeReplyObject(reply);

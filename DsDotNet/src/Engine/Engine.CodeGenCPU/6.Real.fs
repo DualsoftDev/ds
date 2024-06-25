@@ -36,7 +36,8 @@ type VertexMReal with
             //1. EndTag 
             (set, rst) ==| (v.ET, getFuncName())              
             //2. 다른 Real Reset Tag Relay을 위한 1Scan 소비 (Scan에서 제어방식 바뀌면 H/S 필요)
-            (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
+            (fbRising[v.G.Expr], v._off.Expr) --| (v.GG, getFuncName()) 
+            //(v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
         ]
 
     member v.R3_RealStartPoint() =

@@ -246,18 +246,18 @@ partial class ElementsListener
                     Edge e = null;
                     switch (op)
                     {
-                        case "|>": e = new WeakResetEdge(flow, lvs, op, rvs[0]); break;
-                        case ">": e = new WeakSetEdge(flow, lvs, op, rvs[0]); break;
+                        case "|>": e = new ResetEdge(flow, lvs, op, rvs[0]); break;
+                        case ">": e = new SetEdge(flow, lvs, op, rvs[0]); break;
                         case "||>": e = new StrongResetEdge(flow, lvs, op, rvs[0]); break;
                         case ">>": e = new StrongSetEdge(flow, lvs, op, rvs[0]); break;
 
                         case "<|":
                             Assert(lvs.Length == 1);
-                            e = new WeakResetEdge(flow, rvs, "|>", lvs[0]);
+                            e = new ResetEdge(flow, rvs, "|>", lvs[0]);
                             break;
                         case "<":
                             Assert(lvs.Length == 1);
-                            e = new WeakSetEdge(flow, rvs, ">", lvs[0]);
+                            e = new SetEdge(flow, rvs, ">", lvs[0]);
                             break;
                         case "<||":
                             Assert(lvs.Length == 1);

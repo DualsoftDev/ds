@@ -32,40 +32,32 @@ module EdgeModule =
         | false, false -> DuEssNone
 
      /// returns Weak outgoing edges
-    let private getWeakEdgeTargets(graph:DsGraph, source:Vertex, bStartEdge:bool) =
+    let private getEdgeTargets(graph:DsGraph, source:Vertex, bStartEdge:bool) =
         let edges = graph.GetOutgoingEdges(source) |> List.ofSeq
         let mask  = if bStartEdge then EdgeType.Start else EdgeType.Reset
 
         let srcsWeek   = edges |> filter(fun e -> e.EdgeType = mask )
         srcsWeek |> map (fun e->e.Target)
 
-    /// returns [weak] start incoming/outgoing edges for target
-    let getStartWeakEdgeSources(target:Vertex) =
+    /// returns start incoming/outgoing edges for target
+    let getStartEdgeSources(target:Vertex) =
         match getEdgeSources (target.Parent.GetGraph(), target, true) with
         | DuEssWeak ws when ws.Any() -> ws
         | _ -> []
-    /// returns [strong] start incoming/outgoing edges for target
-    let getStartStrongEdgeSources(target:Vertex) =
-        match getEdgeSources (target.Parent.GetGraph(), target, true) with
-        | DuEssStrong ss when ss.Any() -> ss
+
         | _ -> []
-    /// returns [weak] reset incoming/outgoing edges for target
-    let getResetWeakEdgeSources(target:Vertex) =
+    /// returns reset incoming/outgoing edges for target
+    let getResetEdgeSources(target:Vertex) =
         match getEdgeSources (target.Parent.GetGraph(), target, false) with
         | DuEssWeak wr when wr.Any() -> wr
         | _ -> []
-    /// returns [strong] reset incoming/outgoing edges for target
-    let getResetStrongEdgeSources(target:Vertex) =
-        match getEdgeSources (target.Parent.GetGraph(), target, false) with
-        | DuEssStrong sr when sr.Any() -> sr
-        | _ -> []
 
     /// returns  reset outgoing edges for target
-    let getResetWeakEdgeTargets(source:Vertex) =
-        getWeakEdgeTargets (source.Parent.GetGraph(), source, false) 
+    let getResetEdgeTargets(source:Vertex) =
+        getEdgeTargets (source.Parent.GetGraph(), source, false) 
     /// returns  Start outgoing edges for target
-    let getStartWeakEdgeTargets(source:Vertex) =
-        getWeakEdgeTargets (source.Parent.GetGraph(), source, true) 
+    let getStartEdgeTargets(source:Vertex) =
+        getEdgeTargets (source.Parent.GetGraph(), source, true) 
 
 
 
@@ -105,18 +97,11 @@ module EdgeModule =
 
     let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} {e.Target.Name.QuoteOnDemand()}"
 
-    /// edges 에서 strong reset edge type 만 추려 냄
-    let ofStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
-
+    
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
 
-    let ofWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset) && not <| e.EdgeType.HasFlag(EdgeType.Strong))
 
-    let ofNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Except(ofStrongResetEdge edges)
     let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
             edges.Except(ofResetEdge edges)
 
@@ -166,7 +151,7 @@ module EdgeModule =
 
         for KeyValue( (i, j), v) in dic do
             // i -> j 의 reset edge 가 존재하고, j -> i 로도 reset edge 가 존재해야 하지만, 실제 j -> i reset edge 가 없는 경우
-            if v && dic[(j, i)] && originalGraph.FindEdges(j, i) |> ofStrongResetEdge |> Seq.isEmpty then
+            if v && dic[(j, i)] && originalGraph.FindEdges(j, i) |> ofResetEdge |> Seq.isEmpty then
                 edgeCreator(j, i, EdgeType.Reset ||| EdgeType.Strong ||| EdgeType.AugmentedTransitiveClosure) |> ignore
 
     let createMRIEdgesTransitiveClosure(flow:Flow) =
@@ -278,16 +263,8 @@ module EdgeModule =
 
 
 
-    let getResetRootEdges (v:Vertex) =
-        let es = getResetStrongEdgeSources(v)
-        let ew = getResetWeakEdgeSources(v)
-        es @ ew   
-
-    let getStartRootEdges (v:Vertex) =
-        let es = getStartStrongEdgeSources(v)
-        let ew = getStartWeakEdgeSources(v)
-        es @ ew
-            
+    let getResetRootEdges (v:Vertex) = getResetEdgeSources(v)
+    let getStartRootEdges (v:Vertex) = getStartEdgeSources(v)
     
     let checkRealEdgeErrExist (sys:DsSystem) (bStart:bool)  =
         let vs = sys.GetVertices()
@@ -323,11 +300,8 @@ module EdgeModule =
 type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
     
-    [<Extension>] static member OfStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofStrongResetEdge edges
-    [<Extension>] static member OfWeakResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofWeakResetEdge edges
     [<Extension>] static member OfResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
-    [<Extension>] static member OfNotStrongResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotStrongResetEdge edges
 
     [<Extension>] static member MergeGraphs(graphs:  Graph<Vertex, Edge> seq) : Graph<Vertex, Edge> =  mergeGraphs graphs
     [<Extension>] static member MergeFlowGraphs(x:DsSystem) : Graph<Vertex, Edge> = 

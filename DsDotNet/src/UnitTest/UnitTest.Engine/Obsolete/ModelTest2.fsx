@@ -159,17 +159,17 @@ module ModelTest2 =
 
             let ``check main edges`` =
                 let edge = flow.Edges |> Seq.exactlyOne
-                edge.ToText() === "L.F.Main1 > L.F.Main2[WeakSetEdge]"
+                edge.ToText() === "L.F.Main1 > L.F.Main2[SetEdge]"
                 edge.Sources |> Seq.exactlyOne === main1
                 edge.Target === main2
 
             let ``check sub edges`` =
                 let edge1 = main1.Edges |> Seq.exactlyOne
                 let edge2 = main2.Edges |> Seq.exactlyOne
-                edge1.ToText() === "L.F.Main1.Cp > L.F.Main1.Cm[WeakSetEdge]"
-                edge2.ToText() === "L.F.Main2.Cm |> L.F.Main2.Cp[WeakResetEdge]"
-                edge1 :? WeakSetEdge |> ShouldBeTrue
-                edge2 :? WeakResetEdge |> ShouldBeTrue
+                edge1.ToText() === "L.F.Main1.Cp > L.F.Main1.Cm[SetEdge]"
+                edge2.ToText() === "L.F.Main2.Cm |> L.F.Main2.Cp[ResetEdge]"
+                edge1 :? SetEdge |> ShouldBeTrue
+                edge2 :? ResetEdge |> ShouldBeTrue
 
                 let s1 = edge1.Sources|> Seq.exactlyOne
                 ()

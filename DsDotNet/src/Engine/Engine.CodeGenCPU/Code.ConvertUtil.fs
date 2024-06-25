@@ -39,34 +39,23 @@ module CodeConvertUtil =
         static member GetResetCausals(xs:Vertex seq) =
                 xs.Select(fun f ->
                     match getPure f with
-                    | :? Real    as r  -> r.V.G
+                    | :? Real    as r  -> r.V.GG
                     | :? Call as c when c.IsOperator -> c.V.ET
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
-   
 
         [<Extension>]
-        static member GetWeakStartRootAndCausals  (v:Vertex) =
-            let tags = getStartWeakEdgeSources(v).GetStartCausals(true)
+        static member GetStartDAGAndCausals  (v:Vertex) =
+            let tags = getStartEdgeSources(v).GetStartCausals(false)
             tags.ToAndElseOff()
 
         [<Extension>]
-        static member GetWeakStartDAGAndCausals  (v:Vertex) =
-            let tags = getStartWeakEdgeSources(v).GetStartCausals(false)
+        static member GetResetRootAndCausals  (v:Vertex) =
+            let tags = getResetEdgeSources(v).GetResetCausals()
             tags.ToAndElseOff()
 
         [<Extension>]
-        static member GetWeakResetRootAndCausals  (v:Vertex) =
-            let tags = getResetWeakEdgeSources(v).GetResetCausals()
-            tags.ToAndElseOff()
-
-        [<Extension>]
-        static member GetStrongStartRootAndCausals  (v:Vertex) =
-            let tags = getStartStrongEdgeSources(v).GetStartCausals(true)
-            tags.ToAndElseOff()
-
-        [<Extension>]
-        static member GetStrongResetRootAndCausals  (v:Vertex) =
-            let tags = getResetStrongEdgeSources(v).GetResetCausals()
+        static member GetStartRootAndCausals  (v:Vertex) =
+            let tags = getStartEdgeSources(v).GetStartCausals(true)
             tags.ToAndElseOff()
 

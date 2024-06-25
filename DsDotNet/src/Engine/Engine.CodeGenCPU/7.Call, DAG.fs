@@ -64,7 +64,7 @@ type VertexManager with
             for coin in coins do
                 let safety = coin.Vertex.GetPureCall().Value.SafetyExpr
                 let coin = coin :?> VertexMCall
-                let sets = coin.Vertex.GetWeakStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety
+                let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]

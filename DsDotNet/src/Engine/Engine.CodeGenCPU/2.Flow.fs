@@ -10,14 +10,14 @@ type VertexManager with
 
     member v.F1_RootStart() =
         let real = v.Vertex :?> Real
-        let startCausals =  v.Vertex.GetWeakStartRootAndCausals()
+        let startCausals =  v.Vertex.GetStartRootAndCausals()
         let plans = v.System.GetPSs(real).ToOrElseOff()
         let actionLinks = v.System.GetASs(real).ToOrElseOff()
         
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
             if shareds.any()
-            then shareds.Select(fun s -> s.Vertex.GetWeakStartRootAndCausals()).ToOrElseOn()
+            then shareds.Select(fun s -> s.Vertex.GetStartRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
         let semiAuto = v.SF.Expr  <&&> v.Flow.d_st.Expr  
@@ -30,12 +30,12 @@ type VertexManager with
 
     member v.F2_RootReset()  =
         let real = v.Vertex.GetPureReal()
-        let resetCausals =  v.Vertex.GetWeakResetRootAndCausals()
+        let resetCausals =  v.Vertex.GetResetRootAndCausals()
 
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
             if shareds.any()
-            then shareds.Select(fun s -> s.Vertex.GetWeakResetRootAndCausals()).ToOrElseOn()
+            then shareds.Select(fun s -> s.Vertex.GetResetRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
         let sets =  (

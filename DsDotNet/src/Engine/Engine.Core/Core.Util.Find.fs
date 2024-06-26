@@ -76,7 +76,7 @@ module internal ModelFindModule =
             else  failwithf $"해당 디바이스를 Loading 해야 합니다. \n [device file= path] {targetSystemName}"
 
     //jobs 에 등록 안되있으면 Real로 처리 한다.
-    let tryFindCall (system:DsSystem) (Fqdn(callPath))=
+    let tryFindCall (system:DsSystem) (Fqdn(callPath)) : Vertex option=
         //let job = tryFindJob system (callPath.Last())
         //let func = tryFindFunc system (callPath.Last())
         //if job.IsSome  || func.IsSome
@@ -86,7 +86,7 @@ module internal ModelFindModule =
             match tryFindGraphVertex system callPath with
                  |Some(v) ->
                     match v with
-                    | :? Call -> Some(v)
+                    | :? Call as c-> Some(c)
                     | _ -> None
                  |_ -> None
         //else None

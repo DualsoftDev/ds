@@ -35,6 +35,9 @@ module ModelParser =
         for ctx in sysctx.Descendants<SafetyBlockContext>() do
             listener.ProcessSafetyBlock(ctx)
 
+        for ctx in sysctx.Descendants<AutoPreBlockContext>() do
+            listener.ProcessAutoPreBlock(ctx)
+
 
 
         listener

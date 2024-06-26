@@ -341,6 +341,29 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
+
+                
+            let autoPreHolders =
+                [   for f in system.Flows do
+                        yield! f.Graph.Vertices.OfType<IAutoPrerequisiteHolder>()
+
+                        for r in f.Graph.Vertices.OfType<Real>() do
+                        yield! r.Graph.Vertices.OfType<IAutoPrerequisiteHolder>()
+                ] |> List.distinct
+
+            let withAutoPres = autoPreHolders.Where(fun h -> h.AutoPreConditions.Any())
+            let autoPres =
+                [
+                    if withSafeties.Any() then
+                        yield $"{tab2}[autoPre] = {lb}"
+                        for autoPreHolder in withAutoPres do
+                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.Name).JoinWith("; ") + ";"
+                            yield $"{tab3}{autoPreHolder.GetAutoPreCall().Name} = {lb} {conds} {rb}"
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
+            
+            
+            
             let layoutList = system.LoadedSystems 
                              |> Seq.collect (fun f-> f.ChannelPoints.Select(fun kv->kv.Key))
                              |> Seq.distinct
@@ -440,9 +463,10 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            if safeties.Any() || layouts.Any() || finished.Any() || disabled.Any()|| noTransData.Any() then
+            if safeties.Any() || autoPres.Any() || layouts.Any() || finished.Any() || disabled.Any()|| noTransData.Any() then
                 yield $"{tab}[prop] = {lb}"
                 if safeties.Any()  then yield safeties
+                if autoPres.Any()  then yield autoPres
                 if layouts.Any()   then yield layouts
 
                 if path3Ds.Any()  then yield path3Ds

@@ -127,13 +127,21 @@ module rec ViewModule =
                                | :? Real as r -> String.Join(", ", r.SafetyConditions.Select(fun f->f.Name))
                                | :? Call as c -> String.Join(", ", c.SafetyConditions.Select(fun f->f.Name))
                                |_-> failwithlog $"Error {coreVertex.Value.Name}"
-                let safeName = if safeties.Length > 0 then $"[{safeties}]\r\n" else ""
+                let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""
+
+
+                let autoPres = match coreVertex.Value.GetPure() with
+                               | :? Call as c -> String.Join(", ", c.AutoPreConditions.Select(fun f->f.Name))
+                               |_-> failwithlog $"Error {coreVertex.Value.Name}"
+
+                let autoPresName = if autoPres.Length > 0 then $"[{autoPres}]\r\n" else ""
+
                 match coreVertex.Value with
                 | :? Alias as a ->
                     if a.IsOtherFlowRealAlias || not(a.IsSameFlow)
-                    then $"{safeName}{a.Name};{vKey}"  
-                    else  $"{safeName}{name};{vKey}"
-                | _ -> $"{safeName}{x.PureVertex.Value.Name};{vKey}"
+                    then $"{safeName}{autoPresName}{a.Name};{vKey}"  
+                    else  $"{safeName}{autoPresName}{name};{vKey}"
+                | _ -> $"{safeName}{autoPresName}{x.PureVertex.Value.Name};{vKey}"
             else
                 $"{name};{x.GetHashCode()}"
 

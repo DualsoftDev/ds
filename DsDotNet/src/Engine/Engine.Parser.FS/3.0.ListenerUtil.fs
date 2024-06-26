@@ -7,9 +7,52 @@ open Engine.Core
 open type Engine.Parser.dsParser
 open Engine.Parser
 open System.Collections.Generic
+open Antlr4.Runtime.Tree
 
 [<AutoOpen>]
 module ListnerCommonFunctionGeneratorUtil =
+
+    // Helper function to find Real or Call
+    let tryHolderFindRealOrCall (curSystem: DsSystem) (ns: Fqdn) =
+            match ns.ToFSharpList() with
+            | flowOrReal :: [ realOrCall ] ->
+                match curSystem.TryFindFlow(flowOrReal) with
+                | Some(flow) ->  flow.Graph.TryFindVertex(realOrCall)
+
+                | None -> curSystem.TryFindCall(ns)
+
+            | _f :: _r :: [ _c ] -> curSystem.TryFindCall(ns)
+
+            | _ -> failwithlog "ERROR"
+
+    let getSafetyAutoPreDefs  (ctx: List<dsParser.SafetyAutoPreDefContext>) =
+            (*
+             * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
+             *
+            [safety] = {
+                F.Main = {A."+"; B."+"}
+            }
+            => "Main" = {A."+"; B."+"}
+             *)
+            let safetyKvs =
+                [ for safetyDef in ctx do
+                      let key =
+                          let safety =
+                              safetyDef.TryFindFirstChild(fun (t: IParseTree) -> t :? SafetyAutoPreKeyContext).Value
+
+                          safety.CollectNameComponents() // ["Main"] or ["My", "Flow", "Main"]
+
+                      let valueHeader = safetyDef.Descendants<SafetyAutoPreValuesContext>().First()
+
+                      let values =
+                          valueHeader
+                              .Descendants<Identifier23Context>()
+                              .Select(collectNameComponents)
+                              .ToArray()
+
+                      (key, values) ]
+
+            safetyKvs
 
     let getActions  (listActionCtx: List<dsParser.ActionsBlockContext>) =
                 seq {

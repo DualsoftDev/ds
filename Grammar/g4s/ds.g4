@@ -241,12 +241,15 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
     }
 
  */
-propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|actionsBlock|scriptsBlock)* '}';
-    safetyBlock: '[' 'safety' ']' '=' '{' (safetyDef)* '}';    
-        safetyDef: safetyKey '=' '{' safetyValues '}';
+propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|actionsBlock|scriptsBlock)* '}';
+    safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';    
+        safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
             // Real|Call = { ((Real|Call);)* }
-            safetyKey: identifier23;
-            safetyValues: identifier23 (SEMICOLON identifier23)* (SEMICOLON)?;
+            safetyAutoPreKey: identifier23;
+            safetyAutoPreValues: identifier23 (SEMICOLON identifier23)* (SEMICOLON)?;
+
+    autoPreBlock: '[' 'autopre' ']' '=' '{' (safetyAutoPreDef)* '}';    
+       
 
     layoutBlock: '[' 'layouts' fileSpec? ']' '=' '{' (positionDef)* '}';
         positionDef: deviceOrApiName '=' xywh;

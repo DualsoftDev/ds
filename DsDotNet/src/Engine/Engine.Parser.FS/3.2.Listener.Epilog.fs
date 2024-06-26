@@ -178,74 +178,32 @@ module EtcListenerModule =
                         flows
                         |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, inParam, outParam,  flow)))
 
+
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =
-            let safetyDefs = ctx.Descendants<SafetyDefContext>()
-            (*
-             * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
-             *
-            [safety] = {
-                F.Main = {A."+"; B."+"}
-            }
-            => "Main" = {A."+"; B."+"}
-             *)
-            let safetyKvs =
-                [ for safetyDef in safetyDefs do
-                      let key =
-                          let safety =
-                              safetyDef.TryFindFirstChild(fun (t: IParseTree) -> t :? SafetyKeyContext).Value
-
-                          safety.CollectNameComponents() // ["Main"] or ["My", "Flow", "Main"]
-
-                      let valueHeader = safetyDef.Descendants<SafetyValuesContext>().First()
-
-                      let values =
-                          valueHeader
-                              .Descendants<Identifier23Context>()
-                              .Select(collectNameComponents)
-                              .ToArray()
-
-                      (key, values) ]
-
+            let safetyDefs = ctx.Descendants<SafetyAutoPreDefContext>()
+            let safetyKvs = getSafetyAutoPreDefs safetyDefs
             let curSystem = x.TheSystem
-
-            let tryFindRealOrCall (ns: Fqdn) =
-                option {
-                    match ns.ToFSharpList() with
-                    | flowOrReal :: [ realOrCall ] ->
-                        match curSystem.TryFindFlow(flowOrReal) with
-                        | Some(flow) ->
-                            let! vertex = flow.Graph.TryFindVertex(realOrCall)
-
-                            match vertex with
-                            | :? Real as r -> return DuSafetyConditionReal r
-                            | :? Call as c -> return DuSafetyConditionCall c
-                            | _ -> failwithlog "Error"
-
-                        | None ->
-                            let! vertex = curSystem.TryFindCall(ns)
-
-                            match vertex with
-                            | :? Call as c -> return DuSafetyConditionCall c
-                            | _ -> failwithlog "ERROR"
-
-                    | _f :: _r :: [ _c ] ->
-                        let! vertex = curSystem.TryFindCall(ns)
-
-                        match vertex with
-                        | :? Call as c -> return DuSafetyConditionCall c
-                        | _ -> failwithlog "ERROR"
-
-                    | _ -> failwithlog "ERROR"
-                }
 
             for (key, values) in safetyKvs do
                 option {
-                    let! safetyKey = tryFindRealOrCall key
+                    let! safetyKey = tryHolderFindRealOrCall curSystem key
 
                     let safetyConditions =
-                        [ for value in values -> tryFindRealOrCall value ] |> Seq.choose id
+                        [ for value in values -> tryHolderFindRealOrCall curSystem value ] 
+                        |> Seq.choose id
+                        |> Seq.map(fun sc ->
+                            match sc with
+                            | :? Real as r -> DuSafetyConditionReal r               
+                            | :? Call as c -> DuSafetyConditionCall c
+                            | _ -> failwithlog $"safetyConditions type error {safetyKey.GetType().Name}"
+                        )
 
-                    let holder = safetyKey.Core :?> ISafetyConditoinHolder
+                    let holder =
+                        match safetyKey with
+                        | :? Real as r -> r :> ISafetyConditoinHolder                
+                        | :? Call as c -> c :> ISafetyConditoinHolder                
+                        | _ -> failwithlog $"safetyConditoinHolder type error {safetyKey.GetType().Name}"
+              
                     debugfn "%A = {%A}" holder safetyConditions
 
                     safetyConditions.Iter(fun sc ->
@@ -255,3 +213,34 @@ module EtcListenerModule =
                 |> ignore
 
 
+        member x.ProcessAutoPreBlock(ctx: AutoPreBlockContext) =
+            let autopreDefs = ctx.Descendants<SafetyAutoPreDefContext>()
+            let autopreKvs = getSafetyAutoPreDefs autopreDefs
+              
+            let curSystem = x.TheSystem
+
+            for (key, values) in autopreKvs do
+                option {
+                    let! autopreKey = tryHolderFindRealOrCall curSystem key
+
+                    let autopreConditions =
+                        [ for value in values -> tryHolderFindRealOrCall curSystem value ] 
+                        |> Seq.choose id
+                        |> Seq.map(fun sc ->
+                            match sc with
+                            | :? Call as c -> DuAutoPreConditionCall c
+                            | _ -> failwithlog $"autopreConditions type error {autopreKey.GetType().Name}"
+                        )
+
+                    let holder =
+                        match autopreKey with
+                        | :? Call as c -> c :> IAutoPrerequisiteHolder
+                        | _ -> failwithlog $"autopreConditoinHolder type error {autopreKey.GetType().Name}"
+
+                    debugfn "%A = {%A}" holder autopreConditions
+
+                    autopreConditions.Iter(fun sc ->
+                        holder.AutoPreConditions.Add(sc)
+                        |> verifyM $"중복 autopre condition[{(sc.Core :?> INamed).Name}]")
+                }
+                |> ignore

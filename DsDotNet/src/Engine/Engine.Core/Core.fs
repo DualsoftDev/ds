@@ -187,7 +187,11 @@ module CoreModule =
     // Subclasses = {Call | Real}
     type ISafetyConditoinHolder =
         abstract member SafetyConditions: HashSet<SafetyCondition>
-
+    // Subclasses = {Call}
+    type IAutoPrerequisiteHolder =
+        abstract member AutoPreConditions: HashSet<AutoPreCondition>
+        abstract member GetAutoPreCall : unit -> Call
+         
     /// Indirect to Call/Alias/RealOtherFlow/CallSys
     [<AbstractClass>]
     type Indirect (names:string seq, parent:ParentWrapper) =
@@ -272,6 +276,9 @@ module CoreModule =
         member val Disabled:bool = false with get, set
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
+        interface IAutoPrerequisiteHolder with
+            member x.GetAutoPreCall(): Call = x
+            member val AutoPreConditions = HashSet<AutoPreCondition>()
 
     and Alias private (names:string seq, target:AliasTargetWrapper, parent, isOtherFlowRealAlias) = // target : Real or Call or OtherFlowReal
         inherit Indirect(names, parent)
@@ -435,11 +442,23 @@ module CoreModule =
         member x.CallTarget() =
             match x with | DuAliasTargetCall   c -> Some c |_ -> None
    
+
+    and AutoPreCondition =
+        | DuAutoPreConditionCall of Call
+        member x.GetAutoPreCall() =
+            match x with
+            | DuAutoPreConditionCall c -> Some c
+        member x.Core:obj =
+            match x with
+            | DuAutoPreConditionCall call -> call
+        member x.Name:string =
+            match x with
+            | DuAutoPreConditionCall call -> call.Name
+
     and SafetyCondition =
         | DuSafetyConditionReal of Real
         | DuSafetyConditionCall of Call
 
-    type SafetyCondition with
         member x.GetSafetyCall() =
             match x with
             | DuSafetyConditionReal _ -> None
@@ -449,6 +468,15 @@ module CoreModule =
             match x with
             | DuSafetyConditionReal r -> Some r
             | DuSafetyConditionCall _ -> None 
+
+        member x.Core:obj =
+            match x with
+            | DuSafetyConditionReal real -> real
+            | DuSafetyConditionCall call -> call
+        member x.Name:string =
+            match x with
+            | DuSafetyConditionReal real -> real.Name
+            | DuSafetyConditionCall call -> call.Name
 
   
           ///Vertex의 부모의 타입을 구분한다.
@@ -478,15 +506,7 @@ module CoreModule =
             | DuParentFlow f -> f.ModelingEdges
             | DuParentReal r -> r.ModelingEdges
 
-    type SafetyCondition with
-        member x.Core:obj =
-            match x with
-            | DuSafetyConditionReal real -> real
-            | DuSafetyConditionCall call -> call
-        member x.Name:string =
-            match x with
-            | DuSafetyConditionReal real -> real.Name
-            | DuSafetyConditionCall call -> call.Name
+
 
     type AliasTargetWrapper with
         member x.GetTarget() : Vertex =
@@ -550,6 +570,7 @@ module CoreModule =
                 | _->failwithlog "Error"
 
         member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
+        member x.AutoPreConditions = (x :> IAutoPrerequisiteHolder).AutoPreConditions
 
 
     type Alias with

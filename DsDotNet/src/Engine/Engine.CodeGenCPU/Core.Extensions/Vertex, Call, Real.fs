@@ -128,7 +128,7 @@ module ConvertCpuVertex =
                          
           
         member c.SafetyExpr = getSafetyExpr(c.SafetyConditions.Choose(fun f->f.GetSafetyCall()), c.System)
-        member c.AutoPreExpr = getSafetyExpr(c.AutoPreConditions.Choose(fun f->f.GetAutoPreCall()), c.System)
+        member c.AutoPreExpr = getSafetyExpr(c.AutoPreConditions.Map(fun f->f.GetAutoPreCall()), c.System)
 
         member c.StartPointExpr =
             match c.Parent.GetCore() with

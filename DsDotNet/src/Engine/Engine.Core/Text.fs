@@ -71,4 +71,4 @@ type TextExt =
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier
     [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator nameComponents
     [<Extension>] static member CombineQuoteOnDemand (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator (nameComponents.Select(quoteOnDemand))
-    [<Extension>] static member GetValidStorageName (identifier:string) = validStorageName identifier
+    

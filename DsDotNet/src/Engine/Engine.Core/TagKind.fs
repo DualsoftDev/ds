@@ -23,8 +23,8 @@ module TagKindList =
     [<Flags>]
     /// 0 ~ 9999
     type SystemTag  =
-    | on                       = 0000
-    | off                      = 0001
+    | _ON                      = 0000 //system on  LS 특수비트랑 이름 통일
+    | _OFF                     = 0001 //system off  LS 특수비트랑 이름 통일
     | auto_btn                 = 0002
     | manual_btn               = 0003
     | drive_btn                = 0004
@@ -66,12 +66,13 @@ module TagKindList =
     | originMonitor              = 0040
     | goingMonitor               = 0041
 
-    ///flicker
-    | flicker20ms               = 0100
-    | flicker100ms              = 0101
-    | flicker200ms              = 0102
-    | flicker1s                 = 0103
-    | flicker2s                 = 0104
+
+    ///flicker                   
+    | _T20MS                     = 0100  //system timer  LS 특수비트랑 이름 통일
+    | _T100MS                    = 0101  //system timer  LS 특수비트랑 이름 통일
+    | _T200MS                    = 0102  //system timer  LS 특수비트랑 이름 통일
+    | _T1S                       = 0103  //system timer  LS 특수비트랑 이름 통일
+    | _T2S                       = 0104  //system timer  LS 특수비트랑 이름 통일
     ///emulation
     | emulation                 = 9997
     ///simulation

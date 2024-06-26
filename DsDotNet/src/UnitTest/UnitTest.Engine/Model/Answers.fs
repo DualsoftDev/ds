@@ -80,6 +80,9 @@ module ModelAnswers =
             F.Main = { F.Main.Ap; }
             F.Main.Am = { F.Main; }
         }
+        [autopre] = {
+            F.Main.Am = { F.Main.Ap; }
+        }
         [layouts file="cctv1;rtsp://210.99.70.120:1935/live/cctv002.stream"] = {
             A = (1309, 405, 205, 83);
             C = (1600, 500, 300, 300);
@@ -125,6 +128,31 @@ module ModelAnswers =
 }
 """
 
+    let answerAutoPreValid = """
+[sys] L = {
+    [flow] F = {
+        Ap > Main;		
+        Am > Main2;	     
+	                    
+        Main = {
+            Ap > Am;		// Ap(Call)> Am(Call);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(Call)> Am(Call);
+        }
+    }
+    [jobs] = {
+        Am = { A."-"(%I2, %Q2); }
+        Ap = { A."+"(%I1, %Q1); }
+    }
+    [prop] = {
+        [autopre] = {
+            F.Ap = { F.Am; }
+        }
+    }
+    [device file="cylinder.ds"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
+"""
     let answerSafetyValid = """
 [sys] L = {
     [flow] F = {

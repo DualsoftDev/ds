@@ -10,8 +10,10 @@ module SystemManagerModule =
 
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
-    type SystemManager (sys:DsSystem, stg:Storages, target:PlatformTarget)  =
-        let dsSysTag (dt:DataType) name autoAddr target (systemTag:SystemTag) =
+    type SystemManager (sys:DsSystem, rootSys:DsSystem, stg:Storages, target:PlatformTarget)  =
+            //시스템 TAG는 root 시스템   TAG 공용 사용 ex)curSys._ON  = rootSys._ON  
+        let dsSysTag (dt:DataType)  autoAddr target (systemTag:SystemTag) =
+            let name = getStorageName rootSys (int systemTag)
             if stg.ContainsKey(name) then stg[name]
             else
                 let systemTag = systemTag |> int
@@ -22,42 +24,35 @@ module SystemManagerModule =
 
 
         //시스템 Tag는 하위 시스템과 공유
-        let dsSysBit    name autoAddr target (t:SystemTag) = (dsSysTag DuBOOL   name  autoAddr target t) :?> PlanVar<bool>
-        let dsSysUint8  name autoAddr target (t:SystemTag) = (dsSysTag DuUINT8  name  autoAddr target t) :?> PlanVar<uint8>
-        let dsSysUint16 name autoAddr target (t:SystemTag) = (dsSysTag DuUINT16 name  autoAddr target t) :?> PlanVar<uint16>
-        let dsSysUint32 name autoAddr target (t:SystemTag) = (dsSysTag DuUINT32 name  autoAddr target t) :?> PlanVar<uint32>
+        let dsSysBit     autoAddr target (t:SystemTag) = (dsSysTag DuBOOL     autoAddr target t) :?> PlanVar<bool>
+        let dsSysUint8   autoAddr target (t:SystemTag) = (dsSysTag DuUINT8    autoAddr target t) :?> PlanVar<uint8>
+        let dsSysUint16  autoAddr target (t:SystemTag) = (dsSysTag DuUINT16   autoAddr target t) :?> PlanVar<uint16>
+        let dsSysUint32  autoAddr target (t:SystemTag) = (dsSysTag DuUINT32   autoAddr target t) :?> PlanVar<uint32>
 
 
         let mutualCalls = getMutualInfo (sys.GetVerticesOfJobCalls().Cast<Vertex>())
 
+        let on           = dsSysBit false sys  SystemTag._ON
+        let off          = dsSysBit false sys  SystemTag._OFF
+        let auto_btn     = dsSysBit true  sys  SystemTag.auto_btn
+        let manual_btn   = dsSysBit true  sys  SystemTag.manual_btn
+        let drive_btn    = dsSysBit true  sys  SystemTag.drive_btn
+        let pause_btn    = dsSysBit true  sys  SystemTag.pause_btn
+        let emg_btn      = dsSysBit true  sys  SystemTag.emg_btn
+        let test_btn     = dsSysBit true  sys  SystemTag.test_btn
+        let ready_btn    = dsSysBit true  sys  SystemTag.ready_btn
+        let clear_btn    = dsSysBit true  sys  SystemTag.clear_btn
+        let home_btn     = dsSysBit true  sys  SystemTag.home_btn
 
-        //let on     = let onBit = dsSysBit "_onalways"     false   sys   SystemTag.on
-        //             onBit.Value <- true  //항상 ON
-        //             onBit
-        let on           = dsSysBit   "_ON"         false sys  SystemTag.on
-        let off          = dsSysBit   "_OFF"        false sys  SystemTag.off
-        let auto_btn     = dsSysBit   "sysauto_btn"       true  sys  SystemTag.auto_btn
-        let manual_btn   = dsSysBit   "sysmanual_btn"     true  sys  SystemTag.manual_btn
-        let drive_btn    = dsSysBit   "sysdrive_btn"      true  sys  SystemTag.drive_btn
-        let pause_btn     = dsSysBit   "syspause_btn"     true  sys  SystemTag.pause_btn
-        let emg_btn      = dsSysBit   "sysemg_btn"        true  sys  SystemTag.emg_btn
-        let test_btn     = dsSysBit   "systest_btn"       true  sys  SystemTag.test_btn
-        let ready_btn    = dsSysBit   "sysready_btn"      true  sys  SystemTag.ready_btn
-        let clear_btn    = dsSysBit   "sysclear_btn"      true  sys  SystemTag.clear_btn
-        let home_btn     = dsSysBit   "syshome_btn"       true  sys  SystemTag.home_btn
-
-        let auto_lamp     = dsSysBit   "sysauto_lamp"       true  sys  SystemTag.auto_lamp
-        let manual_lamp   = dsSysBit   "sysmanual_lamp"     true  sys  SystemTag.manual_lamp
-        let drive_lamp    = dsSysBit   "sysdrive_lamp"      true  sys  SystemTag.drive_lamp
-        let pause_lamp     = dsSysBit   "syspause_lamp"     true  sys  SystemTag.pause_lamp
-        let emg_lamp      = dsSysBit   "sysemg_lamp"        true  sys  SystemTag.emg_lamp
-        let test_lamp     = dsSysBit   "systest_lamp"       true  sys  SystemTag.test_lamp
-        let ready_lamp    = dsSysBit   "sysready_lamp"      true  sys  SystemTag.ready_lamp
-        let clear_lamp    = dsSysBit   "sysclear_lamp"      true  sys  SystemTag.clear_lamp
-        let home_lamp     = dsSysBit   "syshome_lamp"       true  sys  SystemTag.home_lamp
-
-
-        
+        let auto_lamp     = dsSysBit true  sys  SystemTag.auto_lamp
+        let manual_lamp   = dsSysBit true  sys  SystemTag.manual_lamp
+        let drive_lamp    = dsSysBit true  sys  SystemTag.drive_lamp
+        let pause_lamp    = dsSysBit true  sys  SystemTag.pause_lamp
+        let emg_lamp      = dsSysBit true  sys  SystemTag.emg_lamp
+        let test_lamp     = dsSysBit true  sys  SystemTag.test_lamp
+        let ready_lamp    = dsSysBit true  sys  SystemTag.ready_lamp
+        let clear_lamp    = dsSysBit true  sys  SystemTag.clear_lamp
+        let home_lamp     = dsSysBit true  sys  SystemTag.home_lamp
 
         //let dtimeyy  = dsSysUint8 "_RTC_TIME[0]"  false sys  SystemTag.datet_yy         //ls xgi 현재시각[년도]
         //let dtimemm  = dsSysUint8 "_RTC_TIME[1]"  false sys  SystemTag.datet_mm         //ls xgi 현재시각[월]
@@ -69,31 +64,31 @@ module SystemManagerModule =
         //let dtimeyk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[년대]
 
         let tout     =
-            let tout = dsSysUint32  "systout" true sys SystemTag.timeout 
+            let tout = dsSysUint32   true sys SystemTag.timeout 
             tout.Value <- RuntimeDS.TimeoutCall
             tout
 
-        let pauseMonitor      = dsSysBit "pauseMonitor"     true  sys   SystemTag.pauseMonitor
-        let autoMonitor       = dsSysBit "autoMonitor"      true  sys   SystemTag.autoMonitor   
-        let manualMonitor     = dsSysBit "manualMonitor"    true  sys   SystemTag.manualMonitor 
-        let driveMonitor      = dsSysBit "driveMonitor"     true  sys   SystemTag.driveMonitor  
-        let errorMonitor      = dsSysBit "errorMonitor"     true  sys   SystemTag.errorMonitor   
-        let emergencyMonitor  = dsSysBit "emergencyMonitor" true  sys   SystemTag.emergencyMonitor    
-        let testMonitor       = dsSysBit "testMonitor"      true  sys   SystemTag.testMonitor   
-        let readyMonitor      = dsSysBit "readyMonitor"     true  sys   SystemTag.readyMonitor  
-        let idleMonitor       = dsSysBit "idleMonitor"      true  sys   SystemTag.idleMonitor  
-        let originMonitor     = dsSysBit "originMonitor"    true  sys   SystemTag.originMonitor  
-        let goingMonitor      = dsSysBit "goingMonitor"     true  sys   SystemTag.goingMonitor  
+        let pauseMonitor      = dsSysBit true  sys   SystemTag.pauseMonitor
+        let autoMonitor       = dsSysBit true  sys   SystemTag.autoMonitor   
+        let manualMonitor     = dsSysBit true  sys   SystemTag.manualMonitor 
+        let driveMonitor      = dsSysBit true  sys   SystemTag.driveMonitor  
+        let errorMonitor      = dsSysBit true  sys   SystemTag.errorMonitor   
+        let emergencyMonitor  = dsSysBit true  sys   SystemTag.emergencyMonitor    
+        let testMonitor       = dsSysBit true  sys   SystemTag.testMonitor   
+        let readyMonitor      = dsSysBit true  sys   SystemTag.readyMonitor  
+        let idleMonitor       = dsSysBit true  sys   SystemTag.idleMonitor  
+        let originMonitor     = dsSysBit true  sys   SystemTag.originMonitor  
+        let goingMonitor      = dsSysBit true  sys   SystemTag.goingMonitor  
         
-        let flicker20msec  = dsSysBit "_T20MS" true  sys   SystemTag.flicker20ms
-        let flicker100msec = dsSysBit "_T100MS" true  sys  SystemTag.flicker100ms
-        let flicker200msec = dsSysBit "_T200MS" true  sys  SystemTag.flicker200ms
-        let flicker1sec    = dsSysBit "_T1S"   true  sys   SystemTag.flicker1s
-        let flicker2sec    = dsSysBit "_T2S"   true  sys   SystemTag.flicker2s
+        let flicker20msec  = dsSysBit true  sys   SystemTag._T20MS     
+        let flicker100msec = dsSysBit true  sys   SystemTag._T100MS    
+        let flicker200msec = dsSysBit true  sys   SystemTag._T200MS    
+        let flicker1sec    = dsSysBit true  sys   SystemTag._T1S       
+        let flicker2sec    = dsSysBit true  sys   SystemTag._T2S       
 
 
-        let sim            = dsSysBit "syssim"   true  sys SystemTag.sim
-        let emulation      = dsSysBit "sysemulation"  true  sys   SystemTag.emulation
+        let sim            = dsSysBit   true  sys SystemTag.sim
+        let emulation      = dsSysBit   true  sys SystemTag.emulation
 
 
         do 
@@ -128,8 +123,8 @@ module SystemManagerModule =
             
         member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with
-            | SystemTag.on         ->    on
-            | SystemTag.off        ->    off
+            | SystemTag._ON         ->    on
+            | SystemTag._OFF        ->    off
             | SystemTag.auto_btn   ->    auto_btn
             | SystemTag.manual_btn ->    manual_btn
             | SystemTag.drive_btn  ->    drive_btn
@@ -172,11 +167,11 @@ module SystemManagerModule =
             | SystemTag.originMonitor        ->    originMonitor   
             | SystemTag.goingMonitor         ->    goingMonitor    
             
-            | SystemTag.flicker20ms     -> flicker20msec
-            | SystemTag.flicker100ms    -> flicker100msec
-            | SystemTag.flicker200ms    -> flicker200msec
-            | SystemTag.flicker1s       -> flicker1sec
-            | SystemTag.flicker2s       -> flicker2sec
+            | SystemTag._T20MS     -> flicker20msec
+            | SystemTag._T100MS    -> flicker100msec
+            | SystemTag._T200MS    -> flicker200msec
+            | SystemTag._T1S       -> flicker1sec
+            | SystemTag._T2S       -> flicker2sec
 
             
             | SystemTag.emulation       -> emulation
@@ -185,6 +180,6 @@ module SystemManagerModule =
 
     [<Extension>]
     type SystemManagerExt =
-        [<Extension>] static member OnTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag.on) :?> PlanVar<'T>
-        [<Extension>] static member OffTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag.off) :?> PlanVar<'T>
+        [<Extension>] static member OnTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag._ON) :?> PlanVar<'T>
+        [<Extension>] static member OffTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<'T>
        

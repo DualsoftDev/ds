@@ -447,7 +447,7 @@ module CoreModule =
         | DuAutoPreConditionCall of Call
         member x.GetAutoPreCall() =
             match x with
-            | DuAutoPreConditionCall c -> Some c
+            | DuAutoPreConditionCall c -> c
         member x.Core:obj =
             match x with
             | DuAutoPreConditionCall call -> call

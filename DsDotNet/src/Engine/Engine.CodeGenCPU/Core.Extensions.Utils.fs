@@ -39,7 +39,7 @@ module ConvertCoreExtUtils =
         |> iter (fun t -> x.OutTag  <- t)
 
     let getInExpr (x:DevParam, devTag:ITag, sys:DsSystem) = 
-        let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag.off) :?> PlanVar<bool> 
+        let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool> 
         if devTag.IsNull() 
         then sysOff.Expr  :> IExpression
         else 

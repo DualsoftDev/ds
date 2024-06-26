@@ -132,6 +132,7 @@ module rec ViewModule =
 
                 let autoPres = match coreVertex.Value.GetPure() with
                                | :? Call as c -> String.Join(", ", c.AutoPreConditions.Select(fun f->f.Name))
+                               | :? Real as r -> ""
                                |_-> failwithlog $"Error {coreVertex.Value.Name}"
 
                 let autoPresName = if autoPres.Length > 0 then $"[{autoPres}]\r\n" else ""

@@ -67,11 +67,11 @@ module CpuLoader =
 
 
     let applyTagManager(system:DsSystem, storages:Storages, target) =
-        let createTagM (sys:DsSystem) =
+        let createTagM  (rootSys:DsSystem) (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
             RuntimeDS.System <- sys
-
-            sys.TagManager <- SystemManager(sys, storages, target)
+            
+            sys.TagManager <- SystemManager(sys, rootSys, storages, target)
             sys.Variables.Iter(fun v-> v.TagManager <- VariableManager(v, sys))
             sys.ActionVariables.Iter(fun a-> a.TagManager <- ActionVariableManager(a, sys))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
@@ -85,11 +85,10 @@ module CpuLoader =
                 | _ -> failwithlog (getFuncName()))
 
 
-        createTagM system
+        createTagM  system system //  root와 본인과 같음
         system.GetRecursiveLoadedSystems()
               .Distinct()
-              .Iter(createTagM)
-             
+              .Iter(fun loaded ->  createTagM system loaded)
 
 
     [<Extension>]

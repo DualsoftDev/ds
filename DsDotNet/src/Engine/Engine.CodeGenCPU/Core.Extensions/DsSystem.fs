@@ -19,8 +19,8 @@ module ConvertCpuDsSystem =
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
             getSM(s).GetSystemTag(st) :?> PlanVar<'T>
 
-        member s._on          = s.GetPv<bool>(SystemTag.on)
-        member s._off         = s.GetPv<bool>(SystemTag.off)
+        member s._on          = s.GetPv<bool>(SystemTag._ON)
+        member s._off         = s.GetPv<bool>(SystemTag._OFF)
         member s._sim         = s.GetPv<bool>(SystemTag.sim)
         member s._emulation   = s.GetPv<bool>(SystemTag.emulation)
         member s._auto_btn    = s.GetPv<bool>(SystemTag.auto_btn)
@@ -63,11 +63,11 @@ module ConvertCpuDsSystem =
         member s._goingMonitor  = s.GetPv<bool>(SystemTag.goingMonitor  )
 
         member s._tout        = s.GetPv<uint32>(SystemTag.timeout)
-        member s._flicker20msec = s.GetPv<bool>(SystemTag.flicker20ms)
-        member s._flicker100msec = s.GetPv<bool>(SystemTag.flicker100ms)
-        member s._flicker200msec = s.GetPv<bool>(SystemTag.flicker200ms)
-        member s._flicker1sec = s.GetPv<bool>(SystemTag.flicker1s)
-        member s._flicker2sec = s.GetPv<bool>(SystemTag.flicker2s)
+        member s._flicker20msec = s.GetPv<bool>(SystemTag._T20MS)
+        member s._flicker100msec = s.GetPv<bool>(SystemTag._T100MS)
+        member s._flicker200msec = s.GetPv<bool>(SystemTag._T200MS)
+        member s._flicker1sec = s.GetPv<bool>(SystemTag._T1S)
+        member s._flicker2sec = s.GetPv<bool>(SystemTag._T2S)
         
         member s._homeHW  =  
                     let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())

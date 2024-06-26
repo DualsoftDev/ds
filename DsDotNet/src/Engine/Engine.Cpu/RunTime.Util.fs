@@ -49,7 +49,7 @@ module internal RunTimeUtil =
     ///HMI Reset
     let syncReset(system:DsSystem ) =
         let stgs = system.TagManager.Storages
-        let stgs = stgs.Where(fun w-> w.Value.TagKind <> (int)SystemTag.on)
+        let stgs = stgs.Where(fun w-> w.Value.TagKind <> (int)SystemTag._ON)
 
         for tag in stgs do
             let stg = tag.Value

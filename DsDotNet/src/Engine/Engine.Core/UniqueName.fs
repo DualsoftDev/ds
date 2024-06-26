@@ -31,7 +31,7 @@ module UniquePlcTagName =
             else
                 inputName
 
-        name.GetValidStorageName()|> generateUntilValid
+        name |> generateUntilValid
 
 [<Extension>]
 type UniqueNameExt =

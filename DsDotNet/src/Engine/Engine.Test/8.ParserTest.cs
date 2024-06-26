@@ -31,7 +31,35 @@ namespace Engine
     [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
 }
 
+"; 
+    public static string AutoPreValid = @"
+[sys] L = {
+    [flow] F = {
+        Am > Main2;	     
+        Ap > Main;		
+	                    
+        Main = {
+            Ap > Am;		// Ap(Call)> Am(Call);
+        }
+        Main2 = {
+            Ap > Am;		// Ap(Call)> Am(Call);
+        }
+    }
+    [jobs] = {
+        Am = { A.""-""(%I2, %Q2); }
+        Ap = { A.""+""(%I1, %Q1); }
+    }
+    [prop] = {
+        [autopre] = {
+        F.Ap = { F.Am; }
+        }
+    }
+    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+}
+
 ";
+
+        
         public static string LayoutValid = @"
 [sys] L = {
     [flow] F = {

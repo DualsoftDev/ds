@@ -99,6 +99,10 @@ module ModelTests1 =
             compare ParserTest.SafetyValid answerSafetyValid
 
         [<Test>]
+        member __.``Model component [AutoPreValid] test`` () =
+            compare ParserTest.AutoPreValid answerAutoPreValid
+
+        [<Test>]
         member __.``Model component [LayoutValid] test`` () =
             compare ParserTest.LayoutValid answerLayoutValid
 

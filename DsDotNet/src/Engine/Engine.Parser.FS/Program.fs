@@ -119,6 +119,9 @@ C4 > C5;
             F.Main = { F.Main.Ap; }
             F.Main.Am = { F.Main; }
         }
+        [autopre] = {
+            F.Main.Am = { F.Main.Ap; }
+        }
         [layouts file="cctv1;rtsp://210.99.70.120:1935/live/cctv002.stream"] = {
             A = (1309, 405, 205, 83);
             C = (1600, 500, 300, 300);

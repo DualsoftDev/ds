@@ -22,16 +22,32 @@ module TagKindModule =
 
     let TagDSSubject = new Subject<TagDS>()
     type TagKind = int
-    type TagKindTuple = TagKind * string
+    type TagKindTuple = TagKind * string        //TagKind, TagKindName
     
     type EnumEx() =
-        static member Extract<'T when 'T: struct>() : TagKindTuple array =
+        static member Extract<'T when 'T: struct>(formatWithType: bool) : TagKindTuple array =
             let typ = typeof<'T>
-            let values = Enum.GetValues(typ) :?> 'T[] |> Seq.cast<int> |> toArray
-
-            let names = Enum.GetNames(typ) |> map (fun n -> $"{typ.Name}.{n}")
+            let values = Enum.GetValues(typ) :?> 'T[] |> Seq.cast<int> |> Array.ofSeq
+            let names = 
+                Enum.GetNames(typ) 
+                |> Array.map (fun n -> if formatWithType then $"{typ.Name}.{n}" else n)
             Array.zip values names
 
+    let getTagKindFullSet(ft:bool) = //formatWithType
+            EnumEx.Extract<SystemTag>(ft)
+                    @ EnumEx.Extract<FlowTag>(ft)
+                    @ EnumEx.Extract<VertexTag>(ft)
+                    @ EnumEx.Extract<ApiItemTag>(ft)
+                    @ EnumEx.Extract<ActionTag>(ft)
+                    @ EnumEx.Extract<HwSysTag>(ft)
+                    @ EnumEx.Extract<VariableTag>(ft)
+
+    let allTagKindWithTypes =  getTagKindFullSet true
+    let allTagKinds =  getTagKindFullSet false |> dict
+                
+    let getStorageName (fqdn:FqdnObject) (tagKind:TagKind) =
+        $"{fqdn.QualifiedName}_{allTagKinds[tagKind]}" |> validStorageName
+    
 
 [<AutoOpen>]
 [<Extension>]
@@ -44,14 +60,7 @@ type TagKindExt =
     [<Extension>] static member GetActionTagKind    (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
     [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.tryGetEnumValue<HwSysTag>(x.TagKind)
     [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.tryGetEnumValue<VariableTag>(x.TagKind)
-    [<Extension>] static member GetAllTagKinds () : TagKindTuple array =
-                    EnumEx.Extract<SystemTag>()
-                    @ EnumEx.Extract<FlowTag>()
-                    @ EnumEx.Extract<VertexTag>()
-                    @ EnumEx.Extract<ApiItemTag>()
-                    @ EnumEx.Extract<ActionTag>()
-                    @ EnumEx.Extract<HwSysTag>()
-                    @ EnumEx.Extract<VariableTag>()
+    [<Extension>] static member GetAllTagKinds () : TagKindTuple array = allTagKindWithTypes
 
     [<Extension>]
     static member GetTagInfo (x:IStorage) =

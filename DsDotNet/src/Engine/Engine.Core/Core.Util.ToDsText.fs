@@ -315,13 +315,14 @@ module internal ToDsTextModule =
                         yield! r.Graph.Vertices.OfType<ISafetyConditoinHolder>()
                 ] |> List.distinct
 
-            let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
-            let safeties =
-                let getCallName (call:Call) =
+            let getCallName (call:Call) =
                     match call.Parent with
                     | DuParentReal r-> $"{r.Flow.Name.QuoteOnDemand()}.{call.ParentNPureNames.Combine()}"
                     | DuParentFlow _ -> call.ParentNPureNames.Combine()
 
+            let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
+            let safeties =
+                
                 let safetyConditionName (sc:SafetyCondition) =
                     match sc with
                     | DuSafetyConditionReal real       -> real.ParentNPureNames.Combine()
@@ -354,11 +355,11 @@ module internal ToDsTextModule =
             let withAutoPres = autoPreHolders.Where(fun h -> h.AutoPreConditions.Any())
             let autoPres =
                 [
-                    if withSafeties.Any() then
-                        yield $"{tab2}[autoPre] = {lb}"
+                    if withAutoPres.Any() then
+                        yield $"{tab2}[autopre] = {lb}"
                         for autoPreHolder in withAutoPres do
-                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.Name).JoinWith("; ") + ";"
-                            yield $"{tab3}{autoPreHolder.GetAutoPreCall().Name} = {lb} {conds} {rb}"
+                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetAutoPreCall() |> getCallName).JoinWith("; ") + ";"
+                            yield $"{tab3}{autoPreHolder.GetAutoPreCall()|>getCallName} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
             

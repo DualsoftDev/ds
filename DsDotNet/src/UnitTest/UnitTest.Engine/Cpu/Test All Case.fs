@@ -16,7 +16,6 @@ type XgxConvertDsCPU(target:PlatformTarget) =
     inherit EngineTestBaseClass()
 
     let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/Xgi/Xmls/{testName}.xml")
-    let myExistIO  = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/Xgi/Xmls/Templates/myTemplateExistIO.xml")
 
     let testAddressSetting (sys:DsSystem) =
         let mutable index = 0

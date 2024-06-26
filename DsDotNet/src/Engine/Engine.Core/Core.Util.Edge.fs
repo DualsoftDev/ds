@@ -282,11 +282,6 @@ module EdgeModule =
         errors
 
    
-    type DsSystem with
-        member x.CreateMRIEdgesTransitiveClosure() = createMRIEdgesTransitiveClosure4System x
-        member x.AutoAppendInterfaceReset() = autoAppendInterfaceReset x
-                                   
-
     type Flow with
         member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
             createFlowEdge x modelingEdgeInfo

@@ -16,6 +16,7 @@ open type DsParser
 open System.Collections.Generic
 
 
+// 이 파일에서만 사용됨
 [<AutoOpen>]
 module private DsParserHelperModule =
     type DsSystem with
@@ -34,6 +35,32 @@ module private DsParserHelperModule =
                 | _ -> failwithlog "ERROR"
             }
 
+        member x.LoadExternalSystemAs
+            (
+                systemRepo: ShareableSystemRepository,
+                loadedName: string,
+                absoluteFilePath: string,
+                relativeFilePath: string
+            ) =
+            let external =
+                let param =
+                    { ContainerSystem = x
+                      AbsoluteFilePath = absoluteFilePath
+                      RelativeFilePath = relativeFilePath
+                      LoadedName = loadedName
+                      ShareableSystemRepository = systemRepo
+                      LoadingType = DuExternal }
+
+                match systemRepo.TryFind(absoluteFilePath) with
+                | Some existing -> ExternalSystem(existing, param, false) // 기존 loading 된 system share
+                | None ->
+                    let exSystem = fwdLoadExternalSystem param
+                    assert (systemRepo.ContainsKey(absoluteFilePath))
+                    assert (systemRepo[absoluteFilePath] = exSystem.ReferenceSystem)
+                    exSystem
+
+            x.AddLoadedSystem(external) |> ignore
+            external
 
 
 /// <summary>
@@ -44,7 +71,6 @@ module private DsParserHelperModule =
 /// </summary>
 type DsParserListener(parser: dsParser, options: ParserOptions) =
     inherit dsBaseListener()
-
 
     do parser.Reset()
    
@@ -873,29 +899,3 @@ module ParserLoadApiModule =
             x.AddLoadedSystem(device) |> ignore
             device
 
-        member x.LoadExternalSystemAs
-            (
-                systemRepo: ShareableSystemRepository,
-                loadedName: string,
-                absoluteFilePath: string,
-                relativeFilePath: string
-            ) =
-            let external =
-                let param =
-                    { ContainerSystem = x
-                      AbsoluteFilePath = absoluteFilePath
-                      RelativeFilePath = relativeFilePath
-                      LoadedName = loadedName
-                      ShareableSystemRepository = systemRepo
-                      LoadingType = DuExternal }
-
-                match systemRepo.TryFind(absoluteFilePath) with
-                | Some existing -> ExternalSystem(existing, param, false) // 기존 loading 된 system share
-                | None ->
-                    let exSystem = fwdLoadExternalSystem param
-                    assert (systemRepo.ContainsKey(absoluteFilePath))
-                    assert (systemRepo[absoluteFilePath] = exSystem.ReferenceSystem)
-                    exSystem
-
-            x.AddLoadedSystem(external) |> ignore
-            external

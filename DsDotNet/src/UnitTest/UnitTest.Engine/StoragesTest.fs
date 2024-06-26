@@ -15,12 +15,33 @@ open Engine.Cpu
 
 type StoragesTest() =
     inherit EngineTestBaseClass()
+    let check(dsText:string) = 
+        let systemRepo = ShareableSystemRepository()
+        let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+        let helper = ModelParser.ParseFromString2(dsText, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+        let sys = helper.TheSystem  
+        /// 파싱후에는 TagManager가 없어야 한다.
+        sys.TagManager === null
 
+        let _ = DsCpuExt.GetDsCPU (sys) PlatformTarget.WINDOWS
+        /// CPU 생성후 기본 Storage 생성 확인
+        sys.TagManager.Storages.Count > 0 === true
+        /// 시스템 TAG 정상 생성 확인
+        sys.TagManager.Storages[getStorageName sys (int SystemTag.autoMonitor)].Name  === getStorageName sys (int SystemTag.autoMonitor)
+        sys.TagManager.Storages[getStorageName sys (int SystemTag.errorMonitor)].Name === getStorageName sys (int SystemTag.errorMonitor)
+
+
+        let call = sys.GetVerticesOfJobCalls().Head()
+
+        sys.TagManager.Storages[getStorageName call (int VertexTag.going)].Target.Value === call
+
+        sys.TagManager.Storages[getStorageName call (int VertexTag.finish)].Name === getStorageName call (int VertexTag.finish)
+        
 
     [<Test>]
     member __.``Test Generation Name`` () =
-        let f = getFuncName()
-        let testCode = """
+
+        let testCodeNormal = """
              [sys] HelloDS = {
                 [flow] STN1 = {
                     STN1_EXT_ADV > Work1;
@@ -44,24 +65,67 @@ type StoragesTest() =
                 [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_Device2; 
             }
             """
-        let systemRepo = ShareableSystemRepository()
-        let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
-        let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-        let sys = helper.TheSystem  
-        /// 파싱후에는 TagManager가 없어야 한다.
-        sys.TagManager === null
+        check testCodeNormal
+        
+    [<Test>]
+    member __.``Test 한글 및 공란 Generation Name`` () =
 
-        let _ = DsCpuExt.GetDsCPU (sys) PlatformTarget.WINDOWS
-        /// CPU 생성후 기본 Storage 생성 확인
-        sys.TagManager.Storages.Count > 0 === true
-        /// 시스템 TAG 정상 생성 확인
-        sys.TagManager.Storages[getStorageName sys (int SystemTag.autoMonitor)].Name  === getStorageName sys (int SystemTag.autoMonitor)
-        sys.TagManager.Storages[getStorageName sys (int SystemTag.errorMonitor)].Name === getStorageName sys (int SystemTag.errorMonitor)
-
-
-        let call = sys.GetVerticesOfJobCalls().Head()
-
-        sys.TagManager.Storages[getStorageName call (int VertexTag.going)].Target.Value === call
-
-        sys.TagManager.Storages[getStorageName call (int VertexTag.finish)].Name === getStorageName call (int VertexTag.finish)
+        let testCodeAdvance = """
+            [sys] HelloDS = {
+                [flow] "00 한글" = {
+                    "00 한글__외부시작_ADV_INTrue" > Work1;
+                    Work2 => "1" => Work2;
+                    "1" = {
+                        "00 한글__한글_ADV" > "00 한글__Device2_ADV" > "00 한글__Device3_ADV" > "00 한글__Device4_ADV" > "00 한글__Device1_RET", "00 한글__Device2_RET", "00 한글__Device3_RET" > "00 한글__Device4_RET";
+                    }
+                }
+                [jobs] = {
+                    "00 한글__한글_ADV" = { "00 한글__한글".ADV(P00000, P00040); }
+                    "00 한글__Device2_ADV" = { "00 한글__Device2".ADV(P00001, P00041); }
+                    "00 한글__Device3_ADV" = { "00 한글__Device3".ADV(P00002, P00042); }
+                    "00 한글__Device4_ADV" = { "00 한글__Device4".ADV(P00003, P00043); }
+                    "00 한글__Device1_RET" = { "00 한글__Device1".RET(P00004, P00044); }
+                    "00 한글__Device2_RET" = { "00 한글__Device2".RET(P00005, P00045); }
+                    "00 한글__Device3_RET" = { "00 한글__Device3".RET(P00006, P00046); }
+                    "00 한글__Device4_RET" = { "00 한글__Device4".RET(P00007, P00047); }
+                    "00 한글__외부시작_ADV_INTrue" = { "00 한글__외부시작".ADV(P00008:Boolean:True, -); }
+                }
+                [buttons] = {
+                    [a] = { AutoSelect(M00628, -) = { "00 한글"; } }
+                    [m] = { ManualSelect(M00629, -) = { "00 한글"; } }
+                    [d] = { DrivePushBtn(M0062A, -) = { "00 한글"; } }
+                    [e] = { EmergencyBtn(M0062B, -) = { "00 한글"; } }
+                    [p] = { PausePushBtn(M0062C, -) = { "00 한글"; } }
+                    [c] = { ClearPushBtn(M0062D, -) = { "00 한글"; } }
+                }
+                [lamps] = {
+                    [a] = { AutoModeLamp(-, M0062E) = {  } }
+                    [m] = { ManualModeLamp(-, M0062F) = {  } }
+                    [d] = { DriveLamp(-, M00630) = {  } }
+                    [e] = { ErrorLamp(-, M00631) = {  } }
+                    [r] = { ReadyStateLamp(-, M00632) = {  } }
+                    [i] = { IdleModeLamp(-, M00633) = {  } }
+                    [o] = { OriginStateLamp(-, M00634) = {  } }
+                }
+                [prop] = {
+                    [layouts] = {
+                        "00 한글__한글" = (543, 298, 220, 80);
+                        "00 한글__Device2" = (854, 580, 220, 80);
+                        "00 한글__Device3" = (1154, 580, 220, 80);
+                        "00 한글__Device4" = (854, 800, 220, 80);
+                        "00 한글__Device1" = (554, 580, 220, 80);
+                        "00 한글__외부시작" = (1103, 95, 220, 80);
+                    }
+                }
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
+                    "00 한글__한글",
+                    "00 한글__Device2",
+                    "00 한글__Device3",
+                    "00 한글__Device4",
+                    "00 한글__Device1",
+                    "00 한글__외부시작"; 
+            }
+            """
+        check testCodeAdvance
+        
         

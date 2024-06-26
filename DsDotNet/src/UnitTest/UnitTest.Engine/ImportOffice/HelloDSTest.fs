@@ -3,6 +3,7 @@ open Dual.UnitTest.Common.FS
 
 open T
 
+open Dapper
 open Engine.Core
 open Dual.Common.Core.FS
 open NUnit.Framework
@@ -12,6 +13,8 @@ open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
+open Microsoft.Data.Sqlite
+open Engine.Info
 
 
 
@@ -67,3 +70,37 @@ module HelloDSTestModule =
             callDev1Adv.Name === "STN1__Device1_ADV"
             ()
 
+        [<Test>]
+        member __.``HelloDS stroage test``() =
+            let system = getSystem()
+
+            (* Via Storages *)
+            let globalStorage = new Storages()
+            let pous = CpuLoaderExt.LoadStatements(system, globalStorage, PlatformTarget.WINDOWS)
+            tracefn $"---- Global Storage"
+            for KeyValue(k, v) in globalStorage do
+                tracefn $"Storage: {k} = {v}"
+
+            let var = globalStorage["HelloDS_STN1_Work1_STN1__Device1_ADV_R"]
+
+            //for KeyValue(k, v) in globalStorage do
+            //    yield k, v.Tag
+            ()
+
+            (* 별도 함수 *)
+            tracefn $"---- Fqdn objects"
+            let dic = collectFqdnObjects system
+            for KeyValue(k, v) in dic do
+                tracefn $"Storage: {k} = {v}"
+            ()
+
+            use conn =
+                let connStr = 
+                    let path = @"F:\Git\ds\DsDotNet\bin\net7.0-windows\Logger.sqlite3"
+                    $"Data Source={path}"
+                new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
+
+            let logs = conn.Query<ORMVwLog>("SELECT * FROM vwLog") |> toArray
+            for l in logs do
+                dic.ContainsKey(l.Fqdn) === true
+            ()

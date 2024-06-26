@@ -879,7 +879,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 module ParserLoadApiModule =
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
-
+        // MEMO: 이 함수를 사용하는 곳이, 이 파일의 상단에 존재하는데 F# 에서 에러가 나지 않는 이유는????
         member x.LoadDeviceAs
             (
                 systemRepo: ShareableSystemRepository,

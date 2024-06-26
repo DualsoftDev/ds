@@ -60,9 +60,8 @@ type StoragesTest() =
 
 
         let call = sys.GetVerticesOfJobCalls().Head()
-        let asdas = getStorageName call (int VertexTag.going)
 
+        sys.TagManager.Storages[getStorageName call (int VertexTag.going)].Target.Value === call
 
-        sys.TagManager.Storages[getStorageName call (int VertexTag.going)].Name === getStorageName call (int VertexTag.going)
         sys.TagManager.Storages[getStorageName call (int VertexTag.finish)].Name === getStorageName call (int VertexTag.finish)
         

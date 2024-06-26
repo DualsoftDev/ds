@@ -225,14 +225,14 @@ module TagManagerModule =
         let sysManager = sys.TagManager :?> SystemManager
         let createTag name = this.CreateTag name 
 
-        let counterBit    = counter  s ($"{v.Name}_CTR"|>validStorageName) sys (sysManager.TargetType)
-        let timerOnDelayBit = timer  s ($"{v.Name}_TON"|>validStorageName) sys (sysManager.TargetType)
+        let counterBit    = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)
+        let timerOnDelayBit = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
         let memo           = createTag  false VertexTag.callMemo
         
         let callCommandEnd  = createTag  false VertexTag.callCommandEnd
         let callOperatorValue  = createTag false VertexTag.callOperatorValue
    
-        let timerTimeOutBit  = timer  s ($"{v.Name}_TOUT"|>validStorageName) sys (sysManager.TargetType)
+        let timerTimeOutBit  = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
        
         let txErrOnTimeShortage     = createTag  true    VertexTag.txErrOnTimeShortage   
         let txErrOnTimeOver         = createTag  true    VertexTag.txErrOnTimeOver  

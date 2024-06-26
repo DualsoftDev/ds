@@ -333,6 +333,7 @@ module CoreModule =
             jobParam <- newJobParam
 
         member x.ActionType = x.JobParam.JobAction 
+        member x.JobMulti = x.JobParam.JobMulti 
         member x.AddressInCount = x.JobParam.JobMulti.AddressInCount
         member x.AddressOutCount = x.JobParam.JobMulti.AddressOutCount
         member x.System = system

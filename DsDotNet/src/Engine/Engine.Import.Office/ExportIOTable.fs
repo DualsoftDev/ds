@@ -114,8 +114,10 @@ module ExportIOTable =
                 | (true, value) -> value-1
                 | (false, _) -> 0
 
-            let inSkip =  job.AddressInCount > devIndex |>not
-            let outSkip =  job.AddressOutCount > devIndex |>not
+            let inSkip = if job.JobMulti = Single then false 
+                         else  job.AddressInCount > devIndex |>not
+            let outSkip =if job.JobMulti = Single then false 
+                         else job.AddressOutCount > devIndex |>not
 
             let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
             [ TextXlsAddress

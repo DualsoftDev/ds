@@ -22,7 +22,7 @@ open Engine.Parser.FS.ModelParser
 module ImportU =
     
     [<Extension>]
-    type ImportUtil =
+    type ImportPPTExt =
 
         //Interface Reset 정보 만들기
         [<Extension>]

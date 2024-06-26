@@ -61,7 +61,6 @@
         <Compile Include="Core.Create.fs" />
         <Compile Include="Expression.TagKind.fs" />
         <Compile Include="Expression.Tag.fs" />
-        <Compile Include="EntryPoint.fs" />
         <Compile Include="ModelLoader.fs" />
         <Compile Include="LibraryLoader.fs" />
         <Compile Include="ExportConfigs.fs" />
@@ -72,6 +71,8 @@
         <Compile Include="Info\InfoQueryResult.fs" />
         <Content Include="ValidSyntax.txt" />
         <Content Include="ProgramCodeSyntax.txt" />
+        <Compile Include="EntryPoint.fs" />
+        <Compile Include="AssemblyInfo.fs" />
         <!--<Compile Include="Program.fs" />-->
     </ItemGroup>
 

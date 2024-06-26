@@ -78,7 +78,8 @@ module ModelParser =
         then
             system.AutoAppendInterfaceReset()
 
-        system.Validate() |> ignore
+        validateGraphOfSystem system
+        validateRootCallConnection system
 
         listener
 

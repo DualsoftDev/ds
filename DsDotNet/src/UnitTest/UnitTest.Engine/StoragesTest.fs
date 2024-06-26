@@ -101,23 +101,7 @@ type StoragesTest() =
                     "00+한글__Device4_RET" = { "00+한글__Device4".RET(-, -); }
                     "00+한글__외부시작_ADV_INTrue" = { "00+한글__외부시작".ADV(-:Boolean:True, -); }
                 }
-                [buttons] = {
-                    [a] = { AutoSelect(M00628, -) = { "00-한글"; "00+한글"; } }
-                    [m] = { ManualSelect(M00629, -) = { "00-한글"; "00+한글"; } }
-                    [d] = { DrivePushBtn(M0062A, -) = { "00-한글"; "00+한글"; } }
-                    [e] = { EmergencyBtn(M0062D, -) = { "00-한글"; "00+한글"; } }
-                    [p] = { PausePushBtn(M0062B, -) = { "00-한글"; "00+한글"; } }
-                    [c] = { ClearPushBtn(M0062C, -) = { "00-한글"; "00+한글"; } }
-                }
-                [lamps] = {
-                    [a] = { AutoModeLamp(-, -) = {  } }
-                    [m] = { ManualModeLamp(-, -) = {  } }
-                    [d] = { DriveLamp(-, -) = {  } }
-                    [e] = { ErrorLamp(-, -) = {  } }
-                    [r] = { ReadyStateLamp(-, -) = {  } }
-                    [i] = { IdleModeLamp(-, -) = {  } }
-                    [o] = { OriginStateLamp(-, -) = {  } }
-                }
+            
                 [prop] = {
                     [layouts] = {
                         "00-한글__+11" = (588, 406, 220, 80);

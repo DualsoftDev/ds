@@ -55,21 +55,3 @@ module ContextInformationModule =
         member x.Tuples = x.Flow, x.Parenting, x.NamedContextInformation.Names
 
 
-
-[<AutoOpen>]
-module DsParserHelperModule =
-    type DsSystem with
-
-        member x.TryFindParentWrapper(ci: NamedContextInformation) =
-            option {
-                let! flowName = ci.Flow
-
-                match ci.Tuples with
-                | Some _sys, Some flow, Some parenting, _ ->
-                    let! real = tryFindReal x [ flow; parenting ]
-                    return DuParentReal real
-                | Some _sys, Some _flow, None, _ ->
-                    let! f = tryFindFlow x flowName
-                    return DuParentFlow f
-                | _ -> failwithlog "ERROR"
-            }

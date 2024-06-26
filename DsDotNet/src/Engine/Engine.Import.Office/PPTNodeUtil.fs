@@ -78,11 +78,13 @@ module PPTNodeUtilModule =
             | s when s.IsHomePlate() -> IF_DEVICE
             | s when s.IsFoldedCornerPlate() -> OPEN_EXSYS_CALL
             | s when s.IsFoldedCornerRound() -> COPY_DEV
-            | s when s.IsEllipse() -> CALL
+            | s when s.IsEllipse() ->
+                if s.IsDashShape() then AUTOPRE else CALL
             | s when s.IsBevelShapePlate() -> LAMP
             | s when s.IsBevelShapeRound() -> BUTTON
             | s when s.IsBevelShapeMaxRound() -> CONDITION
             | s when s.IsLayout() -> shape.ErrorName(ErrID._62, iPage)
+            
             | _ ->
                 failWithLog ErrID._1
 

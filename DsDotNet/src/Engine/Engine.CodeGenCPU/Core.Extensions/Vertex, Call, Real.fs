@@ -11,7 +11,7 @@ module ConvertCpuVertex =
 
 
        
-    let getSafetyExpr(xs:Call seq, sys:DsSystem) =    
+    let getSafetyNAutoPreConditionExpr(xs:Call seq, sys:DsSystem) =    
         if xs.any()
         then xs.Select(fun f->f.End).ToAnd()
         else sys._on.Expr
@@ -127,8 +127,8 @@ module ConvertCpuVertex =
                                 ]
                          
           
-        member c.SafetyExpr = getSafetyExpr(c.SafetyConditions.Choose(fun f->f.GetSafetyCall()), c.System)
-        member c.AutoPreExpr = getSafetyExpr(c.AutoPreConditions.Map(fun f->f.GetAutoPreCall()), c.System)
+        member c.SafetyExpr = getSafetyNAutoPreConditionExpr(c.SafetyConditions.Choose(fun f->f.GetSafetyCall()), c.System)
+        member c.AutoPreExpr = getSafetyNAutoPreConditionExpr(c.AutoPreConditions.Map(fun f->f.GetAutoPreCall()), c.System)
 
         member c.StartPointExpr =
             match c.Parent.GetCore() with
@@ -176,6 +176,6 @@ module ConvertCpuVertex =
                             @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages 
                             @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
 
-        member r.SafetyExpr = getSafetyExpr(r.SafetyConditions.Choose(fun f->f.GetSafetyCall()), r.Parent.GetSystem())
+        member r.SafetyExpr = getSafetyNAutoPreConditionExpr(r.SafetyConditions.Choose(fun f->f.GetSafetyCall()), r.Parent.GetSystem())
 
 

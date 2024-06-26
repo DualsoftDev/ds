@@ -19,7 +19,7 @@ type VertexManager with
                 <||> (dop <&&> v.ST.Expr)
                 <||> (mop <&&> v.SF.Expr)
             )
-            <&&> call.SafetyExpr
+            <&&> call.SafetyExpr <&&> call.AutoPreExpr 
             
         let rst =
             if call.UsingTon 
@@ -50,9 +50,11 @@ type VertexManager with
         let coins = real.Graph.Inits.Select(getVM)
         [
             for coin in coins do
-                let safety = coin.Vertex.GetPureCall().Value.SafetyExpr
+                let call = coin.Vertex.GetPureCall().Value
+                let safety = call.SafetyExpr
+                let autoPreExpr = call.AutoPreExpr
                 let coin = coin :?> VertexMCall
-                let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety
+                let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, getFuncName())
         ]
@@ -62,9 +64,11 @@ type VertexManager with
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVM)
         [
             for coin in coins do
-                let safety = coin.Vertex.GetPureCall().Value.SafetyExpr
+                let call = coin.Vertex.GetPureCall().Value
+                let safety = call.SafetyExpr
+                let autoPreExpr = call.AutoPreExpr
                 let coin = coin :?> VertexMCall
-                let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety
+                let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
         ]

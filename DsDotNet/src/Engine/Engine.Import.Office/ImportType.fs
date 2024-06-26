@@ -160,7 +160,7 @@ module ImportType =
         | REALExF ->
             if name.Contains(".") |> not then
                 failwithlog ErrID._54
-        | CALL ->
+        | CALL | AUTOPRE ->
             if not(namePure.Contains(".")) &&  namePure <> nameNFunc  // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
             then
                 failwithlog ErrID._70

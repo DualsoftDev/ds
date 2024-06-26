@@ -14,6 +14,7 @@ module InterfaceClass =
         | REAL //실제 나의 시스템 1 bit
         | REALExF //다른 Flow real
         | CALL //지시관찰
+        | AUTOPRE //전제조건 Node
         //| CALLOPFunc  //Operator 함수전용
         //| CALLCMDFunc //Command  함수전용
         | IF_DEVICE //인터페이스

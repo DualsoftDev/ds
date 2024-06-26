@@ -388,6 +388,24 @@ module ImportU =
 
                     tgtDummy.Value.AddInEdge(edge.Causal, src))
         
+            let getVertexs (pptNodes: pptNode seq) =
+                pptNodes.Select(fun s -> dicVertex.[s.Key])
+
+            let updateAutoPre(edge:pptEdge) = 
+                if edge.EndNode.NodeType = AUTOPRE
+                then 
+                    edge.EndNode.Shape.ErrorName(ErrID._8, edge.EndNode.PageNum)
+                    
+                let tgts =
+                    if (dummys.IsMember(edge.EndNode)) then
+                        dummys.GetMembers(edge.EndNode)|>toArray
+                    else
+                        [|edge.EndNode|]
+
+                tgts.Iter(fun node-> 
+                        node.AutoPres.Add (edge.StartNode.AutoPreCondition)|>ignore )
+               
+
             dicEdges
             |> Seq.iter (fun dic ->
                 let tgtNode = dic.Key
@@ -399,41 +417,42 @@ module ImportU =
                     .Select(fun group -> group.Key, group.Select(id))
                     .Iter(fun (causal, edges) ->
                         edges.Iter(fun edge ->
-                            
-                            let flow = dicFlow.[edge.PageNum]
 
-                            let getVertexs (pptNodes: pptNode seq) =
-                                pptNodes.Select(fun s -> dicVertex.[s.Key])
+                            if edge.StartNode.NodeType = AUTOPRE
+                            then 
+                                updateAutoPre(edge)
+                            else 
+                                let flow = dicFlow.[edge.PageNum]
 
-                            let srcs =
-                                if (dummys.IsMember(edge.StartNode)) then
-                                    dummys.GetMembers(edge.StartNode) |> getVertexs
-                                else
-                                    [dicVertex[edge.StartNode.Key]]
+                                
+                                let srcs =
+                                    if (dummys.IsMember(edge.StartNode)) then
+                                        dummys.GetMembers(edge.StartNode) |> getVertexs
+                                    else
+                                        [dicVertex[edge.StartNode.Key]]
 
-                            let tgts =
-                                if (dummys.IsMember(edge.EndNode)) then
-                                    dummys.GetMembers(edge.EndNode) |> getVertexs
-                                else
-                                    [ dicVertex.[edge.EndNode.Key] ]
+                                let tgts =
+                                    if (dummys.IsMember(edge.EndNode)) then
+                                        dummys.GetMembers(edge.EndNode) |> getVertexs
+                                    else
+                                        [ dicVertex.[edge.EndNode.Key] ]
 
-                            try
-                                convertEdge (edge, flow, srcs, tgts) |> ignore
-                            with ex ->
-                                if
-                                    (ex.Source = "Dual.Common.Core.FS") //관리되는 예외 failwithf 사용 : 추후 예외 타입 작성
-                                then
-                                    raise ex
-                                else
-                                    edge.ConnectionShape.ErrorConnect(
-                                        ex.Message,
-                                        srcs.First().Name,
-                                        tgts.First().Name,
-                                        edge.PageNum
-                                    )))
+                                try
+                                    convertEdge (edge, flow, srcs, tgts) |> ignore
+                                with ex ->
+                                    if
+                                        (ex.Source = "Dual.Common.Core.FS") //관리되는 예외 failwithf 사용 : 추후 예외 타입 작성
+                                    then
+                                        raise ex
+                                    else
+                                        edge.ConnectionShape.ErrorConnect(
+                                            ex.Message,
+                                            srcs.First().Name,
+                                            tgts.First().Name,
+                                            edge.PageNum
+                                        )))
 
-                                )
-
+                                    )
 
         //Safety 만들기
         [<Extension>]
@@ -475,7 +494,7 @@ module ImportU =
 
                 safeties //세이프티 입력 미등록 이름오류 체크
                 |> iter (fun safeFullName ->
-                    if not (mySys.Jobs.Select(fun f -> f.Name).Contains safeFullName) then
+                    if not (dicQualifiedNameSegs.ContainsKey safeFullName) then
                         node.Shape.ErrorName($"{ErrID._28}(err:{safeFullName})", node.PageNum)
                         )
 
@@ -486,6 +505,41 @@ module ImportU =
                     | :? ISafetyConditoinHolder as holder -> holder.SafetyConditions.Add(DuSafetyConditionCall(safeCondV)) |> ignore
                     | _ -> node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
                     )
+                    
+            //AutoPre 처리
+        [<Extension>]
+        static member MakeAutoPre(doc: pptDoc, mySys: DsSystem) =
+            let dicVertex = doc.DicVertex
+            let dicFlow = doc.DicFlow
+
+            doc.Nodes
+            |> Seq.iter (fun node ->
+                let flow = dicFlow.[node.PageNum]
+
+                let dicQualifiedNameSegs =
+                    dicVertex.Values
+                        .OfType<Call>()
+                        .Where(fun call -> call.IsJob)
+                        .Select(fun call -> call.TargetJob.Name, call)
+                    |> dict
+
+
+                // Check for unregistered AutoPre names
+                node.AutoPres
+                |> Seq.iter (fun autoPreFullName ->
+                    if not (dicQualifiedNameSegs.ContainsKey autoPreFullName) then
+                        node.Shape.ErrorName($"{ErrID._10}(err:{autoPreFullName})", node.PageNum)
+                )
+
+                // Add AutoPre conditions
+                node.AutoPres
+                |> Seq.map (fun autoPreFullName -> dicQualifiedNameSegs.[autoPreFullName])
+                |> Seq.iter (fun autoPreCondV ->
+                    match dicVertex.[node.Key].GetPure() |> box with
+                    | :? IAutoPrerequisiteHolder as holder -> holder.AutoPreConditions.Add(DuAutoPreConditionCall(autoPreCondV)) |> ignore
+                    | _ -> node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum)
+                )
+            )
 
         [<Extension>]
         static member MakeApiTxRx(doc: pptDoc) =
@@ -705,6 +759,8 @@ module ImportU =
             doc.MakeEdges(sys)
             //Safety 만들기
             doc.MakeSafeties(sys)
+            //AutoPre 만들기
+            doc.MakeAutoPre(sys)
             //ApiTxRx  만들기
             doc.MakeApiTxRx()
             //AnimationPoint  만들기

@@ -22,6 +22,8 @@ module PPTNodeModule =
     type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties = HashSet<string>()
+        let autoPres = HashSet<string>()
+        
         let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
         let btnHeadPageDefs = Dictionary<string, BtnType>()
         let btnDefs = Dictionary<string, BtnType>()
@@ -39,7 +41,6 @@ module PPTNodeModule =
         let mutable realDelayTime:float option = None   
 
         let nodeType = getNodeType(shape, iPage)
-        let disableCall = shape.IsDashShape()
         let name = GetLastParenthesesReplaceName( nameTrim(shape) |> getTrimName shape,  "")
         let updateSafety (barckets: string) =
                 barckets.Split(';')
@@ -49,6 +50,7 @@ module PPTNodeModule =
                         else
                             failwithf $"{ErrID._74}"
                     )    
+
 
         let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
                 if (groupJob > 0) then
@@ -127,6 +129,7 @@ module PPTNodeModule =
                         
                 | REALExF -> updateTime()
                 | LAYOUT
+                | AUTOPRE
                 | DUMMY -> ()
             with ex ->  
                 shape.ErrorShape(ex.Message, iPage)  
@@ -136,9 +139,21 @@ module PPTNodeModule =
         member x.CopySys = copySystems
         member x.JobCallNames = jobInfos.Keys
         member x.RealFinished = shape.IsUnderlined()
-        member x.RealNoTrans = shape.IsStrikethrough()
-        member x.Safeties = safeties
+        member x.RealNoTrans = if nodeType.IsReal then shape.IsStrikethrough() else failWithLog $"err: {name}RealNoTrans is not real Type"
+        member x.DisableCall = if nodeType.IsCall then shape.IsStrikethrough() else failWithLog $"err: {name}CallSkipCoin is not call Type"
+        member x.JobParam = 
+            if (not(nodeType = CALL || nodeType = AUTOPRE) || x.IsFunction) then
+                shape.ErrorName($"JobOption not support {nodeType}({name}) type", iPage)
+            let flow, job, api = x.CallFlowNJobNApi
+            let jobTypeAction = getJobTypeAction (api) 
+            let jobTypeMulti  = getJobTypeMulti (name.Substring(0, (name.Length-api.Length-1)))
+            JobParam (jobTypeAction, jobTypeMulti)
+      
 
+        member x.Safeties = safeties
+        member x.AutoPres = autoPres
+        member x.AutoPreCondition = x.CallName
+        
         member x.RealGoingTime = realGoingTime
         member x.RealDelayTime = realDelayTime
         member x.IfName = ifName
@@ -146,7 +161,7 @@ module PPTNodeModule =
         member x.IfRX = ifRX
 
         member x.NodeType = nodeType
-        member x.DisableCall = disableCall
+        
         member x.PageTitle = pageTitle
         member x.Position = shape.GetPosition(slieSize)
         member x.OperatorName = pageTitle+TextFlowSplit+name.Replace(".", "_")
@@ -225,7 +240,7 @@ module PPTNodeModule =
       
         member x.CallFlowNJobNApi = 
                 
-            if (nodeType <> CALL) then
+            if (not(nodeType = CALL || nodeType = AUTOPRE)) then
                 shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
 
             let parts = GetLastParenthesesReplaceName(name, "").Split('.')  
@@ -255,19 +270,13 @@ module PPTNodeModule =
             let flow, job, api = x.CallFlowNJobNApi
             flow
 
-        member x.JobParam = 
-            if (nodeType <> CALL || x.IsFunction) then
-                shape.ErrorName($"JobOption not support {nodeType}({name}) type", iPage)
-            let flow, job, api = x.CallFlowNJobNApi
-            let jobTypeAction = getJobTypeAction (api) 
-            let jobTypeMulti  = getJobTypeMulti (name.Substring(0, (name.Length-api.Length-1)))
-            JobParam (jobTypeAction, jobTypeMulti)
-      
+        
+
+        member x.IsAlias: bool = x.Alias.IsSome
+        member val Alias: pptNode option = None with get, set
         member val Id = shape.GetId()
         member val Key = Objkey(iPage, shape.GetId())
         member val Name = name with get, set
-        member x.IsAlias: bool = x.Alias.IsSome
-        member val Alias: pptNode option = None with get, set
         member val AliasNumber: int = 0 with get, set
         member val ButtonHeadPageDefs = btnHeadPageDefs
         member val ButtonDefs = btnDefs

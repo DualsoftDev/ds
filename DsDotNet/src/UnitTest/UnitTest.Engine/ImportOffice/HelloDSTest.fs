@@ -18,6 +18,7 @@ open Engine.Info
 
 
 
+
 [<AutoOpen>]
 module HelloDSTestModule =
 
@@ -36,6 +37,17 @@ module HelloDSTestModule =
                 LayoutImgPaths = layoutImgPaths 
             } = result
             system
+
+        let createConnection() =
+            let connStr = 
+                let path = @"F:\Git\ds\DsDotNet\bin\net7.0-windows\Logger.sqlite3"
+                $"Data Source={path}"
+            new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
+
+        let getLogs() =
+            use conn = createConnection()
+            let logs = conn.Query<ORMVwLog>("SELECT * FROM vwLog")
+            logs
 
 
         [<Test>]
@@ -94,13 +106,10 @@ module HelloDSTestModule =
                 tracefn $"Storage: {k} = {v}"
             ()
 
-            use conn =
-                let connStr = 
-                    let path = @"F:\Git\ds\DsDotNet\bin\net7.0-windows\Logger.sqlite3"
-                    $"Data Source={path}"
-                new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
-
-            let logs = conn.Query<ORMVwLog>("SELECT * FROM vwLog") |> toArray
+            let logs = getLogs().ToFSharpList()
+            let lls = logs.DistinctBy(fun l -> l.Name).ToArray()
             for l in logs do
                 dic.ContainsKey(l.Fqdn) === true
+
+            let g = groupDurationsByFqdn logs "HelloDS.STN1.Work1"
             ()

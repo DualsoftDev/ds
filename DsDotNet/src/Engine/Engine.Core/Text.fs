@@ -52,14 +52,28 @@ module TextImpl =
            | [ n ] -> n
            | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
 
+
+    //let isValidIdentifier (charStr: string) =
+    //// Assuming a placeholder function for checking valid identifier characters
+    //    Char.IsLetterOrDigit(charStr, 0) || charStr = "_"
+
+    // Function to convert a device name to a valid storage name
     let validStorageName devName =
-                        devName
-                        |> Seq.map (fun c ->
-                                        match c with
-                                        | _ when Char.IsNumber(c) 
-                                                || isValidIdentifier(c.ToString())-> c.ToString()
-                                        | _ -> "_")
-                        |> String.concat ""
+        let processedName =
+            devName
+            |> Seq.map (fun c ->
+                if Char.IsNumber(c) || isValidIdentifier(c.ToString()) then
+                    c.ToString()
+                else
+                    "_")
+            |> String.concat ""
+
+        // Ensure the first character is not a number
+        if Char.IsNumber(processedName.[0]) then
+            "_" + processedName
+        else
+            processedName
+
 // Extension methods for string manipulation
 [<Extension>]
 type TextExt =

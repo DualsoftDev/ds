@@ -80,14 +80,14 @@ type StoragesTest() =
                     }
                 }
                 [jobs] = {
-                    "00 한글__한글_ADV" = { "00 한글__한글".ADV(P00000, P00040); }
-                    "00 한글__Device2_ADV" = { "00 한글__Device2".ADV(P00001, P00041); }
-                    "00 한글__Device3_ADV" = { "00 한글__Device3".ADV(P00002, P00042); }
-                    "00 한글__Device4_ADV" = { "00 한글__Device4".ADV(P00003, P00043); }
-                    "00 한글__Device1_RET" = { "00 한글__Device1".RET(P00004, P00044); }
-                    "00 한글__Device2_RET" = { "00 한글__Device2".RET(P00005, P00045); }
-                    "00 한글__Device3_RET" = { "00 한글__Device3".RET(P00006, P00046); }
-                    "00 한글__Device4_RET" = { "00 한글__Device4".RET(P00007, P00047); }
+                    "00 한글__한글_ADV" = { "00 한글__한글".ADV(-, -); }
+                    "00 한글__Device2_ADV" = { "00 한글__Device2".ADV(-,-); }
+                    "00 한글__Device3_ADV" = { "00 한글__Device3".ADV(-,-); }
+                    "00 한글__Device4_ADV" = { "00 한글__Device4".ADV(-,-); }
+                    "00 한글__Device1_RET" = { "00 한글__Device1".RET(-,-); }
+                    "00 한글__Device2_RET" = { "00 한글__Device2".RET(-,-); }
+                    "00 한글__Device3_RET" = { "00 한글__Device3".RET(-,-); }
+                    "00 한글__Device4_RET" = { "00 한글__Device4".RET(-,-); }
                     "00 한글__외부시작_ADV_INTrue" = { "00 한글__외부시작".ADV(P00008:Boolean:True, -); }
                 }
                 [buttons] = {

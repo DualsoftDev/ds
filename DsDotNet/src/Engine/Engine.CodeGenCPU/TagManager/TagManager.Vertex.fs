@@ -165,8 +165,6 @@ module TagManagerModule =
 
     and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
-        let sys =  v.Parent.GetSystem()
-        let s =  sys.TagManager.Storages
         let real = v:?> Real
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag name = this.CreateTag name
@@ -183,11 +181,10 @@ module TagManagerModule =
         let dummyCoinETs      = createTag false     VertexTag.dummyCoinETs
         let originGoingErr    = createTag false     VertexTag.workErrOriginGoing
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
-        
-        let realData  = 
-            let vertexTag = VertexTag.realData |> int
-            let name = $"{v.QualifiedName}_RD"
-            createPlanVar  s name DuUINT16 true v vertexTag sys  
+        //let realData  = 
+        //    let vertexTag = VertexTag.realData |> int
+        //    let name = $"{v.QualifiedName}_RD"
+        //    createPlanVar  s name DuUINT16 true v vertexTag sys  
             
 
         member x.OriginInfo
@@ -206,7 +203,7 @@ module TagManagerModule =
         ///Real Going Relay
         member _.GG         = relayGoingBit
         ///Real Data
-        member _.RD         = realData
+        //member _.RD         = realData
         ///link with physical sensors
         member _.Link       = realLink
         ///GoingOriginErr
@@ -228,14 +225,14 @@ module TagManagerModule =
         let sysManager = sys.TagManager :?> SystemManager
         let createTag name = this.CreateTag name 
 
-        let counterBit    = counter  s $"{v.Name}_CTR"  sys (sysManager.TargetType)
-        let timerOnDelayBit = timer  s $"{v.Name}_TON"  sys (sysManager.TargetType)
+        let counterBit    = counter  s ($"{v.Name}_CTR"|>validStorageName) sys (sysManager.TargetType)
+        let timerOnDelayBit = timer  s ($"{v.Name}_TON"|>validStorageName) sys (sysManager.TargetType)
         let memo           = createTag  false VertexTag.callMemo
         
         let callCommandEnd  = createTag  false VertexTag.callCommandEnd
         let callOperatorValue  = createTag false VertexTag.callOperatorValue
    
-        let timerTimeOutBit  = timer  s $"{v.Name}_TOUT" sys (sysManager.TargetType)
+        let timerTimeOutBit  = timer  s ($"{v.Name}_TOUT"|>validStorageName) sys (sysManager.TargetType)
        
         let txErrOnTimeShortage     = createTag  true    VertexTag.txErrOnTimeShortage   
         let txErrOnTimeOver         = createTag  true    VertexTag.txErrOnTimeOver  

@@ -49,7 +49,7 @@ module ConvertCPU =
                 yield! vm.R5_DummyDAGCoils() 
                 //yield vm.R6_RealDataMove() 
                 yield! vm.R7_RealGoingOriginError() 
-                yield vm.R8_RealGoingPulse() 
+                yield! vm.R8_RealGoingPulse() 
                 
                 
                 yield! vm.D1_DAGHeadStart()

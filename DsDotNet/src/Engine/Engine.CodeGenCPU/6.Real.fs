@@ -85,20 +85,16 @@ type VertexMReal with
                 yield (checking, rst) ==| (v.ErrGoingOrigin , getFuncName())
         ]
         
-        
-    member v.R8_RealGoingPulse(): CommentedStatement  =
-            
-        if RuntimeDS.Package.IsPLCorPLCSIM() 
-        then
-            (fbRising[v.G.Expr], v._off.Expr) --| (v.GP, getFuncName()) 
-        elif RuntimeDS.Package.IsPCorPCSIM() then //Rising 수식 항상 우선 연산하게 Rung 구성
-            //(         v.G.Expr , v.GP.Expr)   --| (v.GP, getFuncName()) //test ahn
-            (         v.G.Expr , v._off.Expr)   --| (v.GP, getFuncName()) 
-        else    
-            failWithLog $"Not supported {RuntimeDS.Package} package"
-
-
- 
+    member v.R8_RealGoingPulse(): CommentedStatement  list =
+        [ 
+            if RuntimeDS.Package.IsPLCorPLCSIM() 
+            then
+                yield(fbRising[v.G.Expr], v._off.Expr) --| (v.GP, getFuncName())
+            elif RuntimeDS.Package.IsPCorPCSIM() then 
+                yield! (v.G.Expr , v._off.Expr)  --^ (v.GP, v.GPR, getFuncName()) 
+            else    
+                failWithLog $"Not supported {RuntimeDS.Package} package"
+        ]
 
 type VertexManager with
     member v.R1_RealInitialStart()    : CommentedStatement        = (v :?> VertexMReal).R1_RealInitialStart()
@@ -108,5 +104,5 @@ type VertexManager with
     member v.R5_DummyDAGCoils()       : CommentedStatement list   = (v :?> VertexMReal).R5_DummyDAGCoils()
     member v.R6_RealDataMove()        : unit                      = (v :?> VertexMReal).R6_RealDataMove()
     member v.R7_RealGoingOriginError(): CommentedStatement list   = (v :?> VertexMReal).R7_RealGoingOriginError()
-    member v.R8_RealGoingPulse()      : CommentedStatement        = (v :?> VertexMReal).R8_RealGoingPulse()
+    member v.R8_RealGoingPulse()      : CommentedStatement list   = (v :?> VertexMReal).R8_RealGoingPulse()
     

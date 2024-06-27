@@ -43,8 +43,7 @@ type VertexMCall with
                     else   
                         failWithLog $"Not supported {RuntimeDS.Package} package"
 
-                //yield (v.MM.Expr, v.CallCommandPulse.Expr) --| (v.CallCommandPulse, getFuncName())  //Rising 수식 항상 우선 연산하게 Rung 구성
-                yield (v.MM.Expr, v._off.Expr) --| (v.CallCommandPulse, getFuncName())  //Rising 수식 항상 우선 연산하게 Rung 구성
+                yield! (v.MM.Expr, v.CallCommandPulse.Expr) --^ (v.CallCommandPulse, v.CallCommandPulse, getFuncName()) 
 
                     ////test ahn
                 yield! call.TargetFunc.Statements |> Seq.collect(fun s->

@@ -156,10 +156,6 @@ module TagKindList =
     | realLink                  = 11027
     | callMemo                  = 11028
 
-    | callCommandPulse          = 11029
-    | callCommandEnd            = 11030
-    | callOperatorValue         = 11031
-    
     | dummyCoinSTs              = 11032
     | dummyCoinRTs              = 11033
     | dummyCoinETs              = 11034
@@ -169,6 +165,14 @@ module TagKindList =
     | actionEnd                 = 11037
 
     | goingPulse                = 11038
+    | goingPulseRelay           = 11039
+
+    
+    | callCommandPulse          = 11040
+    | callCommandPulseRelay     = 11041
+    | callCommandEnd            = 11042
+    | callOperatorValue         = 11043
+    
 
     | txErrOnTimeShortage        = 11050
     | txErrOnTimeOver            = 11051

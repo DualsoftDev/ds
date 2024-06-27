@@ -39,7 +39,7 @@ module CodeConvertUtil =
         static member GetResetCausals(xs:Vertex seq) =
                 xs.Select(fun f ->
                     match getPure f with
-                    | :? Real    as r  -> r.V.GG
+                    | :? Real    as r  -> r.V.GP
                     | :? Call as c when c.IsOperator -> c.V.ET
                     | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()

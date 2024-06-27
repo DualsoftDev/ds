@@ -93,7 +93,7 @@ module HelloDSTestModule =
             for KeyValue(k, v) in globalStorage do
                 tracefn $"Storage: {k} = {v}"
 
-            let var = globalStorage["HelloDS_STN1_Work1_STN1__Device1_ADV_R"]
+            let var = globalStorage["HelloDS_STN1_Work1_STN1__Device1_ADV_ready"]
 
             //for KeyValue(k, v) in globalStorage do
             //    yield k, v.Tag

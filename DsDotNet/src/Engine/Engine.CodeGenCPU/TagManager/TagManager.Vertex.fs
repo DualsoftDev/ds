@@ -170,6 +170,8 @@ module TagManagerModule =
         let createTag name = this.CreateTag name
 
         let relayGoingBit     = createTag false     VertexTag.goingRealy
+        let pulseGoingBit     = createTag false     VertexTag.goingPulse
+        
         let relayRealBit      = createTag false     VertexTag.relayReal
         let realOriginInit    = createTag false     VertexTag.realOriginInit
         let realOriginButton  = createTag false     VertexTag.realOriginButton
@@ -202,6 +204,8 @@ module TagManagerModule =
         member _.RR         = relayRealBit
         ///Real Going Relay
         member _.GG         = relayGoingBit
+        ///Real Going Pulse
+        member _.GP         = pulseGoingBit
         ///Real Data
         //member _.RD         = realData
         ///link with physical sensors
@@ -229,7 +233,8 @@ module TagManagerModule =
         let timerOnDelayBit = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
         let memo           = createTag  false VertexTag.callMemo
         
-        let callCommandEnd  = createTag  false VertexTag.callCommandEnd
+        let callCommandPulse  = createTag  false VertexTag.callCommandPulse
+        let callCommandEnd    = createTag  false VertexTag.callCommandEnd
         let callOperatorValue  = createTag false VertexTag.callOperatorValue
    
         let timerTimeOutBit  = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
@@ -287,6 +292,10 @@ module TagManagerModule =
    
         ///callCommandEnd
         member _.CallCommandEnd           =  callCommandEnd
+        ///callCommandPulse  
+        member _.CallCommandPulse         =  callCommandPulse
+
+        
         ///Call Operator 연산결과 값 (T/F)
         member _.CallOperatorValue    =  callOperatorValue
 

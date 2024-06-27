@@ -34,19 +34,29 @@ type VertexMCall with
         [
             if call.TargetFunc.Statements.any() 
             then
+                let sets = 
+                    if RuntimeDS.Package.IsPLCorPLCSIM() 
+                    then
+                        fbRising [v.MM.Expr]:> IExpression<bool>
+                    elif RuntimeDS.Package.IsPCorPCSIM() then
+                        v.CallCommandPulse.Expr   
+                    else   
+                        failWithLog $"Not supported {RuntimeDS.Package} package"
+
+                //yield (v.MM.Expr, v.CallCommandPulse.Expr) --| (v.CallCommandPulse, getFuncName())  //Rising 수식 항상 우선 연산하게 Rung 구성
+                yield (v.MM.Expr, v._off.Expr) --| (v.CallCommandPulse, getFuncName())  //Rising 수식 항상 우선 연산하게 Rung 구성
+
+                    ////test ahn
                 yield! call.TargetFunc.Statements |> Seq.collect(fun s->
                         [
                             match s with
                             | DuAssign (_, cmdExpr, target) ->
-
-                            let sets = fbRising [v.MM.Expr]:> IExpression<bool>
-                            yield withExpressionComment comment (DuAssign (sets|> Some, cmdExpr, target)) //test ahn PC fbRising 에서도 처리 
-                            yield withExpressionComment comment (DuAssign (None, v.MM.Expr, v.CallCommandEnd))
+                                yield withExpressionComment comment (DuAssign (sets|> Some, cmdExpr, target))
                             |_ -> failWithLog $"err {comment}"
                         ]
                     )
-            else
-                yield withExpressionComment comment (DuAssign (None, v.MM.Expr, v.CallCommandEnd))
+
+                yield (v.CallCommandPulse.Expr, v._off.Expr) --| (v.CallCommandEnd, getFuncName())
         ]
 
     member v.C3_DoOperatorDevice() =

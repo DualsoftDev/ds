@@ -36,10 +36,13 @@ type VertexMReal with
             //1. EndTag 
             (set, rst) ==| (v.ET, getFuncName())              
             //2. 다른 Real Reset Tag Relay을 위한 1Scan 소비 (Scan에서 제어방식 바뀌면 H/S 필요)
-            (fbRising[v.G.Expr], v._off.Expr) --| (v.GG, getFuncName()) 
-            //(v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
+            (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
+
+          
         ]
 
+
+        
     member v.R3_RealStartPoint() =
         let set = (v.G.Expr <&&> !@v.RR.Expr<&&> v.Link.Expr)
         let rst = v._off.Expr
@@ -76,12 +79,25 @@ type VertexMReal with
         let dop = v.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
         [
-            if RuntimeDS.Package.IsPackagePC() ||RuntimeDS.Package.IsPackagePLC() 
+            if not(RuntimeDS.Package.IsPackageSIM())
             then 
                 let checking = v.G.Expr <&&> !@v.OG.Expr <&&> !@v.RR.Expr <&&> dop
                 yield (checking, rst) ==| (v.ErrGoingOrigin , getFuncName())
         ]
         
+        
+    member v.R8_RealGoingPulse(): CommentedStatement  =
+            
+        if RuntimeDS.Package.IsPLCorPLCSIM() 
+        then
+            (fbRising[v.G.Expr], v._off.Expr) --| (v.GP, getFuncName()) 
+        elif RuntimeDS.Package.IsPCorPCSIM() then //Rising 수식 항상 우선 연산하게 Rung 구성
+            //(         v.G.Expr , v.GP.Expr)   --| (v.GP, getFuncName()) //test ahn
+            (         v.G.Expr , v._off.Expr)   --| (v.GP, getFuncName()) 
+        else    
+            failWithLog $"Not supported {RuntimeDS.Package} package"
+
+
  
 
 type VertexManager with
@@ -92,4 +108,5 @@ type VertexManager with
     member v.R5_DummyDAGCoils()       : CommentedStatement list   = (v :?> VertexMReal).R5_DummyDAGCoils()
     member v.R6_RealDataMove()        : unit                      = (v :?> VertexMReal).R6_RealDataMove()
     member v.R7_RealGoingOriginError(): CommentedStatement list   = (v :?> VertexMReal).R7_RealGoingOriginError()
+    member v.R8_RealGoingPulse()      : CommentedStatement        = (v :?> VertexMReal).R8_RealGoingPulse()
     

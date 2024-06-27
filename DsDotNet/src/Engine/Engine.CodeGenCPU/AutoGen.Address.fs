@@ -53,7 +53,7 @@ module DsAddressModule =
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
 
-        let iec = target = PlatformTarget.XGI
+        
 
         let addr = if addr.IsNullOrEmpty()
                     then failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  
@@ -150,7 +150,7 @@ module DsAddressModule =
                     | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다."
 
 
-                if RuntimeDS.Package.IsPackagePC() 
+                if RuntimeDS.Package.IsPCorPCSIM() 
                 then 
                     match ioType with 
                     |In ->  $"IB{cnt / 8}.{cnt % 8}" 
@@ -158,27 +158,30 @@ module DsAddressModule =
                     |Memory -> $"M{memoryCnt}"
                     |NotUsed -> failwithf $"{ioType} not support"
 
-                elif RuntimeDS.Package.IsPackagePLC()
-                     || RuntimeDS.Package.IsPackageSIM()    
+                elif RuntimeDS.Package.IsPLCorPLCSIM()
                 then
                     match ioType with 
                     |In |Out -> 
                         let iSlot, sumBit =  getSlotInfoIEC(ioType, cnt)
 
-                        if iec && ioType = IOType.In
+                        if target = PlatformTarget.XGI && ioType = IOType.In
                         then
                             getXgiIOTextBySize("I", cnt ,sizeBit, iSlot, sumBit)
-                        elif iec  && ioType = IOType.Out 
+                        elif target = PlatformTarget.XGI  && ioType = IOType.Out 
                         then
                             getXgiIOTextBySize("Q", cnt ,sizeBit, iSlot, sumBit)
-                        else 
+                        elif target = PlatformTarget.XGK
+                        then
                             getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), dataType = DuBOOL)
+                        else failwithf $"Error {target} not support"
 
-                    |Memory -> if iec
+                    |Memory -> if target = PlatformTarget.XGI
                                then 
                                     getXgiMemoryTextBySize("M", cnt ,sizeBit)
-                               else 
+                               elif target = PlatformTarget.XGK
+                               then
                                     getXgkTextByType("M", cnt, dataType = DuBOOL)
+                               else failwithf $"Error {target} not support"
 
 
                     |NotUsed -> failwithf $"{ioType} not support"

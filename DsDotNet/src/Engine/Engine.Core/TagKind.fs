@@ -156,6 +156,7 @@ module TagKindList =
     | realLink                  = 11027
     | callMemo                  = 11028
 
+    | callCommandPulse          = 11029
     | callCommandEnd            = 11030
     | callOperatorValue         = 11031
     
@@ -166,6 +167,8 @@ module TagKindList =
     | actionSync                = 11035
     | actionStart               = 11036
     | actionEnd                 = 11037
+
+    | goingPulse                = 11038
 
     | txErrOnTimeShortage        = 11050
     | txErrOnTimeOver            = 11051

@@ -49,6 +49,7 @@ module ConvertCPU =
                 yield! vm.R5_DummyDAGCoils() 
                 //yield vm.R6_RealDataMove() 
                 yield! vm.R7_RealGoingOriginError() 
+                yield vm.R8_RealGoingPulse() 
                 
                 
                 yield! vm.D1_DAGHeadStart()
@@ -94,7 +95,7 @@ module ConvertCPU =
             yield! s.Y5_SystemEmgAlramError()
             
 
-            if RuntimeDS.Package.IsPackagePLC() then
+            if RuntimeDS.Package.IsPLCorPLCSIM() then
                 yield! s.E2_PLCOnly()
             else  
                 yield! s.B2_SWButtonOutput()

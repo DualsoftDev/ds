@@ -91,9 +91,9 @@ type StatementTest() =
         let fails = [
             "Counter declaration error"      , "ctu myCtu1 = createWinCTU(100u, $tag1, $tag1, $tag1, $tag1);"    // 'Counter declaration error: ctu myCounter = createCTU(100u, $tag1, $tag1, $tag1, $tag1)'
             "Unable to cast"                 , "ctu myCtu2 = createWinCTU(100u, $tagDouble, $tag1);"                    // 'Unable to cast object of type 'DuTerminal[System.Double]' to type 'IExpression`1[System.Boolean]'.'
-            ////<<help kwak>> 예외나는데 ShouldFailWithSubstringT 에서 처리가  안되네요  ( 한글 Visual studio 이라 처리안됨 )
+            //// 예외나는데 ShouldFailWithSubstringT 에서 처리가  안되네요  ( 한글 Visual studio 이라 처리안됨 )
             ////        "The index was outside the range", "ctu myTon1 = createWinTON();"                                     // 'The index was outside the range of elements in the list. (Parameter 'n')'
-            ////<<help kwak>>
+            ////
             "Unable to cast"                 , "ctu myTon2 = createWinTON(100u, $tag1);"                         // 'Unable to cast object of type 'DuFunction[Engine.Core.ExpressionModule+Timer]' to type 'Expression`1[Engine.Core.ExpressionModule+Counter]'.'
             "Failed to find"                 , "ctu myTon3 = createWinTON(100u, $undefinedTag);"                 // 'Failed to find variable/tag name in $undefinedTag'
             "Resolution Error"               , "ton myTon4 = createWinTON(1u, $tag1);"                           // 'Timer Resolution Error: Preset value should be larger than 20us'

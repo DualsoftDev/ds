@@ -290,11 +290,13 @@ module ExpressionFunctionModule =
         let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( || )
         let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
 
-        let _rising (_args:Args) : bool = _args.Select(evalArg).Cast<bool>().Expect1()  //help kwak
-        //let _rising (_args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
-        let _falling (_args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
-        let _risingAfter (_args:Args) : bool = false//failwithlog "ERROR"   //args.Select(evalArg).Cast<bool>().Expect1() |> not
-        let _fallingAfter (_args:Args) : bool = false// failwithlog "ERROR"  //args.Select(evalArg).Cast<bool>().Expect1() |> not
+        let errorPLCRunmode(_args:Args, funName:string) = 
+            failwithlog $"""Error: {funName} is a PLC-only formula. ({String.Join(", ", _args.Map(fun a->a.ToText()))})"""
+
+        let _rising (_args:Args) : bool = errorPLCRunmode(_args, "rising")
+        let _falling (_args:Args) : bool = errorPLCRunmode(_args, "falling")
+        let _risingAfter (_args:Args) : bool = errorPLCRunmode(_args, "risingAfter")
+        let _fallingAfter (_args:Args) : bool= errorPLCRunmode(_args, "fallingAfter")
 
 
         let _sin (args:Args) = args.Select(evalArg >> toFloat64).Expect1() |> Math.Sin

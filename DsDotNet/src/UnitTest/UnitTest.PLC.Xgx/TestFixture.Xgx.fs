@@ -139,7 +139,7 @@ module XgxFixtures =
         inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
 
         let sys = DsSystem("testSys")
-
+        
         /// XML을 포맷팅하는 Node.js 스크립트를 실행한다.
         /// Exception 발생 할 경우 조치방법
         ///
@@ -186,6 +186,8 @@ module XgxFixtures =
             // 포맷된 XML 반환
             output.Replace("\r\n", "\n").Replace("\n", "\r\n")
 
+            
+
         /// 주어진 ds expression 코드를 파싱해서 PLC 코드 생성
         ///
         /// 부산물인 storages 와 statements 를 반환
@@ -199,6 +201,8 @@ module XgxFixtures =
         [<SetUp>]
         member x.Setup () =
             RuntimeDS.System <- sys
+            RuntimeDS.Package <- RuntimePackage.PLCSIM
+
 
         [<TearDown>]
         member __.TearDown () =

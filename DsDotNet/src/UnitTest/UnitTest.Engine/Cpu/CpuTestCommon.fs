@@ -22,7 +22,7 @@ module CpuTestUtil =
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- sys
-            RuntimeDS.Package <- RuntimePackage.PLC
+            RuntimeDS.Package <- RuntimePackage.PC
             applyTagManager (sys, Storages(), target)
             checkCausalModel sys
             sys

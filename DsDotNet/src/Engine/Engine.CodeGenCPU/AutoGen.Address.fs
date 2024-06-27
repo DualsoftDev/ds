@@ -21,8 +21,15 @@ module DsAddressModule =
                 outCnt <- 0
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
+    let getPCIOMTextBySize (device:string, offset: int, bitSize:int) : string =
+            match bitSize with  
+            | 1 -> $"{device}X{offset}" 
+            | 8 -> $"{device}B{offset/8}.{offset % 8}" 
+            | 16 -> $"{device}W{offset/16}.{offset % 16}" 
+            | 32 -> $"{device}D{offset/32}.{offset % 32}" 
+            | 64 -> $"{device}L{offset/64}.{offset % 64}" 
+            | _ -> failwithf $"Invalid size :{bitSize}"
 
-   
     let getStartPointXGK(index:int) =
         RuntimeDS.HwSlotDataTypes
             |> Seq.filter(fun (i, _, _) -> i < index)
@@ -173,7 +180,12 @@ module DsAddressModule =
                         elif target = PlatformTarget.XGK
                         then
                             getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), dataType = DuBOOL)
-                        else failwithf $"Error {target} not support"
+                        elif target = PlatformTarget.WINDOWS then
+                            if ioType = IOType.In
+                            then getPCIOMTextBySize("I", cnt ,sizeBit)
+                            else getPCIOMTextBySize("O", cnt ,sizeBit)
+                        else 
+                            failwithf $"Error {target} not support"
 
                     |Memory -> if target = PlatformTarget.XGI
                                then 
@@ -181,7 +193,11 @@ module DsAddressModule =
                                elif target = PlatformTarget.XGK
                                then
                                     getXgkTextByType("M", cnt, dataType = DuBOOL)
-                               else failwithf $"Error {target} not support"
+                               elif target = PlatformTarget.WINDOWS then
+                                    getPCIOMTextBySize("M", cnt ,sizeBit)
+                               else 
+                                    failwithf $"Error {target} not support"
+                                    
 
 
                     |NotUsed -> failwithf $"{ioType} not support"

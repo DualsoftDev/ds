@@ -28,7 +28,7 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
         let testCode = "$qx = rising(!($ix)) && falling(!($ix));"
         let code = baseCode +  testCode
 
-        let statements = parseCodeForWindows storages code
+        let statements = parseCodeForTarget storages code xgx
         statements.Length === 1
         statements[0].ToText() === testCode
 
@@ -47,7 +47,7 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
                     && rising($ix) && falling($ix);"""
         let code = baseCode + testCode
 
-        let statements = parseCodeForWindows storages code
+        let statements = parseCodeForTarget storages code xgx
         statements.Length === 1
         let xxx = statements[0].ToText()
         //statements[0].ToText() === testCode.TrimEnd(';')
@@ -83,7 +83,7 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
                 $qx3 = (fallingAfter($ix1 || !($ix2)) && $ix3) || fallingAfter($ix1);
                 """
 
-        let statements = parseCodeForWindows storages code
+        let statements = parseCodeForTarget storages code xgx
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
@@ -97,7 +97,7 @@ type XgxRisingFallingTest(xgx:PlatformTarget) =
         bool b2 = $bTrue == true;
         """
 
-        let statements = parseCodeForWindows storages code
+        let statements = parseCodeForTarget storages code xgx
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml

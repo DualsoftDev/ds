@@ -45,4 +45,4 @@ module ExpressionFixtures =
         inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
         do
             //Engine.CodeGenCPU.ModuleInitializer.Initialize()
-            setRuntimeTarget XGI |> ignore
+            setRuntimeTarget WINDOWS|> ignore

@@ -178,16 +178,12 @@ module ImportViewModule =
     let UpdateApi (system: DsSystem, node: ViewNode) =
         let newNode = ViewNode("Interface", VIF)
 
-        let flowApis =
-            system.ApiItems
-            |> Seq.filter (fun api -> [api.TX; api.RX].Any(fun r -> r.Flow = node.Flow.Value))
-
         let flowApiNodes =
-            flowApis
+            system.ApiItems
             |> Seq.map (fun api -> api.Name, ViewNode(api.ToText(), VIF))
             |> dict
 
-        flowApis |> Seq.iter (fun api -> newNode.AddSingles(flowApiNodes.[api.Name]))
+        system.ApiItems |> Seq.iter (fun api -> newNode.AddSingles(flowApiNodes.[api.Name]))
 
         system.ApiResetInfos |> Seq.iter (fun i ->
             let operand1Node = flowApiNodes.[i.Operand1]

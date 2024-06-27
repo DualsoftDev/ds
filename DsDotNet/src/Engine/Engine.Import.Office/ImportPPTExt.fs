@@ -292,6 +292,7 @@ module ImportU =
                         elif dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
+                            node.UpdateTime(real)
 
                             Alias.Create(
                                 $"{call.Name}_{node.AliasNumber}",
@@ -302,6 +303,8 @@ module ImportU =
 
                             match segOrg with
                             | :? Real as rt ->
+                                node.UpdateTime(rt)
+                                
                                 Alias.Create(
                                     $"{rt.Name}_{node.AliasNumber}",
                                     DuAliasTargetReal(rt),

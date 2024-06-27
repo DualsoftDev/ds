@@ -65,11 +65,11 @@ module ExpressionExtension =
         DuAction(DuCopy(sets, copyExpr, target))  |> withExpressionComment comment
                 
     /// Create One Scan Relay Coils Statement
-    let (--^) (sets: Expression<bool>, rsts: Expression<bool>) (rising: TypedValueStorage<bool>, risingRelay: TypedValueStorage<bool>, comment:string) =
+    let (--^) (sets: Expression<bool>, risingRelay: TypedValueStorage<bool>) (rising: TypedValueStorage<bool>, comment:string) =
         [
         //순서 무관
-            rising      <== (sets <&&> !@rsts <&&> !@(var2expr risingRelay)) |> withExpressionComment comment
-            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&>  sets  <&&> !@rsts) |> withExpressionComment comment
+            rising      <== (sets  <&&> !@(var2expr risingRelay)) |> withExpressionComment comment
+            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&>  sets ) |> withExpressionComment comment
         ]
 
 

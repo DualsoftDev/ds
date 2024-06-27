@@ -174,6 +174,8 @@ namespace Diagram.View.MSAGL
                 vv.Nodes.Iter(node =>
                 {
                     node.Status4 = status;
+                    if (status == Status4.Going) node.UpdateGoingCnt();
+
                     var ucView = UcViews.FirstOrDefault(w => w.MasterNode == DicNode[node.CoreVertex.Value].FlowNode);
                     if (ucView != null) ucView.UpdateStatus(node);
                 });

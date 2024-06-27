@@ -94,9 +94,15 @@ public partial class UcView : UserControl
         viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
     }
 
-    private void UpdateLabelText(Node nNode)
+    private void UpdateLabelText(Node nNode, int goingCnt)
     {
-        nNode.LabelText = nNode.LabelText.Split(';')[0];
+        var org = nNode.Label.Text.Split(';')[0].Split('\v')[0];
+        if (goingCnt > 0)
+            nNode.LabelText = $"{org}\v\r\n({goingCnt})";
+        else
+            nNode.LabelText = org;
+
+
         nNode.Label.FontColor = Color.White;
         nNode.Attr.Color = Color.Black;
         nNode.Label.FontSize = nnode_label_fontsize;
@@ -141,7 +147,7 @@ public partial class UcView : UserControl
         }
 
         Edge gEdge = viewer.Graph.AddEdge(subGraph.Id, "", subGraph.Id);
-        UpdateLabelText(gEdge.SourceNode);
+        UpdateLabelText(gEdge.SourceNode, viewNode.GoingCnt);
         UpdateNodeView(gEdge.SourceNode, viewNode);
         gEdge.IsVisible = false;
 
@@ -252,8 +258,8 @@ public partial class UcView : UserControl
            throw new Exception($"Error {et.ToText()} not DrawEdgeStyle");
         }
 
-        UpdateLabelText(gEdge.SourceNode);
-        UpdateLabelText(gEdge.TargetNode);
+        UpdateLabelText(gEdge.SourceNode, edge.Sources.First().GoingCnt);
+        UpdateLabelText(gEdge.TargetNode, edge.Targets.First().GoingCnt);
 
         if (model)
         {
@@ -466,7 +472,7 @@ public partial class UcView : UserControl
         UpdateFillColor(dataExist, node, Color.DarkBlue);
         if (vRefresh) RefreshGraph();
     }
-    public void UpdatePlanEndValue(ViewNode viewNode, object item2, bool vRefresh = true)
+    public void UpdatePlanEndValue(ViewNode viewNode, object item2, bool vRefresh = false)
     {
         Node node = findNode(viewNode);
         if (node == null) return;
@@ -513,6 +519,7 @@ public partial class UcView : UserControl
         Node node = findNode(viewNode);
         if (node != null)
         {
+            UpdateLabelText(node, viewNode.GoingCnt);
             UpdateBackColor(viewNode.Status4, node);
             if (vRefresh) RefreshGraph();
         }

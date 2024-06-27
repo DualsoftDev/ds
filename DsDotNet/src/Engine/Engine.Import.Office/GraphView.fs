@@ -25,6 +25,7 @@ module rec ViewModule =
         let dicUsedVertex = new Dictionary<Vertex, ViewNode>()
         let edges = HashSet<ModelingEdgeInfo<ViewNode>>()
         let singles = HashSet<ViewNode>()
+        let mutable goingCont = 0
 
 
         let usedViewNodes () =
@@ -118,6 +119,8 @@ module rec ViewModule =
         member x.IsChildExist = edges.Count > 0 || singles.Count > 0
 
         member x.Name = name
+        member x.UpdateGoingCnt() = goingCont <- goingCont+1
+        member x.GoingCnt = goingCont 
 
         [<Browsable(false)>]
         member x.UIKey =
@@ -145,6 +148,7 @@ module rec ViewModule =
                 | _ -> $"{safeName}{autoPresName}{x.PureVertex.Value.Name};{vKey}"
             else
                 $"{name};{x.GetHashCode()}"
+
 
         [<Browsable(false)>]
         member x.UsedViewNodes = usedViewNodes ()

@@ -13,6 +13,7 @@ RedisPLC/obj/
 RedisPLC/bin/
 RedisTestFrom/obj/
 RedisTestFrom/bin/
+CppRedis3D/x64/
 *.xgdb
 
 *.xgwx_bkx0

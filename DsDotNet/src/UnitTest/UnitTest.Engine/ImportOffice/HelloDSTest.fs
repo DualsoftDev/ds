@@ -46,7 +46,7 @@ module HelloDSTestModule =
 
         let createConnection() =
             let connStr = 
-                let path = @"F:\Git\ds\DsDotNet\bin\net7.0-windows\Logger.sqlite3"
+                let path = @"Z:\ds\Logger.sqlite3"
                 $"Data Source={path}"
             new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 

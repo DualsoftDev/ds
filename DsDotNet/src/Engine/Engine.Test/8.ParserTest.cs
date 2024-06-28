@@ -713,7 +713,7 @@ namespace Engine
         CMD1 = #{$v0 = 1;}
         CMD2 = #{$AOUT = 2;}
     }
-    [device file=""cylinder.ds""] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [device file=""cylinder.ds""] A; // Z:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
 }
 ";
 

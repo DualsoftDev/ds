@@ -76,10 +76,4 @@ module ValidateMoudle =
                 failWithLog $"Flow에 존재하는 Action은 반드시 연결이 필요합니다. {callOp.Name}"
             )
 
-
-
-    type DsSystem with
-        member x.Validate() = 
-            validateGraphOfSystem x
-            validateRootCallConnection x
                 

@@ -73,12 +73,12 @@ module ModelParser =
         let listener = Walk(parser, options)
 
         let system = listener.TheSystem
-        system.CreateMRIEdgesTransitiveClosure()    
-        if system.ApiResetInfos.IsEmpty()
-        then
-            system.AutoAppendInterfaceReset()
+        createMRIEdgesTransitiveClosure4System system
+        if system.ApiResetInfos.IsEmpty() then
+            autoAppendInterfaceReset system
 
-        system.Validate() |> ignore
+        validateGraphOfSystem system
+        validateRootCallConnection system
 
         listener
 

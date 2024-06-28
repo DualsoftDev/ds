@@ -15,6 +15,54 @@ open type Engine.Parser.dsParser
 open type DsParser
 open System.Collections.Generic
 
+
+// 이 파일에서만 사용됨
+[<AutoOpen>]
+module private DsParserHelperModule =
+    type DsSystem with
+
+        member x.TryFindParentWrapper(ci: NamedContextInformation) =
+            option {
+                let! flowName = ci.Flow
+
+                match ci.Tuples with
+                | Some _sys, Some flow, Some parenting, _ ->
+                    let! real = tryFindReal x [ flow; parenting ]
+                    return DuParentReal real
+                | Some _sys, Some _flow, None, _ ->
+                    let! f = tryFindFlow x flowName
+                    return DuParentFlow f
+                | _ -> failwithlog "ERROR"
+            }
+
+        member x.LoadExternalSystemAs
+            (
+                systemRepo: ShareableSystemRepository,
+                loadedName: string,
+                absoluteFilePath: string,
+                relativeFilePath: string
+            ) =
+            let external =
+                let param =
+                    { ContainerSystem = x
+                      AbsoluteFilePath = absoluteFilePath
+                      RelativeFilePath = relativeFilePath
+                      LoadedName = loadedName
+                      ShareableSystemRepository = systemRepo
+                      LoadingType = DuExternal }
+
+                match systemRepo.TryFind(absoluteFilePath) with
+                | Some existing -> ExternalSystem(existing, param, false) // 기존 loading 된 system share
+                | None ->
+                    let exSystem = fwdLoadExternalSystem param
+                    assert (systemRepo.ContainsKey(absoluteFilePath))
+                    assert (systemRepo[absoluteFilePath] = exSystem.ReferenceSystem)
+                    exSystem
+
+            x.AddLoadedSystem(external) |> ignore
+            external
+
+
 /// <summary>
 /// System, Flow, Parenting(껍데기만),
 /// Interface name map 구조까지 생성
@@ -23,7 +71,6 @@ open System.Collections.Generic
 /// </summary>
 type DsParserListener(parser: dsParser, options: ParserOptions) =
     inherit dsBaseListener()
-
 
     do parser.Reset()
    
@@ -832,7 +879,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 module ParserLoadApiModule =
     (* 외부에서 구조적으로 system 을 build 할 때에 사용되는 API *)
     type DsSystem with
-
+        // MEMO: 이 함수를 사용하는 곳이, 이 파일의 상단에 존재하는데 F# 에서 에러가 나지 않는 이유는????
         member x.LoadDeviceAs
             (
                 systemRepo: ShareableSystemRepository,
@@ -852,29 +899,3 @@ module ParserLoadApiModule =
             x.AddLoadedSystem(device) |> ignore
             device
 
-        member x.LoadExternalSystemAs
-            (
-                systemRepo: ShareableSystemRepository,
-                loadedName: string,
-                absoluteFilePath: string,
-                relativeFilePath: string
-            ) =
-            let external =
-                let param =
-                    { ContainerSystem = x
-                      AbsoluteFilePath = absoluteFilePath
-                      RelativeFilePath = relativeFilePath
-                      LoadedName = loadedName
-                      ShareableSystemRepository = systemRepo
-                      LoadingType = DuExternal }
-
-                match systemRepo.TryFind(absoluteFilePath) with
-                | Some existing -> ExternalSystem(existing, param, false) // 기존 loading 된 system share
-                | None ->
-                    let exSystem = fwdLoadExternalSystem param
-                    assert (systemRepo.ContainsKey(absoluteFilePath))
-                    assert (systemRepo[absoluteFilePath] = exSystem.ReferenceSystem)
-                    exSystem
-
-            x.AddLoadedSystem(external) |> ignore
-            external

@@ -1,18 +1,9 @@
-using Dual.Common.Core;
-
 using Engine.Core;
 using Engine.Info;
-using static Engine.Info.DBLoggerORM;
 using Engine.Runtime;
-
-using Microsoft.AspNetCore.Authorization;
-
-using static Engine.Core.CoreModule;
-using static Engine.Core.HmiPackageModule;
+using static Engine.Info.DBLoggerAnalysisDTOModule;
+using static Engine.Info.DBLoggerORM;
 using static Engine.Core.InfoPackageModule;
-using static Engine.Core.TagWebModule;
-using static Engine.Cpu.RunTime;
-
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 
 namespace DsWebApp.Server.Controllers;
@@ -39,17 +30,35 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
     // api/info/q
     [HttpGet("q")]
-    public async Task<RestResult<InfoQueryResult>> GetInfoQuery([FromQuery] string Fqdn, [FromQuery] DateTime Start, [FromQuery] DateTime End)
+    public async Task<RestResult<InfoQueryResult>> GetInfoQuery([FromQuery] string fqdn, [FromQuery] DateTime start, [FromQuery] DateTime end)
     {
         using var conn = global.CreateDbConnection();
         ORMVwLog[] vwLogs =
             (await conn.QueryAsync<ORMVwLog>(
-                $"SELECT * FROM [{Vn.Log}] WHERE [fqdn] = @Fqdn AND [at] BETWEEN @Start AND @End;",
-                new { Fqdn, Start, End })).ToArray();
+                $"SELECT * FROM [{Vn.Log}] WHERE [fqdn] = @fqdn AND [at] BETWEEN @start AND @end;",
+                new { fqdn, start, end })).ToArray();
 
         // todo: 검색 결과 생성
 
         return RestResult<InfoQueryResult>.Ok(new InfoQueryResult());
+    }
+
+    // api/info/log-anal-info
+    [HttpGet("log-anal-info")]
+    public async Task<SystemSpan> GetLogAnalInfo([FromQuery] DateTime? _start, [FromQuery] DateTime? _end)
+    {
+        DateTime start = _start ?? DateTime.MinValue;
+        DateTime end = _end ?? DateTime.MaxValue;
+
+        using var conn = global.CreateDbConnection();
+        var logs =
+            (await conn.QueryAsync<ORMVwLog>(
+                $"SELECT * FROM [{Vn.Log}] WHERE [at] BETWEEN @start AND @end;",
+                new { start, end })).ToArray();
+
+        var sysSpan = SystemSpanEx.CreateSpan(_model.System, logs);
+
+        return sysSpan;
     }
 }
 

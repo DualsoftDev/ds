@@ -16,6 +16,7 @@ open Dual.Common.Core.FS
 open Microsoft.Data.Sqlite
 open Engine.Info
 open Engine.Cpu
+open System.Text.Json
 
 
 
@@ -129,4 +130,9 @@ module HelloDSTestModule =
 
 
             let sysSpan = SystemSpan.CreateSpan(system, logs)
+
+            let text1    = JsonSerializer.Serialize sysSpan
+            let sysSpan1 = JsonSerializer.Deserialize<SystemSpan>(text1)
+            let text2    = JsonSerializer.Serialize sysSpan1
+            text1 === text2
             ()

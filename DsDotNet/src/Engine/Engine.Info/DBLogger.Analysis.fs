@@ -9,6 +9,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open DBLoggerORM
 open System
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module internal DBLoggerAnalysisModule =
@@ -121,9 +122,10 @@ module DBLoggerAnalysisDTOModule =
         new() = CallSpan(dummySpan, "")
 
     // RealSpan 클래스 정의
-    type RealSpan(span:LogSpan, fqdn: string, callSpans: CallSpan[]) =
+    type RealSpan(span:LogSpan, fqdn: string, flowName:string, callSpans: CallSpan[]) =
         inherit FqdnSpan(span, fqdn)
-        new() = RealSpan(dummySpan, "", [||])
+        new() = RealSpan(dummySpan, "", "", [||])
+        member val FlowName = flowName with get, set 
         member val CallSpans = callSpans with get, set
 
     // SystemSpan 클래스 정의
@@ -151,7 +153,8 @@ module DBLoggerAnalysisDTOModule =
                     | [] -> dummySpan
                     | _ -> (logs.Head.At, logs.Last().At)
                 let calls = real.Graph.Vertices.OfType<Call>() |> Seq.map (createCallSpan logs) |> Seq.toArray
-                RealSpan(span, real.QualifiedName, calls)
+                let flowName = real.Flow.Name
+                RealSpan(span, real.QualifiedName, flowName, calls)
 
             let createRealSpans (realLogs: ORMVwLog list list) (real: Real) : RealSpan list =
                 realLogs |> List.map (createRealSpan real)
@@ -167,3 +170,10 @@ module DBLoggerAnalysisDTOModule =
                 | _ -> (logs.Head.At, logs.Last().At)
 
             SystemSpan(span, system.Name, realSpans)
+
+// For C# interop
+module SystemSpanEx =
+    /// 주어진 system 에 대한 log 목록을 분석해서 SystemSpan 결과를 반환
+    let CreateSpan(system: DsSystem, logs: ORMVwLog seq) =
+        let logList = logs |> toFSharpList
+        SystemSpan.CreateSpan(system, logList)

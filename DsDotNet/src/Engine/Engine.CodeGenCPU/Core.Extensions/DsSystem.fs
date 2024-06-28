@@ -182,7 +182,7 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationTaskDevIOM() =
 
-            let jobDevices =x.GetDevicesDisdict(false)
+            let jobDevices =x.GetDevicesSkipEmptyAddress()
             
             for dev, job in jobDevices do
                 if  dev.InAddress <> TextSkip then

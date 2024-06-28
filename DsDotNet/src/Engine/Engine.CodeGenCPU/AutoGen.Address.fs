@@ -20,6 +20,8 @@ module DsAddressModule =
                 inCnt <- 0
                 outCnt <- 0
 
+    
+
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getPCIOMTextBySize (device:string, offset: int, bitSize:int) : string =
             match bitSize with  
@@ -56,6 +58,8 @@ module DsAddressModule =
                     | DuUINT64  -> 64
                     | _   -> failwithf $"{dSzie} not support"
             ) |>  Seq.sum
+
+
 
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
@@ -219,19 +223,6 @@ module DsAddressModule =
      
         newAddr
 
-    let getSkipInfo(dev:TaskDev, job:Job) =
-        let devIndex =
-            let lastPart = dev.DeviceName.Split("_").Last()
-            match System.Int32.TryParse(lastPart) with
-            | (true, value) -> value
-            | (false, _) -> 0
-
-        let inSkip = if job.JobMulti = Single then false 
-                        else  job.AddressInCount < devIndex 
-        let outSkip =if job.JobMulti = Single then false 
-                        else job.AddressOutCount < devIndex 
-
-        inSkip, outSkip 
 
 
   
@@ -273,7 +264,7 @@ module DsAddressModule =
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
             
-        let devsJob =  sys.GetDevicesDisdict(false)
+        let devsJob =  sys.GetDevicesSkipEmptyAddress()
         let mutable extCnt = 0
         for dev, job in devsJob do
             let inSkip, outSkip = getSkipInfo(dev, job)

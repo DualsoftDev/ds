@@ -106,20 +106,21 @@ module ExportIOTable =
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-            let inSym  =  dev.GetInParam(job.Name).Name
-            let outSym =  dev.GetOutParam(job.Name).Name
-            let inSkip, outSkip = getSkipInfo(dev, job)
+        let inSym  =  dev.GetInParam(job.Name).Name
+        let outSym =  dev.GetOutParam(job.Name).Name
+        let inSkip, outSkip = dev.GetSkipInfo(job)
 
-            let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
-            [ TextXlsAddress
-              flow
-              name
-              getPPTTDevDataTypeText (dev)
-              getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
-              getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
-              inSym
-              outSym
-              ]
+        let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
+        [   
+            TextXlsAddress
+            flow
+            name
+            getPPTTDevDataTypeText (dev)
+            getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
+            getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
+            inSym
+            outSym
+        ]
 
     let IOchunkBySize = 22
 
@@ -131,7 +132,7 @@ module ExportIOTable =
           
 
                 let mutable extCnt = 0
-                let devsJob =  sys.GetDevicesDisdict(false)
+                let devsJob =  sys.GetDevicesSkipEmptyAddress()
 
                 for (dev, job) in  devsJob do
                     //외부입력 전용 확인하여 출력 생성하지 않는다.
@@ -415,7 +416,7 @@ module ExportIOTable =
         let dt = getLabelTable "액션이름"
 
         let rows =
-            let devs =  sys.GetDevicesDisdict(true)
+            let devs =  sys.GetDevicesHasOutput()
             devs.Select(fun (dev, _)-> rowDeviceItems dev.ApiItem.Name true)
 
         addRows rows dt
@@ -460,7 +461,7 @@ module ExportIOTable =
         let dt = getLabelTable "디바이스이름"
       
         let rows =
-            let devCallSet =  sys.GetDevicesDisdict(true)
+            let devCallSet =  sys.GetDevicesHasOutput()
             devCallSet.Select(fun (dev,_)-> rowDeviceItems dev.DeviceName false)
 
         addRows rows dt
@@ -549,7 +550,7 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Address}", typeof<string>) |> ignore
 
-        let rowItems ( dev: TaskDev, addr:string) =
+        let rowItems (dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
               dev.InDataType.ToPLCText()
@@ -557,7 +558,7 @@ module ExportIOTable =
                ]
 
         let rows =
-            let devs = sys.GetDevicesDisdict(true)
+            let devs = sys.GetDevicesHasOutput()
             devs
             |> Seq.collect (fun (dev,_) ->
                 [   

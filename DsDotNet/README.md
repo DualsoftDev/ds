@@ -55,3 +55,8 @@ from [Git Downloads](https://git-scm.com/downloads).
 
 The default maintainer account for projects under "fsprojects" is [@fsprojectsgit](https://github.com/fsprojectsgit) -
 F# Community Project Incubation Space (repo management)
+
+
+## DsModeler Key 등록방법
+- PowerPointAddinForDualsoft 프로젝트 속성 > 서명 > 파일에서 선택
+- ~\ds\DsDotNet\Apps\OfficeAddin\PowerPointAddinForDualsoft\PowerPointAddinForDS_Key.pfx 선택

@@ -204,7 +204,7 @@ public static class CustomServerExtension
 {
     public static async Task<IServiceCollection> AddUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
     {
-        await DBLogger.InitializeLogDbOnDemandAsync(serverGlobal.DsCommonAppSettings);
+        await DBLogger.InitializeLogDbOnDemandAsync(serverGlobal.DsCommonAppSettings, cleanExistingDb:false);
         //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
         //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 

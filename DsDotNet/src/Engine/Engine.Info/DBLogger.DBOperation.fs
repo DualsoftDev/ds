@@ -253,9 +253,50 @@ module internal DBLoggerImpl =
                 return logSet
             }
 
-        let createLoggerDBSchemaAsync () =
+        [<Obsolete("Dual.Common.Core.FS ?? 로 이동 필요")>]
+        let removeDatabase(conn:IDbConnection) =
+            let removeDatabaseSQLite(conn:IDbConnection) = 
+                let executeNonQuery (conn: IDbConnection) (commandText: string) =
+                    conn.Execute(commandText) |> ignore
+
+                let dropAll (conn: IDbConnection) (objectType: string) =
+                    let query = sprintf "SELECT 'DROP %s IF EXISTS \"' || name || '\";' AS Cmd FROM sqlite_master WHERE type = '%s' AND name NOT LIKE 'sqlite_%%';" objectType objectType
+                    let commands = conn.Query<string>(query) |> toArray
+                    commands |> iter (executeNonQuery conn)
+
+                // Disable foreign key constraints
+                executeNonQuery conn "PRAGMA foreign_keys = OFF;"
+
+                // Begin transaction
+                executeNonQuery conn "BEGIN TRANSACTION;"
+
+                // Drop all tables
+                dropAll conn "table"
+
+                // Drop all indexes
+                dropAll conn "index"
+
+                // Drop all views
+                dropAll conn "view"
+
+                // Commit transaction
+                executeNonQuery conn "COMMIT;"
+
+                // Enable foreign key constraints
+                executeNonQuery conn "PRAGMA foreign_keys = ON;"
+
+            match conn.GetType().Name.ToLower() with
+            | "sqliteconnection" -> removeDatabaseSQLite conn
+            | _ -> failwithlog "Not yet!"
+
+
+        let createLoggerDBSchemaAsync (cleanExistingDb:bool) =
             task {
                 use conn = createConnection ()
+
+                if cleanExistingDb then
+                    removeDatabase conn
+
                 use! tr = conn.BeginTransactionAsync()
 
                 let! exists = conn.IsTableExistsAsync(Tn.Storage)
@@ -299,13 +340,13 @@ module internal DBLoggerImpl =
             }
 
         /// Log DB schema 생성
-        let initializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) =
+        let initializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
                 let loggerDBSettings = commonAppSetting.LoggerDBSettings
                 let connString = loggerDBSettings.ConnectionString
                 connectionString <- connString
                 interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
-                do! createLoggerDBSchemaAsync ()
+                do! createLoggerDBSchemaAsync cleanExistingDb
             }
 
 
@@ -314,10 +355,11 @@ module internal DBLoggerImpl =
                 querySet: QuerySet,      // reader + writer 인 경우에만 non null 값
                 commonAppSetting: DSCommonAppSettings,
                 systems: DsSystem seq,
-                modelCompileInfo: ModelCompileInfo
+                modelCompileInfo: ModelCompileInfo,
+                cleanExistingDb: bool
             ) =
             task {
-                do! initializeLogDbOnDemandAsync commonAppSetting
+                do! initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
                 do! fillLoggerDBSchemaAsync modelCompileInfo
                 let! logSet_ = createLogInfoSetForWriterAsync (querySet, systems)
                 logSet <- logSet_

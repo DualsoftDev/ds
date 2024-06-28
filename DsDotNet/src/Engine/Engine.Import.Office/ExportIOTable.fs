@@ -108,16 +108,7 @@ module ExportIOTable =
     let rowIOItems (dev: TaskDev, job: Job) target =
             let inSym  =  dev.GetInParam(job.Name).Name
             let outSym =  dev.GetOutParam(job.Name).Name
-            let devIndex =
-                let lastPart = dev.DeviceName.Split("_").Last()
-                match System.Int32.TryParse(lastPart) with
-                | (true, value) -> value-1
-                | (false, _) -> 0
-
-            let inSkip = if job.JobMulti = Single then false 
-                         else  job.AddressInCount > devIndex |>not
-            let outSkip =if job.JobMulti = Single then false 
-                         else job.AddressOutCount > devIndex |>not
+            let inSkip, outSkip = getSkipInfo(dev, job)
 
             let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
             [ TextXlsAddress
@@ -133,22 +124,18 @@ module ExportIOTable =
     let IOchunkBySize = 22
 
     let ToDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable seq =
-        let vs = sys.GetVerticesOfCoins()
         
         let totalRows =
             seq {
 
-                let devJobSet = 
-                    sys.Jobs |> Seq.collect(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
-                             |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
-                             |> Seq.distinctBy(fun (dev,j) -> dev)
+          
 
                 let mutable extCnt = 0
-                for (dev, job) in  devJobSet do
-                    let coins = vs.GetVerticesOfJobCoins(job)
-                    
+                let devsJob =  sys.GetDevicesDisdict(false)
+
+                for (dev, job) in  devsJob do
                     //외부입력 전용 확인하여 출력 생성하지 않는다.
-                    if  dev.IsRootFlowDev(coins) 
+                    if  dev.IsRootOnlyDevice
                     then
                         dev.OutAddress <- (TextSkip)
                         if dev.InAddress = TextAddrEmpty
@@ -395,14 +382,7 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let getDevCallSet(sys:DsSystem) =
-        let calls = sys.GetVerticesHasJob()
-        let devCallSet = calls
-                            .Where(fun c-> c.Parent.GetCore() :? Real)
-                            .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
-                                    |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
-                                    |> Seq.filter (fun (dev, c) -> dev.OutAddress <> TextSkip)
-        devCallSet
+
         
 
     let getLabelTable(name:string) = 
@@ -435,8 +415,8 @@ module ExportIOTable =
         let dt = getLabelTable "액션이름"
 
         let rows =
-            let devCallSet = getDevCallSet sys
-            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.ApiItem.Name true)
+            let devs =  sys.GetDevicesDisdict(true)
+            devs.Select(fun (dev, _)-> rowDeviceItems dev.ApiItem.Name true)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -473,13 +453,15 @@ module ExportIOTable =
      
         emptyLine ()
         dt
+
+
     let ToDevicesTable (sys: DsSystem)  : DataTable =
 
         let dt = getLabelTable "디바이스이름"
       
         let rows =
-            let devCallSet = getDevCallSet sys
-            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.DeviceName false)
+            let devCallSet =  sys.GetDevicesDisdict(true)
+            devCallSet.Select(fun (dev,_)-> rowDeviceItems dev.DeviceName false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -575,13 +557,13 @@ module ExportIOTable =
                ]
 
         let rows =
-            let devCallSet = getDevCallSet sys
-            devCallSet
-            |> Seq.collect (fun (dev, call) ->
+            let devs = sys.GetDevicesDisdict(true)
+            devs
+            |> Seq.collect (fun (dev,_) ->
                 [   
                     match iomType with
                     | IOType.Memory ->
-                        yield rowItems (dev, call.ManualTag.Address)
+                        yield rowItems (dev, dev.MaunualActionAddress)
                     | IOType.In->
                         yield rowItems (dev, dev.InAddress)
                     | IOType.Out ->                            

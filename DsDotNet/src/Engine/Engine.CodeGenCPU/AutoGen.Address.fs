@@ -219,6 +219,21 @@ module DsAddressModule =
      
         newAddr
 
+    let getSkipInfo(dev:TaskDev, job:Job) =
+        let devIndex =
+            let lastPart = dev.DeviceName.Split("_").Last()
+            match System.Int32.TryParse(lastPart) with
+            | (true, value) -> value
+            | (false, _) -> 0
+
+        let inSkip = if job.JobMulti = Single then false 
+                        else  job.AddressInCount < devIndex 
+        let outSkip =if job.JobMulti = Single then false 
+                        else job.AddressOutCount < devIndex 
+
+        inSkip, outSkip 
+
+
   
     let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
         let inAddr = getValidAddress(hwItem.InAddress, hwItem.InParam.Type, hwItem.Name, skipIn, IOType.Memory, target)
@@ -258,25 +273,24 @@ module DsAddressModule =
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
             
-        let vs = sys.GetVerticesOfCoins()
+        let devsJob =  sys.GetDevicesDisdict(false)
         let mutable extCnt = 0
-        for job in sys.Jobs do
-            job.DeviceDefs |> Seq.iteri(fun i dev ->
-                let inSkip = job.JobParam.JobMulti.AddressInCount > i |>not
-                let outSkip = job.JobParam.JobMulti.AddressOutCount > i |>not
-                dev.InAddress  <- getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target)
-                dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
+        for dev, job in devsJob do
+            let inSkip, outSkip = getSkipInfo(dev, job)
+
+            dev.InAddress  <- getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target)
+            dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
+            if not (outSkip) then
+                dev.MaunualActionAddress <- getValidAddress(dev.MaunualActionAddress, DuBOOL, dev.QualifiedName, false, IOType.Memory, target)
                     
-                let coins = vs.GetVerticesOfJobCoins(job)
-                if dev.IsRootFlowDev(coins) 
+            if dev.IsRootOnlyDevice
+            then
+                if dev.InAddress = TextAddrEmpty && not(inSkip)
                 then
-                    if dev.InAddress = TextAddrEmpty && not(inSkip)
-                    then
-                        dev.InAddress  <-  getExternalTempMemory(target, extCnt)
-                        extCnt <- extCnt+1
+                    dev.InAddress  <-  getExternalTempMemory(target, extCnt)
+                    extCnt <- extCnt+1
 
-                    dev.OutAddress <- TextSkip
-            )
-
+                dev.OutAddress <- TextSkip
+        
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

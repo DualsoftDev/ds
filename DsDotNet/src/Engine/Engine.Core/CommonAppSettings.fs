@@ -14,16 +14,16 @@ module CommonAppSettings =
     #endif
 
 
-type LoggerDBSettings() = 
+type LoggerDBSettings(connectionPath:string, syncIntervalSeconds:int) = 
     member x.ConnectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, x.ConnectionPath)}"
-    member val ConnectionPath = "" with get, set
-    member val SyncIntervalSeconds = 1.0 with get, set
+    member val ConnectionPath = connectionPath with get, set
+    member val SyncIntervalSeconds = syncIntervalSeconds with get, set
 
 /// 여러 application(.exe) 들 간의 공유할 정보
 /// "CommonAppSettings.json" 파일
-type DSCommonAppSettings() =
+type DSCommonAppSettings(loggerDBSettings:LoggerDBSettings) =
     member val HmiWebServer = "" with get, set
-    member val LoggerDBSettings = getNull<LoggerDBSettings>() with get, set
+    member val LoggerDBSettings = loggerDBSettings with get, set
     static member Load(jsonPath:string) =
         jsonPath
         |> File.ReadAllText

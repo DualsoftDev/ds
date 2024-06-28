@@ -31,12 +31,17 @@ module CoreCreateModule =
         )
 
     let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (inParam:DevParam, outParm:DevParam): TaskDev =
+        let apis = sys.ApiItems.Where(fun w -> w.Name = apiName)
 
         let api = 
             // Check if the API already exists
-            if sys.ApiItems.Any(fun w -> w.Name = apiName)
+            if apis.any()
             then
-                failwithf $"system {sys.Name} api {apiName} 중복 생성에러"
+                if  apis.length() > 1 then
+                    failwithf $"system {sys.Name} api {apiName} 중복 존재"
+                else
+                    apis.First()
+
             else
                 // Add a default flow if no flows exist
                 if sys.Flows.IsEmpty() then

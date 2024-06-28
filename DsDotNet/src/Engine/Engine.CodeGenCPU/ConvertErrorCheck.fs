@@ -143,6 +143,7 @@ module ConvertErrorCheck =
             j.DeviceDefs.ForEach(fun d-> 
                         if d.InAddress.IsNullOrEmpty() then  d.InAddress <- (TextAddrEmpty)
                         if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- (TextAddrEmpty)
+                        if d.MaunualActionAddress.IsNullOrEmpty() then d.MaunualActionAddress <- (TextAddrEmpty)
                 )
             )
         sys.HWLamps.ForEach(fun l -> 

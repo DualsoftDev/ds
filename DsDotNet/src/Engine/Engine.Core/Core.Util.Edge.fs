@@ -261,6 +261,14 @@ module EdgeModule =
         )
 
 
+    let updateDeviceRootInfo (x: DsSystem) =
+        let calls = x.GetVerticesHasJob()
+        calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c))
+                .Iter(fun (d, c)  ->   
+                    if not(d.IsRootOnlyDevice) then
+                            d.IsRootOnlyDevice <- (c.Parent.GetCore() :? Flow)
+                        )
+
 
     let getResetRootEdges (v:Vertex) = getResetEdgeSources(v)
     let getStartRootEdges (v:Vertex) = getStartEdgeSources(v)

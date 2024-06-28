@@ -53,7 +53,11 @@ module TagManagerModule =
         let forceResetBit  = createTag  true VertexTag.forceReset
         let forceOnBit     = createTag  true VertexTag.forceOn
         let forceOffBit    = createTag  true VertexTag.forceOff
-        let actionSync     = createTag  true VertexTag.actionSync
+        let actionSyncPing     = createTag  true VertexTag.actionSyncPing
+        let actionSyncPong     = createTag  true VertexTag.actionSyncPong
+
+
+        
         let actionStart    = createTag  true VertexTag.actionStart
         let actionEnd      = createTag  true VertexTag.actionEnd
 
@@ -114,7 +118,10 @@ module TagManagerModule =
         member _.OG         =  originBit
         ///Pause Monitor
         member _.PA         =  pauseBit
-        member _.ActionSync     =  actionSync
+        ///Action PLC/PC Output Sync 
+        member _.ActionSyncPing     =  actionSyncPing
+        ///Action PLC/PC Input  Sync 
+        member _.ActionSyncPong     =  actionSyncPong
         member _.ActionStart    =  actionStart
         member _.ActionEnd      =  actionEnd
         

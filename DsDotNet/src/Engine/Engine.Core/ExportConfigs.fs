@@ -20,7 +20,8 @@ module ExportConfigsMoudle =
         Work: string
         WorkType: string
         WorkInfo: string
-        Address: string
+        AddressPing: string
+        AddressPong: string
         Station: string
         Device: string
         Action: string
@@ -61,7 +62,8 @@ module ExportConfigsMoudle =
                             Work = dev.ApiItem.TX.Name
                             WorkType = "Sync"
                             WorkInfo = dev.ApiItem.TX.Path3D.Value
-                            Address = dev.ApiItem.TX.ActionSyncTag.Address
+                            AddressPing = dev.ApiItem.TX.ActionSyncPingTag.Address
+                            AddressPong = dev.ApiItem.TX.ActionSyncPongTag.Address
                             Station = v.Parent.GetFlow().Name
                             Device = dev.DeviceName
                             Action = dev.ApiItem.Name
@@ -70,10 +72,10 @@ module ExportConfigsMoudle =
                         }
                     ifs.Add dataSync |> ignore
 
-                    let dataStart = { dataSync with Id = ifs.Count+1; WorkType = "Start"; Address = dev.ApiItem.TX.ActionStartTag.Address }
+                    let dataStart = { dataSync with Id = ifs.Count+1; WorkType = "Start"; AddressPing = dev.ApiItem.TX.ActionStartTag.Address }
                     ifs.Add dataStart |> ignore
 
-                    let dataEnd   = { dataSync with Id = ifs.Count+1; WorkType = "End";   Address = dev.ApiItem.TX.ActionEndTag.Address }
+                    let dataEnd   = { dataSync with Id = ifs.Count+1; WorkType = "End";   AddressPong = dev.ApiItem.TX.ActionEndTag.Address }
                     ifs.Add dataEnd |> ignore
                )
            )

@@ -276,13 +276,31 @@ type FindExtension =
                         xs.Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외
                           .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
 
+
+
+    [<Extension>] static member GetDevicesDisdict(x:DsSystem, onlyCoin:bool) = 
+
+                    let calls = x.GetVerticesHasJob()
+                                 .DistinctBy(fun v-> v.TargetJob)
+                                    
+                    let devs = calls
+                                .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
+                                .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c.TargetJob) )
+
+                    devs 
+                    |> Seq.distinctBy (fun (dev,_) ->dev)
+                    |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
+
+    [<Extension>] static member GetDevicesHasOutput(x:DsSystem) = 
+                    let ads  = x.GetDevicesDisdict(true)
+                    ads.Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
+
+
     [<Extension>] static member GetTargetDevCoins(taskDev:TaskDev, coins:Vertex seq) = 
                         coins.Where(fun c-> 
                                     c.GetPureCall().Value.TargetJob.DeviceDefs.Contains(taskDev)
                         )
           
-    [<Extension>] static member IsRootFlowDev(taskDev:TaskDev, coins:Vertex seq) = 
-                        taskDev.GetTargetDevCoins(coins).IsEmpty()
 
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x

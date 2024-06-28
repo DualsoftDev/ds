@@ -77,6 +77,8 @@ module ModelParser =
         if system.ApiResetInfos.IsEmpty() then
             autoAppendInterfaceReset system
 
+        updateDeviceRootInfo system
+
         validateGraphOfSystem system
         validateRootCallConnection system
 

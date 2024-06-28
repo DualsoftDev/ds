@@ -176,12 +176,10 @@ module ConvertCPU =
             
     let private applyJob(s:DsSystem) =
         [
-            let coins = s.GetVerticesOfCoins()  
-            let jobs = coins.OfType<Call>()
-                            .Where(fun c-> c.IsJob)
-                            .Select(fun c-> c.TargetJob).Distinct()
-            for j in jobs do
-                yield! j.J1_JobActionOuts()
+            let jobDevices =s.GetDevicesHasOutput()
+            
+            for _, job in jobDevices do
+                yield! job.J1_JobActionOuts()
         ]
 
     let private applyCallOnDelay(s:DsSystem) =
@@ -192,15 +190,12 @@ module ConvertCPU =
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
-            
-            let vs = s.GetVerticesOfCoins()
-            for job, devs in s.Jobs.Select(fun j-> j, j.DeviceDefs) do
-                let coins = vs.GetVerticesOfJobCoins(job)
-                for dev in devs do
-                    if not(dev.IsRootFlowDev(coins))
-                    then
-                        if dev.InTag.IsNonNull() then  
-                            yield dev.SensorEmulation(s, job)
+            let devsJob =  s.GetDevicesDisdict(true)
+            for dev, job in devsJob do
+                if not(dev.IsRootOnlyDevice)
+                then
+                    if dev.InTag.IsNonNull() then  
+                        yield dev.SensorEmulation(s, job)
         ]
  
      

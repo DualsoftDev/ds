@@ -58,7 +58,8 @@ module DsType =
         | ErrorOffTimeOver 
         | ErrorOffTimeShortage
         | ErrGoingOrigin
-        | ActionSync
+        | ActionSyncPing
+        | ActionSyncPong
         | ActionStart
         | ActionEnd
 

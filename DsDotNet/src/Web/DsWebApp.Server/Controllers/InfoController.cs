@@ -45,16 +45,16 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
     // api/info/log-anal-info
     [HttpGet("log-anal-info")]
-    public async Task<SystemSpan> GetLogAnalInfo([FromQuery] DateTime? _start, [FromQuery] DateTime? _end)
+    public async Task<SystemSpan> GetLogAnalInfo([FromQuery] DateTime? start, [FromQuery] DateTime? end)
     {
-        DateTime start = _start ?? DateTime.MinValue;
-        DateTime end = _end ?? DateTime.MaxValue;
+        DateTime start1 = start ?? DateTime.MinValue;
+        DateTime end1 = end ?? DateTime.MaxValue;
 
         using var conn = global.CreateDbConnection();
         var logs =
             (await conn.QueryAsync<ORMVwLog>(
-                $"SELECT * FROM [{Vn.Log}] WHERE [at] BETWEEN @start AND @end;",
-                new { start, end })).ToArray();
+                $"SELECT * FROM [{Vn.Log}] WHERE [at] BETWEEN @start1 AND @end1;",
+                new { start1, end1 })).ToArray();
 
         var sysSpan = SystemSpanEx.CreateSpan(_model.System, logs);
 

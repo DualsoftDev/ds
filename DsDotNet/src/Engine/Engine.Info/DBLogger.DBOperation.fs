@@ -253,49 +253,12 @@ module internal DBLoggerImpl =
                 return logSet
             }
 
-        [<Obsolete("Dual.Common.Core.FS ?? 로 이동 필요")>]
-        let removeDatabase(conn:IDbConnection) =
-            let removeDatabaseSQLite(conn:IDbConnection) = 
-                let executeNonQuery (conn: IDbConnection) (commandText: string) =
-                    conn.Execute(commandText) |> ignore
-
-                let dropAll (conn: IDbConnection) (objectType: string) =
-                    let query = sprintf "SELECT 'DROP %s IF EXISTS \"' || name || '\";' AS Cmd FROM sqlite_master WHERE type = '%s' AND name NOT LIKE 'sqlite_%%';" objectType objectType
-                    let commands = conn.Query<string>(query) |> toArray
-                    commands |> iter (executeNonQuery conn)
-
-                // Disable foreign key constraints
-                executeNonQuery conn "PRAGMA foreign_keys = OFF;"
-
-                // Begin transaction
-                executeNonQuery conn "BEGIN TRANSACTION;"
-
-                // Drop all tables
-                dropAll conn "table"
-
-                // Drop all indexes
-                dropAll conn "index"
-
-                // Drop all views
-                dropAll conn "view"
-
-                // Commit transaction
-                executeNonQuery conn "COMMIT;"
-
-                // Enable foreign key constraints
-                executeNonQuery conn "PRAGMA foreign_keys = ON;"
-
-            match conn.GetType().Name.ToLower() with
-            | "sqliteconnection" -> removeDatabaseSQLite conn
-            | _ -> failwithlog "Not yet!"
-
-
         let createLoggerDBSchemaAsync (cleanExistingDb:bool) =
             task {
                 use conn = createConnection ()
 
                 if cleanExistingDb then
-                    removeDatabase conn
+                    conn.DropDatabase();
 
                 use! tr = conn.BeginTransactionAsync()
 

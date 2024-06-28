@@ -397,7 +397,9 @@ module ExportIOTable =
 
     let getDevCallSet(sys:DsSystem) =
         let calls = sys.GetVerticesHasJob()
-        let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
+        let devCallSet = calls
+                            .Where(fun c-> c.Parent.GetCore() :? Real)
+                            .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
                                     |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
                                     |> Seq.filter (fun (dev, c) -> dev.OutAddress <> TextSkip)
         devCallSet
@@ -708,7 +710,7 @@ module ExportIOTable =
                 ToAutoFlowTable sys target
                 ToAutoWorkTable sys target
 
-                ToFlowNamesTable sys
+                ToFlowNamesTable sys 
                 ToWorkNamesTable sys
                 ToDevicesTable sys
                 ToDevicesApiTable sys

@@ -96,3 +96,74 @@ module internal DBLoggerAnalysisModule =
                         assert (spans.Length = 1)   // 동일 call 이 하나의 real 안에서 여러번 호출되는 경우는 없다고 가정
                         tracefn $"    - {c.Name} = {spans[0]} on cycle {cycle+1}/{lss.Length}"
             ()
+
+
+/// Log 분석 정보: WebServer 에서 데이터 생성하고, Browser 에서 보여주기 위한 data
+[<AutoOpen>]
+module DBLoggerAnalysisDTOModule =
+    type LogSpan = DateTime * DateTime
+    let private dummySpan:LogSpan = (DateTime.MinValue, DateTime.MinValue)
+    // Span 클래스 정의
+    type Span(span:LogSpan) =
+        new() = Span(dummySpan)
+        member val Start = fst span with get, set
+        member val End = snd span with get, set
+
+    // FqdnSpan 클래스 정의
+    type FqdnSpan(span:LogSpan, fqdn: string) =
+        inherit Span(span)
+        new() = FqdnSpan(dummySpan, "")
+        member val Fqdn = fqdn with get, set
+
+    // CallSpan 클래스 정의
+    type CallSpan(span:LogSpan, fqdn: string) =
+        inherit FqdnSpan(span, fqdn)
+        new() = CallSpan(dummySpan, "")
+
+    // RealSpan 클래스 정의
+    type RealSpan(span:LogSpan, fqdn: string, callSpans: CallSpan[]) =
+        inherit FqdnSpan(span, fqdn)
+        new() = RealSpan(dummySpan, "", [||])
+        member val CallSpans = callSpans with get, set
+
+    // SystemSpan 클래스 정의
+    type SystemSpan(span: LogSpan, fqdn: string, realSpans: Dictionary<string, RealSpan list>) =
+        inherit FqdnSpan(span, fqdn)
+        new() = SystemSpan(dummySpan, "", Dictionary<string, RealSpan list>())
+        member val RealSpans = realSpans with get, set
+
+    type SystemSpan with
+        static member CreateSpan(system: DsSystem, logs: ORMVwLog list) : SystemSpan =
+            let logAnalInfo = LogAnalInfo.Create(system, logs)
+
+            let createCallSpan (logs: ORMVwLog list) (call: Call) : CallSpan =
+                let fqdn = call.QualifiedName
+                let callLogs = logs |> List.filter (fun log -> log.Fqdn = fqdn)
+                let span = 
+                    match callLogs with
+                    | [] -> dummySpan
+                    | _ -> (callLogs.Head.At, callLogs.Last().At)
+                CallSpan(span, fqdn)
+
+            let createRealSpan (real: Real) (logs: ORMVwLog list) : RealSpan =
+                let span = 
+                    match logs with
+                    | [] -> dummySpan
+                    | _ -> (logs.Head.At, logs.Last().At)
+                let calls = real.Graph.Vertices.OfType<Call>() |> Seq.map (createCallSpan logs) |> Seq.toArray
+                RealSpan(span, real.QualifiedName, calls)
+
+            let createRealSpans (realLogs: ORMVwLog list list) (real: Real) : RealSpan list =
+                realLogs |> List.map (createRealSpan real)
+
+            let realSpans =
+                logAnalInfo.PerRealLogs
+                |> map (fun (KeyValue(r, lss)) -> r.QualifiedName, createRealSpans lss r)
+                |> Tuple.toDictionary
+
+            let span = 
+                match logs with
+                | [] -> dummySpan
+                | _ -> (logs.Head.At, logs.Last().At)
+
+            SystemSpan(span, system.Name, realSpans)

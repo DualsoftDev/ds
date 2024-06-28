@@ -53,6 +53,7 @@ module DBLoggerORM =
     // database view names
     module Vn =
         let Log = "vwLog"
+        let Storage = "vwStorage"
 
     // property table 사전 정의 row name
     module PropName =
@@ -113,6 +114,7 @@ CREATE VIEW [{Vn.Log}] AS
     SELECT
         log.[id] AS id
         , log.[storageId] AS storageId
+        , stg.[name] AS name
         , stg.[fqdn] AS fqdn
         , stg.[tagKind] AS tagKind
         , tagKind.[name] AS tagKindName
@@ -124,6 +126,21 @@ CREATE VIEW [{Vn.Log}] AS
     JOIN [{Tn.TagKind}] tagKind
     ON [stg].[tagKind] = [tagKind].[id]
     ;
+
+CREATE VIEW [{Vn.Storage}] AS
+    SELECT
+        stg.[id] AS id
+        , stg.[name] AS name
+        , stg.[fqdn] AS fqdn
+        , tagKind.[id] AS tagKind
+        , tagKind.[name] AS tagKindName
+        , stg.[dataType] AS dataType
+    FROM [{Tn.Storage}] stg
+    JOIN [{Tn.TagKind}] tagKind
+    ON [stg].[tagKind] = [tagKind].[id]
+    ;
+
+
 """
 
     /// DB storage table 의 row 항목
@@ -161,9 +178,10 @@ CREATE VIEW [{Vn.Log}] AS
         member val At = at with get, set
         member val Value: obj = value with get, set
 
-    type ORMVwLog(logId: int, storageId: int, tagKind: int, fqdn: string, tagKindName:string, at: DateTime, value: obj) =
+    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj) =
         inherit ORMLog(logId, storageId, at, value)
-        new() = ORMVwLog(-1, -1, -1, null, null, DateTime.MaxValue, null)
+        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null)
+        member val Name = name with get, set
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set
         member val TagKindName = tagKindName with get, set

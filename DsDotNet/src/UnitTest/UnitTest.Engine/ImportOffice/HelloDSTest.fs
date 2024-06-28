@@ -3,6 +3,7 @@ open Dual.UnitTest.Common.FS
 
 open T
 
+open Dapper
 open Engine.Core
 open Dual.Common.Core.FS
 open NUnit.Framework
@@ -12,6 +13,10 @@ open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
+open Microsoft.Data.Sqlite
+open Engine.Info
+open Engine.Cpu
+
 
 
 
@@ -32,7 +37,23 @@ module HelloDSTestModule =
                 LoadingPaths = loadingPaths 
                 LayoutImgPaths = layoutImgPaths 
             } = result
+
+            system.TagManager === null
+            let _ = DsCpuExt.GetDsCPU (system) PlatformTarget.WINDOWS
+            system.TagManager.Storages.Count > 0 === true
+
             system
+
+        let createConnection() =
+            let connStr = 
+                let path = @"Z:\ds\Logger.sqlite3"
+                $"Data Source={path}"
+            new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
+
+        let getLogs() =
+            use conn = createConnection()
+            let logs = conn.Query<ORMVwLog>($"SELECT * FROM {Vn.Log}")
+            logs
 
 
         [<Test>]
@@ -45,6 +66,7 @@ module HelloDSTestModule =
             let reals = stn1.Graph.Vertices.OfType<Real>() |> toArray
             let realNames = reals |> map (fun r -> r.Name) |> toArray
             SeqEq realNames [|"Work1"; "Work2"|]
+            reals[0].QualifiedName === "HelloDS.STN1.Work1"
 
             let callsInReal1 = reals[0].Graph.Vertices.OfType<Call>() |> toArray
             let callInReal1Names = callsInReal1 |> map (fun c -> c.Name) |> toArray
@@ -67,3 +89,40 @@ module HelloDSTestModule =
             callDev1Adv.Name === "STN1__Device1_ADV"
             ()
 
+        [<Test>]
+        member __.``HelloDS stroage test``() =
+            let system = getSystem()
+
+            (* Via Storages *)
+            let storages = system.TagManager.Storages
+            tracefn $"---- Storage"
+            for KeyValue(k, v) in storages do
+                tracefn $"Storage: {k} = {v}"
+
+            let var = storages["HelloDS_STN1_Work1_STN1__Device1_ADV_ready"]
+
+            //for KeyValue(k, v) in globalStorage do
+            //    yield k, v.Tag
+            ()
+
+            (* 별도 함수 *)
+            tracefn $"---- Fqdn objects"
+            let dic = collectFqdnObjects system
+            for KeyValue(k, v) in dic do
+                tracefn $"Storage: {k} = {v}"
+            ()
+
+            let logs = getLogs().ToFSharpList()
+            let lls = logs.DistinctBy(fun l -> l.Name).ToArray()
+            for l in logs do
+                dic.ContainsKey(l.Fqdn) === true
+
+            let g = groupDurationsByFqdn logs "HelloDS.STN1.Work1"
+            ()
+
+        [<Test>]
+        member __.``HelloDS log anal test``() =
+            let system = getSystem()
+            let logAnalInfo = LogAnalInfo.Create(system, getLogs())
+            logAnalInfo.PrintStatistics()
+            ()

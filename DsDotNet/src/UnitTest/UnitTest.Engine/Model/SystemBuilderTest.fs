@@ -86,8 +86,8 @@ module SystemBuilderTest =
 //        Ap = { A."+"(%Q1, %I1); }
 //        Am = { A."-"(%Q2, %I2); }
 //    }
-//    [device file="F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds"] A;
-//    [device file="F:\Git\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds"] B;
+//    [device file="Z:\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds"] A;
+//    [device file="Z:\ds\DsDotNet\src\UnitTest\UnitTest.Engine\Model\..\Libraries\cylinder.ds"] B;
 //}
 //"""
 //            ()

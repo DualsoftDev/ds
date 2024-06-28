@@ -192,11 +192,15 @@ module ConvertCPU =
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
-
+            
+            let vs = s.GetVerticesOfCoins()
             for job, devs in s.Jobs.Select(fun j-> j, j.DeviceDefs) do
+                let coins = vs.GetVerticesOfJobCoins(job)
                 for dev in devs do
-                    if dev.InTag.IsNonNull() then  
-                        yield dev.SensorEmulation(s, job)
+                    if not(dev.IsRootFlowDev(coins))
+                    then
+                        if dev.InTag.IsNonNull() then  
+                            yield dev.SensorEmulation(s, job)
         ]
  
      

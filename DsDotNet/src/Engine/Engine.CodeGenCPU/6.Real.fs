@@ -18,11 +18,13 @@ type VertexMReal with
         let real = v.Vertex :?> Real
         [   
             let set = 
+                let endExpr = (v.ActionEnd.Expr <&&> v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn())
+
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
                 then
-                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !@v.Link.Expr
+                    endExpr <||> v.ON.Expr <||> !@v.Link.Expr
                 else                          
-                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr  
+                    endExpr <||> v.ON.Expr 
 
             let rst = 
                 if real.Graph.Vertices.any()
@@ -96,13 +98,11 @@ type VertexMReal with
                 failWithLog $"Not supported {RuntimeDS.Package} package"
         ]
 
-type VertexManager with
-    member v.R1_RealInitialStart()    : CommentedStatement        = (v :?> VertexMReal).R1_RealInitialStart()
-    member v.R2_RealJobComplete()     : CommentedStatement list   = (v :?> VertexMReal).R2_RealJobComplete()
-    member v.R3_RealStartPoint()      : CommentedStatement        = (v :?> VertexMReal).R3_RealStartPoint()
-    member v.R4_RealLink()            : CommentedStatement        = (v :?> VertexMReal).R4_RealLink()
-    member v.R5_DummyDAGCoils()       : CommentedStatement list   = (v :?> VertexMReal).R5_DummyDAGCoils()
-    member v.R6_RealDataMove()        : unit                      = (v :?> VertexMReal).R6_RealDataMove()
-    member v.R7_RealGoingOriginError(): CommentedStatement list   = (v :?> VertexMReal).R7_RealGoingOriginError()
-    member v.R8_RealGoingPulse()      : CommentedStatement list   = (v :?> VertexMReal).R8_RealGoingPulse()
-    
+    member v.R9_RealGoingAction(): CommentedStatement  list =
+        [
+            yield (v.G.Expr,  v._off.Expr) --| (v.ActionStart, getFuncName())  
+             //실제 구동에서는 Async로 ActionStart->ActionEnd 바로 살림
+            if v.Real.PassAction ||  RuntimeDS.RuntimeSyncMode = RuntimeSyncMode.ActionAsync
+            then
+                yield (v.ActionStart.Expr,  v._off.Expr) --| (v.ActionEnd, getFuncName())   
+        ]

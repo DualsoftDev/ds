@@ -53,8 +53,6 @@ module TagManagerModule =
         let forceResetBit  = createTag  true VertexTag.forceReset
         let forceOnBit     = createTag  true VertexTag.forceOn
         let forceOffBit    = createTag  true VertexTag.forceOff
-        let actionSyncPing     = createTag  true VertexTag.actionSyncPing
-        let actionSyncPong     = createTag  true VertexTag.actionSyncPong
 
 
         
@@ -118,11 +116,9 @@ module TagManagerModule =
         member _.OG         =  originBit
         ///Pause Monitor
         member _.PA         =  pauseBit
-        ///Action PLC/PC Output Sync 
-        member _.ActionSyncPing     =  actionSyncPing
-        ///Action PLC/PC Input  Sync 
-        member _.ActionSyncPong     =  actionSyncPong
+        ///Action PLC/PC Output  
         member _.ActionStart    =  actionStart
+        ///Action PLC/PC Input   
         member _.ActionEnd      =  actionEnd
         
         member _.ErrTRX         =  errorErrTRXBit
@@ -197,6 +193,7 @@ module TagManagerModule =
         //    createPlanVar  s name DuUINT16 true v vertexTag sys  
             
 
+        member x.Real = x.Vertex :?> Real
         member x.OriginInfo
             with get() = originInfo
             and set(v) = originInfo <- v

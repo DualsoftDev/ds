@@ -35,53 +35,59 @@ module ConvertCPU =
 
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex) =
-        let vm = v.TagManager :?> VertexManager
         [
             if IsSpec (v, RealInFlow, AliasFalse) then
+                let vr = v.TagManager :?> VertexMReal
+                yield vr.M1_OriginMonitor()
+                yield vr.E4_RealErrorTotalMonitor() 
 
-                yield vm.M1_OriginMonitor()
-                yield vm.E4_RealErrorTotalMonitor() 
-
-                yield vm.R1_RealInitialStart()
-                yield! vm.R2_RealJobComplete()
-                yield vm.R3_RealStartPoint()
-                yield vm.R4_RealLink() 
-                yield! vm.R5_DummyDAGCoils() 
+                yield vr.R1_RealInitialStart()
+                yield! vr.R2_RealJobComplete()
+                yield vr.R3_RealStartPoint()
+                yield vr.R4_RealLink() 
+                yield! vr.R5_DummyDAGCoils() 
                 //yield vm.R6_RealDataMove() 
-                yield! vm.R7_RealGoingOriginError() 
-                yield! vm.R8_RealGoingPulse() 
-                
-                
-                yield! vm.D1_DAGHeadStart()
-                yield! vm.D2_DAGTailStart()
-                yield! vm.D3_DAGCoinEnd()
-                yield! vm.D4_DAGCoinReset()
+                yield! vr.R7_RealGoingOriginError() 
+                yield! vr.R8_RealGoingPulse() 
+                yield! vr.R9_RealGoingAction() 
 
-                yield vm.F1_RootStart()
-                yield vm.F2_RootReset()
-                yield vm.F5_HomeCommand()
+                yield vr.F1_RootStart()
+                yield vr.F2_RootReset()
+                yield vr.F5_HomeCommand()
+
+
+                yield! vr.D1_DAGHeadStart()
+                yield! vr.D2_DAGTailStart()
+                yield! vr.D3_DAGCoinEnd()
+                yield! vr.D4_DAGCoinReset()
+
+
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
-                    yield vm.F3_VertexEndWithOutReal()    
+                let vm = v.TagManager :?> VertexMReal
+                yield vm.F3_VertexEndWithOutReal()    
 
             if IsSpec (v, CallInFlow, AliasNotCare) && v.GetPureCall().Value.IsOperator then
-                    yield vm.F4_CallOperatorEnd()
+                let vc = v.TagManager :?> VertexMCall
+                yield vc.F4_CallOperatorEnd()
 
             if IsSpec (v, CallInReal , AliasFalse) then
-                
-                yield! vm.E2_CallErrorTXMonitor() 
-                yield! vm.E3_CallErrorRXMonitor() 
-                yield vm.E5_CallErrorTotalMonitor() 
+                let vc = v.TagManager :?> VertexMCall
+                yield! vc.E2_CallErrorTXMonitor() 
+                yield! vc.E3_CallErrorRXMonitor() 
+                yield vc.E5_CallErrorTotalMonitor() 
          
-
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
-                yield vm.C1_CallMemo() 
+                let vc = v.TagManager :?> VertexMCall
+                yield vc.C1_CallMemo() 
        
                 
             if IsSpec (v, VertexAll, AliasNotCare) then
+                let vm = v.TagManager :?> VertexManager
                 yield vm.M2_PauseMonitor()
                 yield! vm.S1_RGFH()
+
         ]
 
     let private applySystemSpec(s:DsSystem) =

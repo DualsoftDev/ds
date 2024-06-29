@@ -218,8 +218,6 @@ module CoreExtensionModule =
 
     type Real with
         member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  
-        member x.ActionSyncPingTag  = x.ExternalTags.First(fun (t,_)-> t = ActionSyncPing)|> snd  
-        member x.ActionSyncPongTag  = x.ExternalTags.First(fun (t,_)-> t = ActionSyncPong)|> snd  
         
         member x.ActionStartTag = x.ExternalTags.First(fun (t,_)-> t = ActionStart)|> snd  
         member x.ActionEndTag   = x.ExternalTags.First(fun (t,_)-> t = ActionEnd)|> snd  

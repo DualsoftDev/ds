@@ -137,12 +137,8 @@ module ConvertCpuDsSystem =
         member  x.GenerationRealActionMemory()  = 
             for real in x.GetRealVertices() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> VertexMReal
-                rm.ActionSyncPing.Address <- getMemory rm.Name (getTarget(x))
-                rm.ActionSyncPong.Address <- getMemory rm.Name (getTarget(x))
                 rm.ActionStart.Address    <- getMemory rm.Name (getTarget(x))
                 rm.ActionEnd.Address      <- getMemory rm.Name (getTarget(x))
-                real.ExternalTags.Add(ActionSyncPing,   rm.ActionSyncPing  :> IStorage) |>ignore
-                real.ExternalTags.Add(ActionSyncPong,   rm.ActionSyncPong  :> IStorage) |>ignore
                 real.ExternalTags.Add(ActionStart,  rm.ActionStart :> IStorage) |>ignore
                 real.ExternalTags.Add(ActionEnd,    rm.ActionEnd   :> IStorage) |>ignore
 

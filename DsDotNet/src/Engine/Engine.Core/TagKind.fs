@@ -168,8 +168,6 @@ module TagKindList =
     | callCommandEnd            = 11042
     | callOperatorValue         = 11043
     
-    | actionSyncPing            = 11045
-    | actionSyncPong            = 11046
     | actionStart               = 11047
     | actionEnd                 = 11048
 

@@ -216,6 +216,7 @@ module CoreModule =
         member x.Flow = flow
         member x.Path3D = x.DsTime.Path3D 
         member x.Script = x.DsTime.Script
+        member x.PassAction = x.Path3D.IsNone &&  x.Script.IsNone 
 
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()

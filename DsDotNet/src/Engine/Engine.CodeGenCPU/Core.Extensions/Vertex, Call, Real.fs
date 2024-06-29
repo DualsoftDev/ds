@@ -140,7 +140,8 @@ module ConvertCpuVertex =
                
                 if initOnCalls.Contains(c)
                     then 
-                        (r.VR.OB.Expr <||> r.VR.OA.Expr) <&&> !@c.End
+                        (r.VR.OB.Expr <||> r.VR.OA.Expr) 
+                        <&&> r.Flow.mop.Expr <&&> !@c.End
                         
                         //(// 실제에서는 수동일때만 h_st 가능 ,시뮬레이션은 자동수동 둘다가능
                         //             (!@c.EndActionOnlyIO <&&> !@c.System._sim.Expr)    

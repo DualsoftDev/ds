@@ -110,13 +110,15 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startMemory, startTimer, startCounter) =
+    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter) =
         assert(plcType.IsOneOf(XGI, XGK))
         use _ = logTraceEnabler()
-        // RuntimeDS.Target <- plcType  // xxx 
         let globalStorage = new Storages()
         let localStorage = new Storages()
         let pous = CpuLoaderExt.LoadStatements(system, globalStorage, plcType)
+
+        let startMemory = DsAddressModule.getCurrentMemoryIndex();
+
         // Create a list to hold <C>ommented <S>tatement<S>
         let mutable css = []
 
@@ -144,12 +146,12 @@ module ExportModule =
 [<Extension>]
 type ExportModuleExt =
     [<Extension>]
-    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startMemory, startTimer, startCounter) =
+    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startMemory, startTimer, startCounter)
+        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter)
 
     [<Extension>]
-    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startMemory, startTimer, startCounter) =
+    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj, startMemory, startTimer, startCounter)
+        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter)
 

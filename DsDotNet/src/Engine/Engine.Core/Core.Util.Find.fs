@@ -312,7 +312,7 @@ type FindExtension =
                                     
                     let devs = calls
                                 .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
-                                .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c.TargetJob) )
+                                .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
 
                     devs 
                     |> Seq.distinctBy (fun (dev,_) ->dev)

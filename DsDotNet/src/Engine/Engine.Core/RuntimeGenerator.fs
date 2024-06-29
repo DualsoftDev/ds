@@ -45,7 +45,9 @@ module RuntimeGeneratorModule =
         | _ -> failwithlogf $"Error {getFuncName()}"
 
     let InitStartMemory = 1000
-    let BufferAlramSize = 1000
+    let BufferAlramSize = 9999
+
+
     let ExternalTempMemory =  "M"
     let ExternalTempIECMemory =  "%MX"
     let ExternalTempNoIECMemory =  "M"

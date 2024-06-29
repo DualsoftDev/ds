@@ -196,8 +196,6 @@ module ConvertCpuDsSystem =
                         let outT = createBridgeTag(x.Storages, dev.ApiStgName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, dev.GetOutParam(job.Name).Type).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
-                    dev.MaunualActionAddress  <-getValidAddress (TextAddrEmpty, DuBOOL, dev.Name, false, IOType.Memory, getTarget(x))
-
 
         member x.GenerationIO() =
 
@@ -205,22 +203,33 @@ module ConvertCpuDsSystem =
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
+            
+        member private x.GenerationCallManualMemory()  = 
+            let devCalls = x.GetDevicesDisdict(true)   
+            for (dev, call) in devCalls do
+                let cv =  call.TagManager :?> VertexMCall
+                cv.SF.Address    <- getMemory (cv.SF.Name) (getTarget(x))
+                dev.MaunualActionAddress  <- cv.SF.Address
 
-        
         member x.GenerationMemory() =
-
+            //Step1)Emulation base + 1 bit 
             x.GenerationEmulationMemory()
+
+            let startAlarm = DsAddressModule.getCurrentMemoryIndex() 
+            //Step2)Alarm base + (2 ~ N) bit 
+
             x.GenerationCallAlarmMemory()
             x.GenerationRealAlarmMemory()
-            
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
-            
 
+            if (DsAddressModule.getCurrentMemoryIndex()-startAlarm < BufferAlramSize) //9999개 HMI 리미트    
+            then  DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize) //9999개 HMI 리미트
+
+            //Step3)Flow Real HMI base + (N+1 ~ M)bit 
+            x.GenerationCallManualMemory()
             x.GenerationFlowHMIMemory()
             x.GenerationRealHMIMemory()
-                                    
-
     
          
         member x.GenerationOrigins() =

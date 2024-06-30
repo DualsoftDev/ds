@@ -42,6 +42,8 @@ type XgxConvertDsCPU(target:PlatformTarget) =
 
         let systemRepo = ShareableSystemRepository()
         let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+        DsAddressModule.setMemoryIndex(0) 
+
         let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
         
         let result = exportXMLforLSPLC(target, helper.TheSystem, myTemplate f, None, 0, 0)

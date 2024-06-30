@@ -206,6 +206,7 @@ module CoreModule =
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val ExternalTags = HashSet<ExternalTagSet>()
+        member val ParentApiSensorExpr = getNull<IExpression>() with get, set
         //member val RealData:byte[] = [||] with get, set
         member val RealData:byte = 0uy with get, set //array타입으로 향후 변경
 

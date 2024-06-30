@@ -139,8 +139,11 @@ type VertexMReal with
                             yield (v.MotionEnd.Expr    , v._off.Expr) --| (v.TimeEnd, getFuncName())   
                     else 
                         failwithlog $"RuntimeMotionMode err : {RuntimeDS.RuntimeMotionMode}"
-                //else 
-                //    yield (v.Real.RX.INTAG.Expr    , v._off.Expr) --| (v.MotionEnd, getFuncName())    //test ahn 실제 rx에 해당하는 api 실 action sensor
+                else
+                    let realSensor  = v.Real.ParentApiSensorExpr
+                    if realSensor.IsNull()
+                    then yield (v._on.Expr, v._off.Expr) --| (v.MotionEnd, getFuncName())    
+                    else yield (realSensor, v._off.Expr) --| (v.MotionEnd, getFuncName())    //실제 rx에 해당하는 api 실 action sensor
                     
         ]
 

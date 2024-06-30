@@ -204,9 +204,15 @@ module ConvertCPU =
                         yield dev.SensorEmulation(s, call.TargetJob)
         ]
  
-     
+    let private updateRealParentExpr(x:DsSystem) =
+        for dev, call in x.GetDevicesDisdict(true) do
+            let sensorExpr = 
+                match call.GetEndAction(dev.ApiItem) with
+                | Some e -> e
+                | _ -> call._on.Expr
             
-
+            dev.ApiItem.RX.Graph.Vertices.OfType<Real>().Iter(fun r->r.ParentApiSensorExpr <-sensorExpr)
+               
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
 
@@ -228,8 +234,9 @@ module ConvertCPU =
 
         else 
             checkErrRealResetExist(sys)
+            updateRealParentExpr(sys)
             sys.GenerationRealActionMemory()
-
+            
         [
             if RuntimeDS.Package = PCSIM
             then
@@ -264,8 +271,8 @@ module ConvertCPU =
 
             //allpyJob 적용 
             yield! applyJob sys
-            ///CallOnDelay 적용
+            ///CallOnDelay 적용  
             yield! applyCallOnDelay sys
 
-            
+
         ]

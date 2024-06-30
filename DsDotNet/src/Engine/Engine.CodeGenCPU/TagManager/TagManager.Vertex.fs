@@ -56,12 +56,7 @@ module TagManagerModule =
 
 
         
-        let scriptStart    = createTag  true VertexTag.scriptStart
-        let motionStart    = createTag  true VertexTag.motionStart
-        let timeStart      = createTag  true VertexTag.timeStart
-        let scriptEnd      = createTag  true VertexTag.scriptEnd
-        let motionEnd      = createTag  true VertexTag.motionEnd
-        let timeEnd        = createTag  true VertexTag.timeEnd
+
 
 
         let errorErrTRXBit = createTag  false   VertexTag.errorTRx
@@ -119,14 +114,7 @@ module TagManagerModule =
         member _.OG         =  originBit
         ///Pause Monitor
         member _.PA         =  pauseBit
-        member _.ScriptStart  =  scriptStart
-        member _.MotionStart  =  motionStart
-        member _.TimeStart    =  timeStart  
-
-        member _.ScriptEnd    =  scriptEnd
-        member _.MotionEnd    =  motionEnd
-        member _.TimeEnd      =  timeEnd
-
+ 
         member _.ErrTRX         =  errorErrTRXBit
         
         member _.CreateTag(name) = createTag name
@@ -196,6 +184,14 @@ module TagManagerModule =
         let dummyCoinRTs      = createTag false     VertexTag.dummyCoinRTs
         let dummyCoinETs      = createTag false     VertexTag.dummyCoinETs
         let originGoingErr    = createTag false     VertexTag.workErrOriginGoing
+
+        let scriptStart    = createTag  true VertexTag.scriptStart
+        let motionStart    = createTag  true VertexTag.motionStart
+        let timeStart      = createTag  true VertexTag.timeStart
+        let scriptEnd      = createTag  true VertexTag.scriptEnd
+        let motionEnd      = createTag  true VertexTag.motionEnd
+        let timeEnd        = createTag  true VertexTag.timeEnd
+
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
         //let realData  = 
         //    let vertexTag = VertexTag.realData |> int
@@ -243,6 +239,13 @@ module TagManagerModule =
 
         member _.IsFinished = (v :?> Real).Finished
 
+        member _.ScriptStart  =  scriptStart
+        member _.MotionStart  =  motionStart
+        member _.TimeStart    =  timeStart  
+
+        member _.ScriptEnd    =  scriptEnd
+        member _.MotionEnd    =  motionEnd
+        member _.TimeEnd      =  timeEnd
 
 
     and VertexMCall(v:Vertex)as this =

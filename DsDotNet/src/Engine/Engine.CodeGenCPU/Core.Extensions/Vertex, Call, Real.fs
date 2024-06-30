@@ -83,7 +83,17 @@ module ConvertCpuVertex =
                 Some(td.GetInExpr(c.TargetJob.Name))
             else 
                 None
+        
+
+        member c.UpdateChildRealExpr(x:ApiItem) =
+            let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
+            if td.ExistInput
+            then 
+                Some(td.GetInExpr(c.TargetJob.Name))
+            else 
+                None
       
+
         member c.LinkExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
                  !@rv.Link.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)

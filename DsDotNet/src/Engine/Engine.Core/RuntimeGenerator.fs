@@ -14,9 +14,9 @@ module RuntimeGeneratorModule =
         | AB 
         | MELSEC
 
-    type RuntimeSyncMode = 
-        | ActionAsync
-        | ActionSync
+    type RuntimeMotionMode = 
+        | MotionAsync
+        | MotionSync
         
     type RuntimePackage = 
         | PC 
@@ -69,7 +69,7 @@ module RuntimeGeneratorModule =
         static let mutable runtimePackage = PCSIM
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
-        static let mutable runtimeSyncMode = RuntimeSyncMode.ActionAsync
+        static let mutable runtimeMotionMode = RuntimeMotionMode.MotionSync
         static let mutable callTimeout = 15000u
         static let mutable emulationAddress = ""
 
@@ -78,7 +78,7 @@ module RuntimeGeneratorModule =
 
         static member val TimeoutCall = callTimeout  with get, set
         static member val EmulationAddress = emulationAddress  with get, set
-        static member val RuntimeSyncMode = runtimeSyncMode  with get, set
+        static member val RuntimeMotionMode = runtimeMotionMode  with get, set
 
         static member Package
             with get() = runtimePackage

@@ -217,10 +217,23 @@ module CoreExtensionModule =
 
 
     type Real with
+    
+        member x.TimeAvg = x.DsTime.AVG 
+        member x.TimeAvgMsec = Convert.ToUInt32( x.DsTime.AVG.Value*1000.0 )
+        member x.TimeStd = x.DsTime.STD
+        member x.Path3D = x.DsTime.Path3D 
+        member x.Script = x.DsTime.Script
+        member x.NoneAction = x.Path3D.IsNone &&  x.Script.IsNone 
+
         member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  
-        
-        member x.ActionStartTag = x.ExternalTags.First(fun (t,_)-> t = ActionStart)|> snd  
-        member x.ActionEndTag   = x.ExternalTags.First(fun (t,_)-> t = ActionEnd)|> snd  
+
+        member x.MotionStartTag = x.ExternalTags.First(fun (t,_)-> t = MotionStart)|> snd  
+        member x.ScriptStartTag = x.ExternalTags.First(fun (t,_)-> t = ScriptStart)|> snd  
+        member x.TimeStartTag = x.ExternalTags.First(fun (t,_)-> t = TimeStart)|> snd
+
+        member x.MotionEndTag = x.ExternalTags.First(fun (t,_)-> t = MotionEnd)|> snd  
+        member x.ScriptEndTag = x.ExternalTags.First(fun (t,_)-> t = ScriptEnd)|> snd  
+        member x.TimeEndTag = x.ExternalTags.First(fun (t,_)-> t = TimeEnd)|> snd  
 
     type Call with
         member x.IsOperator = (x.Parent.GetCore() :? Flow)

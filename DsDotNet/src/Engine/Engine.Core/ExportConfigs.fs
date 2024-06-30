@@ -20,8 +20,16 @@ module ExportConfigsMoudle =
         Work: string
         WorkType: string
         WorkInfo: string
-        ActionStart: string
-        ActionEnd: string
+   
+        ScriptStartTag: string
+        ScriptEndTag: string
+
+        MotionStartTag: string
+        MotionEndTag: string
+
+        TimeStartTag : string
+        TimeEndTag : string
+
         Station: string
         Device: string
         Action: string
@@ -62,8 +70,12 @@ module ExportConfigsMoudle =
                             Work = dev.ApiItem.TX.Name
                             WorkType = "Start"
                             WorkInfo = dev.ApiItem.TX.Path3D.Value
-                            ActionStart = dev.ApiItem.TX.ActionStartTag.Address
-                            ActionEnd = dev.ApiItem.TX.ActionEndTag.Address
+                            ScriptStartTag = dev.ApiItem.TX.ScriptStartTag.Address
+                            ScriptEndTag = dev.ApiItem.TX.ScriptEndTag.Address
+                            MotionStartTag = dev.ApiItem.TX.MotionStartTag.Address
+                            MotionEndTag = dev.ApiItem.TX.MotionEndTag.Address
+                            TimeStartTag = dev.ApiItem.TX.TimeStartTag.Address
+                            TimeEndTag = dev.ApiItem.TX.TimeEndTag.Address
                             Station = v.Parent.GetFlow().Name
                             Device = dev.DeviceName
                             Action = dev.ApiItem.Name

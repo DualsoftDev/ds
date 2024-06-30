@@ -168,18 +168,25 @@ module TagKindList =
     | callCommandEnd            = 11042
     | callOperatorValue         = 11043
     
-    | actionStart               = 11047
-    | actionEnd                 = 11048
+    | scriptStart               = 11044
+    | scriptEnd                 = 11045
 
-    | txErrOnTimeShortage       = 11050
-    | txErrOnTimeOver           = 11051
-    | txErrOffTimeShortage      = 11052
-    | txErrOffTimeOver          = 11053
-    | rxErrShort                = 11054
-    | rxErrShortRising          = 11055
-    | rxErrOpen                 = 11056
-    | rxErrOpenRising           = 11057
-    | workErrOriginGoing        = 11060
+    | motionStart               = 11046
+    | motionEnd                 = 11047
+    
+    | timeStart                 = 11048
+    | timeEnd                   = 11049
+
+    | txErrOnTimeShortage       = 11060
+    | txErrOnTimeOver           = 11061
+    | txErrOffTimeShortage      = 11062
+    | txErrOffTimeOver          = 11063
+    | rxErrShort                = 11064
+    | rxErrShortRising          = 11065
+    | rxErrOpen                 = 11066
+    | rxErrOpenRising           = 11067
+
+    | workErrOriginGoing        = 11070
 
     /// 12000 ~ 12999
     [<Flags>]

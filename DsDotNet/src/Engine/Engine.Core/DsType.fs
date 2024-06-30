@@ -58,8 +58,12 @@ module DsType =
         | ErrorOffTimeOver 
         | ErrorOffTimeShortage
         | ErrGoingOrigin
-        | ActionStart
-        | ActionEnd
+        | MotionStart
+        | MotionEnd
+        | ScriptStart
+        | ScriptEnd
+        | TimeStart
+        | TimeEnd
 
     type ExternalTagSet = ExternalTag * IStorage
     

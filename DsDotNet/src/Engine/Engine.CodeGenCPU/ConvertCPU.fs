@@ -49,7 +49,9 @@ module ConvertCPU =
                 //yield vm.R6_RealDataMove() 
                 yield! vr.R7_RealGoingOriginError() 
                 yield! vr.R8_RealGoingPulse() 
-                yield! vr.R9_RealGoingAction() 
+                yield! vr.R10_RealGoingTime() 
+                yield! vr.R11_RealGoingMotion() 
+                yield! vr.R12_RealGoingScript() 
 
                 yield vr.F1_RootStart()
                 yield vr.F2_RootReset()
@@ -76,12 +78,10 @@ module ConvertCPU =
                 yield! vc.E2_CallErrorTXMonitor() 
                 yield! vc.E3_CallErrorRXMonitor() 
                 yield vc.E5_CallErrorTotalMonitor() 
-         
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
                 let vc = v.TagManager :?> VertexMCall
                 yield vc.C1_CallMemo() 
-       
                 
             if IsSpec (v, VertexAll, AliasNotCare) then
                 let vm = v.TagManager :?> VertexManager

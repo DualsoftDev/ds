@@ -56,12 +56,15 @@ module TagManagerModule =
 
 
         
-        let actionStart    = createTag  true VertexTag.actionStart
-        let actionEnd      = createTag  true VertexTag.actionEnd
+        let scriptStart    = createTag  true VertexTag.scriptStart
+        let motionStart    = createTag  true VertexTag.motionStart
+        let timeStart      = createTag  true VertexTag.timeStart
+        let scriptEnd      = createTag  true VertexTag.scriptEnd
+        let motionEnd      = createTag  true VertexTag.motionEnd
+        let timeEnd        = createTag  true VertexTag.timeEnd
+
 
         let errorErrTRXBit = createTag  false   VertexTag.errorTRx
-
-        
 
         interface ITagManager with
             member x.Target = v
@@ -116,11 +119,14 @@ module TagManagerModule =
         member _.OG         =  originBit
         ///Pause Monitor
         member _.PA         =  pauseBit
-        ///Action PLC/PC Output  
-        member _.ActionStart    =  actionStart
-        ///Action PLC/PC Input   
-        member _.ActionEnd      =  actionEnd
-        
+        member _.ScriptStart  =  scriptStart
+        member _.MotionStart  =  motionStart
+        member _.TimeStart    =  timeStart  
+
+        member _.ScriptEnd    =  scriptEnd
+        member _.MotionEnd    =  motionEnd
+        member _.TimeEnd      =  timeEnd
+
         member _.ErrTRX         =  errorErrTRXBit
         
         member _.CreateTag(name) = createTag name
@@ -168,9 +174,13 @@ module TagManagerModule =
 
     and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
+        let s    = this.Storages
+        let sys = this.System
         let real = v:?> Real
+        let sysManager = sys.TagManager :?> SystemManager
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag name = this.CreateTag name
+        let timerOnTimeBit = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
 
         let relayGoingBit     = createTag false     VertexTag.goingRealy
         let goingPulse        = createTag false     VertexTag.goingPulse
@@ -227,7 +237,13 @@ module TagManagerModule =
         ///DAG Coin End Coil
         member _.CoinAnyOnET         = dummyCoinETs
 
+
+        ///Timer time avg
+        member _.TRealOnTime    = timerOnTimeBit
+
         member _.IsFinished = (v :?> Real).Finished
+
+
 
     and VertexMCall(v:Vertex)as this =
         inherit VertexManager(v)

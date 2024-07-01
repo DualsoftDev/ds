@@ -19,3 +19,5 @@ global using static Engine.Core.TagWebModule;
  * Global type alias for Client
  */
 global using ErrorMessage = string;
+global using NewtonsoftJson = Newtonsoft.Json.JsonConvert;
+global using SystemTextJson = System.Text.Json.JsonSerializer;

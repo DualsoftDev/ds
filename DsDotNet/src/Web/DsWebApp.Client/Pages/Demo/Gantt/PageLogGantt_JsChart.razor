@@ -17,10 +17,50 @@
 else
 {
     <div style="height:300px;">
-        <canvas id=@_chartCanvasId></canvas>
-        <CompChartJs ChartType="timeline" CanvasId=@_chartCanvasId
-                     Data="_backupData" Options="_backupOptions" />
+        <canvas id=chartCanvas></canvas>
+        @*         <CompChartJs ChartType="timeline" CanvasId=@_chartCanvasId
+    Data="_backupData" Options="_backupOptions" />
+    *@
     </div>
+
+    <script>
+        var options = {
+            // Depricated and will be removed in future. Please use elements.* instead.
+            // "colorFunction": function(text, data, dataset, index) {
+            //     return Color('black');
+            // },
+            // "showText": true,
+            // "textPadding": 4
+            "elements": {
+                "colorFunction": function (text, data, dataset, index) {
+                    return Color('black');
+                },
+                "showText": true,
+                "textPadding": 4
+            },
+            "tooltips": {
+                "callbacks": {
+                    "label": function (item) {
+                        console.log(item);
+                        let s = item.yLabel[0];
+                        let e = item.yLabel[1];
+                        let multilines = [`${typeof (s)}: ${s} ~ ${e}`];
+                        multilines.push(JSON.stringify(item));
+                        return multilines;
+                    }
+                }
+            }
+        }
+
+        var config = {
+            "type": "timeline",
+            "data": chartData,
+            "options": options
+        }
+        @* var chart = new Chart(document.getElementById("@_chartCanvasId").getContext('2d'), config); *@
+        var chart = new Chart($('#chartCanvas')[0], config);
+
+    </script>
 }
 
 
@@ -28,8 +68,8 @@ else
 
 @code {
     object _backupData, _backupOptions;
-    string _chartCanvasId = "myBackupCanvas" + Guid.NewGuid().ToString();
-
+    // string _chartCanvasId = "myBackupCanvas" + Guid.NewGuid().ToString();
+    string _chartCanvasId = "chartCanvasId";
 
     protected override async Task OnInitializedAsync()
     {
@@ -37,7 +77,6 @@ else
         var flatSpans = await Http.GetFromJsonAsync<FlatSpans>("api/info/log-anal-info-flat");
 
         await JsDual.Eval(CompChartJs.ClickHandlerSnippet);
-        //await CompChartJs.InitializeChartJSAsync(JsDual);
 
         _backupData = new
         {
@@ -49,33 +88,9 @@ else
                 {
                     label = s.Item1,
                     data = spans.Select(span => new object[] { span.Start, span.End, s.Item1 }).ToArray(),
-                    // backgroundColor = ClientK.Blue,
                 };
             }).ToArray(),
         };
-
-        // _backupOptions = CompChartJs.CreateStackedBarOptions(enableDataLabel: true);
-        _backupOptions = CreateTimelineOptions(enableDataLabel: false);
-
-    }
-
-    static object CreateTimelineOptions(bool enableDataLabel, bool maintainAspectRatio = false)
-    {
-        return new
-        {
-            enableDataLabel = enableDataLabel,
-            maintainAspectRatio = maintainAspectRatio,
-            tooltips = new
-            {
-                displayColors = true,
-                callbacks = new { mode = "x", },
-            },
-            scales = new
-            {
-                x = new { stacked = true, },
-                y = new { stacked = true, },
-            },
-            responsive = true,
-        };
+        await JsDual.Eval($"window.chartData = {NewtonsoftJson.SerializeObject(_backupData)};");
     }
 }

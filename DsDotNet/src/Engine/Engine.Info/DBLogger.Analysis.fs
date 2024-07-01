@@ -168,7 +168,11 @@ module DBLoggerAnalysisDTOModule =
             let span = 
                 match logs with
                 | [] -> dummySpan
-                | _ -> (logs.Head.At, logs.Last().At)
+                | _ ->
+                    let ats = logAnalInfo.PerRealLogs.Values |> collect id |> collect id |> map(fun l -> l.At) |> toArray
+                    let s, e = ats |> Seq.min, ats |> Seq.max
+                    (s, e)
+                    //(logs.Head.At, logs.Last().At)
 
             SystemSpan(span, system.Name, realSpans)
         static member CreatFlatSpan(system: DsSystem, logs: ORMVwLog list) : (string * Span[])[] =

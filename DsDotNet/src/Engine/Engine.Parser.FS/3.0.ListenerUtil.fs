@@ -8,6 +8,7 @@ open type Engine.Parser.dsParser
 open Engine.Parser
 open System.Collections.Generic
 open Antlr4.Runtime.Tree
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module ListnerCommonFunctionGeneratorUtil =
@@ -53,6 +54,51 @@ module ListnerCommonFunctionGeneratorUtil =
                       (key, values) ]
 
             safetyKvs
+
+    type TimeDefinition = {
+        Average: float option
+        Std: float option
+        OnDelay: float option
+    }
+
+    type TimeParam =
+            | AVG of float
+            | STD of float
+            | TON of float
+        
+    let getTimes (listTimeCtx: List<dsParser.TimesBlockContext>) : seq<string list * TimeDefinition> =
+        let parseTimeParams (timeParams: string) : TimeDefinition =
+            let regex = new Regex(@"(AVG|STD|TON)\((\d+(\.\d+)?)\)")
+    
+            let matches = regex.Matches(timeParams)
+            let extractParam (avg, std, delay) (paramType, value) =
+                match paramType with
+                | "AVG" -> Some value, std, delay
+                | "STD" -> avg, Some value, delay
+                | "TON" -> avg, std, Some value
+                | _ -> avg, std, delay
+    
+            let initial = (None, None, None)
+    
+            let (average, std, onDelay) =
+                matches
+                |> Seq.cast<Match>
+                |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value|>float))
+                |> Seq.fold extractParam initial
+    
+            { Average = average; Std = std; OnDelay = onDelay }
+
+        seq {
+            for ctx in listTimeCtx do
+                let list = ctx.Descendants<TimeDefContext>().ToList()
+                for defs in list do
+                    let v = defs.TryFindFirstChild<TimeKeyContext>() |> Option.get
+                    let fqdn = collectNameComponents v |> List.ofArray
+                    let path = defs.TryFindFirstChild<TimeParamsContext>() |> Option.get
+                    let timeDef = parseTimeParams (path.GetText())
+                    yield fqdn, timeDef
+        }
+
 
     let getActions  (listActionCtx: List<dsParser.ActionsBlockContext>) =
                 seq {

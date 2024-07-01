@@ -69,7 +69,7 @@ module TagManagerUtil =
                 | Device ->   match DU.tryGetEnumValue<ActionTag>(tagKind).Value with
                               | ActionTag.ActionIn     -> $"{name}_I"
                               | ActionTag.ActionOut    -> $"{name}_O"
-                              | ActionTag.ActionMemory -> failwithlog "error: Memory not supported "
+                              | ActionTag.ActionMemory -> $"{name}_M"
                               | _ -> failwithlog "error: ActionTag create "
 
                 | Button | Lamp | Condition

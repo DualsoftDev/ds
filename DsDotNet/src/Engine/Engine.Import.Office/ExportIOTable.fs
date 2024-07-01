@@ -106,49 +106,37 @@ module ExportIOTable =
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-            let inSym  =  dev.GetInParam(job.Name).Name
-            let outSym =  dev.GetOutParam(job.Name).Name
-            let devIndex =
-                let lastPart = dev.DeviceName.Split("_").Last()
-                match System.Int32.TryParse(lastPart) with
-                | (true, value) -> value-1
-                | (false, _) -> 0
+        let inSym  =  dev.GetInParam(job.Name).Name
+        let outSym =  dev.GetOutParam(job.Name).Name
+        let inSkip, outSkip = dev.GetSkipInfo(job)
 
-            let inSkip = if job.JobMulti = Single then false 
-                         else  job.AddressInCount > devIndex |>not
-            let outSkip =if job.JobMulti = Single then false 
-                         else job.AddressOutCount > devIndex |>not
-
-            let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
-            [ TextXlsAddress
-              flow
-              name
-              getPPTTDevDataTypeText (dev)
-              getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
-              getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
-              inSym
-              outSym
-              ]
+        let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
+        [   
+            TextXlsAddress
+            flow
+            name
+            getPPTTDevDataTypeText (dev)
+            getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
+            getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
+            inSym
+            outSym
+        ]
 
     let IOchunkBySize = 22
 
     let ToDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable seq =
-        let vs = sys.GetVerticesOfCoins()
         
         let totalRows =
             seq {
 
-                let devJobSet = 
-                    sys.Jobs |> Seq.collect(fun j-> j.DeviceDefs.Select(fun dev-> dev,j))
-                             |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
-                             |> Seq.distinctBy(fun (dev,j) -> dev)
+          
 
                 let mutable extCnt = 0
-                for (dev, job) in  devJobSet do
-                    let coins = vs.GetVerticesOfJobCoins(job)
-                    
+                let devsCall =  sys.GetDevicesSkipEmptyAddress()
+
+                for (dev, call) in  devsCall do
                     //외부입력 전용 확인하여 출력 생성하지 않는다.
-                    if  dev.IsRootFlowDev(coins) 
+                    if  dev.IsRootOnlyDevice
                     then
                         dev.OutAddress <- (TextSkip)
                         if dev.InAddress = TextAddrEmpty
@@ -156,7 +144,7 @@ module ExportIOTable =
                             dev.InAddress  <-  getExternalTempMemory (target, extCnt)
                             extCnt <- extCnt+1
 
-                    yield rowIOItems (dev, job) target
+                    yield rowIOItems (dev, call.TargetJob) target
         }
 
         let dts = 
@@ -395,12 +383,7 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let getDevCallSet(sys:DsSystem) =
-        let calls = sys.GetVerticesHasJob()
-        let devCallSet = calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev,c))
-                                    |> Seq.sortBy (fun (dev, c) -> dev.ApiName)
-                                    |> Seq.filter (fun (dev, c) -> dev.OutAddress <> TextSkip)
-        devCallSet
+
         
 
     let getLabelTable(name:string) = 
@@ -433,8 +416,8 @@ module ExportIOTable =
         let dt = getLabelTable "액션이름"
 
         let rows =
-            let devCallSet = getDevCallSet sys
-            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.ApiItem.Name true)
+            let devs =  sys.GetDevicesHasOutput()
+            devs.Select(fun (dev, _)-> rowDeviceItems dev.ApiItem.Name true)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -471,13 +454,15 @@ module ExportIOTable =
      
         emptyLine ()
         dt
+
+
     let ToDevicesTable (sys: DsSystem)  : DataTable =
 
         let dt = getLabelTable "디바이스이름"
       
         let rows =
-            let devCallSet = getDevCallSet sys
-            devCallSet.Select(fun (dev, api)-> rowDeviceItems dev.DeviceName false)
+            let devCallSet =  sys.GetDevicesHasOutput()
+            devCallSet.Select(fun (dev,_)-> rowDeviceItems dev.DeviceName false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -565,7 +550,7 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn.Address}", typeof<string>) |> ignore
 
-        let rowItems ( dev: TaskDev, addr:string) =
+        let rowItems (dev: TaskDev, addr:string) =
             [ 
               dev.ApiName
               dev.InDataType.ToPLCText()
@@ -573,13 +558,13 @@ module ExportIOTable =
                ]
 
         let rows =
-            let devCallSet = getDevCallSet sys
-            devCallSet
-            |> Seq.collect (fun (dev, call) ->
+            let devs = sys.GetDevicesHasOutput()
+            devs
+            |> Seq.collect (fun (dev,_) ->
                 [   
                     match iomType with
                     | IOType.Memory ->
-                        yield rowItems (dev, call.ManualTag.Address)
+                        yield rowItems (dev, dev.MaunualActionAddress)
                     | IOType.In->
                         yield rowItems (dev, dev.InAddress)
                     | IOType.Out ->                            
@@ -708,7 +693,7 @@ module ExportIOTable =
                 ToAutoFlowTable sys target
                 ToAutoWorkTable sys target
 
-                ToFlowNamesTable sys
+                ToFlowNamesTable sys 
                 ToWorkNamesTable sys
                 ToDevicesTable sys
                 ToDevicesApiTable sys

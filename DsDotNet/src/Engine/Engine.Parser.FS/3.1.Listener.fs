@@ -767,6 +767,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         
         
 
+        let fillTimes (system: DsSystem) (listTimeCtx: List<dsParser.TimesBlockContext> ) =
+            let fqdnTimes = getTimes listTimeCtx
+            for fqdn, t in fqdnTimes do
+                let real = (tryFindSystemInner system fqdn).Value :?> Real
+                if t.Average.IsSome then real.DsTime.AVG <- Some(t.Average.Value|>float)
+                if t.Std.IsSome     then real.DsTime.STD <- Some(t.Std.Value|>float)
+                if t.OnDelay.IsSome then real.DsTime.TON <- Some(t.OnDelay.Value|>float)
+
         let fillActions (system: DsSystem) (listActionCtx: List<dsParser.ActionsBlockContext> ) =
             let fqdnPath = getActions listActionCtx
             for fqdn, path in fqdnPath do
@@ -791,6 +799,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             ctx.Descendants<ActionsBlockContext>().ToList() |> fillActions theSystem
             //Real에 scripts 채우기
             ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts theSystem
+            //Real에 times 채우기
+            ctx.Descendants<TimesBlockContext>().ToList() |> fillTimes theSystem
+
+            
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
 

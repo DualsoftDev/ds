@@ -206,6 +206,7 @@ module CoreModule =
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val ExternalTags = HashSet<ExternalTagSet>()
+        member val ParentApiSensorExpr = getNull<IExpression>() with get, set
         //member val RealData:byte[] = [||] with get, set
         member val RealData:byte = 0uy with get, set //array타입으로 향후 변경
 
@@ -214,8 +215,6 @@ module CoreModule =
         member val NoTransData:bool = false with get, set
         
         member x.Flow = flow
-        member x.Path3D = x.DsTime.Path3D 
-        member x.Script = x.DsTime.Script
 
         interface ISafetyConditoinHolder with
             member val SafetyConditions = HashSet<SafetyCondition>()
@@ -319,10 +318,15 @@ module CoreModule =
             with get() = outParams.First().Value  |> fun (d) -> d.DevAddress
             and set(v) = outParams.ToArray().Iter(fun (kv)-> changeParam (kv.Key,outParams, v, kv.Value.DevName))
    
+        member val MaunualActionAddress = TextAddrEmpty with get, set
+
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
+        //CPU 생성시 할당됨 MaunualTag
+
+        member val IsRootOnlyDevice = false  with get, set
 
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (name:string, system:DsSystem, tasks:TaskDev seq) =

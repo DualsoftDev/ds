@@ -18,11 +18,18 @@ type VertexMReal with
         let real = v.Vertex :?> Real
         [   
             let set = 
+                let endExpr = 
+                    v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn() 
+                              <&&> if v.Real.Script.IsSome then v.ScriptEnd.Expr else v._on.Expr
+                              <&&> if v.Real.TimeAvg.IsSome then v.TimeEnd.Expr  else v._on.Expr
+                              <&&> if v.Real.Path3D.IsSome then v.MotionEnd.Expr else v._on.Expr
+
+
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
                 then
-                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr <||> !@v.Link.Expr
+                    endExpr <||> v.ON.Expr <||> !@v.Link.Expr
                 else                          
-                    (v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn()) <||> v.ON.Expr  
+                    endExpr <||> v.ON.Expr 
 
             let rst = 
                 if real.Graph.Vertices.any()
@@ -69,8 +76,6 @@ type VertexMReal with
             (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, getFuncName())     // E
         ]
 
-
-
     member v.R6_RealDataMove() = ()
         //let set = v.RD.ToExpression() 
         //(set) --> (v.RD, getFuncName())
@@ -96,13 +101,54 @@ type VertexMReal with
                 failWithLog $"Not supported {RuntimeDS.Package} package"
         ]
 
-type VertexManager with
-    member v.R1_RealInitialStart()    : CommentedStatement        = (v :?> VertexMReal).R1_RealInitialStart()
-    member v.R2_RealJobComplete()     : CommentedStatement list   = (v :?> VertexMReal).R2_RealJobComplete()
-    member v.R3_RealStartPoint()      : CommentedStatement        = (v :?> VertexMReal).R3_RealStartPoint()
-    member v.R4_RealLink()            : CommentedStatement        = (v :?> VertexMReal).R4_RealLink()
-    member v.R5_DummyDAGCoils()       : CommentedStatement list   = (v :?> VertexMReal).R5_DummyDAGCoils()
-    member v.R6_RealDataMove()        : unit                      = (v :?> VertexMReal).R6_RealDataMove()
-    member v.R7_RealGoingOriginError(): CommentedStatement list   = (v :?> VertexMReal).R7_RealGoingOriginError()
-    member v.R8_RealGoingPulse()      : CommentedStatement list   = (v :?> VertexMReal).R8_RealGoingPulse()
-    
+    member v.R10_RealGoingTime(): CommentedStatement  list =
+        [
+            if v.Real.TimeAvg.IsSome then
+                yield (v.G.Expr,  v._off.Expr) --| (v.TimeStart, getFuncName())
+                
+                if RuntimeDS.Package.IsPackageSIM() 
+                then
+                    if RuntimeDS.RuntimeMotionMode = MotionAsync then
+                        yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeAvgMsec, getFuncName())
+                        yield (v.TRealOnTime.DN.Expr,  v._off.Expr) --| (v.TimeEnd, getFuncName())
+                        
+                else 
+                    yield (v.TimeStart.Expr,  v._off.Expr) --| (v.TimeEnd, getFuncName())
+                    
+        ]
+
+    member v.R11_RealGoingMotion(): CommentedStatement  list =
+        [
+            if v.Real.Path3D.IsSome then
+                yield (v.G.Expr,  v._off.Expr) --| (v.MotionStart, getFuncName())
+
+                if RuntimeDS.Package.IsPackageSIM() 
+                then
+                    if RuntimeDS.RuntimeMotionMode = MotionAsync
+                    then
+                        if v.Real.TimeAvg.IsSome
+                        then
+                            yield (v.TimeEnd.Expr    , v._off.Expr) --| (v.MotionEnd, getFuncName())   
+                        else 
+                            yield (v.MotionStart.Expr, v._off.Expr) --| (v.MotionEnd, getFuncName())   
+
+                    elif RuntimeDS.RuntimeMotionMode = MotionSync 
+                    then
+                        if v.Real.TimeAvg.IsSome
+                        then
+                            yield (v.MotionEnd.Expr    , v._off.Expr) --| (v.TimeEnd, getFuncName())   
+                    else 
+                        failwithlog $"RuntimeMotionMode err : {RuntimeDS.RuntimeMotionMode}"
+                else
+                    let realSensor  = v.Real.ParentApiSensorExpr
+                    if realSensor.IsNull()
+                    then yield (v.G.Expr, v._off.Expr) --| (v.MotionEnd, getFuncName())      //실제 rx에 해당하는 하지 않으면 action 안보고 going 후 바로 MotionEnd
+                    else yield (realSensor, v._off.Expr) --| (v.MotionEnd, getFuncName())    //실제 rx에 해당하는 하면 api 실 action sensor
+                    
+        ]
+
+    member v.R12_RealGoingScript(): CommentedStatement  list =
+        [
+            if v.Real.Script.IsSome then
+                yield (v.G.Expr,  v._off.Expr) --| (v.ScriptStart, getFuncName())  
+        ]

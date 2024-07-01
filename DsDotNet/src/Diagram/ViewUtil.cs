@@ -4,15 +4,19 @@ using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.CodeGenCPU;
 using Engine.Core;
+using Engine.Info;
+using log4net.Util;
 using Microsoft.Msagl.GraphViewerGdi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using static Engine.CodeGenCPU.ApiTagManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
+using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Core.TagKindList;
@@ -34,6 +38,7 @@ namespace Diagram.View.MSAGL
         static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
         static private DsSystem _sys = null;
+        static public bool SaveLog = false;
         
         public static List<ViewNode> CreateViews(DsSystem sys)
         {
@@ -154,6 +159,9 @@ namespace Diagram.View.MSAGL
                     {
                         HandleApiItemEvent(rx as EventApiItem);
                     }
+
+                    if (SaveLog)
+                        DBLog.InsertValueLog(DateTime.Now, rx);
                 });
             }
         }

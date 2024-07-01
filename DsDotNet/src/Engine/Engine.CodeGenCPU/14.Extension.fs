@@ -41,12 +41,13 @@ type DsSystem with
                 let set = btn.ActionINFunc
                 let tm = s.GetTempTimer(btn)
                 yield set --@ (tm, 2000u, getFuncName())
+                yield (set , rst) --| (s._clear_btn, getFuncName())  //flow.clear_btn 은 drive에 처리
+                yield (set , rst) --| (s._ready_btn, getFuncName())  //flow.ready_btn 은 drive에 처리
 
-                for flow in btn.SettingFlows do
-                    yield (set , rst) --| (s._clear_btn, getFuncName())
-                    yield (set , rst) --| (s._ready_btn, getFuncName())
+
                     //누름 2초 유지시 _home_btn 동시 동작
-                    yield (tm.DN.Expr , rst) --| (flow.home_btn, getFuncName())
+                for f in btn.SettingFlows do
+                    yield (tm.DN.Expr , rst) --| (f.home_btn, getFuncName())
 
             for flow in s.Flows do
                 let set = flow.drive_btn.Expr

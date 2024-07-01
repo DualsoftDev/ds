@@ -31,12 +31,17 @@ module CoreCreateModule =
         )
 
     let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (inParam:DevParam, outParm:DevParam): TaskDev =
+        let apis = sys.ApiItems.Where(fun w -> w.Name = apiName)
 
         let api = 
             // Check if the API already exists
-            if sys.ApiItems.Any(fun w -> w.Name = apiName)
+            if apis.any()
             then
-                failwithf $"system {sys.Name} api {apiName} 중복 생성에러"
+                if  apis.length() > 1 then
+                    failwithf $"system {sys.Name} api {apiName} 중복 존재"
+                else
+                    apis.First()
+
             else
                 // Add a default flow if no flows exist
                 if sys.Flows.IsEmpty() then
@@ -50,9 +55,8 @@ module CoreCreateModule =
                
                 // Create a new Real
                 let newReal = Real.Create(realName, flow)
-                //if flow.Graph.Vertices.OfType<Real>().length() = 1
-                //then
-                //    newReal.Finished <- true    //처음 Real이 원위치
+                flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
+                newReal.Finished <- true    //마지막 Real이 원위치
                  
                   // Create and add a new ApiItem
                 let newApi = ApiItem.Create(apiName, sys, newReal, newReal)

@@ -69,6 +69,7 @@ module CpuLoader =
     let applyTagManager(system:DsSystem, storages:Storages, target) =
         let createTagM  (rootSys:DsSystem) (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
+
             RuntimeDS.System <- sys
             
             sys.TagManager <- SystemManager(sys, rootSys, storages, target)

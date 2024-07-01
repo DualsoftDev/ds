@@ -209,7 +209,7 @@ module PPTNodeModule =
                     | _ -> setField(Some newValue)
                 | None -> ()
 
-            checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AGV) (fun v -> real.DsTime.AGV <- v)
+            checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
 
         member x.UpdateCallDevParm(isRoot: bool) =

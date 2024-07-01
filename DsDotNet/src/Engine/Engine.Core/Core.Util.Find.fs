@@ -180,6 +180,35 @@ module internal ModelFindModule =
     let getSharedCall(v:Vertex) : Alias seq =
             (v :?> Call) |> getVertexSharedCall
 
+    let getVerticesHasJob(x:DsSystem)=
+            getVerticesOfSystem(x)
+                .Choose(fun v -> v|> getPureCall)
+                .Where(fun v -> v.IsJob)
+
+
+    let getSkipInfo(dev:TaskDev, job:Job) =
+        let devIndex =
+            let lastPart = dev.DeviceName.Split("_").Last()
+            match System.Int32.TryParse(lastPart) with
+            | (true, value) -> value
+            | (false, _) -> 0
+
+        let inSkip = if job.JobMulti = Single then false 
+                        else  job.AddressInCount < devIndex 
+        let outSkip =if job.JobMulti = Single then false 
+                        else job.AddressOutCount < devIndex 
+
+        inSkip, outSkip 
+
+    let updateDeviceSkipAddress (x: DsSystem) =
+        let calls = x|>getVerticesHasJob
+        calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c.TargetJob))
+             |> Seq.iter(fun (dev, job) -> 
+                let inSkip, outSkip = getSkipInfo(dev, job)
+                if inSkip then dev.InAddress <- TextSkip
+                if outSkip then dev.OutAddress <- TextSkip
+            )
+
     type DsSystem with
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
         member x.TryFindGraphVertex(Fqdn(fqdn))      = tryFindGraphVertex x fqdn
@@ -236,11 +265,8 @@ type FindExtension =
                     (calls@aliases)
                         .Where(fun c->c.Parent.GetCore() :? Real)     
 
-    [<Extension>] static member GetVerticesHasJob(x:DsSystem) =  
-                    getVerticesOfSystem(x)
-                        .Choose(fun v -> v.GetPureCall())
-                        .Where(fun v -> v.IsJob)
-
+    [<Extension>] static member GetVerticesHasJob(x:DsSystem) =   getVerticesHasJob x
+       
     [<Extension>] static member GetVerticesHasJobOfFlow(x:Flow) =  
                     getVerticesOfFlow(x)
                         .Choose(fun v -> v.GetPureCall())
@@ -264,7 +290,8 @@ type FindExtension =
                                 )
                         )
             
-
+            
+    [<Extension>] static member GetSkipInfo(dev:TaskDev, job:Job) =  getSkipInfo (dev, job)
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
     [<Extension>] static member GetAlarmCalls(x:DsSystem) = 
                                         x.GetVerticesOfJobCalls()
@@ -276,13 +303,35 @@ type FindExtension =
                         xs.Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외
                           .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
 
+
+
+    [<Extension>] static member GetDevicesDisdict(x:DsSystem, onlyCoin:bool) = 
+
+                    let calls = x.GetVerticesHasJob()
+                                 .DistinctBy(fun v-> v.TargetJob)
+                                    
+                    let devs = calls
+                                .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
+                                .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
+
+                    devs 
+                    |> Seq.distinctBy (fun (dev,_) ->dev)
+                    |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
+
+    [<Extension>] static member GetDevicesHasOutput(x:DsSystem) = 
+                    x.GetDevicesDisdict(true) //출력있는건 무조건  Coin
+                        .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
+
+    [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
+                    x.GetDevicesDisdict(false)
+                        .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
+
+
     [<Extension>] static member GetTargetDevCoins(taskDev:TaskDev, coins:Vertex seq) = 
                         coins.Where(fun c-> 
                                     c.GetPureCall().Value.TargetJob.DeviceDefs.Contains(taskDev)
                         )
           
-    [<Extension>] static member IsRootFlowDev(taskDev:TaskDev, coins:Vertex seq) = 
-                        taskDev.GetTargetDevCoins(coins).IsEmpty()
 
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x

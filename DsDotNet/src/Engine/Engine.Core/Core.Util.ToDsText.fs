@@ -404,6 +404,19 @@ module internal ToDsTextModule =
             let noTransDataReals =  reals.Filter(fun f->f.NoTransData)
             let path3DReals = reals.Where(fun f->f.Path3D.IsSome)
             let scriptReals = reals.Where(fun f->f.Script.IsSome)
+            let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome || f.DsTime.TON.IsSome)
+            let times = 
+                [
+                    if timeReals.Any() then
+                        yield $"{tab2}[times] = {lb}"
+                        for real in timeReals do
+                            let avg = real.DsTime.AVG |> Option.map (fun v -> $"AVG({v})") |> Option.defaultValue ""
+                            let std = real.DsTime.STD |> Option.map (fun v -> $"STD({v})") |> Option.defaultValue ""
+                            let delay = real.DsTime.TON |> Option.map (fun v -> $"TON({v})") |> Option.defaultValue ""
+                            let paras = [avg; std; delay] |> List.filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
+                            yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{String.Join(",", paras)}{rb};"""
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
 
             let path3Ds = 
                 [
@@ -464,7 +477,8 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            if safeties.Any() || autoPres.Any() || layouts.Any() || finished.Any() || disabled.Any()|| noTransData.Any() then
+            let props = safeties@autoPres@layouts@path3Ds@scripts@times@finished@disabled@noTransData
+            if props.Any() then
                 yield $"{tab}[prop] = {lb}"
                 if safeties.Any()  then yield safeties
                 if autoPres.Any()  then yield autoPres
@@ -472,6 +486,7 @@ module internal ToDsTextModule =
 
                 if path3Ds.Any()  then yield path3Ds
                 if scripts.Any()  then yield scripts
+                if times.Any()  then yield times
                 if finished.Any()  then yield finished
                 if disabled.Any()  then yield disabled
                 if noTransData.Any()  then yield noTransData

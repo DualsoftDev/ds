@@ -13,6 +13,11 @@ module RuntimeGeneratorModule =
         | XGK 
         | AB 
         | MELSEC
+
+    type RuntimeMotionMode = 
+        | MotionAsync
+        | MotionSync
+        
     type RuntimePackage = 
         | PC 
         | PCSIM 
@@ -45,7 +50,9 @@ module RuntimeGeneratorModule =
         | _ -> failwithlogf $"Error {getFuncName()}"
 
     let InitStartMemory = 1000
-    let BufferAlramSize = 1000
+    let BufferAlramSize = 9999
+
+
     let ExternalTempMemory =  "M"
     let ExternalTempIECMemory =  "%MX"
     let ExternalTempNoIECMemory =  "M"
@@ -62,6 +69,7 @@ module RuntimeGeneratorModule =
         static let mutable runtimePackage = PCSIM
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
+        static let mutable runtimeMotionMode = RuntimeMotionMode.MotionSync
         static let mutable callTimeout = 15000u
         static let mutable emulationAddress = ""
 
@@ -70,6 +78,7 @@ module RuntimeGeneratorModule =
 
         static member val TimeoutCall = callTimeout  with get, set
         static member val EmulationAddress = emulationAddress  with get, set
+        static member val RuntimeMotionMode = runtimeMotionMode  with get, set
 
         static member Package
             with get() = runtimePackage

@@ -160,29 +160,33 @@ module TagKindList =
     | dummyCoinRTs              = 11033
     | dummyCoinETs              = 11034
 
-    | actionSync                = 11035
-    | actionStart               = 11036
-    | actionEnd                 = 11037
-
     | goingPulse                = 11038
     | goingPulseRelay           = 11039
 
-    
     | callCommandPulse          = 11040
     | callCommandPulseRelay     = 11041
     | callCommandEnd            = 11042
     | callOperatorValue         = 11043
     
+    | scriptStart               = 11044
+    | scriptEnd                 = 11045
 
-    | txErrOnTimeShortage        = 11050
-    | txErrOnTimeOver            = 11051
-    | txErrOffTimeShortage       = 11052
-    | txErrOffTimeOver           = 11053
-    | rxErrShort                 = 11054
-    | rxErrShortRising           = 11055
-    | rxErrOpen                  = 11056
-    | rxErrOpenRising            = 11057
-    | workErrOriginGoing         = 11060
+    | motionStart               = 11046
+    | motionEnd                 = 11047
+    
+    | timeStart                 = 11048
+    | timeEnd                   = 11049
+
+    | txErrOnTimeShortage       = 11060
+    | txErrOnTimeOver           = 11061
+    | txErrOffTimeShortage      = 11062
+    | txErrOffTimeOver          = 11063
+    | rxErrShort                = 11064
+    | rxErrShortRising          = 11065
+    | rxErrOpen                 = 11066
+    | rxErrOpenRising           = 11067
+
+    | workErrOriginGoing        = 11070
 
     /// 12000 ~ 12999
     [<Flags>]

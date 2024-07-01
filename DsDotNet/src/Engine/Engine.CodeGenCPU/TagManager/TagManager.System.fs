@@ -12,8 +12,15 @@ module SystemManagerModule =
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
     type SystemManager (sys:DsSystem, rootSys:DsSystem, stg:Storages, target:PlatformTarget)  =
             //시스템 TAG는 root 시스템   TAG 공용 사용 ex)curSys._ON  = rootSys._ON  
-        let dsSysTag (dt:DataType)  autoAddr target (systemTag:SystemTag) =
-            let name = getStorageName rootSys (int systemTag)
+        let dsSysTag (dt:DataType)  autoAddr target (systemTag:SystemTag) (internalSysTag:bool)=
+            let name =  
+                if internalSysTag
+                then
+                    $"{systemTag}" |> validStorageName
+                else 
+                    getStorageName rootSys (int systemTag)
+
+
             if stg.ContainsKey(name) then stg[name]
             else
                 let systemTag = systemTag |> int
@@ -24,35 +31,35 @@ module SystemManagerModule =
 
 
         //시스템 Tag는 하위 시스템과 공유
-        let dsSysBit     autoAddr target (t:SystemTag) = (dsSysTag DuBOOL     autoAddr target t) :?> PlanVar<bool>
-        let dsSysUint8   autoAddr target (t:SystemTag) = (dsSysTag DuUINT8    autoAddr target t) :?> PlanVar<uint8>
-        let dsSysUint16  autoAddr target (t:SystemTag) = (dsSysTag DuUINT16   autoAddr target t) :?> PlanVar<uint16>
-        let dsSysUint32  autoAddr target (t:SystemTag) = (dsSysTag DuUINT32   autoAddr target t) :?> PlanVar<uint32>
+        let dsSysBit     autoAddr target (t:SystemTag) sysTag = (dsSysTag DuBOOL     autoAddr target t sysTag) :?> PlanVar<bool>
+        let dsSysUint8   autoAddr target (t:SystemTag) sysTag = (dsSysTag DuUINT8    autoAddr target t sysTag) :?> PlanVar<uint8>
+        let dsSysUint16  autoAddr target (t:SystemTag) sysTag = (dsSysTag DuUINT16   autoAddr target t sysTag) :?> PlanVar<uint16>
+        let dsSysUint32  autoAddr target (t:SystemTag) sysTag = (dsSysTag DuUINT32   autoAddr target t sysTag) :?> PlanVar<uint32>
 
 
         let mutualCalls = getMutualInfo (sys.GetVerticesOfJobCalls().Cast<Vertex>())
 
-        let on           = dsSysBit false sys  SystemTag._ON
-        let off          = dsSysBit false sys  SystemTag._OFF
-        let auto_btn     = dsSysBit true  sys  SystemTag.auto_btn
-        let manual_btn   = dsSysBit true  sys  SystemTag.manual_btn
-        let drive_btn    = dsSysBit true  sys  SystemTag.drive_btn
-        let pause_btn    = dsSysBit true  sys  SystemTag.pause_btn
-        let emg_btn      = dsSysBit true  sys  SystemTag.emg_btn
-        let test_btn     = dsSysBit true  sys  SystemTag.test_btn
-        let ready_btn    = dsSysBit true  sys  SystemTag.ready_btn
-        let clear_btn    = dsSysBit true  sys  SystemTag.clear_btn
-        let home_btn     = dsSysBit true  sys  SystemTag.home_btn
+        let on           = dsSysBit false sys  SystemTag._ON            true
+        let off          = dsSysBit false sys  SystemTag._OFF           true
+        let auto_btn     = dsSysBit true  sys  SystemTag.auto_btn       false
+        let manual_btn   = dsSysBit true  sys  SystemTag.manual_btn     false
+        let drive_btn    = dsSysBit true  sys  SystemTag.drive_btn      false
+        let pause_btn    = dsSysBit true  sys  SystemTag.pause_btn      false
+        let emg_btn      = dsSysBit true  sys  SystemTag.emg_btn        false
+        let test_btn     = dsSysBit true  sys  SystemTag.test_btn       false
+        let ready_btn    = dsSysBit true  sys  SystemTag.ready_btn      false
+        let clear_btn    = dsSysBit true  sys  SystemTag.clear_btn      false
+        let home_btn     = dsSysBit true  sys  SystemTag.home_btn       false
 
-        let auto_lamp     = dsSysBit true  sys  SystemTag.auto_lamp
-        let manual_lamp   = dsSysBit true  sys  SystemTag.manual_lamp
-        let drive_lamp    = dsSysBit true  sys  SystemTag.drive_lamp
-        let pause_lamp    = dsSysBit true  sys  SystemTag.pause_lamp
-        let emg_lamp      = dsSysBit true  sys  SystemTag.emg_lamp
-        let test_lamp     = dsSysBit true  sys  SystemTag.test_lamp
-        let ready_lamp    = dsSysBit true  sys  SystemTag.ready_lamp
-        let clear_lamp    = dsSysBit true  sys  SystemTag.clear_lamp
-        let home_lamp     = dsSysBit true  sys  SystemTag.home_lamp
+        let auto_lamp     = dsSysBit true  sys  SystemTag.auto_lamp     false
+        let manual_lamp   = dsSysBit true  sys  SystemTag.manual_lamp   false
+        let drive_lamp    = dsSysBit true  sys  SystemTag.drive_lamp    false
+        let pause_lamp    = dsSysBit true  sys  SystemTag.pause_lamp    false
+        let emg_lamp      = dsSysBit true  sys  SystemTag.emg_lamp      false
+        let test_lamp     = dsSysBit true  sys  SystemTag.test_lamp     false
+        let ready_lamp    = dsSysBit true  sys  SystemTag.ready_lamp    false
+        let clear_lamp    = dsSysBit true  sys  SystemTag.clear_lamp    false
+        let home_lamp     = dsSysBit true  sys  SystemTag.home_lamp     false
 
         //let dtimeyy  = dsSysUint8 "_RTC_TIME[0]"  false sys  SystemTag.datet_yy         //ls xgi 현재시각[년도]
         //let dtimemm  = dsSysUint8 "_RTC_TIME[1]"  false sys  SystemTag.datet_mm         //ls xgi 현재시각[월]
@@ -64,31 +71,31 @@ module SystemManagerModule =
         //let dtimeyk  = dsSysUint8 "_ms"                 //ls xgi 현재시각[년대]
 
         let tout     =
-            let tout = dsSysUint32   true sys SystemTag.timeout 
+            let tout = dsSysUint32   true sys SystemTag.timeout  false
             tout.Value <- RuntimeDS.TimeoutCall
             tout
 
-        let pauseMonitor      = dsSysBit true  sys   SystemTag.pauseMonitor
-        let autoMonitor       = dsSysBit true  sys   SystemTag.autoMonitor   
-        let manualMonitor     = dsSysBit true  sys   SystemTag.manualMonitor 
-        let driveMonitor      = dsSysBit true  sys   SystemTag.driveMonitor  
-        let errorMonitor      = dsSysBit true  sys   SystemTag.errorMonitor   
-        let emergencyMonitor  = dsSysBit true  sys   SystemTag.emergencyMonitor    
-        let testMonitor       = dsSysBit true  sys   SystemTag.testMonitor   
-        let readyMonitor      = dsSysBit true  sys   SystemTag.readyMonitor  
-        let idleMonitor       = dsSysBit true  sys   SystemTag.idleMonitor  
-        let originMonitor     = dsSysBit true  sys   SystemTag.originMonitor  
-        let goingMonitor      = dsSysBit true  sys   SystemTag.goingMonitor  
+        let pauseMonitor      = dsSysBit true  sys   SystemTag.pauseMonitor      false
+        let autoMonitor       = dsSysBit true  sys   SystemTag.autoMonitor       false
+        let manualMonitor     = dsSysBit true  sys   SystemTag.manualMonitor     false
+        let driveMonitor      = dsSysBit true  sys   SystemTag.driveMonitor      false
+        let errorMonitor      = dsSysBit true  sys   SystemTag.errorMonitor      false
+        let emergencyMonitor  = dsSysBit true  sys   SystemTag.emergencyMonitor  false  
+        let testMonitor       = dsSysBit true  sys   SystemTag.testMonitor       false
+        let readyMonitor      = dsSysBit true  sys   SystemTag.readyMonitor      false
+        let idleMonitor       = dsSysBit true  sys   SystemTag.idleMonitor       false
+        let originMonitor     = dsSysBit true  sys   SystemTag.originMonitor     false
+        let goingMonitor      = dsSysBit true  sys   SystemTag.goingMonitor      false
         
-        let flicker20msec  = dsSysBit true  sys   SystemTag._T20MS     
-        let flicker100msec = dsSysBit true  sys   SystemTag._T100MS    
-        let flicker200msec = dsSysBit true  sys   SystemTag._T200MS    
-        let flicker1sec    = dsSysBit true  sys   SystemTag._T1S       
-        let flicker2sec    = dsSysBit true  sys   SystemTag._T2S       
+        let flicker20msec  = dsSysBit true  sys   SystemTag._T20MS      true
+        let flicker100msec = dsSysBit true  sys   SystemTag._T100MS     true
+        let flicker200msec = dsSysBit true  sys   SystemTag._T200MS     true
+        let flicker1sec    = dsSysBit true  sys   SystemTag._T1S        true
+        let flicker2sec    = dsSysBit true  sys   SystemTag._T2S        true
 
 
-        let sim            = dsSysBit   true  sys SystemTag.sim
-        let emulation      = dsSysBit   true  sys SystemTag.emulation
+        let sim            = dsSysBit   true  sys SystemTag.sim            false
+        let emulation      = dsSysBit   true  sys SystemTag.emulation      false
 
 
         do 

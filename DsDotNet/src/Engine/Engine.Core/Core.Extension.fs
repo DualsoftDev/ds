@@ -192,6 +192,8 @@ module CoreExtensionModule =
                 else DuBOOL
 
     type TaskDev with
+
+
         member x.GetInParam(jobName:string) = x.InParams[jobName]
         member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)
 
@@ -215,16 +217,26 @@ module CoreExtensionModule =
 
 
     type Real with
+    
+        member x.TimeAvg = x.DsTime.AVG 
+        member x.TimeAvgMsec = Convert.ToUInt32( x.DsTime.AVG.Value*1000.0 )
+        member x.TimeStd = x.DsTime.STD
+        member x.Path3D = x.DsTime.Path3D 
+        member x.Script = x.DsTime.Script
+        member x.NoneAction = x.Path3D.IsNone &&  x.Script.IsNone 
+
         member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  
-        member x.ActionSyncTag  = x.ExternalTags.First(fun (t,_)-> t = ActionSync)|> snd  
-        member x.ActionStartTag = x.ExternalTags.First(fun (t,_)-> t = ActionStart)|> snd  
-        member x.ActionEndTag   = x.ExternalTags.First(fun (t,_)-> t = ActionEnd)|> snd  
+
+        member x.MotionStartTag = x.ExternalTags.First(fun (t,_)-> t = MotionStart)|> snd  
+        member x.ScriptStartTag = x.ExternalTags.First(fun (t,_)-> t = ScriptStart)|> snd  
+
+        member x.MotionEndTag = x.ExternalTags.First(fun (t,_)-> t = MotionEnd)|> snd  
+        member x.ScriptEndTag = x.ExternalTags.First(fun (t,_)-> t = ScriptEnd)|> snd  
 
     type Call with
         member x.IsOperator = (x.Parent.GetCore() :? Flow)
 
         member x.System = x.Parent.GetSystem()
-        member x.ManualTag = x.ExternalTags.First(fun (t,_)-> t = ManualTag)|> snd
         member x.ErrorSensorOn = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)|> snd
         member x.ErrorSensorOff = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)|> snd
         member x.ErrorOnTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeOver)|> snd

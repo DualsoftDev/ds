@@ -20,6 +20,8 @@ module DsAddressModule =
                 inCnt <- 0
                 outCnt <- 0
 
+    
+
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getPCIOMTextBySize (device:string, offset: int, bitSize:int) : string =
             match bitSize with  
@@ -56,6 +58,8 @@ module DsAddressModule =
                     | DuUINT64  -> 64
                     | _   -> failwithf $"{dSzie} not support"
             ) |>  Seq.sum
+
+
 
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
@@ -219,6 +223,8 @@ module DsAddressModule =
      
         newAddr
 
+
+
   
     let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
         let inAddr = getValidAddress(hwItem.InAddress, hwItem.InParam.Type, hwItem.Name, skipIn, IOType.Memory, target)
@@ -258,25 +264,22 @@ module DsAddressModule =
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
             
-        let vs = sys.GetVerticesOfCoins()
+        let devsCall =  sys.GetDevicesSkipEmptyAddress()
         let mutable extCnt = 0
-        for job in sys.Jobs do
-            job.DeviceDefs |> Seq.iteri(fun i dev ->
-                let inSkip = job.JobParam.JobMulti.AddressInCount > i |>not
-                let outSkip = job.JobParam.JobMulti.AddressOutCount > i |>not
-                dev.InAddress  <- getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target)
-                dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
-                    
-                let coins = vs.GetVerticesOfJobCoins(job)
-                if dev.IsRootFlowDev(coins) 
+        for dev, call in devsCall do
+            let inSkip, outSkip = getSkipInfo(dev, call.TargetJob)
+
+            dev.InAddress  <- getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target)
+            dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
+           
+            if dev.IsRootOnlyDevice 
+            then
+                if dev.InAddress = TextAddrEmpty && not(inSkip)
                 then
-                    if dev.InAddress = TextAddrEmpty && not(inSkip)
-                    then
-                        dev.InAddress  <-  getExternalTempMemory(target, extCnt)
-                        extCnt <- extCnt+1
+                    dev.InAddress  <-  getExternalTempMemory(target, extCnt)
+                    extCnt <- extCnt+1
 
-                    dev.OutAddress <- TextSkip
-            )
-
+                dev.OutAddress <- TextSkip
+        
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

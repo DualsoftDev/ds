@@ -1,0 +1,66 @@
+@* https://jsfiddle.net/vr2Lpz8y/ *@
+
+@page "/dashboards/log-gantt-jschart"
+@using Dual.Web.Blazor.Client.Components.Chart
+
+<h3>PageLogGantt_JsChart</h3>
+
+
+@if (_backupData == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div style="height:300px;">
+        <canvas id=@_chartCanvasId></canvas>
+        <CompChartJs ChartType="bar" CanvasId=@_chartCanvasId
+                     Data="_backupData" Options="_backupOptions" />
+    </div>
+}
+
+
+
+
+@code {
+    object _backupData, _backupOptions;
+    string _chartCanvasId = "myBackupCanvas" + Guid.NewGuid().ToString();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.Eval(CompChartJs.ClickHandlerSnippet);
+        //await CompChartJs.InitializeChartJSAsync(JsDual);
+
+        _backupData = new
+        {
+            labels = new[] { "AA"},
+            datasets = new[] {
+                new {
+                    label = "Work1",
+                    data = new [] {
+                        "2018-01-22T16:00:00.000Z",
+                        "2018-01-23T05:40:44.626Z",
+                        "Unknown"
+                    },
+                    // backgroundColor = ClientK.Blue,
+                },
+                // new {
+                //     label = "데이터 변경",
+                //     data = changed,
+                //     backgroundColor = ClientK.Yellow,
+                // },
+                // new {
+                //     label = "데이터 백업실패",
+                //     data = failed,
+                //     backgroundColor = ClientK.Red,
+                // },
+            }
+        };
+
+        // _backupOptions = CompChartJs.CreateStackedBarOptions(enableDataLabel: true);
+        _backupOptions = CompChartJs.CreateStackedBarOptions(enableDataLabel: false);
+
+    }
+}

@@ -139,19 +139,15 @@ module ConvertCpuDsSystem =
                 let rm =  real.TagManager :?> VertexMReal
                 rm.ScriptStart.Address    <- getMemory rm.Name (getTarget(x))
                 rm.MotionStart.Address    <- getMemory rm.Name (getTarget(x))
-                rm.TimeStart.Address      <- getMemory rm.Name (getTarget(x))
 
                 rm.ScriptEnd.Address    <- getMemory rm.Name (getTarget(x))
                 rm.MotionEnd.Address    <- getMemory rm.Name (getTarget(x))
-                rm.TimeEnd.Address      <- getMemory rm.Name (getTarget(x))
 
                 real.ExternalTags.Add(ScriptStart,  rm.ScriptStart :> IStorage) |>ignore
                 real.ExternalTags.Add(MotionStart,  rm.MotionStart   :> IStorage) |>ignore
-                real.ExternalTags.Add(TimeStart,    rm.TimeStart   :> IStorage) |>ignore
 
                 real.ExternalTags.Add(ScriptEnd,    rm.ScriptEnd   :> IStorage) |>ignore
                 real.ExternalTags.Add(MotionEnd,    rm.MotionEnd   :> IStorage) |>ignore
-                real.ExternalTags.Add(TimeEnd,      rm.TimeEnd   :> IStorage) |>ignore
 
     
         member private x.GenerationFlowHMIMemory()  = 

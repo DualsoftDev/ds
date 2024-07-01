@@ -142,8 +142,8 @@ type VertexMReal with
                 else
                     let realSensor  = v.Real.ParentApiSensorExpr
                     if realSensor.IsNull()
-                    then yield (v._on.Expr, v._off.Expr) --| (v.MotionEnd, getFuncName())    
-                    else yield (realSensor, v._off.Expr) --| (v.MotionEnd, getFuncName())    //실제 rx에 해당하는 api 실 action sensor
+                    then yield (v.G.Expr, v._off.Expr) --| (v.MotionEnd, getFuncName())      //실제 rx에 해당하는 하지 않으면 action 안보고 going 후 바로 MotionEnd
+                    else yield (realSensor, v._off.Expr) --| (v.MotionEnd, getFuncName())    //실제 rx에 해당하는 하면 api 실 action sensor
                     
         ]
 

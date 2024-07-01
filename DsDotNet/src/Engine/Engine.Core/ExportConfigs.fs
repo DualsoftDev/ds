@@ -18,7 +18,6 @@ module ExportConfigsMoudle =
     type DsInterface = {
         Id: int
         Work: string
-        WorkType: string
         WorkInfo: string
    
         ScriptStartTag: string
@@ -26,9 +25,6 @@ module ExportConfigsMoudle =
 
         MotionStartTag: string
         MotionEndTag: string
-
-        TimeStartTag : string
-        TimeEndTag : string
 
         Station: string
         Device: string
@@ -68,14 +64,11 @@ module ExportConfigsMoudle =
                         {
                             Id = ifs.Count+1
                             Work = dev.ApiItem.TX.Name
-                            WorkType = "Start"
                             WorkInfo = dev.ApiItem.TX.Path3D.Value
                             ScriptStartTag = dev.ApiItem.TX.ScriptStartTag.Address
                             ScriptEndTag = dev.ApiItem.TX.ScriptEndTag.Address
                             MotionStartTag = dev.ApiItem.TX.MotionStartTag.Address
                             MotionEndTag = dev.ApiItem.TX.MotionEndTag.Address
-                            TimeStartTag = dev.ApiItem.TX.TimeStartTag.Address
-                            TimeEndTag = dev.ApiItem.TX.TimeEndTag.Address
                             Station = v.Parent.GetFlow().Name
                             Device = dev.DeviceName
                             Action = dev.ApiItem.Name
@@ -84,8 +77,8 @@ module ExportConfigsMoudle =
                         }
                     ifs.Add dataSync |> ignore
 
-                    let dataEnd   = { dataSync with Id = ifs.Count+1; WorkType = "End";}
-                    ifs.Add dataEnd |> ignore
+                    //let dataEnd   = { dataSync with Id = ifs.Count+1; WorkType = "End";}
+                    //ifs.Add dataEnd |> ignore
                )
            )
 
@@ -103,7 +96,6 @@ type ExportConfigsExt =
         SaveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces = dsInterfaces
-                                    .Where(fun f-> f.WorkType = "Sync")
                                     .Select(fun f-> f.Id, f.Motion).ToArray() 
 
         let interfaceSimpleConifg = {MotionSync = dsSimpleInterfaces}

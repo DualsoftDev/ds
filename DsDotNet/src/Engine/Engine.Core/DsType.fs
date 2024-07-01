@@ -62,8 +62,6 @@ module DsType =
         | MotionEnd
         | ScriptStart
         | ScriptEnd
-        | TimeStart
-        | TimeEnd
 
     type ExternalTagSet = ExternalTag * IStorage
     

@@ -91,10 +91,11 @@ module PPTNodeUtilModule =
 
         let updateRealTime (contents: string) =
             let parseSeconds (timeStr: string) : float option =
+                let timeStr =timeStr.ToLower().Trim()
                 let msPattern = @"(\d+(\.\d+)?)ms"
                 let secPattern = @"(\d+(\.\d+)?)sec"
                 let minPattern = @"(\d+(\.\d+)?)min"
-                let defaultPattern = @"(\d+(\.\d+)?)"
+                let defaultPattern = @"(\d+(\.\d+))"
 
                 let matchRegex pattern =
                     let m = Regex.Match(timeStr, pattern)
@@ -115,7 +116,7 @@ module PPTNodeUtilModule =
                             // Default to seconds if no unit is specified
                             match matchRegex defaultPattern with
                             | Some sec -> Some sec
-                            | None -> None
+                            | None -> failWithLog $"{timeStr} Invalid time format"
 
             let parts = (GetLastParenthesesContents contents).Split(',')
 

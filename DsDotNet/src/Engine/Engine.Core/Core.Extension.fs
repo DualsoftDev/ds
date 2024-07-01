@@ -229,11 +229,9 @@ module CoreExtensionModule =
 
         member x.MotionStartTag = x.ExternalTags.First(fun (t,_)-> t = MotionStart)|> snd  
         member x.ScriptStartTag = x.ExternalTags.First(fun (t,_)-> t = ScriptStart)|> snd  
-        member x.TimeStartTag = x.ExternalTags.First(fun (t,_)-> t = TimeStart)|> snd
 
         member x.MotionEndTag = x.ExternalTags.First(fun (t,_)-> t = MotionEnd)|> snd  
         member x.ScriptEndTag = x.ExternalTags.First(fun (t,_)-> t = ScriptEnd)|> snd  
-        member x.TimeEndTag = x.ExternalTags.First(fun (t,_)-> t = TimeEnd)|> snd  
 
     type Call with
         member x.IsOperator = (x.Parent.GetCore() :? Flow)

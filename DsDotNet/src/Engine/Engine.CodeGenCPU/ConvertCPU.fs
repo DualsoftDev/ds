@@ -211,7 +211,7 @@ module ConvertCPU =
                 | Some e -> e
                 | _ -> call._on.Expr
             
-            dev.ApiItem.RX.Graph.Vertices.OfType<Real>().Iter(fun r->r.ParentApiSensorExpr <-sensorExpr)
+            dev.ApiItem.RX.ParentApiSensorExpr <-sensorExpr
                
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys

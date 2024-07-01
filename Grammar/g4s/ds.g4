@@ -269,13 +269,7 @@ propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishB
         disableTarget: identifier23;
         disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;
 
-    timesBlock: '[' 'times' ']' '=' '{' (timeDef)* '}';
-    timeDef: timeKey '{' timeParams '}' SEMICOLON;
-    timeKey: identifier23;
-    timeParams: timeParamList;
-    timeParamList: (timeParam (COMMA timeParam)*)?;
-    timeParam: ('M' ':' INTEGER | 'S' ':' INTEGER | 'D' ':' INTEGER); // average, std, onDelay msec
-
+  
     actionsBlock: '[' 'actions' ']' '=' '{' (actionDef)* '}';
     actionDef: actionKey '=' '{' actionParams '}' SEMICOLON;
     actionKey: identifier23;
@@ -285,6 +279,11 @@ propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishB
     scriptDef: scriptKey '=' '{' scriptParams '}' SEMICOLON;
     scriptKey: identifier23;
     scriptParams: content;
+
+    timesBlock: '[' 'times' ']' '=' '{' (timeDef)* '}';
+    timeDef: timeKey '=' '{' timeParams '}' SEMICOLON;
+    timeKey: identifier23;
+    timeParams: content;
 
 
 flowBlock

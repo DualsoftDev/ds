@@ -55,9 +55,8 @@ module CoreCreateModule =
                
                 // Create a new Real
                 let newReal = Real.Create(realName, flow)
-                //if flow.Graph.Vertices.OfType<Real>().length() = 1
-                //then
-                //    newReal.Finished <- true    //처음 Real이 원위치
+                flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
+                newReal.Finished <- true    //마지막 Real이 원위치
                  
                   // Create and add a new ApiItem
                 let newApi = ApiItem.Create(apiName, sys, newReal, newReal)

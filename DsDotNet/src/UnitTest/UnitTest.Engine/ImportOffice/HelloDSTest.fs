@@ -135,4 +135,6 @@ module HelloDSTestModule =
             let sysSpan1 = JsonSerializer.Deserialize<SystemSpan>(text1)
             let text2    = JsonSerializer.Serialize sysSpan1
             text1 === text2
+
+            let flatSpans = SystemSpan.CreatFlatSpan(system, logs)
             ()

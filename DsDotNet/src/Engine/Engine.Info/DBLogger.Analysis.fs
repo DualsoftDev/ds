@@ -107,6 +107,7 @@ module DBLoggerAnalysisDTOModule =
     // Span 클래스 정의
     type Span(span:LogSpan) =
         new() = Span(dummySpan)
+        new(s:DateTime, e:DateTime) = Span(LogSpan(s, e))
         member val Start = fst span with get, set
         member val End = snd span with get, set
 
@@ -170,10 +171,34 @@ module DBLoggerAnalysisDTOModule =
                 | _ -> (logs.Head.At, logs.Last().At)
 
             SystemSpan(span, system.Name, realSpans)
+        static member CreatFlatSpan(system: DsSystem, logs: ORMVwLog list) : (string * Span[])[] =
+            let sysSpan = SystemSpan.CreateSpan(system, logs)
+            let namedSpans =
+                [|
+                    yield sysSpan.Fqdn, new Span(sysSpan.Start, sysSpan.End)
+                    for KeyValue(rFqdn, rss) in sysSpan.RealSpans do
+                        for rs in rss do
+                            yield rFqdn, rs
+                            for cs in rs.CallSpans do
+                                yield cs.Fqdn, cs
+                |]
+            let grs = namedSpans.GroupBy(fun (fqdn, _) -> fqdn)
+            let result = 
+                grs |> map (fun gr ->
+                    gr.Key, gr |> map snd |> toArray
+                ) |> toArray
 
+            result
+
+    type FlatSpans = (string * Span[])[]
 // For C# interop
 module SystemSpanEx =
     /// 주어진 system 에 대한 log 목록을 분석해서 SystemSpan 결과를 반환
-    let CreateSpan(system: DsSystem, logs: ORMVwLog seq) =
+    /// System > Real > Call 의 계층 구조를 가지는 Span 정보를 생성한다.
+    let CreateSpan(system: DsSystem, logs: ORMVwLog seq) : SystemSpan =
         let logList = logs |> toFSharpList
         SystemSpan.CreateSpan(system, logList)
+
+    let CreateFlatSpan(system: DsSystem, logs: ORMVwLog seq) : FlatSpans =
+        let logList = logs |> toFSharpList
+        SystemSpan.CreatFlatSpan(system, logList)

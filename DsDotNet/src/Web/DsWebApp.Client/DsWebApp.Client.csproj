@@ -39,6 +39,7 @@
 	
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
 		<!--<ProjectReference Include="..\..\IOHub\IO.Core\IO.Core.fsproj" />-->
 		<ProjectReference Include="..\..\IOHub\IO.Core\IO.Core.fsproj" />
 		<ProjectReference Include="..\DsWebApp.Shared\DsWebApp.Shared.csproj" />

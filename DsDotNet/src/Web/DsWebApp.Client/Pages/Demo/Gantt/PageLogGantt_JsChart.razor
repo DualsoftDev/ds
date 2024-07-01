@@ -2,6 +2,8 @@
 
 @page "/dashboards/log-gantt-jschart"
 @using Dual.Web.Blazor.Client.Components.Chart
+@using static Engine.Info.DBLoggerAnalysisDTOModule
+@using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
 
 <h3>PageLogGantt_JsChart</h3>
 
@@ -32,37 +34,24 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        var flatSpans = await Http.GetFromJsonAsync<FlatSpans>("api/info/log-anal-info-flat");
+
         await JsDual.Eval(CompChartJs.ClickHandlerSnippet);
         //await CompChartJs.InitializeChartJSAsync(JsDual);
 
         _backupData = new
         {
-            labels = new[] {
-                "HelloDS.STN1.Work1",
-                // "STN1__Device1_ADV",
-                // "STN1__Device2_ADV",
-            },
-            datasets = new[] {
-                new {
-                    label = "Work1",
-                    data = new [] {
-                        "2018-01-22T16:00:00.000Z",
-                        "2018-01-23T05:40:44.626Z",
-                        "Unknown"
-                    },
+            labels = flatSpans.Select(s => s.Item1).ToArray(),
+            datasets = flatSpans.Select(s =>
+            {
+                var spans = s.Item2;
+                return new
+                {
+                    label = s.Item1,
+                    data = spans.Select(span => new object[] { span.Start, span.End, s.Item1 }).ToArray(),
                     // backgroundColor = ClientK.Blue,
-                },
-                // new {
-                //     label = "데이터 변경",
-                //     data = changed,
-                //     backgroundColor = ClientK.Yellow,
-                // },
-                // new {
-                //     label = "데이터 백업실패",
-                //     data = failed,
-                //     backgroundColor = ClientK.Red,
-                // },
-            }
+                };
+            }).ToArray(),
         };
 
         // _backupOptions = CompChartJs.CreateStackedBarOptions(enableDataLabel: true);

@@ -5,6 +5,7 @@ using static Engine.Info.DBLoggerAnalysisDTOModule;
 using static Engine.Info.DBLoggerORM;
 using static Engine.Core.InfoPackageModule;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
+using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
 
 namespace DsWebApp.Server.Controllers;
 
@@ -57,6 +58,23 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
                 new { start1, end1 })).ToArray();
 
         var sysSpan = SystemSpanEx.CreateSpan(_model.System, logs);
+
+        return sysSpan;
+    }
+    // api/info/log-anal-info-flat
+    [HttpGet("log-anal-info-flat")]
+    public async Task<FlatSpans> GetLogAnalFlatInfo([FromQuery] DateTime? start, [FromQuery] DateTime? end)
+    {
+        DateTime start1 = start ?? DateTime.MinValue;
+        DateTime end1 = end ?? DateTime.MaxValue;
+
+        using var conn = global.CreateDbConnection();
+        var logs =
+            (await conn.QueryAsync<ORMVwLog>(
+                $"SELECT * FROM [{Vn.Log}] WHERE [at] BETWEEN @start1 AND @end1;",
+                new { start1, end1 })).ToArray();
+
+        var sysSpan = SystemSpanEx.CreateFlatSpan(_model.System, logs);
 
         return sysSpan;
     }

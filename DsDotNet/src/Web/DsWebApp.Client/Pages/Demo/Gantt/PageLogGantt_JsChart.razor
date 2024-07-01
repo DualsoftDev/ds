@@ -6,6 +6,72 @@
 <h3>PageLogGantt_JsChart</h3>
 
 
+
+<div id="chartTarget" style="height: 160px; width: 100%;">
+    <canvas id="chartCanvas" width="600" height="160" style="display: block; height: 160px; width: 600px;"></canvas>
+    <div style="opacity:0;" class="chartTooltip center">
+    </div>
+</div>
+<script>
+    var data = {
+        "type": "timeline",
+        "options": {
+            // Depricated and will be removed in future. Please use elements.* instead.
+            // "colorFunction": function(text, data, dataset, index) {
+            //     return Color('black');
+            // },
+            // "showText": true,
+            // "textPadding": 4
+            "elements": {
+                "colorFunction": function (text, data, dataset, index) {
+                    return Color('black');
+                },
+                "showText": true,
+                "textPadding": 4
+            }
+        },
+        "data": {
+            "labels": [
+                "Cool Graph",
+                "heater1"
+            ],
+            "datasets": [
+                {
+                    "data": [
+                        [
+                            "2018-01-01T00:00:00.000",
+                            "2018-01-01T00:00:00.199",
+                            "Unknown"
+                        ]
+                    ]
+                },
+                {
+                    "data": [
+                        [
+                            "2018-01-01T00:00:00.003",
+                            "2018-01-01T00:00:00.010",
+                            "On"
+                        ],
+                        [
+                            "2018-01-01T00:00:00.015",
+                            "2018-01-01T00:00:00.023",
+                            "Off"
+                        ],
+                        [
+                            "2018-01-01T00:00:00.027",
+                            "2018-01-01T00:00:00.040",
+                            "On"
+                        ]
+                    ]
+                }
+            ]
+        },
+    };
+    var chart = new Chart($('#chartCanvas')[0], data);
+</script>
+
+
+@* 
 @if (_backupData == null)
 {
     <LoadingSpinner />
@@ -60,7 +126,28 @@ else
         };
 
         // _backupOptions = CompChartJs.CreateStackedBarOptions(enableDataLabel: true);
-        _backupOptions = CompChartJs.CreateStackedBarOptions(enableDataLabel: false);
+        _backupOptions = CreateTimelineOptions(enableDataLabel: false);
 
     }
+
+    static object CreateTimelineOptions(bool enableDataLabel, bool maintainAspectRatio = false)
+    {
+        return new
+        {
+            enableDataLabel = enableDataLabel,
+            maintainAspectRatio = maintainAspectRatio,
+            tooltips = new
+            {
+                displayColors = true,
+                callbacks = new { mode = "x", },
+            },
+            scales = new
+            {
+                x = new { stacked = true, },
+                y = new { stacked = true, },
+            },
+            responsive = true,
+        };
+    }
 }
+ *@

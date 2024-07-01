@@ -16,31 +16,19 @@
 }
 else
 {
-    <div style="height:300px;">
-        <canvas id=chartCanvas></canvas>
-        @*         <CompChartJs ChartType="timeline" CanvasId=@_chartCanvasId
-    Data="_backupData" Options="_backupOptions" />
-    *@
-    </div>
-
+    <canvas id=chartCanvas></canvas>
     <script>
         var options = {
-            // Depricated and will be removed in future. Please use elements.* instead.
-            // "colorFunction": function(text, data, dataset, index) {
-            //     return Color('black');
-            // },
-            // "showText": true,
-            // "textPadding": 4
-            "elements": {
-                "colorFunction": function (text, data, dataset, index) {
+            elements: {
+                colorFunction: function (text, data, dataset, index) {
                     return Color('black');
                 },
-                "showText": true,
-                "textPadding": 4
+                showText: true,
+                textPadding: 4
             },
-            "tooltips": {
-                "callbacks": {
-                    "label": function (item) {
+            tooltips: {
+                callbacks: {
+                    label: function (item) {
                         console.log(item);
                         let s = item.yLabel[0];
                         let e = item.yLabel[1];
@@ -53,13 +41,11 @@ else
         }
 
         var config = {
-            "type": "timeline",
-            "data": chartData,
-            "options": options
+            type: "timeline",
+            data: chartData,        // C# 에서 만든 data 객체
+            options: options
         }
-        @* var chart = new Chart(document.getElementById("@_chartCanvasId").getContext('2d'), config); *@
         var chart = new Chart($('#chartCanvas')[0], config);
-
     </script>
 }
 
@@ -67,7 +53,7 @@ else
 
 
 @code {
-    object _backupData, _backupOptions;
+    object _backupData;
     // string _chartCanvasId = "myBackupCanvas" + Guid.NewGuid().ToString();
     string _chartCanvasId = "chartCanvasId";
 
@@ -83,14 +69,16 @@ else
             labels = flatSpans.Select(s => s.Item1).ToArray(),
             datasets = flatSpans.Select(s =>
             {
-                var spans = s.Item2;
+                var (fqdn, spans) = s;
                 return new
                 {
-                    label = s.Item1,
-                    data = spans.Select(span => new object[] { span.Start, span.End, s.Item1 }).ToArray(),
+                    label = fqdn,
+                    data = spans.Select(span => new object[] { span.Start, span.End, fqdn }).ToArray(),
                 };
             }).ToArray(),
         };
+
+        // C# 객체 _backupData 를 자바스크립트 객체로 변환
         await JsDual.Eval($"window.chartData = {NewtonsoftJson.SerializeObject(_backupData)};");
     }
 }

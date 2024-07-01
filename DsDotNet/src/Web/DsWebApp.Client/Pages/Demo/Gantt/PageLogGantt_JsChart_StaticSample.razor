@@ -28,42 +28,85 @@
                 },
                 "showText": true,
                 "textPadding": 4
+            },
+            "tooltips": {
+                "callbacks": {
+                    "label": function (item) {
+                        console.log(item);
+                        let s = item.yLabel[0];
+                        let e = item.yLabel[1];
+                        let multilines = [`${typeof (s)}: ${s} ~ ${e}`];
+                        multilines.push(JSON.stringify(item));
+                        // return `ITEM: ${JSON.stringify(item)}`;
+                        // return `ITEM: ${typeof (s)}: ${s} ~ ${e}\r\n${JSON.stringify(item)}`;
+                        return multilines;
+                        return `${item.xLabel}${unit}`;
+                    }
+                }
             }
         },
         "data": {
-            "labels": [
-                "Cool Graph",
-                "heater1"
+            "labels": [ // x-labels
+                "HelloDS.STN1.Work1",
+                "STN1__Device1_ADV",
+                "STN1__Device2_ADV",
+                // "STN1__Device3_ADV",
+                // "STN1__Device4_ADV",
+                // "STN1__Device1_RET",
+                // "STN1__Device2_RET",
+                // "STN1__Device3_RET",
+                // "STN1__Device4_RET",
             ],
             "datasets": [
                 {
                     "data": [
                         [
-                            "2018-01-01T00:00:00.000",
-                            "2018-01-01T00:00:00.199",
-                            "Unknown"
+                            new Date(2018, 0, 1, 0, 0, 0, 1),
+                            new Date(2018, 0, 1, 0, 0, 0, 11),
+                            // "2018-01-01T00:00:00.000",
+                            // "2018-01-01T00:00:00.199",
+                            "Work1(0)",
+                            "HelloDS.STN1.Work1"
+                        ],
+                        [
+                            new Date(2018, 0, 1, 0, 0, 0, 12),
+                            new Date(2018, 0, 1, 0, 0, 0, 21),
+                            // "2018-01-01T00:00:00.000",
+                            // "2018-01-01T00:00:00.199",
+                            "Work1(1)",
+                            "HelloDS.STN1.Work1"
+                        ]
+
+                    ]
+                },
+                {
+                    "data": [
+                        [
+                            "2018-01-01T00:00:00.001",
+                            "2018-01-01T00:00:00.003",
+                            "Device1_ADV(0)"
+                        ],
+                        [
+                            "2018-01-01T00:00:00.012",
+                            "2018-01-01T00:00:00.015",
+                            "Device1_ADV(1)"
                         ]
                     ]
                 },
                 {
                     "data": [
                         [
-                            "2018-01-01T00:00:00.003",
-                            "2018-01-01T00:00:00.010",
-                            "On"
+                            "2018-01-01T00:00:00.004",
+                            "2018-01-01T00:00:00.005",
+                            "Device2_ADV(0)"
                         ],
                         [
-                            "2018-01-01T00:00:00.015",
-                            "2018-01-01T00:00:00.023",
-                            "Off"
-                        ],
-                        [
-                            "2018-01-01T00:00:00.027",
-                            "2018-01-01T00:00:00.040",
-                            "On"
+                            "2018-01-01T00:00:00.016",
+                            "2018-01-01T00:00:00.019",
+                            "Device2_ADV(1)"
                         ]
                     ]
-                }
+                },
             ]
         },
     };

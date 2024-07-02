@@ -1,8 +1,10 @@
 namespace Engine.Core
 open System
+open System.Threading
 open System.Reactive.Linq
 open System.Reactive.Disposables
 open Dual.Common.Core.FS
+open System.Runtime.InteropServices
 
 
 (*
@@ -10,6 +12,16 @@ open Dual.Common.Core.FS
  - Timer statement 는 expression 을 매 scan 마다 평가.  값이 변경되면(rising or falling) 해당 timer 에 반영
  - Timer 가 설정되고 나면, observable timer 에 의해서 counter 값이 하나씩 감소하고, 0 이 되면 target trigger
 *)
+
+module TimerModuleApi =
+
+    // DllImport 바인딩을 정적 멤버로 정의합니다.
+    [<DllImport("winmm.dll", SetLastError = true)>]
+    extern uint timeBeginPeriod(uint uPeriod)
+
+    [<DllImport("winmm.dll", SetLastError = true)>]
+    extern uint timeEndPeriod(uint uPeriod)
+   
 
 [<AutoOpen>]
 module rec TimerModule =
@@ -23,12 +35,11 @@ module rec TimerModule =
     /// Timer / Counter 의 number data type
     type CountUnitType = uint32
 
-    let [<Literal>] MinTickInterval = 20u    //<ms>
-
-    /// 20ms timer: 최소 주기.  Windows 상에서의 더 짧은 주기는 시스템에 무리가 있음!!!!
-    let the20msTimer = Observable.Timer(TimeSpan.FromSeconds(0.0), TimeSpan.FromMilliseconds(int MinTickInterval))//.Timestamp()
-    let the100msTimer = the20msTimer.Where(fun x -> x % 5L = 0)
-    let the1secTimer = the20msTimer.Where(fun x -> x % 50L = 0)
+    let [<Literal>] MinTickInterval = 10u    //<ms>
+    let [<Literal>] TimerResolution  = 1u    //<ms> windows timer resolution (1~ 1000000)
+    
+    /// 10ms timer: 최소 주기.  Windows 상에서의 더 짧은 주기는 시스템에 무리가 있음!!!!
+    let theMinTickTimer = Observable.Timer(TimeSpan.FromSeconds(0.0), TimeSpan.FromMilliseconds(int MinTickInterval))//.Timestamp()
 
     type TimerType = TON | TOF | TMR        // AB 에서 TMR 은 RTO 에 해당
 
@@ -69,13 +80,18 @@ module rec TimerModule =
             | TOF -> accumulateTOF()
             | TMR -> accumulateRTO()
 
+        let timerCallback (_: obj) = accumulate() 
+
         let disposables = new CompositeDisposable()
 
         do
             ts.ResetStruct()
 
-            //debugfn "Timer subscribing to tick event"
-            the20msTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
+            debugfn "Timer subscribing to tick event"
+            //theMinTickTimer.Subscribe(fun _ -> accumulate()) |> disposables.Add
+
+            TimerModuleApi.timeBeginPeriod(TimerResolution) |> ignore
+            new Timer(TimerCallback(timerCallback), null, TimeSpan.Zero, TimeSpan.FromMilliseconds(float MinTickInterval)) |> disposables.Add
 
             CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (timerStruct:>IStorage).DsSystem)
                 .Where(fun (_system, storage, _newValue) -> storage = timerStruct.EN)
@@ -122,6 +138,8 @@ module rec TimerModule =
 
         interface IDisposable with
             member this.Dispose() =
+                TimerModuleApi.timeEndPeriod(TimerResolution) |> ignore
+                
                 for d in disposables do
                     d.Dispose()
                 disposables.Clear()

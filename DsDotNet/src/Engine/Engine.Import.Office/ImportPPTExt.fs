@@ -721,7 +721,7 @@ module ImportU =
                 match mySys.TryFindRealVertex(prop.FQDN.[0], prop.FQDN.[1]) with
                 | Some real ->
                     match prop.Type with
-                    | "Action" -> real.DsTime.Path3D <- Some prop.Value
+                    | "Motion" -> real.DsTime.Motion <- Some prop.Value
                     | "Script" -> real.DsTime.Script <- Some prop.Value
                     | _ -> failwithf "Error: %s Type not found" prop.Type
                 | None -> 

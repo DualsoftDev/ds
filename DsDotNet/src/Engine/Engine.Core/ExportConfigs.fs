@@ -57,14 +57,14 @@ module ExportConfigsMoudle =
         sys.GetVerticesHasJob()
            |> Seq.iter(fun v -> 
                v.TargetJob.DeviceDefs
-               |> Seq.filter(fun dev -> dev.ApiItem.TX.Path3D.IsSome)
+               |> Seq.filter(fun dev -> dev.ApiItem.TX.Motion.IsSome)
                |> Seq.iter(fun dev ->
 
                     let dataSync = 
                         {
                             Id = ifs.Count+1
                             Work = dev.ApiItem.TX.Name
-                            WorkInfo = dev.ApiItem.TX.Path3D.Value
+                            WorkInfo = dev.ApiItem.TX.Motion.Value
                             ScriptStartTag = dev.ApiItem.TX.ScriptStartTag.Address
                             ScriptEndTag = dev.ApiItem.TX.ScriptEndTag.Address
                             MotionStartTag = dev.ApiItem.TX.MotionStartTag.Address

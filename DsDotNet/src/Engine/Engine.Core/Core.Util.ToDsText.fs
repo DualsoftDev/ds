@@ -402,7 +402,7 @@ module internal ToDsTextModule =
             let reals = system.GetRealVertices()
             let finishedReals = reals.Filter(fun f->f.Finished)
             let noTransDataReals =  reals.Filter(fun f->f.NoTransData)
-            let path3DReals = reals.Where(fun f->f.Path3D.IsSome)
+            let motionReals = reals.Where(fun f->f.Motion.IsSome)
             let scriptReals = reals.Where(fun f->f.Script.IsSome)
             let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome || f.DsTime.TON.IsSome)
             let times = 
@@ -418,12 +418,12 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let path3Ds = 
+            let motions = 
                 [
-                    if path3DReals.Any() then
-                        yield $"{tab2}[actions] = {lb}"
-                        for real in path3DReals do
-                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{real.Path3D.Value}{rb};"
+                    if motionReals.Any() then
+                        yield $"{tab2}[motions] = {lb}"
+                        for real in motionReals do
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{real.Motion.Value}{rb};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -477,14 +477,14 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let props = safeties@autoPres@layouts@path3Ds@scripts@times@finished@disabled@noTransData
+            let props = safeties@autoPres@layouts@motions@scripts@times@finished@disabled@noTransData
             if props.Any() then
                 yield $"{tab}[prop] = {lb}"
                 if safeties.Any()  then yield safeties
                 if autoPres.Any()  then yield autoPres
                 if layouts.Any()   then yield layouts
 
-                if path3Ds.Any()  then yield path3Ds
+                if motions.Any()  then yield motions
                 if scripts.Any()  then yield scripts
                 if times.Any()  then yield times
                 if finished.Any()  then yield finished

@@ -221,9 +221,9 @@ module CoreExtensionModule =
         member x.TimeAvg = x.DsTime.AVG 
         member x.TimeAvgMsec = Convert.ToUInt32( x.DsTime.AVG.Value*1000.0 )
         member x.TimeStd = x.DsTime.STD
-        member x.Path3D = x.DsTime.Path3D 
+        member x.Motion = x.DsTime.Motion 
         member x.Script = x.DsTime.Script
-        member x.NoneAction = x.Path3D.IsNone &&  x.Script.IsNone 
+        member x.NoneAction = x.Motion.IsNone &&  x.Script.IsNone 
 
         member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  
 

@@ -18,11 +18,12 @@ type VertexMReal with
         let real = v.Vertex :?> Real
         [   
             let set = 
-                let endExpr = 
-                    v.GG.Expr <&&> real.CoinETContacts.ToAndElseOn() 
-                              <&&> if v.Real.Script.IsSome then v.ScriptEnd.Expr else v._on.Expr
-                              <&&> if v.Real.TimeAvg.IsSome then v.TimeEnd.Expr  else v._on.Expr
-                              <&&> if v.Real.Path3D.IsSome then v.MotionEnd.Expr else v._on.Expr
+                let endExpr =  
+                    v.GG.Expr
+                    <&&> real.CoinETContacts.ToAndElseOn() 
+                    <&&> if v.Real.Script.IsSome then v.ScriptEnd.Expr else v._on.Expr
+                    <&&> if v.Real.TimeAvg.IsSome then v.TimeEnd.Expr  else v._on.Expr
+                    <&&> if v.Real.Motion.IsSome then v.MotionEnd.Expr else v._on.Expr
 
 
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
@@ -119,7 +120,7 @@ type VertexMReal with
 
     member v.R11_RealGoingMotion(): CommentedStatement  list =
         [
-            if v.Real.Path3D.IsSome then
+            if v.Real.Motion.IsSome then
                 yield (v.G.Expr,  v.MotionEnd.Expr) --| (v.MotionStart, getFuncName())
 
                 if RuntimeDS.Package.IsPackageSIM() 

@@ -10,7 +10,7 @@ module TimeElements =
         member val STD: float option = None with get, set //  Standard Deviation  sec
         member val TON: float option = None with get, set //  On Delay sec (default 0)
         member val Script:string option = None with get, set //EXTERNAL SCRIPT
-        member val Path3D:string option = None with get, set //3D PATH
+        member val Motion:string option = None with get, set //3D PATH
 
     type TimeParam = {
         Average: float

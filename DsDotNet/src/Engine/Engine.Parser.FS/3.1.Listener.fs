@@ -775,11 +775,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 if t.Std.IsSome     then real.DsTime.STD <- Some(t.Std.Value|>float)
                 if t.OnDelay.IsSome then real.DsTime.TON <- Some(t.OnDelay.Value|>float)
 
-        let fillActions (system: DsSystem) (listActionCtx: List<dsParser.ActionsBlockContext> ) =
-            let fqdnPath = getActions listActionCtx
+        let fillActions (system: DsSystem) (listMotionCtx: List<dsParser.MotionBlockContext> ) =
+            let fqdnPath = getMotions listMotionCtx
             for fqdn, path in fqdnPath do
                 let real = (tryFindSystemInner system fqdn).Value :?> Real
-                real.DsTime.Path3D <- path|>Some
+                real.DsTime.Motion <- path|>Some
 
         let fillScripts (system: DsSystem) (listScriptCtx: List<dsParser.ScriptsBlockContext>) =
             let fqdnPath = getScripts listScriptCtx
@@ -795,8 +795,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             ctx.Descendants<FinishBlockContext>().ToList() |> fillFinished theSystem
             //Real에 noTransData 채우기
             ctx.Descendants<NotransBlockContext>().ToList() |> fillNoTrans theSystem
-            //Real에 actionsBlock 채우기
-            ctx.Descendants<ActionsBlockContext>().ToList() |> fillActions theSystem
+            //Real에 MotionBlock 채우기
+            ctx.Descendants<MotionBlockContext>().ToList() |> fillActions theSystem
             //Real에 scripts 채우기
             ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts theSystem
             //Real에 times 채우기

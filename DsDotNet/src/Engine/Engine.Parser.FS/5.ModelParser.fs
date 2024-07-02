@@ -57,8 +57,8 @@ module ModelParser =
         parser.Reset()
         seq{
             for ctx in sysctx.Descendants<PropsBlockContext>() do
-                let actions = ctx.Descendants<ActionsBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getActions 
-                yield! actions.Select(fun (fqdn, value)-> {Type = "Action"; FQDN = fqdn; Value = value})
+                let actions = ctx.Descendants<MotionBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getMotions 
+                yield! actions.Select(fun (fqdn, value)-> {Type = "Motion"; FQDN = fqdn; Value = value})
 
             for ctx in sysctx.Descendants<PropsBlockContext>() do
                 let scripts = ctx.Descendants<ScriptsBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getScripts 

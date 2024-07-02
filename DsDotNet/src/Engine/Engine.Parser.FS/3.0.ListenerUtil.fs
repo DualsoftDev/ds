@@ -100,14 +100,14 @@ module ListnerCommonFunctionGeneratorUtil =
         }
 
 
-    let getActions  (listActionCtx: List<dsParser.ActionsBlockContext>) =
+    let getMotions  (listMotionCtx: List<dsParser.MotionBlockContext>) =
                 seq {
-                    for ctx in listActionCtx do
-                    let list = ctx.Descendants<ActionDefContext>().ToList()
+                    for ctx in listMotionCtx do
+                    let list = ctx.Descendants<MotionDefContext>().ToList()
                     for defs in list do
-                        let v = defs.TryFindFirstChild<ActionKeyContext>() |> Option.get
+                        let v = defs.TryFindFirstChild<MotionKeyContext>() |> Option.get
                         let fqdn = collectNameComponents v |> List.ofArray
-                        let path = defs.TryFindFirstChild<ActionParamsContext>() |> Option.get
+                        let path = defs.TryFindFirstChild<MotionParamsContext>() |> Option.get
                         yield fqdn, path.GetText()
                 }
     let getScripts (listScriptsCtx: List<dsParser.ScriptsBlockContext>) =

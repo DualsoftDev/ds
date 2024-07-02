@@ -227,7 +227,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
             F.WorkA = {M:1000, S:200, D:30}; // average, std, onDelay msec
             F.WorkB = {M:1000, S:200, D:30}; // average, std, onDelay msec
         }
-        [actions] = {
+        [motions] = {
             F.WorkA  = {./Assets/dsLib/Cylinder/Robot.fbx:Load};
             F.WorkB  = {./Assets/dsLib/Cylinder/Robot.obj:Unload};
             F.WorkC  = {./Assets/dsLib/Cylinder/Robot.obj:Home};
@@ -241,7 +241,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
     }
 
  */
-propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|actionsBlock|scriptsBlock)* '}';
+propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|motionBlock|scriptsBlock)* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';    
         safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
             // Real|Call = { ((Real|Call);)* }
@@ -270,10 +270,10 @@ propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishB
         disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;
 
   
-    actionsBlock: '[' 'actions' ']' '=' '{' (actionDef)* '}';
-    actionDef: actionKey '=' '{' actionParams '}' SEMICOLON;
-    actionKey: identifier23;
-    actionParams: content;
+    motionBlock: '[' 'motions' ']' '=' '{' (motionDef)* '}';
+    motionDef: motionKey '=' '{' motionParams '}' SEMICOLON;
+    motionKey: identifier23;
+    motionParams: content;
 
     scriptsBlock: '[' 'scripts' ']' '=' '{' (scriptDef)* '}';
     scriptDef: scriptKey '=' '{' scriptParams '}' SEMICOLON;

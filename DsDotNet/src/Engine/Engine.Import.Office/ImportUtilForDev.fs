@@ -10,6 +10,7 @@ open Dual.Common.Core.FS
 open Engine.Parser.FS
 open System.Reflection
 open LibraryLoaderModule
+open System
 
 [<AutoOpen>]
 module ImportUtilForDev =
@@ -56,15 +57,19 @@ module ImportUtilForDev =
 
 
     let getNewDevice (mySys:DsSystem) loadedName apiName =
+        
         let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
+        let runDir  = if Path.Exists (Path.Combine(runDir, "dsLib"))
+                        then runDir
+                        else @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/"      
+                     
         let curDir = currentFileName  |> Path.GetDirectoryName
 
-        let libraryConfigFileName = "Library.config"
-        let libConfigPath = Path.Combine(runDir, "dsLib", libraryConfigFileName)
+        let libConfigPath = Path.Combine(runDir, "dsLib", "Library.config")
 
         let libPath  = if Path.Exists libConfigPath      
                        then libConfigPath
-                       else Path.Combine(curDir, "dsLib", libraryConfigFileName)
+                       else failWithLog $"{libConfigPath}Library.config file not found"
 
 
         let libConfig = LoadLibraryConfig(libPath)
@@ -78,8 +83,12 @@ module ImportUtilForDev =
                 if not (Directory.Exists curLibDir) then
                     Directory.CreateDirectory curLibDir |> ignore
 
-                let sourcePath = Path.Combine(runDir, libPath)
-                File.Copy(sourcePath, libAbsolutePath, true)
+                let sourcePath = PathManager.combineFullPathFile([|runDir; libPath|])
+                let libAbsolutePath = PathManager.combineFullPathFile([|libAbsolutePath|])
+                if sourcePath <> libAbsolutePath
+                then 
+                    File.Copy(sourcePath, libAbsolutePath, true)
+
                 Copylibrary.Add libAbsolutePath |> ignore   
 
             libAbsolutePath, None

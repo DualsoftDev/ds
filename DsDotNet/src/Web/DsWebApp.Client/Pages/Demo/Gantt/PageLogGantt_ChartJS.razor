@@ -17,6 +17,10 @@
 else
 {
     <canvas id=chartCanvas></canvas>
+    <button id="reset_zoom">Reset zoom</button>
+    <button id="disable_zoom">Disable zoom</button>
+    <button id="enable_zoom">Enable zoom</button>
+
     <script>
         var options = {
             elements: {
@@ -37,7 +41,20 @@ else
                         return multilines;
                     }
                 }
-            }
+            },
+            plugins: {
+                zoom: {
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'xy',
+                    }
+                }
+            },
         }
 
         var config = {
@@ -45,7 +62,22 @@ else
             data: chartData,        // C# 에서 만든 data 객체
             options: options
         }
-        var chart = new Chart($('#chartCanvas')[0], config);
+        var chart = new Chart($('#chartCanvas')[0], config); 
+        
+
+        $('#reset_zoom').click(function(){
+            chart.resetZoom();
+            console.log(chart);
+        });
+
+        $('#disable_zoom').click(function(){
+            chart.ctx.canvas.removeEventListener('wheel', chart._wheelHandler);
+        });
+
+        $('#enable_zoom').click(function(){
+            chart.ctx.canvas.addEventListener('wheel', chart._wheelHandler);
+        });
+        @* Chart.register(zoomPlugin); *@
     </script>
 }
 
@@ -62,7 +94,7 @@ else
         await base.OnInitializedAsync();
         var flatSpans = await Http.GetFromJsonAsync<FlatSpans>("api/info/log-anal-info-flat");
 
-        await JsDual.Eval(CompChartJs.ClickHandlerSnippet);
+        // await JsDual.Eval(CompChartJs.ClickHandlerSnippet);
 
         _backupData = new
         {

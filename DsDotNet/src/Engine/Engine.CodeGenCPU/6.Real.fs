@@ -104,7 +104,7 @@ type VertexMReal with
     member v.R10_RealGoingTime(): CommentedStatement  list =
         [
             if v.Real.TimeAvg.IsSome then
-                yield (v.G.Expr,  v._off.Expr) --| (v.TimeStart, getFuncName())
+                yield (v.G.Expr,  v.TimeEnd.Expr) --| (v.TimeStart, getFuncName())
                 
                 if RuntimeDS.Package.IsPackageSIM() 
                 then
@@ -120,7 +120,7 @@ type VertexMReal with
     member v.R11_RealGoingMotion(): CommentedStatement  list =
         [
             if v.Real.Path3D.IsSome then
-                yield (v.G.Expr,  v._off.Expr) --| (v.MotionStart, getFuncName())
+                yield (v.G.Expr,  v.MotionEnd.Expr) --| (v.MotionStart, getFuncName())
 
                 if RuntimeDS.Package.IsPackageSIM() 
                 then
@@ -150,5 +150,5 @@ type VertexMReal with
     member v.R12_RealGoingScript(): CommentedStatement  list =
         [
             if v.Real.Script.IsSome then
-                yield (v.G.Expr,  v._off.Expr) --| (v.ScriptStart, getFuncName())  
+                yield (v.G.Expr,  v.ScriptEnd.Expr) --| (v.ScriptStart, getFuncName())  
         ]

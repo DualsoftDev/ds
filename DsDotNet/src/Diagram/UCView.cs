@@ -104,7 +104,6 @@ public partial class UcView : UserControl
 
 
         nNode.Label.FontColor = Color.White;
-        nNode.Attr.Color = Color.Black;
         nNode.Label.FontSize = nnode_label_fontsize;
     }
 
@@ -472,12 +471,11 @@ public partial class UcView : UserControl
         UpdateFillColor(dataExist, node, Color.DarkBlue);
         if (vRefresh) RefreshGraph();
     }
-    public void UpdatePlanEndValue(ViewNode viewNode, object item2, bool vRefresh = false)
+    public void UpdatePlanEndValue(ViewNode viewNode, bool item2, bool vRefresh = true)
     {
         Node node = findNode(viewNode);
         if (node == null) return;
-        bool dataExist = Convert.ToDouble(item2) != 0;
-        UpdateFillColor(dataExist, node, Color.CornflowerBlue);
+        UpdateFillColor(item2, node, Color.CornflowerBlue);
 
         if (vRefresh) RefreshGraph();
     }
@@ -502,7 +500,7 @@ public partial class UcView : UserControl
         if (vRefresh) RefreshGraph();
     }
 
-    public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh = true)
+    public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh)
     {
         UpdateStatus(viewNode, vRefresh);
         UpdatePlanEndValue(viewNode, vv.LampPlanEnd, vRefresh);
@@ -511,6 +509,8 @@ public partial class UcView : UserControl
         UpdateInValue(viewNode, vv.LampInput, vRefresh);
         UpdateOutValue(viewNode, vv.LampOutput, vRefresh);
         UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
+
+        RefreshGraph();
     }
 
 
@@ -571,12 +571,15 @@ public partial class UcView : UserControl
         {
             node.Attr.FillColor = Color.DimGray;
         }
+
     }
 
 
     private void UpdateFillColor(bool dataExist, Node node, Color color)
     {
-        node.Attr.Color = dataExist ? color : Color.Black;
+        node.Attr.Color = dataExist 
+            ? color 
+            : Color.Black;
     }
 
     private void UpdateLineWidth(bool dataExist, Node node)

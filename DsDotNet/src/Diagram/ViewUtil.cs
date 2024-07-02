@@ -277,13 +277,10 @@ namespace Diagram.View.MSAGL
                     {
                         case (int)ApiItemTag.planEnd:
                             {
-                                var off = tags
-                                    .Select(s => Convert.ToUInt64(s.Value)).Any(w => w == 0);
-                                n.LampPlanEnd = !off;
-                                ucView.Do(() =>
-                                {
-                                    ucView?.UpdatePlanEndValue(node, !off);
-                                });
+                                var on = tags.All(s => Convert.ToBoolean(s.Value));
+                                n.LampPlanEnd = on;
+                                ucView.UpdatePlanEndValue(node, on);
+                               
                                 break;
                             }
                     }

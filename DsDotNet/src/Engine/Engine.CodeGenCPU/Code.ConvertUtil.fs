@@ -4,6 +4,7 @@ open System.Linq
 open System.Runtime.CompilerServices
 open Engine.Core
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module CodeConvertUtil =
@@ -37,6 +38,12 @@ module CodeConvertUtil =
         //리셋 원인
         [<Extension>]
         static member GetResetCausals(xs:Vertex seq) =
+
+                if xs.Where(fun f -> f.GetPure() :? Real).Count() > 1
+                then 
+                    let error = String.Join(", ", (xs.Select(fun f->f.Name)))
+                    failwithlog $"리셋은 하나의 작업에서 가능합니다. \r\n(복수 작업 : {error})"
+
                 xs.Select(fun f ->
                     match getPure f with
                     | :? Real    as r  -> r.V.GP

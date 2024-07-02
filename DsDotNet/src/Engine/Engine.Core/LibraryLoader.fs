@@ -1,4 +1,4 @@
-﻿namespace rec Engine.Core
+namespace rec Engine.Core
 
 open System.IO
 open Newtonsoft.Json

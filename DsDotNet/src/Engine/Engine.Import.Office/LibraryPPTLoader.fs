@@ -45,7 +45,7 @@ type LibraryPPTLoaderExt =
     [<Extension>] 
         static member getLibraryConfig(path:string) = LoadLibraryConfig(path)
 
-     [<Extension>]  
+    [<Extension>]  
         static member getLibraryPath(libraryConfig:LibraryConfig, apiName:string) = 
                 if libraryConfig.LibraryInfos.ContainsKey(apiName)
                 then libraryConfig.LibraryInfos[apiName]

@@ -46,9 +46,7 @@ type VertexManager with
                 yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, getFuncName())
                 yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
 
-            elif RuntimeDS.Package.IsPCorPCSIM() then //Rising 수식 항상 우선 연산하게 Rung 구성
-                //yield (input                            , v.ErrShortRising.Expr) --| (v.ErrShortRising, getFuncName()) //test ahn
-                //yield (input                             , v.ErrOpenRising.Expr) --| (v.ErrOpenRising,  getFuncName())
+            elif RuntimeDS.Package.IsPCorPCSIM() then 
 
                 yield (input                            , v._off.Expr) --| (v.ErrShortRising, getFuncName())
                 yield (input                             , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())

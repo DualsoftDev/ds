@@ -164,7 +164,7 @@ C4 > C5;
     }
 
     [flow] F = {        // GVT.Flow
-        C1, C2 > C3, C4 |> C5;
+        C1, C2 > C3 > C4 |> C5;
 C3 > C5 > C6;
 C4 > C5;
         Main        // GVT.{ Segment | Parenting }

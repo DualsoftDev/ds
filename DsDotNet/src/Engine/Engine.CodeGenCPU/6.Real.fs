@@ -21,9 +21,9 @@ type VertexMReal with
                 let endExpr =  
                     v.GG.Expr
                     <&&> real.CoinETContacts.ToAndElseOn() 
-                    <&&> if v.Real.Script.IsSome then v.ScriptEnd.Expr else v._on.Expr
-                    <&&> if v.Real.TimeAvg.IsSome then v.TimeEnd.Expr  else v._on.Expr
-                    <&&> if v.Real.Motion.IsSome then v.MotionEnd.Expr else v._on.Expr
+                    <&&> if v.Real.Script.IsSome then !@v.ScriptStart.Expr <&&> v.ScriptEnd.Expr else v._on.Expr
+                    <&&> if v.Real.TimeAvg.IsSome then  !@v.TimeStart.Expr <&&> v.TimeEnd.Expr   else v._on.Expr
+                    <&&> if v.Real.Motion.IsSome then !@v.MotionStart.Expr <&&> v.MotionEnd.Expr else v._on.Expr
 
 
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())

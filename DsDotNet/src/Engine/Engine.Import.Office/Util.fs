@@ -3,6 +3,7 @@ namespace Engine.Import.Office
 open System.Collections.Concurrent
 open System
 open Engine.Core
+open System.Collections.Generic
 
 [<AutoOpen>]
 module Util =
@@ -20,6 +21,7 @@ module Util =
     let mutable currentFileName = ""
     let mutable runtimeTarget = WINDOWS
 
+    let Copylibrary = HashSet<string>() //Copylibrary 저장
 
 
     let GetTailNumber (name: string) =

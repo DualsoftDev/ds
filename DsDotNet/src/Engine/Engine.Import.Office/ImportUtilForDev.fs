@@ -74,12 +74,13 @@ module ImportUtilForDev =
                 
             let libAbsolutePath = Path.Combine(curDir, libPath)
             let curLibDir = Path.GetDirectoryName libAbsolutePath
-            //if not (File.Exists libAbsolutePath) then  //시스템 라이브러리는 무조건 덮어쓰기
-            if not (Directory.Exists curLibDir) then
-                Directory.CreateDirectory curLibDir |> ignore
+            if not (Copylibrary.Contains(libAbsolutePath)) then  //시스템 라이브러리는 한번 덮어쓰기
+                if not (Directory.Exists curLibDir) then
+                    Directory.CreateDirectory curLibDir |> ignore
 
-            let sourcePath = Path.Combine(runDir, libPath)
-            File.Copy(sourcePath, libAbsolutePath, true)
+                let sourcePath = Path.Combine(runDir, libPath)
+                File.Copy(sourcePath, libAbsolutePath, true)
+                Copylibrary.Add libAbsolutePath |> ignore   
 
             libAbsolutePath, None
         else 

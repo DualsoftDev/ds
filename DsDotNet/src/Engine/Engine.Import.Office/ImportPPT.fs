@@ -204,6 +204,7 @@ module ImportPPTModule =
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 
     let private loadingfromPPTs (path: string ) isLib (pptParams:PPTParams)=
+        Copylibrary.Clear()
         try
             try
                 let cfg = { DsFilePath = path

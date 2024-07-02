@@ -57,7 +57,7 @@ module PPTNodeModule =
                     shape.ErrorName(ErrID._19, iPage)
                 else
                     let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
-                    let copys = copyRows.Select(fun sys -> $"{pageTitle}_{sys}")
+                    let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextFlowSplit}{sys}")
 
                     if copys.Distinct().length() <> copys.length() then
                         Office.ErrorName(shape, ErrID._33, iPage)

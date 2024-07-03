@@ -39,19 +39,19 @@ module ExportConfigsMoudle =
 
     let private jsonSettings = JsonSerializerSettings()
 
-    let LoadInterfaceConfig (path: string) =
+    let loadInterfaceConfig (path: string) =
         let json = File.ReadAllText(path)
         JsonConvert.DeserializeObject<InterfaceConfig>(json, jsonSettings)
 
-    let SaveInterfaceConfig (path: string) (interfaceConfig:InterfaceConfig) =
+    let saveInterfaceConfig (path: string) (interfaceConfig:InterfaceConfig) =
         let json = JsonConvert.SerializeObject(interfaceConfig, Formatting.Indented, jsonSettings)
         File.WriteAllText(path, json)
 
-    let SaveInterfaceSimpleConfig (path: string) (interfaceSimpleConfig:InterfaceSimpleConfig) =
+    let saveInterfaceSimpleConfig (path: string) (interfaceSimpleConfig:InterfaceSimpleConfig) =
         let json = JsonConvert.SerializeObject(interfaceSimpleConfig, Formatting.Indented, jsonSettings)
         File.WriteAllText(path, json)
 
-    let GetDsInterfaces (sys: DsSystem) =
+    let getDsInterfaces (sys: DsSystem) =
         let ifs = HashSet<DsInterface>()
 
         sys.GetVerticesHasJob()
@@ -91,14 +91,16 @@ type ExportConfigsExt =
 
     [<Extension>] 
     static member ExportDSInterface (sys:DsSystem, exportPath:string) =
-        let dsInterfaces = GetDsInterfaces(sys)
+        let dsInterfaces = getDsInterfaces(sys)
         let interfaceConfig = {SystemName = sys.Name; DsInterfaces = dsInterfaces}
-        SaveInterfaceConfig exportPath interfaceConfig
+        saveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces = dsInterfaces
                                     .Select(fun f-> f.Id, f.Motion).ToArray() 
 
         let interfaceSimpleConifg = {MotionSync = dsSimpleInterfaces}
         let exportSimplePath =  PathManager.changeExtension (DsFile(exportPath)) "dsConfigMoiton"
-        SaveInterfaceSimpleConfig exportSimplePath interfaceSimpleConifg
+        saveInterfaceSimpleConfig exportSimplePath interfaceSimpleConifg
 
+    [<Extension>] 
+    static member LoadInterfaceConfig (path:string) = loadInterfaceConfig path

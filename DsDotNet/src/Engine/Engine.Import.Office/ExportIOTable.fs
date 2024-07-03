@@ -399,13 +399,13 @@ module ExportIOTable =
         dt.Columns.Add($"{TextColumn.Bold}", typeof<string>) |> ignore
         dt
 
-    let rowDeviceItems (dev: string) (isAction:bool) =
+    let rowDeviceItems (dev: string) (isBlack:bool) =
             [ 
               dev
               ""
               ""
               ""
-              if isAction then "0" else "16777215"
+              if isBlack then "0" else "16777215"
               "Off"
               "Off"
               "Off"
@@ -417,7 +417,16 @@ module ExportIOTable =
 
         let rows =
             let devs =  sys.GetDevicesForHMI()
-            devs.Select(fun (dev, _)-> rowDeviceItems dev.ApiItem.Name true)
+            devs.Select(fun (dev, _)-> 
+                let text = 
+                    if dev.OutAddress = TextSkip then
+                        "·" 
+                    else
+                        "□" 
+
+                rowDeviceItems text true
+
+                )
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -432,7 +441,7 @@ module ExportIOTable =
       
         let rows =
             sys.GetFlowsOrderByName()
-                .Select(fun flow -> rowDeviceItems flow.Name false)
+                .Select(fun flow -> rowDeviceItems flow.Name true)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -447,7 +456,7 @@ module ExportIOTable =
       
         let rows =
                   sys.GetVerticesOfRealOrderByName()
-                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}" false)
+                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}" true)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -462,7 +471,7 @@ module ExportIOTable =
       
         let rows =
             let devCallSet =  sys.GetDevicesForHMI()
-            devCallSet.Select(fun (dev,_)-> rowDeviceItems dev.DeviceName false)
+            devCallSet.Select(fun (dev,_)-> rowDeviceItems dev.ApiStgName true)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -564,9 +573,9 @@ module ExportIOTable =
                 [   
                     match iomType with
                     | IOType.Memory ->
-                        yield rowItems (dev, dev.MaunualActionAddress)
+                        yield rowItems (dev, if dev.MaunualActionAddress =  TextSkip then HMITempMemory else dev.MaunualActionAddress)
                     | IOType.In->
-                        yield rowItems (dev, dev.InAddress)
+                        yield rowItems (dev, if dev.InAddress =  TextSkip then HMITempMemory else dev.InAddress)
                     | IOType.Out ->                            
                         yield rowItems (dev, if dev.OutAddress =  TextSkip then HMITempMemory else dev.OutAddress)
 

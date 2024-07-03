@@ -208,11 +208,18 @@ module ConvertCpuDsSystem =
             x.GenerationCondition()
             
         member private x.GenerationCallManualMemory()  = 
-            let devCalls = x.GetDevicesCoin()   
+            let devCalls = x.GetDevicesCoin() 
             for (dev, call) in devCalls do
                 let cv =  call.TagManager :?> VertexMCall
-                cv.SF.Address    <- getMemory (cv.SF.Name) (getTarget(x))
-                dev.MaunualActionAddress  <- cv.SF.Address
+                if call.TargetJob.JobMulti = JobTypeMulti.Single 
+                    ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)   
+                then
+                    cv.SF.Address    <- getMemory (cv.SF.Name) (getTarget(x))
+                    dev.MaunualActionAddress  <- cv.SF.Address
+                else 
+                    dev.MaunualActionAddress  <- TextSkip  //다중 작업은 수동 작업을 사용하지 않는다.
+                    
+
 
         member x.GenerationMemory() =
             //Step1)Emulation base + 1 bit 

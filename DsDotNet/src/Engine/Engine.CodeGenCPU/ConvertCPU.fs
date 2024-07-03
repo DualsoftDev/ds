@@ -232,6 +232,9 @@ module ConvertCPU =
                 checkErrHWItem(sys)
                 checkErrApi(sys)
 
+            checkMultiDevPair(sys)
+
+
         else 
             checkErrRealResetExist(sys)
             updateRealParentExpr(sys)

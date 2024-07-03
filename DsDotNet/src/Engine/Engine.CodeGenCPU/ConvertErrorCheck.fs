@@ -64,6 +64,23 @@ module ConvertErrorCheck =
         if not(exEdges.any()) then
             failwithf $"PLC 시스템은 외부시작 신호가 없으면 시작 불가 입니다. HelloDS 모델을 참고하세요"
 
+
+    let checkMultiDevPair(sys: DsSystem) = 
+        let devicesCalls = 
+            sys.GetDevicesCall()
+               .Where(fun (_, call) -> call.TargetJob.JobMulti <> JobTypeMulti.Single)
+
+
+        let groupDev =
+               devicesCalls  |> Seq.groupBy (fun (dev, _) -> dev.DeviceName)
+    
+        for (_, calls) in groupDev  do
+            let jobMultis = calls |> Seq.map (fun (_, call) -> call.TargetJob.JobMulti.DeviceCount) |> Seq.distinct
+            if Seq.length jobMultis > 1 then
+                let callTexts = String.Join("\r\n", calls.Select(fun (_, call) -> call.Name))
+                failwithf $"동일 다비이스의 multi 수량은 같아야 합니다. \r\n{callTexts}"
+
+
     let checkErrRealResetExist (sys:DsSystem) =
         let errors = checkRealEdgeErrExist sys false
         if errors.Count > 0 then

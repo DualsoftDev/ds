@@ -20,8 +20,11 @@ type VertexManager with
             then shareds.Select(fun s -> s.Vertex.GetStartRootAndCausals()).ToOrElseOn()
             else v._off.Expr
 
-        let semiAuto = v.SF.Expr  <&&> v.Flow.d_st.Expr  
-        let sets = (startCausals <||> wsShareds <||>  plans <||> actionLinks <||> semiAuto)
+        let sets = (
+                    (startCausals <||> wsShareds  <||> v.SF.Expr) <&&> v.Flow.d_st.Expr  
+                    <||> plans 
+                    <||> actionLinks 
+                    )
                    <&&> real.SafetyExpr
 
         let rsts  = (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr

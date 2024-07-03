@@ -208,7 +208,7 @@ module ConvertCpuDsSystem =
             x.GenerationCondition()
             
         member private x.GenerationCallManualMemory()  = 
-            let devCalls = x.GetDevicesDisdict(true)   
+            let devCalls = x.GetDevicesCoin()   
             for (dev, call) in devCalls do
                 let cv =  call.TagManager :?> VertexMCall
                 cv.SF.Address    <- getMemory (cv.SF.Name) (getTarget(x))

@@ -170,12 +170,15 @@ module TagKindList =
     
     | scriptStart               = 11044
     | scriptEnd                 = 11045
+    | scriptRelay               = 11046
 
-    | motionStart               = 11046
-    | motionEnd                 = 11047
+    | motionStart               = 11047
+    | motionEnd                 = 11048
+    | motionRelay               = 11049
     
-    | timeStart                 = 11048
-    | timeEnd                   = 11049
+    | timeStart                 = 11050
+    | timeEnd                   = 11051
+    | timeRelay                 = 11052
 
     | txErrOnTimeShortage       = 11060
     | txErrOnTimeOver           = 11061

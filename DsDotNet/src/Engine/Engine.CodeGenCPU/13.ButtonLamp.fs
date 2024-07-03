@@ -57,7 +57,7 @@ type DsSystem with
                         let originActions = s.GetRealVertices().Select(getVMReal)
                                               .Select(fun r->r.OA).ToOrElseOff()
                         
-                        s._originMonitor.Expr <||> (originActions <&&> s._flicker200msec.Expr) 
+                        s._originMonitor.Expr <||> (originActions <&&> s._flicker1sec.Expr) 
                 
             let sets = if sysLamp.InTag.IsNull()
                        then modeBit  

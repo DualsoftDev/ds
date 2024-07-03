@@ -188,9 +188,15 @@ module TagManagerModule =
         let scriptStart    = createTag  true VertexTag.scriptStart
         let motionStart    = createTag  true VertexTag.motionStart
         let timeStart      = createTag  true VertexTag.timeStart
+        
         let scriptEnd      = createTag  true VertexTag.scriptEnd
         let motionEnd      = createTag  true VertexTag.motionEnd
         let timeEnd        = createTag  true VertexTag.timeEnd
+
+        let scriptRelay    = createTag  true VertexTag.scriptRelay
+        let motionRelay    = createTag  true VertexTag.motionRelay
+        let timeRelay      = createTag  true VertexTag.timeRelay
+
 
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
         //let realData  = 
@@ -247,6 +253,9 @@ module TagManagerModule =
         member _.MotionEnd    =  motionEnd
         member _.TimeEnd      =  timeEnd
 
+        member _.ScriptRelay    =  scriptRelay
+        member _.MotionRelay    =  motionRelay
+        member _.TimeRelay      =  timeRelay
 
     and VertexMCall(v:Vertex)as this =
         inherit VertexManager(v)

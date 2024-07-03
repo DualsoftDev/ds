@@ -21,9 +21,9 @@ type VertexMReal with
                 let endExpr =  
                     v.GG.Expr
                     <&&> real.CoinETContacts.ToAndElseOn() 
-                    <&&> if v.Real.Script.IsSome then !@v.ScriptStart.Expr <&&> v.ScriptEnd.Expr else v._on.Expr
-                    <&&> if v.Real.TimeAvg.IsSome then  !@v.TimeStart.Expr <&&> v.TimeEnd.Expr   else v._on.Expr
-                    <&&> if v.Real.Motion.IsSome then !@v.MotionStart.Expr <&&> v.MotionEnd.Expr else v._on.Expr
+                    <&&> if v.Real.Script.IsSome then   v.ScriptRelay.Expr else v._on.Expr
+                    <&&> if v.Real.TimeAvg.IsSome then  v.TimeRelay.Expr   else v._on.Expr
+                    <&&> if v.Real.Motion.IsSome then   v.MotionRelay.Expr else v._on.Expr
 
 
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
@@ -36,17 +36,12 @@ type VertexMReal with
                 if real.Graph.Vertices.any()
                 then v.RT.Expr <&&> real.CoinAlloffExpr  
                 else v.RT.Expr 
-                
 
-            //수식 순서 중요
-            // 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
-
+            //수식 순서 중요 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
             //1. EndTag 
             (set, rst) ==| (v.ET, getFuncName())              
             //2. 다른 Real Reset Tag Relay을 위한 1Scan 소비 (Scan에서 제어방식 바뀌면 H/S 필요)
             (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
-
-          
         ]
 
 
@@ -105,7 +100,8 @@ type VertexMReal with
     member v.R10_RealGoingTime(): CommentedStatement  list =
         [
             if v.Real.TimeAvg.IsSome then
-                yield (v.G.Expr,  v.TimeEnd.Expr) --| (v.TimeStart, getFuncName())
+                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr,  v.ET.Expr) ==| (v.TimeRelay, getFuncName())
+                yield (v.G.Expr,  v.TimeRelay.Expr) --| (v.TimeStart, getFuncName())
                 
                 if RuntimeDS.Package.IsPackageSIM() 
                 then
@@ -121,7 +117,8 @@ type VertexMReal with
     member v.R11_RealGoingMotion(): CommentedStatement  list =
         [
             if v.Real.Motion.IsSome then
-                yield (v.G.Expr,  v.MotionEnd.Expr) --| (v.MotionStart, getFuncName())
+                yield (v.MotionStart.Expr<&&>v.MotionEnd.Expr,  v.ET.Expr) ==| (v.MotionRelay, getFuncName())
+                yield (v.G.Expr,  v.MotionRelay.Expr) --| (v.MotionStart, getFuncName())
 
                 if RuntimeDS.Package.IsPackageSIM() 
                 then
@@ -151,5 +148,6 @@ type VertexMReal with
     member v.R12_RealGoingScript(): CommentedStatement  list =
         [
             if v.Real.Script.IsSome then
-                yield (v.G.Expr,  v.ScriptEnd.Expr) --| (v.ScriptStart, getFuncName())  
+                yield (v.ScriptStart.Expr<&&>v.ScriptEnd.Expr,  v.ET.Expr) ==| (v.ScriptRelay, getFuncName())
+                yield (v.G.Expr,  v.ScriptRelay.Expr) --| (v.ScriptStart, getFuncName())  
         ]

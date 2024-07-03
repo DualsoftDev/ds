@@ -416,7 +416,7 @@ module ExportIOTable =
         let dt = getLabelTable "액션이름"
 
         let rows =
-            let devs =  sys.GetDevicesHasOutput()
+            let devs =  sys.GetDevicesForHMI()
             devs.Select(fun (dev, _)-> rowDeviceItems dev.ApiItem.Name true)
 
         addRows rows dt
@@ -461,7 +461,7 @@ module ExportIOTable =
         let dt = getLabelTable "디바이스이름"
       
         let rows =
-            let devCallSet =  sys.GetDevicesHasOutput()
+            let devCallSet =  sys.GetDevicesForHMI()
             devCallSet.Select(fun (dev,_)-> rowDeviceItems dev.DeviceName false)
 
         addRows rows dt
@@ -558,7 +558,7 @@ module ExportIOTable =
                ]
 
         let rows =
-            let devs = sys.GetDevicesHasOutput()
+            let devs = sys.GetDevicesForHMI()
             devs
             |> Seq.collect (fun (dev,_) ->
                 [   
@@ -568,7 +568,7 @@ module ExportIOTable =
                     | IOType.In->
                         yield rowItems (dev, dev.InAddress)
                     | IOType.Out ->                            
-                        yield rowItems (dev, dev.OutAddress)
+                        yield rowItems (dev, if dev.OutAddress =  TextSkip then HMITempMemory else dev.OutAddress)
 
                     | _ -> failwith "Invalid action tag"
                 ]

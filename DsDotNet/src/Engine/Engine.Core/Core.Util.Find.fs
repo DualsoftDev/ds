@@ -209,6 +209,16 @@ module internal ModelFindModule =
                 if outSkip then dev.OutAddress <- TextSkip
             )
 
+    let  getDevicesDisdict(x: DsSystem, onlyCoin:bool) =
+        let calls = getVerticesHasJob(x).DistinctBy(fun v-> v.TargetJob)
+        let devs = calls
+                    .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
+                    .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
+        devs 
+        |> Seq.distinctBy (fun (dev,_) ->dev)
+        |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
+
+
     type DsSystem with
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
         member x.TryFindGraphVertex(Fqdn(fqdn))      = tryFindGraphVertex x fqdn
@@ -304,28 +314,21 @@ type FindExtension =
                           .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
 
 
+    [<Extension>] static member GetDevicesCoin(x:DsSystem) = getDevicesDisdict(x, true)
 
-    [<Extension>] static member GetDevicesDisdict(x:DsSystem, onlyCoin:bool) = 
-
-                    let calls = x.GetVerticesHasJob()
-                                 .DistinctBy(fun v-> v.TargetJob)
-                                    
-                    let devs = calls
-                                .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
-                                .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
-
-                    devs 
-                    |> Seq.distinctBy (fun (dev,_) ->dev)
-                    |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
-
+    [<Extension>] static member GetDevicesCall(x:DsSystem) = getDevicesDisdict(x, false)
+                  
     [<Extension>] static member GetDevicesHasOutput(x:DsSystem) = 
-                    x.GetDevicesDisdict(true) //출력있는건 무조건  Coin
+                    x.GetDevicesCoin() //출력있는건 무조건  Coin
                         .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
 
-    [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
-                    x.GetDevicesDisdict(false)
-                        .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
+    [<Extension>] static member GetDevicesForHMI(x:DsSystem) = 
+                    x.GetDevicesCoin()
+                        .Where(fun (dev, call) -> call.TargetJob.JobMulti <> Single || dev.OutAddress <> TextSkip)
 
+    [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
+                    x.GetDevicesCall()
+                        .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
 
     [<Extension>] static member GetTargetDevCoins(taskDev:TaskDev, coins:Vertex seq) = 
                         coins.Where(fun c-> 

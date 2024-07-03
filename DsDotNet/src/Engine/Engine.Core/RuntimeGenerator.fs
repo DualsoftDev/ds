@@ -82,6 +82,10 @@ module RuntimeGeneratorModule =
     let ExternalTempIECMemory =  "%MX"
     let ExternalTempNoIECMemory =  "M"
 
+
+    let HMITempMemory =  "%HX0"  //iec xgk 구분안함
+
+
     let getExternalTempMemory (target:PlatformTarget, index:int) =
         match target with
         | XGI -> ExternalTempIECMemory+index.ToString()

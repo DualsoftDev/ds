@@ -13,7 +13,7 @@ open Engine.Core
 module MSG_TEST = 
     
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
-    RegistryPPTDS.TimeSimutionMode <-  TimeSimutionMode.TimeX1.ToString();
+    RegistryPPTDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
 
 
     [<Fact>]

@@ -18,6 +18,31 @@ module RuntimeGeneratorModule =
         | MotionAsync
         | MotionSync
         
+    type TimeSimutionMode = 
+        | TimeNone
+        | TimeX0_1
+        | TimeX0_5
+        | TimeX1
+        | TimeX2
+        | TimeX4
+        | TimeX8
+        | TimeX16
+        | TimeMax
+
+    let TimeSimutionModeList = [ TimeNone; TimeX0_1;TimeX0_5; TimeX1 ; TimeX2; TimeX4; TimeX8; TimeX16; TimeMax;]
+    let ToTimeSimutionMode s =
+        match s with
+        | "TimeNone" -> TimeNone
+        | "TimeX0_1" -> TimeX0_1
+        | "TimeX0_5" -> TimeX0_5
+        | "TimeX1"  -> TimeX1
+        | "TimeX2"  -> TimeX2
+        | "TimeX4"  -> TimeX4
+        | "TimeX8"  -> TimeX8
+        | "TimeX16" -> TimeX16
+        | "TimeMax" -> TimeMax
+        |_-> failwithlogf $"Error ToTimeSimutionMode {s}"
+
     type RuntimePackage = 
         | PC 
         | PCSIM 
@@ -70,6 +95,7 @@ module RuntimeGeneratorModule =
         static let packageChangedSubject = new Subject<RuntimePackage>()
         static let mutable dsSystem: ISystem option = None
         static let mutable runtimeMotionMode = RuntimeMotionMode.MotionSync
+        static let mutable timeSimutionMode = TimeSimutionMode.TimeX1
         static let mutable callTimeout = 15000u
         static let mutable emulationAddress = ""
 
@@ -79,7 +105,8 @@ module RuntimeGeneratorModule =
         static member val TimeoutCall = callTimeout  with get, set
         static member val EmulationAddress = emulationAddress  with get, set
         static member val RuntimeMotionMode = runtimeMotionMode  with get, set
-
+        static member val TimeSimutionMode = timeSimutionMode  with get, set
+        
         static member Package
             with get() = runtimePackage
             and set v =

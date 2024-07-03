@@ -64,17 +64,21 @@ module RunTime =
         let scanOnce() = 
             //나머지 수식은 Changed Event가 있는것만 수행해줌
             let chTags = cpuStorages.ChangedTags()
+
             //Changed 있는것만 IO Hub로 전송
             if chTags.any() then tagChangedForIOHub.OnNext chTags 
 
+            //ChangedTagsClear 전에 exeStates 만들기
             let exeStates = chTags.ExecutableStatements(mapRungs) 
+
+            //ChangedTagsClear
             chTags.ChangedTagsClear(systems)
 
-            chTags.Iter(notifyPreExcute)  // 상태보고/물리Out 처리
-                  
-            if exeStates.any() 
-            then exeStates.Iter(fun s->s.Do())
-            //chTags.Iter(notifyPostExcute)  // HMI Forceoff 처리
+            // 상태보고/물리Out 처리
+            chTags.Iter(notifyPreExcute)
+            
+            //exeStates Do 연산하기
+            exeStates.Iter(fun s->s.Do())
 
             chTags
 

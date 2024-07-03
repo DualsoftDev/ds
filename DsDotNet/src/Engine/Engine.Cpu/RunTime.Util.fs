@@ -16,17 +16,17 @@ module internal RunTimeUtil =
     let notifyPreExcute ( x:IStorage) =
         x.GetTagInfo() |> Option.iter(fun t -> t.OnChanged())
         
-    let  notifyPostExcute ( x:IStorage) =
-        x.GetTagInfo() |> Option.iter(fun t -> 
-                match t with
-                | EventVertex (tag,_,kind) ->
-                        match kind with
-                        | VertexTag.forceOn
-                        | VertexTag.forceOff 
-                        | VertexTag.forceStart 
-                        | VertexTag.forceReset -> tag.BoxedValue <- false 
-                        | _-> ()
-                | _ -> ())
+    //let  notifyPostExcute ( x:IStorage) =
+    //    x.GetTagInfo() |> Option.iter(fun t -> 
+    //            match t with
+    //            | EventVertex (tag,_,kind) ->
+    //                    match kind with
+    //                    | VertexTag.forceOn
+    //                    | VertexTag.forceOff 
+    //                    | VertexTag.forceStart 
+    //                    | VertexTag.forceReset -> tag.BoxedValue <- false 
+    //                    | _-> ()
+    //            | _ -> ())
         
         
     ///사용자 autoStartTags HMI 대신 눌러주기

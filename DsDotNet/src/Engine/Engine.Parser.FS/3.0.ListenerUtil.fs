@@ -67,11 +67,13 @@ module ListnerCommonFunctionGeneratorUtil =
             | TON of float
         
     let getTimes (listTimeCtx: List<dsParser.TimesBlockContext>) : seq<string list * TimeDefinition> =
-        let parseTimeParams (timeParams: string) : TimeDefinition =
+        let parseTimeParams (name, timeParams: string) : TimeDefinition =
             let regex = new Regex(@"(AVG|STD|TON)\((\d+(\.\d+)?)\)")
     
             let matches = regex.Matches(timeParams)
+    
             let extractParam (avg, std, delay) (paramType, value) =
+                validateDecimalPlaces name value
                 match paramType with
                 | "AVG" -> Some value, std, delay
                 | "STD" -> avg, Some value, delay
@@ -83,7 +85,7 @@ module ListnerCommonFunctionGeneratorUtil =
             let (average, std, onDelay) =
                 matches
                 |> Seq.cast<Match>
-                |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value|>float))
+                |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value |> float))
                 |> Seq.fold extractParam initial
     
             { Average = average; Std = std; OnDelay = onDelay }
@@ -95,7 +97,7 @@ module ListnerCommonFunctionGeneratorUtil =
                     let v = defs.TryFindFirstChild<TimeKeyContext>() |> Option.get
                     let fqdn = collectNameComponents v |> List.ofArray
                     let path = defs.TryFindFirstChild<TimeParamsContext>() |> Option.get
-                    let timeDef = parseTimeParams (path.GetText())
+                    let timeDef = parseTimeParams (fqdn.Combine(), path.GetText())
                     yield fqdn, timeDef
         }
 

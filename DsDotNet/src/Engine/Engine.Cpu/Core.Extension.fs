@@ -41,4 +41,3 @@ module CoreExtensionsModule =
         [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:IDictionary<IStorage, Statement seq>) = 
                         xs |> Seq.collect(fun stg -> mRung[stg]) 
 
-      

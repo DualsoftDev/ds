@@ -202,13 +202,13 @@ module rec TimerModule =
                 storages.Add(t.Name, t)
 
     let createUShortTagKind name iniValue tagKind = fwdCreateUShortMemberVariable name iniValue tagKind
-    let createUShort name iniValue  = createUShortTagKind name iniValue -1
+    let createUShort name iniValue  = createUShortTagKind name iniValue skipValueChangedForTagKind
 
     let createUInt32TagKind name iniValue tagKind = fwdCreateUInt32MemberVariable name iniValue tagKind
-    let createUInt32 name iniValue  = createUInt32TagKind name iniValue -1
+    let createUInt32 name iniValue  = createUInt32TagKind name iniValue skipValueChangedForTagKind
 
     let createBoolWithTagKind name iniValue tagKind = fwdCreateBoolMemberVariable name iniValue tagKind
-    let createBool name iniValue  = createBoolWithTagKind name iniValue -1
+    let createBool name iniValue  = createBoolWithTagKind name iniValue skipValueChangedForTagKind
     let xgkTimerCounterContactMarking = "$ON"
     type TimerStruct private(typ:TimerType, name, en, tt, dn, pre, acc, res, sys) =
         inherit TimerCounterBaseStruct(Some true, name, dn, pre, acc, res, sys)

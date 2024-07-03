@@ -5,7 +5,7 @@ open System
 [<AutoOpen>]
 module TimeElements =
     
-    type DsTime() =
+    type DsTime() = //최소 입력단위 0.01초(10msec)
         member val AVG: float option = None with get, set //  Average  sec
         member val STD: float option = None with get, set //  Standard Deviation  sec
         member val TON: float option = None with get, set //  On Delay sec (default 0)
@@ -37,4 +37,10 @@ module TimeElements =
         // 평균의 10%를 기본 표준편차로 설정합니다.
         let stdDev = average * 0.1 
         createTimeParamUsingMeanStd average stdDev 
-        
+
+
+    let validateDecimalPlaces name (valueSec:float)=
+        let decimalPart = valueSec.ToString().Split('.').[1]
+        if decimalPart.Length > 2 then
+            failwithf $"Invalid time {valueSec}sec ({name}) \r\nResolution {(MinTickInterval|>float)/1000.0}sec"
+    

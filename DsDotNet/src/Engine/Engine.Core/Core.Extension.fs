@@ -219,29 +219,29 @@ module CoreExtensionModule =
     type Real with
     
         member x.TimeAvg = 
-                let maxShortSpeedSec = (TimerModule.MinTickInterval|>float)/1000.0
-                let v = 
-                    if x.DsTime.AVG.IsNone then None
+            let maxShortSpeedSec = (TimerModule.MinTickInterval|>float)/1000.0
+            let v = 
+                if x.DsTime.AVG.IsNone then None
+                else 
+                    if RuntimeDS.Package.IsPackageSIM() 
+                    then
+                        match RuntimeDS.TimeSimutionMode  with
+                        | TimeSimutionMode.TimeNone -> None
+                        | TimeSimutionMode.TimeX1 ->   Some (x.DsTime.AVG.Value * 1.0/1.0 )
+                        | TimeSimutionMode.TimeX2 ->   Some (x.DsTime.AVG.Value * 1.0/2.0 )
+                        | TimeSimutionMode.TimeX4 ->   Some (x.DsTime.AVG.Value * 1.0/4.0 )
+                        | TimeSimutionMode.TimeX8 ->   Some (x.DsTime.AVG.Value * 1.0/8.0 )
+                        | TimeSimutionMode.TimeX16 ->  Some (x.DsTime.AVG.Value * 1.0/16.0 ) 
+                        | TimeSimutionMode.TimeX100 -> Some (x.DsTime.AVG.Value * 1.0/100.0 ) 
+                        | TimeSimutionMode.TimeX0_1 -> Some (x.DsTime.AVG.Value * 1.0/0.1 )
+                        | TimeSimutionMode.TimeX0_5 -> Some (x.DsTime.AVG.Value * 1.0/0.5 )
                     else 
-                        if RuntimeDS.Package.IsPackageSIM() 
-                        then
-                            
-                            match RuntimeDS.TimeSimutionMode  with
-                            | TimeSimutionMode.TimeNone -> None
-                            | TimeSimutionMode.TimeX1 ->  Some (x.DsTime.AVG.Value * 1.0/1.0 )
-                            | TimeSimutionMode.TimeX2 ->  Some (x.DsTime.AVG.Value * 1.0/2.0 )
-                            | TimeSimutionMode.TimeX4 ->  Some (x.DsTime.AVG.Value * 1.0/4.0 )
-                            | TimeSimutionMode.TimeX8 ->  Some (x.DsTime.AVG.Value * 1.0/8.0 )
-                            | TimeSimutionMode.TimeX16 -> Some (x.DsTime.AVG.Value * 1.0/16.0 ) 
-                            | TimeSimutionMode.TimeMax->  Some (maxShortSpeedSec)
-                            | TimeSimutionMode.TimeX0_1 ->Some (x.DsTime.AVG.Value * 1.0/0.1 )
-                            | TimeSimutionMode.TimeX0_5 ->Some (x.DsTime.AVG.Value * 1.0/0.5 )
-                        else 
-                            x.DsTime.AVG
+                        x.DsTime.AVG
 
-                if v.IsSome && v.Value < maxShortSpeedSec 
-                then failwithf $"""Error 시뮬레이션 최대 설정을 처리불가 동작 이 있습니다. {x.Name} \r\n[최소동작시간 : {maxShortSpeedSec}, 설정 시간 : {v.Value.ToString("0.0000000")}]"""
-                else v 
+            if v.IsSome && v.Value < maxShortSpeedSec 
+            then failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.TimeSimutionMode}) {x.QualifiedName}
+                            \r\n[최소동작시간 : {maxShortSpeedSec}, 배속반영 동작 시간 : {v.Value}]"
+            else v 
                     
 
 

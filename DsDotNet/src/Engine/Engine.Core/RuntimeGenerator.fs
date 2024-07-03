@@ -27,21 +27,7 @@ module RuntimeGeneratorModule =
         | TimeX4
         | TimeX8
         | TimeX16
-        | TimeMax
-
-    let TimeSimutionModeList = [ TimeNone; TimeX0_1;TimeX0_5; TimeX1 ; TimeX2; TimeX4; TimeX8; TimeX16; TimeMax;]
-    let ToTimeSimutionMode s =
-        match s with
-        | "TimeNone" -> TimeNone
-        | "TimeX0_1" -> TimeX0_1
-        | "TimeX0_5" -> TimeX0_5
-        | "TimeX1"  -> TimeX1
-        | "TimeX2"  -> TimeX2
-        | "TimeX4"  -> TimeX4
-        | "TimeX8"  -> TimeX8
-        | "TimeX16" -> TimeX16
-        | "TimeMax" -> TimeMax
-        |_-> failwithlogf $"Error ToTimeSimutionMode {s}"
+        | TimeX100
 
     type RuntimePackage = 
         | PC 
@@ -136,3 +122,35 @@ module RuntimeGeneratorModule =
         // 기존의 리스트를 지우고 새로운 데이터로 대체합니다.
         RuntimeDS.HwSlotDataTypes.Clear()
         RuntimeDS.HwSlotDataTypes.AddRange(hw)
+
+
+        
+module TimeSimutionModeExtensions =
+
+        let toString mode =
+            match mode with
+            | TimeNone -> "Ignore Time"
+            | TimeX0_1 -> "0.1x Speed"
+            | TimeX0_5 -> "0.5x Speed"
+            | TimeX1 -> "1x Speed"
+            | TimeX2 -> "2x Speed"
+            | TimeX4 -> "4x Speed"
+            | TimeX8 -> "8x Speed"
+            | TimeX16 -> "16x Speed"
+            | TimeX100 -> "100x Speed"
+
+        let fromString s =
+            match s with
+            | "Ignore Time" -> TimeNone
+            | "0.1x Speed" -> TimeX0_1
+            | "0.5x Speed" -> TimeX0_5
+            | "1x Speed" -> TimeX1
+            | "2x Speed" -> TimeX2
+            | "4x Speed" -> TimeX4
+            | "8x Speed" -> TimeX8
+            | "16x Speed" -> TimeX16
+            | "100x Speed" -> TimeX100
+            | _ -> failwithf $"Error ToTimeSimutionMode: {s}"
+
+        let allModes = 
+            [ TimeNone; TimeX0_1; TimeX0_5; TimeX1; TimeX2; TimeX4; TimeX8; TimeX16; TimeX100 ]

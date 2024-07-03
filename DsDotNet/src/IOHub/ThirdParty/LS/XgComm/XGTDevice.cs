@@ -9,6 +9,7 @@ namespace XGTComm
     /// </summary>
     public abstract class XGTDevice
     {
+        public bool InitUpdated { get; set; }
 
         public enum XGTDeviceSize
         {

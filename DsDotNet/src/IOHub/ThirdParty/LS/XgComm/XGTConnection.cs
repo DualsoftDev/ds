@@ -6,6 +6,7 @@ using System.Threading;
 using XGCommLib;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reactive.Subjects;
 namespace XGTComm
 {
     /// <summary>
@@ -80,6 +81,7 @@ namespace XGTComm
             return isConnected;
         }
         public bool IsConnected => CommObject != null && CommObject.IsConnected() == 1;
+        public static Subject<List<Tuple<char, int, byte>>> ByteChangeSubject = new();
         /// <summary>
         /// Checks and re-establishes the connection to the XGT device if it's not connected.
         /// </summary>
@@ -215,6 +217,87 @@ namespace XGTComm
             CommObject.RemoveAll();
             return true;
         }
+        public IEnumerable<XGTDeviceLWord> ReadRandomDevice(IEnumerable<XGTDeviceLWord> xgtDevices     )
+        {
+            if (xgtDevices.Count() > MAX_RANDOM_READ_POINTS)
+                throw new Exception($"MAX_RANDOM_READ_POINTS is {MAX_RANDOM_READ_POINTS} : current {xgtDevices.Count()}");
+
+            addDevComm(xgtDevices);
+
+            byte[] buf = new byte[MAX_RANDOM_READ_POINTS * longSize];
+
+            if (ReadRandomDevice(buf, xgtDevices.Select(s => s.ToText())) == false) //실패시
+            {  //time out으로 실패시 재접후 다시시도
+                ReConnect();
+                if (IsConnected)
+                {
+                    addDevComm(xgtDevices);
+                    ReadRandomDevice(buf, xgtDevices.Select(s => s.ToText()));
+                }
+            }
+
+            void addDevComm(IEnumerable<XGTDeviceLWord> xgtDevices)
+            {
+                xgtDevices.Select(s => CreateDevice(s.Device, s.MemType, s.Size, s.Offset)).ToList()
+                          .ForEach(f => CommObject.AddDeviceInfo(f));
+            }
+
+            List<XGTDeviceLWord> devicesToUpdate = new List<XGTDeviceLWord>();
+            List<ulong> oldValues = new List<ulong>();
+            // xgtDevices를 순회하면서 변경된 값들을 모아두기
+            foreach (var xgtLDWord in xgtDevices)
+            {
+                var newVal = BitConverter.ToUInt64(buf, xgtLDWord.Offset % 512);
+                if (newVal != xgtLDWord.Value || !xgtLDWord.InitUpdated)
+                {
+                    oldValues.Add(xgtLDWord.Value);
+                    devicesToUpdate.Add(xgtLDWord);
+                    xgtLDWord.Value = newVal;
+                }
+            }
+
+            // 변경된 값들을 배열로 변환하여 CheckForBitChanges 함수에 전달
+            if (devicesToUpdate.Any())
+                CheckForBitChanges(oldValues.ToArray(), devicesToUpdate.ToArray());
+            // xgtDevices를 순회하면서 초기처리 완료처리 한번만하게 //test ahn
+            foreach (var xgtLDWord in xgtDevices)
+            {
+                if (!xgtLDWord.InitUpdated)
+                    xgtLDWord.InitUpdated = true;
+            }
+            return xgtDevices;
+
+            void CheckForBitChanges(ulong[] oldValues, XGTDeviceLWord[] devices)
+            {
+                List<Tuple<char, int, byte>> changedByteList = new List<Tuple<char, int, byte>>();
+                ulong[] newValues = devices.Select(f => f.Value).ToArray();
+                for (int deviceIndex = 0; deviceIndex < devices.Length; deviceIndex++)
+                {
+                    ulong oldValue = oldValues[deviceIndex];
+                    ulong newValue = newValues[deviceIndex];
+                    XGTDeviceLWord device = devices[deviceIndex];
+
+                    for (int byteIndex = 0; byteIndex < sizeof(ulong); byteIndex++)
+                    {
+                        byte oldByte = (byte)(oldValue >> (byteIndex * 8));
+                        byte newByte = (byte)(newValue >> (byteIndex * 8));
+
+                        if (oldByte != newByte || !device.InitUpdated)
+                        {
+                            changedByteList.Add(Tuple.Create(device.Device, device.Offset + byteIndex, newByte));
+                        }
+                    }
+                }
+
+                // 변경된 바이트 정보를 한 번에 이벤트로 발생
+                if (changedByteList.Count > 0)
+                {
+                    ByteChangeSubject.OnNext(changedByteList);
+                }
+            }
+        }
+
+      
 
         /// <summary>
         /// Reads the values from the specified XGT devices.

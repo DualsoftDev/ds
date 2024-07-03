@@ -245,11 +245,16 @@ module ImportPPTModule =
                     else
                         path
 
-                if not (ex.Message.EndsWith(ErrorNotify)) then
+                let fileErr= "File contains corrupted data."
+                let msg = if ex.Message.Contains(fileErr)
+                          then ex.Message.Replace(fileErr, "문서보안 복호화가 필요하거나 파일문제가 있습니다.")
+                          else ex.Message
+
+                if not (msg.EndsWith(ErrorNotify)) then
                     ErrorPPTNotify.Trigger(errFileName, 0, 0u, "")
 
                 //첫페이지 아니면 stack에 존재
-                failwithf $"{ex.Message} \t◆파일명 {errFileName}"
+                failwithf $"{msg} \t◆파일명 {errFileName}"
         finally
             dicPptDoc.Where(fun f -> f.Value.IsNonNull()).Iter(fun f -> f.Value.Dispose())
             dicPptDoc.Clear()

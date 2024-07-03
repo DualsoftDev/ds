@@ -1,0 +1,90 @@
+@* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/images-breadthfirst-layout/index.html *@
+
+@page "/demo/cytoscape/qtip"
+
+<h3>QTip</h3>
+
+<div id="cy"></div>
+@code {
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender)
+        {
+            await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
+            await JsDual.Eval(@"
+$(function(){ // on dom ready
+
+
+var cy = cytoscape({
+
+  container: document.getElementById('cy'),
+
+  boxSelectionEnabled: false,
+  autounselectify: true,
+  maxZoom: 2,
+  minZoom: 0.5,
+
+  elements: {
+    nodes: [
+      { data: { id: 'n', label: 'Tap me' } }
+    ]
+  },
+
+  layout: {
+    name: 'grid',
+    padding: 100
+  },
+
+  ready: function(){
+    window.cy = this;
+  },
+
+  style: 'node { content: data(label); }'
+});
+
+// you can use qtip's regular options
+// see http://qtip2.com/
+cy.$('#n').qtip({
+  content: 'Hello!',
+  position: {
+    my: 'top center',
+    at: 'bottom center'
+  },
+  style: {
+    classes: 'qtip-bootstrap',
+    tip: {
+      width: 16,
+      height: 8
+    }
+  }
+});
+
+}); // on dom ready
+
+");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    }
+
+}
+
+<style>
+    body {
+        font: 14px helvetica neue, helvetica, arial, sans-serif;
+    }
+
+    #cy {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        left: 0;
+        top: 0;
+    }
+</style>

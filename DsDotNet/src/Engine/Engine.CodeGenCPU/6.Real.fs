@@ -117,8 +117,8 @@ type VertexMReal with
     member v.R11_RealGoingMotion(): CommentedStatement  list =
         [
             if v.Real.Motion.IsSome then
-                yield (v.MotionStart.Expr<&&>v.MotionEnd.Expr,  v.ET.Expr) ==| (v.MotionRelay, getFuncName())
-                yield (v.G.Expr,  v.MotionRelay.Expr) --| (v.MotionStart, getFuncName())
+                yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,  v.ET.Expr) ==| (v.MotionRelay, getFuncName())
+                yield (v.G.Expr,  v.MotionEnd.Expr <||>  v.MotionRelay.Expr) --| (v.MotionStart, getFuncName())
 
                 if RuntimeDS.Package.IsPackageSIM() 
                 then

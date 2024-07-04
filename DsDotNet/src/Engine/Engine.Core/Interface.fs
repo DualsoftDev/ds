@@ -3,11 +3,13 @@ namespace Engine.Core
 
 open System.Collections.Generic
 open System
+open System.Diagnostics.CodeAnalysis
 
 [<AutoOpen>]
 module Interface =
 
     // Basic interfaces
+    [<AllowNullLiteral>]
     type IVertex = interface end
 
     type INamed  =
@@ -46,7 +48,8 @@ module Interface =
         abstract Comment: string with get, set
         abstract ToBoxedExpression: unit -> obj
 
-    and ISystem = interface end
+    and ISystem =
+        inherit IVertex
 
     type ITerminal =
         abstract Variable: IStorage option

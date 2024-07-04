@@ -24,8 +24,8 @@
         await JsDual.EvalExternalScript("https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js");
 
 
-        var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
-        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1");
+        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
+        var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1");
         await data.IterAsync(
             async json => {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");

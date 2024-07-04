@@ -245,6 +245,7 @@ module CoreModule =
             | OperatorFuncType _ -> true
             | _ -> false
             
+        interface IVertex
         member x.TargetJob =
             match callType with
             | JobType job -> job

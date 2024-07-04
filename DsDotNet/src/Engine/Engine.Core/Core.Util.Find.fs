@@ -326,6 +326,11 @@ type FindExtension =
                     x.GetDevicesCoin()
                         .Where(fun (dev, call) -> call.TargetJob.JobMulti <> Single || dev.OutAddress <> TextSkip)
 
+    [<Extension>] static member GetDevicesForHMIOnlyJobFirst(x:DsSystem) = 
+                    x.GetDevicesCoin()
+                        .Where(fun (dev, call) -> call.TargetJob.JobMulti <> Single || dev.OutAddress <> TextSkip)
+                         |> Seq.filter(fun (dev,c) -> c.TargetJob.DeviceDefs.First() = dev)
+
     [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
                     x.GetDevicesCall()
                         .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))

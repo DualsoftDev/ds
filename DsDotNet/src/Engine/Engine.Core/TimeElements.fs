@@ -43,4 +43,3 @@ module TimeElements =
         let decimalPart = valueSec.ToString().Split('.').[1]
         if decimalPart.Length > 2 then
             failwithf $"Invalid time {valueSec}sec ({name}) \r\nResolution {(MinTickInterval|>float)/1000.0}sec"
-    

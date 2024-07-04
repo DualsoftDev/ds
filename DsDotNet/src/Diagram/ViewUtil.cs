@@ -211,11 +211,11 @@ namespace Diagram.View.MSAGL
                 {
                     n.DisplayNodes.Iter(node =>
                     {
-                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+                        var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
 
                         var on = Convert.ToBoolean(ev.Tag.BoxedValue);
                         n.LampOrigin = on;
-                        ucView?.UpdateOriginValue(node, on);
+                        ucView.UpdateOriginValue(node, on);
                     });
                 });
             }
@@ -234,6 +234,7 @@ namespace Diagram.View.MSAGL
                     if (!IsThisSystem(node)) return;
 
                     var tags = n.TaskDevs.Cast<TaskDev>();
+                    var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
 
                     switch (ea.Tag.TagKind)
                     {
@@ -242,7 +243,7 @@ namespace Diagram.View.MSAGL
                                 var off = tags
                                     .Select(s => Convert.ToUInt64(s.InTag.BoxedValue)).Any(w => w == 0);
                                 n.LampInput = !off;
-                                ucView?.UpdateInValue(node, !off);
+                                ucView.UpdateInValue(node, !off);
                                 break;
                             }
                         case (int)ActionTag.ActionOut:
@@ -250,7 +251,7 @@ namespace Diagram.View.MSAGL
                                 var on = tags
                                     .Select(s => Convert.ToUInt64(s.OutTag.BoxedValue)).Any(w => w != 0);
                                 n.LampOutput = on;
-                                ucView?.UpdateOutValue(node, on);
+                                ucView.UpdateOutValue(node, on);
                                 break;
                             }
                     }
@@ -263,8 +264,7 @@ namespace Diagram.View.MSAGL
         {
             if (!DicMemoryTag.ContainsKey(api.Tag)) return;
             var viewNodes = DicMemoryTag[api.Tag];
-            var ucView = UcViews
-                .FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
+
             viewNodes.Iter(n =>
             {
                 n.DisplayNodes.Iter(node =>
@@ -279,8 +279,8 @@ namespace Diagram.View.MSAGL
                             {
                                 var on = tags.All(s => Convert.ToBoolean(s.Value));
                                 n.LampPlanEnd = on;
+                                var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
                                 ucView.UpdatePlanEndValue(node, on);
-                               
                                 break;
                             }
                     }

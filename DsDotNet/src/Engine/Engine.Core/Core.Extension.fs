@@ -192,7 +192,15 @@ module CoreExtensionModule =
                 else DuBOOL
 
     type TaskDev with
-
+    
+        member x.IsInAddressEmpty = x.InAddress = TextAddrEmpty
+        member x.IsInAddressSkipOrEmpty = x.InAddress = TextAddrEmpty || x.InAddress = TextSkip
+        member x.IsOutAddressEmpty = x.OutAddress = TextAddrEmpty
+        member x.IsOutAddressSkipOrEmpty = x.OutAddress = TextAddrEmpty || x.OutAddress = TextSkip
+        member x.IsAddressEmpty = x.IsInAddressEmpty  && x.IsOutAddressEmpty
+        member x.IsAddressSkipOrEmpty = x.IsOutAddressSkipOrEmpty  && x.IsInAddressSkipOrEmpty
+        member x.IsMaunualAddressEmpty = x.MaunualActionAddress = TextAddrEmpty
+        member x.IsMaunualAddressSkipOrEmpty = x.MaunualActionAddress = TextAddrEmpty || x.MaunualActionAddress = TextSkip
 
         member x.GetInParam(jobName:string) = x.InParams[jobName]
         member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)
@@ -214,8 +222,35 @@ module CoreExtensionModule =
 
         member x.InDataType = getType x.InParams.Values
         member x.OutDataType  =getType x.OutParams.Values
+        
+    type Job with
+        member x.OnDelayTime = 
+            let times = x.DeviceDefs.Choose(fun t-> t.InParams[x.Name].Time)
+            if times.GroupBy(fun t->t).Count() > 1
+            then 
+                let errTask = String.Join(", ",  x.DeviceDefs.Select(fun t-> $"{t.Name} {t.InParams[x.Name].Time}"))
+                failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
+                
+            if times.any() then times.First() |> Some else None
 
+        member x.GetNullAddressDevTask() = 
+            match x.JobMulti with
+            | Single -> 
+                x.DeviceDefs
+                |> Seq.filter (fun f -> f.IsAddressEmpty)
+            | MultiAction (_, _, inCnt, outCnt) -> 
+                x.DeviceDefs
+                |> Seq.mapi (fun i d -> 
+                    if inCnt.IsSome && inCnt.Value = i && d.IsAddressEmpty then 
+                        Some d
+                    elif outCnt.IsSome && outCnt.Value = i && d.IsAddressEmpty then 
+                        Some d
+                    else
+                     None
+                )
+                |> Seq.choose id
 
+                        
     type Real with
     
         member x.TimeAvg = 

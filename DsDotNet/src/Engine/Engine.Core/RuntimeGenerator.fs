@@ -69,7 +69,7 @@ module RuntimeGeneratorModule =
     let ExternalTempNoIECMemory =  "M"
 
 
-    let HMITempMemory =  "%HX10000"  //iec xgk 구분안함
+    let HMITempMemory =  "%HX99"  //iec xgk 구분안함
     let HMITempManualAction =  "%HX0"  //iec xgk 구분안함
 
 

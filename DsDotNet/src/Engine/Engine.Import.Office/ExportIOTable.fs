@@ -399,13 +399,13 @@ module ExportIOTable =
         dt.Columns.Add($"{TextColumn.Bold}", typeof<string>) |> ignore
         dt
 
-    let rowDeviceItems (dev: string) (isBlack:bool) =
+    let rowDeviceItems (dev: string) (hasSafety:bool)=
             [ 
               dev
               ""
               ""
               ""
-              if isBlack then "0" else "16777215"
+              if hasSafety then "8388736" else "0"
               "Off"
               "Off"
               "Off"
@@ -419,12 +419,12 @@ module ExportIOTable =
             let devs =  sys.GetDevicesForHMI()
             devs.Select(fun (dev, _)-> 
                 let text = 
-                    if dev.OutAddress = TextSkip then
-                        "·" 
+                    if dev.MaunualActionAddress = TextSkip then
+                        ""//"·" 
                     else
                         "□" 
 
-                rowDeviceItems text true
+                rowDeviceItems text false
 
                 )
 
@@ -441,7 +441,7 @@ module ExportIOTable =
       
         let rows =
             sys.GetFlowsOrderByName()
-                .Select(fun flow -> rowDeviceItems flow.Name true)
+                .Select(fun flow -> rowDeviceItems flow.Name false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -456,7 +456,7 @@ module ExportIOTable =
       
         let rows =
                   sys.GetVerticesOfRealOrderByName()
-                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}" true)
+                     .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}" false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -471,7 +471,10 @@ module ExportIOTable =
       
         let rows =
             let devCallSet =  sys.GetDevicesForHMI()
-            devCallSet.Select(fun (dev,_)-> rowDeviceItems dev.ApiStgName true)
+            devCallSet.Select(fun (dev,call)-> 
+                    
+                    let hasSafety = call.SafetyConditions.Count > 0   
+                    rowDeviceItems dev.ApiStgName hasSafety)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -567,17 +570,18 @@ module ExportIOTable =
                ]
 
         let rows =
-            let devs = sys.GetDevicesForHMI()
+            //let devs = sys.GetDevicesForHMI()
+            let devs = sys.GetDevicesForHMIOnlyJobFirst() //kia demo 
             devs
             |> Seq.collect (fun (dev,_) ->
                 [   
                     match iomType with
                     | IOType.Memory ->
-                        yield rowItems (dev, if dev.MaunualActionAddress =  TextSkip then HMITempManualAction else dev.MaunualActionAddress)
+                        yield rowItems (dev, if dev.IsMaunualAddressSkipOrEmpty then HMITempManualAction else dev.MaunualActionAddress)
                     | IOType.In->
-                        yield rowItems (dev, if dev.InAddress =  TextSkip then HMITempMemory else dev.InAddress)
+                        yield rowItems (dev, if dev.IsInAddressSkipOrEmpty then HMITempMemory else dev.InAddress)
                     | IOType.Out ->                            
-                        yield rowItems (dev, if dev.OutAddress =  TextSkip then HMITempMemory else dev.OutAddress)
+                        yield rowItems (dev, if dev.IsOutAddressSkipOrEmpty then HMITempMemory else dev.OutAddress)
 
                     | _ -> failwith "Invalid action tag"
                 ]

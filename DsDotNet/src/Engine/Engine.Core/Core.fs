@@ -342,14 +342,7 @@ module CoreModule =
         member x.AddressOutCount = x.JobParam.JobMulti.AddressOutCount
         member x.System = system
         member x.DeviceDefs = tasks
-        member x.OnDelayTime = 
-                let times = tasks.Choose(fun t-> t.InParams[x.Name].Time)
-                if times.GroupBy(fun t->t).Count() > 1
-                then 
-                    let errTask = String.Join(", ", tasks.Select(fun t-> $"{t.Name} {t.InParams[x.Name].Time}"))
-                    failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
-                
-                if times.any() then times.First() |> Some else None
+
 
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
 

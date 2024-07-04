@@ -16,10 +16,10 @@ type VertexManager with
         let sets = 
             (
                 call.StartPointExpr
-                <||> (dop <&&> v.ST.Expr)
+                <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr )
                 <||> (mop <&&> v.SF.Expr)
             )
-            <&&> call.SafetyExpr <&&> call.AutoPreExpr 
+            <&&> call.SafetyExpr 
             
         let rst =
             if call.UsingTon 

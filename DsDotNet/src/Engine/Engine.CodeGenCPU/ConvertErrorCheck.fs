@@ -90,14 +90,10 @@ module ConvertErrorCheck =
     let checkDuplicatesNNullAddress (sys: DsSystem) = 
         // Check for null addresses in jobs
         let nullTagJobs = 
-            sys.Jobs
-            |> Seq.filter (fun j -> 
-                j.DeviceDefs
-                |> Seq.exists (fun f -> f.InAddress = TextAddrEmpty && f.OutAddress = TextAddrEmpty))
-            |> Seq.toList
+            sys.Jobs.SelectMany(fun j->j.GetNullAddressDevTask())
 
-        if nullTagJobs |> List.isEmpty |> not then 
-            let errJobs = nullTagJobs |> List.map (fun j -> j.Name) |> String.concat "\n"
+        if nullTagJobs.any() then 
+            let errJobs = String.Join ("\n", nullTagJobs)
             failwithf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
 
         // Check for null buttons

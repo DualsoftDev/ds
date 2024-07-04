@@ -54,21 +54,19 @@ module ExportConfigsMoudle =
     let getDsInterfaces (sys: DsSystem) =
         let ifs = HashSet<DsInterface>()
 
-        sys.GetVerticesHasJob()
-           |> Seq.iter(fun v -> 
-               v.TargetJob.DeviceDefs
-               |> Seq.filter(fun dev -> dev.ApiItem.TX.Motion.IsSome)
-               |> Seq.iter(fun dev ->
+        sys.GetDevicesCall()
+           |> Seq.filter(fun (dev,_)-> dev.ApiItem.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
+           |> Seq.iter(fun (dev,v) ->
 
                     let dataSync = 
                         {
-                            Id = ifs.Count+1
-                            Work = dev.ApiItem.TX.Name
-                            WorkInfo = dev.ApiItem.TX.Motion.Value
-                            ScriptStartTag = dev.ApiItem.TX.ScriptStartTag.Address
-                            ScriptEndTag = dev.ApiItem.TX.ScriptEndTag.Address
-                            MotionStartTag = dev.ApiItem.TX.MotionStartTag.Address
-                            MotionEndTag = dev.ApiItem.TX.MotionEndTag.Address
+                            Id = ifs.Count
+                            Work = dev.ApiItem.RX.Name
+                            WorkInfo = dev.ApiItem.RX.Motion.Value
+                            ScriptStartTag = dev.ApiItem.RX.ScriptStartTag.Address
+                            ScriptEndTag = dev.ApiItem.RX.ScriptEndTag.Address
+                            MotionStartTag = dev.ApiItem.RX.MotionStartTag.Address
+                            MotionEndTag = dev.ApiItem.RX.MotionEndTag.Address
                             Station = v.Parent.GetFlow().Name
                             Device = dev.DeviceName
                             Action = dev.ApiItem.Name
@@ -76,11 +74,8 @@ module ExportConfigsMoudle =
                             Motion = dev.ApiStgName
                         }
                     ifs.Add dataSync |> ignore
-
-                    //let dataEnd   = { dataSync with Id = ifs.Count+1; WorkType = "End";}
-                    //ifs.Add dataEnd |> ignore
                )
-           )
+           
 
         ifs.ToArray()
 

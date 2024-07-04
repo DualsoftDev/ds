@@ -1,4 +1,5 @@
 using System;
+using System.Reactive.Subjects;
 using XGCommLib;
 
 namespace XGTComm
@@ -10,6 +11,7 @@ namespace XGTComm
     public abstract class XGTDevice
     {
         public bool InitUpdated { get; set; }
+        protected Subject<XGTDevice> ChangeValueSubject = new Subject<XGTDevice>();
 
         public enum XGTDeviceSize
         {
@@ -24,7 +26,11 @@ namespace XGTComm
         private int _offsetBit;
         private char _device;
 
-
+        // Method to subscribe to value changes
+        public IDisposable SubscribeToChanges(Action<XGTDevice> onNext)
+        {
+            return ChangeValueSubject.Subscribe(onNext);
+        }
         public XGTDevice(char device, XGTDeviceSize deviceSize, int offsetBit)
         {
             _device = device;
@@ -62,8 +68,19 @@ namespace XGTComm
     /// </summary>
     public class XGTDeviceBit : XGTDevice
     {
-
-        public bool Value { get; set; }
+        private bool value;
+        public bool Value
+        {
+            get { return value; }
+            set
+            {
+                if (this.value != value)
+                {
+                    this.value = value;
+                    ChangeValueSubject.OnNext(this);
+                }
+            }
+        }
 
         public XGTDeviceBit(char device, int offsetBit)
             : base(device, XGTDeviceSize.Bit, offsetBit)
@@ -81,8 +98,20 @@ namespace XGTComm
     /// </summary>
     public class XGTDeviceByte : XGTDevice
     {
+        private byte value;
+        public byte Value
+        {
+            get { return value; }
+            set
+            {
+                if (this.value != value)
+                {
+                    this.value = value;
+                    ChangeValueSubject.OnNext(this);
+                }
+            }
+        }
 
-        public byte Value { get; set; }
 
         public XGTDeviceByte(char device, int offsetBit)
             : base(device, XGTDeviceSize.Byte, offsetBit)
@@ -100,8 +129,20 @@ namespace XGTComm
     /// </summary>
     public class XGTDeviceWord : XGTDevice
     {
+        private ushort value;
+        public ushort Value
+        {
+            get { return value; }
+            set
+            {
+                if (this.value != value)
+                {
+                    this.value = value;
+                    ChangeValueSubject.OnNext(this);
+                }
+            }
+        }
 
-        public ushort Value { get; set; }
 
         public XGTDeviceWord(char device, int offsetBit)
             : base(device, XGTDeviceSize.Word, offsetBit)
@@ -118,8 +159,19 @@ namespace XGTComm
     /// </summary>
     public class XGTDeviceDWord : XGTDevice
     {
-
-        public uint Value { get; set; }
+        private uint value;
+        public uint Value
+        {
+            get { return value; }
+            set
+            {
+                if (this.value != value)
+                {
+                    this.value = value;
+                    ChangeValueSubject.OnNext(this);
+                }
+            }
+        }
 
         public XGTDeviceDWord(char device, int offsetBit)
             : base(device, XGTDeviceSize.DWord, offsetBit)
@@ -137,8 +189,19 @@ namespace XGTComm
     /// </summary>
     public class XGTDeviceLWord : XGTDevice
     {
-
-        public ulong Value { get; set; }
+        private ulong value;
+        public ulong Value
+        {
+            get { return value; }
+            set
+            {
+                if (this.value != value)
+                {
+                    this.value = value;
+                    ChangeValueSubject.OnNext(this);
+                }
+            }
+        }
 
         public XGTDeviceLWord(char device, int offsetBit)
             : base(device, XGTDeviceSize.LWord, offsetBit)

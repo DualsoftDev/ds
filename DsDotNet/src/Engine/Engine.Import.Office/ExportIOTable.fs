@@ -573,7 +573,7 @@ module ExportIOTable =
                 [   
                     match iomType with
                     | IOType.Memory ->
-                        yield rowItems (dev, if dev.MaunualActionAddress =  TextSkip then HMITempMemory else dev.MaunualActionAddress)
+                        yield rowItems (dev, if dev.MaunualActionAddress =  TextSkip then HMITempManualAction else dev.MaunualActionAddress)
                     | IOType.In->
                         yield rowItems (dev, if dev.InAddress =  TextSkip then HMITempMemory else dev.InAddress)
                     | IOType.Out ->                            

@@ -5,7 +5,11 @@
 <h3>Compoundnodes</h3>
 
 
+<button id="reset_zoom">Reset zoom</button>
+<button id="disable_zoom">Disable zoom</button>
+<button id="enable_zoom">Enable zoom</button>
 <div id="cy"></div>
+
 @code {
     protected override async Task OnInitializedAsync()
     {
@@ -29,7 +33,6 @@
         await data.IterAsync(
             async json => {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
-                var grpah = NewtonsoftJson.DeserializeObject<CytoGraph>(json);
                 await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
@@ -79,58 +82,6 @@ var cy = window.cy = cytoscape({
 
   elements: window.cyData,
 
-  // elements: {
-  //   nodes: [
-  //     { data: { id: 'a', parent: 'b' }, position: { x: 215, y: 85 } },
-  //     { data: { id: 'b' } },
-  //     { data: { id: 'c', parent: 'b' }, position: { x: 300, y: 85 } },
-  //     { data: { id: 'd' }, position: { x: 215, y: 175 } },
-  //     { data: { id: 'e' } },
-  //     { data: { id: 'f', parent: 'e' }, position: { x: 300, y: 175 } }
-  //   ],
-  //   edges: [
-  //     { data: { id: 'ad', source: 'a', target: 'd' } },
-  //     { data: { id: 'eb', source: 'e', target: 'b' } }
-
-  //   ]
-  // },
-
-
-// elements: {
-//     'nodes': [
-//         { data: { id: 'a', parent: 'p' } },
-//         { data: { id: 'b', parent: 'p' } },
-//         { data: { id: 'c', parent: 'p' } },
-//         { data: { id: 'd', parent: 'p' } },
-//         { data: { id: 'e', parent: 'p' } },
-//         { data: { id: 'f', parent: 'p' } },
-//         { data: { id: 'g', parent: 'p' } },
-//         { data: { id: 'h', parent: 'p' } },
-//         { data: { id: 'p' } }
-//     ],
-//     'edges': [
-//         { data: { id: 'e1', source: 'a', target: 'b' } },
-//         { data: { id: 'e2', source: 'b', target: 'c' } },
-//         { data: { id: 'e3', source: 'b', target: 'd' } },
-//         { data: { id: 'e4', source: 'e', target: 'f' } },
-//         { data: { id: 'e5', source: 'f', target: 'g' } },
-//         { data: { id: 'e6', source: 'f', target: 'h' } }
-//     ]
-// },
-
-
-// elements: {
-//     nodes: [
-//         { data: { id: 'a', parent: 'p' }, position: { x: 215, y: 85 } },
-//         { data: { id: 'b', parent: 'p' }, position: { x: 300, y: 85 } },
-//         { data: { id: 'p' } }
-//     ],
-//     edges: [
-//         { data: { id: 'e1', source: 'a', target: 'b' } }
-//     ]
-// },
-
-
 
   layout: {
     // name: 'preset',
@@ -139,6 +90,11 @@ var cy = window.cy = cytoscape({
     name: 'dagre',              // https://jsfiddle.net/bababalcksheep/nyt8Lupv/
     padding: 5
   }
+});
+
+
+$('#reset_zoom').click(function(){
+    console.log('resetting..');
 });
 
 ");
@@ -159,3 +115,63 @@ var cy = window.cy = cytoscape({
         top: 0;
     }
  </style>
+ 
+      
+    
+  
+  
+  
+@* 
+
+     // elements: {
+     //   nodes: [
+     //     { data: { id: 'a', parent: 'b' }, position: { x: 215, y: 85 } },
+     //     { data: { id: 'b' } },
+     //     { data: { id: 'c', parent: 'b' }, position: { x: 300, y: 85 } },
+     //     { data: { id: 'd' }, position: { x: 215, y: 175 } },
+     //     { data: { id: 'e' } },
+     //     { data: { id: 'f', parent: 'e' }, position: { x: 300, y: 175 } }
+     //   ],
+     //   edges: [
+     //     { data: { id: 'ad', source: 'a', target: 'd' } },
+     //     { data: { id: 'eb', source: 'e', target: 'b' } }
+   
+     //   ]
+     // },
+   
+   
+   // elements: {
+   //     'nodes': [
+   //         { data: { id: 'a', parent: 'p' } },
+   //         { data: { id: 'b', parent: 'p' } },
+   //         { data: { id: 'c', parent: 'p' } },
+   //         { data: { id: 'd', parent: 'p' } },
+   //         { data: { id: 'e', parent: 'p' } },
+   //         { data: { id: 'f', parent: 'p' } },
+   //         { data: { id: 'g', parent: 'p' } },
+   //         { data: { id: 'h', parent: 'p' } },
+   //         { data: { id: 'p' } }
+   //     ],
+   //     'edges': [
+   //         { data: { id: 'e1', source: 'a', target: 'b' } },
+   //         { data: { id: 'e2', source: 'b', target: 'c' } },
+   //         { data: { id: 'e3', source: 'b', target: 'd' } },
+   //         { data: { id: 'e4', source: 'e', target: 'f' } },
+   //         { data: { id: 'e5', source: 'f', target: 'g' } },
+   //         { data: { id: 'e6', source: 'f', target: 'h' } }
+   //     ]
+   // },
+   
+   
+   // elements: {
+   //     nodes: [
+   //         { data: { id: 'a', parent: 'p' }, position: { x: 215, y: 85 } },
+   //         { data: { id: 'b', parent: 'p' }, position: { x: 300, y: 85 } },
+   //         { data: { id: 'p' } }
+   //     ],
+   //     edges: [
+   //         { data: { id: 'e1', source: 'a', target: 'b' } }
+   //     ]
+   // },
+
+*@

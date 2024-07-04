@@ -96,28 +96,6 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
         if (node == null)
             return RestResultString.Err($"Failed to find vertex with name: {fqdn}");
 
-        //Graph<Vertex, Edge> graph;
-        //CytoVertex me;
-        //switch (node)
-        //{
-        //    case Flow f:
-        //        graph = f.Graph;
-        //        me = new CytoVertex(f.QualifiedName, f.Name, null);
-        //        break;
-        //    case Real r:
-        //        graph = r.Graph;
-        //        var parent = r.Parent.GetCore().QualifiedName;
-        //        me = new CytoVertex(r.QualifiedName, r.Name, parent);
-        //        break;
-        //    default:
-        //        return null;
-        //}
-
-        //var vertices = graph.Vertices.Select(v => new CytoVertex(v)).Append(me);
-        //var edges = graph.Edges.Select(e => new CytoEdge(e));
-        //var cytoGraph = new CytoGraph(vertices, edges);
-
-
         var vertices = node.CollectVertices(true).ToArray();
         var edges = node.CollectEdges().ToArray();
         var cytoGraph = new CytoGraph(vertices, edges);
@@ -132,17 +110,17 @@ public static class CytoVertexExtension
 {
     static (string, string, string) GetNameAndQualifiedNameAndParentName(IVertex vertex)
     {
-        var name = (vertex as INamed).Name;
-        var qname = (vertex as IQualifiedNamed).QualifiedName;
-        var pname = vertex.GetParentName();
-        return (qname, name, pname);
+        var n = (vertex as INamed).Name;
+        var q = (vertex as IQualifiedNamed).QualifiedName;
+        var p = vertex.GetParentName();
+        return (q, n, p);
     }
     public static IEnumerable<CytoVertex> CollectVertices(this IVertex vertex, bool includeMe=true)
     {
         if (includeMe)
         {
-            var (qname, name, pname) = GetNameAndQualifiedNameAndParentName(vertex);
-            yield return new CytoVertex(qname, name, pname);
+            var (q, n, p) = GetNameAndQualifiedNameAndParentName(vertex);
+            yield return new CytoVertex(q, n, p);
         }
         switch (vertex)
         {

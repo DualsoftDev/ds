@@ -71,7 +71,7 @@ module ImportUtilForLib =
 
     let addNewCall (param: CallParams) =
         let jobName = param.Node.JobName
-        let apiPureName = GetBracketsRemoveName(param.ApiName).Trim()
+        //let apiPureName = GetBracketsRemoveName(param.ApiName).Trim()
         let tasks = HashSet<TaskDev>()
 
         match param.Node.JobParam.JobMulti with

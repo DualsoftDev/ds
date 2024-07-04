@@ -152,7 +152,7 @@ module ListnerCommonFunctionGeneratorUtil =
         let executeCode = fDef.operator().GetText()
         executeCode |> getCode
 
-    let commonDeviceParamExtractor (devCtx: DevParamInOutContext) : DevParam * DevParam =
+    let commonDeviceParamExtractor (devCtx: DevParamInOutContext) : (string*DevParam)*(string*DevParam) =
         devCtx.TryFindFirstChild<DevParamInOutBodyContext>()
         |> Option.map (fun ctx -> getDevParamInOut $"{ctx.GetText()}")
         |> Option.defaultWith(fun () -> failWithLog "commonDeviceParamExtractor error")

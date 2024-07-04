@@ -174,11 +174,11 @@ module PPTNodeModule =
         member x.DevParamIn = 
             if devParam.IsSome && (devParam.Value |> fst).IsSome then 
                 (devParam.Value |> fst).Value 
-            else "" |> defaultDevParam     
+            else defaultDevParam ()    
         member x.DevParamOut = 
             if devParam.IsSome && (devParam.Value |> snd).IsSome then 
                 (devParam.Value |> snd).Value 
-            else "" |> defaultDevParam     
+            else defaultDevParam ()    
 
         member x.JobName =
             let flow, job, Api = x.CallFlowNJobNApi
@@ -221,7 +221,7 @@ module PPTNodeModule =
                 | true, true -> //root dev call
                     let inParam = 
                         if hasDevParam then getOperatorParam (shape, nameNFunc(shape), iPage)
-                        else createDevParam "" None (Some(DuBOOL)) (Some(true)) None
+                        else createDevParam  None (Some(DuBOOL)) (Some(true)) None
                     devParam <- Some(Some(inParam), None)
                 | false, true -> //real dev call
                     if hasDevParam then

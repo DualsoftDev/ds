@@ -185,4 +185,4 @@ module ConvertErrorCheck =
                     else 
                         if outParam.Type <> DuBOOL && outParam.DevValue.IsNull() 
                         then 
-                            failWithLog $"{td.Name} {outParam.DevAddress} 은 value 값을 입력해야 합니다." 
+                            failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다." 

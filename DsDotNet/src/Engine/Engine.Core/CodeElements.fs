@@ -85,7 +85,6 @@ module rec CodeElements =
     
     type DevAddress = string
     type DevParam = {
-        DevAddress: DevAddress
         DevName : string option  //In or Out Tag 이름
         DevType: DataType option
         DevValue: obj option
@@ -98,34 +97,32 @@ module rec CodeElements =
        
         
 
-    let defaultDevParam (address) = 
+    let defaultDevParam () = 
         {   
-            DevAddress = address
             DevName = None
             DevType = None
             DevValue = None
             DevTime = None
         }
 
-    let createDevParam (address:string) (nametype:string option) (dutype:DataType option) (v:obj option)  (t:int option) = 
+    let createDevParam  (nametype:string option) (dutype:DataType option) (v:obj option)  (t:int option) = 
         { 
-          DevAddress = address
           DevName = nametype
           DevType = dutype
           DevValue =v
           DevTime =t
     }
     
-    let changeDevParam (x:DevParam) (address:string) (symbol:string option) =
-        createDevParam address symbol x.DevType x.DevValue x.DevTime
+    let changeDevParam (x:DevParam)(symbol:string option) =
+        createDevParam  symbol x.DevType x.DevValue x.DevTime
     
     let addOrUpdateParam(jobName:string, paramDic:Dictionary<string, DevParam>, newParam :DevParam) = 
         paramDic.Remove jobName |> ignore
         paramDic.Add (jobName, newParam)
             
         
-    let changeParam(jobName:string, paramDic:Dictionary<string, DevParam>, address:string, symbol:string option) = 
-        let changedDevParam = changeDevParam paramDic[jobName] address symbol
+    let changeParam(jobName:string, paramDic:Dictionary<string, DevParam>, symbol:string option) = 
+        let changedDevParam = changeDevParam paramDic[jobName]  symbol
         paramDic.Remove(jobName) |> ignore
         paramDic.Add (jobName, changedDevParam)
 
@@ -134,8 +131,8 @@ module rec CodeElements =
     
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
-    let toTextDevParam (x:DevParam) = 
-        let address = addressPrint x.DevAddress
+    let toTextDevParam addr (x:DevParam) = 
+        let address = addressPrint addr
         let name  = x.DevName  |> Option.defaultValue ""
         let typ   = x.DevType  |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
         let value = x.DevValue |> Option.map (fun v -> x.Type.ToStringValue(v)) |> Option.defaultValue ""
@@ -146,9 +143,9 @@ module rec CodeElements =
 
         result
 
-    let toTextInOutDev (inp:DevParam) (outp:DevParam) = 
-        let inText = toTextDevParam inp
-        let outText = toTextDevParam outp
+    let toTextInOutDev (inp:DevParam) (outp:DevParam) (addr:Addresses)= 
+        let inText = toTextDevParam addr.In inp
+        let outText = toTextDevParam addr.Out outp
         $"{inText}, {outText}"
 
 
@@ -214,5 +211,5 @@ module rec CodeElements =
             | _ ->
                 failwithlog $"Unknown format detected: text '{part}'"
                 
-        createDevParam addr nameOpt typeOpt valueOpt timeOpt
+        addr, createDevParam  nameOpt typeOpt valueOpt timeOpt
 

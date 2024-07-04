@@ -95,9 +95,9 @@ module ImportType =
             let addr, (dataType:DataType), func = paramRaw
             if func <> ""
             then 
-                getDevParam $"{addr}:{func}" 
+                getDevParam $"{addr}:{func}" |> snd
             else
-                addr|>defaultDevParam
+                defaultDevParam()
 
         let inP =  paramFromText inParamRaw
         let outP = paramFromText outParamRaw
@@ -133,8 +133,8 @@ module ImportType =
     let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InParam.Type hwDev.OutParam.Type
 
     let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
-        hwDev.InParam <- changeDevParam hwDev.InParam hwDev.InParam.DevAddress inSym
-        hwDev.OutParam <- changeDevParam hwDev.OutParam hwDev.OutParam.DevAddress outSym
+        hwDev.InParam <- changeDevParam hwDev.InParam    inSym
+        hwDev.OutParam <- changeDevParam hwDev.OutParam  outSym
 
         checkDataType hwDev.Name hwDev.InParam.Type inDataType   
         checkDataType hwDev.Name hwDev.OutParam.Type outDataType

@@ -35,7 +35,7 @@ module PPTNodeUtilModule =
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
                 if func.Contains(",") then 
                     failwithf $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력) 규격 입니다"
-                $"{'-'}:{func}" |> getDevParam
+                $"{'-'}:{func}" |> getDevParam |> snd
             with _ ->
                 shape.ErrorName(ErrID._70, iPage)
 
@@ -52,9 +52,9 @@ module PPTNodeUtilModule =
 
                 let getParam x = 
                     if x = TextSkip then 
-                        "" |> getDevParam
+                        "" |> getDevParam |> snd
                     else 
-                        $":{x}" |> getDevParam
+                        $":{x}" |> getDevParam |> snd
 
                 getParam inFunc, getParam outFunc
             with _ ->

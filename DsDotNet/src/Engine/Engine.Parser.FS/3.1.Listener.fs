@@ -527,10 +527,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             }
             |> ignore
 
-        let createDeviceVariable (system: DsSystem) (devParam:DevParam) (devName:string) =
+        let createDeviceVariable (system: DsSystem)  (devParam:DevParam) (devName:string) address =
             match devParam.DevName with
             | Some name ->
-                let address = devParam.DevAddress
                 let dataType = devParam.Type
                 let variable = createVariableByType name dataType
 
@@ -561,12 +560,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     [   for apiDefCtx in apiDefCtxs do
                             let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
                             let devName = String.Join("_", apiPath.ToArray())
-                            let inParam, outParm =
+                            let (inaddr, inParam), (outaddr, outParm) =
                                 match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
                                 | Some devParam -> 
                                     commonDeviceParamExtractor devParam 
                                 | None ->
-                                    TextAddrEmpty|>defaultDevParam, TextAddrEmpty|>defaultDevParam
+                                     (TextAddrEmpty, defaultDevParam()), (TextAddrEmpty, defaultDevParam())
 
                    
                             match apiPath with
@@ -585,6 +584,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                  
                                         debugfn $"TX={inParam} RX={outParm}"
                                         let taskDev = TaskDev(apiPoint, jobName, inParam, outParm, device)
+                                        taskDev.InAddress <- inaddr
+                                        taskDev.OutAddress <- outaddr
                                         return getTaskDev jobName taskDev inParam outParm
                                     }
 
@@ -607,8 +608,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             let plcName_O = getPlcTagAbleName $"{devName}_O" options.Storages
 
 
-                            createDeviceVariable system inParam plcName_I
-                            createDeviceVariable system outParm plcName_O
+                            createDeviceVariable system inParam plcName_I inaddr
+                            createDeviceVariable system outParm plcName_O outaddr
                     ]
 
 

@@ -416,7 +416,7 @@ module ExportIOTable =
         let dt = getLabelTable "액션이름"
 
         let rows =
-            let devs =  sys.GetDevicesForHMI()
+            let devs =  sys.GetDevicesForHMIOnlyJobFirst()
             devs.Select(fun (dev, _)-> 
                 let text = 
                     if dev.MaunualActionAddress = TextSkip then
@@ -470,7 +470,7 @@ module ExportIOTable =
         let dt = getLabelTable "디바이스이름"
       
         let rows =
-            let devCallSet =  sys.GetDevicesForHMI()
+            let devCallSet =  sys.GetDevicesForHMIOnlyJobFirst()
             devCallSet.Select(fun (dev,call)-> 
                     
                     let hasSafety = call.SafetyConditions.Count > 0   
@@ -574,7 +574,8 @@ module ExportIOTable =
             let devs = sys.GetDevicesForHMIOnlyJobFirst() //kia demo 
             devs
             |> Seq.collect (fun (dev,_) ->
-                [   
+                 [   
+                   
                     match iomType with
                     | IOType.Memory ->
                         yield rowItems (dev, if dev.IsMaunualAddressSkipOrEmpty then HMITempManualAction else dev.MaunualActionAddress)
@@ -584,7 +585,7 @@ module ExportIOTable =
                         yield rowItems (dev, if dev.IsOutAddressSkipOrEmpty then HMITempMemory else dev.OutAddress)
 
                     | _ -> failwith "Invalid action tag"
-                ]
+                 ]
             ) 
 
         addRows rows dt

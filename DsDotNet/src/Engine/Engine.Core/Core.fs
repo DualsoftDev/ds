@@ -308,17 +308,14 @@ module CoreModule =
 
         member x.InParams = inParams 
         member x.OutParams = outParams
-
-      
-        member x.InAddress
-            with get() = inParams.First().Value  |> fun (d) -> d.DevAddress
-            and set(v) = inParams.ToArray().Iter(fun (kv)-> changeParam (kv.Key,inParams, v, kv.Value.DevName))
-
-        member x.OutAddress
-            with get() = outParams.First().Value  |> fun (d) -> d.DevAddress
-            and set(v) = outParams.ToArray().Iter(fun (kv)-> changeParam (kv.Key,outParams, v, kv.Value.DevName))
-   
+        
+        member val InAddress = TextAddrEmpty with get, set
+        member val OutAddress = TextAddrEmpty with get, set
         member val MaunualActionAddress = TextAddrEmpty with get, set
+              
+        //member val InAddress = getNull<string>() with get, set
+        //member val OutAddress = getNull<string>() with get, set
+   
 
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
@@ -347,7 +344,7 @@ module CoreModule =
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam)  =
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam, addr:Addresses)  =
         inherit FqdnObject(name, system)
         member x.Name = name
         member x.System = system
@@ -357,14 +354,8 @@ module CoreModule =
         member val InParam  = inParam   with get, set
         member val OutParam = outParam  with get, set
 
-
-        member x.InAddress
-            with get() = x.InParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.InParam <- changeDevParam  x.InParam v x.InParam.DevName
-
-        member x.OutAddress
-            with get() = x.OutParam  |> fun (d) -> d.DevAddress
-            and set(v) = x.OutParam <- changeDevParam  x.OutParam v x.OutParam.DevName
+        member val InAddress = addr.In with get, set
+        member val OutAddress = addr.Out with get, set
 
         /// CPU 생성 시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
@@ -372,17 +363,17 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
 
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inDevParam: DevParam, outDevParam: DevParam, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam)
+    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inDevParam: DevParam, outDevParam: DevParam, addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam, addr)
         member x.ButtonType = btnType
         member val ErrorEmergency = getNull<IStorage>() with get, set
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, inDevParam: DevParam, outDevParam: DevParam,  flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam) //inAddress lamp check bit
+    and LampDef (name: string, system:DsSystem,lampType: LampType, inDevParam: DevParam, outDevParam: DevParam,  addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam, addr) //inAddress lamp check bit
         member x.LampType = lampType
 
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inDevParam: DevParam, outDevParam: DevParam,  flows: HashSet<Flow>) =
-        inherit HwSystemDef(name,  system, flows, inDevParam, outDevParam) // outAddress condition check bit
+    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inDevParam: DevParam, outDevParam: DevParam, addr:Addresses,  flows: HashSet<Flow>) =
+        inherit HwSystemDef(name,  system, flows, inDevParam, outDevParam, addr) // outAddress condition check bit
         member x.ConditionType = conditionType
         member val ErrorCondition = getNull<IStorage>() with get, set
 

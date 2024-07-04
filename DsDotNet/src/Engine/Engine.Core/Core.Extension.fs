@@ -82,7 +82,7 @@ module CoreExtensionModule =
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
         member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
 
-        member x.AddButton(btnType:BtnType, btnName:string, inDevParam:DevParam, outDevParam:DevParam, flow:Flow) =
+        member x.AddButton(btnType:BtnType, btnName:string, inDevParam:DevParam, outDevParam:DevParam,  addr:Addresses, flow:Flow) =
             checkSystem(x, flow, btnName)
           
             let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
@@ -94,13 +94,13 @@ module CoreExtensionModule =
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, inDevParam, outDevParam, HashSet[|flow|]))
+                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, inDevParam, outDevParam, addr, HashSet[|flow|]))
                       |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
-            x.AddButton(btnType, btnName, inAddress|>defaultDevParam, outAddress|>defaultDevParam, flow)       
+            x.AddButton(btnType, btnName, defaultDevParam(), defaultDevParam(), Addresses(inAddress ,outAddress), flow)       
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, inDevParam:DevParam, outDevParam:DevParam, flow:Flow option) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, inDevParam:DevParam, outDevParam:DevParam, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
@@ -108,24 +108,24 @@ module CoreExtensionModule =
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
             | None -> 
                       let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
-                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, inDevParam, outDevParam, flows))
+                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, inDevParam, outDevParam, addr, flows))
                       |> verifyM $"중복 LampDef [name:{lmpName}]"
         
-        member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string, flow:Flow option) =
-                x.AddLamp(lmpType, lmpName, inAddress|>defaultDevParam, outAddress|>defaultDevParam, flow)       
+        member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
+                x.AddLamp(lmpType, lmpName, defaultDevParam(), defaultDevParam(),Addresses(inAddress ,outAddress),  flow)       
 
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, inDevParam:DevParam, outDevParam:DevParam, flow:Flow) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, inDevParam:DevParam, outDevParam:DevParam, addr:Addresses, flow:Flow) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, inDevParam, outDevParam, HashSet[|flow|]))
+                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, inDevParam, outDevParam,  addr, HashSet[|flow|]))
                       |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddress:string, outAddress:string, flow:Flow) =
-                x.AddCondtion(condiType, condiName, inAddress|>defaultDevParam, outAddress|>defaultDevParam, flow)       
+                x.AddCondtion(condiType, condiName, defaultDevParam(), defaultDevParam(), Addresses(inAddress ,outAddress), flow)       
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
@@ -210,13 +210,13 @@ module CoreExtensionModule =
 
         member x.SetInSymbol(symName:string option) =
             x.InParams.ToList() |> Seq.iter(fun kv -> 
-                changeParam (kv.Key, x.InParams,  x.InParams[kv.Key].DevAddress, symName)
+                changeParam (kv.Key, x.InParams, symName)
             )
             
 
         member x.SetOutSymbol(symName:string option) = 
                 x.OutParams.ToList() |> Seq.iter(fun kv -> 
-                changeParam (kv.Key, x.OutParams,  x.OutParams[kv.Key].DevAddress, symName)
+                changeParam (kv.Key, x.OutParams, symName)
             )
 
 

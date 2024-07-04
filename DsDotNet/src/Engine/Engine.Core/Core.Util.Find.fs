@@ -216,7 +216,7 @@ module internal ModelFindModule =
                     .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
         devs 
         |> Seq.distinctBy (fun (dev,_) ->dev)
-        |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()}{dev.GetOutParam(j.Name).Type.ToText()}{dev.ApiName}") 
+        |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()};{dev.GetOutParam(j.Name).Type.ToText()};{dev.ApiName}") 
 
 
     type DsSystem with
@@ -301,6 +301,9 @@ type FindExtension =
                         )
             
             
+    [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
+    [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
+
     [<Extension>] static member GetSkipInfo(dev:TaskDev, job:Job) =  getSkipInfo (dev, job)
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
     [<Extension>] static member GetAlarmCalls(x:DsSystem) = 
@@ -334,13 +337,4 @@ type FindExtension =
     [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
                     x.GetDevicesCall()
                         .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
-
-    [<Extension>] static member GetTargetDevCoins(taskDev:TaskDev, coins:Vertex seq) = 
-                        coins.Where(fun c-> 
-                                    c.GetPureCall().Value.TargetJob.DeviceDefs.Contains(taskDev)
-                        )
-          
-
-    [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
-    [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
 

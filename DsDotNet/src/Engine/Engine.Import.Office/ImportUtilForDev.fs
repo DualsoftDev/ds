@@ -113,25 +113,34 @@ module ImportUtilForDev =
 
     let getAutoGenDevTask  (autoGenSys:LoadedSystem) loadedName jobName apiName = 
         let referenceSystem = autoGenSys.ReferenceSystem
-        let defaultParams = "" |> defaultDevParam, "" |> defaultDevParam
+        let defaultParams =  defaultDevParam(),  defaultDevParam()
         createTaskDevUsingApiName referenceSystem jobName loadedName apiName defaultParams
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
-        let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
-        let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
+        let tastDevKey = $"{newloadedName}_{apiPureName}"
+        let inParam, outParam =
+            if node.DevParam.IsSome then
+                let inParam  = match node.DevParam.Value |>fst
+                                with
+                                    | Some p -> p
+                                    | _ -> defaultDevParam()
+                let outParam  = match node.DevParam.Value |>snd
+                                with
+                                    | Some p -> p
+                                    | _ ->  defaultDevParam()
+                inParam , outParam 
+            else 
+                defaultDevParam(), defaultDevParam()    
 
-        if node.DevParam.IsSome then
-            let inParam  = match node.DevParam.Value |>fst
-                            with
-                                | Some p -> p
-                                | _ -> ""|>defaultDevParam
-            let outParam  = match node.DevParam.Value |>snd
-                            with
-                                | Some p -> p
-                                | _ -> ""|>defaultDevParam
-                                            
+
+        match mySys.GetDevicesCall().TryFind(fun (d,c) -> d.ApiStgName = tastDevKey) with
+        | Some (taskDev, c) -> 
+                         taskDev.AddOrUpdateInParam(jobName, inParam)
+                         taskDev.AddOrUpdateOutParam(jobName, outParam)
+                         taskDev 
+        | None ->
+            let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
+            let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
             TaskDev(api, jobName ,  inParam, outParam, newloadedName)
-        else            
-            TaskDev(api, jobName ,  ""|>defaultDevParam, ""|>defaultDevParam, newloadedName)
 
                     

@@ -134,7 +134,7 @@ module ImportIOTable =
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
-
+               
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
@@ -142,7 +142,6 @@ module ImportIOTable =
                 let dev = dicDev.[devName]
                 let inAdd =    inAddress|>emptyToSkipAddress
                 let outAdd =   outAddress|>emptyToSkipAddress
-
                 let checkInType, checkOutType = getInOutDataType dataType
 
                 dev.InAddress <-  getValidAddress(inAdd, checkInType,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget)

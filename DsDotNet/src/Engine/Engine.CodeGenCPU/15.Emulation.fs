@@ -24,7 +24,7 @@ type TaskDev with
         else 
 
             let setData = if inParam.DevValue.IsNull()
-                            then failWithLog $"{d.Name} {inParam.DevAddress} 은 value 값을 입력해야 합니다." 
+                            then failWithLog $"{d.Name} {d.InAddress} 은 value 값을 입력해야 합니다." 
                             else inParam.DevValue.Value|>literal2expr
 
             (set, setData) --> (d.InTag, getFuncName())

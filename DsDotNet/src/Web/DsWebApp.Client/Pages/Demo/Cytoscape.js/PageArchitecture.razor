@@ -5,11 +5,28 @@
 <h3>PageArchitecture</h3>
 
 <div id="cy" ></div>
+
+@if (_cyNodes == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+}
+
 @code {
+    object _cyNodes, _cyEdges;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
+
+        prepareGraph();
+
+
+        // C# 객체 _cyNodes 를 자바스크립트 객체로 변환
+        var cyElements = new { nodes = _cyNodes, edges = _cyEdges };
+        await JsDual.Eval($"window.cyElements = {NewtonsoftJson.SerializeObject(cyElements)};");
 
         await JsDual.Eval(@"
 var cy = cytoscape({
@@ -91,83 +108,7 @@ var cy = cytoscape({
         'padding-right': 40
       }),
 
-  elements: {
-    nodes: [
-      {
-        data: { id: 'cy', name: 'Cytoscape.js' }
-      },
-
-      {
-        data: { id: 'core', name: 'Core', parent: 'api' },
-        position: { x: 0, y: 0 }
-      },
-
-      {
-        data: { id: 'eles', name: 'Collection', parent: 'api' },
-        position: { x: 150, y: 150 }
-      },
-
-      {
-        data: { id: 'style', name: 'Stylesheet', parent: 'api' },
-        position: { x: 0, y: 150 }
-      },
-
-      {
-        data: { id: 'selector', name: 'Selector', parent: 'api' },
-        position: { x: -150, y: 150 }
-      },
-
-      {
-        data: { id: 'ext', name: 'Extensions', parent: 'cy' }
-      },
-
-      {
-        data: { id: 'corefn', name: 'Core Function', parent: 'ext' },
-        classes: 'ext',
-        position: { x: 350, y: -140 }
-      },
-
-      {
-        data: { id: 'elesfn', name: 'Collection Function', parent: 'ext' },
-        classes: 'ext',
-        position: { x: 350, y: 0 }
-      },
-
-      {
-        data: { id: 'layout', name: 'Layout', parent: 'ext' },
-        classes: 'ext',
-        position: { x: 350, y: 140 }
-      },
-
-      {
-        data: { id: 'renderer', name: 'Renderer', parent: 'ext' },
-        classes: 'ext',
-        position: { x: 350, y: 280 }
-      },
-
-      {
-        data: { id: 'api', name: 'Core API', parent: 'cy' }
-      },
-
-      {
-        data: { id: 'app', name: 'Client' },
-        position: { x: 0, y: 480 }
-      }
-    ],
-    edges: [
-      { data: { source: 'core', target: 'eles' } },
-      { data: { source: 'core', target: 'ext' } },
-      { data: { source: 'core', target: 'style' } },
-      { data: { source: 'style', target: 'selector' } },
-      { data: { source: 'core', target: 'selector' } },
-      { data: { source: 'elesfn', target: 'eles' }, classes: 'ext' },
-      { data: { source: 'corefn', target: 'core' }, classes: 'ext' },
-      { data: { source: 'layout', target: 'api' }, classes: 'ext' },
-      { data: { source: 'renderer', target: 'api' }, classes: 'ext' },
-      { data: { source: 'app', target: 'api', name: 'use' }, classes: 'app' },
-      { data: { source: 'app', target: 'ext', name: 'register' }, classes: 'app' }
-    ]
-  },
+  elements: window.cyElements,
 
   layout: {
     name: 'preset'
@@ -176,6 +117,126 @@ var cy = cytoscape({
 ");
     }
 
+    void prepareGraph()
+    {
+        _cyNodes = new object[]
+        {
+            new
+            {
+                data = new { id = "cy", name = "Cytoscape.js" }
+            },
+            new
+            {
+                data = new { id = "core", name = "Core", parent = "api" },
+                position = new { x = 0, y = 0 }
+            },
+            new
+            {
+                data = new { id = "eles", name = "Collection", parent = "api" },
+                position = new { x = 150, y = 150 }
+            },
+            new
+            {
+                data = new { id = "style", name = "Stylesheet", parent = "api" },
+                position = new { x = 0, y = 150 }
+            },
+            new
+            {
+                data = new { id = "selector", name = "Selector", parent = "api" },
+                position = new { x = -150, y = 150 }
+            },
+            new
+            {
+                data = new { id = "ext", name = "Extensions", parent = "cy" }
+            },
+            new
+            {
+                data = new { id = "corefn", name = "Core Function", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = -140 }
+            },
+            new
+            {
+                data = new { id = "elesfn", name = "Collection Function", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = 0 }
+            },
+            new
+            {
+                data = new { id = "layout", name = "Layout", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = 140 }
+            },
+            new
+            {
+                data = new { id = "renderer", name = "Renderer", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = 280 }
+            },
+            new
+            {
+                data = new { id = "api", name = "Core API", parent = "cy" }
+            },
+            new
+            {
+                data = new { id = "app", name = "Client" },
+                position = new { x = 0, y = 480 }
+            }
+        };
+        _cyEdges = new object[]
+        {
+            new
+            {
+                data = new { source = "core", target = "eles" }
+            },
+            new
+            {
+                data = new { source = "core", target = "ext" }
+            },
+            new
+            {
+                data = new { source = "core", target = "style" }
+            },
+            new
+            {
+                data = new { source = "style", target = "selector" }
+            },
+            new
+            {
+                data = new { source = "core", target = "selector" }
+            },
+            new
+            {
+                data = new { source = "elesfn", target = "eles" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "corefn", target = "core" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "layout", target = "api" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "renderer", target = "api" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "app", target = "api", name = "use" },
+                classes = "app"
+            },
+            new
+            {
+                data = new { source = "app", target = "ext", name = "register" },
+                classes = "app"
+            }
+        };
+    }
 }
 
 <style>

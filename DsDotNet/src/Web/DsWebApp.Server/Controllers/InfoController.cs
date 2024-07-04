@@ -4,6 +4,8 @@ using Engine.Runtime;
 using static Engine.Info.DBLoggerAnalysisDTOModule;
 using static Engine.Info.DBLoggerORM;
 using static Engine.Core.InfoPackageModule;
+using static Engine.Core.GraphModule;
+using static Engine.Core.CoreModule;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
 
@@ -78,5 +80,45 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
         return sysSpan;
     }
+
+    /// <summary>
+    /// Get graph info: nodes and edges
+    /// </summary>
+    // api/info/graph
+    [HttpGet("graph")]
+    public async Task<RestResultString> GetNodesAndEdges([FromQuery] string fqdn) // fqdn = "HelloDS.STN1.Work1"
+    {
+        var sys = _model.System;
+        var nameComponents = fqdn.SplitToFqdnComponents();
+        nameComponents = fqdn.StartsWith($"{sys.Name}.") ? nameComponents.Skip(1).ToArray() : nameComponents;
+        var node = _model.System.FindGraphVertex(nameComponents);
+        if (node == null)
+            return null;
+
+        Graph<Vertex, Edge> graph;
+        CytoVertex me;
+        switch (node)
+        {
+            case Flow f:
+                graph = f.Graph;
+                me = new CytoVertex(f.QualifiedName, null);
+                break;
+            case Real r:
+                graph = r.Graph;
+                me = new CytoVertex(r.QualifiedName, null);
+                break;
+            default:
+                return null;
+        }
+
+        var vertices = graph.Vertices.Select(v => new CytoVertex(v)).Append(me);
+        var edges = graph.Edges.Select(e => new CytoEdge(e));
+        var cytoGraph = new CytoGraph(vertices, edges);
+
+        var json = cytoGraph.Serialize();
+
+        return RestResultString.Ok(json);
+    }
+
 }
 

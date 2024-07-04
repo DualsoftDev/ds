@@ -199,6 +199,8 @@ type FindExtension =
 
     [<Extension>] static member TryFindExportApiItem(x:DsSystem, Fqdn(apiPath)) = tryFindExportApiItem x apiPath
     [<Extension>] static member TryFindGraphVertex  (x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertex x fqdn
+    [<Extension>] static member FindGraphVertex (x:DsSystem, Fqdn(fqdn)):obj = match tryFindGraphVertex x fqdn with | Some o -> o | None -> null
+
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
     [<Extension>] static member TryFindRealVertex (x:DsSystem, flowName, realName) =  tryFindReal x [ flowName; realName ]
     [<Extension>] static member GetSharedReal (x:Real) = getVertexSharedReal x

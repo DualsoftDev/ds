@@ -101,11 +101,11 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
         {
             case Flow f:
                 graph = f.Graph;
-                me = new CytoVertex(f.QualifiedName, null);
+                me = new CytoVertex(f.QualifiedName, f.Name, null);
                 break;
             case Real r:
                 graph = r.Graph;
-                me = new CytoVertex(r.QualifiedName, null);
+                me = new CytoVertex(r.QualifiedName, r.Name, null);
                 break;
             default:
                 return null;

@@ -25,6 +25,7 @@
 
 
         var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
+        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1");
         await data.IterAsync(
             async json => {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
@@ -45,7 +46,7 @@ var cy = window.cy = cytoscape({
       selector: 'node',
       css: {
         'shape': 'rectangle',
-        'content': 'data(id)',
+        'content': 'data(content)',
         'text-valign': 'center',
         'text-halign': 'center'
       }

@@ -16,21 +16,31 @@ public interface ICytoItem
 public abstract class CytoItem : ICytoItem
 {
     public string id { get; }
+    public string content { get; }
     protected CytoItem() {}
-    protected CytoItem(string id) => this.id = id;
+
+    protected CytoItem(string id, string content)
+    {
+        this.id = id;
+        this.content = content;
+    }
     public abstract string Serialize();
 }
 
 public class CytoVertex : CytoItem
 {
     public string parent;
+    public string type;
 
     public CytoVertex() {}
+
     public CytoVertex(Vertex vertex)
-        : this(vertex.QualifiedName, vertex.Parent.GetCore().QualifiedName)
-    {}
-    public CytoVertex(string fqdn, string parent)
-        : base(fqdn)
+        : this(vertex.QualifiedName, vertex.Name, vertex.Parent.GetCore().QualifiedName)
+    {
+        type = vertex.GetType().Name;
+    }
+    public CytoVertex(string fqdn, string content, string parent)
+        : base(fqdn, content)
     {
         this.parent = parent;
     }
@@ -38,7 +48,7 @@ public class CytoVertex : CytoItem
     {
         var p = parent.IsNullOrEmpty() ? "" : $", parent: '{parent}'";
         var posi = ", position: " + Embrace("x: 215, y: 85");
-        return CytoGraphEx.Embrace($"id: '{id}'{p}");
+        return CytoGraphEx.Embrace($"id: '{id}', content: '{content}', type: '{type}'{p}");
     }
 }
 
@@ -53,7 +63,7 @@ public class CytoEdge : CytoItem
     {}
 
     public CytoEdge(string source, string target)
-        : base($"{source}=>{target}")
+        : base($"{source}=>{target}", $"{source}=>{target}")
     {
         this.source = source;
         this.target = target;

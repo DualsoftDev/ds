@@ -98,9 +98,10 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
         var vertices = node.CollectVertices(true).ToArray();
         var edges = node.CollectEdges().ToArray();
-        var cytoGraph = new CytoGraph(vertices, edges);
+        var cytoGraph = new CyGraph(vertices, edges);
 
         var json = cytoGraph.Serialize();
+        Trace.WriteLine(json);
 
         return RestResultString.Ok(json);
     }
@@ -115,13 +116,13 @@ public static class CytoVertexExtension
         var p = vertex.GetParentName();
         return (q, n, p);
     }
-    public static IEnumerable<CytoVertex> CollectVertices(this IVertex vertex, bool includeMe=true)
+    public static IEnumerable<CyVertex> CollectVertices(this IVertex vertex, bool includeMe=true)
     {
         if (includeMe)
         {
             var (q, n, p) = GetNameAndQualifiedNameAndParentName(vertex);
             var t = vertex.GetType().Name;
-            yield return new CytoVertex(t, q, n, p);
+            yield return new CyVertex(t, q, n, p);
         }
         switch (vertex)
         {
@@ -141,19 +142,19 @@ public static class CytoVertexExtension
         }
     }
 
-    public static IEnumerable<CytoEdge> CollectEdges(this IVertex vertex)
+    public static IEnumerable<CyEdge> CollectEdges(this IVertex vertex)
     {
         switch (vertex)
         {
             case Flow f:
-                foreach (var c in f.Graph.Edges.Select(e => new CytoEdge(e)))
+                foreach (var c in f.Graph.Edges.Select(e => new CyEdge(e)))
                     yield return c;
 
                 foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectEdges()))
                     yield return c;
                 break;
             case Real r:
-                foreach (var c in r.Graph.Edges.Select(e => new CytoEdge(e)))
+                foreach (var c in r.Graph.Edges.Select(e => new CyEdge(e)))
                     yield return c;
                 break;
 

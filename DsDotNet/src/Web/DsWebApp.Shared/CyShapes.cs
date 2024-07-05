@@ -1,25 +1,25 @@
 using Dual.Common.Core;
 using Engine.Core;
 using static Engine.Core.CoreModule;
-using static DsWebApp.Shared.CytoGraphEx;
+using static DsWebApp.Shared.CyGraphEx;
 
 namespace DsWebApp.Shared;
 
 /// <summary>
 /// Cytoscape graph item
 /// </summary>
-public interface ICytoItem
+public interface ICyItem
 {
     string id { get; }
 }
 
-public abstract class CytoItem : ICytoItem
+public abstract class CyItem : ICyItem
 {
     public string id { get; }
     public string content { get; }
-    protected CytoItem() {}
+    protected CyItem() {}
 
-    protected CytoItem(string id, string content)
+    protected CyItem(string id, string content)
     {
         this.id = id;
         this.content = content;
@@ -27,20 +27,20 @@ public abstract class CytoItem : ICytoItem
     public abstract string Serialize();
 }
 
-public class CytoVertex : CytoItem
+public class CyVertex : CyItem
 {
     public string parent;
     public string type;
 
     public string shape;
 
-    public CytoVertex() {}
+    public CyVertex() {}
 
-    public CytoVertex(Vertex vertex)
+    public CyVertex(Vertex vertex)
         : this(vertex.GetType().Name, vertex.QualifiedName, vertex.Name, vertex.Parent.GetCore().QualifiedName)
     {
     }
-    public CytoVertex(string type, string fqdn, string content, string parent)
+    public CyVertex(string type, string fqdn, string content, string parent)
         : base(fqdn, content)
     {
         this.parent = parent;
@@ -56,21 +56,24 @@ public class CytoVertex : CytoItem
     {
         var p = parent.IsNullOrEmpty() ? "" : $", parent: '{parent}'";
         var posi = ", position: " + Embrace("x: 215, y: 85");
-        return CytoGraphEx.Embrace($"id: '{id}', content: '{content}', type: '{type}', shape: '{shape}'{p}");
+        var data = $"id: '{id}', content: '{content}', shape: '{shape}'{p}";
+        data = $"data: {Embrace(data)}";
+        var classes = $"classes: '{type}'";
+        return Embrace($"{data}, {classes}");
     }
 }
 
-public class CytoEdge : CytoItem
+public class CyEdge : CyItem
 {
     public string source { get; }
     public string target { get; }
-    public CytoEdge() { }
+    public CyEdge() { }
 
-    public CytoEdge(Edge edge)
+    public CyEdge(Edge edge)
         : this(edge.Source.QualifiedName, edge.Target.QualifiedName)
     {}
 
-    public CytoEdge(string source, string target)
+    public CyEdge(string source, string target)
         : base($"{source}=>{target}", $"{source}=>{target}")
     {
         this.source = source;
@@ -79,46 +82,45 @@ public class CytoEdge : CytoItem
 
     public override string Serialize()
     {
-        return CytoGraphEx.Embrace($"id: '{id}', source: '{source}', target: '{target}'");
+        var data = $"id: '{id}', source: '{source}', target: '{target}'";
+        data = $"data: {Embrace(data)}";
+        return Embrace(data);
     }
 }
 
-public class CytoData
+public class CyData
 {
-    public CytoItem data { get; }
+    public CyItem data { get; }
 
-    public CytoData(CytoItem item)
+    public CyData(CyItem item)
     {
         data = item;
     }
 }
 
-public class CytoGraph
+public class CyGraph
 {
-    public CytoData[] nodes { get; }
-    public CytoData[] edges { get; }
+    public CyData[] nodes { get; }
+    public CyData[] edges { get; }
 
-    public CytoGraph() {}
+    public CyGraph() {}
 
-    public CytoGraph(IEnumerable<CytoVertex> nodes, IEnumerable<CytoEdge> edges)
+    public CyGraph(IEnumerable<CyVertex> nodes, IEnumerable<CyEdge> edges)
     {
-        this.nodes = nodes.Select(n => new CytoData(n)).ToArray();
-        this.edges = edges.Select(e => new CytoData(e)).ToArray();
+        this.nodes = nodes.Select(n => new CyData(n)).ToArray();
+        this.edges = edges.Select(e => new CyData(e)).ToArray();
     }
 }
 
-public static class CytoGraphEx
+public static class CyGraphEx
 {
     public static string OB = "{";
     public static string CB = "}";
     public static string Embrace(string s) => @$"{OB} {s} {CB}";
-    public static string Serialize(this CytoData data)
-    {
-        return Embrace($"data: {data.data.Serialize()}");
-    }
-    public static string Serialize(this CytoGraph graph)
-    {
+    public static string Serialize(this CyData data) => data.data.Serialize();
 
+    public static string Serialize(this CyGraph graph)
+    {
         var nodes = string.Join(",\n", graph.nodes.Select(n => n.Serialize()));
         var edges = string.Join(",\n", graph.edges.Select(n => n.Serialize()));
         var items = $"nodes: [{nodes}], edges: [{edges}]";

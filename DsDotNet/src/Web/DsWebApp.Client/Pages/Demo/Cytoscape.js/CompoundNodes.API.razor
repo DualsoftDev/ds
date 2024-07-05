@@ -39,20 +39,29 @@
             );
 
         await JsDual.EvalOnGlobalModule(@"
+console.log(window.cyData);
+
 var cy = window.cy = cytoscape({
     container: document.getElementById('cy'),
 
     boxSelectionEnabled: false,
 
     style: [
+        // https://stackoverflow.com/questions/45572034/how-to-select-nodes-by-class-in-cytoscape-js
         {
             selector: 'node',
             css: {
-                // 'shape': 'rectangle',
-                'shape': 'data(shape)',
+                // 'shape': 'data(shape)',
+                'shape': 'rectangle',
                 'content': 'data(content)',
                 'text-valign': 'center',
                 'text-halign': 'center'
+            }
+        },
+        {
+            selector: '.Call',
+            css: {
+                'shape': 'ellipse',
             }
         },
         {
@@ -61,14 +70,12 @@ var cy = window.cy = cytoscape({
                 'text-valign': 'top',
                 'text-halign': 'center',
                 'shape': 'round-rectangle',
-                'corner-radius': ""10"",
                 'padding': 10
             }
         },
         {
             selector: 'node#e',
             css: {
-                'corner-radius': ""10"",
                 'padding': 0
             }
         },
@@ -80,6 +87,7 @@ var cy = window.cy = cytoscape({
             }
         }
     ],
+
 
     elements: window.cyData,
     wheelSensitivity: 0.2,
@@ -116,8 +124,8 @@ $('#reset_zoom').click(() => {
     }
 
     #cy {
-        height: 100%;
-        width: 100%;
+        height: 90%;
+        width: 90%;
         position: relative;
         left: 0;
         top: 0;
@@ -181,5 +189,37 @@ $('#reset_zoom').click(() => {
    //         { data: { id: 'e1', source: 'a', target: 'b' } }
    //     ]
    // },
+   
+   
+   
+   // // https://stackoverflow.com/questions/27280708/how-do-i-make-classes-work-in-cytoscape-js
+   // var cy = cytoscape({
+   //     container: document.getElementById('cy'),
+   //     style: [
+   //         {
+   //             selector: 'node',
+   //             style: {
+   //                 'label': 'data(id)'
+   //             }
+   //         },
 
+   //         {
+   //             selector: '.ClassName1',
+   //             style: {
+   //                 'width': 8,
+   //                 'height': 8,
+   //                 'label': ''
+   //             }
+   //         }
+   //     ],
+   //     elements: {
+   //         nodes: [
+   //               { data: { id: 'explore'}, classes: 'ClassName1'},
+   //               { data: { id: 'discover' } }
+   //         ],
+   //         edges: [
+   //               { data: { source: 'explore', target: 'discover' } }
+   //         ]
+   //    },
+   // });
 *@

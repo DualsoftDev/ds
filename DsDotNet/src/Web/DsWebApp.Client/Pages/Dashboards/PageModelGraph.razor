@@ -8,6 +8,7 @@
 <button id="center">Center</button>
 <button id="reset_zoom">Reset zoom</button>
 <button id="enable_zoom">Enable zoom</button>
+<button id="hide">Hide selection</button>
 <div id="cy"></div>
 
 @code {
@@ -57,26 +58,43 @@ var cy = window.cy = cytoscape({
                 'content': 'data(content)',
                 'text-valign': 'center',
                 'text-halign': 'center',
+                'background-opacity': 1,
             }
         },
         {
-            selector: '.Real',
-            // selector: 'node[classes=""Real""]',
+            selector: 'node.Flow',
+            css: {
+                'shape': 'rectangle',
+                // 'text-outline-width': 1,
+                // 'text-outline-color': 'white',
+                'border-width': 4,
+                'border-color': 'navy',
+                'border-style': 'dashed',
+                'font-size': '60px',
+                'color': 'skyblue',
+                'background-color': 'LightCyan',
+
+
+                // 'text-background-color': 'blue',
+                // 'text-background-padding': 100,
+            }
+        },
+        {
+            selector: 'node.Real',
             css: {
                 'shape': 'rectangle',
                 'background-color': 'DarkSalmon',
             }
         },
         {
-            selector: '.Call',
+            selector: 'node.Call',
             css: {
                 'shape': 'ellipse',
                 'background-color': 'DarkSeaGreen',
-
             }
         },
         {
-            selector: '.Alias',
+            selector: 'node.Alias',
             css: {
                 'shape': 'diamond',
             }
@@ -91,7 +109,13 @@ var cy = window.cy = cytoscape({
             }
         },
         {
-            selector: 'node#e',
+            selector: ':selected',
+            css: {
+                'background-color': 'cyan',
+            }
+        },
+        {
+            selector: 'node#e',     // node 에서 id 가 e 인 요소
             css: {
                 'padding': 0
             }
@@ -105,7 +129,7 @@ var cy = window.cy = cytoscape({
             }
         },
         {
-            selector: '.Reset',
+            selector: 'edge.Reset',
             css: {
                 'line-color': 'green',
                 'curve-style': 'bezier',
@@ -129,18 +153,79 @@ var cy = window.cy = cytoscape({
         name: 'dagre',              // https://jsfiddle.net/bababalcksheep/nyt8Lupv/
         animate: true,
         padding: 5
-    }
+    },
 });
 
+
+// click event: node 및 edge 둘다 적용
+// node 만 적용하려면 cy.on('click', 'node', evt => ...  의 형태로 작성
+cy.on('click', evt => {
+    if (evt.target.id)
+    {
+        console.log('clicked ' + evt.target.id());
+        console.log(evt.target.json());
+        // console.log('clicked ' + JSON.stringify(evt.target.json()));
+    }
+})
+
+
+// button handlers
 $('#center').click(() => {
-    cy.center();
+    cy.fit(cy.nodes().filter(':visible'))
+    // cy.center();
+});
+$('#hide').click(() => {
+    cy.$(':selected').style('display', 'none');
+    cy.fit(cy.nodes().filter(':visible'))
 });
 
 $('#reset_zoom').click(() => {
-    console.log('resetting..');
-    cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
-        .data('shape', 'rectangle')
-        .addClass('active');
+    // multi layout : https://stackoverflow.com/questions/52200858/cytoscape-js-multiple-layouts-different-layout-within-compound-nodes
+
+    // 최상위 레벨 노드를 찾기
+    var topLevelNodes = cy.nodes().filter(function(node) {
+      return node.data('parent') === undefined && !node.hasClass('DsSystem');;
+    });
+
+    const disconnectedNodes = cy.nodes().filter(node => node.degree(false) === 0);
+    disconnectedNodes.layout({
+      name: 'grid',
+      rows: 3 // 모든 단일 노드를 한 줄로 배치
+    }).run();
+
+
+    console.log('Top level nodes:');
+    topLevelNodes.forEach(function(node) {
+      console.log(node.data('id'));
+    });
+
+    // 최상위 레벨 노드에 grid layout 적용
+    topLevelNodes.layout({
+      name: 'grid',
+      columns: 3,
+      fit: true,
+      padding: 30,
+    }).run();
+
+    // topLevelNodes[0].descendants().layout({
+    //   name: 'dagre',
+    //   // columns: 3,
+    //   // fit: true,
+    //   padding: 30,
+    // }).run();
+
+    cy.$('node.Flow').layout({
+      name: 'dagre',
+      // columns: 3,
+      // fit: true,
+      padding: 30,
+    }).run();
+
+
+    // console.log('resetting..');
+    // cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
+    //     .data('shape', 'rectangle')
+    //     .addClass('active');
 });
 
 ");
@@ -163,10 +248,19 @@ $('#reset_zoom').click(() => {
  </style>
  
       
-    
-  
-  
-  
+@*
+cy.nodes()
+cy.$(':selected')
+cy.$(':visible')
+cy.$(':hidden')
+cy.$(':parent')
+cy.$('node.Flow')
+cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
+cy.$(':selected').position({x:2000, y:10})
+*@
+
+
+
 @* 
 
      // elements: {

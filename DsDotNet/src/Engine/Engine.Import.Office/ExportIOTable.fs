@@ -102,8 +102,8 @@ module ExportIOTable =
 
     let splitNameForRow(name:string) = 
         let head = name.Split(TextFlowSplit)[0];   
-        let tail = name[head.Length+2..]
-        head, tail
+        let tail = name[(head.Length+TextFlowSplit.length())..]
+        head, tail 
 
     let rowIOItems (dev: TaskDev, job: Job) target =
         let inSym  =  dev.GetInParam(job.Name).Name

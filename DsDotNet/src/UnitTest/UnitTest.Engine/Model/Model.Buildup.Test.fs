@@ -38,13 +38,13 @@ module ModelBuildupTests1 =
                 let apiItem = TaskDev(apiP, jName, defaultDevParam(), defaultDevParam(),  dev.Name)
                 apiItem.InAddress <-"%I1"
                 apiItem.OutAddress<- "%Q1"
-                Job(jName, system, [apiItem])
+                Job([|jName|], system, [apiItem])
             let callAm =
                 let jName = "Am"
                 let apiItem = TaskDev(apiM, jName, defaultDevParam(), defaultDevParam(),  dev.Name)
                 apiItem.InAddress <-"%I2"
                 apiItem.OutAddress<- "%Q2"
-                Job(jName, system, [apiItem])
+                Job([|jName|], system, [apiItem])
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 

@@ -153,17 +153,17 @@ module internal ToDsTextModule =
             if system.Jobs.Any() then
                 let printDev (d:TaskDev) jobName= $"{d.ApiName}({toTextDevParam d.InAddress (d.GetInParam(jobName))}, {toTextDevParam d.OutAddress (d.GetOutParam(jobName))})"
                 yield $"{tab}[jobs] = {lb}"
-                for c in system.Jobs do
+                for j in system.Jobs do
                     let jobItems =
-                        c.DeviceDefs
-                        |> Seq.map (fun d-> printDev d (c.Name))
+                        j.DeviceDefs
+                        |> Seq.map (fun d-> printDev d (j.Name))
                           
                     let jobItemText = jobItems.JoinWith("; ") + ";"
-                    if c.JobParam.ToText() = ""
+                    if j.JobParam.ToText() = ""
                     then
-                        yield $"{tab2}{c.Name.QuoteOnDemand()} = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{j.Name} = {lb} {jobItemText} {rb}"  
                     else 
-                        yield $"{tab2}{c.Name.QuoteOnDemand()}[{c.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{j.Name}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
 
                 yield $"{tab}{rb}"
             elif system.Functions.Any() then

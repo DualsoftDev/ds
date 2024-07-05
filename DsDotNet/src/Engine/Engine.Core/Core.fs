@@ -326,8 +326,8 @@ module CoreModule =
         member val IsRootOnlyDevice = false  with get, set
 
     /// Job 정의: Call 이 호출하는 Job 항목
-    type Job (name:string, system:DsSystem, tasks:TaskDev seq) =
-        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
+    type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
+        inherit FqdnObject(names.Combine(), createFqdnObject([|system.Name|]))
         let mutable jobParam = JobParam(ActionNormal, JobTypeMulti.Single)
         member x.JobParam = jobParam
         member x.UpdateJobParam(newJobParam: JobParam) =

@@ -216,7 +216,12 @@ module internal ModelFindModule =
                     .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
         devs 
         |> Seq.distinctBy (fun (dev,_) ->dev)
-        |> Seq.sortBy (fun (dev,j) -> $"{dev.GetInParam(j.Name).Type.ToText()};{dev.GetOutParam(j.Name).Type.ToText()};{dev.ApiName}") 
+        |> Seq.sortBy (fun (dev,j) -> 
+                            let jobName = j.TargetJob.NameComponents.Skip(1).Combine();
+                            
+                            $"{dev.GetInParam(jobName).Type.ToText()};
+                              {dev.GetOutParam(jobName).Type.ToText()};
+                              {dev.ApiName}") 
 
 
     type DsSystem with

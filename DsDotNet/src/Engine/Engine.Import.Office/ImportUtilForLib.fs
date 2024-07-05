@@ -30,7 +30,7 @@ module ImportUtilForLib =
         | None -> ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
 
     let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (devParams: DeviceLoadParameters) =
-        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node param.Node.JobName) |> ignore
+        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node (param.Node.JobName.CombineQuoteOnDemand())) |> ignore
 
     let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string) =
         match autoGenSys with
@@ -54,7 +54,7 @@ module ImportUtilForLib =
     let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getDevParams: string -> DeviceLoadParameters) =
         let devOrg = getDeviceOrganization param.MySys libFilePath loadedName
         let devParams = getDevParams loadedName
-        let task = getTaskDev autoGenSys loadedName param.Node.JobName param.ApiName
+        let task = getTaskDev autoGenSys loadedName (param.Node.JobName.CombineQuoteOnDemand()) param.ApiName
         addSingleTask tasks task
         if task.IsNone then
             processSingleTask tasks param devOrg loadedName param.ApiName devParams
@@ -70,7 +70,7 @@ module ImportUtilForLib =
             processTask tasks param devName libFilePath autoGenSys getDevParams
 
     let addNewCall (param: CallParams) =
-        let jobName = param.Node.JobName
+        let jobName = param.Node.JobName.CombineQuoteOnDemand()
         //let apiPureName = GetBracketsRemoveName(param.ApiName).Trim()
         let tasks = HashSet<TaskDev>()
 
@@ -83,8 +83,10 @@ module ImportUtilForLib =
             match param.MySys.Jobs.TryFind(fun f -> f.Name = jobName) with
             | Some existingJob -> existingJob
             | None -> 
-                let job = Job(jobName, param.MySys, tasks |> Seq.toList)
+                let job = Job(param.Node.JobName, param.MySys, tasks |> Seq.toList)
                 job.UpdateJobParam(param.Node.JobParam)
                 param.MySys.Jobs.Add(job); job
 
-        Call.Create(jobForCall, param.Parent)
+        let call = Call.Create(jobForCall, param.Parent)
+        call.Name <- param.Node.CallName
+        call

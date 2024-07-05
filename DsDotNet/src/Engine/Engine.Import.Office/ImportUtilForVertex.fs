@@ -38,17 +38,18 @@ module ImportUtilVertex =
         match sys.Jobs |> Seq.tryFind (fun job -> job.Name = loadSysName) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
+            let jobName = node.JobName.CombineQuoteOnDemand()
             let device = sys.LoadedSystems |> Seq.find (fun d -> d.Name = loadSysName)
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
             |Some api ->
                 let devTask = 
                     match sys.Jobs.SelectMany(fun j->j.DeviceDefs).TryFind(fun d->d.ApiItem = api) with 
                     | Some (taskDev) ->
-                        taskDev.AddOrUpdateInParam   (node.JobName, node.DevParamIn  )
-                        taskDev.AddOrUpdateOutParam  (node.JobName, node.DevParamOut )
+                        taskDev.AddOrUpdateInParam   (jobName, node.DevParamIn  )
+                        taskDev.AddOrUpdateOutParam  (jobName, node.DevParamOut )
                         taskDev
                     | _ -> 
-                        TaskDev(api, node.JobName, node.DevParamIn, node.DevParamOut, loadSysName)
+                        TaskDev(api, jobName, node.DevParamIn, node.DevParamOut, loadSysName)
 
                 let job = Job(node.JobName, sys, [devTask])
                 job.UpdateJobParam(node.JobParam)
@@ -58,7 +59,7 @@ module ImportUtilVertex =
             | None -> 
                 if device.AutoGenFromParentSystem
                 then
-                    let autoTaskDev = getAutoGenDevTask device loadSysName node.JobName apiName
+                    let autoTaskDev = getAutoGenDevTask device loadSysName jobName apiName
                     let job = Job(node.JobName, sys, [autoTaskDev])
                     job.UpdateJobParam(node.JobParam)
                     sys.Jobs.Add job |> ignore
@@ -77,15 +78,15 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                let flow, jobName, apiName = node.CallFlowNJobNApi
+                let flow, job, apiName = node.CallFlowNJobNApi
                 match node.JobParam.JobMulti with
-                | Single when mySys.LoadedSystems.TryFind(fun d -> d.Name = jobName).IsSome -> 
-                    getCallFromLoadedSys mySys node jobName apiName parentWrapper
+                | Single when mySys.LoadedSystems.TryFind(fun d -> d.Name = job.CombineQuoteOnDemand()).IsSome -> 
+                    getCallFromLoadedSys mySys node (job.CombineQuoteOnDemand()) apiName parentWrapper
                 | _  ->
                     let callParams = {
                         MySys = mySys
                         Node = node
-                        JobName = jobName
+                        JobName = job.Combine()
                         ApiName = apiName
                         Parent = parentWrapper
                         }

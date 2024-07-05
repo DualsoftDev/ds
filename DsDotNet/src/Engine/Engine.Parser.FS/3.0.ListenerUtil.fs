@@ -162,7 +162,7 @@ module ListnerCommonFunctionGeneratorUtil =
         let callListings = ctx.Descendants<CallListingContext>().ToArray()
         [
             for callList in callListings do
-                let jobName = callList.TryFindFirstChild<JobNameContext>().Value.GetText().DeQuoteOnDemand()     
+                let jobName = callList.TryFindFirstChild<JobNameContext>().Value.GetText().DeQuoteOnDemand().Split('.')     
                 let jobOption =
                     callList.TryFindFirstChild<JobTypeOptionContext>()
                     |> Option.map (fun ctx -> ctx.GetText().DeQuoteOnDemand())

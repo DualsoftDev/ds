@@ -181,23 +181,23 @@ module PPTNodeModule =
             else defaultDevParam ()    
 
         member x.JobName =
-            let flow, job, Api = x.CallFlowNJobNApi
-            let pureJob = $"{job}_{Api}"
+            let flow, (job: string list), Api = x.CallFlowNJobNApi
+            let pureJob = job.Append(Api)
             let jobName =
                 if x.IsCallDevParam then
                     let inParam = devParam.Value |> fst 
                     let outParam = devParam.Value |> snd
                     if inParam.IsSome && outParam.IsNone then
                         let post = getPostParam inParam.Value
-                        if post = "" then $"{pureJob}" else $"{pureJob}_IN{post}"
+                        if post = "" then pureJob else (pureJob.Append( $"IN{post}").ToArray())
                     elif inParam.IsSome && outParam.IsSome then
                         let postIn = getPostParam inParam.Value
                         let postOut = getPostParam outParam.Value
-                        if postIn = "" && postOut = "" then $"{pureJob}"
-                        else $"{pureJob}_IN{postIn}_OUT{postOut}" 
+                        if postIn = "" && postOut = "" then pureJob
+                        else pureJob.Append( $"_IN{postIn}_OUT{postOut}").ToArray()  
                     else failwithlog "error"
                 else pureJob
-            jobName
+            jobName.ToArray()
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -234,8 +234,8 @@ module PPTNodeModule =
             call.Disabled <- x.DisableCall
             if x.IsCallDevParam && x.IsRootNode.Value = false then 
                 call.TargetJob.DeviceDefs.Iter(fun d->
-                    d.AddOrUpdateInParam(x.JobName , (x.DevParam.Value |> fst).Value)
-                    d.AddOrUpdateOutParam(x.JobName , (x.DevParam.Value |> snd).Value)
+                    d.AddOrUpdateInParam(x.JobName.CombineQuoteOnDemand() , (x.DevParam.Value |> fst).Value)
+                    d.AddOrUpdateOutParam(x.JobName.CombineQuoteOnDemand() , (x.DevParam.Value |> snd).Value)
                 )
       
         member x.CallFlowNJobNApi = 
@@ -246,11 +246,11 @@ module PPTNodeModule =
             let parts = GetLastParenthesesReplaceName(name, "").Split('.')  
             match parts.Length with
             | 2 -> 
-                let job = $"{pageTitle}{TextFlowSplit}{TrimSpace(parts.[0])}"  |> GetBracketsRemoveName
+                let job = [$"{pageTitle}";$"{TrimSpace(parts.[0]) |> GetBracketsRemoveName}"] 
                 let api = TrimSpace(parts.[1]) |> GetBracketsRemoveName
-                pageTitle, job, api
+                pageTitle, job , api
             | 3 -> 
-                let job = $"{TrimSpace(parts.[0])}{TextFlowSplit}{TrimSpace(parts.[1])}"  |> GetBracketsRemoveName
+                let job = [$"{TrimSpace(parts.[0])}";$"{TrimSpace(parts.[1])|> GetBracketsRemoveName}"] 
                 let api = TrimSpace(parts.[2]) |> GetBracketsRemoveName
                 parts.[0], job, api
             | _ -> shape.ErrorShape("Action이름 규격을 확인하세요.", iPage)  
@@ -259,12 +259,13 @@ module PPTNodeModule =
         member x.CallName = 
         
             let flow, job, api = x.CallFlowNJobNApi
-            $"{job}_{api}"
+            $"{job.Last()}_{api}"
 
 
         member x.CallDevName = 
             let flow, job, api = x.CallFlowNJobNApi
-            job    
+            $"{flow}{TextFlowSplit}{job.Last()}"
+           
             
         member x.FlowName = 
             let flow, job, api = x.CallFlowNJobNApi

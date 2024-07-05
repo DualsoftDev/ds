@@ -87,12 +87,22 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
     /// </summary>
     // api/info/graph
     [HttpGet("graph")]
-    public async Task<RestResultString> GetNodesAndEdges([FromQuery] string fqdn) // fqdn = "HelloDS.STN1.Work1"
+    public async Task<RestResultString> GetNodesAndEdges([FromQuery] string fqdn=null) // fqdn = "HelloDS.STN1.Work1"
     {
         var sys = _model.System;
+        fqdn = fqdn ?? sys.Name;
+
+        IVertex node = null;
         var nameComponents = fqdn.SplitToFqdnComponents();
-        nameComponents = fqdn.StartsWith($"{sys.Name}.") ? nameComponents.Skip(1).ToArray() : nameComponents;
-        var node = _model.System.FindGraphVertex(nameComponents);
+        if (fqdn == sys.Name)
+            node = sys;
+        else
+        {
+            if (fqdn.StartsWith($"{sys.Name}."))
+                nameComponents = nameComponents.Skip(1).ToArray();
+            node = _model.System.FindGraphVertex(nameComponents);
+        }
+
         if (node == null)
             return RestResultString.Err($"Failed to find vertex with name: {fqdn}");
 
@@ -126,6 +136,10 @@ public static class CytoVertexExtension
         }
         switch (vertex)
         {
+            case DsSystem s:
+                foreach (var c in s.Flows.SelectMany(f => f.CollectVertices()))
+                    yield return c;
+                break;
             case Flow f:
                 foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectVertices()))
                     yield return c;
@@ -146,6 +160,10 @@ public static class CytoVertexExtension
     {
         switch (vertex)
         {
+            case DsSystem s:
+                foreach (var c in s.Flows.SelectMany(f => f.CollectEdges()))
+                    yield return c;
+                break;
             case Flow f:
                 foreach (var c in f.Graph.Edges.Select(e => new CyEdge(e)))
                     yield return c;

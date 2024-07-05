@@ -348,6 +348,7 @@ type FindExtension =
     [<Extension>]
     static member GetParentName(vertex:IVertex) =
         match vertex with
+        | :? DsSystem as s -> s.Name
         | :? Flow as f -> f.System.QualifiedName
         | :? Real as r -> r.Flow.QualifiedName
         | :? Call as c -> c.Parent.GetCore().QualifiedName

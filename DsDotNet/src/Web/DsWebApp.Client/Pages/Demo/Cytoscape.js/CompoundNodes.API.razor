@@ -29,7 +29,8 @@
 
 
         // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
-        var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1");
+        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
+        var data = await Http.GetRestResultAsync<string>($"/api/info/graph");
         await data.IterAsync(
             async json => {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");

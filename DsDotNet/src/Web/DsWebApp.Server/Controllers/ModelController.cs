@@ -1,3 +1,4 @@
+using DsWebApp.Server.Common;
 using DsWebApp.Server.Hubs;
 using Engine.Runtime;
 
@@ -16,9 +17,9 @@ public class ModelControllerConstructor : ControllerBaseWithLogger
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class ModelController(ServerGlobal global) : ModelControllerConstructor(global.Logger)
+public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstructor(serverGlobal.Logger)
 {
-    RuntimeModel _model => global.RuntimeModel;
+    RuntimeModel _model => serverGlobal.RuntimeModel;
 
     /*
        {
@@ -28,8 +29,11 @@ public class ModelController(ServerGlobal global) : ModelControllerConstructor(g
     */
     // api/model
     [HttpGet]
-    public RestResult<RuntimeModelDto> GetModelInfo()
+    public async Task<RestResult<RuntimeModelDto>> GetModelInfo()
     {
+        if (!await serverGlobal.StandbyUntilServerReadyAsync())
+            return RestResult<RuntimeModelDto>.Err("Server not ready.");
+
         if (_model == null)
             return RestResult<RuntimeModelDto>.Err("No model"); // 404 Not Found 반환
 

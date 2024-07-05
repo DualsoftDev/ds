@@ -82,6 +82,7 @@ public partial class Demon : BackgroundService
                     });
             _modelSubscription.Add(subscription);
 
+            serverGlobal.ServerReady = true;
 
         }
 

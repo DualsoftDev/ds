@@ -32,8 +32,6 @@ public class CyVertex : CyItem
     public string parent;
     public string type;
 
-    public string shape;
-
     public CyVertex() {}
 
     public CyVertex(Vertex vertex)
@@ -45,18 +43,12 @@ public class CyVertex : CyItem
     {
         this.parent = parent;
         this.type = type;
-        shape = type switch
-        {
-            "Call" => "ellipse",
-            _ => "rectangle"
-
-        };
     }
     public override string Serialize()
     {
         var p = parent.IsNullOrEmpty() ? "" : $", parent: '{parent}'";
         var posi = ", position: " + Embrace("x: 215, y: 85");
-        var data = $"id: '{id}', content: '{content}', shape: '{shape}'{p}";
+        var data = $"id: '{id}', content: '{content}'{p}";
         data = $"data: {Embrace(data)}";
         var classes = $"classes: '{type}'";
         return Embrace($"{data}, {classes}");

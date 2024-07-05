@@ -1,0 +1,195 @@
+@* https://jsfiddle.net/vr2Lpz8y/ *@
+
+@page "/dashboards/log-gantt-jschart-static-sample"
+@using Dual.Web.Blazor.Client.Components.Chart
+
+<h3>PageLogGantt_JsChart</h3>
+
+
+
+<div id="chartTarget" style="height: 160px; width: 100%;">
+    <canvas id="chartCanvas" width="600" height="160" style="display: block; height: 160px; width: 600px;"></canvas>
+    <div style="opacity:0;" class="chartTooltip center">
+    </div>
+</div>
+<script>
+    var options = {
+        // Depricated and will be removed in future. Please use elements.* instead.
+        // "colorFunction": function(text, data, dataset, index) {
+        //     return Color('black');
+        // },
+        // "showText": true,
+        // "textPadding": 4
+        "elements": {
+            "colorFunction": function (text, data, dataset, index) {
+                return Color('black');
+            },
+            "showText": true,
+            "textPadding": 4
+        },
+        "tooltips": {
+            "callbacks": {
+                "label": function (item) {
+                    console.log(item);
+                    let s = item.yLabel[0];
+                    let e = item.yLabel[1];
+                    let multilines = [`${typeof (s)}: ${s} ~ ${e}`];
+                    multilines.push(JSON.stringify(item));
+                    return multilines;
+                }
+            }
+        }
+    }
+    var data = {
+        "labels": [ // x-labels
+            "HelloDS.STN1.Work1",
+            "STN1__Device1_ADV",
+            "STN1__Device2_ADV",
+            // "STN1__Device3_ADV",
+            // "STN1__Device4_ADV",
+            // "STN1__Device1_RET",
+            // "STN1__Device2_RET",
+            // "STN1__Device3_RET",
+            // "STN1__Device4_RET",
+        ],
+        "datasets": [
+            {
+                "data": [
+                    [
+                        new Date(2018, 0, 1, 0, 0, 0, 1),
+                        new Date(2018, 0, 1, 0, 0, 0, 11),
+                        // "2018-01-01T00:00:00.000",
+                        // "2018-01-01T00:00:00.199",
+                        "Work1(0)",
+                        "HelloDS.STN1.Work1"
+                    ],
+                    [
+                        new Date(2018, 0, 1, 0, 0, 0, 12),
+                        new Date(2018, 0, 1, 0, 0, 0, 21),
+                        // "2018-01-01T00:00:00.000",
+                        // "2018-01-01T00:00:00.199",
+                        "Work1(1)",
+                        "HelloDS.STN1.Work1"
+                    ]
+
+                ]
+            },
+            {
+                "data": [
+                    [
+                        "2018-01-01T00:00:00.001",
+                        "2018-01-01T00:00:00.003",
+                        "Device1_ADV(0)"
+                    ],
+                    [
+                        "2018-01-01T00:00:00.012",
+                        "2018-01-01T00:00:00.015",
+                        "Device1_ADV(1)"
+                    ]
+                ]
+            },
+            {
+                "data": [
+                    [
+                        "2018-01-01T00:00:00.004",
+                        "2018-01-01T00:00:00.005",
+                        "Device2_ADV(0)"
+                    ],
+                    [
+                        "2018-01-01T00:00:00.016",
+                        "2018-01-01T00:00:00.019",
+                        "Device2_ADV(1)"
+                    ]
+                ]
+            },
+        ]
+    };
+    var config = {
+        "type" : "timeline",
+        "data" : data,
+        "options" : options
+    }
+    var chart = new Chart($('#chartCanvas')[0], config);
+</script>
+
+
+@* 
+@if (_backupData == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div style="height:300px;">
+        <canvas id=@_chartCanvasId></canvas>
+        <CompChartJs ChartType="bar" CanvasId=@_chartCanvasId
+                     Data="_backupData" Options="_backupOptions" />
+    </div>
+}
+
+
+
+
+@code {
+    object _backupData, _backupOptions;
+    string _chartCanvasId = "myBackupCanvas" + Guid.NewGuid().ToString();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.Eval(CompChartJs.ClickHandlerSnippet);
+        //await CompChartJs.InitializeChartJSAsync(JsDual);
+
+        _backupData = new
+        {
+            labels = new[] { "AA"},
+            datasets = new[] {
+                new {
+                    label = "Work1",
+                    data = new [] {
+                        "2018-01-22T16:00:00.000Z",
+                        "2018-01-23T05:40:44.626Z",
+                        "Unknown"
+                    },
+                    // backgroundColor = ClientK.Blue,
+                },
+                // new {
+                //     label = "데이터 변경",
+                //     data = changed,
+                //     backgroundColor = ClientK.Yellow,
+                // },
+                // new {
+                //     label = "데이터 백업실패",
+                //     data = failed,
+                //     backgroundColor = ClientK.Red,
+                // },
+            }
+        };
+
+        // _backupOptions = CompChartJs.CreateStackedBarOptions(enableDataLabel: true);
+        _backupOptions = CreateTimelineOptions(enableDataLabel: false);
+
+    }
+
+    static object CreateTimelineOptions(bool enableDataLabel, bool maintainAspectRatio = false)
+    {
+        return new
+        {
+            enableDataLabel = enableDataLabel,
+            maintainAspectRatio = maintainAspectRatio,
+            tooltips = new
+            {
+                displayColors = true,
+                callbacks = new { mode = "x", },
+            },
+            scales = new
+            {
+                x = new { stacked = true, },
+                y = new { stacked = true, },
+            },
+            responsive = true,
+        };
+    }
+}
+ *@

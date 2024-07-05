@@ -1,19 +1,14 @@
-using Dual.Common.Core;
-
 using Engine.Core;
 using Engine.Info;
-using static Engine.Info.DBLoggerORM;
 using Engine.Runtime;
-
-using Microsoft.AspNetCore.Authorization;
-
-using static Engine.Core.CoreModule;
-using static Engine.Core.HmiPackageModule;
+using static Engine.Info.DBLoggerAnalysisDTOModule;
+using static Engine.Info.DBLoggerORM;
 using static Engine.Core.InfoPackageModule;
-using static Engine.Core.TagWebModule;
-using static Engine.Cpu.RunTime;
-
+using static Engine.Core.GraphModule;
+using static Engine.Core.CoreModule;
+using static Engine.Core.Interface;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
+using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
 
 namespace DsWebApp.Server.Controllers;
 
@@ -39,17 +34,133 @@ public class InfoController(ServerGlobal global) : ControllerBaseWithLogger(glob
 
     // api/info/q
     [HttpGet("q")]
-    public async Task<RestResult<InfoQueryResult>> GetInfoQuery([FromQuery] string Fqdn, [FromQuery] DateTime Start, [FromQuery] DateTime End)
+    public async Task<RestResult<InfoQueryResult>> GetInfoQuery([FromQuery] string fqdn, [FromQuery] DateTime start, [FromQuery] DateTime end)
     {
         using var conn = global.CreateDbConnection();
         ORMVwLog[] vwLogs =
             (await conn.QueryAsync<ORMVwLog>(
-                $"SELECT * FROM [{Vn.Log}] WHERE [fqdn] = @Fqdn AND [at] BETWEEN @Start AND @End;",
-                new { Fqdn, Start, End })).ToArray();
+                $"SELECT * FROM [{Vn.Log}] WHERE [fqdn] = @fqdn AND [at] BETWEEN @start AND @end;",
+                new { fqdn, start, end })).ToArray();
 
         // todo: 검색 결과 생성
 
         return RestResult<InfoQueryResult>.Ok(new InfoQueryResult());
     }
+
+    // api/info/log-anal-info
+    [HttpGet("log-anal-info")]
+    public async Task<SystemSpan> GetLogAnalInfo([FromQuery] DateTime? start, [FromQuery] DateTime? end)
+    {
+        DateTime start1 = start ?? DateTime.MinValue;
+        DateTime end1 = end ?? DateTime.MaxValue;
+
+        using var conn = global.CreateDbConnection();
+        var logs =
+            (await conn.QueryAsync<ORMVwLog>(
+                $"SELECT * FROM [{Vn.Log}] WHERE [at] BETWEEN @start1 AND @end1;",
+                new { start1, end1 })).ToArray();
+
+        var sysSpan = SystemSpanEx.CreateSpan(_model.System, logs);
+
+        return sysSpan;
+    }
+    // api/info/log-anal-info-flat
+    [HttpGet("log-anal-info-flat")]
+    public async Task<FlatSpans> GetLogAnalFlatInfo([FromQuery] DateTime? start, [FromQuery] DateTime? end)
+    {
+        DateTime start1 = start ?? DateTime.MinValue;
+        DateTime end1 = end ?? DateTime.MaxValue;
+
+        using var conn = global.CreateDbConnection();
+        var logs =
+            (await conn.QueryAsync<ORMVwLog>(
+                $"SELECT * FROM [{Vn.Log}] WHERE [at] BETWEEN @start1 AND @end1;",
+                new { start1, end1 })).ToArray();
+
+        var sysSpan = SystemSpanEx.CreateFlatSpan(_model.System, logs);
+
+        return sysSpan;
+    }
+
+    /// <summary>
+    /// Get graph info: nodes and edges
+    /// </summary>
+    // api/info/graph
+    [HttpGet("graph")]
+    public async Task<RestResultString> GetNodesAndEdges([FromQuery] string fqdn) // fqdn = "HelloDS.STN1.Work1"
+    {
+        var sys = _model.System;
+        var nameComponents = fqdn.SplitToFqdnComponents();
+        nameComponents = fqdn.StartsWith($"{sys.Name}.") ? nameComponents.Skip(1).ToArray() : nameComponents;
+        var node = _model.System.FindGraphVertex(nameComponents);
+        if (node == null)
+            return RestResultString.Err($"Failed to find vertex with name: {fqdn}");
+
+        var vertices = node.CollectVertices(true).ToArray();
+        var edges = node.CollectEdges().ToArray();
+        var cytoGraph = new CyGraph(vertices, edges);
+
+        var json = cytoGraph.Serialize();
+        Trace.WriteLine(json);
+
+        return RestResultString.Ok(json);
+    }
 }
 
+public static class CytoVertexExtension
+{
+    static (string, string, string) GetNameAndQualifiedNameAndParentName(IVertex vertex)
+    {
+        var n = (vertex as INamed).Name;
+        var q = (vertex as IQualifiedNamed).QualifiedName;
+        var p = vertex.GetParentName();
+        return (q, n, p);
+    }
+    public static IEnumerable<CyVertex> CollectVertices(this IVertex vertex, bool includeMe=true)
+    {
+        if (includeMe)
+        {
+            var (q, n, p) = GetNameAndQualifiedNameAndParentName(vertex);
+            var t = vertex.GetType().Name;
+            yield return new CyVertex(t, q, n, p);
+        }
+        switch (vertex)
+        {
+            case Flow f:
+                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectVertices()))
+                    yield return c;
+                break;
+            case Real r:
+                foreach (var c in r.Graph.Vertices.SelectMany(v => v.CollectVertices()))
+                    yield return c;
+                break;
+            case Call cc: 
+                //yield return c;
+                break;
+            default:
+                yield break;
+        }
+    }
+
+    public static IEnumerable<CyEdge> CollectEdges(this IVertex vertex)
+    {
+        switch (vertex)
+        {
+            case Flow f:
+                foreach (var c in f.Graph.Edges.Select(e => new CyEdge(e)))
+                    yield return c;
+
+                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectEdges()))
+                    yield return c;
+                break;
+            case Real r:
+                foreach (var c in r.Graph.Edges.Select(e => new CyEdge(e)))
+                    yield return c;
+                break;
+
+            default:
+                yield break;
+        }
+    }
+
+}

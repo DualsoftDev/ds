@@ -26,12 +26,16 @@ module RuntimeTest =
     [<Fact>]
     let ``Runtime Running Test`` () = 
         
-        File.Delete("Logger.sqlite3") //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
         (*시뮬레이션 구동 테스트*)
         let systems = [| runtimeModel.System|]
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
+
+        // 기존 db log 가 삭제되는 것을 방지하기 위해서 test 용으로 따로 database 설정
+        commonAppSettings.LoggerDBSettings.ConnectionPath <- Path.Combine(AppContext.BaseDirectory, "TmpLogger.sqlite3")
+
         let mci = ModelCompileInfo(runtimeModel.JsonPath, runtimeModel.JsonPath)
-        DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci).Wait()
+        let cleanExistingDb = true      //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
+        DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci, cleanExistingDb).Wait()
         DsSimulator.Do(runtimeModel.Cpu, 3000) |> Assert.True //값변경있으면서 구동하면 true
 
 

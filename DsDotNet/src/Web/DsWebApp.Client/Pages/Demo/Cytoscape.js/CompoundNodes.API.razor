@@ -1,0 +1,225 @@
+@* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/compound-nodes/index.html *@
+
+@page "/demo/cytoscape/compound-nodes-api"
+
+<h3>Compoundnodes</h3>
+
+
+<button id="center">Center</button>
+<button id="reset_zoom">Reset zoom</button>
+<button id="enable_zoom">Enable zoom</button>
+<div id="cy"></div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
+        // await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
+        // await JsDual.EvalExternalScript("https://raw.githubusercontent.com/cytoscape/cytoscape.js-dagre/master/cytoscape-dagre.js");
+
+        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.16/cytoscape.min.js");
+        // await JsDual.EvalExternalScript("https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.2.1/cytoscape-dagre.min.js");
+        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.2/dagre.min.js");
+
+        // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
+        await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
+        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js");
+        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js");
+
+
+        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
+        var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1");
+        await data.IterAsync(
+            async json => {
+                Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
+                await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
+            },
+            async err => await JsDual.Alert($"Failed to get data: {err}")
+            );
+
+        await JsDual.EvalOnGlobalModule(@"
+console.log(window.cyData);
+
+var cy = window.cy = cytoscape({
+    container: document.getElementById('cy'),
+
+    boxSelectionEnabled: false,
+
+    style: [
+        // https://stackoverflow.com/questions/45572034/how-to-select-nodes-by-class-in-cytoscape-js
+        {
+            selector: 'node',
+            css: {
+                // 'shape': 'data(shape)',
+                'shape': 'rectangle',
+                'content': 'data(content)',
+                'text-valign': 'center',
+                'text-halign': 'center'
+            }
+        },
+        {
+            selector: '.Call',
+            css: {
+                'shape': 'ellipse',
+            }
+        },
+        {
+            selector: ':parent',
+            css: {
+                'text-valign': 'top',
+                'text-halign': 'center',
+                'shape': 'round-rectangle',
+                'padding': 10
+            }
+        },
+        {
+            selector: 'node#e',
+            css: {
+                'padding': 0
+            }
+        },
+        {
+            selector: 'edge',
+            css: {
+                'curve-style': 'bezier',
+                'target-arrow-shape': 'triangle'
+            }
+        }
+    ],
+
+
+    elements: window.cyData,
+    wheelSensitivity: 0.2,
+
+    layout: {
+        // name: 'preset',
+        // name: 'grid',
+        // name: 'circle',
+        name: 'dagre',              // https://jsfiddle.net/bababalcksheep/nyt8Lupv/
+        animate: true,
+        padding: 5
+    }
+});
+
+$('#center').click(() => {
+    cy.center();
+});
+
+$('#reset_zoom').click(() => {
+    console.log('resetting..');
+    cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
+        .data('shape', 'rectangle')
+        .addClass('active');
+});
+
+");
+    }
+
+}
+
+<style>
+    body {
+        font: 14px helvetica neue, helvetica, arial, sans-serif;
+    }
+
+    #cy {
+        height: 90%;
+        width: 90%;
+        position: relative;
+        left: 0;
+        top: 0;
+    }
+ </style>
+ 
+      
+    
+  
+  
+  
+@* 
+
+     // elements: {
+     //   nodes: [
+     //     { data: { id: 'a', parent: 'b' }, position: { x: 215, y: 85 } },
+     //     { data: { id: 'b' } },
+     //     { data: { id: 'c', parent: 'b' }, position: { x: 300, y: 85 } },
+     //     { data: { id: 'd' }, position: { x: 215, y: 175 } },
+     //     { data: { id: 'e' } },
+     //     { data: { id: 'f', parent: 'e' }, position: { x: 300, y: 175 } }
+     //   ],
+     //   edges: [
+     //     { data: { id: 'ad', source: 'a', target: 'd' } },
+     //     { data: { id: 'eb', source: 'e', target: 'b' } }
+   
+     //   ]
+     // },
+   
+   
+   // elements: {
+   //     'nodes': [
+   //         { data: { id: 'a', parent: 'p' } },
+   //         { data: { id: 'b', parent: 'p' } },
+   //         { data: { id: 'c', parent: 'p' } },
+   //         { data: { id: 'd', parent: 'p' } },
+   //         { data: { id: 'e', parent: 'p' } },
+   //         { data: { id: 'f', parent: 'p' } },
+   //         { data: { id: 'g', parent: 'p' } },
+   //         { data: { id: 'h', parent: 'p' } },
+   //         { data: { id: 'p' } }
+   //     ],
+   //     'edges': [
+   //         { data: { id: 'e1', source: 'a', target: 'b' } },
+   //         { data: { id: 'e2', source: 'b', target: 'c' } },
+   //         { data: { id: 'e3', source: 'b', target: 'd' } },
+   //         { data: { id: 'e4', source: 'e', target: 'f' } },
+   //         { data: { id: 'e5', source: 'f', target: 'g' } },
+   //         { data: { id: 'e6', source: 'f', target: 'h' } }
+   //     ]
+   // },
+   
+   
+   // elements: {
+   //     nodes: [
+   //         { data: { id: 'a', parent: 'p' }, position: { x: 215, y: 85 } },
+   //         { data: { id: 'b', parent: 'p' }, position: { x: 300, y: 85 } },
+   //         { data: { id: 'p' } }
+   //     ],
+   //     edges: [
+   //         { data: { id: 'e1', source: 'a', target: 'b' } }
+   //     ]
+   // },
+   
+   
+   
+   // // https://stackoverflow.com/questions/27280708/how-do-i-make-classes-work-in-cytoscape-js
+   // var cy = cytoscape({
+   //     container: document.getElementById('cy'),
+   //     style: [
+   //         {
+   //             selector: 'node',
+   //             style: {
+   //                 'label': 'data(id)'
+   //             }
+   //         },
+
+   //         {
+   //             selector: '.ClassName1',
+   //             style: {
+   //                 'width': 8,
+   //                 'height': 8,
+   //                 'label': ''
+   //             }
+   //         }
+   //     ],
+   //     elements: {
+   //         nodes: [
+   //               { data: { id: 'explore'}, classes: 'ClassName1'},
+   //               { data: { id: 'discover' } }
+   //         ],
+   //         edges: [
+   //               { data: { source: 'explore', target: 'discover' } }
+   //         ]
+   //    },
+   // });
+*@

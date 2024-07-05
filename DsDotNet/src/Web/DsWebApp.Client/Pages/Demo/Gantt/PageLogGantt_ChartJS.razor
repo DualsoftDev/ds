@@ -1,0 +1,116 @@
+@* https://jsfiddle.net/vr2Lpz8y/ *@
+
+@page "/dashboards/log-gantt-jschart"
+@using Dual.Web.Blazor.Client.Components.Chart
+@using static Engine.Info.DBLoggerAnalysisDTOModule
+@using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
+
+<h3>PageLogGantt_JsChart</h3>
+
+
+
+
+@if (_backupData == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <canvas id=chartCanvas></canvas>
+    <button id="reset_zoom">Reset zoom</button>
+    <button id="disable_zoom">Disable zoom</button>
+    <button id="enable_zoom">Enable zoom</button>
+
+    <script>
+        var options = {
+            elements: {
+                colorFunction: function (text, data, dataset, index) {
+                    return Color('black');
+                },
+                showText: true,
+                textPadding: 4
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (item) {
+                        console.log(item);
+                        let s = item.yLabel[0];
+                        let e = item.yLabel[1];
+                        let multilines = [`${typeof (s)}: ${s} ~ ${e}`];
+                        multilines.push(JSON.stringify(item));
+                        return multilines;
+                    }
+                }
+            },
+            plugins: {
+                zoom: {
+                    zoom: {
+                        wheel: {
+                            enabled: true,
+                        },
+                        pinch: {
+                            enabled: true
+                        },
+                        mode: 'xy',
+                    }
+                }
+            },
+        }
+
+        var config = {
+            type: "timeline",
+            data: chartData,        // C# 에서 만든 data 객체
+            options: options
+        }
+        var chart = new Chart($('#chartCanvas')[0], config); 
+        
+
+        $('#reset_zoom').click(function(){
+            chart.resetZoom();
+            console.log(chart);
+        });
+
+        $('#disable_zoom').click(function(){
+            chart.ctx.canvas.removeEventListener('wheel', chart._wheelHandler);
+        });
+
+        $('#enable_zoom').click(function(){
+            chart.ctx.canvas.addEventListener('wheel', chart._wheelHandler);
+        });
+        @* Chart.register(zoomPlugin); *@
+    </script>
+}
+
+
+
+
+@code {
+    object _backupData;
+    // string _chartCanvasId = "myBackupCanvas" + Guid.NewGuid().ToString();
+    string _chartCanvasId = "chartCanvasId";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        var flatSpans = await Http.GetFromJsonAsync<FlatSpans>("api/info/log-anal-info-flat");
+
+        // await JsDual.Eval(CompChartJs.ClickHandlerSnippet);
+
+        _backupData = new
+        {
+            labels = flatSpans.Select(s => s.Item1).ToArray(),
+            datasets = flatSpans.Select(s =>
+            {
+                var (fqdn, spans) = s;
+                return new
+                {
+                    label = fqdn,
+                    data = spans.Select(span => new object[] { span.Start, span.End, fqdn }).ToArray(),
+                };
+            }).ToArray(),
+        };
+
+        // C# 객체 _backupData 를 자바스크립트 객체로 변환
+        await JsDual.Eval($"window.chartData = {NewtonsoftJson.SerializeObject(_backupData)};");
+    }
+}

@@ -9,6 +9,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open DBLoggerORM
 open System
+open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module internal DBLoggerAnalysisModule =
@@ -96,3 +97,112 @@ module internal DBLoggerAnalysisModule =
                         assert (spans.Length = 1)   // 동일 call 이 하나의 real 안에서 여러번 호출되는 경우는 없다고 가정
                         tracefn $"    - {c.Name} = {spans[0]} on cycle {cycle+1}/{lss.Length}"
             ()
+
+
+/// Log 분석 정보: WebServer 에서 데이터 생성하고, Browser 에서 보여주기 위한 data
+[<AutoOpen>]
+module DBLoggerAnalysisDTOModule =
+    type LogSpan = DateTime * DateTime
+    let private dummySpan:LogSpan = (DateTime.MinValue, DateTime.MinValue)
+    // Span 클래스 정의
+    type Span(span:LogSpan) =
+        new() = Span(dummySpan)
+        new(s:DateTime, e:DateTime) = Span(LogSpan(s, e))
+        member val Start = fst span with get, set
+        member val End = snd span with get, set
+
+    // FqdnSpan 클래스 정의
+    type FqdnSpan(span:LogSpan, fqdn: string) =
+        inherit Span(span)
+        new() = FqdnSpan(dummySpan, "")
+        member val Fqdn = fqdn with get, set
+
+    // CallSpan 클래스 정의
+    type CallSpan(span:LogSpan, fqdn: string) =
+        inherit FqdnSpan(span, fqdn)
+        new() = CallSpan(dummySpan, "")
+
+    // RealSpan 클래스 정의
+    type RealSpan(span:LogSpan, fqdn: string, flowName:string, callSpans: CallSpan[]) =
+        inherit FqdnSpan(span, fqdn)
+        new() = RealSpan(dummySpan, "", "", [||])
+        member val FlowName = flowName with get, set 
+        member val CallSpans = callSpans with get, set
+
+    // SystemSpan 클래스 정의
+    type SystemSpan(span: LogSpan, fqdn: string, realSpans: Dictionary<string, RealSpan list>) =
+        inherit FqdnSpan(span, fqdn)
+        new() = SystemSpan(dummySpan, "", Dictionary<string, RealSpan list>())
+        member val RealSpans = realSpans with get, set
+
+    type SystemSpan with
+        static member CreateSpan(system: DsSystem, logs: ORMVwLog list) : SystemSpan =
+            let logAnalInfo = LogAnalInfo.Create(system, logs)
+
+            let createCallSpan (logs: ORMVwLog list) (call: Call) : CallSpan =
+                let fqdn = call.QualifiedName
+                let callLogs = logs |> List.filter (fun log -> log.Fqdn = fqdn)
+                let span = 
+                    match callLogs with
+                    | [] -> dummySpan
+                    | _ -> (callLogs.Head.At, callLogs.Last().At)
+                CallSpan(span, fqdn)
+
+            let createRealSpan (real: Real) (logs: ORMVwLog list) : RealSpan =
+                let span = 
+                    match logs with
+                    | [] -> dummySpan
+                    | _ -> (logs.Head.At, logs.Last().At)
+                let calls = real.Graph.Vertices.OfType<Call>() |> Seq.map (createCallSpan logs) |> Seq.toArray
+                let flowName = real.Flow.Name
+                RealSpan(span, real.QualifiedName, flowName, calls)
+
+            let createRealSpans (realLogs: ORMVwLog list list) (real: Real) : RealSpan list =
+                realLogs |> List.map (createRealSpan real)
+
+            let realSpans =
+                logAnalInfo.PerRealLogs
+                |> map (fun (KeyValue(r, lss)) -> r.QualifiedName, createRealSpans lss r)
+                |> Tuple.toDictionary
+
+            let span = 
+                match logs with
+                | [] -> dummySpan
+                | _ ->
+                    let ats = logAnalInfo.PerRealLogs.Values |> collect id |> collect id |> map(fun l -> l.At) |> toArray
+                    let s, e = ats |> Seq.min, ats |> Seq.max
+                    (s, e)
+                    //(logs.Head.At, logs.Last().At)
+
+            SystemSpan(span, system.Name, realSpans)
+        static member CreatFlatSpan(system: DsSystem, logs: ORMVwLog list) : (string * Span[])[] =
+            let sysSpan = SystemSpan.CreateSpan(system, logs)
+            let namedSpans =
+                [|
+                    yield sysSpan.Fqdn, new Span(sysSpan.Start, sysSpan.End)
+                    for KeyValue(rFqdn, rss) in sysSpan.RealSpans do
+                        for rs in rss do
+                            yield rFqdn, rs
+                            for cs in rs.CallSpans do
+                                yield cs.Fqdn, cs
+                |]
+            let grs = namedSpans.GroupBy(fun (fqdn, _) -> fqdn)
+            let result = 
+                grs |> map (fun gr ->
+                    gr.Key, gr |> map snd |> toArray
+                ) |> toArray
+
+            result
+
+    type FlatSpans = (string * Span[])[]
+// For C# interop
+module SystemSpanEx =
+    /// 주어진 system 에 대한 log 목록을 분석해서 SystemSpan 결과를 반환
+    /// System > Real > Call 의 계층 구조를 가지는 Span 정보를 생성한다.
+    let CreateSpan(system: DsSystem, logs: ORMVwLog seq) : SystemSpan =
+        let logList = logs |> toFSharpList
+        SystemSpan.CreateSpan(system, logList)
+
+    let CreateFlatSpan(system: DsSystem, logs: ORMVwLog seq) : FlatSpans =
+        let logList = logs |> toFSharpList
+        SystemSpan.CreatFlatSpan(system, logList)

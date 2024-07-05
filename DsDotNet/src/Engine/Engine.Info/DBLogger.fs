@@ -21,19 +21,20 @@ type DBLogger() =
         (
             commonAppSetting: DSCommonAppSettings,
             systems: DsSystem seq,
-            modelCompileInfo: ModelCompileInfo
+            modelCompileInfo: ModelCompileInfo,
+            cleanExistingDb: bool
         ) =
         task {
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (null, commonAppSetting, systems, modelCompileInfo)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (null, commonAppSetting, systems, modelCompileInfo, cleanExistingDb)
 
             return logSet :> ILogSet
         }
 
     /// model 정보 없이, database schema 만 생성
-    static member InitializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) = DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSetting
+    static member InitializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings, cleanExistingDb:bool) = DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
 
         
 
@@ -50,13 +51,15 @@ type DBLogger() =
             querySet: QuerySet,
             commonAppSetting: DSCommonAppSettings,
             systems: DsSystem seq,
-            modelCompileInfo: ModelCompileInfo
+            modelCompileInfo: ModelCompileInfo,
+            cleanExistingDb:bool
+
         ) =
         task {
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (querySet, commonAppSetting, systems, modelCompileInfo)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (querySet, commonAppSetting, systems, modelCompileInfo, cleanExistingDb)
 
             return logSet :> ILogSet
         }

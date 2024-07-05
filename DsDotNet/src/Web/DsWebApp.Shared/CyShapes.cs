@@ -92,6 +92,7 @@ public class CyData
 
 public class CyGraph
 {
+    public static DsSystem TheSystem { get; set; }
     public CyData[] nodes { get; }
     public CyData[] edges { get; }
 

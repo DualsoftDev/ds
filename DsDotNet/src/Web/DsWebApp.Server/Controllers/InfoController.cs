@@ -120,7 +120,8 @@ public static class CytoVertexExtension
         if (includeMe)
         {
             var (q, n, p) = GetNameAndQualifiedNameAndParentName(vertex);
-            yield return new CytoVertex(q, n, p);
+            var t = vertex.GetType().Name;
+            yield return new CytoVertex(t, q, n, p);
         }
         switch (vertex)
         {

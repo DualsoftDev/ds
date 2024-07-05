@@ -32,23 +32,31 @@ public class CytoVertex : CytoItem
     public string parent;
     public string type;
 
+    public string shape;
+
     public CytoVertex() {}
 
     public CytoVertex(Vertex vertex)
-        : this(vertex.QualifiedName, vertex.Name, vertex.Parent.GetCore().QualifiedName)
+        : this(vertex.GetType().Name, vertex.QualifiedName, vertex.Name, vertex.Parent.GetCore().QualifiedName)
     {
-        type = vertex.GetType().Name;
     }
-    public CytoVertex(string fqdn, string content, string parent)
+    public CytoVertex(string type, string fqdn, string content, string parent)
         : base(fqdn, content)
     {
         this.parent = parent;
+        this.type = type;
+        shape = type switch
+        {
+            "Call" => "ellipse",
+            _ => "rectangle"
+
+        };
     }
     public override string Serialize()
     {
         var p = parent.IsNullOrEmpty() ? "" : $", parent: '{parent}'";
         var posi = ", position: " + Embrace("x: 215, y: 85");
-        return CytoGraphEx.Embrace($"id: '{id}', content: '{content}', type: '{type}'{p}");
+        return CytoGraphEx.Embrace($"id: '{id}', content: '{content}', type: '{type}', shape: '{shape}'{p}");
     }
 }
 

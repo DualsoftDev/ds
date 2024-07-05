@@ -5,8 +5,8 @@
 <h3>Compoundnodes</h3>
 
 
+<button id="center">Center</button>
 <button id="reset_zoom">Reset zoom</button>
-<button id="disable_zoom">Disable zoom</button>
 <button id="enable_zoom">Enable zoom</button>
 <div id="cy"></div>
 
@@ -48,7 +48,8 @@ var cy = window.cy = cytoscape({
     {
       selector: 'node',
       css: {
-        'shape': 'rectangle',
+        // 'shape': 'rectangle',
+        'shape': 'data(shape)',
         'content': 'data(content)',
         'text-valign': 'center',
         'text-halign': 'center'
@@ -81,7 +82,7 @@ var cy = window.cy = cytoscape({
   ],
 
   elements: window.cyData,
-
+  wheelSensitivity: 0.2,
 
   layout: {
     // name: 'preset',
@@ -93,10 +94,15 @@ var cy = window.cy = cytoscape({
 });
 
 
-$('#reset_zoom').click(function(){
+$('#center').click( () => { cy.center(); } );
+    
+$('#reset_zoom').click( () => {
     console.log('resetting..');
+    cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
+        .data('shape', 'rectangle')
+        .addClass('active');
+        ;
 });
-
 ");
     }
 

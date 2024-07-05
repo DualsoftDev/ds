@@ -59,23 +59,26 @@ public class CyEdge : CyItem
 {
     public string source { get; }
     public string target { get; }
+    public string type { get; }
     public CyEdge() { }
 
     public CyEdge(Edge edge)
         : this(edge.Source.QualifiedName, edge.Target.QualifiedName)
-    {}
-
-    public CyEdge(string source, string target)
-        : base($"{source}=>{target}", $"{source}=>{target}")
     {
-        this.source = source;
-        this.target = target;
+        type = edge.EdgeType.ToString();
+    }
+
+    CyEdge(string src, string tgt)
+        : base($"{src}=>{tgt}", $"{src}=>{tgt}")
+    {
+        this.source = src;
+        this.target = tgt;
     }
 
     public override string Serialize()
     {
         var data = $"id: '{id}', source: '{source}', target: '{target}'";
-        data = $"data: {Embrace(data)}";
+        data = $"data: {Embrace(data)}, classes: '{type}'";
         return Embrace(data);
     }
 }

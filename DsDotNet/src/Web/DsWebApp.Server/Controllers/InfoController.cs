@@ -193,5 +193,4 @@ public static class CytoVertexExtension
                 yield break;
         }
     }
-
 }

@@ -1,8 +1,8 @@
 @* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/compound-nodes/index.html *@
 
-@page "/demo/cytoscape/compound-nodes-api"
+@page "/dashboards/graph"
 
-<h3>Compoundnodes</h3>
+<h3>Model Graph</h3>
 
 
 <button id="center">Center</button>
@@ -53,7 +53,7 @@ var cy = window.cy = cytoscape({
             selector: 'node',
             css: {
                 // 'shape': 'data(shape)',
-                'shape': 'rectangle',
+                'shape': 'pentagon',
                 'content': 'data(content)',
                 'text-valign': 'center',
                 'text-halign': 'center',
@@ -61,6 +61,7 @@ var cy = window.cy = cytoscape({
         },
         {
             selector: '.Real',
+            // selector: 'node[classes=""Real""]',
             css: {
                 'shape': 'rectangle',
                 'background-color': 'DarkSalmon',
@@ -72,6 +73,12 @@ var cy = window.cy = cytoscape({
                 'shape': 'ellipse',
                 'background-color': 'DarkSeaGreen',
 
+            }
+        },
+        {
+            selector: '.Alias',
+            css: {
+                'shape': 'diamond',
             }
         },
         {
@@ -245,4 +252,34 @@ $('#reset_zoom').click(() => {
    //         ]
    //    },
    // });
+   
+   
+Shapes: 
+   ellipse
+   triangle
+   round-triangle
+   rectangle
+   round-rectangle
+   bottom-round-rectangle
+   cut-rectangle
+   barrel
+   rhomboid
+   right-rhomboid
+   diamond
+   round-diamond
+   pentagon
+   round-pentagon
+   hexagon
+   round-hexagon
+   concave-hexagon
+   heptagon
+   round-heptagon
+   octagon
+   round-octagon
+   star
+   tag
+   round-tag
+   vee
+   polygon (custom polygon specified via shape-polygon-points).
+
 *@

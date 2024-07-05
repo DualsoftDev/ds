@@ -256,6 +256,9 @@ module ImportU =
 
             let createCall () =
                 calls
+                |> Seq.sortBy(fun node -> node.PageNum)
+                |> Seq.sortBy(fun node -> node.Position.Left)
+                |> Seq.sortBy(fun node -> node.Position.Top)
                 |> Seq.iter (fun node ->
                         try
 

@@ -5,6 +5,7 @@ open Dual.Common.Core.FS;
 open System.Runtime.CompilerServices
 open System.Text.RegularExpressions
 open System
+open System.Linq
 open System.Collections.Generic
 open System.Reactive.Subjects
 
@@ -25,7 +26,32 @@ module DsProcessEvent =
 
 
 [<AutoOpen>]
-module CoreExtensionsModule =
+module CpuExtensionsModule =
+
+    let private updateStorageValues (sys: DsSystem) tagKind value =
+        sys.TagManager.Storages
+            .Where(fun w -> w.Value.TagKind = (int)tagKind)
+            .Iter(fun t -> t.Value.BoxedValue <- value)
+
+    let private preAction (sys: DsSystem, bAuto: bool) =
+        // Update auto and drive button values
+        updateStorageValues sys SystemTag.auto_btn bAuto
+        updateStorageValues sys SystemTag.drive_btn bAuto
+
+        // Update manual button values
+        let bManual = not bAuto 
+        updateStorageValues sys SystemTag.manual_btn bManual
+
+        // Update ready button values
+        updateStorageValues sys SystemTag.ready_btn true
+
+    ///사용자 autoStartTags HMI 대신 눌러주기
+    let preAutoDriveAction(sys:DsSystem) =
+        preAction (sys , true)
+
+    ///사용자 manualStartTags HMI 대신 눌러주기
+    let preManualAction(sys:DsSystem) = 
+        preAction (sys , false) 
  
 
     [<Extension>]

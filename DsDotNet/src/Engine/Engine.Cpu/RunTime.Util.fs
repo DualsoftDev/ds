@@ -29,17 +29,6 @@ module internal RunTimeUtil =
     //            | _ -> ())
         
         
-    ///사용자 autoStartTags HMI 대신 눌러주기
-    let preAction(sys:DsSystem, on:bool) =
-        let autoStartStorageKeyValues =
-            sys.TagManager.Storages
-                .Where(fun w->
-                            w.Value.TagKind = (int)SystemTag.auto_btn
-                            ||   w.Value.TagKind = (int)SystemTag.drive_btn
-                            ||   w.Value.TagKind = (int)SystemTag.ready_btn
-                    )
-        autoStartStorageKeyValues.Iter(fun t -> t.Value.BoxedValue <-  on)
-
 
     ///시뮬레이션 비트 ON
     let cpuSimOn(sys:DsSystem) =

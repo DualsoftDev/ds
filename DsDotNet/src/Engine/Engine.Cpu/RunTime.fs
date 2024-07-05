@@ -51,7 +51,7 @@ module RunTime =
             if RuntimeDS.Package.IsPackageSIM()
             then stopBtn.BoxedValue <- false
                  systems.Iter(fun sys-> cpuSimOn(sys))
-                 systems.Iter(fun sys-> preAction(sys, true))
+                 systems.Iter(fun sys-> preAutoDriveAction(sys))
 
 
         let subscription = 

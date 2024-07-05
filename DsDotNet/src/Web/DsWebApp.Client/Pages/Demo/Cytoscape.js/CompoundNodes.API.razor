@@ -40,69 +40,71 @@
 
         await JsDual.EvalOnGlobalModule(@"
 var cy = window.cy = cytoscape({
-  container: document.getElementById('cy'),
+    container: document.getElementById('cy'),
 
-  boxSelectionEnabled: false,
+    boxSelectionEnabled: false,
 
-  style: [
-    {
-      selector: 'node',
-      css: {
-        // 'shape': 'rectangle',
-        'shape': 'data(shape)',
-        'content': 'data(content)',
-        'text-valign': 'center',
-        'text-halign': 'center'
-      }
-    },
-    {
-      selector: ':parent',
-      css: {
-        'text-valign': 'top',
-        'text-halign': 'center',
-        'shape': 'round-rectangle',
-        'corner-radius': ""10"",
-        'padding': 10
-      }
-    },
-    {
-      selector: 'node#e',
-      css: {
-        'corner-radius': ""10"",
-        'padding': 0
-      }
-    },
-    {
-      selector: 'edge',
-      css: {
-        'curve-style': 'bezier',
-        'target-arrow-shape': 'triangle'
-      }
+    style: [
+        {
+            selector: 'node',
+            css: {
+                // 'shape': 'rectangle',
+                'shape': 'data(shape)',
+                'content': 'data(content)',
+                'text-valign': 'center',
+                'text-halign': 'center'
+            }
+        },
+        {
+            selector: ':parent',
+            css: {
+                'text-valign': 'top',
+                'text-halign': 'center',
+                'shape': 'round-rectangle',
+                'corner-radius': ""10"",
+                'padding': 10
+            }
+        },
+        {
+            selector: 'node#e',
+            css: {
+                'corner-radius': ""10"",
+                'padding': 0
+            }
+        },
+        {
+            selector: 'edge',
+            css: {
+                'curve-style': 'bezier',
+                'target-arrow-shape': 'triangle'
+            }
+        }
+    ],
+
+    elements: window.cyData,
+    wheelSensitivity: 0.2,
+
+    layout: {
+        // name: 'preset',
+        // name: 'grid',
+        // name: 'circle',
+        name: 'dagre',              // https://jsfiddle.net/bababalcksheep/nyt8Lupv/
+        animate: true,
+        padding: 5
     }
-  ],
-
-  elements: window.cyData,
-  wheelSensitivity: 0.2,
-
-  layout: {
-    // name: 'preset',
-    // name: 'grid',
-    // name: 'circle',
-    name: 'dagre',              // https://jsfiddle.net/bababalcksheep/nyt8Lupv/
-    padding: 5
-  }
 });
 
+$('#center').click(() => {
+    cy.center();
+});
 
-$('#center').click( () => { cy.center(); } );
-    
-$('#reset_zoom').click( () => {
+$('#reset_zoom').click(() => {
     console.log('resetting..');
     cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
         .data('shape', 'rectangle')
         .addClass('active');
-        ;
 });
+
 ");
     }
 

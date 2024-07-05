@@ -28,7 +28,7 @@
 
     <ItemGroup>
 		<PackageReference Include="DualSoft-Common-Core" Version="0.2.8" />
-		<PackageReference Include="DualSoft-Common-Db" Version="0.2.1" />
+		<PackageReference Include="DualSoft-Common-Db" Version="0.2.5" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9" />
         <PackageReference Include="Dapper" Version="2.0.143" />
     </ItemGroup>

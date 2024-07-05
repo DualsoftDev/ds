@@ -52,6 +52,10 @@ module TextImpl =
            | [ n ] -> n
            | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
 
+    let split (separator: string) (input: string) : string[] =
+        if String.IsNullOrEmpty(input) then
+            failwith "ERROR: Input string is null or empty"
+        input.Split([| separator |], StringSplitOptions.None)
 
     //let isValidIdentifier (charStr: string) =
     //// Assuming a placeholder function for checking valid identifier characters
@@ -85,4 +89,6 @@ type TextExt =
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier
     [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator nameComponents
     [<Extension>] static member CombineQuoteOnDemand (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator (nameComponents.Select(quoteOnDemand))
+    /// fqdn -> component []
+    [<Extension>] static member SplitToFqdnComponents (fqdn:string, [<Optional; DefaultParameterValue(".")>] separator) = split separator fqdn
     

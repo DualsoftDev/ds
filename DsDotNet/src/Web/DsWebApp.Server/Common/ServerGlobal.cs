@@ -14,6 +14,7 @@ namespace DsWebApp.Server.Common;
 public class ServerGlobal
 {
     public ServerSettings ServerSettings { get; set; }
+    public bool ServerReady { get; set; }
     public DSCommonAppSettings DsCommonAppSettings { get; set; }
 
     /// <summary>
@@ -91,4 +92,20 @@ public class ServerGlobal
 
     public IDbConnection CreateDbConnection() => new SqliteConnection(DsCommonAppSettings.LoggerDBSettings.ConnectionString).Tee(c => c.Open());
 
+    /// <summary>
+    /// wait for the cache to be initialized 
+    /// </summary>
+    public async Task<bool> StandbyUntilServerReadyAsync(int seconds = 10)
+    {
+        for (int i = 0; i < seconds && !ServerReady; i++)
+        {
+            await Console.Out.WriteLineAsync($"Waiting server ready: {i}...");
+            await Task.Delay(1000);
+        }
+
+        if (!ServerReady)
+            Logger.Error("Server not ready!");
+
+        return ServerReady;
+    }
 }

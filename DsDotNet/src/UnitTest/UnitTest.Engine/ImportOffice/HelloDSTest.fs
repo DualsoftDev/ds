@@ -16,6 +16,7 @@ open Dual.Common.Core.FS
 open Microsoft.Data.Sqlite
 open Engine.Info
 open Engine.Cpu
+open System.Text.Json
 
 
 
@@ -123,6 +124,17 @@ module HelloDSTestModule =
         [<Test>]
         member __.``HelloDS log anal test``() =
             let system = getSystem()
-            let logAnalInfo = LogAnalInfo.Create(system, getLogs())
+            let logs = getLogs().ToFSharpList()
+            let logAnalInfo = LogAnalInfo.Create(system, logs)
             logAnalInfo.PrintStatistics()
+
+
+            let sysSpan = SystemSpan.CreateSpan(system, logs)
+
+            let text1    = JsonSerializer.Serialize sysSpan
+            let sysSpan1 = JsonSerializer.Deserialize<SystemSpan>(text1)
+            let text2    = JsonSerializer.Serialize sysSpan1
+            text1 === text2
+
+            let flatSpans = SystemSpan.CreatFlatSpan(system, logs)
             ()

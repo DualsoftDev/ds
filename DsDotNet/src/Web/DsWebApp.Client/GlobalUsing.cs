@@ -8,6 +8,7 @@ global using Dual.Web.Blazor;
 global using Dual.Web.Blazor.Client.Canvas2d;
 global using Dual.Web.Blazor.Client.Canvas2d.Model;
 global using Dual.Web.Blazor.Client.Components;
+global using Dual.Web.Blazor.Client.Components.Chart;
 
 global using static Engine.Core.TagWebModule;
 
@@ -18,3 +19,5 @@ global using static Engine.Core.TagWebModule;
  * Global type alias for Client
  */
 global using ErrorMessage = string;
+global using NewtonsoftJson = Newtonsoft.Json.JsonConvert;
+global using SystemTextJson = System.Text.Json.JsonSerializer;

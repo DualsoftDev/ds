@@ -88,6 +88,7 @@ module FqdnImpl =
 
     type FqdnObject(name:string, parent:IQualifiedNamed) =
         inherit Named(name)
+        interface IVertex
         interface IQualifiedNamed with
             member x.NameComponents = [| yield! parent.NameComponents; x.Name |]
             member x.QualifiedName = combine "." x.NameComponents

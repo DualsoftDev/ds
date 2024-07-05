@@ -1,0 +1,35 @@
+@* PageDynamicLoadScript *@
+
+@page "/demo/load-dynamic-script"
+
+<h3>PageDynamicLoadScript</h3>
+
+<div id="cy" style="width: 300px; height: 200px;"></div>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
+
+        await JsDual.Eval(@"
+            var cy = cytoscape({
+                container: document.getElementById('cy'),
+                elements: {
+                    nodes: [
+                        { data: { id: 'a' } },
+                        { data: { id: 'b' } },
+                    ],
+                    edges: [{
+                        data: {
+                            id: 'ab',
+                            source: 'a',
+                            target: 'b'
+                        }
+                    }
+                    ]
+                }
+            });
+");
+    }
+
+}

@@ -9,7 +9,7 @@ module internal ModelFindModule =
     let nameComponentsEq (Fqdn(ys)) (xs:IQualifiedNamed) = xs.NameComponents = ys
     let nameEq (name:string) (x:INamed) = x.Name = name
    
-    let tryFindSystemInner (system:DsSystem) (xs:string list) : obj option =
+    let tryFindSystemInner (system:DsSystem) (xs:string list) : IVertex option =
         match xs with
         | [] -> Some system
         | f::xs1 when system.Flows.Any(nameEq f) ->
@@ -25,7 +25,7 @@ module internal ModelFindModule =
                     | remaining ->
                         option {
                             let! v = real.Graph.TryFindVertex(remaining.Combine())
-                            return box v
+                            return box v :?> IVertex
                         }
                 | _ -> None
 
@@ -37,7 +37,7 @@ module internal ModelFindModule =
         | [x] -> failwithlog $"tryFindSystemInner error : single fqdn {x}"
         | _ -> failwithlog "ERROR"
 
-    let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : obj option =
+    let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : IVertex option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
         let fqdn = fqdn.ToFSharpList()
         match fqdn with
@@ -243,6 +243,8 @@ type FindExtension =
 
     [<Extension>] static member TryFindExportApiItem(x:DsSystem, Fqdn(apiPath)) = tryFindExportApiItem x apiPath
     [<Extension>] static member TryFindGraphVertex  (x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertex x fqdn
+    [<Extension>] static member FindGraphVertex (x:DsSystem, Fqdn(fqdn)):IVertex = match tryFindGraphVertex x fqdn with | Some o -> o | None -> null
+
     [<Extension>] static member TryFindGraphVertex<'V when 'V :> IVertex>(x:DsSystem, Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
     [<Extension>] static member TryFindRealVertex (x:DsSystem, flowName, realName) =  tryFindReal x [ flowName; realName ]
     [<Extension>] static member GetSharedReal (x:Real) = getVertexSharedReal x
@@ -343,3 +345,17 @@ type FindExtension =
                     x.GetDevicesCall()
                         .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
 
+    [<Extension>]
+    static member GetQualifiedName(vertex:IVertex) =
+        match vertex with
+        | :? IQualifiedNamed as q -> q.QualifiedName
+        | _ -> failwithlog "ERROR"
+    [<Extension>]
+    static member GetParentName(vertex:IVertex) =
+        match vertex with
+        | :? DsSystem as s -> s.Name
+        | :? Flow as f -> f.System.QualifiedName
+        | :? Real as r -> r.Flow.QualifiedName
+        | :? Call as c -> c.Parent.GetCore().QualifiedName
+        | :? Alias as a -> a.Parent.GetCore().QualifiedName
+        | _ -> failwithlog "ERROR"

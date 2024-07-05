@@ -253,9 +253,13 @@ module internal DBLoggerImpl =
                 return logSet
             }
 
-        let createLoggerDBSchemaAsync () =
+        let createLoggerDBSchemaAsync (cleanExistingDb:bool) =
             task {
                 use conn = createConnection ()
+
+                if cleanExistingDb then
+                    conn.DropDatabase();
+
                 use! tr = conn.BeginTransactionAsync()
 
                 let! exists = conn.IsTableExistsAsync(Tn.Storage)
@@ -299,13 +303,13 @@ module internal DBLoggerImpl =
             }
 
         /// Log DB schema 생성
-        let initializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) =
+        let initializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
                 let loggerDBSettings = commonAppSetting.LoggerDBSettings
                 let connString = loggerDBSettings.ConnectionString
                 connectionString <- connString
                 interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
-                do! createLoggerDBSchemaAsync ()
+                do! createLoggerDBSchemaAsync cleanExistingDb
             }
 
 
@@ -314,10 +318,11 @@ module internal DBLoggerImpl =
                 querySet: QuerySet,      // reader + writer 인 경우에만 non null 값
                 commonAppSetting: DSCommonAppSettings,
                 systems: DsSystem seq,
-                modelCompileInfo: ModelCompileInfo
+                modelCompileInfo: ModelCompileInfo,
+                cleanExistingDb: bool
             ) =
             task {
-                do! initializeLogDbOnDemandAsync commonAppSetting
+                do! initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
                 do! fillLoggerDBSchemaAsync modelCompileInfo
                 let! logSet_ = createLogInfoSetForWriterAsync (querySet, systems)
                 logSet <- logSet_

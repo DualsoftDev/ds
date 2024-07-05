@@ -1,0 +1,51 @@
+@* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/images-breadthfirst-layout/index.html *@
+
+@page "/demo/cytoscape/some-name"
+
+<h3>ImageBreadthFirst</h3>
+
+<div id="cy"></div>
+
+
+@if (_cyData == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+}
+
+@code {
+    object _cyData;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
+
+        _cyData = new
+        {
+        };
+        // C# 객체 _cyData 를 자바스크립트 객체로 변환
+        await JsDual.Eval($"window.cyData = {NewtonsoftJson.SerializeObject(_cyData)};");
+
+
+        await JsDual.Eval(@"
+
+");
+    }
+
+}
+
+<style>
+    body {
+        font: 14px helvetica neue, helvetica, arial, sans-serif;
+    }
+
+    #cy {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        left: 0;
+        top: 0;
+    }
+</style>

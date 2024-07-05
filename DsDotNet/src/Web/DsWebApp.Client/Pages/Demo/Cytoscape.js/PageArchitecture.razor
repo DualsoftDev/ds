@@ -1,0 +1,254 @@
+@* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/architecture/index.html *@
+
+@page "/demo/cytoscape/architecture"
+
+<h3>PageArchitecture</h3>
+
+<div id="cy" ></div>
+
+@if (_cyNodes == null)
+{
+    <LoadingSpinner />
+}
+else
+{
+}
+
+@code {
+    object _cyNodes, _cyEdges;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
+
+        prepareGraph();
+
+
+        // C# 객체 _cyNodes 를 자바스크립트 객체로 변환
+        var cyElements = new { nodes = _cyNodes, edges = _cyEdges };
+        await JsDual.Eval($"window.cyElements = {NewtonsoftJson.SerializeObject(cyElements)};");
+
+        await JsDual.Eval(@"
+var cy = cytoscape({
+  container: document.getElementById('cy'),
+  style: cytoscape.stylesheet()
+    .selector('node')
+      .css({
+        'content': 'data(name)',
+        'text-valign': 'center',
+        'color': 'white',
+        'text-outline-width': 5,
+        'text-outline-color': '#888',
+        'width': 80,
+        'height': 80
+      })
+    .selector('edge')
+      .css({
+        'content': 'data(name)',
+        'width': 8,
+        'line-color': '#888',
+        'target-arrow-color': '#888',
+        'source-arrow-color': '#888',
+        'target-arrow-shape': 'triangle'
+      })
+    .selector(':selected')
+    .selector('$node > node')
+      .css({
+        'shape': 'roundrectangle',
+        'text-valign': 'top',
+        'height': 'auto',
+        'width': 'auto',
+        'background-color': '#ccc',
+        'background-opacity': 0.333,
+        'color': '#888',
+        'text-outline-width':
+        0,
+        'font-size': 25
+      })
+    .selector('#core, #app')
+      .css({
+        'width': 120,
+        'height': 120,
+        'font-size': 25
+      })
+    .selector('#api')
+      .css({
+        'padding-top': 20,
+        'padding-left': 20,
+        'padding-bottom': 20,
+        'padding-right': 20
+      })
+    .selector('#ext, .ext')
+      .css({
+        'background-color': '#93CDDD',
+        'text-outline-color': '#93CDDD',
+        'line-color': '#93CDDD',
+        'target-arrow-color': '#93CDDD'
+      })
+    .selector('#app, .app')
+      .css({
+        'background-color': '#F79646',
+        'text-outline-color': '#F79646',
+        'line-color': '#F79646',
+        'target-arrow-color': '#F79646',
+        'text-outline-color': '#F79646',
+        'text-outline-width': 5,
+        'color': '#fff'
+      })
+    .selector('#cy')
+      .css({
+        'background-opacity': 0,
+        'border-width': 1,
+        'border-color': '#aaa',
+        'border-opacity': 0.5,
+        'font-size': 50,
+        'padding-top': 40,
+        'padding-left': 40,
+        'padding-bottom': 40,
+        'padding-right': 40
+      }),
+
+  elements: window.cyElements,
+
+  layout: {
+    name: 'preset'
+  }
+});
+");
+    }
+
+    void prepareGraph()
+    {
+        _cyNodes = new object[]
+        {
+            new
+            {
+                data = new { id = "cy", name = "Cytoscape.js" }
+            },
+            new
+            {
+                data = new { id = "core", name = "Core", parent = "api" },
+                position = new { x = 0, y = 0 }
+            },
+            new
+            {
+                data = new { id = "eles", name = "Collection", parent = "api" },
+                position = new { x = 150, y = 150 }
+            },
+            new
+            {
+                data = new { id = "style", name = "Stylesheet", parent = "api" },
+                position = new { x = 0, y = 150 }
+            },
+            new
+            {
+                data = new { id = "selector", name = "Selector", parent = "api" },
+                position = new { x = -150, y = 150 }
+            },
+            new
+            {
+                data = new { id = "ext", name = "Extensions", parent = "cy" }
+            },
+            new
+            {
+                data = new { id = "corefn", name = "Core Function", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = -140 }
+            },
+            new
+            {
+                data = new { id = "elesfn", name = "Collection Function", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = 0 }
+            },
+            new
+            {
+                data = new { id = "layout", name = "Layout", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = 140 }
+            },
+            new
+            {
+                data = new { id = "renderer", name = "Renderer", parent = "ext" },
+                classes = "ext",
+                position = new { x = 350, y = 280 }
+            },
+            new
+            {
+                data = new { id = "api", name = "Core API", parent = "cy" }
+            },
+            new
+            {
+                data = new { id = "app", name = "Client" },
+                position = new { x = 0, y = 480 }
+            }
+        };
+        _cyEdges = new object[]
+        {
+            new
+            {
+                data = new { source = "core", target = "eles" }
+            },
+            new
+            {
+                data = new { source = "core", target = "ext" }
+            },
+            new
+            {
+                data = new { source = "core", target = "style" }
+            },
+            new
+            {
+                data = new { source = "style", target = "selector" }
+            },
+            new
+            {
+                data = new { source = "core", target = "selector" }
+            },
+            new
+            {
+                data = new { source = "elesfn", target = "eles" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "corefn", target = "core" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "layout", target = "api" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "renderer", target = "api" },
+                classes = "ext"
+            },
+            new
+            {
+                data = new { source = "app", target = "api", name = "use" },
+                classes = "app"
+            },
+            new
+            {
+                data = new { source = "app", target = "ext", name = "register" },
+                classes = "app"
+            }
+        };
+    }
+}
+
+<style>
+    body {
+        font: 14px helvetica neue, helvetica, arial, sans-serif;
+    }
+
+    #cy {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        left: 0;
+        top: 0;
+    }
+</style>      

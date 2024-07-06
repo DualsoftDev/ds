@@ -123,19 +123,21 @@ module internal DBLoggerImpl =
                 if readerWriterType = DBLoggerType.Reader then
                     failwithlogf $"Database can't be sync'ed for {connectionString}"
                 else
+                    let modelId = querySet.CommonAppSettings.LoggerDBSettings.ModelId
                     for s in newStorages do
                         let! id =
                             conn.InsertAndQueryLastRowIdAsync(
                                 tr,
                                 $"""INSERT INTO [{Tn.Storage}]
-                                (name, fqdn, tagKind, dataType)
-                                VALUES (@Name, @Fqdn, @TagKind, @DataType)
+                                (name, fqdn, tagKind, dataType, modelId)
+                                VALUES (@Name, @Fqdn, @TagKind, @DataType, @ModelId)
                                 ;
                             """,
                                 {| Name = s.Name
                                    Fqdn = s.Fqdn
                                    TagKind = s.TagKind
-                                   DataType = s.DataType |}
+                                   DataType = s.DataType
+                                   ModelId = modelId |}
                             )
 
                         s.Id <- id
@@ -149,7 +151,7 @@ module internal DBLoggerImpl =
         let queue = ConcurrentQueue<ORMLog>()
 
         /// 주기적으로 memory -> DB 로 log 를 write
-        let dequeAndWriteDBAsync (nPeriod: int64) =
+        let dequeAndWriteDBAsync (nPeriod: int64, commonAppSetting: DSCommonAppSettings) =
             verify (logSet.ReaderWriterType.HasFlag(DBLoggerType.Writer))
 
             // 큐를 배열로 바꾸고 비우는 함수
@@ -180,12 +182,12 @@ module internal DBLoggerImpl =
                     if (logSet.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
                         logSet.BuildIncremental newLogs
-
+                    let modelId = commonAppSetting.LoggerDBSettings.ModelId
                     for l in newLogs do
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
-                                (at, storageId, value)
-                                VALUES (@At, @StorageId, @Value)
+                                (at, storageId, value, modelId)
+                                VALUES (@At, @StorageId, @Value, @ModelId)
                             """
 
                         do!
@@ -193,7 +195,8 @@ module internal DBLoggerImpl =
                                 query,
                                 {| At = l.At
                                    StorageId = l.StorageId
-                                   Value = l.Value |}
+                                   Value = l.Value
+                                   ModelId = modelId |}
                             )
 
                         ()
@@ -253,7 +256,7 @@ module internal DBLoggerImpl =
                 return logSet
             }
 
-        let createLoggerDBSchemaAsync (cleanExistingDb:bool) =
+        let createLoggerDBSchemaAsync (modelZipPath:string) (dbWriter:string) (cleanExistingDb:bool) =
             task {
                 use conn = createConnection ()
 
@@ -269,13 +272,31 @@ module internal DBLoggerImpl =
                     do! conn.ExecuteSilentlyAsync(sqlCreateSchema, tr)
                     ()
 
+                let lastModified = System.IO.FileInfo(modelZipPath).LastWriteTime
+                let param:obj = {| Path=modelZipPath; LastModified=lastModified; Runtime=dbWriter |}
+                let! models = conn.QueryAsync<int>($"SELECT id FROM [{Tn.Model}] WHERE path = @Path AND lastModified = @LastModified AND runtime=@Runtime;", param, tr)
+                let modelId =
+                    match models.ToFSharpList() with
+                    | id::[] -> id
+                    | [] ->
+                        let id =
+                            conn.InsertAndQueryLastRowIdAsync(tr,
+                                $"""INSERT INTO [{Tn.Model}]
+                                    (path, lastModified, runtime)
+                                    VALUES (@Path, @LastModified, @Runtime)
+                                """,
+                                param
+                            ).Result
+                        id
+
                 let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
 
                 for (id, name) in newTagKindInfos do
-                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
-                    do! conn.ExecuteSilentlyAsync(query, {| Id = id; Name = name |}, tr)
+                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name, modelId) VALUES (@Id, @Name, @ModelId);"
+                    do! conn.ExecuteSilentlyAsync(query, {| Id = id; Name = name; ModelId=modelId |}, tr)
 
                 do! tr.CommitAsync()
+                return modelId
             }
 
 
@@ -307,9 +328,11 @@ module internal DBLoggerImpl =
             task {
                 let loggerDBSettings = commonAppSetting.LoggerDBSettings
                 let connString = loggerDBSettings.ConnectionString
+                let (modelZipPath, dbWriter:string) = loggerDBSettings.ModelFilePath, loggerDBSettings.DbWriter
                 connectionString <- connString
                 interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
-                do! createLoggerDBSchemaAsync cleanExistingDb
+                let! modelId = createLoggerDBSchemaAsync modelZipPath dbWriter cleanExistingDb
+                commonAppSetting.LoggerDBSettings.ModelId <- modelId
             }
 
 
@@ -327,7 +350,7 @@ module internal DBLoggerImpl =
                 let! logSet_ = createLogInfoSetForWriterAsync (querySet, systems)
                 logSet <- logSet_
 
-                interval.Subscribe(fun counter -> writePeriodicAsync(counter).Wait())
+                interval.Subscribe(fun counter -> writePeriodicAsync(counter, commonAppSetting).Wait())
                 |> logSet_.Disposables.Add
 
                 return logSet_

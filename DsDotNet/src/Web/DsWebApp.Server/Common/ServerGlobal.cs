@@ -51,7 +51,8 @@ public class ServerGlobal
             {
                 logger.Warn($"Failed to load runtime model: {serverSettings.RuntimeModelDsZipPath}\r\n{ex.Message}");
             }
-        });
+        }
+        );
     }
 
     public RuntimeModel ReloadRuntimeModel(ServerSettings serverSettings)

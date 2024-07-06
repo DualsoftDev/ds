@@ -14,11 +14,13 @@ module CommonAppSettings =
     #endif
 
 
-type LoggerDBSettings(connectionPath:string, syncIntervalSeconds:int) = 
+type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, syncIntervalSeconds:int) = 
     member x.ConnectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, x.ConnectionPath)}"
-    member val ConnectionPath = connectionPath with get, set
+    member val ConnectionPath = sqlitePath with get, set
     member val SyncIntervalSeconds = syncIntervalSeconds with get, set
-
+    member val DbWriter = dbWriter with get, set
+    member val ModelFilePath = modelFilePath with get, set
+    member val ModelId = -1 with get, set
 /// 여러 application(.exe) 들 간의 공유할 정보
 /// "CommonAppSettings.json" 파일
 type DSCommonAppSettings(loggerDBSettings:LoggerDBSettings) =

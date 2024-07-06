@@ -24,6 +24,7 @@ type DBLogger() =
             modelCompileInfo: ModelCompileInfo,
             cleanExistingDb: bool
         ) =
+        ()
         task {
             Log4NetWrapper.logWithTrace <- true
 
@@ -34,7 +35,8 @@ type DBLogger() =
         }
 
     /// model 정보 없이, database schema 만 생성
-    static member InitializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings, cleanExistingDb:bool) = DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
+    static member InitializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings, cleanExistingDb:bool) =
+        DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
 
         
 
@@ -55,6 +57,7 @@ type DBLogger() =
             cleanExistingDb:bool
 
         ) =
+        ()
         task {
             Log4NetWrapper.logWithTrace <- true
 

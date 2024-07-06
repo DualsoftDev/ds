@@ -148,133 +148,73 @@ var cy = window.cy = cytoscape({
     },
 });
 
+console.log('---------------- cytoscape loaded ----------------')
+if (window.cyReady) {
+    console.log('---------------- cytoscape loaded ----------------')
+    //cy.ready(window.cyReady);
+    cy.on('load', window.cyReady);
+}
 
 
+/*
+cy.ready() 나 cy.on('load') : 제대로 동작하지 않는 듯..
+ */
+repositionNodes = function (visibleNodes, columns) {
+    console.log('repositionNodes: ');
+    // 각 노드의 위치를 계산하여 재배치합니다.
+    var spacingX = 0;
+    var spacingY = 0;
 
+    // 노드의 최대 너비와 높이를 구합니다.
+    visibleNodes.forEach(node => {
+        var bb = node.boundingBox();
+        spacingX = Math.max(spacingX, bb.w);
+        spacingY = Math.max(spacingY, bb.h);
+    });
 
+    // 여유 간격을 더해줍니다.
+    spacingX += 20; // X축 여유 간격
+    spacingY += 20; // Y축 여유 간격
 
+    visibleNodes.forEach((node, index) => {
+        var col = index % columns;
+        var row = Math.floor(index / columns);
+        var position = {
+            x: col * spacingX,
+            y: row * spacingY
+        };
+        console.log(`node: ${node.id()}, col: ${col}, row: ${row}, x: ${position.x}, y: ${position.y}`)
+        node.position(position);
+    });
 
-
-
-
+    // Cytoscape.js에서 노드 위치 변경을 적용합니다.
+    cy.batch(function () {
+        visibleNodes.forEach(node => {
+            node.position(node.position());
+        });
+    });
+    cy.layout({ name: 'preset' }).run();
+}
 
 
 
 /*
-      
-cy.nodes()
-cy.edges()
-cy.$(':selected')
-cy.$(':visible')
-cy.$(':hidden')
-cy.$(':parent')
-cy.$('node.Flow')
-cy.$(':selected').position()
-cy.$(':selected').position({x:2000, y:10})
-cy.$('#SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1')
-cy.$id('SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1') // cy.$('#some-id') 와 동일
-cy.$id('SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1').data()
-cy.$id('SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1').classes()
-cy.edges().filter(e => e.classes().includes("Reset")).length
-cy.edges().filter(e => e.classes().includes("Reset"))[0].data()
-cy.edges().filter(e => e.classes().includes("Reset"))[0].classes()
-cy.edges().filter(e => e.classes().includes("Reset")).json()
+// cy.ready() 또는 cy.on('load') 이벤트 핸들러: 실제 실행은 되지만, (blazor 환경 때문?? )최초 loading 시에 반영은 되지 않는다.
+cy.ready(function () {
+    // 특정 클래스("Flow")를 가진 보이는 노드들을 필터링합니다.
+    var visibleNodes = cy.$('node.Flow').filter(node => node.visible());
 
-cy.edges().filter(e => e.data().source === 'SIDE.MES.S201_RBT1' ).json()
-cy.nodes().map(n => n.data().id)
+    // 열의 개수를 설정합니다.
+    var num_columns = 3;
 
-cy.nodes().filter(n => n.data().id === "SIDE").json()
-cy.$id('SIDE').json()
-cy.$('#SIDE').json()
+    // 함수 호출
+    repositionNodes(visibleNodes, num_columns);
+
+});
+*/
 
 
-
-
-     // elements: {
-     //   nodes: [
-     //     { data: { id: 'a', parent: 'b' }, position: { x: 215, y: 85 } },
-     //     { data: { id: 'b' } },
-     //     { data: { id: 'c', parent: 'b' }, position: { x: 300, y: 85 } },
-     //     { data: { id: 'd' }, position: { x: 215, y: 175 } },
-     //     { data: { id: 'e' } },
-     //     { data: { id: 'f', parent: 'e' }, position: { x: 300, y: 175 } }
-     //   ],
-     //   edges: [
-     //     { data: { id: 'ad', source: 'a', target: 'd' } },
-     //     { data: { id: 'eb', source: 'e', target: 'b' } }
-   
-     //   ]
-     // },
-   
-   
-   // elements: {
-   //     'nodes': [
-   //         { data: { id: 'a', parent: 'p' } },
-   //         { data: { id: 'b', parent: 'p' } },
-   //         { data: { id: 'c', parent: 'p' } },
-   //         { data: { id: 'd', parent: 'p' } },
-   //         { data: { id: 'e', parent: 'p' } },
-   //         { data: { id: 'f', parent: 'p' } },
-   //         { data: { id: 'g', parent: 'p' } },
-   //         { data: { id: 'h', parent: 'p' } },
-   //         { data: { id: 'p' } }
-   //     ],
-   //     'edges': [
-   //         { data: { id: 'e1', source: 'a', target: 'b' } },
-   //         { data: { id: 'e2', source: 'b', target: 'c' } },
-   //         { data: { id: 'e3', source: 'b', target: 'd' } },
-   //         { data: { id: 'e4', source: 'e', target: 'f' } },
-   //         { data: { id: 'e5', source: 'f', target: 'g' } },
-   //         { data: { id: 'e6', source: 'f', target: 'h' } }
-   //     ]
-   // },
-   
-   
-   // elements: {
-   //     nodes: [
-   //         { data: { id: 'a', parent: 'p' }, position: { x: 215, y: 85 } },
-   //         { data: { id: 'b', parent: 'p' }, position: { x: 300, y: 85 } },
-   //         { data: { id: 'p' } }
-   //     ],
-   //     edges: [
-   //         { data: { id: 'e1', source: 'a', target: 'b' } }
-   //     ]
-   // },
-   
-   
-   
-   // // https://stackoverflow.com/questions/27280708/how-do-i-make-classes-work-in-cytoscape-js
-   // var cy = cytoscape({
-   //     container: document.getElementById('cy'),
-   //     style: [
-   //         {
-   //             selector: 'node',
-   //             style: {
-   //                 'label': 'data(id)'
-   //             }
-   //         },
-
-   //         {
-   //             selector: '.ClassName1',
-   //             style: {
-   //                 'width': 8,
-   //                 'height': 8,
-   //                 'label': ''
-   //             }
-   //         }
-   //     ],
-   //     elements: {
-   //         nodes: [
-   //               { data: { id: 'explore'}, classes: 'ClassName1'},
-   //               { data: { id: 'discover' } }
-   //         ],
-   //         edges: [
-   //               { data: { source: 'explore', target: 'discover' } }
-   //         ]
-   //    },
-   // });
-   
-   
+/*   
 Shapes: 
    ellipse
    triangle

@@ -15,14 +15,6 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
-        // await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
-        // await JsDual.EvalExternalScript("https://raw.githubusercontent.com/cytoscape/cytoscape.js-dagre/master/cytoscape-dagre.js");
-
-        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.16/cytoscape.min.js");
-        // await JsDual.EvalExternalScript("https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.2.1/cytoscape-dagre.min.js");
-        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.2/dagre.min.js");
-
         // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
         await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
         await JsDual.EvalExternalScript("https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js");
@@ -46,8 +38,26 @@
 //
 var cyData = window.cyData
 console.log(cyData)
-var resetEdges = cyData.edges.filter(edge => edge.classes.includes('Reset'))
-var nonResetEdges = cyData.edges.filter(edge => !edge.classes.includes('Reset'))
+var resetEdges = cyData.edges.filter(edge => edge.classes.includes('Reset'));
+var nonResetEdges = cyData.edges.filter(edge => !edge.classes.includes('Reset'));
+
+console.log(`Initial: resetEdges = ${resetEdges.length}, nonResetEdges = ${nonResetEdges.length}`)
+
+
+// 동일한 source와 target을 가지는 엣지들을 병합합니다.
+resetEdges.forEach(resetEdge => {
+    let matchingEdge = nonResetEdges.find(edge => edge.data.source === resetEdge.data.target && edge.data.target === resetEdge.data.source);
+    if (matchingEdge) {
+        // matchingEdge의 클래스를 'Start, Reset' 으로 업데이트합니다.
+        matchingEdge.classes = 'Start, ReverseReset';
+    } else {
+        // 만약 매칭되는 엣지가 없으면, resetEdge를 유지합니다.
+        nonResetEdges.push(resetEdge);
+    }
+});
+console.log(`Middle: resetEdges = ${resetEdges.length}, nonResetEdges = ${nonResetEdges.length}`)
+
+
 cyData.edges = nonResetEdges
 
 var cy = window.cy = cytoscape({
@@ -147,6 +157,16 @@ var cy = window.cy = cytoscape({
                 // 'line-dash-pattern': [6, 3],
             }
         },
+        {
+            selector: 'edge.ReverseReset',
+            css: {
+                'line-color': 'green',
+                'curve-style': 'bezier',
+                'source-arrow-shape': 'circle',
+                'source-arrow-color': 'red',
+                'line-style': 'dashed',     // 'solid', 'dotted',
+            }
+        },
     ],
 
 
@@ -162,11 +182,6 @@ var cy = window.cy = cytoscape({
         padding: 5
     },
 });
-
-// DAG 를 다 그렸으므로, reset edge 를 cytoscape 에 추가.
-resetEdges.forEach(edge => {
-    cy.add(edge)
-})
 
 
 // click event: node 및 edge 둘다 적용

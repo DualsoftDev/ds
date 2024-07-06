@@ -62,7 +62,7 @@ var cy = window.cy = cytoscape({
         {
             selector: '.Real',
             css: {
-                'shape': 'ellipse',
+                'shape': 'rectangle',
                 'background-color': 'DarkSalmon',
             }
         },
@@ -93,9 +93,22 @@ var cy = window.cy = cytoscape({
             selector: 'edge',
             css: {
                 'curve-style': 'bezier',
-                'target-arrow-shape': 'triangle'
+                'target-arrow-shape': 'triangle',
+                'target-arrow-color': 'navy',
             }
-        }
+        },
+        {
+            selector: '.Reset',
+            css: {
+                'line-color': 'green',
+                'curve-style': 'bezier',
+                'target-arrow-shape': 'circle',
+                'target-arrow-color': 'red',
+                'line-style': 'dashed',     // 'solid', 'dotted',
+                // 'line-dash-offset': 24,
+                // 'line-dash-pattern': [6, 3],
+            }
+        },
     ],
 
 

@@ -41,7 +41,14 @@
             );
 
         await JsDual.EvalOnGlobalModule(@"
-console.log(window.cyData);
+//
+// Graph algorithm 상에서 DAG 로 그리기 위해서 reset edge 는 일단 제외한 상태로 시작
+//
+var cyData = window.cyData
+console.log(cyData)
+var resetEdges = cyData.edges.filter(edge => edge.classes.includes('Reset'))
+var nonResetEdges = cyData.edges.filter(edge => !edge.classes.includes('Reset'))
+cyData.edges = nonResetEdges
 
 var cy = window.cy = cytoscape({
     container: document.getElementById('cy'),
@@ -143,7 +150,7 @@ var cy = window.cy = cytoscape({
     ],
 
 
-    elements: window.cyData,
+    elements: cyData,
     wheelSensitivity: 0.2,
 
     layout: {
@@ -155,6 +162,11 @@ var cy = window.cy = cytoscape({
         padding: 5
     },
 });
+
+// DAG 를 다 그렸으므로, reset edge 를 cytoscape 에 추가.
+resetEdges.forEach(edge => {
+    cy.add(edge)
+})
 
 
 // click event: node 및 edge 둘다 적용
@@ -250,13 +262,24 @@ $('#reset_zoom').click(() => {
       
 @*
 cy.nodes()
+cy.edges()
 cy.$(':selected')
 cy.$(':visible')
 cy.$(':hidden')
 cy.$(':parent')
 cy.$('node.Flow')
-cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
+cy.$(':selected').position()
 cy.$(':selected').position({x:2000, y:10})
+cy.$('#SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1')
+cy.$id('SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1') // cy.$('#some-id') 와 동일
+cy.$id('SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1').data()
+cy.$id('SIDE.S200_CARTYPE_MOVE.S204_END__SIDE.S200_CARTYPE_MOVE.S205_RBT1').classes()
+cy.edges().filter(e => e.classes().includes("Reset")).length
+cy.edges().filter(e => e.classes().includes("Reset"))[0].data()
+cy.edges().filter(e => e.classes().includes("Reset"))[0].classes()
+cy.edges().filter(e => e.classes().includes("Reset")).json()
+
+cy.edges().filter(e => e.data().source === 'SIDE.MES.S201_RBT1' ).json()
 *@
 
 

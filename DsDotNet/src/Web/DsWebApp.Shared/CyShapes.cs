@@ -15,8 +15,8 @@ public interface ICyItem
 
 public abstract class CyItem : ICyItem
 {
-    public string id { get; }
-    public string content { get; }
+    public string id { get; private set; }
+    public string content { get; private set; }
     protected CyItem() {}
 
     protected CyItem(string id, string content)
@@ -25,6 +25,7 @@ public abstract class CyItem : ICyItem
         this.content = content;
     }
     public abstract string Serialize();
+    protected void Set(string id, string content) => (this.id, this.content) = (id, content);
 }
 
 public class CyVertex : CyItem
@@ -47,7 +48,6 @@ public class CyVertex : CyItem
     public override string Serialize()
     {
         var p = parent.IsNullOrEmpty() ? "" : $", parent: '{parent}'";
-        var posi = ", position: " + Embrace("x: 215, y: 85");
         var data = $"id: '{id}', content: '{content}'{p}";
         data = $"data: {Embrace(data)}";
         var classes = $"classes: '{type}'";
@@ -57,9 +57,9 @@ public class CyVertex : CyItem
 
 public class CyEdge : CyItem
 {
-    public string source { get; }
-    public string target { get; }
-    public string type { get; }
+    public string source { get; private set; }
+    public string target { get; private set; }
+    public string type { get; private set; }
     public CyEdge() { }
 
     public CyEdge(Edge edge)
@@ -69,10 +69,18 @@ public class CyEdge : CyItem
     }
 
     CyEdge(string src, string tgt)
-        : base($"{src}=>{tgt}", $"{src}=>{tgt}")
+        : base($"{src}__{tgt}", $"{src}__{tgt}")
     {
         this.source = src;
         this.target = tgt;
+    }
+
+    public void Set(string id, string content, string source, string target, string type)
+    {
+        this.source = source;
+        this.target = target;
+        this.type = type;
+        base.Set(id, content);
     }
 
     public override string Serialize()

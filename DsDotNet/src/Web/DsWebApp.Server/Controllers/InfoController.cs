@@ -10,6 +10,7 @@ using static Engine.Core.Interface;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
 using DsWebApp.Server.Common;
+using DevExpress.Pdf.Native.BouncyCastle.Asn1.X509;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -114,7 +115,30 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
 
         var vertices = node.CollectVertices(true).ToArray();
         var edges = node.CollectEdges().ToArray();
-        var cytoGraph = new CyGraph(vertices, edges);
+        var multiEdgesGroups=
+            edges.GroupBy(e => (e.source, e.target))
+                .Where(g => g.Count() > 1)
+                .ToArray()
+            ;
+        var multiEdges =
+            multiEdgesGroups.Select(gr =>
+            {
+                var multiples = gr.ToArray();
+                var classes = gr.Select(e => e.type).JoinString(", ");
+                var edge = new CyEdge();
+                var m0 = multiples[0];
+                edge.Set(m0.id, m0.content, m0.source, m0.target, classes);
+                return edge;
+            }).ToArray();
+
+        // edges 에서 중복된 edge 를 제거하고, 중복된 edge 를 표시하는 edge 를 추가한다.
+        var finalEdges =
+            edges
+                .Where(e => !multiEdgesGroups.Any(gr => gr.Contains(e)))
+                .Concat(multiEdges)
+                .ToArray();
+
+        var cytoGraph = new CyGraph(vertices, finalEdges);
 
         var json = cytoGraph.Serialize();
         Trace.WriteLine(json);
@@ -178,6 +202,11 @@ public static class CytoVertexExtension
                     yield return c;
                 break;
             case Flow f:
+                if (f.Name == "MES")
+                {
+                    var xxx = f.Graph.Edges.Select(e => new CyEdge(e)).ToArray();
+                    Console.Write("");
+                }
                 foreach (var c in f.Graph.Edges.Select(e => new CyEdge(e)))
                     yield return c;
 

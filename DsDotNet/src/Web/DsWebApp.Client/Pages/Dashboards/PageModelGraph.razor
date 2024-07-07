@@ -21,8 +21,8 @@
         await JsDual.EvalExternalScript("https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js");
         await JsDual.EvalExternalScript("https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js");
 
-         /*
-         * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
+        /*
+        * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
         */
         // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
         // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
@@ -31,13 +31,32 @@
             async json => {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
                 await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
+                await JsDual.EvalExternalScript("js/cyDsGraph.js");
+                await JsDual.EvalOnGlobalModule(_snippet);
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
             );
+    }
 
-        await JsDual.EvalExternalScript("js/cyDsGraph.js");
 
-        await JsDual.EvalOnGlobalModule(@"
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        Console.WriteLine("OnAfterRenderAsync.");
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            // await JsDual.EvalOnGlobalModule(@"fit();");
+        }
+        else
+        {
+            Console.WriteLine("fit() is ready.");
+            // dirty hack!
+            await Task.Delay(2000);
+            await JsDual.EvalOnGlobalModule(@"fit();");
+        }
+    }
+
+    string _snippet = @"
 // click event: node 및 edge 둘다 적용
 // node 만 적용하려면 cy.on('click', 'node', evt => ...  의 형태로 작성
 cy.on('click', evt => {
@@ -180,17 +199,9 @@ $('#reset_zoom').click(() => {
     //     .data('shape', 'rectangle')
     //     .addClass('active');
 });
-");
-    }
+";
 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-        if (firstRender)
-        {
-        }
-    }
 }
 
 <style>

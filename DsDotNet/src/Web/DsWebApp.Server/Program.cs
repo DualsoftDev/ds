@@ -171,6 +171,7 @@ app.MapHub<InfoHub>(InfoHub.HubPath);
 app.MapHub<ModelHub>(ModelHub.HubPath);
 app.MapHub<HmiTagHub>(HmiTagHub.HubPath)
     .RequireCors(_corsPolicyName);
+app.MapHub<DbHub>(DbHub.HubPath);
 
 app.MapFallbackToFile("index.html");
 app.UseWebSockets(); // WebSocket 활성화

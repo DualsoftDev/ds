@@ -1,0 +1,32 @@
+@* PageJsRuntime *@
+@page "/demo/js-runtime"
+
+<h3>PageJsRuntime</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.Eval("window.myFunction = function() {}");
+        bool exists = await JsDual.IsFunctionExists("myFunction");
+        Console.WriteLine($"Function exists: {exists}");
+
+        await JsRuntime.InvokeVoidAsync("eval", "window.myFunction2 = function() {}");
+        bool exists2 = await JsDual.IsFunctionExists("myFunction2");
+        Console.WriteLine($"Function2 exists: {exists}");
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            bool exists = await JsDual.IsFunctionExists("myFunction");
+            Console.WriteLine($"After: Function exists: {exists}");
+            bool exists2 = await JsDual.IsFunctionExists("myFunction2");
+            Console.WriteLine($"After: Function2 exists: {exists2}");
+        }
+    }
+
+}

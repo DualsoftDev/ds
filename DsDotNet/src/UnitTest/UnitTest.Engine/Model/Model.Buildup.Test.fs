@@ -34,17 +34,19 @@ module ModelBuildupTests1 =
             let apiP = apis.First(fun ai -> ai.Name = "ADV")
             let apiM = apis.First(fun ai -> ai.Name = "RET")
             let callAp =
-                let jName = "Ap"
+                let jobFqdn = [|"F";"A";"p"|]
+                let jName = jobFqdn.Combine()
                 let apiItem = TaskDev(apiP, jName, defaultDevParam(), defaultDevParam(),  dev.Name)
                 apiItem.InAddress <-"%I1"
                 apiItem.OutAddress<- "%Q1"
-                Job([|jName|], system, [apiItem])
+                Job(jobFqdn, system, [apiItem])
             let callAm =
-                let jName = "Am"
+                let jobFqdn = [|"F";"A";"m"|]
+                let jName = jobFqdn.Combine()
                 let apiItem = TaskDev(apiM, jName, defaultDevParam(), defaultDevParam(),  dev.Name)
                 apiItem.InAddress <-"%I2"
                 apiItem.OutAddress<- "%Q2"
-                Job([|jName|], system, [apiItem])
+                Job(jobFqdn, system, [apiItem])
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 
@@ -61,12 +63,12 @@ module ModelBuildupTests1 =
 [sys] My = {
     [flow] F = {
         Main = {
-            Ap < Am;		
+            A.p < A.m;		// A.p(Call)< A.m(Call);
         }
     }
     [jobs] = {
-        Ap = { A.ADV(%I1, %Q1); }
-        Am = { A.RET(%I2, %Q2); }
+        F.A.p = { A.ADV(%I1, %Q1); }
+        F.A.m = { A.RET(%I2, %Q2); }
     }
     [device file="./cylinder/double.ds"] A; 
 }
@@ -90,7 +92,7 @@ module ModelBuildupTests1 =
         member __.``Model with alias test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let vCallP = Alias.Create("Main2", DuAliasTargetReal real, DuParentFlow flow, false)
+            let vCallP = Alias.Create([|"Main2"|], DuAliasTargetReal real, DuParentFlow flow, false)
             let call2 = Call.Create(callAp, DuParentFlow flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, "<", call2)) |> ignore
@@ -98,16 +100,15 @@ module ModelBuildupTests1 =
             let answer = """
 [sys] My = {
     [flow] F = {
-        Main2 < Ap;		// Main2(Alias)< Ap(Call);
+        Main2 < A.p;		// Main2(Alias)< A.p(Call);
         Main; // island
         [aliases] = {
             Main = { Main2; }
         }
-
     }
     [jobs] = {
-        Ap = { A.ADV(%I1, %Q1); }
-        Am = { A.RET(%I2, %Q2); }
+        F.A.p = { A.ADV(%I1, %Q1); }
+        F.A.m = { A.RET(%I2, %Q2); }
     }
     [device file="./cylinder/double.ds"] A; 
 }
@@ -122,7 +123,7 @@ module ModelBuildupTests1 =
 
             let flow2 = Flow.Create("F2", system)
 
-            let real2 = Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow flow2, false)
+            let real2 = Alias.Create(real.ParentNPureNames, DuAliasTargetReal real, DuParentFlow flow2, false)
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
@@ -130,16 +131,16 @@ module ModelBuildupTests1 =
             let answer = """
 [sys] My = {
     [flow] F = {
-            Main; // island
+        Main; // island
     }
     [flow] F2 = {
-        F.Main > R3;		// F.Main(RealOtherFlow)> R3(Real);
+        F.Main > R3;		// F.Main(Alias)> R3(Real);
     }
     [jobs] = {
-        Ap = { A.ADV(%I1, %Q1); }
-        Am = { A.RET(%I2, %Q2); }
+        F.A.p = { A.ADV(%I1, %Q1); }
+        F.A.m = { A.RET(%I2, %Q2); }
     }
-    [device file="./cylinder/double.ds"] A; 
+    [device file="./cylinder/double.ds"] A;
 }
 """
             logDebug $"{generated}"
@@ -159,11 +160,11 @@ module ModelBuildupTests1 =
             let answer = """
 [sys] My = {
     [flow] F = {
-            Main, Main2; // island
+        Main, Main2; // island
     }
     [jobs] = {
-        Ap = { A.ADV(%I1, %Q1); }
-        Am = { A.RET(%I2, %Q2); }
+        F.A.p = { A.ADV(%I1, %Q1); }
+        F.A.m = { A.RET(%I2, %Q2); }
     }
     [interfaces] = {
         Adv = { F.Main ~ F.Main }
@@ -193,13 +194,13 @@ module ModelBuildupTests1 =
             let answer = """
 [sys] My = {
     [flow] F = {
-            Main; // island
+        Main; // island
     }
     [flow] F2 = {
     }
     [jobs] = {
-        Ap = { A.ADV(%I1, %Q1); }
-        Am = { A.RET(%I2, %Q2); }
+        F.A.p = { A.ADV(%I1, %Q1); }
+        F.A.m = { A.RET(%I2, %Q2); }
     }
     [buttons] = {
         [d] = {

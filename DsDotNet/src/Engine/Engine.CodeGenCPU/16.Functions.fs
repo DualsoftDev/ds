@@ -67,7 +67,7 @@ type VertexMCall with
                     then //주소가 없으면 Plan 으로 처리
                         d.ApiItem.PE.Expr
                     else    
-                        d.GetInExpr(call.TargetJob.Name)
+                        d.GetInExpr(call.TargetJob)
                 ) 
 
         if inOps.IsEmpty()

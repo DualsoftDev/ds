@@ -8,24 +8,24 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
-        Am > Main2;	     
-        Ap > Main;		
+        A.m > Main2;	     
+        A.p > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            A.p > A.m;		// A.p(Call)> A.m(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            A.p > A.m;		// A.p(Call)> A.m(Call);
         }
     }
     [jobs] = {
-        Am = { A.""-""(%I2, %Q2); }
-        Ap = { A.""+""(%I1, %Q1); }
+        F.A.m = { A.""-""(%I2, %Q2); }
+        F.A.p = { A.""+""(%I1, %Q1); }
     }
     [prop] = {
         [safety] = {
-        F.Main = { F.Ap; F.Am; }
-        F.Ap = { F.Main; }
+        F.Main = { F.A.p; F.A.m; }
+        F.F.A.p = { F.Main; }
         }
     }
     [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
@@ -33,51 +33,56 @@ namespace Engine
 
 "; 
     public static string AutoPreValid = @"
-[sys] L = {
-    [flow] F = {
-        Am > Main2;	     
-        Ap > Main;		
-	                    
-        Main = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+[sys] HelloDS = {
+    [flow] STN2 = {
+        Work1 = {
+            Device11111.ADV > Device11111.RET > Device11111_ADV_1 > Device11111_RET_1;
         }
-        Main2 = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+        [aliases] = {
+            Work1.Device11111.ADV = { Device11111_ADV_1; }
+            Work1.Device11111.RET = { Device11111_RET_1; }
         }
     }
     [jobs] = {
-        Am = { A.""-""(%I2, %Q2); }
-        Ap = { A.""+""(%I1, %Q1); }
+        STN2.Device11111.ADV[N3(2, 2)] = { STN2_Device11111_01.ADV(IB0.0, OB0.0); STN2_Device11111_02.ADV(IB0.2, OB0.2); STN2_Device11111_03.ADV(-, -); }
+        STN2.Device11111.RET[N3(3, 1)] = { STN2_Device11111_01.RET(IB0.1, OB0.1); STN2_Device11111_02.RET(IB0.3, -); STN2_Device11111_03.RET(IB0.4, -); }
     }
     [prop] = {
         [autopre] = {
-        F.Ap = { F.Am; }
+            STN2.Work1.Device11111.ADV = { STN2.Device11111.RET; }
+        }
+        [layouts] = {
+            STN2_Device11111_01 = (1369, 815, 220, 80);
+            STN2_Device11111_02 = (1369, 815, 220, 80);
+            STN2_Device11111_03 = (1369, 815, 220, 80);
         }
     }
-    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] 
+        STN2_Device11111_01,
+        STN2_Device11111_02,
+        STN2_Device11111_03; 
 }
-
 ";
 
         
         public static string LayoutValid = @"
 [sys] L = {
     [flow] F = {
-        Am > Main2;	     
-        Ap > Main;		
+        A.m > Main2;	     
+        A.p > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            A.p > A.m;		// A.p(Call)> A.m(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            A.p > A.m;		// A.p(Call)> A.m(Call);
         }
     }
     [jobs] = {
-        Am = { A.""-""(%I2, %Q2); }
-        Ap = { A.""+""(%I1, %Q1); }
-        Bm = { B.""-""(%I4, %Q4); }
-        Bp = { B.""+""(%I3, %Q3); }
+        F.A.m = { A.""-""(%I2, %Q2); }
+        F.A.p = { A.""+""(%I1, %Q1); }
+        F.B.m = { B.""-""(%I4, %Q4); }
+        F.B.p = { B.""+""(%I3, %Q3); }
     }
     [prop] = {
         [layouts] = {
@@ -91,19 +96,19 @@ namespace Engine
         public static string FinishValid = @"
 [sys] L = {
     [flow] F = {
-        Am > Main2;	     
-        Ap > Main;		
+        A.m > Main2;	     
+        A.p > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            A.p > A.m;		// A.p(Call)> A.m(Call);
         }
         Main2 = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            A.p > A.m;		// A.p(Call)> A.m(Call);
         }
     }
     [jobs] = {
-        Am = { A.""-""(%I2, %Q2); }
-        Ap = { A.""+""(%I1, %Q1); }
+        F.A.m = { A.""-""(%I2, %Q2); }
+        F.A.p = { A.""+""(%I1, %Q1); }
     }
     [prop] = {
         [finish] = {
@@ -118,27 +123,24 @@ namespace Engine
         public static string DisableValid = @"
 [sys] L = {
     [flow] F = {
-        Am > Main2;	     
-        Ap > Main;		
+        A.m > Main2;	     
+        A.p > Main;		
 	                    
         Main = {
-            Ap > Am;		// Ap(Call)> Am(Call);
+            A.p > A.m;		// A.p(Call)> A.m(Call);
         }
-        Main2 = {
-            Ap > Am;		// Ap(Call)> Am(Call);
-        }
+      
     }
     [jobs] = {
-        Am = { A.""-""(%I2, %Q2); }
-        Ap = { A.""+""(%I1, %Q1); }
+        F.A.m = { A.""-""(_, _); }
+        F.A.p = { A.""+""(_, _); }
     }
     [prop] = {
         [disable] = {
-            F.Main.Am;
-            F.Main2.Am;
+            F.Main.A.m;
         }
     }
-    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file=""cylinder.ds""] A; 
 }
 
 ";
@@ -168,14 +170,14 @@ namespace Engine
         Work1 > Work2;
     }
 
-    [lamps] = {
-        [a] = { AutoModeLamp(-, _) = { } }
-        [m] = { ManualModeLamp(-, _) = {  } }
-        [d] = { DriveLamp(-, _) = {  } }
-        [e] = { ErrorLamp(-, _) = {  } }
-        [r] = { ReadyStateLamp(-, _) = {  } }
-        [i] = { IdleModeLamp(-, _) = { } }
-        [o] = { OriginStateLamp(-, _) = {  } }
+    [lA.mps] = {
+        [a] = { AutoModeLA.mp(-, _) = { } }
+        [m] = { ManualModeLA.mp(-, _) = {  } }
+        [d] = { DriveLA.mp(-, _) = {  } }
+        [e] = { ErrorLA.mp(-, _) = {  } }
+        [r] = { ReadyStateLA.mp(-, _) = {  } }
+        [i] = { IdleModeLA.mp(-, _) = { } }
+        [o] = { OriginStateLA.mp(-, _) = {  } }
     }
 }
 ";
@@ -314,11 +316,11 @@ namespace Engine
         public static string Dup = @"
 [sys] L = {
     [flow] FF = {
-        A, Ap > C;
+        A, A.p > C;
     }
     [jobs] = {
-        Ap = { A.""+""(%I1, %Q1); }
-        //Am = { A.""-""(%I2, %Q2); }  //사용 안되면 정의 불가
+        F.A.p = { A.""+""(%I1, %Q1); }
+        //F.A.m = { A.""-""(%I2, %Q2); }  //사용 안되면 정의 불가
     }
     [device file=""cylinder.ds""] A;
 }
@@ -533,44 +535,44 @@ namespace Engine
 
         public static string Aliases = @"
 [sys] my = {
-    [flow] F = {
-        Main = {
-            // AVp1 |> Am1;
-            // 정보로서의 Call 상호 리셋
-            //Ap1 <|> Am1;
-            Ap > Am; 
+    [flow] STN11 = {
+        Work2 => Work1 => Work2;		// Work2(Real)=> Work1(Real) => Work2(Real);
+        외부시작.ADV.INTrue > Work1_1;		// 외부시작.ADV.INTrue(Call)> Work1_1(Alias);
+        Work1 = {
+            Device1.ADV > Device1_ADV_1;		// Device1.ADV(Call)> Device1_ADV_1(Alias);
         }
         [aliases] = {
-            Main.Ap = { Ap1; Ap2; Ap3; }
-            Main.Am = { Am1; Am2; Am3; }    // system name optional
-            //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
+            Work1 = { Work1_1; }
+            Work1.Device1.ADV = { Device1_ADV_1; }
         }
     }
     [jobs] = {
-        Ap = { A.""+""(%I1, %Q1); }
-        Am = { A.""-""(%I2, %Q2); }
+        STN11.외부시작.ADV.INTrue = { STN11_외부시작.ADV(_:Boolean:True, _); }
+        STN11.Device1.ADV = { STN11_Device1.ADV(_, _); }
     }
-    [device file=""cylinder.ds""] A;
+    [device file=""cylinder.ds""] 
+        STN11_Device1,
+        STN11_외부시작; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
 }
 ";
         public static string LinkAndLinkAliases = @"
 [sys] my = {
     [flow] F = {
         Main = {
-            // AVp1 |> Am1;
+            // AVp1 |> A.m1;
             // 정보로서의 Call 상호 리셋
-            //Ap1 <|> Am1;
-            Ap > Am; 
+            //A.p1 <|> A.m1;
+            A.p > A.m; 
         }
         [aliases] = {
-            Main.Ap = { Ap1; Ap2; Ap3; }
-            Main.Am = { Am1; Am2; Am3; }    // system name optional
+            Main.F.A.p = { A.p1; A.p2; A.p3; }
+            Main.F.A.m = { A.m1; A.m2; A.m3; }    // system nA.me optional
             //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
         }
     }
     [jobs] = {
-        Ap = { A.""+""(%I1, %Q1); }
-        Am = { A.""-""(%I2, %Q2); }
+        F.A.p = { A.""+""(%I1, %Q1); }
+        F.A.m = { A.""-""(%I2, %Q2); }
     }
     [device file=""cylinder.ds""] A;
 }
@@ -582,19 +584,19 @@ namespace Engine
     [flow] F = {
         Main = {
             // 정보로서의 Call 상호 리셋
-            Ap <|> Am;
-            Bp <|> Bm;
-            Ap > Am, Bp > Bm > Ap1 > Am1, Bp1 > Bm1;
+            A.p <|> A.m;
+            B.p <|> B.m;
+            A.p > A.m, B.p > B.m > A.p1 > A.m1, B.p1 > B.m1;
         }
-        Ap = {A.F.Vp ~ A.F.Sp}
-        Am = {A.F.Vm ~ A.F.Sm}
-        Bp = {B.F.Vp ~ B.F.Sp}
-        Bm = {B.F.Vm ~ B.F.Sm}
+        F.A.p = {A.F.Vp ~ A.F.Sp}
+        F.A.m = {A.F.Vm ~ A.F.Sm}
+        F.B.p = {B.F.Vp ~ B.F.Sp}
+        F.B.m = {B.F.Vm ~ B.F.Sm}
         [alias] = {
-            Ap = { Ap1; Ap2; }
-            Am = { Am1; Am2; }
-            Bp = { Bp1; Bp2; }
-            Bm = { Bm1; Bm2; }
+            F.A.p = { A.p1; A.p2; }
+            F.A.m = { A.m1; A.m2; }
+            F.B.p = { B.p1; B.p2; }
+            F.B.m = { B.m1; B.m2; }
         }
 
     }
@@ -657,12 +659,12 @@ namespace Engine
     [flow] F = {
         #OP1, #OP2 > Main <|> Reset;	
         Main = {
-            mv1up > mv1dn;		
+            mv1.up > mv1.dn;		
         }
     }
     [jobs] = {
-        mv1up = { A.""+""(%I300:symbol1:UInt16:0us:12ms, %Q300:ABC); }
-        mv1dn = { A.""-""(%I301:1ms, %Q301:Single:0f); }
+        F.mv1.up = { A.""+""(%I300:symbol1:UInt16:0us:12ms, %Q300:ABC); }
+        F.mv1.dn = { A.""-""(%I301:1ms, %Q301:Single:0f); }
     }
     [variables] = {}
     [operators] = {
@@ -713,7 +715,7 @@ namespace Engine
         CMD1 = #{$v0 = 1;}
         CMD2 = #{$AOUT = 2;}
     }
-    [device file=""cylinder.ds""] A; // Z:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [device file=""cylinder.ds""] A; // Z:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExA.mple/dsSimple/cylinder.ds
 }
 ";
 

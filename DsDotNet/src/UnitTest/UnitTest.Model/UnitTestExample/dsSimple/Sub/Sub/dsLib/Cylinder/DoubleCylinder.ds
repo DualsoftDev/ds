@@ -8,6 +8,14 @@
         ADV <|> RET;
     }
     [prop] = {
+        [motions] = {
+            FLOW.RETURN = {./Assets/Cylinder/DoubleType.obj:RET};
+            FLOW.ADVANCE = {./Assets/Cylinder/DoubleType.obj:ADV};
+        }
+        [times] = {
+            FLOW.RETURN = {AVG(0.5)};
+            FLOW.ADVANCE = {AVG(0.5)};
+        }
         [finish] = {
             FLOW.RETURN;
         }
@@ -15,4 +23,4 @@
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.9]
+//DS Engine Version = [0.9.8.36]

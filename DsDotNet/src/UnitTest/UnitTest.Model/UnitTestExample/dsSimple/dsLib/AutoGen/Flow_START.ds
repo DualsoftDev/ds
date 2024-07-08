@@ -1,15 +1,14 @@
-[sys] Double = {
-    [flow] Flow = {
-        RET <|> ADV;
+[sys] Flow_START = {
+    [flow] genFlow = {
+        genON <|> genClearRealgenON;
+        genON > genClearRealgenON;
     }
     [interfaces] = {
-        ADV = { Flow.ADV ~ Flow.ADV }
-        RET = { Flow.RET ~ Flow.RET }
-        RET <|> ADV;
+        ON = { genFlow.genON ~ genFlow.genON }
     }
     [prop] = {
         [finish] = {
-            Flow.RET;
+            genFlow.genON;
         }
     }
 }

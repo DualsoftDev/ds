@@ -48,7 +48,7 @@ module ContextInformationModule =
               else
                   yield! x.Names ]
 
-        member x.FullName = x.NameComponents.ToArray().Combine()
+        member x.FullName = x.NameComponents.ToArray().CombineQuoteOnDemand()
 
     type ObjectContextInformation with
 

@@ -183,35 +183,16 @@ module EtcListenerModule =
             let safetyDefs = ctx.Descendants<SafetyAutoPreDefContext>()
             let safetyKvs = getSafetyAutoPreDefs safetyDefs
             let curSystem = x.TheSystem
-
+           
             for (key, values) in safetyKvs do
-                option {
-                    let! safetyKey = tryHolderFindRealOrCall curSystem key
+                let safetyholder=  getSafetyAutoPreCall curSystem key 
+                let safetyConditions =
+                    [ for value in values -> getSafetyAutoPreCall curSystem value ] 
+                    |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
 
-                    let safetyConditions =
-                        [ for value in values -> tryHolderFindRealOrCall curSystem value ] 
-                        |> Seq.choose id
-                        |> Seq.map(fun sc ->
-                            match sc with
-                            | :? Real as r -> DuSafetyConditionReal r               
-                            | :? Call as c -> DuSafetyConditionCall c
-                            | _ -> failwithlog $"safetyConditions type error {safetyKey.GetType().Name}"
-                        )
-
-                    let holder =
-                        match safetyKey with
-                        | :? Real as r -> r :> ISafetyConditoinHolder                
-                        | :? Call as c -> c :> ISafetyConditoinHolder                
-                        | _ -> failwithlog $"safetyConditoinHolder type error {safetyKey.GetType().Name}"
-              
-                    debugfn "%A = {%A}" holder safetyConditions
-
-                    safetyConditions.Iter(fun sc ->
-                        holder.SafetyConditions.Add(sc)
-                        |> verifyM $"중복 safety condition[{(sc.Core :?> INamed).Name}]")
-                }
-                |> ignore
-
+                safetyConditions.Iter(fun sc ->
+                    safetyholder.SafetyConditions.Add(sc)
+                    |> verifyM $"중복 safety condition[{(sc.Core :?> INamed).Name}]")
 
         member x.ProcessAutoPreBlock(ctx: AutoPreBlockContext) =
             let autopreDefs = ctx.Descendants<SafetyAutoPreDefContext>()
@@ -220,27 +201,11 @@ module EtcListenerModule =
             let curSystem = x.TheSystem
 
             for (key, values) in autopreKvs do
-                option {
-                    let! autopreKey = tryHolderFindRealOrCall curSystem key
-
+                    let autopreKey =  getSafetyAutoPreCall curSystem key 
                     let autopreConditions =
-                        [ for value in values -> tryHolderFindRealOrCall curSystem value ] 
-                        |> Seq.choose id
-                        |> Seq.map(fun sc ->
-                            match sc with
-                            | :? Call as c -> DuAutoPreConditionCall c
-                            | _ -> failwithlog $"autopreConditions type error {autopreKey.GetType().Name}"
-                        )
-
-                    let holder =
-                        match autopreKey with
-                        | :? Call as c -> c :> IAutoPrerequisiteHolder
-                        | _ -> failwithlog $"autopreConditoinHolder type error {autopreKey.GetType().Name}"
-
-                    debugfn "%A = {%A}" holder autopreConditions
+                        [ for value in values -> getSafetyAutoPreCall curSystem value ] 
+                        |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
 
                     autopreConditions.Iter(fun sc ->
-                        holder.AutoPreConditions.Add(sc)
+                        autopreKey.AutoPreConditions.Add(sc)
                         |> verifyM $"중복 autopre condition[{(sc.Core :?> INamed).Name}]")
-                }
-                |> ignore

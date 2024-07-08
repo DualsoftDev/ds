@@ -4,6 +4,8 @@ namespace Engine.Core
 open System
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
+open System.Text.RegularExpressions
+open System.Collections
 
 [<AutoOpen>]
 module DsType =
@@ -70,57 +72,80 @@ module DsType =
         | CCTV = 0
         | IMAGE  = 1
 
-    
+        // 공통 함수: 문자열에서 마지막으로 닫히는 기호를 찾고, 그에 대응하는 여는 기호를 찾음
+        // 공통 함수: 문자열에서 마지막으로 닫히는 기호를 찾고, 그에 대응하는 여는 기호를 찾음
+    let FindEnclosedGroup (name: string, openSymbol: char, closeSymbol: char, searchFromStart: bool) =
+        let mutable startIdx = -1
+        let mutable endIdx = -1
+        let stack = new Stack()
+
+        let findIndices direction startPos =
+            let rec loop i =
+                if i < 0 || i >= name.Length then ()
+                else
+                    if name.[i] = openSymbol then
+                        if stack.Count = 0 then startIdx <- i
+                        stack.Push(i)
+                    elif name.[i] = closeSymbol then
+                        if stack.Count > 0 then stack.Pop() |> ignore
+                        if stack.Count = 0 then endIdx <- i
+
+                    if startIdx = -1 || endIdx = -1 then loop (i + direction)
+            loop startPos
+
+        if searchFromStart then 
+            if name.StartsWith(openSymbol.ToString()) then findIndices 1 0
+        else 
+            if name.EndsWith(closeSymbol.ToString()) then findIndices -1 (name.Length - 1)
+
+        startIdx, endIdx
+
+    // 첫 번째 대괄호 그룹 제거
     let GetHeadBracketRemoveName (name: string) =
-        let patternHead = "^\[[^]]*]" // 첫 대괄호 제거
-
-        let replaceName =
-            System.Text.RegularExpressions.Regex.Replace(name, patternHead, "")
-
-        replaceName
-
-    let GetLastBracketRelaceName (name: string, replaceName: string) =
-        let patternTail = "\[[^]]*]$" // 끝 대괄호 제거
-
-        let replaceName =
-            System.Text.RegularExpressions.Regex.Replace(name, patternTail, replaceName)
-
-        replaceName
-
-    let GetLastParenthesesReplaceName (name: string, replaceName: string) =
-        let patternTail = @"\([^)]*\)$" // 끝 소괄호 제거
-
-        let replacedName = System.Text.RegularExpressions.Regex.Replace(name, patternTail, replaceName) // Perform the replacement
-        replacedName
-
-    let GetLastParenthesesContents (name: string) =
-        let patternTail = @"\(([^)]*)\)$" // Regular expression to match the content inside the last parentheses
-        let m = System.Text.RegularExpressions.Regex.Match(name, patternTail) // Find the match
-        if m.Success then
-            m.Groups.[1].Value // Return the captured content
+        let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', true)
+        if startIdx <> -1 && endIdx <> -1 then
+            name.Substring(0, startIdx) + name.Substring(endIdx + 1)
         else
-            "" // Return an empty string if no match is found
+            name
+
+    // 마지막 대괄호 그룹 제거
+    let GetLastBracketRelaceName (name: string) =
+        let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', false)
+        if startIdx <> -1 && endIdx <> -1 then
+            name.Substring(0, startIdx) + name.Substring(endIdx + 1)
+        else
+            name
+
+    // 마지막 괄호 그룹을 주어진 문자열로 교체
+    let GetLastParenthesesReplaceName (name: string, replaceName: string) =
+        let startIdx, endIdx = FindEnclosedGroup(name, '(', ')', false)
+        if startIdx <> -1 && endIdx <> -1 then
+            name.Substring(0, startIdx) + replaceName + name.Substring(endIdx + 1)
+        else
+            name
+
+    // 마지막 괄호 그룹 내용 반환
+    let GetLastParenthesesContents (name: string) =
+        let startIdx, endIdx = FindEnclosedGroup(name, '(', ')', false)
+        if startIdx <> -1 && endIdx <> -1 then
+            name.Substring(startIdx + 1, endIdx - startIdx - 1)
+        else
+            ""
+
+    // 첫 번째 또는 마지막 대괄호 그룹을 반환
+    let GetSquareBrackets (name: string, bHead: bool): string option =
+        let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', bHead)
+        if startIdx <> -1 && endIdx <> -1 then
+            Some(name.Substring(startIdx + 1, endIdx - startIdx - 1))
+        else
+            None
 
 
     // 특수 대괄호 제거 후 순수 이름 추출
     // [yy]xx[xxx]Name[1,3] => xx[xxx]Name
     // 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
     let GetBracketsRemoveName (name: string) =
-        GetLastBracketRelaceName((name |> GetHeadBracketRemoveName), "")
-
-
-    /// 이 함수는 입력 문자열 name에서 대괄호로 감싸인 부분을 추출합니다.
-    ///
-    /// - bHead가 true이면 첫 번째 대괄호 부분을, false이면 마지막 대괄호 부분을 반환합니다.
-    ///
-    /// - 반환값은 Some string 또는 None일 수 있습니다.
-    let GetSquareBrackets (name: string, bHead: bool): string option =
-        let pattern = "(?<=\[).*?(?=\])"  // 대괄호 안에 내용은 무조건 가져온다
-        let matches = System.Text.RegularExpressions.Regex.Matches(name, pattern)
-        if bHead then
-            if name.StartsWith("[") && name.Contains("]") then Some matches.[0].Value else None
-        else
-            if name.EndsWith("]") && name.Contains("[") then Some matches.[matches.Count - 1].Value else None
+        name |> GetLastBracketRelaceName  |> GetHeadBracketRemoveName
 
     let isStringDigit (str: string) =
         str |> Seq.forall Char.IsDigit

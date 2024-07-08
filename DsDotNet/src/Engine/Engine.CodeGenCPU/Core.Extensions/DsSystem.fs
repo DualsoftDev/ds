@@ -187,16 +187,16 @@ module ConvertCpuDsSystem =
 
             let jobDevices =x.GetDevicesSkipEmptyAddress()
             
-            for dev, job in jobDevices do
+            for dev, call in jobDevices do
                 if  dev.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, dev.ApiStgName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev, dev.GetInParam(job.Name).Type).Value
+                    let inT = createBridgeTag(x.Storages, dev.ApiStgName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev, dev.GetInParam(call.TargetJob).Type).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
                 if not(dev.IsRootOnlyDevice)
                 then
                     if  dev.OutAddress <> TextSkip then
-                        let outT = createBridgeTag(x.Storages, dev.ApiStgName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, dev.GetOutParam(job.Name).Type).Value
+                        let outT = createBridgeTag(x.Storages, dev.ApiStgName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, dev.GetOutParam(call.TargetJob).Type).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
 

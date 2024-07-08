@@ -52,7 +52,7 @@ module ConvertCpuVertex =
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 
         member c.EndPlan =  
-                    if c.IsPureCommand
+                    if c.IsCommand
                     then
                         (c.TagManager :?> VertexMCall).CallCommandEnd.Expr
                     elif c.IsOperator
@@ -80,7 +80,7 @@ module ConvertCpuVertex =
             let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
             if td.ExistInput
             then 
-                Some(td.GetInExpr(c.TargetJob.Name))
+                Some(td.GetInExpr(c.TargetJob))
             else 
                 None
         
@@ -89,7 +89,7 @@ module ConvertCpuVertex =
             let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
             if td.ExistInput
             then 
-                Some(td.GetInExpr(c.TargetJob.Name))
+                Some(td.GetInExpr(c.TargetJob))
             else 
                 None
       
@@ -137,8 +137,8 @@ module ConvertCpuVertex =
                                 ]
                          
           
-        member c.SafetyExpr = getSafetyNAutoPreConditionExpr(c.SafetyConditions.Choose(fun f->f.GetSafetyCall()), c.System)
-        member c.AutoPreExpr = getSafetyNAutoPreConditionExpr(c.AutoPreConditions.Map(fun f->f.GetAutoPreCall()), c.System)
+        member c.SafetyExpr = getSafetyNAutoPreConditionExpr(c.SafetyConditions.Map(fun f->f.GetCall()), c.System)
+        member c.AutoPreExpr = getSafetyNAutoPreConditionExpr(c.AutoPreConditions.Map(fun f->f.GetCall()), c.System)
 
         member c.StartPointExpr =
             match c.Parent.GetCore() with
@@ -187,6 +187,5 @@ module ConvertCpuVertex =
                             @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages 
                             @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
 
-        member r.SafetyExpr = getSafetyNAutoPreConditionExpr(r.SafetyConditions.Choose(fun f->f.GetSafetyCall()), r.Parent.GetSystem())
 
 

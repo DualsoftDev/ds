@@ -110,6 +110,7 @@ module ParserUtilityModule =
                     || tree :? Identifier2Context
                     || tree :? Identifier3Context
                     || tree :? Identifier4Context
+                    || tree :? Identifier5Context
                     || tree :? IdentifierCommandNameContext
                     || tree :? IdentifierOperatorNameContext
 
@@ -131,7 +132,7 @@ module ParserUtilityModule =
                     return [| idCtx.GetText().DeQuoteOnDemand() |]
                 else
                     let! name = x.TryGetName()
-                    return fwdParseFqdn(name).ToArray()
+                    return fwdParseFqdn(name).Select(fun f->f.DeQuoteOnDemand()).ToArray()
             }
 
         member x.CollectNameComponents() : string[] =
@@ -141,7 +142,7 @@ module ParserUtilityModule =
             option {
                 let! ctx = x.TryFindFirstAscendant<SystemContext>(true)
                 let! names = ctx.TryCollectNameComponents()
-                return names.Combine()
+                return names.CombineDequoteOnDemand()
             }
 
     type ParserRuleContext with

@@ -99,7 +99,7 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
         CyGraph.TheSystem = sys;
 
         IVertex node = null;
-        var nameComponents = fqdn.SplitToFqdnComponents();
+        var nameComponents = fqdn.SplitToFqdnDeQuoteOnDemand();
         if (fqdn == sys.Name)
             node = sys;
         else

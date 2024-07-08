@@ -35,7 +35,7 @@ module ImportUtilVertex =
         )
 
     let getCallFromLoadedSys (sys: DsSystem) (node: pptNode) (loadSysName: string) (apiName: string) parentWrapper =
-        match sys.Jobs |> Seq.tryFind (fun job -> job.Name = loadSysName) with
+        match sys.Jobs |> Seq.tryFind (fun job -> job.QualifiedName = node.JobName.CombineQuoteOnDemand()) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
             let jobName = node.JobName.CombineQuoteOnDemand()
@@ -86,7 +86,8 @@ module ImportUtilVertex =
                     let callParams = {
                         MySys = mySys
                         Node = node
-                        JobName = job.Combine()
+                        JobName = job.CombineQuoteOnDemand()
+                        DevName = node.CallDevName
                         ApiName = apiName
                         Parent = parentWrapper
                         }

@@ -15,12 +15,26 @@ module internal ToDsTextModule =
     let combineLines = ofNotNullAny >> joinLines
     let mutable  pCooment = true //printComment
 
-    let getName (v:Vertex) =
-            match v with    
-            | :? Call as c when c.IsPureCommand -> (getRawName v.PureNames true) + "()"
-            | :? Call as c when c.IsPureOperator -> "#"+(getRawName v.PureNames true)
-                
-            |_-> getRawName v.PureNames true    
+    let getName (v: Vertex) =
+        match v with    
+        | :? Real as r -> r.Name.QuoteOnDemand()
+        | :? Call as c -> c.NameForGraph
+        | :? Alias as a -> a.Name.QuoteOnDemand()
+        //| :? Alias as a ->
+        //        if a.IsOtherFlowRealAlias || a.TargetWrapper.GetTarget() :? Real
+        //        then
+        //            v.PureNames.Combine(".").QuoteOnDemand()    
+        //            //if v.PureNames.Length > 1
+        //            //then
+        //            //    v.PureNames.Combine(".")
+        //            //else 
+        //            //    v.PureNames.Combine(".").QuoteOnDemand()    
+
+        //        else
+        //            v.PureNames.Combine("_").QuoteOnDemand()
+
+        | _ -> failWithLog "ERROR"          
+
 
     type private MEI = ModelingEdgeInfo<Vertex>
     let private modelingEdgeInfosToDs (es:MEI seq) (tab:string) =
@@ -88,7 +102,6 @@ module internal ToDsTextModule =
         ]
 
     let flowToDs (flow:Flow) (indent:int) =
-        let getName (xs:string array) = getRawName xs true
         let tab = getTab indent
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
@@ -101,15 +114,15 @@ module internal ToDsTextModule =
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
                 for a in flow.AliasDefs.Values do
-                    let toTextAlias = a.AliasTexts.Where(fun f->not(f.Contains('.'))).ToArray()
+                    let toTextAlias = a.AliasTexts.Select(fun f->f.QuoteOnDemand())
                     if toTextAlias.any()
                     then
-                        let aliasTexts = (toTextAlias.Select(fun f->f.QuoteOnDemand()) |> String.concat "; ") + ";"
+                        let aliasTexts = (toTextAlias |> String.concat "; ") + ";"
                         let tab = getTab (indent+2)
                         let aliasKey =
                             match a.AliasTarget with
-                            | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow) |> getName
-                            | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs() |> getName
+                            | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).CombineQuoteOnDemand()
+                            | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs().CombineQuoteOnDemand()
                             | None -> failwithlog "ERROR"
 
                         yield $"{tab}{aliasKey} = {lb} {aliasTexts} {rb}"
@@ -151,20 +164,20 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             if system.Jobs.Any() then
-                let printDev (d:TaskDev) jobName= $"{d.ApiName}({toTextDevParam d.InAddress (d.GetInParam(jobName))}, {toTextDevParam d.OutAddress (d.GetOutParam(jobName))})"
+                let printDev (d:TaskDev) job= $"{d.ApiName}({toTextDevParam d.InAddress (d.GetInParam(job))}, {toTextDevParam d.OutAddress (d.GetOutParam(job))})"
                 yield $"{tab}[jobs] = {lb}"
                 for j in system.Jobs do
                     let jobItems =
                         j.DeviceDefs
-                        |> Seq.map (fun d-> printDev d (j.Name))
+                        |> Seq.map (fun d-> printDev d (j))
                           
                     let jobItemText = jobItems.JoinWith("; ") + ";"
                     if j.JobParam.ToText() = ""
                     then
-                        yield $"{tab2}{j.Name} = {lb} {jobItemText} {rb}"  
+                        yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"  
                     else 
-                        yield $"{tab2}{j.Name}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
-
+                        yield $"{tab2}{j.QualifiedName}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
+                                        
                 yield $"{tab}{rb}"
             elif system.Functions.Any() then
                 yield $"{tab}[jobs] = {lb}{rb}" 
@@ -213,7 +226,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[interfaces] = {lb}"
                 for item in system.ApiItems do
                     let ser =
-                        let getFlowAndRealName (r:Real) = [r.Flow.Name; r.Name].Combine()
+                        let getFlowAndRealName (r:Real) = [r.Flow.Name; r.Name].CombineQuoteOnDemand()
                         let coverWithUnderScore (x:string) = if x.IsNullOrEmpty() then "_" else x
                         let s = getFlowAndRealName(item.TX) |> coverWithUnderScore
                         let e = getFlowAndRealName(item.RX) |> coverWithUnderScore
@@ -243,7 +256,7 @@ module internal ToDsTextModule =
 
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
                 let getHwInfo(hw:HwSystemDef) = 
-                    let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).Combine().QuoteOnDemand())
+                    let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).CombineQuoteOnDemand())
                     let itemText = if flows.any() then (flows |> String.concat "; ") + ";" else ""
                     let inAddr =  addressPrint  hw.InAddress  
                     let outAddr = addressPrint  hw.OutAddress 
@@ -309,47 +322,45 @@ module internal ToDsTextModule =
                     layouts *)
             let safetyHolders =
                 [   for f in system.Flows do
-                        yield! f.Graph.Vertices.OfType<ISafetyConditoinHolder>()
+                        yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
 
                         for r in f.Graph.Vertices.OfType<Real>() do
-                        yield! r.Graph.Vertices.OfType<ISafetyConditoinHolder>()
+                        yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
                 ] |> List.distinct
 
-            let getCallName (call:Call) =
+            let getSafetyAutoPreName (holder:bool) (call:Call) =
+                let name = 
                     match call.Parent with
-                    | DuParentReal r-> $"{r.Flow.Name.QuoteOnDemand()}.{call.ParentNPureNames.Combine()}"
-                    | DuParentFlow _ -> call.ParentNPureNames.Combine()
+                    | DuParentReal r-> 
+                        if holder
+                        then //otherFlow Holder
+                            $"{r.Flow.Name.QuoteOnDemand()}.{r.Name.QuoteOnDemand()}.{call.NameForGraph}"
+                        else //otherFlow Condition
+                            call.TargetJob.NameComponents.CombineQuoteOnDemand()
+                                     
+                    | DuParentFlow _ -> failWithLog $"ERROR getSafetyAutoPreName {call.QualifiedName}"
+                name
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
-            let safeties =
-                
-                let safetyConditionName (sc:SafetyCondition) =
-                    match sc with
-                    | DuSafetyConditionReal real       -> real.ParentNPureNames.Combine()
-                    | DuSafetyConditionCall call       -> (getCallName call)
-                let safetyConditionHolderName(sch:ISafetyConditoinHolder) =
-                    match sch with
-                    | :? Real as real -> real.ParentNPureNames.Combine()
-                    | :? Call as call -> (getCallName call)
-                    | _ -> failwithlog "ERROR"
 
+         
+
+            let safeties =
                 [
                     if withSafeties.Any() then
                         yield $"{tab2}[safety] = {lb}"
                         for safetyHolder in withSafeties do
-                            let conds = safetyHolder.SafetyConditions.Select(safetyConditionName).JoinWith("; ") + ";"
-                            yield $"{tab3}{safetyConditionHolderName safetyHolder} = {lb} {conds} {rb}"
+                            let conds = safetyHolder.SafetyConditions.Select(fun v->v.GetCall() |> getSafetyAutoPreName false).JoinWith("; ") + ";"
+                            yield $"{tab3}{safetyHolder.GetCall()|> getSafetyAutoPreName true} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
-
-
                 
             let autoPreHolders =
                 [   for f in system.Flows do
-                        yield! f.Graph.Vertices.OfType<IAutoPrerequisiteHolder>()
+                        yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
 
                         for r in f.Graph.Vertices.OfType<Real>() do
-                        yield! r.Graph.Vertices.OfType<IAutoPrerequisiteHolder>()
+                        yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
                 ] |> List.distinct
 
             let withAutoPres = autoPreHolders.Where(fun h -> h.AutoPreConditions.Any())
@@ -358,8 +369,8 @@ module internal ToDsTextModule =
                     if withAutoPres.Any() then
                         yield $"{tab2}[autopre] = {lb}"
                         for autoPreHolder in withAutoPres do
-                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetAutoPreCall() |> getCallName).JoinWith("; ") + ";"
-                            yield $"{tab3}{autoPreHolder.GetAutoPreCall()|>getCallName} = {lb} {conds} {rb}"
+                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetCall() |> getSafetyAutoPreName false).JoinWith("; ") + ";"
+                            yield $"{tab3}{autoPreHolder.GetCall()|>getSafetyAutoPreName true} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
             

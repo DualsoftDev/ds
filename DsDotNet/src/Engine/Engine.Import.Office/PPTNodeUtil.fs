@@ -90,33 +90,37 @@ module PPTNodeUtilModule =
 
 
         let updateRealTime (contents: string) =
+            
             let parseSeconds (timeStr: string) : float option =
-                let timeStr =timeStr.ToLower().Trim()
-                let msPattern = @"(\d+(\.\d+)?)ms"
-                let secPattern = @"(\d+(\.\d+)?)sec"
-                let minPattern = @"(\d+(\.\d+)?)min"
-                let defaultPattern = @"(\d+(\.\d+))"
+                if timeStr = TextSkip 
+                then None
+                else
+                    let timeStr =timeStr.ToLower().Trim()
+                    let msPattern = @"(\d+(\.\d+)?)ms"
+                    let secPattern = @"(\d+(\.\d+)?)sec"
+                    let minPattern = @"(\d+(\.\d+)?)min"
+                    let defaultPattern = @"(\d+(\.\d+))"
 
-                let matchRegex pattern =
-                    let m = Regex.Match(timeStr, pattern)
-                    if m.Success then
-                        let value = m.Groups.[1].Value |> float
-                        Some value
-                    else None
+                    let matchRegex pattern =
+                        let m = Regex.Match(timeStr, pattern)
+                        if m.Success then
+                            let value = m.Groups.[1].Value |> float
+                            Some value
+                        else None
 
-                match matchRegex msPattern with
-                | Some ms -> Some (ms / 1000.0)
-                | None ->
-                    match matchRegex secPattern with
-                    | Some sec -> Some sec
+                    match matchRegex msPattern with
+                    | Some ms -> Some (ms / 1000.0)
                     | None ->
-                        match matchRegex minPattern with
-                        | Some min -> Some (min * 60.0)
+                        match matchRegex secPattern with
+                        | Some sec -> Some sec
                         | None ->
-                            // Default to seconds if no unit is specified
-                            match matchRegex defaultPattern with
-                            | Some sec -> Some sec
-                            | None -> failWithLog $"{timeStr} Invalid time format"
+                            match matchRegex minPattern with
+                            | Some min -> Some (min * 60.0)
+                            | None ->
+                                // Default to seconds if no unit is specified
+                                match matchRegex defaultPattern with
+                                | Some sec -> Some sec
+                                | None -> failWithLog $"{timeStr} Invalid time format"
 
             let parts = (GetLastParenthesesContents contents).Split(',')
 
@@ -142,3 +146,6 @@ module PPTNodeUtilModule =
                     match GetSquareBrackets("[" + f, true) with
                     | Some item -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), item
                     | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
+
+
+

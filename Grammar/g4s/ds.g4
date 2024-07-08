@@ -95,6 +95,7 @@ IDENTIFIER1: Compo;
 IDENTIFIER2: Compo '.' Compo;
 IDENTIFIER3: Compo '.' Compo '.' Compo;
 IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
+IDENTIFIER5: Compo '.' Compo '.' Compo '.' Compo '.' Compo;
 
 IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
@@ -168,22 +169,27 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier2: IDENTIFIER2;
     identifier3: IDENTIFIER3;
     identifier4: IDENTIFIER4;
-
+    identifier5: IDENTIFIER5;
+    
     identifier12: (identifier1 | identifier2);
     identifier23: (identifier2 | identifier3);
+    identifier34: (identifier3 | identifier4);
+    identifier45: (identifier4 | identifier5);
+    
     identifier123: (identifier1 | identifier2 | identifier3);
+    identifier234: (identifier2 | identifier3 | identifier4);
     identifier123CNF: identifier123 (COMMA identifier123)*;
 
-    identifierCommandName : IDENTIFIER1 ;
-    identifierCommandPara : IDENTIFIER1 ;
-    identifierOperatorName : IDENTIFIER1 ;
+    identifierCommandName : identifier1 ;
+    identifierCommandPara : identifier1 ;  //추후 구현 (파라메터 인자추가)
+    identifierOperatorName : identifier1 ;
 
     identifierOperator: '#'identifierOperatorName;
     identifierCommand: identifierCommandName '(' identifierCommandPara? ')';
 
     flowPath: identifier2;
 
-devParamInOut: '(' devParamInOutBody ')' (SEMICOLON)?;
+devParamInOut: '(' devParamInOutBody ')';
 devParamInOutBody:  inParam COMMA outParam;
 content : .+?;
 inParam:  content (':'content)*;
@@ -244,12 +250,10 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
 propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|motionBlock|scriptsBlock)* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';    
         safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
-            // Real|Call = { ((Real|Call);)* }
-            safetyAutoPreKey: identifier23;
-            safetyAutoPreValues: identifier23 (SEMICOLON identifier23)* (SEMICOLON)?;
+            safetyAutoPreKey: identifier45;
+            safetyAutoPreValues: identifier3 (SEMICOLON identifier3)* (SEMICOLON)?;
 
     autoPreBlock: '[' 'autopre' ']' '=' '{' (safetyAutoPreDef)* '}';    
-       
 
     layoutBlock: '[' 'layouts' fileSpec? ']' '=' '{' (positionDef)* '}';
         positionDef: deviceOrApiName '=' xywh;
@@ -294,7 +298,7 @@ flowBlock
         )* '}'  (SEMICOLON)?   // |flowTask|callDef
     ;
     parentingBlock: identifier1 '=' '{' (causal | nonCausal | nonCausals)* '}';
-    nonCausal : (identifier1 | identifier12 | identifierCommand);
+    nonCausal : (identifier123 | identifierCommand);
     nonCausals: (nonCausal (COMMA nonCausal)*)?  SEMICOLON;     // A, B(), C;
         
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
@@ -303,7 +307,7 @@ flowBlock
         aliasListing:
             aliasDef '=' '{' (aliasMnemonic)? ( ';' aliasMnemonic)* (';')+ '}' (';')?
             ;
-        aliasDef: identifier12;     // {OtherFlow}.{real} or {MyFlowReal} or {Call}
+        aliasDef: identifier123;     // {OtherFlow}.{real} or {MyFlowReal} or {dev}.{api}
         aliasMnemonic: identifier1;
 
 codeBlock: CODE_BLOCK;
@@ -350,12 +354,12 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
-        jobName ('['jobTypeOption']')? '=' '{' (callApiDef ';')*'}' (SEMICOLON)?;
+        jobName ('['jobTypeOption']')? '=' '{' (callApiDef (SEMICOLON))* '}' (SEMICOLON)?;
 
-    jobName: identifier1;
+    jobName: identifier234;
     jobTypeOption : content;
 
-    callApiDef: (interfaceCall devParamInOut | interfaceCall);
+    callApiDef: (interfaceCall devParamInOut) | (interfaceCall);
 
     interfaceCall: identifier12;
 
@@ -409,7 +413,7 @@ conditionBlock: '[' 'conditions' ']' '=' '{' (categoryBlocks)* '}';
 causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF: causalToken (',' causalToken)* ;
-    causalToken: identifier12 | identifierOperator | identifierCommand;
+    causalToken: identifier1234 | identifierOperator | identifierCommand;
 
     causalOperator
         : '>'   // CAUSAL_FWD

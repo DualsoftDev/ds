@@ -13,7 +13,7 @@ type TaskDev with
         let set = d.ApiItem.PE.Expr
         let rst = sys._off.Expr
 
-        let inParam = d.GetInParam(job.Name)
+        let inParam = d.GetInParam(job)
         if inParam.Type = DuBOOL
         then 
             let setBool = if inParam.Value.IsNull() || (inParam.Value |> Convert.ToBoolean)

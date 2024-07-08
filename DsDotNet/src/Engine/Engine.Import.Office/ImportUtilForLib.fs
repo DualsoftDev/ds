@@ -17,12 +17,13 @@ module ImportUtilForLib =
         MySys: DsSystem
         Node: pptNode
         JobName: string
+        DevName: string
         ApiName: string
         Parent: ParentWrapper
     }
     with
-        member x.WithJobName(newJobName: string) =
-            { x with JobName = newJobName }
+        member x.WithDevName(newDevName: string) =
+            { x with DevName = newDevName }
 
     let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) =
         match mySys.LoadedSystems.TryFind(fun f -> f.Name = name) with
@@ -46,7 +47,7 @@ module ImportUtilForLib =
         | None -> ()
 
     let getLibraryPathsAndParams (param: CallParams) =
-        let libFilePath, autoGenSys = getNewDevice param.MySys param.JobName param.ApiName
+        let libFilePath, autoGenSys = getNewDevice param.MySys param.DevName param.ApiName
         let relPath = PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
         let getDevParams name = getParams (libFilePath, relPath, name, param.MySys, DuDevice, ShareableSystemRepository())
         (libFilePath, autoGenSys, getDevParams)
@@ -61,12 +62,13 @@ module ImportUtilForLib =
 
     let handleSingleJob (tasks: HashSet<TaskDev>) (param: CallParams) =
         let libFilePath, autoGenSys, getDevParams = getLibraryPathsAndParams param
-        processTask tasks param param.JobName libFilePath autoGenSys getDevParams
+        processTask tasks param param.DevName libFilePath autoGenSys getDevParams
 
     let handleMultiActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =
         for devIdx in 1 .. param.Node.JobParam.DeviceCount do
-            let devName = getMultiDeviceName param.JobName devIdx
-            let libFilePath, autoGenSys, getDevParams = getLibraryPathsAndParams (param.WithJobName(devName))
+            let devName = getMultiDeviceName param.Node.CallDevName devIdx
+           
+            let libFilePath, autoGenSys, getDevParams = getLibraryPathsAndParams (param.WithDevName(devName))
             processTask tasks param devName libFilePath autoGenSys getDevParams
 
     let addNewCall (param: CallParams) =
@@ -80,7 +82,7 @@ module ImportUtilForLib =
 
   
         let jobForCall =
-            match param.MySys.Jobs.TryFind(fun f -> f.Name = jobName) with
+            match param.MySys.Jobs.TryFind(fun f -> f.QualifiedName = jobName) with
             | Some existingJob -> existingJob
             | None -> 
                 let job = Job(param.Node.JobName, param.MySys, tasks |> Seq.toList)

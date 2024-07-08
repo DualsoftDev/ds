@@ -74,7 +74,7 @@ module ImportIOTable =
             let dicDev =
                 sys.Jobs
                 |> Seq.collect (fun f -> f.DeviceDefs)
-                |> Seq.map (fun j -> j.ApiName, j)
+                |> Seq.map (fun j -> j.DeviceApiName, j)
                 |> dict
 
             let dicJob =

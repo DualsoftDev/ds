@@ -92,6 +92,9 @@ module ErrID =
     let _74 = "Safety 정의는 Device.Api 또는 Flow.Device.Api 형식으로 입력해야 합니다."
     let _75 = "Table Device 이름규격은 dev.Api 입니다."
     let _76 = "Work 설정시간이 중복 정의 되었습니다."
+    let _77 = "Safety는 자신을 조건으로 사용불가 입니다."
+    let _78 = "전제조건은 자신을 조건으로 사용불가 입니다."
+    let _79 = "Safety는 Action만 조건으로 가능합니다."
    
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

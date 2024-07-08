@@ -176,7 +176,7 @@ module ConvertErrorCheck =
             for td in j.DeviceDefs do
                 if td.ExistOutput
                 then 
-                    let outParam = td.GetOutParam(j.Name)
+                    let outParam = td.GetOutParam(j)
                     if j.ActionType = Push 
                     then 
                         if outParam.Type = DuBOOL

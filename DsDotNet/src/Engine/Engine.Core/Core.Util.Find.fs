@@ -8,7 +8,16 @@ open System.Runtime.CompilerServices
 module internal ModelFindModule =
     let nameComponentsEq (Fqdn(ys)) (xs:IQualifiedNamed) = xs.NameComponents = ys
     let nameEq (name:string) (x:INamed) = x.Name = name
-   
+    let getVerticesOfFlow(flow:Flow) =
+        let realVertices =
+            flow.Graph.Vertices.OfType<Real>()
+                .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>())
+
+        let flowVertices =  flow.Graph.Vertices.Cast<Vertex>()
+        realVertices @ flowVertices
+
+
+
     let tryFindSystemInner (system:DsSystem) (xs:string list) : IVertex option =
         match xs with
         | [] -> Some system
@@ -16,15 +25,15 @@ module internal ModelFindModule =
             let flow = system.Flows.First(nameEq f)
             match xs1 with
             | [] -> Some flow
-            | r::xs2 ->
+            | r::xs2 ->   
                 match flow.Graph.FindVertex(r) |> box with
                 | :? Call as call-> Some call
                 | :? Real as real->
                     match xs2 with
                     | [] -> Some real
-                    | remaining ->
+                    | _ ->
                         option {
-                            let! v = real.Graph.TryFindVertex(remaining.Combine())
+                            let! v = real.Graph.TryFindVertex(xs2.Combine())
                             return box v :?> IVertex
                         }
                 | _ -> None
@@ -54,7 +63,7 @@ module internal ModelFindModule =
         }
 
     let tryFindFlow(system:DsSystem) (name:string)    = system.Flows.TryFind(nameEq name)
-    let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(nameEq name)
+    let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(fun j->j.UnqualifiedName = name)
     let tryFindFunc (system:DsSystem) name            = system.Functions.TryFind(fun s->s.Name = name)
     let tryFindExternalSystem (system:DsSystem) name  = system.ExternalSystems.TryFind(nameEq name)
     let tryFindLoadedSystem (system:DsSystem) name    = system.LoadedSystems.TryFind(fun s->s.LoadedName = name)
@@ -65,7 +74,7 @@ module internal ModelFindModule =
         system.ApiItems.TryFindWithName(apiKey)
 
     and tryFindCallingApiItem (system: DsSystem) (targetSystemName: string) (targetApiName: string) (allowAutoGenDevice: bool) =
-        let findedLoadedSystem = tryFindLoadedSystem system targetSystemName
+        let findedLoadedSystem = tryFindLoadedSystem system (targetSystemName)
 
         match findedLoadedSystem with
         | Some loadedSystem ->
@@ -139,13 +148,7 @@ module internal ModelFindModule =
         let flowVertices = system.Flows.SelectMany(fun f -> f.Graph.Vertices.Cast<Vertex>())
         realVertices @ flowVertices
 
-    let getVerticesOfFlow(flow:Flow) =
-        let realVertices =
-            flow.Graph.Vertices.OfType<Real>()
-                .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>())
 
-        let flowVertices =  flow.Graph.Vertices.Cast<Vertex>()
-        realVertices @ flowVertices
 
     let getDevicesOfFlow(flow:Flow) =
         let devNames = getVerticesOfFlow(flow).OfType<Call>()   
@@ -216,11 +219,10 @@ module internal ModelFindModule =
                     .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
         devs 
         |> Seq.distinctBy (fun (dev,_) ->dev)
-        |> Seq.sortBy (fun (dev,j) -> 
-                            let jobName = j.TargetJob.NameComponents.Skip(1).Combine();
+        |> Seq.sortBy (fun (dev,c) -> 
                             
-                            $"{dev.GetInParam(jobName).Type.ToText()};
-                              {dev.GetOutParam(jobName).Type.ToText()};
+                            $"{dev.GetInParam(c.TargetJob).Type.ToText()};
+                              {dev.GetOutParam(c.TargetJob).Type.ToText()};
                               {dev.ApiName}") 
 
 

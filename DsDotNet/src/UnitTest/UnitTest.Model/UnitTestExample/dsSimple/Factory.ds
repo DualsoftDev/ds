@@ -5,42 +5,41 @@
         AssemblyShop |> UNLOAD;
         AssemblyShop |> PaintShopBuffer2;
         AssemblyShop |> PaintShopBuffer1;
-        Flow_START_ON_INTrue > PressShop => BodyShop1Buffer => BodyShop1;
+        START.ON.INTrue > PressShop => BodyShop1Buffer => BodyShop1;
         PressShop_1 => BodyShop2Buffer => BodyShop2;
-        Flow_Paint_END_INTrue > AssemblyShop => UNLOAD;
-        Flow_Body2_END_INTrue > PaintShopBuffer2;
-        Flow_Body1_END_INTrue > PaintShopBuffer1;
+        Paint.END.INTrue > AssemblyShop => UNLOAD;
+        Body2.END.INTrue > PaintShopBuffer2;
+        Body1.END.INTrue > PaintShopBuffer1;
         PaintShopBuffer1 = {
-            Flow_Body1_UNLOAD > Flow_Paint_START;
+            Body1.UNLOAD > Paint.START;
         }
         PaintShopBuffer2 = {
-            Flow_Body2_UNLOAD > Flow_Paint_START;
+            Body2.UNLOAD > Paint.START;
         }
         AssemblyShop = {
-            Flow_Paint_UNLOAD; 
+            Paint.UNLOAD; 
         }
         BodyShop1Buffer = {
-            Flow_Body1_START; 
+            Body1.START; 
         }
         BodyShop2Buffer = {
-            Flow_Body2_START; 
+            Body2.START; 
         }
         [aliases] = {
             PressShop = { PressShop_1; }
         }
     }
     [jobs] = {
-        Flow_Body1_END_INTrue = { Flow_Body1.END(-:Boolean:True, -); }
-        Flow_Body2_END_INTrue = { Flow_Body2.END(-:Boolean:True, -); }
-        Flow_Paint_END_INTrue = { Flow_Paint.END(-:Boolean:True, -); }
-        Flow_Body1_UNLOAD = { Flow_Body1.UNLOAD(P00001, P00041); }
-        Flow_Paint_START = { Flow_Paint.START(P00004, P00044); }
-        Flow_Paint_START = { Flow_Paint.START(P00004, P00044); }
-        Flow_Body2_UNLOAD = { Flow_Body2.UNLOAD(P00003, P00043); }
-        Flow_Paint_UNLOAD = { Flow_Paint.UNLOAD(P00005, P00045); }
-        Flow_Body1_START = { Flow_Body1.START(P00000, P00040); }
-        Flow_Body2_START = { Flow_Body2.START(P00002, P00042); }
-        Flow_START_ON_INTrue = { Flow_START.ON(P00006:Boolean:True, -); }
+        Flow.START.ON.INTrue = { Flow_START.ON(M00003, -); }
+        Flow.Body1.END.INTrue = { Flow_Body1.END(M00000, -); }
+        Flow.Paint.END.INTrue = { Flow_Paint.END(M00002, -); }
+        Flow.Body1.START = { Flow_Body1.START(P00000, P00040); }
+        Flow.Body1.UNLOAD = { Flow_Body1.UNLOAD(P00001, P00041); }
+        Flow.Paint.START = { Flow_Paint.START(P00004, P00044); }
+        Flow.Paint.UNLOAD = { Flow_Paint.UNLOAD(P00005, P00045); }
+        Flow.Body2.END.INTrue = { Flow_Body2.END(M00001, -); }
+        Flow.Body2.START = { Flow_Body2.START(P00002, P00042); }
+        Flow.Body2.UNLOAD = { Flow_Body2.UNLOAD(P00003, P00043); }
     }
     [buttons] = {
         [a] = { AutoSelect(M00628, -) = { Flow; } }
@@ -71,8 +70,8 @@
         Flow_Body1,
         Flow_Body2; 
     [device file="./Sub/PaintShop.ds"] Flow_Paint; 
-    [device file="./dsLib/Part.ds"] Flow_START; 
+    [device file="./dsLib/AutoGen/Flow_START.ds"] Flow_START; 
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.9]
+//DS Engine Version = [0.9.8.36]

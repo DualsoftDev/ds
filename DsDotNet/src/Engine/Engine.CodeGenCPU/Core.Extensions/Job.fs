@@ -13,7 +13,7 @@ module ConvertCpuJob =
     type Job with
         member j.ActionInExpr= 
             let inExprs = j.DeviceDefs.Where(fun d-> d.ExistInput)
-                                      .Select(fun d-> d.GetInExpr(j.Name))
+                                      .Select(fun d-> d.GetInExpr(j))
             if inExprs.any() then 
                 inExprs.ToAndElseOff() |>Some  
             else None

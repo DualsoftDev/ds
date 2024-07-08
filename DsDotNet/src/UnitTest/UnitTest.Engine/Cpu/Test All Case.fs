@@ -25,18 +25,23 @@ type XgxConvertDsCPU(target:PlatformTarget) =
         let testCode = """
              [sys] HelloDS = {
                 [flow] STN1 = {
-                    STN1_EXT_ADV > Work1;
                     Work1 = {
-                        STN1_Device4_RET; 
+                        Device1.ADV; 
+                        Device2.ADV; 
+                        Device1.RET; 
+                        Device2.RET; 
                     }
                 }
                 [jobs] = {
-                    STN1_EXT_ADV = { STN1_EXT.ADV(-:66, -); }
-                    STN1_Device4_RET = { STN1_Device4.RET(-:300, -:200); }
+                    STN1.Device1.ADV = { STN1_Device1.ADV(-, -); }
+                    STN1.Device2.ADV = { STN1_Device2.ADV(-, -); }
+                    STN1.Device1.RET = { STN1_Device1.RET(-, -); }
+                    STN1.Device2.RET = { STN1_Device2.RET(-, -); }
                 }
    
                 [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_EXT; 
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_Device4; 
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_Device1; 
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_Device2; 
             }
             """
 

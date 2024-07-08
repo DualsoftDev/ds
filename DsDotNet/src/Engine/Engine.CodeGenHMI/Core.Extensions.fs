@@ -70,7 +70,7 @@ module ConvertHMI =
             let actionInTags  = x.DeviceDefs.Where(fun d->d.InTag.IsNonNull()).Select(fun d->d.InTag) //todo  ActionINFunc func $not 적용 검토     
             let apiTagManager = x.DeviceDefs.First().ApiItem.TagManager :?> ApiItemManager
             {
-                Name = x.Name
+                Name = x.QualifiedName
                 JobPushMutiLamp = getPushMultiLamp  apiTagManager (ApiItemTag.planSet |>int) (actionInTags)
             }
 

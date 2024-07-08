@@ -70,10 +70,7 @@ module ImportType =
             if name.Split(".").Length <> 2 then
                 failwithlog ErrID._75
             else 
-                let devName = row.[(int) IOColumn.Name].ToString().Split(".")[0]  
-                let apiName = row.[(int) IOColumn.Name].ToString().Split(".")[1]  
-        
-                $"{flowName}{TextFlowSplit}{devName}".QuoteOnDemand() + "." + apiName.QuoteOnDemand()
+                $"{flowName}_{name}"
         else 
             name
 

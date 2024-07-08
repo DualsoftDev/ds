@@ -25,7 +25,7 @@ type Job with
                         else api.PE.Expr <&&> api.PS.Expr <&&> !@rstMemos.ToOrElseOff()
 
 
-                    let outParam = td.GetOutParam(j.Name)
+                    let outParam = td.GetOutParam(j)
                     if j.ActionType = Push 
                     then 
                         if td.ExistOutput

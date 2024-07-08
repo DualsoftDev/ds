@@ -14,17 +14,34 @@ open System.Text.RegularExpressions
 module ListnerCommonFunctionGeneratorUtil =
 
     // Helper function to find Real or Call
-    let tryHolderFindRealOrCall (curSystem: DsSystem) (ns: Fqdn) =
-            match ns.ToFSharpList() with
-            | flowOrReal :: [ realOrCall ] ->
-                match curSystem.TryFindFlow(flowOrReal) with
-                | Some(flow) ->  flow.Graph.TryFindVertex(realOrCall)
+    let getSafetyAutoPreCall (curSystem: DsSystem) (ns: Fqdn) =
+        let findFlowOrFail f =
+            match curSystem.TryFindFlow(f) with
+            | Some(flow) -> flow
+            | None -> failwithlog "ERROR"
 
-                | None -> curSystem.TryFindCall(ns)
+        match ns.ToFSharpList() with
+        | f :: [call; api] ->
+            findFlowOrFail f
+            |> fun flow -> flow.GetVerticesHasJobOfFlow()
+                               .First(fun v -> v.Name = $"{call}.{api}")
 
-            | _f :: _r :: [ _c ] -> curSystem.TryFindCall(ns)
+        | f :: [real; call; api] ->
+            findFlowOrFail f
+            |> fun flow -> 
+                flow.GetVerticesOfFlow().OfType<Call>()
+                    .Where(fun c -> c.Parent.GetCore().Name = real)
+                    .First(fun c -> c.Name = $"{call}.{api}")
 
-            | _ -> failwithlog "ERROR"
+        | f :: [real; otherFlow; call; api] ->
+            findFlowOrFail f
+            |> fun flow -> 
+                flow.GetVerticesOfFlow().OfType<Call>()
+                    .Where(fun c -> c.Parent.GetCore().Name = real)
+                    .First(fun c -> c.Name = $"{otherFlow}.{call}.{api}")
+
+        | _ -> failwithlog "ERROR"
+
 
     let getSafetyAutoPreDefs  (ctx: List<dsParser.SafetyAutoPreDefContext>) =
             (*
@@ -47,7 +64,7 @@ module ListnerCommonFunctionGeneratorUtil =
 
                       let values =
                           valueHeader
-                              .Descendants<Identifier23Context>()
+                              .Descendants<Identifier3Context>()
                               .Select(collectNameComponents)
                               .ToArray()
 
@@ -97,7 +114,7 @@ module ListnerCommonFunctionGeneratorUtil =
                     let v = defs.TryFindFirstChild<TimeKeyContext>() |> Option.get
                     let fqdn = collectNameComponents v |> List.ofArray
                     let path = defs.TryFindFirstChild<TimeParamsContext>() |> Option.get
-                    let timeDef = parseTimeParams (fqdn.Combine(), path.GetText())
+                    let timeDef = parseTimeParams (fqdn.CombineQuoteOnDemand(), path.GetText())
                     yield fqdn, timeDef
         }
 
@@ -162,7 +179,9 @@ module ListnerCommonFunctionGeneratorUtil =
         let callListings = ctx.Descendants<CallListingContext>().ToArray()
         [
             for callList in callListings do
-                let jobName = callList.TryFindFirstChild<JobNameContext>().Value.GetText().DeQuoteOnDemand().Split('.')     
+                let item = callList.TryFindFirstChild<JobNameContext>().Value.GetText()
+                
+                let jobName = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()  
                 let jobOption =
                     callList.TryFindFirstChild<JobTypeOptionContext>()
                     |> Option.map (fun ctx -> ctx.GetText().DeQuoteOnDemand())

@@ -21,6 +21,13 @@ open Engine.Parser.FS.ModelParser
 [<AutoOpen>]
 module ImportU =
     
+    let getQualifiedNameSegs (doc:pptDoc) = 
+
+        doc.DicVertex.Values
+            .OfType<Call>().Where(fun call -> call.IsJob)
+            .Select(fun call -> call.TargetJob.NameComponents.Select(fun s->s.DeQuoteOnDemand()).Combine(), call)
+        |> dict
+
     [<Extension>]
     type ImportPPTExt =
 
@@ -239,7 +246,7 @@ module ImportU =
                     match node.NodeType with
                     | REALExF -> // isOtherFlowRealAlias is false  (외부 플로우에 있을뿐 Or Alias가 아님)
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
-                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine(), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
+                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames, DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
                         node.UpdateTime(real)
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
@@ -287,7 +294,7 @@ module ImportU =
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                             node.UpdateTime(real)
                             Alias.Create(
-                                String.Join("_", real.ParentNPureNames),
+                                real.ParentNPureNames,
                                 DuAliasTargetReal(real),
                                 DuParentFlow(flow), true
                             )
@@ -296,9 +303,10 @@ module ImportU =
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
                             node.UpdateTime(real)
+                            let aliasName =  $"""{call.DeviceNApi.Combine("_")}_{node.AliasNumber}""" 
 
                             Alias.Create(
-                                $"{call.Name}_{node.AliasNumber}",
+                                [|aliasName|],
                                 DuAliasTargetCall(segOrg :?> Call),
                                 DuParentReal(real), false
                             )
@@ -309,13 +317,13 @@ module ImportU =
                                 node.UpdateTime(rt)
                                 
                                 Alias.Create(
-                                    $"{rt.Name}_{node.AliasNumber}",
+                                    [| $"""{rt.Name}_{node.AliasNumber}""" |],
                                     DuAliasTargetReal(rt),
                                     DuParentFlow(flow) , false
                                 )
                             | :? Call as ct ->
                                 Alias.Create(
-                                    $"{ct.Name}_{node.AliasNumber}",
+                                    [| $"""{ct.Name}_{node.AliasNumber}""" |],
                                     DuAliasTargetCall(ct),
                                     DuParentFlow(flow) , false
                                 )
@@ -409,8 +417,11 @@ module ImportU =
                         [|edge.EndNode|]
 
                 tgts.Iter(fun node-> 
-                        node.AutoPres.Add (edge.StartNode.AutoPreCondition)|>ignore )
-               
+                        let autoPreCondition =
+                            let flow, job, api = edge.StartNode.CallFlowNJobNApi
+                            $"{flow}{TextFlowSplit}{job.Last().DeQuoteOnDemand()}.{api}"
+                        
+                        node.AutoPres.Add (autoPreCondition)|>ignore )
 
             dicEdges
             |> Seq.iter (fun dic ->
@@ -465,50 +476,26 @@ module ImportU =
         static member MakeSafeties(doc: pptDoc, mySys: DsSystem) =
             let dicVertex = doc.DicVertex
             let dicFlow = doc.DicFlow
-
+            let dicQualifiedNameSegs = getQualifiedNameSegs doc
             doc.Nodes
             |> Seq.iter   (fun node ->
                 let flow = dicFlow.[node.PageNum]
+            
 
-                let dicQualifiedNameSegs =
-                    dicVertex.Values
-                        .OfType<Call>()
-                        .Where(fun call -> call.IsJob)
-                        .Select(fun call -> call.TargetJob.Name, call)
-                    |> dict
-
-                let safeName (safety: string) =
-                    if safety.Split('.').Length  = 2
-                    then
-                        let dev = (safety.Split('.')[0]).Trim()
-                        let api = (safety.Split('.')[1]).Trim()
-
-                        $"{flow.Name}{TextFlowSplit}{dev}_{api}"
-
-                    elif safety.Split('.').Length  = 3
-                    then
-                        let flow = (safety.Split('.')[0]).Trim()
-                        let dev = (safety.Split('.')[1]).Trim()
-                        let api = (safety.Split('.')[2]).Trim()
-
-                        $"{flow}{TextFlowSplit}{dev}_{api}"
-                    else 
-                        failWithLog $"error safety name format ({safety})"
-
-
-                let safeties = node.Safeties |> map safeName |> toArray
-
-                safeties //세이프티 입력 미등록 이름오류 체크
+                node.Safeties //세이프티 입력 미등록 이름오류 체크
                 |> iter (fun safeFullName ->
                     if not (dicQualifiedNameSegs.ContainsKey safeFullName) then
                         node.Shape.ErrorName($"{ErrID._28}(err:{safeFullName})", node.PageNum)
+
+                    if node.CallApiName = safeFullName then
+                        node.Shape.ErrorName($"{ErrID._77}(err:{safeFullName})", node.PageNum)
                         )
 
-                safeties
+                node.Safeties
                 |> map (fun safeFullName -> dicQualifiedNameSegs.[safeFullName])
                 |> iter (fun safeCondV ->
                     match dicVertex.[node.Key].GetPure() |> box with
-                    | :? ISafetyConditoinHolder as holder -> holder.SafetyConditions.Add(DuSafetyConditionCall(safeCondV)) |> ignore
+                    | :? ISafetyAutoPreRequisiteHolder as holder -> holder.SafetyConditions.Add(DuSafetyAutoPreConditionCall(safeCondV)) |> ignore
                     | _ -> node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
                     )
                     
@@ -517,17 +504,10 @@ module ImportU =
         static member MakeAutoPre(doc: pptDoc, mySys: DsSystem) =
             let dicVertex = doc.DicVertex
             let dicFlow = doc.DicFlow
-
+            let dicQualifiedNameSegs = getQualifiedNameSegs doc
             doc.Nodes
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-
-                let dicQualifiedNameSegs =
-                    dicVertex.Values
-                        .OfType<Call>()
-                        .Where(fun call -> call.IsJob)
-                        .Select(fun call -> call.TargetJob.Name, call)
-                    |> dict
 
 
                 // Check for unregistered AutoPre names
@@ -535,6 +515,9 @@ module ImportU =
                 |> Seq.iter (fun autoPreFullName ->
                     if not (dicQualifiedNameSegs.ContainsKey autoPreFullName) then
                         node.Shape.ErrorName($"{ErrID._10}(err:{autoPreFullName})", node.PageNum)
+
+                    if node.CallApiName = autoPreFullName then
+                        node.Shape.ErrorName($"{ErrID._78}(err:{autoPreFullName})", node.PageNum)
                 )
 
                 // Add AutoPre conditions
@@ -542,7 +525,7 @@ module ImportU =
                 |> Seq.map (fun autoPreFullName -> dicQualifiedNameSegs.[autoPreFullName])
                 |> Seq.iter (fun autoPreCondV ->
                     match dicVertex.[node.Key].GetPure() |> box with
-                    | :? IAutoPrerequisiteHolder as holder -> holder.AutoPreConditions.Add(DuAutoPreConditionCall(autoPreCondV)) |> ignore
+                    | :? ISafetyAutoPreRequisiteHolder as holder -> holder.AutoPreConditions.Add(DuSafetyAutoPreConditionCall(autoPreCondV)) |> ignore
                     | _ -> node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum)
                 )
             )
@@ -704,7 +687,7 @@ module ImportU =
             (* Multi Call Api별 갯수 동일 체크*)
             let calls = doc.Nodes
                                 .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
-                                .GroupBy(fun n -> n.CallName)
+                                .GroupBy(fun n -> $"{n.FlowName}.{n.CallName}")
             calls.Iter(fun call -> 
                 let callEachCounts = call.Select(fun f->f.JobParam.DeviceCount)
                 if callEachCounts.Distinct().Count() > 1

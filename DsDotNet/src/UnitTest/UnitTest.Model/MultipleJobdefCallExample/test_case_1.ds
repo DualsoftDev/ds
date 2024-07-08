@@ -2,31 +2,31 @@
     [flow] Page1 = {
     }
     [flow] S101 = {
-        R1 > R2;		// R1(Real)> R2(Real);
+        R1 > R2;		
         R1 = {
-            S101_Copy2_Func1 > S101_Copy2_Func2;		// S101_Copy1_Func1(CallDev)> S101_Copy2_Func2(CallDev);
+            Copy2.Func1 > Copy2.Func2;		
         }
 		R2 = {
-			S101_Copy1_Func1, S101_Copy1_Func2 > S101_Copy1_Func3 > S101_Copy1_Func6 > S101_Copy1_Func5;
+			Copy1.Func1, Copy1.Func2 > Copy1.Func3 > Copy1.Func4 > Copy1.Func6 > Copy1.Func5;
 		}
     }
     [flow] S102 = {
-        R1 > R2;		// R1(Real)> R2(Real);
+        R1 > R2;	
         R1 = {
-            S102_SystemA_Func1 > S102_SystemA_Func2;		// S102_SystemA_Func1(CallDev)> S102_SystemA_Func2(CallDev);
+            SystemA.Func1 > SystemA.Func2;	
         }
     }
     [jobs] = {
-        S101_Copy1_Func6 = { S101_Copy1.Func6(_, _); }
-        S101_Copy1_Func5 = { S101_Copy1.Func5(_, _); }
-        S101_Copy1_Func4 = { S101_Copy1.Func4(_, _); }
-        S101_Copy1_Func3 = { S101_Copy1.Func3(_, _); }
-        S101_Copy1_Func2 = { S101_Copy1.Func2(_, _); }
-        S101_Copy1_Func1 = { S101_Copy1.Func1(_, _); }
-        S101_Copy2_Func2 = { S101_Copy2.Func2(_, _); }
-        S101_Copy2_Func1 = { S101_Copy2.Func1(_, _); }
-        S102_SystemA_Func2 = { S102_SystemA1.Func2(_, _); S102_SystemA2.Func1(_, _); S102_SystemA3.Func2(_, _); S102_SystemA4.Func1(_, _); S102_SystemA5.Func2(_, _); }
-        S102_SystemA_Func1 = { S102_SystemA1.Func1(_, _); S102_SystemA2.Func2(_, _); S102_SystemA3.Func1(_, _); S102_SystemA4.Func2(_, _); S102_SystemA5.Func1(_, _); }
+        S101.Copy1.Func6 = { S101_Copy1.Func6(_, _); }
+        S101.Copy1.Func5 = { S101_Copy1.Func5(_, _); }
+        S101.Copy1.Func4 = { S101_Copy1.Func4(_, _); }
+        S101.Copy1.Func3 = { S101_Copy1.Func3(_, _); }
+        S101.Copy1.Func2 = { S101_Copy1.Func2(_, _); }
+        S101.Copy1.Func1 = { S101_Copy1.Func1(_, _); }
+        S101.Copy2.Func2 = { S101_Copy2.Func2(_, _); }
+        S101.Copy2.Func1 = { S101_Copy2.Func1(_, _); }
+        S102.SystemA.Func2 = { S102_SystemA1.Func2(_, _); S102_SystemA2.Func2(_, _); S102_SystemA3.Func2(_, _); S102_SystemA4.Func2(_, _); S102_SystemA5.Func2(_, _); }
+        S102.SystemA.Func1 = { S102_SystemA1.Func1(_, _); S102_SystemA2.Func1(_, _); S102_SystemA3.Func1(_, _); S102_SystemA4.Func1(_, _); S102_SystemA5.Func1(_, _); }
     }
     [device file="lib/basic.ds"] S101_Copy1;
     [device file="lib/basic.ds"] S101_Copy2;

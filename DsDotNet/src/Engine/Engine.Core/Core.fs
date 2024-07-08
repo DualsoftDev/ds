@@ -144,6 +144,61 @@ module CoreModule =
                 else 
                     actionVariables.Add(actionVariable)
 
+    and AliasTargetWrapper =
+        | DuAliasTargetReal of Real
+        | DuAliasTargetCall of Call
+        member x.RealTarget() =
+            match x with | DuAliasTargetReal   r -> Some r |_ -> None
+        member x.CallTarget() =
+            match x with | DuAliasTargetCall   c -> Some c |_ -> None
+   
+   
+    // Subclasses = {Call}
+    type ISafetyAutoPreRequisiteHolder =
+        abstract member SafetyConditions: HashSet<SafetyAutoPreCondition>
+        abstract member AutoPreConditions: HashSet<SafetyAutoPreCondition>
+        abstract member GetCall : unit -> Call
+    and SafetyAutoPreCondition =
+        | DuSafetyAutoPreConditionCall of Call
+        member x.GetCall() =
+            match x with
+            | DuSafetyAutoPreConditionCall c -> c
+        member x.Core:obj =
+            match x with
+            | DuSafetyAutoPreConditionCall call -> call
+        member x.Name:string =
+            match x with
+            | DuSafetyAutoPreConditionCall call -> call.Name
+
+
+  
+          ///Vertex의 부모의 타입을 구분한다.
+    type ParentWrapper =
+        | DuParentFlow of Flow //Real/Call/Alias 의 부모
+        | DuParentReal of Real //Call/Alias      의 부모
+
+    type ParentWrapper with
+        member x.GetCore() =
+            match x with
+            | DuParentFlow f -> f :> FqdnObject
+            | DuParentReal r -> r
+        member x.GetFlow() =
+            match x with
+            | DuParentFlow f -> f
+            | DuParentReal r -> r.Flow
+        member x.GetSystem() =
+            match x with
+            | DuParentFlow f -> f.System
+            | DuParentReal r -> r.Flow.System
+        member x.GetGraph():DsGraph =
+            match x with
+            | DuParentFlow f -> f.Graph
+            | DuParentReal r -> r.Graph
+        member x.GetModelingEdges() =
+            match x with
+            | DuParentFlow f -> f.ModelingEdges
+            | DuParentReal r -> r.ModelingEdges
+
     type Flow private (name: string, system: DsSystem) =
         inherit FqdnObject(name, system)
         
@@ -184,14 +239,6 @@ module CoreModule =
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()
 
-    // Subclasses = {Call | Real}
-    type ISafetyConditoinHolder =
-        abstract member SafetyConditions: HashSet<SafetyCondition>
-    // Subclasses = {Call}
-    type IAutoPrerequisiteHolder =
-        abstract member AutoPreConditions: HashSet<AutoPreCondition>
-        abstract member GetAutoPreCall : unit -> Call
-         
     /// Indirect to Call/Alias/RealOtherFlow/CallSys
     [<AbstractClass>]
     type Indirect (names:string seq, parent:ParentWrapper) =
@@ -216,18 +263,21 @@ module CoreModule =
         
         member x.Flow = flow
 
-        interface ISafetyConditoinHolder with
-            member val SafetyConditions = HashSet<SafetyCondition>()
+
 
     type CallType =
         | JobType of Job
         | CommadFuncType of CommandFunction
         | OperatorFuncType of OperatorFunction
 
-    type Call(callType: CallType, parent) =
+    type Call(jobOrFunc: CallType, parent:ParentWrapper) =
         inherit Indirect
-            (match callType with
-            | JobType job -> job.Name
+            (match jobOrFunc with
+            | JobType job -> 
+                if job.NameComponents.Head() = parent.GetFlow().Name   
+                then job.NameComponents.Skip(1).CombineDequoteOnDemand()
+                else job.NameComponents.CombineDequoteOnDemand()
+                       
             | CommadFuncType func -> func.Name
             | OperatorFuncType func -> func.Name
             , parent)
@@ -246,42 +296,44 @@ module CoreModule =
             
         interface IVertex
         member x.TargetJob =
-            match callType with
+            match jobOrFunc with
             | JobType job -> job
             | _ -> failwithlog $"{x.QualifiedName} is not JobType."
 
         member x.TargetFunc =
-            match callType with
+            match jobOrFunc with
             | CommadFuncType func -> func :> Func
             | OperatorFuncType func -> func :> Func
             | _ -> failwithlog $"{x.QualifiedName} is not FunctionType."
-
+                         
         /// Indicates if the target includes a job.
-        member _.IsJob = isJob callType 
-        member _.IsPureCommand = isCommand callType  
-        member _.IsPureOperator = isOperator callType  
+        member _.IsJob = isJob jobOrFunc 
+        member _.IsCommand = isCommand jobOrFunc  
+        member _.IsOperator = isOperator jobOrFunc  
+        member _.JobOrFunc = jobOrFunc  
         member _.CallOperatorType  = 
-            match callType with
+            match jobOrFunc with
             | JobType _ -> DuOPUnDefined
             | CommadFuncType _ -> DuOPUnDefined
             | OperatorFuncType func -> func.OperatorType
 
         member _.CallCommandType  = 
-            match callType with
+            match jobOrFunc with
             | JobType _ -> DuCMDUnDefined
             | CommadFuncType func -> func.CommandType
             | OperatorFuncType _ -> DuCMDUnDefined
 
+
         member val ExternalTags = HashSet<ExternalTagSet>()
         member val Disabled:bool = false with get, set
-        interface ISafetyConditoinHolder with
-            member val SafetyConditions = HashSet<SafetyCondition>()
-        interface IAutoPrerequisiteHolder with
-            member x.GetAutoPreCall(): Call = x
-            member val AutoPreConditions = HashSet<AutoPreCondition>()
+        
+        interface ISafetyAutoPreRequisiteHolder with
+            member x.GetCall(): Call = x
+            member val SafetyConditions = HashSet<SafetyAutoPreCondition>()
+            member val AutoPreConditions = HashSet<SafetyAutoPreCondition>()
 
-    and Alias private (names:string seq, target:AliasTargetWrapper, parent, isOtherFlowRealAlias) = // target : Real or Call or OtherFlowReal
-        inherit Indirect(names, parent)
+    and Alias private (name:string , target:AliasTargetWrapper, parent, isOtherFlowRealAlias) = // target : Real or Call or OtherFlowReal
+        inherit Indirect([|name|], parent)
         member _.TargetWrapper = target
         member _.IsOtherFlowRealAlias = isOtherFlowRealAlias
         member _.IsSameFlow = target.GetTarget() 
@@ -305,6 +357,7 @@ module CoreModule =
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member x.ApiName = (x:>FqdnObject).QualifiedName
         member x.ApiStgName = $"{deviceName}_{api.Name}"
+        member x.DeviceApiName = $"{deviceName}.{api.Name}"
         member x.DeviceName = deviceName
 
         member x.InParams = inParams 
@@ -314,10 +367,6 @@ module CoreModule =
         member val OutAddress = TextAddrEmpty with get, set
         member val MaunualActionAddress = TextAddrEmpty with get, set
               
-        //member val InAddress = getNull<string>() with get, set
-        //member val OutAddress = getNull<string>() with get, set
-   
-
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
@@ -328,7 +377,7 @@ module CoreModule =
 
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
-        inherit FqdnObject(names.Combine(), createFqdnObject([|system.Name|]))
+        inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
         let mutable jobParam = JobParam(ActionNormal, JobTypeMulti.Single)
         member x.JobParam = jobParam
         member x.UpdateJobParam(newJobParam: JobParam) =
@@ -338,10 +387,13 @@ module CoreModule =
         member x.JobMulti = x.JobParam.JobMulti 
         member x.AddressInCount = x.JobParam.JobMulti.AddressInCount
         member x.AddressOutCount = x.JobParam.JobMulti.AddressOutCount
+
+
         member x.System = system
         member x.DeviceDefs = tasks
+        member x.Name = failWithLog $"{names.Combine()} Name using 'QualifiedName'"
 
-
+                                
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
 
     [<AbstractClass>]
@@ -401,8 +453,8 @@ module CoreModule =
         member _.Operand2 = operand2  // "-"
         member _.Operator = operator  // "<|>", "|>", "<|"
         member _.ToDsText() = 
-            let src = operand1.QuoteOnDemand()
-            let tgt = operand2.QuoteOnDemand()
+            let src = operand1
+            let tgt = operand2
             sprintf "%s %s %s"  src (operator |> toTextModelEdge) tgt  //"+" <|> "-"
         static member Create(system:DsSystem, operand1, operator, operand2, autoGenByFlow) =
             let ri = ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
@@ -423,78 +475,6 @@ module CoreModule =
             edge
 
         override x.ToString() = $"{x.Source.QualifiedName} {x.EdgeType.ToText()} {x.Target.QualifiedName}"
-
-    and AliasTargetWrapper =
-        | DuAliasTargetReal of Real
-        | DuAliasTargetCall of Call
-        member x.RealTarget() =
-            match x with | DuAliasTargetReal   r -> Some r |_ -> None
-        member x.CallTarget() =
-            match x with | DuAliasTargetCall   c -> Some c |_ -> None
-   
-
-    and AutoPreCondition =
-        | DuAutoPreConditionCall of Call
-        member x.GetAutoPreCall() =
-            match x with
-            | DuAutoPreConditionCall c -> c
-        member x.Core:obj =
-            match x with
-            | DuAutoPreConditionCall call -> call
-        member x.Name:string =
-            match x with
-            | DuAutoPreConditionCall call -> call.Name
-
-    and SafetyCondition =
-        | DuSafetyConditionReal of Real
-        | DuSafetyConditionCall of Call
-
-        member x.GetSafetyCall() =
-            match x with
-            | DuSafetyConditionReal _ -> None
-            | DuSafetyConditionCall c -> Some c
-
-        member x.GetSafetyReal() =
-            match x with
-            | DuSafetyConditionReal r -> Some r
-            | DuSafetyConditionCall _ -> None 
-
-        member x.Core:obj =
-            match x with
-            | DuSafetyConditionReal real -> real
-            | DuSafetyConditionCall call -> call
-        member x.Name:string =
-            match x with
-            | DuSafetyConditionReal real -> real.Name
-            | DuSafetyConditionCall call -> call.Name
-
-  
-          ///Vertex의 부모의 타입을 구분한다.
-    type ParentWrapper =
-        | DuParentFlow of Flow //Real/Call/Alias 의 부모
-        | DuParentReal of Real //Call/Alias      의 부모
-
-    type ParentWrapper with
-        member x.GetCore() =
-            match x with
-            | DuParentFlow f -> f :> FqdnObject
-            | DuParentReal r -> r
-        member x.GetFlow() =
-            match x with
-            | DuParentFlow f -> f
-            | DuParentReal r -> r.Flow
-        member x.GetSystem() =
-            match x with
-            | DuParentFlow f -> f.System
-            | DuParentReal r -> r.Flow.System
-        member x.GetGraph():DsGraph =
-            match x with
-            | DuParentFlow f -> f.Graph
-            | DuParentReal r -> r.Graph
-        member x.GetModelingEdges() =
-            match x with
-            | DuParentFlow f -> f.ModelingEdges
-            | DuParentReal r -> r.ModelingEdges
 
 
 
@@ -517,7 +497,8 @@ module CoreModule =
                 if x.Flow <> aliasFlow
                 then [|x.Flow.Name; x.Name|]  //other flow
                 else [| x.Name |]             //my    flow
-        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
+
+
 
     type OperatorFunction with
         static member Create(name:string,  excuteCode:string) =
@@ -537,8 +518,11 @@ module CoreModule =
     type Call with
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target|>JobType, parent)
-            addCallVertex parent call
-            call
+            if parent.GetSystem().Flows.SelectMany(fun f->f.Graph.Vertices.OfType<Call>()).Any(fun c->c.QualifiedName = call.QualifiedName)
+            then failwithlog $"중복 call name [{call.Name}]"
+            else 
+                addCallVertex parent call
+                call
 
         static member Create(func:Func, parent:ParentWrapper) =
             let callType = 
@@ -552,19 +536,19 @@ module CoreModule =
             call   
 
      
-
+        member x.DeviceNApi = x.TargetJob.NameComponents.Skip(1)
         member x.GetAliasTargetToDs() =
             match x.Parent.GetCore() with
-                | :? Flow -> [x.Name].ToArray()
-                | :? Real -> x.ParentNPureNames
+                | :? Real as r -> [r.Name]@x.DeviceNApi
+                | :? Flow -> [x.Name]
                 | _->failwithlog "Error"
 
-        member x.SafetyConditions = (x :> ISafetyConditoinHolder).SafetyConditions
-        member x.AutoPreConditions = (x :> IAutoPrerequisiteHolder).AutoPreConditions
+        member x.SafetyConditions = (x :> ISafetyAutoPreRequisiteHolder).SafetyConditions
+        member x.AutoPreConditions = (x :> ISafetyAutoPreRequisiteHolder).AutoPreConditions
 
 
     type Alias with
-        static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isOtherFlowRealAlias) =
+        static member Create(names:string[], target:AliasTargetWrapper, parent:ParentWrapper, isOtherFlowRealAlias) =
             let createAliasDefOnDemand(isOtherFlowReal) =
                 (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
                  * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
@@ -572,21 +556,23 @@ module CoreModule =
                 let flow:Flow = parent.GetFlow()
                 let aliasKey =
                     match target with
-                    | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow)
-                    | DuAliasTargetCall c -> c.GetAliasTargetToDs()
+                    | DuAliasTargetCall c -> c.GetAliasTargetToDs().ToArray()
+                    | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow).ToArray()
                 let ads = flow.AliasDefs
+                let aliasText = names.Select(fun s->s.DeQuoteOnDemand()).Combine()
                 match ads.TryFind(aliasKey) with
-                | Some ad -> ad.AliasTexts.AddIfNotContains(name) |> ignore
-                | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|], isOtherFlowReal))
+                | Some ad -> ad.AliasTexts.AddIfNotContains(aliasText) |> ignore
+                | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|aliasText|], isOtherFlowReal))
+                aliasText
 
-            createAliasDefOnDemand(isOtherFlowRealAlias)
-            let alias = Alias(name.DeQuoteOnDemand().SplitBy('.'), target, parent, isOtherFlowRealAlias)
+            let aliasText = createAliasDefOnDemand(isOtherFlowRealAlias)
+            let alias = Alias(aliasText, target, parent, isOtherFlowRealAlias)
             if parent.GetCore() :? Real
             then
                 target.RealTarget().IsNone
-                |> verifyM $"Vertex {name} children type error"
+                |> verifyM $"Vertex {names.Combine()} children type error"
 
-            parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{name}]"
+            parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{names.Combine()}]"
             alias
 
     type ApiItem with

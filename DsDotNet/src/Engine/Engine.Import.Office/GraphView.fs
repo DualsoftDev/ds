@@ -127,15 +127,15 @@ module rec ViewModule =
             if coreVertex.IsSome then   
                 let vKey = coreVertex.Value.QualifiedName.GetHashCode()
                 let safeties = match coreVertex.Value.GetPure() with
-                               | :? Real as r -> String.Join(", ", r.SafetyConditions.Select(fun f->f.Name))
                                | :? Call as c -> String.Join(", ", c.SafetyConditions.Select(fun f->f.Name))
+                               | :? Real -> ""
                                |_-> failwithlog $"Error {coreVertex.Value.Name}"
                 let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""
 
 
                 let autoPres = match coreVertex.Value.GetPure() with
                                | :? Call as c -> String.Join(", ", c.AutoPreConditions.Select(fun f->f.Name))
-                               | :? Real as r -> ""
+                               | :? Real -> ""
                                |_-> failwithlog $"Error {coreVertex.Value.Name}"
 
                 let autoPresName = if autoPres.Length > 0 then $"[{autoPres}]\r\n" else ""

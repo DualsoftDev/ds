@@ -157,23 +157,23 @@ module CoreExtensionModule =
             let getMutual(apiInfo:ApiResetInfo) =
                 match apiInfo.Operator with
                 | ModelingEdgeType.Interlock  -> 
-                    match src.Name.QuoteOnDemand() = apiInfo.Operand1, src.Name.QuoteOnDemand() = apiInfo.Operand2 with
+                    match src.Name = apiInfo.Operand1, src.Name = apiInfo.Operand2 with
                     |true, false -> Some apiInfo.Operand2
                     |false, true -> Some apiInfo.Operand1
                     |_ -> None
                 | ModelingEdgeType.ResetEdge -> 
-                    match src.Name.QuoteOnDemand() = apiInfo.Operand1 with
+                    match src.Name = apiInfo.Operand1 with
                     |true -> Some apiInfo.Operand2
                     |_ -> None
                 | ModelingEdgeType.RevResetEdge -> 
-                    match src.Name.QuoteOnDemand() = apiInfo.Operand2 with
+                    match src.Name = apiInfo.Operand2 with
                     |true -> Some apiInfo.Operand1
                     |_ -> None
                 | _ -> None
 
             let resets = x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
 
-            resets.Select(fun s->x.ApiItems.Find(fun f->f.QualifiedName = $"{x.Name.QuoteOnDemand()}.{s.Value.QuoteOnDemand()}"))
+            resets.Select(fun s->x.ApiItems.Find(fun f->f.UnqualifiedName = $"{x.Name}.{s.Value}"))
 
         member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
@@ -202,10 +202,10 @@ module CoreExtensionModule =
         member x.IsMaunualAddressEmpty = x.MaunualActionAddress = TextAddrEmpty
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualActionAddress = TextAddrEmpty || x.MaunualActionAddress = TextSkip
 
-        member x.GetInParam(jobName:string) = x.InParams[jobName]
+        member x.GetInParam(job:Job) = x.InParams[job.QualifiedName]
         member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)
 
-        member x.GetOutParam(jobName:string) = x.OutParams[jobName]
+        member x.GetOutParam(job:Job) = x.OutParams[job.QualifiedName]
         member x.AddOrUpdateOutParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.OutParams, newDevParam)
 
         member x.SetInSymbol(symName:string option) =
@@ -225,10 +225,10 @@ module CoreExtensionModule =
         
     type Job with
         member x.OnDelayTime = 
-            let times = x.DeviceDefs.Choose(fun t-> t.InParams[x.Name].Time)
+            let times = x.DeviceDefs.Choose(fun t-> t.InParams[x.QualifiedName].Time)
             if times.GroupBy(fun t->t).Count() > 1
             then 
-                let errTask = String.Join(", ",  x.DeviceDefs.Select(fun t-> $"{t.Name} {t.InParams[x.Name].Time}"))
+                let errTask = String.Join(", ",  x.DeviceDefs.Select(fun t-> $"{t.Name} {t.InParams[x.QualifiedName].Time}"))
                 failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
                 
             if times.any() then times.First() |> Some else None
@@ -299,8 +299,31 @@ module CoreExtensionModule =
         member x.MotionEndTag = x.ExternalTags.First(fun (t,_)-> t = MotionEnd)|> snd  
         member x.ScriptEndTag = x.ExternalTags.First(fun (t,_)-> t = ScriptEnd)|> snd  
 
+
+    let getCallName (x:Call) (bGraph:bool)= 
+        match x.JobOrFunc with
+            | JobType job -> 
+                let jobFqdn = job.NameComponents
+                let callOwnerFlow =  x.Parent.GetFlow().Name
+                let jobOwnerFlow =  jobFqdn.Head()
+                if callOwnerFlow = jobOwnerFlow
+                then 
+                    if bGraph
+                    then
+                        jobFqdn.Skip(1).CombineQuoteOnDemand() 
+                    else
+                        failWithLog $"아직 확인 필요" //test ahn
+                else 
+                    jobFqdn.CombineQuoteOnDemand() //다른 Flow는 skip flow 없음
+                             
+            | CommadFuncType func -> func.Name.QuoteOnDemand()+"()"
+            | OperatorFuncType func -> "#"+func.Name.QuoteOnDemand()
+
+
     type Call with
-        member x.IsOperator = (x.Parent.GetCore() :? Flow)
+        
+        member x.NameForGraph = getCallName x true
+         
 
         member x.System = x.Parent.GetSystem()
         member x.ErrorSensorOn = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)|> snd
@@ -362,11 +385,11 @@ type SystemExt =
     [<Extension>]
     static member GetDevice(x:TaskDev, sys:DsSystem) = sys.Devices.First(fun f->f.Name  = x.DeviceName)
 
-    [<Extension>]
-    static member ToTextForDevParam(x:TaskDev, jobName:string) = toTextInOutDev (x.GetInParam(jobName)) (x.GetOutParam(jobName))
+    //[<Extension>]
+    //static member ToTextForDevParam(x:TaskDev, jobName:string) = toTextInOutDev (x.GetInParam(jobName)) (x.GetOutParam(jobName))
 
-    [<Extension>]
-    static member ToTextForDevParam(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
+    //[<Extension>]
+    //static member ToTextForDevParam(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
 
     //[<Extension>]
     //static member IsSensorNot(x:DevParam) = 

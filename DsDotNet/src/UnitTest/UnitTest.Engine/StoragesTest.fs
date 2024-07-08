@@ -22,8 +22,9 @@ type StoragesTest() =
         let sys = helper.TheSystem  
         /// 파싱후에는 TagManager가 없어야 한다.
         sys.TagManager === null
-
+        DsAddressModule.assignAutoAddress(sys, 0, 100000) PlatformTarget.WINDOWS
         let _ = DsCpuExt.GetDsCPU (sys) PlatformTarget.WINDOWS
+
         /// CPU 생성후 기본 Storage 생성 확인
         sys.TagManager.Storages.Count > 0 === true
         /// 시스템 TAG 정상 생성 확인
@@ -44,20 +45,18 @@ type StoragesTest() =
         let testCodeNormal = """
              [sys] HelloDS = {
                 [flow] STN1 = {
-                    STN1_EXT_ADV > Work1;
                     Work1 = {
-                        STN1_Device1_ADV; 
-                        STN1_Device2_ADV; 
-                        STN1_Device1_RET; 
-                        STN1_Device2_RET; 
+                        Device1.ADV; 
+                        Device2.ADV; 
+                        Device1.RET; 
+                        Device2.RET; 
                     }
                 }
                 [jobs] = {
-                    STN1_EXT_ADV = { STN1_EXT.ADV(-, -); }
-                    STN1_Device1_ADV = { STN1_Device1.ADV(-, -); }
-                    STN1_Device2_ADV = { STN1_Device2.ADV(-, -); }
-                    STN1_Device1_RET = { STN1_Device1.RET(-, -); }
-                    STN1_Device2_RET = { STN1_Device2.RET(-, -); }
+                    STN1.Device1.ADV = { STN1_Device1.ADV(-, -); }
+                    STN1.Device2.ADV = { STN1_Device2.ADV(-, -); }
+                    STN1.Device1.RET = { STN1_Device1.RET(-, -); }
+                    STN1.Device2.RET = { STN1_Device2.RET(-, -); }
                 }
    
                 [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_EXT; 
@@ -71,64 +70,76 @@ type StoragesTest() =
     member __.``Test 한글 및 공란 Generation Name`` () =
 
         let testCodeAdvance = """
-            [sys] HelloDS = {
-                [flow] "00-한글" = {
-                    Work2 => "1" => Work2;
-                    "1" = {
-                        "00-한글__+11_RET", "00-한글__-11_RET", "00-한글__+11_ADV", "00-한글__-11_ADV", "00-한글__?11_ADV"; 
-                    }
-                }
-                [flow] "00+한글" = {
-                    "00+한글__외부시작_ADV_INTrue" > Work1;
-                    Work2 => "1" => Work2;
-                    "1" = {
-                        "00+한글__한글_ADV" > "00+한글__Device2_ADV" > "00+한글__Device3_ADV" > "00+한글__Device4_ADV" > "00+한글__Device1_RET", "00+한글__Device2_RET", "00+한글__Device3_RET" > "00+한글__Device4_RET";
-                    }
-                }
-                [jobs] = {
-                    "00-한글__+11_RET" = { "00-한글__+11".RET(-, -); }
-                    "00-한글__-11_RET" = { "00-한글__-11".RET(-, -); }
-                    "00-한글__+11_ADV" = { "00-한글__+11".ADV(-, -); }
-                    "00-한글__-11_ADV" = { "00-한글__-11".ADV(-, -); }
-                    "00-한글__?11_ADV" = { "00-한글__?11".ADV(-, -); }
-                    "00+한글__한글_ADV" = { "00+한글__한글".ADV(-, -); }
-                    "00+한글__Device2_ADV" = { "00+한글__Device2".ADV(-, -); }
-                    "00+한글__Device3_ADV" = { "00+한글__Device3".ADV(-, -); }
-                    "00+한글__Device4_ADV" = { "00+한글__Device4".ADV(-, -); }
-                    "00+한글__Device1_RET" = { "00+한글__Device1".RET(-, -); }
-                    "00+한글__Device2_RET" = { "00+한글__Device2".RET(-, -); }
-                    "00+한글__Device3_RET" = { "00+한글__Device3".RET(-, -); }
-                    "00+한글__Device4_RET" = { "00+한글__Device4".RET(-, -); }
-                    "00+한글__외부시작_ADV_INTrue" = { "00+한글__외부시작".ADV(-:Boolean:True, -); }
-                }
-            
-                [prop] = {
-                    [layouts] = {
-                        "00-한글__+11" = (588, 406, 220, 80);
-                        "00-한글__-11" = (598, 687, 220, 80);
-                        "00-한글__?11" = (588, 529, 220, 80);
-                        "00+한글__한글" = (543, 298, 220, 80);
-                        "00+한글__Device2" = (854, 580, 220, 80);
-                        "00+한글__Device3" = (1154, 580, 220, 80);
-                        "00+한글__Device4" = (854, 800, 220, 80);
-                        "00+한글__Device1" = (554, 580, 220, 80);
-                        "00+한글__외부시작" = (1103, 95, 220, 80);
-                    }
-                }
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
-                    "00-한글__+11",
-                    "00-한글__-11",
-                    "00-한글__?11",
-                    "00+한글__한글",
-                    "00+한글__Device2",
-                    "00+한글__Device3",
-                    "00+한글__Device4",
-                    "00+한글__Device1",
-                    "00+한글__외부시작"; 
-            }
-            //DS Language Version = [1.0.0.1]
-            //DS Library Date = [Library Release Date 24.3.26]
-            //DS Engine Version = [0.9.8.24]
+        [sys] 한글시스템 = {
+    [flow] "0+1" = {
+        "1".ADV.INTrue > "1" > "0-1_1";
+        한글 > "0-1"."1" > Work1;
+        한글 = {
+            "3".ADV; 
+        }
+        "1" = {
+            한글.ADV > 한글.RET > 한글_ADV_1;
+        }
+        [aliases] = {
+            "0-1"."1" = { "0-1_1"; }
+            "1".한글.ADV = { 한글_ADV_1; }
+        }
+    }
+    [flow] "0-1" = {
+        "1" = {
+            "1".ADV > "2".RET > "3".ADV;
+        }
+    }
+    [jobs] = {
+        "0+1"."1".ADV.INTrue = { "0+1_1".ADV(_:Boolean:True, _); }
+        "0+1".한글.RET = { "0+1_한글".RET(_, _); }
+        "0+1".한글.ADV = { "0+1_한글".ADV(_, _); }
+        "0-1"."2".RET = { "0-1_2".RET(_, _); }
+        "0-1"."1".ADV = { "0-1_1".ADV(_, _); }
+        "0-1"."3".ADV = { "0-1_3".ADV(_, _); }
+        "0+1"."3".ADV = { "0+1_3".ADV(_, _); }
+    }
+    [interfaces] = {
+        Api1 = { "0+1"."1" ~ "0+1"."1" }
+    }
+    [buttons] = {
+        [a] = { AutoSelect(_, -) = { "0+1"; "0-1"; } }
+        [m] = { ManualSelect(_, -) = { "0+1"; "0-1"; } }
+        [d] = { DrivePushBtn(_, -) = { "0+1"; "0-1"; } }
+        [e] = { EmergencyBtn(_, -) = { "0+1"; "0-1"; } }
+        [p] = { PausePushBtn(_, -) = { "0+1"; "0-1"; } }
+        [c] = { ClearPushBtn(_, -) = { "0+1"; "0-1"; } }
+    }
+    [lamps] = {
+        [a] = { AutoModeLamp(-, _) = {  } }
+        [m] = { ManualModeLamp(-, _) = {  } }
+        [d] = { DriveLamp(-, _) = {  } }
+        [e] = { ErrorLamp(-, _) = {  } }
+        [r] = { ReadyStateLamp(-, _) = {  } }
+        [i] = { IdleModeLamp(-, _) = {  } }
+        [o] = { OriginStateLamp(-, _) = {  } }
+    }
+    [prop] = {
+        [layouts] = {
+            "0+1_1" = (133, 266, 220, 80);
+            "0+1_한글" = (991, 346, 220, 80);
+            "0-1_2" = (984, 469, 220, 80);
+            "0-1_1" = (697, 493, 220, 80);
+            "0-1_3" = (1203, 542, 220, 80);
+            "0+1_3" = (334, 676, 220, 80);
+        }
+    }
+    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
+        "0+1_1",
+        "0+1_한글",
+        "0-1_2",
+        "0-1_1",
+        "0-1_3",
+        "0+1_3"; 
+}
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.8.36]
             """
         check testCodeAdvance
         

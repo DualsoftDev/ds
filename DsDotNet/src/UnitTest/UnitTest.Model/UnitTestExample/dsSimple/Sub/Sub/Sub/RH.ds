@@ -3,39 +3,39 @@
         S131 |> CLEAR |> S132;
         CLEAR |> S131 > S132;
         S131 = {
-            StationFlow_RH_RbtHand01_UNLOAD > StationFlow_RH_RbtHand01_HOME;
-            StationFlow_RH_RbtHand01_UNLOAD > StationFlow_RH_PART01_REMOVE;
-            StationFlow_RH_RbtHand01_LOAD > StationFlow_RH_1stClamp01_ADV;
-            StationFlow_RH_RbtHand01_LOAD > StationFlow_RH_PART01_MOVE > StationFlow_RH_RbtWeld01_WELD > StationFlow_RH_RbtWeld01_HOME;
-            StationFlow_RH_1stClamp01_RET > StationFlow_RH_RbtHand01_UNLOAD > StationFlow_RH_Pin01_ADV;
-            StationFlow_RH_RbtWeld01_WELD > StationFlow_RH_2ndClamp01_RET > StationFlow_RH_1stClamp01_RET > StationFlow_RH_Pin01_RET > StationFlow_RH_Pin01_ADV;
-            StationFlow_RH_PART01_MOVE > StationFlow_RH_1stClamp01_ADV > StationFlow_RH_2ndClamp01_ADV > StationFlow_RH_RbtWeld01_WELD;
+            RbtHand01.UNLOAD > RbtHand01.HOME;
+            RbtHand01.UNLOAD > PART01.REMOVE;
+            RbtHand01.LOAD > "1stClamp01".ADV;
+            RbtHand01.LOAD > PART01.MOVE > RbtWeld01.WELD > RbtWeld01.HOME;
+            "1stClamp01".RET > RbtHand01.UNLOAD > Pin01.ADV;
+            RbtWeld01.WELD > "2ndClamp01".RET > "1stClamp01".RET > Pin01.RET > Pin01.ADV;
+            PART01.MOVE > "1stClamp01".ADV > "2ndClamp01".ADV > RbtWeld01.WELD;
         }
         S132 = {
-            StationFlow_RH_2ndClamp02_RET > StationFlow_RH_1stClamp02_RET > StationFlow_RH_Pin02_RET > StationFlow_RH_Pin02_ADV;
-            StationFlow_RH_1stClamp02_ADV > StationFlow_RH_2ndClamp02_ADV;
+            "2ndClamp02".RET > "1stClamp02".RET > Pin02.RET > Pin02.ADV;
+            "1stClamp02".ADV > "2ndClamp02".ADV;
         }
     }
     [jobs] = {
-        StationFlow_RH_1stClamp01_RET = { StationFlow_RH_1stClamp01.RET(_, _); }
-        StationFlow_RH_1stClamp01_ADV = { StationFlow_RH_1stClamp01.ADV(_, _); }
-        StationFlow_RH_2ndClamp01_RET = { StationFlow_RH_2ndClamp01.RET(_, _); }
-        StationFlow_RH_2ndClamp01_ADV = { StationFlow_RH_2ndClamp01.ADV(_, _); }
-        StationFlow_RH_Pin01_RET = { StationFlow_RH_Pin01.RET(_, _); }
-        StationFlow_RH_Pin01_ADV = { StationFlow_RH_Pin01.ADV(_, _); }
-        StationFlow_RH_RbtHand01_LOAD = { StationFlow_RH_RbtHand01.LOAD(_, _); }
-        StationFlow_RH_RbtWeld01_WELD = { StationFlow_RH_RbtWeld01.WELD(_, _); }
-        StationFlow_RH_PART01_MOVE = { StationFlow_RH_PART01.MOVE(_, _); }
-        StationFlow_RH_RbtHand01_UNLOAD = { StationFlow_RH_RbtHand01.UNLOAD(_, _); }
-        StationFlow_RH_PART01_REMOVE = { StationFlow_RH_PART01.REMOVE(_, _); }
-        StationFlow_RH_RbtHand01_HOME = { StationFlow_RH_RbtHand01.HOME(_, _); }
-        StationFlow_RH_RbtWeld01_HOME = { StationFlow_RH_RbtWeld01.HOME(_, _); }
-        StationFlow_RH_1stClamp02_RET = { StationFlow_RH_1stClamp02.RET(_, _); }
-        StationFlow_RH_1stClamp02_ADV = { StationFlow_RH_1stClamp02.ADV(_, _); }
-        StationFlow_RH_2ndClamp02_RET = { StationFlow_RH_2ndClamp02.RET(_, _); }
-        StationFlow_RH_2ndClamp02_ADV = { StationFlow_RH_2ndClamp02.ADV(_, _); }
-        StationFlow_RH_Pin02_RET = { StationFlow_RH_Pin02.RET(_, _); }
-        StationFlow_RH_Pin02_ADV = { StationFlow_RH_Pin02.ADV(_, _); }
+        StationFlow_RH."1stClamp02".ADV = { StationFlow_RH_1stClamp02.ADV(_, _); }
+        StationFlow_RH.RbtHand01.LOAD = { StationFlow_RH_RbtHand01.LOAD(_, _); }
+        StationFlow_RH."1stClamp01".ADV = { StationFlow_RH_1stClamp01.ADV(_, _); }
+        StationFlow_RH."2ndClamp02".ADV = { StationFlow_RH_2ndClamp02.ADV(_, _); }
+        StationFlow_RH."2ndClamp01".ADV = { StationFlow_RH_2ndClamp01.ADV(_, _); }
+        StationFlow_RH.PART01.MOVE = { StationFlow_RH_PART01.MOVE(_, _); }
+        StationFlow_RH."2ndClamp02".RET = { StationFlow_RH_2ndClamp02.RET(_, _); }
+        StationFlow_RH."2ndClamp01".RET = { StationFlow_RH_2ndClamp01.RET(_, _); }
+        StationFlow_RH.RbtWeld01.WELD = { StationFlow_RH_RbtWeld01.WELD(_, _); }
+        StationFlow_RH."1stClamp02".RET = { StationFlow_RH_1stClamp02.RET(_, _); }
+        StationFlow_RH."1stClamp01".RET = { StationFlow_RH_1stClamp01.RET(_, _); }
+        StationFlow_RH.RbtWeld01.HOME = { StationFlow_RH_RbtWeld01.HOME(_, _); }
+        StationFlow_RH.Pin02.RET = { StationFlow_RH_Pin02.RET(_, _); }
+        StationFlow_RH.RbtHand01.UNLOAD = { StationFlow_RH_RbtHand01.UNLOAD(_, _); }
+        StationFlow_RH.Pin01.RET = { StationFlow_RH_Pin01.RET(_, _); }
+        StationFlow_RH.PART01.REMOVE = { StationFlow_RH_PART01.REMOVE(_, _); }
+        StationFlow_RH.Pin02.ADV = { StationFlow_RH_Pin02.ADV(_, _); }
+        StationFlow_RH.Pin01.ADV = { StationFlow_RH_Pin01.ADV(_, _); }
+        StationFlow_RH.RbtHand01.HOME = { StationFlow_RH_RbtHand01.HOME(_, _); }
     }
     [interfaces] = {
         Func1 = { StationFlow_RH.S131 ~ StationFlow_RH.S132 }
@@ -74,4 +74,4 @@
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.9]
+//DS Engine Version = [0.9.8.36]

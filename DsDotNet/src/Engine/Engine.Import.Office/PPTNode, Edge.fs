@@ -45,10 +45,17 @@ module PPTNodeModule =
         let updateSafety (barckets: string) =
                 barckets.Split(';')
                     |> Seq.iter (fun f ->
-                        if f.Split('.').Length > 1 then
-                            safeties.Add(f) |> ignore
-                        else
-                            failwithf $"{ErrID._74}"
+                        let safeItem = 
+                            let items = f.Split('.').Select(fun s->s.Trim())
+                            match items.length() with
+                            | 2 -> 
+                                $"{pageTitle}{TextFlowSplit}{items.Combine()}"
+                            | 3 -> 
+                                items.Combine()
+                            | _ ->
+                                failWithLog ErrID._79
+                        
+                        safeties.Add(safeItem) |> ignore    
                     )    
 
 
@@ -57,7 +64,7 @@ module PPTNodeModule =
                     shape.ErrorName(ErrID._19, iPage)
                 else
                     let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
-                    let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextFlowSplit}{sys}")
+                    let copys = copyRows.Select(fun sys -> $"{pageTitle}_{sys}")
 
                     if copys.Distinct().length() <> copys.length() then
                         Office.ErrorName(shape, ErrID._33, iPage)
@@ -152,7 +159,7 @@ module PPTNodeModule =
 
         member x.Safeties = safeties
         member x.AutoPres = autoPres
-        member x.AutoPreCondition = x.CallName
+
         
         member x.RealGoingTime = realGoingTime
         member x.RealDelayTime = realDelayTime
@@ -164,8 +171,8 @@ module PPTNodeModule =
         
         member x.PageTitle = pageTitle
         member x.Position = shape.GetPosition(slieSize)
-        member x.OperatorName = pageTitle+TextFlowSplit+name.Replace(".", "_")
-        member x.CommandName  = pageTitle+TextFlowSplit+name.Replace(".", "_")
+        member x.OperatorName = pageTitle+"_"+name
+        member x.CommandName = pageTitle+"_"+name
         member x.IsCall = nodeType = CALL
         member x.IsCallDevParam = nodeType = CALL && devParam.IsSome 
         member x.IsRootNode = rootNode
@@ -189,12 +196,17 @@ module PPTNodeModule =
                     let outParam = devParam.Value |> snd
                     if inParam.IsSome && outParam.IsNone then
                         let post = getPostParam inParam.Value
-                        if post = "" then pureJob else (pureJob.Append( $"IN{post}").ToArray())
+                        if post = "" 
+                        then pureJob 
+                        else pureJob.SkipLast(1).Append( $"{Api}(IN{post})").ToArray()
+
                     elif inParam.IsSome && outParam.IsSome then
                         let postIn = getPostParam inParam.Value
                         let postOut = getPostParam outParam.Value
-                        if postIn = "" && postOut = "" then pureJob
-                        else pureJob.Append( $"_IN{postIn}_OUT{postOut}").ToArray()  
+                        if postIn = "" && postOut = "" 
+                        then pureJob
+                        else pureJob.SkipLast(1).Append( $"{Api}(IN{postIn}_OUT{postOut})").ToArray()  
+
                     else failwithlog "error"
                 else pureJob
             jobName.ToArray()
@@ -234,8 +246,8 @@ module PPTNodeModule =
             call.Disabled <- x.DisableCall
             if x.IsCallDevParam && x.IsRootNode.Value = false then 
                 call.TargetJob.DeviceDefs.Iter(fun d->
-                    d.AddOrUpdateInParam(x.JobName.CombineQuoteOnDemand() , (x.DevParam.Value |> fst).Value)
-                    d.AddOrUpdateOutParam(x.JobName.CombineQuoteOnDemand() , (x.DevParam.Value |> snd).Value)
+                    d.AddOrUpdateInParam(x.JobName.Combine() , (x.DevParam.Value |> fst).Value)
+                    d.AddOrUpdateOutParam(x.JobName.Combine() , (x.DevParam.Value |> snd).Value)
                 )
       
         member x.CallFlowNJobNApi = 
@@ -245,7 +257,7 @@ module PPTNodeModule =
 
             let parts = GetLastParenthesesReplaceName(name, "").Split('.')  
             match parts.Length with
-            | 2 -> 
+            | 2 ->                                          
                 let job = [$"{pageTitle}";$"{TrimSpace(parts.[0]) |> GetBracketsRemoveName}"] 
                 let api = TrimSpace(parts.[1]) |> GetBracketsRemoveName
                 pageTitle, job , api
@@ -259,12 +271,16 @@ module PPTNodeModule =
         member x.CallName = 
         
             let flow, job, api = x.CallFlowNJobNApi
-            $"{job.Last()}_{api}"
+            $"{job.Last()}.{api}"
 
+        member x.CallApiName = 
+        
+            let flow, job, api = x.CallFlowNJobNApi
+            $"{flow}.{job.Last()}.{api}"
 
         member x.CallDevName = 
             let flow, job, api = x.CallFlowNJobNApi
-            $"{flow}{TextFlowSplit}{job.Last()}"
+            $"{flow}_{job.Last()}"
            
             
         member x.FlowName = 

@@ -22,8 +22,16 @@ module FqdnImpl =
         match fqdnList with
         | [n] when quoteOnSingle -> quoteOnDemand n
         | [n] -> n
-        | [_p; _q] -> combine "." fqdnList
-        | _ -> failwithlog "ERROR"
+        | _ -> 
+            if fqdn.length() > 4
+            then 
+                failwithlog (sprintf "Fqdn length is too long: %s" (fqdn.Combine()))
+            else 
+                if quoteOnSingle
+                then 
+                    combineQuoteOnDemand "." fqdnList
+                else 
+                    combine "." fqdnList
 
     let internal getRelativeNames(referencePath:Fqdn) (fqdn:Fqdn) =
         let rec countSameStartElements xs ys =
@@ -83,7 +91,8 @@ module FqdnImpl =
             new IQualifiedNamed with
                 member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
                 member _.NameComponents = nameComponents
-                member x.QualifiedName = nameComponents.Combine()
+                member x.QualifiedName = failwithlog "ERROR"
+                member x.UnqualifiedName = failwithlog "ERROR"
         }
 
     type FqdnObject(name:string, parent:IQualifiedNamed) =
@@ -91,12 +100,15 @@ module FqdnImpl =
         interface IVertex
         interface IQualifiedNamed with
             member x.NameComponents = [| yield! parent.NameComponents; x.Name |]
-            member x.QualifiedName = combine "." x.NameComponents
+            member x.QualifiedName =  x.NameComponents.CombineQuoteOnDemand()
+            member x.UnqualifiedName =  x.NameComponents.CombineDequoteOnDemand()
         member x.Name with get() = (x :> INamed).Name and set(v) = (x :> INamed).Name <- v
         [<Browsable(false)>]
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         [<Browsable(false)>]
-        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
+        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName  
+        [<Browsable(false)>]
+        member x.UnqualifiedName = (x :> IQualifiedNamed).UnqualifiedName
         abstract member GetRelativeName: Fqdn -> string
         default x.GetRelativeName(referencePath:Fqdn) =
             getRelativeName referencePath x.NameComponents
@@ -105,7 +117,6 @@ module FqdnImpl =
 
 [<Extension>]
 type FqdnExt =
-    [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>]separator) = combine separator nameComponents
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()
     [<Extension>] static member GetRelativeName(fqdn:Fqdn, referencePath:Fqdn) = getRelativeName referencePath fqdn

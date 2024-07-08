@@ -64,16 +64,20 @@ module ValidateMoudle =
             let parentJob = sys.Jobs.Where(fun j-> j.ApiDefs.Contains(a))
             if(parentJob.Count() > 1)
             then 
-                let jobNames = StringExt.JoinWith(parentJob.Select(fun j->j.Name), ", ")
+                let jobNames = StringExt.JoinWith(parentJob.Select(fun j->j.QualifiedName), ", ")
                 failwithf $"{a.QualifiedName} is 중복 assigned ({jobNames})"
         )
 
     let validateRootCallConnection(sys:DsSystem) =
         let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
         sys.GetVerticesCallOperator().Iter(fun callOp->
+            if "SIDE.MES.\"\"2ND_LATCH2\".RET.INTrue\"" = callOp.QualifiedName then
+                logWarn $""
             if not(rootEdgeSrcs.Contains (callOp))
-                then
-                failWithLog $"Flow에 존재하는 Action은 반드시 연결이 필요합니다. {callOp.Name}"
+            then
+                failWithLog $"Flow에 존재하는 Action은 반드시 연결이 필요합니다. {callOp.QualifiedName}"
+            else 
+                ()
             )
 
                 

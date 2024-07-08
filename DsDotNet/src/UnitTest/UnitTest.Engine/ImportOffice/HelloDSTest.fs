@@ -72,14 +72,14 @@ module HelloDSTestModule =
             let callsInReal1 = reals[0].Graph.Vertices.OfType<Call>() |> toArray
             let callInReal1Names = callsInReal1 |> map (fun c -> c.Name) |> toArray
             SeqEq callInReal1Names [|
-                "STN1__Device1_ADV"
-                "STN1__Device2_ADV"
-                "STN1__Device3_ADV"
-                "STN1__Device4_ADV"
-                "STN1__Device1_RET"
-                "STN1__Device2_RET"
-                "STN1__Device3_RET"
-                "STN1__Device4_RET"
+                "Device1.ADV"
+                "Device2.ADV"
+                "Device3.ADV"
+                "Device4.ADV"
+                "Device1.RET"
+                "Device2.RET"
+                "Device3.RET"
+                "Device4.RET"
                 |]
 
             let callsInReal2 = reals[1].Graph.Vertices.OfType<Call>() |> toArray
@@ -87,7 +87,7 @@ module HelloDSTestModule =
             SeqEq callInReal2Names [||]
 
             let callDev1Adv = callsInReal1[0]
-            callDev1Adv.Name === "STN1__Device1_ADV"
+            callDev1Adv.Name === "Device1.ADV"
             ()
 
         [<Test>]
@@ -100,7 +100,7 @@ module HelloDSTestModule =
             for KeyValue(k, v) in storages do
                 tracefn $"Storage: {k} = {v}"
 
-            let var = storages["HelloDS_STN1_Work1_STN1__Device1_ADV_ready"]
+            let var = storages["HelloDS_STN1_Work1__Device2_ADV__ready"]
 
             //for KeyValue(k, v) in globalStorage do
             //    yield k, v.Tag

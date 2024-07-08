@@ -62,6 +62,6 @@ module ConvertCoreExtUtils =
 
         [<Extension>] static member GetInExpr (x:HwSystemDef) = 
                             getInExpr (x.InParam, x.InTag, x.System) :?> Expression<bool>
-        [<Extension>] static member GetInExpr (x:TaskDev, jobName:string) = 
-                            getInExpr ((x.GetInParam(jobName)), x.InTag, x.ApiItem.ApiSystem)  :?> Expression<bool>
+        [<Extension>] static member GetInExpr (x:TaskDev, job:Job) = 
+                            getInExpr ((x.GetInParam(job)), x.InTag, x.ApiItem.ApiSystem)  :?> Expression<bool>
                         

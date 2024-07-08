@@ -25,7 +25,6 @@ type VertexManager with
                     <||> plans 
                     <||> actionLinks 
                     )
-                   <&&> real.SafetyExpr
 
         let rsts  = (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
         (sets, rsts) ==| (v.ST, getFuncName())//조건에 의한 릴레이
@@ -65,13 +64,17 @@ type VertexManager with
 
     member v.F4_CallOperatorEnd() =
         let sets =
+            let callExpr = v._sim.Expr <&&> v.SF.Expr <&&> !@v.RF.Expr
             match v.Vertex  with
-            | :? Call as call when call.IsOperator ->  
-                    call.VC.CallOperatorValue.Expr  <||> ( v._sim.Expr <&&> v.SF.Expr <&&> !@v.RF.Expr)
+            | :? Call as call ->  
+                if   call.IsOperator
+                then
+                     call.VC.CallOperatorValue.Expr  <||> callExpr
+                else 
+                     callExpr
             | _ ->
                 failwithlog "Error"
              
-
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())
 

@@ -101,13 +101,13 @@ module ExportIOTable =
         dt
 
     let splitNameForRow(name:string) = 
-        let head = name.Split(TextFlowSplit)[0];   
-        let tail = name[(head.Length+TextFlowSplit.length())..]
+        let head = name.Split("_")[0];   
+        let tail = name[(head.Length+1)..]
         head, tail 
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-        let inSym  =  dev.GetInParam(job.Name).Name
-        let outSym =  dev.GetOutParam(job.Name).Name
+        let inSym  =  dev.GetInParam(job).Name
+        let outSym =  dev.GetOutParam(job).Name
         let inSkip, outSkip = dev.GetSkipInfo(job)
 
         let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
@@ -571,7 +571,7 @@ module ExportIOTable =
 
         let rows =
             //let devs = sys.GetDevicesForHMI()
-            let devs = sys.GetDevicesForHMIOnlyJobFirst() //kia demo 
+            let devs = sys.GetDevicesForHMIOnlyJobFirst() //kia demo //teat ahn
             devs
             |> Seq.collect (fun (dev,_) ->
                  [   

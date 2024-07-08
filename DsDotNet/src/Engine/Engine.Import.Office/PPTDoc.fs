@@ -57,7 +57,7 @@ module PPTDocModule =
                         then
                              match  allNodes.TryFind(fun f -> $"{f.PageTitle}.{f.Name}" = name) with
                              | Some f -> f
-                             | None -> failWithLog $"{name} 해당 Flow.Work를 찾을 수 없습니다."
+                             | None -> node.Shape.ErrorName( $"해당 Flow.Work를 찾을 수 없습니다 {name}", node.PageNum)
 
                         else aliasCheckNodes |> Seq.filter (fun f -> f.Name = name) |> Seq.head
 
@@ -312,7 +312,7 @@ type PPTDocExt =
                                            .Where(fun f->f.NodeType = CALL)
                                            .Where(fun f->f.IsFunction|>not)
                         if flowNodes.Any(fun n->n.CallDevName = node.CallDevName) then
-                            node.CallName, node.JobParam.JobMulti.DeviceCount
+                            node.CallDevName, node.JobParam.JobMulti.DeviceCount
                         else
                             failWithLog $"{node.CallDevName} 해당 디바이스가 없습니다."
                     else

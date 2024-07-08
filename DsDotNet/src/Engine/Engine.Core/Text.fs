@@ -44,13 +44,20 @@ module TextImpl =
 
     let deQuote = unwrapString dq dq
 
+    /// Need quoteOnDemand use combineQuoteOnDemand
     let combine (separator:string) (nameComponents:string seq) =
         nameComponents 
         |> List.ofSeq 
         |> function
            | [] -> failwithlog "ERROR"
            | [ n ] -> n
-           | ns -> ns |> Seq.map quoteOnDemand |> String.concat separator
+           | ns -> ns |> String.concat separator 
+
+    let combineQuoteOnDemand (separator:string) (nameComponents:string seq) =
+        combine separator (nameComponents.Select(quoteOnDemand))
+
+    let combineDequoteOnDemand (separator:string) (nameComponents:string seq) =
+        combine separator (nameComponents.Select(deQuoteOnDemand))
 
     let split (separator: string) (input: string) : string[] =
         if String.IsNullOrEmpty(input) then
@@ -88,7 +95,9 @@ type TextExt =
     [<Extension>] static member QuoteOnDemand (identifier:string) = quoteOnDemand identifier
     [<Extension>] static member DeQuoteOnDemand (identifier:string) = deQuoteOnDemand identifier
     [<Extension>] static member Combine (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator nameComponents
-    [<Extension>] static member CombineQuoteOnDemand (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combine separator (nameComponents.Select(quoteOnDemand))
+    [<Extension>] static member CombineQuoteOnDemand (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combineQuoteOnDemand separator nameComponents
+    [<Extension>] static member CombineDequoteOnDemand (nameComponents:string seq, [<Optional; DefaultParameterValue(".")>] separator) = combineDequoteOnDemand separator nameComponents
     /// fqdn -> component []
-    [<Extension>] static member SplitToFqdnComponents (fqdn:string, [<Optional; DefaultParameterValue(".")>] separator) = split separator fqdn
+    [<Extension>] static member SplitToFqdn (fqdn:string, [<Optional; DefaultParameterValue(".")>] separator) = split separator fqdn
+    [<Extension>] static member SplitToFqdnDeQuoteOnDemand (fqdn:string) = fqdn.DeQuoteOnDemand() |> split "." |> Seq.map(fun f->f.DeQuoteOnDemand())
     

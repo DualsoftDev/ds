@@ -1,124 +1,131 @@
 [sys] Floor = {
     [flow] LineFlow = {
-        Unload |> UnloadClear;
-        S113.Work => S114.Work => Unload => UnloadClear;
+        UnloadClear_1 |> clear;
+        UnloadClear_1 |> Unload;
+        UnloadClear_1 => clear;
+        S113.Work => S114.Work => Unload;
         STN_Buffer => S111.Work => S112.Work => S113.Work;
         Unload = {
-            LineFlow_RBT117_LOAD > LineFlow_RBT117_UNLOAD > LineFlow_RBT117_HOME;
+            RBT117.LOAD > RBT117.UNLOAD > RBT117.HOME;
+        }
+        UnloadClear; 
+        [aliases] = {
+            UnloadClear = { UnloadClear_1; }
         }
     }
     [flow] S111 = {
         Work <|> genClearRealWork;
         Work > genClearRealWork;
         Work = {
-            S111_RbtHand01_UNLOAD > S111_RbtHand01_HOME;
-            S111_RbtHand01_UNLOAD > S111_PART01_REMOVE;
-            S111_RbtHand01_LOAD > S111_1stClamp01_ADV;
-            S111_RbtHand01_LOAD > S111_PART01_MOVE > S111_RbtWeld01_WELD > S111_RbtWeld01_HOME;
-            S111_1stClamp01_RET > S111_RbtHand01_UNLOAD > S111_Pin01_ADV;
-            S111_RbtWeld01_WELD > S111_2ndClamp01_RET > S111_1stClamp01_RET > S111_Pin01_RET > S111_Pin01_ADV;
-            S111_PART01_MOVE > S111_1stClamp01_ADV > S111_2ndClamp01_ADV > S111_RbtWeld01_WELD;
+            RbtHand01.UNLOAD > RbtHand01.HOME;
+            RbtHand01.UNLOAD > PART01.REMOVE;
+            RbtHand01.LOAD > "1stClamp01".ADV;
+            RbtHand01.LOAD > PART01.MOVE > RbtWeld01.WELD > RbtWeld01.HOME;
+            "1stClamp01".RET > RbtHand01.UNLOAD > Pin01.ADV;
+            RbtWeld01.WELD > "2ndClamp01".RET > "1stClamp01".RET > Pin01.RET > Pin01.ADV;
+            PART01.MOVE > "1stClamp01".ADV > "2ndClamp01".ADV > RbtWeld01.WELD;
         }
     }
     [flow] S112 = {
         Work <|> genClearRealWork;
         Work > genClearRealWork;
         Work = {
-            S112_RbtHand01_UNLOAD > S112_RbtHand01_HOME;
-            S112_RbtHand01_UNLOAD > S112_PART01_REMOVE;
-            S112_RbtHand01_LOAD > S112_1stClamp01_ADV;
-            S112_RbtHand01_LOAD > S112_PART01_MOVE > S112_RbtWeld01_WELD > S112_RbtWeld01_HOME;
-            S112_1stClamp01_RET > S112_RbtHand01_UNLOAD > S112_Pin01_ADV;
-            S112_RbtWeld01_WELD > S112_2ndClamp01_RET > S112_1stClamp01_RET > S112_Pin01_RET > S112_Pin01_ADV;
-            S112_PART01_MOVE > S112_1stClamp01_ADV > S112_2ndClamp01_ADV > S112_RbtWeld01_WELD;
+            RbtHand01.UNLOAD > RbtHand01.HOME;
+            RbtHand01.UNLOAD > PART01.REMOVE;
+            RbtHand01.LOAD > "1stClamp01".ADV;
+            RbtHand01.LOAD > PART01.MOVE > RbtWeld01.WELD > RbtWeld01.HOME;
+            "1stClamp01".RET > RbtHand01.UNLOAD > Pin01.ADV;
+            RbtWeld01.WELD > "2ndClamp01".RET > "1stClamp01".RET > Pin01.RET > Pin01.ADV;
+            PART01.MOVE > "1stClamp01".ADV > "2ndClamp01".ADV > RbtWeld01.WELD;
         }
     }
     [flow] S113 = {
         Work <|> genClearRealWork;
         Work > genClearRealWork;
         Work = {
-            S113_RbtHand01_UNLOAD > S113_RbtHand01_HOME;
-            S113_RbtHand01_UNLOAD > S113_PART01_REMOVE;
-            S113_RbtHand01_LOAD > S113_1stClamp01_ADV;
-            S113_RbtHand01_LOAD > S113_PART01_MOVE > S113_RbtWeld01_WELD > S113_RbtWeld01_HOME;
-            S113_1stClamp01_RET > S113_RbtHand01_UNLOAD > S113_Pin01_ADV;
-            S113_RbtWeld01_WELD > S113_2ndClamp01_RET > S113_1stClamp01_RET > S113_Pin01_RET > S113_Pin01_ADV;
-            S113_PART01_MOVE > S113_1stClamp01_ADV > S113_2ndClamp01_ADV > S113_RbtWeld01_WELD;
+            RbtHand01.UNLOAD > RbtHand01.HOME;
+            RbtHand01.UNLOAD > PART01.REMOVE;
+            RbtHand01.LOAD > "1stClamp01".ADV;
+            RbtHand01.LOAD > PART01.MOVE > RbtWeld01.WELD > RbtWeld01.HOME;
+            "1stClamp01".RET > RbtHand01.UNLOAD > Pin01.ADV;
+            RbtWeld01.WELD > "2ndClamp01".RET > "1stClamp01".RET > Pin01.RET > Pin01.ADV;
+            PART01.MOVE > "1stClamp01".ADV > "2ndClamp01".ADV > RbtWeld01.WELD;
         }
     }
     [flow] S114 = {
         Work <|> genClearRealWork;
         Work > genClearRealWork;
         Work = {
-            S114_RbtHand01_UNLOAD > S114_RbtHand01_HOME;
-            S114_RbtHand01_UNLOAD > S114_PART01_REMOVE;
-            S114_RbtHand01_LOAD > S114_1stClamp01_ADV;
-            S114_RbtHand01_LOAD > S114_PART01_MOVE > S114_RbtWeld01_WELD > S114_RbtWeld01_HOME;
-            S114_1stClamp01_RET > S114_RbtHand01_UNLOAD > S114_Pin01_ADV;
-            S114_RbtWeld01_WELD > S114_2ndClamp01_RET > S114_1stClamp01_RET > S114_Pin01_RET > S114_Pin01_ADV;
-            S114_PART01_MOVE > S114_1stClamp01_ADV > S114_2ndClamp01_ADV > S114_RbtWeld01_WELD;
+            RbtHand01.UNLOAD > RbtHand01.HOME;
+            RbtHand01.UNLOAD > PART01.REMOVE;
+            RbtHand01.LOAD > "1stClamp01".ADV;
+            RbtHand01.LOAD > PART01.MOVE > RbtWeld01.WELD > RbtWeld01.HOME;
+            "1stClamp01".RET > RbtHand01.UNLOAD > Pin01.ADV;
+            RbtWeld01.WELD > "2ndClamp01".RET > "1stClamp01".RET > Pin01.RET > Pin01.ADV;
+            PART01.MOVE > "1stClamp01".ADV > "2ndClamp01".ADV > RbtWeld01.WELD;
         }
     }
     [jobs] = {
-        LineFlow_RBT117_LOAD = { LineFlow_RBT117.LOAD(_, _); }
-        LineFlow_RBT117_HOME = { LineFlow_RBT117.HOME(_, _); }
-        LineFlow_RBT117_UNLOAD = { LineFlow_RBT117.UNLOAD(_, _); }
-        S111_1stClamp01_RET = { S111_1stClamp01.RET(_, _); }
-        S111_1stClamp01_ADV = { S111_1stClamp01.ADV(_, _); }
-        S111_2ndClamp01_RET = { S111_2ndClamp01.RET(_, _); }
-        S111_2ndClamp01_ADV = { S111_2ndClamp01.ADV(_, _); }
-        S111_Pin01_RET = { S111_Pin01.RET(_, _); }
-        S111_Pin01_ADV = { S111_Pin01.ADV(_, _); }
-        S111_RbtHand01_LOAD = { S111_RbtHand01.LOAD(_, _); }
-        S111_RbtWeld01_WELD = { S111_RbtWeld01.WELD(_, _); }
-        S111_PART01_MOVE = { S111_PART01.MOVE(_, _); }
-        S111_RbtHand01_UNLOAD = { S111_RbtHand01.UNLOAD(_, _); }
-        S111_PART01_REMOVE = { S111_PART01.REMOVE(_, _); }
-        S111_RbtHand01_HOME = { S111_RbtHand01.HOME(_, _); }
-        S111_RbtWeld01_HOME = { S111_RbtWeld01.HOME(_, _); }
-        S112_1stClamp01_RET = { S112_1stClamp01.RET(_, _); }
-        S112_1stClamp01_ADV = { S112_1stClamp01.ADV(_, _); }
-        S112_2ndClamp01_RET = { S112_2ndClamp01.RET(_, _); }
-        S112_2ndClamp01_ADV = { S112_2ndClamp01.ADV(_, _); }
-        S112_Pin01_RET = { S112_Pin01.RET(_, _); }
-        S112_Pin01_ADV = { S112_Pin01.ADV(_, _); }
-        S112_RbtHand01_LOAD = { S112_RbtHand01.LOAD(_, _); }
-        S112_RbtWeld01_WELD = { S112_RbtWeld01.WELD(_, _); }
-        S112_PART01_MOVE = { S112_PART01.MOVE(_, _); }
-        S112_RbtHand01_UNLOAD = { S112_RbtHand01.UNLOAD(_, _); }
-        S112_PART01_REMOVE = { S112_PART01.REMOVE(_, _); }
-        S112_RbtHand01_HOME = { S112_RbtHand01.HOME(_, _); }
-        S112_RbtWeld01_HOME = { S112_RbtWeld01.HOME(_, _); }
-        S113_1stClamp01_RET = { S113_1stClamp01.RET(_, _); }
-        S113_1stClamp01_ADV = { S113_1stClamp01.ADV(_, _); }
-        S113_2ndClamp01_RET = { S113_2ndClamp01.RET(_, _); }
-        S113_2ndClamp01_ADV = { S113_2ndClamp01.ADV(_, _); }
-        S113_Pin01_RET = { S113_Pin01.RET(_, _); }
-        S113_Pin01_ADV = { S113_Pin01.ADV(_, _); }
-        S113_RbtHand01_LOAD = { S113_RbtHand01.LOAD(_, _); }
-        S113_RbtWeld01_WELD = { S113_RbtWeld01.WELD(_, _); }
-        S113_PART01_MOVE = { S113_PART01.MOVE(_, _); }
-        S113_RbtHand01_UNLOAD = { S113_RbtHand01.UNLOAD(_, _); }
-        S113_PART01_REMOVE = { S113_PART01.REMOVE(_, _); }
-        S113_RbtHand01_HOME = { S113_RbtHand01.HOME(_, _); }
-        S113_RbtWeld01_HOME = { S113_RbtWeld01.HOME(_, _); }
-        S114_1stClamp01_RET = { S114_1stClamp01.RET(_, _); }
-        S114_1stClamp01_ADV = { S114_1stClamp01.ADV(_, _); }
-        S114_2ndClamp01_RET = { S114_2ndClamp01.RET(_, _); }
-        S114_2ndClamp01_ADV = { S114_2ndClamp01.ADV(_, _); }
-        S114_Pin01_RET = { S114_Pin01.RET(_, _); }
-        S114_Pin01_ADV = { S114_Pin01.ADV(_, _); }
-        S114_RbtHand01_LOAD = { S114_RbtHand01.LOAD(_, _); }
-        S114_RbtWeld01_WELD = { S114_RbtWeld01.WELD(_, _); }
-        S114_PART01_MOVE = { S114_PART01.MOVE(_, _); }
-        S114_RbtHand01_UNLOAD = { S114_RbtHand01.UNLOAD(_, _); }
-        S114_PART01_REMOVE = { S114_PART01.REMOVE(_, _); }
-        S114_RbtHand01_HOME = { S114_RbtHand01.HOME(_, _); }
-        S114_RbtWeld01_HOME = { S114_RbtWeld01.HOME(_, _); }
+        S111.RbtHand01.LOAD = { S111_RbtHand01.LOAD(_, _); }
+        S112.RbtHand01.LOAD = { S112_RbtHand01.LOAD(_, _); }
+        S113.RbtHand01.LOAD = { S113_RbtHand01.LOAD(_, _); }
+        S114.RbtHand01.LOAD = { S114_RbtHand01.LOAD(_, _); }
+        S111."1stClamp01".ADV = { S111_1stClamp01.ADV(_, _); }
+        S112."1stClamp01".ADV = { S112_1stClamp01.ADV(_, _); }
+        S113."1stClamp01".ADV = { S113_1stClamp01.ADV(_, _); }
+        S114."1stClamp01".ADV = { S114_1stClamp01.ADV(_, _); }
+        S111."2ndClamp01".ADV = { S111_2ndClamp01.ADV(_, _); }
+        S112."2ndClamp01".ADV = { S112_2ndClamp01.ADV(_, _); }
+        S113."2ndClamp01".ADV = { S113_2ndClamp01.ADV(_, _); }
+        S114."2ndClamp01".ADV = { S114_2ndClamp01.ADV(_, _); }
+        S111.PART01.MOVE = { S111_PART01.MOVE(_, _); }
+        S112.PART01.MOVE = { S112_PART01.MOVE(_, _); }
+        S113.PART01.MOVE = { S113_PART01.MOVE(_, _); }
+        S114.PART01.MOVE = { S114_PART01.MOVE(_, _); }
+        S111."2ndClamp01".RET = { S111_2ndClamp01.RET(_, _); }
+        S112."2ndClamp01".RET = { S112_2ndClamp01.RET(_, _); }
+        S113."2ndClamp01".RET = { S113_2ndClamp01.RET(_, _); }
+        S114."2ndClamp01".RET = { S114_2ndClamp01.RET(_, _); }
+        S111.RbtWeld01.WELD = { S111_RbtWeld01.WELD(_, _); }
+        S112.RbtWeld01.WELD = { S112_RbtWeld01.WELD(_, _); }
+        S113.RbtWeld01.WELD = { S113_RbtWeld01.WELD(_, _); }
+        S114.RbtWeld01.WELD = { S114_RbtWeld01.WELD(_, _); }
+        LineFlow.RBT117.LOAD = { LineFlow_RBT117.LOAD(_, _); }
+        S111."1stClamp01".RET = { S111_1stClamp01.RET(_, _); }
+        S112."1stClamp01".RET = { S112_1stClamp01.RET(_, _); }
+        S113."1stClamp01".RET = { S113_1stClamp01.RET(_, _); }
+        S114."1stClamp01".RET = { S114_1stClamp01.RET(_, _); }
+        S111.RbtWeld01.HOME = { S111_RbtWeld01.HOME(_, _); }
+        S112.RbtWeld01.HOME = { S112_RbtWeld01.HOME(_, _); }
+        S113.RbtWeld01.HOME = { S113_RbtWeld01.HOME(_, _); }
+        S114.RbtWeld01.HOME = { S114_RbtWeld01.HOME(_, _); }
+        LineFlow.RBT117.UNLOAD = { LineFlow_RBT117.UNLOAD(_, _); }
+        S111.RbtHand01.UNLOAD = { S111_RbtHand01.UNLOAD(_, _); }
+        S112.RbtHand01.UNLOAD = { S112_RbtHand01.UNLOAD(_, _); }
+        S113.RbtHand01.UNLOAD = { S113_RbtHand01.UNLOAD(_, _); }
+        S114.RbtHand01.UNLOAD = { S114_RbtHand01.UNLOAD(_, _); }
+        S111.Pin01.RET = { S111_Pin01.RET(_, _); }
+        S112.Pin01.RET = { S112_Pin01.RET(_, _); }
+        S113.Pin01.RET = { S113_Pin01.RET(_, _); }
+        S114.Pin01.RET = { S114_Pin01.RET(_, _); }
+        S111.PART01.REMOVE = { S111_PART01.REMOVE(_, _); }
+        S112.PART01.REMOVE = { S112_PART01.REMOVE(_, _); }
+        S113.PART01.REMOVE = { S113_PART01.REMOVE(_, _); }
+        S114.PART01.REMOVE = { S114_PART01.REMOVE(_, _); }
+        LineFlow.RBT117.HOME = { LineFlow_RBT117.HOME(_, _); }
+        S111.Pin01.ADV = { S111_Pin01.ADV(_, _); }
+        S112.Pin01.ADV = { S112_Pin01.ADV(_, _); }
+        S113.Pin01.ADV = { S113_Pin01.ADV(_, _); }
+        S114.Pin01.ADV = { S114_Pin01.ADV(_, _); }
+        S111.RbtHand01.HOME = { S111_RbtHand01.HOME(_, _); }
+        S112.RbtHand01.HOME = { S112_RbtHand01.HOME(_, _); }
+        S113.RbtHand01.HOME = { S113_RbtHand01.HOME(_, _); }
+        S114.RbtHand01.HOME = { S114_RbtHand01.HOME(_, _); }
     }
     [interfaces] = {
         RUN = { LineFlow.STN_Buffer ~ S111.Work }
         END = { LineFlow.Unload ~ LineFlow.Unload }
+        CLEAR = { LineFlow.UnloadClear ~ LineFlow.UnloadClear }
     }
     [prop] = {
         [layouts] = {
@@ -140,12 +147,12 @@
             S114_RbtHand01 = (745, 826, 192, 77);
             S114_PART01 = (961, 730, 192, 77);
             S111_1stClamp01 = (427, 268, 192, 77);
-            S111_2ndClamp01 = (427, 379, 192, 77);
             S112_1stClamp01 = (427, 268, 192, 77);
-            S112_2ndClamp01 = (427, 379, 192, 77);
             S113_1stClamp01 = (427, 268, 192, 77);
-            S113_2ndClamp01 = (427, 379, 192, 77);
             S114_1stClamp01 = (427, 268, 192, 77);
+            S111_2ndClamp01 = (427, 379, 192, 77);
+            S112_2ndClamp01 = (427, 379, 192, 77);
+            S113_2ndClamp01 = (427, 379, 192, 77);
             S114_2ndClamp01 = (427, 379, 192, 77);
         }
     }
@@ -188,14 +195,14 @@
         S114_PART02; 
     [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
         S111_1stClamp01,
-        S111_2ndClamp01,
         S112_1stClamp01,
-        S112_2ndClamp01,
         S113_1stClamp01,
-        S113_2ndClamp01,
         S114_1stClamp01,
+        S111_2ndClamp01,
+        S112_2ndClamp01,
+        S113_2ndClamp01,
         S114_2ndClamp01; 
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.9]
+//DS Engine Version = [0.9.8.36]

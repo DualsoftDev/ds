@@ -69,7 +69,7 @@ module ConvertCPU =
                 let vm = v.TagManager :?> VertexMReal
                 yield vm.F3_VertexEndWithOutReal()    
 
-            if IsSpec (v, CallInFlow, AliasNotCare) && v.GetPureCall().Value.IsOperator then
+            if IsSpec (v, CallInFlow, AliasNotCare) then
                 let vc = v.TagManager :?> VertexMCall
                 yield vc.F4_CallOperatorEnd()
 
@@ -150,13 +150,13 @@ module ConvertCPU =
 
     let private funcCall(s:DsSystem) =
         let pureOperatorFuncs =
-            s.GetVertices().OfType<Call>().Where(fun c->c.IsPureOperator)
+            s.GetVertices().OfType<Call>().Where(fun c->c.IsOperator)
 
         let flowOperatorFuncs =
-            s.GetVertices().OfType<Call>().Where(fun c->c.IsOperator && not (c.IsPureOperator))
+            s.GetVertices().OfType<Call>().Where(fun c->c.IsOperator && not (c.IsOperator))
 
         let pureCommandFuncs =
-            s.GetVertices().OfType<Call>().Where(fun c->c.IsPureCommand)
+            s.GetVertices().OfType<Call>().Where(fun c->c.IsCommand)
                           
         [
 

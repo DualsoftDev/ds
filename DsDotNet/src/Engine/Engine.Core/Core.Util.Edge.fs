@@ -94,7 +94,7 @@ module EdgeModule =
 
         createEdge segment.Graph modelingEdgeInfo
 
-    let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name.QuoteOnDemand()} {e.EdgeType.ToText()} {e.Target.Name.QuoteOnDemand()}"
+    let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
 
     
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
@@ -184,7 +184,9 @@ module EdgeModule =
         let g = Graph<Vertex, Edge>()
        
         for vertex in graph.Islands do
-            g.Vertices.Add (vertex.GetPureReal():>Vertex) |>ignore
+            if vertex.GetPureCall().IsNone  //flow에서 조건으로 Call은 제외
+            then 
+                g.Vertices.Add (vertex.GetPureReal():>Vertex) |>ignore
 
         for edge in graph.Edges do
             if edge.Source.GetPureCall().IsNone  //flow에서 조건으로 Call은 제외

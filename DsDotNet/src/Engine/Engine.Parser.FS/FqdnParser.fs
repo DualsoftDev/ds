@@ -22,7 +22,7 @@ module FqdnParserModule =
             let parser = createParser (text)
             let ctx = parser.fqdn ()
             let ncs = ctx.Descendants<fqdnParser.NameComponentContext>()
-            [ for nc in ncs -> nc.GetText().DeQuoteOnDemand() ]
+            [ for nc in ncs -> nc.GetText() ]
         with
         | :? ParserException ->
             logWarn $"Failed to parse FQDN: {text}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"

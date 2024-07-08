@@ -80,11 +80,6 @@ module ModelTests1 =
             compare Program.DuplicatedEdgesText answerDuplicatedEdgesText
 
         [<Test>]
-        member __.``DuplicatedCallsText test`` () =
-            logInfo "=== DuplicatedCallsText"
-            compareExact Program.DuplicatedCallsText 
-
-        [<Test>]
         member __.``SplittedMRIEdgesText test`` () =
             logInfo "=== SplittedMRIEdgesText"
             compare Program.SplittedMRIEdgesText answerSplittedMRIEdgesText
@@ -133,7 +128,7 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [Aliases] test`` () =
-            compareExact ParserTest.Aliases
+            compare ParserTest.Aliases answerAliases
 
         [<Test>]
         member __.``Model component [Link and link aliases] test`` () =

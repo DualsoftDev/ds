@@ -96,14 +96,15 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     override x.EnterSystem(ctx: SystemContext) =
         match options.LoadedSystemName with
         | Some systemName ->
-            x.OptLoadedSystemName <- Some systemName
-            x.Rule2SystemNameDictionary.Add(ctx, systemName)
+            let sysName = systemName
+            x.OptLoadedSystemName <- Some sysName
+            x.Rule2SystemNameDictionary.Add(ctx, sysName)
         | _ -> ()
 
         match ctx.TryFindFirstChild<SysBlockContext>() with
         | Some _sysBlockCtx ->
             let name =
-                options.LoadedSystemName |? (ctx.systemName().GetText().DeQuoteOnDemand())
+                options.LoadedSystemName |? (ctx.systemName().GetText())
 
             
 
@@ -204,7 +205,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
          let devs = ctx.TryFindFirstChild<DeviceNameListContext>().Value.Descendants<DeviceNameContext>()
          devs.Iter(fun dev->
-                let loadedName = dev.CollectNameComponents().Combine()
+                let loadedName = dev.CollectNameComponents().CombineDequoteOnDemand()
                 let file = if file <> "" then file else $"dsLib/{loadedName}.ds"
                 let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
             
@@ -215,7 +216,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let fileSpecCtx = ctx.TryFindFirstChild<FileSpecContext>().Value
         let file = x.GetValidFile fileSpecCtx
         let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
-        let loadedName = ctx.CollectNameComponents().Combine()
+        let loadedName = ctx.CollectNameComponents().CombineDequoteOnDemand()
 
        
 
@@ -292,10 +293,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let ns = ctx.CollectNameComponents().ToFSharpList()
 
         { ContextType = ctx.GetType()
-          System = system
-          Flow = flow
-          Parenting = parenting
-          Names = ns }
+          System = if system.IsSome then Some (system.Value.DeQuoteOnDemand()) else None
+          Flow = if flow.IsSome then Some (flow.Value.DeQuoteOnDemand()) else None
+          Parenting = if parenting.IsSome then Some (parenting.Value.DeQuoteOnDemand()) else None
+          Names = ns.Select(fun s->s.DeQuoteOnDemand()).ToFSharpList() }
 
     /// parser rule context 에 대한 객체 기준의 정보를 얻는다.  DsSystem 객체, flow 객체, parenting 객체 등
     member x.GetObjectContextInformation(system: DsSystem, parserRuleContext: ParserRuleContext) =
@@ -320,13 +321,31 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let ci = x.GetContextInformation ctx
 
         option {
-            let! parentWrapper = x.TheSystem.TryFindParentWrapper(ci)
-            let graph = parentWrapper.GetGraph()
+            let parentWrapper = 
+                match x.TheSystem.TryFindParentWrapper(ci) with
+                | Some pw -> pw
+                | None -> failwithlog "ERROR"
 
+            let graph = parentWrapper.GetGraph()
+            
             match ci.Names with
-            | _ofn :: [ _ofrn ] -> // of(r)n: other flow (real) name
+            | [ realOrAlias ] -> 
+                return! graph.TryFindVertex(realOrAlias)
+
+            | _n1 :: [ _n2 ] -> // (other flow real) or (call.api)
                 return! graph.TryFindVertex(ci.Names.Combine())
-            | [ callOrAlias ] -> return! graph.TryFindVertex(callOrAlias)
+
+            | _n1 :: [ _n2; _n3]  ->  //other flow call
+                if parentWrapper.GetCore() :? Real 
+                    && parentWrapper.GetFlow().Name = _n1 
+                then 
+                    return! graph.TryFindVertex(ci.Names.Skip(1).Combine())
+                else 
+                    return! graph.TryFindVertex(ci.Names.Combine())
+
+            | _n1 :: [ _n2; _n3; _n4 ]  -> //other flow call
+                    return! graph.TryFindVertex(ci.Names.Combine())
+              
             | _ -> failwithlog "ERROR"
         }
 
@@ -416,19 +435,31 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let flow = pw.GetFlow()
                 tryFindCall flow.System vetexPath |> Option.isSome
 
-            let isAliasMnemonic (pw: ParentWrapper, mnemonic: string) =
+            let isAliasMnemonic (pw: ParentWrapper, aliasText: string) =
                 let flow = pw.GetFlow()
-                tryFindAliasDefWithMnemonic flow mnemonic |> Option.isSome
+                tryFindAliasDefWithMnemonic flow aliasText |> Option.isSome
 
+            let getJobName (pw: ParentWrapper, names: string list) =
+                match names.Length with
+                | 3 -> names.Combine() //OtherFlow.Call.Api
+                | 2 -> $"{pw.GetFlow().Name}.{names.Combine()}" // Dev.Api
+                | _ -> failwith "getJobName ERROR"
 
             let isJobName (pw, name) = tryFindJob pw name |> Option.isSome
 
             let isJobOrAlias (pw: ParentWrapper, Fqdn(vetexPath)) =
                 isJobName (pw.GetFlow().System, vetexPath.Last())
-                || isAliasMnemonic (pw, vetexPath.CombineQuoteOnDemand())
+                || isAliasMnemonic (pw, vetexPath.Combine())
+                
+            let createAlias(parent: ParentWrapper, names: string[] ) =
+                let flow = parent.GetFlow()
+                let aliasDef = tryFindAliasDefWithMnemonic flow ($"{names.Combine()}") |> Option.get
+                let exFlow = aliasDef.AliasKey.length() = 2
+                Alias.Create(names, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
+
 
             let candidates = candidateCtxs.Choose(getContainerChildPair)
-
+              
             let loop () =
                 for (optParent, ctxInfo) in candidates do
                     let parent = optParent
@@ -437,7 +468,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                        ||ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
                          && existing.IsNone
                     then
-                        let opCmd = ctxInfo.Names.Combine()
+                        let opCmd = ctxInfo.GetRawName().DeQuoteOnDemand()
                         match tryFindFunc system opCmd with
                         | Some func -> Call.Create(func, parent) |> ignore
                         | _ -> 
@@ -451,39 +482,39 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         match existing with
                         | Some v -> debugfn $"{v.Name} already exists.  Skip creating it."
                         | None ->
-                            let name = ctxInfo.Names.CombineQuoteOnDemand()
+                            let name = ctxInfo.Names.Combine()
                             match cycle, ctxInfo.Names with
-                            | 0, [ r ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
+                            | 0, [ real ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
+                                
                                 match parent.GetCore()  with
                                 | :? Flow as flow->
                                     if not <| isCallName (parent, ctxInfo.Names)  then
-                                        Real.Create(r, flow) |> ignore
+                                        Real.Create(real, flow) |> ignore
                                 |_ ->
                                     failwithf $"{name} needs Job define"
 
-                            | 1, [ c ] when not <| (isAliasMnemonic (parent, name)) ->
-                                match tryFindJob system c with
-                                | Some job ->
-                                      if job.DeviceDefs.any () then
-                                        Call.Create(job, parent) |> ignore
-                                | None -> ()
+                            | 1, _ when not <| (isAliasMnemonic (parent, name)) ->
+                                match tryFindJob system (getJobName (parent, ctxInfo.Names)) with
+                                | Some job -> 
+                                    Call.Create(job, parent) |> ignore
+                                | None -> () 
                             
-                            //| 1, realorFlow :: [ cr ] //when not <| isAliasMnemonic (parent, name)
-                            | 2, realorFlow :: [ cr ] 
-                                ->
-                                let otherFlowReal = tryFindReal system [ realorFlow; cr ] |> Option.get
-                                //RealOtherFlow.Create(otherFlowReal, parent) |> ignore
-                                Alias.Create(name, DuAliasTargetReal otherFlowReal, parent, false) |> ignore
-                                debugfn $"{realorFlow}.{cr} should already have been created."
+                            | 2, _x1 :: [ _x2 ]  ->
+                                  match parent.GetCore() with
+                                  | :? Flow as _myflow ->
+                                        let otherFlowReal = tryFindReal system [ _x1; _x2 ] |> Option.get
+                                        Alias.Create(ctxInfo.Names.ToArray(), DuAliasTargetReal otherFlowReal, parent, false) |> ignore
+                                  |_ when isAliasMnemonic (parent, name) -> 
+                                        createAlias(parent, ctxInfo.Names.ToArray()) 
+                                  |_ -> ()
 
-                            | 2, [ q ] when isAliasMnemonic (parent, name) ->
-                                let flow = parent.GetFlow()
-                                let aliasDef = tryFindAliasDefWithMnemonic flow (q.QuoteOnDemand()) |> Option.get
-                                let exFlow = aliasDef.AliasKey.length() = 2
-                                Alias.Create(q, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
-
+                            | 2, [ _ ]  when isAliasMnemonic (parent, name) ->
+                                 createAlias(parent, ctxInfo.Names.ToArray()) 
+                                
                             | _, [ _q ] -> ()
                             | _, _ofn :: [ _ofrn ] -> ()
+                            | _, _ofn :: [ _ofrn; _jobExpr ] -> ()
+                            | _, _ofn :: [ _otherFlow ;_ofrn; _jobExpr ] -> ()
                             | _ -> failwithlog "ERROR"
 
             loop
@@ -648,22 +679,29 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | :? Call as c -> DuAliasTargetCall c
                             | _ -> failwithlog "ERROR"
 
-                    //if call.IsNone then
-                    //    let job = flow.System.TryFindRealOtherSystem ([flow.Name;rc].ToArray())
-                    //    job |> Option.get |> DuAliasTargetRealExSystem
-                    //else
-                    //    call |> Option.get |> DuAliasTargetCall
 
                     | flowOrReal :: [ rc ] -> //FlowEx.R or Real.C
                         match tryFindFlow system flowOrReal with
                         | Some f -> f.Graph.TryFindVertex<Real>(rc) |> Option.get |> DuAliasTargetReal
                         | None ->
                             //tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
-                            let vertex = tryFindCall system ([ flow.Name ] @ ns) |> Option.get
+                            let vertex = tryFindCall system ([ flow.Name ] @ ns.Select(fun f->f.QuoteOnDemand())) |> Option.get
 
                             match vertex with
                             | :? Call as c -> DuAliasTargetCall c
                             | _ -> failwithlog "ERROR"
+
+                    | _real :: [ _dev; _api ] -> 
+                            //tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
+                            let vertex = 
+                                match tryFindCall system ([ flow.Name ] @ ns) with
+                                |   Some v -> v
+                                |   None -> failwithlog "ERROR"
+
+                            match vertex with
+                            | :? Call as c -> DuAliasTargetCall c
+                            | _ -> failwithlog "ERROR"
+
                     | _ -> failwithlog "ERROR"
 
 
@@ -677,7 +715,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             option {
                 let! flow = tryFindFlow system ci.Flow.Value
                 let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
-                let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).ToArray()
+                let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).Select(deQuoteOnDemand).ToArray()
                 let isOtherFlowRealAlias = aliasKeys.Length = 2   //flowA.Real1
                 let ad = AliasDef(aliasKeys, None, mnemonics, isOtherFlowRealAlias)
                 flow.AliasDefs.Add(aliasKeys, ad)
@@ -864,7 +902,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         for ctx in sysctx.Descendants<CommandBlockContext>() do
             createCommand ctx
-       
+
         for ctx in sysctx.Descendants<AliasListingContext>() do
             createAliasDef x ctx |> ignore
 

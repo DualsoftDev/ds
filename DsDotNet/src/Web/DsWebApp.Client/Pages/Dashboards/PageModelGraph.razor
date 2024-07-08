@@ -17,9 +17,14 @@
     {
         await base.OnInitializedAsync();
         // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
-        await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
-        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js");
-        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js");
+        var jss = new[]
+        {
+            "js/external/cytoscape/dagre.js",
+            "js/external/cytoscape/cytoscape.min.js",
+            "js/external/cytoscape/cytoscape-dagre.js",
+        };
+        foreach(var js in jss)
+            await JsDual.EvalExternalScript(js);
 
         /*
         * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)

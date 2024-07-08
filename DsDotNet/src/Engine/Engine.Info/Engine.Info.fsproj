@@ -23,7 +23,6 @@
 
     <ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-		<ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

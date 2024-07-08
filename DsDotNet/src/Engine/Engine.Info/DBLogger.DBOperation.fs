@@ -288,6 +288,7 @@ module internal DBLoggerImpl =
                                 param
                             ).Result
                         id
+                    | _ -> failwith "Multiple models found"
 
                 let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
 

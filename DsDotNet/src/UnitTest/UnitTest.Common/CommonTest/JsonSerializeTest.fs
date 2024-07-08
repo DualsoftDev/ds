@@ -1,51 +1,15 @@
 namespace T
 
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open Dual.UnitTest.Common.FS
 open NUnit.Framework
 open System
 open Newtonsoft.Json
-open System.Collections.Generic
 
 [<AutoOpen>]
 module JsonSerializeTestModule =
     type NewtonsoftJson = Newtonsoft.Json.JsonConvert
-
-
-    // https://stackoverflow.com/questions/25007001/json-net-does-not-preserve-primitive-type-information-in-lists-or-dictionaries-o
-    /// Serialize 할 때 type 정보를 같이 저장하는 converter.
-    /// - objFieldNames 에 포함된 object field 를 갖는 경우, 해당 object 의 type 정보를 같이 저장한다.
-    /// - objFieldNames 가 empty 이면 모든 field 에 대해 type 정보를 같이 저장한다.
-    type ObjTypePreservingConverter(objFieldNames: string seq) =
-        inherit JsonConverter()
-        let objFieldNames = objFieldNames |> HashSet
-
-        new() = ObjTypePreservingConverter([])
-
-
-        override this.CanRead = false
-
-        override this.CanConvert(objectType: Type) = objectType.IsPrimitive || objectType = typeof<Decimal>
-
-        override this.ReadJson(reader: JsonReader, objectType: Type, existingValue: obj, serializer: JsonSerializer) : obj =
-            raise (NotImplementedException())
-
-        override this.WriteJson(writer: JsonWriter, value: obj, serializer: JsonSerializer) =
-            if objFieldNames.IsNullOrEmpty() || objFieldNames.Contains(writer.Path) then
-                writer.WriteStartObject()
-                writer.WritePropertyName("$type", false)
-                match serializer.TypeNameAssemblyFormatHandling with
-                | TypeNameAssemblyFormatHandling.Full ->
-                    writer.WriteValue(value.GetType().AssemblyQualifiedName)
-                | _ ->
-                    writer.WriteValue(value.GetType().FullName)
-                writer.WritePropertyName("$value", false)
-                writer.WriteValue(value)
-                writer.WriteEndObject()
-            else
-                writer.WriteValue(value)
-
-
 
     /// DB log table 의 row 항목
     type MyORMLog(id: int, storageId: int, at: DateTime, value: obj) =

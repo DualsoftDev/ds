@@ -5,6 +5,7 @@ open Dual.UnitTest.Common.FS
 open NUnit.Framework
 open System
 open Newtonsoft.Json
+open System.Collections.Generic
 
 [<AutoOpen>]
 module JsonSerializeTestModule =
@@ -12,8 +13,15 @@ module JsonSerializeTestModule =
 
 
     // https://stackoverflow.com/questions/25007001/json-net-does-not-preserve-primitive-type-information-in-lists-or-dictionaries-o
-    type TypePreservingConverter() =
+    /// Serialize 할 때 type 정보를 같이 저장하는 converter.
+    /// - objFieldNames 에 포함된 object field 를 갖는 경우, 해당 object 의 type 정보를 같이 저장한다.
+    /// - objFieldNames 가 empty 이면 모든 field 에 대해 type 정보를 같이 저장한다.
+    type ObjTypePreservingConverter(objFieldNames: string seq) =
         inherit JsonConverter()
+        let objFieldNames = objFieldNames |> HashSet
+
+        new() = ObjTypePreservingConverter([])
+
 
         override this.CanRead = false
 
@@ -23,8 +31,7 @@ module JsonSerializeTestModule =
             raise (NotImplementedException())
 
         override this.WriteJson(writer: JsonWriter, value: obj, serializer: JsonSerializer) =
-            match serializer.TypeNameHandling with
-            | TypeNameHandling.All ->
+            if objFieldNames.IsNullOrEmpty() || objFieldNames.Contains(writer.Path) then
                 writer.WriteStartObject()
                 writer.WritePropertyName("$type", false)
                 match serializer.TypeNameAssemblyFormatHandling with
@@ -35,7 +42,7 @@ module JsonSerializeTestModule =
                 writer.WritePropertyName("$value", false)
                 writer.WriteValue(value)
                 writer.WriteEndObject()
-            | _ ->
+            else
                 writer.WriteValue(value)
 
 
@@ -71,7 +78,7 @@ module JsonSerializeTestModule =
         [<Test>]
         member _.``Newtonsoft Object SerializationTest with type handler`` () =
             let settings = new JsonSerializerSettings(TypeNameHandling = TypeNameHandling.All)
-            settings.Converters.Insert(0, new TypePreservingConverter())
+            settings.Converters.Insert(0, new ObjTypePreservingConverter([|"Value"|]))
             let objects = supportedObjects @ unsupportedObjects
             for o in objects do
                 let log = MyORMLog(1, 2, DateTime.Now, o)
@@ -81,4 +88,5 @@ module JsonSerializeTestModule =
                 log.StorageId === log2.StorageId
                 log.At === log2.At
                 log.Value === log2.Value
+                tracefn "%s" json
             ()

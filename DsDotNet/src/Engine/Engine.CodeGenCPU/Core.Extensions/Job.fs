@@ -11,7 +11,7 @@ module ConvertCpuJob =
     let getSM(j:Job) = j.System.TagManager:?> SystemManager
 
     type Job with
-        member j.ActionInExpr= 
+        member j.ActionInExpr = 
             let inExprs = j.DeviceDefs.Where(fun d-> d.ExistInput)
                                       .Select(fun d-> d.GetInExpr(j))
             if inExprs.any() then 

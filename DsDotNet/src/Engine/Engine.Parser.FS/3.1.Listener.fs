@@ -333,7 +333,15 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 return! graph.TryFindVertex(realOrAlias)
 
             | _n1 :: [ _n2 ] -> // (other flow real) or (call.api)
-                return! graph.TryFindVertex(ci.Names.Combine())
+                match graph.TryFindVertex(ci.Names.Combine()) with
+                | Some v -> return v
+                | None ->
+                    return! graph.Vertices.TryFind(fun v -> 
+                            match v with
+                            | :? Alias as a -> a.TargetWrapper.RealTarget()
+                                                .Value.ParentNPureNames.Combine() = ci.Names.Combine()
+                            |_-> false)
+                                        
 
             | _n1 :: [ _n2; _n3]  ->  //other flow call
                 if parentWrapper.GetCore() :? Real 
@@ -443,7 +451,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 match names.Length with
                 | 3 -> names.Combine() //OtherFlow.Call.Api
                 | 2 -> $"{pw.GetFlow().Name}.{names.Combine()}" // Dev.Api
-                | _ -> failwith "getJobName ERROR"
+                | _ -> failwith $"getJobName {names.Combine()} ERROR"
 
             let isJobName (pw, name) = tryFindJob pw name |> Option.isSome
 
@@ -451,11 +459,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 isJobName (pw.GetFlow().System, vetexPath.Last())
                 || isAliasMnemonic (pw, vetexPath.Combine())
                 
-            let createAlias(parent: ParentWrapper, names: string[] ) =
+            let createAlias(parent: ParentWrapper, name: string ) =
                 let flow = parent.GetFlow()
-                let aliasDef = tryFindAliasDefWithMnemonic flow ($"{names.Combine()}") |> Option.get
+                let aliasDef = tryFindAliasDefWithMnemonic flow name |> Option.get
                 let exFlow = aliasDef.AliasKey.length() = 2
-                Alias.Create(names, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
+                Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
 
 
             let candidates = candidateCtxs.Choose(getContainerChildPair)
@@ -503,13 +511,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                   match parent.GetCore() with
                                   | :? Flow as _myflow ->
                                         let otherFlowReal = tryFindReal system [ _x1; _x2 ] |> Option.get
-                                        Alias.Create(ctxInfo.Names.ToArray(), DuAliasTargetReal otherFlowReal, parent, false) |> ignore
+                                        Alias.Create(ctxInfo.Names.Combine("_"), DuAliasTargetReal otherFlowReal, parent, false) |> ignore
                                   |_ when isAliasMnemonic (parent, name) -> 
-                                        createAlias(parent, ctxInfo.Names.ToArray()) 
+                                        createAlias(parent, ctxInfo.Names.Combine("_")) 
                                   |_ -> ()
 
                             | 2, [ _ ]  when isAliasMnemonic (parent, name) ->
-                                 createAlias(parent, ctxInfo.Names.ToArray()) 
+                                 createAlias(parent, ctxInfo.Names.Combine("_")) 
                                 
                             | _, [ _q ] -> ()
                             | _, _ofn :: [ _ofrn ] -> ()
@@ -851,7 +859,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let createOperator(ctx:OperatorBlockContext) =
             ctx.operatorNameOnly() |> Seq.iter (fun fDef ->
                 let funcName = fDef.TryFindIdentifier1FromContext().Value
-                x.TheSystem.Functions.Add(OperatorFunction(funcName)) )
+                x.TheSystem.Functions.Add(OperatorFunction(funcName.DeQuoteOnDemand())) )
         
             let functionDefs = ctx.operatorDef()
             functionDefs |> Seq.iter (fun fDef ->
@@ -880,7 +888,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let createCommand(ctx:CommandBlockContext) =
             ctx.commandNameOnly() |> Seq.iter (fun fDef ->
                 let funcName = fDef.TryFindIdentifier1FromContext().Value
-                x.TheSystem.Functions.Add(CommandFunction(funcName)) )
+                x.TheSystem.Functions.Add(CommandFunction(funcName.DeQuoteOnDemand())) )
 
             let functionDefs = ctx.commandDef()
             functionDefs |> Seq.iter (fun fDef ->

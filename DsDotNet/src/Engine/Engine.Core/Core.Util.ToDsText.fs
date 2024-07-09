@@ -16,24 +16,13 @@ module internal ToDsTextModule =
     let mutable  pCooment = true //printComment
 
     let getName (v: Vertex) =
-        match v with    
-        | :? Real as r -> r.Name.QuoteOnDemand()
-        | :? Call as c -> c.NameForGraph
-        | :? Alias as a -> a.Name.QuoteOnDemand()
-        //| :? Alias as a ->
-        //        if a.IsOtherFlowRealAlias || a.TargetWrapper.GetTarget() :? Real
-        //        then
-        //            v.PureNames.Combine(".").QuoteOnDemand()    
-        //            //if v.PureNames.Length > 1
-        //            //then
-        //            //    v.PureNames.Combine(".")
-        //            //else 
-        //            //    v.PureNames.Combine(".").QuoteOnDemand()    
-
-        //        else
-        //            v.PureNames.Combine("_").QuoteOnDemand()
-
-        | _ -> failWithLog "ERROR"          
+        let name = 
+            match v with    
+            | :? Real as r -> r.Name.QuoteOnDemand()
+            | :? Call as c -> c.NameForGraph
+            | :? Alias as a -> a.Name.QuoteOnDemand()
+            | _ -> failWithLog "ERROR"          
+        name 
 
 
     type private MEI = ModelingEdgeInfo<Vertex>
@@ -106,9 +95,9 @@ module internal ToDsTextModule =
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (DuParentFlow flow) (indent+1)
-            let aliasDefExist = flow.AliasDefs.Values  //외부 Flow Alias 외에 하나라도 있으면
-                                    .Where(fun a-> a.AliasTexts.Count <> a.AliasTexts.Where(fun w->w.Contains('.')).length())
-                                    .any()     
+            let aliasDefExist = flow.AliasDefs.Values.any() 
+                                    //.Where(fun a-> a.AliasTexts.Count <> a.AliasTexts.Where(fun w->w.Contains('.')).length())
+                                    //.any()       //외부 Flow Alias 외에 하나라도 있으면
                                 
             if aliasDefExist then
                 let tab = getTab (indent+1)

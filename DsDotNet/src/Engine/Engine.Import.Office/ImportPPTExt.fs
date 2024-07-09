@@ -246,7 +246,7 @@ module ImportU =
                     match node.NodeType with
                     | REALExF -> // isOtherFlowRealAlias is false  (외부 플로우에 있을뿐 Or Alias가 아님)
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
-                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames, DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
+                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine("_"), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
                         node.UpdateTime(real)
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
@@ -294,7 +294,7 @@ module ImportU =
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                             node.UpdateTime(real)
                             Alias.Create(
-                                real.ParentNPureNames,
+                                $"""{real.ParentNPureNames.Combine("_")}_{node.AliasNumber}""" ,
                                 DuAliasTargetReal(real),
                                 DuParentFlow(flow), true
                             )
@@ -303,10 +303,9 @@ module ImportU =
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
                             node.UpdateTime(real)
-                            let aliasName =  $"""{call.DeviceNApi.Combine("_")}_{node.AliasNumber}""" 
 
                             Alias.Create(
-                                [|aliasName|],
+                                $"""{call.DeviceNApi.Combine("_")}_{node.AliasNumber}""" ,
                                 DuAliasTargetCall(segOrg :?> Call),
                                 DuParentReal(real), false
                             )
@@ -317,13 +316,13 @@ module ImportU =
                                 node.UpdateTime(rt)
                                 
                                 Alias.Create(
-                                    [| $"""{rt.Name}_{node.AliasNumber}""" |],
+                                    $"""{rt.Name}_{node.AliasNumber}""" ,
                                     DuAliasTargetReal(rt),
                                     DuParentFlow(flow) , false
                                 )
                             | :? Call as ct ->
                                 Alias.Create(
-                                    [| $"""{ct.Name}_{node.AliasNumber}""" |],
+                                    $"""{ct.Name}_{node.AliasNumber}""" ,
                                     DuAliasTargetCall(ct),
                                     DuParentFlow(flow) , false
                                 )

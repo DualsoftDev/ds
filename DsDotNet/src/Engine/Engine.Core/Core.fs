@@ -498,8 +498,6 @@ module CoreModule =
                 then [|x.Flow.Name; x.Name|]  //other flow
                 else [| x.Name |]             //my    flow
 
-
-
     type OperatorFunction with
         static member Create(name:string,  excuteCode:string) =
             let op = OperatorFunction(name)
@@ -548,7 +546,7 @@ module CoreModule =
 
 
     type Alias with
-        static member Create(names:string[], target:AliasTargetWrapper, parent:ParentWrapper, isOtherFlowRealAlias) =
+        static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isOtherFlowRealAlias) =
             let createAliasDefOnDemand(isOtherFlowReal) =
                 (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
                  * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
@@ -558,21 +556,26 @@ module CoreModule =
                     match target with
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs().ToArray()
                     | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow).ToArray()
+
+
+
                 let ads = flow.AliasDefs
-                let aliasText = names.Select(fun s->s.DeQuoteOnDemand()).Combine()
+                let aliasText = name.QuoteOnDemand()
                 match ads.TryFind(aliasKey) with
                 | Some ad -> ad.AliasTexts.AddIfNotContains(aliasText) |> ignore
                 | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|aliasText|], isOtherFlowReal))
-                aliasText
+                
+        
+            createAliasDefOnDemand(isOtherFlowRealAlias)
 
-            let aliasText = createAliasDefOnDemand(isOtherFlowRealAlias)
-            let alias = Alias(aliasText, target, parent, isOtherFlowRealAlias)
+
+            let alias = Alias(name, target, parent, isOtherFlowRealAlias)
             if parent.GetCore() :? Real
             then
                 target.RealTarget().IsNone
-                |> verifyM $"Vertex {names.Combine()} children type error"
+                |> verifyM $"Vertex {name} children type error"
 
-            parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{names.Combine()}]"
+            parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{name}]"
             alias
 
     type ApiItem with

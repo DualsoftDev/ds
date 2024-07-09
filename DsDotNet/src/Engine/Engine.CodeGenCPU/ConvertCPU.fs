@@ -67,11 +67,11 @@ module ConvertCPU =
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
                 let vm = v.TagManager :?> VertexMReal
-                yield vm.F3_VertexEndWithOutReal()    
+                yield vm.F3_RealEndInFlow()    
 
             if IsSpec (v, CallInFlow, AliasNotCare) then
                 let vc = v.TagManager :?> VertexMCall
-                yield vc.F4_CallOperatorEnd()
+                yield vc.F4_CallEndInFlow()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> VertexMCall

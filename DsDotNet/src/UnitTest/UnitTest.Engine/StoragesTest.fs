@@ -72,8 +72,8 @@ type StoragesTest() =
         let testCodeAdvance = """
         [sys] 한글시스템 = {
     [flow] "0+1" = {
-        "1".ADV.INTrue > "1" > "0-1_1";
-        한글 > "0-1"."1" > Work1;
+        한글 > "0-1_1" > Work1;
+        "1"."ADV(INTrue)" > "1" > "0-1_1_1";
         한글 = {
             "3".ADV; 
         }
@@ -81,7 +81,7 @@ type StoragesTest() =
             한글.ADV > 한글.RET > 한글_ADV_1;
         }
         [aliases] = {
-            "0-1"."1" = { "0-1_1"; }
+            "0-1"."1" = { "0-1_1"; "0-1_1_1"; "0-1_1_1"; "0-1_1"; }
             "1".한글.ADV = { 한글_ADV_1; }
         }
     }
@@ -91,33 +91,33 @@ type StoragesTest() =
         }
     }
     [jobs] = {
-        "0+1"."1".ADV.INTrue = { "0+1_1".ADV(_:Boolean:True, _); }
-        "0+1".한글.RET = { "0+1_한글".RET(_, _); }
-        "0+1".한글.ADV = { "0+1_한글".ADV(_, _); }
-        "0-1"."2".RET = { "0-1_2".RET(_, _); }
-        "0-1"."1".ADV = { "0-1_1".ADV(_, _); }
-        "0-1"."3".ADV = { "0-1_3".ADV(_, _); }
-        "0+1"."3".ADV = { "0+1_3".ADV(_, _); }
+        "0+1"."1"."ADV(INTrue)" = { "0+1_1".ADV(IB0.0:Boolean:True, -); }
+        "0+1".한글.RET = { "0+1_한글".RET(IB0.3, OB0.3); }
+        "0+1".한글.ADV = { "0+1_한글".ADV(IB0.2, OB0.2); }
+        "0-1"."2".RET = { "0-1_2".RET(IB0.5, OB0.5); }
+        "0-1"."1".ADV = { "0-1_1".ADV(IB0.4, OB0.4); }
+        "0-1"."3".ADV = { "0-1_3".ADV(IB0.6, OB0.6); }
+        "0+1"."3".ADV = { "0+1_3".ADV(IB0.1, OB0.1); }
     }
     [interfaces] = {
         Api1 = { "0+1"."1" ~ "0+1"."1" }
     }
     [buttons] = {
-        [a] = { AutoSelect(_, -) = { "0+1"; "0-1"; } }
-        [m] = { ManualSelect(_, -) = { "0+1"; "0-1"; } }
-        [d] = { DrivePushBtn(_, -) = { "0+1"; "0-1"; } }
-        [e] = { EmergencyBtn(_, -) = { "0+1"; "0-1"; } }
-        [p] = { PausePushBtn(_, -) = { "0+1"; "0-1"; } }
-        [c] = { ClearPushBtn(_, -) = { "0+1"; "0-1"; } }
+        [a] = { AutoSelect(M1001, -) = { "0+1"; "0-1"; } }
+        [m] = { ManualSelect(M1002, -) = { "0+1"; "0-1"; } }
+        [d] = { DrivePushBtn(M1003, -) = { "0+1"; "0-1"; } }
+        [e] = { EmergencyBtn(M1004, -) = { "0+1"; "0-1"; } }
+        [p] = { PausePushBtn(M1005, -) = { "0+1"; "0-1"; } }
+        [c] = { ClearPushBtn(M1006, -) = { "0+1"; "0-1"; } }
     }
     [lamps] = {
-        [a] = { AutoModeLamp(-, _) = {  } }
-        [m] = { ManualModeLamp(-, _) = {  } }
-        [d] = { DriveLamp(-, _) = {  } }
-        [e] = { ErrorLamp(-, _) = {  } }
-        [r] = { ReadyStateLamp(-, _) = {  } }
-        [i] = { IdleModeLamp(-, _) = {  } }
-        [o] = { OriginStateLamp(-, _) = {  } }
+        [a] = { AutoModeLamp(-, M1007) = {  } }
+        [m] = { ManualModeLamp(-, M1008) = {  } }
+        [d] = { DriveLamp(-, M1009) = {  } }
+        [e] = { ErrorLamp(-, M1010) = {  } }
+        [r] = { ReadyStateLamp(-, M1011) = {  } }
+        [i] = { IdleModeLamp(-, M1012) = {  } }
+        [o] = { OriginStateLamp(-, M1013) = {  } }
     }
     [prop] = {
         [layouts] = {
@@ -139,7 +139,7 @@ type StoragesTest() =
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.36]
+//DS Engine Version = [0.9.9.1]
             """
         check testCodeAdvance
         

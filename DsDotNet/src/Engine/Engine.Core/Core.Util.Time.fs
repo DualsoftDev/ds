@@ -45,8 +45,8 @@ module TimeModule =
             alias.Time <- Some 0
             alias
 
-        let dummySrc = getDummyAliasTarget [|"dummySrc"|]  (srcs.First())
-        let dummyTgt = getDummyAliasTarget [|"dummyTgt"|]  (tgts.First())
+        let dummySrc = getDummyAliasTarget "dummySrc"  (srcs.First())
+        let dummyTgt = getDummyAliasTarget "dummyTgt"  (tgts.First())
         let dummyEdges = HashSet<Edge>()
 
         for src in srcs do

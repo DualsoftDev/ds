@@ -72,7 +72,7 @@ module ModelTests1 =
         [<Test>]
         member __.``AdoptoedValidText test`` () =
             logInfo "=== AdoptoedValidText"
-            compareExact Program.AdoptoedValidText
+            compare Program.AdoptoedValidText answerAdoptoedValidText
 
         [<Test>]
         member __.``DuplicatedEdgesText test`` () =

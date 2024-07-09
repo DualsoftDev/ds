@@ -3,9 +3,9 @@
         "SIDE LH" |> LH_LOAD;
         "SIDE RH" |> RH_LOAD;
         FLR |> "FLR _LOAD";
-        SIDE_RH.END.INTrue > BB;
-        SIDE_LH.END.INTrue > BB;
-        Floor.END.INTrue > BB;
+        SIDE_RH."END(INTrue)" > BB;
+        SIDE_LH."END(INTrue)" > BB;
+        Floor."END(INTrue)" > BB;
         FLR |> RUN > FLR => "FLR _LOAD";
         START => RUN > "SIDE LH" => LH_LOAD;
         RUN > "SIDE RH" => RH_LOAD;
@@ -27,17 +27,20 @@
         UNLOAD |> BC4;
         UNLOAD => AUTOCLEAR;
         MOVING > "DOOR RH" => BC1 => BC2 => BC3 => BC4;
-        FlowA.BB > MOVING => "DOOR LH" => BC1;
-        FlowA.BB => BR => BC1;
+        FlowA_BB > MOVING => "DOOR LH" => BC1;
+        FlowA_BB => BR => BC1;
+        [aliases] = {
+            FlowA.BB = { FlowA_BB; }
+        }
     }
     [jobs] = {
         FlowA.SIDE_RH.RUN = { FlowA_SIDE_RH.RUN(_, _); }
-        FlowA.SIDE_RH.END.INTrue = { FlowA_SIDE_RH.END(_, _); }
+        FlowA.SIDE_RH."END(INTrue)" = { FlowA_SIDE_RH.END(_, _); }
         FlowA.Floor.RUN = { FlowA_Floor.RUN(_, _); }
-        FlowA.Floor.END.INTrue = { FlowA_Floor.END(_, _); }
+        FlowA.Floor."END(INTrue)" = { FlowA_Floor.END(_, _); }
         FlowA.SIDE_RH.CLEAR = { FlowA_SIDE_RH.CLEAR(_, _); }
         FlowA.Floor.CLEAR = { FlowA_Floor.CLEAR(_, _); }
-        FlowA.SIDE_LH.END.INTrue = { FlowA_SIDE_LH.END(_, _); }
+        FlowA.SIDE_LH."END(INTrue)" = { FlowA_SIDE_LH.END(_, _); }
         FlowA.SIDE_LH.CLEAR = { FlowA_SIDE_LH.CLEAR(_, _); }
         FlowA.SIDE_LH.RUN = { FlowA_SIDE_LH.RUN(_, _); }
     }
@@ -62,4 +65,4 @@
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.36]
+//DS Engine Version = [0.9.9.1]

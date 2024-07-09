@@ -100,7 +100,7 @@ module ParserUtilityModule =
 
             option {
                 let! ctx = x.TryFindFirstChild<Identifier1Context>(false, exclude = exclude)
-                return ctx.GetText().DeQuoteOnDemand()
+                return ctx.GetText()
             }
 
         member x.TryFindNameComponentContext() : IParseTree option =
@@ -119,8 +119,8 @@ module ParserUtilityModule =
         member x.TryGetName() : string option =
             option {
                 let! idCtx = x.TryFindNameComponentContext()
-                let name = idCtx.GetText().DeQuoteOnDemand()
-                return name
+                let name = idCtx.GetText()
+                return name.DeQuoteOnDemand()
             }
 
         member x.TryCollectNameComponents() : string[] option = // :Fqdn
@@ -129,20 +129,22 @@ module ParserUtilityModule =
 
                 if  idCtx :? Identifier1Context 
                 then
-                    return [| idCtx.GetText().DeQuoteOnDemand() |]
+                    return [| idCtx.GetText() |]
                 else
-                    let! name = x.TryGetName()
-                    return fwdParseFqdn(name).Select(fun f->f.DeQuoteOnDemand()).ToArray()
+                    let name = idCtx.GetText()
+                    return fwdParseFqdn(name).ToArray()
             }
 
         member x.CollectNameComponents() : string[] =
-            x.TryCollectNameComponents() |> Option.get
+            match x.TryCollectNameComponents() with
+            | Some names -> names.Select(deQuoteOnDemand).ToArray()
+            | None -> failWithLog "Failed to collect name components"
 
         member x.TryGetSystemName() =
             option {
                 let! ctx = x.TryFindFirstAscendant<SystemContext>(true)
                 let! names = ctx.TryCollectNameComponents()
-                return names.CombineDequoteOnDemand()
+                return names.Combine()
             }
 
     type ParserRuleContext with

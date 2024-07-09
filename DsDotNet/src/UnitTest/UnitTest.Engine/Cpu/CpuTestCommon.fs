@@ -31,7 +31,7 @@ module CpuTestUtil =
         let vertices          = sys.GetVertices()
         let flow              = sys.Flows.OrderBy(fun d->d.Name).First()
         let realInFlow        = flow.Graph.Vertices.OrderBy(fun d->d.Name).OfType<Real>().First()  
-        let callInReal        = flow.Graph.Vertices.OrderBy(fun d->d.Name).OfType<Call>().First()  
+        let callInReal        = realInFlow.Graph.Vertices.OrderBy(fun d->d.Name).OfType<Call>().First()  
 
         let aliasCallInReal   = realInFlow.Graph.Vertices.OfType<Alias>().First()       
         let aliasRealInFlow   = flow.Graph.Vertices.OfType<Alias>().First()  

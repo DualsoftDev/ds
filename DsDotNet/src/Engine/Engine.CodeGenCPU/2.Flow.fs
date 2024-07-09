@@ -52,7 +52,7 @@ type VertexManager with
         (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이
 
 
-    member v.F3_VertexEndWithOutReal() =
+    member v.F3_RealEndInFlow() =
         let sets =
             match v.Vertex  with
             | :? Alias   as rf -> rf.V.Vertex.GetPure().V.ET.Expr
@@ -62,7 +62,7 @@ type VertexManager with
         let rsts = v._off.Expr
         (sets, rsts) --| (v.ET, getFuncName())
 
-    member v.F4_CallOperatorEnd() =
+    member v.F4_CallEndInFlow() =
         let sets =
             let callExpr = v._sim.Expr <&&> v.SF.Expr <&&> !@v.RF.Expr
             match v.Vertex  with
@@ -71,12 +71,11 @@ type VertexManager with
                 then
                      call.VC.CallOperatorValue.Expr  <||> callExpr
                 else 
-                     callExpr
+                     call.End  <||> callExpr
             | _ ->
                 failwithlog "Error"
              
-        let rsts = v._off.Expr
-        (sets, rsts) --| (v.ET, getFuncName())
+        (sets, v._off.Expr) --| (v.ET, getFuncName())
 
     member v.F5_HomeCommand() =
         let real = v.Vertex :?> Real

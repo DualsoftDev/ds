@@ -28,4 +28,4 @@ type Spec02_FlowStatement() =
     [<Test>]
     member __.``F3 VertexEnd WithOutReal`` () =
         for v in t.AbleVertexInFlows do
-            v.V.F3_VertexEndWithOutReal() |> doCheck 
+            v.V.F3_RealEndInFlow() |> doCheck 

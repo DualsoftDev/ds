@@ -3,13 +3,17 @@
         UnloadClear_1 |> clear;
         UnloadClear_1 |> Unload;
         UnloadClear_1 => clear;
-        S113.Work => S114.Work => Unload;
-        STN_Buffer => S111.Work => S112.Work => S113.Work;
+        S113_Work => S114_Work => Unload;
+        STN_Buffer => S111_Work => S112_Work => S113_Work;
         Unload = {
             RBT117.LOAD > RBT117.UNLOAD > RBT117.HOME;
         }
         UnloadClear; 
         [aliases] = {
+            S111.Work = { S111_Work; }
+            S112.Work = { S112_Work; }
+            S113.Work = { S113_Work; }
+            S114.Work = { S114_Work; }
             UnloadClear = { UnloadClear_1; }
         }
     }
@@ -205,4 +209,4 @@
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.36]
+//DS Engine Version = [0.9.9.1]

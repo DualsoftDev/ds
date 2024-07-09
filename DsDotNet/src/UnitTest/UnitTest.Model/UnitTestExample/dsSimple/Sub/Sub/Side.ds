@@ -3,10 +3,16 @@
         UnloadClear |> clear;
         UnloadClear |> Unload;
         UnloadClear => clear;
-        S711.Work > S713.Work => S714.Work => Unload;
-        STN_Buffer => S711.Work => S712.Work => S714.Work;
+        S711_Work > S713_Work => S714_Work => Unload;
+        STN_Buffer => S711_Work => S712_Work => S714_Work;
         Unload = {
             RBT717.LOAD > RBT717.UNLOAD > RBT717.HOME;
+        }
+        [aliases] = {
+            S711.Work = { S711_Work; }
+            S712.Work = { S712_Work; }
+            S713.Work = { S713_Work; }
+            S714.Work = { S714_Work; }
         }
     }
     [flow] S711 = {
@@ -203,4 +209,4 @@
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.36]
+//DS Engine Version = [0.9.9.1]

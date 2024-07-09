@@ -180,9 +180,9 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier234: (identifier2 | identifier3 | identifier4);
     identifier123CNF: identifier123 (COMMA identifier123)*;
 
+    identifierOperatorName : identifier1 ;
     identifierCommandName : identifier1 ;
     identifierCommandPara : identifier1 ;  //추후 구현 (파라메터 인자추가)
-    identifierOperatorName : identifier1 ;
 
     identifierOperator: '#'identifierOperatorName;
     identifierCommand: identifierCommandName '(' identifierCommandPara? ')';

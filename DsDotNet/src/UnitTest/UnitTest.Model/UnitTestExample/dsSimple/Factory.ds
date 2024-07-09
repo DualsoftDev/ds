@@ -5,11 +5,11 @@
         AssemblyShop |> UNLOAD;
         AssemblyShop |> PaintShopBuffer2;
         AssemblyShop |> PaintShopBuffer1;
-        START.ON.INTrue > PressShop => BodyShop1Buffer => BodyShop1;
+        START."ON(INTrue)" > PressShop => BodyShop1Buffer => BodyShop1;
         PressShop_1 => BodyShop2Buffer => BodyShop2;
-        Paint.END.INTrue > AssemblyShop => UNLOAD;
-        Body2.END.INTrue > PaintShopBuffer2;
-        Body1.END.INTrue > PaintShopBuffer1;
+        Paint."END(INTrue)" > AssemblyShop => UNLOAD;
+        Body2."END(INTrue)" > PaintShopBuffer2;
+        Body1."END(INTrue)" > PaintShopBuffer1;
         PaintShopBuffer1 = {
             Body1.UNLOAD > Paint.START;
         }
@@ -30,14 +30,14 @@
         }
     }
     [jobs] = {
-        Flow.START.ON.INTrue = { Flow_START.ON(M00003, -); }
-        Flow.Body1.END.INTrue = { Flow_Body1.END(M00000, -); }
-        Flow.Paint.END.INTrue = { Flow_Paint.END(M00002, -); }
+        Flow.START."ON(INTrue)" = { Flow_START.ON(M00003, -); }
+        Flow.Body1."END(INTrue)" = { Flow_Body1.END(M00000, -); }
+        Flow.Paint."END(INTrue)" = { Flow_Paint.END(M00002, -); }
         Flow.Body1.START = { Flow_Body1.START(P00000, P00040); }
         Flow.Body1.UNLOAD = { Flow_Body1.UNLOAD(P00001, P00041); }
         Flow.Paint.START = { Flow_Paint.START(P00004, P00044); }
         Flow.Paint.UNLOAD = { Flow_Paint.UNLOAD(P00005, P00045); }
-        Flow.Body2.END.INTrue = { Flow_Body2.END(M00001, -); }
+        Flow.Body2."END(INTrue)" = { Flow_Body2.END(M00001, -); }
         Flow.Body2.START = { Flow_Body2.START(P00002, P00042); }
         Flow.Body2.UNLOAD = { Flow_Body2.UNLOAD(P00003, P00043); }
     }
@@ -74,4 +74,4 @@
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.8.36]
+//DS Engine Version = [0.9.9.1]

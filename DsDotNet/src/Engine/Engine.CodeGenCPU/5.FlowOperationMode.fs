@@ -15,11 +15,14 @@ type Flow with
 
         (set, rst) --| (f.iop, getFuncName())
 
-    member f.O2_AutoOperationMode() =
+    member f.O2_AutoOperationMode(isActive:bool) =
         let set = f.AutoExpr 
         let rst = !@f.r_st.Expr
-        
-        (set, rst) --| (f.aop, getFuncName())
+        if isActive
+        then 
+            (set, rst) --| (f.aop, getFuncName())
+        else
+            (f._on.Expr, f._off.Expr) --| (f.aop, getFuncName())
 
     member f.O3_ManualOperationMode () =
         let set = f.ManuExpr

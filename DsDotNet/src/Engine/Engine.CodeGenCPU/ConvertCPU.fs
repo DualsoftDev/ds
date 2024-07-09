@@ -111,17 +111,17 @@ module ConvertCPU =
 
 
     ///flow 별 운영모드 적용
-    let private applyOperationModeSpec(f:Flow) =
+    let private applyOperationModeSpec(f:Flow) isActive =
         [
             yield f.O1_IdleOperationMode()
-            yield f.O2_AutoOperationMode()
+            yield f.O2_AutoOperationMode(isActive)
             yield f.O3_ManualOperationMode()
             yield f.ST1_OriginState()
-            yield f.ST2_ReadyState()
+            yield f.ST2_ReadyState(isActive)
             yield f.ST3_GoingState()
             yield f.ST4_EmergencyState()
             yield f.ST5_ErrorState()
-            yield f.ST6_DriveState()
+            yield f.ST6_DriveState(isActive)
             yield f.ST7_TestState()
         ]
 
@@ -241,7 +241,7 @@ module ConvertCPU =
             sys.GenerationRealActionMemory()
             
         [
-            if RuntimeDS.Package = PCSIM
+            if RuntimeDS.Package.IsPackageSIM()
             then
                 yield! sys.Y1_SystemSimulationForFlow()
 
@@ -259,7 +259,7 @@ module ConvertCPU =
 
             //Flow 적용
             for f in sys.Flows do
-                yield! applyOperationModeSpec f
+                yield! applyOperationModeSpec f isActive
                 yield! applyFlowMonitorSpec f
 
             //Vertex 적용

@@ -20,7 +20,7 @@ type VertexManager with
         [
             let running = v.MM.Expr <&&> !@call.End <&&> !@iop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
-            if RuntimeDS.Package.IsPackageSIM()   
+            if RuntimePackage.PCSIM = RuntimeDS.Package   
             then
                 yield(vOff, rst) ==| (v.ErrOnTimeOver , getFuncName())
             else 

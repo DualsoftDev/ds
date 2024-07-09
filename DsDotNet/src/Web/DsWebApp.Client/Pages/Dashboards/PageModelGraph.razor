@@ -13,16 +13,21 @@
 <button id="enable_zoom">Enable zoom</button>
 <button id="hide">Hide selection</button>
 <button id="show">Show</button>
+<DxButton Text="Start MONITOR" Click="@(async () => await startMonitorAsync())" Visible="@(_hubSubscription == null)"/>
+<DxButton Text="Stop MONITOR" Click="@(async () => await stopMonitorAsync())" Visible="@(_hubSubscription != null)" />
+
 <div id="cy"></div>
 
 @code {
     HubConnection _hubConnection;
+    IDisposable _hubSubscription;
     ORMLoggerDB _logDb;
     Dictionary<string, CyVertex> _nodeDic;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/db").StartHubAsync();
         var result = await Http.GetRestResultAsync<string>($"/api/info/logdb-base");
         result.Iter(
             logDbBaseJson =>
@@ -33,7 +38,7 @@
             },
             err => Console.Error.WriteLine($"Failed to get logdb-base: {err}")
         );
-        
+
 
         // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
         var jss = new[]
@@ -45,9 +50,9 @@
         foreach(var js in jss)
             await JsDual.EvalExternalScript(js);
 
-        /*
+         /*
          * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
-         */
+        */
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
         var data = await Http.GetRestResultAsync<string>($"/api/model/graph");
@@ -75,44 +80,82 @@
                     },
                     async err => await JsDual.Alert($"Failed to get data: {err}")
                 );
-
-                _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/db").StartHubAsync();
-                _hubConnection.On<string>(SK.S2CNLogChanged,
-                    async logJson =>
-                    {
-                        Console.WriteLine($"Got message from hub");
-
-                        var log = ORMLog.Deserialize(logJson);
-                        var vwLog = _logDb.ToView(log);
-                        var fqdn = vwLog.Fqdn;
-                        if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
-                        {
-                            var status = vwLog.TagKindName switch
-                            {
-                                "VertexTag.ready" => "R",
-                                "VertexTag.going" => "G",
-                                "VertexTag.finish" => "F",
-                                "VertexTag.homing" => "H",
-                                _ => ""
-                            };
-                            await JsDual.EvalOnGlobalModule($@"
-                            cy.$('#{fqdn}')
-                                .removeClass('R')
-                                .removeClass('G')
-                                .removeClass('F')
-                                .removeClass('H')
-                                .addClass('{status}')"
-                            );
-                            Console.WriteLine($"Log change detected: {vwLog.Id}.");
-                        }
-                        else
-                        {
-                            Console.Error.WriteLine($"Failed to find fqdn: {fqdn}");
-                        }
-                    });
-
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
+        );
+    }
+
+    IDisposable listenHub()
+    {
+        return _hubConnection.On<string>(SK.S2CNLogChanged,
+            async logJson =>
+            {
+                try
+                {
+                    var log = ORMLog.Deserialize(logJson);
+                    var vwLog = _logDb.ToView(log);
+                    var fqdn = vwLog.Fqdn;
+                    if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
+                        await applyLogAsync(vwLog);
+                    else
+                        throw new Exception($"Failed to find fqdn: {fqdn}");
+
+                }
+                catch (Exception e)
+                {
+                    await JsDual.Alert(e.Message);
+                    throw;
+                }
+            });
+    }
+
+    async Task clearStatusAsync()
+    {
+        foreach(var n in _nodeDic.Values)
+        {
+            Console.WriteLine($"Clearing status of {n.id}: cy.$('#{n.id}')");
+            await JsDual.EvalOnGlobalModule($@"cy.$('#{n.id}')
+                .removeClass('R')
+                .removeClass('G')
+                .removeClass('F')
+                .removeClass('H')
+                .addClass('U')"
+            );
+        }
+    }
+
+    async Task stopMonitorAsync()
+    {
+        await Task.Yield();
+        _hubSubscription?.Dispose();
+        _hubSubscription = null;
+    }
+    
+    async Task startMonitorAsync()
+    {
+        await clearStatusAsync();
+        _hubSubscription?.Dispose();
+        _hubSubscription = listenHub();
+    }
+    async Task applyLogAsync(ORMVwLog vwLog)
+    {
+        var status = vwLog.TagKindName switch
+        {
+            "VertexTag.ready" => "R",
+            "VertexTag.going" => "G",
+            "VertexTag.finish" => "F",
+            "VertexTag.homing" => "H",
+            _ => ""
+        };
+        Console.WriteLine($"cy.$(#'{vwLog.Fqdn}').classes() : added {status}");
+        await JsDual.EvalOnGlobalModule($@"
+            cy.$('#{vwLog.Fqdn}')
+                .removeClass('R')
+                .removeClass('G')
+                .removeClass('F')
+                .removeClass('H')
+                .removeClass('U')
+                .addClass('{status}')"
         );
     }
 
@@ -134,7 +177,7 @@
         }
     }
 
-    string _snippet = @"
+    readonly string _snippet = @"
 // click event: node 및 edge 둘다 적용
 // node 만 적용하려면 cy.on('click', 'node', evt => ...  의 형태로 작성
 cy.on('click', evt => {
@@ -279,12 +322,13 @@ $('#reset_zoom').click(() => {
 });
 ";
 
-    string _runtimeStyles = @"
+    readonly string _runtimeStyles = @"
     cy.style()
         .selector('node.Call.R').style('background-color', 'grey')
         .selector('node.Call.G').style('background-color', 'green')
         .selector('node.Call.F').style('background-color', 'blue')
         .selector('node.Call.H').style('background-color', 'yellow')
+        .selector('node.Call.U').style('background-color', 'grey').style('opacity', 0.5)
 ";
 
 
@@ -305,6 +349,3 @@ $('#reset_zoom').click(() => {
     }
  </style>
  
-        
-@* 
-*@

@@ -4,6 +4,7 @@ open System
 open System.IO
 open Newtonsoft.Json
 open Dual.Common.Core.FS
+open System.Reactive.Linq
 
 [<AutoOpen>]
 module CommonAppSettings =
@@ -14,13 +15,15 @@ module CommonAppSettings =
     #endif
 
 
-type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, syncIntervalSeconds:int) = 
+type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, syncIntervalMilliSeconds:int) = 
+    member val SyncInterval = Observable.Interval(TimeSpan.FromMilliseconds(syncIntervalMilliSeconds))
+    member val SyncIntervalMilliSeconds = syncIntervalMilliSeconds
     member x.ConnectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, x.ConnectionPath)}"
     member val ConnectionPath = sqlitePath with get, set
-    member val SyncIntervalSeconds = syncIntervalSeconds with get, set
     member val DbWriter = dbWriter with get, set
     member val ModelFilePath = modelFilePath with get, set
     member val ModelId = -1 with get, set
+
 /// 여러 application(.exe) 들 간의 공유할 정보
 /// "CommonAppSettings.json" 파일
 type DSCommonAppSettings(loggerDBSettings:LoggerDBSettings) =

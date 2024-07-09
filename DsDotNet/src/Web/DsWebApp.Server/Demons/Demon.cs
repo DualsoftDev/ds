@@ -1,23 +1,15 @@
-using DevExpress.XtraPrinting.Native.Lines;
-
-using DsWebApp.Server.Hubs;
-
 using Engine.Runtime;
 
 using IO.Core;
-
-using static Engine.Core.TagWebModule;
 using static Engine.Core.InfoPackageModule;
 
 using SK = DsWebApp.Shared.SK;
 using static Engine.Core.CoreModule;
 using Engine.Info;
 using Engine.Core;
-using static Engine.Core.Interface;
-using Microsoft.Extensions.Options;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using static Engine.Info.DBLoggerORM;
+using System.ServiceModel.Channels;
+using Dual.Common.Base.FS;
+using Newtonsoft.Json;
 
 namespace DsWebApp.Server.Demons;
 public partial class Demon : BackgroundService
@@ -112,6 +104,12 @@ public partial class Demon : BackgroundService
         try
         {
             await executeAsyncHelper(ct);
+            var connStr = _serverGlobal.DsCommonAppSettings.LoggerDBSettings.ConnectionString;
+            LoggerDB.StartLogMonitor(connStr, 100, ct);
+            LoggerDB.DBLogSubject.Subscribe(log =>
+            {
+                _hubContextDb.Clients.All.SendAsync(SK.S2CNLogChanged, log.Serialize());
+            });
         }
         catch (Exception ex)
         {

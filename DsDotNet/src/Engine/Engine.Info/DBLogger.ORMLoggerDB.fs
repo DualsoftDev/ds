@@ -9,6 +9,7 @@ open System.Data
 open Dapper
 open Dual.Common.Db
 open System.Reactive.Subjects
+open System.Threading
 
 [<AutoOpen>]
 module LoggerDB =
@@ -30,7 +31,32 @@ module LoggerDB =
         member val Storages = logDbBase.Storages |> map(fun s -> s.Id, s) |> Tuple.toDictionary
         member val TagKinds = logDbBase.TagKinds |> map(fun t -> t.Id, t) |> Tuple.toDictionary
 
+    /// db 의 log table 을 주기적으로 모니터링하여 추가된 row 가 존재하면 DBLogSubject 에 log 를 발행
+    /// db 의 log table 을 주기적으로 모니터링하여 추가된 row 가 존재하면 DBLogSubject 에 log 를 발행
+    let StartLogMonitor(connStr: string, sleepMs:int, cancellationToken:CancellationToken) =
+        let monitorTask () =
+            async {
+                let conn = createConnectionWith(connStr)
+                let lastRow = conn.QueryFirstOrDefault<ORMLog>($"SELECT * FROM {Tn.Log} ORDER BY Id DESC LIMIT 1")
+                let mutable lastId = if isItNull(lastRow) then -1 else lastRow.Id
+                conn.Dispose()
 
+                while not cancellationToken.IsCancellationRequested do
+                    try
+                        use conn = createConnectionWith(connStr)
+                        let! logs = conn.QueryAsync<ORMLog>($"SELECT * FROM [{Tn.Log}] WHERE id > {lastId};") |> Async.AwaitTask
+                        for log in logs do
+                            DBLogSubject.OnNext(log)
+                            lastId <- log.Id
+
+                        do! Async.Sleep(sleepMs) // 5초마다 체크
+                    with ex ->
+                        printfn "Exception: %s" ex.Message
+                        do! Async.Sleep(10000) // 예외 발생 시 10초 대기
+            }
+        
+        Async.Start(monitorTask(), cancellationToken)
+        
 
 [<AutoOpen>]
 [<Extension>]

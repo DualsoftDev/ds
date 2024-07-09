@@ -3,12 +3,14 @@ namespace Engine.Info
 open System
 open System.Runtime.CompilerServices
 open Engine.Core
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Reactive.Disposables
 open System.Data
 open Dapper
 open Dual.Common.Db
+open Newtonsoft.Json
 
 
 type ILogSet =
@@ -20,6 +22,7 @@ type DBLoggerType =
     | Writer = 1
     | Reader = 2
 
+type internal NewtonsoftJson = Newtonsoft.Json.JsonConvert
 
 /// DB logging query 기준
 /// StartTime: 조회 시작 기간.
@@ -176,6 +179,10 @@ CREATE VIEW [{Vn.Storage}] AS
 
     /// DB log table 의 row 항목
     type ORMLog(id: int, storageId: int, at: DateTime, value: obj) =
+        do
+            let x = 1
+            ()
+
         new() = ORMLog(-1, -1, DateTime.MaxValue, null)
 
         interface IDBRow
@@ -183,6 +190,13 @@ CREATE VIEW [{Vn.Storage}] AS
         member val StorageId = storageId with get, set
         member val At = at with get, set
         member val Value = value with get, set
+        static member private settings =
+            let settings = new JsonSerializerSettings(TypeNameHandling = TypeNameHandling.All)
+            settings.Converters.Insert(0, new ObjTypePreservingConverter([|"Value"|]))
+            settings
+        static member Deserialize(json: string) = NewtonsoftJson.DeserializeObject<ORMLog>(json, ORMLog.settings)
+        member x.Serialize():string = NewtonsoftJson.SerializeObject(x, ORMLog.settings)
+
 
     /// DB log table 의 row 항목
     type ORMModel(id: int, path:string, lastModified:DateTime) =

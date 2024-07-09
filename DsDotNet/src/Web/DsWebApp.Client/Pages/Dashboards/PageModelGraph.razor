@@ -1,6 +1,7 @@
 @* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/compound-nodes/index.html *@
 
 @page "/dashboards/graph"
+@using Engine.Info
 
 <h3>Model Graph</h3>
 
@@ -13,9 +14,20 @@
 <div id="cy"></div>
 
 @code {
+    HubConnection _hubConnection;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/db").StartHubAsync();
+        _hubConnection.On<string>(SK.S2CNLogChanged,
+            async logJson =>
+            {
+                //StateHasChanged();
+                var log = DBLoggerORM.ORMLog.Deserialize(logJson);
+                Console.WriteLine($"Log change detected: {log.Id}.");
+            });
+
+
         // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
         var jss = new[]
         {

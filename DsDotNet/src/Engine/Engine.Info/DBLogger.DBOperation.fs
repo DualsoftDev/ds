@@ -79,9 +79,6 @@ module internal DBLoggerImpl =
             if logs.any () then
                 x.LastLog <- logs |> Seq.tryLast
 
-    // 여기 설정치는 loggerDBSettings.SyncIntervalSeconds 에 의해서 overwrite 됨
-    let mutable interval = Observable.Interval(TimeSpan.FromSeconds(30))
-
     let mutable logSet = getNull<LogSet> ()
 
     let private createLogInfoSetCommonAsync
@@ -333,7 +330,6 @@ module internal DBLoggerImpl =
                 let connString = loggerDBSettings.ConnectionString
                 let (modelZipPath, dbWriter:string) = loggerDBSettings.ModelFilePath, loggerDBSettings.DbWriter
                 connectionString <- connString
-                interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
                 let! modelId = createLoggerDBSchemaAsync modelZipPath dbWriter cleanExistingDb
                 commonAppSetting.LoggerDBSettings.ModelId <- modelId
             }
@@ -353,7 +349,7 @@ module internal DBLoggerImpl =
                 let! logSet_ = createLogInfoSetForWriterAsync (querySet, systems)
                 logSet <- logSet_
 
-                interval.Subscribe(fun counter -> writePeriodicAsync(counter, commonAppSetting).Wait())
+                commonAppSetting.LoggerDBSettings.SyncInterval.Subscribe(fun counter -> writePeriodicAsync(counter, commonAppSetting).Wait())
                 |> logSet_.Disposables.Add
 
                 return logSet_
@@ -428,11 +424,10 @@ module internal DBLoggerImpl =
             task {
                 let loggerDBSettings = querySet.CommonAppSettings.LoggerDBSettings
                 connectionString <- loggerDBSettings.ConnectionString
-                interval <- Observable.Interval(TimeSpan.FromSeconds(loggerDBSettings.SyncIntervalSeconds))
                 let! logSet_ = createLoggerInfoSetForReaderAsync (querySet, systems)
                 logSet <- logSet_
 
-                interval.Subscribe(fun counter -> readPeriodicAsync(counter, querySet).Wait())
+                loggerDBSettings.SyncInterval.Subscribe(fun counter -> readPeriodicAsync(counter, querySet).Wait())
                 |> logSet_.Disposables.Add
 
                 return logSet_

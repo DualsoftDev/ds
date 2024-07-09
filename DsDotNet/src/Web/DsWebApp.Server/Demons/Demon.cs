@@ -26,6 +26,7 @@ public partial class Demon : BackgroundService
     IHubContext<FieldIoHub> _hubContextFieldIo;
     IHubContext<InfoHub> _hubContextInfo;
     IHubContext<HmiTagHub> _hubContextHmiTag;
+    IHubContext<DbHub> _hubContextDb;
     ILog _logger => _serverGlobal.Logger;
     DsSystem _dsSystem => _serverGlobal.RuntimeModel?.System;
 
@@ -34,12 +35,14 @@ public partial class Demon : BackgroundService
         , IHubContext<ModelHub> hubContextModel
         , IHubContext<FieldIoHub> hubContextFieldIo
         , IHubContext<InfoHub> hubContextInfo
-        , IHubContext<HmiTagHub> hubContextHmiTag)
+        , IHubContext<HmiTagHub> hubContextHmiTag
+        , IHubContext<DbHub> hubContextDb)
     {
         _serverGlobal = serverGlobal;
         _hubContextFieldIo = hubContextFieldIo;
         _hubContextHmiTag = hubContextHmiTag;
         _hubContextInfo = hubContextInfo;
+        _hubContextDb = hubContextDb;
 
         CompositeDisposable _modelSubscription = new();
         IDisposable innerSubscriptionFromWeb = null;

@@ -30,3 +30,10 @@ public class InfoHub() : ConnectionManagedHub(Name)
     public static string HubPath => "/hub/info";
     public static HashSet<ClientId> ConnectedClients => ConnectionManagedHub.GetClients(Name);
 }
+
+public class DbHub() : ConnectionManagedHub(Name)
+{
+    public static string Name => "DbHub";
+    public static string HubPath => "/hub/db";
+    public static HashSet<ClientId> ConnectedClients => ConnectionManagedHub.GetClients(Name);
+}

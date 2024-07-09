@@ -1,11 +1,12 @@
 namespace T
 open Dual.UnitTest.Common.FS
 
-
-open Engine.Core
-open Dual.Common.Core.FS
+open System.Linq
 open NUnit.Framework
 
+open Dual.Common.Core.FS
+open Engine.Core
+open Engine.Parser.FS
 
 [<AutoOpen>]
 module ModelGrapTests =
@@ -16,6 +17,32 @@ module ModelGrapTests =
 
     type CycleDetectTest() =
         inherit EngineTestBaseClass()
+        let systemRepo = ShareableSystemRepository()
+        let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
+            let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+            helper.TheSystem
+
+        [<Test>]
+        member __.``Edge test`` () =
+            let text = """
+[sys] sSYS = {
+    [flow] fMES = {
+        S201_RBT1 |> BUFFER;
+        MES => BUFFER > MES;
+    }
+}
+"""
+            let system = parseText systemRepo "" text
+            let g = system.Flows.First().Graph
+            g.Edges.Any(fun e -> e.Source.Name = "S201_RBT1" && e.Target.Name = "BUFFER" && e.EdgeType = EdgeType.Reset) === true
+            g.Edges.Any(fun e -> e.Source.Name = "MES" && e.Target.Name = "BUFFER" && e.EdgeType = EdgeType.Start) === true
+            g.Edges.Any(fun e -> e.Source.Name = "BUFFER" && e.Target.Name = "MES" && e.EdgeType = EdgeType.Reset) === true
+            g.Edges.Any(fun e -> e.Source.Name = "BUFFER" && e.Target.Name = "MES" && e.EdgeType = EdgeType.Start) === true
+            g.Edges.Count === 4
+
+            g.Vertices.Count === 3
+            ()
+
 
         [<Test>]
         member __.``CycleDetectTest test`` () =

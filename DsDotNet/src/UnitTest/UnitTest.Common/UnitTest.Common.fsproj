@@ -29,6 +29,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="CommonTest\JsonSerializeTest.fs" />
         <Compile Include="CommonTest\DiscriminatedUnionTest.fs" />
         <Compile Include="TestFixture.fs" />
         <Compile Include="ObjectHolderTest.fs" />

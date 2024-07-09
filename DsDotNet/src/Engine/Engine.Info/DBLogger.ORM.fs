@@ -45,6 +45,7 @@ module DBLoggerORM =
     // database table names
     module Tn =
         let Storage = "storage"
+        let Model = "model"
         let Log = "log"
         let Error = "error"
         let TagKind = "tagKind"
@@ -71,7 +72,15 @@ CREATE TABLE [{Tn.Storage}] (
     , [fqdn]        NVARCHAR(128) NOT NULL CHECK(LENGTH(fqdn) <= 128)
     , [tagKind]     INTEGER NOT NULL
     , [dataType]    NVARCHAR(64) NOT NULL CHECK(LENGTH(dataType) <= 64)
-    , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind, dataType, name)
+    , [modelId]     INTEGER NOT NULL
+    , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind, dataType, name, modelId)
+);
+
+CREATE TABLE [{Tn.Model}] (
+    [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    , [path]        NVARCHAR(128) NOT NULL  -- pptx/zip path
+    , [lastModified] DATETIME2(7) NOT NULL  -- file last modified
+    , [runtime]     NVARCHAR(128) NOT NULL CHECK(runtime IN ('PC', 'PLC', 'LightPC', 'LightPLC', 'Simulation', 'Developer'))
 );
 
 CREATE TABLE [{Tn.Log}] (
@@ -79,6 +88,7 @@ CREATE TABLE [{Tn.Log}] (
     , [storageId]   INTEGER NOT NULL
     , [at]          DATETIME2(7) NOT NULL
     , [value]       NUMERIC NOT NULL
+    , [modelId]     INTEGER NOT NULL
     , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
 );
 
@@ -86,7 +96,8 @@ CREATE TABLE [{Tn.Log}] (
 CREATE TABLE [{Tn.TagKind}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
-    , CONSTRAINT uniq_row UNIQUE (id, name)
+    , [modelId]     INTEGER NOT NULL
+    , CONSTRAINT uniq_row UNIQUE (id, name, modelId)
 );
 
 CREATE TABLE [{Tn.Property}] (
@@ -164,6 +175,12 @@ CREATE VIEW [{Vn.Storage}] AS
         member val StorageId = storageId with get, set
         member val At = at with get, set
         member val Value = value with get, set
+    /// DB log table 의 row 항목
+    type ORMModel(id: int, path:string, lastModified:DateTime) =
+        new() = ORMModel(-1, null, DateTime.MinValue)
+        member val Id = id with get, set
+        member val Path = path with get, set
+        member val LastModified = lastModified with get, set
 
     /// tagKind table row
     type ORMTagKind() =

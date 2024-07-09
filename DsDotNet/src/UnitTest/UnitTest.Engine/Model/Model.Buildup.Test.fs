@@ -129,18 +129,22 @@ module ModelBuildupTests1 =
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
             let generated = system.ToDsText(true)
             let answer = """
+
 [sys] My = {
     [flow] F = {
         Main; // island
     }
     [flow] F2 = {
-        F.Main > R3;		// F.Main(Alias)> R3(Real);
+        F_Main > R3;		// F_Main(Alias)> R3(Real);
+        [aliases] = {
+            F.Main = { F_Main; }
+        }
     }
     [jobs] = {
         F.A.p = { A.ADV(%I1, %Q1); }
         F.A.m = { A.RET(%I2, %Q2); }
     }
-    [device file="./cylinder/double.ds"] A;
+    [device file="./cylinder/double.ds"] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsFolder/lib/cylinder/double.ds
 }
 """
             logDebug $"{generated}"

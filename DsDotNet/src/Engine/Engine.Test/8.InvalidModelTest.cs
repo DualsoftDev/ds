@@ -43,12 +43,12 @@ namespace Engine
 [sys] My = {
     [flow] F = {
         Main = {
-            Ap > Am > Ap;
+            A.p > A.m > A.p;
         }
     }
     [jobs] = {
-        Ap = { A.""+""(%I1, %Q1); }
-        Am = { A.""-""(%I2, %Q2); }
+        F.A.p = { A.""+""(%I1, %Q1); }
+        F.A.m = { A.""-""(%I2, %Q2); }
     }
     [device file=""cylinder.ds""] A;
 }

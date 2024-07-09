@@ -9,15 +9,15 @@
     [flow] F = {
         Work > Done;
         Work = {
-            Ap > Am;
+            A.p > A.m;
         }
         Vp > Sp;
         Vm > Sm;
     }
 
     [jobs] = {
-        Ap = { RH.ADV(_, _); }
-        Am = { RH.RET(_, _); }
+        F.A.p = { RH.ADV(_, _); }
+        F.A.m = { RH.RET(_, _); }
     }
   
     [external file="systemRH.ds"] RH;

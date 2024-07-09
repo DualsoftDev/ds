@@ -19,16 +19,15 @@ namespace Engine
         }
     }
     [jobs] = {
-        F.A.m = { A.""-""(%I2, %Q2); }
-        F.A.p = { A.""+""(%I1, %Q1); }
+        F.A.m = { A.ADV; }
+        F.A.p = { A.RET; }
     }
     [prop] = {
         [safety] = {
-        F.Main = { F.A.p; F.A.m; }
-        F.F.A.p = { F.Main; }
+            F.Main.A.p = { F.A.m; }
         }
     }
-    [device file=""cylinder.ds""] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]  A;
 }
 
 "; 
@@ -121,27 +120,38 @@ namespace Engine
 
 ";
         public static string DisableValid = @"
-[sys] L = {
-    [flow] F = {
-        A.m > Main2;	     
-        A.p > Main;		
-	                    
-        Main = {
-            A.p > A.m;		// A.p(Call)> A.m(Call);
+[sys] HelloDS = {
+    [flow] STN1 = {
+        외부시작.""ADV(INTrue)"" > Work1_1;
+        Work2 => Work1 => Work2;
+        Work1 = {
+            Device1.ADV > Device2.ADV;
+            Device2_ADV_1; 
         }
-      
+        [aliases] = {
+            Work1 = { Work1_1; }
+            Work1.Device2.ADV = { Device2_ADV_1; }
+        }
     }
     [jobs] = {
-        F.A.m = { A.""-""(_, _); }
-        F.A.p = { A.""+""(_, _); }
+        STN1.외부시작.""ADV(INTrue)"" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
+        STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
+   
     [prop] = {
         [disable] = {
-            F.Main.A.m;
+            STN1.Work1.""Device2.ADV"";
         }
     }
-    [device file=""cylinder.ds""] A; 
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] 
+        STN1_외부시작,
+        STN1_Device1,
+        STN1_Device2; 
 }
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.9.1]
 
 ";
 
@@ -170,14 +180,14 @@ namespace Engine
         Work1 > Work2;
     }
 
-    [lA.mps] = {
-        [a] = { AutoModeLA.mp(-, _) = { } }
-        [m] = { ManualModeLA.mp(-, _) = {  } }
-        [d] = { DriveLA.mp(-, _) = {  } }
-        [e] = { ErrorLA.mp(-, _) = {  } }
-        [r] = { ReadyStateLA.mp(-, _) = {  } }
-        [i] = { IdleModeLA.mp(-, _) = { } }
-        [o] = { OriginStateLA.mp(-, _) = {  } }
+    [lamps] = {
+        [a] = { AutoModeLamp(-, _) = { } }
+        [m] = { ManualModeLamp(-, _) = {  } }
+        [d] = { DriveLamp(-, _) = {  } }
+        [e] = { ErrorLamp(-, _) = {  } }
+        [r] = { ReadyStateLamp(-, _) = {  } }
+        [i] = { IdleModeLamp(-, _) = { } }
+        [o] = { OriginStateLamp(-, _) = {  } }
     }
 }
 ";
@@ -313,18 +323,6 @@ namespace Engine
 }
 ";
 
-        public static string Dup = @"
-[sys] L = {
-    [flow] FF = {
-        A, A.p > C;
-    }
-    [jobs] = {
-        F.A.p = { A.""+""(%I1, %Q1); }
-        //F.A.m = { A.""-""(%I2, %Q2); }  //사용 안되면 정의 불가
-    }
-    [device file=""cylinder.ds""] A;
-}
-";
 
 
         public static string Error = @"
@@ -422,67 +420,19 @@ namespace Engine
     [flow] F = {
         Seg1 > Seg2;
         Seg1 = {
-            RunR > RunL;
+            Run.R > Run.L;
         }
     }
     
     [jobs] = {
-        RunR = { sysR.RUN(%I1, %Q1); }
-        RunL = { sysL.RUN(%I2, %Q2); }
+        F.Run.R = { sysR.RUN(%I1, %Q1); }
+        F.Run.L = { sysL.RUN(%I2, %Q2); }
     }
     [external file=""systemRH.ds""] sysR;
     [external file=""systemLH.ds""] sysL;
 }
 ";
 
-        public static string T6Alias =@"
-[sys] T6_Alias = {
-    [flow] Page1 = {
-        AndFlow.R2 > OrFlow.R1;
-    }
-    [flow] AndFlow = {
-        R2 > R3;
-        R1 > R3;
-    }
-    [flow] OrFlow = {
-        R2 > Copy1_R3;
-        R1 > R3;
-        [aliases] = {
-            R3 = { Copy1_R3; }
-        }
-    }
-    [jobs] = {
-        C1 = { B.""+""(%I1, %Q1); A.""+""(_, %Q999.2343); }
-        C2 = { A.""-""(_, %Q3); B.""-""(%I1, _); }
-    }
-    [external file=""cylinder.ds""] A;
-    [device file=""cylinder.ds""] B;
-    // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal: file path without quote!!
-}
-";
-
-
-        public static string TaskLinkorDevice = @"
-    [sys] Control = {
-    [flow] F = {
-        FWD > BWD > Main <|> Reset;		// FWD(CallSys)> BWD(CallSys) > Main(Real) <|> Reset(Real);
-        Main = {
-            mv1up > mv1dn;		// mv1up(Call)> mv1dn(Call);
-        }
-    }
-    [jobs] = {
-        mv1up = { A.""+""(%I300, %Q300); }
-        mv1dn = { A.""-""(%I301, %Q301); }
-    }
-    [interfaces] = {
-        G = { F.Main ~ F.Main }
-        R = { F.Reset ~ F.Reset }
-        G <|> R;
-    }
-    [device file=""cylinder.ds""] A; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
-    [external file=""systemRH.ds""] sysR; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemRH.ds
-    [external file=""systemLH.ds""] sysL; // D:\ds_new\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/systemLH.ds
-}";
 
 
         public static string ExternalSegmentCall = @"
@@ -534,50 +484,33 @@ namespace Engine
 
 
         public static string Aliases = @"
-[sys] my = {
-    [flow] STN11 = {
-        Work2 => Work1 => Work2;		// Work2(Real)=> Work1(Real) => Work2(Real);
-        외부시작.ADV.INTrue > Work1_1;		// 외부시작.ADV.INTrue(Call)> Work1_1(Alias);
+[sys] HelloDS = {
+    [flow] STN1 = {
+        외부시작.""ADV(INTrue)"" > Work1_1;
+        Work2 => Work1 => Work2;
         Work1 = {
-            Device1.ADV > Device1_ADV_1;		// Device1.ADV(Call)> Device1_ADV_1(Alias);
+            Device1.ADV > Device2.ADV;
+            Device2_ADV_1; 
         }
         [aliases] = {
             Work1 = { Work1_1; }
-            Work1.Device1.ADV = { Device1_ADV_1; }
+            Work1.Device2.ADV = { Device2_ADV_1; }
         }
     }
     [jobs] = {
-        STN11.외부시작.ADV.INTrue = { STN11_외부시작.ADV(_:Boolean:True, _); }
-        STN11.Device1.ADV = { STN11_Device1.ADV(_, _); }
+        STN1.외부시작.""ADV(INTrue)"" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
+        STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
-    [device file=""cylinder.ds""] 
-        STN11_Device1,
-        STN11_외부시작; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
-}
-";
-        public static string LinkAndLinkAliases = @"
-[sys] my = {
-    [flow] F = {
-        Main = {
-            // AVp1 |> A.m1;
-            // 정보로서의 Call 상호 리셋
-            //A.p1 <|> A.m1;
-            A.p > A.m; 
-        }
-        [aliases] = {
-            Main.F.A.p = { A.p1; A.p2; A.p3; }
-            Main.F.A.m = { A.m1; A.m2; A.m3; }    // system nA.me optional
-            //Vp = {AVp1;}  // invalid: 자신 시스템에 정의된 것만 alias
-        }
-    }
-    [jobs] = {
-        F.A.p = { A.""+""(%I1, %Q1); }
-        F.A.m = { A.""-""(%I2, %Q2); }
-    }
-    [device file=""cylinder.ds""] A;
+   
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] 
+        STN1_외부시작,
+        STN1_Device1,
+        STN1_Device2; 
 }
 
 ";
+      
 
         public static string Diamond = @"
 [sys] L = {
@@ -680,12 +613,12 @@ namespace Engine
     [flow] F = {
         #OP1, #OP2 > Main <|> Reset;	
         Main = {
-            mv1up > mv1dn;		
+            mv1.up > mv1.dn;		
         }
     }
     [jobs] = {
-        mv1up = { A.""+""(%I300:symbol1:UInt16, %Q300); }
-        mv1dn = { A.""-""(%I301, %Q301); }
+        F.mv1.up = { A.""+""(%I300:symbol1:UInt16, %Q300); }
+        F.mv1.dn = { A.""-""(%I301, %Q301); }
     }
     [variables] = {}
     [operators] = {
@@ -701,12 +634,12 @@ namespace Engine
     [flow] F = {
         Main <|> Reset;	
         Main = {
-            mv1up > mv1dn > CMD1(), CMD2();		
+            mv1.up > mv1.dn > CMD1(), CMD2();		
         }
     }
     [jobs] = {
-        mv1up = { A.""+""(%I300, %Q300); }
-        mv1dn = { A.""-""(%I301, %Q301:AOUT:Int32:300); }
+        F.mv1.up = { A.""+""(%I300, %Q300); }
+        F.mv1.dn = { A.""-""(%I301, %Q301:AOUT:Int32:300); }
     }
     [variables] = {
         Int32 v0;

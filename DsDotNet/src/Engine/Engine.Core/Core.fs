@@ -382,7 +382,7 @@ module CoreModule =
         member x.JobParam = jobParam
         member x.UpdateJobParam(newJobParam: JobParam) =
             jobParam <- newJobParam
-
+       
         member x.ActionType = x.JobParam.JobAction 
         member x.JobMulti = x.JobParam.JobMulti 
         member x.AddressInCount = x.JobParam.JobMulti.AddressInCount

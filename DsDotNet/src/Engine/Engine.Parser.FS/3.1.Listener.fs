@@ -595,7 +595,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     task
 
             for jobNameFqdn, jobOption, apiDefCtxs in callListings do
-                let jobName = jobNameFqdn.CombineQuoteOnDemand()
+                let jobName = jobNameFqdn.CombineDequoteOnDemand()
                 let apiItems =
                     [   for apiDefCtx in apiDefCtxs do
                             let apiPath = apiDefCtx.CollectNameComponents() |> List.ofSeq // e.g ["A"; "+"]
@@ -624,9 +624,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                  
                                         debugfn $"TX={inParam} RX={outParm}"
                                         let taskDev = TaskDev(apiPoint, jobName, inParam, outParm, device)
-                                        taskDev.InAddress <- inaddr
-                                        taskDev.OutAddress <- outaddr
-                                        return getTaskDev (jobName) taskDev inParam outParm
+                                        
+                                        let taskDev = getTaskDev (jobName) taskDev inParam outParm
+                                        if inaddr <> taskDev.InAddress 
+                                        then
+                                            taskDev.InAddress <- if taskDev.IsInAddressEmpty
+                                                                 then inaddr else failWithLog $"Address is already assigned {device} {api}"
+                                        if outaddr <> taskDev.OutAddress 
+                                        then
+                                            taskDev.OutAddress <- if taskDev.IsOutAddressEmpty 
+                                                                  then outaddr else failWithLog $"Address is already assigned {device} {api}"
+
+                                        return  taskDev
                                     }
 
                                 match apiItem with

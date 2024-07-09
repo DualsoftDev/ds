@@ -202,10 +202,10 @@ module CoreExtensionModule =
         member x.IsMaunualAddressEmpty = x.MaunualActionAddress = TextAddrEmpty
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualActionAddress = TextAddrEmpty || x.MaunualActionAddress = TextSkip
 
-        member x.GetInParam(job:Job) = x.InParams[job.QualifiedName]
+        member x.GetInParam(job:Job) = x.InParams[job.UnqualifiedName]
         member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)
 
-        member x.GetOutParam(job:Job) = x.OutParams[job.QualifiedName]
+        member x.GetOutParam(job:Job) = x.OutParams[job.UnqualifiedName]
         member x.AddOrUpdateOutParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.OutParams, newDevParam)
 
         member x.SetInSymbol(symName:string option) =
@@ -225,25 +225,34 @@ module CoreExtensionModule =
         
     type Job with
         member x.OnDelayTime = 
-            let times = x.DeviceDefs.Choose(fun t-> t.InParams[x.QualifiedName].Time)
+            let times = x.DeviceDefs.Choose(fun t-> t.InParams[x.UnqualifiedName].Time)
             if times.GroupBy(fun t->t).Count() > 1
             then 
-                let errTask = String.Join(", ",  x.DeviceDefs.Select(fun t-> $"{t.Name} {t.InParams[x.QualifiedName].Time}"))
+                let errTask = String.Join(", ",  x.DeviceDefs.Select(fun t-> $"{t.Name} {t.InParams[x.UnqualifiedName].Time}"))
                 failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
                 
             if times.any() then times.First() |> Some else None
+
+
+        member x.UpdateDevParam(inParam: DevParam, outParam: DevParam) =
+                x.DeviceDefs.Iter(fun d-> 
+                    d.AddOrUpdateInParam (x.UnqualifiedName, inParam)
+                    d.AddOrUpdateOutParam(x.UnqualifiedName, outParam)
+                )
+
 
         member x.GetNullAddressDevTask() = 
             match x.JobMulti with
             | Single -> 
                 x.DeviceDefs
-                |> Seq.filter (fun f -> f.IsAddressEmpty)
+                |> Seq.filter (fun f -> f.IsAddressEmpty && not(f.GetInParam(x).IsDefaultParam))
             | MultiAction (_, _, inCnt, outCnt) -> 
                 x.DeviceDefs
                 |> Seq.mapi (fun i d -> 
-                    if inCnt.IsSome && inCnt.Value = i && d.IsAddressEmpty then 
+                    let empty = d.IsAddressEmpty && not(d.GetInParam(x).IsDefaultParam && d.GetOutParam(x).IsDefaultParam)
+                    if inCnt.IsSome && inCnt.Value = i && empty then 
                         Some d
-                    elif outCnt.IsSome && outCnt.Value = i && d.IsAddressEmpty then 
+                    elif outCnt.IsSome && outCnt.Value = i && empty then 
                         Some d
                     else
                      None

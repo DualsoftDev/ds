@@ -151,9 +151,15 @@ module internal ToDsTextModule =
 
             for f in system.Flows do
                 yield flowToDs f indent
-
+                
             if system.Jobs.Any() then
-                let printDev (d:TaskDev) job= $"{d.ApiName}({toTextDevParam d.InAddress (d.GetInParam(job))}, {toTextDevParam d.OutAddress (d.GetOutParam(job))})"
+                let printDev (d:TaskDev) job=
+                            if d.GetInParam(job).IsDefaultParam && d.GetOutParam(job).IsDefaultParam
+                            then
+                                $"{d.ApiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
+                            else
+                                $"{d.ApiName}({d.GetInParam(job).ToTextWithAddress(d.InAddress)}, {d.GetOutParam(job).ToTextWithAddress(d.OutAddress)})"
+
                 yield $"{tab}[jobs] = {lb}"
                 for j in system.Jobs do
                     let jobItems =

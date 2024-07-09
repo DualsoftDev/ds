@@ -55,7 +55,7 @@ module ImportUtilForLib =
     let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getDevParams: string -> DeviceLoadParameters) =
         let devOrg = getDeviceOrganization param.MySys libFilePath loadedName
         let devParams = getDevParams loadedName
-        let task = getTaskDev autoGenSys loadedName (param.Node.JobName.CombineQuoteOnDemand()) param.ApiName
+        let task = getTaskDev autoGenSys loadedName (param.Node.JobName.Combine()) param.ApiName
         addSingleTask tasks task
         if task.IsNone then
             processSingleTask tasks param devOrg loadedName param.ApiName devParams
@@ -86,6 +86,7 @@ module ImportUtilForLib =
             | Some existingJob -> existingJob
             | None -> 
                 let job = Job(param.Node.JobName, param.MySys, tasks |> Seq.toList)
+                job.UpdateDevParam(param.Node.DevParamIn, param.Node.DevParamOut)
                 job.UpdateJobParam(param.Node.JobParam)
                 param.MySys.Jobs.Add(job); job
 

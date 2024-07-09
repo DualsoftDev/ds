@@ -83,7 +83,7 @@ module rec CodeElements =
 
         member x.ToDsText() = if x.CommandCode = "" then TextSkip else x.CommandCode
     
-    type DevAddress = string
+    let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
     type DevParam = {
         DevName : string option  //In or Out Tag 이름
         DevType: DataType option
@@ -94,8 +94,23 @@ module rec CodeElements =
         member x.Type  = x.DevType  |> Option.defaultValue DuBOOL //기본 타입 bool   
         member x.Name  = x.DevName  |> Option.defaultValue ""
         member x.Time  = x.DevTime 
-       
+        member x.IsDefaultParam  = 
+                    x.DevName.IsNone 
+                    && x.DevTime.IsNone
+                    && x.Type = DuBOOL
+                    && x.Value.IsNull()
         
+        member x.ToTextWithAddress(addr:string) = 
+            let address  = addressPrint addr
+            let name  = x.DevName  |> Option.defaultValue ""
+            let typ   = x.DevType  |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
+            let value = x.DevValue |> Option.map (fun v -> x.Type.ToStringValue(v)) |> Option.defaultValue ""
+            let time  = x.DevTime  |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
+
+            let parts = [ address; name; typ; value; time ]
+            let result = parts |> List.filter (fun s -> not(String.IsNullOrEmpty(s))) |> String.concat ":"
+
+            result
 
     let defaultDevParam () = 
         {   
@@ -129,24 +144,11 @@ module rec CodeElements =
 
 
     
-    let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
-    let toTextDevParam addr (x:DevParam) = 
-        let address = addressPrint addr
-        let name  = x.DevName  |> Option.defaultValue ""
-        let typ   = x.DevType  |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
-        let value = x.DevValue |> Option.map (fun v -> x.Type.ToStringValue(v)) |> Option.defaultValue ""
-        let time  = x.DevTime  |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
+    
 
-        let parts = [ address; name; typ; value; time ]
-        let result = parts |> List.filter (fun s -> not (String.IsNullOrEmpty(s))) |> String.concat ":"
-
-        result
-
-    let toTextInOutDev (inp:DevParam) (outp:DevParam) (addr:Addresses)= 
-        let inText = toTextDevParam addr.In inp
-        let outText = toTextDevParam addr.Out outp
-        $"{inText}, {outText}"
+    let toTextInOutDev (inp:DevParam) (outp:DevParam)  (addr:Addresses)=  
+        $"{inp.ToTextWithAddress(addr.In)}, {outp.ToTextWithAddress(addr.Out)}"
 
 
         

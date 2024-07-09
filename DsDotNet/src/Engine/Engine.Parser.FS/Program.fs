@@ -926,9 +926,12 @@ module Program =
         }
     }
     [flow] F2 = {
-        F.Seg1 > Seg;		// F.Seg1(Alias)> Seg(Real);
+        F_Seg1 > Seg;		// F_Seg1(Alias)> Seg(Real);
         Seg = {
             F.p > F.m;		// F.p(Call)> F.m(Call);
+        }
+        [aliases] = {
+            F.Seg1 = { F_Seg1; }
         }
     }
     [jobs] = {
@@ -939,7 +942,7 @@ module Program =
     }
     [device file="cylinder.ds"] 
         F,
-        F2; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExA.mple/dsSimple/cylinder.ds
+        F2; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
 }
 
 """

@@ -186,8 +186,8 @@ module ImportViewModule =
         system.ApiItems |> Seq.iter (fun api -> newNode.AddSingles(flowApiNodes.[api.Name]))
 
         system.ApiResetInfos |> Seq.iter (fun i ->
-            let operand1Node = flowApiNodes.[i.Operand1]
-            let operand2Node = flowApiNodes.[i.Operand2]
+            let operand1Node = flowApiNodes.[i.Operand1.DeQuoteOnDemand()]
+            let operand2Node = flowApiNodes.[i.Operand2.DeQuoteOnDemand()]
             newNode.AddEdge(ModelingEdgeInfo<ViewNode>(operand1Node, i.Operator.ToText(), operand2Node))
         )
         if newNode.GetSingles().Count() > 0 then

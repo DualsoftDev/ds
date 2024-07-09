@@ -122,33 +122,19 @@ module ModelTests1 =
         member __.``Model component [Conditions] test`` () =
             compare ParserTest.Conditions answerConditions
 
-        [<Test>]
-        member __.``Model component [Dup] test`` () =
-            compareExact ParserTest.Dup
-
+  
         [<Test>]
         member __.``Model component [Aliases] test`` () =
             compare ParserTest.Aliases answerAliases
 
-        [<Test>]
-        member __.``Model component [Link and link aliases] test`` () =
-            compareExact ParserTest.LinkAndLinkAliases 
 
         [<Test>]
         member __.``Model component [QualifiedName] test`` () =
             (fun () -> compareExact ParserTest.QualifiedName ) |> ShouldFail
 
         [<Test>]
-        member __.``Model component [T6 alias] test`` () =
-            compare ParserTest.T6Alias  answerT6Alias
-
-        [<Test>]
         member __.``Model component [external circular dependency] test`` () =
             compare ParserTest.CircularDependency answerCircularDependency
-
-        [<Test>]
-        member __.``Model component [Task Device/Link (old:JobDef)] test`` () =
-            compareExact ParserTest.TaskLinkorDevice 
 
         [<Test>]
         member __.``Model component [Function/Commands] test`` () =

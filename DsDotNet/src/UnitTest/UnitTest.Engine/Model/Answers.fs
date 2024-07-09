@@ -705,9 +705,8 @@ module ModelAnswers =
     let answerSafetyValid = """
 [sys] L = {
     [flow] F = {
-        A.p > Main;		
-        A.m > Main2;	     
-	                    
+        A.p > Main;		// A.p(Call)> Main(Real);
+        A.m > Main2;		// A.m(Call)> Main2(Real);
         Main = {
             A.p > A.m;		// A.p(Call)> A.m(Call);
         }
@@ -716,16 +715,15 @@ module ModelAnswers =
         }
     }
     [jobs] = {
-        F.A.m = { A."-"(%I2, %Q2); }
-        F.A.p = { A."+"(%I1, %Q1); }
+        F.A.m = { A.ADV(_, _); }
+        F.A.p = { A.RET(_, _); }
     }
     [prop] = {
         [safety] = {
-        F.Main = { F.A.p; F.A.m; }
-        F.F.A.p = { F.Main; }
+            F.Main.A.p = { F.A.m; }
         }
     }
-    [device file="cylinder.ds"] A; // D:\ds\dsA\DsDotNet\src\UnitTest\UnitTest.Engine\Model/../../UnitTest.Model/cylinder.ds
+    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/Cylinder/DoubleCylinder.ds
 }
 """
     let answerLayoutValid = """
@@ -782,27 +780,37 @@ module ModelAnswers =
 }
 """
     let answerDisableValid = """
-[sys] L = {
-    [flow] F = {
-        A.m > Main2;	     
-        A.p > Main;		
-	                    
-        Main = {
-            A.p > A.m;		// A.p(Call)> A.m(Call);
+[sys] HelloDS = {
+    [flow] STN1 = {
+        Work1 => Work2 => Work1;		// Work1(Real)=> Work2(Real) => Work1(Real);
+        외부시작."ADV(INTrue)" > Work1_1;		// 외부시작."ADV(INTrue)"(Call)> Work1_1(Alias);
+        Work1 = {
+            Device1.ADV > Device2.ADV;		// Device1.ADV(Call)> Device2.ADV(Call);
+            Device2_ADV_1; // island
         }
-      
+        [aliases] = {
+            Work1 = { Work1_1; }
+            Work1.Device2.ADV = { Device2_ADV_1; }
+        }
     }
     [jobs] = {
-        F.A.m = { A.""-""(_, _); }
-        F.A.p = { A.""+""(_, _); }
+        STN1.외부시작."ADV(INTrue)" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
+        STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
     [prop] = {
         [disable] = {
-            F.Main.A.m;
+            STN1.Work1."Device2.ADV";
         }
     }
-    [device file=""cylinder.ds""] A; 
+    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
+        STN1_외부시작,
+        STN1_Device1,
+        STN1_Device2; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/Cylinder/DoubleCylinder.ds
 }
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.9.1]
 """
     let answerDuplicatedEdgesText = """
 [sys] B = {
@@ -882,14 +890,14 @@ module ModelComponentAnswers =
     [flow] f1 = {
         Work1 > Work2;		// Work1(Real)> Work2(Real);
     }
-    [lA.mps] = {
-        [a] = { AutoModeLA.mp(-, _) = {  } }
-        [m] = { ManualModeLA.mp(-, _) = {  } }
-        [d] = { DriveLA.mp(-, _) = {  } }
-        [e] = { ErrorLA.mp(-, _) = {  } }
-        [r] = { ReadyStateLA.mp(-, _) = {  } }
-        [i] = { IdleModeLA.mp(-, _) = {  } }
-        [o] = { OriginStateLA.mp(-, _) = {  } }
+    [lamps] = {
+        [a] = { AutoModeLamp(-, _) = {  } }
+        [m] = { ManualModeLamp(-, _) = {  } }
+        [d] = { DriveLamp(-, _) = {  } }
+        [e] = { ErrorLamp(-, _) = {  } }
+        [r] = { ReadyStateLamp(-, _) = {  } }
+        [i] = { IdleModeLamp(-, _) = {  } }
+        [o] = { OriginStateLamp(-, _) = {  } }
     }
 }
 """
@@ -941,69 +949,49 @@ module ModelComponentAnswers =
 }
 """
     let answerAliases =  """
-[sys] my = {
-    [flow] STN11 = {
-        외부시작.ADV.INTrue > Work1_1;		// 외부시작.ADV.INTrue(Call)> Work1_1(Alias);
+[sys] HelloDS = {
+    [flow] STN1 = {
         Work1 => Work2 => Work1;		// Work1(Real)=> Work2(Real) => Work1(Real);
+        외부시작."ADV(INTrue)" > Work1_1;		// 외부시작."ADV(INTrue)"(Call)> Work1_1(Alias);
         Work1 = {
-            Device1.ADV > Device1_ADV_1;		// Device1.ADV(Call)> Device1_ADV_1(Alias);
+            Device1.ADV > Device2.ADV;		// Device1.ADV(Call)> Device2.ADV(Call);
+            Device2_ADV_1; // island
         }
         [aliases] = {
             Work1 = { Work1_1; }
-            Work1.Device1.ADV = { Device1_ADV_1; }
+            Work1.Device2.ADV = { Device2_ADV_1; }
         }
     }
     [jobs] = {
-        STN11.외부시작.ADV.INTrue = { STN11_외부시작.ADV(_:Boolean:True, _); }
-        STN11.Device1.ADV = { STN11_Device1.ADV(_, _); }
+        STN1.외부시작."ADV(INTrue)" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
+        STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
-    [device file="cylinder.ds"] 
-        STN11_Device1,
-        STN11_외부시작; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/cylinder.ds
+    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
+        STN1_외부시작,
+        STN1_Device1,
+        STN1_Device2; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/Cylinder/DoubleCylinder.ds
 }
+//DS Language Version = [1.0.0.1]
+//DS Library Date = [Library Release Date 24.3.26]
+//DS Engine Version = [0.9.9.1]
  """
 
-    let answerT6Alias = """
-[sys] T6_Alias = {
-    [flow] Page1 = {
-        AndFlow.R2 > OrFlow.R1;
-    }
-    [flow] AndFlow = {
-        R1 > R3;
-        R2 > R3;
-    }
-    [flow] OrFlow = {
-        R1 > R3;
-        R2 > Copy1_R3;
-        [aliases] = {
-            R3 = { Copy1_R3; }
-        }
-    }
-    [jobs] = {
-        C1 = { B."+"(%I1, %Q1); A."+"(_, %Q999.2343); }
-        C2 = { A."-"(_, %Q3); B."-"(%I1, _); }
-    }
-    [device file="cylinder.ds"] B;
-    [external file="cylinder.ds"] A;
-    // [device file=c:/my.a.b.c.d.e.ds] C;      //<-- illegal: file path without quote!!
-}
-"""
 
     let answerCircularDependency = """
 [sys] My = {
     [flow] F = {
-        Seg1 > Seg2;
+        Seg1 > Seg2;		// Seg1(Real)> Seg2(Real);
         Seg1 = {
-            RunR > RunL;
+            Run.R > Run.L;		// Run.R(Call)> Run.L(Call);
         }
     }
-
     [jobs] = {
-        RunR = { sysR.RUN(%I1, %Q1); }
-        RunL = { sysL.RUN(%I2, %Q2); }
+        F.Run.R = { sysR.RUN(%I1, %Q1); }
+        F.Run.L = { sysL.RUN(%I2, %Q2); }
     }
-    [external file="systemRH.ds"] sysR;
-    [external file="systemLH.ds"] sysL;
+    [external file="systemRH.ds"] sysR; 
+    [external file="systemLH.ds"] sysL; 
 }
 """
 

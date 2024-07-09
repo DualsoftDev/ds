@@ -44,6 +44,28 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
         return RestResult<RuntimeModelDto>.Ok(model);
     }
 
+
+
+    /// <summary>
+    /// Get vertices
+    /// </summary>
+    // api/model/graph-vertices
+    [HttpGet("graph-vertices")]
+    public async Task<RestResultString> GetNodes()
+    {
+        if (!await serverGlobal.StandbyUntilServerReadyAsync())
+            return RestResultString.Err("Server not ready.");
+
+        var sys = _model.System;
+        CyGraph.TheSystem = sys;
+        var vertices = sys.CollectVertices().ToArray();
+        CyGraph.TheSystem = null;
+
+        var json = NewtonsoftJson.SerializeObject(vertices);
+        var xxx = NewtonsoftJson.DeserializeObject<CyVertex[]>(json);
+        return RestResultString.Ok(json);
+    }
+
     /// <summary>
     /// Get graph info: nodes and edges
     /// </summary>

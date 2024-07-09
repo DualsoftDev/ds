@@ -3,13 +3,14 @@ namespace Engine.Info
 open System.Runtime.CompilerServices
 open System.Threading.Tasks
 open Microsoft.Data.Sqlite
-open Engine.Core
 open Dual.Common.Core.FS
 open System.Data
 open Dapper
 open Dual.Common.Db
 open System.Reactive.Subjects
 open System.Threading
+open Dual.Common.Base.FS
+open Newtonsoft.Json
 
 [<AutoOpen>]
 module LoggerDB =
@@ -24,6 +25,13 @@ module LoggerDB =
         member val Properties = properties.ToArray() with get, set
         member val Storages = storages.ToArray() with get, set
         member val TagKinds = tagKinds.ToArray() with get, set
+        static member private settings =
+            let settings = new JsonSerializerSettings(TypeNameHandling = TypeNameHandling.All)
+            settings.Converters.Insert(0, new ObjTypePreservingConverter([|"Value"|]))
+            settings
+        static member Deserialize(json: string) = NewtonsoftJson.DeserializeObject<ORMLoggerDBBase>(json, ORMLoggerDBBase.settings)
+        member x.Serialize():string = NewtonsoftJson.SerializeObject(x, ORMLoggerDBBase.settings)
+
 
     type ORMLoggerDB(logDbBase:ORMLoggerDBBase) =
         member x.Model = logDbBase.Model

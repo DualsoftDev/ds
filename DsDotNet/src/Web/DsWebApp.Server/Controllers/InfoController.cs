@@ -6,6 +6,8 @@ using static Engine.Info.DBLoggerORM;
 using static Engine.Core.InfoPackageModule;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
+using static Engine.Core.ModelLoaderModule;
+using static Engine.Info.LoggerDB;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -43,6 +45,19 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
 
         return RestResult<InfoQueryResult>.Ok(new InfoQueryResult());
     }
+
+    // api/info/logdb-base
+    [HttpGet("logdb-base")]
+    public async Task<RestResultString> GetLoggerDB()
+    {
+        using var conn = serverGlobal.CreateDbConnection();
+        var modelId = 1;
+        var logDB = await ORMLoggerDBBaseExt.CreateAsync(modelId, conn, null);
+        var logDBJson = logDB.Serialize();
+
+        return RestResultString.Ok(logDBJson);
+    }
+
 
     // api/info/log-anal-info
     [HttpGet("log-anal-info")]

@@ -15,8 +15,8 @@ public interface ICyItem
 
 public abstract class CyItem : ICyItem
 {
-    public string id { get; private set; }
-    public string content { get; private set; }
+    public string id { get; /*internal*/ set; }
+    public string content { get; /*internal*/ set; }
     protected CyItem() {}
 
     protected CyItem(string id, string content)
@@ -30,8 +30,8 @@ public abstract class CyItem : ICyItem
 
 public class CyVertex : CyItem
 {
-    public string parent;
-    public string type;
+    public string parent { get; /*internal*/ set; }
+    public string type { get; /*internal*/ set; }
 
     public CyVertex() {}
 
@@ -57,9 +57,9 @@ public class CyVertex : CyItem
 
 public class CyEdge : CyItem
 {
-    public string source { get; private set; }
-    public string target { get; private set; }
-    public string type { get; private set; }
+    public string source { get; /*internal*/ set; }
+    public string target { get; /*internal*/ set; }
+    public string type { get; /*internal*/ set; }
     public CyEdge() { }
 
     public CyEdge(Edge edge)
@@ -93,7 +93,7 @@ public class CyEdge : CyItem
 
 public class CyData
 {
-    public CyItem data { get; }
+    public CyItem data { get; /*internal*/ set; }
 
     public CyData(CyItem item)
     {

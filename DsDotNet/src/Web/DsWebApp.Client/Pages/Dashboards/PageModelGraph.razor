@@ -1,6 +1,8 @@
 @* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/compound-nodes/index.html *@
 
 @page "/dashboards/graph"
+@using static Engine.Info.LoggerDB;
+@using static Engine.Info.DBLoggerORM;
 @using Engine.Info
 
 <h3>Model Graph</h3>
@@ -15,18 +17,23 @@
 
 @code {
     HubConnection _hubConnection;
+    ORMLoggerDB _logDb;
+    Dictionary<string, CyVertex> _nodeDic;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/db").StartHubAsync();
-        _hubConnection.On<string>(SK.S2CNLogChanged,
-            async logJson =>
-            {
-                //StateHasChanged();
-                var log = DBLoggerORM.ORMLog.Deserialize(logJson);
-                Console.WriteLine($"Log change detected: {log.Id}.");
-            });
 
+        var result = await Http.GetRestResultAsync<string>($"/api/info/logdb-base");
+        result.Iter(
+            logDbBaseJson =>
+            {
+                var logDbBase = ORMLoggerDBBase.Deserialize(logDbBaseJson);
+                _logDb = new ORMLoggerDB(logDbBase);
+                Console.WriteLine($"LogDB: {_logDb.TagKinds.Count}");
+            },
+            err => Console.Error.WriteLine($"Failed to get logdb-base: {err}")
+        );
+        
 
         // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
         var jss = new[]
@@ -39,20 +46,74 @@
             await JsDual.EvalExternalScript(js);
 
         /*
-        * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
-        */
+         * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
+         */
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
         var data = await Http.GetRestResultAsync<string>($"/api/model/graph");
         await data.IterAsync(
-            async json => {
+            async json =>
+            {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
                 await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
                 await JsDual.EvalExternalScript("js/cyDsGraph.js");
                 await JsDual.EvalOnGlobalModule(_snippet);
+                await JsDual.EvalOnGlobalModule(_runtimeStyles);
+
+                var optJsonNodes = await Http.GetRestResultAsync<string>($"/api/model/graph-vertices");
+                optJsonNodes.Iter(
+                    jsonNodes =>
+                    {
+                        var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(jsonNodes);
+                        foreach (var n in nodes)
+                        {
+                            Console.WriteLine($"{n.id} = {n.type}");
+                        }
+
+                        _nodeDic = nodes.ToDictionary(node => node.id);
+                        Console.WriteLine($"Got total {nodes.Length} vertices");
+                    },
+                    async err => await JsDual.Alert($"Failed to get data: {err}")
+                );
+
+                _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/db").StartHubAsync();
+                _hubConnection.On<string>(SK.S2CNLogChanged,
+                    async logJson =>
+                    {
+                        Console.WriteLine($"Got message from hub");
+
+                        var log = ORMLog.Deserialize(logJson);
+                        var vwLog = _logDb.ToView(log);
+                        var fqdn = vwLog.Fqdn;
+                        if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
+                        {
+                            var status = vwLog.TagKindName switch
+                            {
+                                "VertexTag.ready" => "R",
+                                "VertexTag.going" => "G",
+                                "VertexTag.finish" => "F",
+                                "VertexTag.homing" => "H",
+                                _ => ""
+                            };
+                            await JsDual.EvalOnGlobalModule($@"
+                            cy.$('#{fqdn}')
+                                .removeClass('R')
+                                .removeClass('G')
+                                .removeClass('F')
+                                .removeClass('H')
+                                .addClass('{status}')"
+                            );
+                            Console.WriteLine($"Log change detected: {vwLog.Id}.");
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine($"Failed to find fqdn: {fqdn}");
+                        }
+                    });
+
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
-            );
+        );
     }
 
 
@@ -217,6 +278,15 @@ $('#reset_zoom').click(() => {
     //     .addClass('active');
 });
 ";
+
+    string _runtimeStyles = @"
+    cy.style()
+        .selector('node.Call.R').style('background-color', 'grey')
+        .selector('node.Call.G').style('background-color', 'green')
+        .selector('node.Call.F').style('background-color', 'blue')
+        .selector('node.Call.H').style('background-color', 'yellow')
+";
+
 
 
 }

@@ -29,11 +29,11 @@ type internal NewtonsoftJson = Newtonsoft.Json.JsonConvert
 /// Null 이면 사전 지정된 start time 을 사용.  (사전 지정된 값이 없을 경우, DateTime.MinValue 와 동일)
 /// 모든 데이터 조회하려면 DateTime.MinValue 를 사용
 [<AllowNullLiteral>]
-type QuerySet(commonAppSettings:DSCommonAppSettings, modelId:int, startAt: DateTime option, endAt: DateTime option) =
+type QueryCriteria(commonAppSettings:DSCommonAppSettings, modelId:int, startAt: DateTime option, endAt: DateTime option) =
     //new() = QuerySet(getNull<DSCommonAppSettings>(), -1, None, None)
 
     new(commonAppSettings, modelId, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
-        QuerySet(commonAppSettings, modelId, startAt |> Option.ofNullable, endAt |> Option.ofNullable)
+        QueryCriteria(commonAppSettings, modelId, startAt |> Option.ofNullable, endAt |> Option.ofNullable)
 
     member x.ModelId = modelId
     /// 사용자 지정: 조회 start time
@@ -278,7 +278,7 @@ CREATE VIEW [{Vn.Storage}] AS
         member val LastLog: Log option = None with get, set
 
     /// DB logging 관련 전체 설정
-    and LogSet(querySet: QuerySet, systems: DsSystem seq, storages: Storage seq, readerWriterType: DBLoggerType) as this =
+    and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: Storage seq, readerWriterType: DBLoggerType) as this =
         let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
 
         let summaryDic =
@@ -294,7 +294,7 @@ CREATE VIEW [{Vn.Storage}] AS
         let disposables = new CompositeDisposable()
 
         member x.Systems = systems
-        member val QuerySet = querySet with get, set
+        member val QuerySet = queryCriteria with get, set
         member x.Summaries = summaryDic
         member x.Storages = storageDic
         member x.StoragesById = storageByIdDic
@@ -327,7 +327,7 @@ CREATE VIEW [{Vn.Storage}] AS
         )
 
 
-    type QuerySet with
+    type QueryCriteria with
 
         /// 조회 기간 target 설정 값 필요시 db 에 반영하고, target 에 맞게 조회 기간 변경
         member x.SetQueryRangeAsync(modelId:int, conn: IDbConnection, tr: IDbTransaction) =

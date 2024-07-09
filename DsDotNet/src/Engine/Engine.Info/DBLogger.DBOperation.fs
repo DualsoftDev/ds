@@ -73,8 +73,8 @@ module internal DBLoggerImpl =
 
     let private createLogInfoSetCommonAsync
         (
-            querySet: QuerySet,
-            commonAppSetting: DSCommonAppSettings,
+            queryCriteria: QueryCriteria,
+            commonAppSettings: DSCommonAppSettings,
             systems: DsSystem seq,
             conn: IDbConnection,
             tr: IDbTransaction,
@@ -91,7 +91,7 @@ module internal DBLoggerImpl =
                 |> map Storage
                 |> toArray
 
-            let connStr = commonAppSetting.ConnectionString
+            let connStr = commonAppSettings.ConnectionString
             if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connStr}"
 
@@ -112,16 +112,16 @@ module internal DBLoggerImpl =
                 if readerWriterType = DBLoggerType.Reader then
                     failwithlogf $"Database can't be sync'ed for {connStr}"
                 else
-                    let modelId = querySet.CommonAppSettings.LoggerDBSettings.ModelId
+                    let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
                     for s in newStorages do
                         let! id =
                             conn.InsertAndQueryLastRowIdAsync(
                                 tr,
                                 $"""INSERT INTO [{Tn.Storage}]
-                                (name, fqdn, tagKind, dataType, modelId)
-                                VALUES (@Name, @Fqdn, @TagKind, @DataType, @ModelId)
-                                ;
-                            """,
+                                    (name, fqdn, tagKind, dataType, modelId)
+                                    VALUES (@Name, @Fqdn, @TagKind, @DataType, @ModelId)
+                                    ;
+                                """,
                                 {| Name = s.Name
                                    Fqdn = s.Fqdn
                                    TagKind = s.TagKind
@@ -131,7 +131,7 @@ module internal DBLoggerImpl =
 
                         s.Id <- id
 
-            return new LogSet(querySet, systems, existingStorages @ newStorages, readerWriterType)
+            return new LogSet(queryCriteria, systems, existingStorages @ newStorages, readerWriterType)
         }
 
     /// DB log writer.  Runtime engine
@@ -140,7 +140,7 @@ module internal DBLoggerImpl =
         let queue = ConcurrentQueue<ORMLog>()
 
         /// 주기적으로 memory -> DB 로 log 를 write
-        let dequeAndWriteDBAsync (nPeriod: int64, commonAppSetting: DSCommonAppSettings) =
+        let dequeAndWriteDBAsync (nPeriod: int64, commonAppSettings: DSCommonAppSettings) =
             verify (logSet.ReaderWriterType.HasFlag(DBLoggerType.Writer))
 
             // 큐를 배열로 바꾸고 비우는 함수
@@ -165,13 +165,13 @@ module internal DBLoggerImpl =
 
                 if newLogs.any () then
                     logDebug $"{DateTime.Now}: Writing {newLogs.length ()} new logs."
-                    use conn = commonAppSetting.CreateConnection()
+                    use conn = commonAppSettings.CreateConnection()
                     use! tr = conn.BeginTransactionAsync()
 
                     if (logSet.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
                         logSet.BuildIncremental newLogs
-                    let modelId = commonAppSetting.LoggerDBSettings.ModelId
+                    let modelId = commonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
@@ -221,22 +221,23 @@ module internal DBLoggerImpl =
         let enqueLogForInsert (x: DsLog) = enqueLogsForInsert ([ x ])
 
 
-        let createLogInfoSetForWriterAsync (querySet: QuerySet) (commonAppSetting: DSCommonAppSettings) (systems: DsSystem seq) : Task<LogSet> =
+        let createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
             task {
-                use conn = commonAppSetting.CreateConnection()
+                let commonAppSettings = queryCriteria.CommonAppSettings
+                use conn = commonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
                 let mutable readerWriterType = DBLoggerType.Writer
-                if querySet <> null then
+                if queryCriteria <> null then
                     readerWriterType <- readerWriterType ||| DBLoggerType.Reader
-                    do! querySet.SetQueryRangeAsync(querySet.ModelId, conn, tr)
+                    do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
 
-                let! logSet = createLogInfoSetCommonAsync(querySet, commonAppSetting, systems, conn, tr, readerWriterType)
-                if querySet <> null then
+                let! logSet = createLogInfoSetCommonAsync(queryCriteria, commonAppSettings, systems, conn, tr, readerWriterType)
+                if queryCriteria <> null then
                     let! existingLogs =
                         conn.QueryAsync<ORMLog>(
                             $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
-                            {| START = querySet.StartTime
-                               END = querySet.EndTime |}
+                            {| START = queryCriteria.StartTime
+                               END = queryCriteria.EndTime |}
                         )
                     logSet.InitializeForReader(existingLogs)
 
@@ -316,32 +317,32 @@ module internal DBLoggerImpl =
             }
 
         /// Log DB schema 생성
-        let initializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings) (cleanExistingDb:bool) =
+        let initializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
-                let loggerDBSettings = commonAppSetting.LoggerDBSettings
+                let loggerDBSettings = commonAppSettings.LoggerDBSettings
                 let connStr = loggerDBSettings.ConnectionString
                 let (modelZipPath, dbWriter:string) = loggerDBSettings.ModelFilePath, loggerDBSettings.DbWriter
                 let! modelId = createLoggerDBSchemaAsync connStr modelZipPath dbWriter cleanExistingDb
-                commonAppSetting.LoggerDBSettings.ModelId <- modelId
+                commonAppSettings.LoggerDBSettings.ModelId <- modelId
             }
 
 
         let initializeLogWriterOnDemandAsync
             (
-                querySet: QuerySet,      // reader + writer 인 경우에만 non null 값
-                commonAppSetting: DSCommonAppSettings,
+                queryCriteria: QueryCriteria,      // reader + writer 인 경우에만 non null 값
                 systems: DsSystem seq,
                 modelCompileInfo: ModelCompileInfo,
                 cleanExistingDb: bool
             ) =
             task {
-                let connStr = commonAppSetting.ConnectionString
-                do! initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
+                let commonAppSettings = queryCriteria.CommonAppSettings
+                let connStr = commonAppSettings.ConnectionString
+                do! initializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
                 do! fillLoggerDBSchemaAsync connStr modelCompileInfo
-                let! logSet_ = createLogInfoSetForWriterAsync querySet commonAppSetting systems
+                let! logSet_ = createLogInfoSetForWriterAsync queryCriteria systems
                 logSet <- logSet_
 
-                commonAppSetting.LoggerDBSettings.SyncInterval.Subscribe(fun counter -> writePeriodicAsync(counter, commonAppSetting).Wait())
+                commonAppSettings.LoggerDBSettings.SyncInterval.Subscribe(fun counter -> writePeriodicAsync(counter, commonAppSettings).Wait())
                 |> logSet_.Disposables.Add
 
                 return logSet_
@@ -352,16 +353,16 @@ module internal DBLoggerImpl =
     [<AutoOpen>]
     module Reader =
         /// 주기적으로 DB -> memory 로 log 를 read
-        let readPeriodicAsync (nPeriod: int64, querySet: QuerySet) =
+        let readPeriodicAsync (nPeriod: int64, queryCriteria: QueryCriteria) =
             task {
-                use conn = querySet.CommonAppSettings.CreateConnection()
+                use conn = queryCriteria.CommonAppSettings.CreateConnection()
 
                 if nPeriod % 10L = 0L then
-                    let! dbDsConfigJsonPath = queryPropertyAsync (querySet.ModelId, PropName.ConfigPath, conn, null)
+                    let! dbDsConfigJsonPath = queryPropertyAsync (queryCriteria.ModelId, PropName.ConfigPath, conn, null)
 
-                    if dbDsConfigJsonPath <> querySet.DsConfigJsonPath then
+                    if dbDsConfigJsonPath <> queryCriteria.DsConfigJsonPath then
                         failwithlogf
-                            $"DS Source file change detected:\r\n\t{dbDsConfigJsonPath} <> {querySet.DsConfigJsonPath}"
+                            $"DS Source file change detected:\r\n\t{dbDsConfigJsonPath} <> {queryCriteria.DsConfigJsonPath}"
 
                 let lastLogId =
                     match logSet.LastLog with
@@ -381,23 +382,23 @@ module internal DBLoggerImpl =
             }
 
 
-        let createLoggerInfoSetForReaderAsync (querySet: QuerySet, commonAppSetting: DSCommonAppSettings, systems: DsSystem seq) : Task<LogSet> =
+        let createLoggerInfoSetForReaderAsync (queryCriteria: QueryCriteria, commonAppSettings: DSCommonAppSettings, systems: DsSystem seq) : Task<LogSet> =
             task {
-                use conn = querySet.CommonAppSettings.CreateConnection()
+                use conn = queryCriteria.CommonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
 
-                let modelId = querySet.ModelId
+                let modelId = queryCriteria.ModelId
                 let! dsConfigJson = queryPropertyAsync (modelId, PropName.ConfigPath, conn, tr)
-                querySet.DsConfigJsonPath <- dsConfigJson
+                queryCriteria.DsConfigJsonPath <- dsConfigJson
 
-                do! querySet.SetQueryRangeAsync(modelId, conn, tr)
-                let! logSet = createLogInfoSetCommonAsync (querySet, commonAppSetting, systems, conn, tr, DBLoggerType.Reader)
+                do! queryCriteria.SetQueryRangeAsync(modelId, conn, tr)
+                let! logSet = createLogInfoSetCommonAsync (queryCriteria, commonAppSettings, systems, conn, tr, DBLoggerType.Reader)
 
                 let! existingLogs =
                     conn.QueryAsync<ORMLog>(
                         $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
-                        {| START = querySet.StartTime
-                           END = querySet.EndTime |}
+                        {| START = queryCriteria.StartTime
+                           END = queryCriteria.EndTime |}
                     )
 
                 do! checkDbForReaderAsync (conn, tr)
@@ -411,21 +412,21 @@ module internal DBLoggerImpl =
 
 
 
-        let initializeLogReaderOnDemandAsync (querySet: QuerySet, systems: DsSystem seq) =
+        let initializeLogReaderOnDemandAsync (queryCriteria: QueryCriteria, systems: DsSystem seq) =
 
             task {
-                let loggerDBSettings = querySet.CommonAppSettings.LoggerDBSettings
-                let! logSet_ = createLoggerInfoSetForReaderAsync (querySet, querySet.CommonAppSettings, systems)
+                let loggerDBSettings = queryCriteria.CommonAppSettings.LoggerDBSettings
+                let! logSet_ = createLoggerInfoSetForReaderAsync (queryCriteria, queryCriteria.CommonAppSettings, systems)
                 logSet <- logSet_
 
-                loggerDBSettings.SyncInterval.Subscribe(fun counter -> readPeriodicAsync(counter, querySet).Wait())
+                loggerDBSettings.SyncInterval.Subscribe(fun counter -> readPeriodicAsync(counter, queryCriteria).Wait())
                 |> logSet_.Disposables.Add
 
                 return logSet_
             }
 
-        let changeQueryDurationAsync (logSet: LogSet, querySet: QuerySet) =
-            initializeLogReaderOnDemandAsync (querySet, logSet.Systems)
+        let changeQueryDurationAsync (logSet: LogSet, queryCriteria: QueryCriteria) =
+            initializeLogReaderOnDemandAsync (queryCriteria, logSet.Systems)
 
 
 

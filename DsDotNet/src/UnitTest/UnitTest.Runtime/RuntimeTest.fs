@@ -35,7 +35,8 @@ module RuntimeTest =
 
         let mci = ModelCompileInfo(runtimeModel.JsonPath, runtimeModel.JsonPath)
         let cleanExistingDb = true      //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
-        DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci, cleanExistingDb).Wait()
+        let queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), Nullable<DateTime>());
+        DBLogger.InitializeLogWriterOnDemandAsync(queryCriteria, systems, mci, cleanExistingDb).Wait()
         DsSimulator.Do(runtimeModel.Cpu, 3000) |> Assert.True //값변경있으면서 구동하면 true
 
 

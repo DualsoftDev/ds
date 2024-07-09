@@ -1,9 +1,7 @@
 using Engine.Core;
 using Engine.Info;
 using Engine.Runtime;
-using Engine.TestSimulator;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -27,10 +25,11 @@ namespace Engine.TestSimulator
             RuntimeModel runModel = new(testFile, PlatformTarget.WINDOWS);
 
             DsSystem[] systems = new DsSystem[] { runModel.System };
-            DSCommonAppSettings commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
 
             ModelCompileInfo mci = new(runModel.JsonPath, runModel.JsonPath);
-            _ = await DBLogger.InitializeLogWriterOnDemandAsync(commonAppSettings, systems, mci, false);
+            DSCommonAppSettings commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
+            var queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), null);
+            _ = await DBLogger.InitializeLogWriterOnDemandAsync(queryCriteria, systems, mci, false);
             _ = DsSimulator.Do(runModel.Cpu, 10000);
             Console.ReadKey();  
         }

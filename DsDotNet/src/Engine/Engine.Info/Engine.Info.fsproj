@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
@@ -13,7 +13,7 @@
 		<Compile Include="DBLogger.ORM.fs" />
         <Compile Include="DBLogger.Query.fs" />
         <Compile Include="DBLogger.DBOperation.fs" />
-        <Compile Include="DBLogger.ORMLoggerDB.fs" />
+        <Compile Include="DBLogger.ORMDBSkeleton.fs" />
         <Compile Include="DBLogger.fs" />
         <Compile Include="DBLog.fs" />
         <Compile Include="DBLogger.Api.fs" />

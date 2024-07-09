@@ -52,7 +52,7 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
     {
         using var conn = serverGlobal.CreateDbConnection();
         var modelId = 1;
-        var logDB = await ORMLoggerDBBaseExt.CreateAsync(modelId, conn, null);
+        var logDB = await ORMDBSkeletonDTOExt.CreateAsync(modelId, conn, null);
         var logDBJson = logDB.Serialize();
 
         return RestResultString.Ok(logDBJson);

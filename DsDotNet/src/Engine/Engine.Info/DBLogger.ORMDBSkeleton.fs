@@ -18,9 +18,10 @@ module LoggerDB =
     /// ORMLog 제외한 나머지 DB 항목의 subject
     let DBSubject = new Subject<IDBRow>()
 
-    /// Log 혹은 Storage 항목으로부터 뷰 항목 생성하기 위해서 필요한 data table 항목 cache (ORMVwLog, VwStorage 생성)
-    type ORMLoggerDBBase(model:ORMModel, properties:ORMProperty seq, storages:ORMStorage seq, tagKinds:ORMTagKind seq) =
-        new() = ORMLoggerDBBase(getNull<ORMModel> (), [], [], [])
+    /// Log 혹은 Storage 항목으로부터 뷰 항목 생성하기 위해서 필요한 data table 항목 cache (ORMVwLog, VwStorage 생성) 용 DTO(Data Transfer Object)
+    /// Json 으로 Serialize/Deserialize 가능
+    type ORMDBSkeletonDTO(model:ORMModel, properties:ORMProperty seq, storages:ORMStorage seq, tagKinds:ORMTagKind seq) =
+        new() = ORMDBSkeletonDTO(getNull<ORMModel> (), [], [], [])
         member val Model = model with get, set
         member val Properties = properties.ToArray() with get, set
         member val Storages = storages.ToArray() with get, set
@@ -29,17 +30,17 @@ module LoggerDB =
             let settings = new JsonSerializerSettings(TypeNameHandling = TypeNameHandling.All)
             settings.Converters.Insert(0, new ObjTypePreservingConverter([|"Value"|]))
             settings
-        static member Deserialize(json: string) = NewtonsoftJson.DeserializeObject<ORMLoggerDBBase>(json, ORMLoggerDBBase.settings)
-        member x.Serialize():string = NewtonsoftJson.SerializeObject(x, ORMLoggerDBBase.settings)
+        static member Deserialize(json: string) = NewtonsoftJson.DeserializeObject<ORMDBSkeletonDTO>(json, ORMDBSkeletonDTO.settings)
+        member x.Serialize():string = NewtonsoftJson.SerializeObject(x, ORMDBSkeletonDTO.settings)
 
 
-    type ORMLoggerDB(logDbBase:ORMLoggerDBBase) =
+    /// Log 혹은 Storage 항목으로부터 뷰 항목 생성하기 위해서 필요한 data table 항목 cache (ORMVwLog, VwStorage 생성)
+    type ORMDBSkeleton(logDbBase:ORMDBSkeletonDTO) =
         member x.Model = logDbBase.Model
         member x.Properties = logDbBase.Properties
         member val Storages = logDbBase.Storages |> map(fun s -> s.Id, s) |> Tuple.toDictionary
         member val TagKinds = logDbBase.TagKinds |> map(fun t -> t.Id, t) |> Tuple.toDictionary
 
-    /// db 의 log table 을 주기적으로 모니터링하여 추가된 row 가 존재하면 DBLogSubject 에 log 를 발행
     /// db 의 log table 을 주기적으로 모니터링하여 추가된 row 가 존재하면 DBLogSubject 에 log 를 발행
     let StartLogMonitor(connStr: string, sleepMs:int, cancellationToken:CancellationToken) =
         let monitorTask () =
@@ -68,9 +69,9 @@ module LoggerDB =
 
 [<AutoOpen>]
 [<Extension>]
-type ORMLoggerDBBaseExt =
+type ORMDBSkeletonDTOExt =
     [<Extension>]
-    static member CreateAsync(modelId:int, conn:IDbConnection, tr:IDbTransaction): Task<ORMLoggerDBBase> =
+    static member CreateAsync(modelId:int, conn:IDbConnection, tr:IDbTransaction): Task<ORMDBSkeletonDTO> =
         task {
             use _ = conn.TransactionScope(tr)
             let! models     = conn.QueryAsync<ORMModel>   ($"SELECT * FROM model    WHERE id      = {modelId}", tr)
@@ -79,15 +80,16 @@ type ORMLoggerDBBaseExt =
             let! tagKinds   = conn.QueryAsync<ORMTagKind> ($"SELECT * FROM tagKind  WHERE modelId = {modelId}", tr)
 
             let model = models |> Seq.head
-            return ORMLoggerDBBase(model, properties, storages, tagKinds)
+            return ORMDBSkeletonDTO(model, properties, storages, tagKinds)
         }
     [<Extension>]
-    static member CreateAsync(modelId:int, connStr:string): Task<ORMLoggerDBBase> =
+    static member CreateAsync(modelId:int, connStr:string): Task<ORMDBSkeletonDTO> =
         use conn = new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
-        ORMLoggerDBBaseExt.CreateAsync(modelId, conn, null)
+        ORMDBSkeletonDTOExt.CreateAsync(modelId, conn, null)
 
+    /// ORMLog 를 다른 table join 을 통해서 ORM
     [<Extension>]
-    static member ToView(db:ORMLoggerDB, log:ORMLog): ORMVwLog =
+    static member ToView(db:ORMDBSkeleton, log:ORMLog): ORMVwLog =
         let stg = db.Storages[log.StorageId]
         let tagKind = db.TagKinds[stg.TagKind]
         ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value)

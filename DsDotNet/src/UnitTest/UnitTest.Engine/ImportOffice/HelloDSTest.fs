@@ -144,7 +144,7 @@ module HelloDSTestModule =
         member __.``Load logger database test``() =
             let conn = createConnection()
             let loggerDb = 
-                ORMLoggerDBBaseExt.CreateAsync(1, conn, null).Result |> ORMLoggerDB
+                ORMDBSkeletonDTOExt.CreateAsync(1, conn, null).Result |> ORMDBSkeleton
             let log1 = conn.QueryFirst<ORMLog>($"SELECT * FROM {Vn.Log} WHERE id = 1;")
             let vwLog1 = loggerDb.ToView(log1)
 

@@ -21,7 +21,7 @@
 @code {
     HubConnection _hubConnection;
     IDisposable _hubSubscription;
-    ORMLoggerDB _logDb;
+    ORMDBSkeleton _logDb;
     Dictionary<string, CyVertex> _nodeDic;
     protected override async Task OnInitializedAsync()
     {
@@ -32,8 +32,8 @@
         result.Iter(
             logDbBaseJson =>
             {
-                var logDbBase = ORMLoggerDBBase.Deserialize(logDbBaseJson);
-                _logDb = new ORMLoggerDB(logDbBase);
+                var logDbBase = ORMDBSkeletonDTO.Deserialize(logDbBaseJson);
+                _logDb = new ORMDBSkeleton(logDbBase);
                 Console.WriteLine($"LogDB: {_logDb.TagKinds.Count}");
             },
             err => Console.Error.WriteLine($"Failed to get logdb-base: {err}")

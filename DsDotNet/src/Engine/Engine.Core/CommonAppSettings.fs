@@ -26,6 +26,7 @@ type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, 
 
 /// 여러 application(.exe) 들 간의 공유할 정보
 /// "CommonAppSettings.json" 파일
+[<AllowNullLiteral>]
 type DSCommonAppSettings(loggerDBSettings:LoggerDBSettings) =
     member val HmiWebServer = "" with get, set
     member val LoggerDBSettings = loggerDBSettings with get, set

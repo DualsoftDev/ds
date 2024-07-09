@@ -1,7 +1,7 @@
 namespace Engine.Info
 
 open System
-open System.Runtime.CompilerServices
+open Microsoft.Data.Sqlite
 open Engine.Core
 open Dual.Common.Base.FS
 open Dual.Common.Core.FS
@@ -29,11 +29,11 @@ type internal NewtonsoftJson = Newtonsoft.Json.JsonConvert
 /// Null 이면 사전 지정된 start time 을 사용.  (사전 지정된 값이 없을 경우, DateTime.MinValue 와 동일)
 /// 모든 데이터 조회하려면 DateTime.MinValue 를 사용
 [<AllowNullLiteral>]
-type QuerySet(modelId:int, startAt: DateTime option, endAt: DateTime option) =
-    new() = QuerySet(-1, None, None)
+type QuerySet(commonAppSettings:DSCommonAppSettings, modelId:int, startAt: DateTime option, endAt: DateTime option) =
+    //new() = QuerySet(getNull<DSCommonAppSettings>(), -1, None, None)
 
-    new(modelId:int, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
-        QuerySet(modelId, startAt |> Option.ofNullable, endAt |> Option.ofNullable)
+    new(commonAppSettings, modelId, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
+        QuerySet(commonAppSettings, modelId, startAt |> Option.ofNullable, endAt |> Option.ofNullable)
 
     member x.ModelId = modelId
     /// 사용자 지정: 조회 start time
@@ -42,7 +42,7 @@ type QuerySet(modelId:int, startAt: DateTime option, endAt: DateTime option) =
     member x.TargetEnd = endAt
     member val StartTime = startAt |? DateTime.MinValue with get, set
     member val EndTime = endAt |? DateTime.MaxValue with get, set
-    member val CommonAppSettings: DSCommonAppSettings = getNull<DSCommonAppSettings> () with get, set
+    member val CommonAppSettings = commonAppSettings
     member val DsConfigJsonPath = "" with get, set
 
 [<AutoOpen>]
@@ -361,3 +361,12 @@ CREATE VIEW [{Vn.Storage}] AS
 
                 logInfo $"Query range set: [{x.StartTime} ~ {x.EndTime}]"
             }
+
+
+    let createConnectionWith (connStr) =
+        new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
+
+    type DSCommonAppSettings with
+        member x.ConnectionString = x.LoggerDBSettings.ConnectionString
+        member x.CreateConnection(): SqliteConnection = createConnectionWith x.ConnectionString
+            

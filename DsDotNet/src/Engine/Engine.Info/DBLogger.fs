@@ -8,7 +8,7 @@ open System.IO
 
 
 type DBLogger() =
-    static let querySet = QuerySet()
+    //static let querySet = QuerySet()
     //static let querySet = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
 
     static member EnqueLogForInsert(log: DsLog) =
@@ -72,12 +72,12 @@ type DBLogger() =
     /// 조회 기간 변경 (reader)
     /// call site 에서는 기존 인자로 주어진 logSet 은 자동 dispose 되며, 새로 return 되는 logSet 을 이용하여야 한다.
     [<Obsolete("Not yet implemented")>]
-    static member ChangeQueryDurationAsync(logSet: ILogSet, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
+    static member ChangeQueryDurationAsync(commonAppSettings:DSCommonAppSettings, logSet: ILogSet, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
         task {
             let logSet = logSet :?> LogSet
             failwith "Not yet implemented"
             let modelId = -1
-            let querySet = QuerySet(modelId, startAt, endAt)
+            let querySet = QuerySet(commonAppSettings, modelId, startAt, endAt)
             let! newLogSet = DBLoggerImpl.Reader.changeQueryDurationAsync (logSet, querySet)
             dispose (logSet :> IDisposable)
             return newLogSet :> ILogSet

@@ -50,7 +50,7 @@ module DBLoggerTestModule =
             createStorage "my.Test2.TRXERR" (int VertexTag.errorTRx)
         ]
 
-        let querySet = QuerySet()
+        let querySet = QuerySet(getNull<DSCommonAppSettings>(), -1, None, None)
         let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
         let fqdn, kind = cyl1Error.Fqdn, int VertexTag.errorTRx
 

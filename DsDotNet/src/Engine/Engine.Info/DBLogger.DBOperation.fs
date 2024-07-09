@@ -3,7 +3,6 @@ namespace Engine.Info
 open System
 open Dapper
 open Engine.Core
-open Microsoft.Data.Sqlite
 open Dual.Common.Core.FS
 open Dual.Common.Db
 open System.Data
@@ -15,11 +14,6 @@ open DBLoggerORM
 
 [<AutoOpen>]
 module internal DBLoggerImpl =
-    type private Observable = System.Reactive.Linq.Observable
-
-    let createConnectionWith (connStr) =
-        new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
-
     let getNewTagKindInfosAsync (conn: IDbConnection, tr: IDbTransaction) =
         let tagKindInfos = GetAllTagKinds ()
 
@@ -97,7 +91,7 @@ module internal DBLoggerImpl =
                 |> map Storage
                 |> toArray
 
-            let connStr = commonAppSetting.LoggerDBSettings.ConnectionString
+            let connStr = commonAppSetting.ConnectionString
             if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connStr}"
 
@@ -170,9 +164,8 @@ module internal DBLoggerImpl =
                 let newLogs = drainQueueToArray (queue)
 
                 if newLogs.any () then
-                    let connStr = commonAppSetting.LoggerDBSettings.ConnectionString
                     logDebug $"{DateTime.Now}: Writing {newLogs.length ()} new logs."
-                    use conn = createConnectionWith connStr
+                    use conn = commonAppSetting.CreateConnection()
                     use! tr = conn.BeginTransactionAsync()
 
                     if (logSet.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
@@ -230,8 +223,7 @@ module internal DBLoggerImpl =
 
         let createLogInfoSetForWriterAsync (querySet: QuerySet) (commonAppSetting: DSCommonAppSettings) (systems: DsSystem seq) : Task<LogSet> =
             task {
-                let connStr = commonAppSetting.LoggerDBSettings.ConnectionString
-                use conn = createConnectionWith connStr
+                use conn = commonAppSetting.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
                 let mutable readerWriterType = DBLoggerType.Writer
                 if querySet <> null then
@@ -343,7 +335,7 @@ module internal DBLoggerImpl =
                 cleanExistingDb: bool
             ) =
             task {
-                let connStr = commonAppSetting.LoggerDBSettings.ConnectionString
+                let connStr = commonAppSetting.ConnectionString
                 do! initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
                 do! fillLoggerDBSchemaAsync connStr modelCompileInfo
                 let! logSet_ = createLogInfoSetForWriterAsync querySet commonAppSetting systems
@@ -362,8 +354,7 @@ module internal DBLoggerImpl =
         /// 주기적으로 DB -> memory 로 log 를 read
         let readPeriodicAsync (nPeriod: int64, querySet: QuerySet) =
             task {
-                let connStr = querySet.CommonAppSettings.LoggerDBSettings.ConnectionString
-                use conn = createConnectionWith connStr
+                use conn = querySet.CommonAppSettings.CreateConnection()
 
                 if nPeriod % 10L = 0L then
                     let! dbDsConfigJsonPath = queryPropertyAsync (querySet.ModelId, PropName.ConfigPath, conn, null)
@@ -392,8 +383,7 @@ module internal DBLoggerImpl =
 
         let createLoggerInfoSetForReaderAsync (querySet: QuerySet, commonAppSetting: DSCommonAppSettings, systems: DsSystem seq) : Task<LogSet> =
             task {
-                let connStr = querySet.CommonAppSettings.LoggerDBSettings.ConnectionString
-                use conn = createConnectionWith connStr
+                use conn = querySet.CommonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
 
                 let modelId = querySet.ModelId

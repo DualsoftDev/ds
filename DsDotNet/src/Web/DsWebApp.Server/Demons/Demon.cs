@@ -64,7 +64,7 @@ public partial class Demon : BackgroundService
 
             _modelSubscription.Clear();
             var modelId = 1;     // todo: modelId 수정 필요
-            var querySet = new QuerySet(modelId, DateTime.Now.Date.AddDays(-1), null) { CommonAppSettings = _serverGlobal.DsCommonAppSettings };
+            var querySet = new QuerySet(_serverGlobal.DsCommonAppSettings, modelId, DateTime.Now.Date.AddDays(-1), null);
             var logSetW = DBLogger.InitializeLogReaderWriterOnDemandAsync(querySet, _serverGlobal.DsCommonAppSettings, systems, mci, cleanExistingDb:false).Result;
             _modelSubscription.Add(logSetW);
             IDisposable subscription =

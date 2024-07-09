@@ -32,7 +32,7 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
         <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.13"/>
         <PackageReference Include="DualSoft-Common-Core" Version="0.2.8"/>
-        <PackageReference Include="DualSoft-Common-Db" Version="0.2.5"/>
+        <PackageReference Include="DualSoft-Common-Db" Version="0.2.6"/>
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9"/>
         <PackageReference Include="Dapper" Version="2.0.143"/>
     </ItemGroup>

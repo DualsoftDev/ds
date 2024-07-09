@@ -75,7 +75,9 @@ type DBLogger() =
     static member ChangeQueryDurationAsync(logSet: ILogSet, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
         task {
             let logSet = logSet :?> LogSet
-            let querySet = QuerySet(startAt, endAt)
+            failwith "Not yet implemented"
+            let modelId = -1
+            let querySet = QuerySet(modelId, startAt, endAt)
             let! newLogSet = DBLoggerImpl.Reader.changeQueryDurationAsync (logSet, querySet)
             dispose (logSet :> IDisposable)
             return newLogSet :> ILogSet

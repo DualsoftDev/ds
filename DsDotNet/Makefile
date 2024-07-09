@@ -11,9 +11,9 @@ tmp-link:
 
 clean:
 	@echo "Removing all subdriectory named [bin] or [obj] or [.vs] on [`pwd`].."
+	-@rm -rf .vs *.idea
 	-@rm -rf /c/Users/kwak/.nuget/packages/dual*
 	-@find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +
-	-@find . -type d \( -name ".vs" -o -name '*.idea' \) -exec rm -rf {} +
 	make dotnet-restore
 
 # copy-template if not exists:

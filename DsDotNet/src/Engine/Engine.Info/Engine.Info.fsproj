@@ -11,6 +11,7 @@
         <None Include="SQL.md" />
         <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="DBLogger.ORM.fs" />
+		<Compile Include="DBLogger.ORMLoggerDB.fs" />
         <Compile Include="DBLogger.Query.fs" />
         <Compile Include="DBLogger.DBOperation.fs" />
         <Compile Include="DBLogger.fs" />
@@ -22,12 +23,13 @@
     </ItemGroup>
 
     <ItemGroup>
+		<!-- <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" /> -->
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
 		<PackageReference Include="DualSoft-Common-Core" Version="0.2.8" />
-		<PackageReference Include="DualSoft-Common-Db" Version="0.2.5" />
+		<PackageReference Include="DualSoft-Common-Db" Version="0.2.6" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9" />
         <PackageReference Include="Dapper" Version="2.0.143" />
     </ItemGroup>

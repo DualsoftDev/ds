@@ -239,7 +239,7 @@ module internal DBLoggerImpl =
                 let mutable readerWriterType = DBLoggerType.Writer
                 if querySet <> null then
                     readerWriterType <- readerWriterType ||| DBLoggerType.Reader
-                    do! querySet.SetQueryRangeAsync(conn, tr)
+                    do! querySet.SetQueryRangeAsync(querySet.ModelId, conn, tr)
 
                 let! logSet = createLogInfoSetCommonAsync (querySet, systems, conn, tr, readerWriterType)
                 if querySet <> null then
@@ -264,7 +264,6 @@ module internal DBLoggerImpl =
                     conn.DropDatabase();
 
                 use! tr = conn.BeginTransactionAsync()
-
                 let! exists = conn.IsTableExistsAsync(Tn.Storage)
 
                 if not exists then
@@ -306,22 +305,25 @@ module internal DBLoggerImpl =
                 let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
 
                 use conn = createConnection ()
+                let modelId = 1     // todo: modelId 추후 수정 필요
 
                 do!
                     conn.ExecuteSilentlyAsync(
                         $"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                          (name, value)
-                                          VALUES(@Name, @Value);""",
+                                          (name, value, modelId)
+                                          VALUES(@Name, @Value, @ModelId);""",
                         {| Name = PropName.PptPath
-                           Value = pptPath |} )
+                           Value = pptPath
+                           ModelId = modelId |} )
 
                 do!
                     conn.ExecuteSilentlyAsync(
                         $"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                          (name, value)
-                                          VALUES(@Name, @Value);""",
+                                          (name, value, modelId)
+                                          VALUES(@Name, @Value, @ModelId);""",
                         {| Name = PropName.ConfigPath
-                           Value = config |} )
+                           Value = config
+                           ModelId = modelId |} )
             }
 
         /// Log DB schema 생성
@@ -367,7 +369,7 @@ module internal DBLoggerImpl =
                 use conn = createConnection ()
 
                 if nPeriod % 10L = 0L then
-                    let! dbDsConfigJsonPath = queryPropertyAsync (PropName.ConfigPath, conn, null)
+                    let! dbDsConfigJsonPath = queryPropertyAsync (querySet.ModelId, PropName.ConfigPath, conn, null)
 
                     if dbDsConfigJsonPath <> querySet.DsConfigJsonPath then
                         failwithlogf
@@ -396,10 +398,11 @@ module internal DBLoggerImpl =
                 use conn = createConnection ()
                 use! tr = conn.BeginTransactionAsync()
 
-                let! dsConfigJson = queryPropertyAsync (PropName.ConfigPath, conn, tr)
+                let modelId = querySet.ModelId
+                let! dsConfigJson = queryPropertyAsync (modelId, PropName.ConfigPath, conn, tr)
                 querySet.DsConfigJsonPath <- dsConfigJson
 
-                do! querySet.SetQueryRangeAsync(conn, tr)
+                do! querySet.SetQueryRangeAsync(modelId, conn, tr)
                 let! logSet = createLogInfoSetCommonAsync (querySet, systems, conn, tr, DBLoggerType.Reader)
 
                 let! existingLogs =
@@ -463,4 +466,6 @@ module internal DBLoggerImpl =
     /// DS json config file 의 경로를 반환
     let queryPropertyDsConfigJsonPathWithConnectionStringAsync (connectionString: string) =
         use conn = createConnectionWith (connectionString)
-        queryPropertyAsync (PropName.ConfigPath, conn, null)
+        failwith "Not yet implemented"
+        let modelId = -1
+        queryPropertyAsync (modelId, PropName.ConfigPath, conn, null)

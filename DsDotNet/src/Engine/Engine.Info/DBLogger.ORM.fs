@@ -1,6 +1,7 @@
 namespace Engine.Info
 
 open System
+open System.Runtime.CompilerServices
 open Engine.Core
 open Dual.Common.Core.FS
 open System.Collections.Generic
@@ -25,12 +26,13 @@ type DBLoggerType =
 /// Null 이면 사전 지정된 start time 을 사용.  (사전 지정된 값이 없을 경우, DateTime.MinValue 와 동일)
 /// 모든 데이터 조회하려면 DateTime.MinValue 를 사용
 [<AllowNullLiteral>]
-type QuerySet(startAt: DateTime option, endAt: DateTime option) =
-    new() = QuerySet(None, None)
+type QuerySet(modelId:int, startAt: DateTime option, endAt: DateTime option) =
+    new() = QuerySet(-1, None, None)
 
-    new(startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
-        QuerySet(startAt |> Option.ofNullable, endAt |> Option.ofNullable)
+    new(modelId:int, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
+        QuerySet(modelId, startAt |> Option.ofNullable, endAt |> Option.ofNullable)
 
+    member x.ModelId = modelId
     /// 사용자 지정: 조회 start time
     member x.TargetStart = startAt
     /// 사용자 지정: 조회 end time
@@ -104,6 +106,7 @@ CREATE TABLE [{Tn.Property}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
     , [value]       NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
+    , [modelId]     INTEGER NOT NULL
 );
 
 
@@ -154,6 +157,8 @@ CREATE VIEW [{Vn.Storage}] AS
 
 """
 
+    type IDBRow = interface end
+
     /// DB storage table 의 row 항목
     type Storage(id: int, tagKind: int, fqdn: string, dataTypeName: string, name: string) =
         new() = Storage(-1, -1, null, null, null)
@@ -162,6 +167,7 @@ CREATE VIEW [{Vn.Storage}] AS
             if iStorage.Target.IsNone then failwithf $"Storage Target is not exist {iStorage.Name}"
             Storage(-1, iStorage.TagKind, iStorage.Target.Value.QualifiedName, iStorage.DataType.Name, iStorage.Name)
 
+        interface IDBRow
         member val Id: int = id with get, set
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set
@@ -171,19 +177,25 @@ CREATE VIEW [{Vn.Storage}] AS
     /// DB log table 의 row 항목
     type ORMLog(id: int, storageId: int, at: DateTime, value: obj) =
         new() = ORMLog(-1, -1, DateTime.MaxValue, null)
+
+        interface IDBRow
         member val Id = id with get, set
         member val StorageId = storageId with get, set
         member val At = at with get, set
         member val Value = value with get, set
+
     /// DB log table 의 row 항목
     type ORMModel(id: int, path:string, lastModified:DateTime) =
         new() = ORMModel(-1, null, DateTime.MinValue)
+
+        interface IDBRow
         member val Id = id with get, set
         member val Path = path with get, set
         member val LastModified = lastModified with get, set
 
     /// tagKind table row
     type ORMTagKind() =
+        interface IDBRow
         member val Id = 0 with get, set
         member val Name = "" with get, set
 
@@ -191,6 +203,8 @@ CREATE VIEW [{Vn.Storage}] AS
     type Log(id: int, storage: Storage, at: DateTime, value: obj) =
         inherit ORMLog(id, storage.Id, at, value)
         new() = Log(-1, getNull<Storage> (), DateTime.MaxValue, null)
+
+        interface IDBRow
         member val Storage = storage with get, set
         member val At = at with get, set
         member val Value: obj = value with get, set
@@ -202,6 +216,28 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set
         member val TagKindName = tagKindName with get, set
+
+
+
+    type ORMProperty(id:int, name: string, value: string) =
+        new() = ORMProperty(-1, null, null)
+
+        interface IDBRow
+        member val Id = id with get, set
+        member val Name = name with get, set
+        member val Value = value with get, set
+
+    type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int) =
+        new() = ORMStorage(-1, null, null, -1, null, -1)
+
+        interface IDBRow
+        member val Id = id with get, set
+        member val Name = name with get, set
+        member val Fqdn = fqdn with get, set
+        member val TagKind = tagKind with get, set
+        member val DataType = dataType with get, set
+        member val ModelId = modelId with get, set
+
 
     type Fqdn = string
     type StorageKey = TagKind * Fqdn
@@ -259,20 +295,20 @@ CREATE VIEW [{Vn.Storage}] AS
 
 
     /// property table 항목 조회
-    let queryPropertyAsync (propertyName: string, conn: IDbConnection, tr: IDbTransaction) =
+    let queryPropertyAsync (modelId:int, propertyName: string, conn: IDbConnection, tr: IDbTransaction) =
         conn.QueryFirstOrDefaultAsync<string>(
-            $"SELECT value FROM [{Tn.Property}] WHERE name = @Name",
-            {| Name = propertyName |},
+            $"SELECT value FROM [{Tn.Property}] WHERE name = @Name AND modelId=@ModelId",
+            {| Name = propertyName; ModelId=modelId |},
             tr
         )
 
     /// property table 항목 수정
-    let updatePropertyAsync (propertyName: string, value: string, conn: IDbConnection, tr: IDbTransaction) =
+    let updatePropertyAsync (modelId:int, propertyName: string, value: string, conn: IDbConnection, tr: IDbTransaction) =
         conn.ExecuteSilentlyAsync(
             $"""INSERT OR REPLACE INTO [{Tn.Property}]
-                (name, value)
-                VALUES(@Name, @Value);""",
-            {| Name = propertyName; Value = value |},
+                (name, value, modelId)
+                VALUES(@Name, @Value, @ModelId);""",
+            {| Name = propertyName; Value = value; ModelId=modelId |},
             tr
         )
 
@@ -280,14 +316,14 @@ CREATE VIEW [{Vn.Storage}] AS
     type QuerySet with
 
         /// 조회 기간 target 설정 값 필요시 db 에 반영하고, target 에 맞게 조회 기간 변경
-        member x.SetQueryRangeAsync(conn: IDbConnection, tr: IDbTransaction) =
+        member x.SetQueryRangeAsync(modelId:int, conn: IDbConnection, tr: IDbTransaction) =
             task {
                 match x.TargetStart with
                 | Some s ->
-                    do! updatePropertyAsync (PropName.Start, s.ToString(), conn, tr)
+                    do! updatePropertyAsync (modelId, PropName.Start, s.ToString(), conn, tr)
                     x.StartTime <- s
                 | _ ->
-                    let! str = queryPropertyAsync (PropName.Start, conn, tr)
+                    let! str = queryPropertyAsync (modelId, PropName.Start, conn, tr)
 
                     x.StartTime <-
                         if isNull (str) then
@@ -298,10 +334,10 @@ CREATE VIEW [{Vn.Storage}] AS
 
                 match x.TargetEnd with
                 | Some e ->
-                    do! updatePropertyAsync (PropName.End, e.ToString(), conn, tr)
+                    do! updatePropertyAsync (modelId, PropName.End, e.ToString(), conn, tr)
                     x.EndTime <- e
                 | _ ->
-                    let! str = queryPropertyAsync (PropName.End, conn, tr)
+                    let! str = queryPropertyAsync (modelId, PropName.End, conn, tr)
 
                     x.EndTime <-
                         if isNull (str) then

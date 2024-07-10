@@ -20,7 +20,7 @@ public class FilesController : ControllerBaseWithLogger
         var onFileUploaded = new Action<string>(fileName =>
         {
             // dszip 파일 신규 upload 에 대한 처리  //copy->move로 변경 동작일단 잘됨
-            System.IO.File.Copy(fileName, _runtimeModelDsZipPath);
+            System.IO.File.Copy(fileName, _runtimeModelDsZipPath, overwrite:true);
             _global.ServerSettings.RuntimeModelDsZipPath = fileName;
             _global.ReloadRuntimeModel(global.ServerSettings);
             _hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, fileName);

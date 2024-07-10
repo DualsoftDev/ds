@@ -4,13 +4,11 @@ using Engine.Runtime;
 using static Engine.Info.DBLoggerAnalysisDTOModule;
 using static Engine.Info.DBLoggerORM;
 using static Engine.Core.InfoPackageModule;
-using static Engine.Core.GraphModule;
-using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
-using DsWebApp.Server.Common;
-using DevExpress.Pdf.Native.BouncyCastle.Asn1.X509;
+using static Engine.Core.ModelLoaderModule;
+using static Engine.Info.LoggerDB;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -48,6 +46,19 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
 
         return RestResult<InfoQueryResult>.Ok(new InfoQueryResult());
     }
+
+    // api/info/logdb-base
+    [HttpGet("logdb-base")]
+    public async Task<RestResultString> GetLoggerDB()
+    {
+        using var conn = serverGlobal.CreateDbConnection();
+        var modelId = 1;
+        var logDB = await ORMDBSkeletonDTOExt.CreateAsync(modelId, conn, null);
+        var logDBJson = logDB.Serialize();
+
+        return RestResultString.Ok(logDBJson);
+    }
+
 
     // api/info/log-anal-info
     [HttpGet("log-anal-info")]
@@ -146,80 +157,5 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
         CyGraph.TheSystem = null;
 
         return RestResultString.Ok(json);
-    }
-}
-
-public static class CytoVertexExtension
-{
-    static (string, string, string) GetNameAndQualifiedNameAndParentName(IVertex vertex)
-    {
-        var n = (vertex as INamed).Name;
-        var q = (vertex as IQualifiedNamed).QualifiedName;
-        var p = vertex.GetParentName();
-        return (q, n, p);
-    }
-    public static IEnumerable<CyVertex> CollectVertices(this IVertex vertex, bool includeMe=true)
-    {
-        if (includeMe)
-        {
-            var (q, n, p) = GetNameAndQualifiedNameAndParentName(vertex);
-            var t = vertex.GetType().Name;
-
-            // flow 별로 최 외곽에 배치 : top level flow
-            if (vertex is Flow f && f.System == CyGraph.TheSystem)
-                p = null;
-
-            yield return new CyVertex(t, q, n, p);
-        }
-        switch (vertex)
-        {
-            case DsSystem s:
-                foreach (var c in s.Flows.SelectMany(f => f.CollectVertices()))
-                    yield return c;
-                break;
-            case Flow f:
-                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectVertices()))
-                    yield return c;
-                break;
-            case Real r:
-                foreach (var c in r.Graph.Vertices.SelectMany(v => v.CollectVertices()))
-                    yield return c;
-                break;
-            case Call cc: 
-                //yield return c;
-                break;
-            default:
-                yield break;
-        }
-    }
-
-    public static IEnumerable<CyEdge> CollectEdges(this IVertex vertex)
-    {
-        switch (vertex)
-        {
-            case DsSystem s:
-                foreach (var c in s.Flows.SelectMany(f => f.CollectEdges()))
-                    yield return c;
-                break;
-            case Flow f:
-                if (f.Name == "MES")
-                {
-                    var xxx = f.Graph.Edges.Select(e => new CyEdge(e)).ToArray();
-                    Console.Write("");
-                }
-                foreach (var c in f.Graph.Edges.Select(e => new CyEdge(e)))
-                    yield return c;
-
-                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectEdges()))
-                    yield return c;
-                break;
-            case Real r:
-                foreach (var c in r.Graph.Edges.Select(e => new CyEdge(e)))
-                    yield return c;
-                break;
-
-            default:
-                yield break;
-        }
     }
 }

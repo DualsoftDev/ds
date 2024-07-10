@@ -38,6 +38,8 @@ var cy = window.cy = cytoscape({
                 // 'shape': 'data(shape)',
                 'shape': 'pentagon',
                 'content': 'data(content)',
+                'border-width': 1,
+                'border-color': 'navy',
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'background-opacity': 1,
@@ -49,8 +51,6 @@ var cy = window.cy = cytoscape({
                 'shape': 'rectangle',
                 // 'text-outline-width': 1,
                 // 'text-outline-color': 'white',
-                'border-width': 4,
-                'border-color': 'navy',
                 'border-style': 'dashed',
                 'font-size': '60px',
                 'color': 'skyblue',
@@ -94,6 +94,12 @@ var cy = window.cy = cytoscape({
             selector: ':selected',
             css: {
                 'background-color': 'cyan',
+            }
+        },
+        {
+            selector: 'not(:selected)',
+            css: {
+                'background-color': '',
             }
         },
         {

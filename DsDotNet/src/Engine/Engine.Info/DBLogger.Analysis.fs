@@ -9,14 +9,13 @@ open Dual.Common.Core.FS
 open Engine.Core
 open DBLoggerORM
 open System
-open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module internal DBLoggerAnalysisModule =
     /// log 를 fqdn 별로 그룹핑하여 반환한다.
     /// - log 는 시간순 정렬되어 있어야 한다.
     /// - fqdn 의 going ON 부터 finish ON 까지의 log 를 그룹핑하여 반환한다.
-    /// - e.g X 의 duration log 를 구한다면
+    /// - e.g X type 의 duration log 를 구한다면 (Xs1, Xe1), (Xs2, Xe2), 구간 사이의 log 들을 취합해서 반환
     ///     - 입력 : [ 1; 2; 3; Xs1; 4; 5; 6; Xe1; 7; 8; Xs2; 9; 10; Xe2; ...]
     ///     - 출력 : [ [Xs1; 4; 5; 6; Xe1]; [Xs2; 9; 10; Xe2]; ...]
     let groupDurationsByFqdn (logs: ORMVwLog list) (fqdn:string) : ORMVwLog list list =
@@ -175,6 +174,8 @@ module DBLoggerAnalysisDTOModule =
                     //(logs.Head.At, logs.Last().At)
 
             SystemSpan(span, system.Name, realSpans)
+
+
         static member CreatFlatSpan(system: DsSystem, logs: ORMVwLog list) : (string * Span[])[] =
             let sysSpan = SystemSpan.CreateSpan(system, logs)
             let namedSpans =
@@ -195,6 +196,8 @@ module DBLoggerAnalysisDTOModule =
             result
 
     type FlatSpans = (string * Span[])[]
+
+
 // For C# interop
 module SystemSpanEx =
     /// 주어진 system 에 대한 log 목록을 분석해서 SystemSpan 결과를 반환

@@ -14,6 +14,7 @@
 	  </Content>
 	</ItemGroup>
 	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
@@ -21,7 +22,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="DualSoft-Common-Utils" Version="0.2.1" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.13" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.14" />
 		<PackageReference Include="DualSoft-Web-Server" Version="0.2.2" />
 	</ItemGroup>
 

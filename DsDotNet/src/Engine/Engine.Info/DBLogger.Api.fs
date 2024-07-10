@@ -6,7 +6,6 @@ open System
 open System.Diagnostics
 open System.Linq
 open System.Runtime.CompilerServices
-open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module DBLoggerApi =

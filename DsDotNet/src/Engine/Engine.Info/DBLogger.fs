@@ -8,8 +8,8 @@ open System.IO
 
 
 type DBLogger() =
-    static let querySet = QuerySet()
-    //static let querySet = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
+    //static let queryCriteria = QuerySet()
+    //static let queryCriteria = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
 
     static member EnqueLogForInsert(log: DsLog) =
         DBLoggerImpl.Writer.enqueLogForInsert (log: DsLog)
@@ -19,7 +19,7 @@ type DBLogger() =
 
     static member InitializeLogWriterOnDemandAsync
         (
-            commonAppSetting: DSCommonAppSettings,
+            queryCriteria: QueryCriteria,
             systems: DsSystem seq,
             modelCompileInfo: ModelCompileInfo,
             cleanExistingDb: bool
@@ -29,29 +29,28 @@ type DBLogger() =
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (null, commonAppSetting, systems, modelCompileInfo, cleanExistingDb)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, modelCompileInfo, cleanExistingDb)
 
             return logSet :> ILogSet
         }
 
     /// model 정보 없이, database schema 만 생성
-    static member InitializeLogDbOnDemandAsync (commonAppSetting: DSCommonAppSettings, cleanExistingDb:bool) =
-        DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSetting cleanExistingDb
+    static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings, cleanExistingDb:bool) =
+        DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
 
         
 
-    static member InitializeLogReaderOnDemandAsync(querySet: QuerySet, systems: DsSystem seq) =
+    static member InitializeLogReaderOnDemandAsync(queryCriteria: QueryCriteria, systems: DsSystem seq) =
         task {
             Log4NetWrapper.logWithTrace <- true
-            let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync (querySet, systems)
+            let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync (queryCriteria, systems)
             return logSet :> ILogSet
         }
 
     /// Reader + Writer 일체형
     static member InitializeLogReaderWriterOnDemandAsync
         (
-            querySet: QuerySet,
-            commonAppSetting: DSCommonAppSettings,
+            queryCriteria: QueryCriteria,
             systems: DsSystem seq,
             modelCompileInfo: ModelCompileInfo,
             cleanExistingDb:bool
@@ -62,7 +61,7 @@ type DBLogger() =
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (querySet, commonAppSetting, systems, modelCompileInfo, cleanExistingDb)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, modelCompileInfo, cleanExistingDb)
 
             return logSet :> ILogSet
         }
@@ -72,11 +71,13 @@ type DBLogger() =
     /// 조회 기간 변경 (reader)
     /// call site 에서는 기존 인자로 주어진 logSet 은 자동 dispose 되며, 새로 return 되는 logSet 을 이용하여야 한다.
     [<Obsolete("Not yet implemented")>]
-    static member ChangeQueryDurationAsync(logSet: ILogSet, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
+    static member ChangeQueryDurationAsync(commonAppSettings:DSCommonAppSettings, logSet: ILogSet, startAt: Nullable<DateTime>, endAt: Nullable<DateTime>) =
         task {
             let logSet = logSet :?> LogSet
-            let querySet = QuerySet(startAt, endAt)
-            let! newLogSet = DBLoggerImpl.Reader.changeQueryDurationAsync (logSet, querySet)
+            failwith "Not yet implemented"
+            let modelId = -1
+            let queryCriteria = QueryCriteria(commonAppSettings, modelId, startAt, endAt)
+            let! newLogSet = DBLoggerImpl.Reader.changeQueryDurationAsync (logSet, queryCriteria)
             dispose (logSet :> IDisposable)
             return newLogSet :> ILogSet
         }

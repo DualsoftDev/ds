@@ -104,6 +104,7 @@ services.AddDevExpressBlazor(options =>
 });
 
 var commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
+commonAppSettings.FillModelId();
 var serverSettings =
     conf.GetSection("ServerSettings").Get<ServerSettings>()
         .Tee(ss => ss.Initialize());

@@ -1,23 +1,15 @@
-using DevExpress.XtraPrinting.Native.Lines;
-
-using DsWebApp.Server.Hubs;
-
 using Engine.Runtime;
 
 using IO.Core;
-
-using static Engine.Core.TagWebModule;
 using static Engine.Core.InfoPackageModule;
 
 using SK = DsWebApp.Shared.SK;
 using static Engine.Core.CoreModule;
 using Engine.Info;
 using Engine.Core;
-using static Engine.Core.Interface;
-using Microsoft.Extensions.Options;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using static Engine.Info.DBLoggerORM;
+using System.ServiceModel.Channels;
+using Dual.Common.Base.FS;
+using Newtonsoft.Json;
 
 namespace DsWebApp.Server.Demons;
 public partial class Demon : BackgroundService
@@ -71,8 +63,9 @@ public partial class Demon : BackgroundService
             ModelCompileInfo mci = new(runtimeModel.SourceDsZipPath, runtimeModel.SourceDsZipPath);
 
             _modelSubscription.Clear();
-            var querySet = new QuerySet(DateTime.Now.Date.AddDays(-1), null) { CommonAppSettings = _serverGlobal.DsCommonAppSettings };
-            var logSetW = DBLogger.InitializeLogReaderWriterOnDemandAsync(querySet, _serverGlobal.DsCommonAppSettings, systems, mci, cleanExistingDb:false).Result;
+            var modelId = 1;     // todo: modelId 수정 필요
+            var queryCriteria = new QueryCriteria(_serverGlobal.DsCommonAppSettings, modelId, DateTime.Now.Date.AddDays(-1), null);
+            var logSetW = DBLogger.InitializeLogReaderWriterOnDemandAsync(queryCriteria, systems, mci, cleanExistingDb:false).Result;
             _modelSubscription.Add(logSetW);
             IDisposable subscription =
                 CpusEvent.ValueSubject
@@ -111,6 +104,12 @@ public partial class Demon : BackgroundService
         try
         {
             await executeAsyncHelper(ct);
+            var connStr = _serverGlobal.DsCommonAppSettings.LoggerDBSettings.ConnectionString;
+            LoggerDB.StartLogMonitor(connStr, 100, ct);
+            LoggerDB.DBLogSubject.Subscribe(log =>
+            {
+                _hubContextDb.Clients.All.SendAsync(SK.S2CNLogChanged, log.Serialize());
+            });
         }
         catch (Exception ex)
         {

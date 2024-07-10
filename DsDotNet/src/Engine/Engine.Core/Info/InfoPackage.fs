@@ -40,15 +40,15 @@ module InfoPackageModule =
         default x.IsEqual (y:IInfoBase) =
             let o = y :?> InfoBase
             x.Name = o.Name
-            && x.Fqdn = o.Fqdn
-            && x.DriveSpan = o.DriveSpan
-            && x.DriveAverage = o.DriveAverage
-            && x.ErrorSpan = o.ErrorSpan
-            && x.ErrorAverage = o.ErrorAverage
-            && x.ErrorCount = o.ErrorCount
-            && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
-            && x.Efficiency = o.Efficiency
-            && x.PauseCount = o.PauseCount
+                && x.Fqdn         = o.Fqdn
+                && x.DriveSpan    = o.DriveSpan
+                && x.DriveAverage = o.DriveAverage
+                && x.ErrorSpan    = o.ErrorSpan
+                && x.ErrorAverage = o.ErrorAverage
+                && x.ErrorCount   = o.ErrorCount
+                && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
+                && x.Efficiency   = o.Efficiency
+                && x.PauseCount   = o.PauseCount
         
     type InfoDevice() = 
         interface IInfoBase with
@@ -69,11 +69,11 @@ module InfoPackageModule =
         member x.IsEqual (y:IInfoBase) =
             let o = y :?> InfoDevice
             x.Name = o.Name
-            && x.Fqdn = o.Fqdn
-            && x.GoingCount = o.GoingCount
-            && x.ErrorCount = o.ErrorCount
-            && x.RepairAverage = o.RepairAverage
-            && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
+                && x.Fqdn          = o.Fqdn
+                && x.GoingCount    = o.GoingCount
+                && x.ErrorCount    = o.ErrorCount
+                && x.RepairAverage = o.RepairAverage
+                && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
         static member Create(x:Device) =
             let info = new InfoDevice(Name=x.Name, Fqdn = x.QualifiedName, Id=x.Id)
             info
@@ -94,10 +94,10 @@ module InfoPackageModule =
         override x.IsEqual(y:IInfoBase) =
             let o = y :?> InfoCall
             base.IsEqual(y)
-            && x.GoingCount = o.GoingCount
-            && x.GoingDeviation = o.GoingDeviation
-            && x.WaitTime = o.WaitTime
-            //&& x.InfoDevices.SequenceEqual(o.InfoDevices)
+                && x.GoingCount     = o.GoingCount
+                && x.GoingDeviation = o.GoingDeviation
+                && x.WaitTime       = o.WaitTime
+                //&& x.InfoDevices.SequenceEqual(o.InfoDevices)
         static member Create(x:Call) =
             let info = new InfoCall(Name=x.Name, Fqdn = x.QualifiedName)
             info.SystemName <- x.NameComponents[0]
@@ -134,12 +134,13 @@ module InfoPackageModule =
         override x.IsEqual(y:IInfoBase) =
             let o = y :?> InfoFlow
             base.IsEqual(y)
-            && x.LeadTime = o.LeadTime
+                && x.LeadTime = o.LeadTime
 
         static member Create(x:Flow) =
             let info = new InfoFlow(Name=x.Name, Fqdn = x.QualifiedName)
             info.SystemName <- x.NameComponents[0]
             info
+
     type InfoSystem() = 
         inherit InfoBase()
         ///제품 1개 시스템 처리시간 추후 계산 (알고리즘 필요)
@@ -149,7 +150,7 @@ module InfoPackageModule =
         override x.IsEqual(y:IInfoBase) =
             let o = y :?> InfoSystem
             base.IsEqual(y)
-            && x.LeadTime = o.LeadTime
+                && x.LeadTime = o.LeadTime
         static member Create(x:DsSystem) =
             let info = new InfoSystem(Name=x.Name, Fqdn = x.QualifiedName)
             info

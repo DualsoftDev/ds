@@ -4,6 +4,7 @@ open System
 open System.IO
 open Newtonsoft.Json
 open Dual.Common.Core.FS
+open System.Reactive.Linq
 
 [<AutoOpen>]
 module CommonAppSettings =
@@ -14,19 +15,26 @@ module CommonAppSettings =
     #endif
 
 
-type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, syncIntervalSeconds:int) = 
+type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, syncIntervalMilliSeconds:int) = 
+    member val SyncInterval = Observable.Interval(TimeSpan.FromMilliseconds(syncIntervalMilliSeconds))
+    member val SyncIntervalMilliSeconds = syncIntervalMilliSeconds
     member x.ConnectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, x.ConnectionPath)}"
     member val ConnectionPath = sqlitePath with get, set
-    member val SyncIntervalSeconds = syncIntervalSeconds with get, set
     member val DbWriter = dbWriter with get, set
     member val ModelFilePath = modelFilePath with get, set
     member val ModelId = -1 with get, set
+
 /// 여러 application(.exe) 들 간의 공유할 정보
 /// "CommonAppSettings.json" 파일
+[<AllowNullLiteral>]
 type DSCommonAppSettings(loggerDBSettings:LoggerDBSettings) =
+    do
+        // 생성자 호출 후에는 FillModelId() 확장 메서드 호출 필요.
+        noop()
     member val HmiWebServer = "" with get, set
     member val LoggerDBSettings = loggerDBSettings with get, set
-    static member Load(jsonPath:string) =
+    /// 호출 후에는 FillModelId() 확장 메서드 호출 필요.
+    static member Load(jsonPath:string) : DSCommonAppSettings =
         jsonPath
         |> File.ReadAllText
         |> JsonConvert.DeserializeObject<DSCommonAppSettings>

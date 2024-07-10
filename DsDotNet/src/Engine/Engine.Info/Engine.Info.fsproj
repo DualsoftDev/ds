@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
@@ -13,6 +13,7 @@
 		<Compile Include="DBLogger.ORM.fs" />
         <Compile Include="DBLogger.Query.fs" />
         <Compile Include="DBLogger.DBOperation.fs" />
+        <Compile Include="DBLogger.ORMDBSkeleton.fs" />
         <Compile Include="DBLogger.fs" />
         <Compile Include="DBLog.fs" />
         <Compile Include="DBLogger.Api.fs" />
@@ -22,13 +23,14 @@
     </ItemGroup>
 
     <ItemGroup>
+		<!-- <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" /> -->
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
-		<ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
+	    <PackageReference Include="DualSoft-Common-Base-FS" Version="0.1.1" />
 		<PackageReference Include="DualSoft-Common-Core" Version="0.2.8" />
-		<PackageReference Include="DualSoft-Common-Db" Version="0.2.5" />
+		<PackageReference Include="DualSoft-Common-Db" Version="0.2.6" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9" />
         <PackageReference Include="Dapper" Version="2.0.143" />
     </ItemGroup>

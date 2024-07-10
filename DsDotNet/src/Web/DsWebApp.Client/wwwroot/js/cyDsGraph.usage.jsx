@@ -33,6 +33,8 @@ cy.$('#SIDE.MES.MES_1').style('border-width', '3px')
 cy.$('node.Flow').descendants().style('background-color', 'green')
 cy.fit(cy.$(':visible'))
 
+cy.add({ data: { id: 'z', parent: 'b' } })
+cy.add({ data: { source: 'z', target: 'c' } })
 // elements: {
 //   nodes: [
 //     { data: { id: 'a', parent: 'b' }, position: { x: 215, y: 85 } },

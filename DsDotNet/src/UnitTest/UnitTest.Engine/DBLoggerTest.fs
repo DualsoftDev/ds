@@ -50,8 +50,8 @@ module DBLoggerTestModule =
             createStorage "my.Test2.TRXERR" (int VertexTag.errorTRx)
         ]
 
-        let querySet = QuerySet()
-        let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
+        let queryCriteria = QueryCriteria(getNull<DSCommonAppSettings>(), -1, None, None)
+        let logSet = createTestLoggerInfoSetForReader(queryCriteria, storages, logs)
         let fqdn, kind = cyl1Error.Fqdn, int VertexTag.errorTRx
 
         [<Test>]
@@ -72,7 +72,7 @@ module DBLoggerTestModule =
             // ON log 하나만 추가 된 후, 동일 test : cycle 미 완성
             let lastOn = createLog cyl1Error (nextSecond()) true
             let mutable logs = logs @ [lastOn]
-            let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
+            let logSet = createTestLoggerInfoSetForReader(queryCriteria, storages, logs)
 
             2 === DBLogger.Count(fqdn, kind, logSet)
             true === DBLogger.GetLastValue(fqdn, kind, logSet)
@@ -87,7 +87,7 @@ module DBLoggerTestModule =
             // OFF log 하나 더 추가해서 duration 완성된 후, 동일 test
             let lastOn = createLog cyl1Error (nextSecond()) false
             logs <- logs @ [lastOn]
-            let logSet = createTestLoggerInfoSetForReader(querySet, storages, logs)
+            let logSet = createTestLoggerInfoSetForReader(queryCriteria, storages, logs)
 
             3 === DBLogger.Count(fqdn, kind, logSet)
             false === DBLogger.GetLastValue(fqdn, kind, logSet)

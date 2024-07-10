@@ -35,4 +35,8 @@ public class SK
     /// </summary>
     public const string S2CNInfoChanged = "S2CNotifyInfoChanged";
 
+    /// <summary>
+    /// Server 2 Client Notify ORMLog Changed
+    /// </summary>
+    public const string S2CNLogChanged = "S2CNotifyLogChanged";
 }

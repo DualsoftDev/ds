@@ -1,6 +1,9 @@
 @* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/compound-nodes/index.html *@
 
 @page "/dashboards/graph"
+@using static Engine.Info.LoggerDB;
+@using static Engine.Info.DBLoggerORM;
+@using Engine.Info
 
 <h3>Model Graph</h3>
 
@@ -10,33 +13,202 @@
 <button id="enable_zoom">Enable zoom</button>
 <button id="hide">Hide selection</button>
 <button id="show">Show</button>
+<DxButton Text="Start MONITOR" Click="@(async () => await startMonitorAsync())" Visible="@(_hubSubscription == null)"/>
+<DxButton Text="Stop MONITOR" Click="@(async () => await stopMonitorAsync())" Visible="@(_hubSubscription != null)" />
+
 <div id="cy"></div>
 
 @code {
+    HubConnection _hubConnection;
+    IDisposable _hubSubscription;
+    ORMDBSkeleton _logDb;
+    Dictionary<string, CyVertex> _nodeDic;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
-        await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
-        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js");
-        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js");
 
-        /*
-        * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
+        _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/db").StartHubAsync();
+        var result = await Http.GetRestResultAsync<string>($"/api/info/logdb-base");
+        result.Iter(
+            logDbBaseJson =>
+            {
+                var logDbBase = ORMDBSkeletonDTO.Deserialize(logDbBaseJson);
+                _logDb = new ORMDBSkeleton(logDbBase);
+                Console.WriteLine($"LogDB: {_logDb.TagKinds.Count}");
+            },
+            err => Console.Error.WriteLine($"Failed to get logdb-base: {err}")
+        );
+
+
+        // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
+        var jss = new[]
+        {
+            "js/external/cytoscape/dagre.js",
+            "js/external/cytoscape/cytoscape.min.js",
+            "js/external/cytoscape/cytoscape-dagre.js",
+        };
+        foreach(var js in jss)
+            await JsDual.EvalExternalScript(js);
+
+         /*
+         * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
         */
-        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
-        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
-        var data = await Http.GetRestResultAsync<string>($"/api/info/graph");
+        // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
+        // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
+        var data = await Http.GetRestResultAsync<string>($"/api/model/graph");
         await data.IterAsync(
-            async json => {
+            async json =>
+            {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
                 await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
                 await JsDual.EvalExternalScript("js/cyDsGraph.js");
                 await JsDual.EvalOnGlobalModule(_snippet);
+                await JsDual.EvalOnGlobalModule(_runtimeStyles);
+
+                var optJsonNodes = await Http.GetRestResultAsync<string>($"/api/model/graph-vertices");
+                optJsonNodes.Iter(
+                    jsonNodes =>
+                    {
+                        var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(jsonNodes);
+                        foreach (var n in nodes)
+                        {
+                            Console.WriteLine($"{n.id} = {n.type}");
+                        }
+
+                        _nodeDic = nodes.ToDictionary(node => node.id);
+                        Console.WriteLine($"Got total {nodes.Length} vertices");
+                    },
+                    async err => await JsDual.Alert($"Failed to get data: {err}")
+                );
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
-            );
+        );
     }
+
+    IDisposable listenHub()
+    {
+        return _hubConnection.On<string>(SK.S2CNLogChanged,
+            async logJson =>
+            {
+                try
+                {
+                    var log = ORMLog.Deserialize(logJson);
+                    var vwLog = _logDb.ToView(log);
+                    var fqdn = vwLog.Fqdn;
+                    if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
+                        await applyLogAsync(vwLog);
+                    else
+                        throw new Exception($"Failed to find fqdn: {fqdn}");
+
+                }
+                catch (Exception e)
+                {
+                    await JsDual.Alert(e.Message);
+                    throw;
+                }
+            });
+    }
+
+    async Task setStatusAsync(bool addClass)
+    {
+        var classify = addClass ? "addClass" : "removeClass";
+        foreach(var n in _nodeDic.Values)
+        {
+            Console.WriteLine($"Clearing status of {n.id}: cy.$('#{n.id}')");
+            await JsDual.EvalOnGlobalModule($@"cy.$('#{n.id}')
+                .removeClass('R')
+                .removeClass('G')
+                .removeClass('F')
+                .removeClass('H')
+                .{classify}('U')"
+            );
+        }
+    }
+    Task astrayStatusAsync() => setStatusAsync(true);
+    Task resetStatusAsync() => setStatusAsync(false);
+
+    async Task stopMonitorAsync()
+    {
+        await resetStatusAsync();
+        _hubSubscription?.Dispose();
+        _hubSubscription = null;
+    }
+    
+    async Task startMonitorAsync()
+    {
+        await astrayStatusAsync();
+        _hubSubscription?.Dispose();
+        _hubSubscription = listenHub();
+    }
+    async Task applyLogAsync(ORMVwLog vwLog)
+    {
+        var status = vwLog.TagKindName switch
+        {
+            "VertexTag.ready" => "R",
+            "VertexTag.going" => "G",
+            "VertexTag.finish" => "F",
+            "VertexTag.homing" => "H",
+            _ => ""
+        };
+        Console.WriteLine($"cy.$('#{vwLog.Fqdn}').classes() : added {status}");
+        await JsDual.EvalOnGlobalModule($@"
+            var node = cy.$('#{vwLog.Fqdn}')
+            node
+                // .filter(':not(.Flow)')
+                .removeClass('R')
+                .removeClass('G')
+                .removeClass('F')
+                .removeClass('H')
+                .removeClass('U')
+                .style('opacity', '1')
+                .addClass('{status}')
+            node.ancestors()
+                .filter('.Flow')
+                .style('opacity', '1')  
+            "
+        );
+    }
+
+    readonly string _runtimeStyles = @"
+        // cy.style()
+        //     .selector(':not(Flow)')
+        //     .selector('node.R').style('background-color', 'grey')
+        //     .selector('node.G').style('background-color', 'green')
+        //     .selector('node.F').style('background-color', 'blue')
+        //     .selector('node.H').style('background-color', 'yellow')
+        //     .selector('node.U').style('background-color', 'grey')
+        //         .style('opacity', 0.5)
+        //         .style('border-color', 'grey')
+        //         .style('border-width', 3)
+
+        // Flow 가 아닐 때에만 적용
+        const applyStyle = (backgroundColor, opacity, borderColor, borderWidth) => {
+            return {
+                'background-color': ele => !ele.hasClass('Flow') ? backgroundColor : ele.style('background-color'),
+                'opacity'         : ele => !ele.hasClass('Flow') ? opacity         : ele.style('opacity'),
+                'border-color'    : ele => !ele.hasClass('Flow') ? borderColor     : ele.style('border-color'),
+                'border-width'    : ele => !ele.hasClass('Flow') ? borderWidth     : ele.style('border-width')
+            };
+        };
+
+        cy.style()
+            .selector('node.R').style(applyStyle('grey', '', '', ''))
+            .selector('node.G').style(applyStyle('green', '', '', ''))
+            .selector('node.F').style(applyStyle('blue', '', '', ''))
+            .selector('node.H').style(applyStyle('yellow', '', '', ''))
+            .selector('node.U').style(applyStyle('grey', 0.5, 'grey', 3));
+        ";
+
+        // .selector('node.R:not(Flow)').style('background-color', 'grey')
+        // .selector('node.G:not(Flow)').style('background-color', 'green')
+        // .selector('node.F:not(Flow)').style('background-color', 'blue')
+        // .selector('node.H:not(Flow)').style('background-color', 'yellow')
+        // .selector('node.U:not(Flow)').style('background-color', 'grey')
+        // .style('opacity', 0.5)
+        // .style('border-color', 'grey')
+        // .style('border-width', 3)
+
+
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -56,7 +228,7 @@
         }
     }
 
-    string _snippet = @"
+    readonly string _snippet = @"
 // click event: node 및 edge 둘다 적용
 // node 만 적용하려면 cy.on('click', 'node', evt => ...  의 형태로 작성
 cy.on('click', evt => {
@@ -73,7 +245,10 @@ cy.on('mouseover', 'node', function(event) {
   // 여기서 노드에 마우스가 올려졌을 때의 작업을 수행합니다.
   console.log('Mouse over on node:', node.id());
   node.style({
-    'background-color': 'CornflowerBlue',
+    // 'background-color': 'CornflowerBlue',
+    'border-color': 'navy',
+    'border-width': '5px',
+    'opacity': '1',
     'color': 'red',
     'text-outline-color': 'white',
     'text-outline-width': 2,
@@ -87,7 +262,10 @@ cy.on('mouseout', 'node', function(event) {
   // 여기서 노드에서 마우스가 떠났을 때의 작업을 수행합니다.
   console.log('Mouse out from node:', node.id());
   node.style({
-    'background-color': '', // 원래 색으로 복원
+    'border-color': '',
+    'border-width': '',
+    'opacity': '',
+    // 'background-color': '', // 원래 색으로 복원
     'color': '', // 원래 색으로 복원
     'text-outline-color': '',
     'text-outline-width': '',
@@ -179,29 +357,14 @@ $('#reset_zoom').click(() => {
         padding: 30,
     }).run();
 
-    // topLevelNodes[0].descendants().layout({
-    //   name: 'dagre',
-    //   // columns: 3,
-    //   // fit: true,
-    //   padding: 30,
-    // }).run();
-
     cy.$('node.Flow').layout({
         name: 'dagre',
         // columns: 3,
         // fit: true,
         padding: 30,
     }).run();
-
-
-    // console.log('resetting..');
-    // cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
-    //     .data('shape', 'rectangle')
-    //     .addClass('active');
 });
 ";
-
-
 }
 
 <style>
@@ -218,6 +381,3 @@ $('#reset_zoom').click(() => {
     }
  </style>
  
-        
-@* 
-*@

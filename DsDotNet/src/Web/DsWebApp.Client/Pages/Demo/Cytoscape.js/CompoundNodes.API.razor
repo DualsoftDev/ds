@@ -14,23 +14,19 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.3.15/cytoscape.js");
-        // await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
-        // await JsDual.EvalExternalScript("https://raw.githubusercontent.com/cytoscape/cytoscape.js-dagre/master/cytoscape-dagre.js");
-
-        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.2.16/cytoscape.min.js");
-        // await JsDual.EvalExternalScript("https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.2.1/cytoscape-dagre.min.js");
-        // await JsDual.EvalExternalScript("https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.2/dagre.min.js");
-
-        // https://stackoverflow.com/questions/75845434/why-the-following-simple-cytoscape-dagre-html-is-not-working
-        await JsDual.EvalExternalScript("https://unpkg.com/dagre@0.7.4/dist/dagre.js");
-        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape@3.23.0/dist/cytoscape.min.js");
-        await JsDual.EvalExternalScript("https://unpkg.com/cytoscape-dagre@2.5.0/cytoscape-dagre.js");
+        var jss = new[]
+        {
+            "js/external/cytoscape/dagre.js",
+            "js/external/cytoscape/cytoscape.min.js",
+            "js/external/cytoscape/cytoscape-dagre.js",
+        };
+        foreach (var js in jss)
+            await JsDual.EvalExternalScript(js);
 
 
-        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=HelloDS.STN1.Work1");
-        // var data = await Http.GetRestResultAsync<string>($"/api/info/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
-        var data = await Http.GetRestResultAsync<string>($"/api/info/graph");
+        // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
+        // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
+        var data = await Http.GetRestResultAsync<string>($"/api/model/graph");
         await data.IterAsync(
             async json => {
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");

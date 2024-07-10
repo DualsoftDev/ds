@@ -29,6 +29,7 @@ module RuntimeTest =
         (*시뮬레이션 구동 테스트*)
         let systems = [| runtimeModel.System|]
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
+        //commonAppSettings.FillModelId()
 
         // 기존 db log 가 삭제되는 것을 방지하기 위해서 test 용으로 따로 database 설정
         commonAppSettings.LoggerDBSettings.ConnectionPath <- Path.Combine(AppContext.BaseDirectory, "TmpLogger.sqlite3")

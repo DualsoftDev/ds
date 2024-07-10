@@ -28,9 +28,13 @@ type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, 
 /// "CommonAppSettings.json" 파일
 [<AllowNullLiteral>]
 type DSCommonAppSettings(loggerDBSettings:LoggerDBSettings) =
+    do
+        // 생성자 호출 후에는 FillModelId() 확장 메서드 호출 필요.
+        noop()
     member val HmiWebServer = "" with get, set
     member val LoggerDBSettings = loggerDBSettings with get, set
-    static member Load(jsonPath:string) =
+    /// 호출 후에는 FillModelId() 확장 메서드 호출 필요.
+    static member Load(jsonPath:string) : DSCommonAppSettings =
         jsonPath
         |> File.ReadAllText
         |> JsonConvert.DeserializeObject<DSCommonAppSettings>

@@ -11,6 +11,7 @@ open System.Data
 open Dapper
 open Dual.Common.Db
 open Newtonsoft.Json
+open System.Runtime.CompilerServices
 
 
 type ILogSet =
@@ -366,7 +367,29 @@ CREATE VIEW [{Vn.Storage}] AS
     let createConnectionWith (connStr) =
         new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 
+    open System.IO
     type DSCommonAppSettings with
         member x.ConnectionString = x.LoggerDBSettings.ConnectionString
         member x.CreateConnection(): SqliteConnection = createConnectionWith x.ConnectionString
+
+
+[<Extension>]
+type DSCommonAppSettingsExt =
+    [<Extension>]
+    static member FillModelId(commonAppSettings:DSCommonAppSettings): unit =
+        let x = commonAppSettings
+        let path = x.LoggerDBSettings.ModelFilePath
+        let runtime = x.LoggerDBSettings.DbWriter
+        use conn = x.CreateConnection()
+        let lastModified = System.IO.FileInfo(path).LastWriteTime
+        let ids =
+            conn.Query<int>(
+                $@"SELECT * FROM {Tn.Model}
+                    WHERE path = @Path
+                    AND runtime = @Runtime
+                    AND lastModified = @LastModified",
+                {|Path = path; Runtime = runtime; LastModified = lastModified|})
+        let id = ids.HeadOr(-1)
+        x.LoggerDBSettings.ModelId <- id
+
             

@@ -109,8 +109,9 @@
             });
     }
 
-    async Task clearStatusAsync()
+    async Task setStatusAsync(bool addClass)
     {
+        var classify = addClass ? "addClass" : "removeClass";
         foreach(var n in _nodeDic.Values)
         {
             Console.WriteLine($"Clearing status of {n.id}: cy.$('#{n.id}')");
@@ -119,21 +120,23 @@
                 .removeClass('G')
                 .removeClass('F')
                 .removeClass('H')
-                .addClass('U')"
+                .{classify}('U')"
             );
         }
     }
+    Task astrayStatusAsync() => setStatusAsync(true);
+    Task resetStatusAsync() => setStatusAsync(false);
 
     async Task stopMonitorAsync()
     {
-        await Task.Yield();
+        await resetStatusAsync();
         _hubSubscription?.Dispose();
         _hubSubscription = null;
     }
     
     async Task startMonitorAsync()
     {
-        await clearStatusAsync();
+        await astrayStatusAsync();
         _hubSubscription?.Dispose();
         _hubSubscription = listenHub();
     }
@@ -147,17 +150,65 @@
             "VertexTag.homing" => "H",
             _ => ""
         };
-        Console.WriteLine($"cy.$(#'{vwLog.Fqdn}').classes() : added {status}");
+        Console.WriteLine($"cy.$('#{vwLog.Fqdn}').classes() : added {status}");
         await JsDual.EvalOnGlobalModule($@"
-            cy.$('#{vwLog.Fqdn}')
+            var node = cy.$('#{vwLog.Fqdn}')
+            node
+                // .filter(':not(.Flow)')
                 .removeClass('R')
                 .removeClass('G')
                 .removeClass('F')
                 .removeClass('H')
                 .removeClass('U')
-                .addClass('{status}')"
+                .style('opacity', '1')
+                .addClass('{status}')
+            node.ancestors()
+                .filter('.Flow')
+                .style('opacity', '1')  
+            "
         );
     }
+
+    readonly string _runtimeStyles = @"
+        // cy.style()
+        //     .selector(':not(Flow)')
+        //     .selector('node.R').style('background-color', 'grey')
+        //     .selector('node.G').style('background-color', 'green')
+        //     .selector('node.F').style('background-color', 'blue')
+        //     .selector('node.H').style('background-color', 'yellow')
+        //     .selector('node.U').style('background-color', 'grey')
+        //         .style('opacity', 0.5)
+        //         .style('border-color', 'grey')
+        //         .style('border-width', 3)
+
+        // Flow 가 아닐 때에만 적용
+        const applyStyle = (backgroundColor, opacity, borderColor, borderWidth) => {
+            return {
+                'background-color': ele => !ele.hasClass('Flow') ? backgroundColor : ele.style('background-color'),
+                'opacity'         : ele => !ele.hasClass('Flow') ? opacity         : ele.style('opacity'),
+                'border-color'    : ele => !ele.hasClass('Flow') ? borderColor     : ele.style('border-color'),
+                'border-width'    : ele => !ele.hasClass('Flow') ? borderWidth     : ele.style('border-width')
+            };
+        };
+
+        cy.style()
+            .selector('node.R').style(applyStyle('grey', '', '', ''))
+            .selector('node.G').style(applyStyle('green', '', '', ''))
+            .selector('node.F').style(applyStyle('blue', '', '', ''))
+            .selector('node.H').style(applyStyle('yellow', '', '', ''))
+            .selector('node.U').style(applyStyle('grey', 0.5, 'grey', 3));
+        ";
+
+        // .selector('node.R:not(Flow)').style('background-color', 'grey')
+        // .selector('node.G:not(Flow)').style('background-color', 'green')
+        // .selector('node.F:not(Flow)').style('background-color', 'blue')
+        // .selector('node.H:not(Flow)').style('background-color', 'yellow')
+        // .selector('node.U:not(Flow)').style('background-color', 'grey')
+        // .style('opacity', 0.5)
+        // .style('border-color', 'grey')
+        // .style('border-width', 3)
+
+
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -194,7 +245,10 @@ cy.on('mouseover', 'node', function(event) {
   // 여기서 노드에 마우스가 올려졌을 때의 작업을 수행합니다.
   console.log('Mouse over on node:', node.id());
   node.style({
-    'background-color': 'CornflowerBlue',
+    // 'background-color': 'CornflowerBlue',
+    'border-color': 'navy',
+    'border-width': '5px',
+    'opacity': '1',
     'color': 'red',
     'text-outline-color': 'white',
     'text-outline-width': 2,
@@ -208,7 +262,10 @@ cy.on('mouseout', 'node', function(event) {
   // 여기서 노드에서 마우스가 떠났을 때의 작업을 수행합니다.
   console.log('Mouse out from node:', node.id());
   node.style({
-    'background-color': '', // 원래 색으로 복원
+    'border-color': '',
+    'border-width': '',
+    'opacity': '',
+    // 'background-color': '', // 원래 색으로 복원
     'color': '', // 원래 색으로 복원
     'text-outline-color': '',
     'text-outline-width': '',
@@ -300,39 +357,14 @@ $('#reset_zoom').click(() => {
         padding: 30,
     }).run();
 
-    // topLevelNodes[0].descendants().layout({
-    //   name: 'dagre',
-    //   // columns: 3,
-    //   // fit: true,
-    //   padding: 30,
-    // }).run();
-
     cy.$('node.Flow').layout({
         name: 'dagre',
         // columns: 3,
         // fit: true,
         padding: 30,
     }).run();
-
-
-    // console.log('resetting..');
-    // cy.$('#HelloDS.STN1.Work1.STN1__Device1_RET')
-    //     .data('shape', 'rectangle')
-    //     .addClass('active');
 });
 ";
-
-    readonly string _runtimeStyles = @"
-    cy.style()
-        .selector('node.Call.R').style('background-color', 'grey')
-        .selector('node.Call.G').style('background-color', 'green')
-        .selector('node.Call.F').style('background-color', 'blue')
-        .selector('node.Call.H').style('background-color', 'yellow')
-        .selector('node.Call.U').style('background-color', 'grey').style('opacity', 0.5)
-";
-
-
-
 }
 
 <style>

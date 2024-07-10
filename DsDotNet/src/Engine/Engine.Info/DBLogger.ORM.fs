@@ -381,15 +381,21 @@ type DSCommonAppSettingsExt =
         let path = x.LoggerDBSettings.ModelFilePath
         let runtime = x.LoggerDBSettings.DbWriter
         use conn = x.CreateConnection()
-        let lastModified = System.IO.FileInfo(path).LastWriteTime
-        let ids =
-            conn.Query<int>(
-                $@"SELECT * FROM {Tn.Model}
-                    WHERE path = @Path
-                    AND runtime = @Runtime
-                    AND lastModified = @LastModified",
-                {|Path = path; Runtime = runtime; LastModified = lastModified|})
-        let id = ids.HeadOr(-1)
+
+        let id =
+
+            if conn.IsTableExistsAsync(Tn.Model).Result then
+                let lastModified = System.IO.FileInfo(path).LastWriteTime
+                let ids =
+                    conn.Query<int>(
+                        $@"SELECT * FROM {Tn.Model}
+                            WHERE path = @Path
+                            AND runtime = @Runtime
+                            AND lastModified = @LastModified",
+                        {|Path = path; Runtime = runtime; LastModified = lastModified|})
+                ids.HeadOr(-1)
+            else
+                -1
         x.LoggerDBSettings.ModelId <- id
 
             

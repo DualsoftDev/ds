@@ -1,3 +1,4 @@
+using System.Text;
 using Dual.Common.Core;
 using Engine.Core;
 using static Engine.Core.CoreModule;
@@ -17,10 +18,29 @@ public static class FilterEx
 {
     public static string FilterId(this string id)
     {
+        // 정규식 패턴: 한글 유니코드 범위 (\uAC00-\uD7A3)
+        string pattern = @"[\uAC00-\uD7A3]";
+
         List<string> invalidChars = "\"'!@#$%^&*()".ToEnumerable().ToList();
         foreach (char c in "\"'!@#$%^&*()")
             id = id.Replace(c, '_');
-        return id;
+        return ReplaceKoreanWithUnicodeNumbers(id);
+
+        static string ReplaceKoreanWithUnicodeNumbers(string input)
+        {
+            StringBuilder result = new StringBuilder();
+
+            foreach (char c in input)
+            {
+                // 한글 유니코드 범위 (\uAC00-\uD7A3)
+                if (c >= '\uAC00' && c <= '\uD7A3')
+                    result.Append($"_{(int)c:X4}");
+                else
+                    result.Append(c);
+            }
+
+            return result.ToString();
+        }
     }
 }
 public abstract class CyItem : ICyItem

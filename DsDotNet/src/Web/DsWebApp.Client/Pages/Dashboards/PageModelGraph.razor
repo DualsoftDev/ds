@@ -68,7 +68,7 @@
                 await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
                 await JsDual.EvalExternalScript("js/cyDsGraph.js");
                 await JsDual.EvalOnGlobalModule(_snippet);
-                await JsDual.EvalOnGlobalModule(_runtimeStyles);
+                await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");
 
                 var optJsonNodes = await Http.GetRestResultAsync<string>($"/api/model/graph-vertices");
                 optJsonNodes.Iter(
@@ -123,8 +123,8 @@
             });
     }
 
-    async Task markStatusUnknownAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H').addClass('U M')");
-    async Task resetStatusAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H U NM')");
+    async Task markStatusUnknownAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H NM').addClass('U M')");
+    async Task resetStatusAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H U M').addClass('NM')");
 
     async Task stopMonitorAsync()
     {
@@ -158,44 +158,6 @@
         );
     }
 
-    readonly string _runtimeStyles = @"
-        cy.style()
-            .selector(':not(Flow)')
-            .selector('node.R').style('background-color', 'grey')
-            .selector('node.G').style('background-color', 'green')
-            .selector('node.F').style('background-color', 'blue')
-            .selector('node.H').style('background-color', 'yellow')
-            .selector('node.U').style('background-color', 'grey')
-                // .style('opacity', 0.5)
-                // .style('border-color', 'grey')
-                // .style('border-width', 3)
-
-        // // Flow 가 아닐 때에만 적용
-        // const applyStyle = (backgroundColor, opacity, borderColor, borderWidth) => {
-        //     return {
-        //         'background-color': ele => !ele.hasClass('Flow') ? backgroundColor : ele.style('background-color'),
-        //         'opacity'         : ele => !ele.hasClass('Flow') ? opacity         : ele.style('opacity'),
-        //         'border-color'    : ele => !ele.hasClass('Flow') ? borderColor     : ele.style('border-color'),
-        //         'border-width'    : ele => !ele.hasClass('Flow') ? borderWidth     : ele.style('border-width')
-        //     };
-        // };
-
-        // cy.style()
-        //     .selector('node.R').style(applyStyle('grey', '', '', ''))
-        //     .selector('node.G').style(applyStyle('green', '', '', ''))
-        //     .selector('node.F').style(applyStyle('blue', '', '', ''))
-        //     .selector('node.H').style(applyStyle('yellow', '', '', ''))
-        //     .selector('node.U').style(applyStyle('grey', 0.5, 'grey', 3));
-        ";
-
-    // .selector('node.R:not(Flow)').style('background-color', 'grey')
-    // .selector('node.G:not(Flow)').style('background-color', 'green')
-    // .selector('node.F:not(Flow)').style('background-color', 'blue')
-    // .selector('node.H:not(Flow)').style('background-color', 'yellow')
-    // .selector('node.U:not(Flow)').style('background-color', 'grey')
-    // .style('opacity', 0.5)
-    // .style('border-color', 'grey')
-    // .style('border-width', 3)
 
 
 

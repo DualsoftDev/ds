@@ -46,7 +46,7 @@ var cy = window.cy = cytoscape({
             selector: 'node',
             css: {
                 // 'shape': 'data(shape)',
-                'shape': 'pentagon',
+                'shape': 'rectangle',
                 'content': 'data(content)',
                 'border-width': 1,
                 'border-color': 'navy',
@@ -55,42 +55,55 @@ var cy = window.cy = cytoscape({
                 'background-opacity': 1,
             }
         },
-        {
-            selector: 'node.Flow',
-            css: {
-                'shape': 'rectangle',
-                // 'text-outline-width': 1,
-                // 'text-outline-color': 'white',
-                'border-style': 'dashed',
-                'font-size': '60px',
-                'color': 'skyblue',
-                'background-color': 'LightCyan',
+
+        { selector: 'node.Call', css: { 'shape': 'ellipse' } },
+        { selector: 'node.Alias', css: { 'shape': 'diamond' } },
+
+        { selector: 'node.Flow.NM',  css: {'background-color': 'LightCyan'} },
+        { selector: 'node.Real.NM',  css: {'background-color': 'DarkSalmon'} },
+        { selector: 'node.Call.NM',  css: {'background-color': 'DarkSeaGreen'} },
+        { selector: 'node.Alias.NM', css: {'background-color': 'LightCyan' } },
+
+        { selector: 'node.M.U', css: { 'background-color': 'white' } },
+        { selector: 'node.M.R', css: { 'background-color': 'white' } },
+        { selector: 'node.M.G', css: { 'background-color': 'green' } },
+        { selector: 'node.M.F', css: { 'background-color': 'blue' } },
+        { selector: 'node.M.H', css: { 'background-color': 'yellow' } },
 
 
-                // 'text-background-color': 'blue',
-                // 'text-background-padding': 100,
-            }
-        },
-        {
-            selector: 'node.Real',
-            css: {
-                'shape': 'rectangle',
-                'background-color': 'DarkSalmon',
-            }
-        },
-        {
-            selector: 'node.Call',
-            css: {
-                'shape': 'ellipse',
-                'background-color': 'DarkSeaGreen',
-            }
-        },
-        {
-            selector: 'node.Alias',
-            css: {
-                'shape': 'diamond',
-            }
-        },
+        //{
+        //    selector: 'node.Flow',
+        //    css: {
+        //        'shape': 'rectangle',
+        //        // 'text-outline-width': 1,
+        //        // 'text-outline-color': 'white',
+        //        'border-style': 'dashed',
+        //        'font-size': '60px',
+        //        'color': 'skyblue',
+        //        // 'text-background-color': 'blue',
+        //        // 'text-background-padding': 100,
+        //    }
+        //},
+        //{
+        //    selector: 'node.Real',
+        //    css: {
+        //        'shape': 'rectangle',
+        //        'background-color': 'DarkSalmon',
+        //    }
+        //},
+        //{
+        //    selector: 'node.Call',
+        //    css: {
+        //        'shape': 'ellipse',
+        //        'background-color': 'DarkSeaGreen',
+        //    }
+        //},
+        //{
+        //    selector: 'node.Alias',
+        //    css: {
+        //        'shape': 'diamond',
+        //    }
+        //},
         {
             selector: ':parent',
             css: {

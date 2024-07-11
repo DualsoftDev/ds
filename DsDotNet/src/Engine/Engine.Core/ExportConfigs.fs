@@ -9,12 +9,17 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module ExportConfigsMoudle =
-    
-   
+
+    type InterfaceSimpleConfig = {
+        Motions: DsSimpleInterface[]
+    }
+    type DsSimpleInterface = { MotionName:string }
+
     type InterfaceConfig = {
         SystemName: string
         DsInterfaces: DsInterface[]
     }
+
     type DsInterface = {
         Id: int
         Work: string
@@ -32,10 +37,11 @@ module ExportConfigsMoudle =
         LibraryPath: string
         Motion: string
     }
+    with 
+        member x.ToJson() = JsonConvert.SerializeObject(x, Formatting.Indented)
+        member x.ToJsonSimpleFormat() = JsonConvert.SerializeObject({MotionName =  x.Motion}, Formatting.Indented)
     
-    type InterfaceSimpleConfig = {
-        MotionSync: (int*string)[]
-    }
+    
 
     let private jsonSettings = JsonSerializerSettings()
 
@@ -91,9 +97,9 @@ type ExportConfigsExt =
         saveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces = dsInterfaces
-                                    .Select(fun f-> f.Id, f.Motion).ToArray() 
+                                    .Select(fun f-> {MotionName =  f.Motion}).ToArray() 
 
-        let interfaceSimpleConifg = {MotionSync = dsSimpleInterfaces}
+        let interfaceSimpleConifg = {Motions =dsSimpleInterfaces}
         let exportSimplePath =  PathManager.changeExtension (DsFile(exportPath)) "dsConfigMoiton"
         saveInterfaceSimpleConfig exportSimplePath interfaceSimpleConifg
 

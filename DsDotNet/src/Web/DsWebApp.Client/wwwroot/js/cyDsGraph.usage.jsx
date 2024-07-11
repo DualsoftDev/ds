@@ -35,6 +35,15 @@ cy.fit(cy.$(':visible'))
 
 cy.add({ data: { id: 'z', parent: 'b' } })
 cy.add({ data: { source: 'z', target: 'c' } })
+
+node.degree()
+node.indegree()
+node.outdegree()
+node.hasClass('DsSystem')
+node.neighborhood()     // 이웃 {node 와 edge} 들
+node.neighborhood('edge') // 이웃 edge 들
+node.neighborhood('node') // 이웃 node 들
+
 // elements: {
 //   nodes: [
 //     { data: { id: 'a', parent: 'b' }, position: { x: 215, y: 85 } },

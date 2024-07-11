@@ -7,18 +7,23 @@
 
 <h3>Model Graph</h3>
 
-
 <button id="center">Center</button>
-<button id="reset_zoom">Reset zoom</button>
-<button id="enable_zoom">Enable zoom</button>
 <button id="hide">Hide selection</button>
 <button id="show">Show</button>
-<DxButton Text="Start MONITOR" Click="@(async () => await startMonitorAsync())" Visible="@(_hubSubscription == null)"/>
-<DxButton Text="Stop MONITOR" Click="@(async () => await stopMonitorAsync())" Visible="@(_hubSubscription != null)" />
+<DxButton Text="Start MONITOR" Click="@(async () => await startMonitorAsync())" Visible="@(_graphLoaded && _hubSubscription == null)" />
+<DxButton Text="Stop MONITOR" Click="@(async () => await stopMonitorAsync())" Visible="@(_graphLoaded && _hubSubscription != null)" />
+<DxButton Text="Clear MONITOR status" Click="@(async () => await resetStatusAsync())" Visible="@(_graphLoaded && _hubSubscription == null)" />    
+
+@if (! _graphLoaded)
+{
+    <LoadingSpinner Text="Loading model.." />
+}
+
 
 <div id="cy"></div>
 
 @code {
+    bool _graphLoaded;
     HubConnection _hubConnection;
     IDisposable _hubSubscription;
     ORMDBSkeleton _logDb;
@@ -107,7 +112,7 @@
                     if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
                         await applyLogAsync(vwLog);
                     else
-                        throw new Exception($"Failed to find fqdn: {fqdn}");
+                        throw new Exception($"Failed to find fqdn: {fqdn} for log id={vwLog.Id}");
 
                 }
                 catch (Exception e)
@@ -118,38 +123,18 @@
             });
     }
 
-    async Task setStatusAsync(bool addClass)
-    {
-        Console.WriteLine($"setStatusAsync({addClass})");
-        var classify = addClass ? "addClass" : "removeClass";
-        foreach(var n in _nodeDic.Values)
-        {
-            if (n.type.Contains("DsSystem"))
-                continue;
-            Console.WriteLine($"Clearing status of {n.id}: cy.$('#{n.id}')");
-            await JsDual.EvalOnGlobalModule($@"cy.$('#{n.id}')
-                .removeClass('R')
-                .removeClass('G')
-                .removeClass('F')
-                .removeClass('H')
-                .{classify}('U')"
-            );
-        }
-        Console.WriteLine($"DONE setStatusAsync({addClass})");
-    }
-    Task astrayStatusAsync() => setStatusAsync(true);
-    Task resetStatusAsync() => setStatusAsync(false);
+    async Task markStatusUnknownAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H').addClass('U M')");
+    async Task resetStatusAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H U NM')");
 
     async Task stopMonitorAsync()
     {
-        await resetStatusAsync();
         _hubSubscription?.Dispose();
         _hubSubscription = null;
     }
-    
+
     async Task startMonitorAsync()
     {
-        await astrayStatusAsync();
+        await markStatusUnknownAsync();
         _hubSubscription?.Dispose();
         _hubSubscription = listenHub();
     }
@@ -166,19 +151,9 @@
         var id = vwLog.Fqdn.FilterId();
         Console.WriteLine($"cy.$('#{id}').classes() : added {status}");
         await JsDual.EvalOnGlobalModule($@"
-            var node = cy.$('#{id}')
-            node
-                // .filter(':not(.Flow)')
-                .removeClass('R')
-                .removeClass('G')
-                .removeClass('F')
-                .removeClass('H')
-                .removeClass('U')
-                // .style('opacity', '1')
+            cy.$('#{id}')
+                .removeClass('R G F H U')
                 .addClass('{status}')
-            // node.ancestors()
-            //     .filter('.Flow')
-            //     .style('opacity', '1')  
             "
         );
     }
@@ -213,14 +188,14 @@
         //     .selector('node.U').style(applyStyle('grey', 0.5, 'grey', 3));
         ";
 
-        // .selector('node.R:not(Flow)').style('background-color', 'grey')
-        // .selector('node.G:not(Flow)').style('background-color', 'green')
-        // .selector('node.F:not(Flow)').style('background-color', 'blue')
-        // .selector('node.H:not(Flow)').style('background-color', 'yellow')
-        // .selector('node.U:not(Flow)').style('background-color', 'grey')
-        // .style('opacity', 0.5)
-        // .style('border-color', 'grey')
-        // .style('border-width', 3)
+    // .selector('node.R:not(Flow)').style('background-color', 'grey')
+    // .selector('node.G:not(Flow)').style('background-color', 'green')
+    // .selector('node.F:not(Flow)').style('background-color', 'blue')
+    // .selector('node.H:not(Flow)').style('background-color', 'yellow')
+    // .selector('node.U:not(Flow)').style('background-color', 'grey')
+    // .style('opacity', 0.5)
+    // .style('border-color', 'grey')
+    // .style('border-width', 3)
 
 
 
@@ -233,12 +208,14 @@
         {
             // await JsDual.EvalOnGlobalModule(@"fit();");
         }
-        else
+        else if (! _graphLoaded)
         {
             Console.WriteLine("fit() is ready.");
             // dirty hack!
             await Task.Delay(2000);
             await JsDual.EvalOnGlobalModule(@"fit();");
+            _graphLoaded = true;
+            StateHasChanged();
         }
     }
 
@@ -247,7 +224,7 @@
 // node 만 적용하려면 cy.on('click', 'node', evt => ...  의 형태로 작성
 cy.on('click', evt => {
     if (evt.target.id) {
-        console.log('clicked ' + evt.target.id());
+        console.log(`clicked  cy.$('#${evt.target.id()}')`);
         console.log(evt.target.json());
         // console.log('clicked ' + JSON.stringify(evt.target.json()));
     }
@@ -326,19 +303,20 @@ function fit()
 
 // button handlers
 $('#center').click(() => {
-    fit();
+    cy.center();
     //cy.fit(cy.nodes().filter(':visible'))
-    // cy.center();
 });
 
 
 $('#hide').click(() => {
-    cy.$(':selected').style('display', 'none');
+    cy.$(':selected').filter('.Flow').style('display', 'none');
     fit();
 });
 
+$('#dxButton').click(() => { Console.WriteLine('DxButton clicked.');} );
+
 $('#show').click(() => {
-    cy.$(':hidden').style('display', 'element')
+    cy.$(':hidden').filter('.Flow').style('display', 'element')
     cy.fit(cy.nodes().filter(':visible'))
     fit()
 });

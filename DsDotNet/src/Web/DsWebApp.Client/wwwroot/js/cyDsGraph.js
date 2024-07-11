@@ -30,6 +30,16 @@ var cy = window.cy = cytoscape({
 
     boxSelectionEnabled: false,
 
+    /*
+     * Node classes
+        - category: DsSystem, Flow, Real, Call, Alias
+        - Monitoring 여부
+            - M: Monitoring mode
+                - R,G,F,H
+                - U: Unknown
+            - NM: Non-Monitoring, NorMal mode
+     */
+
     style: [
         // https://stackoverflow.com/questions/45572034/how-to-select-nodes-by-class-in-cytoscape-js
         {
@@ -111,7 +121,7 @@ var cy = window.cy = cytoscape({
         {
             selector: 'edge',
             css: {
-                'curve-style': 'bezier',
+                'curve-style': 'unbundled-bezier',
                 'target-arrow-shape': 'triangle',
                 'target-arrow-color': 'navy',
             }
@@ -120,7 +130,6 @@ var cy = window.cy = cytoscape({
             selector: 'edge.Reset',
             css: {
                 'line-color': 'green',
-                'curve-style': 'bezier',
                 'target-arrow-shape': 'circle',
                 'target-arrow-color': 'red',
                 'line-style': 'dashed',     // 'solid', 'dotted',
@@ -132,7 +141,6 @@ var cy = window.cy = cytoscape({
             selector: 'edge.ReverseReset',
             css: {
                 'line-color': 'green',
-                'curve-style': 'bezier',
                 'source-arrow-shape': 'circle',
                 'source-arrow-color': 'red',
                 'line-style': 'dashed',     // 'solid', 'dotted',

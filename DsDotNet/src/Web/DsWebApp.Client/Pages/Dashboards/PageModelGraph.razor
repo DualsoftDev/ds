@@ -27,7 +27,7 @@
     HubConnection _hubConnection;
     IDisposable _hubSubscription;
     ORMDBSkeleton _logDb;
-    Dictionary<string, CyVertex> _nodeDic;
+    Dictionary<string, CyVertex> _fqdnNodeDic;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -62,41 +62,21 @@
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
         var data = await Http.GetRestResultAsync<string[]>($"/api/model/graph");
         await data.IterAsync(
-            async arr =>
+            async jsons =>
             {
-                var (graphJson, nodesJson) = (arr[0], arr[1]);
+                var (graphJson, nodesJson) = (jsons[0], jsons[1]);
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{graphJson}");
                 await JsDual.EvalOnGlobalModule($"window.cyData = {graphJson};");
                 await JsDual.EvalExternalScript("js/cyDsGraph.js");
                 await JsDual.EvalOnGlobalModule(_snippet);
-                await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");
+                await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");       // default to Non-Monitoring mode
 
                 var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(nodesJson);
                 foreach (var n in nodes)
-                {
                     Console.WriteLine($"{n.id} = {n.type}");
-                }
 
-                _nodeDic = nodes.ToDictionary(node => node.fqdn);
+                _fqdnNodeDic = nodes.ToDictionary(node => node.fqdn);
                 Console.WriteLine($"Got total {nodes.Length} vertices");
-
-                // var xxx = NewtonsoftJson.DeserializeObject(graphJson);
-
-                // var result = await Http.GetRestResultAsync<(string, string)>($"/api/model/graph-vertices");
-                // result.Iter(
-                //     nodesJson =>
-                //     {
-                //         var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(nodesJson);
-                //         foreach (var n in nodes)
-                //         {
-                //             Console.WriteLine($"{n.id} = {n.type}");
-                //         }
-
-                //         _nodeDic = nodes.ToDictionary(node => node.fqdn);
-                //         Console.WriteLine($"Got total {nodes.Length} vertices");
-                //     },
-                //     async err => await JsDual.Alert($"Failed to get data: {err}")
-                // );
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
         );
@@ -116,7 +96,7 @@
                     if (fqdn == @"SIDE4.S204.STN_SV.""1ST_CLAMP3.ADV""" || fqdn == @"SIDE4.S204.STN_CT.""1ST_CLAMP3.ADV""")
                         Console.WriteLine($"Got log: {logJson}");
 
-                    if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
+                    if (_fqdnNodeDic != null && _fqdnNodeDic.TryGetValue(fqdn, out var node))
                         await applyLogAsync(vwLog);
                     else
                         throw new Exception($"Failed to find fqdn: {fqdn} for log id={vwLog.Id}");
@@ -130,8 +110,17 @@
             });
     }
 
-    async Task markStatusUnknownAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H NM').addClass('U M')");
-    async Task resetStatusAsync() => await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H U M').addClass('NM')");
+    /// <summary>
+    /// 최초 상태를 받기전의 알수 없는 상태로 marking
+    /// </summary>
+    async Task markStatusUnknownAsync() =>
+        await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H NM').addClass('U M')");
+
+    /// <summary>
+    /// Non-Monitoring 상태로 초기화
+    /// </summary>
+    async Task resetStatusAsync() =>
+        await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H U M').addClass('NM')");
 
     async Task stopMonitorAsync()
     {
@@ -145,6 +134,10 @@
         _hubSubscription?.Dispose();
         _hubSubscription = listenHub();
     }
+
+    /// <summary>
+    /// Log 변경을 UI 에 적용한다.
+    /// </summary>
     async Task applyLogAsync(ORMVwLog vwLog)
     {
         var status = vwLog.TagKindName switch
@@ -155,19 +148,14 @@
             "VertexTag.homing" => "H",
             _ => ""
         };
-        var id = _nodeDic[vwLog.Fqdn].id;
-        Console.WriteLine($"cy.$('#{id}').classes() : added {status}");
-        await JsDual.EvalOnGlobalModule($@"
-            cy.$('#{id}')
-                .removeClass('R G F H U')
-                .addClass('{status}')
-            "
-        );
+
+        // fqdn 의 value 에 따라 해당 node 의 상태를 변경
+        var id = _fqdnNodeDic[vwLog.Fqdn].id;
+        Console.WriteLine($"cy.$('#{id}').classes() : added {status}  (Log: {vwLog.Id}={vwLog.Fqdn})");
+        var val = vwLog.Value.ToString();
+        var addOrRemove =  val == "1" ? "addClass" : "removeClass";
+        await JsDual.EvalOnGlobalModule($@"cy.$('#{id}').removeClass('U').{addOrRemove}('{status}')");
     }
-
-
-
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -175,11 +163,12 @@
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            // await JsDual.EvalOnGlobalModule(@"fit();");
+            // cytoscape 와의 interop 시, firstRender 후 바로 적용이 불가능.  _graphLoaded 를 통해 조건부 적용
         }
         else if (! _graphLoaded)
         {
-            Console.WriteLine("fit() is ready.");
+            Console.WriteLine("Fitting cytoscape graph after loading.");
+
             // dirty hack!
             await Task.Delay(2000);
             await JsDual.EvalOnGlobalModule(@"fit();");
@@ -233,6 +222,10 @@ cy.on('mouseout', 'node', function(event) {
   });
 });
 
+
+function getEdgeLabel(edge) {
+    return `${cy.$id(edge.data('source')).data('content')} => ${cy.$id(edge.data('target')).data('content')}`;
+}
 // 'edge' 클래스의 모든 엣지에 mouseover 이벤트 리스너를 추가
 cy.on('mouseover', 'edge', function(event) {
   var edge = event.target;
@@ -242,7 +235,7 @@ cy.on('mouseover', 'edge', function(event) {
     'line-color': 'red',
     'color': 'red',
     'width': 4, // 엣지 두께 변경
-    'label': `${cy.$id(edge.data('source')).data('fqdn')} => ${cy.$id(edge.data('target')).data('fqdn')}`  // 마우스 오버 시 엣지 ID를 라벨로 표시
+    'label': getEdgeLabel(edge)  // 마우스 오버 시 엣지 ID를 라벨로 표시
   });
 });
 

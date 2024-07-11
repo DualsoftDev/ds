@@ -65,10 +65,10 @@ var cy = window.cy = cytoscape({
         { selector: 'node.Alias.NM', css: {'background-color': 'LightCyan' } },
 
         { selector: 'node.M.U', css: { 'background-color': 'white' } },
-        { selector: 'node.M.R', css: { 'background-color': 'white' } },
-        { selector: 'node.M.G', css: { 'background-color': 'green' } },
-        { selector: 'node.M.F', css: { 'background-color': 'blue' } },
-        { selector: 'node.M.H', css: { 'background-color': 'yellow' } },
+        { selector: 'node.M.R', css: { 'background-color': 'DarkGreen' } },
+        { selector: 'node.M.G', css: { 'background-color': 'DarkGoldenrod' } },
+        { selector: 'node.M.F', css: { 'background-color': 'RoyalBlue' } },
+        { selector: 'node.M.H', css: { 'background-color': 'DimGray' } },
 
 
         //{

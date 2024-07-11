@@ -6,7 +6,7 @@ open System.Runtime.InteropServices
 open Antlr4.Runtime
 open Dual.Common.Core.FS
 
-type ParserError(line: int, column: int, message: string, ambient: string) =
+type ParserErrorRecord(line: int, column: int, message: string, ambient: string) =
     member val Line = line
     member val Column = column
     member val Message = message
@@ -16,7 +16,7 @@ type ParserError(line: int, column: int, message: string, ambient: string) =
 type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>] throwOnError) =
     inherit ConsoleErrorListener<'Symbol>()
 
-    member val Errors = ResizeArray<ParserError>()
+    member val Errors = ResizeArray<ParserErrorRecord>()
 
     override x.SyntaxError
         (
@@ -35,14 +35,14 @@ type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>] throwOnEr
             let ambient = parser.RuleContext.GetText()
             base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e)
             logError ($"Parser error on [{line}:{col}]@{dsFile}: {msg}")
-            x.Errors.Add(new ParserError(line, col, msg, ambient))
+            x.Errors.Add(new ParserErrorRecord(line, col, msg, ambient))
 
             if throwOnError then
-                ParserException($"{msg} near {ambient}", line, col) |> raise
+                ParserError($"{msg} near {ambient}", line, col) |> raise
         | :? Lexer ->
             logError ($"Lexer error on [{line}:{col}]@{dsFile}: {msg}")
-            x.Errors.Add(new ParserError(line, col, msg, ""))
+            x.Errors.Add(new ParserErrorRecord(line, col, msg, ""))
 
             if throwOnError then
-                ParserException($"Lexical error : {msg}", line, col) |> raise
+                ParserError($"Lexical error : {msg}", line, col) |> raise
         | _ -> failwithlog "ERROR"

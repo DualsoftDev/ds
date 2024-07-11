@@ -239,7 +239,7 @@ partial class ElementsListener : dsBaseListener
 
         var layouts = Descendants<LayoutsContext>(ctx).ToArray();
         if (layouts.Length > 1)
-            throw new ParserException("Layouts block should exist only once", ctx);
+            throw new ParserError("Layouts block should exist only once", ctx);
 
         var positionDefs = Descendants<PositionDefContext>(ctx).ToArray();
         foreach (var posiDef in positionDefs)
@@ -259,7 +259,7 @@ partial class ElementsListener : dsBaseListener
         //}
         var addresses = Descendants<AddressesContext>(ctx).ToArray();
         if (addresses.Length > 1)
-            throw new ParserException("Layouts block should exist only once", ctx);
+            throw new ParserError("Layouts block should exist only once", ctx);
 
         var addressDefs = Descendants<AddressDefContext>(ctx).ToArray();
         foreach (var addrDef in addressDefs)

@@ -14,35 +14,23 @@ public interface ICyItem
     string id { get; }
 }
 
-public static class FilterEx
+public class FqdnIdManager
 {
-    public static string FilterId(this string id)
+    Dictionary<string, string> _fqdn2IdDic = new();
+    int _idCounter = 0;
+    public string FetchId(string fqdn)
     {
-        // 정규식 패턴: 한글 유니코드 범위 (\uAC00-\uD7A3)
-        string pattern = @"[\uAC00-\uD7A3]";
+        if (fqdn is null)
+            return null;
 
-        List<string> invalidChars = "\"'!@#$%^&*()".ToEnumerable().ToList();
-        foreach (char c in "\"'!@#$%^&*()")
-            id = id.Replace(c, '_');
-        return ReplaceKoreanWithUnicodeNumbers(id);
-
-        static string ReplaceKoreanWithUnicodeNumbers(string input)
-        {
-            StringBuilder result = new StringBuilder();
-
-            foreach (char c in input)
-            {
-                // 한글 유니코드 범위 (\uAC00-\uD7A3)
-                if (c >= '\uAC00' && c <= '\uD7A3')
-                    result.Append($"_{(int)c:X4}");
-                else
-                    result.Append(c);
-            }
-
-            return result.ToString();
-        }
+        if (_fqdn2IdDic.TryGetValue(fqdn, out string id))
+            return id;
+        var newId = _idCounter++.ToString();
+        _fqdn2IdDic.Add(fqdn, newId);
+        return newId;
     }
 }
+
 public abstract class CyItem : ICyItem
 {
     public string id { get; /*internal*/ set; }
@@ -50,15 +38,15 @@ public abstract class CyItem : ICyItem
     public string content { get; /*internal*/ set; }
     protected CyItem() {}
 
-    protected CyItem(string fqdn, string content)
+    protected CyItem(FqdnIdManager idManager, string fqdn, string content)
     {
         this.fqdn = fqdn;
-        this.id = fqdn.FilterId();
+        this.id = idManager.FetchId(fqdn);
         this.content = content;
     }
     public abstract string Serialize();
-    protected void Set(string fqdn, string content) =>
-        (this.fqdn, this.id, this.content) = (fqdn, fqdn.FilterId(), content);
+    protected void Set(FqdnIdManager idManager, string fqdn, string content) =>
+        (this.fqdn, this.id, this.content) = (fqdn, idManager.FetchId(fqdn), content);
 }
 
 public class CyVertex : CyItem
@@ -68,14 +56,14 @@ public class CyVertex : CyItem
 
     public CyVertex() {}
 
-    public CyVertex(Vertex vertex)
-        : this(vertex.GetType().Name, vertex.QualifiedName, vertex.Name, vertex.Parent.GetCore().QualifiedName)
+    //public CyVertex(Vertex vertex)
+    //    : this(vertex.GetType().Name, vertex.QualifiedName, vertex.Name, vertex.Parent.GetCore().QualifiedName)
+    //{
+    //}
+    public CyVertex(FqdnIdManager idManager, string type, string fqdn, string content, string parent)
+        : base(idManager, fqdn, content)
     {
-    }
-    public CyVertex(string type, string fqdn, string content, string parent)
-        : base(fqdn, content)
-    {
-        this.parent = parent;
+        this.parent = idManager.FetchId(parent);
         this.type = type;
     }
     public override string Serialize()
@@ -95,25 +83,25 @@ public class CyEdge : CyItem
     public string type { get; /*internal*/ set; }
     public CyEdge() { }
 
-    public CyEdge(Edge edge)
-        : this(edge.Source.QualifiedName, edge.Target.QualifiedName)
+    public CyEdge(FqdnIdManager idManager, Edge edge)
+        : this( idManager, edge.Source.QualifiedName, edge.Target.QualifiedName)
     {
         type = edge.EdgeType.ToString();
     }
 
-    CyEdge(string src, string tgt)
-        : base($"{src}__{tgt}", $"{src}__{tgt}")
+    CyEdge(FqdnIdManager idManager, string src, string tgt)
+        : base(idManager, $"{idManager.FetchId(src)}_{idManager.FetchId(tgt)}", $"{src}__{tgt}")
     {
-        this.source = src.FilterId();
-        this.target = tgt.FilterId();
+        this.source = idManager.FetchId(src);
+        this.target = idManager.FetchId(tgt);
     }
 
-    public void Set(string fqdn, string content, string source, string target, string type)
+    public void Set(FqdnIdManager idManager, string fqdn, string content, string source, string target, string type)
     {
         this.source = source;
         this.target = target;
         this.type = type;
-        base.Set(fqdn, content);
+        base.Set(idManager, fqdn, content);
     }
 
     public override string Serialize()

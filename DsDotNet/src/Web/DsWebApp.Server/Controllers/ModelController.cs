@@ -3,6 +3,7 @@ using Engine.Core;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
+using Dual.Web.Blazor.Shared;
 
 namespace DsWebApp.Server.Controllers;
 
@@ -46,35 +47,35 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
 
 
 
-    /// <summary>
-    /// Get vertices
-    /// </summary>
-    // api/model/graph-vertices
-    [HttpGet("graph-vertices")]
-    public async Task<RestResultString> GetNodes()
-    {
-        if (!await serverGlobal.StandbyUntilServerReadyAsync())
-            return RestResultString.Err("Server not ready.");
+    ///// <summary>
+    ///// Get vertices
+    ///// </summary>
+    //// api/model/graph-vertices
+    //[HttpGet("graph-vertices")]
+    //public async Task<RestResultString> GetNodes()
+    //{
+    //    if (!await serverGlobal.StandbyUntilServerReadyAsync())
+    //        return RestResultString.Err("Server not ready.");
 
-        var sys = _model.System;
-        CyGraph.TheSystem = sys;
-        var vertices = sys.CollectVertices().ToArray();
-        CyGraph.TheSystem = null;
+    //    var sys = _model.System;
+    //    CyGraph.TheSystem = sys;
+    //    var vertices = sys.CollectVertices().ToArray();
+    //    CyGraph.TheSystem = null;
 
-        var json = NewtonsoftJson.SerializeObject(vertices);
-        var xxx = NewtonsoftJson.DeserializeObject<CyVertex[]>(json);
-        return RestResultString.Ok(json);
-    }
+    //    var json = NewtonsoftJson.SerializeObject(vertices);
+    //    var xxx = NewtonsoftJson.DeserializeObject<CyVertex[]>(json);
+    //    return RestResultString.Ok(json);
+    //}
 
     /// <summary>
     /// Get graph info: nodes and edges
     /// </summary>
     // api/model/graph
     [HttpGet("graph")]
-    public async Task<RestResultString> GetNodesAndEdges([FromQuery] string fqdn = null) // fqdn = "HelloDS.STN1.Work1"
+    public async Task<RestResult<string[]>> GetNodesAndEdges([FromQuery] string fqdn = null) // fqdn = "HelloDS.STN1.Work1"
     {
         if (!await serverGlobal.StandbyUntilServerReadyAsync())
-            return RestResultString.Err("Server not ready.");
+            return RestResult<string[]>.Err("Server not ready.");
 
         var sys = _model.System;
         fqdn = fqdn ?? sys.Name;
@@ -93,10 +94,13 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
         }
 
         if (node == null)
-            return RestResultString.Err($"Failed to find vertex with name: {fqdn}");
+            return RestResult<string[]>.Err($"Failed to find vertex with name: {fqdn}");
 
-        var vertices = node.CollectVertices(true).ToArray();
-        var edges = node.CollectEdges().ToArray();
+        FqdnIdManager idManager = new();
+
+
+        var vertices = node.CollectVertices(idManager, true).ToArray();
+        var edges = node.CollectEdges(idManager).ToArray();
         var multiEdgesGroups =
             edges.GroupBy(e => (e.source, e.target))
                 .Where(g => g.Count() > 1)
@@ -109,7 +113,7 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
                 var classes = gr.Select(e => e.type).JoinString(", ");
                 var edge = new CyEdge();
                 var m0 = multiples[0];
-                edge.Set(m0.fqdn, m0.content, m0.source, m0.target, classes);
+                edge.Set(idManager, m0.fqdn, m0.content, m0.source, m0.target, classes);
                 return edge;
             }).ToArray();
 
@@ -122,12 +126,13 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
 
         var cytoGraph = new CyGraph(vertices, finalEdges);
 
-        var json = cytoGraph.Serialize();
-        Trace.WriteLine(json);
+        var nodesJson = NewtonsoftJson.SerializeObject(vertices);
+        var graphJson = cytoGraph.Serialize();
+        Trace.WriteLine(graphJson);
 
         CyGraph.TheSystem = null;
 
-        return RestResultString.Ok(json);
+        return RestResult<string[]>.Ok( new[] { graphJson, nodesJson } );
     }
 }
 
@@ -141,7 +146,7 @@ public static class CytoVertexExtension
         var p = vertex.GetParentName();
         return (q, n, p);
     }
-    public static IEnumerable<CyVertex> CollectVertices(this IVertex vertex, bool includeMe = true)
+    public static IEnumerable<CyVertex> CollectVertices(this IVertex vertex, FqdnIdManager idManager, bool includeMe = true)
     {
         if (includeMe)
         {
@@ -152,20 +157,20 @@ public static class CytoVertexExtension
             if (vertex is Flow f && f.System == CyGraph.TheSystem)
                 p = null;
 
-            yield return new CyVertex(t, q, n, p);
+            yield return new CyVertex(idManager, t, q, n, p);
         }
         switch (vertex)
         {
             case DsSystem s:
-                foreach (var c in s.Flows.SelectMany(f => f.CollectVertices()))
+                foreach (var c in s.Flows.SelectMany(f => f.CollectVertices(idManager)))
                     yield return c;
                 break;
             case Flow f:
-                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectVertices()))
+                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectVertices(idManager)))
                     yield return c;
                 break;
             case Real r:
-                foreach (var c in r.Graph.Vertices.SelectMany(v => v.CollectVertices()))
+                foreach (var c in r.Graph.Vertices.SelectMany(v => v.CollectVertices(idManager)))
                     yield return c;
                 break;
             case Call cc:
@@ -176,28 +181,28 @@ public static class CytoVertexExtension
         }
     }
 
-    public static IEnumerable<CyEdge> CollectEdges(this IVertex vertex)
+    public static IEnumerable<CyEdge> CollectEdges(this IVertex vertex, FqdnIdManager idManager)
     {
         switch (vertex)
         {
             case DsSystem s:
-                foreach (var c in s.Flows.SelectMany(f => f.CollectEdges()))
+                foreach (var c in s.Flows.SelectMany(f => f.CollectEdges(idManager)))
                     yield return c;
                 break;
             case Flow f:
                 if (f.Name == "MES")
                 {
-                    var xxx = f.Graph.Edges.Select(e => new CyEdge(e)).ToArray();
+                    var xxx = f.Graph.Edges.Select(e => new CyEdge(idManager, e)).ToArray();
                     Console.Write("");
                 }
-                foreach (var c in f.Graph.Edges.Select(e => new CyEdge(e)))
+                foreach (var c in f.Graph.Edges.Select(e => new CyEdge(idManager, e)))
                     yield return c;
 
-                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectEdges()))
+                foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectEdges(idManager)))
                     yield return c;
                 break;
             case Real r:
-                foreach (var c in r.Graph.Edges.Select(e => new CyEdge(e)))
+                foreach (var c in r.Graph.Edges.Select(e => new CyEdge(idManager, e)))
                     yield return c;
                 break;
 

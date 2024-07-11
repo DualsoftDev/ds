@@ -60,36 +60,43 @@
         */
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
-        var data = await Http.GetRestResultAsync<string>($"/api/model/graph");
+        var data = await Http.GetRestResultAsync<string[]>($"/api/model/graph");
         await data.IterAsync(
-            async json =>
+            async arr =>
             {
-                Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
-                await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
+                var (graphJson, nodesJson) = (arr[0], arr[1]);
+                Console.WriteLine($"--------------- Cytoscape data:\r\n{graphJson}");
+                await JsDual.EvalOnGlobalModule($"window.cyData = {graphJson};");
                 await JsDual.EvalExternalScript("js/cyDsGraph.js");
                 await JsDual.EvalOnGlobalModule(_snippet);
                 await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");
 
-                var optJsonNodes = await Http.GetRestResultAsync<string>($"/api/model/graph-vertices");
-                optJsonNodes.Iter(
-                    jsonNodes =>
-                    {
-                        var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(jsonNodes);
-                        foreach (var n in nodes)
-                        {
-                            Console.WriteLine($"{n.id} = {n.type}");
-                        }
+                var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(nodesJson);
+                foreach (var n in nodes)
+                {
+                    Console.WriteLine($"{n.id} = {n.type}");
+                }
 
-                        _nodeDic = nodes.ToDictionary(node => node.fqdn);
-                        Console.WriteLine($"Got total {nodes.Length} vertices");
-                    },
-                    async err => await JsDual.Alert($"Failed to get data: {err}")
-                );
+                _nodeDic = nodes.ToDictionary(node => node.fqdn);
+                Console.WriteLine($"Got total {nodes.Length} vertices");
 
+                // var xxx = NewtonsoftJson.DeserializeObject(graphJson);
 
-                var filteredDic = _nodeDic.Values.ToDictionary(node => node.id.FilterId(), node => node.id);
-                var jsonDic = NewtonsoftJson.SerializeObject(filteredDic);
-                await JsDual.EvalOnGlobalModule($"window.fid = {jsonDic};");
+                // var result = await Http.GetRestResultAsync<(string, string)>($"/api/model/graph-vertices");
+                // result.Iter(
+                //     nodesJson =>
+                //     {
+                //         var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(nodesJson);
+                //         foreach (var n in nodes)
+                //         {
+                //             Console.WriteLine($"{n.id} = {n.type}");
+                //         }
+
+                //         _nodeDic = nodes.ToDictionary(node => node.fqdn);
+                //         Console.WriteLine($"Got total {nodes.Length} vertices");
+                //     },
+                //     async err => await JsDual.Alert($"Failed to get data: {err}")
+                // );
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
         );
@@ -148,7 +155,7 @@
             "VertexTag.homing" => "H",
             _ => ""
         };
-        var id = vwLog.Fqdn.FilterId();
+        var id = _nodeDic[vwLog.Fqdn].id;
         Console.WriteLine($"cy.$('#{id}').classes() : added {status}");
         await JsDual.EvalOnGlobalModule($@"
             cy.$('#{id}')
@@ -196,7 +203,7 @@ cy.on('click', evt => {
 cy.on('mouseover', 'node', function(event) {
   var node = event.target;
   // 여기서 노드에 마우스가 올려졌을 때의 작업을 수행합니다.
-  console.log('Mouse over on node:', node.id());
+  console.log('Mouse over on node:', node.data('fqdn'));
   node.style({
     // 'background-color': 'CornflowerBlue',
     'border-color': 'navy',
@@ -205,7 +212,7 @@ cy.on('mouseover', 'node', function(event) {
     'color': 'red',
     'text-outline-color': 'white',
     'text-outline-width': 2,
-    'label': node.id() // 마우스 오버 시 노드 ID (FQDN)를 라벨로 표시
+    'label': node.data('fqdn') // 마우스 오버 시 노드 ID (FQDN)를 라벨로 표시
   });
 });
 
@@ -213,7 +220,7 @@ cy.on('mouseover', 'node', function(event) {
 cy.on('mouseout', 'node', function(event) {
   var node = event.target;
   // 여기서 노드에서 마우스가 떠났을 때의 작업을 수행합니다.
-  console.log('Mouse out from node:', node.id());
+  console.log('Mouse out from node:', node.data('fqdn'));
   node.style({
     'border-color': '',
     'border-width': '',
@@ -235,7 +242,7 @@ cy.on('mouseover', 'edge', function(event) {
     'line-color': 'red',
     'color': 'red',
     'width': 4, // 엣지 두께 변경
-    'label': edge.id() // 마우스 오버 시 엣지 ID를 라벨로 표시
+    'label': `${cy.$id(edge.data('source')).data('fqdn')} => ${cy.$id(edge.data('target')).data('fqdn')}`  // 마우스 오버 시 엣지 ID를 라벨로 표시
   });
 });
 

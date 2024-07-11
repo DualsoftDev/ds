@@ -109,7 +109,7 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
                 var classes = gr.Select(e => e.type).JoinString(", ");
                 var edge = new CyEdge();
                 var m0 = multiples[0];
-                edge.Set(m0.id, m0.content, m0.source, m0.target, classes);
+                edge.Set(m0.fqdn, m0.content, m0.source, m0.target, classes);
                 return edge;
             }).ToArray();
 

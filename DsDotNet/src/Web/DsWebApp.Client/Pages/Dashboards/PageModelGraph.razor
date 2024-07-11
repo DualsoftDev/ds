@@ -50,8 +50,8 @@
         foreach(var js in jss)
             await JsDual.EvalExternalScript(js);
 
-         /*
-         * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
+        /*
+        * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
         */
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
@@ -75,11 +75,16 @@
                             Console.WriteLine($"{n.id} = {n.type}");
                         }
 
-                        _nodeDic = nodes.ToDictionary(node => node.id);
+                        _nodeDic = nodes.ToDictionary(node => node.fqdn);
                         Console.WriteLine($"Got total {nodes.Length} vertices");
                     },
                     async err => await JsDual.Alert($"Failed to get data: {err}")
                 );
+
+
+                var filteredDic = _nodeDic.Values.ToDictionary(node => node.id.FilterId(), node => node.id);
+                var jsonDic = NewtonsoftJson.SerializeObject(filteredDic);
+                await JsDual.EvalOnGlobalModule($"window.fid = {jsonDic};");
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
         );
@@ -95,6 +100,10 @@
                     var log = ORMLog.Deserialize(logJson);
                     var vwLog = _logDb.ToView(log);
                     var fqdn = vwLog.Fqdn;
+
+                    if (fqdn == @"SIDE4.S204.STN_SV.""1ST_CLAMP3.ADV""" || fqdn == @"SIDE4.S204.STN_CT.""1ST_CLAMP3.ADV""")
+                        Console.WriteLine($"Got log: {logJson}");
+
                     if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
                         await applyLogAsync(vwLog);
                     else
@@ -111,9 +120,12 @@
 
     async Task setStatusAsync(bool addClass)
     {
+        Console.WriteLine($"setStatusAsync({addClass})");
         var classify = addClass ? "addClass" : "removeClass";
         foreach(var n in _nodeDic.Values)
         {
+            if (n.type.Contains("DsSystem"))
+                continue;
             Console.WriteLine($"Clearing status of {n.id}: cy.$('#{n.id}')");
             await JsDual.EvalOnGlobalModule($@"cy.$('#{n.id}')
                 .removeClass('R')
@@ -123,6 +135,7 @@
                 .{classify}('U')"
             );
         }
+        Console.WriteLine($"DONE setStatusAsync({addClass})");
     }
     Task astrayStatusAsync() => setStatusAsync(true);
     Task resetStatusAsync() => setStatusAsync(false);
@@ -150,9 +163,10 @@
             "VertexTag.homing" => "H",
             _ => ""
         };
-        Console.WriteLine($"cy.$('#{vwLog.Fqdn}').classes() : added {status}");
+        var id = vwLog.Fqdn.FilterId();
+        Console.WriteLine($"cy.$('#{id}').classes() : added {status}");
         await JsDual.EvalOnGlobalModule($@"
-            var node = cy.$('#{vwLog.Fqdn}')
+            var node = cy.$('#{id}')
             node
                 // .filter(':not(.Flow)')
                 .removeClass('R')
@@ -160,43 +174,43 @@
                 .removeClass('F')
                 .removeClass('H')
                 .removeClass('U')
-                .style('opacity', '1')
+                // .style('opacity', '1')
                 .addClass('{status}')
-            node.ancestors()
-                .filter('.Flow')
-                .style('opacity', '1')  
+            // node.ancestors()
+            //     .filter('.Flow')
+            //     .style('opacity', '1')  
             "
         );
     }
 
     readonly string _runtimeStyles = @"
-        // cy.style()
-        //     .selector(':not(Flow)')
-        //     .selector('node.R').style('background-color', 'grey')
-        //     .selector('node.G').style('background-color', 'green')
-        //     .selector('node.F').style('background-color', 'blue')
-        //     .selector('node.H').style('background-color', 'yellow')
-        //     .selector('node.U').style('background-color', 'grey')
-        //         .style('opacity', 0.5)
-        //         .style('border-color', 'grey')
-        //         .style('border-width', 3)
-
-        // Flow 가 아닐 때에만 적용
-        const applyStyle = (backgroundColor, opacity, borderColor, borderWidth) => {
-            return {
-                'background-color': ele => !ele.hasClass('Flow') ? backgroundColor : ele.style('background-color'),
-                'opacity'         : ele => !ele.hasClass('Flow') ? opacity         : ele.style('opacity'),
-                'border-color'    : ele => !ele.hasClass('Flow') ? borderColor     : ele.style('border-color'),
-                'border-width'    : ele => !ele.hasClass('Flow') ? borderWidth     : ele.style('border-width')
-            };
-        };
-
         cy.style()
-            .selector('node.R').style(applyStyle('grey', '', '', ''))
-            .selector('node.G').style(applyStyle('green', '', '', ''))
-            .selector('node.F').style(applyStyle('blue', '', '', ''))
-            .selector('node.H').style(applyStyle('yellow', '', '', ''))
-            .selector('node.U').style(applyStyle('grey', 0.5, 'grey', 3));
+            .selector(':not(Flow)')
+            .selector('node.R').style('background-color', 'grey')
+            .selector('node.G').style('background-color', 'green')
+            .selector('node.F').style('background-color', 'blue')
+            .selector('node.H').style('background-color', 'yellow')
+            .selector('node.U').style('background-color', 'grey')
+                // .style('opacity', 0.5)
+                // .style('border-color', 'grey')
+                // .style('border-width', 3)
+
+        // // Flow 가 아닐 때에만 적용
+        // const applyStyle = (backgroundColor, opacity, borderColor, borderWidth) => {
+        //     return {
+        //         'background-color': ele => !ele.hasClass('Flow') ? backgroundColor : ele.style('background-color'),
+        //         'opacity'         : ele => !ele.hasClass('Flow') ? opacity         : ele.style('opacity'),
+        //         'border-color'    : ele => !ele.hasClass('Flow') ? borderColor     : ele.style('border-color'),
+        //         'border-width'    : ele => !ele.hasClass('Flow') ? borderWidth     : ele.style('border-width')
+        //     };
+        // };
+
+        // cy.style()
+        //     .selector('node.R').style(applyStyle('grey', '', '', ''))
+        //     .selector('node.G').style(applyStyle('green', '', '', ''))
+        //     .selector('node.F').style(applyStyle('blue', '', '', ''))
+        //     .selector('node.H').style(applyStyle('yellow', '', '', ''))
+        //     .selector('node.U').style(applyStyle('grey', 0.5, 'grey', 3));
         ";
 
         // .selector('node.R:not(Flow)').style('background-color', 'grey')

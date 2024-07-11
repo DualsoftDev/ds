@@ -13,19 +13,32 @@ public interface ICyItem
     string id { get; }
 }
 
+public static class FilterEx
+{
+    public static string FilterId(this string id)
+    {
+        List<string> invalidChars = "\"'!@#$%^&*()".ToEnumerable().ToList();
+        foreach (char c in "\"'!@#$%^&*()")
+            id = id.Replace(c, '_');
+        return id;
+    }
+}
 public abstract class CyItem : ICyItem
 {
     public string id { get; /*internal*/ set; }
+    public string fqdn { get; /*internal*/ set; }
     public string content { get; /*internal*/ set; }
     protected CyItem() {}
 
-    protected CyItem(string id, string content)
+    protected CyItem(string fqdn, string content)
     {
-        this.id = id;
+        this.fqdn = fqdn;
+        this.id = fqdn.FilterId();
         this.content = content;
     }
     public abstract string Serialize();
-    protected void Set(string id, string content) => (this.id, this.content) = (id, content);
+    protected void Set(string fqdn, string content) =>
+        (this.fqdn, this.id, this.content) = (fqdn, fqdn.FilterId(), content);
 }
 
 public class CyVertex : CyItem
@@ -48,7 +61,7 @@ public class CyVertex : CyItem
     public override string Serialize()
     {
         var p = parent.IsNullOrEmpty() ? "" : $", parent: '{parent}'";
-        var data = $"id: '{id}', content: '{content}'{p}";
+        var data = $"id: '{id}', fqdn: '{fqdn}', content: '{content}'{p}";
         data = $"data: {Embrace(data)}";
         var classes = $"classes: '{type}'";
         return Embrace($"{data}, {classes}");
@@ -71,16 +84,16 @@ public class CyEdge : CyItem
     CyEdge(string src, string tgt)
         : base($"{src}__{tgt}", $"{src}__{tgt}")
     {
-        this.source = src;
-        this.target = tgt;
+        this.source = src.FilterId();
+        this.target = tgt.FilterId();
     }
 
-    public void Set(string id, string content, string source, string target, string type)
+    public void Set(string fqdn, string content, string source, string target, string type)
     {
         this.source = source;
         this.target = target;
         this.type = type;
-        base.Set(id, content);
+        base.Set(fqdn, content);
     }
 
     public override string Serialize()

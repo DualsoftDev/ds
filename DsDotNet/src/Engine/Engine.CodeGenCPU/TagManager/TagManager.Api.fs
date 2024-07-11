@@ -17,11 +17,10 @@ module ApiTagManagerModule =
             let pv:IStorage = createPlanVar stg name DuBOOL false apiItem (int apiItemTag) apiItem.ApiSystem 
             pv :?> PlanVar<bool>
             
-        let ps = cpv ApiItemTag.planSet
-        let pe = cpv ApiItemTag.planEnd
+        let ps = cpv ApiItemTag.apiItemSet
+        let pe = cpv ApiItemTag.apiItemEnd
         let sensorLinking = cpv ApiItemTag.sensorLinking
         let sensorLinked = cpv ApiItemTag.sensorLinked
-        
    
         interface ITagManager with
             member _.Target = apiItem
@@ -30,17 +29,17 @@ module ApiTagManagerModule =
 
         member _.GetApiTag (vt:ApiItemTag) :IStorage =
             match vt with 
-            | ApiItemTag.planSet            -> ps  :> IStorage
-            | ApiItemTag.planEnd            -> pe  :> IStorage
+            | ApiItemTag.apiItemSet            -> ps  :> IStorage
+            | ApiItemTag.apiItemEnd            -> pe  :> IStorage
+            | ApiItemTag.sensorLinking         -> sensorLinking  :> IStorage
+            | ApiItemTag.sensorLinked          -> sensorLinked  :> IStorage
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
          
 
         member _.ApiItem   = apiItem
-
     
+        member _.APISET   = ps
+        member _.APIEND   = pe
         member _.SL1   = sensorLinking
         member _.SL2   = sensorLinked
-        member _.PS   = ps
-        member _.PE   = pe
-
         

@@ -52,14 +52,14 @@ module ConvertCpuVertex =
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 
         member c.EndPlan =  
-                    if c.IsCommand
-                    then
-                        (c.TagManager :?> VertexMCall).CallCommandEnd.Expr
-                    elif c.IsOperator
-                    then
-                        (c.TagManager :?> VertexMCall).CallOperatorValue.Expr
-                    else 
-                        c.TargetJob.ApiDefs.Select(fun f->f.PE).ToAnd()
+            if c.IsCommand
+            then
+                (c.TagManager :?> VertexMCall).CallCommandEnd.Expr
+            elif c.IsOperator
+            then
+                (c.TagManager :?> VertexMCall).CallOperatorValue.Expr
+            else 
+                c.TargetJob.DeviceDefs.Select(fun f-> f.PE).ToAnd()
 
         member c.EndAction = 
                     if c.IsJob 
@@ -108,12 +108,12 @@ module ConvertCpuVertex =
         
         member c.PSs =
             if c.IsJob 
-            then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PS)
+            then c.TargetJob.DeviceDefs.Select(fun f->f.PS)
             else [c.VC._on]
 
         member c.PEs =
             if c.IsJob 
-            then c.TargetJob.DeviceDefs.Select(fun f->f.ApiItem.PE)
+            then c.TargetJob.DeviceDefs.Select(fun f->f.PE)
             else [c.VC.CallCommandEnd]
 
         member c.TXs = 

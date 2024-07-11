@@ -14,6 +14,7 @@ using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.ApiTagManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
+using static Engine.CodeGenCPU.TaskDevManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.ExpressionForwardDeclModule;
@@ -35,7 +36,7 @@ namespace Diagram.View.MSAGL
         public static Dictionary<Vertex, ViewVertex> DicNode = new();
 
         static IDisposable _Disposable;
-        static Dictionary<IStorage, List<ViewVertex>> DicActionTag = new();
+        static Dictionary<IStorage, List<ViewVertex>> DicTaskDevTag = new();
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
         static private DsSystem _sys = null;
         static public bool SaveLog = false;
@@ -48,7 +49,7 @@ namespace Diagram.View.MSAGL
             ViewChangeSubject();
 
             DicNode.Clear();
-            DicActionTag.Clear();
+            DicTaskDevTag.Clear();
             DicMemoryTag.Clear();
 
             var flowViews = flowViewNodes.ToArray();
@@ -75,9 +76,9 @@ namespace Diagram.View.MSAGL
 
                     viewVertex.TaskDevs.Cast<TaskDev>().Iter(t =>
                     {
-                        UpdateDicActionTag(t.InTag, viewVertex);
-                        UpdateDicActionTag(t.OutTag, viewVertex);
-                        UpdateDicApiTag(t.ApiItem, viewVertex);
+                        UpdateDicTaskDevTag(t.InTag, viewVertex);
+                        UpdateDicTaskDevTag(t.OutTag, viewVertex);
+                        UpdateDicTaskDevPlanTag(t, viewVertex);
                     });
                 }
             });
@@ -117,22 +118,22 @@ namespace Diagram.View.MSAGL
                 return nodes;
             }
 
-            void UpdateDicActionTag(IStorage tag, ViewVertex viewVertex)
+            void UpdateDicTaskDevTag(IStorage tag, ViewVertex viewVertex)
             {
                 if (tag != null)
                 {
-                    if (!DicActionTag.ContainsKey(tag))
-                        DicActionTag.Add(tag, new List<ViewVertex>());
-                    DicActionTag[tag].Add(viewVertex);
+                    if (!DicTaskDevTag.ContainsKey(tag))
+                        DicTaskDevTag.Add(tag, new List<ViewVertex>());
+                    DicTaskDevTag[tag].Add(viewVertex);
                 }
             }
-            void UpdateDicApiTag(ApiItem api, ViewVertex viewVertex)
+            void UpdateDicTaskDevPlanTag(TaskDev td, ViewVertex viewVertex)
             {
-                var planTag = (api.TagManager as ApiItemManager).PE;
+                var planEndTag = (td.TagManager as TaskDevManager).PE;
 
-                if (!DicMemoryTag.ContainsKey(planTag))
-                    DicMemoryTag.Add(planTag, new List<ViewVertex>());
-                DicMemoryTag[planTag].Add(viewVertex);
+                if (!DicMemoryTag.ContainsKey(planEndTag))
+                    DicMemoryTag.Add(planEndTag, new List<ViewVertex>());
+                DicMemoryTag[planEndTag].Add(viewVertex);
             }
             void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
             {
@@ -151,14 +152,15 @@ namespace Diagram.View.MSAGL
                     {
                         HandleVertexEvent(rx as EventVertex);
                     }
-                    else if (rx.IsEventAction)
+                    else if (rx.IsEventTaskDev)
                     {
-                        HandleActionEvent(rx as EventAction);
+                        HandleActionEvent(rx as EventTaskDev);
                     }
-                    else if (rx.IsEventApiItem)
+                    else if (rx.IsEventTaskDev)
                     {
-                        HandleApiItemEvent(rx as EventApiItem);
+                        HandleTaskDevEvent(rx as EventTaskDev);
                     }
+                 
                     if (SaveLog)
                         DBLog.InsertValueLog(DateTime.Now, rx);
                 });
@@ -220,11 +222,11 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        private static void HandleActionEvent(EventAction ea)
+        private static void HandleActionEvent(EventTaskDev ea)
         {
-            if (!DicActionTag.ContainsKey(ea.Tag)) return;
+            if (!DicTaskDevTag.ContainsKey(ea.Tag)) return;
 
-            var viewNodes = DicActionTag[ea.Tag];
+            var viewNodes = DicTaskDevTag[ea.Tag];
             var ucView = UcViews.FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
             viewNodes.Iter(n =>
             {
@@ -237,7 +239,7 @@ namespace Diagram.View.MSAGL
 
                     switch (ea.Tag.TagKind)
                     {
-                        case (int)ActionTag.ActionIn:
+                        case (int)TaskDevTag.actionIn:
                             {
                                 var off = tags
                                     .Select(s => Convert.ToUInt64(s.InTag.BoxedValue)).Any(w => w == 0);
@@ -245,7 +247,7 @@ namespace Diagram.View.MSAGL
                                 ucView.UpdateInValue(node, !off);
                                 break;
                             }
-                        case (int)ActionTag.ActionOut:
+                        case (int)TaskDevTag.actionOut:
                             {
                                 var on = tags
                                     .Select(s => Convert.ToUInt64(s.OutTag.BoxedValue)).Any(w => w != 0);
@@ -259,10 +261,10 @@ namespace Diagram.View.MSAGL
         }
 
 
-        private static void HandleApiItemEvent(EventApiItem api)
+        private static void HandleTaskDevEvent(EventTaskDev td)
         {
-            if (!DicMemoryTag.ContainsKey(api.Tag)) return;
-            var viewNodes = DicMemoryTag[api.Tag];
+            if (!DicMemoryTag.ContainsKey(td.Tag)) return;
+            var viewNodes = DicMemoryTag[td.Tag];
 
             viewNodes.Iter(n =>
             {
@@ -270,11 +272,11 @@ namespace Diagram.View.MSAGL
                 {
                     if (!IsThisSystem(node)) return;
 
-                    var tags = n.TaskDevs.Cast<TaskDev>().Select(w => w.ApiItem.TagManager).Cast<ApiItemManager>().Select(s => s.PE);
+                    var tags = n.TaskDevs.Cast<TaskDev>().Select(w => w.TagManager).Cast<TaskDevManager>().Select(s => s.PE);
 
-                    switch (api.Tag.TagKind)
+                    switch (td.Tag.TagKind)
                     {
-                        case (int)ApiItemTag.planEnd:
+                        case (int)ApiItemTag.apiItemEnd:
                             {
                                 var on = tags.All(s => Convert.ToBoolean(s.Value));
                                 n.LampPlanEnd = on;

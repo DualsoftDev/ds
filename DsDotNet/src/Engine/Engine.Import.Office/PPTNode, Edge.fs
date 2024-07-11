@@ -49,7 +49,7 @@ module PPTNodeModule =
                             let items = f.Split('.').Select(fun s->s.Trim())
                             match items.length() with
                             | 2 -> 
-                                $"{pageTitle}{TextFlowSplit}{items.Combine()}"
+                                $"{pageTitle}.{items.Combine()}"
                             | 3 -> 
                                 items.Combine()
                             | _ ->
@@ -280,7 +280,7 @@ module PPTNodeModule =
 
         member x.CallDevName = 
             let flow, job, api = x.CallFlowNJobNApi
-            $"{flow}_{job.Last()}"
+            $"{flow}{TextDeviceSplit}{job.Last()}"
            
             
         member x.FlowName = 

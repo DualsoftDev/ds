@@ -354,7 +354,7 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
-        jobName ('['jobTypeOption']')? '=' '{' (callApiDef (SEMICOLON))* '}' (SEMICOLON)?;
+        jobName ('['jobTypeOption']')? '=' ('{' (callApiDef (SEMICOLON))* '}' | (devParamInOut SEMICOLON));
 
     jobName: identifier234;
     jobTypeOption : content;

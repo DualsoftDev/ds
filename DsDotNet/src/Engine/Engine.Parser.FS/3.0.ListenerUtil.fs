@@ -72,6 +72,15 @@ module ListnerCommonFunctionGeneratorUtil =
 
             safetyKvs
 
+    type DevApiDefinition = {
+            ApiFqnd : string array
+            InParam : DevParam
+            OutParam : DevParam
+            InAddress : string
+
+            OutAddress : string
+        }
+
     type TimeDefinition = {
         Average: float option
         Std: float option
@@ -178,16 +187,19 @@ module ListnerCommonFunctionGeneratorUtil =
     let commonCallParamExtractor (ctx: JobBlockContext) =
         let callListings = ctx.Descendants<CallListingContext>().ToArray()
         [
-            for callList in callListings do
-                let item = callList.TryFindFirstChild<JobNameContext>().Value.GetText()
+            for callListingCtx in callListings do
+                let item = callListingCtx.TryFindFirstChild<JobNameContext>().Value.GetText()
                 
                 let jobName = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()  
-                let jobOption =
-                    callList.TryFindFirstChild<JobTypeOptionContext>()
-                    |> Option.map (fun ctx -> ctx.GetText().DeQuoteOnDemand())
+                let jobParam =
+                    match callListingCtx.TryFindFirstChild<JobTypeOptionContext>() with
+                    | Some ctx ->
+                            getParserJobType $"{jobName}[{ctx.GetText().DeQuoteOnDemand()}]"  
+                    | None ->
+                            JobParam(ActionNormal, JobTypeMulti.Single)
 
-                let apiDefCtxs = callList.Descendants<CallApiDefContext>().ToArray()
-                yield jobName, jobOption, apiDefCtxs
+                let apiDefCtxs = callListingCtx.Descendants<CallApiDefContext>().ToArray()
+                yield jobName, jobParam, apiDefCtxs, callListingCtx
         ]
     let createApiResetInfo (terms:string array) (sys:DsSystem) =
         if terms.Contains("|>") || terms.Contains("<|") then 

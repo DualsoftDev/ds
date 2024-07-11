@@ -153,23 +153,28 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
                 
             if system.Jobs.Any() then
-                let printDev (d:TaskDev) job=
-                            if d.GetInParam(job).IsDefaultParam && d.GetOutParam(job).IsDefaultParam
-                            then
-                                $"{d.ApiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
-                            else
-                                $"{d.ApiName}({d.GetInParam(job).ToTextWithAddress(d.InAddress)}, {d.GetOutParam(job).ToTextWithAddress(d.OutAddress)})"
+                let printDev (d:TaskDev) job skipApiPrint=
+                    let apiName = if skipApiPrint then "" else d.DeviceApiToDsText
+                    if d.GetInParam(job).IsDefaultParam && d.GetOutParam(job).IsDefaultParam
+                    then
+                        $"{apiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
+                    else
+                        $"{apiName}({d.GetInParam(job).ToTextWithAddress(d.InAddress)}, {d.GetOutParam(job).ToTextWithAddress(d.OutAddress)})"
 
                 yield $"{tab}[jobs] = {lb}"
                 for j in system.Jobs do
                     let jobItems =
                         j.DeviceDefs
-                        |> Seq.map (fun d-> printDev d (j))
+                        |> Seq.map (fun d-> printDev d (j) false)
                           
                     let jobItemText = jobItems.JoinWith("; ") + ";"
                     if j.JobParam.ToText() = ""
                     then
-                        yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"  
+                        if j.DeviceDefs.length() = 1 && j.DeviceDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit)
+                        then
+                            yield $"{tab2}{j.QualifiedName} = {printDev (j.DeviceDefs.Head()) (j) true};"
+                        else
+                            yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"  
                     else 
                         yield $"{tab2}{j.QualifiedName}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
                                         

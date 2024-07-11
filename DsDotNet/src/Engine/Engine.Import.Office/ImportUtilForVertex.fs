@@ -49,7 +49,7 @@ module ImportUtilVertex =
                         taskDev.AddOrUpdateOutParam  (jobName, node.DevParamOut )
                         taskDev
                     | _ -> 
-                        TaskDev(api, jobName, node.DevParamIn, node.DevParamOut, loadSysName)
+                        TaskDev(api, jobName, node.DevParamIn, node.DevParamOut, loadSysName, sys)
 
                 let job = Job(node.JobName, sys, [devTask])
                 job.UpdateJobParam(node.JobParam)

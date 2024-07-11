@@ -141,6 +141,6 @@ module ImportUtilForDev =
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
             let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-            TaskDev(api, jobName ,  inParam, outParam, newloadedName)
+            TaskDev(api, jobName ,  inParam, outParam, newloadedName, mySys)
 
                     

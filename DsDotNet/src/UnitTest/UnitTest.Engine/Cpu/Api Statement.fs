@@ -13,14 +13,14 @@ type Spec01_PortStatement() =
     let t = CpuTestSample(WINDOWS)
 
     [<Test>]
-    member __.``A1_PlanSend`` () =
-        for api, coins in t.ApiCoinsSet do
+    member __.``A1_ApiSet`` () =
+        for td, coins in t.TaskDevCoinsSet do
             if coins.Any() then
-                api.A1_PlanSend(t.Sys, coins) |> doCheck
+                getAM(td.ApiItem).A1_ApiSet(t.Sys, td) |> doCheck
     [<Test>]
-    member __.``A2_PlanReceive`` () =
+    member __.``A2_ApiEnd`` () =
         for api, coins in t.ApiCoinsSet do
-            api.A2_PlanReceive(t.Sys) |> doCheck
+            api.A2_ApiEnd(t.Sys) |> doCheck
     [<Test>]
     member __.``A3_SensorLinking`` () =
         for api, coins in t.ApiCoinsSet do

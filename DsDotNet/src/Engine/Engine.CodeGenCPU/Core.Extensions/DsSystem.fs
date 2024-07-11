@@ -189,14 +189,14 @@ module ConvertCpuDsSystem =
             
             for dev, call in jobDevices do
                 if  dev.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, dev.ApiStgName, dev.InAddress, (int)ActionTag.ActionIn , BridgeType.Device, x , dev, dev.GetInParam(call.TargetJob).Type).Value
+                    let inT = createBridgeTag(x.Storages, dev.ApiStgName, dev.InAddress, (int)TaskDevTag.actionIn , BridgeType.Device, x , dev, dev.GetInParam(call.TargetJob).Type).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
                 if not(dev.IsRootOnlyDevice)
                 then
                     if  dev.OutAddress <> TextSkip then
-                        let outT = createBridgeTag(x.Storages, dev.ApiStgName, dev.OutAddress, (int)ActionTag.ActionOut , BridgeType.Device, x , dev, dev.GetOutParam(call.TargetJob).Type).Value
+                        let outT = createBridgeTag(x.Storages, dev.ApiStgName, dev.OutAddress, (int)TaskDevTag.actionOut , BridgeType.Device, x , dev, dev.GetOutParam(call.TargetJob).Type).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
 
@@ -254,8 +254,8 @@ module ConvertCpuDsSystem =
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send
-        member x.GetPSs(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.PS)
-        member x.GetASs(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.SL1)
+        member x.GetApiSets(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.APISET)
+        member x.GetApiSensorLinks(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.SL1)
 
         member x.GetReadAbleTags() =
             SystemTag.GetValues(typeof<SystemTag>)

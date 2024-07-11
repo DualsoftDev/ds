@@ -50,22 +50,22 @@ module OriginTestModule =
         member __.``OriginTestCase0`` () =
             let answer:seq<KeyValuePair<string, InitialType>> =
                 seq {
-                    KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NotCare);
-                    KeyValuePair("S101_Copy1.Func5", On);
-                    KeyValuePair("S101_Copy1.Func1", Off);
-                    KeyValuePair("S101_Copy1.Func2", On);
-                    KeyValuePair("S101_Copy1.Func6", NotCare);
-                    KeyValuePair("S102_SystemA1.Func1", Off);
-                    KeyValuePair("S102_SystemA2.Func1", Off);
-                    KeyValuePair("S102_SystemA3.Func1", Off);
-                    KeyValuePair("S102_SystemA4.Func1", Off);
-                    KeyValuePair("S102_SystemA5.Func1", Off);
-                    KeyValuePair("S102_SystemA1.Func2", On);
-                    KeyValuePair("S102_SystemA2.Func2", On);
-                    KeyValuePair("S102_SystemA3.Func2", On);
-                    KeyValuePair("S102_SystemA4.Func2", On);
-                    KeyValuePair("S102_SystemA5.Func2", On);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func3", Off);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func4", NotCare);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func5", On);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func2", On);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func6", NotCare);
+                    KeyValuePair("T7_CopySystem.S102_SystemA1.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA2.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA3.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA4.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA5.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA1.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA2.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA3.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA4.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA5.Func2", On);
                 }
             answerChecker "test_case_0.ds" answer
 
@@ -73,24 +73,24 @@ module OriginTestModule =
         member __.``OriginTestCase1`` () =
             let answer:seq<KeyValuePair<string, InitialType>> =
                 seq {
-                    KeyValuePair("S101_Copy2.Func1", Off);
-                    KeyValuePair("S101_Copy2.Func2", On);
-                    KeyValuePair("S101_Copy1.Func1", NotCare);
-                    KeyValuePair("S101_Copy1.Func2", NotCare);
-                    KeyValuePair("S101_Copy1.Func3", Off);
-                    KeyValuePair("S101_Copy1.Func4", NotCare);
-                    KeyValuePair("S101_Copy1.Func6", NotCare);
-                    KeyValuePair("S101_Copy1.Func5", On);
-                    KeyValuePair("S102_SystemA1.Func1", Off);
-                    KeyValuePair("S102_SystemA2.Func1", Off);
-                    KeyValuePair("S102_SystemA3.Func1", Off);
-                    KeyValuePair("S102_SystemA4.Func1", Off);
-                    KeyValuePair("S102_SystemA5.Func1", Off);
-                    KeyValuePair("S102_SystemA1.Func2", On);
-                    KeyValuePair("S102_SystemA2.Func2", On);
-                    KeyValuePair("S102_SystemA3.Func2", On);
-                    KeyValuePair("S102_SystemA4.Func2", On);
-                    KeyValuePair("S102_SystemA5.Func2", On);
+                    KeyValuePair("T7_CopySystem.S101_Copy2.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S101_Copy2.Func2", On);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func1", NotCare);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func2", NotCare);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func3", Off);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func4", NotCare);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func6", NotCare);
+                    KeyValuePair("T7_CopySystem.S101_Copy1.Func5", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA1.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA2.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA3.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA4.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA5.Func1", Off);
+                    KeyValuePair("T7_CopySystem.S102_SystemA1.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA2.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA3.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA4.Func2", On);
+                    KeyValuePair("T7_CopySystem.S102_SystemA5.Func2", On);
                 }
             answerChecker "test_case_1.ds" answer
 

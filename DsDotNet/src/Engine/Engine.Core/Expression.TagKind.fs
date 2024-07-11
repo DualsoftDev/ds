@@ -15,7 +15,7 @@ module TagKindModule =
         | EventFlow     of Tag: IStorage * Target: Flow         * TagKind: FlowTag
         | EventVertex   of Tag: IStorage * Target: Vertex       * TagKind: VertexTag
         | EventApiItem  of Tag: IStorage * Target: ApiItem      * TagKind: ApiItemTag
-        | EventAction   of Tag: IStorage * Target: TaskDev      * TagKind: ActionTag
+        | EventTaskDev  of Tag: IStorage * Target: TaskDev      * TagKind: TaskDevTag
         | EventHwSys    of Tag: IStorage * Target: HwSystemDef  * TagKind: HwSysTag
         | EventVariable of Tag: IStorage * Target: DsSystem     * TagKind: VariableTag
         
@@ -38,7 +38,7 @@ module TagKindModule =
                     @ EnumEx.Extract<FlowTag>(ft)
                     @ EnumEx.Extract<VertexTag>(ft)
                     @ EnumEx.Extract<ApiItemTag>(ft)
-                    @ EnumEx.Extract<ActionTag>(ft)
+                    @ EnumEx.Extract<TaskDevTag>(ft)
                     @ EnumEx.Extract<HwSysTag>(ft)
                     @ EnumEx.Extract<VariableTag>(ft)
 
@@ -57,7 +57,7 @@ type TagKindExt =
     [<Extension>] static member GetFlowTagKind      (x:IStorage) = DU.tryGetEnumValue<FlowTag>(x.TagKind)
     [<Extension>] static member GetVertexTagKind    (x:IStorage) = DU.tryGetEnumValue<VertexTag>(x.TagKind)
     [<Extension>] static member GetApiTagKind       (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>(x.TagKind)
-    [<Extension>] static member GetActionTagKind    (x:IStorage) = DU.tryGetEnumValue<ActionTag>(x.TagKind)
+    [<Extension>] static member GetTaskDevTagKind   (x:IStorage) = DU.tryGetEnumValue<TaskDevTag>(x.TagKind)
     [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.tryGetEnumValue<HwSysTag>(x.TagKind)
     [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.tryGetEnumValue<VariableTag>(x.TagKind)
     [<Extension>] static member GetAllTagKinds () : TagKindTuple array = allTagKindWithTypes
@@ -74,7 +74,7 @@ type TagKindExt =
             | :? Flow as f         -> Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
             | :? Vertex as v       -> Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
             | :? ApiItem as a      -> Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-            | :? TaskDev  as d     -> Some( EventAction  (x, d, x.GetActionTagKind().Value))
+            | :? TaskDev  as d     -> Some( EventTaskDev  (x, d, x.GetTaskDevTagKind().Value))
             | :? HwSystemDef as h  -> Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
             |_ -> None
         |None -> None
@@ -86,7 +86,7 @@ type TagKindExt =
         |EventFlow      (i, _, _) -> i
         |EventVertex    (i, _, _) -> i       
         |EventApiItem   (i, _, _) -> i
-        |EventAction    (i, _, _) -> i
+        |EventTaskDev   (i, _, _) -> i
         |EventHwSys     (i, _, _) -> i
         |EventVariable  (i, _, _) -> i
 
@@ -100,7 +100,7 @@ type TagKindExt =
         |EventFlow      ( _, target, _) -> target |> box
         |EventVertex    ( _, target, _) -> target |> box
         |EventApiItem   ( _, target, _) -> target |> box
-        |EventAction    ( _, target, _) -> target |> box
+        |EventTaskDev   ( _, target, _) -> target |> box
         |EventHwSys     ( _, target, _) -> target |> box
         |EventVariable  ( _, target, _) -> target |> box
 
@@ -113,7 +113,7 @@ type TagKindExt =
         |EventFlow      (tag, obj, kind) -> getText tag obj kind
         |EventVertex    (tag, obj, kind) -> getText tag obj kind
         |EventApiItem   (tag, obj, kind) -> getText tag obj kind
-        |EventAction    (tag, obj, kind) -> getText tag obj kind
+        |EventTaskDev   (tag, obj, kind) -> getText tag obj kind
         |EventHwSys     (tag, obj, kind) -> getText tag obj kind
         |EventVariable  (tag, obj, kind) -> getText tag obj kind
         
@@ -126,7 +126,7 @@ type TagKindExt =
         |EventFlow      (_, obj, _) -> obj.System
         |EventVertex    (_, obj, _) -> obj.Parent.GetSystem()       
         |EventApiItem   (_, obj, _) -> obj.ApiSystem           //active system이 아니고 loaded 시스템
-        |EventAction    (_, obj, _) -> obj.ApiItem.ApiSystem   //active system이 아니고 loaded 시스템
+        |EventTaskDev   (_, obj, _) -> obj.ParnetSystem
         |EventHwSys     (_, obj, _) -> obj.System
         |EventVariable  (_, obj, _) -> obj
         
@@ -205,14 +205,14 @@ type TagKindExt =
                                             VertexTag.pause       
                                             )
                                           
-            |EventApiItem (_, _, kind) -> kind.IsOneOf(
-                                            ApiItemTag.planSet,
-                                            ApiItemTag.planEnd
-                                            )
-            |EventAction (_, _, kind) ->  kind.IsOneOf(
-                                            ActionTag.ActionIn,
-                                            ActionTag.ActionOut,
-                                            ActionTag.ActionMemory
+            |EventApiItem  (_, _, _) -> false
+
+            |EventTaskDev (_, _, kind) ->  kind.IsOneOf(
+                                            TaskDevTag.planStart,
+                                            TaskDevTag.planEnd,
+                                            TaskDevTag.actionIn,
+                                            TaskDevTag.actionOut,
+                                            TaskDevTag.actionMemory
                                             )
             |EventHwSys  (_, _, _) -> false
             |EventVariable  (_, _, _) -> true

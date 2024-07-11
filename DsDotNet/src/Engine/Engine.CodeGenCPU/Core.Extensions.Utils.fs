@@ -19,6 +19,7 @@ module ConvertCoreExtUtils =
     let getSM (x:DsSystem) = x.TagManager :?> SystemManager
     let getFM (x:Flow)     = x.TagManager :?> FlowManager
     let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
+    let getDM (x:TaskDev)  = x.TagManager :?> TaskDevManager
 
    
     let errText (x:Call)  = getVMCoin(x).ErrorText

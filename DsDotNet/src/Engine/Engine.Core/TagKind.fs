@@ -194,18 +194,19 @@ module TagKindList =
     /// 12000 ~ 12999
     [<Flags>]
     type ApiItemTag =
-    | planSet                   = 12000
-    | planEnd                   = 12002
+    | apiItemSet                = 12000
+    | apiItemEnd                = 12002
     | sensorLinking             = 12003
     | sensorLinked              = 12004
-      
 
     /// 14000 ~ 14999
     [<Flags>]
-    type ActionTag    =
-    | ActionIn                 = 14000
-    | ActionOut                = 14001
-    | ActionMemory             = 14002
+    type TaskDevTag    =
+    | planStart                = 14000
+    | planEnd                  = 14001
+    | actionIn                 = 14002
+    | actionOut                = 14003
+    | actionMemory             = 14004
 
     /// 15000 ~ 14999
     [<Flags>]

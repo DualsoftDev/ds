@@ -134,19 +134,34 @@ module ConvertCPU =
             
         ]
         
-    let private apiPlanSync(s:DsSystem) =
+    let private applyApiItem(s:DsSystem) =
         [
-            let apiCoinsSet =  s.GetApiCoinsSet()
-            for (api, coins) in apiCoinsSet do
-                let am = api.TagManager :?> ApiItemManager
-                yield am.A2_PlanReceive(s)
+            let devCallSet =  s.GetTaskDevCoinsSet()
+            for (td, coins) in devCallSet do
+                let am = td.ApiItem.TagManager :?> ApiItemManager
+                yield am.A2_ApiEnd(s)
 
                 if coins.any()
                 then
-                    yield am.A1_PlanSend(s, coins)
+                    yield am.A1_ApiSet(s, td)
                     yield am.A3_SensorLinking(s, coins.OfType<Call>())
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
         ]
+
+
+    let private applyTaskDev(s:DsSystem) =
+        [
+            let devCallSet =  s.GetTaskDevCoinsSet()
+            for (dev, coins) in devCallSet do
+                let tm = dev.TagManager :?> TaskDevManager
+                yield tm.TD2_PlanReceive(s)
+
+                if coins.any()
+                then
+                    yield tm.TD1_PlanSend(s, coins)
+               
+        ]
+
 
     let private funcCall(s:DsSystem) =
         let pureOperatorFuncs =
@@ -267,7 +282,9 @@ module ConvertCPU =
                 yield! applyVertexSpec v
 
             //Api 적용 
-            yield! apiPlanSync sys
+            yield! applyApiItem sys
+            //TaskDev 적용 
+            yield! applyTaskDev sys
             
             //funcCall 적용 
             yield! funcCall sys

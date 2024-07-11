@@ -71,7 +71,7 @@ module ConvertHMI =
             let apiTagManager = x.DeviceDefs.First().ApiItem.TagManager :?> ApiItemManager
             {
                 Name = x.QualifiedName
-                JobPushMutiLamp = getPushMultiLamp  apiTagManager (ApiItemTag.planSet |>int) (actionInTags)
+                JobPushMutiLamp = getPushMultiLamp  apiTagManager (ApiItemTag.apiItemSet |>int) (actionInTags)
             }
 
     type Real with

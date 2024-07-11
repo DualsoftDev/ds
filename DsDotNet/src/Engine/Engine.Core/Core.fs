@@ -125,6 +125,8 @@ module CoreModule =
         member val Flows = createNamedHashSet<Flow>()
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()
+        ///내시스템이 사용한 interface
+        member x.TaskDevs = x.Jobs.SelectMany(fun j->j.DeviceDefs)
         ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
@@ -345,8 +347,8 @@ module CoreModule =
      
       /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
     ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
-    type TaskDev (api:ApiItem, parentJob:string, inParam:DevParam, outParam:DevParam, deviceName:string) =
-        inherit FqdnObject(api.Name, createFqdnObject([|deviceName|]))
+    type TaskDev (api:ApiItem, parentJob:string, inParam:DevParam, outParam:DevParam, deviceName:string, parentSys:DsSystem) =
+        inherit FqdnObject(api.Name, createFqdnObject([|parentSys.Name;deviceName|]))
         let inParams  = Dictionary<string, DevParam>()
         let outParams = Dictionary<string, DevParam>()
         do  
@@ -358,7 +360,9 @@ module CoreModule =
         member x.ApiName = (x:>FqdnObject).QualifiedName
         member x.ApiStgName = $"{deviceName}_{api.Name}"
         member x.DeviceApiName = $"{deviceName}.{api.Name}"
+        member x.DeviceApiToDsText= $"{deviceName.QuoteOnDemand()}.{api.Name.QuoteOnDemand()}"
         member x.DeviceName = deviceName
+        member x.ParnetSystem = parentSys
 
         member x.InParams = inParams 
         member x.OutParams = outParams

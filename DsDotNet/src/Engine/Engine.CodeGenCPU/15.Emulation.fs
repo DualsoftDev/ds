@@ -10,7 +10,7 @@ type TaskDev with
 
     member d.SensorEmulation(sys:DsSystem, job:Job) =
 
-        let set = d.ApiItem.PE.Expr
+        let set = d.PE.Expr
         let rst = sys._off.Expr
 
         let inParam = d.GetInParam(job)

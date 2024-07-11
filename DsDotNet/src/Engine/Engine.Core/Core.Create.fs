@@ -81,7 +81,7 @@ module CoreCreateModule =
                 
                 newApi
 
-        TaskDev(api, jobName, inParam, outParm, devName)
+        TaskDev(api, jobName, inParam, outParm, devName, sys)
 
 
     let apiAutoGenUpdateSystem(sys:DsSystem) =

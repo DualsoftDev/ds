@@ -66,11 +66,11 @@ module TagManagerUtil =
             let name =
                 match bridgeType with
                 | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
-                | Device ->   match DU.tryGetEnumValue<ActionTag>(tagKind).Value with
-                              | ActionTag.ActionIn     -> $"{name}_I"
-                              | ActionTag.ActionOut    -> $"{name}_O"
-                              | ActionTag.ActionMemory -> $"{name}_M"
-                              | _ -> failwithlog "error: ActionTag create "
+                | Device ->   match DU.tryGetEnumValue<TaskDevTag>(tagKind).Value with
+                              | TaskDevTag.actionIn     -> $"{name}_I"
+                              | TaskDevTag.actionOut    -> $"{name}_O"
+                              | TaskDevTag.actionMemory -> $"{name}_M"
+                              | _ -> failwithlog "error: TaskDevTag create "
 
                 | Button | Lamp | Condition
                     ->   match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with

@@ -10,9 +10,5 @@ open System
 module ConvertCpuTaskDev =
     
 
-    type TaskDev with
-        member td.ExistInput   = addressExist td.InAddress
-        member td.ExistOutput  = addressExist td.OutAddress
-
     type HwSystemDef with 
         member s.ActionINFunc = s.GetInExpr() 

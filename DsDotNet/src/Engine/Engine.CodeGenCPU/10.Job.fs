@@ -18,11 +18,10 @@ type Job with
             for td in j.DeviceDefs do
                 if td.ExistOutput
                 then 
-                    let api = td.ApiItem
                     let rstMemos = jobCoins.SelectMany(fun coin->coin.MutualResetCoins.Select(fun c->c.VC.MM))
                     let sets =
                         if RuntimeDS.Package.IsPackageSIM() then _off
-                        else api.PE.Expr <&&> api.PS.Expr <&&> !@rstMemos.ToOrElseOff()
+                        else td.PE.Expr <&&> td.PS.Expr <&&> !@rstMemos.ToOrElseOff()
 
 
                     let outParam = td.GetOutParam(j)

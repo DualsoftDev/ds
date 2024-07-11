@@ -70,7 +70,7 @@ module ImportType =
             if name.Split(".").Length <> 2 then
                 failwithlog ErrID._75
             else 
-                $"{flowName}_{name}"
+                $"{flowName}{TextDeviceSplit}{name}"
         else 
             name
 

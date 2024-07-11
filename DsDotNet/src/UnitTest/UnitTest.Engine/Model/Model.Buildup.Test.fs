@@ -36,14 +36,14 @@ module ModelBuildupTests1 =
             let callAp =
                 let jobFqdn = [|"F";"A";"p"|]
                 let jName = jobFqdn.Combine()
-                let apiItem = TaskDev(apiP, jName, defaultDevParam(), defaultDevParam(),  dev.Name)
+                let apiItem = TaskDev(apiP, jName, defaultDevParam(), defaultDevParam(),  dev.Name, system)
                 apiItem.InAddress <-"%I1"
                 apiItem.OutAddress<- "%Q1"
                 Job(jobFqdn, system, [apiItem])
             let callAm =
                 let jobFqdn = [|"F";"A";"m"|]
                 let jName = jobFqdn.Combine()
-                let apiItem = TaskDev(apiM, jName, defaultDevParam(), defaultDevParam(),  dev.Name)
+                let apiItem = TaskDev(apiM, jName, defaultDevParam(), defaultDevParam(),  dev.Name, system)
                 apiItem.InAddress <-"%I2"
                 apiItem.OutAddress<- "%Q2"
                 Job(jobFqdn, system, [apiItem])

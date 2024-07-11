@@ -164,6 +164,8 @@ module internal ModelFindModule =
         getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.ApiDefs)
                                 .Distinct()
 
+      
+
     let getVertexSharedReal(real:Real) =
         let vs = real.Parent.GetSystem() |> getVerticesOfSystem
         vs.OfType<Alias>().Where(fun a->a.TargetWrapper.RealTarget().IsSome && a.TargetWrapper.RealTarget().Value = real)
@@ -187,6 +189,30 @@ module internal ModelFindModule =
             getVerticesOfSystem(x)
                 .Choose(fun v -> v|> getPureCall)
                 .Where(fun v -> v.IsJob)
+
+                
+    let getVerticesOfCoins x = 
+        let vs =   getVerticesOfSystem(x)
+        let calls = vs.OfType<Call>().Cast<Vertex>()
+        let aliases = vs.OfType<Alias>().Cast<Vertex>()
+        (calls@aliases)
+            .Where(fun c->c.Parent.GetCore() :? Real)     
+
+             
+    let getDistinctTaskDevs(x:DsSystem) =
+            let taskDevs =  getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.DeviceDefs)
+                                .Distinct()
+            
+            let coinAll = getVerticesOfCoins x
+            taskDevs |> Seq.map(fun td->
+                    td, 
+                        coinAll.Filter(fun f->
+                        match f with
+                        | :? Call as c when c.IsJob ->  c.TargetJob.DeviceDefs.Contains(td)
+                        | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.DeviceDefs.Contains(td)
+                        |_ -> false
+                    )
+            )
 
 
     let getSkipInfo(dev:TaskDev, job:Job) =
@@ -277,12 +303,8 @@ type FindExtension =
                     x.Flows.OrderBy(fun f-> f.Name )
                     
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
-    [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = 
-                    let vs = x.GetVertices()
-                    let calls = vs.OfType<Call>().Cast<Vertex>()
-                    let aliases = vs.OfType<Alias>().Cast<Vertex>()
-                    (calls@aliases)
-                        .Where(fun c->c.Parent.GetCore() :? Real)     
+    [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = getVerticesOfCoins x
+               
 
     [<Extension>] static member GetVerticesHasJob(x:DsSystem) =   getVerticesHasJob x
        
@@ -295,20 +317,13 @@ type FindExtension =
                     x.GetVerticesOfCoins()
                         .Choose(fun v -> v.GetPureCall())
                         .Where(fun v -> v.IsJob)
-        
+
+
+    [<Extension>] static member GetTaskDevCoinsSet(x:DsSystem) = 
+                        getDistinctTaskDevs x 
+                    
     [<Extension>] static member GetApiCoinsSet(x:DsSystem) = 
-                        let apis = x.GetDistinctApis()
-                        let coinAll = x.GetVerticesOfCoins()  
-                        apis |> Seq.map(fun a->
-                                a, 
-                                    coinAll.Filter(fun f->
-                                    match f with
-                                    | :? Call as c when c.IsJob ->  c.TargetJob.ApiDefs.Contains(a)
-                                    | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.ApiDefs.Contains(a)
-                                    |_ -> false
-                                )
-                        )
-            
+                        getDistinctTaskDevs(x).Select(fun (td,coins) -> td.ApiItem, coins)         
             
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x

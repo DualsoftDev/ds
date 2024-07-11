@@ -101,8 +101,8 @@ module ExportIOTable =
         dt
 
     let splitNameForRow(name:string) = 
-        let head = name.Split("_")[0];   
-        let tail = name[(head.Length+1)..]
+        let head = name.Split(TextDeviceSplit)[0];   
+        let tail = name[(head.Length+TextDeviceSplit.length())..]
         head, tail 
 
     let rowIOItems (dev: TaskDev, job: Job) target =

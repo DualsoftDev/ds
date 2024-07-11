@@ -175,7 +175,6 @@ module CoreExtensionModule =
 
             resets.Select(fun s->x.ApiItems.Find(fun f->f.UnqualifiedName = $"{x.Name}.{s.Value}"))
 
-        member x.DeviceDefs = x.Jobs |> Seq.collect(fun s->s.DeviceDefs)
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (loadSys:DsSystem) = x.LoadedSystems.TryFind(fun f-> f.ReferenceSystem = loadSys)
          
@@ -342,7 +341,7 @@ module CoreExtensionModule =
         member x.ErrorOffTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeOver)|> snd
         member x.ErrorOffTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeShortage)|> snd
 
-    let inValidActionTags (x:DsSystem) = 
+    let inValidTaskDevTags (x:DsSystem) = 
                     x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)
                            |> Seq.collect(fun d-> 
                                   [  
@@ -377,15 +376,15 @@ type SystemExt =
     [<Extension>]
     static member GetLamps (x:DsSystem, lampType:LampType) :IEnumerable<LampDef> = getLamps(x, lampType)
     [<Extension>]
-    static member ValidActionTag(x:DsSystem) = x |> inValidActionTags |> Seq.any
+    static member ValidTaskDevTag(x:DsSystem) = x |> inValidTaskDevTags |> Seq.any
     [<Extension>]
     static member ValidHwSystemTag(x:DsSystem) = x |> inValidHwSystemTag |> Seq.any
     [<Extension>]
     static member CheckValidInterfaceNchageParsingAddress(x:DsSystem) =
-                let inValidActionTags = inValidActionTags(x);
+                let inValidTaskDevTags = inValidTaskDevTags(x);
                 let inValidHwSystemTag = inValidHwSystemTag(x);
-                if inValidActionTags.Any() then
-                     failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidActionTags)}"
+                if inValidTaskDevTags.Any() then
+                     failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidTaskDevTags)}"
                 if inValidHwSystemTag.Any() then
                     failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
 

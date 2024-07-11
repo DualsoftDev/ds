@@ -11,8 +11,8 @@ type VertexManager with
     member v.F1_RootStart() =
         let real = v.Vertex :?> Real
         let startCausals =  v.Vertex.GetStartRootAndCausals()
-        let plans = v.System.GetPSs(real).ToOrElseOff()
-        let actionLinks = v.System.GetASs(real).ToOrElseOff()
+        let plans = v.System.GetApiSets(real).ToOrElseOff()
+        let actionLinks = v.System.GetApiSensorLinks(real).ToOrElseOff()
         
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =

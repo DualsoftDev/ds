@@ -19,7 +19,7 @@ module ScanDSImpl =
     type IoEventDS(dsCPU:DsCPU, vendors:VendorSpec seq,  client:Client, _server:Server) =
         let vendorDic = vendors.SelectMany(fun f-> f.Files.Select(fun s->s.GetPath().ToLower(), f.AddressResolver)) |> dict
         let tagSet = dsCPU.TagIndexSet
-        let actionTags = dsCPU.Storages.Where(fun f-> TagKindExt.GetActionTagKind(f.Value).IsSome)
+        let TaskDevTags = dsCPU.Storages.Where(fun f-> TagKindExt.GetTaskDevTagKind(f.Value).IsSome)
                             |> Seq.groupBy(fun f->f.Value.Address)
                             |> Seq.map(fun (k, v) -> k, v.Select(fun s->s.Value))
                             |> dict
@@ -52,10 +52,10 @@ module ScanDSImpl =
                             let absoluteBitIndex = offset * 8 + bitIndex
                             let value = (values.[i] &&& (1uy <<< bitIndex))
                             let address = vendorDic[change.Path.ToLower()].GetTagName(change.Path.Split('/').Last(), absoluteBitIndex, 1)
-                            if actionTags.ContainsKey address then 
-                                actionTags.[address].Iter(fun s -> s.BoxedValue <- value)
+                            if TaskDevTags.ContainsKey address then 
+                                TaskDevTags.[address].Iter(fun s -> s.BoxedValue <- value)
                             else 
-                                Console.WriteLine($"ds actionTags : {address} not exist");
+                                Console.WriteLine($"ds TaskDevTags : {address} not exist");
 
                         )
                 | 16 ->()
@@ -100,9 +100,9 @@ module ScanDSImpl =
             | _-> failwithf $"{tags.First().Name} : {dataType.Name} not support err"
         let writeVendorData  (tags:IStorage seq) =
             
-            let actionTags = tags.Select(fun f-> dsCPU.Storages[f.Name])
-            actionTags.Iter(fun t->  
-                if TagKindExt.GetActionTagKind(t).Value <> ActionTag.ActionOut 
+            let TaskDevTags = tags.Select(fun f-> dsCPU.Storages[f.Name])
+            TaskDevTags.Iter(fun t->  
+                if TagKindExt.GetTaskDevTagKind(t).Value <> TaskDevTag.actionOut 
                 then failwithf $"writeVendorData error {t} is input tag"
                 else
                     let dev =t.Address.Substring(0,1) //예외확인
@@ -123,8 +123,8 @@ module ScanDSImpl =
                         )
 
         let onDSTagChanged (changes:IStorage seq) = 
-            let dsMemory     = changes |> Seq.filter(fun f-> TagKindExt.GetActionTagKind(f).IsNone)
-            let vendorMemory = changes |> Seq.filter(fun f-> TagKindExt.GetActionTagKind(f).IsSome)
+            let dsMemory     = changes |> Seq.filter(fun f-> TagKindExt.GetTaskDevTagKind(f).IsNone)
+            let vendorMemory = changes |> Seq.filter(fun f-> TagKindExt.GetTaskDevTagKind(f).IsSome)
        
             dsMemory
                 |> Seq.groupBy(fun f-> f.DataType)

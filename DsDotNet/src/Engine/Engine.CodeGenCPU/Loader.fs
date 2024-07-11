@@ -77,6 +77,7 @@ module CpuLoader =
             sys.ActionVariables.Iter(fun a-> a.TagManager <- ActionVariableManager(a, sys))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
+            sys.TaskDevs.Iter(fun td->td.TagManager <- TaskDevManager(td, sys))
             sys.GetVertices().Iter(fun v->
                 match v with
                 | :? Real

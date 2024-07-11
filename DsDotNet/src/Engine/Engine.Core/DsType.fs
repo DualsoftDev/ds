@@ -73,7 +73,6 @@ module DsType =
         | IMAGE  = 1
 
         // 공통 함수: 문자열에서 마지막으로 닫히는 기호를 찾고, 그에 대응하는 여는 기호를 찾음
-        // 공통 함수: 문자열에서 마지막으로 닫히는 기호를 찾고, 그에 대응하는 여는 기호를 찾음
     let FindEnclosedGroup (name: string, openSymbol: char, closeSymbol: char, searchFromStart: bool) =
         let mutable startIdx = -1
         let mutable endIdx = -1

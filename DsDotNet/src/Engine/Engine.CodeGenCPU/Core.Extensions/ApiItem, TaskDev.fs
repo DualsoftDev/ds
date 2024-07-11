@@ -15,11 +15,19 @@ module ConvertCpuApiItem =
     //    let timeout = reals.Sum(fun r->r.TimeParam.Value.USL)
     //    let timeShort = reals.Sum(fun r->r.TimeParam.Value.LSL)
     //    timeout, timeShort
+    
+    type TaskDev with
+        member td.ExistInput   = addressExist td.InAddress
+        member td.ExistOutput  = addressExist td.OutAddress
+
+        member td.PS     = getDM(td).PS
+        member td.PE     = getDM(td).PE
 
 
     type ApiItem with
-        member a.PS     = getAM(a).PS
-        member a.PE     = getAM(a).PE
+        member a.APISET     = getAM(a).APISET
+        member a.APIEND     = getAM(a).APIEND
+
         ///sensorLinking
         member a.SL1     = getAM(a).SL1
         ///sensorLinked

@@ -14,7 +14,7 @@ module DsText =
     let [<Literal>] TextFuncNotUsed= "NotUsed"  //함수 사용안함
     let [<Literal>] TextSkip      = "-"  //주소 스킵 처리
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
-    let [<Literal>] TextFlowSplit = "." //PPT Table 정보 Flow Device 파싱 기준
+    let [<Literal>] TextDeviceSplit = "__" //DS Flow, Device 자동 파싱 기준
 
 
     //edge

@@ -160,8 +160,7 @@ namespace Diagram.View.MSAGL
                         HandleApiItemEvent(rx as EventApiItem);
                     }
 
-                    if (SaveLog)
-                        DBLog.InsertValueLog(DateTime.Now, rx);
+                    DBLog.InsertValueLog(DateTime.Now, rx);
                 });
             }
         }

@@ -72,9 +72,12 @@ public partial class Demon : BackgroundService
                     .Subscribe(tpl =>
                     {
                         var (sys, storage, val) = (tpl.Item1, tpl.Item2, tpl.Item3);
-                        var ti = storage.GetTagInfo();
-                        if (ti != null && ti.Value.IsNeedSaveDBLog())
-                            DBLogger.EnqueLogForInsert(new DsLogModule.DsLog(DateTime.Now, storage));
+                        if (sys == runtimeModel.System) //Active System만 로그 저장
+                        {
+                            var ti = storage.GetTagInfo();
+                            if (ti != null && ti.Value.IsNeedSaveDBLog())
+                                DBLogger.EnqueLogForInsert(new DsLogModule.DsLog(DateTime.Now, storage));
+                        }
                     });
             _modelSubscription.Add(subscription);
 

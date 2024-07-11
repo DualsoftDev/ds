@@ -205,7 +205,14 @@ type TagKindExt =
                                             VertexTag.pause       
                                             )
                                           
-            |EventApiItem (_, _, _) -> false
-            |EventAction (_, _, _) -> false
+            |EventApiItem (_, _, kind) -> kind.IsOneOf(
+                                            ApiItemTag.planSet,
+                                            ApiItemTag.planEnd
+                                            )
+            |EventAction (_, _, kind) ->  kind.IsOneOf(
+                                            ActionTag.ActionIn,
+                                            ActionTag.ActionOut,
+                                            ActionTag.ActionMemory
+                                            )
             |EventHwSys  (_, _, _) -> false
             |EventVariable  (_, _, _) -> true

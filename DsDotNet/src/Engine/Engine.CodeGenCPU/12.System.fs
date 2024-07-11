@@ -7,6 +7,8 @@ open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 type DsSystem with
+
+
     member s.Y1_SystemSimulationForFlow() = [
             for flow in s.Flows do
                 yield (s._auto_btn.Expr  , s._off.Expr) --| (flow.auto_btn,   getFuncName())
@@ -15,9 +17,10 @@ type DsSystem with
                 yield (s._pause_btn.Expr , s._off.Expr) --| (flow.pause_btn,  getFuncName())
                 yield (s._emg_btn.Expr   , s._off.Expr) --| (flow.emg_btn,    getFuncName())
                 yield (s._test_btn.Expr  , s._off.Expr) --| (flow.test_btn,   getFuncName())
-                yield (s._home_btn.Expr  , s._off.Expr) --| (flow.home_btn,   getFuncName())
-                yield (s._clear_btn.Expr , s._off.Expr) --| (flow.clear_btn,  getFuncName())
-                yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
+                if RuntimeDS.Package.IsPCorPCSIM() then //PLC는  E2_PLCOnly 에서 처리중 
+                    yield (s._home_btn.Expr  , s._off.Expr) --| (flow.home_btn,   getFuncName())
+                    yield (s._clear_btn.Expr , s._off.Expr) --| (flow.clear_btn,  getFuncName())
+                    yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
         ]
         
   

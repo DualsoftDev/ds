@@ -234,23 +234,20 @@ namespace Diagram.View.MSAGL
                 {
                     if (!IsThisSystem(node)) return;
 
-                    var tags = n.TaskDevs.Cast<TaskDev>();
                     var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
 
                     switch (ea.Tag.TagKind)
                     {
                         case (int)TaskDevTag.actionIn:
                             {
-                                var off = tags
-                                    .Select(s => Convert.ToUInt64(s.InTag.BoxedValue)).Any(w => w == 0);
-                                n.LampInput = !off;
-                                ucView.UpdateInValue(node, !off);
+                                var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
+                                n.LampInput = on;
+                                ucView.UpdateInValue(node, on);
                                 break;
                             }
                         case (int)TaskDevTag.actionOut:
                             {
-                                var on = tags
-                                    .Select(s => Convert.ToUInt64(s.OutTag.BoxedValue)).Any(w => w != 0);
+                                var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
                                 n.LampOutput = on;
                                 ucView.UpdateOutValue(node, on);
                                 break;

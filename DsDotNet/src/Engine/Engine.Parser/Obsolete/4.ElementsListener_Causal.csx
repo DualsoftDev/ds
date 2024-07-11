@@ -240,8 +240,8 @@ partial class ElementsListener
                     Assert(rvs.All(l => l is not CallPrototype));
 
                     Assert(l != null && r != null);   // 'node not found');
-                    if (lvs.Length == 0) throw new ParserException($"Parse error: {l.GetLabel()} not found", ll);
-                    if (rvs.Length == 0) throw new ParserException($"Parse error: {r.GetLabel()} not found", rr);
+                    if (lvs.Length == 0) throw new ParserError($"Parse error: {l.GetLabel()} not found", ll);
+                    if (rvs.Length == 0) throw new ParserError($"Parse error: {r.GetLabel()} not found", rr);
 
                     Edge e = null;
                     switch (op)

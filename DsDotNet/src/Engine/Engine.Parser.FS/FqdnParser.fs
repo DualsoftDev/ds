@@ -24,7 +24,7 @@ module FqdnParserModule =
             let ncs = ctx.Descendants<fqdnParser.NameComponentContext>()
             [ for nc in ncs -> nc.GetText() ]
         with
-        | :? ParserException ->
+        | :? ParserError ->
             logWarn $"Failed to parse FQDN: {text}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
             [ text ]
         | exn -> failwith $"ERROR: {exn}"

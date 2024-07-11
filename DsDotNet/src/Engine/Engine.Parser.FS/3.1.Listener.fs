@@ -20,8 +20,9 @@ open System.Collections.Generic
 [<AutoOpen>]
 module private DsParserHelperModule =
 
-    let errorLoadCore(ns:string seq) (ctx:RuleContext) = 
-                ParserException($"{ns.Combine()}\r\n", ctx).ToString() |> failwithlog
+    let errorLoadCore (ctx:RuleContext) = 
+        let err = ParserError("", ctx).ToString() 
+        failwithlog ($"""규칙확인{err.Split('\n').Skip(1).Combine("\n")}""")
 
     type DsSystem with
 
@@ -397,7 +398,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let findVertex tokenCtx =
                     match x.TryFindVertex tokenCtx with
                     | Some v -> v
-                    | None -> raise <| ParserException($"ERROR: failed to find [{tokenCtx.GetText()}]", ctx)
+                    | None -> raise <| ParserError($"ERROR: failed to find [{tokenCtx.GetText()}]", ctx)
 
                 let lvs = lefts.Select(findVertex)
                 let rvs = rights.Select(findVertex)
@@ -503,7 +504,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     if not <| isCallName (parent, ctxInfo.Names)  then
                                         Real.Create(real, flow) |> ignore
                                 |_ ->
-                                    errorLoadCore ctxInfo.Names ctx
+                                    errorLoadCore  ctx
                                     
 
                             | 1, _ when not <| (isAliasMnemonic (parent, name)) ->
@@ -511,7 +512,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 | Some job -> 
                                     Call.Create(job, parent) |> ignore
                                 | None ->
-                                    errorLoadCore ctxInfo.Names ctx
+                                    match system.Flows.TryFind(fun f->f.Name = ctxInfo.Names.Head) with
+                                    | Some _f -> ()  //exFlow alisas 면  | cycle 2, _x1 :: [ _x2 ] 에서 등록
+                                    |_->
+                                        errorLoadCore  ctx
                             
                             | 2, _x1 :: [ _x2 ]  ->
                                   match parent.GetCore() with
@@ -521,7 +525,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                   |_ when isAliasMnemonic (parent, name) -> 
                                         createAlias(parent, ctxInfo.Names.Combine("_")) 
                                   |_ -> 
-                                    errorLoadCore ctxInfo.Names ctx   
+                                    errorLoadCore ctx   
 
                             | 2, [ _ ]  when isAliasMnemonic (parent, name) ->
                                  createAlias(parent, ctxInfo.Names.Combine("_")) 
@@ -531,7 +535,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | _, _ofn :: [ _ofrn; _jobExpr ] -> ()
                             | _, _ofn :: [ _otherFlow ;_ofrn; _jobExpr ] -> ()
                             | _ ->
-                                errorLoadCore ctxInfo.Names ctx
+                                errorLoadCore ctx
 
 
             loop
@@ -703,7 +707,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                             match vertex with
                             | :? Call as c -> DuAliasTargetCall c
-                            | _ -> errorLoadCore ns ctx
+                            | _ -> errorLoadCore  ctx
 
 
                     | flowOrReal :: [ rc ] -> //FlowEx.R or Real.C
@@ -716,9 +720,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | Some v -> 
                                 match v with
                                 | :? Call as c -> DuAliasTargetCall c
-                                | _ -> errorLoadCore ns ctx
+                                | _ -> errorLoadCore  ctx
                             | None ->  
-                                errorLoadCore ns ctx
+                                errorLoadCore  ctx
 
 
                     | _real :: [ _dev; _api ] -> 
@@ -726,13 +730,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             let vertex = 
                                 match tryFindCall system ([ flow.Name ] @ ns) with
                                 |   Some v -> v
-                                | _ -> errorLoadCore ns ctx
+                                | _ -> errorLoadCore  ctx
 
                             match vertex with
                             | :? Call as c -> DuAliasTargetCall c
-                            | _ -> errorLoadCore ns ctx
+                            | _ -> errorLoadCore  ctx
 
-                    | _ -> errorLoadCore ns ctx
+                    | _ -> errorLoadCore  ctx
 
 
                 flow.AliasDefs[aliasKeys].AliasTarget <- Some target

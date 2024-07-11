@@ -79,7 +79,7 @@ class ModelListener : dsBaseListener
                             createInstanceFromCallPrototype(cp, last, instanceMap);
                             break;
                         default:
-                            throw new ParserException("ERROR: CallPrototype expected.", ctx);
+                            throw new ParserError("ERROR: CallPrototype expected.", ctx);
                     }
                 }
                 else
@@ -116,7 +116,7 @@ class ModelListener : dsBaseListener
                     switch (target)
                     {
                         case null:
-                            throw new ParserException($"ERROR : failed to find [{ns.Combine()}]", ctx);
+                            throw new ParserError($"ERROR : failed to find [{ns.Combine()}]", ctx);
 
                         case Segment exSeg: //when _parenting != null:
                             var exSegCall = new ExSegment(ns.Combine(), exSeg);
@@ -134,7 +134,7 @@ class ModelListener : dsBaseListener
                             break;
 
                         default:
-                            throw new ParserException("ERROR : unknown??.", ctx);
+                            throw new ParserError("ERROR : unknown??.", ctx);
                     }
                 }
                 break;

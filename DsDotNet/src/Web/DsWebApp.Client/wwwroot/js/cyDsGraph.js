@@ -71,39 +71,6 @@ var cy = window.cy = cytoscape({
         { selector: 'node.M.H', css: { 'background-color': 'DimGray' } },
 
 
-        //{
-        //    selector: 'node.Flow',
-        //    css: {
-        //        'shape': 'rectangle',
-        //        // 'text-outline-width': 1,
-        //        // 'text-outline-color': 'white',
-        //        'border-style': 'dashed',
-        //        'font-size': '60px',
-        //        'color': 'skyblue',
-        //        // 'text-background-color': 'blue',
-        //        // 'text-background-padding': 100,
-        //    }
-        //},
-        //{
-        //    selector: 'node.Real',
-        //    css: {
-        //        'shape': 'rectangle',
-        //        'background-color': 'DarkSalmon',
-        //    }
-        //},
-        //{
-        //    selector: 'node.Call',
-        //    css: {
-        //        'shape': 'ellipse',
-        //        'background-color': 'DarkSeaGreen',
-        //    }
-        //},
-        //{
-        //    selector: 'node.Alias',
-        //    css: {
-        //        'shape': 'diamond',
-        //    }
-        //},
         {
             selector: ':parent',
             css: {
@@ -120,17 +87,11 @@ var cy = window.cy = cytoscape({
             }
         },
         {
-            selector: 'not(:selected)',
-            css: {
-                'background-color': '',
-            }
-        },
-        {
             selector: 'node#e',     // node 에서 id 가 e 인 요소
-            css: {
-                'padding': 0
-            }
+            css: { 'padding': 0 }
         },
+
+
         {
             selector: 'edge',
             css: {

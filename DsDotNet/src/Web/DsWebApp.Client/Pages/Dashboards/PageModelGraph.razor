@@ -93,9 +93,6 @@
                     var vwLog = _logDb.ToView(log);
                     var fqdn = vwLog.Fqdn;
 
-                    if (fqdn == @"SIDE4.S204.STN_SV.""1ST_CLAMP3.ADV""" || fqdn == @"SIDE4.S204.STN_CT.""1ST_CLAMP3.ADV""")
-                        Console.WriteLine($"Got log: {logJson}");
-
                     if (_fqdnNodeDic != null && _fqdnNodeDic.TryGetValue(fqdn, out var node))
                         await applyLogAsync(vwLog);
                     else

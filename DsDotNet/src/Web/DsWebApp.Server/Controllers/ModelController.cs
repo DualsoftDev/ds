@@ -47,28 +47,9 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
 
 
 
-    ///// <summary>
-    ///// Get vertices
-    ///// </summary>
-    //// api/model/graph-vertices
-    //[HttpGet("graph-vertices")]
-    //public async Task<RestResultString> GetNodes()
-    //{
-    //    if (!await serverGlobal.StandbyUntilServerReadyAsync())
-    //        return RestResultString.Err("Server not ready.");
-
-    //    var sys = _model.System;
-    //    CyGraph.TheSystem = sys;
-    //    var vertices = sys.CollectVertices().ToArray();
-    //    CyGraph.TheSystem = null;
-
-    //    var json = NewtonsoftJson.SerializeObject(vertices);
-    //    var xxx = NewtonsoftJson.DeserializeObject<CyVertex[]>(json);
-    //    return RestResultString.Ok(json);
-    //}
-
     /// <summary>
-    /// Get graph info: nodes and edges
+    /// Get graph info: gets nodes and edges
+    /// return: string[2]: [graphJson, nodesJson]
     /// </summary>
     // api/model/graph
     [HttpGet("graph")]
@@ -164,18 +145,26 @@ public static class CytoVertexExtension
             case DsSystem s:
                 foreach (var c in s.Flows.SelectMany(f => f.CollectVertices(idManager)))
                     yield return c;
+
+                //foreach (var t in s.TaskDevs)
+                //    yield return new CyVertex(idManager, "TaskDev", t.QualifiedName, t.Name, null);
+
                 break;
+
             case Flow f:
                 foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectVertices(idManager)))
                     yield return c;
                 break;
+
             case Real r:
                 foreach (var c in r.Graph.Vertices.SelectMany(v => v.CollectVertices(idManager)))
                     yield return c;
                 break;
+
             case Call cc:
                 //yield return c;
                 break;
+
             default:
                 yield break;
         }

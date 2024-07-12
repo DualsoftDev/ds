@@ -55,9 +55,9 @@ public class FilesController : ControllerBaseWithLogger
         return file == null ? NotFound() : file;
     }
 
-    // api/files/{fileName}/activate
-    [HttpGet("{fileName}/activate")]
-    public async Task<RestResultString> MyActivate(string fileName)
+    // api/files/activate
+    [HttpPost("activate")]
+    public async Task<ActionResult<RestResultString>> MyActivate([FromBody] string fileName)
     {
         _onFileUploaded(Path.Combine(_global.ServerSettings.ServiceFolder, fileName));
         return RestResultString.Ok($"OK: {fileName}");

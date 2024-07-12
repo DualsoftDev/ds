@@ -30,11 +30,21 @@ cy.$('#SIDE.MES.MES_1').style('shape', 'ellipse')
 cy.$('#SIDE.MES.MES_1').style('color')
 cy.$('#SIDE.MES.MES_1').style('background-color', 'yellow')
 cy.$('#SIDE.MES.MES_1').style('border-width', '3px')
+cy.$('.Flow').style()
 cy.$('node.Flow').descendants().style('background-color', 'green')
 cy.fit(cy.$(':visible'))
 
 cy.add({ data: { id: 'z', parent: 'b' } })
 cy.add({ data: { source: 'z', target: 'c' } })
+
+node.degree()
+node.indegree()
+node.outdegree()
+node.hasClass('DsSystem')
+node.neighborhood()     // 이웃 {node 와 edge} 들
+node.neighborhood('edge') // 이웃 edge 들
+node.neighborhood('node') // 이웃 node 들
+
 // elements: {
 //   nodes: [
 //     { data: { id: 'a', parent: 'b' }, position: { x: 215, y: 85 } },

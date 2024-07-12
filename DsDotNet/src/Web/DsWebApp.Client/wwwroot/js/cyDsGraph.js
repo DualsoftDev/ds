@@ -3,32 +3,120 @@
 //
 var cyData = window.cyData
 console.log(cyData)
-var resetEdges = cyData.edges.filter(edge => edge.classes.includes('Reset'));
-var nonResetEdges = cyData.edges.filter(edge => !edge.classes.includes('Reset'));
-
-console.log(`Initial: resetEdges = ${resetEdges.length}, nonResetEdges = ${nonResetEdges.length}`)
 
 
-// 동일한 source와 target을 가지는 엣지들을 병합합니다.
-resetEdges.forEach(resetEdge => {
-    let matchingEdge = nonResetEdges.find(edge => edge.data.source === resetEdge.data.target && edge.data.target === resetEdge.data.source);
-    if (matchingEdge) {
-        // matchingEdge의 클래스를 'Start, Reset' 으로 업데이트합니다.
-        matchingEdge.classes = 'Start, ReverseReset';
-    } else {
-        // 만약 매칭되는 엣지가 없으면, resetEdge를 유지합니다.
-        nonResetEdges.push(resetEdge);
+
+
+
+// 엣지를 정규화된 방식으로 그룹화하는 함수.  source와 target을 알파벳 순서로 정렬한 후, 이를 키로 사용하여 반환.  source 와 target 순서 무시하는 방법
+function normalizeEdge(edge) {
+    return [edge.data.source, edge.data.target].sort().join('_');
+}
+
+// 엣지 그룹을 위한 객체
+var edgeGroups = {};
+// cyData.edges를 순회하면서 엣지를 그룹화
+cyData.edges.forEach(edge => {
+    let normalizedKey = normalizeEdge(edge);
+    if (!edgeGroups[normalizedKey]) {
+        edgeGroups[normalizedKey] = [];
+    }
+    edgeGroups[normalizedKey].push(edge);
+});
+
+
+var edges = [];
+
+// 그룹화된 엣지를 처리하는 예제
+Object.keys(edgeGroups).forEach(key => {
+    var group = edgeGroups[key];
+    if (group.length === 1) {
+        edges.push(group[0]);    
+    } else if (group.length > 1) {
+
+        console.log('group before: ', JSON.stringify(group))
+        // 'Start' 클래스를 가진 엣지를 맨 먼저 오게 정렬
+        group.sort((a, b) => {
+            if (a.classes.includes('Start') && !b.classes.includes('Start')) {
+                return -1;
+            } else if (!a.classes.includes('Start') && b.classes.includes('Start')) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        console.log('group after: ', JSON.stringify(group))
+
+        var theEdge = group[0]
+        console.log('The Edge: ', JSON.stringify(theEdge))
+        //console.log(`The edge (${theEdge.classes}): ${theEdge.source.content} -> ${theEdge.target.content}`);
+        edges.push(theEdge);
+
+
+        // 그룹 내에 여러 엣지가 있는 경우 처리
+        console.log(`Group ${key} has ${group.length} edges.`);
+        group.slice(1).forEach(edge => {
+            var c = theEdge.classes
+            var isForward = edge.data.source === theEdge.data.source && edge.data.target === theEdge.data.target
+            switch (edge.classes) {
+                case 'Reset':
+                    console.log(`updating ${theEdge.classes} += ${isForward ? ' Reset' : ' ReverseReset'}`)
+                    theEdge.classes = theEdge.classes + (isForward ? ' Reset' : ' ReverseReset');
+                    break;
+                default:
+                    console.error(`Unknown edge class: ${edge.classes}`);
+                    break;
+            }
+            console.log(edge);
+        });
     }
 });
-console.log(`Middle: resetEdges = ${resetEdges.length}, nonResetEdges = ${nonResetEdges.length}`)
+
+console.log('Edge groups:', edgeGroups);
 
 
-cyData.edges = nonResetEdges
 
+//var resetEdges = cyData.edges.filter(edge => edge.classes.includes('Reset'));
+//var startEdges = cyData.edges.filter(edge => edge.classes.includes('Start'));
+
+//console.log(`Initial: resetEdges = ${resetEdges.length}, startEdges = ${startEdges.length}`)
+
+
+//// 동일한 source와 target을 가지는 엣지들을 병합.  start edge 기준으로 방향이 반대인 reset edge 병합.
+//resetEdges.forEach(resetEdge => {
+//    let forwardStartReverseResetMatchingEdge = startEdges.find(edge => edge.data.source === resetEdge.data.target && edge.data.target === resetEdge.data.source);
+//    let forwardStartForwardResetMatchingEdge = startEdges.find(edge => edge.data.source === resetEdge.data.source && edge.data.target === resetEdge.data.target);
+
+//    if (forwardStartReverseResetMatchingEdge) {
+//        // matchingEdge의 클래스를 'Start, Reset' 으로 업데이트합니다.
+//        forwardStartReverseResetMatchingEdge.classes = 'Start, ReverseReset';
+//    } else if (forwardStartForwardResetMatchingEdge) {
+//        // matchingEdge의 클래스를 'Start, Reset' 으로 업데이트합니다.
+//        console.error("--------------------------------------------------- FOUND")
+//        forwardStartForwardResetMatchingEdge.classes = 'Start, Reset';
+//    } else {
+//        // 만약 매칭되는 엣지가 없으면, resetEdge를 유지합니다.
+//        startEdges.push(resetEdge);
+//    }
+//});
+//console.log(`Middle: resetEdges = ${resetEdges.length}, startEdges = ${startEdges.length}`)
+//cyData.edges = startEdges
+
+cyData.edges = edges
 var cy = window.cy = cytoscape({
     container: document.getElementById('cy'),
 
     boxSelectionEnabled: false,
+
+    /*
+     * Node classes
+        - category: DsSystem, Flow, Real, Call, Alias
+        - Monitoring 여부
+            - M: Monitoring mode
+                - R,G,F,H
+                - U: Unknown
+            - NM: Non-Monitoring, NorMal mode
+     */
 
     style: [
         // https://stackoverflow.com/questions/45572034/how-to-select-nodes-by-class-in-cytoscape-js
@@ -36,7 +124,7 @@ var cy = window.cy = cytoscape({
             selector: 'node',
             css: {
                 // 'shape': 'data(shape)',
-                'shape': 'pentagon',
+                'shape': 'rectangle',
                 'content': 'data(content)',
                 'border-width': 1,
                 'border-color': 'navy',
@@ -45,42 +133,22 @@ var cy = window.cy = cytoscape({
                 'background-opacity': 1,
             }
         },
-        {
-            selector: 'node.Flow',
-            css: {
-                'shape': 'rectangle',
-                // 'text-outline-width': 1,
-                // 'text-outline-color': 'white',
-                'border-style': 'dashed',
-                'font-size': '60px',
-                'color': 'skyblue',
-                'background-color': 'LightCyan',
+
+        { selector: 'node.Call', css: { 'shape': 'ellipse' } },
+        { selector: 'node.Alias', css: { 'shape': 'diamond' } },
+
+        { selector: 'node.Flow.NM',  css: {'background-color': 'LightCyan'} },
+        { selector: 'node.Real.NM',  css: {'background-color': 'DarkSalmon'} },
+        { selector: 'node.Call.NM',  css: {'background-color': 'DarkSeaGreen'} },
+        { selector: 'node.Alias.NM', css: {'background-color': 'LightCyan' } },
+
+        { selector: 'node.M.U', css: { 'background-color': 'white' } },
+        { selector: 'node.M.R', css: { 'background-color': 'DarkGreen' } },
+        { selector: 'node.M.G', css: { 'background-color': 'DarkGoldenrod' } },
+        { selector: 'node.M.F', css: { 'background-color': 'RoyalBlue' } },
+        { selector: 'node.M.H', css: { 'background-color': 'DimGray' } },
 
 
-                // 'text-background-color': 'blue',
-                // 'text-background-padding': 100,
-            }
-        },
-        {
-            selector: 'node.Real',
-            css: {
-                'shape': 'rectangle',
-                'background-color': 'DarkSalmon',
-            }
-        },
-        {
-            selector: 'node.Call',
-            css: {
-                'shape': 'ellipse',
-                'background-color': 'DarkSeaGreen',
-            }
-        },
-        {
-            selector: 'node.Alias',
-            css: {
-                'shape': 'diamond',
-            }
-        },
         {
             selector: ':parent',
             css: {
@@ -97,45 +165,56 @@ var cy = window.cy = cytoscape({
             }
         },
         {
-            selector: 'not(:selected)',
-            css: {
-                'background-color': '',
-            }
-        },
-        {
             selector: 'node#e',     // node 에서 id 가 e 인 요소
-            css: {
-                'padding': 0
-            }
+            css: { 'padding': 0 }
         },
+
+
         {
             selector: 'edge',
             css: {
-                'curve-style': 'bezier',
+                'line-style': 'solid',
+                'curve-style': 'unbundled-bezier',
                 'target-arrow-shape': 'triangle',
+                'target-arrow-color': 'navy',
+                'source-arrow-color': 'navy',
+            }
+        },
+        {
+            selector: 'edge.Start',
+            css: {
                 'target-arrow-color': 'navy',
             }
         },
         {
             selector: 'edge.Reset',
             css: {
-                'line-color': 'green',
-                'curve-style': 'bezier',
-                'target-arrow-shape': 'circle',
-                'target-arrow-color': 'red',
                 'line-style': 'dashed',     // 'solid', 'dotted',
-                // 'line-dash-offset': 24,
-                // 'line-dash-pattern': [6, 3],
+            //    'line-color': 'green',
+            //    'target-arrow-shape': 'circle',
+            //    'target-arrow-color': 'red',
+            //    'line-style': 'dashed',     // 'solid', 'dotted',
             }
         },
         {
-            selector: 'edge.ReverseReset',
+            selector: 'edge.Start.ReverseReset',
             css: {
-                'line-color': 'green',
-                'curve-style': 'bezier',
                 'source-arrow-shape': 'circle',
-                'source-arrow-color': 'red',
-                'line-style': 'dashed',     // 'solid', 'dotted',
+                'target-arrow-shape': 'triangle',
+            }
+        },
+        {
+            selector: 'edge.Reset.ReverseReset',
+            css: {
+                'source-arrow-shape': 'triangle',
+                'target-arrow-shape': 'triangle',
+            }
+        },
+        {
+            selector: 'edge.Start.Reset.ReverseReset',
+            css: {
+                'source-arrow-shape': 'circle',
+                'target-arrow-shape': 'triangle',
             }
         },
     ],

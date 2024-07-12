@@ -7,22 +7,27 @@
 
 <h3>Model Graph</h3>
 
-
 <button id="center">Center</button>
-<button id="reset_zoom">Reset zoom</button>
-<button id="enable_zoom">Enable zoom</button>
 <button id="hide">Hide selection</button>
 <button id="show">Show</button>
-<DxButton Text="Start MONITOR" Click="@(async () => await startMonitorAsync())" Visible="@(_hubSubscription == null)"/>
-<DxButton Text="Stop MONITOR" Click="@(async () => await stopMonitorAsync())" Visible="@(_hubSubscription != null)" />
+<DxButton Text="Start MONITOR" Click="@(async () => await startMonitorAsync())" Visible="@(_graphLoaded && _hubSubscription == null)" />
+<DxButton Text="Stop MONITOR" Click="@(async () => await stopMonitorAsync())" Visible="@(_graphLoaded && _hubSubscription != null)" />
+<DxButton Text="Clear MONITOR status" Click="@(async () => await resetStatusAsync())" Visible="@(_graphLoaded && _hubSubscription == null)" />    
+
+@if (! _graphLoaded)
+{
+    <LoadingSpinner Text="Loading model.." />
+}
+
 
 <div id="cy"></div>
 
 @code {
+    bool _graphLoaded;
     HubConnection _hubConnection;
     IDisposable _hubSubscription;
     ORMDBSkeleton _logDb;
-    Dictionary<string, CyVertex> _nodeDic;
+    Dictionary<string, CyVertex> _fqdnNodeDic;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -50,36 +55,28 @@
         foreach(var js in jss)
             await JsDual.EvalExternalScript(js);
 
-         /*
-         * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
+        /*
+        * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
         */
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
-        var data = await Http.GetRestResultAsync<string>($"/api/model/graph");
+        var data = await Http.GetRestResultAsync<string[]>($"/api/model/graph");
         await data.IterAsync(
-            async json =>
+            async jsons =>
             {
-                Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
-                await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
+                var (graphJson, nodesJson) = (jsons[0], jsons[1]);
+                Console.WriteLine($"--------------- Cytoscape data:\r\n{graphJson}");
+                await JsDual.EvalOnGlobalModule($"window.cyData = {graphJson};");
                 await JsDual.EvalExternalScript("js/cyDsGraph.js");
-                await JsDual.EvalOnGlobalModule(_snippet);
-                await JsDual.EvalOnGlobalModule(_runtimeStyles);
+                await JsDual.EvalExternalScript("js/pages/PageModelGraph_razor.js");
+                await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");       // default to Non-Monitoring mode
 
-                var optJsonNodes = await Http.GetRestResultAsync<string>($"/api/model/graph-vertices");
-                optJsonNodes.Iter(
-                    jsonNodes =>
-                    {
-                        var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(jsonNodes);
-                        foreach (var n in nodes)
-                        {
-                            Console.WriteLine($"{n.id} = {n.type}");
-                        }
+                var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(nodesJson);
+                foreach (var n in nodes)
+                    Console.WriteLine($"{n.id} = {n.type}");
 
-                        _nodeDic = nodes.ToDictionary(node => node.id);
-                        Console.WriteLine($"Got total {nodes.Length} vertices");
-                    },
-                    async err => await JsDual.Alert($"Failed to get data: {err}")
-                );
+                _fqdnNodeDic = nodes.ToDictionary(node => node.fqdn);
+                Console.WriteLine($"Got total {nodes.Length} vertices");
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
         );
@@ -95,10 +92,14 @@
                     var log = ORMLog.Deserialize(logJson);
                     var vwLog = _logDb.ToView(log);
                     var fqdn = vwLog.Fqdn;
-                    if (_nodeDic != null && _nodeDic.TryGetValue(fqdn, out var node))
+
+                    if (fqdn == @"SIDE4.S204.STN_SV.""1ST_CLAMP3.ADV""" || fqdn == @"SIDE4.S204.STN_CT.""1ST_CLAMP3.ADV""")
+                        Console.WriteLine($"Got log: {logJson}");
+
+                    if (_fqdnNodeDic != null && _fqdnNodeDic.TryGetValue(fqdn, out var node))
                         await applyLogAsync(vwLog);
                     else
-                        throw new Exception($"Failed to find fqdn: {fqdn}");
+                        throw new Exception($"Failed to find fqdn: {fqdn} for log id={vwLog.Id}");
 
                 }
                 catch (Exception e)
@@ -109,37 +110,34 @@
             });
     }
 
-    async Task setStatusAsync(bool addClass)
-    {
-        var classify = addClass ? "addClass" : "removeClass";
-        foreach(var n in _nodeDic.Values)
-        {
-            Console.WriteLine($"Clearing status of {n.id}: cy.$('#{n.id}')");
-            await JsDual.EvalOnGlobalModule($@"cy.$('#{n.id}')
-                .removeClass('R')
-                .removeClass('G')
-                .removeClass('F')
-                .removeClass('H')
-                .{classify}('U')"
-            );
-        }
-    }
-    Task astrayStatusAsync() => setStatusAsync(true);
-    Task resetStatusAsync() => setStatusAsync(false);
+    /// <summary>
+    /// 최초 상태를 받기전의 알수 없는 상태로 marking
+    /// </summary>
+    async Task markStatusUnknownAsync() =>
+        await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H NM').addClass('U M')");
+
+    /// <summary>
+    /// Non-Monitoring 상태로 초기화
+    /// </summary>
+    async Task resetStatusAsync() =>
+        await JsDual.EvalOnGlobalModule("cy.nodes().removeClass('R G F H U M').addClass('NM')");
 
     async Task stopMonitorAsync()
     {
-        await resetStatusAsync();
         _hubSubscription?.Dispose();
         _hubSubscription = null;
     }
-    
+
     async Task startMonitorAsync()
     {
-        await astrayStatusAsync();
+        await markStatusUnknownAsync();
         _hubSubscription?.Dispose();
         _hubSubscription = listenHub();
     }
+
+    /// <summary>
+    /// Log 변경을 UI 에 적용한다.
+    /// </summary>
     async Task applyLogAsync(ORMVwLog vwLog)
     {
         var status = vwLog.TagKindName switch
@@ -150,66 +148,14 @@
             "VertexTag.homing" => "H",
             _ => ""
         };
-        Console.WriteLine($"cy.$('#{vwLog.Fqdn}').classes() : added {status}");
-        await JsDual.EvalOnGlobalModule($@"
-            var node = cy.$('#{vwLog.Fqdn}')
-            node
-                // .filter(':not(.Flow)')
-                .removeClass('R')
-                .removeClass('G')
-                .removeClass('F')
-                .removeClass('H')
-                .removeClass('U')
-                .style('opacity', '1')
-                .addClass('{status}')
-            node.ancestors()
-                .filter('.Flow')
-                .style('opacity', '1')  
-            "
-        );
+
+        // fqdn 의 value 에 따라 해당 node 의 상태를 변경
+        var id = _fqdnNodeDic[vwLog.Fqdn].id;
+        Console.WriteLine($"cy.$('#{id}').classes() : added {status}  (Log: {vwLog.Id}={vwLog.Fqdn})");
+        var val = vwLog.Value.ToString();
+        var addOrRemove =  val == "1" ? "addClass" : "removeClass";
+        await JsDual.EvalOnGlobalModule($@"cy.$('#{id}').removeClass('U').{addOrRemove}('{status}')");
     }
-
-    readonly string _runtimeStyles = @"
-        // cy.style()
-        //     .selector(':not(Flow)')
-        //     .selector('node.R').style('background-color', 'grey')
-        //     .selector('node.G').style('background-color', 'green')
-        //     .selector('node.F').style('background-color', 'blue')
-        //     .selector('node.H').style('background-color', 'yellow')
-        //     .selector('node.U').style('background-color', 'grey')
-        //         .style('opacity', 0.5)
-        //         .style('border-color', 'grey')
-        //         .style('border-width', 3)
-
-        // Flow 가 아닐 때에만 적용
-        const applyStyle = (backgroundColor, opacity, borderColor, borderWidth) => {
-            return {
-                'background-color': ele => !ele.hasClass('Flow') ? backgroundColor : ele.style('background-color'),
-                'opacity'         : ele => !ele.hasClass('Flow') ? opacity         : ele.style('opacity'),
-                'border-color'    : ele => !ele.hasClass('Flow') ? borderColor     : ele.style('border-color'),
-                'border-width'    : ele => !ele.hasClass('Flow') ? borderWidth     : ele.style('border-width')
-            };
-        };
-
-        cy.style()
-            .selector('node.R').style(applyStyle('grey', '', '', ''))
-            .selector('node.G').style(applyStyle('green', '', '', ''))
-            .selector('node.F').style(applyStyle('blue', '', '', ''))
-            .selector('node.H').style(applyStyle('yellow', '', '', ''))
-            .selector('node.U').style(applyStyle('grey', 0.5, 'grey', 3));
-        ";
-
-        // .selector('node.R:not(Flow)').style('background-color', 'grey')
-        // .selector('node.G:not(Flow)').style('background-color', 'green')
-        // .selector('node.F:not(Flow)').style('background-color', 'blue')
-        // .selector('node.H:not(Flow)').style('background-color', 'yellow')
-        // .selector('node.U:not(Flow)').style('background-color', 'grey')
-        // .style('opacity', 0.5)
-        // .style('border-color', 'grey')
-        // .style('border-width', 3)
-
-
-
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -217,154 +163,19 @@
         await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
-            // await JsDual.EvalOnGlobalModule(@"fit();");
+            // cytoscape 와의 interop 시, firstRender 후 바로 적용이 불가능.  _graphLoaded 를 통해 조건부 적용
         }
-        else
+        else if (! _graphLoaded)
         {
-            Console.WriteLine("fit() is ready.");
+            Console.WriteLine("Fitting cytoscape graph after loading.");
+
             // dirty hack!
             await Task.Delay(2000);
             await JsDual.EvalOnGlobalModule(@"fit();");
+            _graphLoaded = true;
+            StateHasChanged();
         }
     }
-
-    readonly string _snippet = @"
-// click event: node 및 edge 둘다 적용
-// node 만 적용하려면 cy.on('click', 'node', evt => ...  의 형태로 작성
-cy.on('click', evt => {
-    if (evt.target.id) {
-        console.log('clicked ' + evt.target.id());
-        console.log(evt.target.json());
-        // console.log('clicked ' + JSON.stringify(evt.target.json()));
-    }
-})
-
-// 'node' 클래스의 모든 노드에 mouseover 이벤트 리스너를 추가
-cy.on('mouseover', 'node', function(event) {
-  var node = event.target;
-  // 여기서 노드에 마우스가 올려졌을 때의 작업을 수행합니다.
-  console.log('Mouse over on node:', node.id());
-  node.style({
-    // 'background-color': 'CornflowerBlue',
-    'border-color': 'navy',
-    'border-width': '5px',
-    'opacity': '1',
-    'color': 'red',
-    'text-outline-color': 'white',
-    'text-outline-width': 2,
-    'label': node.id() // 마우스 오버 시 노드 ID (FQDN)를 라벨로 표시
-  });
-});
-
-// 'node' 클래스의 모든 노드에 mouseout 이벤트 리스너를 추가
-cy.on('mouseout', 'node', function(event) {
-  var node = event.target;
-  // 여기서 노드에서 마우스가 떠났을 때의 작업을 수행합니다.
-  console.log('Mouse out from node:', node.id());
-  node.style({
-    'border-color': '',
-    'border-width': '',
-    'opacity': '',
-    // 'background-color': '', // 원래 색으로 복원
-    'color': '', // 원래 색으로 복원
-    'text-outline-color': '',
-    'text-outline-width': '',
-    'label': '' // 라벨 제거
-  });
-});
-
-// 'edge' 클래스의 모든 엣지에 mouseover 이벤트 리스너를 추가
-cy.on('mouseover', 'edge', function(event) {
-  var edge = event.target;
-  // 여기서 엣지에 마우스가 올려졌을 때의 작업을 수행합니다.
-  console.log('Mouse over on edge:', edge.id());
-  edge.style({
-    'line-color': 'red',
-    'color': 'red',
-    'width': 4, // 엣지 두께 변경
-    'label': edge.id() // 마우스 오버 시 엣지 ID를 라벨로 표시
-  });
-});
-
-// 'edge' 클래스의 모든 엣지에 mouseout 이벤트 리스너를 추가
-cy.on('mouseout', 'edge', function(event) {
-  var edge = event.target;
-  // 여기서 엣지에서 마우스가 떠났을 때의 작업을 수행합니다.
-  console.log('Mouse out from edge:', edge.id());
-  edge.style({
-    'line-color': '', // 원래 색으로 복원
-    'width': '', // 원래 두께로 복원
-    'color': '', // 원래 색으로 복원
-    'label': '' // 라벨 제거
-  });
-});
-
-function fit()
-{
-    var visibleNodes = cy.$('node.Flow').filter(node => node.visible());
-
-    // 열의 개수를 설정합니다.
-    var num_columns = 3;
-
-    // 함수 호출
-    repositionNodes(visibleNodes, num_columns);
-}
-
-// button handlers
-$('#center').click(() => {
-    fit();
-    //cy.fit(cy.nodes().filter(':visible'))
-    // cy.center();
-});
-
-
-$('#hide').click(() => {
-    cy.$(':selected').style('display', 'none');
-    fit();
-});
-
-$('#show').click(() => {
-    cy.$(':hidden').style('display', 'element')
-    cy.fit(cy.nodes().filter(':visible'))
-    fit()
-});
-
-$('#reset_zoom').click(() => {
-    // multi layout : https://stackoverflow.com/questions/52200858/cytoscape-js-multiple-layouts-different-layout-within-compound-nodes
-
-    // 최상위 레벨 노드를 찾기
-    var topLevelNodes = cy.nodes().filter(function (node) {
-        return node.data('parent') === undefined && !node.hasClass('DsSystem');;
-    });
-
-    const disconnectedNodes = cy.nodes().filter(node => node.degree(false) === 0);
-    disconnectedNodes.layout({
-        name: 'grid',
-        rows: 3 // 모든 단일 노드를 한 줄로 배치
-    }).run();
-
-
-    console.log('Top level nodes:');
-    topLevelNodes.forEach(function (node) {
-        console.log(node.data('id'));
-    });
-
-    // 최상위 레벨 노드에 grid layout 적용
-    topLevelNodes.layout({
-        name: 'grid',
-        columns: 3,
-        fit: true,
-        padding: 30,
-    }).run();
-
-    cy.$('node.Flow').layout({
-        name: 'dagre',
-        // columns: 3,
-        // fit: true,
-        padding: 30,
-    }).run();
-});
-";
 }
 
 <style>

@@ -34,12 +34,13 @@ module ImportUtilVertex =
             newFunc
         )
 
-    let getCallFromLoadedSys (sys: DsSystem) (node: pptNode) (loadSysName: string) (apiName: string) parentWrapper =
-        match sys.Jobs |> Seq.tryFind (fun job -> job.QualifiedName = node.JobName.CombineQuoteOnDemand()) with
+    let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: pptNode) (apiName: string) parentWrapper =
+        let loadSysName = device.Name
+
+        match sys.Jobs |> Seq.tryFind (fun job -> job.QualifiedName = node.JobName.Combine()) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
-            let jobName = node.JobName.CombineQuoteOnDemand()
-            let device = sys.LoadedSystems |> Seq.find (fun d -> d.Name = loadSysName)
+            let jobName = node.JobName.Combine()
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
             |Some api ->
                 let devTask = 
@@ -79,9 +80,10 @@ module ImportUtilVertex =
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
                 let flow, job, apiName = node.CallFlowNJobNApi
-                match node.JobParam.JobMulti with
-                | Single when mySys.LoadedSystems.TryFind(fun d -> d.Name = job.CombineQuoteOnDemand()).IsSome -> 
-                    getCallFromLoadedSys mySys node (job.CombineQuoteOnDemand()) apiName parentWrapper
+
+                match node.JobParam.JobMulti,  mySys.LoadedSystems.TryFind(fun d -> d.Name = job.Combine("_")) with
+                | Single, Some dev -> 
+                    getCallFromLoadedSys mySys dev node apiName parentWrapper
                 | _  ->
                     let callParams = {
                         MySys = mySys

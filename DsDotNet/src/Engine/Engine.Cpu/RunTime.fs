@@ -124,7 +124,7 @@ module RunTime =
             run <- false;
 
         let doStepByStatus(activeSys) =
-            for s in statements do s.Do() 
+            //for s in statements do s.Do() 
             let mutable endStepByStatus = false
             while not(endStepByStatus) do
                 let chTags = scanOnce()

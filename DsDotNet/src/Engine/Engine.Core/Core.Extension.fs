@@ -308,7 +308,7 @@ module CoreExtensionModule =
         member x.ScriptEndTag = x.ExternalTags.First(fun (t,_)-> t = ScriptEnd)|> snd  
 
 
-    let getCallName (x:Call) (bGraph:bool)= 
+    let getCallName (x:Call) = 
         match x.JobOrFunc with
             | JobType job -> 
                 let jobFqdn = job.NameComponents
@@ -316,11 +316,7 @@ module CoreExtensionModule =
                 let jobOwnerFlow =  jobFqdn.Head()
                 if callOwnerFlow = jobOwnerFlow
                 then 
-                    if bGraph
-                    then
-                        jobFqdn.Skip(1).CombineQuoteOnDemand() 
-                    else
-                        failWithLog $"아직 확인 필요" //test ahn
+                    jobFqdn.Skip(1).CombineQuoteOnDemand() 
                 else 
                     jobFqdn.CombineQuoteOnDemand() //다른 Flow는 skip flow 없음
                              
@@ -330,8 +326,7 @@ module CoreExtensionModule =
 
     type Call with
         
-        member x.NameForGraph = getCallName x true
-         
+        member x.NameForGraph = getCallName x 
 
         member x.System = x.Parent.GetSystem()
         member x.ErrorSensorOn = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)|> snd

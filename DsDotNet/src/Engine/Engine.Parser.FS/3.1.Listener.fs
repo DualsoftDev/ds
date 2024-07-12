@@ -306,7 +306,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     /// parser rule context 에 대한 객체 기준의 정보를 얻는다.  DsSystem 객체, flow 객체, parenting 객체 등
     member x.GetObjectContextInformation(system: DsSystem, parserRuleContext: ParserRuleContext) =
         let ci = x.GetContextInformation(parserRuleContext)
-        assert (system.Name = ci.System.Value)
+        assert (system.Name.DeQuoteOnDemand() = ci.System.Value)
         let flow = ci.Flow.Bind system.TryFindFlow
 
         let parenting =
@@ -579,18 +579,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             }
             |> ignore
 
-        let createDeviceVariable (system: DsSystem)  (devParam:DevParam) (devName:string) address =
+        let createDeviceVariable (system: DsSystem)  (devParam:DevParam) (stgKey:string) address =
             match devParam.DevName with
             | Some name ->
                 let dataType = devParam.Type
                 let variable = createVariableByType name dataType
 
-                system.AddActionVariables (ActionVariable(name, address, devName, dataType)) |> ignore
+                system.AddActionVariables (ActionVariable(name, address, stgKey, dataType)) |> ignore
                 options.Storages.Add(name, variable) |> ignore
 
             | None -> ()
-
-     
 
         let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) = 
             let (inaddr, inParam), (outaddr, outParm) =
@@ -692,8 +690,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     let errText = String.Join(", ", apiFqnd.ToArray())
                                     failwithlog $"loading type error ({errText})device"
                             
-                            let plcName_I = getPlcTagAbleName $"""{devApiName}_I""" options.Storages
-                            let plcName_O = getPlcTagAbleName $"""{devApiName}_O""" options.Storages
+                            let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName) options.Storages
+                            let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
                             createDeviceVariable system inParam plcName_I task.InAddress
                             createDeviceVariable system outParm plcName_O task.OutAddress
 

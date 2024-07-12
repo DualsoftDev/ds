@@ -1,6 +1,7 @@
 namespace Engine.CodeGenCPU
 
 open Engine.Core
+open Engine.Parser.FS
 open Dual.Common.Core.FS
 open System.Reactive.Linq
 open System
@@ -67,15 +68,15 @@ module TagManagerUtil =
                 match bridgeType with
                 | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
                 | Device ->   match DU.tryGetEnumValue<TaskDevTag>(tagKind).Value with
-                              | TaskDevTag.actionIn     -> $"{name}_I"
-                              | TaskDevTag.actionOut    -> $"{name}_O"
-                              | TaskDevTag.actionMemory -> $"{name}_M"
+                              | TaskDevTag.actionIn     -> name |> getInActionName
+                              | TaskDevTag.actionOut    -> name |> getOutActionName
+                              | TaskDevTag.actionMemory -> name |> getMemoryActionName
                               | _ -> failwithlog "error: TaskDevTag create "
 
                 | Button | Lamp | Condition
                     ->   match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with
-                              | HwSysTag.HwSysIn      -> $"{name}_I"
-                              | HwSysTag.HwSysOut     -> $"{name}_O"
+                              | HwSysTag.HwSysIn      -> name |> getInActionName
+                              | HwSysTag.HwSysOut     -> name |> getOutActionName
                               | _ -> failwithlog "error: HwSysTag create "
 
             let plcName = getPlcTagAbleName name stg

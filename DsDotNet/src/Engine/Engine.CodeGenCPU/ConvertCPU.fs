@@ -211,16 +211,16 @@ module ConvertCPU =
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
-            let devsCall =  s.GetDevicesCoin()
+            let devsCall =  s.GetDevicesCall()
             for dev, call in devsCall do
-                if not(dev.IsRootOnlyDevice)
-                then
+                //if not(dev.IsRootOnlyDevice)
+                //then
                     if dev.InTag.IsNonNull() then  
                         yield dev.SensorEmulation(s, call.TargetJob)
         ]
  
     let private updateRealParentExpr(x:DsSystem) =
-        for dev, call in x.GetDevicesCoin() do
+        for dev, call in x.GetDevicesCall() do
             let sensorExpr = 
                 match call.GetEndAction(dev.ApiItem) with
                 | Some e -> e

@@ -85,6 +85,15 @@ module TextImpl =
         else
             processedName
 
+    ///  "/";"\\ 경로기호 금지, '__' Flow 구분자 금지, '.' Quatation 구분자 금지
+    let invalidCharsSystem = [|"/"; "\\"; "__"; "."|]
+
+    let checkFlowName (name: string) =
+        if invalidCharsSystem |> Seq.exists (fun f -> name.Contains(f)) then
+            let errChars = String.Join("  ", invalidCharsSystem)
+            failwith $"이름에 금지된 문자열이 있습니다. \r\n{name} \r\n금지항목 : ( {errChars} )"
+
+
 // Extension methods for string manipulation
 [<Extension>]
 type TextExt =

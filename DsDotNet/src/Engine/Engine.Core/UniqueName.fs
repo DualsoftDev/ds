@@ -31,7 +31,13 @@ module UniquePlcTagName =
             else
                 inputName
 
-        name |> generateUntilValid
+        name |> validStorageName |> generateUntilValid
+
+     
+    let getInActionName name = $"{name}_I"
+    let getOutActionName name = $"{name}_O"
+    let getMemoryActionName name = $"{name}_M"
+
 
 [<Extension>]
 type UniqueNameExt =

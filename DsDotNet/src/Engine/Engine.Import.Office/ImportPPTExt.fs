@@ -108,9 +108,7 @@ module ImportU =
 
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 let flowName = if page.PageNum = pptHeadPage then $"{sysName}_Page1" else flowName
-                if flowName.Contains(".")||flowName.Contains(TextDeviceSplit) then
-                    Office.ErrorPPT(ErrorCase.Name, ErrID._20, page.Title, page.PageNum, 0u, "")
-
+   
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
 
 

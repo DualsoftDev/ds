@@ -90,6 +90,8 @@ module CoreCreateModule =
             let oldReal = flow.Graph.Vertices.OfType<Real>().Head()
             let realName = $"genClearReal{api.Name}"
             let clearReal = Real.Create(realName, flow)
+            clearReal.Finished <- true
+            oldReal.Finished <- false
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , "<|>", clearReal)) |> ignore
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , ">", clearReal)) |> ignore
 

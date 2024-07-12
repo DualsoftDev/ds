@@ -64,7 +64,7 @@ module PPTNodeModule =
                     shape.ErrorName(ErrID._19, iPage)
                 else
                     let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
-                    let copys = copyRows.Select(fun sys -> $"{pageTitle}_{sys}")
+                    let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextDeviceSplit}{sys}")
 
                     if copys.Distinct().length() <> copys.length() then
                         Office.ErrorName(shape, ErrID._33, iPage)
@@ -279,8 +279,8 @@ module PPTNodeModule =
             $"{flow}.{job.Last()}.{api}"
 
         member x.CallDevName = 
-            let flow, job, api = x.CallFlowNJobNApi
-            $"{flow}{TextDeviceSplit}{job.Last()}"
+                let flow, job, api = x.CallFlowNJobNApi
+                $"{flow}{TextDeviceSplit}{job.Last()}"
            
             
         member x.FlowName = 

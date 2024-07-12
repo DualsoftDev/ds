@@ -103,7 +103,9 @@ module CoreModule =
                                     { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
 
 
+        
         interface ISystem 
+            
         member _.AddLoadedSystem(childSys) = 
             loadedSystems.Add(childSys)
             |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
@@ -203,6 +205,9 @@ module CoreModule =
 
     type Flow private (name: string, system: DsSystem) =
         inherit FqdnObject(name, system)
+        
+        do 
+            checkFlowName  name
         
         member val Graph = DsGraph()
         

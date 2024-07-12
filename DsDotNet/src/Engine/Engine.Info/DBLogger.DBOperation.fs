@@ -235,9 +235,10 @@ module internal DBLoggerImpl =
                 if queryCriteria <> null then
                     let! existingLogs =
                         conn.QueryAsync<ORMLog>(
-                            $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
+                            $"SELECT * FROM [{Tn.Log}] WHERE modelId = @ModelId AND at BETWEEN @START AND @END ORDER BY id;",
                             {| START = queryCriteria.StartTime
-                               END = queryCriteria.EndTime |}
+                               END = queryCriteria.EndTime
+                               ModelId = queryCriteria.ModelId|}
                         )
                     logSet.InitializeForReader(existingLogs)
 
@@ -246,13 +247,10 @@ module internal DBLoggerImpl =
                 return logSet
             }
 
-        let createLoggerDBSchemaAsync (connStr:string) (modelZipPath:string) (dbWriter:string) (cleanExistingDb:bool) =
+        let createLoggerDBSchemaAsync (connStr:string) (modelZipPath:string) (dbWriter:string) =
             task {
+                failwith "ERROR: LoggerDBSettings.FillModelId() ... 관련 호출로 일부 대체"
                 use conn = createConnectionWith connStr
-
-                if cleanExistingDb then
-                    conn.DropDatabase();
-
                 use! tr = conn.BeginTransactionAsync()
                 let! exists = conn.IsTableExistsAsync(Tn.Storage)
 
@@ -320,10 +318,9 @@ module internal DBLoggerImpl =
         let initializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
                 let loggerDBSettings = commonAppSettings.LoggerDBSettings
-                let connStr = loggerDBSettings.ConnectionString
-                let (modelZipPath, dbWriter:string) = loggerDBSettings.ModelFilePath, loggerDBSettings.DbWriter
-                let! modelId = createLoggerDBSchemaAsync connStr modelZipPath dbWriter cleanExistingDb
-                commonAppSettings.LoggerDBSettings.ModelId <- modelId
+                if cleanExistingDb then
+                    loggerDBSettings.DropDatabase()
+                loggerDBSettings.FillModelId() |> ignore
             }
 
 

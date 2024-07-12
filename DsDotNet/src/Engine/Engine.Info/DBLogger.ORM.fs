@@ -86,7 +86,7 @@ CREATE TABLE [{Tn.Model}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [path]        NVARCHAR(128) NOT NULL  -- pptx/zip path
     , [lastModified] DATETIME2(7) NOT NULL  -- file last modified
-    , [runtime]     NVARCHAR(128) NOT NULL CHECK(runtime IN ('PC', 'PLC', 'LightPC', 'LightPLC', 'Simulation', 'Developer'))
+    , [runtime]     NVARCHAR(128) NOT NULL CHECK(runtime IN ('PC', 'PCSIM', 'PLC', 'PLCSIM'))       -- , 'LightPC', 'LightPLC', 'Simulation', 'Developer'
 );
 
 CREATE TABLE [{Tn.Log}] (
@@ -367,35 +367,74 @@ CREATE VIEW [{Vn.Storage}] AS
     let createConnectionWith (connStr) =
         new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 
-    open System.IO
-    type DSCommonAppSettings with
-        member x.ConnectionString = x.LoggerDBSettings.ConnectionString
-        member x.CreateConnection(): SqliteConnection = createConnectionWith x.ConnectionString
-
 
 [<Extension>]
-type DSCommonAppSettingsExt =
+type LoggerDBSettingsExt =
     [<Extension>]
-    static member FillModelId(commonAppSettings:DSCommonAppSettings): unit =
-        let x = commonAppSettings
-        let path = x.LoggerDBSettings.ModelFilePath
-        let runtime = x.LoggerDBSettings.DbWriter
-        use conn = x.CreateConnection()
+    static member CreateConnection(loggerDBSettings:LoggerDBSettings): SqliteConnection =
+        let connStr = $"Data Source={loggerDBSettings.ConnectionPath}"
+        createConnectionWith connStr
 
-        let id =
+    [<Extension>]
+    static member DropDatabase(loggerDBSettings:LoggerDBSettings) = loggerDBSettings.DropDatabase()
 
-            if conn.IsTableExistsAsync(Tn.Model).Result then
-                let lastModified = System.IO.FileInfo(path).LastWriteTime
-                let ids =
-                    conn.Query<int>(
-                        $@"SELECT * FROM {Tn.Model}
-                            WHERE path = @Path
-                            AND runtime = @Runtime
-                            AND lastModified = @LastModified",
-                        {|Path = path; Runtime = runtime; LastModified = lastModified|})
-                ids.HeadOr(-1)
-            else
-                -1
-        x.LoggerDBSettings.ModelId <- id
+    [<Extension>]
+    static member ComputeModelId(loggerDBSettings:LoggerDBSettings): int =
+        use conn = loggerDBSettings.CreateConnection()
+        // db 가 아직 초기화되지 않은 경우의 처리???
+        failwith "Not implemented"
+
+    [<Extension>]
+    static member FillModelId(loggerDBSettings:LoggerDBSettings): int =
+        use conn = loggerDBSettings.CreateConnection()
+        use tr = conn.BeginTransaction()
+        let tableExists = conn.IsTableExistsAsync(Tn.Model).Result
+
+        let path = loggerDBSettings.ModelFilePath
+        let runtime = loggerDBSettings.DbWriter
+
+        if not tableExists then
+            if (path.IsNullOrEmpty() || runtime.IsNullOrEmpty()) then
+                failwith "ModelFilePath and DbWriter must be set for empty database!"
+
+            // schema 새로 생성
+            conn.ExecuteSilentlyAsync(sqlCreateSchema, tr).Wait()
+
+
+        let lastModified = System.IO.FileInfo(path).LastWriteTime
+        let param = {|Path = path; Runtime = runtime; LastModified = lastModified|}
+        let optModel =
+            let sql =
+                $"""SELECT * FROM {Tn.Model}
+                        WHERE path = @Path
+                        AND runtime = @Runtime
+                        AND lastModified = @LastModified"""
+            conn.TryQuerySingle<ORMModel>(sql, param, null)
+
+        match optModel with
+        | Some m -> loggerDBSettings.ModelId <- m.Id
+        | _ ->
+            loggerDBSettings.ModelId <-
+                conn.InsertAndQueryLastRowIdAsync(tr,
+                    $"""INSERT INTO [{Tn.Model}]
+                        (path, lastModified, runtime)
+                        VALUES (@Path, @LastModified, @Runtime)
+                    """,
+                    param
+                ).Result
+                
+        tr.Commit()
+
+        loggerDBSettings.ModelId
 
             
+
+
+[<AutoOpen>]
+module DBLoggerORM2 =
+    open System.IO
+    type DSCommonAppSettings with
+        member x.ConnectionString = $"Data Source={x.LoggerDBSettings.ConnectionPath}"
+        member x.CreateConnection(): SqliteConnection = x.LoggerDBSettings.CreateConnection()
+
+

@@ -91,7 +91,9 @@ public class ServerGlobal
         _ioHub = new IoHub(zmqSettingsJson);
     }
 
-    public IDbConnection CreateDbConnection() => new SqliteConnection(DsCommonAppSettings.LoggerDBSettings.ConnectionString).Tee(c => c.Open());
+    public IDbConnection CreateDbConnection() =>
+        new SqliteConnection($"Data Source={DsCommonAppSettings.LoggerDBSettings.ConnectionPath}")
+        .Tee(c => c.Open());
 
     /// <summary>
     /// wait for the cache to be initialized 

@@ -8,7 +8,7 @@
   "AllowedHosts": "*",
   "ServerSettings": {
     "UseHttpsRedirection": true,
-    "RuntimeModelDsZipPath": "C:\\ProgramData\\Dualsoft\\DsModel\\exportDS.zip",
+    "_RuntimeModelDsZipPath": "Z:\\ds\\exportDS.zip __ LoggerDBSetting 과 중복됨... LoggerDBSetting 에서 읽어서 채울 것.",
     "AutoStartOnSystemPowerUp": true,
     "JwtTokenValidityMinutes": 1440,
     "RuntimePackageCs": "PC",

@@ -9,6 +9,7 @@ using Dual.Web.Server.Auth;
 using Microsoft.Data.Sqlite;
 using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
+using static Engine.Info.DBLoggerORM;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 
@@ -104,10 +105,11 @@ services.AddDevExpressBlazor(options =>
 });
 
 var commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
-commonAppSettings.FillModelId();
+commonAppSettings.LoggerDBSettings.FillModelId();
 var serverSettings =
     conf.GetSection("ServerSettings").Get<ServerSettings>()
-        .Tee(ss => ss.Initialize());
+        .Tee(ss => ss.Initialize(commonAppSettings))
+        ;
 var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 services.AddSingleton(serverGlobals);
 services.AddDsAuth(serverGlobals, conf);

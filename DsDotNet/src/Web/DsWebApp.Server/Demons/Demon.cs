@@ -63,7 +63,8 @@ public partial class Demon : BackgroundService
             ModelCompileInfo mci = new(runtimeModel.SourceDsZipPath, runtimeModel.SourceDsZipPath);
 
             _modelSubscription.Clear();
-            var modelId = 1;     // todo: modelId 수정 필요
+            var loggerDBSettings = serverGlobal.DsCommonAppSettings.LoggerDBSettings;            
+            var modelId = loggerDBSettings.FillModelId();
             var queryCriteria = new QueryCriteria(_serverGlobal.DsCommonAppSettings, modelId, DateTime.Now.Date.AddDays(-1), null);
             var logSetW = DBLogger.InitializeLogReaderWriterOnDemandAsync(queryCriteria, systems, mci, cleanExistingDb:false).Result;
             _modelSubscription.Add(logSetW);
@@ -107,7 +108,7 @@ public partial class Demon : BackgroundService
         try
         {
             await executeAsyncHelper(ct);
-            var connStr = _serverGlobal.DsCommonAppSettings.LoggerDBSettings.ConnectionString;
+            var connStr = $"Data Source={_serverGlobal.DsCommonAppSettings.LoggerDBSettings.ConnectionPath}";
             LoggerDB.StartLogMonitor(connStr, 100, ct);
             LoggerDB.DBLogSubject.Subscribe(log =>
             {

@@ -67,7 +67,6 @@ module DsAddressModule =
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
 
-        
 
         let addr = if addr.IsNullOrEmpty()
                     then failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  
@@ -102,41 +101,40 @@ module DsAddressModule =
             if addr = TextAddrEmpty && not(isSkip)
             then
                 let cnt =
-                    
 
                     match ioType with 
                     | In      -> 
-                                 if sizeBit = 1 
-                                 then
-                                     let ret = getCurrent inDigitCnt sizeBit
-                                     inDigitCnt <- getNext inDigitCnt sizeBit ; ret
-                                 else
+                            if sizeBit = 1 
+                            then
+                                let ret = getCurrent inDigitCnt sizeBit
+                                inDigitCnt <- getNext inDigitCnt sizeBit ; ret
+                            else
 
 
-                                    if target = PlatformTarget.XGI 
-                                    then
-                                        let ret = inAnalogCnt
-                                        inAnalogCnt <- inAnalogCnt+1 ; ret
-                                    else 
-                                        let ret = inAnalogCnt
-                                        inAnalogCnt <-  inAnalogCnt+sizeBit/16 ; ret
+                            if target = PlatformTarget.XGI 
+                            then
+                                let ret = inAnalogCnt
+                                inAnalogCnt <- inAnalogCnt+1 ; ret
+                            else 
+                                let ret = inAnalogCnt
+                                inAnalogCnt <-  inAnalogCnt+sizeBit/16 ; ret
                                  
 
                     | Out     -> 
-                                if sizeBit = 1 
-                                then
-                                    let ret = getCurrent outDigitCnt sizeBit
-                                    outDigitCnt <- getNext outDigitCnt sizeBit ; ret
-                                else
+                        if sizeBit = 1 
+                        then
+                            let ret = getCurrent outDigitCnt sizeBit
+                            outDigitCnt <- getNext outDigitCnt sizeBit ; ret
+                        else
 
 
-                                    if target = PlatformTarget.XGI 
-                                    then
-                                        let ret = outAnalogCnt
-                                        outAnalogCnt <- outAnalogCnt+1 ; ret
-                                    else 
-                                        let ret =  outAnalogCnt 
-                                        outAnalogCnt <-  outAnalogCnt+sizeBit/16 ; ret
+                            if target = PlatformTarget.XGI 
+                            then
+                                let ret = outAnalogCnt
+                                outAnalogCnt <- outAnalogCnt+1 ; ret
+                            else 
+                                let ret =  outAnalogCnt 
+                                outAnalogCnt <-  outAnalogCnt+sizeBit/16 ; ret
                                     
                     
                     

@@ -150,8 +150,12 @@ module internal XgiSymbolsModule =
                     | XGK ->
                         if t.Address = "" then  //XGK 는 무조건 address 가 있어야 한다.
                             t.Address <- TextAddrEmpty
-                        
-                        autoAllocatorAdress t prjParam
+                        if t.Name = "S10_RBT__RBT1_FLOW_home_motionEnd" || t.Name = "HelloDS_S10_RBT_RBT__S10_파트_OFF__startTag"
+                        then
+                            ()
+                        if t.Address = TextAddrEmpty then  
+                            autoAllocatorAdress t prjParam
+
                         getXGXTagInfo prjParam.TargetType t.Address t.Name
 
                     | _ ->

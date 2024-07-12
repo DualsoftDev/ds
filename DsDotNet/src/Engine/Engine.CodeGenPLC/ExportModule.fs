@@ -115,7 +115,7 @@ module ExportModule =
         use _ = logTraceEnabler()
         let globalStorage = new Storages()
         let localStorage = new Storages()
-        let pous = CpuLoaderExt.LoadStatements(system, globalStorage, plcType)
+        let pous = CpuLoaderExt.LoadStatements(system, globalStorage, plcType).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
         let startMemory = DsAddressModule.getCurrentMemoryIndex();
 
@@ -136,7 +136,7 @@ module ExportModule =
                 globalStorage.Remove(tagKV.Key)|>ignore
             )
 
-        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter
+        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj (startMemory/8+1)  startTimer startCounter
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)
 

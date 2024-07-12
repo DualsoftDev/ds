@@ -108,7 +108,7 @@ module ConvertCpuDsSystem =
             
          
         member private x.GenerationCallAlarmMemory()  = 
-            let calls = x.GetAlarmCalls()
+            let calls = x.GetAlarmCalls().Distinct() 
 
             for call in calls do
 
@@ -129,13 +129,13 @@ module ConvertCpuDsSystem =
          
          
         member private x.GenerationRealAlarmMemory()  = 
-            for real in x.GetRealVertices() |> Seq.sortBy (fun c -> c.Name) do
+            for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> VertexMReal
                 rm.ErrGoingOrigin.Address <- getMemory rm.Name (getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
         member  x.GenerationRealActionMemory()  = 
-            for real in x.GetRealVertices() |> Seq.sortBy (fun c -> c.Name) do
+            for real in x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> VertexMReal
                 rm.ScriptStart.Address    <- getMemory rm.Name (getTarget(x))
                 rm.MotionStart.Address    <- getMemory rm.Name (getTarget(x))
@@ -167,7 +167,7 @@ module ConvertCpuDsSystem =
                             )
 
         member private x.GenerationRealHMIMemory()  = 
-                    x.GetVerticesOfRealOrderByName()
+                    x.GetVerticesOfRealOrderByName().Distinct() 
                     |> Seq.iter (fun real ->
                             let name = $"{real.Flow.Name}_{real.Name}"  
                             let rm =  real.TagManager :?> VertexMReal
@@ -185,7 +185,7 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationTaskDevIOM() =
 
-            let jobDevices =x.GetDevicesSkipEmptyAddress()
+            let jobDevices =x.GetDevicesSkipEmptyAddress().Distinct() 
             
             for dev, call in jobDevices do
                 if  dev.InAddress <> TextSkip then

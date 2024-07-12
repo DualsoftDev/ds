@@ -62,6 +62,7 @@ module MemoryAllocator =
 
         let rec getAddress (reqMemType: string) : string =
             let reqMemType = getMemType reqMemType  
+     
 
             match reqMemType with
             | "X" ->
@@ -147,7 +148,9 @@ module MemoryAllocator =
                         else
                             failwithlog "ERROR"
 
+#if DEBUG
                     logDebug "Address %s allocated" address
+#endif
                     address
             | _ -> failwithlog "ERROR"
 

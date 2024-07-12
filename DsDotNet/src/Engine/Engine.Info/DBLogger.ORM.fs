@@ -69,6 +69,10 @@ module DBLoggerORM =
         let Start = "start"
         let End = "end"
 
+        let ModelRuntime = "modelRuntime"
+        let ModelFilePath = "modelFilePath"
+        let ModelFileLastModfied = "modelFileLastModfied"
+
 
     let sqlCreateSchema =
         $"""
@@ -390,18 +394,30 @@ type LoggerDBSettingsExt =
         use tr = conn.BeginTransaction()
         let tableExists = conn.IsTableExistsAsync(Tn.Model).Result
 
-        let path = loggerDBSettings.ModelFilePath
-        let runtime = loggerDBSettings.DbWriter
+        let mutable path = loggerDBSettings.ModelFilePath
+        let mutable runtime = loggerDBSettings.DbWriter
+        let mutable lastModified = DateTime.MaxValue
+        let lastModelInfoSpecified = path.NonNullAny() && runtime.NonNullAny()
+
 
         if not tableExists then
-            if (path.IsNullOrEmpty() || runtime.IsNullOrEmpty()) then
-                failwith "ModelFilePath and DbWriter must be set for empty database!"
+            if not lastModelInfoSpecified then
+                failwithlog "ModelFilePath and DbWriter must be set for empty database!"
 
             // schema 새로 생성
             conn.ExecuteSilentlyAsync(sqlCreateSchema, tr).Wait()
 
+        if lastModelInfoSpecified then
+            lastModified <- System.IO.FileInfo(path).LastWriteTime
+        else
+            let propDic = conn.Query<ORMProperty>($"SELECT * FROM [{Tn.Property}]") |> map (fun p -> p.Name, p.Value) |> Tuple.toDictionary
+            path <- propDic[PropName.ModelFilePath]
+            lastModified <- propDic[PropName.ModelFileLastModfied] |> DateTime.Parse
+            runtime <- propDic[PropName.ModelRuntime]
+            if System.IO.FileInfo(path).LastWriteTime <> lastModified then
+                failwith "Model file has been changed. Please update the model file path."
+            ()
 
-        let lastModified = System.IO.FileInfo(path).LastWriteTime
         let param = {|Path = path; Runtime = runtime; LastModified = lastModified|}
         let optModel =
             let sql =

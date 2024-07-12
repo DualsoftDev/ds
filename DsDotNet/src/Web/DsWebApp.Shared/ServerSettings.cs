@@ -9,11 +9,14 @@ namespace DsWebApp.Shared;
 
 public class ServerSettings
 {
+    public string ServiceFolder { get; set; }
     public bool UseHttpsRedirection { get; set; }
     public bool AutoStartOnSystemPowerUp { get; set; }    
     public ClientEnvironment ClientEnvironment { get; set; }
     public DSCommonAppSettings CommonAppSettings { get; set; }
-    public string RuntimeModelDsZipPath { get; set; }
+    public string RuntimeModelDsZipPath {
+        get => CommonAppSettings?.LoggerDBSettings?.ModelFilePath;
+        set => CommonAppSettings.LoggerDBSettings.ModelFilePath = value; }
     public string ServerUrl { get; set; }
     public double JwtTokenValidityMinutes { get; set; }
 
@@ -42,7 +45,8 @@ public static class ServerSettingsExtensions
         serverSettings.CommonAppSettings = commonAppSettings;
         LoggerDBSettings loggerDBSettings = commonAppSettings.LoggerDBSettings;
         serverSettings.RuntimeModelDsZipPath = loggerDBSettings.ModelFilePath;
-        Directory.CreateDirectory(Path.GetDirectoryName(serverSettings.RuntimeModelDsZipPath));
+        if (serverSettings.RuntimeModelDsZipPath.NonNullAny())
+            Directory.CreateDirectory(Path.GetDirectoryName(serverSettings.RuntimeModelDsZipPath));
 
         if (loggerDBSettings.ConnectionPath.IsNullOrEmpty())
             throw new Exception("LoggerDBSettings.ConnectionPath is not set.");

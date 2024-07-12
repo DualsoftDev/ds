@@ -7,12 +7,14 @@
   },
   "AllowedHosts": "*",
   "ServerSettings": {
+    "ServiceFolder": "z:\\ds",
     "UseHttpsRedirection": true,
     "_RuntimeModelDsZipPath": "Z:\\ds\\exportDS.zip __ LoggerDBSetting 과 중복됨... LoggerDBSetting 에서 읽어서 채울 것.",
     "AutoStartOnSystemPowerUp": true,
     "JwtTokenValidityMinutes": 1440,
-    "RuntimePackageCs": "PC",
+    "_RuntimePackageCs": "PCSIM",
     "_RuntimePackageCs_Samples": [ "PC", "PLC", "LightPC", "LightPLC", "Simulation", "Developer" ],
+    "_RuntimePackageCs 공란으로 둘 경우, 최종값으로 읽어서 채움": "",
     "ClientEnvironment": {
       "IsEnableDebug": "true",
       "IsShowDemo": "true",

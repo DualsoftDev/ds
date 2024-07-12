@@ -10,6 +10,7 @@ using Engine.Core;
 using System.ServiceModel.Channels;
 using Dual.Common.Base.FS;
 using Newtonsoft.Json;
+using DsWebApp.Server.Common;
 
 namespace DsWebApp.Server.Demons;
 public partial class Demon : BackgroundService
@@ -108,12 +109,23 @@ public partial class Demon : BackgroundService
         try
         {
             await executeAsyncHelper(ct);
-            var connStr = $"Data Source={_serverGlobal.DsCommonAppSettings.LoggerDBSettings.ConnectionPath}";
-            LoggerDB.StartLogMonitor(connStr, 100, ct);
-            LoggerDB.DBLogSubject.Subscribe(log =>
+
+            var loggerDBSettings = _serverGlobal.DsCommonAppSettings.LoggerDBSettings;
+            if (loggerDBSettings.ModelId >= 0)
             {
-                _hubContextDb.Clients.All.SendAsync(SK.S2CNLogChanged, log.Serialize());
-            });
+                var connStr = $"Data Source={loggerDBSettings.ConnectionPath}";
+                LoggerDB.StartLogMonitor(connStr, 100, ct);
+                LoggerDB.DBLogSubject.Subscribe(log =>
+                {
+                    _hubContextDb.Clients.All.SendAsync(SK.S2CNLogChanged, log.Serialize());
+                });
+            }
+            else
+            {
+                // 강제로 ready 상태로 변경
+                _serverGlobal.ServerReady = true;
+            }
+
         }
         catch (Exception ex)
         {

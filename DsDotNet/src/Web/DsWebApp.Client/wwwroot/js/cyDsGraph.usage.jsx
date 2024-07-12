@@ -30,6 +30,7 @@ cy.$('#SIDE.MES.MES_1').style('shape', 'ellipse')
 cy.$('#SIDE.MES.MES_1').style('color')
 cy.$('#SIDE.MES.MES_1').style('background-color', 'yellow')
 cy.$('#SIDE.MES.MES_1').style('border-width', '3px')
+cy.$('.Flow').style()
 cy.$('node.Flow').descendants().style('background-color', 'green')
 cy.fit(cy.$(':visible'))
 

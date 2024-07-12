@@ -1,6 +1,10 @@
-using System.Text;
+/*
+ * WebServer 의 api/model/graph Api 에 의해서 호출된다.
+ */
+
 using Dual.Common.Core;
 using Engine.Core;
+using static Engine.Core.DsConstants;
 using static Engine.Core.CoreModule;
 using static DsWebApp.Shared.CyGraphEx;
 
@@ -14,6 +18,9 @@ public interface ICyItem
     string id { get; }
 }
 
+/// <summary>
+/// FQDN 을 uniq 한 숫자 id 로 변환/관리
+/// </summary>
 public class FqdnIdManager
 {
     Dictionary<string, string> _fqdn2IdDic = new();
@@ -25,6 +32,7 @@ public class FqdnIdManager
 
         if (_fqdn2IdDic.TryGetValue(fqdn, out string id))
             return id;
+
         var newId = _idCounter++.ToString();
         _fqdn2IdDic.Add(fqdn, newId);
         return newId;
@@ -86,7 +94,11 @@ public class CyEdge : CyItem
     public CyEdge(FqdnIdManager idManager, Edge edge)
         : this( idManager, edge.Source.QualifiedName, edge.Target.QualifiedName)
     {
-        type = edge.EdgeType.ToString();
+        var et = edge.EdgeType;
+        if (!et.IsOneOf(EdgeType.Start, EdgeType.Reset))
+            throw new Exception("Check.  Not Start or Reset edge.");
+
+        type = et.ToString();
     }
 
     CyEdge(FqdnIdManager idManager, string src, string tgt)
@@ -141,6 +153,10 @@ public static class CyGraphEx
 {
     public static string OB = "{";
     public static string CB = "}";
+
+    /// <summary>
+    /// Brace ('{', '}') 로 감싸기
+    /// </summary>
     public static string Embrace(string s) => @$"{OB} {s} {CB}";
     public static string Serialize(this CyData data) => data.data.Serialize();
 

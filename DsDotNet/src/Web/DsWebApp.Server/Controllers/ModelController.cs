@@ -181,6 +181,8 @@ public static class CytoVertexExtension
         }
     }
 
+    /* Flow 나 Real 의 ModelingEdges 를 사용할 경우, 현재 Group 정의된 edge(화살표 끝점없이 직선만으로 연결된 group) 정보 누락. e.g "A > { B, C } > D"
+     */
     public static IEnumerable<CyEdge> CollectEdges(this IVertex vertex, FqdnIdManager idManager)
     {
         switch (vertex)
@@ -189,18 +191,15 @@ public static class CytoVertexExtension
                 foreach (var c in s.Flows.SelectMany(f => f.CollectEdges(idManager)))
                     yield return c;
                 break;
+
             case Flow f:
-                if (f.Name == "MES")
-                {
-                    var xxx = f.Graph.Edges.Select(e => new CyEdge(idManager, e)).ToArray();
-                    Console.Write("");
-                }
                 foreach (var c in f.Graph.Edges.Select(e => new CyEdge(idManager, e)))
                     yield return c;
 
                 foreach (var c in f.Graph.Vertices.SelectMany(v => v.CollectEdges(idManager)))
                     yield return c;
                 break;
+
             case Real r:
                 foreach (var c in r.Graph.Edges.Select(e => new CyEdge(idManager, e)))
                     yield return c;

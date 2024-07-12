@@ -59,8 +59,13 @@ Object.keys(edgeGroups).forEach(key => {
             var c = theEdge.classes
             var isForward = edge.data.source === theEdge.data.source && edge.data.target === theEdge.data.target
             switch (edge.classes) {
-                case 'Reset': theEdge.classes = c + (isForward ? ' Reset' : ' ReverseReset'); break;
-                default: break;
+                case 'Reset':
+                    console.log(`updating ${theEdge.classes} += ${isForward ? ' Reset' : ' ReverseReset'}`)
+                    theEdge.classes = theEdge.classes + (isForward ? ' Reset' : ' ReverseReset');
+                    break;
+                default:
+                    console.error(`Unknown edge class: ${edge.classes}`);
+                    break;
             }
             console.log(edge);
         });
@@ -168,29 +173,48 @@ var cy = window.cy = cytoscape({
         {
             selector: 'edge',
             css: {
+                'line-style': 'solid',
                 'curve-style': 'unbundled-bezier',
                 'target-arrow-shape': 'triangle',
+                'target-arrow-color': 'navy',
+                'source-arrow-color': 'navy',
+            }
+        },
+        {
+            selector: 'edge.Start',
+            css: {
                 'target-arrow-color': 'navy',
             }
         },
         {
             selector: 'edge.Reset',
             css: {
-                'line-color': 'green',
-                'target-arrow-shape': 'circle',
-                'target-arrow-color': 'red',
                 'line-style': 'dashed',     // 'solid', 'dotted',
-                // 'line-dash-offset': 24,
-                // 'line-dash-pattern': [6, 3],
+            //    'line-color': 'green',
+            //    'target-arrow-shape': 'circle',
+            //    'target-arrow-color': 'red',
+            //    'line-style': 'dashed',     // 'solid', 'dotted',
             }
         },
         {
-            selector: 'edge.ReverseReset',
+            selector: 'edge.Start.ReverseReset',
             css: {
-                'line-color': 'green',
                 'source-arrow-shape': 'circle',
-                'source-arrow-color': 'red',
-                'line-style': 'dashed',     // 'solid', 'dotted',
+                'target-arrow-shape': 'triangle',
+            }
+        },
+        {
+            selector: 'edge.Reset.ReverseReset',
+            css: {
+                'source-arrow-shape': 'triangle',
+                'target-arrow-shape': 'triangle',
+            }
+        },
+        {
+            selector: 'edge.Start.Reset.ReverseReset',
+            css: {
+                'source-arrow-shape': 'circle',
+                'target-arrow-shape': 'triangle',
             }
         },
     ],

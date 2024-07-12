@@ -110,7 +110,7 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
             multiEdgesGroups.Select(gr =>
             {
                 var multiples = gr.ToArray();
-                var classes = gr.Select(e => e.type).JoinString(", ");
+                var classes = gr.Select(e => e.type).JoinString(" ");   // cytoscape 의 class 구분자는 ' '
                 var edge = new CyEdge();
                 var m0 = multiples[0];
                 edge.Set(idManager, m0.fqdn, m0.content, m0.source, m0.target, classes);

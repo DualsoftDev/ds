@@ -119,6 +119,8 @@ public class CyEdge : CyItem
     public override string Serialize()
     {
         var data = $"id: '{id}', source: '{source}', target: '{target}'";
+        if (type.Contains(","))
+            Console.Write("");
         data = $"data: {Embrace(data)}, classes: '{type}'";
         return Embrace(data);
     }

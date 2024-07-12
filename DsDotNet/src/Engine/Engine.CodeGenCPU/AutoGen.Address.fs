@@ -10,17 +10,20 @@ open PLC.CodeGen.Common
 module DsAddressModule =
    
  
-    let mutable inCnt = 0
-    let mutable outCnt = 0
+    let mutable inDigitCnt = 0
+    let mutable inAnalogCnt = 0
+    let mutable outDigitCnt = 0
+    let mutable outAnalogCnt = 0
     let mutable memoryCnt = InitStartMemory
     let setMemoryIndex(index:int) = memoryCnt <- index;
     let getCurrentMemoryIndex() = memoryCnt;
     let InitializeIOMemoryIndex () =
                 memoryCnt <- InitStartMemory
-                inCnt <- 0
-                outCnt <- 0
+                inDigitCnt <- 0
+                inAnalogCnt <- 0
+                outDigitCnt <- 0
+                outAnalogCnt <- 0
 
-    
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
     let getPCIOMTextBySize (device:string, offset: int, bitSize:int) : string =
@@ -102,10 +105,42 @@ module DsAddressModule =
                     
 
                     match ioType with 
-                    | In      -> let ret = getCurrent inCnt sizeBit
-                                 inCnt <- getNext inCnt sizeBit ; ret
-                    | Out     -> let ret = getCurrent outCnt sizeBit 
-                                 outCnt <- getNext outCnt sizeBit   ;ret
+                    | In      -> 
+                                 if sizeBit = 1 
+                                 then
+                                     let ret = getCurrent inDigitCnt sizeBit
+                                     inDigitCnt <- getNext inDigitCnt sizeBit ; ret
+                                 else
+
+
+                                    if target = PlatformTarget.XGI 
+                                    then
+                                        let ret = inAnalogCnt
+                                        inAnalogCnt <- inAnalogCnt+1 ; ret
+                                    else 
+                                        let ret = inAnalogCnt
+                                        inAnalogCnt <-  inAnalogCnt+sizeBit/16 ; ret
+                                 
+
+                    | Out     -> 
+                                if sizeBit = 1 
+                                then
+                                    let ret = getCurrent outDigitCnt sizeBit
+                                    outDigitCnt <- getNext outDigitCnt sizeBit ; ret
+                                else
+
+
+                                    if target = PlatformTarget.XGI 
+                                    then
+                                        let ret = outAnalogCnt
+                                        outAnalogCnt <- outAnalogCnt+1 ; ret
+                                    else 
+                                        let ret =  outAnalogCnt 
+                                        outAnalogCnt <-  outAnalogCnt+sizeBit/16 ; ret
+                                    
+                    
+                    
+                    
                     | Memory  -> let ret = getCurrent memoryCnt sizeBit  
                                  memoryCnt <- getNext memoryCnt sizeBit; ret
                     | NotUsed -> failwithf $"{ioType} not support"
@@ -175,15 +210,33 @@ module DsAddressModule =
                     |In |Out -> 
                         let iSlot, sumBit =  getSlotInfoIEC(ioType, cnt)
 
-                        if target = PlatformTarget.XGI && ioType = IOType.In
+                        if target = PlatformTarget.XGI 
                         then
-                            getXgiIOTextBySize("I", cnt ,sizeBit, iSlot, sumBit)
-                        elif target = PlatformTarget.XGI  && ioType = IOType.Out 
-                        then
-                            getXgiIOTextBySize("Q", cnt ,sizeBit, iSlot, sumBit)
+                            if  ioType = IOType.In 
+                            then
+                                getXgiIOTextBySize("I", cnt ,sizeBit, iSlot, sumBit)
+
+                            elif ioType = IOType.Out
+                            then
+                                getXgiIOTextBySize("Q", cnt ,sizeBit,  iSlot, sumBit)
+                            else 
+                                failwithf $"Error {target} not support"
+
                         elif target = PlatformTarget.XGK
                         then
-                            getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), dataType = DuBOOL)
+                            if sizeBit = 1
+                            then
+                                getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), dataType = DuBOOL)
+                            else 
+                                if ioType = IOType.In 
+                                then
+                                    getXgkTextByType("P", cnt, dataType = DuBOOL)
+                                elif ioType = IOType.Out
+                                then
+                                    getXgkTextByType("P", cnt+1024, dataType = DuBOOL)  //test ahn 임시 Q 는 1024 시프트
+                                else 
+                                    failwithf $"Error {target} not support"
+                        
                         elif target = PlatformTarget.WINDOWS then
                             if ioType = IOType.In
                             then getPCIOMTextBySize("I", cnt ,sizeBit)

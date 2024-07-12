@@ -62,8 +62,9 @@ module LSEAddressPattern =
         if isBool
         then getXgkBitText(device, offset)
         else 
-            if offset%8 = 0 then getXgkWordText(device, offset/8)
-            else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
+            getXgkWordText(device, offset+1024)  //test ahn  임시로 아날로그는 1024 시프트해서 
+           //if offset%8 = 0 then getXgkWordText(device, (offset/8)+1024)  
+           // else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
 
             
     let getXgKTextByTag (device:LsTagInfo) : string =
@@ -71,13 +72,13 @@ module LSEAddressPattern =
 
     let getXgiIOTextBySize (device:string, offset: int, bitSize:int, iSlot:int, sumBit:int) : string =
         if bitSize = 1
-        then $"%%{device}X0.{iSlot}.{(offset-sumBit) % 64}" 
+        then $"%%{device}X0.{iSlot}.{(offset-sumBit) % 64}"  //test ahn 아날로그 base 1로 일단 고정
         else 
             match bitSize with  //test ahn  xgi 규격확인
-            | 8 -> $"%%{device}B{iSlot}"
-            | 16 -> $"%%{device}W{iSlot}"
-            | 32 -> $"%%{device}D{iSlot}"
-            | 64 -> $"%%{device}L{iSlot}"
+            | 8 -> $"%%{device}B{offset+1024}"
+            | 16 -> $"%%{device}W{offset+1024}"
+            | 32 -> $"%%{device}D{offset+1024}"
+            | 64 -> $"%%{device}L{offset+1024}"
             | _ -> failwithf $"Invalid size :{bitSize}"
             
 

@@ -104,20 +104,22 @@ type TagKindExt =
         |EventHwSys     ( _, target, _) -> target |> box
         |EventVariable  ( _, target, _) -> target |> box
 
-      
     [<Extension>]
-    static member GetTagToText(x:TagDS) =
-        let getText(tag:IStorage) (_obj:INamed) _kind = $"{tag.Name}({tag.BoxedValue})"
+    static member GetTagContents(x:TagDS) =
         match x with
-        |EventSystem    (tag, obj, kind) -> getText tag obj kind
-        |EventFlow      (tag, obj, kind) -> getText tag obj kind
-        |EventVertex    (tag, obj, kind) -> getText tag obj kind
-        |EventApiItem   (tag, obj, kind) -> getText tag obj kind
-        |EventTaskDev   (tag, obj, kind) -> getText tag obj kind
-        |EventHwSys     (tag, obj, kind) -> getText tag obj kind
-        |EventVariable  (tag, obj, kind) -> getText tag obj kind
+        |EventSystem    (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        |EventFlow      (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        |EventVertex    (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        |EventApiItem   (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        |EventTaskDev   (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        |EventHwSys     (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        |EventVariable  (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
         
-    
+     
+    [<Extension>]
+    static member GetTagToText(x:TagDS) = 
+        let tagName, value, _objName, _kind = x.GetTagContents()     
+        $"{tagName}({value})"
 
     [<Extension>]
     static member GetSystem(x:TagDS) =

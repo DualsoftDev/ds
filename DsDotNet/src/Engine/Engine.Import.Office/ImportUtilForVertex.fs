@@ -81,8 +81,8 @@ module ImportUtilVertex =
             else
                 let flow, job, apiName = node.CallFlowNJobNApi
 
-                match node.JobParam.JobMulti,  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{flow}{TextDeviceSplit}{job.Last()}") with
-                | Single, Some dev -> 
+                match   mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{flow}{TextDeviceSplit}{job.Last()}") with
+                |  Some dev -> 
                     getCallFromLoadedSys mySys dev node apiName parentWrapper
                 | _  ->
                     let callParams = {

@@ -295,8 +295,7 @@ module CoreExtensionModule =
 
 
         member x.TimeStd = x.DsTime.STD
-        member x.Motion = x.DsTime.Motion 
-        member x.Script = x.DsTime.Script
+       
         member x.NoneAction = x.Motion.IsNone &&  x.Script.IsNone 
 
         member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd  

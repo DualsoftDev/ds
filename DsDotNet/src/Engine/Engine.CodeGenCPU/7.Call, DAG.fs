@@ -28,12 +28,15 @@ type VertexManager with
                             <||>
                 (call.End <&&> mop)
             else
-                (call.EndPlan <&&> v._sim.Expr)
-                            <||>
-                (call.End <&&> !@v._sim.Expr)
+                call.End 
 
 
         let parentReal = call.Parent.GetCore() :?> Vertex
+        let jobCoins = call.System.GetVerticesOfCoins().OfType<Call>()
+        let rstMemos = jobCoins.SelectMany(fun coin->coin.MutualResetCoins.Select(fun c->c.VC.MM))
+        
+        
+        let sets = sets <&&> !@rstMemos.ToOrElseOff()
         let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
 
         
@@ -89,16 +92,17 @@ type VertexManager with
                     let setEnd = call.PEs.ToAndElseOn() <&&> call.End
 
                     //if setEnd Pulse Mode
-                  
+
                     if RuntimeDS.Package.IsPLCorPLCSIM() 
                     then
                         yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, getFuncName() )
                     elif RuntimeDS.Package.IsPCorPCSIM()
                     then 
-                        yield! (setEnd, coin.GPR)  --^ (coin.GP, getFuncName()) 
+                        yield! (setEnd, coin.GPR, coin.GPH)  --^ (coin.GP, getFuncName()) 
                         yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
 
                     ///if setEnd  Mode
+
                     //yield (setStart<&&>setEnd, rsts) ==| (coin.ET, getFuncName() )
         ]
 

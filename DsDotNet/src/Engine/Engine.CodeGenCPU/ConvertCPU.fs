@@ -143,7 +143,7 @@ module ConvertCPU =
 
                 if coins.any()
                 then
-                    yield am.A1_ApiSet(s, td)
+                    yield! am.A1_ApiSet(td)
                     yield am.A3_SensorLinking(s, coins.OfType<Call>())
                     yield am.A4_SensorLinked(s, coins.OfType<Call>())
         ]

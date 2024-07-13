@@ -218,48 +218,6 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        //private static void HandleActionEvent(EventTaskDev ea)
-        //{
-        //    if (!DicTaskDevTag.ContainsKey(ea.Tag)) return;
-
-        //    var viewNodes = DicTaskDevTag[ea.Tag];
-        //    var ucView = UcViews.FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
-        //    viewNodes.Iter(n =>
-        //    {
-        //        n.DisplayNodes.Iter(node =>
-        //        {
-        //            if (!IsThisSystem(node)) return;
-
-        //            var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
-
-        //            switch (ea.Tag.TagKind)
-        //            {
-        //                case (int)TaskDevTag.actionIn:
-        //                    {
-        //                        var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
-        //                        n.LampInput = on;
-        //                        ucView.UpdateInValue(node, on);
-        //                        break;
-        //                    }
-        //                case (int)TaskDevTag.actionOut:
-        //                    {
-        //                        var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
-        //                        n.LampOutput = on;
-        //                        ucView.UpdateOutValue(node, on);
-        //                        break;
-        //                    }
-        //                case (int)TaskDevTag.planEnd:
-        //                    {
-        //                        var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
-        //                        n.LampPlanEnd = on;
-        //                        ucView.UpdatePlanEndValue(node, on);
-        //                        break;
-        //                    }
-        //            }
-        //        });
-        //    });
-        //}
-
 
         private static void HandleTaskDevEvent(EventTaskDev td)
         {

@@ -668,9 +668,26 @@ module ImportU =
             mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None)
             mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None)
             mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
+            
+        [<Extension>]
+        static member PreCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
+
+      
+            (* Multi Call Api별 갯수 동일 체크*)
+            let calls = doc.Nodes
+                                .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
+                                .GroupBy(fun n -> $"{n.FlowName}.{n.CallDevName}")
+
+            calls.Iter(fun call -> 
+                let callEachCounts = call.Select(fun f->f.JobParam.DeviceCount)
+                if callEachCounts.Distinct().Count() > 1
+                then
+                    let errNode = call.Select(fun f->f).First() 
+                    errNode.Shape.ErrorShape(ErrID._72, errNode.PageNum)
+            )
 
         [<Extension>]
-        static member ValidatePPTSystem(doc: pptDoc, sys: DsSystem) =
+        static member PostCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
 
             (* Root Call 연결 없음 체크 *)
             let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
@@ -682,17 +699,7 @@ module ImportU =
                             then
                                 n.Shape.ErrorShape(ErrID._71, n.PageNum)
                 )
-            (* Multi Call Api별 갯수 동일 체크*)
-            let calls = doc.Nodes
-                                .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
-                                .GroupBy(fun n -> $"{n.FlowName}.{n.CallName}")
-            calls.Iter(fun call -> 
-                let callEachCounts = call.Select(fun f->f.JobParam.DeviceCount)
-                if callEachCounts.Distinct().Count() > 1
-                then
-                    let errNode = call.Select(fun f->f).First() 
-                    errNode.Shape.ErrorShape(ErrID._72, errNode.PageNum)
-            )
+          
 
                                 
            
@@ -705,8 +712,8 @@ module ImportU =
                 match mySys.TryFindRealVertex(prop.FQDN.[0], prop.FQDN.[1]) with
                 | Some real ->
                     match prop.Type with
-                    | "Motion" -> real.DsTime.Motion <- Some prop.Value
-                    | "Script" -> real.DsTime.Script <- Some prop.Value
+                    | "Motion" -> real.Motion <- Some prop.Value
+                    | "Script" -> real.Script <- Some prop.Value
                     | _ -> failwithf "Error: %s Type not found" prop.Type
                 | None -> 
                     failwithf "Error: Real not found: %s" (String.concat "." prop.FQDN)
@@ -728,6 +735,8 @@ module ImportU =
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
             
+            doc.PreCheckPPTSystem(sys)
+
             doc.MakeFlows(sys) |> ignore
 
             //자동생성
@@ -757,6 +766,6 @@ module ImportU =
             doc.MakeRealProperty(sys)
 
 
-
-            doc.ValidatePPTSystem(sys)
+            
+            doc.PostCheckPPTSystem(sys)
             doc.IsBuilded <- true

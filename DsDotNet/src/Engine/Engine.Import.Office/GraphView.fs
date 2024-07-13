@@ -143,7 +143,7 @@ module rec ViewModule =
                 match coreVertex.Value with
                 | :? Alias as a ->
                     if a.IsOtherFlowRealAlias || not(a.IsSameFlow)
-                    then $"{safeName}{autoPresName}{a.Name};{vKey}"  
+                    then $"{safeName}{autoPresName}{a.GetPure().ParentNPureNames.Combine()};{vKey}"  
                     else  $"{safeName}{autoPresName}{name};{vKey}"
                 | _ -> $"{safeName}{autoPresName}{x.PureVertex.Value.Name};{vKey}"
             else

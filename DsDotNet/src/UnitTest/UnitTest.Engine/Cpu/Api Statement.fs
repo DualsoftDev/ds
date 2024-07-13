@@ -16,7 +16,7 @@ type Spec01_PortStatement() =
     member __.``A1_ApiSet`` () =
         for td, coins in t.TaskDevCoinsSet do
             if coins.Any() then
-                getAM(td.ApiItem).A1_ApiSet(t.Sys, td) |> doCheck
+                getAM(td.ApiItem).A1_ApiSet(td) |> doChecks
     [<Test>]
     member __.``A2_ApiEnd`` () =
         for api, coins in t.ApiCoinsSet do

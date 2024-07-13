@@ -17,7 +17,10 @@ module ApiTagManagerModule =
             let pv:IStorage = createPlanVar stg name DuBOOL false apiItem (int apiItemTag) apiItem.ApiSystem 
             pv :?> PlanVar<bool>
             
-        let ps = cpv ApiItemTag.apiItemSet
+        let apiItemSet = cpv ApiItemTag.apiItemSet
+        let apiItemSetPusle = cpv ApiItemTag.apiItemSetPusle
+        let apiItemSetPusleRelay = cpv ApiItemTag.apiItemSetPusleRelay
+        let apiItemSetPusleHold = cpv ApiItemTag.apiItemSetPusleHold
         let pe = cpv ApiItemTag.apiItemEnd
         let sensorLinking = cpv ApiItemTag.sensorLinking
         let sensorLinked = cpv ApiItemTag.sensorLinked
@@ -29,7 +32,10 @@ module ApiTagManagerModule =
 
         member _.GetApiTag (vt:ApiItemTag) :IStorage =
             match vt with 
-            | ApiItemTag.apiItemSet            -> ps  :> IStorage
+            | ApiItemTag.apiItemSet             -> apiItemSet  :> IStorage
+            | ApiItemTag.apiItemSetPusle        -> apiItemSetPusle  :> IStorage
+            | ApiItemTag.apiItemSetPusleRelay   -> apiItemSetPusleRelay  :> IStorage
+            | ApiItemTag.apiItemSetPusleHold    -> apiItemSetPusleHold  :> IStorage
             | ApiItemTag.apiItemEnd            -> pe  :> IStorage
             | ApiItemTag.sensorLinking         -> sensorLinking  :> IStorage
             | ApiItemTag.sensorLinked          -> sensorLinked  :> IStorage
@@ -38,7 +44,10 @@ module ApiTagManagerModule =
 
         member _.ApiItem   = apiItem
     
-        member _.APISET   = ps
+        member _.APISET   = apiItemSet
+        member _.ApiItemSetPusle   = apiItemSetPusle
+        member _.ApiItemSetPusleRelay   = apiItemSetPusleRelay
+        member _.ApiItemSetPusleHold   = apiItemSetPusleHold
         member _.APIEND   = pe
         member _.SL1   = sensorLinking
         member _.SL2   = sensorLinked

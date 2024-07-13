@@ -64,7 +64,7 @@ type VertexManager with
 
     member v.F4_CallEndInFlow() =
         let sets =
-            let callExpr = v._sim.Expr <&&> v.SF.Expr <&&> !@v.RF.Expr
+            let callExpr = v.SF.Expr <&&> !@v.RF.Expr
             match v.Vertex  with
             | :? Call as call ->  
                 if   call.IsOperator

@@ -877,13 +877,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let fqdnPath = getMotions listMotionCtx
             for fqdn, path in fqdnPath do
                 let real = (tryFindSystemInner system fqdn).Value :?> Real
-                real.DsTime.Motion <- path|>Some
+                real.Motion <- path|>Some
 
         let fillScripts (system: DsSystem) (listScriptCtx: List<dsParser.ScriptsBlockContext>) =
             let fqdnPath = getScripts listScriptCtx
+
             for fqdn, script in fqdnPath do
                 let real = (tryFindSystemInner system fqdn).Value :?> Real
-                real.DsTime.Script <- script|>Some
+                real.Script <- script|>Some
 
         let fillProperties (x: DsParserListener) (ctx: PropsBlockContext) =
             let theSystem = x.TheSystem

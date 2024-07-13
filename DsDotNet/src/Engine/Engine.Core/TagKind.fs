@@ -160,44 +160,56 @@ module TagKindList =
     | dummyCoinRTs              = 11033
     | dummyCoinETs              = 11034
 
-    | goingPulse                = 11038
-    | goingPulseRelay           = 11039
+    | goingPulse                = 11037
+    | goingPulseRelay           = 11038
+    | goingPulseHold            = 11039
 
     | callCommandPulse          = 11040
     | callCommandPulseRelay     = 11041
-    | callCommandEnd            = 11042
-    | callOperatorValue         = 11043
+    | callCommandPulseHold      = 11042
     
-    | scriptStart               = 11044
-    | scriptEnd                 = 11045
-    | scriptRelay               = 11046
+    | callCommandEnd            = 11043
+    | callOperatorValue         = 11044
+    
+    | scriptStart               = 11045
+    | scriptEnd                 = 11046
+    | scriptRelay               = 11047
 
-    | motionStart               = 11047
-    | motionEnd                 = 11048
-    | motionRelay               = 11049
+    | motionStart               = 11048
+    | motionEnd                 = 11049
+    | motionRelay               = 11050
     
-    | timeStart                 = 11050
-    | timeEnd                   = 11051
-    | timeRelay                 = 11052
+    | timeStart                 = 11051
+    | timeEnd                   = 11052
+    | timeRelay                 = 11053
 
     | txErrOnTimeShortage       = 11060
     | txErrOnTimeOver           = 11061
     | txErrOffTimeShortage      = 11062
     | txErrOffTimeOver          = 11063
-    | rxErrShort                = 11064
-    | rxErrShortRising          = 11065
-    | rxErrOpen                 = 11066
-    | rxErrOpenRising           = 11067
+    | rxErrShort                = 11070
+    | rxErrShortRising          = 11071
+    | rxErrShortRisingRelay     = 11072
+    ///pulse 1scan 지연용도
+    | rxErrShortRisingHold      = 11073
+    | rxErrOpen                 = 11074
+    | rxErrOpenRising           = 11075
+    | rxErrOpenRisingRelay      = 11076
+    ///pulse 1scan 지연용도
+    | rxErrOpenRisingHold       = 11077
 
-    | workErrOriginGoing        = 11070
+    | workErrOriginGoing        = 11080
 
     /// 12000 ~ 12999
     [<Flags>]
     type ApiItemTag =
     | apiItemSet                = 12000
-    | apiItemEnd                = 12002
-    | sensorLinking             = 12003
-    | sensorLinked              = 12004
+    | apiItemSetPusle           = 12001
+    | apiItemSetPusleRelay      = 12002
+    | apiItemSetPusleHold       = 12003
+    | apiItemEnd                = 12005
+    | sensorLinking             = 12006
+    | sensorLinked              = 12007
 
     /// 14000 ~ 14999
     [<Flags>]

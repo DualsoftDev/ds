@@ -25,7 +25,11 @@ module ConvertCpuApiItem =
 
 
     type ApiItem with
-        member a.APISET     = getAM(a).APISET
+        member a.APISET                 = getAM(a).APISET
+        member a.ApiItemSetPusle        = getAM(a).ApiItemSetPusle
+        member a.ApiItemSetPusleRelay   = getAM(a).ApiItemSetPusleRelay
+        member a.ApiItemSetPusleHold    = getAM(a).ApiItemSetPusleHold
+
         member a.APIEND     = getAM(a).APIEND
 
         ///sensorLinking

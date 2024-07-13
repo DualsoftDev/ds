@@ -92,7 +92,7 @@ type VertexMReal with
             then
                 yield(fbRising[v.G.Expr], v._off.Expr) --| (v.GP, getFuncName())
             elif RuntimeDS.Package.IsPCorPCSIM() then 
-                yield! (v.G.Expr, v.GPR)  --^ (v.GP, getFuncName()) 
+                yield! (v.G.Expr, v.GPR, v.GPH)  --^ (v.GP, getFuncName()) 
             else    
                 failWithLog $"Not supported {RuntimeDS.Package} package"
         ]

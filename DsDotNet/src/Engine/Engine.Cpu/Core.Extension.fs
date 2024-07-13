@@ -65,5 +65,6 @@ module CpuExtensionsModule =
                            |> Seq.iter(fun w -> w.TagChanged <- false)
 
         [<Extension>] static member ExecutableStatements (xs:IStorage seq, mRung:IDictionary<IStorage, Statement seq>) = 
-                        xs |> Seq.collect(fun stg -> mRung[stg]) 
+                        xs |> Seq.collect(fun stg -> mRung[stg])
+                           |> Seq.distinct
 

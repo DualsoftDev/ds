@@ -107,7 +107,7 @@ type TagKindExt =
       
     [<Extension>]
     static member GetTagToText(x:TagDS) =
-        let getText(tag:IStorage) (obj:INamed) kind = $"{tag.Name};{tag.BoxedValue};{obj.Name};{kind}"
+        let getText(tag:IStorage) (_obj:INamed) _kind = $"{tag.Name}({tag.BoxedValue})"
         match x with
         |EventSystem    (tag, obj, kind) -> getText tag obj kind
         |EventFlow      (tag, obj, kind) -> getText tag obj kind

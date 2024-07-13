@@ -256,7 +256,24 @@ module CoreModule =
     [<DebuggerDisplay("{QualifiedName}")>]
     type Real private (name:string, flow:Flow) =
         inherit Vertex([|name|], DuParentFlow flow)
+        let mutable motion:string option = None
+        let mutable script:string option = None
+    
+        let setIfNotAlreadySet field value fieldName =
+            match field with
+            | Some _ -> failWithLog $"{fieldName} is already set {flow}.{name}"
+            | None -> value
+    
+        member x.Motion 
+            with get() = motion 
+            and set(v) = motion <- setIfNotAlreadySet motion v "Motion"
+    
+        member x.Script 
+            with get() = script 
+            and set(v) = script <- setIfNotAlreadySet script v "Script"
 
+        
+        member x.Flow = flow
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val ExternalTags = HashSet<ExternalTagSet>()
@@ -267,9 +284,6 @@ module CoreModule =
         member val DsTime:DsTime = DsTime() with get, set
         member val Finished:bool = false with get, set
         member val NoTransData:bool = false with get, set
-        
-        member x.Flow = flow
-
 
 
     type CallType =

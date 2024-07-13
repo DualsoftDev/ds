@@ -27,11 +27,12 @@ type TaskDevManager with
 
 type ApiItemManager with
 
-    member a.A1_ApiSet(sys:DsSystem, td:TaskDev) =
-
-        let sets =  td.PS.Expr
-        (sets, sys._off.Expr) --| (a.APISET, getFuncName())
-
+    member a.A1_ApiSet(td:TaskDev) =
+        [
+            let sets = td.PS.Expr
+            yield! (sets, a.ApiItemSetPusleRelay, a.ApiItemSetPusleHold) --^ (a.ApiItemSetPusle, getFuncName())
+            yield  (a.ApiItemSetPusle.Expr, a.ApiItem.TX.VR.ET.Expr) ==| (a.APISET, getFuncName())
+        ]
     member a.A2_ApiEnd(sys:DsSystem) =
 
         let sets =  a.ApiItem.RxET.Expr

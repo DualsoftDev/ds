@@ -47,21 +47,19 @@ type VertexManager with
                 yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
 
             elif RuntimeDS.Package.IsPCorPCSIM() then 
-
-                yield (input, v._off.Expr) --| (v.ErrShortRising, getFuncName())
-                yield (input, v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
-
+                yield! (input, v.ErrShortRisingRelay, v.ErrShortRisingHold) --^ (v.ErrShortRising, getFuncName())
+                yield! (!@input, v.ErrOpenRisingRelay, v.ErrOpenRisingHold) --^ (v.ErrOpenRising,  getFuncName())
             else    
                 failWithLog $"Not supported {RuntimeDS.Package} package"
             
             (* short error *)
-            yield (checkCondi <&&>  rxReadyExpr <&&> v.ErrShortRising.Expr,  rst<||>v._sim.Expr)  ==| (v.ErrShort, getFuncName())
+            yield (checkCondi <&&>  rxReadyExpr <&&> v.ErrShortRising.Expr,  rst)  ==| (v.ErrShort, getFuncName())
             (* open  error *)
             if call.UsingTon
             then
-                yield (checkCondi <&&>  rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr,   rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
+                yield (checkCondi <&&>  rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr,   rst)  ==| (v.ErrOpen , getFuncName())
             else
-                yield (checkCondi <&&>  rxFinishExpr                      <&&> v.ErrOpenRising.Expr,   rst<||>v._sim.Expr)  ==| (v.ErrOpen , getFuncName())
+                yield (checkCondi <&&>  rxFinishExpr                      <&&> v.ErrOpenRising.Expr,   rst)  ==| (v.ErrOpen , getFuncName())
         ]
         
 

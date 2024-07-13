@@ -59,6 +59,7 @@ module TagManagerModule =
 
         let goingPulse        = createTag false     VertexTag.goingPulse
         let goingPulseRelay   = createTag false     VertexTag.goingPulseRelay
+        let goingPulseHold    = createTag false     VertexTag.goingPulseHold
         
 
         let errorErrTRXBit = createTag  false   VertexTag.errorTRx
@@ -122,6 +123,8 @@ module TagManagerModule =
         member _.GP         = goingPulse
         /// Going Pulse Relay
         member _.GPR         = goingPulseRelay
+        /// Going Pulse Hold
+        member _.GPH         = goingPulseHold
  
         member _.ErrTRX         =  errorErrTRXBit
         
@@ -149,7 +152,8 @@ module TagManagerModule =
 
             | VertexTag.goingPulse          -> goingPulse       :> IStorage
             | VertexTag.goingPulseRelay     -> goingPulseRelay  :> IStorage
-
+            | VertexTag.goingPulseHold      -> goingPulseHold  :> IStorage
+            
             | VertexTag.txErrOnTimeShortage  -> (v.TagManager:?> VertexMCall).ErrOnTimeShortage  :> IStorage
             | VertexTag.txErrOnTimeOver      -> (v.TagManager:?> VertexMCall).ErrOnTimeOver      :> IStorage
             | VertexTag.txErrOffTimeShortage -> (v.TagManager:?> VertexMCall).ErrOffTimeShortage :> IStorage
@@ -274,6 +278,7 @@ module TagManagerModule =
         let memo           = createTag  false VertexTag.callMemo
         
         let callCommandPulseRelay  = createTag  false VertexTag.callCommandPulseRelay
+        let callCommandPulseHold  = createTag  false VertexTag.callCommandPulseHold
         let callCommandPulse  = createTag  false VertexTag.callCommandPulse
         let callCommandEnd    = createTag  false VertexTag.callCommandEnd
         let callOperatorValue  = createTag false VertexTag.callOperatorValue
@@ -286,8 +291,12 @@ module TagManagerModule =
         let txErrOffTimeOver        = createTag  true    VertexTag.txErrOffTimeOver   
         let rxErrShort              = createTag  true    VertexTag.rxErrShort      
         let rxErrShortRising        = createTag  true    VertexTag.rxErrShortRising      
+        let rxErrShortRisingRelay   = createTag  true    VertexTag.rxErrShortRisingRelay      
+        let rxErrShortRisingHold   = createTag  true    VertexTag.rxErrShortRisingHold      
         let rxErrOpen               = createTag  true    VertexTag.rxErrOpen    
         let rxErrOpenRising         = createTag  true    VertexTag.rxErrOpenRising          
+        let rxErrOpenRisingRelay    = createTag  true    VertexTag.rxErrOpenRisingRelay          
+        let rxErrOpenRisingHold    = createTag  true    VertexTag.rxErrOpenRisingHold          
 
         let errors = 
             let err1 = if txErrOnTimeShortage.Value      then "감지시간부족" else ""
@@ -325,10 +334,16 @@ module TagManagerModule =
         member _.ErrOnTimeOver     = txErrOnTimeOver 
         member _.ErrOffTimeShortage = txErrOffTimeShortage 
         member _.ErrOffTimeOver     = txErrOffTimeOver 
+
         member _.ErrShort        = rxErrShort    
         member _.ErrShortRising  = rxErrShortRising    
+        member _.ErrShortRisingRelay  = rxErrShortRisingRelay    
+        member _.ErrShortRisingHold  = rxErrShortRisingHold    
+        
         member _.ErrOpen         = rxErrOpen     
         member _.ErrOpenRising   = rxErrOpenRising     
+        member _.ErrOpenRisingRelay   = rxErrOpenRisingRelay     
+        member _.ErrOpenRisingHold   = rxErrOpenRisingHold     
 
    
         ///callCommandEnd
@@ -336,6 +351,7 @@ module TagManagerModule =
         ///callCommandPulse  
         member _.CallCommandPulse         =  callCommandPulse
         member _.CallCommandPulseRelay    =  callCommandPulseRelay
+        member _.CallCommandPulseHold     =  callCommandPulseHold
 
         
         ///Call Operator 연산결과 값 (T/F)

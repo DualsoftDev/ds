@@ -249,8 +249,18 @@ module PPTDocModule =
                     | _, 0u ->
                         conn.ErrorConnect(ErrID._15, $"{nodes.[Objkey(iPage, startId)].Name}", "", iPage)
                     | _ ->
-                        let sNode = nodes.[Objkey(iPage, startId)]
-                        let eNode = nodes.[Objkey(iPage, endId)]
+
+                        let sKey = Objkey(iPage, startId)
+                        let eKey = Objkey(iPage, endId)
+                        if not(nodes.ContainsKey(sKey) && nodes.ContainsKey(eKey))
+                        then 
+                            conn.ErrorConnect(ErrID._14, "", "", iPage)
+                        
+                        
+                        let sNode = nodes.[sKey]
+                        let eNode = nodes.[eKey]
+
+
                         let sName = if nodes.ContainsKey(sNode.Key) then sNode.Name else ""
                         let eName = if nodes.ContainsKey(eNode.Key) then eNode.Name else ""
 

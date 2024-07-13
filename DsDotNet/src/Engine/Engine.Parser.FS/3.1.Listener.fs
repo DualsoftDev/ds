@@ -981,7 +981,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         for ctx in sysctx.Descendants<PropsBlockContext>() do
             fillProperties x ctx
 
-        apiAutoGenUpdateSystem system
         guardedValidateSystem system
       
 

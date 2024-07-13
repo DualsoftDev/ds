@@ -45,7 +45,7 @@ public partial class UcView : UserControl
     int node_attr_linewidthH = 4;
     int node_attr_linewidthL = 1;
     int edge_attr_linewidthWeek = 1;
-    int edge_attr_HeadSize = 6;
+    int edge_attr_HeadSize = 7;
     int nnode_label_fontsize = 6;
 
     private readonly Dictionary<string, Node> _dicDrawing = new();
@@ -503,12 +503,14 @@ public partial class UcView : UserControl
     public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh)
     {
         UpdateStatus(viewNode, vRefresh);
-        UpdatePlanEndValue(viewNode, vv.LampPlanEnd, vRefresh);
         UpdateOriginValue(viewNode, vv.LampOrigin, vRefresh);
 
         UpdateInValue(viewNode, vv.LampInput, vRefresh);
         UpdateOutValue(viewNode, vv.LampOutput, vRefresh);
         UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
+
+        UpdatePlanEndValue(viewNode, vv.LampPlanEnd, vRefresh);
+
 
         RefreshGraph();
     }

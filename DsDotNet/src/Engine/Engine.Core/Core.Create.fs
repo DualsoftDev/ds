@@ -15,21 +15,6 @@ module CoreCreateModule =
         let system = DsSystem(systemName)
         system
 
-    let genClearRealAddForSingleReal (mySys: DsSystem) =
-        let updateSingleReal (flow:Flow) (real: Real) =
-            let oldReal = flow.Graph.Vertices.OfType<Real>().Head()
-            let realName = $"genClearReal{real.Name}"
-            let clearReal = Real.Create(realName, flow)
-            flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , "<|>", clearReal)) |> ignore
-            flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , ">", clearReal)) |> ignore
-
-        mySys.Flows.Iter(fun flow ->
-            let reals = flow.Graph.Vertices.OfType<Real>()
-
-            if reals.length() = 1
-            then updateSingleReal flow (reals.First())
-        )
-
     let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (inParam:DevParam, outParm:DevParam): TaskDev =
         let apis = sys.ApiItems.Where(fun w -> w.Name = apiName)
 
@@ -84,19 +69,18 @@ module CoreCreateModule =
         TaskDev(api, jobName, inParam, outParm, devName, sys)
 
 
-    let apiAutoGenUpdateSystem(sys:DsSystem) =
+    let updateSystemForSingleApi(sys:DsSystem) =
         let updateSingleApi (refSys: DsSystem)  (api: ApiItem)  =
             let flow = refSys.Flows.Head()
             let oldReal = flow.Graph.Vertices.OfType<Real>().Head()
             let realName = $"genClearReal{api.Name}"
             let clearReal = Real.Create(realName, flow)
-            clearReal.Finished <- true
             oldReal.Finished <- false
+            clearReal.Finished <- true
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , "<|>", clearReal)) |> ignore
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , ">", clearReal)) |> ignore
 
         let autoGenDevs = sys.LoadedSystems
-                             .Where(fun d->d.AutoGenFromParentSystem)
                              .Select(fun d->d.ReferenceSystem)
 
         autoGenDevs.Where(fun s->s.ApiItems.Count = 1)

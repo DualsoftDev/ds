@@ -154,10 +154,6 @@ namespace Diagram.View.MSAGL
                     }
                     else if (rx.IsEventTaskDev)
                     {
-                        HandleActionEvent(rx as EventTaskDev);
-                    }
-                    else if (rx.IsEventTaskDev)
-                    {
                         HandleTaskDevEvent(rx as EventTaskDev);
                     }
                  
@@ -222,40 +218,47 @@ namespace Diagram.View.MSAGL
             }
         }
 
-        private static void HandleActionEvent(EventTaskDev ea)
-        {
-            if (!DicTaskDevTag.ContainsKey(ea.Tag)) return;
+        //private static void HandleActionEvent(EventTaskDev ea)
+        //{
+        //    if (!DicTaskDevTag.ContainsKey(ea.Tag)) return;
 
-            var viewNodes = DicTaskDevTag[ea.Tag];
-            var ucView = UcViews.FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
-            viewNodes.Iter(n =>
-            {
-                n.DisplayNodes.Iter(node =>
-                {
-                    if (!IsThisSystem(node)) return;
+        //    var viewNodes = DicTaskDevTag[ea.Tag];
+        //    var ucView = UcViews.FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
+        //    viewNodes.Iter(n =>
+        //    {
+        //        n.DisplayNodes.Iter(node =>
+        //        {
+        //            if (!IsThisSystem(node)) return;
 
-                    var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
+        //            var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
 
-                    switch (ea.Tag.TagKind)
-                    {
-                        case (int)TaskDevTag.actionIn:
-                            {
-                                var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
-                                n.LampInput = on;
-                                ucView.UpdateInValue(node, on);
-                                break;
-                            }
-                        case (int)TaskDevTag.actionOut:
-                            {
-                                var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
-                                n.LampOutput = on;
-                                ucView.UpdateOutValue(node, on);
-                                break;
-                            }
-                    }
-                });
-            });
-        }
+        //            switch (ea.Tag.TagKind)
+        //            {
+        //                case (int)TaskDevTag.actionIn:
+        //                    {
+        //                        var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
+        //                        n.LampInput = on;
+        //                        ucView.UpdateInValue(node, on);
+        //                        break;
+        //                    }
+        //                case (int)TaskDevTag.actionOut:
+        //                    {
+        //                        var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
+        //                        n.LampOutput = on;
+        //                        ucView.UpdateOutValue(node, on);
+        //                        break;
+        //                    }
+        //                case (int)TaskDevTag.planEnd:
+        //                    {
+        //                        var on = Convert.ToUInt64(ea.Tag.BoxedValue) != 0;
+        //                        n.LampPlanEnd = on;
+        //                        ucView.UpdatePlanEndValue(node, on);
+        //                        break;
+        //                    }
+        //            }
+        //        });
+        //    });
+        //}
 
 
         private static void HandleTaskDevEvent(EventTaskDev td)
@@ -273,7 +276,23 @@ namespace Diagram.View.MSAGL
 
                     switch (td.Tag.TagKind)
                     {
-                        case (int)ApiItemTag.apiItemEnd:
+                        case (int)TaskDevTag.actionIn:
+                            {
+                                var on = Convert.ToUInt64(td.Tag.BoxedValue) != 0;
+                                n.LampInput = on;
+                                var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
+                                ucView.UpdateInValue(node, on);
+                                break;
+                            }
+                        case (int)TaskDevTag.actionOut:
+                            {
+                                var on = Convert.ToUInt64(td.Tag.BoxedValue) != 0;
+                                n.LampOutput = on;
+                                var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
+                                ucView.UpdateOutValue(node, on);
+                                break;
+                            }
+                        case (int)TaskDevTag.planEnd:
                             {
                                 var on = tags.All(s => Convert.ToBoolean(s.Value));
                                 n.LampPlanEnd = on;

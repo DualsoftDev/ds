@@ -339,8 +339,9 @@ module ImportU =
             //createFunction Node 처리 마감
             //createAliasFunction ()
 
-            mySys.ReferenceSystems
-                 .Iter(genClearRealAddForSingleReal)
+
+            updateSystemForSingleApi mySys
+
 
         //pptEdge 변환 및 등록
         [<Extension>]

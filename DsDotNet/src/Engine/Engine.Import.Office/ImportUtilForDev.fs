@@ -1,16 +1,11 @@
 // Copyright (c) Dualsoft  All Rights Reserved.
 namespace Engine.Import.Office
 
-open System.Collections.Generic
 open Engine.Core
-open DocumentFormat.OpenXml.Packaging
-open System.Linq
 open System.IO
 open Dual.Common.Core.FS
-open Engine.Parser.FS
 open System.Reflection
 open LibraryLoaderModule
-open System
 
 [<AutoOpen>]
 module ImportUtilForDev =
@@ -140,7 +135,8 @@ module ImportUtilForDev =
                          taskDev 
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
-            let api = devOrg.ApiItems.First(fun f -> f.Name = apiPureName)
-            TaskDev(api, jobName ,  inParam, outParam, newloadedName, mySys)
-
+            match devOrg.ApiItems.TryFind(fun f -> f.Name = apiPureName) with
+            | Some api -> TaskDev(api, jobName ,  inParam, outParam, newloadedName, mySys)
+            | None ->
+                failWithLog $"Api {apiPureName} not found in {newloadedName}"
                     

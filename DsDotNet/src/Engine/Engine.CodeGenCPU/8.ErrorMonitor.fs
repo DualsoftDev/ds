@@ -48,8 +48,8 @@ type VertexManager with
 
             elif RuntimeDS.Package.IsPCorPCSIM() then 
 
-                yield (input                            , v._off.Expr) --| (v.ErrShortRising, getFuncName())
-                yield (input                             , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
+                yield (input, v._off.Expr) --| (v.ErrShortRising, getFuncName())
+                yield (input, v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
 
             else    
                 failWithLog $"Not supported {RuntimeDS.Package} package"

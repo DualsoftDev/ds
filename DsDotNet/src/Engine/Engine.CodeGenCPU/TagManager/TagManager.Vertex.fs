@@ -57,7 +57,9 @@ module TagManagerModule =
 
         
 
-
+        let goingPulse        = createTag false     VertexTag.goingPulse
+        let goingPulseRelay   = createTag false     VertexTag.goingPulseRelay
+        
 
         let errorErrTRXBit = createTag  false   VertexTag.errorTRx
 
@@ -114,6 +116,12 @@ module TagManagerModule =
         member _.OG         =  originBit
         ///Pause Monitor
         member _.PA         =  pauseBit
+
+
+        /// Going Pulse
+        member _.GP         = goingPulse
+        /// Going Pulse Relay
+        member _.GPR         = goingPulseRelay
  
         member _.ErrTRX         =  errorErrTRXBit
         
@@ -139,6 +147,8 @@ module TagManagerModule =
             | VertexTag.forceOn             -> forceOnBit          :> IStorage
             | VertexTag.forceOff            -> forceOffBit         :> IStorage
 
+            | VertexTag.goingPulse          -> goingPulse       :> IStorage
+            | VertexTag.goingPulseRelay     -> goingPulseRelay  :> IStorage
 
             | VertexTag.txErrOnTimeShortage  -> (v.TagManager:?> VertexMCall).ErrOnTimeShortage  :> IStorage
             | VertexTag.txErrOnTimeOver      -> (v.TagManager:?> VertexMCall).ErrOnTimeOver      :> IStorage
@@ -152,7 +162,7 @@ module TagManagerModule =
             | VertexTag.realOriginAction     -> (v.TagManager:?> VertexMReal).OA    :> IStorage
             | VertexTag.relayReal            -> (v.TagManager:?> VertexMReal).RR    :> IStorage
             | VertexTag.goingRealy           -> (v.TagManager:?> VertexMReal).GG    :> IStorage
-                                             
+          
             | VertexTag.counter             
             | VertexTag.timerOnDelay        -> failwithlog $"Error : Time Counter Type {vt} not support!!"
 
@@ -171,9 +181,7 @@ module TagManagerModule =
         let timerOnTimeBit = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
 
         let relayGoingBit     = createTag false     VertexTag.goingRealy
-        let goingPulse        = createTag false     VertexTag.goingPulse
-        let goingPulseRelay   = createTag false     VertexTag.goingPulseRelay
-        
+
         let relayRealBit      = createTag false     VertexTag.relayReal
         let realOriginInit    = createTag false     VertexTag.realOriginInit
         let realOriginButton  = createTag false     VertexTag.realOriginButton
@@ -221,10 +229,7 @@ module TagManagerModule =
         member _.RR         = relayRealBit
         ///Real Going Relay
         member _.GG         = relayGoingBit
-        ///Real Going Pulse
-        member _.GP         = goingPulse
-        ///Real Going Pulse
-        member _.GPR         = goingPulseRelay
+    
         ///Real Data
         //member _.RD         = realData
         ///link with physical sensors

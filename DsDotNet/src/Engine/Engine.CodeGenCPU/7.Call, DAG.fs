@@ -80,16 +80,26 @@ type VertexManager with
             for child in children do
                 let coin = child :?> VertexMCall
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
-                let setEnd = call.PEs.ToAndElseOn() <&&> call.End
-
-                let sets = 
-                    if call.Disabled then 
-                        coin.ST.Expr <&&> real.V.G.Expr
-                    else
-                        coin.ST.Expr <&&> setEnd <&&> real.V.G.Expr
-
                 let rsts = coin.RT.Expr
-                yield (sets, rsts) ==| (coin.ET, getFuncName() )
+                if call.Disabled then 
+                    yield (coin.ST.Expr <&&> real.V.G.Expr, rsts) ==| (coin.ET, getFuncName() )
+                else 
+
+                    let setStart = coin.ST.Expr <&&> real.V.G.Expr
+                    let setEnd = call.PEs.ToAndElseOn() <&&> call.End
+
+                    //if setEnd Pulse Mode
+                  
+                    if RuntimeDS.Package.IsPLCorPLCSIM() 
+                    then
+                        yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, getFuncName() )
+                    elif RuntimeDS.Package.IsPCorPCSIM()
+                    then 
+                        yield! (setEnd, coin.GPR)  --^ (coin.GP, getFuncName()) 
+                        yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
+
+                    ///if setEnd  Mode
+                    //yield (setStart<&&>setEnd, rsts) ==| (coin.ET, getFuncName() )
         ]
 
 

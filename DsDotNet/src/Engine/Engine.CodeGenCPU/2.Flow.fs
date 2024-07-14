@@ -45,7 +45,7 @@ type VertexManager with
                     ) 
                     <||> 
                     (
-                        v.RF.Expr <||> real.VR.OB.Expr <||> real.VR.OA.Expr
+                        v.RF.Expr <||> (*real.VR.OB.Expr <||> *)real.VR.OA.Expr
                     )
 
         let rsts  = real.V.R.Expr

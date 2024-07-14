@@ -16,7 +16,7 @@ type Spec13_SystemStatement() =
     let t = CpuTestSample(WINDOWS)
     [<Test>]
     member __.``Y1 System Bit Set Flow`` () =
-        t.Sys.Y1_SystemSimulationForFlow() |> doChecks
+        t.Sys.Y1_SystemSimulationForFlow(t.Sys) |> doChecks
 
     //[<Test>]
     //member __.``Y2 System Condition Ready`` () =

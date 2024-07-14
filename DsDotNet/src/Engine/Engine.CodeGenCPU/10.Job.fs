@@ -9,16 +9,13 @@ open Dual.Common.Core.FS
 
 type Job with
      
-    member j.J1_JobActionOuts() =
-        let vs = j.System.GetVerticesOfCoins()
-        let jobCoins = vs.GetVerticesOfJobCoins(j).OfType<Call>()
-
+    member j.J1_JobActionOuts(call:Call) =
         let _off = j.System._off.Expr
         [
             for td in j.DeviceDefs do
                 if td.ExistOutput
                 then 
-                    let rstMemos = jobCoins.SelectMany(fun coin->coin.MutualResetCoins.Select(fun c->c.VC.MM))
+                    let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
                     let sets =
                         if RuntimeDS.Package.IsPackageSIM() then _off
                         else td.PE.Expr <&&> td.PS.Expr

@@ -9,18 +9,18 @@ open Dual.Common.Core.FS
 type DsSystem with
 
 
-    member s.Y1_SystemSimulationForFlow() = [
+    member s.Y1_SystemSimulationForFlow(activeSys:DsSystem) = [
             for flow in s.Flows do
-                yield (s._auto_btn.Expr  , s._off.Expr) --| (flow.auto_btn,   getFuncName())
-                yield (s._manual_btn.Expr, s._off.Expr) --| (flow.manual_btn, getFuncName())
-                yield (s._drive_btn.Expr , s._off.Expr) --| (flow.drive_btn,  getFuncName())
-                yield (s._pause_btn.Expr , s._off.Expr) --| (flow.pause_btn,  getFuncName())
-                yield (s._emg_btn.Expr   , s._off.Expr) --| (flow.emg_btn,    getFuncName())
-                yield (s._test_btn.Expr  , s._off.Expr) --| (flow.test_btn,   getFuncName())
+                yield (activeSys._auto_btn.Expr  , activeSys._off.Expr) --| (flow.auto_btn,   getFuncName())
+                yield (activeSys._manual_btn.Expr, activeSys._off.Expr) --| (flow.manual_btn, getFuncName())
+                yield (activeSys._drive_btn.Expr , activeSys._off.Expr) --| (flow.drive_btn,  getFuncName())
+                yield (activeSys._pause_btn.Expr , activeSys._off.Expr) --| (flow.pause_btn,  getFuncName())
+                yield (activeSys._emg_btn.Expr   , activeSys._off.Expr) --| (flow.emg_btn,    getFuncName())
+                yield (activeSys._test_btn.Expr  , activeSys._off.Expr) --| (flow.test_btn,   getFuncName())
                 if RuntimeDS.Package.IsPCorPCSIM() then //PLC는  E2_PLCOnly 에서 처리중 
-                    yield (s._home_btn.Expr  , s._off.Expr) --| (flow.home_btn,   getFuncName())
-                    yield (s._clear_btn.Expr , s._off.Expr) --| (flow.clear_btn,  getFuncName())
-                    yield (s._ready_btn.Expr , s._off.Expr) --| (flow.ready_btn,  getFuncName())
+                    yield (activeSys._home_btn.Expr  , activeSys._off.Expr) --| (flow.home_btn,   getFuncName())
+                    yield (activeSys._clear_btn.Expr , activeSys._off.Expr) --| (flow.clear_btn,  getFuncName())
+                    yield (activeSys._ready_btn.Expr , activeSys._off.Expr) --| (flow.ready_btn,  getFuncName())
         ]
         
   

@@ -23,5 +23,5 @@ type Spec07_CallStatement() =
 
     [<Test>]
     member __.`` J1 JobActionOuts`` () =
-        for j in t.Sys.Jobs do
-            j.J1_JobActionOuts() |> doChecks
+        for c in t.Sys.GetVerticesOfJobCalls() do
+            c.TargetJob.J1_JobActionOuts(c) |> doChecks

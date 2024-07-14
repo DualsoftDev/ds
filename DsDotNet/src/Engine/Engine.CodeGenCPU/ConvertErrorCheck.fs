@@ -151,7 +151,7 @@ module ConvertErrorCheck =
              
             failwithf $"중복 주소 발견: {dupMsg}"
 
-    let setSimulationAddress(sys:DsSystem) = 
+    let setSimulationEmptyAddress(sys:DsSystem) = 
         sys.Jobs.ForEach(fun j->
             j.DeviceDefs.ForEach(fun d-> 
                         if d.InAddress.IsNullOrEmpty() then  d.InAddress <- (TextAddrEmpty)

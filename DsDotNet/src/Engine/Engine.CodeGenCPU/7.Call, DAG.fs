@@ -32,9 +32,7 @@ type VertexManager with
 
 
         let parentReal = call.Parent.GetCore() :?> Vertex
-        let jobCoins = call.System.GetVerticesOfCoins().OfType<Call>()
-        let rstMemos = jobCoins.SelectMany(fun coin->coin.MutualResetCoins.Select(fun c->c.VC.MM))
-        
+        let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
         
         let sets = sets <&&> !@rstMemos.ToOrElseOff()
         let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr

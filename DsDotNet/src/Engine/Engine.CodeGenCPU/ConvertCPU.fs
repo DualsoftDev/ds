@@ -101,11 +101,7 @@ module ConvertCPU =
             yield! s.Y5_SystemEmgAlramError()
             
 
-            if RuntimeDS.Package.IsPLCorPLCSIM() then
-                yield! s.E2_PLCOnly()
-            else  
-                yield! s.B2_SWButtonOutput()
-                yield! s.B4_SWModeLamp() 
+
         ]
 
 
@@ -200,7 +196,7 @@ module ConvertCPU =
             let callDevices =s.GetDevicesHasOutput()
             
             for _, call in callDevices do
-                yield! call.TargetJob.J1_JobActionOuts()
+                yield! call.TargetJob.J1_JobActionOuts(call)
         ]
 
     let private applyCallOnDelay(s:DsSystem) =
@@ -231,15 +227,17 @@ module ConvertCPU =
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
 
+        sys.GenerationOrigins()
+
         if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
         then 
            
-            sys.GenerationOrigins()
             sys.GenerationMemory()
             sys.GenerationIO()
 
             match RuntimeDS.Package with
-            | PCSIM -> setSimulationAddress(sys) //시뮬레이션 주소 자동할당 및 체크 스킵
+            | PCSIM -> 
+                setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
             | _->  
                 checkDuplicatesNNullAddress sys
                 //checkErrExternalStartRealExist sys //hmi 시작 가능
@@ -249,29 +247,33 @@ module ConvertCPU =
 
             checkMultiDevPair(sys)
 
-
         else 
             checkErrRealResetExist(sys)
             updateRealParentExpr(sys)
             sys.GenerationRealActionMemory()
+
             
         [
-            if RuntimeDS.Package.IsPackageSIM()
-            then
-                yield! sys.Y1_SystemSimulationForFlow()
-
-            if isActive && RuntimeDS.Package.IsPackageSIM()
-            then 
-                yield! emulationDevice sys
-
-            //Variables  적용 
-            yield! applyVariables sys
-
             //Active 시스템 적용 
             if isActive
             then   
                 yield! applySystemSpec sys
+                yield! sys.B2_SWButtonOutput()
+                yield! sys.B4_SWModeLamp() 
 
+                if RuntimeDS.Package.IsPackageSIM()
+                then 
+                    yield! sys.Y1_SystemSimulationForFlow(sys)
+
+                    for subSys in sys.GetRecursiveLoadedSystems() do
+                        yield! subSys.Y1_SystemSimulationForFlow(sys) 
+
+                    yield! sys.E2_PLCOnly()
+                    yield! emulationDevice sys
+
+            //Variables  적용 
+            yield! applyVariables sys
+        
             //Flow 적용
             for f in sys.Flows do
                 yield! applyOperationModeSpec f isActive
@@ -293,6 +295,4 @@ module ConvertCPU =
             yield! applyJob sys
             ///CallOnDelay 적용  
             yield! applyCallOnDelay sys
-
-
         ]

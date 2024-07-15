@@ -114,7 +114,7 @@ CREATE TABLE [{Tn.Property}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
     , [value]       NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
-    , [modelId]     INTEGER NOT NULL
+    , [modelId]     INTEGER     -- nullable. null 인 경우, 특정 모델에 대한 속성이 아님
 );
 
 
@@ -410,10 +410,11 @@ type LoggerDBSettingsExt =
         if lastModelInfoSpecified then
             lastModified <- System.IO.FileInfo(path).LastWriteTime
         else
-            let propDic = conn.Query<ORMProperty>($"SELECT * FROM [{Tn.Property}]") |> map (fun p -> p.Name, p.Value) |> Tuple.toDictionary
+            let propDic = conn.Query<ORMProperty>($"SELECT * FROM [{Tn.Property}]", null, tr) |> map (fun p -> p.Name, p.Value) |> Tuple.toDictionary
             path <- propDic[PropName.ModelFilePath]
             lastModified <- propDic[PropName.ModelFileLastModfied] |> DateTime.Parse
-            runtime <- propDic[PropName.ModelRuntime]
+            if runtime.IsNullOrEmpty() then
+                runtime <- propDic[PropName.ModelRuntime]
             if System.IO.FileInfo(path).LastWriteTime <> lastModified then
                 failwith "Model file has been changed. Please update the model file path."
             ()
@@ -425,10 +426,20 @@ type LoggerDBSettingsExt =
                         WHERE path = @Path
                         AND runtime = @Runtime
                         AND lastModified = @LastModified"""
-            conn.TryQuerySingle<ORMModel>(sql, param, null)
+            conn.TryQuerySingle<ORMModel>(sql, param, tr)
 
         match optModel with
-        | Some m -> loggerDBSettings.ModelId <- m.Id
+        | Some m ->
+            let propSql = 
+                $"""INSERT OR REPLACE INTO [{Tn.Property}]
+                    (name, value)
+                    VALUES(@Name, @Value);"""
+            conn.Execute(propSql, {| Name = PropName.ModelFilePath; Value = path |}, tr) |> ignore
+            conn.Execute(propSql, {| Name = PropName.ModelFileLastModfied; Value = lastModified.ToString() |}, tr) |> ignore
+            conn.Execute(propSql, {| Name = PropName.ModelRuntime; Value = runtime |}, tr) |> ignore
+
+
+            loggerDBSettings.ModelId <- m.Id
         | _ ->
             loggerDBSettings.ModelId <-
                 conn.InsertAndQueryLastRowIdAsync(tr,

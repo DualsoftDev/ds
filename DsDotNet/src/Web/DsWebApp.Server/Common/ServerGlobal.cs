@@ -70,6 +70,9 @@ public class ServerGlobal
                 return null;
             }
 
+            var loggerDBSettings = serverSettings.CommonAppSettings.LoggerDBSettings;
+            loggerDBSettings.FillModelId();
+
             RuntimeDS.Package = serverSettings.GetRuntimePackage();
 
             RuntimeModel = new RuntimeModel(dsZipPath, PlatformTarget.WINDOWS);

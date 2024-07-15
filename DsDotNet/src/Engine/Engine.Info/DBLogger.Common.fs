@@ -20,3 +20,7 @@ module DBCommon =
             | ex ->
                 // Optionally log or handle other exceptions
                 raise ex
+
+    type DateTime with
+        member x.TruncateMilliseconds() =
+            new DateTime(x.Year, x.Month, x.Day, x.Hour, x.Minute, x.Second)

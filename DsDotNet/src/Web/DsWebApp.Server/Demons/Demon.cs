@@ -65,7 +65,7 @@ public partial class Demon : BackgroundService
 
             _modelSubscription.Clear();
             var loggerDBSettings = serverGlobal.DsCommonAppSettings.LoggerDBSettings;            
-            var modelId = loggerDBSettings.FillModelId();
+            (var modelId, var path) = loggerDBSettings.FillModelId();
             var queryCriteria = new QueryCriteria(_serverGlobal.DsCommonAppSettings, modelId, DateTime.Now.Date.AddDays(-1), null);
             var logSetW = DBLogger.InitializeLogReaderWriterOnDemandAsync(queryCriteria, systems, mci, cleanExistingDb:false).Result;
             _modelSubscription.Add(logSetW);

@@ -89,14 +89,14 @@ CREATE TABLE [{Tn.Storage}] (
 CREATE TABLE [{Tn.Model}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [path]        NVARCHAR(128) NOT NULL  -- pptx/zip path
-    , [lastModified] DATETIME2(7) NOT NULL  -- file last modified
+    , [lastModified] TEXT NOT NULL  -- file last modified
     , [runtime]     NVARCHAR(128) NOT NULL CHECK(runtime IN ('PC', 'PCSIM', 'PLC', 'PLCSIM'))       -- , 'LightPC', 'LightPLC', 'Simulation', 'Developer'
 );
 
 CREATE TABLE [{Tn.Log}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [storageId]   INTEGER NOT NULL
-    , [at]          DATETIME2(7) NOT NULL
+    , [at]          TEXT NOT NULL       -- SQLite DateTime 지원 안함.  DATETIME2(7)
     , [value]       NUMERIC NOT NULL
     , [modelId]     INTEGER NOT NULL
     , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
@@ -389,7 +389,7 @@ type LoggerDBSettingsExt =
         failwith "Not implemented"
 
     [<Extension>]
-    static member FillModelId(loggerDBSettings:LoggerDBSettings): int =
+    static member FillModelId(loggerDBSettings:LoggerDBSettings): int*string =
         use conn = loggerDBSettings.CreateConnection()
         use tr = conn.BeginTransaction()
         let tableExists = conn.IsTableExistsAsync(Tn.Model).Result
@@ -416,7 +416,7 @@ type LoggerDBSettingsExt =
             if runtime.IsNullOrEmpty() then
                 runtime <- propDic[PropName.ModelRuntime]
             let fi = System.IO.FileInfo(path)
-            if fi.LastWriteTime <> lastModified then
+            if fi.LastWriteTime.TruncateMilliseconds() <> lastModified then
                 failwith "Model file has been changed. Please update the model file path."
             ()
 
@@ -453,7 +453,7 @@ type LoggerDBSettingsExt =
                 
         tr.Commit()
 
-        loggerDBSettings.ModelId
+        loggerDBSettings.ModelId, path
 
             
 

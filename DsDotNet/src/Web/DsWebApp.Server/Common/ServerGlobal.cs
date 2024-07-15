@@ -3,6 +3,7 @@ using Engine.Info;
 using Engine.Runtime;
 using IO.Core;
 
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Data.Sqlite;
 
 using System.Data;
@@ -64,14 +65,16 @@ public class ServerGlobal
             RuntimeModel?.Dispose();
             RuntimeModel = null;
 
-            if (!File.Exists(dsZipPath))
+            if (dsZipPath.NonNullAny() && !File.Exists(dsZipPath))
             {
                 Logger.Warn($"Model file not found: {dsZipPath}");
                 return null;
             }
 
             var loggerDBSettings = serverSettings.CommonAppSettings.LoggerDBSettings;
-            loggerDBSettings.FillModelId();
+            (var modelId, var path) = loggerDBSettings.FillModelId();
+            Debug.Assert(dsZipPath.IsNullOrEmpty() || dsZipPath == path);
+            dsZipPath = path;
 
             RuntimeDS.Package = serverSettings.GetRuntimePackage();
 

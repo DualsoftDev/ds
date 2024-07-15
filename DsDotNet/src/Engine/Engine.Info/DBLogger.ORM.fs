@@ -415,7 +415,8 @@ type LoggerDBSettingsExt =
             lastModified <- propDic[PropName.ModelFileLastModfied] |> DateTime.Parse
             if runtime.IsNullOrEmpty() then
                 runtime <- propDic[PropName.ModelRuntime]
-            if System.IO.FileInfo(path).LastWriteTime <> lastModified then
+            let fi = System.IO.FileInfo(path)
+            if fi.LastWriteTime <> lastModified then
                 failwith "Model file has been changed. Please update the model file path."
             ()
 
@@ -438,7 +439,7 @@ type LoggerDBSettingsExt =
             conn.Execute(propSql, {| Name = PropName.ModelFileLastModfied; Value = lastModified.ToString() |}, tr) |> ignore
             conn.Execute(propSql, {| Name = PropName.ModelRuntime; Value = runtime |}, tr) |> ignore
 
-
+            logInfo $"Model: id = {m.Id}, path={path}, lastModified={lastModified}"
             loggerDBSettings.ModelId <- m.Id
         | _ ->
             loggerDBSettings.ModelId <-

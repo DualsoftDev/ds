@@ -26,9 +26,7 @@ type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, 
         noop()
     new() = LoggerDBSettings("", "", "", 0)
     [<JsonIgnore>]
-    //member val SyncInterval = Observable.Interval(TimeSpan.FromMilliseconds(syncIntervalMilliSeconds)) with get, set
     member val SyncIntervalMilliSeconds = syncIntervalMilliSeconds with get, set
-    //member val ConnectionString = $"Data Source={Path.Combine(AppContext.BaseDirectory, sqlitePath)}" with get, set
     member val ConnectionPath = sqlitePath with get, set
     member val DbWriter = dbWriter with get, set
     member val ModelFilePath = modelFilePath with get, set
@@ -36,6 +34,7 @@ type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, 
 
 
 type LoggerDBSettings with
+    /// Serialiation 문제로 extension proproty 로 정의함
     member x.SyncInterval = Observable.Interval(TimeSpan.FromMilliseconds(x.SyncIntervalMilliSeconds))
 
 /// 여러 application(.exe) 들 간의 공유할 정보

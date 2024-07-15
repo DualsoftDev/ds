@@ -646,32 +646,9 @@ module PPTUtil =
              || shape.IsFlowChartPreparation() //CallRX
              || shape.IsLayout())
 
-        /// 전체 사용된 도형 반환 (Text box 제외)
-        [<Extension>]
-        static member GetShapeAndGeometries(commonSlideData: CommonSlideData) : (Shape * ShapeTypeValues) seq =
-            let shapes = commonSlideData.ShapeTree.Descendants<Shape>()
-
-            shapes
-            |> Seq.filter (fun shape -> shape.IsValidShape())
-            |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
-            |> Seq.map (fun shape ->
-                let geometry =
-                    shape.Descendants<Drawing.PresetGeometry>().First().Preset.Value
-
-                shape, geometry)
+ 
 
       
-
-
-        ///전체 사용된 도형 반환 (Text box 제외)
-        [<Extension>]
-        static member PageShapes(doc: PresentationDocument) =
-            Office.SlidesSkipHide(doc)
-            |> Seq.collect (fun (slidePart,_) ->
-                let page = slidePart |> Office.GetPage
-                Office.GetShapeAndGeometries(slidePart.Slide.CommonSlideData)
-                |> map(fun (shape, geometry) -> shape, page, geometry))
-
 
        ///전체 사용된 에러 체크 반환 (Text box 제외)
         [<Extension>]
@@ -680,7 +657,7 @@ module PPTUtil =
             let isNonTextShape (shape: Shape) =
                 not (shape.IsTitleBox()) && not (shape.Descendants<TextBody>().Any())
 
-            let allShapes = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
+            let allShapes = slidePart.GetShapeTreeShapes()
             allShapes
                 |> Seq.filter isNonTextShape
                 |> Seq.except (ableShapes)
@@ -788,7 +765,7 @@ module PPTUtil =
             let imgs = HashSet<string>()
             doc.GetLayoutPages()
             |> Seq.iter (fun (slidePart ,pageIndex) ->
-                let shapes = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
+                let shapes = slidePart.GetShapeTreeShapes().ToArray()
                 let layouts = shapes.Where(fun f->f.ShapeName().StartsWith("TextBox") && f.InnerText.StartsWith("[Layout]"))
                 let paths = shapes.Where(fun f->f.ShapeName().StartsWith("TextBox") && f.InnerText.StartsWith("[Path]"))
                 if paths.Any() && layouts.Any()
@@ -834,3 +811,60 @@ module PPTUtil =
                 |> Seq.tryHead
 
             getSlideNotes slidePart $"iPage:{iPage}" iPage
+
+
+
+            
+                   /// 전체 사용된 도형 반환 (Text box 제외)
+        [<Extension>]
+        static member GetShapeAndGeometries(shapes: Shape seq) : (Shape * ShapeTypeValues) seq =
+            shapes
+            |> Seq.filter (fun shape -> shape.IsValidShape())
+            |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
+            |> Seq.map (fun shape ->
+                let geometry =
+                    shape.Descendants<Drawing.PresetGeometry>().First().Preset.Value
+
+                shape, geometry)
+
+        [<Extension>]
+        static member private GetShapeTreeElements<'T when 'T :> OpenXmlElement>(slidePart: SlidePart) =
+            let slideElements = slidePart.Slide.CommonSlideData.ShapeTree.Descendants<'T>()
+            let layoutElements =
+                match slidePart.SlideLayoutPart with
+                | null -> Seq.empty
+                | slideLayoutPart -> slideLayoutPart.SlideLayout.CommonSlideData.ShapeTree.Descendants<'T>()
+            Seq.append slideElements layoutElements
+
+        [<Extension>]
+        static member GetShapeTreeShapes(slidePart: SlidePart) =
+            Office.GetShapeTreeElements<Shape>(slidePart)
+
+        [<Extension>]
+        static member GetShapeTreeConnectionShapes(slidePart: SlidePart) =
+            Office.GetShapeTreeElements<ConnectionShape>(slidePart)
+
+        [<Extension>]
+        static member GetShapeTreeGroupShapes(slidePart: SlidePart) =
+            Office.GetShapeTreeElements<GroupShape>(slidePart)
+
+
+        ///전체 사용된 도형 반환 (Text box 제외)
+        [<Extension>]
+        static member PageShapesNotUsingMasterPage(doc: PresentationDocument) =
+            Office.SlidesSkipHide(doc)
+            |> Seq.collect (fun (slidePart,_) ->
+                let page = slidePart |> Office.GetPage
+                Office.GetShapeAndGeometries(slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>())
+                |> map(fun (shape, geometry) -> shape, page, geometry))
+
+                ///전체 사용된 도형 반환 (Text box 제외)
+        [<Extension>]
+        static member PageShapes(doc: PresentationDocument) =
+            Office.SlidesSkipHide(doc)
+            |> Seq.collect (fun (slidePart,_) ->
+                let page = slidePart |> Office.GetPage
+                Office.GetShapeAndGeometries(slidePart.GetShapeTreeShapes())
+                |> map(fun (shape, geometry) -> shape, page, geometry))
+
+    

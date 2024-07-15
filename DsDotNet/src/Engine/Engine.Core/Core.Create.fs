@@ -83,7 +83,7 @@ module CoreCreateModule =
         let autoGenDevs = sys.LoadedSystems
                              .Select(fun d->d.ReferenceSystem)
 
-        autoGenDevs.Where(fun s->s.ApiItems.Count = 1)
+        autoGenDevs.Where(fun s->(s.GetVertices().OfType<Real>().Count()) = 1)
                    .Iter(fun refSys-> updateSingleApi refSys (refSys.ApiItems.Head()))
 
     let loadedSystemsToDsFile(sys:DsSystem) =

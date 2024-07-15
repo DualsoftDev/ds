@@ -20,7 +20,7 @@ module PPTConnectionModule =
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections (doc: PresentationDocument) =
         Office.SlidesSkipHide(doc)
-        |> Seq.map (fun (slide, _) -> slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<ConnectionShape>())
+        |> Seq.map (fun (slide, _) -> slide, slide.GetShapeTreeConnectionShapes())
         |> Seq.map (fun (slide, connects) ->
             slide,
             connects
@@ -47,10 +47,9 @@ module PPTConnectionModule =
     ///전체 사용된 도형간 그룹지정 정보
     let Groups (doc: PresentationDocument) =
         Office.SlidesSkipHide(doc)
-        |> Seq.filter (fun (slide, _) -> slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>().Any())
-        |> Seq.map (fun (slide, _) -> slide, slide.Slide.CommonSlideData.ShapeTree.Descendants<GroupShape>() |> Seq.toList)
+        |> Seq.filter (fun (slide, _) -> slide.GetShapeTreeGroupShapes().Any())
+        |> Seq.map (fun (slide, _) -> slide,  slide.GetShapeTreeGroupShapes()|> Seq.toList)
 
-        
     let GetCausal (conn: ConnectionShape, iPage, startName, endName) =
         let shapeProperties = conn.Descendants<ShapeProperties>().FirstOrDefault()
         let outline = shapeProperties.Descendants<Outline>().FirstOrDefault()

@@ -347,14 +347,17 @@ type FindExtension =
                     x.GetDevicesCoin() //출력있는건 무조건  Coin
                         .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
 
+  
     [<Extension>] static member GetDevicesForHMI(x:DsSystem) = 
-                    x.GetDevicesCoin()
-                        .Where(fun (dev, call) -> call.TargetJob.JobMulti <> Single || not(dev.IsOutAddressSkipOrEmpty))
-
-    [<Extension>] static member GetDevicesForHMIOnlyJobFirst(x:DsSystem) = 
+                 //kia demo //test ahn
                     x.GetDevicesCoin()
                         .Where(fun (dev, call) -> call.TargetJob.JobMulti <> Single || not(dev.IsOutAddressSkipOrEmpty))
                          |> Seq.filter(fun (dev,c) -> c.TargetJob.DeviceDefs.First() = dev)
+                 //normal //test ahn
+                    //x.GetDevicesCoin()
+                    //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))
+
+
 
     [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
                     x.GetDevicesCall()

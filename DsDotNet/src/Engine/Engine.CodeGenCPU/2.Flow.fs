@@ -65,15 +65,21 @@ type VertexManager with
     member v.F4_CallEndInFlow() =
         let sets =
             let callExpr = v.SF.Expr <&&> !@v.RF.Expr
-            match v.Vertex  with
-            | :? Call as call ->  
+            let getExpr(call:Call) = 
                 if   call.IsOperator
                 then
                      call.VC.CallOperatorValue.Expr  <||> callExpr
                 else 
                      call.End  <||> callExpr
+
+            match v.Vertex  with
+            | :? Call as c ->   getExpr c
+            | :? Alias as rf -> 
+                    match  rf.TargetWrapper with
+                    | DuAliasTargetReal _ -> failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
+                    | DuAliasTargetCall c ->    getExpr c
             | _ ->
-                failwithlog "Error"
+                failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
              
         (sets, v._off.Expr) --| (v.ET, getFuncName())
 

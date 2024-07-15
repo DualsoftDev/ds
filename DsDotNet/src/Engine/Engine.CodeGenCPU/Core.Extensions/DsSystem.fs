@@ -206,7 +206,7 @@ module ConvertCpuDsSystem =
             x.GenerationCondition()
             
         member private x.GenerationCallManualMemory()  = 
-            let devCalls = x.GetDevicesForHMIOnlyJobFirst() 
+            let devCalls = x.GetDevicesForHMI() 
             for (dev, call) in devCalls do
                 let cv =  call.TagManager :?> VertexMCall
                 if call.TargetJob.JobMulti = JobTypeMulti.Single 

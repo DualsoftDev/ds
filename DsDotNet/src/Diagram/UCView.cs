@@ -47,6 +47,7 @@ public partial class UcView : UserControl
     int edge_attr_linewidthWeek = 1;
     int edge_attr_HeadSize = 7;
     int nnode_label_fontsize = 6;
+    int nnode_label_fontsize_call = 4;
 
     private readonly Dictionary<string, Node> _dicDrawing = new();
 
@@ -94,17 +95,35 @@ public partial class UcView : UserControl
         viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
     }
 
-    private void UpdateLabelText(Node nNode, int goingCnt)
+    public void ForceUpdateLabelText()
     {
-        var org = nNode.Label.Text.Split(';')[0].Split('\v')[0];
+        MasterNode.UsedViewNodes.Where(w => w.IsVertex).Iter(viewNode =>
+        {
+            Node node = findNode(viewNode);
+            UpdateLabelText(node, viewNode);
+        });
+    }
+
+
+    private void UpdateLabelText(Node nNode, ViewNode viewNode)
+    {
+        int goingCnt = viewNode.GoingCnt;
+        var org = viewNode.DisplayName; 
         if (goingCnt > 0)
             nNode.LabelText = $"{org}\v\r\n({goingCnt})";
         else
             nNode.LabelText = org;
 
-
         nNode.Label.FontColor = Color.White;
-        nNode.Label.FontSize = nnode_label_fontsize;
+
+        if (viewNode.ViewType == ViewType.VREAL)
+        {
+            nNode.Label.FontSize = nnode_label_fontsize;
+        }
+        else
+        {
+            nNode.Label.FontSize = nnode_label_fontsize_call;
+        }
     }
 
     private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
@@ -146,7 +165,7 @@ public partial class UcView : UserControl
         }
 
         Edge gEdge = viewer.Graph.AddEdge(subGraph.Id, "", subGraph.Id);
-        UpdateLabelText(gEdge.SourceNode, viewNode.GoingCnt);
+        UpdateLabelText(gEdge.SourceNode, viewNode);
         UpdateNodeView(gEdge.SourceNode, viewNode);
         gEdge.IsVisible = false;
 
@@ -257,8 +276,8 @@ public partial class UcView : UserControl
            throw new Exception($"Error {et.ToText()} not DrawEdgeStyle");
         }
 
-        UpdateLabelText(gEdge.SourceNode, edge.Sources.First().GoingCnt);
-        UpdateLabelText(gEdge.TargetNode, edge.Targets.First().GoingCnt);
+        UpdateLabelText(gEdge.SourceNode, edge.Sources.First());
+        UpdateLabelText(gEdge.TargetNode, edge.Targets.First());
 
         if (model)
         {
@@ -500,8 +519,11 @@ public partial class UcView : UserControl
         if (vRefresh) RefreshGraph();
     }
 
-    public void UpdateViewNode(ViewNode viewNode, ViewVertex vv, bool vRefresh)
+    public void UpdateViewNode(ViewNode viewNode, ViewVertex vv)
     {
+        bool vRefresh = false;
+        Node node = findNode(viewNode);
+
         UpdateStatus(viewNode, vRefresh);
         UpdateOriginValue(viewNode, vv.LampOrigin, vRefresh);
 
@@ -510,7 +532,6 @@ public partial class UcView : UserControl
         UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
 
         UpdatePlanEndValue(viewNode, vv.LampPlanEnd, vRefresh);
-
 
         RefreshGraph();
     }
@@ -521,7 +542,7 @@ public partial class UcView : UserControl
         Node node = findNode(viewNode);
         if (node != null)
         {
-            UpdateLabelText(node, viewNode.GoingCnt);
+            UpdateLabelText(node, viewNode);
             UpdateBackColor(viewNode.Status4, node);
             if (vRefresh) RefreshGraph();
         }

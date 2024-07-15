@@ -416,7 +416,7 @@ module ExportIOTable =
         let dt = getLabelTable "액션이름"
 
         let rows =
-            let devs =  sys.GetDevicesForHMIOnlyJobFirst()
+            let devs =  sys.GetDevicesForHMI()
             devs.Select(fun (dev, _)-> 
                 let text = 
                     if dev.MaunualActionAddress = TextSkip then
@@ -470,7 +470,7 @@ module ExportIOTable =
         let dt = getLabelTable "디바이스이름"
       
         let rows =
-            let devCallSet =  sys.GetDevicesForHMIOnlyJobFirst()
+            let devCallSet =  sys.GetDevicesForHMI()
             devCallSet.Select(fun (dev,call)-> 
                     
                     let hasSafety = call.SafetyConditions.Count > 0   
@@ -570,8 +570,8 @@ module ExportIOTable =
                ]
 
         let rows =
-            //let devs = sys.GetDevicesForHMI()
-            let devs = sys.GetDevicesForHMIOnlyJobFirst() //kia demo //teat ahn
+            
+            let devs = sys.GetDevicesForHMI()
             devs
             |> Seq.collect (fun (dev,_) ->
                  [   

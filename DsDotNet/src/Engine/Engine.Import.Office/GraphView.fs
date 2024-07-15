@@ -3,6 +3,7 @@ namespace Engine.Import.Office
 
 open Dual.Common.Core.FS
 open Engine.Core
+open Engine.CodeGenCPU
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Linq
@@ -37,6 +38,31 @@ module rec ViewModule =
 
               ]
             |> Seq.distinct
+
+
+        let callSafeAutoPreName (call: Call) =
+            let getNameNValue(sa:SafetyAutoPreCondition) =  
+                let condiCall = sa.GetCall()
+                let values = String.Join(","
+                    , condiCall.TargetJob
+                               .DeviceDefs
+                               .Where(fun f-> f.InTag.IsNonNull())
+                               .Select(fun f->
+                                    match getDataType f.InTag.DataType  with
+                                    | DuBOOL -> 
+                                        if Convert.ToBoolean(f.InTag.BoxedValue)
+                                        then "O" else "X"
+                                    | _-> f.InTag.BoxedValue.ToString())
+                                    )
+
+                $"{condiCall.Name} {values}"
+            let safeties = String.Join(", ", call.SafetyConditions.Select(fun f->getNameNValue f))
+            let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""
+
+            let autoPres = String.Join(", ", call.AutoPreConditions.Select(fun f->getNameNValue f))
+            let autoPresName = if autoPres.Length > 0 then $"[{autoPres}]\r\n" else ""
+
+            $"{safeName}{autoPresName}"
 
 
         new(name, viewType) = ViewNode(name, viewType, None, None, None, None)
@@ -122,32 +148,56 @@ module rec ViewModule =
         member x.UpdateGoingCnt() = goingCont <- goingCont+1
         member x.GoingCnt = goingCont 
 
-        [<Browsable(false)>]
-        member x.UIKey =
+     
+        member x.DisplayName =   
             if coreVertex.IsSome then   
-                let vKey = coreVertex.Value.QualifiedName.GetHashCode()
-                let safeties = match coreVertex.Value.GetPure() with
-                               | :? Call as c -> String.Join(", ", c.SafetyConditions.Select(fun f->f.Name))
-                               | :? Real -> ""
-                               |_-> failwithlog $"Error {coreVertex.Value.Name}"
-                let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""
-
-
-                let autoPres = match coreVertex.Value.GetPure() with
-                               | :? Call as c -> String.Join(", ", c.AutoPreConditions.Select(fun f->f.Name))
-                               | :? Real -> ""
-                               |_-> failwithlog $"Error {coreVertex.Value.Name}"
-
-                let autoPresName = if autoPres.Length > 0 then $"[{autoPres}]\r\n" else ""
+                let safeAutoPre = match coreVertex.Value.GetPure() with
+                                   | :? Call as c -> callSafeAutoPreName c
+                                   | :? Real -> ""
+                                   |_-> failwithlog $"Error {coreVertex.Value.Name}"
 
                 match coreVertex.Value with
                 | :? Alias as a ->
                     if a.IsOtherFlowRealAlias || not(a.IsSameFlow)
-                    then $"{safeName}{autoPresName}{a.GetPure().ParentNPureNames.Combine()};{vKey}"  
-                    else  $"{safeName}{autoPresName}{name};{vKey}"
-                | _ -> $"{safeName}{autoPresName}{x.PureVertex.Value.Name};{vKey}"
-            else
-                $"{name};{x.GetHashCode()}"
+                    then $"{safeAutoPre}{a.GetPure().ParentNPureNames.Combine()}"  
+                    else  $"{safeAutoPre}{name}"
+                | _ -> $"{safeAutoPre}{x.PureVertex.Value.Name}"
+
+            else 
+                $"{name}"
+
+        [<Browsable(false)>]
+        member x.UIKey =
+                if coreVertex.IsSome then   
+                    coreVertex.Value.QualifiedName.GetHashCode().ToString()
+                else 
+                    x.GetHashCode().ToString()
+
+            //if coreVertex.IsSome then   
+            //    let vKey = coreVertex.Value.QualifiedName.GetHashCode()
+            //    let safeties = match coreVertex.Value.GetPure() with
+            //                   | :? Call as c -> String.Join(", ", c.SafetyConditions.Select(fun f->f.Name))
+            //                   | :? Real -> ""
+            //                   |_-> failwithlog $"Error {coreVertex.Value.Name}"
+            //    let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""
+
+
+            //    let autoPres = match coreVertex.Value.GetPure() with
+            //                   | :? Call as c -> String.Join(", ", c.AutoPreConditions.Select(fun f->f.Name))
+            //                   | :? Real -> ""
+            //                   |_-> failwithlog $"Error {coreVertex.Value.Name}"
+
+            //    let autoPresName = if autoPres.Length > 0 then $"[{autoPres}]\r\n" else ""
+
+            //    match coreVertex.Value with
+            //    | :? Alias as a ->
+            //        if a.IsOtherFlowRealAlias || not(a.IsSameFlow)
+            //        then $"{safeName}{autoPresName}{a.GetPure().ParentNPureNames.Combine()};{vKey}"  
+            //        else  $"{safeName}{autoPresName}{name};{vKey}"
+            //    | _ -> $"{safeName}{autoPresName}{x.PureVertex.Value.Name};{vKey}"
+            //else
+            //    $"{name};{x.GetHashCode()}"
+
 
 
         [<Browsable(false)>]

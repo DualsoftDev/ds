@@ -1,6 +1,7 @@
 namespace Engine.Info
 
 open System
+open System.IO
 open Microsoft.Data.Sqlite
 open Engine.Core
 open Dual.Common.Base.FS
@@ -71,7 +72,6 @@ module DBLoggerORM =
 
         let ModelRuntime = "modelRuntime"
         let ModelFilePath = "modelFilePath"
-        let ModelFileLastModfied = "modelFileLastModfied"
 
 
     let sqlCreateSchema =
@@ -89,7 +89,6 @@ CREATE TABLE [{Tn.Storage}] (
 CREATE TABLE [{Tn.Model}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [path]        NVARCHAR(128) NOT NULL  -- pptx/zip path
-    , [lastModified] TEXT NOT NULL  -- file last modified
     , [runtime]     NVARCHAR(128) NOT NULL CHECK(runtime IN ('PC', 'PCSIM', 'PLC', 'PLCSIM'))       -- , 'LightPC', 'LightPLC', 'Simulation', 'Developer'
 );
 
@@ -204,13 +203,12 @@ CREATE VIEW [{Vn.Storage}] AS
 
 
     /// DB log table 의 row 항목
-    type ORMModel(id: int, path:string, lastModified:DateTime) =
-        new() = ORMModel(-1, null, DateTime.MinValue)
+    type ORMModel(id: int, path:string) =
+        new() = ORMModel(-1, null)
 
         interface IDBRow
         member val Id = id with get, set
         member val Path = path with get, set
-        member val LastModified = lastModified with get, set
 
     /// tagKind table row
     type ORMTagKind() =
@@ -390,13 +388,13 @@ type LoggerDBSettingsExt =
 
     [<Extension>]
     static member FillModelId(loggerDBSettings:LoggerDBSettings): int*string =
+        Directory.CreateDirectory(Path.GetDirectoryName(loggerDBSettings.ConnectionPath)) |> ignore
         use conn = loggerDBSettings.CreateConnection()
         use tr = conn.BeginTransaction()
         let tableExists = conn.IsTableExistsAsync(Tn.Model).Result
 
         let mutable path = loggerDBSettings.ModelFilePath
         let mutable runtime = loggerDBSettings.DbWriter
-        let mutable lastModified = DateTime.MaxValue
         let lastModelInfoSpecified = path.NonNullAny() && runtime.NonNullAny()
 
 
@@ -407,26 +405,18 @@ type LoggerDBSettingsExt =
             // schema 새로 생성
             conn.ExecuteSilentlyAsync(sqlCreateSchema, tr).Wait()
 
-        if lastModelInfoSpecified then
-            lastModified <- System.IO.FileInfo(path).LastWriteTime
-        else
+        if not lastModelInfoSpecified then
             let propDic = conn.Query<ORMProperty>($"SELECT * FROM [{Tn.Property}]", null, tr) |> map (fun p -> p.Name, p.Value) |> Tuple.toDictionary
             path <- propDic[PropName.ModelFilePath]
-            lastModified <- propDic[PropName.ModelFileLastModfied] |> DateTime.Parse
             if runtime.IsNullOrEmpty() then
                 runtime <- propDic[PropName.ModelRuntime]
-            let fi = System.IO.FileInfo(path)
-            if fi.LastWriteTime.TruncateMilliseconds() <> lastModified then
-                failwith "Model file has been changed. Please update the model file path."
-            ()
 
-        let param = {|Path = path; Runtime = runtime; LastModified = lastModified|}
+        let param = {|Path = path; Runtime = runtime |}
         let optModel =
             let sql =
                 $"""SELECT * FROM {Tn.Model}
                         WHERE path = @Path
-                        AND runtime = @Runtime
-                        AND lastModified = @LastModified"""
+                        AND runtime = @Runtime"""
             conn.TryQuerySingle<ORMModel>(sql, param, tr)
 
         match optModel with
@@ -436,17 +426,16 @@ type LoggerDBSettingsExt =
                     (name, value)
                     VALUES(@Name, @Value);"""
             conn.Execute(propSql, {| Name = PropName.ModelFilePath; Value = path |}, tr) |> ignore
-            conn.Execute(propSql, {| Name = PropName.ModelFileLastModfied; Value = lastModified.ToString() |}, tr) |> ignore
             conn.Execute(propSql, {| Name = PropName.ModelRuntime; Value = runtime |}, tr) |> ignore
 
-            logInfo $"Model: id = {m.Id}, path={path}, lastModified={lastModified}"
+            logInfo $"Model: id = {m.Id}, path={path}"
             loggerDBSettings.ModelId <- m.Id
         | _ ->
             loggerDBSettings.ModelId <-
                 conn.InsertAndQueryLastRowIdAsync(tr,
                     $"""INSERT INTO [{Tn.Model}]
-                        (path, lastModified, runtime)
-                        VALUES (@Path, @LastModified, @Runtime)
+                        (path, runtime)
+                        VALUES (@Path, @Runtime)
                     """,
                     param
                 ).Result

@@ -182,18 +182,19 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Name = name with get, set
 
     /// DB log table 의 row 항목
-    type ORMLog(id: int, storageId: int, at: DateTime, value: obj) =
+    type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int) =
         do
             let x = 1
             ()
 
-        new() = ORMLog(-1, -1, DateTime.MaxValue, null)
+        new() = ORMLog(-1, -1, DateTime.MaxValue, null, -1)
 
         interface IDBRow
         member val Id = id with get, set
         member val StorageId = storageId with get, set
         member val At = at with get, set
         member val Value = value with get, set
+        member val ModelId = modelId with get, set
         static member private settings =
             let settings = new JsonSerializerSettings(TypeNameHandling = TypeNameHandling.All)
             settings.Converters.Insert(0, new ObjTypePreservingConverter([|"Value"|]))
@@ -217,18 +218,18 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Name = "" with get, set
 
     /// Runtime 생성 log 항목
-    type Log(id: int, storage: Storage, at: DateTime, value: obj) =
-        inherit ORMLog(id, storage.Id, at, value)
-        new() = Log(-1, getNull<Storage> (), DateTime.MaxValue, null)
+    type Log(id: int, storage: Storage, at: DateTime, value: obj, modelId:int) =
+        inherit ORMLog(id, storage.Id, at, value, modelId)
+        new() = Log(-1, getNull<Storage> (), DateTime.MaxValue, null, -1)
 
         interface IDBRow
         member val Storage = storage with get, set
         member val At = at with get, set
         member val Value: obj = value with get, set
 
-    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj) =
-        inherit ORMLog(logId, storageId, at, value)
-        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null)
+    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj, modelId:int) =
+        inherit ORMLog(logId, storageId, at, value, modelId)
+        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null, -1)
         member val Name = name with get, set
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set

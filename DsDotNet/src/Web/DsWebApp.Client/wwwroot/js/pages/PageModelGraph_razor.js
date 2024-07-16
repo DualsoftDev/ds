@@ -8,6 +8,15 @@ cy.on('click', evt => {
     }
 })
 
+cy.on('click', 'node', evt => {
+    if (evt.target.id) {
+        console.log(`clicked  cy.$('#${evt.target.id()}')`);
+        var fqdn = cy.$(`#${evt.target.id()}`).data('fqdn')
+        dotNetHelper.invokeMethodAsync('HandleNode', 'click', fqdn);
+    }
+})
+
+
 // 'node' 클래스의 모든 노드에 mouseover 이벤트 리스너를 추가
 cy.on('mouseover', 'node', function (event) {
     var node = event.target;
@@ -30,6 +39,7 @@ cy.on('mouseout', 'node', function (event) {
     var node = event.target;
     // 여기서 노드에서 마우스가 떠났을 때의 작업을 수행합니다.
     console.log('Mouse out from node:', node.data('fqdn'));
+    dotNetHelper.invokeMethodAsync('echo', `Mouse out from node: ${node.data('fqdn')}`);
     node.style({
         'border-color': '',
         'border-width': '',
@@ -41,6 +51,10 @@ cy.on('mouseout', 'node', function (event) {
         'label': '' // 라벨 제거
     });
 });
+
+window.setDotnetObjRef = function (dotNetHelper) {
+    window.dotNetHelper = dotNetHelper
+}
 
 
  window.getEdgeLabel = function (edge) {

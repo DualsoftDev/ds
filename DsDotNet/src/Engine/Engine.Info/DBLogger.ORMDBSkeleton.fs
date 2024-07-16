@@ -92,4 +92,4 @@ type ORMDBSkeletonDTOExt =
     static member ToView(db:ORMDBSkeleton, log:ORMLog): ORMVwLog =
         let stg = db.Storages[log.StorageId]
         let tagKind = db.TagKinds[stg.TagKind]
-        ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value)
+        ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value, log.ModelId)

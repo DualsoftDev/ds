@@ -39,7 +39,7 @@ module internal DBLoggerImpl =
 
     let ormLog2Log (logSet: LogSet) (l: ORMLog) =
         let storage = logSet.StoragesById[l.StorageId]
-        Log(l.Id, storage, l.At, l.Value)
+        Log(l.Id, storage, l.At, l.Value, l.ModelId)
 
     type LogSet with
         // ormLogs: id 순(시간 순) 정렬
@@ -215,7 +215,8 @@ module internal DBLoggerImpl =
                         noop ()
 
                     let value = toDecimal x.Storage.BoxedValue
-                    ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
+                    let modelId = logSet.QuerySet.ModelId
+                    ORMLog(-1, storageId, x.Time, value, modelId) |> queue.Enqueue
                 | None -> failwithlog "NOT yet!!"
 
         let enqueLogForInsert (x: DsLog) = enqueLogsForInsert ([ x ])
@@ -232,6 +233,7 @@ module internal DBLoggerImpl =
                     do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
 
                 let! logSet = createLogInfoSetCommonAsync(queryCriteria, commonAppSettings, systems, conn, tr, readerWriterType)
+                assert(logSet.QuerySet.ModelId = queryCriteria.ModelId)
                 if queryCriteria <> null then
                     let! existingLogs =
                         conn.QueryAsync<ORMLog>(
@@ -369,7 +371,8 @@ module internal DBLoggerImpl =
                 let! newLogs =
                     conn.QueryAsync<ORMLog>(
                         $"""SELECT * FROM [{Tn.Log}] 
-                            WHERE id > {lastLogId} ORDER BY id DESC;"""
+                            WHERE modelId = @ModelId AND id > @LastLogId ORDER BY id DESC;""",
+                        {| ModelId = queryCriteria.ModelId; LastLogId = lastLogId; |}
                     )
                 // TODO: logSet.QuerySet.StartTime, logSet.QuerySet.EndTime 구간 내의 것만 필터
                 if newLogs.any () then

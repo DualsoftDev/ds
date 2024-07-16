@@ -23,6 +23,16 @@ module private DsParserHelperModule =
     let errorLoadCore (ctx:RuleContext) = 
         let err = ParserError("", ctx).ToString() 
         failwithlog ($"""규칙확인{err.Split('\n').Skip(1).Combine("\n")}""")
+        
+    let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) = 
+        let (inaddr, inParam), (outaddr, outParm) =
+            ctx.TryFindFirstChild<DevParamInOutContext>()
+            |> Option.get 
+            |> commonDeviceParamExtractor
+        let device = jobNameFqdn.Take(2).Combine(TextDeviceSplit)
+        let api = GetLastParenthesesReplaceName (jobNameFqdn.Last(), "")
+
+        {ApiFqnd = [|device; api|]; InParam = inParam; OutParam = outParm; InAddress = inaddr; OutAddress = outaddr}
 
     type DsSystem with
 
@@ -413,7 +423,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     /// system context 아래에 기술된 모든 vertex 들을 생성한다.
     member x.CreateVertices(_ctx: SystemContext) =
         let system = x.TheSystem
-        let sysctx = x.AntlrParser.system ()
+        let sysctx = x.AntlrParser.system()
 
         let getContainerChildPair (ctx: ParserRuleContext) : (ParentWrapper  * NamedContextInformation * ParserRuleContext) option =
             let ci = x.GetContextInformation(ctx)
@@ -589,16 +599,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 options.Storages.Add(name, variable) |> ignore
 
             | None -> ()
-
-        let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) = 
-            let (inaddr, inParam), (outaddr, outParm) =
-                ctx.TryFindFirstChild<DevParamInOutContext>()
-                |> Option.get 
-                |> commonDeviceParamExtractor
-            let device = jobNameFqdn.Take(2).Combine(TextDeviceSplit)
-            let api = GetLastParenthesesReplaceName (jobNameFqdn.Last(), "")
-
-            {ApiFqnd = [|device; api|]; InParam = inParam; OutParam = outParm; InAddress = inaddr; OutAddress = outaddr}
 
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =

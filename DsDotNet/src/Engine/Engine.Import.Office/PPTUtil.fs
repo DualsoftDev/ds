@@ -480,7 +480,10 @@ module PPTUtil =
                 false
             else
                 let geometry = shape.GetGeometry()
-                geometry.Preset.Value = Drawing.ShapeTypeValues.NoSmoking
+                if geometry = null 
+                then false
+                else 
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.NoSmoking
         
         //[<Extension>]
         //static member CheckFlowChartDecision(shape: Shape) =
@@ -496,7 +499,10 @@ module PPTUtil =
                 false
             else
                 let geometry = shape.GetGeometry()
-                geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartPreparation
+                if geometry = null 
+                then false
+                else 
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.FlowChartPreparation
 
         [<Extension>]
         static member CheckBlockArc(shape: Shape) =
@@ -504,8 +510,10 @@ module PPTUtil =
                 false
             else
                 let geometry = shape.GetGeometry()
-                geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc
-
+                if geometry = null 
+                then false
+                else 
+                    geometry.Preset.Value = Drawing.ShapeTypeValues.BlockArc
 
 
         // Layout  정의 블록
@@ -646,7 +654,6 @@ module PPTUtil =
              || shape.IsFlowChartPreparation() //CallRX
              || shape.IsLayout())
 
- 
 
       
 
@@ -657,7 +664,7 @@ module PPTUtil =
             let isNonTextShape (shape: Shape) =
                 not (shape.IsTitleBox()) && not (shape.Descendants<TextBody>().Any())
 
-            let allShapes = slidePart.GetShapeTreeShapes()
+            let allShapes = slidePart.GetShapeTreeShapes() |> Seq.filter(fun f-> Office.IsValidShape(f))
             allShapes
                 |> Seq.filter isNonTextShape
                 |> Seq.except (ableShapes)
@@ -818,14 +825,14 @@ module PPTUtil =
                    /// 전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
         static member GetShapeAndGeometries(shapes: Shape seq) : (Shape * ShapeTypeValues) seq =
-            shapes
-            |> Seq.filter (fun shape -> shape.IsValidShape())
-            |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
-            |> Seq.map (fun shape ->
-                let geometry =
-                    shape.Descendants<Drawing.PresetGeometry>().First().Preset.Value
+                shapes
+                |> Seq.filter (fun shape -> shape.IsValidShape())
+                |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
+                |> Seq.map (fun shape ->
+                    let geometry =
+                        shape.Descendants<Drawing.PresetGeometry>().First().Preset.Value
 
-                shape, geometry)
+                    shape, geometry)
 
         [<Extension>]
         static member private GetShapeTreeElements<'T when 'T :> OpenXmlElement>(slidePart: SlidePart) =

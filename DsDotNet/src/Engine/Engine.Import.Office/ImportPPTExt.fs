@@ -720,17 +720,53 @@ module ImportU =
 
             let processPage (doc: pptDoc) (mySys: DsSystem) (systemRepo: ShareableSystemRepository) (page: pptPage) =
                 match Office.GetSlideNoteText(doc.Doc, page.PageNum) with
-                | note when note <> "" ->
-                    let dsText = $"[sys] temp = {{ [prop] = {{{note}}}}}"
+                | note when
+                       note.StartsWith ("[motions]")
+                    || note.StartsWith ("[scripts]") ->
+
+                    let dsText = $"[sys] temp = {{ [prop] = {{ {note} }}}}"
                     let dsProperties = WalkProperty(dsText, ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuName", None, DuNone))
                     dsProperties |> Seq.iter (processProperty mySys)
                 | _ -> ()
-
 
             let systemRepo = ShareableSystemRepository()
             doc.Pages 
                 |> Seq.filter (fun page -> page.PageNum <> 1)
                 |> Seq.iter (processPage doc mySys systemRepo)
+
+        [<Extension>]
+        static member MakeAddressBySlideNote(doc: pptDoc, mySys: DsSystem) =
+            let processPage (doc: pptDoc) (mySys: DsSystem) (systemRepo: ShareableSystemRepository) (page: pptPage) =
+                match Office.GetSlideNoteText(doc.Doc, page.PageNum) with
+                | note when not(note.StartsWith("[sys]"))  ->
+                    let dsText = $"[sys] temp = {{ [jobs] ={{ {note} }} }}"
+                    let devApiDefinitions = WalkJobAddress(dsText, ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuName", None, DuNone))
+                    devApiDefinitions 
+                    |> Seq.iter(fun a->
+                         match mySys.TaskDevs.TryFind(fun td->td.DeviceApiName = a.ApiFqnd.Combine()) with
+                         | Some td -> 
+                                if td.IsInAddressEmpty 
+                                then 
+                                    td.InAddress <- a.InAddress
+                                else    
+                                    failwithf "Error: %s InAddress already exists" (a.ApiFqnd.Combine())
+
+                                if td.IsOutAddressEmpty 
+                                then 
+                                    td.OutAddress <- a.OutAddress
+                                else    
+                                    failwithf "Error: %s OutAddress already exists" (a.ApiFqnd.Combine())
+
+                         | None -> failwithf "Error: %s not found" (a.ApiFqnd.Combine())
+                    )
+
+                | _ -> ()
+
+            let systemRepo = ShareableSystemRepository()
+            doc.Pages 
+                |> Seq.filter (fun page -> page.PageNum = 1)
+                |> Seq.iter (processPage doc mySys systemRepo)
+
 
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
@@ -764,8 +800,8 @@ module ImportU =
 
             //RealTime속성 만들기
             doc.MakeRealProperty(sys)
-
-
+            //Job 기본 Address SlideNote로 부터 가져오기 
+            doc.MakeAddressBySlideNote(sys)
             
             doc.PostCheckPPTSystem(sys)
             doc.IsBuilded <- true

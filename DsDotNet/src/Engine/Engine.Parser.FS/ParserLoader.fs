@@ -12,13 +12,17 @@ module ParserLoader =
 
     let private loadSystemFromDsFile (systemRepo: ShareableSystemRepository) (dsFilePath) autoGenDevice =
         let text = File.ReadAllText(dsFilePath)
-        let dir = Path.GetDirectoryName(dsFilePath)
 
-        let option =
-            ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice)
+        if text.TrimStart().StartsWith("[sys]")
+        then 
+            let dir = Path.GetDirectoryName(dsFilePath)
+            let option =
+                ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice)
 
-        let system = ModelParser.ParseFromString(text, option)
-        system
+            let system = ModelParser.ParseFromString(text, option)
+            system
+        else
+            failwithf $"Invalid ds file format \r\n ds format is [sys] ... \r\n {dsFilePath}"
 
     let loadingDS (loadingConfigDir: string) (dsFile: string )  autoGenDevice (target:PlatformTarget)=
         ParserUtil.runtimeTarget  <- target

@@ -9,6 +9,7 @@ open Engine.Core
 open type Engine.Parser.dsParser
 open System
 open System.Linq
+open Antlr4.Runtime
 
 module ModelParser =
     let Walk (parser: dsParser, options: ParserOptions) =
@@ -48,13 +49,15 @@ module ModelParser =
         Value: string
     }
 
-    let WalkProperty (text: string, options: ParserOptions) =
+    let WalkAndExtract (text: string, options: ParserOptions) =
         let (parser, _errors) = DsParser.FromDocument(text)
         let listener = new DsParserListener(parser, options)
         let sysctx = parser.system ()
         ParseTreeWalker.Default.Walk(listener, sysctx)
-        debugfn ("--- End of skeleton listener")
         parser.Reset()
+        sysctx
+
+    let ExtractPropsBlock (sysctx: ParserRuleContext) =
         seq{
             for ctx in sysctx.Descendants<PropsBlockContext>() do
                 let actions = ctx.Descendants<MotionBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getMotions 
@@ -65,8 +68,21 @@ module ModelParser =
                 yield! scripts.Select(fun (fqdn, value)-> {Type = "Script"; FQDN = fqdn; Value = value})
         }
 
+    let ExtractJobBlock  (sysctx: ParserRuleContext) =
+        [
+            for ctx in sysctx.Descendants<JobBlockContext>() do
+                let callListings = commonCallParamExtractor ctx 
+                for jobNameFqdn, _jobParam, _apiDefCtxs, callListingCtx in callListings do
+                    yield getAutoGenDevApi (jobNameFqdn,  callListingCtx) 
+        ]
 
-       
+    let WalkProperty (text: string, options: ParserOptions) =
+        WalkAndExtract(text, options) |> ExtractPropsBlock
+
+
+    let WalkJobAddress (text: string, options: ParserOptions) =
+        WalkAndExtract(text, options) |> ExtractJobBlock
+
 
     let ParseFromString2 (text: string, options: ParserOptions) : DsParserListener =
         let (parser, _errors) = DsParser.FromDocument(text)

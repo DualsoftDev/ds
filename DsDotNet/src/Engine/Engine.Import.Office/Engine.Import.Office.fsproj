@@ -34,9 +34,9 @@
         <Compile Include="ExportPDF.fs" />
         <Compile Include="ExportLayoutTable.fs" />
         <Compile Include="ExportIOTable.fs" />
-        <Compile Include="ImportUtilForDev.fs" />
-        <Compile Include="ImportUtilForLib.fs" />
-        <Compile Include="ImportUtilForVertex.fs" />
+        <Compile Include="Util.Dev.fs" />
+        <Compile Include="Util.Lib.fs" />
+        <Compile Include="Util.Vertex.fs" />
         <Compile Include="ImportPPTExt.fs" />
         <Compile Include="ImportPPT.fs" />
         <Compile Include="LibraryPPTLoader.fs" />

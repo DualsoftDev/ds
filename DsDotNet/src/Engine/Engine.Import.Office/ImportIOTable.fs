@@ -134,7 +134,6 @@ module ImportIOTable =
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
-               
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 if not <| dicDev.ContainsKey(devName) then
                     Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)

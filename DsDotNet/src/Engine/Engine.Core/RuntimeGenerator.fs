@@ -62,6 +62,8 @@ module RuntimeGeneratorModule =
 
     let InitStartMemory = 1000
     let BufferAlramSize = 9999
+    let XGKAnalogOffsetByte = 128
+    let XGKAnalogOutOffsetByte = 128
 
 
     let ExternalTempMemory =  "M"

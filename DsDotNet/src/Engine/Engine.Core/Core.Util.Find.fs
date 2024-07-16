@@ -240,15 +240,14 @@ module internal ModelFindModule =
 
     let  getDevicesDisdict(x: DsSystem, onlyCoin:bool) =
         let calls = getVerticesHasJob(x).DistinctBy(fun v-> v.TargetJob)
-        let devs = calls
+        let tds = calls
                     .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
                     .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
-        devs 
-        |> Seq.distinctBy (fun (dev,_) ->dev)
-        |> Seq.sortBy (fun (dev,c) ->  $"{dev.GetInParam(c.TargetJob).Type.ToText()};{dev.GetOutParam(c.TargetJob).Type.ToText()}")
-        |> Seq.sortBy (fun (dev,_) ->  dev.Name)
-        |> Seq.sortBy (fun (dev,_) ->  dev.ApiItem.Name)
-
+        tds 
+        |> Seq.distinctBy (fun (td, _) -> td)
+        |> Seq.sortBy (fun (td, c) -> 
+            let paramSortKey = $"{td.GetInParam(c.TargetJob).Type.ToText()};{td.GetOutParam(c.TargetJob).Type.ToText()}"
+            (td.DeviceName, td.ApiItem.Name, paramSortKey))
 
     type DsSystem with
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn

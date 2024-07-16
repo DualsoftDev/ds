@@ -13,8 +13,8 @@
         <Compile Include="DBLogger.Common.fs" />
 		<Compile Include="DBLogger.ORM.fs" />
         <Compile Include="DBLogger.Query.fs" />
-        <Compile Include="DBLogger.DBOperation.fs" />
         <Compile Include="DBLogger.ORMDBSkeleton.fs" />
+        <Compile Include="DBLogger.DBOperation.fs" />
         <Compile Include="DBLogger.fs" />
         <Compile Include="DBLog.fs" />
         <Compile Include="DBLogger.Api.fs" />

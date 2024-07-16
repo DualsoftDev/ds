@@ -14,6 +14,9 @@ open DBLoggerORM
 
 [<AutoOpen>]
 module internal DBLoggerImpl =
+    /// for debugging purpose only!
+    let mutable ORMDBSkeleton = getNull<ORMDBSkeleton>()
+
     let getNewTagKindInfosAsync (conn: IDbConnection, tr: IDbTransaction) =
         let tagKindInfos = GetAllTagKinds ()
 
@@ -225,6 +228,10 @@ module internal DBLoggerImpl =
         let createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
+                
+                let! dbSckeleton = ORMDBSkeletonDTOExt.CreateLoggerDBAsync(queryCriteria.ModelId, $"Data Source={commonAppSettings.LoggerDBSettings.ConnectionPath}")
+                ORMDBSkeleton <- dbSckeleton
+
                 use conn = commonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
                 let mutable readerWriterType = DBLoggerType.Writer
@@ -396,9 +403,10 @@ module internal DBLoggerImpl =
 
                 let! existingLogs =
                     conn.QueryAsync<ORMLog>(
-                        $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
+                        $"SELECT * FROM [{Tn.Log}] WHERE modelId = @ModelId AND  at BETWEEN @START AND @END ORDER BY id;",
                         {| START = queryCriteria.StartTime
-                           END = queryCriteria.EndTime |}
+                           END = queryCriteria.EndTime
+                           ModelId = queryCriteria.ModelId|}
                     )
 
                 do! checkDbForReaderAsync (conn, tr)

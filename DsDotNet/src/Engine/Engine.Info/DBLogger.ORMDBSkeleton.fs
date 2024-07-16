@@ -87,6 +87,13 @@ type ORMDBSkeletonDTOExt =
         use conn = new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
         ORMDBSkeletonDTOExt.CreateAsync(modelId, conn, null)
 
+    [<Extension>]
+    static member CreateLoggerDBAsync(modelId:int, connStr:string): Task<ORMDBSkeleton> =
+        task {
+            let! dbDTO = ORMDBSkeletonDTOExt.CreateAsync(modelId, connStr)
+            return dbDTO |> ORMDBSkeleton
+        }
+
     /// ORMLog 를 다른 table join 을 통해서 ORM
     [<Extension>]
     static member ToView(db:ORMDBSkeleton, log:ORMLog): ORMVwLog =

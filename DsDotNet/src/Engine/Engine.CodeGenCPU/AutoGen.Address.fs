@@ -104,21 +104,17 @@ module DsAddressModule =
 
                     match ioType with 
                     | In      -> 
-                            if sizeBit = 1 
-                            then
-                                let ret = getCurrent inDigitCnt sizeBit
-                                inDigitCnt <- getNext inDigitCnt sizeBit ; ret
+                        if sizeBit = 1 
+                        then
+                            let ret = getCurrent inDigitCnt sizeBit
+                            inDigitCnt <- getNext inDigitCnt sizeBit ; ret
+                        else
+                            if XGK = target then
+                                let ret = inAnalogCnt
+                                inAnalogCnt <- inAnalogCnt+sizeBit/8 ; ret
                             else
-
-
-                            if target = PlatformTarget.XGI 
-                            then
                                 let ret = inAnalogCnt
                                 inAnalogCnt <- inAnalogCnt+1 ; ret
-                            else 
-                                let ret = inAnalogCnt
-                                inAnalogCnt <-  inAnalogCnt+sizeBit/16 ; ret
-                                 
 
                     | Out     -> 
                         if sizeBit = 1 
@@ -126,18 +122,12 @@ module DsAddressModule =
                             let ret = getCurrent outDigitCnt sizeBit
                             outDigitCnt <- getNext outDigitCnt sizeBit ; ret
                         else
-
-
-                            if target = PlatformTarget.XGI 
-                            then
+                            if XGK = target then
+                                let ret = outAnalogCnt
+                                outAnalogCnt <- outAnalogCnt+sizeBit/8 ; ret
+                            else
                                 let ret = outAnalogCnt
                                 outAnalogCnt <- outAnalogCnt+1 ; ret
-                            else 
-                                let ret =  outAnalogCnt 
-                                outAnalogCnt <-  outAnalogCnt+sizeBit/16 ; ret
-                                    
-                    
-                    
                     
                     | Memory  -> let ret = getCurrent memoryCnt sizeBit  
                                  memoryCnt <- getNext memoryCnt sizeBit; ret
@@ -222,18 +212,19 @@ module DsAddressModule =
 
                         elif target = PlatformTarget.XGK
                         then
+                            let isBool = dataType = DuBOOL
                             if sizeBit = 1
                             then
-                                getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), dataType = DuBOOL)
+                                getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), isBool)
                             else 
                                 if ioType = IOType.In 
                                 then
-                                    getXgkTextByType("P", cnt, dataType = DuBOOL)
+                                    getXgkTextByType("P", cnt+XGKAnalogOffsetByte, isBool)
                                 elif ioType = IOType.Out
                                 then
-                                    getXgkTextByType("P", cnt+1024, dataType = DuBOOL)  //test ahn 임시 Q 는 1024 시프트
+                                    getXgkTextByType("P", cnt+XGKAnalogOffsetByte+XGKAnalogOutOffsetByte, isBool)  //test ahn 임시 Q 는  시프트 ??
                                 else 
-                                    failwithf $"Error {target} not support"
+                                    failwithf $"Error {target} not support" 
                         
                         elif target = PlatformTarget.WINDOWS then
                             if ioType = IOType.In

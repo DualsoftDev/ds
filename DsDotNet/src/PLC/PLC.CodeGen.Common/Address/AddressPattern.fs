@@ -62,9 +62,7 @@ module LSEAddressPattern =
         if isBool
         then getXgkBitText(device, offset)
         else 
-            getXgkWordText(device, offset+1024)  //test ahn  임시로 아날로그는 1024 시프트해서 
-           //if offset%8 = 0 then getXgkWordText(device, (offset/8)+1024)  
-           // else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
+           getXgkWordText(device, offset)  
 
             
     let getXgKTextByTag (device:LsTagInfo) : string =

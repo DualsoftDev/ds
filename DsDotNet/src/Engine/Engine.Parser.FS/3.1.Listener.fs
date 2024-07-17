@@ -747,12 +747,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | None ->  
                                 errorLoadCore  ctx
 
-                    | _flow :: [ _dev; _api ] -> 
-                            match flow.GetVerticesOfFlow().OfType<Call>().TryFind(fun f->f.Name = ns.Combine())  with
-                            | Some call -> call|>  DuAliasTargetCall
-                            | _ -> errorLoadCore  ctx
-                            
 
+                    | _flowOrReal :: [ _dev; _api ] -> 
+                            match tryFindCall system ([ flow.Name ] @ ns) with
+                            | Some v ->
+                                (v :?> Call) |> DuAliasTargetCall
+                            |_ -> 
+                                match flow.GetVerticesOfFlow().OfType<Call>().TryFind(fun f->f.Name = ns.Combine())  with
+                                    | Some call -> call|>  DuAliasTargetCall
+                                    | _ -> errorLoadCore  ctx
+                           
                     | _ -> errorLoadCore  ctx
 
 

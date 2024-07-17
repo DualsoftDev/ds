@@ -561,16 +561,13 @@ module CoreModule =
         member x.GetAliasTargetToDs(aliasFlow:Flow) = 
                 let orgFlowName = x.TargetJob.NameComponents.Head()
                 if orgFlowName <> aliasFlow.Name
-                then   [orgFlowName]@x.DeviceNApi //other flow
-                else   x.DeviceNApi 
-
-            //match x.Parent.GetFlow() = aliasFlow with
-            //| true -> [x.Name]
-            //| false -> [x.Parent.GetFlow().Name; x.Name]
-            //match x.Parent.GetCore() with
-            //    | :? Real as r -> [r.Name]@x.DeviceNApi
-            //    | :? Flow -> [x.Name]
-            //    | _->failwithlog "Error"
+                then 
+                    [orgFlowName]@x.DeviceNApi //other flow
+                else  
+                    match x.Parent.GetCore() with
+                        | :? Real as r -> [r.Name]@x.DeviceNApi
+                        | :? Flow -> [x.Name]
+                        | _->failwithlog "Error"
 
         member x.SafetyConditions = (x :> ISafetyAutoPreRequisiteHolder).SafetyConditions
         member x.AutoPreConditions = (x :> ISafetyAutoPreRequisiteHolder).AutoPreConditions

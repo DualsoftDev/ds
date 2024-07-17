@@ -20,8 +20,8 @@ module LoggerDB =
 
     /// Log 혹은 Storage 항목으로부터 뷰 항목 생성하기 위해서 필요한 data table 항목 cache (ORMVwLog, VwStorage 생성) 용 DTO(Data Transfer Object)
     /// Json 으로 Serialize/Deserialize 가능
-    type ORMDBSkeletonDTO(model:ORMModel, properties:ORMProperty seq, storages:ORMStorage seq, tagKinds:ORMTagKind seq) =
-        new() = ORMDBSkeletonDTO(getNull<ORMModel> (), [], [], [])
+    type ORMDBSkeletonDTO(model:ORMModel option, properties:ORMProperty seq, storages:ORMStorage seq, tagKinds:ORMTagKind seq) =
+        new() = ORMDBSkeletonDTO(None, [], [], [])
         member val Model = model with get, set
         member val Properties = properties.ToArray() with get, set
         member val Storages = storages.ToArray() with get, set
@@ -79,7 +79,7 @@ type ORMDBSkeletonDTOExt =
             let! storages   = conn.QueryAsync<ORMStorage> ($"SELECT * FROM storage  WHERE modelId = {modelId}", tr)
             let! tagKinds   = conn.QueryAsync<ORMTagKind> ($"SELECT * FROM tagKind",                            tr)
 
-            let model = models |> Seq.head
+            let model = models |> Seq.tryHead
             return ORMDBSkeletonDTO(model, properties, storages, tagKinds)
         }
     [<Extension>]

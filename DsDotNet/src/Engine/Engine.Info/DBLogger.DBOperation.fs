@@ -15,7 +15,7 @@ open DBLoggerORM
 [<AutoOpen>]
 module internal DBLoggerImpl =
     /// for debugging purpose only!
-    let mutable ORMDBSkeleton = getNull<ORMDBSkeleton>()
+    let mutable ORMDBSkeleton4Debug = getNull<ORMDBSkeleton>()
 
     let checkDbForReaderAsync (conn: IDbConnection, tr: IDbTransaction) =
         task {
@@ -165,9 +165,9 @@ module internal DBLoggerImpl =
                     let modelId = commonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
 #if DEBUG
-                        let! xxx = conn.QueryFirstOrDefaultAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
-                        assert(xxx.ModelId = modelId)
-                        assert (ORMDBSkeleton.Model.Id = modelId)
+                        let! stg = conn.QueryFirstOrDefaultAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
+                        assert(stg.ModelId = modelId)
+                        assert (ORMDBSkeleton4Debug.Model.IsNone || ORMDBSkeleton4Debug.Model.Value.Id = modelId)
                         //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
 #endif
                         let query =
@@ -224,7 +224,7 @@ module internal DBLoggerImpl =
                 let commonAppSettings = queryCriteria.CommonAppSettings
                 
                 let! dbSckeleton = ORMDBSkeletonDTOExt.CreateLoggerDBAsync(queryCriteria.ModelId, $"Data Source={commonAppSettings.LoggerDBSettings.ConnectionPath}")
-                ORMDBSkeleton <- dbSckeleton
+                ORMDBSkeleton4Debug <- dbSckeleton
 
                 use conn = commonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()

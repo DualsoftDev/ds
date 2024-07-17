@@ -822,17 +822,23 @@ module PPTUtil =
 
 
             
-                   /// 전체 사용된 도형 반환 (Text box 제외)
+        /// 전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
         static member GetShapeAndGeometries(shapes: Shape seq) : (Shape * ShapeTypeValues) seq =
                 shapes
                 |> Seq.filter (fun shape -> shape.IsValidShape())
-                |> Seq.filter (fun f -> f.ShapeName().StartsWith("TextBox") |> not)
+                |> Seq.filter (fun f -> not(f.ShapeName().StartsWith("TextBox")))
                 |> Seq.map (fun shape ->
                     let geometry =
                         shape.Descendants<Drawing.PresetGeometry>().First().Preset.Value
 
-                    shape, geometry)
+                    shape, geometry)   
+                    
+                    
+        /// 마스터페이지 객체틀 종류에서 <#내용> 항목만 골라냄
+        [<Extension>]
+        static member GetPlaceholderShapes(shapes: Shape seq) : Shape seq =
+                    shapes |> Seq.filter (fun shape -> shape.Descendants<PlaceholderShape>().Any())
 
         [<Extension>]
         static member private GetShapeTreeElements<'T when 'T :> OpenXmlElement>(slidePart: SlidePart) =
@@ -855,6 +861,27 @@ module PPTUtil =
         static member GetShapeTreeGroupShapes(slidePart: SlidePart) =
             Office.GetShapeTreeElements<GroupShape>(slidePart)
 
+            
+        /// 마스터페이지 객체틀 종류에서 <#내용> 항목만 골라냄
+        [<Extension>]
+        static member PagePlaceHolderShapes(doc: PresentationDocument) =
+            let getPlaceHolderId (shape:Shape) = shape.Descendants<ApplicationNonVisualDrawingProperties>().First().Descendants<PlaceholderShape>().First().Index
+            Office.SlidesSkipHide(doc)
+            |> Seq.collect (fun (slidePart,_) ->
+                let page = slidePart |> Office.GetPage
+                let masterPlaceHolders = Office.GetPlaceholderShapes(slidePart.SlideLayoutPart.SlideLayout.CommonSlideData.ShapeTree.Descendants<Shape>())
+                                               .Where(fun f -> f.InnerText.StartsWith("<#") && f.InnerText.EndsWith(">"))
+
+                Office.GetPlaceholderShapes(slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>())
+                |> Seq.choose(fun shape -> 
+                    match masterPlaceHolders.TryFind(fun f->getPlaceHolderId(f) = getPlaceHolderId(shape)) with
+                    | Some mp -> Some(mp.InnerText, shape.InnerText, page)
+                    | None -> None 
+                    )
+                )
+                    
+            |> Seq.toArray
+
 
         ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
@@ -865,7 +892,7 @@ module PPTUtil =
                 Office.GetShapeAndGeometries(slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>())
                 |> map(fun (shape, geometry) -> shape, page, geometry))
 
-                ///전체 사용된 도형 반환 (Text box 제외)
+        ///전체 사용된 도형 반환 (Text box 제외)
         [<Extension>]
         static member PageShapes(doc: PresentationDocument) =
             Office.SlidesSkipHide(doc)

@@ -19,7 +19,7 @@ module PPTNodeModule =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool) =
+    type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties = HashSet<string>()
         let autoPres = HashSet<string>()
@@ -41,7 +41,6 @@ module PPTNodeModule =
         let mutable realDelayTime:float option = None   
 
         let nodeType = getNodeType(shape, iPage)
-        let name = GetLastParenthesesReplaceName( nameTrim(shape) |> getTrimName shape,  "")
         let updateSafety (barckets: string) =
                 barckets.Split(';')
                     |> Seq.iter (fun f ->
@@ -99,6 +98,17 @@ module PPTNodeModule =
             let goingT, delayT = updateRealTime shape.InnerText
             realGoingTime <- goingT
             realDelayTime <- delayT
+
+        let nameNFunc(shape:Shape) = 
+                let mutable macroUpdateName = shape.InnerText.Replace("”", "\"").Replace("“", "\"") 
+                macros.Where(fun m->m.Page = iPage)
+                          .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}")
+                    )
+
+                macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+        let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
+        let nameTrim(shape:Shape) = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
+        let name = GetLastParenthesesReplaceName(nameTrim(shape) |> getTrimName shape,  "")
 
         do
 

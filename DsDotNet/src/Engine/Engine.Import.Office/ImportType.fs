@@ -58,6 +58,14 @@ module ImportType =
         | DataType = 1
         | Manual = 2
 
+
+    type MasterPageMacro = 
+        {
+            Macro : string
+            MacroRelace : string
+            Page : int
+        }
+
     type DevParamRawItem  = string*DataType*string //address, dataType, func
 
     let getDevName (row: Data.DataRow) = 

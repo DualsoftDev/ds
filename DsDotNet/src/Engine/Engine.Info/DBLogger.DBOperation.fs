@@ -17,11 +17,11 @@ module internal DBLoggerImpl =
     /// for debugging purpose only!
     let mutable ORMDBSkeleton = getNull<ORMDBSkeleton>()
 
-    let getNewTagKindInfosAsync (conn: IDbConnection, tr: IDbTransaction) =
+    let getNewTagKindInfosAsync (modelId:int, conn: IDbConnection, tr: IDbTransaction) =
         let tagKindInfos = GetAllTagKinds ()
 
         task {
-            let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}];", null, tr)
+            let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}] WHERE modelId = {modelId};", null, tr)
 
             let existingTagKindHash =
                 existingTagKindMap |> map (fun t -> t.Id, t.Name) |> HashSet
@@ -29,9 +29,9 @@ module internal DBLoggerImpl =
             return tagKindInfos |> filter (fun t -> not <| existingTagKindHash.Contains(t))
         }
 
-    let checkDbForReaderAsync (conn: IDbConnection, tr: IDbTransaction) =
+    let checkDbForReaderAsync (modelId:int, conn: IDbConnection, tr: IDbTransaction) =
         task {
-            let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
+            let! newTagKindInfos = getNewTagKindInfosAsync (modelId, conn, tr)
 
             if newTagKindInfos.any () then
                 failwithlogf $"Database sync failed."
@@ -94,11 +94,12 @@ module internal DBLoggerImpl =
                 |> map Storage
                 |> toArray
 
+            let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
             let connStr = commonAppSettings.ConnectionString
             if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connStr}"
 
-            let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}]")
+            let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
 
             let dbStorages =
                 dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
@@ -115,7 +116,6 @@ module internal DBLoggerImpl =
                 if readerWriterType = DBLoggerType.Reader then
                     failwithlogf $"Database can't be sync'ed for {connStr}"
                 else
-                    let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
                     for s in newStorages do
                         let! id =
                             conn.InsertAndQueryLastRowIdAsync(
@@ -286,7 +286,7 @@ module internal DBLoggerImpl =
                         id
                     | _ -> failwith "Multiple models found"
 
-                let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
+                let! newTagKindInfos = getNewTagKindInfosAsync (modelId, conn, tr)
 
                 for (id, name) in newTagKindInfos do
                     let query = $"INSERT INTO [{Tn.TagKind}] (id, name, modelId) VALUES (@Id, @Name, @ModelId);"
@@ -409,7 +409,7 @@ module internal DBLoggerImpl =
                            ModelId = queryCriteria.ModelId|}
                     )
 
-                do! checkDbForReaderAsync (conn, tr)
+                do! checkDbForReaderAsync (modelId, conn, tr)
 
                 do! tr.CommitAsync()
 

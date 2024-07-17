@@ -54,8 +54,12 @@ module rec ViewModule =
                                         then "O" else "X"
                                     | _-> f.InTag.BoxedValue.ToString())
                                     )
-
-                $"{condiCall.Name} {values}"
+                if call.Parent.GetFlow() = condiCall.Parent.GetFlow()
+                then 
+                    $"{condiCall.Name} {values}"
+                else 
+                    $"{condiCall.Parent.GetFlow().Name}.{condiCall.Name} {values}"
+                    
             let safeties = String.Join(", ", call.SafetyConditions.Select(fun f->getNameNValue f))
             let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""
 

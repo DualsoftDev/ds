@@ -138,6 +138,8 @@ module PPTDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
+
+
     type pptDoc(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =
 
         let pages = Dictionary<SlidePart, pptPage>()
@@ -178,6 +180,11 @@ module PPTDocModule =
                     else
                         pages.Values |> Seq.exists (fun w -> w.PageNum = page))
 
+            let getMacroKey page master = $"{page}:{master}"
+            let masterMacros =  
+                Office.PagePlaceHolderShapes(doc)
+                |> Seq.map(fun (master, value, page) -> {Macro = master; MacroRelace = value; Page = page} )
+
             pages.Values
             |> Seq.iter (fun pptPage -> 
                 let ableShapes = shapes |> Seq.filter (fun (shape, page, _) -> pptPage.PageNum = page) |> Seq.map(fun (shape,_,_) -> shape)
@@ -197,7 +204,8 @@ module PPTDocModule =
                 let headPageName = headSlide.PageTitle()
                 let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
                 let headPage = page = pptHeadPage
-                let node = pptNode (shape, page, flowName, slideSize, headPage)
+                
+                let node = pptNode (shape, page, flowName, slideSize, headPage, masterMacros)
 
                 if node.Name = "" then
                     shape.ErrorName(ErrID._13, page)

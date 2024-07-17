@@ -18,10 +18,7 @@ module PPTNodeUtilModule =
         let trimSpaceNewLine (text: string) = text |> trimSpace |> trimNewLine
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
-        let nameNFunc(shape:Shape) = shape.InnerText.Replace("”", "\"").Replace("“", "\"") |> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
-        let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
-        let nameTrim(shape:Shape) = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
-
+ 
         let getPostParam(param:DevParam) =
             match param.DevValue, param.DevTime with 
             | Some v, None -> $"{v}"

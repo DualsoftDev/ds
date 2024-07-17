@@ -76,11 +76,11 @@ module ImportPPTModule =
 
             let doc =
                 match dicPptDoc.TryGetValue pathPPT with
-                | true, existingDoc -> pptDoc (pathPPT, paras |> Some, existingDoc)
+                | true, existingDoc -> pptDoc (pathPPT, paras |> Some, existingDoc, pptParams.TargetType)
                 | false, _ ->
                     let newDoc = Office.Open(pathPPT)
                     dicPptDoc.Add(pathPPT, newDoc)
-                    pptDoc (pathPPT, paras |> Some, newDoc)
+                    pptDoc (pathPPT, paras |> Some, newDoc, pptParams.TargetType)
 
 
 

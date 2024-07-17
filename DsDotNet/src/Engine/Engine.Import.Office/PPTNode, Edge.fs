@@ -224,7 +224,7 @@ module PPTNodeModule =
             checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
 
-        member x.UpdateCallDevParm(isRoot: bool) =
+        member x.UpdateCallDevParm(isRoot: bool, target) =
             rootNode <- Some isRoot
             if nodeType = CALL then
                 let isDevCall = name.Contains(".")
@@ -237,7 +237,7 @@ module PPTNodeModule =
                     devParam <- Some(Some(inParam), None)
                 | false, true -> //real dev call
                     if hasDevParam then
-                        let inParam, outParam = getCoinParam (shape, nameNFunc(shape), iPage)
+                        let inParam, outParam = getCoinParam (shape, nameNFunc(shape), iPage, target)
                         devParam <- Some(Some(inParam), Some(outParam))
                 | _ ->  
                     if hasDevParam then failWithLog "function call 'devParam' not support"

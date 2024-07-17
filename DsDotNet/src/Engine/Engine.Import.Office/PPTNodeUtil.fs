@@ -39,7 +39,7 @@ module PPTNodeUtilModule =
             with _ ->
                 shape.ErrorName(ErrID._70, iPage)
 
-        let getCoinParam (shape:Shape, name:string, iPage:int) = 
+        let getCoinParam (shape:Shape, name:string, iPage:int, target) = 
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
@@ -53,8 +53,14 @@ module PPTNodeUtilModule =
                 let getParam x = 
                     if x = TextSkip then 
                         "" |> getDevParam |> snd
-                    else 
-                        $":{x}" |> getDevParam |> snd
+                    else
+                        match getTextValueNType x with
+                        | Some (v, t) ->
+                            if t = DuINT32 && target = XGK then  //xgk는 기본 word 규격인 us로 변환
+                                $":{v}s" |> getDevParam |> snd
+                            else
+                                $":{x}" |> getDevParam |> snd
+                        | None -> failwithf $"{x} 입력규격을 확인하세요"
 
                 getParam inFunc, getParam outFunc
             with _ ->

@@ -138,7 +138,7 @@ module PPTDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
-    type pptDoc(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument) =
+    type pptDoc(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =
 
         let pages = Dictionary<SlidePart, pptPage>()
         let nodes = Dictionary<string, pptNode>()
@@ -234,7 +234,7 @@ module PPTDocModule =
             nodes.Values
             |> Seq.iter (fun node ->
                 let isRoot = not (children |> Seq.contains node)
-                node.UpdateCallDevParm(isRoot))
+                node.UpdateCallDevParm(isRoot, target))
 
             connections
             |> Seq.iter (fun (slide, conns) -> 

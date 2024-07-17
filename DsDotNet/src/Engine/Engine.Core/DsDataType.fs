@@ -233,7 +233,6 @@ module DsDataType =
 
 
     let getTextValueNType (x: string) =
-        let mutable value = 0
         match x with
         | _ when x.StartsWith("\"") && x.EndsWith("\"") && x.Length > 1 ->
             Some (x.[1..x.Length-2], DuSTRING)
@@ -241,25 +240,28 @@ module DsDataType =
             Some (x.[1].ToString(), DuCHAR)
         | _ when x.EndsWith("f") && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.' || c = 'f') ->
             Some (x.TrimEnd('f'), DuFLOAT32)
-        | _ when x.Contains('.') && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.' ) ->
+        | _ when x.Contains('.') && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.') ->
             Some (x, DuFLOAT64)
-        | _ when x.EndsWith("uy") && x.TrimEnd([|'u';'y'|]) |> Int32.TryParse |> fst ->
+        | _ when x.EndsWith("uy") && Byte.TryParse(x.TrimEnd([|'u';'y'|]))|> fst  ->
             Some (x.TrimEnd([|'u';'y'|]), DuUINT8)
-        | _ when x.EndsWith("us") && x.TrimEnd([|'u';'s'|]) |> Int32.TryParse |> fst ->
+        | _ when x.EndsWith("us") && UInt16.TryParse(x.TrimEnd([|'u';'s'|]))|> fst  ->
             Some (x.TrimEnd([|'u';'s'|]), DuUINT16)
-        | _ when x.EndsWith("UL") && x.TrimEnd([|'U';'L'|]) |> Int64.TryParse |> fst ->
+        | _ when x.EndsWith("u") && UInt32.TryParse(x.TrimEnd('u'))|> fst  ->
+            Some (x.TrimEnd('u'), DuUINT32)
+        | _ when x.EndsWith("UL") && UInt64.TryParse(x.TrimEnd([|'U';'L'|]))|> fst  ->
             Some (x.TrimEnd([|'U';'L'|]), DuUINT64)
         | _ when x.ToLower() = "true" || x.ToLower() = "false" ->
             Some (x, DuBOOL)
-        | _ when x.EndsWith("L") && x.TrimEnd('L') |> Int64.TryParse |> fst ->
+        | _ when x.EndsWith("L") && Int64.TryParse(x.TrimEnd('L'))|> fst  ->
             Some (x.TrimEnd('L'), DuINT64)
-        | _ when x.EndsWith("u") && x.TrimEnd('u') |> Int32.TryParse |> fst ->
-            Some (x.TrimEnd('u'), DuUINT32)
-        | _ when x.EndsWith("y") && x.TrimEnd('y') |> Int32.TryParse |> fst ->
-            Some (x.TrimEnd('y'), DuINT8)
-        | _ when x.EndsWith("s") && x.TrimEnd('s') |> Int32.TryParse |> fst ->
+        | _ when x.EndsWith("I") && Int32.TryParse(x.TrimEnd('I'))|> fst  ->
+            Some (x.TrimEnd('I'), DuINT32)
+        | _ when x.EndsWith("s") && Int16.TryParse(x.TrimEnd('s'))|> fst  ->
             Some (x.TrimEnd('s'), DuINT16)
-        | _ when System.Int32.TryParse (x, &value) ->
+        | _ when x.EndsWith("y") && SByte.TryParse(x.TrimEnd('y'))|> fst  ->
+            Some (x.TrimEnd('y'), DuINT8)
+
+        | _ when Int32.TryParse(x) |> fst -> 
             Some (x, DuINT32)
         | _ -> None
         

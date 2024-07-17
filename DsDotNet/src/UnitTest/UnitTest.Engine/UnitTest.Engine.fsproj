@@ -32,6 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="DataType\DataTypeTester.fs" />
 		<Compile Include="Time\TimeSystemTester.fs" />
 		<Compile Include="Time\TimeTester.fs" />
 		<Compile Include="TestFixture.Engine.fs" />

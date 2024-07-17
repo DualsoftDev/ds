@@ -176,6 +176,7 @@ module internal DBLoggerImpl =
                         logSet.BuildIncremental newLogs
                     let modelId = commonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
+                        assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
                                 (at, storageId, value, modelId)

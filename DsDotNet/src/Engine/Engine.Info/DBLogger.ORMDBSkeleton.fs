@@ -20,8 +20,8 @@ module LoggerDB =
 
     /// Log 혹은 Storage 항목으로부터 뷰 항목 생성하기 위해서 필요한 data table 항목 cache (ORMVwLog, VwStorage 생성) 용 DTO(Data Transfer Object)
     /// Json 으로 Serialize/Deserialize 가능
-    type ORMDBSkeletonDTO(model:ORMModel, properties:ORMProperty seq, storages:ORMStorage seq, tagKinds:ORMTagKind seq) =
-        new() = ORMDBSkeletonDTO(getNull<ORMModel> (), [], [], [])
+    type ORMDBSkeletonDTO(model:ORMModel option, properties:ORMProperty seq, storages:ORMStorage seq, tagKinds:ORMTagKind seq) =
+        new() = ORMDBSkeletonDTO(None, [], [], [])
         member val Model = model with get, set
         member val Properties = properties.ToArray() with get, set
         member val Storages = storages.ToArray() with get, set
@@ -77,9 +77,9 @@ type ORMDBSkeletonDTOExt =
             let! models     = conn.QueryAsync<ORMModel>   ($"SELECT * FROM model    WHERE id      = {modelId}", tr)
             let! properties = conn.QueryAsync<ORMProperty>($"SELECT * FROM property WHERE modelId = {modelId}", tr)
             let! storages   = conn.QueryAsync<ORMStorage> ($"SELECT * FROM storage  WHERE modelId = {modelId}", tr)
-            let! tagKinds   = conn.QueryAsync<ORMTagKind> ($"SELECT * FROM tagKind  WHERE modelId = {modelId}", tr)
+            let! tagKinds   = conn.QueryAsync<ORMTagKind> ($"SELECT * FROM tagKind",                            tr)
 
-            let model = models |> Seq.head
+            let model = models |> Seq.tryHead
             return ORMDBSkeletonDTO(model, properties, storages, tagKinds)
         }
     [<Extension>]
@@ -87,9 +87,16 @@ type ORMDBSkeletonDTOExt =
         use conn = new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
         ORMDBSkeletonDTOExt.CreateAsync(modelId, conn, null)
 
+    [<Extension>]
+    static member CreateLoggerDBAsync(modelId:int, connStr:string): Task<ORMDBSkeleton> =
+        task {
+            let! dbDTO = ORMDBSkeletonDTOExt.CreateAsync(modelId, connStr)
+            return dbDTO |> ORMDBSkeleton
+        }
+
     /// ORMLog 를 다른 table join 을 통해서 ORM
     [<Extension>]
     static member ToView(db:ORMDBSkeleton, log:ORMLog): ORMVwLog =
         let stg = db.Storages[log.StorageId]
         let tagKind = db.TagKinds[stg.TagKind]
-        ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value)
+        ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value, log.ModelId)

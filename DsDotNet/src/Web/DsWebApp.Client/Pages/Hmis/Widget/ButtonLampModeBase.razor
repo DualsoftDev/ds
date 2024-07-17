@@ -93,7 +93,7 @@
     {
         // todo : mouse up 되기 전까지는, 다른 browser 창 등에 의해서 값이 변경되면, true 값을 계속 전송하도록 수정
         Button.SetValue(true);
-        await Button.PostAsync(Http, onError);
+        await Http.PostTagAsync(Button, AuthenticationStateProvider, onError);
     }
     async Task onMouseUp()
     {
@@ -101,7 +101,7 @@
         if (IsPushButton)
         {
             Button.SetValue(false);
-            await Button.PostAsync(Http, onError);
+            await Http.PostTagAsync(Button, AuthenticationStateProvider, onError);
         }
     }
 

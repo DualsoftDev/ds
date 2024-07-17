@@ -77,7 +77,7 @@ type ORMDBSkeletonDTOExt =
             let! models     = conn.QueryAsync<ORMModel>   ($"SELECT * FROM model    WHERE id      = {modelId}", tr)
             let! properties = conn.QueryAsync<ORMProperty>($"SELECT * FROM property WHERE modelId = {modelId}", tr)
             let! storages   = conn.QueryAsync<ORMStorage> ($"SELECT * FROM storage  WHERE modelId = {modelId}", tr)
-            let! tagKinds   = conn.QueryAsync<ORMTagKind> ($"SELECT * FROM tagKind  WHERE modelId = {modelId}", tr)
+            let! tagKinds   = conn.QueryAsync<ORMTagKind> ($"SELECT * FROM tagKind",                            tr)
 
             let model = models |> Seq.head
             return ORMDBSkeletonDTO(model, properties, storages, tagKinds)

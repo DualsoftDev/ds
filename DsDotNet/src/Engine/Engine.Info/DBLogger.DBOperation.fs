@@ -17,21 +17,9 @@ module internal DBLoggerImpl =
     /// for debugging purpose only!
     let mutable ORMDBSkeleton = getNull<ORMDBSkeleton>()
 
-    let getNewTagKindInfosAsync (modelId:int, conn: IDbConnection, tr: IDbTransaction) =
-        let tagKindInfos = GetAllTagKinds ()
-
+    let checkDbForReaderAsync (conn: IDbConnection, tr: IDbTransaction) =
         task {
-            let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}] WHERE modelId = {modelId};", null, tr)
-
-            let existingTagKindHash =
-                existingTagKindMap |> map (fun t -> t.Id, t.Name) |> HashSet
-
-            return tagKindInfos |> filter (fun t -> not <| existingTagKindHash.Contains(t))
-        }
-
-    let checkDbForReaderAsync (modelId:int, conn: IDbConnection, tr: IDbTransaction) =
-        task {
-            let! newTagKindInfos = getNewTagKindInfosAsync (modelId, conn, tr)
+            let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
 
             if newTagKindInfos.any () then
                 failwithlogf $"Database sync failed."
@@ -176,7 +164,12 @@ module internal DBLoggerImpl =
                         logSet.BuildIncremental newLogs
                     let modelId = commonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
-                        assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
+#if DEBUG
+                        let! xxx = conn.QueryFirstOrDefaultAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
+                        assert(xxx.ModelId = modelId)
+                        assert (ORMDBSkeleton.Model.Id = modelId)
+                        //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
+#endif
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
                                 (at, storageId, value, modelId)
@@ -199,7 +192,7 @@ module internal DBLoggerImpl =
 
         let writePeriodicAsync = dequeAndWriteDBAsync
 
-        let enqueLogsForInsert (xs: DsLog seq) =
+        let enqueLogsForInsert (xs: DsLog seq) : unit =
             let toDecimal (value: obj) =
                 match toBool value with
                 | Bool b -> (if b then 1 else 0) |> decimal
@@ -223,7 +216,7 @@ module internal DBLoggerImpl =
                     ORMLog(-1, storageId, x.Time, value, modelId) |> queue.Enqueue
                 | None -> failwithlog "NOT yet!!"
 
-        let enqueLogForInsert (x: DsLog) = enqueLogsForInsert ([ x ])
+        let enqueLogForInsert (x: DsLog) : unit = enqueLogsForInsert ([ x ])
 
 
         let createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
@@ -236,9 +229,8 @@ module internal DBLoggerImpl =
                 use conn = commonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
                 let mutable readerWriterType = DBLoggerType.Writer
-                if queryCriteria <> null then
-                    readerWriterType <- readerWriterType ||| DBLoggerType.Reader
-                    do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
+                readerWriterType <- readerWriterType ||| DBLoggerType.Reader
+                do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
 
                 let! logSet = createLogInfoSetCommonAsync(queryCriteria, commonAppSettings, systems, conn, tr, readerWriterType)
                 assert(logSet.QuerySet.ModelId = queryCriteria.ModelId)
@@ -287,11 +279,11 @@ module internal DBLoggerImpl =
                         id
                     | _ -> failwith "Multiple models found"
 
-                let! newTagKindInfos = getNewTagKindInfosAsync (modelId, conn, tr)
+                let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
 
                 for (id, name) in newTagKindInfos do
-                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name, modelId) VALUES (@Id, @Name, @ModelId);"
-                    do! conn.ExecuteSilentlyAsync(query, {| Id = id; Name = name; ModelId=modelId |}, tr)
+                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
+                    do! conn.ExecuteSilentlyAsync(query, {| Id = id; Name = name |}, tr)
 
                 do! tr.CommitAsync()
                 return modelId
@@ -327,6 +319,7 @@ module internal DBLoggerImpl =
         /// Log DB schema 생성
         let initializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
+                logDebug $":::initializeLogDbOnDemandAsync()"
                 let loggerDBSettings = commonAppSettings.LoggerDBSettings
                 if cleanExistingDb then
                     loggerDBSettings.DropDatabase()
@@ -407,10 +400,10 @@ module internal DBLoggerImpl =
                         $"SELECT * FROM [{Tn.Log}] WHERE modelId = @ModelId AND  at BETWEEN @START AND @END ORDER BY id;",
                         {| START = queryCriteria.StartTime
                            END = queryCriteria.EndTime
-                           ModelId = queryCriteria.ModelId|}
+                           ModelId = modelId|}
                     )
 
-                do! checkDbForReaderAsync (modelId, conn, tr)
+                do! checkDbForReaderAsync (conn, tr)
 
                 do! tr.CommitAsync()
 

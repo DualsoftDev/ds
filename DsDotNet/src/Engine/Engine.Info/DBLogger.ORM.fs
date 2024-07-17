@@ -104,9 +104,9 @@ CREATE TABLE [{Tn.Log}] (
 
 CREATE TABLE [{Tn.TagKind}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-    , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
-    , [modelId]     INTEGER NOT NULL
-    , CONSTRAINT uniq_row UNIQUE (id, name, modelId)
+    , [name]        NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
+    -- , [modelId]     INTEGER NOT NULL
+    , CONSTRAINT uniq_row UNIQUE (id, name)     -- , modelId
 );
 
 CREATE TABLE [{Tn.Property}] (
@@ -141,6 +141,7 @@ CREATE VIEW [{Vn.Log}] AS
         , tagKind.[name] AS tagKindName
         , log.[at] AS at
         , log.[value] AS value
+        , log.[modelId] AS modelId
     FROM [{Tn.Log}] log
     JOIN [{Tn.Storage}] stg
     ON [stg].[id] = [log].[storageId]
@@ -156,6 +157,7 @@ CREATE VIEW [{Vn.Storage}] AS
         , tagKind.[id] AS tagKind
         , tagKind.[name] AS tagKindName
         , stg.[dataType] AS dataType
+        , stg.[modelId] AS modelId
     FROM [{Tn.Storage}] stg
     JOIN [{Tn.TagKind}] tagKind
     ON [stg].[tagKind] = [tagKind].[id]
@@ -237,13 +239,14 @@ CREATE VIEW [{Vn.Storage}] AS
 
 
 
-    type ORMProperty(id:int, name: string, value: string) =
-        new() = ORMProperty(-1, null, null)
+    type ORMProperty(id:int, name: string, value: string, modelId:int) =
+        new() = ORMProperty(-1, null, null, -1)
 
         interface IDBRow
         member val Id = id with get, set
         member val Name = name with get, set
         member val Value = value with get, set
+        member val ModelId = modelId with get, set
 
     type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int) =
         new() = ORMStorage(-1, null, null, -1, null, -1)
@@ -302,13 +305,16 @@ CREATE VIEW [{Vn.Storage}] AS
         member x.Summaries = summaryDic
         member x.Storages = storageDic
         member x.StoragesById = storageByIdDic
+        member x.ModelId = queryCriteria.ModelId
         member val LastLog: Log option = None with get, set
         member x.ReaderWriterType = readerWriterType
         member x.Disposables = disposables
         member x.GetSummary(summaryKey: StorageKey) = summaryDic[summaryKey]
 
         interface ILogSet with
-            override x.Dispose() = x.Disposables.Dispose()
+            override x.Dispose() =
+                x.Disposables.Dispose()
+                tracefn "------------------ LogSet disposed"
 
 
 
@@ -370,6 +376,17 @@ CREATE VIEW [{Vn.Storage}] AS
     let createConnectionWith (connStr) =
         new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 
+    let getNewTagKindInfosAsync (conn: IDbConnection, tr: IDbTransaction) =
+        let tagKindInfos = GetAllTagKinds ()
+
+        task {
+            let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}];", null, tr)       // WHERE modelId = {modelId}
+
+            let existingTagKindHash =
+                existingTagKindMap |> map (fun t -> t.Id, t.Name) |> HashSet
+
+            return tagKindInfos |> filter (fun t -> not <| existingTagKindHash.Contains(t))
+        }
 
 [<Extension>]
 type LoggerDBSettingsExt =
@@ -429,10 +446,10 @@ type LoggerDBSettingsExt =
             conn.Execute(propSql, {| Name = PropName.ModelFilePath; Value = path |}, tr) |> ignore
             conn.Execute(propSql, {| Name = PropName.ModelRuntime; Value = runtime |}, tr) |> ignore
 
-            logInfo $"Model: id = {m.Id}, path={path}"
+            logInfo $"With new Model: id = {m.Id}, path={path}"
             loggerDBSettings.ModelId <- m.Id
         | _ ->
-            loggerDBSettings.ModelId <-
+            let modelId = 
                 conn.InsertAndQueryLastRowIdAsync(tr,
                     $"""INSERT INTO [{Tn.Model}]
                         (path, runtime)
@@ -440,6 +457,14 @@ type LoggerDBSettingsExt =
                     """,
                     param
                 ).Result
+            loggerDBSettings.ModelId <- modelId
+
+            let newTagKindInfos = (getNewTagKindInfosAsync (conn, tr)).Result
+
+            for (id, name) in newTagKindInfos do
+                let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
+                conn.Execute(query, {| Id = id; Name = name |}, tr) |> ignore
+
                 
         tr.Commit()
 

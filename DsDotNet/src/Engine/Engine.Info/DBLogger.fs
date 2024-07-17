@@ -63,7 +63,7 @@ type DBLogger() =
             let! logSet =
                 DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, modelCompileInfo, cleanExistingDb)
 
-            return logSet :> ILogSet
+            return logSet //:> ILogSet
         }
 
 

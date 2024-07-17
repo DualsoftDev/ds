@@ -34,13 +34,12 @@ module ParserUtilityModule =
 
             let rec helper (rslt: ResizeArray<'T>, frm: IParseTree, incMe: bool) =
                 if not (exclude (frm)) then
-                    if (incMe && predicate (frm) && isType<'T> frm) then
+                    if (incMe && predicate (frm)) then
                         rslt.Add(forceCast<'T> (frm))
 
                     for index in [ 0 .. frm.ChildCount - 1 ] do
                         helper (rslt, frm.GetChild(index), true)
 
-            //Func<IParseTree, bool> pred = predicate ?? new Func<IParseTree, bool>(ctx => ctx is T)
             let result = ResizeArray<'T>()
             helper (result, x, includeMe)
             result

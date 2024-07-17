@@ -106,7 +106,7 @@ module ImportUtilForDev =
         else 
             loadedSys
 
-    let getAutoGenDevTask  (autoGenSys:LoadedSystem) loadedName jobName apiName = 
+    let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName = 
         let referenceSystem = autoGenSys.ReferenceSystem
         let defaultParams =  defaultDevParam(),  defaultDevParam()
         createTaskDevUsingApiName referenceSystem jobName loadedName apiName defaultParams

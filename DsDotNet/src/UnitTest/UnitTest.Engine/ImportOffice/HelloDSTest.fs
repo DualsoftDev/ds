@@ -30,7 +30,7 @@ module HelloDSTestModule =
             RuntimeDS.Package <- PCSIM
 
         let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
-        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateBtnLamp = true}
+        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPPT = false;  CreateBtnLamp = true}
         let getSystem() =
             let result = ImportPPT.GetDSFromPPTWithLib (helloDSPath, false, pptParms)
             let { 

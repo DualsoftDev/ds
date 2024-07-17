@@ -283,8 +283,14 @@ module ImportU =
 
                     if node.IsFunction then
                         node.Shape.ErrorName($"Alias Function은 지원하지 않습니다.", node.PageNum)
+                    let segOrg =    dicVertex.[node.Alias.Value.Key]
+                  
+                    //let segOrg = 
+                    //    match dicVertex.Values.TryFind(fun f-> $"{f.Parent.GetFlow().Name}.{f.Name}" 
+                    //                                            = $"{node.Alias.Value.Name}")   with
+                    //    | Some v -> v
+                    //    | None -> node.Shape.ErrorName($"{ErrID._26} Error Name : [{node.Alias.Value.Name}]", node.PageNum)
 
-                    let segOrg = dicVertex.[node.Alias.Value.Key]
                     
                     let alias =
                         let flow = dicFlow.[node.PageNum]

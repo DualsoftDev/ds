@@ -60,7 +60,7 @@ module ImportUtilVertex =
             | None -> 
                 if device.AutoGenFromParentSystem
                 then
-                    let autoTaskDev = getAutoGenDevTask device loadSysName jobName apiName
+                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName
                     let job = Job(node.JobName, sys, [autoTaskDev])
                     job.UpdateJobParam(node.JobParam)
                     sys.Jobs.Add job |> ignore

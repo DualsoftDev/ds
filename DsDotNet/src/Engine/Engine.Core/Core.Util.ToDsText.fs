@@ -21,6 +21,11 @@ module internal ToDsTextModule =
             | :? Real as r -> r.Name.QuoteOnDemand()
             | :? Call as c -> c.NameForGraph
             | :? Alias as a -> a.Name.QuoteOnDemand()
+                    //match a.TargetWrapper.CallTarget() with
+                    //|Some c -> c.NameForGraph
+                    //|None ->
+                    //    a.Name.QuoteOnDemand()
+
             | _ -> failWithLog "ERROR"          
         name 
 
@@ -111,7 +116,7 @@ module internal ToDsTextModule =
                         let aliasKey =
                             match a.AliasTarget with
                             | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).CombineQuoteOnDemand()
-                            | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs().CombineQuoteOnDemand()
+                            | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs(flow).CombineQuoteOnDemand()
                             | None -> failwithlog "ERROR"
 
                         yield $"{tab}{aliasKey} = {lb} {aliasTexts} {rb}"

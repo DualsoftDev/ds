@@ -12,6 +12,7 @@ open Engine.Parser.FS
 [<AutoOpen>]
 module private ModelComparisonHelper =
     let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
+        ModelParser.ClearDicParsingText()
         let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
         helper.TheSystem
 

@@ -28,14 +28,14 @@ module ImportUtilForLib =
     let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) =
         match mySys.LoadedSystems.TryFind(fun f -> f.Name = name) with
         | Some f -> f.ReferenceSystem
-        | None -> ParserLoader.LoadFromActivePath libFilePath Util.runtimeTarget |> fst
+        | None -> ParserLoader.LoadFromDevicePath libFilePath Util.runtimeTarget |> fst
 
     let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (devParams: DeviceLoadParameters) =
         tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node (param.Node.JobName.CombineQuoteOnDemand())) |> ignore
 
     let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string) =
         match autoGenSys with
-        | Some autoGenSys -> getAutoGenDevTask autoGenSys loadedName jobName apiName |> Some
+        | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName |> Some
         | None -> None
 
     let addSingleTask (tasks: HashSet<TaskDev>) (task: TaskDev option) =

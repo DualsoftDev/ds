@@ -24,11 +24,12 @@ module ParserOptionModule =
             ShareableSystemRepository: ShareableSystemRepository
             AbsoluteFilePath: string option
             LoadingType: ParserLoadingType
+            IsNewModel: bool // 새로운 모델인지 여부
         }
 
     type ParserOptions with
 
-        static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, autoGenDevice) =
+        static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, autoGenDevice, isNewModel) =
             { ActiveCpuName = activeCpuName
               IsSimulationMode = false
               AllowSkipExternalSegment = false
@@ -38,17 +39,19 @@ module ParserOptionModule =
               LoadedSystemName = None
               ShareableSystemRepository = systemRepo
               AbsoluteFilePath = absoluteFilePath
-              LoadingType = loadingType }
+              LoadingType = loadingType 
+              IsNewModel = isNewModel
+              }
 
         static member Create4Simulation(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) =
             let runtime =
-                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, false)
+                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, false, true)
 
             { runtime with IsSimulationMode = true }
 
         static member Create4ChatGpt(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) =
             let runtime =
-                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, true)
+                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, true, true)
 
             { runtime with IsSimulationMode = true }
 

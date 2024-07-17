@@ -10,13 +10,21 @@ open type Engine.Parser.dsParser
 open System
 open System.Linq
 open Antlr4.Runtime
+open System.Collections.Generic
+
 
 module ModelParser =
-    let Walk (parser: dsParser, options: ParserOptions) =
+
+
+    let WalkAndExtract (text: string, options: ParserOptions) =
+        let (parser, _errors) = DsParser.FromDocument(text)
+        let _ = new DsParserListener(parser, options)
+        parser, parser.system()
+
+
+    let Walk (parser: dsParser, sysctx:SystemContext, options: ParserOptions) =
         let listener = new DsParserListener(parser, options)
-        let sysctx = parser.system ()
         ParseTreeWalker.Default.Walk(listener, sysctx)
-        debugfn ("--- End of skeleton listener")
         parser.Reset()
 
         listener.CreateVertices(sysctx)
@@ -49,13 +57,6 @@ module ModelParser =
         Value: string
     }
 
-    let WalkAndExtract (text: string, options: ParserOptions) =
-        let (parser, _errors) = DsParser.FromDocument(text)
-        let listener = new DsParserListener(parser, options)
-        let sysctx = parser.system ()
-        ParseTreeWalker.Default.Walk(listener, sysctx)
-        parser.Reset()
-        sysctx
 
     let ExtractPropsBlock (sysctx: ParserRuleContext) =
         seq{
@@ -77,16 +78,35 @@ module ModelParser =
         ]
 
     let WalkProperty (text: string, options: ParserOptions) =
-        WalkAndExtract(text, options) |> ExtractPropsBlock
+        WalkAndExtract(text, options) |> snd |> ExtractPropsBlock
 
 
     let WalkJobAddress (text: string, options: ParserOptions) =
-        WalkAndExtract(text, options) |> ExtractJobBlock
-
+        WalkAndExtract(text, options) |> snd |> ExtractJobBlock
+    
+    let _DicParsingText = Dictionary<string, dsParser*SystemContext>() //동일 절대경로는 기존 dsParser를 재사용하기 위함
+    let ClearDicParsingText() = _DicParsingText.Clear()
 
     let ParseFromString2 (text: string, options: ParserOptions) : DsParserListener =
-        let (parser, _errors) = DsParser.FromDocument(text)
-        let listener = Walk(parser, options)
+        if options.IsNewModel then
+            ClearDicParsingText()
+
+        let (parser, sysCtx) =
+            match options.AbsoluteFilePath with
+            | Some path when _DicParsingText.ContainsKey(path) -> 
+                _DicParsingText[path]
+            | _ -> 
+                let parserNctx =  WalkAndExtract (text,  options)
+                let path = if options.AbsoluteFilePath.IsSome then 
+                              options.AbsoluteFilePath.Value
+                            else 
+                                "" 
+
+                _DicParsingText.Add(path, parserNctx)
+                _DicParsingText[path]
+        
+
+        let listener = Walk(parser, sysCtx, options)
 
         let system = listener.TheSystem
         createMRIEdgesTransitiveClosure4System system
@@ -121,6 +141,7 @@ module ModelParser =
                     "ActiveCpuName",
                     Some param.AbsoluteFilePath,
                     param.LoadingType,
+                    false,
                     false
                 )
 

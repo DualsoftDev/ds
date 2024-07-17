@@ -18,6 +18,7 @@ type StoragesTest() =
     let check(dsText:string) = 
         let systemRepo = ShareableSystemRepository()
         let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
+        ModelParser.ClearDicParsingText()
         let helper = ModelParser.ParseFromString2(dsText, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
         let sys = helper.TheSystem  
         /// 파싱후에는 TagManager가 없어야 한다.

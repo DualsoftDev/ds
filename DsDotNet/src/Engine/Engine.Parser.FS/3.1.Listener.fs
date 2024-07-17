@@ -423,7 +423,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     /// system context 아래에 기술된 모든 vertex 들을 생성한다.
     member x.CreateVertices(_ctx: SystemContext) =
         let system = x.TheSystem
-        let sysctx = x.AntlrParser.system()
+        let sysctx = _ctx
 
         let getContainerChildPair (ctx: ParserRuleContext) : (ParentWrapper  * NamedContextInformation * ParserRuleContext) option =
             let ci = x.GetContextInformation(ctx)
@@ -450,6 +450,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
                 yield! sysctx.Descendants<NonCausalContext>().Cast<ParserRuleContext>() 
             ]
+
+        let candidates = candidateCtxs.Choose(getContainerChildPair)
 
         let tokenCreator (cycle: int) =
 
@@ -479,12 +481,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let aliasDef = tryFindAliasDefWithMnemonic flow name |> Option.get
                 let exFlow = aliasDef.AliasKey.length() = 2
                 Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
-
-
-            let candidates = candidateCtxs.Choose(getContainerChildPair)
               
             let loop () =
-                for (optParent, ctxInfo,  ctx) in candidates do
+                for (optParent, ctxInfo, ctx) in candidates do
                     let parent = optParent
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
                     if  (ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> 
@@ -727,38 +726,32 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         match flow.System.TryFindReal [ flow.Name; rc ] with
                         | Some r -> r |> DuAliasTargetReal
                         | None ->
-                            let vertex = flow.System.TryFindCall([ flow.Name; rc ].ToArray()) |> Option.get
-
-                            match vertex with
-                            | :? Call as c -> DuAliasTargetCall c
+                            match flow.System.TryFindCall([ flow.Name; rc ].ToArray()) with
+                            | Some v ->
+                                 match v with
+                                 | :? Call as c -> c |> DuAliasTargetCall 
+                                 | _ -> errorLoadCore  ctx
                             | _ -> errorLoadCore  ctx
-
 
                     | flowOrReal :: [ rc ] -> //FlowEx.R or Real.C
                         match tryFindFlow system flowOrReal with
-                        | Some f -> f.Graph.TryFindVertex<Real>(rc) |> Option.get |> DuAliasTargetReal
+                        | Some f -> match f.Graph.TryFindVertex<Real>(rc) with
+                                    |Some v-> v |> DuAliasTargetReal
+                                    |None -> errorLoadCore  ctx
                         | None ->
-                            //tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
-                            
                             match tryFindCall system ([ flow.Name ] @ ns.Select(fun f->f.QuoteOnDemand())) with
                             | Some v -> 
                                 match v with
-                                | :? Call as c -> DuAliasTargetCall c
+                                | :? Call as c -> c |> DuAliasTargetCall 
                                 | _ -> errorLoadCore  ctx
                             | None ->  
                                 errorLoadCore  ctx
 
-
-                    | _real :: [ _dev; _api ] -> 
-                            //tryFindCall system ([flow.Name]@ns) |> Option.get |> DuAliasTargetCall
-                            let vertex = 
-                                match tryFindCall system ([ flow.Name ] @ ns) with
-                                |   Some v -> v
-                                | _ -> errorLoadCore  ctx
-
-                            match vertex with
-                            | :? Call as c -> DuAliasTargetCall c
+                    | _flow :: [ _dev; _api ] -> 
+                            match flow.GetVerticesOfFlow().OfType<Call>().TryFind(fun f->f.Name = ns.Combine())  with
+                            | Some call -> call|>  DuAliasTargetCall
                             | _ -> errorLoadCore  ctx
+                            
 
                     | _ -> errorLoadCore  ctx
 

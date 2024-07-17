@@ -64,9 +64,8 @@ type ModelLoaderExt =
 
 
     [<Extension>] 
-    static member pptxToExportDS (sys:DsSystem, pptPath:string) = 
+    static member pptxToExportDS (sys:DsSystem, dsFilePath:string) = 
         //sys.CheckValidInterfaceNchageParsingAddress() //test ahn ppt로부터 가져오면 체크시 주소가 없다.
-        let dsFilePath = PathManager.changeExtension (pptPath.ToFile()) ".ds" 
         
         for s in sys.GetRecursiveLoadeds() do
             match s with

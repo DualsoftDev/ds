@@ -4,6 +4,7 @@ open System.IO
 open Dual.Common.Core.FS
 open Engine.Core
 open System.Linq
+open System.Diagnostics
 
 
 [<AutoOpen>]
@@ -17,7 +18,7 @@ module ParserLoader =
         then 
             let dir = Path.GetDirectoryName(dsFilePath)
             let option =
-                ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice)
+                ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, false)
 
             let system = ModelParser.ParseFromString(text, option)
             system
@@ -58,11 +59,27 @@ module ParserLoader =
         { Config = cfg
           System = system
           LoadingPaths = loadings }
+          
 
-    let LoadFromActivePath (activePath: string) (target:PlatformTarget)=
+    let LoadFromActivePath (activePath: string) (target:PlatformTarget) (usingGpt:bool)=
+        ModelParser.ClearDicParsingText()
+
+        let stopwatch = Stopwatch()
+        stopwatch.Start()
+     
+
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir   activePath  false  target 
+        let a = loadingDS dir activePath  usingGpt  target 
+
+        stopwatch.Stop()
+        stopwatch.ElapsedMilliseconds |> printfn "Elapsed time: %d ms"
+        a
+
+    let LoadFromDevicePath (activePath: string) (target:PlatformTarget)=
+        let dir = PathManager.getDirectoryName (activePath.ToFile())
+        loadingDS dir activePath  false  target 
 
     let LoadFromChatGptPath (activePath: string) (target:PlatformTarget)=
-        let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir   activePath  true  target
+        LoadFromActivePath activePath target true
+
+        

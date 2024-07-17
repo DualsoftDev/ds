@@ -33,7 +33,7 @@ module DataTypeTesterModule =
             getTextValueNType "127y" === (Some ("127", DuINT8))
             getTextValueNType "32767s" === (Some ("32767", DuINT16))
             getTextValueNType "2147483647" === (Some ("2147483647", DuINT32))
-            getTextValueNType "2147483647l" === (Some ("2147483647", DuINT32))
+            getTextValueNType "2147483647I" === (Some ("2147483647", DuINT32))
 
         [<Test>]
         member _.``Test Group 4`` () =

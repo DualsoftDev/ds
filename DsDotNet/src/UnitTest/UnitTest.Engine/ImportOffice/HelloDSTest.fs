@@ -7,18 +7,12 @@ open Dapper
 open Engine.Core
 open Dual.Common.Core.FS
 open NUnit.Framework
-open Engine.Parser.FS
 open Engine.Import.Office
 open System.Linq
-open Engine.Core
-open Engine.CodeGenCPU
-open Dual.Common.Core.FS
 open Microsoft.Data.Sqlite
 open Engine.Info
 open Engine.Cpu
 open System.Text.Json
-
-
 
 
 [<AutoOpen>]
@@ -47,8 +41,16 @@ module HelloDSTestModule =
             system
 
         let createConnection() =
+            (*
+              HelloDS.Logger.UnitTest.sqlite3 생성 방법
+                - HelloDS.pptx 를 이용해서 시뮬레이션 수행.
+                - DB logging ON 상태로 1 cycle 이상 돌아야 함.
+                - 생성된 database 파일 (Logger.sqlite3) 을 createConnection() 에서 지정한 path 로 복사
+                - 위 과정 수행 후 test 실행.
+             *)
+
             let connStr = 
-                let path = @"Z:\ds\Logger.sqlite3"
+                let path = @"Z:\ds\HelloDS.Logger.UnitTest.sqlite3"
                 $"Data Source={path}"
             new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 
@@ -92,7 +94,7 @@ module HelloDSTestModule =
             ()
 
         [<Test>]
-        member __.``X HelloDS stroage test``() =
+        member __.``HelloDS stroage test``() =
             let system = getSystem()
 
             (* Via Storages *)
@@ -111,7 +113,7 @@ module HelloDSTestModule =
             tracefn $"---- Fqdn objects"
             let dic = collectFqdnObjects system
             for KeyValue(k, v) in dic do
-                tracefn $"Storage: {k} = {v}"
+                tracefn $"Fqdn: {k} = {v}"
             ()
 
             let logs = getLogs().ToFSharpList()
@@ -123,7 +125,7 @@ module HelloDSTestModule =
             ()
 
         [<Test>]
-        member __.``X HelloDS log anal test``() =
+        member __.``HelloDS log anal test``() =
             let system = getSystem()
             let logs = getLogs().ToFSharpList()
             let logAnalInfo = LogAnalInfo.Create(system, logs)
@@ -142,7 +144,7 @@ module HelloDSTestModule =
 
 
         [<Test>]
-        member __.``X Load logger database test``() =
+        member __.``Load logger database test``() =
             let conn = createConnection()
             let loggerDb = 
                 ORMDBSkeletonDTOExt.CreateAsync(1, conn, null).Result |> ORMDBSkeleton

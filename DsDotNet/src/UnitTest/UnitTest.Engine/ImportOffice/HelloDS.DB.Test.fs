@@ -16,16 +16,16 @@ open System.Text.Json
 
 
 [<AutoOpen>]
-module HelloDSTestModule =
+module HelloDSDBTestModule =
 
-    type HelloDSTest() =
+    type HelloDSDBTest() =
         inherit EngineTestBaseClass()
         do
             RuntimeDS.Package <- PCSIM
 
         let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
-        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPPT = false;  CreateBtnLamp = true}
         let getSystem() =
+            let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPPT = false;  CreateBtnLamp = true}
             let result = ImportPPT.GetDSFromPPTWithLib (helloDSPath, false, pptParms)
             let { 
                 System = system
@@ -50,7 +50,7 @@ module HelloDSTestModule =
              *)
 
             let connStr = 
-                let path = @"Z:\ds\HelloDS.Logger.UnitTest.sqlite3"
+                let path = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.Logger.UnitTest.sqlite3"
                 $"Data Source={path}"
             new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 

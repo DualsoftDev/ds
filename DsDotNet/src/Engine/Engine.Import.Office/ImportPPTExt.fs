@@ -283,8 +283,9 @@ module ImportU =
                         if node.NodeType = REALExF then // isOtherFlowRealAlias is true
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                             node.UpdateTime(real)
+                            let name = real.ParentNPureNames.Combine("_")
                             Alias.Create(
-                                $"""{real.ParentNPureNames.Combine("_")}_{node.AliasNumber}""" ,
+                                $"{name}_{node.AliasNumber}" ,
                                 DuAliasTargetReal(real),
                                 DuParentFlow(flow), true
                             )
@@ -293,9 +294,9 @@ module ImportU =
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
                             node.UpdateTime(real)
-
+                            let name = call.DeviceNApi.Combine("_")
                             Alias.Create(
-                                $"""{call.DeviceNApi.Combine("_")}_{node.AliasNumber}""" ,
+                                $"{name}_{node.AliasNumber}" ,
                                 DuAliasTargetCall(segOrg :?> Call),
                                 DuParentReal(real), false
                             )
@@ -304,17 +305,20 @@ module ImportU =
                             match segOrg with
                             | :? Real as rt ->
                                 node.UpdateTime(rt)
-                                
+                                let otherFlow  =  flow <> rt.Flow
+                                let name = if otherFlow then $"{rt.Flow.Name}{rt.Name}"else rt.Name
                                 Alias.Create(
-                                    $"""{rt.Name}_{node.AliasNumber}""" ,
+                                    $"{name}_{node.AliasNumber}" ,
                                     DuAliasTargetReal(rt),
-                                    DuParentFlow(flow) , false
+                                    DuParentFlow(flow) , otherFlow
                                 )
                             | :? Call as ct ->
+                                let otherFlow  = flow.Name <> ct.TargetJob.NameComponents.Head()
+                                let name = if otherFlow then ct.TargetJob.NameComponents.Combine() else ct.Name
                                 Alias.Create(
-                                    $"""{ct.Name}_{node.AliasNumber}""" ,
+                                    $"{name}_{node.AliasNumber}" ,
                                     DuAliasTargetCall(ct),
-                                    DuParentFlow(flow) , false
+                                    DuParentFlow(flow) , otherFlow
                                 )
                             | _ -> failwithf "Error type"
 

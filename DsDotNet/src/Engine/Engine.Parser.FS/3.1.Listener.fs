@@ -478,8 +478,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 
             let createAlias(parent: ParentWrapper, name: string ) =
                 let flow = parent.GetFlow()
+                let isRoot = parent.GetCore() :? Flow
                 let aliasDef = tryFindAliasDefWithMnemonic flow name |> Option.get
-                let exFlow = aliasDef.AliasKey.length() > 2
+                let aliasFqdnCnt = aliasDef.AliasKey.length()
+                                //flow.Real     //flow.Call.Api     //Real.Call.Api
+                let exFlow = (aliasFqdnCnt = 2 || (aliasFqdnCnt = 3 && isRoot))
                 Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
               
             let loop () =
@@ -745,12 +748,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 | :? Call as c -> c |> DuAliasTargetCall 
                                 | _ -> errorLoadCore  ctx
                             | None ->  
-                                 //match tryFindCall system ([ flow.Name ] @ ns.Select(fun f->f.QuoteOnDemand())) with
-                                 //| Some v -> 
-                                 //   match v with
-                                 //   | :? Call as c -> c |> DuAliasTargetCall 
-                                 //   | _ -> errorLoadCore  ctx
-                                 //| None ->  
+
                                     errorLoadCore  ctx
 
 
@@ -777,8 +775,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let! flow = tryFindFlow system ci.Flow.Value
                 let! aliasKeys = ctx.TryFindFirstChild<AliasDefContext>().Map(collectNameComponents)
                 let mnemonics = ctx.Descendants<AliasMnemonicContext>().Select(getText).Select(deQuoteOnDemand).ToArray()
-                let isOtherFlowRealAlias = aliasKeys.Length = 2   //flowA.Real1
-                let ad = AliasDef(aliasKeys, None, mnemonics, isOtherFlowRealAlias)
+                let ad = AliasDef(aliasKeys, None, mnemonics)
                 flow.AliasDefs.Add(aliasKeys, ad)
                 return ad
             }

@@ -152,6 +152,7 @@ module HmiPackageModule =
         ReadyPushLamp         : HMIPushLamp 
 
         Flows                 : HMIFlow array
+        Jobs                  : HMIJob array
     } with
         member x.CollectTags () =
             seq {

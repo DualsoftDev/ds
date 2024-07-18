@@ -141,7 +141,8 @@ module ConvertHMI =
                 HomePushLamp         =  getPushLamp   tm (SystemTag.home_btn  |>int) (SystemTag.home_lamp  |>int)
                 ReadyPushLamp        =  getPushLamp   tm (SystemTag.ready_btn |>int) (SystemTag.ready_lamp |>int)
 
-                Flows         = x.Flows.Select(fun f->f.GetHMI()).ToArray()
+                Flows = x.Flows|> map (fun f -> f.GetHMI()) |> toArray
+                Jobs  = x.Jobs |> map (fun j -> j.GetHMI()) |> toArray
             }
 
     [<AutoOpen>]

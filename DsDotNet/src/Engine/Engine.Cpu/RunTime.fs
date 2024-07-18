@@ -56,7 +56,7 @@ module RunTime =
 
         let subscription = 
             tagWebChangedFromWebSubject.Subscribe(fun tagWeb-> 
-                    debugfn $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
+                    logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                     let cpuTag = tagStorages.[tagWeb.Name]
                     cpuTag.BoxedValue <-tagWeb.Value
             )

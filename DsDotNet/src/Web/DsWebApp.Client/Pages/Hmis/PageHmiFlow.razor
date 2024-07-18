@@ -32,6 +32,7 @@ else
     [Parameter] public string FlowName { get; set; }
     HMIFlow _flow;
     HMIReal[] _reals;
+    HMICall[] _directCalls;
     bool _tagManagerLoading = true;
     public CompHmiTagManager TagManager { get; set; }
 
@@ -41,5 +42,9 @@ else
         await ClientGlobal.InitializeAsync(Http, NavigationManager, LocalStorage);
         _flow = _system.Flows.FirstOrDefault(f => f.Name == FlowName);
         _reals = _flow.Reals;
+        _directCalls = _flow.DirectCalls;
+
+        var callNames = _directCalls.Select(c => c.Name).JoinString(", ");
+        Console.WriteLine($"Total {_directCalls.Length} direct calls in flow {FlowName}: {callNames}");
     }
 }

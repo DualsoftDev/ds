@@ -37,6 +37,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Folder Include="Pages\Monitoring\" />
 	  <Folder Include="Test\" />
 	</ItemGroup>
 	

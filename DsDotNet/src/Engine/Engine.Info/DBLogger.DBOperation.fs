@@ -162,14 +162,15 @@ module internal DBLoggerImpl =
                     if (logSet.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
                         logSet.BuildIncremental newLogs
-                    let modelId = commonAppSettings.LoggerDBSettings.ModelId
+                    let currentModelId = commonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
-#if DEBUG
-                        let! stg = conn.QueryFirstOrDefaultAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
-                        assert(stg.ModelId = modelId)
-                        assert (ORMDBSkeleton4Debug.Model.IsNone || ORMDBSkeleton4Debug.Model.Value.Id = modelId)
-                        //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
-#endif
+                        let! stg = conn.QueryFirstAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
+                        let modelId = stg.ModelId
+//#if DEBUG
+//                        assert(stg.ModelId = modelId)
+//                        assert (ORMDBSkeleton4Debug.Model.IsNone || ORMDBSkeleton4Debug.Model.Value.Id = modelId)
+//                        //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
+//#endif
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
                                 (at, storageId, value, modelId)

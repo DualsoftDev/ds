@@ -92,7 +92,7 @@ module HelloDSTestModule =
             ()
 
         [<Test>]
-        member __.``HelloDS stroage test``() =
+        member __.``X HelloDS stroage test``() =
             let system = getSystem()
 
             (* Via Storages *)
@@ -123,7 +123,7 @@ module HelloDSTestModule =
             ()
 
         [<Test>]
-        member __.``HelloDS log anal test``() =
+        member __.``X HelloDS log anal test``() =
             let system = getSystem()
             let logs = getLogs().ToFSharpList()
             let logAnalInfo = LogAnalInfo.Create(system, logs)
@@ -142,7 +142,7 @@ module HelloDSTestModule =
 
 
         [<Test>]
-        member __.``Load logger database test``() =
+        member __.``X Load logger database test``() =
             let conn = createConnection()
             let loggerDb = 
                 ORMDBSkeletonDTOExt.CreateAsync(1, conn, null).Result |> ORMDBSkeleton

@@ -35,6 +35,12 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
     public bool IsCpuRunning { get; set; }
     public event PropertyChangedEventHandler PropertyChanged;
 
+    /// <summary>
+    /// Client browser 의 초기 설정.  Http, NavigationManager 등 blazor component 요소들이 활용가능할 때 수행해야 할 작업 지정
+    /// <br/> - Server 로부터 settings, RuntimeModel 가져오기
+    /// <br/> - Hub connection 설정
+    /// <br/> - CPU running status 변경에 대한 subscription
+    /// </summary>
     public async Task InitializeAsync(HttpClient http, NavigationManager navigationManager, ILocalStorageService localStorage)
     {
         if (ServerSettings == null)

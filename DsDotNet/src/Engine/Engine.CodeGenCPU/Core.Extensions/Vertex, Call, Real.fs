@@ -11,10 +11,7 @@ module ConvertCpuVertex =
 
 
        
-    let getSafetyNAutoPreConditionExpr(xs:Call seq, sys:DsSystem) =    
-        if xs.any()
-        then xs.Select(fun f->f.End).ToAnd()
-        else sys._on.Expr
+
 
     type Vertex with
         member r.V = r.TagManager :?> VertexManager
@@ -41,7 +38,7 @@ module ConvertCpuVertex =
         member c.HasSensor  =
             match c.IsJob with
             | true -> 
-                c.TargetJob.DeviceDefs
+                c.TargetJob.TaskDefs
                     .Where(fun d-> d.ExistInput)
                     .any()
             | false -> false
@@ -59,7 +56,7 @@ module ConvertCpuVertex =
             then
                 (c.TagManager :?> VertexMCall).CallOperatorValue.Expr
             else 
-                c.TargetJob.DeviceDefs.Select(fun f-> f.PE).ToAnd()
+                c.TargetJob.TaskDefs.Select(fun f-> f.PE).ToAnd()
 
         member c.EndAction = 
                     if c.IsJob 
@@ -77,7 +74,7 @@ module ConvertCpuVertex =
                 else c.End
 
         member c.GetEndAction(x:ApiItem) =
-            let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
+            let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x) 
             if td.ExistInput
             then 
                 Some(td.GetInExpr(c.TargetJob))
@@ -86,7 +83,7 @@ module ConvertCpuVertex =
         
 
         member c.UpdateChildRealExpr(x:ApiItem) =
-            let td = c.TargetJob.DeviceDefs.First(fun d->d.ApiItem = x) 
+            let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x) 
             if td.ExistInput
             then 
                 Some(td.GetInExpr(c.TargetJob))
@@ -108,22 +105,22 @@ module ConvertCpuVertex =
         
         member c.PSs =
             if c.IsJob 
-            then c.TargetJob.DeviceDefs.Select(fun f->f.PS)
+            then c.TargetJob.TaskDefs.Select(fun f->f.PS)
             else [c.VC._on]
 
         member c.PEs =
             if c.IsJob 
-            then c.TargetJob.DeviceDefs.Select(fun f->f.PE)
+            then c.TargetJob.TaskDefs.Select(fun f->f.PE)
             else [c.VC.CallCommandEnd]
 
         member c.TXs = 
             if c.IsJob
-            then c.TargetJob.DeviceDefs |>Seq.map(fun j -> j.ApiItem.TX)
+            then c.TargetJob.TaskDefs |>Seq.map(fun j -> j.ApiItem.TX)
             else []
 
         member c.RXs = 
             if c.IsJob
-            then c.TargetJob.DeviceDefs |>Seq.map(fun j -> j.ApiItem.RX)
+            then c.TargetJob.TaskDefs |>Seq.map(fun j -> j.ApiItem.RX)
             else []
 
         member c.Errors       = 
@@ -137,8 +134,8 @@ module ConvertCpuVertex =
                                 ]
                          
           
-        member c.SafetyExpr = getSafetyNAutoPreConditionExpr(c.SafetyConditions.Map(fun f->f.GetCall()), c.System)
-        member c.AutoPreExpr = getSafetyNAutoPreConditionExpr(c.AutoPreConditions.Map(fun f->f.GetCall()), c.System)
+        member c.SafetyExpr   = c.SafetyConditions.Choose(fun f->f.GetJob().ActionInExpr).ToAndElseOn()
+        member c.AutoPreExpr = c.AutoPreConditions.Choose(fun f->f.GetJob().ActionInExpr).ToAndElseOn()
 
         member c.StartPointExpr =
             match c.Parent.GetCore() with

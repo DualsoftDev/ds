@@ -42,7 +42,7 @@ module ErrID =
     let _25 = "중복된 인터페이스 이름이 있습니다."
     let _26 = "해당이름의 Flow가 없습니다."
     let _27 = "해당이름의 Work이 없습니다(공란확인)"
-    let _28 = "Safety 이름이 시스템 내부에 존재하지 않습니다."
+    let _28 = "Spare"
     let _29 = "Loading 파일경로에 파일이 없습니다."
     let _30 = "버튼 타입은 출력값은 입력 불가입니다. [0, N] 수량을 사용하세요"
     let _31 = "시스템 이름과 Flow이름이 같으면 안됩니다."
@@ -92,10 +92,12 @@ module ErrID =
     let _74 = "Safety 정의는 Device.Api 또는 Flow.Device.Api 형식으로 입력해야 합니다."
     let _75 = "Table Device 이름규격은 dev.Api 입니다."
     let _76 = "Work 설정시간이 중복 정의 되었습니다."
-    let _77 = "Safety는 자신을 조건으로 사용불가 입니다."
+ 
     let _78 = "전제조건은 자신을 조건으로 사용불가 입니다."
     let _79 = "Safety는 Action만 조건으로 가능합니다."
-   
+    let _80 = "Safety or AutoPre 이름이 시스템 내부에 존재하지 않습니다."
+    let _81 = "Safety or AutoPre 는 자신을 조건으로 사용불가 입니다."
+
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."
     let _1002 = "시스템에 램프 이름이 없습니다."

@@ -38,7 +38,7 @@ module ConvertErrorCheck =
     let checkErrApi(sys:DsSystem) = 
 
           for coin in sys.GetVerticesOfJobCalls() do
-                for td in coin.TargetJob.DeviceDefs do
+                for td in coin.TargetJob.TaskDefs do
                     let api = td.ApiItem
                     if api.RX.IsNull() then
                         failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
@@ -123,7 +123,7 @@ module ConvertErrorCheck =
         let allAddresses = 
             [
                 yield! sys.Jobs |> Seq.collect (fun j -> 
-                    j.DeviceDefs|> Seq.collect (fun d -> [($"{d.ApiName}_IN", d.InAddress); ($"{d.ApiName}_OUT", d.OutAddress)])
+                    j.TaskDefs|> Seq.collect (fun d -> [($"{d.ApiName}_IN", d.InAddress); ($"{d.ApiName}_OUT", d.OutAddress)])
                                )
                     |> Seq.distinctBy(fun (name,_)-> name)
                     
@@ -153,7 +153,7 @@ module ConvertErrorCheck =
 
     let setSimulationEmptyAddress(sys:DsSystem) = 
         sys.Jobs.ForEach(fun j->
-            j.DeviceDefs.ForEach(fun d-> 
+            j.TaskDefs.ForEach(fun d-> 
                         if d.InAddress.IsNullOrEmpty() then  d.InAddress <- (TextAddrEmpty)
                         if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- (TextAddrEmpty)
                         if d.MaunualActionAddress.IsNullOrEmpty() then d.MaunualActionAddress <- (TextAddrEmpty)
@@ -173,7 +173,7 @@ module ConvertErrorCheck =
 
     let checkJobs(sys:DsSystem) = 
         for j in sys.Jobs do
-            for td in j.DeviceDefs do
+            for td in j.TaskDefs do
                 if td.ExistOutput
                 then 
                     let outParam = td.GetOutParam(j)

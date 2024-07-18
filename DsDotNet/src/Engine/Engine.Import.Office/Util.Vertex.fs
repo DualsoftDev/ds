@@ -44,7 +44,7 @@ module ImportUtilVertex =
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
             |Some api ->
                 let devTask = 
-                    match sys.Jobs.SelectMany(fun j->j.DeviceDefs).TryFind(fun d->d.ApiItem = api) with 
+                    match sys.Jobs.SelectMany(fun j->j.TaskDefs).TryFind(fun d->d.ApiItem = api) with 
                     | Some (taskDev) ->
                         taskDev.AddOrUpdateInParam   (jobName, node.DevParamIn  )
                         taskDev.AddOrUpdateOutParam  (jobName, node.DevParamOut )

@@ -61,14 +61,14 @@ module ConvertHMI =
             {
                 Name        = x.Name
                 Calls    = containerCalls
-                                .Where(fun c->c.TargetJob.DeviceDefs.any(fun d->d.ApiItem.ApiSystem = x.ReferenceSystem))
+                                .Where(fun c->c.TargetJob.TaskDefs.any(fun d->d.ApiItem.ApiSystem = x.ReferenceSystem))
                                 .Select(fun c->c.GetHMI()).ToArray()
             }
 
     type Job with
         member private x.GetHMI()   =
-            let actionInTags  = x.DeviceDefs.Where(fun d->d.InTag.IsNonNull()).Select(fun d->d.InTag) //todo  ActionINFunc func $not 적용 검토     
-            let apiTagManager = x.DeviceDefs.First().ApiItem.TagManager :?> ApiItemManager
+            let actionInTags  = x.TaskDefs.Where(fun d->d.InTag.IsNonNull()).Select(fun d->d.InTag) //todo  ActionINFunc func $not 적용 검토     
+            let apiTagManager = x.TaskDefs.First().ApiItem.TagManager :?> ApiItemManager
             {
                 Name = x.QualifiedName
                 JobPushMutiLamp = getPushMultiLamp  apiTagManager (ApiItemTag.apiItemSet |>int) (actionInTags)
@@ -97,7 +97,7 @@ module ConvertHMI =
                 Devices      = calls
                                     .Where(fun c->c.IsJob)
                                     .SelectMany(fun c->
-                                      c.TargetJob.DeviceDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()
+                                      c.TargetJob.TaskDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()
                                                             .Select(fun d->d.GetHMI())
                                        ).ToArray()
                                

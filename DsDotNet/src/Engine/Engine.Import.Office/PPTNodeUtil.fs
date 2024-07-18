@@ -26,6 +26,21 @@ module PPTNodeUtilModule =
             | None, Some t -> $"{t}ms"
             | None, None -> $""
 
+        let getJobNameWithParams(jobFqdn:string seq, inParam:DevParam option, outParam:DevParam option) =
+            if inParam.IsSome && outParam.IsNone then
+                let post = getPostParam inParam.Value
+                if post = "" 
+                then jobFqdn 
+                else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{post})").ToArray()
+
+            elif inParam.IsSome && outParam.IsSome then
+                let postIn = getPostParam inParam.Value
+                let postOut = getPostParam outParam.Value
+                if postIn = "" && postOut = "" 
+                then jobFqdn
+                else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{postIn}_OUT{postOut})").ToArray()  
+
+            else jobFqdn
 
         let getOperatorParam (shape:Shape, name:string, iPage:int) = 
             try

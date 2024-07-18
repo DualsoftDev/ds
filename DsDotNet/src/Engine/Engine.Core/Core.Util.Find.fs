@@ -152,7 +152,7 @@ module internal ModelFindModule =
 
     let getDevicesOfFlow(flow:Flow) =
         let devNames = getVerticesOfFlow(flow).OfType<Call>()   
-                             .SelectMany(fun c->c.TargetJob.DeviceDefs.Select(fun d->d.DeviceName))
+                             .SelectMany(fun c->c.TargetJob.TaskDefs.Select(fun d->d.DeviceName))
 
         flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
 
@@ -200,7 +200,7 @@ module internal ModelFindModule =
 
              
     let getDistinctTaskDevs(x:DsSystem) =
-            let taskDevs =  getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.DeviceDefs)
+            let taskDevs =  getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.TaskDefs)
                                 .Distinct()
             
             let coinAll = getVerticesOfCoins x
@@ -208,8 +208,8 @@ module internal ModelFindModule =
                     td, 
                         coinAll.Filter(fun f->
                         match f with
-                        | :? Call as c when c.IsJob ->  c.TargetJob.DeviceDefs.Contains(td)
-                        | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.DeviceDefs.Contains(td)
+                        | :? Call as c when c.IsJob ->  c.TargetJob.TaskDefs.Contains(td)
+                        | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.TaskDefs.Contains(td)
                         |_ -> false
                     )
             )
@@ -231,7 +231,7 @@ module internal ModelFindModule =
 
     let updateDeviceSkipAddress (x: DsSystem) =
         let calls = x|>getVerticesHasJob
-        calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c.TargetJob))
+        calls.SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c.TargetJob))
              |> Seq.iter(fun (dev, job) -> 
                 let inSkip, outSkip = getSkipInfo(dev, job)
                 if inSkip then dev.InAddress <- TextSkip
@@ -242,7 +242,7 @@ module internal ModelFindModule =
         let calls = getVerticesHasJob(x).DistinctBy(fun v-> v.TargetJob)
         let tds = calls
                     .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
-                    .SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c) )
+                    .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c) )
         tds 
         |> Seq.distinctBy (fun (td, _) -> td)
         |> Seq.sortBy (fun (td, c) -> 
@@ -351,7 +351,7 @@ type FindExtension =
                  //kia demo //test ahn
                     x.GetDevicesCoin()
                         .Where(fun (dev, call) -> call.TargetJob.JobMulti <> Single || not(dev.IsOutAddressSkipOrEmpty))
-                         |> Seq.filter(fun (dev,c) -> c.TargetJob.DeviceDefs.First() = dev)
+                         |> Seq.filter(fun (dev,c) -> c.TargetJob.TaskDefs.First() = dev)
                  //normal //test ahn
                     //x.GetDevicesCoin()
                     //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))

@@ -22,7 +22,7 @@ module PPTNodeModule =
     type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties = HashSet<string>()
-        let autoPres = HashSet<string>()
+        let autoPres = HashSet<string[]*DevParam>()  //jobFqdn, inparam
         
         let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
         let btnHeadPageDefs = Dictionary<string, BtnType>()
@@ -109,6 +109,7 @@ module PPTNodeModule =
         let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
         let nameTrim(shape:Shape) = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
         let name = GetLastParenthesesReplaceName(nameTrim(shape) |> getTrimName shape,  "")
+        let hasDevParam = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
 
         do
 
@@ -197,29 +198,19 @@ module PPTNodeModule =
                 (devParam.Value |> snd).Value 
             else defaultDevParam ()    
 
-        member x.JobName =
+        member x.JobName = 
+            
             let flow, (job: string list), Api = x.CallFlowNJobNApi
             let pureJob = job.Append(Api)
-            let jobName =
-                if x.IsCallDevParam then
-                    let inParam = devParam.Value |> fst 
-                    let outParam = devParam.Value |> snd
-                    if inParam.IsSome && outParam.IsNone then
-                        let post = getPostParam inParam.Value
-                        if post = "" 
-                        then pureJob 
-                        else pureJob.SkipLast(1).Append( $"{Api}(IN{post})").ToArray()
+            let inParam, outParam =
+                if x.IsCallDevParam 
+                then
+                    devParam.Value |> fst , devParam.Value |> snd
+                else
+                    None, None  
+            
+            getJobNameWithParams(pureJob, inParam, outParam).ToArray()
 
-                    elif inParam.IsSome && outParam.IsSome then
-                        let postIn = getPostParam inParam.Value
-                        let postOut = getPostParam outParam.Value
-                        if postIn = "" && postOut = "" 
-                        then pureJob
-                        else pureJob.SkipLast(1).Append( $"{Api}(IN{postIn}_OUT{postOut})").ToArray()  
-
-                    else failwithlog "error"
-                else pureJob
-            jobName.ToArray()
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -234,17 +225,18 @@ module PPTNodeModule =
             checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
 
-        member x.UpdateCallDevParm(isRoot: bool, target) =
+        member x.GetInParm() =
+                if hasDevParam then getOperatorParam (shape, nameNFunc(shape), iPage)
+                else createDevParam  None (Some(DuBOOL)) (Some(true)) None
+
+        member x.UpdateNodeParams(isRoot: bool, target) =
             rootNode <- Some isRoot
+
             if nodeType = CALL then
                 let isDevCall = name.Contains(".")
-                let hasDevParam = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
                 match isRoot, isDevCall with
                 | true, true -> //root dev call
-                    let inParam = 
-                        if hasDevParam then getOperatorParam (shape, nameNFunc(shape), iPage)
-                        else createDevParam  None (Some(DuBOOL)) (Some(true)) None
-                    devParam <- Some(Some(inParam), None)
+                    devParam <- Some(Some(x.GetInParm()), None)
                 | false, true -> //real dev call
                     if hasDevParam then
                         let inParam, outParam = getCoinParam (shape, nameNFunc(shape), iPage, target)
@@ -252,10 +244,11 @@ module PPTNodeModule =
                 | _ ->  
                     if hasDevParam then failWithLog "function call 'devParam' not support"
 
+
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
             if x.IsCallDevParam && x.IsRootNode.Value = false then 
-                call.TargetJob.DeviceDefs.Iter(fun d->
+                call.TargetJob.TaskDefs.Iter(fun d->
                     d.AddOrUpdateInParam(x.JobName.Combine() , (x.DevParam.Value |> fst).Value)
                     d.AddOrUpdateOutParam(x.JobName.Combine() , (x.DevParam.Value |> snd).Value)
                 )

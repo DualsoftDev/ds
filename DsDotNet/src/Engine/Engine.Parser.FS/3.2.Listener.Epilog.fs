@@ -187,7 +187,12 @@ module EtcListenerModule =
             for (key, values) in safetyKvs do
                 let safetyholder=  getSafetyAutoPreCall curSystem key 
                 let safetyConditions =
-                    [ for value in values -> getSafetyAutoPreCall curSystem value ] 
+                    [
+                        for value in values do
+                            match  curSystem.Jobs.TryFind(fun job-> job.UnqualifiedName = (value.Combine())) with
+                            | Some j -> yield j
+                            | None -> failWithLog $"{value} is not job Name"
+                    ] 
                     |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
 
                 safetyConditions.Iter(fun sc ->
@@ -203,7 +208,12 @@ module EtcListenerModule =
             for (key, values) in autopreKvs do
                     let autopreKey =  getSafetyAutoPreCall curSystem key 
                     let autopreConditions =
-                        [ for value in values -> getSafetyAutoPreCall curSystem value ] 
+                        [
+                            for value in values do
+                                match  curSystem.Jobs.TryFind(fun job-> job.UnqualifiedName = (value.Combine())) with
+                                | Some j -> yield j
+                                | None -> failWithLog $"{value} is not job Name"
+                        ] 
                         |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
 
                     autopreConditions.Iter(fun sc ->

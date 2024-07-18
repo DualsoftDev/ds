@@ -37,7 +37,7 @@ module FqdnExplorer =
 
             | :? Job as job ->
                 yield (job.QualifiedName, job)
-                for c in job.DeviceDefs do
+                for c in job.TaskDefs do
                     yield! visit c
 
             | :? TaskDev as taskDev ->

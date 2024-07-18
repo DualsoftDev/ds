@@ -169,15 +169,15 @@ module internal ToDsTextModule =
                 yield $"{tab}[jobs] = {lb}"
                 for j in system.Jobs do
                     let jobItems =
-                        j.DeviceDefs
+                        j.TaskDefs
                         |> Seq.map (fun d-> printDev d (j) false)
                           
                     let jobItemText = jobItems.JoinWith("; ") + ";"
                     if j.JobParam.ToText() = ""
                     then
-                        if j.DeviceDefs.length() = 1 && j.DeviceDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit)
+                        if j.TaskDefs.length() = 1 && j.TaskDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit)
                         then
-                            yield $"{tab2}{j.QualifiedName} = {printDev (j.DeviceDefs.Head()) (j) true};"
+                            yield $"{tab2}{j.QualifiedName} = {printDev (j.TaskDefs.Head()) (j) true};"
                         else
                             yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"  
                     else 
@@ -333,18 +333,12 @@ module internal ToDsTextModule =
                         yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
                 ] |> List.distinct
 
-            let getSafetyAutoPreName (holder:bool) (call:Call) =
-                let name = 
+            let getSafetyAutoPreName (call:Call) =
                     match call.Parent with
                     | DuParentReal r-> 
-                        if holder
-                        then //otherFlow Holder
                             $"{r.Flow.Name.QuoteOnDemand()}.{r.Name.QuoteOnDemand()}.{call.NameForGraph}"
-                        else //otherFlow Condition
-                            call.TargetJob.NameComponents.CombineQuoteOnDemand()
                                      
                     | DuParentFlow _ -> failWithLog $"ERROR getSafetyAutoPreName {call.QualifiedName}"
-                name
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
 
@@ -355,8 +349,8 @@ module internal ToDsTextModule =
                     if withSafeties.Any() then
                         yield $"{tab2}[safety] = {lb}"
                         for safetyHolder in withSafeties do
-                            let conds = safetyHolder.SafetyConditions.Select(fun v->v.GetCall() |> getSafetyAutoPreName false).JoinWith("; ") + ";"
-                            yield $"{tab3}{safetyHolder.GetCall()|> getSafetyAutoPreName true} = {lb} {conds} {rb}"
+                            let conds = safetyHolder.SafetyConditions.Select(fun v->v.GetJob().QualifiedName).JoinWith("; ") + ";"
+                            yield $"{tab3}{safetyHolder.GetCall()|> getSafetyAutoPreName } = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
                 
@@ -374,8 +368,8 @@ module internal ToDsTextModule =
                     if withAutoPres.Any() then
                         yield $"{tab2}[autopre] = {lb}"
                         for autoPreHolder in withAutoPres do
-                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetCall() |> getSafetyAutoPreName false).JoinWith("; ") + ";"
-                            yield $"{tab3}{autoPreHolder.GetCall()|>getSafetyAutoPreName true} = {lb} {conds} {rb}"
+                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetJob().QualifiedName).JoinWith("; ") + ";"
+                            yield $"{tab3}{autoPreHolder.GetCall()|>getSafetyAutoPreName} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
             

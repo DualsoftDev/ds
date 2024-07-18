@@ -61,7 +61,7 @@ type VertexMCall with
     member v.C3_DoOperatorDevice() =
         let call = v.Vertex :?> Call
         let inOps = 
-            call.TargetJob.DeviceDefs
+            call.TargetJob.TaskDefs
                 .Select(fun d->
                     if d.InAddress = TextAddrEmpty || d.InAddress = TextSkip
                     then //주소가 없으면 Plan 으로 처리

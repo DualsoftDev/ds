@@ -128,7 +128,7 @@ module CoreModule =
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()
         ///내시스템이 사용한 interface
-        member x.TaskDevs = x.Jobs.SelectMany(fun j->j.DeviceDefs)
+        member x.TaskDevs = x.Jobs.SelectMany(fun j->j.TaskDefs)
         ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
@@ -161,18 +161,19 @@ module CoreModule =
     type ISafetyAutoPreRequisiteHolder =
         abstract member SafetyConditions: HashSet<SafetyAutoPreCondition>
         abstract member AutoPreConditions: HashSet<SafetyAutoPreCondition>
-        abstract member GetCall : unit -> Call
+        abstract member GetCall: unit -> Call
+        
     and SafetyAutoPreCondition =
-        | DuSafetyAutoPreConditionCall of Call
-        member x.GetCall() =
+        | DuSafetyAutoPreConditionCall of Job
+        member x.GetJob() =
             match x with
-            | DuSafetyAutoPreConditionCall c -> c
+            | DuSafetyAutoPreConditionCall job -> job
         member x.Core:obj =
             match x with
-            | DuSafetyAutoPreConditionCall call -> call
+            | DuSafetyAutoPreConditionCall job -> job
         member x.Name:string =
             match x with
-            | DuSafetyAutoPreConditionCall call -> call.Name
+            | DuSafetyAutoPreConditionCall job -> job.Name
 
 
   
@@ -349,7 +350,7 @@ module CoreModule =
         member val Disabled:bool = false with get, set
         
         interface ISafetyAutoPreRequisiteHolder with
-            member x.GetCall(): Call = x
+            member x.GetCall() = x
             member val SafetyConditions = HashSet<SafetyAutoPreCondition>()
             member val AutoPreConditions = HashSet<SafetyAutoPreCondition>()
 
@@ -413,7 +414,7 @@ module CoreModule =
 
 
         member x.System = system
-        member x.DeviceDefs = tasks
+        member x.TaskDefs = tasks
         member x.Name = failWithLog $"{names.Combine()} Name using 'QualifiedName'"
 
                                 

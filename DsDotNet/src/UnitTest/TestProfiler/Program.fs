@@ -45,7 +45,7 @@ let main argv =
 
     //let testAddressSetting (sys:DsSystem) =
     //    for j in sys.Jobs do
-    //        for dev in j.DeviceDefs do
+    //        for dev in j.TaskDefs do
     //        if dev.ApiItem.RXs.any() then  dev.InAddress <- "%MX777"
     //        if dev.ApiItem.TXs.any() then  dev.OutAddress <- "%MX888"
 

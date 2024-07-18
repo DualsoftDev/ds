@@ -242,7 +242,8 @@ module PPTDocModule =
             nodes.Values
             |> Seq.iter (fun node ->
                 let isRoot = not (children |> Seq.contains node)
-                node.UpdateCallDevParm(isRoot, target))
+                node.UpdateNodeParams(isRoot, target)
+                )
 
             connections
             |> Seq.iter (fun (slide, conns) -> 

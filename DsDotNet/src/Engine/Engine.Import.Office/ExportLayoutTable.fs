@@ -46,7 +46,7 @@ module ExportLayoutTable =
               
         let rows = flows.SelectMany(fun f -> 
                         f.GetVerticesHasJobOfFlow().SelectMany(fun c->
-                            c.TargetJob.DeviceDefs.Select(fun d->
+                            c.TargetJob.TaskDefs.Select(fun d->
                                 let points = d.GetDevice(f.System).ChannelPoints
                                 let chs = points.Where(fun kv->kv.Key = TextEmtpyChannel)
                                 if chs.IsEmpty()

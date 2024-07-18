@@ -42,23 +42,25 @@ module rec ViewModule =
 
         let callSafeAutoPreName (call: Call) =
             let getNameNValue(sa:SafetyAutoPreCondition) =  
-                let condiCall = sa.GetCall()
+                let condiJob = sa.GetJob()
                 let values = String.Join(","
-                    , condiCall.TargetJob
-                               .DeviceDefs
+                    , condiJob
+                               .TaskDefs
                                .Where(fun f-> f.InTag.IsNonNull())
                                .Select(fun f->
                                     match getDataType f.InTag.DataType  with
                                     | DuBOOL -> 
                                         if Convert.ToBoolean(f.InTag.BoxedValue)
-                                        then "O" else "X"
+                                        then "T" else "F"
                                     | _-> f.InTag.BoxedValue.ToString())
                                     )
-                if call.Parent.GetFlow() = condiCall.Parent.GetFlow()
+
+                let jobFlow = condiJob.NameComponents.Head()
+                if call.Parent.GetFlow().Name = jobFlow
                 then 
-                    $"{condiCall.Name} {values}"
+                    $"{condiJob.NameComponents.Skip(1).Combine()} {values}"
                 else 
-                    $"{condiCall.Parent.GetFlow().Name}.{condiCall.Name} {values}"
+                    $"{condiJob.UnqualifiedName} {values}"
                     
             let safeties = String.Join(", ", call.SafetyConditions.Select(fun f->getNameNValue f))
             let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""

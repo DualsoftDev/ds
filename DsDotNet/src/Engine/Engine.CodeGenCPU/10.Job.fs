@@ -12,7 +12,7 @@ type Job with
     member j.J1_JobActionOuts(call:Call) =
         let _off = j.System._off.Expr
         [
-            for td in j.DeviceDefs do
+            for td in j.TaskDefs do
                 if td.ExistOutput
                 then 
                     let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)

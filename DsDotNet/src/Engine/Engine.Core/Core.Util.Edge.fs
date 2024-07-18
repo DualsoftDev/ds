@@ -265,7 +265,7 @@ module EdgeModule =
 
     let updateDeviceRootInfo (x: DsSystem) =
         let calls = x.GetVerticesHasJob()
-        calls.SelectMany(fun c-> c.TargetJob.DeviceDefs.Select(fun dev-> dev, c))
+        calls.SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
              |> Seq.groupBy fst
              |> Seq.iter(fun (k, vs) -> 
                     k.IsRootOnlyDevice <- not(vs.any(fun (_, c)->c.Parent.GetCore() :? Real))

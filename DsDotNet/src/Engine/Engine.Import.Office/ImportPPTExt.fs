@@ -20,13 +20,6 @@ open Engine.Parser.FS.ModelParser
 
 [<AutoOpen>]
 module ImportU =
-    
-    let getQualifiedNameSegs (doc:pptDoc) = 
-
-        doc.DicVertex.Values
-            .OfType<Call>().Where(fun call -> call.IsJob)
-            .Select(fun call -> call.TargetJob.NameComponents.Select(fun s->s.DeQuoteOnDemand()).Combine(), call)
-        |> dict
 
     [<Extension>]
     type ImportPPTExt =
@@ -276,6 +269,9 @@ module ImportU =
                             node.Shape.ErrorName(ex.Message, node.PageNum)
                             )
 
+     
+
+
             let createAlias () =
                 pptNodes
                 |> Seq.filter (fun node -> node.IsAlias)
@@ -341,7 +337,9 @@ module ImportU =
             createCall ()
             //Alias Node 처리 마감
             createAlias ()  
-            
+
+       
+
             //createFunction Node 처리 마감
             //createAliasFunction ()
 
@@ -423,9 +421,10 @@ module ImportU =
                 tgts.Iter(fun node-> 
                         let autoPreCondition =
                             let flow, job, api = edge.StartNode.CallFlowNJobNApi
-                            $"{flow}.{job.Last().DeQuoteOnDemand()}.{api}"
+                            [|flow;job.Last().DeQuoteOnDemand();api|]
+                        let inDevParams = edge.StartNode.GetInParm()
                         
-                        node.AutoPres.Add (autoPreCondition)|>ignore )
+                        node.AutoPres.Add (autoPreCondition, inDevParams)|>ignore )
 
             dicEdges
             |> Seq.iter (fun dic ->
@@ -475,64 +474,62 @@ module ImportU =
 
                                     )
 
-        //Safety 만들기
+        //Safety & AutoPre만들기
         [<Extension>]
-        static member MakeSafeties(doc: pptDoc, mySys: DsSystem) =
+        static member MakeSafetyAutoPre(doc: pptDoc, mySys: DsSystem) =
             let dicVertex = doc.DicVertex
-            let dicFlow = doc.DicFlow
-            let dicQualifiedNameSegs = getQualifiedNameSegs doc
-            doc.Nodes
-            |> Seq.iter   (fun node ->
-                let flow = dicFlow.[node.PageNum]
-            
+            let dicJob =   
+                doc.DicVertex.Values
+                   .OfType<Call>().Where(fun call -> call.IsJob)
+                   .Select(fun call -> call.TargetJob.UnqualifiedName, call.TargetJob)
+                   |> dict
 
-                node.Safeties //세이프티 입력 미등록 이름오류 체크
+            doc.Nodes
+            |> Seq.iter(fun node ->
+        
+                node.Safeties@node.AutoPres.Select(fun (j,_param) -> j.Combine())
                 |> iter (fun safeFullName ->
-                    if not (dicQualifiedNameSegs.ContainsKey safeFullName) then
-                        node.Shape.ErrorName($"{ErrID._28}(err:{safeFullName})", node.PageNum)
+                    if not (dicJob.ContainsKey safeFullName) then
+                        node.Shape.ErrorName($"{ErrID._80}(err:{safeFullName})", node.PageNum)
 
                     if node.CallApiName = safeFullName then
-                        node.Shape.ErrorName($"{ErrID._77}(err:{safeFullName})", node.PageNum)
+                        node.Shape.ErrorName($"{ErrID._81}(err:{safeFullName})", node.PageNum)
                         )
 
                 node.Safeties
-                |> map (fun safeFullName -> dicQualifiedNameSegs.[safeFullName])
-                |> iter (fun safeCondV ->
+                |> map (fun fullName -> dicJob.[fullName])
+                |> iter (fun condJob  ->
                     match dicVertex.[node.Key].GetPure() |> box with
-                    | :? ISafetyAutoPreRequisiteHolder as holder -> holder.SafetyConditions.Add(DuSafetyAutoPreConditionCall(safeCondV)) |> ignore
-                    | _ -> node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
-                    )
-                    
-            //AutoPre 처리
-        [<Extension>]
-        static member MakeAutoPre(doc: pptDoc, mySys: DsSystem) =
-            let dicVertex = doc.DicVertex
-            let dicFlow = doc.DicFlow
-            let dicQualifiedNameSegs = getQualifiedNameSegs doc
-            doc.Nodes
-            |> Seq.iter (fun node ->
-                let flow = dicFlow.[node.PageNum]
+                    | :? ISafetyAutoPreRequisiteHolder as holder ->
+                            holder.SafetyConditions.Add(DuSafetyAutoPreConditionCall(condJob )) |> ignore
+                    | _ ->
+                            node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
 
-
-                // Check for unregistered AutoPre names
                 node.AutoPres
-                |> Seq.iter (fun autoPreFullName ->
-                    if not (dicQualifiedNameSegs.ContainsKey autoPreFullName) then
-                        node.Shape.ErrorName($"{ErrID._10}(err:{autoPreFullName})", node.PageNum)
+                |> iter (fun (jobFqdn, inParams)  ->
+                    let condJob =
+                        let jobFullName = getJobNameWithParams(jobFqdn, Some(inParams), None).ToArray()
+                        
+                        match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFullName.CombineQuoteOnDemand()) with
+                        | Some existingJob -> existingJob
+                        | None -> 
+                            match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
+                            | Some masterJob ->
+                                    let job = Job(jobFullName, mySys, masterJob.TaskDefs)
+                                    job.UpdateDevParam(inParams, defaultDevParam())
+                                    mySys.Jobs.Add(job); job
 
-                    if node.CallApiName = autoPreFullName then
-                        node.Shape.ErrorName($"{ErrID._78}(err:{autoPreFullName})", node.PageNum)
-                )
-
-                // Add AutoPre conditions
-                node.AutoPres
-                |> Seq.map (fun autoPreFullName -> dicQualifiedNameSegs.[autoPreFullName])
-                |> Seq.iter (fun autoPreCondV ->
+                            | None -> 
+                                    failWithLog $"AutoPres 대상이 없습니다. {jobFqdn}"
+                        
                     match dicVertex.[node.Key].GetPure() |> box with
-                    | :? ISafetyAutoPreRequisiteHolder as holder -> holder.AutoPreConditions.Add(DuSafetyAutoPreConditionCall(autoPreCondV)) |> ignore
-                    | _ -> node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum)
-                )
+                    | :? ISafetyAutoPreRequisiteHolder as holder -> 
+                            holder.AutoPreConditions.Add(DuSafetyAutoPreConditionCall(condJob)) |> ignore
+                    | _ -> 
+                            node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
             )
+
+
 
         [<Extension>]
         static member MakeApiTxRx(doc: pptDoc) =
@@ -795,10 +792,8 @@ module ImportU =
             doc.MakeSegment(sys)
             //Edge  만들기
             doc.MakeEdges(sys)
-            //Safety 만들기
-            doc.MakeSafeties(sys)
-            //AutoPre 만들기
-            doc.MakeAutoPre(sys)
+            //Safety AutoPre 만들기
+            doc.MakeSafetyAutoPre(sys)
             //ApiTxRx  만들기
             doc.MakeApiTxRx()
             //AnimationPoint  만들기

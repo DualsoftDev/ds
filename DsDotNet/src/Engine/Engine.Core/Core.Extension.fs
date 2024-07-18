@@ -224,17 +224,17 @@ module CoreExtensionModule =
         
     type Job with
         member x.OnDelayTime = 
-            let times = x.DeviceDefs.Choose(fun t-> t.InParams[x.UnqualifiedName].Time)
+            let times = x.TaskDefs.Choose(fun t-> t.InParams[x.UnqualifiedName].Time)
             if times.GroupBy(fun t->t).Count() > 1
             then 
-                let errTask = String.Join(", ",  x.DeviceDefs.Select(fun t-> $"{t.Name} {t.InParams[x.UnqualifiedName].Time}"))
+                let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.UnqualifiedName].Time}"))
                 failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
                 
             if times.any() then times.First() |> Some else None
 
 
         member x.UpdateDevParam(inParam: DevParam, outParam: DevParam) =
-                x.DeviceDefs.Iter(fun d-> 
+                x.TaskDefs.Iter(fun d-> 
                     d.AddOrUpdateInParam (x.UnqualifiedName, inParam)
                     d.AddOrUpdateOutParam(x.UnqualifiedName, outParam)
                 )
@@ -243,10 +243,10 @@ module CoreExtensionModule =
         member x.GetNullAddressDevTask() = 
             match x.JobMulti with
             | Single -> 
-                x.DeviceDefs
+                x.TaskDefs
                 |> Seq.filter (fun f -> f.IsAddressEmpty && not(f.GetInParam(x).IsDefaultParam))
             | MultiAction (_, _, inCnt, outCnt) -> 
-                x.DeviceDefs
+                x.TaskDefs
                 |> Seq.mapi (fun i d -> 
                     let empty = d.IsAddressEmpty && not(d.GetInParam(x).IsDefaultParam && d.GetOutParam(x).IsDefaultParam)
                     if inCnt.IsSome && inCnt.Value = i && empty then 
@@ -336,7 +336,7 @@ module CoreExtensionModule =
         member x.ErrorOffTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeShortage)|> snd
 
     let inValidTaskDevTags (x:DsSystem) = 
-                    x.Jobs |> Seq.collect(fun j-> j.DeviceDefs)
+                    x.Jobs |> Seq.collect(fun j-> j.TaskDefs)
                            |> Seq.collect(fun d-> 
                                   [  
                                      yield d, "INPUT",d.InAddress

@@ -125,7 +125,9 @@ module ConvertHMI =
                 ErrorLampMode       = getLamp   tm (FlowTag.error_state    |>int)
                 
                 Reals            = x.Graph.Vertices.OfType<Real>().Select(fun r->r.GetHMI()).ToArray()
+                DirectCalls      = [||]
             }
+
 
 
     type DsSystem with

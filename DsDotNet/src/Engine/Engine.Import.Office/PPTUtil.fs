@@ -872,6 +872,11 @@ module PPTUtil =
                 let masterPlaceHolders = Office.GetPlaceholderShapes(slidePart.SlideLayoutPart.SlideLayout.CommonSlideData.ShapeTree.Descendants<Shape>())
                                                .Where(fun f -> f.InnerText.StartsWith("<#") && f.InnerText.EndsWith(">"))
 
+                let errShapes = masterPlaceHolders.Where(fun s->s.InnerText.Split('#').Count() <> 2)
+                if errShapes.any()
+                then 
+                    failWithLog $"{errShapes.First().InnerText} MasterPage PlaceHolder Error"
+
                 Office.GetPlaceholderShapes(slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>())
                 |> Seq.choose(fun shape -> 
                     match masterPlaceHolders.TryFind(fun f->getPlaceHolderId(f) = getPlaceHolderId(shape)) with

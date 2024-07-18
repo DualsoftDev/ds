@@ -198,8 +198,8 @@ module CoreExtensionModule =
         member x.IsOutAddressSkipOrEmpty = x.OutAddress = TextAddrEmpty || x.OutAddress = TextSkip
         member x.IsAddressEmpty = x.IsInAddressEmpty  && x.IsOutAddressEmpty
         member x.IsAddressSkipOrEmpty = x.IsOutAddressSkipOrEmpty  && x.IsInAddressSkipOrEmpty
-        member x.IsMaunualAddressEmpty = x.MaunualActionAddress = TextAddrEmpty
-        member x.IsMaunualAddressSkipOrEmpty = x.MaunualActionAddress = TextAddrEmpty || x.MaunualActionAddress = TextSkip
+        member x.IsMaunualAddressEmpty = x.MaunualAddress = TextAddrEmpty
+        member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
 
         member x.GetInParam(job:Job) = x.InParams[job.UnqualifiedName]
         member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)

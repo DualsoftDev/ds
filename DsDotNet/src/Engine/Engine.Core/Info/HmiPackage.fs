@@ -39,16 +39,25 @@ module HmiPackageModule =
     //모니터링 전용 (명령은 소속Job 통해서)
     type HMIDevice = {
         Name : string
-        Calls : HMICall array  
-    } with
-        member x.CollectTags () = x.Calls |> Seq.collect (fun c -> c.CollectTags())
+        ActionIN : HMILamp option     
+        ActionOUT : HMILamp option     
+    } 
+    with 
+        member x.CollectTags () =
+            seq {
+                    if x.ActionIN.IsSome then yield x.ActionIN.Value        
+                    if x.ActionOUT.IsSome then yield x.ActionOUT.Value
+                }
 
     ///수동 동작의 단위 jobA = { Dev1.ADV, Dev2.ADV, ... }
     ///하나의 명령으로 복수의 디바이스 행위  
     ///Push & MultiLamp ex) 실린더1차 전진 Push, 실린더1차_Dev1,실린더1차_Dev2,실린더1차_Dev3 전진 램프들
     type HMIJob = {
         Name : string
-        JobPushMutiLamp  : HMIPushMultiLamp 
+        JobPushMutiLamp   : HMIPushMultiLamp   //강제시작 forceStart & inTags
+        JobPushForceON    : HMIPush            //작업완료
+        JobPushForceOFF   : HMIPush            //작업완료리셋
+        JobPushOrigin     : HMIPush            //원위치
     } with
         member x.CollectTags () =
             let push, lamps = x.JobPushMutiLamp

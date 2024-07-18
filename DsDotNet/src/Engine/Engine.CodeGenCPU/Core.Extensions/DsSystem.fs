@@ -197,7 +197,6 @@ module ConvertCpuDsSystem =
                         let outT = createBridgeTag(x.Storages, dev.ApiStgName, dev.OutAddress, (int)TaskDevTag.actionOut , BridgeType.Device, x , dev, dev.GetOutParam(call.TargetJob).Type).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
-
         member x.GenerationIO() =
 
             x.GenerationTaskDevIOM()
@@ -213,9 +212,9 @@ module ConvertCpuDsSystem =
                     ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)   
                 then
                     cv.SF.Address    <- getMemory (cv.SF.Name) (getTarget(x))
-                    dev.MaunualActionAddress  <- cv.SF.Address
+                    dev.MaunualAddress  <- cv.SF.Address
                 else 
-                    dev.MaunualActionAddress  <- TextSkip  //다중 작업은 수동 작업을 사용하지 않는다.
+                    dev.MaunualAddress  <- TextSkip  //다중 작업은 수동 작업을 사용하지 않는다.
                     
 
 

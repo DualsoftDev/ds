@@ -52,7 +52,6 @@ module TagManagerModule =
         let forceStartBit  = createTag  true VertexTag.forceStart
         let forceResetBit  = createTag  true VertexTag.forceReset
         let forceOnBit     = createTag  true VertexTag.forceOn
-        let forceOffBit    = createTag  true VertexTag.forceOff
 
 
         
@@ -148,7 +147,6 @@ module TagManagerModule =
             | VertexTag.forceStart          -> forceStartBit       :> IStorage
             | VertexTag.forceReset          -> forceResetBit       :> IStorage
             | VertexTag.forceOn             -> forceOnBit          :> IStorage
-            | VertexTag.forceOff            -> forceOffBit         :> IStorage
 
             | VertexTag.goingPulse          -> goingPulse       :> IStorage
             | VertexTag.goingPulseRelay     -> goingPulseRelay  :> IStorage

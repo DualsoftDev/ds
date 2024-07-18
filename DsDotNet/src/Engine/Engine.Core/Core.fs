@@ -1,4 +1,4 @@
-// Copyright (c) Dualsoft  All Rights Reserved.
+    // Copyright (c) Dualsoft  All Rights Reserved.
 // Dualsoft에 저작권이 있습니다. 모든 권한 보유.
 
 namespace rec Engine.Core
@@ -389,13 +389,12 @@ module CoreModule =
         
         member val InAddress = TextAddrEmpty with get, set
         member val OutAddress = TextAddrEmpty with get, set
-        member val MaunualActionAddress = TextAddrEmpty with get, set
+        member val MaunualAddress = TextAddrEmpty with get, set
               
         //CPU 생성시 할당됨 InTag
         member val InTag = getNull<ITag>() with get, set
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
-        //CPU 생성시 할당됨 MaunualTag
 
         member val IsRootOnlyDevice = false  with get, set
 

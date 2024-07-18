@@ -23,14 +23,15 @@ module TaskDevManagerModule =
             member _.Storages = stg
 
 
-        member _.GetApiTag (vt:TaskDevTag) :IStorage =
+        member _.GetTaskDevTag (vt:TaskDevTag) :IStorage =
             match vt with 
             | TaskDevTag.planStart          -> ps  :> IStorage
             | TaskDevTag.planEnd            -> pe  :> IStorage
+            | TaskDevTag.actionIn           -> td.InTag :> IStorage
+            | TaskDevTag.actionOut          -> td.OutTag :> IStorage
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
          
         member _.TaskDev   = td
-
       
         member _.PS   = ps
         member _.PE   = pe

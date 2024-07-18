@@ -18,10 +18,11 @@ module ConvertHMI =
     let getWebTag (tm:ITagManager) (kind:int) =
         let tag = 
             match tm with
-            | :? SystemManager  as m -> m.GetSystemTag (DU.tryGetEnumValue<SystemTag>(kind).Value)
-            | :? FlowManager    as m -> m.GetFlowTag   (DU.tryGetEnumValue<FlowTag>(kind).Value)
-            | :? VertexManager  as m -> m.GetVertexTag (DU.tryGetEnumValue<VertexTag>(kind).Value)
-            | :? ApiItemManager as m -> m.GetApiTag    (DU.tryGetEnumValue<ApiItemTag>(kind).Value)
+            | :? SystemManager  as m -> m.GetSystemTag  (DU.tryGetEnumValue<SystemTag>(kind).Value)
+            | :? FlowManager    as m -> m.GetFlowTag    (DU.tryGetEnumValue<FlowTag>(kind).Value)
+            | :? VertexManager  as m -> m.GetVertexTag  (DU.tryGetEnumValue<VertexTag>(kind).Value)
+            | :? ApiItemManager as m -> m.GetApiTag     (DU.tryGetEnumValue<ApiItemTag>(kind).Value)
+            | :? TaskDevManager as m -> m.GetTaskDevTag (DU.tryGetEnumValue<TaskDevTag>(kind).Value)
             | _ -> failwithf "getPushWebTag error"
 
         TagWebExt.GetWebTag(tag, kindDescriptions) 
@@ -38,7 +39,14 @@ module ConvertHMI =
 
     let getPushMultiLamp (tm:ITagManager) (pushKind:int) (lampTags:ITag seq) =
         getWebTag tm pushKind, lampTags.Select(fun f-> TagWebExt.GetWebTag(f, kindDescriptions))
-        
+
+    let getDeiveHMIs(call:Call) = 
+        call.TargetJob.TaskDefs.Select(fun td->
+        {
+            Name =  td.DeviceName
+            ActionIN  = if td.InTag.IsNonNull()  then Some (getLamp (td.TagManager) (TaskDevTag.actionIn |> int)) else None
+            ActionOUT = if td.OutTag.IsNonNull() then Some (getLamp (td.TagManager) (TaskDevTag.actionOut |> int)) else None
+        })
 
     type Call with
         member private x.GetHMI()   =
@@ -58,26 +66,23 @@ module ConvertHMI =
     type LoadedSystem with
         member private x.GetHMI()   =
             let containerCalls = x.ContainerSystem.GetVerticesOfJobCalls()
-            {
-                Name        = x.Name
-                Calls    = containerCalls
-                                .Where(fun c->c.TargetJob.TaskDefs.any(fun d->d.ApiItem.ApiSystem = x.ReferenceSystem))
-                                .Select(fun c->c.GetHMI()).ToArray()
-            }
+            containerCalls.Where(fun c->c.TargetJob.TaskDefs.any(fun d->d.ApiItem.ApiSystem = x.ReferenceSystem))
+                          .SelectMany(getDeiveHMIs)
 
     type Job with
-        member private x.GetHMI()   =
+        member private x.GetHMI(call:Call)   =
             let actionInTags  = x.TaskDefs.Where(fun d->d.InTag.IsNonNull()).Select(fun d->d.InTag) //todo  ActionINFunc func $not 적용 검토     
-            let apiTagManager = x.TaskDefs.First().ApiItem.TagManager :?> ApiItemManager
             {
                 Name = x.QualifiedName
-                JobPushMutiLamp = getPushMultiLamp  apiTagManager (ApiItemTag.apiItemSet |>int) (actionInTags)
+                JobPushMutiLamp = getPushMultiLamp call.TagManager (VertexTag.forceStart |>int) (actionInTags)
+                JobPushForceON  = getPush  call.TagManager (VertexTag.forceOn |>int) 
+                JobPushForceOFF  = getPush  call.TagManager (VertexTag.forceReset |>int) 
+                JobPushOrigin  = getPush  call.TagManager (VertexTag.origin |>int) 
             }
 
     type Real with
         member private x.GetHMI()   =
 
-            let getLoadedName (api:ApiItem) = x.Parent.GetSystem().GetLoadedSys(api.ApiSystem).Value
             let calls = x.Graph.Vertices.OfType<Call>()
             let tm = x.TagManager :?> VertexManager
             {
@@ -85,7 +90,7 @@ module ConvertHMI =
                 StartPush    = getPush tm (VertexTag.startTag |>int)   
                 ResetPush    = getPush tm (VertexTag.resetTag |>int)  
                 ONPush       = getPush tm (VertexTag.forceOn |>int)  
-                OFFPush      = getPush tm (VertexTag.forceOff |>int)  
+                OFFPush      = getPush tm (VertexTag.forceReset |>int)  
                 ReadyLamp    = getLamp tm (VertexTag.ready |>int)  
                 GoingLamp    = getLamp tm (VertexTag.going |>int)  
                 FinishLamp   = getLamp tm (VertexTag.finish |>int)  
@@ -94,16 +99,12 @@ module ConvertHMI =
                 PauseLamp    = getLamp tm (VertexTag.pause |>int)  
                 Error        = getLamp tm (VertexTag.errorTRx |>int)  
                 
-                Devices      = calls
-                                    .Where(fun c->c.IsJob)
-                                    .SelectMany(fun c->
-                                      c.TargetJob.TaskDefs.Select(fun d-> getLoadedName d.ApiItem).Distinct()
-                                                            .Select(fun d->d.GetHMI())
-                                       ).ToArray()
+                Devices      = calls.SelectMany(fun c-> getDeiveHMIs(c)).ToArray()
                                
                 Jobs         = calls 
                                     .Where(fun c->c.IsJob)
-                                    .Select(fun c->c.TargetJob.GetHMI()).ToArray()
+                                    .DistinctBy(fun c->c.TargetJob)
+                                    .Select(fun c->c.TargetJob.GetHMI(c)).ToArray()
             }
 
     type Flow with
@@ -152,7 +153,7 @@ module ConvertHMI =
             let ip        = RuntimeDS.IP
             let versionDS = Assembly.GetExecutingAssembly().GetName().Version.ToString()
             let system    = sys.GetHMI()
-            let devices   = sys.Devices.Select(fun d -> d.GetHMI()).ToArray()
+            let devices   = sys.Devices.SelectMany(fun d -> d.GetHMI()).ToArray()
             HMIPackage(ip, versionDS, system, devices) |> tee (fun x-> x.BuildTagMap())
 
         [<Extension>]

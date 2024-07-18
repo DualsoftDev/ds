@@ -419,7 +419,7 @@ module ExportIOTable =
             let devs =  sys.GetDevicesForHMI()
             devs.Select(fun (dev, _)-> 
                 let text = 
-                    if dev.MaunualActionAddress = TextSkip then
+                    if dev.MaunualAddress = TextSkip then
                         ""//"·" 
                     else
                         "□" 
@@ -578,7 +578,7 @@ module ExportIOTable =
                    
                     match iomType with
                     | IOType.Memory ->
-                        yield rowItems (dev, if dev.IsMaunualAddressSkipOrEmpty then HMITempManualAction else dev.MaunualActionAddress)
+                        yield rowItems (dev, if dev.IsMaunualAddressSkipOrEmpty then HMITempManualAction else dev.MaunualAddress)
                     | IOType.In->
                         yield rowItems (dev, if dev.IsInAddressSkipOrEmpty then HMITempMemory else dev.InAddress)
                     | IOType.Out ->                            

@@ -37,17 +37,14 @@ module FqdnExplorer =
 
             | :? Job as job ->
                 yield (job.QualifiedName, job)
-                for c in job.TaskDefs do
-                    yield! visit c
+                for td in job.TaskDefs do
+                    yield! visit td
 
             | :? TaskDev as taskDev ->
                 yield (taskDev.QualifiedName, taskDev)
 
             | :? Alias as alias ->
                 yield (alias.QualifiedName, alias)
-
-            //| :? Alias ->
-            //    ()
 
             | _ -> failwith "ERROR"
         }

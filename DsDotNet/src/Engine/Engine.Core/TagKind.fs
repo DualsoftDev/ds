@@ -145,9 +145,8 @@ module TagKindList =
     | relayReal                 = 11018
     
     | forceStart                = 11019
-    | forceReset                = 11020
+    | forceReset                = 11020 //forceOff 의미
     | forceOn                   = 11021
-    | forceOff                  = 11022
 
     | counter                   = 11023
     | timerOnDelay              = 11024

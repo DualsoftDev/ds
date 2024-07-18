@@ -52,7 +52,6 @@ module DsType =
         | DuDriveState
 
     type ExternalTag = 
-        | ManualTag
         | ErrorSensorOn 
         | ErrorSensorOff 
         | ErrorOnTimeOver 

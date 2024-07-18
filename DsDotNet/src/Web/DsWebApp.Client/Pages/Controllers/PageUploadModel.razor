@@ -43,6 +43,7 @@
     <thead>
         <tr>
             <th>Name</th>
+            <th>Activate</th>
             <th>Download</th>
             <th>Delete</th>
         </tr>
@@ -52,6 +53,8 @@
         {
             <tr>
                 <td><a href="files/@url" target="_blank">@url</a></td>
+                @* <td><a href="api/files/@url/activate" class="btn btn-primary">activate</a></td> *@
+                <td><a @onclick="() => activateModel(url)" class="btn btn-primary">activate</a></td>
                 <td><a href="api/files/@url/get" class="btn btn-primary">download</a></td>
                 <td>
                     <button class="btn btn-outline-danger" disabled="@(!isDeletable(url))"
@@ -75,6 +78,13 @@
     List<string> _fileUrls = new List<string>();
 
     ServerSettings _serverSettings;
+
+    async Task activateModel(string url)
+    {
+        Console.WriteLine($"Activating file {url}");
+        var result = await Http.PostAsJsonGetRestResultStringAsync("/api/files/activate", url);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         _serverSettings = ClientGlobal.ServerSettings;

@@ -14,17 +14,8 @@ open DBLoggerORM
 
 [<AutoOpen>]
 module internal DBLoggerImpl =
-    let getNewTagKindInfosAsync (conn: IDbConnection, tr: IDbTransaction) =
-        let tagKindInfos = GetAllTagKinds ()
-
-        task {
-            let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}];", null, tr)
-
-            let existingTagKindHash =
-                existingTagKindMap |> map (fun t -> t.Id, t.Name) |> HashSet
-
-            return tagKindInfos |> filter (fun t -> not <| existingTagKindHash.Contains(t))
-        }
+    /// for debugging purpose only!
+    let mutable ORMDBSkeleton4Debug = getNull<ORMDBSkeleton>()
 
     let checkDbForReaderAsync (conn: IDbConnection, tr: IDbTransaction) =
         task {
@@ -39,7 +30,7 @@ module internal DBLoggerImpl =
 
     let ormLog2Log (logSet: LogSet) (l: ORMLog) =
         let storage = logSet.StoragesById[l.StorageId]
-        Log(l.Id, storage, l.At, l.Value)
+        Log(l.Id, storage, l.At, l.Value, l.ModelId)
 
     type LogSet with
         // ormLogs: id 순(시간 순) 정렬
@@ -91,11 +82,12 @@ module internal DBLoggerImpl =
                 |> map Storage
                 |> toArray
 
+            let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
             let connStr = commonAppSettings.ConnectionString
             if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connStr}"
 
-            let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}]")
+            let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
 
             let dbStorages =
                 dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
@@ -112,7 +104,6 @@ module internal DBLoggerImpl =
                 if readerWriterType = DBLoggerType.Reader then
                     failwithlogf $"Database can't be sync'ed for {connStr}"
                 else
-                    let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
                     for s in newStorages do
                         let! id =
                             conn.InsertAndQueryLastRowIdAsync(
@@ -173,6 +164,12 @@ module internal DBLoggerImpl =
                         logSet.BuildIncremental newLogs
                     let modelId = commonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
+#if DEBUG
+                        let! stg = conn.QueryFirstOrDefaultAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
+                        assert(stg.ModelId = modelId)
+                        assert (ORMDBSkeleton4Debug.Model.IsNone || ORMDBSkeleton4Debug.Model.Value.Id = modelId)
+                        //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
+#endif
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
                                 (at, storageId, value, modelId)
@@ -195,7 +192,7 @@ module internal DBLoggerImpl =
 
         let writePeriodicAsync = dequeAndWriteDBAsync
 
-        let enqueLogsForInsert (xs: DsLog seq) =
+        let enqueLogsForInsert (xs: DsLog seq) : unit =
             let toDecimal (value: obj) =
                 match toBool value with
                 | Bool b -> (if b then 1 else 0) |> decimal
@@ -215,29 +212,35 @@ module internal DBLoggerImpl =
                         noop ()
 
                     let value = toDecimal x.Storage.BoxedValue
-                    ORMLog(-1, storageId, x.Time, value) |> queue.Enqueue
+                    let modelId = logSet.QuerySet.ModelId
+                    ORMLog(-1, storageId, x.Time, value, modelId) |> queue.Enqueue
                 | None -> failwithlog "NOT yet!!"
 
-        let enqueLogForInsert (x: DsLog) = enqueLogsForInsert ([ x ])
+        let enqueLogForInsert (x: DsLog) : unit = enqueLogsForInsert ([ x ])
 
 
         let createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
+                
+                let! dbSckeleton = ORMDBSkeletonDTOExt.CreateLoggerDBAsync(queryCriteria.ModelId, $"Data Source={commonAppSettings.LoggerDBSettings.ConnectionPath}")
+                ORMDBSkeleton4Debug <- dbSckeleton
+
                 use conn = commonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
                 let mutable readerWriterType = DBLoggerType.Writer
-                if queryCriteria <> null then
-                    readerWriterType <- readerWriterType ||| DBLoggerType.Reader
-                    do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
+                readerWriterType <- readerWriterType ||| DBLoggerType.Reader
+                do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
 
                 let! logSet = createLogInfoSetCommonAsync(queryCriteria, commonAppSettings, systems, conn, tr, readerWriterType)
+                assert(logSet.QuerySet.ModelId = queryCriteria.ModelId)
                 if queryCriteria <> null then
                     let! existingLogs =
                         conn.QueryAsync<ORMLog>(
-                            $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
+                            $"SELECT * FROM [{Tn.Log}] WHERE modelId = @ModelId AND at BETWEEN @START AND @END ORDER BY id;",
                             {| START = queryCriteria.StartTime
-                               END = queryCriteria.EndTime |}
+                               END = queryCriteria.EndTime
+                               ModelId = queryCriteria.ModelId|}
                         )
                     logSet.InitializeForReader(existingLogs)
 
@@ -246,13 +249,10 @@ module internal DBLoggerImpl =
                 return logSet
             }
 
-        let createLoggerDBSchemaAsync (connStr:string) (modelZipPath:string) (dbWriter:string) (cleanExistingDb:bool) =
+        let createLoggerDBSchemaAsync (connStr:string) (modelZipPath:string) (dbWriter:string) =
             task {
+                failwith "ERROR: LoggerDBSettings.FillModelId() ... 관련 호출로 일부 대체"
                 use conn = createConnectionWith connStr
-
-                if cleanExistingDb then
-                    conn.DropDatabase();
-
                 use! tr = conn.BeginTransactionAsync()
                 let! exists = conn.IsTableExistsAsync(Tn.Storage)
 
@@ -282,8 +282,8 @@ module internal DBLoggerImpl =
                 let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
 
                 for (id, name) in newTagKindInfos do
-                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name, modelId) VALUES (@Id, @Name, @ModelId);"
-                    do! conn.ExecuteSilentlyAsync(query, {| Id = id; Name = name; ModelId=modelId |}, tr)
+                    let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
+                    do! conn.ExecuteSilentlyAsync(query, {| Id = id; Name = name |}, tr)
 
                 do! tr.CommitAsync()
                 return modelId
@@ -319,11 +319,11 @@ module internal DBLoggerImpl =
         /// Log DB schema 생성
         let initializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
+                logDebug $":::initializeLogDbOnDemandAsync()"
                 let loggerDBSettings = commonAppSettings.LoggerDBSettings
-                let connStr = loggerDBSettings.ConnectionString
-                let (modelZipPath, dbWriter:string) = loggerDBSettings.ModelFilePath, loggerDBSettings.DbWriter
-                let! modelId = createLoggerDBSchemaAsync connStr modelZipPath dbWriter cleanExistingDb
-                commonAppSettings.LoggerDBSettings.ModelId <- modelId
+                if cleanExistingDb then
+                    loggerDBSettings.DropDatabase()
+                loggerDBSettings.FillModelId() |> ignore
             }
 
 
@@ -372,7 +372,8 @@ module internal DBLoggerImpl =
                 let! newLogs =
                     conn.QueryAsync<ORMLog>(
                         $"""SELECT * FROM [{Tn.Log}] 
-                            WHERE id > {lastLogId} ORDER BY id DESC;"""
+                            WHERE modelId = @ModelId AND id > @LastLogId ORDER BY id DESC;""",
+                        {| ModelId = queryCriteria.ModelId; LastLogId = lastLogId; |}
                     )
                 // TODO: logSet.QuerySet.StartTime, logSet.QuerySet.EndTime 구간 내의 것만 필터
                 if newLogs.any () then
@@ -396,9 +397,10 @@ module internal DBLoggerImpl =
 
                 let! existingLogs =
                     conn.QueryAsync<ORMLog>(
-                        $"SELECT * FROM [{Tn.Log}] WHERE at BETWEEN @START AND @END ORDER BY id;",
+                        $"SELECT * FROM [{Tn.Log}] WHERE modelId = @ModelId AND  at BETWEEN @START AND @END ORDER BY id;",
                         {| START = queryCriteria.StartTime
-                           END = queryCriteria.EndTime |}
+                           END = queryCriteria.EndTime
+                           ModelId = modelId|}
                     )
 
                 do! checkDbForReaderAsync (conn, tr)

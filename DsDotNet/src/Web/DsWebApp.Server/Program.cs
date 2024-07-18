@@ -9,6 +9,7 @@ using Dual.Web.Server.Auth;
 using Microsoft.Data.Sqlite;
 using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
+using static Engine.Info.DBLoggerORM;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 
@@ -104,10 +105,17 @@ services.AddDevExpressBlazor(options =>
 });
 
 var commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
-commonAppSettings.FillModelId();
+try { commonAppSettings.LoggerDBSettings.FillModelId(); }
+catch (Exception ex) { logger.Error($"Failed to initialize LoggerDB setting: {ex}"); }
+
 var serverSettings =
     conf.GetSection("ServerSettings").Get<ServerSettings>()
-        .Tee(ss => ss.Initialize());
+        .Tee(ss =>
+        {
+            try { ss.Initialize(commonAppSettings); }
+            catch (Exception ex) { logger.Error($"Failed to initialize LoggerDB setting: {ex}"); }
+        })
+        ;
 var serverGlobals = new ServerGlobal(serverSettings, commonAppSettings, logger);
 services.AddSingleton(serverGlobals);
 services.AddDsAuth(serverGlobals, conf);
@@ -206,9 +214,10 @@ public static class CustomServerExtension
 {
     public static async Task<IServiceCollection> AddUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
     {
-        await DBLogger.InitializeLogDbOnDemandAsync(serverGlobal.DsCommonAppSettings, cleanExistingDb:false);
-        //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
-        //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
+        if (serverGlobal.DsCommonAppSettings.LoggerDBSettings.ModelId >= 0)
+            await DBLogger.InitializeLogDbOnDemandAsync(serverGlobal.DsCommonAppSettings, cleanExistingDb:false);
+            //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
+            //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 
         ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
         return services;

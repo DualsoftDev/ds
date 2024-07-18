@@ -3,6 +3,8 @@
 
 using Dual.Web.Blazor.Shared;
 
+using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
+
 namespace DsWebApp.Server.Controllers;
 
 [ApiController]
@@ -12,23 +14,29 @@ public class FilesController : ControllerBaseWithLogger
     ServerGlobal _global;
     IHubContext<ModelHub> _hubContextModel;
     FilesControllerHelper _helper;
+    Action<string> _onFileUploaded;
+
+
     public FilesController(ServerGlobal global, IHubContext<ModelHub> hubContextModel)
         : base(global.Logger)
     {
         _global = global;
         _hubContextModel = hubContextModel;
-        var onFileUploaded = new Action<string>(fileName =>
+        _onFileUploaded = new (fileName =>
         {
+            var serviceFolder = global.ServerSettings.ServiceFolder;
             // dszip 파일 신규 upload 에 대한 처리  //copy->move로 변경 동작일단 잘됨
-            System.IO.File.Copy(fileName, _runtimeModelDsZipPath, overwrite:true);
+            //var targetFile = Path.Combine(serviceFolder, Path.GetFileName(fileName));
+            //System.IO.File.Copy(fileName, targetFile, overwrite:true);
+            //var path = Path.Combine(serviceFolder, Path.GetFileName(fileName));
             _global.ServerSettings.RuntimeModelDsZipPath = fileName;
             _global.ReloadRuntimeModel(global.ServerSettings);
             _hubContextModel.Clients.All.SendAsync(SK.S2CNModelChanged, fileName);
         });
-        _helper = new FilesControllerHelper(_logger) {  ServiceFolder = _serviceFolder, OnFileUploaded = onFileUploaded};
+        _helper = new FilesControllerHelper(_logger) {  ServiceFolder = _serviceFolder, OnFileUploaded = _onFileUploaded};
     }
     string _runtimeModelDsZipPath => _global.ServerSettings.RuntimeModelDsZipPath;
-    string _serviceFolder => Path.GetDirectoryName(_runtimeModelDsZipPath);
+    string _serviceFolder => _global.ServerSettings.ServiceFolder;
 
     // api/files/{fileName}/delete
     [HttpGet("{fileName}/delete")]
@@ -45,6 +53,14 @@ public class FilesController : ControllerBaseWithLogger
     {
         FileStreamResult file = _helper.GetFile(fileName);
         return file == null ? NotFound() : file;
+    }
+
+    // api/files/activate
+    [HttpPost("activate")]
+    public async Task<ActionResult<RestResultString>> MyActivate([FromBody] string fileName)
+    {
+        _onFileUploaded(Path.Combine(_global.ServerSettings.ServiceFolder, fileName));
+        return RestResultString.Ok($"OK: {fileName}");
     }
 
     // api/files

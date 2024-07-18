@@ -1,6 +1,13 @@
 @* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/compound-nodes/index.html *@
 
+@* 
+참고 파일
+- js/cyDsGraph.js
+- js/pages/PageModelGraph_razor.js
+ *@
+
 @page "/dashboards/graph"
+@implements IDisposable
 @using static Engine.Info.LoggerDB;
 @using static Engine.Info.DBLoggerORM;
 @using Engine.Info
@@ -28,10 +35,12 @@
     IDisposable _hubSubscription;
     ORMDBSkeleton _logDb;
     Dictionary<string, CyVertex> _fqdnNodeDic;
+    DotNetObjectReference<PageModelGraph> _dotNetObjRef;
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
+        _dotNetObjRef = DotNetObjectReference.Create(this);
         _hubConnection = await NavigationManager.ToAbsoluteUri("/hub/db").StartHubAsync();
         var result = await Http.GetRestResultAsync<string>($"/api/info/logdb-base");
         result.Iter(
@@ -70,6 +79,8 @@
                 await JsDual.EvalExternalScript("js/cyDsGraph.js");
                 await JsDual.EvalExternalScript("js/pages/PageModelGraph_razor.js");
                 await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");       // default to Non-Monitoring mode
+
+                await JsRuntime.InvokeVoidAsync("setDotnetObjRef", _dotNetObjRef);
 
                 var nodes = NewtonsoftJson.DeserializeObject<CyVertex[]>(nodesJson);
                 foreach (var n in nodes)
@@ -172,6 +183,24 @@
             _graphLoaded = true;
             StateHasChanged();
         }
+    }
+
+    [JSInvokable]
+    public async Task echo(string message)
+    {
+        await Task.Yield();
+        Console.WriteLine($"------------ Got {message} from JS.");
+    }
+    [JSInvokable]
+    public async Task HandleNode(string eventName, string fqdn)
+    {
+        await Task.Yield();
+        Console.WriteLine($"------------ Got Node Event {eventName} on {fqdn} from JS.");
+    }
+
+    public void Dispose()
+    {
+        _dotNetObjRef?.Dispose();
     }
 }
 

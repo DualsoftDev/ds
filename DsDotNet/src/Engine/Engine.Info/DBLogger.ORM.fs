@@ -1,6 +1,7 @@
 namespace Engine.Info
 
 open System
+open System.IO
 open Microsoft.Data.Sqlite
 open Engine.Core
 open Dual.Common.Base.FS
@@ -69,6 +70,9 @@ module DBLoggerORM =
         let Start = "start"
         let End = "end"
 
+        let ModelRuntime = "modelRuntime"
+        let ModelFilePath = "modelFilePath"
+
 
     let sqlCreateSchema =
         $"""
@@ -85,14 +89,13 @@ CREATE TABLE [{Tn.Storage}] (
 CREATE TABLE [{Tn.Model}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [path]        NVARCHAR(128) NOT NULL  -- pptx/zip path
-    , [lastModified] DATETIME2(7) NOT NULL  -- file last modified
-    , [runtime]     NVARCHAR(128) NOT NULL CHECK(runtime IN ('PC', 'PLC', 'LightPC', 'LightPLC', 'Simulation', 'Developer'))
+    , [runtime]     NVARCHAR(128) NOT NULL CHECK(runtime IN ('PC', 'PCSIM', 'PLC', 'PLCSIM'))       -- , 'LightPC', 'LightPLC', 'Simulation', 'Developer'
 );
 
 CREATE TABLE [{Tn.Log}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [storageId]   INTEGER NOT NULL
-    , [at]          DATETIME2(7) NOT NULL
+    , [at]          TEXT NOT NULL       -- SQLite DateTime 지원 안함.  DATETIME2(7)
     , [value]       NUMERIC NOT NULL
     , [modelId]     INTEGER NOT NULL
     , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
@@ -101,16 +104,16 @@ CREATE TABLE [{Tn.Log}] (
 
 CREATE TABLE [{Tn.TagKind}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
-    , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
-    , [modelId]     INTEGER NOT NULL
-    , CONSTRAINT uniq_row UNIQUE (id, name, modelId)
+    , [name]        NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
+    -- , [modelId]     INTEGER NOT NULL
+    , CONSTRAINT uniq_row UNIQUE (id, name)     -- , modelId
 );
 
 CREATE TABLE [{Tn.Property}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [name]        NVARCHAR(64) UNIQUE NOT NULL CHECK(LENGTH(name) <= 64)
     , [value]       NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
-    , [modelId]     INTEGER NOT NULL
+    , [modelId]     INTEGER     -- nullable. null 인 경우, 특정 모델에 대한 속성이 아님
 );
 
 
@@ -138,6 +141,7 @@ CREATE VIEW [{Vn.Log}] AS
         , tagKind.[name] AS tagKindName
         , log.[at] AS at
         , log.[value] AS value
+        , log.[modelId] AS modelId
     FROM [{Tn.Log}] log
     JOIN [{Tn.Storage}] stg
     ON [stg].[id] = [log].[storageId]
@@ -153,6 +157,7 @@ CREATE VIEW [{Vn.Storage}] AS
         , tagKind.[id] AS tagKind
         , tagKind.[name] AS tagKindName
         , stg.[dataType] AS dataType
+        , stg.[modelId] AS modelId
     FROM [{Tn.Storage}] stg
     JOIN [{Tn.TagKind}] tagKind
     ON [stg].[tagKind] = [tagKind].[id]
@@ -179,18 +184,19 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Name = name with get, set
 
     /// DB log table 의 row 항목
-    type ORMLog(id: int, storageId: int, at: DateTime, value: obj) =
+    type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int) =
         do
             let x = 1
             ()
 
-        new() = ORMLog(-1, -1, DateTime.MaxValue, null)
+        new() = ORMLog(-1, -1, DateTime.MaxValue, null, -1)
 
         interface IDBRow
         member val Id = id with get, set
         member val StorageId = storageId with get, set
         member val At = at with get, set
         member val Value = value with get, set
+        member val ModelId = modelId with get, set
         static member private settings =
             let settings = new JsonSerializerSettings(TypeNameHandling = TypeNameHandling.All)
             settings.Converters.Insert(0, new ObjTypePreservingConverter([|"Value"|]))
@@ -200,13 +206,12 @@ CREATE VIEW [{Vn.Storage}] AS
 
 
     /// DB log table 의 row 항목
-    type ORMModel(id: int, path:string, lastModified:DateTime) =
-        new() = ORMModel(-1, null, DateTime.MinValue)
+    type ORMModel(id: int, path:string) =
+        new() = ORMModel(-1, null)
 
         interface IDBRow
         member val Id = id with get, set
         member val Path = path with get, set
-        member val LastModified = lastModified with get, set
 
     /// tagKind table row
     type ORMTagKind() =
@@ -215,18 +220,18 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Name = "" with get, set
 
     /// Runtime 생성 log 항목
-    type Log(id: int, storage: Storage, at: DateTime, value: obj) =
-        inherit ORMLog(id, storage.Id, at, value)
-        new() = Log(-1, getNull<Storage> (), DateTime.MaxValue, null)
+    type Log(id: int, storage: Storage, at: DateTime, value: obj, modelId:int) =
+        inherit ORMLog(id, storage.Id, at, value, modelId)
+        new() = Log(-1, getNull<Storage> (), DateTime.MaxValue, null, -1)
 
         interface IDBRow
         member val Storage = storage with get, set
         member val At = at with get, set
         member val Value: obj = value with get, set
 
-    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj) =
-        inherit ORMLog(logId, storageId, at, value)
-        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null)
+    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj, modelId:int) =
+        inherit ORMLog(logId, storageId, at, value, modelId)
+        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null, -1)
         member val Name = name with get, set
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set
@@ -234,13 +239,14 @@ CREATE VIEW [{Vn.Storage}] AS
 
 
 
-    type ORMProperty(id:int, name: string, value: string) =
-        new() = ORMProperty(-1, null, null)
+    type ORMProperty(id:int, name: string, value: string, modelId:int) =
+        new() = ORMProperty(-1, null, null, -1)
 
         interface IDBRow
         member val Id = id with get, set
         member val Name = name with get, set
         member val Value = value with get, set
+        member val ModelId = modelId with get, set
 
     type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int) =
         new() = ORMStorage(-1, null, null, -1, null, -1)
@@ -299,13 +305,16 @@ CREATE VIEW [{Vn.Storage}] AS
         member x.Summaries = summaryDic
         member x.Storages = storageDic
         member x.StoragesById = storageByIdDic
+        member x.ModelId = queryCriteria.ModelId
         member val LastLog: Log option = None with get, set
         member x.ReaderWriterType = readerWriterType
         member x.Disposables = disposables
         member x.GetSummary(summaryKey: StorageKey) = summaryDic[summaryKey]
 
         interface ILogSet with
-            override x.Dispose() = x.Disposables.Dispose()
+            override x.Dispose() =
+                x.Disposables.Dispose()
+                tracefn "------------------ LogSet disposed"
 
 
 
@@ -367,35 +376,108 @@ CREATE VIEW [{Vn.Storage}] AS
     let createConnectionWith (connStr) =
         new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 
-    open System.IO
-    type DSCommonAppSettings with
-        member x.ConnectionString = x.LoggerDBSettings.ConnectionString
-        member x.CreateConnection(): SqliteConnection = createConnectionWith x.ConnectionString
+    let getNewTagKindInfosAsync (conn: IDbConnection, tr: IDbTransaction) =
+        let tagKindInfos = GetAllTagKinds ()
 
+        task {
+            let! existingTagKindMap = conn.QueryAsync<ORMTagKind>($"SELECT * FROM [{Tn.TagKind}];", null, tr)       // WHERE modelId = {modelId}
+
+            let existingTagKindHash =
+                existingTagKindMap |> map (fun t -> t.Id, t.Name) |> HashSet
+
+            return tagKindInfos |> filter (fun t -> not <| existingTagKindHash.Contains(t))
+        }
 
 [<Extension>]
-type DSCommonAppSettingsExt =
+type LoggerDBSettingsExt =
     [<Extension>]
-    static member FillModelId(commonAppSettings:DSCommonAppSettings): unit =
-        let x = commonAppSettings
-        let path = x.LoggerDBSettings.ModelFilePath
-        let runtime = x.LoggerDBSettings.DbWriter
-        use conn = x.CreateConnection()
+    static member CreateConnection(loggerDBSettings:LoggerDBSettings): SqliteConnection =
+        let connStr = $"Data Source={loggerDBSettings.ConnectionPath}"
+        createConnectionWith connStr
 
-        let id =
+    [<Extension>]
+    static member DropDatabase(loggerDBSettings:LoggerDBSettings) = loggerDBSettings.DropDatabase()
 
-            if conn.IsTableExistsAsync(Tn.Model).Result then
-                let lastModified = System.IO.FileInfo(path).LastWriteTime
-                let ids =
-                    conn.Query<int>(
-                        $@"SELECT * FROM {Tn.Model}
-                            WHERE path = @Path
-                            AND runtime = @Runtime
-                            AND lastModified = @LastModified",
-                        {|Path = path; Runtime = runtime; LastModified = lastModified|})
-                ids.HeadOr(-1)
-            else
-                -1
-        x.LoggerDBSettings.ModelId <- id
+    [<Extension>]
+    static member ComputeModelId(loggerDBSettings:LoggerDBSettings): int =
+        use conn = loggerDBSettings.CreateConnection()
+        // db 가 아직 초기화되지 않은 경우의 처리???
+        failwith "Not implemented"
+
+    [<Extension>]
+    static member FillModelId(loggerDBSettings:LoggerDBSettings): int*string =
+        Directory.CreateDirectory(Path.GetDirectoryName(loggerDBSettings.ConnectionPath)) |> ignore
+        use conn = loggerDBSettings.CreateConnection()
+        use tr = conn.BeginTransaction()
+        let tableExists = conn.IsTableExistsAsync(Tn.Model).Result
+
+        let mutable path = loggerDBSettings.ModelFilePath
+        let mutable runtime = loggerDBSettings.DbWriter
+        let lastModelInfoSpecified = path.NonNullAny() && runtime.NonNullAny()
+
+
+        if not tableExists then
+            if not lastModelInfoSpecified then
+                failwithlog "ModelFilePath and DbWriter must be set for empty database!"
+
+            // schema 새로 생성
+            conn.ExecuteSilentlyAsync(sqlCreateSchema, tr).Wait()
+
+        if not lastModelInfoSpecified then
+            let propDic = conn.Query<ORMProperty>($"SELECT * FROM [{Tn.Property}]", null, tr) |> map (fun p -> p.Name, p.Value) |> Tuple.toDictionary
+            path <- propDic[PropName.ModelFilePath]
+            if runtime.IsNullOrEmpty() then
+                runtime <- propDic[PropName.ModelRuntime]
+
+        let param = {|Path = path; Runtime = runtime |}
+        let optModel =
+            let sql =
+                $"""SELECT * FROM {Tn.Model}
+                        WHERE path = @Path
+                        AND runtime = @Runtime"""
+            conn.TryQuerySingle<ORMModel>(sql, param, tr)
+
+        match optModel with
+        | Some m ->
+            let propSql = 
+                $"""INSERT OR REPLACE INTO [{Tn.Property}]
+                    (name, value)
+                    VALUES(@Name, @Value);"""
+            conn.Execute(propSql, {| Name = PropName.ModelFilePath; Value = path |}, tr) |> ignore
+            conn.Execute(propSql, {| Name = PropName.ModelRuntime; Value = runtime |}, tr) |> ignore
+
+            logInfo $"With new Model: id = {m.Id}, path={path}"
+            loggerDBSettings.ModelId <- m.Id
+        | _ ->
+            let modelId = 
+                conn.InsertAndQueryLastRowIdAsync(tr,
+                    $"""INSERT INTO [{Tn.Model}]
+                        (path, runtime)
+                        VALUES (@Path, @Runtime)
+                    """,
+                    param
+                ).Result
+            loggerDBSettings.ModelId <- modelId
+
+            let newTagKindInfos = (getNewTagKindInfosAsync (conn, tr)).Result
+
+            for (id, name) in newTagKindInfos do
+                let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
+                conn.Execute(query, {| Id = id; Name = name |}, tr) |> ignore
+
+                
+        tr.Commit()
+
+        loggerDBSettings.ModelId, path
 
             
+
+
+[<AutoOpen>]
+module DBLoggerORM2 =
+    open System.IO
+    type DSCommonAppSettings with
+        member x.ConnectionString = $"Data Source={x.LoggerDBSettings.ConnectionPath}"
+        member x.CreateConnection(): SqliteConnection = x.LoggerDBSettings.CreateConnection()
+
+

@@ -21,7 +21,8 @@ module DBLoggerTestModule =
         let createLog =
             let counter = counterGenerator 1
             let helper (storage:Storage) (at:DateTime) (value:obj) =
-                ORMLog(counter(), storage.Id, at, value)
+                let modelId = -1
+                ORMLog(counter(), storage.Id, at, value, modelId)
             helper
 
         let nextSecond =

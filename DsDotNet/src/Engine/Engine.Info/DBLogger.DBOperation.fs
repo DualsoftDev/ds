@@ -167,6 +167,7 @@ module internal DBLoggerImpl =
                         let! stg = conn.QueryFirstAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
                         let modelId = stg.ModelId
 //#if DEBUG
+//                        // currentModelId 와 log 의 modelId 는 서로 다를 수 있다.  모델 변경 직후, 예전 log 가 날아오는 경우 존재
 //                        assert(stg.ModelId = modelId)
 //                        assert (ORMDBSkeleton4Debug.Model.IsNone || ORMDBSkeleton4Debug.Model.Value.Id = modelId)
 //                        //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
@@ -177,15 +178,15 @@ module internal DBLoggerImpl =
                                 VALUES (@At, @StorageId, @Value, @ModelId)
                             """
 
-                        do!
-                            conn.ExecuteSilentlyAsync(
+                        let! _ =
+                            conn.ExecuteAsync(
                                 query,
                                 {| At = l.At
                                    StorageId = l.StorageId
                                    Value = l.Value
-                                   ModelId = modelId |}
+                                   ModelId = modelId |},
+                                tr
                             )
-
                         ()
 
                     do! tr.CommitAsync()

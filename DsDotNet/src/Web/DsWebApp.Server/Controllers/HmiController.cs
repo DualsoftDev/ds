@@ -1,3 +1,5 @@
+using Engine.Core;
+using Engine.Info;
 using Engine.Runtime;
 
 using Microsoft.AspNetCore.Authorization;
@@ -5,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
+using static Engine.Info.DBLoggerORM;
 
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 
@@ -43,6 +46,9 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
             Debug.WriteLine($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
+            var storage = global.Storages[tagWeb.Name];
+            DBLogger.EnqueLogForInsert(new DsLogModule.DsLog(DateTime.Now, storage));
+
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
             return RestResultString.Ok("OK");
         }

@@ -8,6 +8,8 @@ using Microsoft.Data.Sqlite;
 
 using System.Data;
 using System.Reactive.Subjects;
+
+using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
 
 namespace DsWebApp.Server.Common;
@@ -22,6 +24,7 @@ public class ServerGlobal
     /// DsZipPath 에 따른 compile 된 Runtime model
     /// </summary>
     public RuntimeModel RuntimeModel { get; private set; }
+    public Dictionary<string, IStorage> Storages { get; private set; }
     public Subject<RuntimeModel> RuntimeModelChangedSubject { get; } = new();
 
 
@@ -42,6 +45,7 @@ public class ServerGlobal
             try
             {
                 RuntimeModel = ReloadRuntimeModel(serverSettings);
+                Storages = RuntimeModel?.System.GetStorages(skipInternal: true).ToDictionary(stg => stg.Name);
                 if (serverSettings.AutoStartOnSystemPowerUp)
                 {
                     // Task.Factory.StartNew(() => RuntimeModel?.Cpu.Run());
@@ -64,6 +68,7 @@ public class ServerGlobal
             Logger.Info($"Model change detected: {dsZipPath}");
             RuntimeModel?.Dispose();
             RuntimeModel = null;
+            Storages = null;
 
             if (dsZipPath.NonNullAny() && !File.Exists(dsZipPath))
             {
@@ -79,6 +84,7 @@ public class ServerGlobal
             RuntimeDS.Package = serverSettings.GetRuntimePackage();
 
             RuntimeModel = new RuntimeModel(dsZipPath, PlatformTarget.WINDOWS);
+            Storages = RuntimeModel?.System.GetStorages(skipInternal: true).ToDictionary(stg => stg.Name);
 
             RuntimeModelChangedSubject.OnNext(RuntimeModel);
             return RuntimeModel;

@@ -74,10 +74,7 @@ module internal DBLoggerImpl =
         task {
             let systemStorages: Storage array =
                 systems
-                |> map (fun s -> s.TagManager)
-                |> distinct
-                |> Seq.collect (fun tagManager -> tagManager.Storages.Values)
-                |> filter (fun s -> s.TagKind <> skipValueChangedForTagKind) // 내부변수
+                |> collect(fun s -> s.GetStorages(true))
                 |> distinct
                 |> map Storage
                 |> toArray
@@ -297,7 +294,10 @@ module internal DBLoggerImpl =
                 let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
 
                 use conn = createConnectionWith connStr
-                let modelId = 1     // todo: modelId 추후 수정 필요
+                use! tr = conn.BeginTransactionAsync()
+
+                let! modelIds = conn.QueryAsync<int>($"SELECT id FROM [{Tn.Model}] WHERE path COLLATE NOCASE = @Path LIMIT 1", {| Path = pptPath |}, tr);
+                let modelId = modelIds |> exactlyOne
 
                 do!
                     conn.ExecuteSilentlyAsync(
@@ -306,7 +306,7 @@ module internal DBLoggerImpl =
                                           VALUES(@Name, @Value, @ModelId);""",
                         {| Name = PropName.PptPath
                            Value = pptPath
-                           ModelId = modelId |} )
+                           ModelId = modelId |}, tr )
 
                 do!
                     conn.ExecuteSilentlyAsync(
@@ -315,7 +315,9 @@ module internal DBLoggerImpl =
                                           VALUES(@Name, @Value, @ModelId);""",
                         {| Name = PropName.ConfigPath
                            Value = config
-                           ModelId = modelId |} )
+                           ModelId = modelId |}, tr )
+
+                do! tr.CommitAsync()
             }
 
         /// Log DB schema 생성

@@ -387,6 +387,16 @@ type SystemExt =
     [<Extension>]
     static member GetDevice(x:TaskDev, sys:DsSystem) = sys.Devices.First(fun f->f.Name  = x.DeviceName)
 
+    /// System 하부의 storages 반환.
+    ///
+    /// - skipInternal: 내부 변수 skip 여부
+    [<Extension>]
+    static member GetStorages(x:DsSystem, skipInternal:bool):IStorage seq =
+        x.TagManager.Storages.Values
+        |> filter (fun s -> not skipInternal || s.TagKind <> skipValueChangedForTagKind) // 내부변수
+        |> distinct
+
+
     //[<Extension>]
     //static member ToTextForDevParam(x:TaskDev, jobName:string) = toTextInOutDev (x.GetInParam(jobName)) (x.GetOutParam(jobName))
 

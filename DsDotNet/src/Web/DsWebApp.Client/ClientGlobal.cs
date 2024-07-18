@@ -35,6 +35,10 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
     public bool IsCpuRunning { get; set; }
     public event PropertyChangedEventHandler PropertyChanged;
 
+    HttpClient _http;
+    NavigationManager _navigationManager;
+    ILocalStorageService _localStorage;
+
     /// <summary>
     /// Client browser 의 초기 설정.  Http, NavigationManager 등 blazor component 요소들이 활용가능할 때 수행해야 할 작업 지정
     /// <br/> - Server 로부터 settings, RuntimeModel 가져오기
@@ -43,6 +47,10 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
     /// </summary>
     public async Task InitializeAsync(HttpClient http, NavigationManager navigationManager, ILocalStorageService localStorage)
     {
+        _http = http;
+        _navigationManager = navigationManager;
+        _localStorage = localStorage;
+
         if (ServerSettings == null)
         {
             ServerSettings = await http.GetFromJsonAsync<ServerSettings>("api/serversettings");

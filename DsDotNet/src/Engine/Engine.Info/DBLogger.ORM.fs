@@ -396,7 +396,9 @@ type LoggerDBSettingsExt =
         createConnectionWith connStr
 
     [<Extension>]
-    static member DropDatabase(loggerDBSettings:LoggerDBSettings) = loggerDBSettings.DropDatabase()
+    static member DropDatabase(loggerDBSettings:LoggerDBSettings) =
+        use conn = loggerDBSettings.CreateConnection()
+        conn.DropDatabase()
 
     [<Extension>]
     static member ComputeModelId(loggerDBSettings:LoggerDBSettings): int =

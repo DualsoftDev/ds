@@ -1,0 +1,42 @@
+@* CompHmiJobsInFlowTable *@
+
+@using Engine.Core
+
+@if (_loading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <li>Direct call of @Flow.Name </li>
+    <DxGrid Data="_directCalls">
+        <Columns>
+            <DxGridDataColumn FieldName="Name" Caption="Call"></DxGridDataColumn>
+@* 
+            <LampRealColumn Caption="상태(RGFH)"/>
+            <ButtonColumn Caption="자동시작" TagGetter="@((dataItem) =>((HMICall)dataItem).StartPush)" />
+            <ButtonColumn Caption="자동복귀" TagGetter="@((dataItem) =>((HMICall)dataItem).ResetPush)" />
+            <ButtonColumn Caption="작업완료SET" TagGetter="@((dataItem) =>((HMICall)dataItem).ONPush)" />
+            <ButtonColumn Caption="작업완료RST" TagGetter="@((dataItem) =>((HMICall)dataItem).OFFPush)" />
+ *@
+        </Columns>
+    </DxGrid>
+}
+
+@code {
+    bool _loading = true;
+    [Parameter] public HMISystem System { get; set; }
+    [Parameter] public HMIFlow Flow { get; set; }
+    HMICall[] _directCalls;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _directCalls = Flow.DirectCalls;
+        _loading = false;
+    }
+}
+
+
+

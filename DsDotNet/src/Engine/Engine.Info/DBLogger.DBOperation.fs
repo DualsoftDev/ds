@@ -162,29 +162,31 @@ module internal DBLoggerImpl =
                     if (logSet.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
                         logSet.BuildIncremental newLogs
-                    let modelId = commonAppSettings.LoggerDBSettings.ModelId
+                    let currentModelId = commonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
-#if DEBUG
-                        let! stg = conn.QueryFirstOrDefaultAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
-                        assert(stg.ModelId = modelId)
-                        assert (ORMDBSkeleton4Debug.Model.IsNone || ORMDBSkeleton4Debug.Model.Value.Id = modelId)
-                        //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
-#endif
+                        let! stg = conn.QueryFirstAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
+                        let modelId = stg.ModelId
+//#if DEBUG
+//                        // currentModelId 와 log 의 modelId 는 서로 다를 수 있다.  모델 변경 직후, 예전 log 가 날아오는 경우 존재
+//                        assert(stg.ModelId = modelId)
+//                        assert (ORMDBSkeleton4Debug.Model.IsNone || ORMDBSkeleton4Debug.Model.Value.Id = modelId)
+//                        //assert(ORMDBSkeleton.Storages[l.StorageId].ModelId = modelId)
+//#endif
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
                                 (at, storageId, value, modelId)
                                 VALUES (@At, @StorageId, @Value, @ModelId)
                             """
 
-                        do!
-                            conn.ExecuteSilentlyAsync(
+                        let! _ =
+                            conn.ExecuteAsync(
                                 query,
                                 {| At = l.At
                                    StorageId = l.StorageId
                                    Value = l.Value
-                                   ModelId = modelId |}
+                                   ModelId = modelId |},
+                                tr
                             )
-
                         ()
 
                     do! tr.CommitAsync()

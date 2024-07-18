@@ -2,10 +2,17 @@
 
 @code {
     protected HMIPackage _hmiPackage;
+    /// <summary>
+    /// HMIPackage.System
+    /// </summary>
     protected HMISystem _system => _hmiPackage?.System;
     protected HMIDevice[] _devices => _hmiPackage?.Devices;
     protected bool _loading { get; set; } = true;
 
+    /// <summary>
+    /// HMI 관련 기능 초기화.
+    /// <br/> - 서버로부터 ClientGlobal.HmiPackage 정보 가져오기
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();

@@ -6,7 +6,7 @@
 
 <CompHmiTagManager @ref="TagManager" OnLoaded="@(() => _tagManagerLoading=false)" />
 
-@if (_loading || _tagManagerLoading)
+@if (_myLoading || _loading || _tagManagerLoading)
 {
     <p><em>Loading...</em></p>
 }
@@ -16,7 +16,6 @@ else
                          OnCpuRunningStatusChanged="@(_ => StateHasChanged())" />
 
     <h3>Flow @FlowName</h3>
-
     <DxLoadingPanel Visible=@(ClientGlobal.ModelDsZipPath.IsNullOrEmpty() || !ClientGlobal.IsCpuRunning)
         Text="Wait CPU running..."
         IsContentBlocked="true"
@@ -24,14 +23,17 @@ else
         ApplyBackgroundShading="true">
         <CascadingValue Name="TagManager" Value="@TagManager">
             <CompHmiRealTable Reals="@_reals" />
+            <CompHmiJobsInFlowTable System="@_system" Flow=@_flow/>
         </CascadingValue>
     </DxLoadingPanel>
 }
 
 @code {
     [Parameter] public string FlowName { get; set; }
+    bool _myLoading = true;
     HMIFlow _flow;
     HMIReal[] _reals;
+    HMICall[] _directCalls;
     bool _tagManagerLoading = true;
     public CompHmiTagManager TagManager { get; set; }
 
@@ -41,5 +43,10 @@ else
         await ClientGlobal.InitializeAsync(Http, NavigationManager, LocalStorage);
         _flow = _system.Flows.FirstOrDefault(f => f.Name == FlowName);
         _reals = _flow.Reals;
+        _directCalls = _flow.DirectCalls;
+
+        var callNames = _directCalls.Select(c => c.Name).JoinString(", ");
+        Console.WriteLine($"Total {_directCalls.Length} direct calls in flow {FlowName}: {callNames}");
+        _myLoading = false;
     }
 }

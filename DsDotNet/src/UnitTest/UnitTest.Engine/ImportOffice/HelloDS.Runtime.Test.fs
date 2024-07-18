@@ -12,6 +12,7 @@ open Engine.Runtime
 
 [<AutoOpen>]
 module HelloDSRuntimeTestModule =
+    type SystemTextJson = System.Text.Json.JsonSerializer
 
     type HelloDSRuntimeTest() =
         inherit EngineTestBaseClass()
@@ -43,6 +44,10 @@ module HelloDSRuntimeTestModule =
         member __.``HelloDS runtime model test``() =
             let system = getSystem()
             let runtimeModel = runtimeModel
+
+            let json = SystemTextJson.Serialize(runtimeModel.HMIPackage)
+            let pkg = SystemTextJson.Deserialize<HMIPackage>(json)
+            pkg.BuildTagMap()
 
             ()
 

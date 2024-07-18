@@ -19,10 +19,28 @@
         _hmiPackage = ClientGlobal.HmiPackage;
         if (_hmiPackage == null)
         {
-            Console.WriteLine("Loading HmiPackage from server..");
-            var result = await Http.GetRestResultAsync<HMIPackage>($"api/hmi/package");
-            result.Iter(
-                okPackage => {
+            // Console.WriteLine("Loading serialized HmiPackage from server..");
+            // var strResult = await Http.GetStringAsync($"api/hmi/package-string");
+            // var xxx = strResult.IsNullOrEmpty() ? "NULL" : "NonNull";
+            // Console.WriteLine($"Got {strResult}: {xxx}");
+            // var package = NewtonsoftJson.DeserializeObject<HMIPackage>(strResult);
+            // Console.WriteLine("Loaded serialized HmiPackage from server..");
+
+            // Console.WriteLine("Loading serialized HmiPackage from server..");
+            // var restStrResult = await Http.GetRestResultAsync<string>($"api/hmi/package-rest-string");
+            // Console.WriteLine($"Got {restStrResult.Value}");
+            // var package = NewtonsoftJson.DeserializeObject<HMIPackage>(restStrResult.Value);
+            // Console.WriteLine("Loaded serialized HmiPackage from server..");
+
+
+            Console.WriteLine("Loading serialized HmiPackage from server..");
+            var restResult = await Http.GetRestResultViaSerialAsync<HMIPackage>($"api/hmi/package-rest-string");
+            // var package = restResult.Value;
+            // Console.WriteLine($"Got {package.IP}");
+            // Console.WriteLine("Loaded serialized HmiPackage from server..");
+            restResult.Iter(
+                okPackage =>
+                {
                     if (okPackage == null)
                     {
                         JsDual.Alert("Check model loaded on server.  HmiPackage is null.");
@@ -32,6 +50,22 @@
                     ClientGlobal.HmiPackage = _hmiPackage = okPackage.Tee(pkg => pkg.BuildTagMap());
                 },
                 async err => await JsDual.Alert(err));
+
+
+            // Console.WriteLine("Loading HmiPackage from server..");
+            // var result = await Http.GetRestResultViaSerialAsync<HMIPackage>($"api/hmi/package");
+            // Console.WriteLine("Loaded HmiPackage from server..");
+            // result.Iter(
+            //     okPackage => {
+            //         if (okPackage == null)
+            //         {
+            //             JsDual.Alert("Check model loaded on server.  HmiPackage is null.");
+            //             return;
+            //         }
+
+            //         ClientGlobal.HmiPackage = _hmiPackage = okPackage.Tee(pkg => pkg.BuildTagMap());
+            //     },
+            //     async err => await JsDual.Alert(err));
         }
 
         _loading = false;

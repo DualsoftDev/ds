@@ -24,12 +24,29 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// "api/hmi/package" : 모든 HMI 태그 정보를 반환
     /// </summary>
     [HttpGet("package")]
-    public RestResult<HMIPackage> GetAllHmiTags()
+    public RestResult<HMIPackage> GetHmiPackage()
     {
         return _model?.HMIPackage;
     }
 
+    /// <summary>
+    /// "api/hmi/package-string" : 모든 HMI 태그 정보를 반환
+    /// </summary>
+    [HttpGet("package-string")]
+    public string GetHmiPackageString()
+    {
+        return null;
+        return NewtonsoftJson.SerializeObject(_model?.HMIPackage);
+    }
 
+    /// <summary>
+    /// "api/hmi/package-rest-string" : 모든 HMI 태그 정보를 반환
+    /// </summary>
+    [HttpGet("package-rest-string")]
+    public RestResult<string> GetHmiPackageRestString()
+    {
+        return RestResult<string>.Ok(NewtonsoftJson.SerializeObject(_model?.HMIPackage));
+    }
     async Task<RestResultString> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
     {
         await Task.Yield();

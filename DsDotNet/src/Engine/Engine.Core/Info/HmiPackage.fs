@@ -55,9 +55,6 @@ module HmiPackageModule =
     type HMIJob = {
         Name : string
         JobPushMutiLamp   : HMIPushMultiLamp   //강제시작 forceStart & inTags
-        JobPushForceON    : HMIPush            //작업완료
-        JobPushForceOFF   : HMIPush            //작업완료리셋
-        JobPushOrigin     : HMIPush            //원위치
     } with
         member x.CollectTags () =
             let push, lamps = x.JobPushMutiLamp

@@ -75,9 +75,6 @@ module ConvertHMI =
             {
                 Name = x.QualifiedName
                 JobPushMutiLamp = getPushMultiLamp call.TagManager (VertexTag.forceStart |>int) (actionInTags)
-                JobPushForceON  = getPush  call.TagManager (VertexTag.forceOn |>int) 
-                JobPushForceOFF  = getPush  call.TagManager (VertexTag.forceReset |>int) 
-                JobPushOrigin  = getPush  call.TagManager (VertexTag.origin |>int) 
             }
 
     type Real with

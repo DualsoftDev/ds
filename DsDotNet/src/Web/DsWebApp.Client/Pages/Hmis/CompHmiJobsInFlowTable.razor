@@ -9,16 +9,14 @@
 else
 {
     <li>Direct call of @Flow.Name </li>
-    <DxGrid Data="_directCalls">
+    <DxGrid Data="_jobs">
         <Columns>
-            <DxGridDataColumn FieldName="Name" Caption="Call"></DxGridDataColumn>
-@* 
-            <LampRealColumn Caption="상태(RGFH)"/>
-            <ButtonColumn Caption="자동시작" TagGetter="@((dataItem) =>((HMICall)dataItem).StartPush)" />
-            <ButtonColumn Caption="자동복귀" TagGetter="@((dataItem) =>((HMICall)dataItem).ResetPush)" />
-            <ButtonColumn Caption="작업완료SET" TagGetter="@((dataItem) =>((HMICall)dataItem).ONPush)" />
-            <ButtonColumn Caption="작업완료RST" TagGetter="@((dataItem) =>((HMICall)dataItem).OFFPush)" />
- *@
+            <DxGridDataColumn FieldName="Name" Caption="Job"></DxGridDataColumn>
+
+            @* <ButtonLampColumn Caption="Clear" CompositeGetter="@((dataItem) =>((HMIJob)dataItem).JobPushMutiLamp)" /> *@
+            @* <DxGridDataColumn Caption="이름" FieldName=@nameof(HMIJob.Name)/> *@
+            <ButtonColumn Caption="강제시작" TagGetter="@((dataItem) =>((HMIJob)dataItem).JobPushMutiLamp.Item1)" />
+
         </Columns>
     </DxGrid>
 }
@@ -27,13 +25,21 @@ else
     bool _loading = true;
     [Parameter] public HMISystem System { get; set; }
     [Parameter] public HMIFlow Flow { get; set; }
-    HMICall[] _directCalls;
+    HMIJob[] _jobs;
 
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _directCalls = Flow.DirectCalls;
+        if (Flow is null)
+        {
+
+        }
+        else
+        {
+
+        }
+        _jobs = Flow.Reals.SelectMany(r => r.Jobs).ToArray();
         _loading = false;
     }
 }

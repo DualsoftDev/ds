@@ -1,7 +1,7 @@
 .ONESHELL:
 
 dotnet-restore:
-	@dotnet restore
+	@dotnet restore Ds.sln
 
 # powerpoint addin unittest 실패시 임시 대처
 tmp-link:

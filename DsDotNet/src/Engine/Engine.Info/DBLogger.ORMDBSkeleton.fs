@@ -97,6 +97,9 @@ type ORMDBSkeletonDTOExt =
     /// ORMLog 를 다른 table join 을 통해서 ORM
     [<Extension>]
     static member ToView(db:ORMDBSkeleton, log:ORMLog): ORMVwLog =
-        let stg = db.Storages[log.StorageId]
-        let tagKind = db.TagKinds[stg.TagKind]
-        ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value, log.ModelId)
+        match db.Storages.TryFind(log.StorageId) with
+        | Some stg ->
+            let tagKind = db.TagKinds[stg.TagKind]
+            ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value, log.ModelId)
+        | None ->
+            failwith $"Failed to expand log item to view:: {log.Serialize()}"

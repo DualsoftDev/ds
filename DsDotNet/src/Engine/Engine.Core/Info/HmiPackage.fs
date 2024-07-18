@@ -118,8 +118,6 @@ module HmiPackageModule =
         ErrorLampMode            : HMILamp 
 
         Reals            : HMIReal array
-        /// Flow 내의 direct child calls
-        DirectCalls      : HMICall array
     } with
         member x.CollectTags () =
             seq {
@@ -152,6 +150,7 @@ module HmiPackageModule =
         ReadyPushLamp         : HMIPushLamp 
 
         Flows                 : HMIFlow array
+        Jobs                  : HMIJob array
     } with
         member x.CollectTags () =
             seq {

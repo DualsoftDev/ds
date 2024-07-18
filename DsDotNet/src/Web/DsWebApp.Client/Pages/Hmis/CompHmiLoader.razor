@@ -19,10 +19,11 @@
         _hmiPackage = ClientGlobal.HmiPackage;
         if (_hmiPackage == null)
         {
-            Console.WriteLine("Loading HmiPackage from server..");
-            var result = await Http.GetRestResultAsync<HMIPackage>($"api/hmi/package");
+            Console.WriteLine("Loading serialized HmiPackage from server..");
+            var result = await Http.GetRestResultViaSerialAsync<HMIPackage>($"api/hmi/package");
             result.Iter(
-                okPackage => {
+                okPackage =>
+                {
                     if (okPackage == null)
                     {
                         JsDual.Alert("Check model loaded on server.  HmiPackage is null.");

@@ -37,7 +37,8 @@
 		<Compile Include="Time\TimeTester.fs" />
 		<Compile Include="TestFixture.Engine.fs" />
 		<Compile Include="ImportOffice\pptTest.fs" />
-		<Compile Include="ImportOffice\HelloDSTest.fs" />
+		<Compile Include="ImportOffice\HelloDS.DB.Test.fs" />
+		<Compile Include="ImportOffice\HelloDS.Runtime.Test.fs" />
 		<Compile Include="Miscs\MiscTests.fs" />
 		<Compile Include="Model\Answers.fs" />
 		<Compile Include="Model\Model.fs" />
@@ -99,6 +100,7 @@
 		<ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+		<ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />

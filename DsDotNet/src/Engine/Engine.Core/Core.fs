@@ -566,7 +566,7 @@ module CoreModule =
                 else  
                     match x.Parent.GetCore() with
                         | :? Real as r -> [r.Name]@x.DeviceNApi
-                        | :? Flow -> [x.Name]
+                        | :? Flow -> x.DeviceNApi
                         | _->failwithlog "Error"
 
         member x.SafetyConditions = (x :> ISafetyAutoPreRequisiteHolder).SafetyConditions

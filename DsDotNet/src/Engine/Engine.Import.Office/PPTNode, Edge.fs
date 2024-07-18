@@ -22,7 +22,7 @@ module PPTNodeModule =
     type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties = HashSet<string>()
-        let autoPres = HashSet<string[]*DevParam>()  //jobFqdn, inparam
+        let autoPres = HashSet<string[]*DevParam*(DevParam option)>()  //jobFqdn, inparam, outParam
         
         let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
         let btnHeadPageDefs = Dictionary<string, BtnType>()
@@ -225,32 +225,33 @@ module PPTNodeModule =
             checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
 
-        member x.GetInParm() =
-                if hasDevParam then getOperatorParam (shape, nameNFunc(shape), iPage)
-                else createDevParam  None (Some(DuBOOL)) (Some(true)) None
+
+
 
         member x.UpdateNodeParams(isRoot: bool, target) =
             rootNode <- Some isRoot
 
-            if nodeType = CALL then
+            if nodeType = CALL || nodeType = AUTOPRE then
                 let isDevCall = name.Contains(".")
-                match isRoot, isDevCall with
-                | true, true -> //root dev call
-                    devParam <- Some(Some(x.GetInParm()), None)
-                | false, true -> //real dev call
+                if isDevCall 
+                then
                     if hasDevParam then
-                        let inParam, outParam = getCoinParam (shape, nameNFunc(shape), iPage, target)
-                        devParam <- Some(Some(inParam), Some(outParam))
-                | _ ->  
-                    if hasDevParam then failWithLog "function call 'devParam' not support"
+                        let inParam, outParam = getNodeDevParam (shape, nameNFunc(shape), iPage, target)
+                        devParam <- Some(inParam, outParam)
+                    else 
+                        if isRoot then
+                            devParam <- Some(Some(createDevParam  None (Some(DuBOOL)) (Some(true)) None), None)
+                else 
+                    if hasDevParam then
+                        failWithLog "function call 'devParam' not support"
 
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
             if x.IsCallDevParam && x.IsRootNode.Value = false then 
                 call.TargetJob.TaskDefs.Iter(fun d->
-                    d.AddOrUpdateInParam(x.JobName.Combine() , (x.DevParam.Value |> fst).Value)
-                    d.AddOrUpdateOutParam(x.JobName.Combine() , (x.DevParam.Value |> snd).Value)
+                    d.AddOrUpdateInParam(x.JobName.Combine(), x.DevParamIn)
+                    d.AddOrUpdateOutParam(x.JobName.Combine(), x.DevParamOut)
                 )
       
         member x.CallFlowNJobNApi = 

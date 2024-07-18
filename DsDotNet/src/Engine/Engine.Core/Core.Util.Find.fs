@@ -27,7 +27,6 @@ module internal ModelFindModule =
             | [] -> Some flow
             | r::xs2 ->   
                 match flow.Graph.FindVertex(r) |> box with
-                | :? Call as call-> Some call
                 | :? Real as real->
                     match xs2 with
                     | [] -> Some real
@@ -36,7 +35,10 @@ module internal ModelFindModule =
                             let! v = real.Graph.TryFindVertex(xs2.Combine())
                             return box v :?> IVertex
                         }
-                | _ -> None
+                | _ ->    
+                    match flow.Graph.FindVertex(xs1.CombineDequoteOnDemand()) |> box with
+                    | :? Call as call-> Some call
+                    | _ -> None
 
         | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
             let device = system.LoadedSystems.Find(nameEq dev)

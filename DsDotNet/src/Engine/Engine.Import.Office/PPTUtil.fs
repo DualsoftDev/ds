@@ -870,7 +870,7 @@ module PPTUtil =
             |> Seq.collect (fun (slidePart,_) ->
                 let page = slidePart |> Office.GetPage
                 let masterPlaceHolders = Office.GetPlaceholderShapes(slidePart.SlideLayoutPart.SlideLayout.CommonSlideData.ShapeTree.Descendants<Shape>())
-                                               .Where(fun f -> f.InnerText.StartsWith("<#") && f.InnerText.EndsWith(">"))
+                                               .Where(fun f -> f.InnerText.TrimStart().StartsWith("<#") && f.InnerText.TrimEnd().EndsWith(">"))
 
                 let errShapes = masterPlaceHolders.Where(fun s->s.InnerText.Split('#').Count() <> 2)
                 if errShapes.any()
@@ -880,7 +880,7 @@ module PPTUtil =
                 Office.GetPlaceholderShapes(slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>())
                 |> Seq.choose(fun shape -> 
                     match masterPlaceHolders.TryFind(fun f->getPlaceHolderId(f) = getPlaceHolderId(shape)) with
-                    | Some mp -> Some(mp.InnerText, shape.InnerText, page)
+                    | Some mp -> Some(mp.InnerText.Trim(), shape.InnerText.Trim(), page)
                     | None -> None 
                     )
                 )

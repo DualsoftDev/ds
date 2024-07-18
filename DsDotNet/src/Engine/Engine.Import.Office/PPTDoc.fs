@@ -333,9 +333,10 @@ type PPTDocExt =
                         if flowNodes.Any(fun n->n.CallDevName = node.CallDevName) then
                             node.CallDevName, node.JobParam.JobMulti.DeviceCount
                         else
-                            failWithLog $"{node.CallDevName} 해당 디바이스가 없습니다."
+                            Office.ErrorName(node.Shape, $"{node.CallDevName} 해당 디바이스가 없습니다.", node.PageNum)
                     else
-                        failWithLog $"{node.FlowName} 해당 페이지가 없습니다.")
+                        Office.ErrorName(node.Shape, $"{node.FlowName} 해당 페이지가 없습니다.", node.PageNum)
+                        )
             |> dict
 
         let getDevCount (devName) = 

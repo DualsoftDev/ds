@@ -479,7 +479,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let createAlias(parent: ParentWrapper, name: string ) =
                 let flow = parent.GetFlow()
                 let aliasDef = tryFindAliasDefWithMnemonic flow name |> Option.get
-                let exFlow = aliasDef.AliasKey.length() = 2
+                let exFlow = aliasDef.AliasKey.length() > 2
                 Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
               
             let loop () =
@@ -733,8 +733,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                  | _ -> errorLoadCore  ctx
                             | _ -> errorLoadCore  ctx
 
-                    | flowOrReal :: [ rc ] -> //FlowEx.R or Real.C
-                        match tryFindFlow system flowOrReal with
+                    | flowOrRealorDev :: [ rc ] -> //FlowEx.R or Real.C
+                        match tryFindFlow system flowOrRealorDev with
                         | Some f -> match f.Graph.TryFindVertex<Real>(rc) with
                                     |Some v-> v |> DuAliasTargetReal
                                     |None -> errorLoadCore  ctx
@@ -745,7 +745,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 | :? Call as c -> c |> DuAliasTargetCall 
                                 | _ -> errorLoadCore  ctx
                             | None ->  
-                                errorLoadCore  ctx
+                                 //match tryFindCall system ([ flow.Name ] @ ns.Select(fun f->f.QuoteOnDemand())) with
+                                 //| Some v -> 
+                                 //   match v with
+                                 //   | :? Call as c -> c |> DuAliasTargetCall 
+                                 //   | _ -> errorLoadCore  ctx
+                                 //| None ->  
+                                    errorLoadCore  ctx
 
 
                     | _flowOrReal :: [ _dev; _api ] -> 

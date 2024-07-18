@@ -42,39 +42,41 @@ module PPTNodeUtilModule =
 
             else jobFqdn
 
-        let getOperatorParam (shape:Shape, name:string, iPage:int) = 
-            try
-                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-                if func.Contains(",") then 
-                    failwithf $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력) 규격 입니다"
-                $"{'-'}:{func}" |> getDevParam |> snd
-            with _ ->
-                shape.ErrorName(ErrID._70, iPage)
+        //let getOperatorParam (shape:Shape, name:string, iPage:int) = 
+        //    try
+        //        let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
+        //        if func.Contains(",") then 
+        //            failwithf $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력) 규격 입니다"
+        //        $"{'-'}:{func}" |> getDevParam |> snd
+        //    with ex ->
+        //        shape.ErrorName(ex.Message, iPage)
 
-        let getCoinParam (shape:Shape, name:string, iPage:int, target) = 
+        let getNodeDevParam (shape:Shape, name:string, iPage:int, target) = 
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
-                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-                if not(func.Contains(",")) then 
-                    failwithlog (error())
-
-                let inFunc, outFunc =
-                    func.Split(",").Head() |> trimSpaceNewLine,
-                    func.Split(",").Last() |> trimSpaceNewLine
-
                 let getParam x = 
-                    if x = TextSkip then 
-                        "" |> getDevParam |> snd
-                    else
-                        match getTextValueNType x with
-                        | Some (v, t) ->
-                            if t = DuINT32 && target = XGK then  //xgk는 기본 word 규격인 us로 변환
-                                $":{v}s" |> getDevParam |> snd
-                            else
-                                $":{x}" |> getDevParam |> snd
-                        | None -> failwithf $"{x} 입력규격을 확인하세요"
+                        if x = TextSkip then 
+                            "" |> getDevParam |> snd
+                        else
+                            match getTextValueNType x with
+                            | Some (v, t) ->
+                                if t = DuINT32 && target = XGK then  //xgk는 기본 word 규격인 us로 변환
+                                    $":{v}s" |> getDevParam |> snd
+                                else
+                                    $":{x}" |> getDevParam |> snd
+                            | None -> failwithf $"{x} 입력규격을 확인하세요"
 
-                getParam inFunc, getParam outFunc
+                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
+                if func.Contains(",") then 
+
+                    let inFunc, outFunc =
+                        func.Split(",").Head() |> trimSpaceNewLine,
+                        func.Split(",").Last() |> trimSpaceNewLine
+
+                    Some(getParam inFunc), Some(getParam outFunc)
+
+                else 
+                    Some(getParam func), Some(defaultDevParam())
             with _ ->
                 shape.ErrorName((error()), iPage)
 

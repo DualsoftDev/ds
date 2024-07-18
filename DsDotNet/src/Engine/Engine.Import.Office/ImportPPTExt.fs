@@ -269,25 +269,15 @@ module ImportU =
                             node.Shape.ErrorName(ex.Message, node.PageNum)
                             )
 
-     
-
-
             let createAlias () =
                 pptNodes
                 |> Seq.filter (fun node -> node.IsAlias)
                 |> Seq.iter (fun node ->
 
-                    if node.IsFunction then
-                        node.Shape.ErrorName($"Alias Function은 지원하지 않습니다.", node.PageNum)
+                    //if node.IsFunction then
+                    //    node.Shape.ErrorName($"Alias Function은 지원하지 않습니다.", node.PageNum)
                     let segOrg =    dicVertex.[node.Alias.Value.Key]
                   
-                    //let segOrg = 
-                    //    match dicVertex.Values.TryFind(fun f-> $"{f.Parent.GetFlow().Name}.{f.Name}" 
-                    //                                            = $"{node.Alias.Value.Name}")   with
-                    //    | Some v -> v
-                    //    | None -> node.Shape.ErrorName($"{ErrID._26} Error Name : [{node.Alias.Value.Name}]", node.PageNum)
-
-                    
                     let alias =
                         let flow = dicFlow.[node.PageNum]
                         if node.NodeType = REALExF then // isOtherFlowRealAlias is true
@@ -422,9 +412,15 @@ module ImportU =
                         let autoPreCondition =
                             let flow, job, api = edge.StartNode.CallFlowNJobNApi
                             [|flow;job.Last().DeQuoteOnDemand();api|]
-                        let inDevParams = edge.StartNode.GetInParm()
+                        let inParam = edge.StartNode.DevParamIn
+                        let outParam = 
+                            if edge.StartNode.DevParam.IsNull()
+                            then None
+                            else edge.StartNode.DevParamOut |> Some
                         
-                        node.AutoPres.Add (autoPreCondition, inDevParams)|>ignore )
+                        node.AutoPres.Add(autoPreCondition, inParam, outParam)|>ignore
+                        
+                        )
 
             dicEdges
             |> Seq.iter (fun dic ->
@@ -485,14 +481,16 @@ module ImportU =
                    |> dict
 
             doc.Nodes
+            |> Seq.filter (fun node -> node.NodeType.IsCall || node.NodeType = AUTOPRE)
             |> Seq.iter(fun node ->
         
-                node.Safeties@node.AutoPres.Select(fun (j,_param) -> j.Combine())
+                node.Safeties
+                @(node.AutoPres.Select(fun (j,inParams, outParams) -> getJobNameWithParams(j, Some(inParams), outParams).Combine()))
                 |> iter (fun safeFullName ->
                     if not (dicJob.ContainsKey safeFullName) then
                         node.Shape.ErrorName($"{ErrID._80}(err:{safeFullName})", node.PageNum)
 
-                    if node.CallApiName = safeFullName then
+                    if node.JobName.Combine() = safeFullName then
                         node.Shape.ErrorName($"{ErrID._81}(err:{safeFullName})", node.PageNum)
                         )
 
@@ -506,9 +504,9 @@ module ImportU =
                             node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
 
                 node.AutoPres
-                |> iter (fun (jobFqdn, inParams)  ->
+                |> iter (fun (jobFqdn, inParams, outParams)  ->
                     let condJob =
-                        let jobFullName = getJobNameWithParams(jobFqdn, Some(inParams), None).ToArray()
+                        let jobFullName = getJobNameWithParams(jobFqdn, Some(inParams), outParams).ToArray()
                         
                         match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFullName.CombineQuoteOnDemand()) with
                         | Some existingJob -> existingJob

@@ -102,6 +102,7 @@
                 {
                     var log = ORMLog.Deserialize(logJson);
                     var vwLog = _logDb.ToView(log);
+
                     var fqdn = vwLog.Fqdn;
 
                     if (_fqdnNodeDic != null && _fqdnNodeDic.TryGetValue(fqdn, out var node))

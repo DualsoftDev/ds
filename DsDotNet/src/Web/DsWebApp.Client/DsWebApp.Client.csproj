@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
 		<LangVersion>12.0</LangVersion>
@@ -37,6 +37,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Folder Include="Pages\Hmis\Widget\GridColumn\" />
 	  <Folder Include="Pages\Monitoring\" />
 	  <Folder Include="Test\" />
 	</ItemGroup>

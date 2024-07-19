@@ -55,10 +55,9 @@ module internal DBLoggerImpl =
                     else
                         group
 
-                x.Summaries[key].Build(logsWithStartON)
+                x.Summaries[key].Build(logsWithStartON, x.LastLogs)
 
-            if logs.any () then
-                x.LastLog <- logs |> Seq.tryLast
+            x.TheLastLog <- logs |> Seq.tryLast
 
     let mutable logSet = getNull<LogSet> ()
 
@@ -369,7 +368,7 @@ module internal DBLoggerImpl =
                             $"DS Source file change detected:\r\n\t{dbDsConfigJsonPath} <> {queryCriteria.DsConfigJsonPath}"
 
                 let lastLogId =
-                    match logSet.LastLog with
+                    match logSet.TheLastLog with
                     | Some l -> l.Id
                     | _ -> -1
 
@@ -451,7 +450,8 @@ module internal DBLoggerImpl =
     /// 지정된 조건에 따라 마지막 'Value'를 반환
     let getLastValue (logSet: LogSet, fqdn: string, tagKind: int) : bool option =
         option {
-            let! lastLog = logSet.GetSummary(tagKind, fqdn).LastLog
+            let! storage = logSet.Storages.TryFind((tagKind, fqdn))
+            let! lastLog = logSet.LastLogs.TryFind(storage)
             return lastLog.Value |> toBool
         }
 

@@ -258,6 +258,7 @@ CREATE VIEW [{Vn.Storage}] AS
     type Summary(logSet: LogSet, storageKey: StorageKey, count: int, sum: double) =
         let mutable count = count
         let mutable sum = sum
+
         /// Number rising
         member x.Count
             with get() = count
@@ -271,11 +272,11 @@ CREATE VIEW [{Vn.Storage}] AS
         /// Container reference
         member x.LogSet = logSet
         member x.StorageKey = storageKey
-        member val LastLog: Log option = None with get, set
 
     /// DB logging 관련 전체 설정
     and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: ORMStorage seq, readerWriterType: DBLoggerType) as this =
         let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
+        let lastLogs = Dictionary<ORMStorage, Log>()
 
         let summaryDic =
             storages
@@ -293,9 +294,10 @@ CREATE VIEW [{Vn.Storage}] AS
         member val QuerySet = queryCriteria with get, set
         member x.Summaries = summaryDic
         member x.Storages = storageDic
+        member x.LastLogs = lastLogs
+        member val TheLastLog: Log option = None with get, set
         member x.StoragesById = storageByIdDic
         member x.ModelId = queryCriteria.ModelId
-        member val LastLog: Log option = None with get, set
         member x.ReaderWriterType = readerWriterType
         member x.Disposables = disposables
         member x.GetSummary(summaryKey: StorageKey) = summaryDic[summaryKey]

@@ -80,7 +80,7 @@ module ModelAnswers =
         }
         Work1, Flow2, Flow1, "3 작업 (Work) 타입_드릴작업"; // island
         [aliases] = {
-            "3 작업 (Work) 타입".드릴작업 = { "3 작업 (Work) 타입_드릴작업"; "3 작업 (Work) 타입_드릴작업"; }
+            "3 작업 (Work) 타입".드릴작업 = { "3 작업 (Work) 타입_드릴작업"; }
         }
     }
     [flow] "4 행위 (Action) 타입" = {
@@ -644,7 +644,7 @@ module ModelAnswers =
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.9.1]
+//DS Engine Version = [0.9.9.5]
 """
 
 

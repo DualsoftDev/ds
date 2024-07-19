@@ -226,9 +226,8 @@ module CoreModule =
 
 
 
-    and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, aliasTexts: string [], isOtherFlowRealAlias:bool) =
+    and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, aliasTexts: string []) =
         member _.AliasKey = aliasKey
-        member _.IsOtherFlowRealAlias = isOtherFlowRealAlias // 다른 플로우의 Real 이며 내부에서 Alias로 Or 사용하는 경우
         member val AliasTarget = target with get, set
         member val AliasTexts = aliasTexts |> ResizeArray
 
@@ -354,10 +353,10 @@ module CoreModule =
             member val SafetyConditions = HashSet<SafetyAutoPreCondition>()
             member val AutoPreConditions = HashSet<SafetyAutoPreCondition>()
 
-    and Alias private (name:string , target:AliasTargetWrapper, parent, isOtherFlowRealAlias) = // target : Real or Call or OtherFlowReal
+    and Alias private (name:string , target:AliasTargetWrapper, parent, isOtherFlowRealAlias:bool) = // target : Real or Call or OtherFlowReal
         inherit Indirect([|name|], parent)
         member _.TargetWrapper = target
-        member _.IsOtherFlowRealAlias = isOtherFlowRealAlias
+        member _.IsExFlowReal = isOtherFlowRealAlias
         member _.IsSameFlow = target.GetTarget() 
                               |> fun v -> v.Parent.GetFlow() = parent.GetFlow() 
 
@@ -575,7 +574,7 @@ module CoreModule =
 
     type Alias with
         static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isOtherFlowRealAlias) =
-            let createAliasDefOnDemand(isOtherFlowReal) =
+            let createAliasDefOnDemand() =
                 (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
                  * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
                  *)
@@ -585,16 +584,12 @@ module CoreModule =
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs(flow).ToArray()
                     | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow).ToArray()
 
-
-
-                let ads = flow.AliasDefs
-                let aliasText = name.QuoteOnDemand()
-                match ads.TryFind(aliasKey) with
-                | Some ad -> ad.AliasTexts.AddIfNotContains(aliasText) |> ignore
-                | None -> ads.Add(aliasKey, AliasDef(aliasKey, Some target, [|aliasText|], isOtherFlowReal))
+                match flow.AliasDefs.TryFind(aliasKey) with
+                | Some ad -> ad.AliasTexts.AddIfNotContains(name) |> ignore
+                | None -> flow.AliasDefs.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
                 
         
-            createAliasDefOnDemand(isOtherFlowRealAlias)
+            createAliasDefOnDemand()
 
 
             let alias = Alias(name, target, parent, isOtherFlowRealAlias)

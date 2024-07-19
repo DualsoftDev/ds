@@ -79,7 +79,7 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
             {
                 Console.WriteLine($"Model change detected on signalR: {modelDsZipPath}");
                 ModelDsZipPath = modelDsZipPath;
-                var result = await http.GetRestResultViaSerialAsync<HMIPackage>($"api/hmi/package");
+                var result = await http.GetDeserializedObjectAsycn<HMIPackage>($"api/hmi/package");
                 result.Iter(
                     ok => HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
                     err => Console.Error.WriteLine(err));

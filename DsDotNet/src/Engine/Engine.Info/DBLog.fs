@@ -33,5 +33,5 @@ module DBLog =
     let InsertValueLog (time: DateTime) (tag: TagDS) : ValueLog =
         let vlog = ValueLog(time, tag)
         if tag.IsNeedSaveDBLog() then
-            DBLogger.EnqueLogForInsert(vlog)
+            DBLogger.EnqueLog(vlog)
         vlog

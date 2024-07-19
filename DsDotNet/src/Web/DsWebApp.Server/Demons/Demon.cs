@@ -81,7 +81,7 @@ public partial class Demon : BackgroundService
                         {
                             var ti = storage.GetTagInfo();
                             if (ti != null && ti.Value.IsNeedSaveDBLog())
-                                DBLogger.EnqueLogForInsert(new DsLogModule.DsLog(DateTime.Now, storage));
+                                DBLogger.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage));
                         }
                     });
             _modelSubscription.Add(subscription);

@@ -19,7 +19,7 @@
                 Console.WriteLine($"----------- ZIP path change detected: {_cg.ModelDsZipPath}");
                 if (MonitorHmi)
                 {
-                    var result = await Http.GetRestResultViaSerialAsync<HMIPackage>($"api/hmi/package");
+                    var result = await Http.GetDeserializedObjectAsycn<HMIPackage>($"api/hmi/package");
                     result.Iter(
                         ok => _cg.HmiPackage = ok.Tee(pkg => pkg.BuildTagMap()),
                         err => Console.Error.WriteLine(err));

@@ -155,7 +155,8 @@
             "VertexTag.going" => "G",
             "VertexTag.finish" => "F",
             "VertexTag.homing" => "H",
-            _ => ""
+            // "VertexTag.forceStart" => "FS",      ????
+            _ => $"Unknown: {vwLog.TagKindName}"
         };
 
         // fqdn 의 value 에 따라 해당 node 의 상태를 변경

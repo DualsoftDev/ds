@@ -191,7 +191,7 @@ module internal DBLoggerImpl =
 
         let writePeriodicAsync = dequeAndWriteDBAsync
 
-        let enqueLogsForInsert (xs: DsLog seq) : unit =
+        let enqueLogs (xs: DsLog seq) : unit =
             let toDecimal (value: obj) =
                 match toBool value with
                 | Bool b -> (if b then 1 else 0) |> decimal
@@ -215,7 +215,7 @@ module internal DBLoggerImpl =
                     ORMLog(-1, storageId, x.Time, value, modelId) |> queue.Enqueue
                 | None -> failwithlog "NOT yet!!"
 
-        let enqueLogForInsert (x: DsLog) : unit = enqueLogsForInsert ([ x ])
+        let enqueLog (x: DsLog) : unit = enqueLogs ([ x ])
 
 
         let createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =

@@ -20,7 +20,7 @@
         if (_hmiPackage == null)
         {
             Console.WriteLine("Loading serialized HmiPackage from server..");
-            var result = await Http.GetRestResultViaSerialAsync<HMIPackage>($"api/hmi/package");
+            var result = await Http.GetDeserializedObjectAsycn<HMIPackage>($"api/hmi/package");
             result.Iter(
                 okPackage =>
                 {

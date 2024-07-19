@@ -19,7 +19,11 @@
         @* lamp 값을 서버로부터 다시 읽은 것을 반영해서 check 표시 *@
         <DxButton Text="@Text"
                   RenderStyleMode="ButtonRenderStyleMode.Outline"
-                  IconCssClass="@((bool)Lamp.Value ? "oi oi-circle-check" : "oi oi-circle-check transparent")"
+                  IconCssClass="@( Lamp is null
+                                    ? ""
+                                    : (bool)Lamp.Value
+                                        ? "oi oi-circle-check"
+                                        : "oi oi-circle-check transparent")"
                   @onmousedown="@((args) => onMouseDown())"
                   @onmouseup="@((args) => onMouseUp())"/>
     </span>
@@ -43,9 +47,15 @@
 
         await base.OnInitializedAsync();
 
-        Console.WriteLine($"::: Auto push tag: {Button.Name}/{Button.KindDescription}/{Button.Kind}");
-        Console.WriteLine($"::: Auto lamp tag: {Lamp.Name}/{Lamp.KindDescription}/{Lamp.Kind}");
-        Console.WriteLine($"::: Auto mode tag: {Mode?.Name}/{Mode?.KindDescription}/{Mode?.Kind}");
+        if (Button != null)
+            Console.WriteLine($"::: Auto push tag: {Button.Name}/{Button.KindDescription}/{Button.Kind}");
+
+        if (Lamp != null)
+            Console.WriteLine($"::: Auto lamp tag: {Lamp.Name}/{Lamp.KindDescription}/{Lamp.Kind}");
+
+        if (Mode != null)
+            Console.WriteLine($"::: Auto mode tag: {Mode.Name}/{Mode.KindDescription}/{Mode.Kind}");
+
         _subscription =
             ClientGlobal.TagChangedSubject.Subscribe(async tag =>
             {
@@ -91,18 +101,20 @@
 
     async Task onMouseDown()
     {
-        // todo : mouse up 되기 전까지는, 다른 browser 창 등에 의해서 값이 변경되면, true 값을 계속 전송하도록 수정
-        Button.SetValue(true);
-        await Http.PostTagAsync(Button, AuthenticationStateProvider, onError);
+        if (Button != null)
+        {
+            // todo : mouse up 되기 전까지는, 다른 browser 창 등에 의해서 값이 변경되면, true 값을 계속 전송하도록 수정
+            Button.SetValue(true);
+            await Http.PostTagAsync(Button, AuthenticationStateProvider, onError);
+        }
     }
     async Task onMouseUp()
     {
-        Console.WriteLine("OnMouseUp.");
-        if (IsPushButton)
+        if (Button != null && IsPushButton)
         {
+            Console.WriteLine("OnMouseUp.");
             Button.SetValue(false);
             await Http.PostTagAsync(Button, AuthenticationStateProvider, onError);
         }
     }
-
 }

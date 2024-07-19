@@ -1,4 +1,4 @@
-@* LampReal *@
+@* LampFlow *@
 
 @implements IDisposable
 
@@ -25,7 +25,7 @@
     {
         await base.OnInitializedAsync();
         if (TagManager == null)
-            throw new Exception("TagManager is null on LampReal.");
+            throw new Exception("TagManager is null on LampFlow.");
         _subscription =
             ClientGlobal.TagChangedSubject.Subscribe(onTagWebChanged);
 

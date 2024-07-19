@@ -1,11 +1,11 @@
-namespace Engine.Tests
+namespace SystemCloneTests
 
-open NUnit.Framework
+open Xunit
 open Engine.Core
 open System.Collections.Generic
 open System.Linq
+open FsUnit.Xunit
 
-[<TestFixture>]
 type DsSystemCloneTests() =
 
     let createTestSystem() =
@@ -36,80 +36,80 @@ type DsSystemCloneTests() =
         real2.NoTransData <- false
 
         // Adding edges between vertices
-        flow1.CreateEdge(ModelingEdgeInfo<Vertex>(real1 , ">", real3)) |> ignore
-        flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2 , ">", real4)) |> ignore
+        flow1.CreateEdge(ModelingEdgeInfo<Vertex>(real1, ">", real3)) |> ignore
+        flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real4)) |> ignore
         
         Alias.Create("Alias1", DuAliasTargetReal real1, DuParentFlow flow2, false) |> ignore
 
         system
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone System Name``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
-        Assert.AreEqual("ClonedSystem", clonedSystem.Name)
+        clonedSystem.Name |> should equal "ClonedSystem"
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Flow Count``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
-        Assert.AreEqual(2, clonedSystem.Flows.Count)
+        clonedSystem.Flows.Count |> should equal 2
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Real Count``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
-        Assert.AreEqual(4, clonedSystem.GetVertices().OfType<Real>().Count())
+        clonedSystem.GetVertices().OfType<Real>().Count() |> should equal 4
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Alias Count``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
-        Assert.AreEqual(1, clonedSystem.GetVertices().OfType<Alias>().Count())
+        clonedSystem.GetVertices().OfType<Alias>().Count() |> should equal 1
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Flow Names``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
-        Assert.AreEqual("Flow1", clonedSystem.Flows.ElementAt(0).Name)
-        Assert.AreEqual("Flow2", clonedSystem.Flows.ElementAt(1).Name)
+        clonedSystem.Flows.ElementAt(0).Name |> should equal "Flow1"
+        clonedSystem.Flows.ElementAt(1).Name |> should equal "Flow2"
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Real Names``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
         let realNames = clonedSystem.GetVertices().OfType<Real>().Select(fun r -> r.Name).ToArray()
-        Assert.Contains("Real1", realNames)
-        Assert.Contains("Real2", realNames)
-        Assert.Contains("Real3", realNames)
-        Assert.Contains("Real4", realNames)
+        realNames |> should contain "Real1"
+        realNames |> should contain "Real2"
+        realNames |> should contain "Real3"
+        realNames |> should contain "Real4"
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Alias Name``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
-        Assert.AreEqual("Alias1", clonedSystem.GetVertices().OfType<Alias>().ElementAt(0).Name)
+        clonedSystem.GetVertices().OfType<Alias>().ElementAt(0).Name |> should equal "Alias1"
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Real Members``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
 
         let real1Clone = clonedSystem.GetVertices().OfType<Real>().First(fun r -> r.Name = "Real1")
-        Assert.AreEqual(Some "Motion1", real1Clone.Motion)
-        Assert.AreEqual(Some "Script1", real1Clone.Script)
-        Assert.AreEqual(42uy, real1Clone.RealData)
-        Assert.AreEqual(true, real1Clone.Finished)
-        Assert.AreEqual(true, real1Clone.NoTransData)
+        real1Clone.Motion |> should equal (Some "Motion1")
+        real1Clone.Script |> should equal (Some "Script1")
+        real1Clone.RealData |> should equal 42uy
+        real1Clone.Finished |> should equal true
+        real1Clone.NoTransData |> should equal true
         
         let real2Clone = clonedSystem.GetVertices().OfType<Real>().First(fun r -> r.Name = "Real2")
-        Assert.AreEqual(Some "Motion2", real2Clone.Motion)
-        Assert.AreEqual(Some "Script2", real2Clone.Script)
-        Assert.AreEqual(24uy, real2Clone.RealData)
-        Assert.AreEqual(false, real2Clone.Finished)
-        Assert.AreEqual(false, real2Clone.NoTransData)
+        real2Clone.Motion |> should equal (Some "Motion2")
+        real2Clone.Script |> should equal (Some "Script2")
+        real2Clone.RealData |> should equal 24uy
+        real2Clone.Finished |> should equal false
+        real2Clone.NoTransData |> should equal false
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Graph Structure in Flow1``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
@@ -117,16 +117,16 @@ type DsSystemCloneTests() =
         
         // Verify vertices in Flow1
         let flow1Vertices = flow1.Graph.Vertices.OfType<Real>().ToList()
-        Assert.AreEqual(2, flow1Vertices.Count)
-        Assert.IsTrue(flow1Vertices.Any(fun v -> v.Name = "Real1"))
-        Assert.IsTrue(flow1Vertices.Any(fun v -> v.Name = "Real3"))
+        flow1Vertices.Count |> should equal 2
+        flow1Vertices |> should contain (flow1Vertices.First(fun v -> v.Name = "Real1"))
+        flow1Vertices |> should contain (flow1Vertices.First(fun v -> v.Name = "Real3"))
 
         // Verify edges in Flow1
         let flow1Edges = flow1.Graph.Edges.ToList()
-        Assert.AreEqual(1, flow1Edges.Count)
-        Assert.IsTrue(flow1Edges.Any(fun e -> e.Source.Name = "Real1" && e.Target.Name = "Real3" && e.EdgeType = EdgeType.Start))
+        flow1Edges.Count |> should equal 1
+        flow1Edges |> should contain (flow1Edges.First(fun e -> e.Source.Name = "Real1" && e.Target.Name = "Real3" && e.EdgeType = EdgeType.Start))
 
-    [<Test>]
+    [<Fact>]
     member _.``Test Clone Graph Structure in Flow2``() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
@@ -134,11 +134,11 @@ type DsSystemCloneTests() =
 
         // Verify vertices in Flow2
         let flow2Vertices = flow2.Graph.Vertices.OfType<Real>().ToList()
-        Assert.AreEqual(2, flow2Vertices.Count)
-        Assert.IsTrue(flow2Vertices.Any(fun v -> v.Name = "Real2"))
-        Assert.IsTrue(flow2Vertices.Any(fun v -> v.Name = "Real4"))
+        flow2Vertices.Count |> should equal 2
+        flow2Vertices |> should contain (flow2Vertices.First(fun v -> v.Name = "Real2"))
+        flow2Vertices |> should contain (flow2Vertices.First(fun v -> v.Name = "Real4"))
 
         // Verify edges in Flow2
         let flow2Edges = flow2.Graph.Edges.ToList()
-        Assert.AreEqual(1, flow2Edges.Count)
-        Assert.IsTrue(flow2Edges.Any(fun e -> e.Source.Name = "Real2" && e.Target.Name = "Real4" && e.EdgeType = EdgeType.Start))
+        flow2Edges.Count |> should equal 1
+        flow2Edges |> should contain (flow2Edges.First(fun e -> e.Source.Name = "Real2" && e.Target.Name = "Real4" && e.EdgeType = EdgeType.Start))

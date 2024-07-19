@@ -108,7 +108,7 @@
                     if (_fqdnNodeDic != null && _fqdnNodeDic.TryGetValue(fqdn, out var node))
                         await applyLogAsync(vwLog);
                     else
-                        throw new Exception($"Failed to find fqdn: {fqdn} for log id={vwLog.Id}");
+                        await JsDual.Error($"Failed to find fqdn: {fqdn} for log id={vwLog.Id}");
 
                 }
                 catch (Exception e)

@@ -130,6 +130,7 @@ module HmiPackageModule =
                 yield! getPushLampModeTags x.ReadyPushLampMode
                 yield! getPushLampTags x.ClearPushLamp
                 yield! getPushLampTags x.PausePushLamp
+                yield! getPushLampTags x.HomePushLamp
                 yield x.IdleLampMode
                 yield x.OriginLampMode
                 yield x.ErrorLampMode

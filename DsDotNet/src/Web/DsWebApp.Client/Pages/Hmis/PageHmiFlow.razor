@@ -22,6 +22,8 @@ else
         CssClass="w-100"
         ApplyBackgroundShading="true">
         <CascadingValue Name="TagManager" Value="@TagManager">
+            <Lamp Text="Origin" Composite="@_flow.OriginLampMode"/>
+            <ButtonLamp Text="Home" Composite="@_flow.HomePushLamp" />
             <CompHmiRealTable Reals="@_reals" />
             <CompHmiJobsInFlowTable System="@_system" Flow=@_flow/>
         </CascadingValue>

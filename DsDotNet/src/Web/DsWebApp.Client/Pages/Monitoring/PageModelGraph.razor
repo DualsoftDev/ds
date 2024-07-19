@@ -108,7 +108,7 @@
                     if (_fqdnNodeDic != null && _fqdnNodeDic.TryGetValue(fqdn, out var node))
                         await applyLogAsync(vwLog);
                     else
-                        throw new Exception($"Failed to find fqdn: {fqdn} for log id={vwLog.Id}");
+                        await JsDual.Error($"Failed to find fqdn: {fqdn} for log id={vwLog.Id}");
 
                 }
                 catch (Exception e)
@@ -155,7 +155,8 @@
             "VertexTag.going" => "G",
             "VertexTag.finish" => "F",
             "VertexTag.homing" => "H",
-            _ => ""
+            // "VertexTag.forceStart" => "FS",      ????
+            _ => $"Unknown: {vwLog.TagKindName}"
         };
 
         // fqdn 의 value 에 따라 해당 node 의 상태를 변경

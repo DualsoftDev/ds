@@ -52,7 +52,7 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
     public async Task<RestResultString> GetLoggerDB()
     {
         using var conn = serverGlobal.CreateDbConnection();
-        var modelId = 1;
+        var modelId = serverGlobal.DsCommonAppSettings.LoggerDBSettings.ModelId;
         var logDB = await ORMDBSkeletonDTOExt.CreateAsync(modelId, conn, null);
         var logDBJson = logDB.Serialize();
 

@@ -1,3 +1,5 @@
+using Engine.Core;
+using Engine.Info;
 using Engine.Runtime;
 
 using Microsoft.AspNetCore.Authorization;
@@ -5,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
+using static Engine.Info.DBLoggerORM;
 
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 
@@ -19,6 +22,7 @@ namespace DsWebApp.Server.Controllers;
 public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(global.Logger)
 {
     RuntimeModel _model => global.RuntimeModel;
+    ILog logger => global.Logger;
 
     /// <summary>
     /// "api/hmi/package" : 모든 HMI 태그 정보를 반환
@@ -40,9 +44,12 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
             if (cpu == null)
                 return RestResultString.Err("No Loaded Model");
 
-            Debug.WriteLine($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
+            logger.Debug($"HmiTagHub has {HmiTagHub.ConnectedClients.Count} connections");
             _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
+            var storage = global.RuntimeModel.Storages[tagWeb.Name];
+            DBLogger.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage));
+
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
             return RestResultString.Ok("OK");
         }

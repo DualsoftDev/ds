@@ -11,11 +11,11 @@ type DBLogger() =
     //static let queryCriteria = QuerySet()
     //static let queryCriteria = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
 
-    static member EnqueLogForInsert(log: DsLog) =
-        DBLoggerImpl.Writer.enqueLogForInsert (log: DsLog)
+    static member EnqueLog(log: DsLog) =
+        DBLoggerImpl.Writer.enqueLog (log: DsLog)
 
-    static member EnqueLogsForInsert(logs: DsLog seq) =
-        DBLoggerImpl.Writer.enqueLogsForInsert (logs: DsLog seq)
+    static member EnqueLogs(logs: DsLog seq) =
+        DBLoggerImpl.Writer.enqueLogs (logs: DsLog seq)
 
     static member InitializeLogWriterOnDemandAsync
         (

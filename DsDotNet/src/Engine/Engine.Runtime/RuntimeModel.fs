@@ -17,6 +17,9 @@ type RuntimeModel(zipDsPath:FilePath, target)  =
     let model:Model = ParserLoader.LoadFromConfig (jsonPath) target
     let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU model.System target
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
+    let storages =
+        let skipInternal = true
+        model.System.GetStorages(skipInternal).ToDictionary(fun stg -> stg.Name)
    
     interface IDisposable with
         member x.Dispose() = x.Dispose()
@@ -25,6 +28,7 @@ type RuntimeModel(zipDsPath:FilePath, target)  =
     member x.SourceDsZipPath = zipDsPath
     member x.TagKindDescriptions = kindDescriptions
     member x.JsonPath = jsonPath
+    member x.Storages = storages
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU

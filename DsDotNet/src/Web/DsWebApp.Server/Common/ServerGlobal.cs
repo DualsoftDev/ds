@@ -8,6 +8,8 @@ using Microsoft.Data.Sqlite;
 
 using System.Data;
 using System.Reactive.Subjects;
+
+using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
 
 namespace DsWebApp.Server.Common;

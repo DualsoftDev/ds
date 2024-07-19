@@ -169,19 +169,19 @@ CREATE VIEW [{Vn.Storage}] AS
     type IDBRow = interface end
 
     /// DB storage table 의 row 항목
-    type Storage(id: int, tagKind: int, fqdn: string, dataTypeName: string, name: string) =
-        new() = Storage(-1, -1, null, null, null)
-
+    type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int) =
+        new() = ORMStorage(-1, null, null, -1, null, -1)
         new(iStorage: IStorage) =
             if iStorage.Target.IsNone then failwithf $"Storage Target is not exist {iStorage.Name}"
-            Storage(-1, iStorage.TagKind, iStorage.Target.Value.QualifiedName, iStorage.DataType.Name, iStorage.Name)
+            ORMStorage(-1, iStorage.Name, iStorage.Target.Value.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, -1)
 
         interface IDBRow
-        member val Id: int = id with get, set
+        member val Id = id with get, set
+        member val Name = name with get, set
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set
-        member val DataType = dataTypeName with get, set
-        member val Name = name with get, set
+        member val DataType = dataType with get, set
+        member val ModelId = modelId with get, set
 
     /// DB log table 의 row 항목
     type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int) =
@@ -220,9 +220,9 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Name = "" with get, set
 
     /// Runtime 생성 log 항목
-    type Log(id: int, storage: Storage, at: DateTime, value: obj, modelId:int) =
+    type Log(id: int, storage: ORMStorage, at: DateTime, value: obj, modelId:int) =
         inherit ORMLog(id, storage.Id, at, value, modelId)
-        new() = Log(-1, getNull<Storage> (), DateTime.MaxValue, null, -1)
+        new() = Log(-1, getNull<ORMStorage> (), DateTime.MaxValue, null, -1)
 
         interface IDBRow
         member val Storage = storage with get, set
@@ -248,27 +248,17 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Value = value with get, set
         member val ModelId = modelId with get, set
 
-    type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int) =
-        new() = ORMStorage(-1, null, null, -1, null, -1)
-
-        interface IDBRow
-        member val Id = id with get, set
-        member val Name = name with get, set
-        member val Fqdn = fqdn with get, set
-        member val TagKind = tagKind with get, set
-        member val DataType = dataType with get, set
-        member val ModelId = modelId with get, set
-
 
     type Fqdn = string
     type StorageKey = TagKind * Fqdn
 
-    let getStorageKey (s: Storage) : StorageKey = s.TagKind, s.Fqdn
+    let getStorageKey (s: ORMStorage) : StorageKey = s.TagKind, s.Fqdn
 
     /// StorageKey(-> TagKind*Fqdn) 로 주어진 항목에 대한 summary (-> Count, Sum)
     type Summary(logSet: LogSet, storageKey: StorageKey, count: int, sum: double) =
         let mutable count = count
         let mutable sum = sum
+
         /// Number rising
         member x.Count
             with get() = count
@@ -282,11 +272,11 @@ CREATE VIEW [{Vn.Storage}] AS
         /// Container reference
         member x.LogSet = logSet
         member x.StorageKey = storageKey
-        member val LastLog: Log option = None with get, set
 
     /// DB logging 관련 전체 설정
-    and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: Storage seq, readerWriterType: DBLoggerType) as this =
+    and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: ORMStorage seq, readerWriterType: DBLoggerType) as this =
         let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
+        let lastLogs = Dictionary<ORMStorage, Log>()
 
         let summaryDic =
             storages
@@ -295,7 +285,7 @@ CREATE VIEW [{Vn.Storage}] AS
                 key, Summary(this, key, 0, 0.))
             |> Tuple.toDictionary
 
-        let storageByIdDic = Dictionary<int, Storage>()
+        let storageByIdDic = Dictionary<int, ORMStorage>()
         let systems = systems |> toArray
 
         let disposables = new CompositeDisposable()
@@ -304,9 +294,10 @@ CREATE VIEW [{Vn.Storage}] AS
         member val QuerySet = queryCriteria with get, set
         member x.Summaries = summaryDic
         member x.Storages = storageDic
+        member x.LastLogs = lastLogs
+        member val TheLastLog: Log option = None with get, set
         member x.StoragesById = storageByIdDic
         member x.ModelId = queryCriteria.ModelId
-        member val LastLog: Log option = None with get, set
         member x.ReaderWriterType = readerWriterType
         member x.Disposables = disposables
         member x.GetSummary(summaryKey: StorageKey) = summaryDic[summaryKey]

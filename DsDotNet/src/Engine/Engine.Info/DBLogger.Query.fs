@@ -3,6 +3,7 @@ namespace Engine.Info
 open System
 open Dual.Common.Core.FS
 open Engine.Core
+open System.Collections.Generic
 
 [<AutoOpen>]
 module internal DBLoggerQueryImpl =
@@ -32,7 +33,7 @@ module internal DBLoggerQueryImpl =
 
     type Summary with
         // logs: id 순
-        member x.Build(FList(logs: Log list)) =
+        member x.Build(FList(logs: Log list), lastLogs:Dictionary<ORMStorage, Log>) =
             let mutable count = 0
             let mutable sum = 0.0
 
@@ -58,25 +59,29 @@ module internal DBLoggerQueryImpl =
 
             x.Count <- count
             x.Sum <- sum
-            x.LastLog <- logs.TryLast()
+
+            logs
+            |> groupBy(fun l -> l.Storage)
+            |> map (fun (key, group) -> group |> last)
+            |> iter( fun l -> lastLogs[l.Storage] <- l)
+
             ()
 
-        member x.BuildIncremental(FList(newLogs: Log list)) =
-            let helper (last: Log) =
-                if x.LastLog.IsNone then
-                    if isOff (last) then
-                        logWarn $"Warning: Invalid value starts: OFF(false)."
-                else
-                    let prev = x.LastLog.Value
+        member x.BuildIncremental(FList(newLogs: Log list), lastLogs:Dictionary<ORMStorage, Log>) =
+            let helper (current: Log) =
+                match lastLogs.TryFind(current.Storage) with
+                | Some last ->
+                    if current.Id >= 0 && isOn (last) = isOn (current) then
+                        logWarn  $"Warning: Duplicated consecutive values detected for log id = {current.Id}, prev log id = {last.Id}."
 
-                    if isOn (prev) = isOn (last) then
-                        logWarn  $"Warning: Duplicated consecutive values detected."
-
-                    if isOff (last) then
+                    if isOff (current) then
                         x.Count <- x.Count + 1
-                        x.Sum <- x.Sum + (last.At - prev.At).TotalSeconds
+                        x.Sum <- x.Sum + (current.At - last.At).TotalSeconds
+                | None ->
+                    if isOff (current) then
+                        logWarn $"Warning: Invalid value starts: OFF(false)."
 
-                x.LastLog <- Some last
+                lastLogs[current.Storage] <- current
 
             newLogs |> iter helper
 
@@ -89,9 +94,8 @@ module internal DBLoggerQueryImpl =
                 logs |> Seq.groupBy (fun l -> getStorageKey x.StoragesById[l.StorageId])
 
             for (key, group) in groups do
-                x.Summaries[key].BuildIncremental(group)
+                x.Summaries[key].BuildIncremental(group, x.LastLogs)
 
-            if logs.any () then
-                x.LastLog <- logs |> Seq.tryLast
+            x.TheLastLog <- logs |> Seq.tryLast
 
             ()

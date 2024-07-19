@@ -55,10 +55,9 @@ module internal DBLoggerImpl =
                     else
                         group
 
-                x.Summaries[key].Build(logsWithStartON)
+                x.Summaries[key].Build(logsWithStartON, x.LastLogs)
 
-            if logs.any () then
-                x.LastLog <- logs |> Seq.tryLast
+            x.TheLastLog <- logs |> Seq.tryLast
 
     let mutable logSet = getNull<LogSet> ()
 
@@ -72,14 +71,11 @@ module internal DBLoggerImpl =
             readerWriterType: DBLoggerType
         ) : Task<LogSet> =
         task {
-            let systemStorages: Storage array =
+            let systemStorages: ORMStorage array =
                 systems
-                |> map (fun s -> s.TagManager)
+                |> collect(fun s -> s.GetStorages(true))
                 |> distinct
-                |> Seq.collect (fun tagManager -> tagManager.Storages.Values)
-                |> filter (fun s -> s.TagKind <> skipValueChangedForTagKind) // 내부변수
-                |> distinct
-                |> map Storage
+                |> map ORMStorage
                 |> toArray
 
             let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
@@ -87,7 +83,7 @@ module internal DBLoggerImpl =
             if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connStr}"
 
-            let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
+            let! dbStorages = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
 
             let dbStorages =
                 dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
@@ -194,7 +190,7 @@ module internal DBLoggerImpl =
 
         let writePeriodicAsync = dequeAndWriteDBAsync
 
-        let enqueLogsForInsert (xs: DsLog seq) : unit =
+        let enqueLogs (xs: DsLog seq) : unit =
             let toDecimal (value: obj) =
                 match toBool value with
                 | Bool b -> (if b then 1 else 0) |> decimal
@@ -218,7 +214,7 @@ module internal DBLoggerImpl =
                     ORMLog(-1, storageId, x.Time, value, modelId) |> queue.Enqueue
                 | None -> failwithlog "NOT yet!!"
 
-        let enqueLogForInsert (x: DsLog) : unit = enqueLogsForInsert ([ x ])
+        let enqueLog (x: DsLog) : unit = enqueLogs ([ x ])
 
 
         let createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
@@ -297,7 +293,10 @@ module internal DBLoggerImpl =
                 let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
 
                 use conn = createConnectionWith connStr
-                let modelId = 1     // todo: modelId 추후 수정 필요
+                use! tr = conn.BeginTransactionAsync()
+
+                let! modelIds = conn.QueryAsync<int>($"SELECT id FROM [{Tn.Model}] WHERE path COLLATE NOCASE = @Path LIMIT 1", {| Path = pptPath |}, tr);
+                let modelId = modelIds |> exactlyOne
 
                 do!
                     conn.ExecuteSilentlyAsync(
@@ -306,7 +305,7 @@ module internal DBLoggerImpl =
                                           VALUES(@Name, @Value, @ModelId);""",
                         {| Name = PropName.PptPath
                            Value = pptPath
-                           ModelId = modelId |} )
+                           ModelId = modelId |}, tr )
 
                 do!
                     conn.ExecuteSilentlyAsync(
@@ -315,7 +314,9 @@ module internal DBLoggerImpl =
                                           VALUES(@Name, @Value, @ModelId);""",
                         {| Name = PropName.ConfigPath
                            Value = config
-                           ModelId = modelId |} )
+                           ModelId = modelId |}, tr )
+
+                do! tr.CommitAsync()
             }
 
         /// Log DB schema 생성
@@ -367,7 +368,7 @@ module internal DBLoggerImpl =
                             $"DS Source file change detected:\r\n\t{dbDsConfigJsonPath} <> {queryCriteria.DsConfigJsonPath}"
 
                 let lastLogId =
-                    match logSet.LastLog with
+                    match logSet.TheLastLog with
                     | Some l -> l.Id
                     | _ -> -1
 
@@ -449,7 +450,8 @@ module internal DBLoggerImpl =
     /// 지정된 조건에 따라 마지막 'Value'를 반환
     let getLastValue (logSet: LogSet, fqdn: string, tagKind: int) : bool option =
         option {
-            let! lastLog = logSet.GetSummary(tagKind, fqdn).LastLog
+            let! storage = logSet.Storages.TryFind((tagKind, fqdn))
+            let! lastLog = logSet.LastLogs.TryFind(storage)
             return lastLog.Value |> toBool
         }
 

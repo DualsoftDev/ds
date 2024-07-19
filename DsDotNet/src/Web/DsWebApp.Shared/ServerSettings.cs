@@ -45,6 +45,7 @@ public static class ServerSettingsExtensions
         serverSettings.CommonAppSettings = commonAppSettings;
         LoggerDBSettings loggerDBSettings = commonAppSettings.LoggerDBSettings;
         serverSettings.RuntimeModelDsZipPath = loggerDBSettings.ModelFilePath;
+        serverSettings.SetRuntimePackage(RuntimeGeneratorModule.ToRuntimePackage(loggerDBSettings.DbWriter));
         if (serverSettings.ServiceFolder.NonNullAny())
             Directory.CreateDirectory(serverSettings.ServiceFolder);
         if (serverSettings.RuntimeModelDsZipPath.NonNullAny())

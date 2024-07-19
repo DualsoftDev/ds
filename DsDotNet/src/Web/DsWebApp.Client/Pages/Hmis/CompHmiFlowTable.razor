@@ -31,6 +31,7 @@ else
             <ButtonLampModeColumn    Caption="Em.Stop" CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).EmergencyPushLampMode)"/>
             <ButtonLampModeColumn    Caption="Test"    CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).TestPushLampMode)" />
             <ButtonLampModeColumn    Caption="Ready"   CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).ReadyPushLampMode)" />
+            <ButtonLampColumn        Caption="Home"    CompositeGetter="@((dataItem) =>((HMIFlow)dataItem).HomePushLamp)" />
 
         </Columns>
     </DxGrid>

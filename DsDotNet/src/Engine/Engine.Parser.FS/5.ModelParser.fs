@@ -110,32 +110,36 @@ module ModelParser =
 
     let ParseFromString (text: string, options: ParserOptions) : DsSystem =
 
-        //if options.IsNewModel then
-        //    ClearDicParsingText()
+        if options.IsNewModel then
+            ClearDicParsingText()
 
-        //let path = if options.AbsoluteFilePath.IsSome then 
-        //              options.AbsoluteFilePath.Value  else   "" 
+        let path = if options.AbsoluteFilePath.IsSome then 
+                      options.AbsoluteFilePath.Value  else   "" 
                
                
-        //let newParsing skipAddDict  = 
-        //    let sys = ParseFromString2(text, options).TheSystem
-        //    sys.ToDsText(false) |> Console.WriteLine
+        let newParsing skipAddDict  = 
+            let sys = ParseFromString2(text, options).TheSystem
+            sys.ToDsText(false) |> Console.WriteLine
 
-        //    if sys.Jobs.IsEmpty() && not(skipAddDict) then //하위 디바이스가 없어야 system Clone 등록 가능
-        //        _DicParsingSystem.Add(path, sys) |> ignore
-        //    sys
+            if sys.Jobs.IsEmpty() && not(skipAddDict) then //하위 디바이스가 없어야 system Clone 등록 가능
+                _DicParsingSystem.Add(path, sys) |> ignore
+                File.WriteAllText("Z:\ds\org.ds", sys.ToDsText(true));
+            sys
 
 
-        //if _DicParsingSystem.ContainsKey(path)
-        //then
-        //    match options.LoadedSystemName with
-        //    | Some loadedName -> _DicParsingSystem[path].Clone(loadedName)
-        //    | None -> newParsing true
+        if _DicParsingSystem.ContainsKey(path)
+        then
+            match options.LoadedSystemName with
+            | Some loadedName -> 
+                        let cloneSys = _DicParsingSystem[path].Clone(loadedName)
+                        File.WriteAllText("Z:\ds\cloneSys.ds", cloneSys.ToDsText(true));
+                        cloneSys
+            | None -> newParsing true
            
-        //else 
-        //    newParsing false
+        else 
+            newParsing false
 
-        ParseFromString2(text, options).TheSystem
+        //ParseFromString2(text, options).TheSystem
 
 
     let Initialize () =

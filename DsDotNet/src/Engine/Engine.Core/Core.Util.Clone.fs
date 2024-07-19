@@ -10,23 +10,26 @@ module rec CoreCloneModule =
 
     type ApiItem with
         member private x.Clone(newSys: DsSystem , dicVertex:Dictionary<Vertex, Vertex>) =
-            let newApi = ApiItem.Create(x.Name, newSys, dicVertex[x.RX]:?>Real, dicVertex[x.TX]:?>Real)
+            // 향후 ApiItem 항목 추가시 깊은복사 구현
+            let newApi = ApiItem.Create(x.Name, newSys, dicVertex[x.TX]:?>Real, dicVertex[x.RX]:?>Real)
             newApi.TimeParam <- x.TimeParam
 
     type ApiResetInfo with
         member private x.Clone(newSys: DsSystem) =
+            // 향후 ApiResetInfo 항목 추가시 깊은복사 구현
             ApiResetInfo.Create(newSys, x.Operand1, x.Operator, x.Operand2, x.AutoGenByFlow) |> ignore
                 
 
     type Flow with
         member private x.Clone(newSystem: DsSystem) =
             let newFlow = Flow.Create(x.Name, newSystem)
-            // 향후 Flow 항목 추가시 복사 구현
+            // 향후 Flow 항목 추가시 깊은복사 구현
             newFlow
 
     type Real with
         member private x.Clone(newFlow: Flow) =
             let newReal = Real.Create(x.Name, newFlow)
+            // 향후 Real 항목 추가시 깊은복사 구현
             newReal.Motion <- x.Motion
             newReal.Script <- x.Script
             newReal.RealData <- x.RealData
@@ -37,6 +40,7 @@ module rec CoreCloneModule =
 
     type Alias with
         member private x.Clone(newFlow: Flow, newReal: Real) =
+            // 향후 Alias 항목 추가시 깊은복사 구현
             Alias.Create(x.Name, DuAliasTargetReal newReal, DuParentFlow newFlow, x.IsExFlowReal) 
 
             

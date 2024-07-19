@@ -72,11 +72,11 @@ module internal DBLoggerImpl =
             readerWriterType: DBLoggerType
         ) : Task<LogSet> =
         task {
-            let systemStorages: Storage array =
+            let systemStorages: ORMStorage array =
                 systems
                 |> collect(fun s -> s.GetStorages(true))
                 |> distinct
-                |> map Storage
+                |> map ORMStorage
                 |> toArray
 
             let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
@@ -84,7 +84,7 @@ module internal DBLoggerImpl =
             if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connStr}"
 
-            let! dbStorages = conn.QueryAsync<Storage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
+            let! dbStorages = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
 
             let dbStorages =
                 dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary

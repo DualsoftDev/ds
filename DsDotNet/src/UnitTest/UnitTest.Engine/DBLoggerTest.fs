@@ -15,12 +15,12 @@ module DBLoggerTestModule =
         let createStorage =
             let counter = counterGenerator 1
             let helper (fqdn:string) (tagKind:int) =
-                Storage(counter(), tagKind, fqdn, "Boolean", fqdn)
+                ORMStorage(counter(), fqdn, fqdn, tagKind, "Boolean", -1)
             helper
 
         let createLog =
             let counter = counterGenerator 1
-            let helper (storage:Storage) (at:DateTime) (value:obj) =
+            let helper (storage:ORMStorage) (at:DateTime) (value:obj) =
                 let modelId = -1
                 ORMLog(counter(), storage.Id, at, value, modelId)
             helper

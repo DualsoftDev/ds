@@ -117,6 +117,7 @@ module ConvertHMI =
                 TestPushLampMode         = getPushLampMode   tm (i FlowTag.test_btn ) (i FlowTag.test_lamp )  (i FlowTag.test_state  )
                 ReadyPushLampMode        = getPushLampMode   tm (i FlowTag.ready_btn) (i FlowTag.ready_lamp)  (i FlowTag.ready_state )
                 ClearPushLamp            = getPushLamp       tm (i FlowTag.clear_btn) (i FlowTag.clear_lamp)
+                HomePushLamp             = getPushLamp       tm (i FlowTag.home_btn)  (i FlowTag.home_lamp)  
                 PausePushLamp            = getPushLamp       tm (i FlowTag.pause_btn) (i FlowTag.pause_lamp)  
           
                 IdleLampMode        = getLamp   tm (i FlowTag.idle_mode   )
@@ -140,6 +141,8 @@ module ConvertHMI =
                 TestPushLamp         =  getPushLamp   tm (i SystemTag.test_btn ) (i SystemTag.test_lamp )
                 HomePushLamp         =  getPushLamp   tm (i SystemTag.home_btn ) (i SystemTag.home_lamp )
                 ReadyPushLamp        =  getPushLamp   tm (i SystemTag.ready_btn) (i SystemTag.ready_lamp)
+                
+                OriginLampMode       = getLamp   tm (i SystemTag.originMonitor)
 
                 Flows = x.Flows|> map (fun f -> f.GetHMI()) |> toArray
                 

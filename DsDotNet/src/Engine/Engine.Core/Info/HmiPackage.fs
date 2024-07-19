@@ -112,6 +112,7 @@ module HmiPackageModule =
 
         ClearPushLamp            : HMIPushLamp     
         PausePushLamp            : HMIPushLamp 
+        HomePushLamp             : HMIPushLamp 
         
         IdleLampMode             : HMILamp 
         OriginLampMode           : HMILamp 
@@ -148,6 +149,8 @@ module HmiPackageModule =
         TestPushLamp          : HMIPushLamp      
         HomePushLamp          : HMIPushLamp      
         ReadyPushLamp         : HMIPushLamp 
+
+        OriginLampMode        : HMILamp 
 
         Flows                 : HMIFlow array
         Jobs                  : HMIJob array

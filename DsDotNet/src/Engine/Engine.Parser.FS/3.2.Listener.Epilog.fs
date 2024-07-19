@@ -32,9 +32,10 @@ module EtcListenerModule =
 
 
         member x.ProcessButtonBlock(ctx: ButtonBlockContext) =
-            for ctxChild in ctx.children do
-                if ctxChild :? ParserRuleContext then
-                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
+
+            let ctx = ctx.Descendants<CategoryBlocksContext>().ToArray()
+            for ctxChild in ctx do
+                    let first = ctxChild.Descendants<ParserRuleContext>()[1]
                     let system = x.TheSystem
 
                     let targetBtnType =
@@ -56,7 +57,7 @@ module EtcListenerModule =
                     let key = (system, category)
 
                     if x.ButtonCategories.Contains(key) then
-                        failwith $"중복 button category {category} near {ctx.GetText()}"
+                        failwith $"중복 button category {category} near {first.GetText()}"
                     else
                         x.ButtonCategories.Add(key) |> ignore
 
@@ -93,9 +94,9 @@ module EtcListenerModule =
                             system.AddButton(targetBtnType, btnName, inAddr, outAddr, flow)))
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
-            for ctxChild in ctx.children do
-                if ctxChild :? ParserRuleContext then
-                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
+            let ctx = ctx.Descendants<CategoryBlocksContext>().ToArray()
+            for ctxChild in ctx do
+                    let first = ctxChild.Descendants<ParserRuleContext>()[1]
                     let system = x.TheSystem
 
                     let targetLmpType =
@@ -136,9 +137,9 @@ module EtcListenerModule =
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
 
         member x.ProcessConditionBlock(ctx: ConditionBlockContext) =
-            for ctxChild in ctx.children do
-                if ctxChild :? ParserRuleContext then
-                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
+                let ctx = ctx.Descendants<CategoryBlocksContext>().ToArray()
+                for ctxChild in ctx do
+                    let first = ctxChild.Descendants<ParserRuleContext>()[1]
                     let system = x.TheSystem
 
                     let targetCndType =

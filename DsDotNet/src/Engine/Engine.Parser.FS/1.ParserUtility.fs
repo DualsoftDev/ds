@@ -1,22 +1,16 @@
 namespace rec Engine.Parser.FS
 
-open System
-open System.IO
 open System.Linq
-
 open Antlr4.Runtime
 open Antlr4.Runtime.Tree
-
 open Dual.Common.Core.FS
 open Engine.Parser
 open type Engine.Parser.dsParser
 open Engine.Core
 
-
-
-
 [<AutoOpen>]
 module ParserUtilityModule =
+
     let collectNameComponents (parseTree: IParseTree) = parseTree.CollectNameComponents()
 
     type IParseTree with
@@ -28,35 +22,40 @@ module ParserUtilityModule =
                 ?exclude: ParseTreePredicate
             ) : ResizeArray<'T> =
 
-            let includeMe = includeMe |? false
-            let predicate = predicate |? (isType<'T>)
-            let exclude = exclude |? (fun _ -> false)
+            let includeMe = defaultArg includeMe false
+            let predicate = defaultArg predicate (fun pt -> pt :? 'T)
+            let exclude = defaultArg exclude (fun _ -> false)
 
-            let rec helper (rslt: ResizeArray<'T>, frm: IParseTree, incMe: bool) =
-                if not (exclude (frm)) then
-                    if (incMe && predicate (frm)) then
-                        rslt.Add(forceCast<'T> (frm))
+            let result = ResizeArray<'T>() 
+            let stack = System.Collections.Generic.Stack<IParseTree>()
+            stack.Push(x)
 
-                    for index in [ 0 .. frm.ChildCount - 1 ] do
-                        helper (rslt, frm.GetChild(index), true)
+            while stack.Count > 0 do
+                let current = stack.Pop()
+                if not (exclude current) then
+                    if predicate current then
+                        result.Add(current :?> 'T)
+                    for i = current.ChildCount - 1 downto 0 do
+                        stack.Push(current.GetChild(i))
 
-            let result = ResizeArray<'T>()
-            helper (result, x, includeMe)
+            if includeMe && predicate x then
+                result.Insert(0, x :?> 'T)
+
             result
 
-        member x.Ascendants<'T when 'T :> IParseTree>(?includeMe: bool, ?predicate: ParseTreePredicate) =
+        member x.Ascendants<'T when 'T :> IParseTree>(?includeMe: bool, ?predicate: ParseTreePredicate) : ResizeArray<'T> =
+            let includeMe = defaultArg includeMe false
+            let predicate = defaultArg predicate (fun pt -> pt :? 'T)
 
-            let includeMe = includeMe |? false
-            let predicate = predicate |? (isType<'T>)
-
-            let rec helper (from: IParseTree, includeMe: bool) =
-                [ if from <> null then
-                      if (includeMe && predicate (from) && isType<'T> from) then
-                          yield forceCast<'T> (from)
-
-                      yield! helper (from.Parent, true) ]
+            let result = ResizeArray<'T>()
+            let rec helper (current: IParseTree, includeMe: bool) =
+                if current <> null then
+                    if includeMe && predicate current then
+                        result.Add(current :?> 'T)
+                    helper (current.Parent, true)
 
             helper (x, includeMe)
+            result
 
         member x.TryFindFirstChild(predicate: ParseTreePredicate, ?includeMe: bool) =
             let includeMe = includeMe |? false

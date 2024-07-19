@@ -290,10 +290,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     member x.GetContextInformation(parserRuleContext: ParserRuleContext) = // collectUpwardContextInformation
         let ctx = parserRuleContext
 
-        let system =
+        let system = 
             match x.Rule2SystemNameDictionary.TryFind(parserRuleContext) with
             | Some systemName -> Some systemName
-            | None -> parserRuleContext.TryGetSystemName()
+            | None -> Some x.TheSystem.Name  //parserRuleContext.TryGetSystemName()대신에 한번 저장된거 사용해서 성능개선
 
         let flow =
             ctx

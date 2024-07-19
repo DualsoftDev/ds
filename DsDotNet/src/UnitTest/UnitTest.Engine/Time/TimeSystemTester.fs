@@ -14,7 +14,7 @@ module TimeSystemTestModule =
         
         let systemRepo = ShareableSystemRepository()
         let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
-        let helper testCode = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone)).TheSystem
+        let helper testCode = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
             
         [<Test>]
         member _.``System Api GetDuration`` () =

@@ -25,6 +25,7 @@ module ModelBuildupTests1 =
         let systemRepo = ShareableSystemRepository()
 
         let createSimpleSystem() =
+            ModelParser.ClearDicParsingText()
             let system = DsSystem("My")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)

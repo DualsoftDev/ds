@@ -260,7 +260,7 @@ module CoreExtensionModule =
 
                         
     type Real with
-    
+
         member x.TimeAvg = 
             let maxShortSpeedSec = (TimerModule.MinTickInterval|>float)/1000.0
             let v = 

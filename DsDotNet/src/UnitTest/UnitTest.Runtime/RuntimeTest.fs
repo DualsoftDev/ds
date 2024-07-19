@@ -19,7 +19,7 @@ module RuntimeTest =
     RuntimeDS.Package <- RuntimePackage.PCSIM
     let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true;  CreateFromPPT = false; CreateBtnLamp = true}
 
-    let zipPath = ImportPPT.GetRuntimeZipFromPPT (testPPT, pptParms)
+    let zipPath, sys = ImportPPT.GetRuntimeZipFromPPT (testPPT, pptParms)
     let runtimeModel = new RuntimeModel(zipPath, pptParms.TargetType)
 
    

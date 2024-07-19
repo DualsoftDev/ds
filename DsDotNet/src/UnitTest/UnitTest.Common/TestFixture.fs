@@ -28,5 +28,4 @@ module Fixtures =
         Tag(param)
 
     let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
-        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-        helper.TheSystem
+        ModelParser.ParseFromString(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))

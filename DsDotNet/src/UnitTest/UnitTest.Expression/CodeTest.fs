@@ -168,8 +168,7 @@ double myDouble = 3.14 + 3.14;
             use _ = setRuntimeTarget WINDOWS
             let systemRepo = ShareableSystemRepository()
             let parseText text =
-                let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))
-                helper.TheSystem
+                ModelParser.ParseFromString(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", None, DuNone))
 
             let storages = Storages()
             let ds = """

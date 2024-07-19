@@ -13,8 +13,7 @@ open Engine.Parser.FS
 module private ModelComparisonHelper =
     let parseText (systemRepo:ShareableSystemRepository) referenceDir text =
         ModelParser.ClearDicParsingText()
-        let helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-        helper.TheSystem
+        ModelParser.ParseFromString(text, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
 
     let compare (systemRepo:ShareableSystemRepository) referenceDir originalText answer =
         let system = parseText systemRepo referenceDir originalText
@@ -198,9 +197,9 @@ module ModelTests1 =
 
             let systemRepo = ShareableSystemRepository()
             let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
-            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+            let helperSys = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
             //"+" |> "-", "-" |> "+";
-            helper.TheSystem.ApiResetInfos.Count === 2
+            helperSys.ApiResetInfos.Count === 2
 
         [<Test>]
         member __.``Interlock extract test`` () =
@@ -225,9 +224,9 @@ module ModelTests1 =
 
             let systemRepo = ShareableSystemRepository()
             let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
-            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+            let helperSys = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
             //ADV <|> RET, ADV |> RET, RET |> ADV;  => 기존 인과 존재하면 추가 안함
-            helper.TheSystem.ApiResetInfos.Count === 1
+            helperSys.ApiResetInfos.Count === 1
 
 
         [<Test>]
@@ -251,10 +250,10 @@ module ModelTests1 =
 
             let systemRepo = ShareableSystemRepository()
             let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
-            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+            let helperSys = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
 
 
-            helper.TheSystem.ApiResetInfos.Count === 2
+            helperSys.ApiResetInfos.Count === 2
 
         [<Test>]
         member __.``Interlock extract alias test`` () =
@@ -289,8 +288,8 @@ module ModelTests1 =
 
             let systemRepo = ShareableSystemRepository()
             let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
-            let helper = ModelParser.ParseFromString2(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
+            let helperSys = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
 
 
-            helper.TheSystem.ApiResetInfos.Count === 2
+            helperSys.ApiResetInfos.Count === 2
   

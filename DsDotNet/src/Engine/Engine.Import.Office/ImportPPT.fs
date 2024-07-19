@@ -288,5 +288,5 @@ module ImportPPTModule =
         [<Extension>]
         static member GetRuntimeZipFromPPT(fullName: string, pptParams)=
             let ret = ImportPPT.GetDSFromPPTWithLib(fullName, false, pptParams)
-            ModelLoaderExt.saveModelZip(ret.LoadingPaths , ret.ActivePath, ret.LayoutImgPaths)
+            ModelLoaderExt.saveModelZip(ret.LoadingPaths , ret.ActivePath, ret.LayoutImgPaths), ret.System
 

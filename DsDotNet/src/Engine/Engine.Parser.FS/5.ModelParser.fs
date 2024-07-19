@@ -22,8 +22,10 @@ module ModelParser =
         parser, parser.system()
 
 
-    let Walk (parser: dsParser, sysctx:SystemContext, options: ParserOptions) =
+    let Walk (text: string, options: ParserOptions)  =
+        let (parser, _errors) = DsParser.FromDocument(text)
         let listener = new DsParserListener(parser, options)
+        let sysctx = parser.system()
         ParseTreeWalker.Default.Walk(listener, sysctx)
         parser.Reset()
 
@@ -84,29 +86,10 @@ module ModelParser =
     let WalkJobAddress (text: string, options: ParserOptions) =
         WalkAndExtract(text, options) |> snd |> ExtractJobBlock
     
-    let _DicParsingText = Dictionary<string, dsParser*SystemContext>() //동일 절대경로는 기존 dsParser를 재사용하기 위함
-    let ClearDicParsingText() = _DicParsingText.Clear()
 
-    let ParseFromString2 (text: string, options: ParserOptions) : DsParserListener =
-        if options.IsNewModel then
-            ClearDicParsingText()
+    let private ParseFromString2 (text: string, options: ParserOptions) : DsParserListener =
 
-        let (parser, sysCtx) =
-            match options.AbsoluteFilePath with
-            | Some path when _DicParsingText.ContainsKey(path) -> 
-                _DicParsingText[path]
-            | _ -> 
-                let parserNctx =  WalkAndExtract (text,  options)
-                let path = if options.AbsoluteFilePath.IsSome then 
-                              options.AbsoluteFilePath.Value
-                            else 
-                                "" 
-
-                _DicParsingText.Add(path, parserNctx)
-                _DicParsingText[path]
-        
-
-        let listener = Walk(parser, sysCtx, options)
+        let listener = Walk(text, options)
 
         let system = listener.TheSystem
         createMRIEdgesTransitiveClosure4System system
@@ -122,8 +105,38 @@ module ModelParser =
         listener
 
 
+    let _DicParsingSystem = Dictionary<string, DsSystem>() //동일 절대경로는 기존 dsParser를 재사용하기 위함
+    let ClearDicParsingText() = _DicParsingSystem.Clear()
+
     let ParseFromString (text: string, options: ParserOptions) : DsSystem =
+
+        //if options.IsNewModel then
+        //    ClearDicParsingText()
+
+        //let path = if options.AbsoluteFilePath.IsSome then 
+        //              options.AbsoluteFilePath.Value  else   "" 
+               
+               
+        //let newParsing skipAddDict  = 
+        //    let sys = ParseFromString2(text, options).TheSystem
+        //    sys.ToDsText(false) |> Console.WriteLine
+
+        //    if sys.Jobs.IsEmpty() && not(skipAddDict) then //하위 디바이스가 없어야 system Clone 등록 가능
+        //        _DicParsingSystem.Add(path, sys) |> ignore
+        //    sys
+
+
+        //if _DicParsingSystem.ContainsKey(path)
+        //then
+        //    match options.LoadedSystemName with
+        //    | Some loadedName -> _DicParsingSystem[path].Clone(loadedName)
+        //    | None -> newParsing true
+           
+        //else 
+        //    newParsing false
+
         ParseFromString2(text, options).TheSystem
+
 
     let Initialize () =
         debugfn "Initializing model parser"

@@ -132,7 +132,6 @@ module CoreModule =
         ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
-        member val StartPoints = createQualifiedNamedHashSet<Real>()
 
         member x.AddVariables(variableData:VariableData) = 
                 if variables.any(fun v->v.Name = variableData.Name)
@@ -274,14 +273,16 @@ module CoreModule =
 
         
         member x.Flow = flow
+
         member val Graph = DsGraph()
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val ExternalTags = HashSet<ExternalTagSet>()
         member val ParentApiSensorExpr = getNull<IExpression>() with get, set
+
         //member val RealData:byte[] = [||] with get, set
         member val RealData:byte = 0uy with get, set //array타입으로 향후 변경
-
         member val DsTime:DsTime = DsTime() with get, set
+
         member val Finished:bool = false with get, set
         member val NoTransData:bool = false with get, set
 
@@ -353,10 +354,10 @@ module CoreModule =
             member val SafetyConditions = HashSet<SafetyAutoPreCondition>()
             member val AutoPreConditions = HashSet<SafetyAutoPreCondition>()
 
-    and Alias private (name:string , target:AliasTargetWrapper, parent, isOtherFlowRealAlias:bool) = // target : Real or Call or OtherFlowReal
+    and Alias private (name:string , target:AliasTargetWrapper, parent, isExFlowReal:bool) = // target : Real or Call or OtherFlowReal
         inherit Indirect([|name|], parent)
         member _.TargetWrapper = target
-        member _.IsExFlowReal = isOtherFlowRealAlias
+        member _.IsExFlowReal = isExFlowReal
         member _.IsSameFlow = target.GetTarget() 
                               |> fun v -> v.Parent.GetFlow() = parent.GetFlow() 
 
@@ -454,14 +455,14 @@ module CoreModule =
 
 
     /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
-    and ApiItem private (name:string, system:DsSystem, timeParam:TimeParam option) =
+    and ApiItem private (name:string, system:DsSystem) =
         (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
         inherit FqdnObject(name, createFqdnObject([|system.Name|]))
         interface INamedVertex
 
         member _.Name = name
         member _.ApiSystem = system
-        member _.TimeParam = timeParam
+        member val TimeParam:TimeParam option = None with get, set
       
         member val TX = getNull<Real>() with get, set
         member val RX = getNull<Real>() with get, set
@@ -573,7 +574,7 @@ module CoreModule =
 
 
     type Alias with
-        static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isOtherFlowRealAlias) =
+        static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isExFlowReal) =
             let createAliasDefOnDemand() =
                 (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
                  * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
@@ -592,7 +593,7 @@ module CoreModule =
             createAliasDefOnDemand()
 
 
-            let alias = Alias(name, target, parent, isOtherFlowRealAlias)
+            let alias = Alias(name, target, parent, isExFlowReal)
             if parent.GetCore() :? Real
             then
                 target.RealTarget().IsNone
@@ -603,7 +604,7 @@ module CoreModule =
 
     type ApiItem with
         static member Create(name, system) =
-            let cp = ApiItem(name, system, None)
+            let cp = ApiItem(name, system)
             system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
             cp
         static member Create(name, system, tx, rx) =

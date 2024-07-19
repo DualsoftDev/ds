@@ -19,8 +19,7 @@ type StoragesTest() =
         let systemRepo = ShareableSystemRepository()
         let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
         ModelParser.ClearDicParsingText()
-        let helper = ModelParser.ParseFromString2(dsText, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-        let sys = helper.TheSystem  
+        let sys = ModelParser.ParseFromString(dsText, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
         /// 파싱후에는 TagManager가 없어야 한다.
         sys.TagManager === null
         DsAddressModule.assignAutoAddress(sys, 0, 100000) PlatformTarget.WINDOWS

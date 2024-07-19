@@ -57,6 +57,7 @@
         <Compile Include="Core.Util.Origin.fs" />
         <Compile Include="Core.Util.Time.fs" />
         <Compile Include="Core.Validation.fs" />
+        <Compile Include="Core.Util.Clone.fs" />
         <Compile Include="Core.Util.ToDsText.fs" />
         <Compile Include="Core.Create.fs" />
         <Compile Include="Expression.TagKind.fs" />

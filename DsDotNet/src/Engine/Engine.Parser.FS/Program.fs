@@ -1523,7 +1523,7 @@ module Program =
     let ParseNormal (text: string) =
         let systemRepo = ShareableSystemRepository()
 
-        ModelParser.ParseFromString2(
+        ModelParser.ParseFromString(
             text,
             ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuNA.me", None, DuNone)
         )

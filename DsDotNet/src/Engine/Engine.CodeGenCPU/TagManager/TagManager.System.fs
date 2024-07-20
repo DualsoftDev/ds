@@ -153,7 +153,6 @@ module SystemManagerModule =
             | SystemTag.clear_lamp  ->    clear_lamp
             | SystemTag.home_lamp   ->    home_lamp
 
-
             //| SystemTag.datet_yy        ->    dtimeyy
             //| SystemTag.datet_mm        ->    dtimemm
             //| SystemTag.datet_dd        ->    dtimedd
@@ -173,6 +172,7 @@ module SystemManagerModule =
             | SystemTag.readyMonitor         ->    readyMonitor    
             | SystemTag.originMonitor        ->    originMonitor   
             | SystemTag.goingMonitor         ->    goingMonitor    
+            
             
             | SystemTag._T20MS     -> flicker20msec
             | SystemTag._T100MS    -> flicker100msec

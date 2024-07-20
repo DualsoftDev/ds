@@ -63,7 +63,7 @@ module internal GraphHelperModule =
 
 
     (* https://blog.naver.com/ndb796/221236952158 *)
-    /// function that retruns strongly connected components from given edge lists of graph
+    /// function that returns strongly connected components from given edge lists of graph
     let findStronglyConnectedComponents(graph:Graph<'V, 'E>) (edges:'E seq) =
         let g = graph
         let sccs =

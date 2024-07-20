@@ -58,8 +58,14 @@ module PPTDocModule =
                              match  allNodes.TryFind(fun f -> $"{f.PageTitle}.{f.Name}" = name) with
                              | Some f -> f
                              | None -> node.Shape.ErrorName( $"해당 Flow.Work를 찾을 수 없습니다 {name}", node.PageNum)
-
-                        else aliasCheckNodes |> Seq.filter (fun f -> f.Name = name) |> Seq.head
+                  
+                        else aliasCheckNodes |> Seq.filter (fun f -> 
+                                                    let keyName = 
+                                                        match f.NodeType with
+                                                            | CALL -> f.JobName.Combine()
+                                                            | _ -> f.Name
+                                                    keyName = name) 
+                                                    |> Seq.head
 
                     node.Alias <- Some(orgNode)
                     node.AliasNumber <- aliasNumber)
@@ -76,7 +82,15 @@ module PPTDocModule =
                 then findNodes, findNodes
                 else findNodes, nodes
 
-            let nameNums= GetAliasNumber(filterNodes|> Seq.map (fun f -> f.Name))
+            let nameNums= GetAliasNumber
+                            (filterNodes
+                                |> Seq.map (fun f -> 
+                                    match f.NodeType with
+                                    | CALL -> f.JobName.Combine()
+                                    | _ -> f.Name
+                                    )
+                            )
+
             updateAlias filterNodes allNodes nameNums exFlowReal
 
 

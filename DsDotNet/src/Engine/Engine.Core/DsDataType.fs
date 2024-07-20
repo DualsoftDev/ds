@@ -251,7 +251,9 @@ module DsDataType =
         | _ when x.EndsWith("UL") && UInt64.TryParse(x.TrimEnd([|'U';'L'|]))|> fst  ->
             Some (x.TrimEnd([|'U';'L'|]), DuUINT64)
         | _ when x.ToLower() = "true" || x.ToLower() = "false" ->
-            Some (x, DuBOOL)
+            Some (x, DuBOOL) 
+        | _ when x.ToLower() = "t" -> Some ("true", DuBOOL)
+        | _ when x.ToLower() = "f" -> Some ("false", DuBOOL)
         | _ when x.EndsWith("L") && Int64.TryParse(x.TrimEnd('L'))|> fst  ->
             Some (x.TrimEnd('L'), DuINT64)
         | _ when x.EndsWith("I") && Int32.TryParse(x.TrimEnd('I'))|> fst  ->

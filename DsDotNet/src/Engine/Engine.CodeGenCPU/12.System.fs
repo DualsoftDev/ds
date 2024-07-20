@@ -45,6 +45,8 @@ type DsSystem with
             
         ]
 
+        
+
     member s.Y4_SystemConditionError() =
         [
             for condi in  s.HWConditions do
@@ -57,3 +59,11 @@ type DsSystem with
                 yield (emg.ActionINFunc , s._off.Expr) --| (emg.ErrorEmergency,   getFuncName())
         ]
         
+    //// 외부신호 초기값 변화를 연산하기 위해 강제로 수식 추가 
+    //member s.Y6_SystemDeviceTrigger() =
+    //    let sets = 
+    //        s.GetCallVertices().Where(fun c ->c.Parent.GetCore() :? Flow)
+    //         .Select(getVM).Select(fun f->f.ET).ToOrElseOff()
+    //    //_originMonitor 변화시 한번 체크하여 강제 연산 유도
+    //    (sets <&&> s._originMonitor.Expr, s._off.Expr) --| (s._deviceTrigger, getFuncName())
+

@@ -67,6 +67,7 @@ module TagKindList =
     | goingMonitor               = 0041
 
 
+
     ///flicker                   
     | _T20MS                     = 0100  //system timer  LS 특수비트랑 이름 통일
     | _T100MS                    = 0101  //system timer  LS 특수비트랑 이름 통일

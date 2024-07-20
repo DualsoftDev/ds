@@ -99,8 +99,6 @@ module ConvertCPU =
             yield! s.Y3_SystemState()
             yield! s.Y4_SystemConditionError()
             yield! s.Y5_SystemEmgAlramError()
-            
-
 
         ]
 
@@ -209,8 +207,8 @@ module ConvertCPU =
             yield s.SetFlagForEmulation()
             let devsCall =  s.GetDevicesCall()
             for dev, call in devsCall do
-                //if not(dev.IsRootOnlyDevice)
-                //then
+                if not(dev.IsRootOnlyDevice)
+                then
                     if dev.InTag.IsNonNull() then  
                         yield dev.SensorEmulation(s, call.TargetJob)
         ]

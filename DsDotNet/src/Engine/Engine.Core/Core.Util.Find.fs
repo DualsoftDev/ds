@@ -291,6 +291,7 @@ type FindExtension =
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     [<Extension>] static member GetRealVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Real>()
+    [<Extension>] static member GetCallVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Call>()
     
     [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
     [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =  

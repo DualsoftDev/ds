@@ -62,6 +62,9 @@ module ConvertCpuDsSystem =
         member s._originMonitor = s.GetPv<bool>(SystemTag.originMonitor  )
         member s._goingMonitor  = s.GetPv<bool>(SystemTag.goingMonitor  )
 
+        
+
+
         member s._tout        = s.GetPv<uint32>(SystemTag.timeout)
         member s._flicker20msec = s.GetPv<bool>(SystemTag._T20MS)
         member s._flicker100msec = s.GetPv<bool>(SystemTag._T100MS)

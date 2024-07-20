@@ -26,10 +26,9 @@ namespace Engine.TestSimulator
 
             DsSystem[] systems = new DsSystem[] { runModel.System };
 
-            ModelCompileInfo mci = new(runModel.JsonPath, runModel.JsonPath);
             DSCommonAppSettings commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
             var queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), null);
-            _ = await DBLogger.InitializeLogWriterOnDemandAsync(queryCriteria, systems, mci, false);
+            _ = await DBLogger.InitializeLogWriterOnDemandAsync(queryCriteria, systems, false);
             _ = DsSimulator.Do(runModel.Cpu, 10000);
             Console.ReadKey();  
         }

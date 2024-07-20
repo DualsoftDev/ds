@@ -362,8 +362,6 @@ versionsBlock: '[' 'versions' ']' '=' '{' versionDef* '}';
             isoDate: year=INTEGER '-' month=INTEGER '-' day=INTEGER;    
     version: major=INTEGER '.' minor=INTEGER ( '.' build=INTEGER ( '.' revision=INTEGER )? )?;
 
-
-
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
         jobName ('['jobTypeOption']')? '=' ('{' (callApiDef (SEMICOLON))* '}' | (devParamInOut SEMICOLON));

@@ -15,7 +15,7 @@ module CoreCreateModule =
         let system = DsSystem(systemName)
         system
 
-    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (inParam:DevParam, outParm:DevParam): TaskDev =
+    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (devParaIO:DevParaIO): TaskDev =
         let apis = sys.ApiItems.Where(fun w -> w.Name = apiName)
 
         let api = 
@@ -66,7 +66,7 @@ module CoreCreateModule =
                 
                 newApi
 
-        TaskDev(api, jobName, inParam, outParm, devName, sys)
+        TaskDev(api, jobName, devParaIO, devName, sys)
 
 
     let updateSystemForSingleApi(sys:DsSystem) =

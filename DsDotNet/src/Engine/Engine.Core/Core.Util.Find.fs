@@ -247,9 +247,9 @@ module internal ModelFindModule =
                     .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c) )
         tds 
         |> Seq.distinctBy (fun (td, _) -> td)
-        |> Seq.sortBy (fun (td, c) -> 
-            let paramSortKey = $"{td.GetInParam(c.TargetJob).Type.ToText()};{td.GetOutParam(c.TargetJob).Type.ToText()}"
-            (td.DeviceName, td.ApiItem.Name, paramSortKey))
+        |> Seq.sortBy (fun (td, _c) -> 
+            //let paramSortKey = $"{td.GetInParam(c.TargetJob).Type.ToText()};{td.GetOutParam(c.TargetJob).Type.ToText()}"
+            (td.DeviceName, td.ApiItem.Name(*, paramSortKey*)))
 
     type DsSystem with
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn

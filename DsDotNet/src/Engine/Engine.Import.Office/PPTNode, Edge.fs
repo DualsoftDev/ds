@@ -22,7 +22,7 @@ module PPTNodeModule =
     type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties = HashSet<string>()
-        let autoPres = HashSet<string[]*DevParam*(DevParam option)>()  //jobFqdn, inparam, outParam
+        let autoPres = HashSet<string[]*DevParaIO>()  //jobFqdn, inparam, outParam
         
         let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
         let btnHeadPageDefs = Dictionary<string, BtnType>()
@@ -34,7 +34,7 @@ module PPTNodeModule =
 
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable devParam: (DevParam option * DevParam option) option = None     // Input/Output param
+        let mutable devParam: DevParaIO option = None     // Input/Output param
         let mutable ifTX = ""
         let mutable ifRX = ""
         let mutable realGoingTime:float option = None   
@@ -189,27 +189,16 @@ module PPTNodeModule =
         member x.IsRootNode = rootNode
         member x.IsFunction = x.IsCall && not(name.Contains("."))
         member x.DevParam = devParam
-        member x.DevParamIn = 
-            if devParam.IsSome && (devParam.Value |> fst).IsSome then 
-                (devParam.Value |> fst).Value 
-            else defaultDevParam ()    
-        member x.DevParamOut = 
-            if devParam.IsSome && (devParam.Value |> snd).IsSome then 
-                (devParam.Value |> snd).Value 
-            else defaultDevParam ()    
-
+        member x.DevParamIn =  if devParam.IsSome then  devParam.Value.InPara else None
+        member x.DevParamOut = if devParam.IsSome then  devParam.Value.OutPara else None
+           
         member x.JobName = 
             
             let flow, (job: string list), Api = x.CallFlowNJobNApi
             let pureJob = job.Append(Api)
-            let inParam, outParam =
-                if x.IsCallDevParam 
-                then
-                    devParam.Value |> fst , devParam.Value |> snd
-                else
-                    None, None  
             
-            getJobNameWithParams(pureJob, inParam, outParam).ToArray()
+            
+            getJobNameWithParams(pureJob, devParam).ToArray()
 
 
         member x.UpdateTime(real: Real) =
@@ -236,11 +225,11 @@ module PPTNodeModule =
                 if isDevCall 
                 then
                     if hasDevParam then
-                        let inParam, outParam = getNodeDevParam (shape, nameNFunc(shape), iPage, target)
-                        devParam <- Some(inParam, outParam)
+                        devParam <- getNodeDevParam (shape, nameNFunc(shape), iPage, target)
                     else 
                         if isRoot then
-                            devParam <- Some(Some(createDevParam  None (Some(DuBOOL)) (Some(true)) None), None)
+                            let inPara = createDevParam  None (Some(DuBOOL)) None None |> Some  
+                            devParam <- {InPara = inPara;OutPara = None} |> Some
                 else 
                     if hasDevParam then
                         failWithLog "function call 'devParam' not support"
@@ -250,8 +239,9 @@ module PPTNodeModule =
             call.Disabled <- x.DisableCall
             if x.IsCallDevParam && x.IsRootNode.Value = false then 
                 call.TargetJob.TaskDefs.Iter(fun d->
-                    d.AddOrUpdateInParam(x.JobName.Combine(), x.DevParamIn)
-                    d.AddOrUpdateOutParam(x.JobName.Combine(), x.DevParamOut)
+                    if x.DevParam.IsSome
+                    then
+                        d.AddOrUpdateDevParam(x.JobName.Combine(), x.DevParam.Value)
                 )
       
         member x.CallFlowNJobNApi = 

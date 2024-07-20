@@ -19,28 +19,61 @@ module PPTNodeUtilModule =
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
  
-        let getPostParam(param:DevParam) =
-            match param.DevValue, param.DevTime with 
-            | Some v, None -> $"{v}"
-            | Some v, Some t -> $"{v}_{t}ms"
-            | None, Some t -> $"{t}ms"
-            | None, None -> $""
+        let getPostParam(param:DevPara option) =
+            if param.IsNone then ""
+            else
+                let param = param |> Option.get
+                match param.DevValue, param.DevTime with 
+                | Some v, None -> $"{v}"
+                | Some v, Some t -> $"{v}_{t}ms"
+                | None, Some t -> $"{t}ms"
+                | None, None -> $""
 
-        let getJobNameWithParams(jobFqdn:string seq, inParam:DevParam option, outParam:DevParam option) =
-            if inParam.IsSome && outParam.IsNone then
-                let post = getPostParam inParam.Value
-                if post = "" 
-                then jobFqdn 
-                else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{post})").ToArray()
+        let getJobNameWithParams(jobFqdn:string seq, devParaIO:DevParaIO option) =
+            if devParaIO.IsNone then jobFqdn
+            else 
+                let devParaIO = devParaIO |> Option.get
 
-            elif inParam.IsSome && outParam.IsSome then
-                let postIn = getPostParam inParam.Value
-                let postOut = getPostParam outParam.Value
-                if postIn = "" && postOut = "" 
-                then jobFqdn
-                else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{postIn}_OUT{postOut})").ToArray()  
+                let inParaText  =
+                    match  getPostParam devParaIO.InPara with
+                    | "" -> "IN"
+                    | x -> $"IN{x}"  
 
-            else jobFqdn
+                let outParaText  =
+                    match  getPostParam devParaIO.OutPara with
+                    | "" -> "OUT"
+                    | x -> $"OUT{x}"
+
+                if inParaText = "IN" && outParaText = "OUT" //둘다 없는경우
+                then
+                    jobFqdn
+
+                elif inParaText = "IN" && outParaText <> "OUT"  //OUT 만 있는경우
+                then 
+                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({outParaText})").ToArray()
+                     
+                elif inParaText <> "IN" && outParaText = "OUT"  //IN 만 있는경우
+                then 
+                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText})").ToArray()
+
+                else //둘다 있는경우
+                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText}_{outParaText})").ToArray()
+
+
+                //if devParaIO.InPara.IsSome && devParaIO.OutPara.IsNone then
+                //    let post = getPostParam devParaIO.InPara.Value
+                //    if post = "" 
+                //    then jobFqdn 
+                //    else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{post})").ToArray()
+
+                //elif devParaIO.InPara.IsSome && devParaIO.OutPara.IsSome then
+                //    let postIn = getPostParam devParaIO.InPara.Value
+                //    let postOut = getPostParam devParaIO.OutPara.Value
+                //    if postIn = "" && postOut = "" 
+                //    then jobFqdn
+                //    else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{postIn}_OUT{postOut})").ToArray()  
+
+                //else jobFqdn
 
 
         let getNodeDevParam (shape:Shape, name:string, iPage:int, target) = 
@@ -65,10 +98,9 @@ module PPTNodeUtilModule =
                         func.Split(",").Head() |> trimSpaceNewLine,
                         func.Split(",").Last() |> trimSpaceNewLine
 
-                    Some(getParam inFunc), Some(getParam outFunc)
-
+                    {InPara =  Some(getParam inFunc); OutPara = Some(getParam outFunc)} |>Some
                 else 
-                    Some(getParam func), Some(defaultDevParam())
+                    {InPara =  Some(getParam func); OutPara = Some(defaultDevParam())} |>Some
             with _ ->
                 shape.ErrorName((error()), iPage)
 

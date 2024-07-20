@@ -416,14 +416,12 @@ module ImportU =
                         let autoPreCondition =
                             let flow, job, api = edge.StartNode.CallFlowNJobNApi
                             [|flow;job.Last().DeQuoteOnDemand();api|]
-                        let inParam = edge.StartNode.DevParamIn
-                        let outParam = 
-                            if edge.StartNode.DevParam.IsNull()
-                            then None
-                            else edge.StartNode.DevParamOut |> Some
                         
-                        node.AutoPres.Add(autoPreCondition, inParam, outParam)|>ignore
-                        
+                        match edge.StartNode.DevParam with
+                        | Some devParam -> 
+                            node.AutoPres.Add(autoPreCondition, devParam)|>ignore
+                        | None -> 
+                             node.AutoPres.Add(autoPreCondition, defaultDevParaIO())|>ignore
                         )
 
             dicEdges
@@ -489,7 +487,7 @@ module ImportU =
             |> Seq.iter(fun node ->
         
                 node.Safeties
-                @(node.AutoPres.Select(fun (j,inParams, outParams) -> getJobNameWithParams(j, Some(inParams), outParams).Combine()))
+                @(node.AutoPres.Select(fun (j,devParams) -> getJobNameWithParams(j, devParams|>Some).Combine()))
                 |> iter (fun safeFullName ->
                     if not (dicJob.ContainsKey safeFullName) then
                         node.Shape.ErrorName($"{ErrID._80}(err:{safeFullName})", node.PageNum)
@@ -508,9 +506,9 @@ module ImportU =
                             node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
 
                 node.AutoPres
-                |> iter (fun (jobFqdn, inParams, outParams)  ->
+                |> iter (fun (jobFqdn, devParams)  ->
                     let condJob =
-                        let jobFullName = getJobNameWithParams(jobFqdn, Some(inParams), outParams).ToArray()
+                        let jobFullName = getJobNameWithParams(jobFqdn, Some(devParams)).ToArray()
                         
                         match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFullName.CombineQuoteOnDemand()) with
                         | Some existingJob -> existingJob
@@ -518,7 +516,7 @@ module ImportU =
                             match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
                             | Some masterJob ->
                                     let job = Job(jobFullName, mySys, masterJob.TaskDefs)
-                                    job.UpdateDevParam(inParams, defaultDevParam())
+                                    job.UpdateDevParam(devParams)
                                     mySys.Jobs.Add(job); job
 
                             | None -> 

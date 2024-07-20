@@ -88,7 +88,7 @@ module ImportType =
             $"{loadedName}_{indexStr}"
                     
 
-    let checkPPTDataType (devParamRaw:DevParamRawItem) (devParam:DevParam) = 
+    let checkPPTDataType (devParamRaw:DevParamRawItem) (devParam:DevPara) = 
         let address, typePPT = devParamRaw |>fun (addr,t,_) -> addr, t
         if (address <> TextSkip) && (typePPT <> devParam.Type)  
         then    
@@ -135,14 +135,17 @@ module ImportType =
         else $"{inTypeText}:{outTypeText}"
 
     let getPPTTDevDataTypeText (dev:TaskDev) =   getPPTDataTypeText dev.InDataType dev.OutDataType
-    let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InParam.Type hwDev.OutParam.Type
+    let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InDataType hwDev.OutDataType
 
     let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
-        hwDev.InParam <- changeDevParam hwDev.InParam    inSym
-        hwDev.OutParam <- changeDevParam hwDev.OutParam  outSym
 
-        checkDataType hwDev.Name hwDev.InParam.Type inDataType   
-        checkDataType hwDev.Name hwDev.OutParam.Type outDataType
+        let inPara = changeSymbolDevParam hwDev.DevParaIO.InPara inSym  |>Some
+        let outPara = changeSymbolDevParam hwDev.DevParaIO.OutPara inSym  |>Some
+
+        hwDev.DevParaIO <- {InPara = inPara; OutPara = outPara}
+
+        checkDataType hwDev.Name hwDev.InDataType inDataType   
+        checkDataType hwDev.Name hwDev.OutDataType outDataType
         
             
     let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, namePure:string, nameNFunc:string) =

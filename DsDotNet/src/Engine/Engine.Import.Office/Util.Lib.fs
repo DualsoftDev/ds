@@ -31,7 +31,7 @@ module ImportUtilForLib =
         | None -> ParserLoader.LoadFromDevicePath libFilePath Util.runtimeTarget |> fst
 
     let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (devParams: DeviceLoadParameters) =
-        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node (param.Node.JobName.CombineQuoteOnDemand())) |> ignore
+        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node (param.Node.JobName.Combine())) |> ignore
 
     let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string) =
         match autoGenSys with
@@ -86,8 +86,9 @@ module ImportUtilForLib =
             | Some existingJob -> existingJob
             | None -> 
                 let job = Job(param.Node.JobName, param.MySys, tasks |> Seq.toList)
-                job.UpdateDevParam(param.Node.DevParamIn, param.Node.DevParamOut)
-                job.UpdateJobParam(param.Node.JobParam)
+                if param.Node.DevParam.IsSome
+                then 
+                    job.UpdateDevParam(param.Node.DevParam.Value)
                 param.MySys.Jobs.Add(job); job
 
         let call = Call.Create(jobForCall, param.Parent)

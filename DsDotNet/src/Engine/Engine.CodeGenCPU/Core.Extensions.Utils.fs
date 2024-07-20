@@ -34,26 +34,30 @@ module ConvertCoreExtUtils =
             | _ -> 
                 failwithf "bridgeType err"
 
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InParam.Type)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InDataType)
         |> iter (fun t -> x.InTag   <- t)
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutParam.Type)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutDataType)
         |> iter (fun t -> x.OutTag  <- t)
 
-    let getInExpr (x:DevParam, devTag:ITag, sys:DsSystem) = 
+    let getInExpr (x:DevPara option, devTag:ITag, sys:DsSystem) = 
         let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool> 
         if devTag.IsNull() 
         then sysOff.Expr  :> IExpression
         else 
-            if x.Type = DuBOOL 
-            then 
-                if x.DevValue.IsNull() 
-                    then devTag.ToExpression()
-                elif Convert.ToBoolean(x.Value) 
-                    then  devTag.ToExpression()
-                else 
-                    !@(devTag.ToExpression():?> Expression<bool>) :> IExpression
-            else // bool 타입아닌 경우 비교문 생성
-                createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value ;devTag.ToExpression()]   
+            if x.IsNone 
+            then devTag.ToExpression()
+            else  
+                let x = x |> Option.get
+                if x.Type = DuBOOL 
+                then 
+                    if x.DevValue.IsNull() 
+                        then devTag.ToExpression()
+                    elif Convert.ToBoolean(x.Value) 
+                        then  devTag.ToExpression()
+                    else 
+                        !@(devTag.ToExpression():?> Expression<bool>) :> IExpression
+                else // bool 타입아닌 경우 비교문 생성
+                    createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value ;devTag.ToExpression()]   
 
     [<AutoOpen>]
     [<Extension>]
@@ -62,7 +66,7 @@ module ConvertCoreExtUtils =
         [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)    = getFM(x).GetFlowTag(typ )
 
         [<Extension>] static member GetInExpr (x:HwSystemDef) = 
-                            getInExpr (x.InParam, x.InTag, x.System) :?> Expression<bool>
+                            getInExpr (x.DevParaIO.InPara, x.InTag, x.System) :?> Expression<bool>
         [<Extension>] static member GetInExpr (x:TaskDev, job:Job) = 
-                            getInExpr ((x.GetInParam(job)), x.InTag, x.ApiItem.ApiSystem)  :?> Expression<bool>
+                            getInExpr (Some(x.GetInParam(job)), x.InTag, x.ApiItem.ApiSystem)  :?> Expression<bool>
                         

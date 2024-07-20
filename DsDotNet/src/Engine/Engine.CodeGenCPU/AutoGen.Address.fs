@@ -269,8 +269,8 @@ module DsAddressModule =
 
   
     let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
-        let inAddr = getValidAddress(hwItem.InAddress, hwItem.InParam.Type, hwItem.Name, skipIn, IOType.Memory, target)
-        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.OutParam.Type , hwItem.Name, skipOut, IOType.Memory, target)
+        let inAddr = getValidAddress(hwItem.InAddress, hwItem.InDataType, hwItem.Name, skipIn, IOType.Memory, target)
+        let outAddr = getValidAddress(hwItem.OutAddress, hwItem.OutDataType , hwItem.Name, skipOut, IOType.Memory, target)
         inAddr, outAddr
 
     let updateHwAddress (hwItem: HwSystemDef) (inAddr, outAddr) target   =

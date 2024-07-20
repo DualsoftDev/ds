@@ -367,13 +367,18 @@ module CoreModule =
      
       /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
     ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
-    type TaskDev (api:ApiItem, parentJob:string, inParam:DevParam, outParam:DevParam, deviceName:string, parentSys:DsSystem) =
+    type TaskDev (api:ApiItem, parentJob:string, devParaIO:DevParaIO, deviceName:string, parentSys:DsSystem) =
         inherit FqdnObject(api.Name, createFqdnObject([|parentSys.Name;deviceName|]))
-        let inParams  = Dictionary<string, DevParam>()
-        let outParams = Dictionary<string, DevParam>()
+        let inParams  = Dictionary<string, DevPara>()
+        let outParams = Dictionary<string, DevPara>()
         do  
-            inParams.Add (parentJob, inParam)
-            outParams.Add (parentJob, outParam)
+            if devParaIO.InPara.IsSome
+            then inParams.Add (parentJob, devParaIO.InPara.Value)
+            else inParams.Add (parentJob, defaultDevParam())
+
+            if devParaIO.OutPara.IsSome
+            then outParams.Add (parentJob, devParaIO.OutPara.Value)
+            else outParams.Add (parentJob, defaultDevParam())
 
         member x.ApiItem = api
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
@@ -420,15 +425,16 @@ module CoreModule =
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, inParam:DevParam, outParam:DevParam, addr:Addresses)  =
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, devParaIO:DevParaIO, addr:Addresses)  =
         inherit FqdnObject(name, system)
         member x.Name = name
         member x.System = system
         member val SettingFlows = flows with get, set
         //SettingFlows 없으면 전역 시스템 설정
         member val IsGlobalSystemHw = flows.IsEmpty()
-        member val InParam  = inParam   with get, set
-        member val OutParam = outParam  with get, set
+        member val DevParaIO  = devParaIO  with get, set
+        member x.InDataType  = if devParaIO.InPara.IsSome then devParaIO.InPara.Value.Type else DuBOOL
+        member x.OutDataType  = if devParaIO.OutPara.IsSome then devParaIO.OutPara.Value.Type else DuBOOL
 
         member val InAddress = addr.In with get, set
         member val OutAddress = addr.Out with get, set
@@ -439,17 +445,17 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
 
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, inDevParam: DevParam, outDevParam: DevParam, addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam, addr)
+    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, devParaIO:DevParaIO,  addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, devParaIO, addr)
         member x.ButtonType = btnType
         member val ErrorEmergency = getNull<IStorage>() with get, set
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, inDevParam: DevParam, outDevParam: DevParam,  addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, inDevParam, outDevParam, addr) //inAddress lamp check bit
+    and LampDef (name: string, system:DsSystem,lampType: LampType, devParaIO:DevParaIO, addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, devParaIO, addr) //inAddress lamp check bit
         member x.LampType = lampType
 
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, inDevParam: DevParam, outDevParam: DevParam, addr:Addresses,  flows: HashSet<Flow>) =
-        inherit HwSystemDef(name,  system, flows, inDevParam, outDevParam, addr) // outAddress condition check bit
+    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, devParaIO:DevParaIO, addr:Addresses,  flows: HashSet<Flow>) =
+        inherit HwSystemDef(name,  system, flows, devParaIO, addr) // outAddress condition check bit
         member x.ConditionType = conditionType
         member val ErrorCondition = getNull<IStorage>() with get, set
 

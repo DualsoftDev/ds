@@ -45,12 +45,15 @@ module ExportIOTable =
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
-    let toTextPPTFunc (x:DevParam) =
-        match x.DevValue, x.DevTime with 
-        | Some(v), Some(t) -> $"{v}:{t}ms"
-        | Some(v), None    -> $"{v}"
-        | None, Some(v)       -> $"{v}ms"
-        | None, None          -> $""
+    let toTextPPTFunc (x:DevPara option) =
+        if x.IsSome then 
+            let x = x |> Option.get
+            match x.DevValue, x.DevTime with 
+            | Some(v), Some(t) -> $"{v}:{t}ms"
+            | Some(v), None    -> $"{v}"
+            | None, Some(v)       -> $"{v}ms"
+            | None, None          -> $""
+        else ""
 
     let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable =
 
@@ -60,8 +63,8 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let inSym =  toTextPPTFunc btn.InParam 
-                    let outSym =  toTextPPTFunc btn.OutParam
+                    let inSym =  toTextPPTFunc btn.DevParaIO.InPara 
+                    let outSym =  toTextPPTFunc btn.DevParaIO.OutPara
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
                     let dType = getPPTHwDevDataTypeText btn
                     
@@ -71,8 +74,8 @@ module ExportIOTable =
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let inSym =  toTextPPTFunc lamp.InParam 
-                    let outSym =  toTextPPTFunc lamp.OutParam
+                    let inSym =  toTextPPTFunc lamp.DevParaIO.InPara 
+                    let outSym =  toTextPPTFunc lamp.DevParaIO.OutPara
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) Util.runtimeTarget
                     let dType = getPPTHwDevDataTypeText lamp
                     dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,inSym, outSym)
@@ -207,8 +210,8 @@ module ExportIOTable =
                     getPPTHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
-                    cond.InParam.Name 
-                    cond.OutParam.Name 
+                    if cond.DevParaIO.InPara.IsSome then cond.DevParaIO.InPara.Value.Name else ""
+                    if cond.DevParaIO.OutPara.IsSome then cond.DevParaIO.OutPara.Value.Name else ""
                 ]
             )
         

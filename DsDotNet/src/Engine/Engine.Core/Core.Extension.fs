@@ -82,7 +82,7 @@ module CoreExtensionModule =
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
         member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
 
-        member x.AddButton(btnType:BtnType, btnName:string, inDevParam:DevParam, outDevParam:DevParam,  addr:Addresses, flow:Flow) =
+        member x.AddButton(btnType:BtnType, btnName:string, devParaIO:DevParaIO,  addr:Addresses, flow:Flow) =
             checkSystem(x, flow, btnName)
           
             let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
@@ -94,13 +94,13 @@ module CoreExtensionModule =
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, inDevParam, outDevParam, addr, HashSet[|flow|]))
+                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, devParaIO, addr, HashSet[|flow|]))
                       |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
-            x.AddButton(btnType, btnName, defaultDevParam(), defaultDevParam(), Addresses(inAddress ,outAddress), flow)       
+            x.AddButton(btnType, btnName,  defaultDevParaIO(), Addresses(inAddress ,outAddress), flow)       
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, inDevParam:DevParam, outDevParam:DevParam, addr:Addresses, flow:Flow option) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, devParaIO:DevParaIO, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
@@ -108,24 +108,24 @@ module CoreExtensionModule =
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
             | None -> 
                       let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
-                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, inDevParam, outDevParam, addr, flows))
+                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, devParaIO, addr, flows))
                       |> verifyM $"중복 LampDef [name:{lmpName}]"
         
         member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
-                x.AddLamp(lmpType, lmpName, defaultDevParam(), defaultDevParam(),Addresses(inAddress ,outAddress),  flow)       
+                x.AddLamp(lmpType, lmpName, defaultDevParaIO(), Addresses(inAddress ,outAddress),  flow)       
 
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, inDevParam:DevParam, outDevParam:DevParam, addr:Addresses, flow:Flow) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, devParaIO:DevParaIO, addr:Addresses, flow:Flow) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, inDevParam, outDevParam,  addr, HashSet[|flow|]))
+                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, devParaIO,  addr, HashSet[|flow|]))
                       |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddress:string, outAddress:string, flow:Flow) =
-                x.AddCondtion(condiType, condiName, defaultDevParam(), defaultDevParam(), Addresses(inAddress ,outAddress), flow)       
+                x.AddCondtion(condiType, condiName, defaultDevParaIO(), Addresses(inAddress ,outAddress), flow)       
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
@@ -178,7 +178,7 @@ module CoreExtensionModule =
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (loadSys:DsSystem) = x.LoadedSystems.TryFind(fun f-> f.ReferenceSystem = loadSys)
          
-    let getType (xs:DevParam seq) = 
+    let getType (xs:DevPara seq) = 
         if xs.Where(fun f->f.DevType.IsSome).Any() 
                 then 
                     let types = xs.Choose(fun f->f.DevType)
@@ -202,10 +202,11 @@ module CoreExtensionModule =
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
 
         member x.GetInParam(job:Job) = x.InParams[job.UnqualifiedName]
-        member x.AddOrUpdateInParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.InParams, newDevParam)
-
         member x.GetOutParam(job:Job) = x.OutParams[job.UnqualifiedName]
-        member x.AddOrUpdateOutParam(jobName:string, newDevParam:DevParam) = addOrUpdateParam (jobName,  x.OutParams, newDevParam)
+
+        member x.AddOrUpdateDevParam(jobName:string, devParam:DevParaIO) = 
+                    addOrUpdateParam (jobName,  x.InParams, devParam.InPara)
+                    addOrUpdateParam (jobName,  x.OutParams, devParam.OutPara)
 
         member x.SetInSymbol(symName:string option) =
             x.InParams.ToList() |> Seq.iter(fun kv -> 
@@ -233,10 +234,9 @@ module CoreExtensionModule =
             if times.any() then times.First() |> Some else None
 
 
-        member x.UpdateDevParam(inParam: DevParam, outParam: DevParam) =
+        member x.UpdateDevParam(devParaIO: DevParaIO) =
                 x.TaskDefs.Iter(fun d-> 
-                    d.AddOrUpdateInParam (x.UnqualifiedName, inParam)
-                    d.AddOrUpdateOutParam(x.UnqualifiedName, outParam)
+                    d.AddOrUpdateDevParam (x.UnqualifiedName, devParaIO)
                 )
 
 

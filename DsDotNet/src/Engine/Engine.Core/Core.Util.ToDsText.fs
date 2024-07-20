@@ -277,8 +277,9 @@ module internal ToDsTextModule =
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
                             let itemText, inAddr, outAddr = getHwInfo hw
-
-                            yield $"{tab3}{getInOutTypeText (hw.Name.QuoteOnDemand()) hw.InParam.Type hw.OutParam.Type }({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
+                            let inType, outType = hw.InDataType, hw.OutDataType
+                            
+                            yield $"{tab3}{getInOutTypeText (hw.Name.QuoteOnDemand()) inType outType}({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
                           
                         yield $"{tab2}{rb}"
                 ] |> combineLines

@@ -108,35 +108,22 @@ module ImportUtilForDev =
 
     let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName = 
         let referenceSystem = autoGenSys.ReferenceSystem
-        let defaultParams =  defaultDevParam(),  defaultDevParam()
-        createTaskDevUsingApiName referenceSystem jobName loadedName apiName defaultParams
+        createTaskDevUsingApiName referenceSystem jobName loadedName apiName (defaultDevParaIO())
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
-        let inParam, outParam =
-            if node.DevParam.IsSome then
-                let inParam  = match node.DevParam.Value |>fst
-                                with
-                                    | Some p -> p
-                                    | _ -> defaultDevParam()
-                let outParam  = match node.DevParam.Value |>snd
-                                with
-                                    | Some p -> p
-                                    | _ ->  defaultDevParam()
-                inParam , outParam 
-            else 
-                defaultDevParam(), defaultDevParam()    
-
+        let devParam = match node.DevParam with
+                        | Some devParam ->  devParam
+                        | None -> defaultDevParaIO()        
 
         match mySys.GetDevicesCall().TryFind(fun (d,c) -> d.ApiStgName = tastDevKey) with
         | Some (taskDev, c) -> 
-                         taskDev.AddOrUpdateInParam(jobName, inParam)
-                         taskDev.AddOrUpdateOutParam(jobName, outParam)
+                         taskDev.AddOrUpdateDevParam(jobName, devParam)
                          taskDev 
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
             match devOrg.ApiItems.TryFind(fun f -> f.Name = apiPureName) with
-            | Some api -> TaskDev(api, jobName ,  inParam, outParam, newloadedName, mySys)
+            | Some api -> TaskDev(api, jobName ,  devParam,  newloadedName, mySys)
             | None ->
                 failWithLog $"Api {apiPureName} not found in {newloadedName}"
                     

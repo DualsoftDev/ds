@@ -84,7 +84,14 @@ module rec CodeElements =
         member x.ToDsText() = if x.CommandCode = "" then TextSkip else x.CommandCode
     
     let addressPrint (addr:string) = if addr.IsNullOrEmpty() then TextAddrEmpty else addr
-    type DevParam = {
+
+    type DevParaIO =
+     {
+        InPara : DevPara option 
+        OutPara: DevPara option
+    } 
+
+    type DevPara = {
         DevName : string option  //In or Out Tag 이름
         DevType: DataType option
         DevValue: obj option
@@ -112,13 +119,18 @@ module rec CodeElements =
 
             result
 
-    let defaultDevParam () = 
+    let defaultDevParam() = 
         {   
             DevName = None
             DevType = None
             DevValue = None
             DevTime = None
         }
+
+    let defaultDevParaIO() = {
+        InPara = None
+        OutPara = None
+    } 
 
     let createDevParam  (nametype:string option) (dutype:DataType option) (v:obj option)  (t:int option) = 
         { 
@@ -128,16 +140,20 @@ module rec CodeElements =
           DevTime =t
     }
     
-    let changeDevParam (x:DevParam)(symbol:string option) =
-        createDevParam  symbol x.DevType x.DevValue x.DevTime
+    let changeSymbolDevParam (x:DevPara option)(symbol:string option) =
+        if x.IsNone then defaultDevParam()
+        else
+            let x = x |> Option.get
+            createDevParam  symbol x.DevType x.DevValue x.DevTime
     
-    let addOrUpdateParam(jobName:string, paramDic:Dictionary<string, DevParam>, newParam :DevParam) = 
-        paramDic.Remove jobName |> ignore
-        paramDic.Add (jobName, newParam)
+    let addOrUpdateParam(jobName:string, paramDic:Dictionary<string, DevPara>, newParam :DevPara option) = 
+        if newParam.IsSome then
+            paramDic.Remove jobName |> ignore
+            paramDic.Add (jobName, newParam.Value)
             
         
-    let changeParam(jobName:string, paramDic:Dictionary<string, DevParam>, symbol:string option) = 
-        let changedDevParam = changeDevParam paramDic[jobName]  symbol
+    let changeParam(jobName:string, paramDic:Dictionary<string, DevPara>, symbol:string option) = 
+        let changedDevParam = changeSymbolDevParam (Some(paramDic[jobName]))  symbol
         paramDic.Remove(jobName) |> ignore
         paramDic.Add (jobName, changedDevParam)
 
@@ -147,7 +163,7 @@ module rec CodeElements =
 
     
 
-    let toTextInOutDev (inp:DevParam) (outp:DevParam)  (addr:Addresses)=  
+    let toTextInOutDev (inp:DevPara) (outp:DevPara)  (addr:Addresses)=  
         $"{inp.ToTextWithAddress(addr.In)}, {outp.ToTextWithAddress(addr.Out)}"
 
 

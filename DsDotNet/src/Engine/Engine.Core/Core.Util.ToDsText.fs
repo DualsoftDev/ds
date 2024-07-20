@@ -487,21 +487,13 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let props = safeties@autoPres@layouts@motions@scripts@times@finished@disabled@noTransData
+            let props = [| safeties; autoPres; layouts; motions; scripts; times; finished; disabled; noTransData |] |> filter(fun p -> p.NonNullAny())
             if props.Any() then
                 yield $"{tab}[prop] = {lb}"
-                if safeties.Any()  then yield safeties
-                if autoPres.Any()  then yield autoPres
-                if layouts.Any()   then yield layouts
-
-                if motions.Any()  then yield motions
-                if scripts.Any()  then yield scripts
-                if times.Any()  then yield times
-                if finished.Any()  then yield finished
-                if disabled.Any()  then yield disabled
-                if noTransData.Any()  then yield noTransData
-                
+                for p in props do
+                    yield p                
                 yield $"{tab}{rb}"
+
             let commentDevice(absoluteFilePath:string) = if pCooment then  $"// {absoluteFilePath}" else "";
          
             let groupedDevices = 
@@ -531,7 +523,23 @@ module internal ToDsTextModule =
             
             // code 는 [Commands] = { cmd1 = ${code1}$, cmd2 = ${code2}$ } 복수개 저장
 
+            yield "/*"
+            yield $"{tab}[versions] = {lb}"
+            let assem = Assembly.GetExecutingAssembly()
+            let langVer = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+            let libDate =
+                let desc = assem.GetCustomAttribute<AssemblyDescriptionAttribute>().Description
+                desc.Replace("Library Release Date ", "")
+            let engineVer = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version
+            yield $"{tab2}DS-Langugage-Version = {langVer};"
+            yield $"{tab2}DS-Engine-Version = {engineVer};"
+            yield $"{tab2}DS-Library-Date = {libDate};"
+            yield $"{tab}{rb}"
+            yield "*/"
+
             yield rb
+
+
             yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}]"
             yield $"//DS Library Date = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyDescriptionAttribute>().Description}]"
             yield $"//DS Engine Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}]"

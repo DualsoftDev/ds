@@ -1,0 +1,25 @@
+@page "/demo/test-rest-api"
+
+<h3>PageTestRestApi</h3>
+
+<DxButton Text="Get Serialized Object" Click="@onGetSerializedObject"/>
+<DxButton Text="Server exception" Click="@onGetServerException"/>
+@code {
+    async Task onGetSerializedObject()
+    {
+        var result = await Http.GetDeserializedObjectAsycn<DSCommonAppSettings>("/api/test/common-app-settings");
+        await result.IterAsync(
+            async commonAppSettings => await JsDual.Alert($"Succeeded to get: DbPath = {commonAppSettings.LoggerDBSettings.ConnectionPath}"),
+            async err => await JsDual.Alert($"Failed to get info: {err}")
+        );
+    }
+
+    async Task onGetServerException()
+    {
+        var result = await Http.GetDeserializedObjectAsycn<DSCommonAppSettings>("/api/test/server-exception");
+        await result.IterAsync(
+            async commonAppSettings => await JsDual.Alert($"Succeeded to get: DbPath = {commonAppSettings.LoggerDBSettings.ConnectionPath}"),
+            async err => await JsDual.Alert($"Failed to get info: {err}")
+        );
+    }
+}

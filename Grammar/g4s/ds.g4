@@ -97,8 +97,10 @@ IDENTIFIER3: Compo '.' Compo '.' Compo;
 IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
 IDENTIFIER5: Compo '.' Compo '.' Compo '.' Compo '.' Compo;
 
-IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
+// 필요하면 parser rule 로 만들어야 할 듯.  version 과 충돌함.
+// IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
+// FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
 
 
@@ -135,7 +137,6 @@ NEQ: '!=';
 //NEWLINE: '\r'? '\n';
 
 INTEGER: '0'|[1-9][0-9]*;
-FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
 // Close Angle Bracket
 Cab: '>';
@@ -200,9 +201,11 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
-        : '{' (  flowBlock | jobBlock | commandBlock | operatorBlock | loadDeviceBlock | loadExternalSystemBlock
-                    | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
-                    | variableBlock )*
+        : '{' (       flowBlock | jobBlock
+                    | commandBlock | operatorBlock | variableBlock | interfaceBlock | conditionBlock 
+                    | loadDeviceBlock | loadExternalSystemBlock
+                    | buttonBlock | lampBlock
+                    | propsBlock | versionsBlock)*
           '}'       // identifier1Listing|parenting|causal|call
           (SEMICOLON)?;
     systemName:identifier1;
@@ -247,7 +250,10 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
     }
 
  */
-propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|motionBlock|scriptsBlock)* '}';
+propsBlock: '[' 'prop' ']' '=' '{' (
+          safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock
+        | timesBlock | motionBlock | scriptsBlock
+        | layoutBlock )* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';    
         safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
             safetyAutoPreKey: identifier45;
@@ -349,8 +355,17 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
     commandDef :  commandName '=' command;
     commandName: identifier1;
     command : codeBlock;
-    
 
+versionsBlock: '[' 'versions' ']' '=' '{' versionDef* '}';
+    versionDef: (langVersionDef | engineVersionDef | libraryDateDef) SEMICOLON;
+    langVersionDef: 'DS-Langugage-Version' '=' version;
+    engineVersionDef: 'DS-Engine-Version' '=' version;
+    libraryDateDef: 'DS-Library-Date' '=' date;
+        date: isoDate;  // | usDate | euDate;
+            // usDate: month '/' day '/' year;
+            // euDate: day '-' month '-' year;
+            isoDate: year=INTEGER '-' month=INTEGER '-' day=INTEGER;    
+    version: major=INTEGER '.' minor=INTEGER ( '.' build=INTEGER ( '.' revision=INTEGER )? )?;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
@@ -383,18 +398,18 @@ interfaceBlock
     linkPhrase: identifier12;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
-categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmgBlock|testBlock|homeBlock|readyBlock|idleBlock|originBlock;
-    autoBlock      :'[' ('a_in'|'a') ']' '=' categoryBlock;
-    manualBlock    :'[' ('m_in'|'m') ']' '=' categoryBlock;
-    driveBlock     :'[' ('d_in'|'d') ']' '=' categoryBlock;
-    errorOrEmgBlock:'[' ('e_in'|'e') ']' '=' categoryBlock;
-    pauseBlock     :'[' ('p_in'|'p') ']' '=' categoryBlock;
-    clearBlock     :'[' ('c_in'|'c') ']' '=' categoryBlock;
-    testBlock      :'[' ('t_in'|'t') ']' '=' categoryBlock;
-    homeBlock      :'[' ('h_in'|'h') ']' '=' categoryBlock;
-    readyBlock     :'[' ('r_in'|'r') ']' '=' categoryBlock;
-    idleBlock      :'[' ('i_in'|'i') ']' '=' categoryBlock;
-    originBlock    :'[' ('o_in'|'o') ']' '=' categoryBlock;
+categoryBlocks:autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock | errorOrEmgBlock | testBlock | homeBlock | readyBlock | idleBlock | originBlock;
+    autoBlock      :'[' ('a_in' | 'a') ']' '=' categoryBlock;
+    manualBlock    :'[' ('m_in' | 'm') ']' '=' categoryBlock;
+    driveBlock     :'[' ('d_in' | 'd') ']' '=' categoryBlock;
+    errorOrEmgBlock:'[' ('e_in' | 'e') ']' '=' categoryBlock;
+    pauseBlock     :'[' ('p_in' | 'p') ']' '=' categoryBlock;
+    clearBlock     :'[' ('c_in' | 'c') ']' '=' categoryBlock;
+    testBlock      :'[' ('t_in' | 't') ']' '=' categoryBlock;
+    homeBlock      :'[' ('h_in' | 'h') ']' '=' categoryBlock;
+    readyBlock     :'[' ('r_in' | 'r') ']' '=' categoryBlock;
+    idleBlock      :'[' ('i_in' | 'i') ']' '=' categoryBlock;
+    originBlock    :'[' ('o_in' | 'o') ']' '=' categoryBlock;
     
     categoryBlock: '{' (() | (hwSysItemDef)*) '}';
   

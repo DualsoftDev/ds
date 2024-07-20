@@ -90,6 +90,6 @@ module CoreCreateModule =
 
         sys.LoadedSystems
                    .Iter(fun refSys-> 
-                        let text = refSys.ReferenceSystem.ToDsText(false)
+                        let text = refSys.ReferenceSystem.ToDsText(false, true)
                         fileWriteAllText (refSys.AbsoluteFilePath, text)
                         )

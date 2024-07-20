@@ -51,7 +51,7 @@ module ModelLoader =
         let libName = PathManager.getFileNameWithoutExtension(dsFile)
 
         s.ReferenceSystem.Name <- libName
-        let txt =s.ReferenceSystem.ToDsText(false)
+        let txt =s.ReferenceSystem.ToDsText(false, true)
         FileManager.fileWriteAllText(absFilePath, txt)
         s.ReferenceSystem.Name <- refName
 
@@ -73,7 +73,7 @@ type ModelLoaderExt =
             | :? ExternalSystem -> exportLoadedSystem s |> ignore
             | _ -> ()
 
-        FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false))
+        FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false, true))
 
         dsFilePath
 

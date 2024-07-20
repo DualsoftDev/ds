@@ -66,6 +66,6 @@ module LoadConfigTestModule =
             let findReferenceSystem = tryFindReferenceSystem system  "RH" |> Option.get
             findFromLoaded.Name =!= findReferenceSystem.Name
 
-            let generated = system.ToDsText(true);
+            let generated = system.ToDsText(true, false);
             compare systemRepo dsFileDir mySysText generated
             ()

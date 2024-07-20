@@ -42,14 +42,6 @@ module PPTNodeUtilModule =
 
             else jobFqdn
 
-        //let getOperatorParam (shape:Shape, name:string, iPage:int) = 
-        //    try
-        //        let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-        //        if func.Contains(",") then 
-        //            failwithf $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력) 규격 입니다"
-        //        $"{'-'}:{func}" |> getDevParam |> snd
-        //    with ex ->
-        //        shape.ErrorName(ex.Message, iPage)
 
         let getNodeDevParam (shape:Shape, name:string, iPage:int, target) = 
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"

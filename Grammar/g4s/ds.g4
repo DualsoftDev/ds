@@ -202,7 +202,7 @@ system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
         : '{' (  flowBlock | jobBlock | commandBlock | operatorBlock | loadDeviceBlock | loadExternalSystemBlock
                     | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
-                    | variableBlock )*
+                    | variableBlock | versionsBlock)*
           '}'       // identifier1Listing|parenting|causal|call
           (SEMICOLON)?;
     systemName:identifier1;
@@ -350,7 +350,16 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
     commandName: identifier1;
     command : codeBlock;
     
-
+versionsBlock: '[' 'versions' ']' '=' '{' versionDef* '}';
+    versionDef: (langVersionDef | engineVersionDef | libraryDateDef) SEMICOLON;
+    langVersionDef: 'DS-Langugage-Version' '=' version;
+    engineVersionDef: 'DS-Engine-Version' '=' version;
+    libraryDateDef: 'DS-Library-Date' '=' date;
+        date: isoDate;  // | usDate | euDate;
+            // usDate: month '/' day '/' year;
+            // euDate: day '-' month '-' year;
+            isoDate: year=INTEGER '-' month=INTEGER '-' day=INTEGER;    
+    version: major=INTEGER '.' minor=INTEGER ( '.' build=INTEGER ( '.' revision=INTEGER )? )?;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:

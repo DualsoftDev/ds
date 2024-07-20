@@ -37,10 +37,9 @@ module RuntimeTest =
         // 기존 db log 가 삭제되는 것을 방지하기 위해서 test 용으로 따로 database 설정
         loggerDBSettings.ConnectionPath <- Path.Combine(AppContext.BaseDirectory, "TmpLogger.sqlite3")
 
-        let mci = ModelCompileInfo(runtimeModel.JsonPath, runtimeModel.JsonPath)
         let cleanExistingDb = true      //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
         let queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), Nullable<DateTime>());
-        DBLogger.InitializeLogWriterOnDemandAsync(queryCriteria, systems, mci, cleanExistingDb).Wait()
+        DBLogger.InitializeLogWriterOnDemandAsync(queryCriteria, systems, cleanExistingDb).Wait()
         DsSimulator.Do(runtimeModel.Cpu, 3000) |> Assert.True //값변경있으면서 구동하면 true
 
 

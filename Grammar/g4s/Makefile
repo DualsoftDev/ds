@@ -34,6 +34,13 @@ udt4:
 udt5:
 	$(grun) expr.g4 toplevels -gui g4test/udt-copy.ds
 
+version:
+	$(grun) ds.g4 versionDef -gui g4test/version.ds
+versions:
+	$(grun) ds.g4 versionsBlock -gui g4test/versions.ds
+version2:
+	echo 1.2.3.4 | $(grun) ds.g4 version  -gui
+
 lambda:
 	$(grun) expr.g4 toplevels -gui g4test/lambda.ds
 

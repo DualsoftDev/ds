@@ -145,7 +145,7 @@ module internal ToDsTextModule =
         | i, o when i = o -> $"{name}(type:{inDataType.ToText()})"
         | _ ->  $"{name}(type:{inDataType.ToText()}, {outDataType.ToText()})"
 
-    let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool)=
+    let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment
         let tab = getTab indent
         let tab2 = getTab 2
@@ -488,21 +488,13 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let props = safeties@autoPres@layouts@motions@scripts@times@finished@disabled@noTransData
+            let props = [| safeties; autoPres; layouts; motions; scripts; times; finished; disabled; noTransData |] |> filter(fun p -> p.NonNullAny())
             if props.Any() then
                 yield $"{tab}[prop] = {lb}"
-                if safeties.Any()  then yield safeties
-                if autoPres.Any()  then yield autoPres
-                if layouts.Any()   then yield layouts
-
-                if motions.Any()  then yield motions
-                if scripts.Any()  then yield scripts
-                if times.Any()  then yield times
-                if finished.Any()  then yield finished
-                if disabled.Any()  then yield disabled
-                if noTransData.Any()  then yield noTransData
-                
+                for p in props do
+                    yield p                
                 yield $"{tab}{rb}"
+
             let commentDevice(absoluteFilePath:string) = if pCooment then  $"// {absoluteFilePath}" else "";
          
             let groupedDevices = 
@@ -532,17 +524,28 @@ module internal ToDsTextModule =
             
             // code 는 [Commands] = { cmd1 = ${code1}$, cmd2 = ${code2}$ } 복수개 저장
 
+            if printVersions then
+                yield $"{tab}[versions] = {lb}"
+                let assem = Assembly.GetExecutingAssembly()
+                let langVer = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+                let engineVer = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version
+                yield $"{tab2}DS-Langugage-Version = {langVer};"
+                yield $"{tab2}DS-Engine-Version = {engineVer};"
+                yield $"{tab}{rb}"
+
             yield rb
-            yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}]"
+
+
             yield $"//DS Library Date = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyDescriptionAttribute>().Description}]"
-            yield $"//DS Engine Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}]"
+            //yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}]"
+            //yield $"//DS Engine Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}]"
 
         ] |> combineLines
 
     type DsSystem with
-        member x.ToDsText(printComment:bool) = systemToDs x 1 printComment
+        member x.ToDsText(printComment:bool, printVersions:bool) = systemToDs x 1 printComment printVersions
 
 
 [<Extension>]
 type SystemToDsExt =
-    [<Extension>] static member ToDsText (system:DsSystem, printComment:bool) = systemToDs system 1 printComment
+    [<Extension>] static member ToDsText (system:DsSystem, printComment:bool, printVersions:bool) = systemToDs system 1 printComment printVersions

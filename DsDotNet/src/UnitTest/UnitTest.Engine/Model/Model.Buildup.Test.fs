@@ -59,7 +59,7 @@ module ModelBuildupTests1 =
             let vCallM = Call.Create( callAm, DuParentReal real)
             real.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, "<", vCallM)) |> ignore
 
-            let generated = system.ToDsText(true)
+            let generated = system.ToDsText(true, false)
             let answer = """
 [sys] My = {
     [flow] F = {
@@ -97,7 +97,7 @@ module ModelBuildupTests1 =
             let call2 = Call.Create(callAp, DuParentFlow flow)
 
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(vCallP, "<", call2)) |> ignore
-            let generated = system.ToDsText(true)
+            let generated = system.ToDsText(true, false)
             let answer = """
 [sys] My = {
     [flow] F = {
@@ -128,7 +128,7 @@ module ModelBuildupTests1 =
             let real3 = Real.Create("R3", flow2)
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
-            let generated = system.ToDsText(true)
+            let generated = system.ToDsText(true, false)
             let answer = """
 
 [sys] My = {
@@ -161,7 +161,7 @@ module ModelBuildupTests1 =
 
             ApiResetInfo.Create(system, "Adv", ModelingEdgeType.Interlock, "Ret", false) |> ignore
 
-            let generated = system.ToDsText(true)
+            let generated = system.ToDsText(true, false)
             let answer = """
 [sys] My = {
     [flow] F = {
@@ -195,7 +195,7 @@ module ModelBuildupTests1 =
             system.AddButton(BtnType.DuEmergencyBTN, "STOP2", "%I1","%Q1",flow2)
             system.AddButton(BtnType.DuDriveBTN, "START2", "%I1","%Q1",flow2)
 
-            let generated = system.ToDsText(true)
+            let generated = system.ToDsText(true, false)
             let answer = """
 [sys] My = {
     [flow] F = {

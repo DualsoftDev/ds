@@ -28,12 +28,12 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
     /// "api/hmi/package" : 모든 HMI 태그 정보를 반환
     /// </summary>
     [HttpGet("package")]
-    public RestResult<string> GetHmiPackageRestString()
+    public RestResultString GetHmiPackageRestString()
     {
         if (_model?.HMIPackage == null)
-            return RestResult<string>.Err("No model.");
+            return RestResultString.Err("No model.");
 
-        return RestResult<string>.Ok(NewtonsoftJson.SerializeObject(_model?.HMIPackage));
+        return RestResultString.Ok(NewtonsoftJson.SerializeObject(_model?.HMIPackage));
     }
     async Task<RestResultString> onTagWebChangedByClientBrowserAsync(TagWeb tagWeb)
     {

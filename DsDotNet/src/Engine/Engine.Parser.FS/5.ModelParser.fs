@@ -119,11 +119,11 @@ module ModelParser =
                
         let newParsing skipAddDict  = 
             let sys = ParseFromString2(text, options).TheSystem
-            sys.ToDsText(false) |> Console.WriteLine
+            sys.ToDsText(false, true) |> Console.WriteLine
 
             if sys.Jobs.IsEmpty() && not(skipAddDict) then //하위 디바이스가 없어야 system Clone 등록 가능
                 _DicParsingSystem.Add(path, sys) |> ignore
-                File.WriteAllText("Z:\ds\org.ds", sys.ToDsText(true));
+                File.WriteAllText("Z:\ds\org.ds", sys.ToDsText(true, true));
             sys
 
 
@@ -132,7 +132,7 @@ module ModelParser =
             match options.LoadedSystemName with
             | Some loadedName -> 
                         let cloneSys = _DicParsingSystem[path].Clone(loadedName)
-                        File.WriteAllText("Z:\ds\cloneSys.ds", cloneSys.ToDsText(true));
+                        File.WriteAllText("Z:\ds\cloneSys.ds", cloneSys.ToDsText(true, true));
                         cloneSys
             | None -> newParsing true
            

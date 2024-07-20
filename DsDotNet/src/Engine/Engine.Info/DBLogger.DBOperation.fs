@@ -288,36 +288,6 @@ module internal DBLoggerImpl =
             }
 
 
-        let fillLoggerDBSchemaAsync (connStr:string) (modelCompileInfo: ModelCompileInfo) =
-            task {
-                let pptPath, config = modelCompileInfo.PptPath, modelCompileInfo.ConfigPath
-
-                use conn = createConnectionWith connStr
-                use! tr = conn.BeginTransactionAsync()
-
-                let! modelIds = conn.QueryAsync<int>($"SELECT id FROM [{Tn.Model}] WHERE path COLLATE NOCASE = @Path LIMIT 1", {| Path = pptPath |}, tr);
-                let modelId = modelIds |> exactlyOne
-
-                do!
-                    conn.ExecuteSilentlyAsync(
-                        $"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                          (name, value, modelId)
-                                          VALUES(@Name, @Value, @ModelId);""",
-                        {| Name = PropName.PptPath
-                           Value = pptPath
-                           ModelId = modelId |}, tr )
-
-                do!
-                    conn.ExecuteSilentlyAsync(
-                        $"""INSERT OR REPLACE INTO [{Tn.Property}]
-                                          (name, value, modelId)
-                                          VALUES(@Name, @Value, @ModelId);""",
-                        {| Name = PropName.ConfigPath
-                           Value = config
-                           ModelId = modelId |}, tr )
-
-                do! tr.CommitAsync()
-            }
 
         /// Log DB schema 생성
         let initializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
@@ -334,14 +304,12 @@ module internal DBLoggerImpl =
             (
                 queryCriteria: QueryCriteria,      // reader + writer 인 경우에만 non null 값
                 systems: DsSystem seq,
-                modelCompileInfo: ModelCompileInfo,
                 cleanExistingDb: bool
             ) =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
                 let connStr = commonAppSettings.ConnectionString
                 do! initializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
-                do! fillLoggerDBSchemaAsync connStr modelCompileInfo
                 let! logSet_ = createLogInfoSetForWriterAsync queryCriteria systems
                 logSet <- logSet_
 

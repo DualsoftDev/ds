@@ -21,7 +21,6 @@ type DBLogger() =
         (
             queryCriteria: QueryCriteria,
             systems: DsSystem seq,
-            modelCompileInfo: ModelCompileInfo,
             cleanExistingDb: bool
         ) =
         ()
@@ -29,7 +28,7 @@ type DBLogger() =
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, modelCompileInfo, cleanExistingDb)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
 
             return logSet :> ILogSet
         }
@@ -52,16 +51,14 @@ type DBLogger() =
         (
             queryCriteria: QueryCriteria,
             systems: DsSystem seq,
-            modelCompileInfo: ModelCompileInfo,
             cleanExistingDb:bool
-
         ) =
         ()
         task {
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, modelCompileInfo, cleanExistingDb)
+                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
 
             return logSet //:> ILogSet
         }

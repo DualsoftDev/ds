@@ -97,8 +97,10 @@ IDENTIFIER3: Compo '.' Compo '.' Compo;
 IDENTIFIER4: Compo '.' Compo '.' Compo '.' Compo;
 IDENTIFIER5: Compo '.' Compo '.' Compo '.' Compo '.' Compo;
 
-IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
+// 필요하면 parser rule 로 만들어야 할 듯.  version 과 충돌함.
+// IPV4: [1-9][0-9]*'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*)'.'('0'|[1-9][0-9]*);
 // IPV4: (INTEGER)(DOT) INTEGER DOT INTEGER DOT INTEGER;
+// FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
 
 
@@ -135,7 +137,6 @@ NEQ: '!=';
 //NEWLINE: '\r'? '\n';
 
 INTEGER: '0'|[1-9][0-9]*;
-FLOAT: [1-9][0-9]*('.'[0-9]+)?;
 
 // Close Angle Bracket
 Cab: '>';
@@ -349,7 +350,7 @@ commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
     commandDef :  commandName '=' command;
     commandName: identifier1;
     command : codeBlock;
-    
+
 versionsBlock: '[' 'versions' ']' '=' '{' versionDef* '}';
     versionDef: (langVersionDef | engineVersionDef | libraryDateDef) SEMICOLON;
     langVersionDef: 'DS-Langugage-Version' '=' version;
@@ -360,6 +361,8 @@ versionsBlock: '[' 'versions' ']' '=' '{' versionDef* '}';
             // euDate: day '-' month '-' year;
             isoDate: year=INTEGER '-' month=INTEGER '-' day=INTEGER;    
     version: major=INTEGER '.' minor=INTEGER ( '.' build=INTEGER ( '.' revision=INTEGER )? )?;
+
+
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:

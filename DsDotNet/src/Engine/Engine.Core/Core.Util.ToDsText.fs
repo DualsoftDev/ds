@@ -523,26 +523,20 @@ module internal ToDsTextModule =
             
             // code 는 [Commands] = { cmd1 = ${code1}$, cmd2 = ${code2}$ } 복수개 저장
 
-            yield "/*"
             yield $"{tab}[versions] = {lb}"
             let assem = Assembly.GetExecutingAssembly()
             let langVer = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
-            let libDate =
-                let desc = assem.GetCustomAttribute<AssemblyDescriptionAttribute>().Description
-                desc.Replace("Library Release Date ", "")
             let engineVer = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version
             yield $"{tab2}DS-Langugage-Version = {langVer};"
             yield $"{tab2}DS-Engine-Version = {engineVer};"
-            yield $"{tab2}DS-Library-Date = {libDate};"
             yield $"{tab}{rb}"
-            yield "*/"
 
             yield rb
 
 
-            yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}]"
             yield $"//DS Library Date = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyDescriptionAttribute>().Description}]"
-            yield $"//DS Engine Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}]"
+            //yield $"//DS Language Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion}]"
+            //yield $"//DS Engine Version = [{Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version}]"
 
         ] |> combineLines
 

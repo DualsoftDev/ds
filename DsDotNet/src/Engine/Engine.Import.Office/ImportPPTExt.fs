@@ -200,11 +200,11 @@ module ImportU =
                 match node.JobParam.JobMulti with
                 | JobTypeMulti.MultiAction(_,cnt,_,_) -> 
                     for i in [1..cnt] do 
-                        let multiName = getMultiDeviceName node.CallDevName  i
+                        let multiName = getMultiDeviceName node.DevName  i
                         let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = multiName)
                         addChannelPoints dev node
                 | _ ->
-                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.CallDevName)
+                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.DevName)
                     addChannelPoints dev node
                     )
 
@@ -413,10 +413,7 @@ module ImportU =
                         [|edge.EndNode|]
 
                 tgts.Iter(fun node-> 
-                        let autoPreCondition =
-                            let flow, job, api = edge.StartNode.CallFlowNJobNApi
-                            [|flow;job.Last().DeQuoteOnDemand();api|]
-                        
+                        let autoPreCondition =edge.StartNode.Job
                         match edge.StartNode.DevParam with
                         | Some devParam -> 
                             node.AutoPres.Add(autoPreCondition, devParam)|>ignore
@@ -487,13 +484,21 @@ module ImportU =
             |> Seq.iter(fun node ->
         
                 node.Safeties
-                @(node.AutoPres.Select(fun (j,devParams) -> getJobNameWithParams(j, devParams|>Some).Combine()))
-                |> iter (fun safeFullName ->
-                    if not (dicJob.ContainsKey safeFullName) then
-                        node.Shape.ErrorName($"{ErrID._80}(err:{safeFullName})", node.PageNum)
+                |> iter (fun safeName ->
+                    if not (dicJob.ContainsKey safeName) then
+                        node.Shape.ErrorName($"{ErrID._80}(err:{safeName})", node.PageNum)
 
-                    if node.JobName.Combine() = safeFullName then
-                        node.Shape.ErrorName($"{ErrID._81}(err:{safeFullName})", node.PageNum)
+                    if node.Job.Combine() = safeName then
+                        node.Shape.ErrorName($"{ErrID._81}(err:{safeName})", node.PageNum)
+                        )   
+                        
+                node.AutoPres.Select(fun (j,_devParams) -> j.Combine())
+                |> iter (fun autoPres ->
+                    if not (dicJob.ContainsKey autoPres) then
+                        node.Shape.ErrorName($"{ErrID._82}(err:{autoPres})", node.PageNum)
+
+                    if node.Job.Combine() = autoPres then
+                        node.Shape.ErrorName($"{ErrID._83}(err:{autoPres})", node.PageNum)
                         )
 
                 node.Safeties
@@ -508,14 +513,12 @@ module ImportU =
                 node.AutoPres
                 |> iter (fun (jobFqdn, devParams)  ->
                     let condJob =
-                        let jobFullName = getJobNameWithParams(jobFqdn, Some(devParams)).ToArray()
-                        
-                        match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFullName.CombineQuoteOnDemand()) with
+                        match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with
                         | Some existingJob -> existingJob
                         | None -> 
                             match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
                             | Some masterJob ->
-                                    let job = Job(jobFullName, mySys, masterJob.TaskDefs)
+                                    let job = Job(jobFqdn, mySys, masterJob.TaskDefs)
                                     job.UpdateDevParam(devParams)
                                     mySys.Jobs.Add(job); job
 
@@ -627,11 +630,10 @@ module ImportU =
                 |> Seq.collect (fun s -> s.CopySys.Keys)
 
             calls
-                .Where(fun call -> not (loads.Contains(call.CallName)))
+                //.Where(fun call -> not (loads.Contains(call.DevName)))
                 .Select(fun call ->
-                    let flow, job, api = call.CallFlowNJobNApi
-                    { DevName = call.CallName
-                      ApiName = api })
+                    { DevName = call.DevName
+                      ApiName = call.ApiName })
 
 
         [<Extension>]
@@ -679,7 +681,7 @@ module ImportU =
             (* Multi Call Api별 갯수 동일 체크*)
             let calls = doc.Nodes
                                 .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
-                                .GroupBy(fun n -> $"{n.FlowName}.{n.CallDevName}")
+                                .GroupBy(fun n -> $"{n.FlowName}.{n.DevName}")
 
             calls.Iter(fun call -> 
                 let callEachCounts = call.Select(fun f->f.JobParam.DeviceCount)

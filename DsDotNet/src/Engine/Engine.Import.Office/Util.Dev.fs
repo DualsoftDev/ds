@@ -106,9 +106,9 @@ module ImportUtilForDev =
         else 
             loadedSys
 
-    let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName = 
+    let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName (devParaIO:DevParaIO)= 
         let referenceSystem = autoGenSys.ReferenceSystem
-        createTaskDevUsingApiName referenceSystem jobName loadedName apiName (defaultDevParaIO())
+        createTaskDevUsingApiName referenceSystem jobName loadedName apiName  devParaIO
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"

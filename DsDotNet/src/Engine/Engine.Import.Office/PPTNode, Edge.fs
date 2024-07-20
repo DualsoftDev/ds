@@ -159,14 +159,7 @@ module PPTNodeModule =
         member x.RealFinished = shape.IsUnderlined()
         member x.RealNoTrans = if nodeType.IsReal then shape.IsStrikethrough() else failWithLog $"err: {name}RealNoTrans is not real Type"
         member x.DisableCall = if nodeType.IsCall then shape.IsStrikethrough() else failWithLog $"err: {name}CallSkipCoin is not call Type"
-        member x.JobParam = 
-            if (not(nodeType = CALL || nodeType = AUTOPRE) || x.IsFunction) then
-                shape.ErrorName($"JobOption not support {nodeType}({name}) type", iPage)
-            let flow, job, api = x.CallFlowNJobNApi
-            let jobTypeAction = getJobTypeAction (api) 
-            let jobTypeMulti  = getJobTypeMulti (name.Substring(0, (name.Length-api.Length-1)))
-            JobParam (jobTypeAction, jobTypeMulti)
-      
+       
 
         member x.Safeties = safeties
         member x.AutoPres = autoPres
@@ -191,15 +184,6 @@ module PPTNodeModule =
         member x.DevParam = devParam
         member x.DevParamIn =  if devParam.IsSome then  devParam.Value.InPara else None
         member x.DevParamOut = if devParam.IsSome then  devParam.Value.OutPara else None
-           
-        member x.JobName = 
-            
-            let flow, (job: string list), Api = x.CallFlowNJobNApi
-            let pureJob = job.Append(Api)
-            
-            
-            getJobNameWithParams(pureJob, devParam).ToArray()
-
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -213,8 +197,6 @@ module PPTNodeModule =
 
             checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
-
-
 
 
         member x.UpdateNodeParams(isRoot: bool, target) =
@@ -234,6 +216,9 @@ module PPTNodeModule =
                     if hasDevParam then
                         failWithLog "function call 'devParam' not support"
 
+       
+        member x.Job = 
+            getJobNameWithParams(x.JobPure, devParam).ToArray()
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
@@ -241,48 +226,49 @@ module PPTNodeModule =
                 call.TargetJob.TaskDefs.Iter(fun d->
                     if x.DevParam.IsSome
                     then
-                        d.AddOrUpdateDevParam(x.JobName.Combine(), x.DevParam.Value)
+                        d.AddOrUpdateDevParam(x.Job.Combine(), x.DevParam.Value)
                 )
       
-        member x.CallFlowNJobNApi = 
-                
-            if (not(nodeType = CALL || nodeType = AUTOPRE)) then
+        member x.JobPure : string seq =
+            if not (nodeType = CALL || nodeType = AUTOPRE) then
                 shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
-
-            let parts = GetLastParenthesesReplaceName(name, "").Split('.')  
+    
+            let parts = GetLastParenthesesReplaceName(name, "").Split('.')
+    
             match parts.Length with
-            | 2 ->                                          
-                let job = [$"{pageTitle}";$"{TrimSpace(parts.[0]) |> GetBracketsRemoveName}"] 
-                let api = TrimSpace(parts.[1]) |> GetBracketsRemoveName
-                pageTitle, job , api
-            | 3 -> 
-                let job = [$"{TrimSpace(parts.[0])}";$"{TrimSpace(parts.[1])|> GetBracketsRemoveName}"] 
-                let api = TrimSpace(parts.[2]) |> GetBracketsRemoveName
-                parts.[0], job, api
-            | _ -> shape.ErrorShape("Action이름 규격을 확인하세요.", iPage)  
+            | 2 ->
+                let jobBody = 
+                    [ pageTitle
+                      parts.[0] |> TrimSpace |> GetBracketsRemoveName ]
+                let api = GetLastParenthesesReplaceName(parts.[1] |> TrimSpace ,  "") |> GetBracketsRemoveName
+                jobBody.Append api
+    
+            | 3 ->
+                let jobBody =
+                    [ parts.[0] |> TrimSpace
+                      parts.[1] |> TrimSpace |> GetBracketsRemoveName ]
+                let api = GetLastParenthesesReplaceName(parts.[2] |> TrimSpace ,  "")|> GetBracketsRemoveName
+                jobBody.Append api
+    
+            | _ -> 
+                shape.ErrorShape("Action이름 규격을 확인하세요.", iPage)
 
+     
 
-        member x.CallName = 
-        
-            let flow, job, api = x.CallFlowNJobNApi
-            $"{job.Last()}.{api}"
-
-        member x.CallApiName = 
-        
-            let flow, job, api = x.CallFlowNJobNApi
-            $"{flow}.{job.Last()}.{api}"
-
-        member x.CallDevName = 
-                let flow, job, api = x.CallFlowNJobNApi
-                $"{flow}{TextDeviceSplit}{job.Last()}"
-           
+        member x.JobParam = 
+            if (not(nodeType = CALL || nodeType = AUTOPRE) || x.IsFunction) then
+                shape.ErrorName($"JobOption not support {nodeType}({name}) type", iPage)
+            let api = x.Job.Last()
+            let jobTypeAction = getJobTypeAction (api) 
+            let jobTypeMulti  = getJobTypeMulti (name)
+            JobParam (jobTypeAction, jobTypeMulti)
+      
+        member x.DevName = 
+                $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
+        member x.ApiName = 
+                x.JobPure.Last()
             
-        member x.FlowName = 
-            let flow, job, api = x.CallFlowNJobNApi
-            flow
-
-        
-
+        member x.FlowName =  pageTitle
         member x.IsAlias: bool = x.Alias.IsSome
         member val Alias: pptNode option = None with get, set
         member val Id = shape.GetId()

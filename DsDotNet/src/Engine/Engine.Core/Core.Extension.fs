@@ -205,8 +205,8 @@ module CoreExtensionModule =
         member x.GetOutParam(job:Job) = x.OutParams[job.UnqualifiedName]
 
         member x.AddOrUpdateDevParam(jobName:string, devParam:DevParaIO) = 
-                    addOrUpdateParam (jobName,  x.InParams, devParam.InPara)
-                    addOrUpdateParam (jobName,  x.OutParams, devParam.OutPara)
+                    addParam (jobName,  x.InParams, devParam.InPara)
+                    addParam (jobName,  x.OutParams, devParam.OutPara)
 
         member x.SetInSymbol(symName:string option) =
             x.InParams.ToList() |> Seq.iter(fun kv -> 

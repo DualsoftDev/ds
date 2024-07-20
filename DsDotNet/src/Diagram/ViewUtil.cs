@@ -202,17 +202,16 @@ namespace Diagram.View.MSAGL
             {
                 if (!DicMemoryTag.ContainsKey(ev.Tag)) return;
                 var viewNodes = DicMemoryTag[ev.Tag];
-                //var ucView = UcViews.FirstOrDefault(w => viewNodes.Select(n => n.FlowNode).Contains(w.MasterNode));
 
                 viewNodes.Iter(n =>
                 {
                     n.DisplayNodes.Iter(node =>
                     {
-                        var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
+                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
 
                         var on = Convert.ToBoolean(ev.Tag.BoxedValue);
                         n.LampOrigin = on;
-                        ucView.UpdateOriginValue(node, on);
+                        ucView?.UpdateOriginValue(node, on);
                     });
                 });
             }
@@ -238,24 +237,24 @@ namespace Diagram.View.MSAGL
                             {
                                 var on = Convert.ToUInt64(td.Tag.BoxedValue) != 0;
                                 n.LampInput = on;
-                                var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
-                                ucView.UpdateInValue(node, on);
+                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+                                ucView?.UpdateInValue(node, on);
                                 break;
                             }
                         case (int)TaskDevTag.actionOut:
                             {
                                 var on = Convert.ToUInt64(td.Tag.BoxedValue) != 0;
                                 n.LampOutput = on;
-                                var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
-                                ucView.UpdateOutValue(node, on);
+                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+                                ucView?.UpdateOutValue(node, on);
                                 break;
                             }
                         case (int)TaskDevTag.planEnd:
                             {
                                 var on = tags.All(s => Convert.ToBoolean(s.Value));
                                 n.LampPlanEnd = on;
-                                var ucView = UcViews.First(w => w.MasterNode == n.FlowNode);
-                                ucView.UpdatePlanEndValue(node, on);
+                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+                                ucView?.UpdatePlanEndValue(node, on);
                                 break;
                             }
                     }

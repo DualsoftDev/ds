@@ -146,11 +146,13 @@ module rec CodeElements =
             let x = x |> Option.get
             createDevParam  symbol x.DevType x.DevValue x.DevTime
     
-    let addOrUpdateParam(jobName:string, paramDic:Dictionary<string, DevPara>, newParam :DevPara option) = 
-        if newParam.IsSome then
-            paramDic.Remove jobName |> ignore
-            paramDic.Add (jobName, newParam.Value)
-            
+    let addParam(jobName:string, paramDic:Dictionary<string, DevPara>, newParam :DevPara option) = 
+        if not(paramDic.ContainsKey jobName)
+        then 
+            if newParam.IsSome then
+                paramDic.Add (jobName, newParam.Value)
+            else 
+                paramDic.Add (jobName, defaultDevParam())
         
     let changeParam(jobName:string, paramDic:Dictionary<string, DevPara>, symbol:string option) = 
         let changedDevParam = changeSymbolDevParam (Some(paramDic[jobName]))  symbol

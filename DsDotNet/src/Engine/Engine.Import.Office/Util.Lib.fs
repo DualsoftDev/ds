@@ -19,6 +19,7 @@ module ImportUtilForLib =
         JobName: string
         DevName: string
         ApiName: string
+        DevParaIO: DevParaIO
         Parent: ParentWrapper
     }
     with
@@ -31,11 +32,11 @@ module ImportUtilForLib =
         | None -> ParserLoader.LoadFromDevicePath libFilePath Util.runtimeTarget |> fst
 
     let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (devParams: DeviceLoadParameters) =
-        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node (param.Node.JobName.Combine())) |> ignore
+        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node (param.Node.Job.Combine())) |> ignore
 
-    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string) =
+    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string)  (devParaIO:DevParaIO)=
         match autoGenSys with
-        | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName |> Some
+        | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName devParaIO|> Some
         | None -> None
 
     let addSingleTask (tasks: HashSet<TaskDev>) (task: TaskDev option) =
@@ -49,31 +50,31 @@ module ImportUtilForLib =
     let getLibraryPathsAndParams (param: CallParams) =
         let libFilePath, autoGenSys = getNewDevice param.MySys param.DevName param.ApiName
         let relPath = PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
-        let getDevParams name = getParams (libFilePath, relPath, name, param.MySys, DuDevice, ShareableSystemRepository())
-        (libFilePath, autoGenSys, getDevParams)
+        let getProperty name = getParams (libFilePath, relPath, name, param.MySys, DuDevice, ShareableSystemRepository())
+        (libFilePath, autoGenSys, getProperty)
 
-    let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getDevParams: string -> DeviceLoadParameters) =
+    let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getProperty: string -> DeviceLoadParameters) =
         let devOrg = getDeviceOrganization param.MySys libFilePath loadedName
-        let devParams = getDevParams loadedName
-        let task = getTaskDev autoGenSys loadedName (param.Node.JobName.Combine()) param.ApiName
+        let devParams = getProperty loadedName
+
+        let task = getTaskDev autoGenSys loadedName (param.Node.Job.Combine()) param.ApiName  param.DevParaIO
         addSingleTask tasks task
         if task.IsNone then
             processSingleTask tasks param devOrg loadedName param.ApiName devParams
 
     let handleSingleJob (tasks: HashSet<TaskDev>) (param: CallParams) =
-        let libFilePath, autoGenSys, getDevParams = getLibraryPathsAndParams param
-        processTask tasks param param.DevName libFilePath autoGenSys getDevParams
+        let libFilePath, autoGenSys, getProperty = getLibraryPathsAndParams param
+        processTask tasks param param.DevName libFilePath autoGenSys getProperty
 
     let handleMultiActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =
         for devIdx in 1 .. param.Node.JobParam.DeviceCount do
-            let devName = getMultiDeviceName param.Node.CallDevName devIdx
+            let devName = getMultiDeviceName param.Node.DevName devIdx
            
-            let libFilePath, autoGenSys, getDevParams = getLibraryPathsAndParams (param.WithDevName(devName))
-            processTask tasks param devName libFilePath autoGenSys getDevParams
+            let libFilePath, autoGenSys, getProperty = getLibraryPathsAndParams (param.WithDevName(devName))
+            processTask tasks param devName libFilePath autoGenSys getProperty
 
     let addNewCall (param: CallParams) =
-        let jobName = param.Node.JobName.CombineQuoteOnDemand()
-        //let apiPureName = GetBracketsRemoveName(param.ApiName).Trim()
+        let jobName = param.Node.Job.CombineQuoteOnDemand()
         let tasks = HashSet<TaskDev>()
 
         match param.Node.JobParam.JobMulti with
@@ -85,12 +86,12 @@ module ImportUtilForLib =
             match param.MySys.Jobs.TryFind(fun f -> f.QualifiedName = jobName) with
             | Some existingJob -> existingJob
             | None -> 
-                let job = Job(param.Node.JobName, param.MySys, tasks |> Seq.toList)
+                let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
                 if param.Node.DevParam.IsSome
                 then 
                     job.UpdateDevParam(param.Node.DevParam.Value)
                 param.MySys.Jobs.Add(job); job
 
         let call = Call.Create(jobForCall, param.Parent)
-        call.Name <- param.Node.CallName
+        call.Name <- param.Node.Job.Combine()
         call

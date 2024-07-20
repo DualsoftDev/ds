@@ -62,7 +62,7 @@ module PPTDocModule =
                         else aliasCheckNodes |> Seq.filter (fun f -> 
                                                     let keyName = 
                                                         match f.NodeType with
-                                                            | CALL -> f.JobName.Combine()
+                                                            | CALL -> f.Job.Combine()
                                                             | _ -> f.Name
                                                     keyName = name) 
                                                     |> Seq.head
@@ -86,7 +86,7 @@ module PPTDocModule =
                             (filterNodes
                                 |> Seq.map (fun f -> 
                                     match f.NodeType with
-                                    | CALL -> f.JobName.Combine()
+                                    | CALL -> f.Job.Combine()
                                     | _ -> f.Name
                                     )
                             )
@@ -338,19 +338,7 @@ type PPTDocExt =
             doc.Nodes
             |> Seq.filter (fun node -> node.IsCall)
             |> Seq.filter (fun node -> not (node.IsFunction))
-            |> Seq.map (fun node ->
-                    if doc.PageNames.Contains(node.FlowName) then
-                        let flowNodes = doc.Nodes
-                                           .Where(fun f->f.PageTitle = node.FlowName)
-                                           .Where(fun f->f.NodeType = CALL)
-                                           .Where(fun f->f.IsFunction|>not)
-                        if flowNodes.Any(fun n->n.CallDevName = node.CallDevName) then
-                            node.CallDevName, node.JobParam.JobMulti.DeviceCount
-                        else
-                            Office.ErrorName(node.Shape, $"{node.CallDevName} 해당 디바이스가 없습니다.", node.PageNum)
-                    else
-                        Office.ErrorName(node.Shape, $"{node.FlowName} 해당 페이지가 없습니다.", node.PageNum)
-                        )
+            |> Seq.map (fun node -> node.DevName, node.JobParam.JobMulti.DeviceCount)
             |> dict
 
         let getDevCount (devName) = 

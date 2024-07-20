@@ -36,18 +36,20 @@ module ImportUtilVertex =
 
     let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: pptNode) (apiName: string) parentWrapper =
         let loadSysName = device.Name
+        let jobName = node.Job.Combine()
 
-        match sys.Jobs |> Seq.tryFind (fun job -> job.QualifiedName = node.JobName.Combine()) with
+
+        match sys.Jobs |> Seq.tryFind (fun job -> job.QualifiedName = jobName) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
-            let jobName = node.JobName.Combine()
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
             |Some api ->
                 let devTask = 
                     let devParam = match node.DevParam with
                                     | Some devParam ->  devParam
                                     | None -> defaultDevParaIO()  
-                    match sys.Jobs.SelectMany(fun j->j.TaskDefs).TryFind(fun d->d.ApiItem = api) with 
+
+                    match sys.TaskDevs.TryFind(fun d->d.ApiItem = api ) with 
                     | Some (taskDev) ->
                    
                         taskDev.AddOrUpdateDevParam   (jobName, devParam )
@@ -55,7 +57,7 @@ module ImportUtilVertex =
                     | _ -> 
                         TaskDev(api, jobName, devParam, loadSysName, sys)
 
-                let job = Job(node.JobName, sys, [devTask])
+                let job = Job(node.Job, sys, [devTask])
                 job.UpdateJobParam(node.JobParam)
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
@@ -63,8 +65,9 @@ module ImportUtilVertex =
             | None -> 
                 if device.AutoGenFromParentSystem
                 then
-                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName
-                    let job = Job(node.JobName, sys, [autoTaskDev])
+                    let devParaIO = if node.DevParam.IsSome  then node.DevParam.Value else defaultDevParaIO()
+                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName devParaIO
+                    let job = Job(node.Job, sys, [autoTaskDev])
                     job.UpdateJobParam(node.JobParam)
                     sys.Jobs.Add job |> ignore
                     Call.Create(job, parentWrapper)
@@ -82,18 +85,19 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                let flow, job, apiName = node.CallFlowNJobNApi
+                let  apiName =  node.ApiName
 
-                match   mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{flow}{TextDeviceSplit}{job.Last()}") with
+                match   mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
                 |  Some dev -> 
                     getCallFromLoadedSys mySys dev node apiName parentWrapper
                 | _  ->
                     let callParams = {
                         MySys = mySys
                         Node = node
-                        JobName = job.CombineQuoteOnDemand()
-                        DevName = node.CallDevName
+                        JobName = node.Job.CombineQuoteOnDemand()
+                        DevName = node.DevName
                         ApiName = apiName
+                        DevParaIO = if node.DevParam.IsSome then node.DevParam.Value else defaultDevParaIO()
                         Parent = parentWrapper
                         }
                     addNewCall callParams

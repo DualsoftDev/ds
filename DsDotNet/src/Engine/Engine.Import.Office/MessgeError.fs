@@ -95,8 +95,10 @@ module ErrID =
  
     let _78 = "전제조건은 자신을 조건으로 사용불가 입니다."
     let _79 = "Safety는 Action만 조건으로 가능합니다."
-    let _80 = "Safety or AutoPre 이름이 시스템 내부에 존재하지 않습니다."
-    let _81 = "Safety or AutoPre 는 자신을 조건으로 사용불가 입니다."
+    let _80 = "Safety  이름이 시스템 내부에 존재하지 않습니다."
+    let _81 = "Safety  는 자신을 조건으로 사용불가 입니다."
+    let _82 = "AutoPre 이름이 시스템 내부에 존재하지 않습니다."
+    let _83 = "AutoPre 는 자신을 조건으로 사용불가 입니다."
 
     // IO Mapping Error (1001 ~ )
     let _1001 = "시스템에 버튼 이름이 없습니다."

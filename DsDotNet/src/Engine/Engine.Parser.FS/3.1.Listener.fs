@@ -284,6 +284,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             addVari constName varType  value true
             )
             
+    override x.EnterLangVersionDef(ctx: LangVersionDefContext) =
+        x.TheSystem.LangVersion <- Version.Parse(ctx.version().GetText())
+
+    override x.EnterEngineVersionDef(ctx: EngineVersionDefContext) =
+        x.TheSystem.EngineVersion <- Version.Parse(ctx.version().GetText())
 
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등

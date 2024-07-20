@@ -145,7 +145,7 @@ module internal ToDsTextModule =
         | i, o when i = o -> $"{name}(type:{inDataType.ToText()})"
         | _ ->  $"{name}(type:{inDataType.ToText()}, {outDataType.ToText()})"
 
-    let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool)=
+    let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment
         let tab = getTab indent
         let tab2 = getTab 2
@@ -523,13 +523,14 @@ module internal ToDsTextModule =
             
             // code 는 [Commands] = { cmd1 = ${code1}$, cmd2 = ${code2}$ } 복수개 저장
 
-            yield $"{tab}[versions] = {lb}"
-            let assem = Assembly.GetExecutingAssembly()
-            let langVer = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
-            let engineVer = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version
-            yield $"{tab2}DS-Langugage-Version = {langVer};"
-            yield $"{tab2}DS-Engine-Version = {engineVer};"
-            yield $"{tab}{rb}"
+            if printVersions then
+                yield $"{tab}[versions] = {lb}"
+                let assem = Assembly.GetExecutingAssembly()
+                let langVer = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
+                let engineVer = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version
+                yield $"{tab2}DS-Langugage-Version = {langVer};"
+                yield $"{tab2}DS-Engine-Version = {engineVer};"
+                yield $"{tab}{rb}"
 
             yield rb
 
@@ -541,9 +542,9 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     type DsSystem with
-        member x.ToDsText(printComment:bool) = systemToDs x 1 printComment
+        member x.ToDsText(printComment:bool, printVersions:bool) = systemToDs x 1 printComment printVersions
 
 
 [<Extension>]
 type SystemToDsExt =
-    [<Extension>] static member ToDsText (system:DsSystem, printComment:bool) = systemToDs system 1 printComment
+    [<Extension>] static member ToDsText (system:DsSystem, printComment:bool, printVersions:bool) = systemToDs system 1 printComment printVersions

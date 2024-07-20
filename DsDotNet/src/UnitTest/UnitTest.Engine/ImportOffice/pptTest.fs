@@ -16,10 +16,10 @@ module pptTestModule =
     ///ppt로 부터 만든 모델을 text로 다시 읽어 이중 확인
     let check (model:DSFromPPT) =
         let systemRepo = ShareableSystemRepository()
-        let dsText =  model.System.ToDsText(true)
+        let dsText =  model.System.ToDsText(true, false)
         let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/ImportOfficeExample/ppt/"
         let helperSys = ModelParser.ParseFromString(dsText, ParserOptions.Create4Runtime(systemRepo, libdir, "localhost", None, DuNone, false, true))
-        let reGenerated = helperSys.ToDsText(true)
+        let reGenerated = helperSys.ToDsText(true, false)
         reGenerated.Length =!= 0 //파싱 확인만 text 비교는 순서바뀌어서 불가능
     let testpptPath = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/ImportOfficeExample/ppt/"
     let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPPT = false; CreateBtnLamp = true}

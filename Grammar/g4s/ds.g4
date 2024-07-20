@@ -201,9 +201,11 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock
-        : '{' (  flowBlock | jobBlock | commandBlock | operatorBlock | loadDeviceBlock | loadExternalSystemBlock
-                    | interfaceBlock | buttonBlock | lampBlock | conditionBlock | propsBlock
-                    | variableBlock | versionsBlock)*
+        : '{' (       flowBlock | jobBlock
+                    | commandBlock | operatorBlock | variableBlock | interfaceBlock | conditionBlock 
+                    | loadDeviceBlock | loadExternalSystemBlock
+                    | buttonBlock | lampBlock
+                    | propsBlock | versionsBlock)*
           '}'       // identifier1Listing|parenting|causal|call
           (SEMICOLON)?;
     systemName:identifier1;
@@ -248,7 +250,10 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
     }
 
  */
-propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock | autoPreBlock | layoutBlock | finishBlock | disableBlock | notransBlock | timesBlock | motionBlock | scriptsBlock)* '}';
+propsBlock: '[' 'prop' ']' '=' '{' (
+          safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock
+        | timesBlock | motionBlock | scriptsBlock
+        | layoutBlock )* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';    
         safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
             safetyAutoPreKey: identifier45;

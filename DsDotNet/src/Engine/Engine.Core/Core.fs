@@ -133,6 +133,9 @@ module CoreModule =
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
 
+        member val LangVersion = Version() with get, set
+        member val EngineVersion = Version() with get, set
+
         member x.AddVariables(variableData:VariableData) = 
                 if variables.any(fun v->v.Name = variableData.Name)
                 then 

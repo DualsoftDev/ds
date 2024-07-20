@@ -3,6 +3,7 @@ using Dual.Common.Winform;
 using Engine.Core;
 using Microsoft.Msagl.Drawing;
 using Microsoft.Msagl.GraphViewerGdi;
+using Microsoft.Msagl.Layout.Layered;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -38,8 +39,32 @@ public partial class UcView : UserControl
         viewer.Dock = DockStyle.Fill;
         viewer.PanButtonPressed = true;
         viewer.ToolBarIsVisible = false;
+        viewer.MouseDoubleClick += Viewer_MouseDoubleClick;
 
         Controls.Add(viewer);
+    }
+
+    private void Viewer_MouseDoubleClick(object sender, MouseEventArgs e)
+    {
+        var layoutSetting = viewer.Graph.LayoutAlgorithmSettings as SugiyamaLayoutSettings;
+
+        if (layoutSetting.PackingMethod == Microsoft.Msagl.Core.Layout.PackingMethod.Columns)
+        {
+            layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Compact;
+            layoutSetting.NodeSeparation = 2;
+            layoutSetting.ClusterMargin = 2;
+            layoutSetting.LiftCrossEdges = false;
+            layoutSetting.PackingAspectRatio = 2;
+        }
+        else
+        {
+            layoutSetting.PackingMethod = Microsoft.Msagl.Core.Layout.PackingMethod.Columns;
+            layoutSetting.LayerSeparation = 20;
+            layoutSetting.NodeSeparation = 40;
+            layoutSetting.ClusterMargin = 10;
+        }
+
+        viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
     }
 
     int node_attr_linewidthH = 4;

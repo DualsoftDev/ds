@@ -247,7 +247,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
     }
 
  */
-propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock|autoPreBlock|layoutBlock|finishBlock|disableBlock|notransBlock|timesBlock|motionBlock|scriptsBlock)* '}';
+propsBlock: '[' 'prop' ']' '=' '{' (safetyBlock | autoPreBlock | layoutBlock | finishBlock | disableBlock | notransBlock | timesBlock | motionBlock | scriptsBlock)* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';    
         safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
             safetyAutoPreKey: identifier45;
@@ -383,18 +383,18 @@ interfaceBlock
     linkPhrase: identifier12;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
-categoryBlocks:autoBlock|manualBlock|driveBlock|clearBlock|pauseBlock|errorOrEmgBlock|testBlock|homeBlock|readyBlock|idleBlock|originBlock;
-    autoBlock      :'[' ('a_in'|'a') ']' '=' categoryBlock;
-    manualBlock    :'[' ('m_in'|'m') ']' '=' categoryBlock;
-    driveBlock     :'[' ('d_in'|'d') ']' '=' categoryBlock;
-    errorOrEmgBlock:'[' ('e_in'|'e') ']' '=' categoryBlock;
-    pauseBlock     :'[' ('p_in'|'p') ']' '=' categoryBlock;
-    clearBlock     :'[' ('c_in'|'c') ']' '=' categoryBlock;
-    testBlock      :'[' ('t_in'|'t') ']' '=' categoryBlock;
-    homeBlock      :'[' ('h_in'|'h') ']' '=' categoryBlock;
-    readyBlock     :'[' ('r_in'|'r') ']' '=' categoryBlock;
-    idleBlock      :'[' ('i_in'|'i') ']' '=' categoryBlock;
-    originBlock    :'[' ('o_in'|'o') ']' '=' categoryBlock;
+categoryBlocks:autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock | errorOrEmgBlock | testBlock | homeBlock | readyBlock | idleBlock | originBlock;
+    autoBlock      :'[' ('a_in' | 'a') ']' '=' categoryBlock;
+    manualBlock    :'[' ('m_in' | 'm') ']' '=' categoryBlock;
+    driveBlock     :'[' ('d_in' | 'd') ']' '=' categoryBlock;
+    errorOrEmgBlock:'[' ('e_in' | 'e') ']' '=' categoryBlock;
+    pauseBlock     :'[' ('p_in' | 'p') ']' '=' categoryBlock;
+    clearBlock     :'[' ('c_in' | 'c') ']' '=' categoryBlock;
+    testBlock      :'[' ('t_in' | 't') ']' '=' categoryBlock;
+    homeBlock      :'[' ('h_in' | 'h') ']' '=' categoryBlock;
+    readyBlock     :'[' ('r_in' | 'r') ']' '=' categoryBlock;
+    idleBlock      :'[' ('i_in' | 'i') ']' '=' categoryBlock;
+    originBlock    :'[' ('o_in' | 'o') ']' '=' categoryBlock;
     
     categoryBlock: '{' (() | (hwSysItemDef)*) '}';
   

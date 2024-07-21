@@ -219,7 +219,7 @@ module PPTDocModule =
                 let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
                 let headPage = page = pptHeadPage
                 
-                let node = pptNode (shape, page, flowName, slideSize, headPage, masterMacros)
+                let node = pptNode (shape, page, flowName, slideSize, headPage, masterMacros, target)
 
                 if node.Name = "" then
                     shape.ErrorName(ErrID._13, page)
@@ -256,7 +256,7 @@ module PPTDocModule =
             nodes.Values
             |> Seq.iter (fun node ->
                 let isRoot = not (children |> Seq.contains node)
-                node.UpdateNodeParams(isRoot, target)
+                node.UpdateNodeRoot(isRoot, target)
                 )
 
             connections
@@ -338,7 +338,7 @@ type PPTDocExt =
             doc.Nodes
             |> Seq.filter (fun node -> node.IsCall)
             |> Seq.filter (fun node -> not (node.IsFunction))
-            |> Seq.map (fun node -> node.DevName, node.JobParam.JobMulti.DeviceCount)
+            |> Seq.map (fun node -> node.DevName, node.JobParam.TaskDevCount)
             |> dict
 
         let getDevCount (devName) = 

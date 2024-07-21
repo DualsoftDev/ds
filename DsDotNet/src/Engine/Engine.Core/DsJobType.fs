@@ -1,4 +1,3 @@
-// Copyright (c) Dualsoft  All Rights Reserved.
 namespace Engine.Core
 
 open System
@@ -7,7 +6,7 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module DsJobType =
-        
+
     type JobTypeAction = 
         | ActionNormal  
         | Push    
@@ -15,47 +14,44 @@ module DsJobType =
             match x with
             | ActionNormal   -> ""
             | Push    -> TextJobPush
-
-    type JobTypeMulti = 
-        | Single 
-        | MultiAction of string * int * int option * int option
-        member x.DeviceCount = 
-            match x with
-            | MultiAction (_, cnt, _ , _) -> cnt
-            | _ -> 1
-
-        member x.AddressInCount = 
-            match x with
-            | MultiAction (_, _, cnt , _) -> 
-                if cnt.IsSome then cnt.Value else 1
-            | _ -> 1
-
-        member x.AddressOutCount = 
-            match x with
-            | MultiAction (_, _, _ , cnt) -> 
-                if cnt.IsSome then cnt.Value else 1
-            | _ -> 1
-
+    
+    type JobTypeSensing = 
+        | SensingNormal  
+        | SensingNegative 
         member x.ToText() = 
             match x with
-            | Single   -> ""
-            | MultiAction (_, arrayCnt, inCnt, outCnt)-> 
-                let inAddrCnt  = if inCnt.IsSome then inCnt.Value else arrayCnt
-                let outAddrCnt = if outCnt.IsSome then outCnt.Value else arrayCnt
-                $"{TextJobMulti}{arrayCnt}({inAddrCnt}, {outAddrCnt})"
+            | SensingNormal   -> ""
+            | SensingNegative   -> TextJobNegative
 
-    type JobParam(action: JobTypeAction, multi: JobTypeMulti) =
+    type JobTypeTaskDevInfo = 
+        {
+            TaskDevCount: int
+            InCount : int option
+            OutCount : int option
+        }
+        with  
+            member x.AddressInCount = if x.InCount.IsSome then x.InCount.Value else x.TaskDevCount
+            member x.AddressOutCount = if x.OutCount.IsSome then x.OutCount.Value else x.TaskDevCount
+            member x.ToText() = 
+                if x.TaskDevCount = 1 && x.AddressInCount = 1 && x.AddressOutCount  = 1 then
+                    ""
+                else
+                    $"{TextJobMulti}{x.TaskDevCount}({x.AddressInCount}, {x.AddressOutCount})"
+
+    type JobParam(action: JobTypeAction, jobTypeSensing: JobTypeSensing, jobTypeTaskDevInfo: JobTypeTaskDevInfo) =
         member val JobAction = action with get
-        member val JobMulti = multi with get
-
+        member val JobSensing = jobTypeSensing with get
+        member val JobTaskDevInfo = jobTypeTaskDevInfo with get
+        
         member x.ToText() =
             let actionText = x.JobAction.ToText()
-            let multiText = x.JobMulti.ToText()
-            let parts = [actionText; multiText] |> List.filter (fun part -> not (String.IsNullOrEmpty(part)))
+            let sensingText = x.JobSensing.ToText()
+            let multiText = x.JobTaskDevInfo.ToText()
+            let parts = [actionText; sensingText; multiText] |> List.filter (fun part -> not (String.IsNullOrEmpty(part)))
             String.Join("; ", parts)
 
-        member x.DeviceCount =
-            x.JobMulti.DeviceCount
+        member x.TaskDevCount =
+            x.JobTaskDevInfo.TaskDevCount
 
     let getJobTypeAction (name: string) =
         let endContents = GetSquareBrackets(name, false)
@@ -63,51 +59,69 @@ module DsJobType =
         | Some e when e = TextJobPush -> JobTypeAction.Push
         | _ -> JobTypeAction.ActionNormal
 
-    let getJobTypeMulti (name: string) =
-        let nameContents = GetBracketsRemoveName(name)
-        let endContents  = GetSquareBrackets(name, false)
-        if endContents.IsNone
-        then 
-            JobTypeMulti.Single
-        else 
-            let parseMultiActionString (str: string) =
-                let mainPart, optionalPart =
-                    if str.Contains("(") then
-                        let parts = str.Split([| '('; ')' |], System.StringSplitOptions.RemoveEmptyEntries)
-                        (parts.[0].TrimStart(TextJobMulti.ToCharArray()), if parts.Length > 1 then Some(parts.[1]) else None)
-                    else
-                        (str, None)
+    let getJobTypeSensing (name: string) =
+        let endContents = GetSquareBrackets(name, false)
+        match endContents with
+        | Some e when e = TextJobNegative -> JobTypeSensing.SensingNegative     
+        | _ -> JobTypeSensing.SensingNormal
 
-                let cnt = mainPart |> int
-                let inCnt, outCnt =
-                    match optionalPart with
-                    | Some optPart ->
-                        let values = optPart.Split(',')
-                        let inCnt = if values.Length > 0 then Some(values.[0] |> int) else None
-                        let outCnt = if values.Length > 1 then Some(values.[1] |> int) else None
-                        (inCnt, outCnt)
-                    | None -> (None, None)
+    let getJobTypeTaskDevInfo (param: string) =
+        let parseMultiActionString (str: string) =
+            let mainPart, optionalPart =
+                if str.Contains("(") then
+                    let parts = str.Split([| '('; ')' |], System.StringSplitOptions.RemoveEmptyEntries)
+                    (parts.[0].TrimStart(TextJobMulti.ToCharArray()), if parts.Length > 1 then Some(parts.[1]) else None)
+                else
+                    (str, None)
 
-                cnt, inCnt, outCnt
+            let cnt = mainPart |> int
+            let inCnt, outCnt =
+                match optionalPart with
+                | Some optPart ->
+                    let values = optPart.Split(',')
+                    let inCnt = if values.Length > 0 then Some(values.[0] |> int) else None
+                    let outCnt = if values.Length > 1 then Some(values.[1] |> int) else None
+                    (inCnt, outCnt)
+                | None -> (None, None)
 
-            let cnt, inCnt, outCnt = parseMultiActionString endContents.Value
-            if cnt < 1 then
-                failWithLog $"MultiAction Count >= 1 : {name}"
+            cnt, inCnt, outCnt
 
-            JobTypeMulti.MultiAction (nameContents, cnt, inCnt, outCnt)
+        let cnt, inCnt, outCnt = parseMultiActionString param
+        if cnt < 1 then
+            failWithLog $"MultiAction Count >= 1 : {param}"
 
+        {
+            TaskDevCount = cnt
+            InCount = inCnt
+            OutCount = outCnt
+        }
 
-    let getParserJobType(name: string) =
-        let mutable jobTypeMulti = JobTypeMulti.Single
-        let mutable jobTypeAction = JobTypeAction.ActionNormal
+    let defaultJobTypeTaskDevInfo() =  { TaskDevCount = 1; InCount = Some 1; OutCount = Some 1 }
+    let defaultJobPara() = JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
 
-        let items = name.Split(';')
-        for item in items do
-            let trimmedName = item.Trim()
-            if trimmedName.Contains(',') then
-                jobTypeMulti <- getJobTypeMulti trimmedName
-            else
-                jobTypeAction <- getJobTypeAction trimmedName
+    let getParserJobType (param: string) =
+        let param = param.TrimStart('[').TrimEnd(']')
+        let items = param.Split(';')
 
+        let jobTypeTaskDevInfo = 
+            items
+            |> Array.tryFind (fun item -> item.Contains(','))
+            |> Option.map getJobTypeTaskDevInfo
+            |> Option.defaultValue (defaultJobTypeTaskDevInfo())
 
-        JobParam(jobTypeAction, jobTypeMulti)
+        let jobTypeAction = 
+            items
+            |> Array.exists (fun item -> item.Trim() = TextJobPush)
+            |> function
+                | true -> JobTypeAction.Push
+                | false -> JobTypeAction.ActionNormal
+
+        let jobTypeSensing = 
+            items
+            |> Array.exists (fun item -> item.Trim() = TextJobNegative)
+            |> function
+                | true -> JobTypeSensing.SensingNegative
+                | false -> JobTypeSensing.SensingNormal
+
+        JobParam(jobTypeAction, jobTypeSensing, jobTypeTaskDevInfo)
+

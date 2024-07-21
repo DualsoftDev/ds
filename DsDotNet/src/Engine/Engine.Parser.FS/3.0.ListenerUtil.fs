@@ -188,16 +188,16 @@ module ListnerCommonFunctionGeneratorUtil =
             for callListingCtx in callListings do
                 let item = callListingCtx.TryFindFirstChild<JobNameContext>().Value.GetText()
                 
-                let jobName = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()  
+                let jobFqdn = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()  
                 let jobParam =
                     match callListingCtx.TryFindFirstChild<JobTypeOptionContext>() with
                     | Some ctx ->
-                            getParserJobType $"{jobName}[{ctx.GetText().DeQuoteOnDemand()}]"  
+                            getParserJobType ($"[{ctx.GetText().DeQuoteOnDemand()}]")
                     | None ->
-                            JobParam(ActionNormal, JobTypeMulti.Single)
+                            JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
 
                 let apiDefCtxs = callListingCtx.Descendants<CallApiDefContext>().ToArray()
-                yield jobName, jobParam, apiDefCtxs, callListingCtx
+                yield jobFqdn, jobParam, apiDefCtxs, callListingCtx
         ]
     let createApiResetInfo (terms:string array) (sys:DsSystem) =
         if terms.Contains("|>") || terms.Contains("<|") then 

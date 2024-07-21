@@ -27,10 +27,3 @@ type Xywh(x: int, y: int, w: Nullable<int>, h: Nullable<int>) =
     member z.W = w 
     member z.H = h 
 
-
-[<AllowNullLiteral>]
-type Addresses(inAddress: string, outAddress: string) =
-    /// Input address
-    member x.In = inAddress
-    /// Output address
-    member x.Out = outAddress

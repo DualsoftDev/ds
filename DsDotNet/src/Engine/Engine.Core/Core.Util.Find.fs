@@ -224,10 +224,8 @@ module internal ModelFindModule =
             | (true, value) -> value
             | (false, _) -> 0
 
-        let inSkip = if job.JobMulti = Single then false 
-                        else  job.AddressInCount < devIndex 
-        let outSkip =if job.JobMulti = Single then false 
-                        else job.AddressOutCount < devIndex 
+        let inSkip = job.AddressInCount < devIndex 
+        let outSkip = job.AddressOutCount < devIndex 
 
         inSkip, outSkip 
 
@@ -353,7 +351,7 @@ type FindExtension =
     [<Extension>] static member GetDevicesForHMI(x:DsSystem) = 
                  //kia demo //test ahn
                     x.GetDevicesCoin()
-                        .Where(fun (dev, call) -> call.TargetJob.JobMulti <> Single || not(dev.IsOutAddressSkipOrEmpty))
+                        .Where(fun (dev, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
                          |> Seq.filter(fun (dev,c) -> c.TargetJob.TaskDefs.First() = dev)
                  //normal //test ahn
                     //x.GetDevicesCoin()

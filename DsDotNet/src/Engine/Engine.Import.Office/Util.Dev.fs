@@ -112,9 +112,7 @@ module ImportUtilForDev =
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
-        let devParam = match node.DevParam with
-                        | Some devParam ->  devParam
-                        | None -> defaultDevParaIO()        
+        let devParam =  node.DevParam 
 
         match mySys.GetDevicesCall().TryFind(fun (d,c) -> d.ApiStgName = tastDevKey) with
         | Some (taskDev, c) -> 

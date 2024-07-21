@@ -211,15 +211,13 @@ module ConvertCpuDsSystem =
             let devCalls = x.GetDevicesForHMI() 
             for (dev, call) in devCalls do
                 let cv =  call.TagManager :?> VertexMCall
-                if call.TargetJob.JobMulti = JobTypeMulti.Single 
+                if call.TargetJob.JobTaskDevInfo.TaskDevCount = 1
                     ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)   
                 then
                     cv.SF.Address    <- getMemory (cv.SF.Name) (getTarget(x))
                     dev.MaunualAddress  <- cv.SF.Address
                 else 
                     dev.MaunualAddress  <- TextSkip  //다중 작업은 수동 작업을 사용하지 않는다.
-                    
-
 
         member x.GenerationMemory() =
             //Step1)Emulation base + 1 bit 

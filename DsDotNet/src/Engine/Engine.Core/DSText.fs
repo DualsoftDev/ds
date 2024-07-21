@@ -30,6 +30,7 @@ module DsText =
 
 
     let [<Literal>] TextJobPush = "P"
+    let [<Literal>] TextJobNegative= "!"
     let [<Literal>] TextJobMulti = "N"
 
                  

@@ -197,18 +197,18 @@ module ImportU =
             |> Seq.filter (fun node -> node.NodeType = CALL)
             |> Seq.filter (fun node -> not(node.IsFunction))
             |> Seq.iter (fun node ->
-                match node.JobParam.JobMulti with
-                | JobTypeMulti.MultiAction(_,cnt,_,_) -> 
-                    for i in [1..cnt] do 
-                        let multiName = getMultiDeviceName node.DevName  i
-                        let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = multiName)
-                        addChannelPoints dev node
-                | _ ->
-                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = node.DevName)
+                let cnt = node.JobParam.TaskDevCount
+                for i in [1..cnt] do 
+                    let multiName = 
+                        if cnt = 1
+                        then 
+                            node.DevName
+                        else 
+                            getMultiDeviceName node.DevName  i
+                            
+                    let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = multiName)
                     addChannelPoints dev node
                     )
-
-         
            
 
         //real call alias  만들기
@@ -414,11 +414,7 @@ module ImportU =
 
                 tgts.Iter(fun node-> 
                         let autoPreCondition =edge.StartNode.Job
-                        match edge.StartNode.DevParam with
-                        | Some devParam -> 
-                            node.AutoPres.Add(autoPreCondition, devParam)|>ignore
-                        | None -> 
-                             node.AutoPres.Add(autoPreCondition, defaultDevParaIO())|>ignore
+                        node.AutoPres.Add(autoPreCondition)|>ignore
                         )
 
             dicEdges
@@ -476,7 +472,17 @@ module ImportU =
             let dicJob =   
                 doc.DicVertex.Values
                    .OfType<Call>().Where(fun call -> call.IsJob)
-                   .Select(fun call -> call.TargetJob.UnqualifiedName, call.TargetJob)
+                   .SelectMany(fun call ->
+                                seq{
+                                    let JobName =  call.TargetJob.UnqualifiedName
+                                    let pureJobName = GetBracketsRemoveName call.TargetJob.UnqualifiedName
+                                    yield call.TargetJob.UnqualifiedName, call.TargetJob
+
+                                    if JobName <> pureJobName
+                                    then 
+                                        yield pureJobName, call.TargetJob
+                                }
+                            )
                    |> dict
 
             doc.Nodes
@@ -492,7 +498,7 @@ module ImportU =
                         node.Shape.ErrorName($"{ErrID._81}(err:{safeName})", node.PageNum)
                         )   
                         
-                node.AutoPres.Select(fun (j,_devParams) -> j.Combine())
+                node.AutoPres.Select(fun (j) -> j.Combine())
                 |> iter (fun autoPres ->
                     if not (dicJob.ContainsKey autoPres) then
                         node.Shape.ErrorName($"{ErrID._82}(err:{autoPres})", node.PageNum)
@@ -511,19 +517,24 @@ module ImportU =
                             node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
 
                 node.AutoPres
-                |> iter (fun (jobFqdn, devParams)  ->
-                    let condJob =
-                        match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with
-                        | Some existingJob -> existingJob
-                        | None -> 
-                            match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
-                            | Some masterJob ->
-                                    let job = Job(jobFqdn, mySys, masterJob.TaskDefs)
-                                    job.UpdateDevParam(devParams)
-                                    mySys.Jobs.Add(job); job
+                |> iter (fun (jobFqdn)  ->
+                    let condJob = 
+                        if dicJob.ContainsKey (jobFqdn.Combine())
+                        then 
+                            dicJob[jobFqdn.Combine()]
+                        else 
+                            failWithLog $"AutoPres 대상이 없습니다. {jobFqdn}"
+                    //let condJob = 
+                    //    match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with
+                    //    | Some existingJob -> existingJob
+                    //    | None -> 
+                            //match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
+                            //| Some masterJob ->
+                            //        let job = Job(jobFqdn, mySys, masterJob.TaskDefs)
+                            //        //job.UpdateDevParam(devParams)
+                            //        mySys.Jobs.Add(job); job
 
-                            | None -> 
-                                    failWithLog $"AutoPres 대상이 없습니다. {jobFqdn}"
+                            //| None -> 
                         
                     match dicVertex.[node.Key].GetPure() |> box with
                     | :? ISafetyAutoPreRequisiteHolder as holder -> 
@@ -677,14 +688,13 @@ module ImportU =
         [<Extension>]
         static member PreCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
 
-      
             (* Multi Call Api별 갯수 동일 체크*)
             let calls = doc.Nodes
                                 .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
                                 .GroupBy(fun n -> $"{n.FlowName}.{n.DevName}")
 
             calls.Iter(fun call -> 
-                let callEachCounts = call.Select(fun f->f.JobParam.DeviceCount)
+                let callEachCounts = call.Select(fun f->f.JobParam.TaskDevCount)
                 if callEachCounts.Distinct().Count() > 1
                 then
                     let errNode = call.Select(fun f->f).First() 

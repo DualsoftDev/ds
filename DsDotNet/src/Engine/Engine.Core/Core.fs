@@ -410,21 +410,19 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-        let mutable jobParam = JobParam(ActionNormal, JobTypeMulti.Single)
+        let mutable jobParam = defaultJobPara()
         member x.JobParam = jobParam
         member x.UpdateJobParam(newJobParam: JobParam) =
             jobParam <- newJobParam
        
         member x.ActionType = x.JobParam.JobAction 
-        member x.JobMulti = x.JobParam.JobMulti 
-        member x.AddressInCount = x.JobParam.JobMulti.AddressInCount
-        member x.AddressOutCount = x.JobParam.JobMulti.AddressOutCount
-
+        member x.JobTaskDevInfo = x.JobParam.JobTaskDevInfo 
+        member x.AddressInCount = x.JobParam.JobTaskDevInfo.AddressInCount
+        member x.AddressOutCount = x.JobParam.JobTaskDevInfo.AddressOutCount
 
         member x.System = system
         member x.TaskDefs = tasks
         member x.Name = failWithLog $"{names.Combine()} Name using 'QualifiedName'"
-
                                 
         member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
 

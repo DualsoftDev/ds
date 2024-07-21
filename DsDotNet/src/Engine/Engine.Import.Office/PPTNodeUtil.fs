@@ -29,11 +29,8 @@ module PPTNodeUtilModule =
                 | None, Some t -> $"{t}ms"
                 | None, None -> $""
 
-        let getJobNameWithParams(jobFqdn:string seq, devParaIO:DevParaIO option) =
-            if devParaIO.IsNone then jobFqdn
-            else 
-                let devParaIO = devParaIO |> Option.get
-
+        let getJobNameWithDevParaIO(jobFqdn:string seq, devParaIO:DevParaIO) =
+            let newJob = 
                 let inParaText  =
                     match  getPostParam devParaIO.InPara with
                     | "" -> "IN"
@@ -58,22 +55,15 @@ module PPTNodeUtilModule =
 
                 else //둘다 있는경우
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText}_{outParaText})").ToArray()
+            newJob
+            
 
-
-                //if devParaIO.InPara.IsSome && devParaIO.OutPara.IsNone then
-                //    let post = getPostParam devParaIO.InPara.Value
-                //    if post = "" 
-                //    then jobFqdn 
-                //    else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{post})").ToArray()
-
-                //elif devParaIO.InPara.IsSome && devParaIO.OutPara.IsSome then
-                //    let postIn = getPostParam devParaIO.InPara.Value
-                //    let postOut = getPostParam devParaIO.OutPara.Value
-                //    if postIn = "" && postOut = "" 
-                //    then jobFqdn
-                //    else jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}(IN{postIn}_OUT{postOut})").ToArray()  
-
-                //else jobFqdn
+        let getJobNameWithJobParam(jobFqdn:string seq, jobParam:JobParam) =  
+            let jobParamText =  jobParam.ToText()
+            match jobParamText with
+            | "" -> jobFqdn
+            |_   ->
+                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
 
 
         let getNodeDevParam (shape:Shape, name:string, iPage:int, target) = 
@@ -95,16 +85,16 @@ module PPTNodeUtilModule =
                 if func.Contains(",") then 
 
                     let inFunc, outFunc =
-                        func.Split(",").Head() |> trimSpaceNewLine,
+                        func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobParam에서 다시 처리
                         func.Split(",").Last() |> trimSpaceNewLine
 
-                    {InPara =  Some(getParam inFunc); OutPara = Some(getParam outFunc)} |>Some
+                    {InPara =  Some(getParam inFunc); OutPara = Some(getParam outFunc)}
                 else 
-                    {InPara =  Some(getParam func); OutPara = Some(defaultDevParam())} |>Some
+                    {InPara =  Some(getParam func); OutPara = Some(defaultDevParam())} 
             with _ ->
                 shape.ErrorName((error()), iPage)
 
-        let getTrimName(shape:Shape) (nameTrim:string) =
+        let getTrimName(shape:Shape, nameTrim:string) =
             match GetSquareBrackets(nameTrim, false) with
             | Some text -> 
                 let pureName = nameTrim |> GetBracketsRemoveName |> trimSpaceNewLine

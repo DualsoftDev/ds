@@ -19,8 +19,9 @@
         <Compile Include="DSText.fs" />
         <Compile Include="DsConstants.fs" />
         <Compile Include="DsType.fs" />
-        <Compile Include="DsJobType.fs" />
         <Compile Include="DsDataType.fs" />
+        <Compile Include="DsJobType.fs" />
+        <Compile Include="DsTaskDevType.fs" />
         <Compile Include="DsEvent.fs" />
         <Compile Include="DsLog.fs" />
         <Compile Include="Prolog.fs" />

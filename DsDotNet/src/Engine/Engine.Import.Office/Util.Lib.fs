@@ -62,14 +62,17 @@ module ImportUtilForLib =
         if task.IsNone then
             processSingleTask tasks param devOrg loadedName param.ApiName devParams
 
-    let handleSingleJob (tasks: HashSet<TaskDev>) (param: CallParams) =
-        let libFilePath, autoGenSys, getProperty = getLibraryPathsAndParams param
-        processTask tasks param param.DevName libFilePath autoGenSys getProperty
 
     let handleMultiActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =
-        for devIdx in 1 .. param.Node.JobParam.DeviceCount do
-            let devName = getMultiDeviceName param.Node.DevName devIdx
-           
+        
+        for devIdx in 1 .. param.Node.JobParam.TaskDevCount do
+            let devName =
+                if param.Node.JobParam.TaskDevCount = 1
+                then 
+                    param.Node.DevName
+                else 
+                    getMultiDeviceName param.Node.DevName devIdx
+
             let libFilePath, autoGenSys, getProperty = getLibraryPathsAndParams (param.WithDevName(devName))
             processTask tasks param devName libFilePath autoGenSys getProperty
 
@@ -77,9 +80,7 @@ module ImportUtilForLib =
         let jobName = param.Node.Job.CombineQuoteOnDemand()
         let tasks = HashSet<TaskDev>()
 
-        match param.Node.JobParam.JobMulti with
-        | Single -> handleSingleJob tasks param
-        | MultiAction (_, _, _, _) -> handleMultiActionJob tasks param
+        handleMultiActionJob tasks param
 
   
         let jobForCall =
@@ -87,9 +88,8 @@ module ImportUtilForLib =
             | Some existingJob -> existingJob
             | None -> 
                 let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
-                if param.Node.DevParam.IsSome
-                then 
-                    job.UpdateDevParam(param.Node.DevParam.Value)
+                job.UpdateJobParam(param.Node.JobParam)
+                job.UpdateDevParam(param.Node.DevParam)
                 param.MySys.Jobs.Add(job); job
 
         let call = Call.Create(jobForCall, param.Parent)

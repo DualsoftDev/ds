@@ -68,14 +68,14 @@ module ConvertErrorCheck =
     let checkMultiDevPair(sys: DsSystem) = 
         let devicesCalls = 
             sys.GetDevicesCall()
-               .Where(fun (_, call) -> call.TargetJob.JobMulti <> JobTypeMulti.Single)
+               .Where(fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1)
 
 
         let groupDev =
                devicesCalls  |> Seq.groupBy (fun (dev, _) -> dev.DeviceName)
     
         for (_, calls) in groupDev  do
-            let jobMultis = calls |> Seq.map (fun (_, call) -> call.TargetJob.JobMulti.DeviceCount) |> Seq.distinct
+            let jobMultis = calls |> Seq.map (fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount ) |> Seq.distinct
             if Seq.length jobMultis > 1 then
                 let callTexts = String.Join("\r\n", calls.Select(fun (_, call) -> call.Name))
                 failwithf $"동일 다비이스의 multi 수량은 같아야 합니다. \r\n{callTexts}"

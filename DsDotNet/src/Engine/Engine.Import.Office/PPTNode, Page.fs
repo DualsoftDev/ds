@@ -19,10 +19,10 @@ module PPTNodeModule =
         member x.IsUsing = bShow
         member x.Title = slidePart.PageTitle()
 
-    type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq) =
+    type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq, target:PlatformTarget) =
         let copySystems = Dictionary<string, string>() //copyName, orgiName
         let safeties = HashSet<string>()
-        let autoPres = HashSet<string[]*DevParaIO>()  //jobFqdn, inparam, outParam
+        let autoPres = HashSet<string[]>()  //jobFqdn
         
         let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
         let btnHeadPageDefs = Dictionary<string, BtnType>()
@@ -34,7 +34,10 @@ module PPTNodeModule =
 
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable devParam: DevParaIO option = None     // Input/Output param
+        let mutable devParam: DevParaIO = defaultDevParaIO()  // Input/Output param
+        let mutable jobParam: JobParam = defaultJobPara()     // jobParam  param
+
+        
         let mutable ifTX = ""
         let mutable ifRX = ""
         let mutable realGoingTime:float option = None   
@@ -107,9 +110,9 @@ module PPTNodeModule =
 
                 macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
         let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
-        let nameTrim(shape:Shape) = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
-        let name = GetLastParenthesesReplaceName(nameTrim(shape) |> getTrimName shape,  "")
-        let hasDevParam = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
+        let name = 
+            let nameTrim  = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
+            GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
 
         do
 
@@ -149,6 +152,29 @@ module PPTNodeModule =
                 | LAYOUT
                 | AUTOPRE
                 | DUMMY -> ()
+            
+                if nodeType = CALL || nodeType = AUTOPRE || name.Contains(".")  //isDevCall  
+                then
+                    //Dev1[3(3,3)].Api(!300, 200)
+                    let names = (nameNFunc shape).Split('.')
+                    let prop =
+                        if names.Count() = 2    then names.First()  
+                        elif names.Count() = 3  then names.Skip(1).First()
+                        else 
+                            failwith $"Error: {nameNFunc shape}" 
+    
+                    let jobPram =
+                        match GetSquareBrackets(prop, false) with
+                        |Some s ->
+                            let taskDevPara = names.Last() |> GetLastParenthesesContents
+                            if taskDevPara.StartsWith(TextJobNegative)
+                            then 
+                                getParserJobType($"{s};{TextJobNegative}")
+                            else 
+                                getParserJobType(s)
+                        |_->
+                            defaultJobPara() 
+                    jobParam <- jobPram 
             with ex ->  
                 shape.ErrorShape(ex.Message, iPage)  
 
@@ -160,10 +186,8 @@ module PPTNodeModule =
         member x.RealNoTrans = if nodeType.IsReal then shape.IsStrikethrough() else failWithLog $"err: {name}RealNoTrans is not real Type"
         member x.DisableCall = if nodeType.IsCall then shape.IsStrikethrough() else failWithLog $"err: {name}CallSkipCoin is not call Type"
        
-
         member x.Safeties = safeties
         member x.AutoPres = autoPres
-
         
         member x.RealGoingTime = realGoingTime
         member x.RealDelayTime = realDelayTime
@@ -178,12 +202,12 @@ module PPTNodeModule =
         member x.OperatorName = pageTitle+"_"+name
         member x.CommandName = pageTitle+"_"+name
         member x.IsCall = nodeType = CALL
-        member x.IsCallDevParam = nodeType = CALL && devParam.IsSome 
         member x.IsRootNode = rootNode
         member x.IsFunction = x.IsCall && not(name.Contains("."))
         member x.DevParam = devParam
-        member x.DevParamIn =  if devParam.IsSome then  devParam.Value.InPara else None
-        member x.DevParamOut = if devParam.IsSome then  devParam.Value.OutPara else None
+        member x.JobParam =  jobParam
+        member x.DevParamIn =  devParam.InPara
+        member x.DevParamOut = devParam.OutPara
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -198,35 +222,34 @@ module PPTNodeModule =
             checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
 
+            
+        member x.Job = 
+            getJobNameWithDevParaIO(x.JobPure, devParam).ToArray()
+           
+        member x.JobWithJobPara = 
+            getJobNameWithJobParam(x.Job, jobParam).ToArray()
 
-        member x.UpdateNodeParams(isRoot: bool, target) =
+        member x.UpdateNodeRoot(isRoot: bool, target) =
             rootNode <- Some isRoot
-
             if nodeType = CALL || nodeType = AUTOPRE then
-                let isDevCall = name.Contains(".")
-                if isDevCall 
+                let hasDevParam = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
+                if name.Contains(".")  //isDevCall
                 then
                     if hasDevParam then
                         devParam <- getNodeDevParam (shape, nameNFunc(shape), iPage, target)
                     else 
                         if isRoot then
                             let inPara = createDevParam  None (Some(DuBOOL)) None None |> Some  
-                            devParam <- {InPara = inPara;OutPara = None} |> Some
+                            devParam <- {InPara = inPara;OutPara = None}
                 else 
                     if hasDevParam then
                         failWithLog "function call 'devParam' not support"
 
-       
-        member x.Job = 
-            getJobNameWithParams(x.JobPure, devParam).ToArray()
-
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
-            if x.IsCallDevParam && x.IsRootNode.Value = false then 
+            if x.IsRootNode.Value = false then 
                 call.TargetJob.TaskDefs.Iter(fun d->
-                    if x.DevParam.IsSome
-                    then
-                        d.AddOrUpdateDevParam(x.Job.Combine(), x.DevParam.Value)
+                    d.AddOrUpdateDevParam(x.Job.Combine(), x.DevParam)
                 )
       
         member x.JobPure : string seq =
@@ -255,14 +278,6 @@ module PPTNodeModule =
 
      
 
-        member x.JobParam = 
-            if (not(nodeType = CALL || nodeType = AUTOPRE) || x.IsFunction) then
-                shape.ErrorName($"JobOption not support {nodeType}({name}) type", iPage)
-            let api = x.Job.Last()
-            let jobTypeAction = getJobTypeAction (api) 
-            let jobTypeMulti  = getJobTypeMulti (name)
-            JobParam (jobTypeAction, jobTypeMulti)
-      
         member x.DevName = 
                 $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
         member x.ApiName = 
@@ -282,37 +297,3 @@ module PPTNodeModule =
         member val CondiHeadPageDefs = condiHeadPageDefs
         member val CondiDefs = condiDefs
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)
-
-    and pptEdge(conn: Presentation.ConnectionShape, iEdge: UInt32Value, iPage: int, sNode: pptNode, eNode: pptNode) =
-
-        let (causal:ModelingEdgeType), (reverse:bool) = GetCausal(conn, iPage, sNode.Name, eNode.Name)
-
-        member x.PageNum = iPage
-        member x.ConnectionShape = conn
-        member x.Id = iEdge
-        member x.IsInterfaceEdge: bool = x.StartNode.NodeType.IsIF || x.EndNode.NodeType.IsIF
-        member x.StartNode: pptNode = if (reverse) then eNode else sNode
-        member x.EndNode: pptNode = if (reverse) then sNode else eNode
-        member x.ParentId = 0 //reserve
-
-        member val Name = conn.EdgeName()
-        member val Key = Objkey(iPage, iEdge)
-
-        member x.Text =
-            let sName =
-                match sNode.Alias with
-                | Some a -> a.Name
-                | None -> sNode.Name
-
-            let eName =
-                match eNode.Alias with
-                | Some a -> a.Name
-                | None -> eNode.Name
-
-            if (reverse) then
-                $"{iPage};{eName}{causal.ToText()}{sName}"
-            else
-                $"{iPage};{sName}{causal.ToText()}{eName}"
-
-        member val Causal: ModelingEdgeType = causal
-

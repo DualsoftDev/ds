@@ -22,7 +22,8 @@
         <Compile Include="ImportType.fs" />
         <Compile Include="PPTConnection.fs" />
         <Compile Include="PPTNodeUtil.fs" />
-        <Compile Include="PPTNode, Edge.fs" />
+        <Compile Include="PPTNode, Page.fs" />
+        <Compile Include="PPTEdge.fs" />
         <Compile Include="PPTGroup.fs" />
         <Compile Include="PPTDummy.fs" />
         <Compile Include="PPTDoc.fs" />

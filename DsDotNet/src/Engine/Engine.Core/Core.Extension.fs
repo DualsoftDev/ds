@@ -241,22 +241,19 @@ module CoreExtensionModule =
 
 
         member x.GetNullAddressDevTask() = 
-            match x.JobMulti with
-            | Single -> 
-                x.TaskDefs
-                |> Seq.filter (fun f -> f.IsAddressEmpty && not(f.GetInParam(x).IsDefaultParam))
-            | MultiAction (_, _, inCnt, outCnt) -> 
-                x.TaskDefs
-                |> Seq.mapi (fun i d -> 
-                    let empty = d.IsAddressEmpty && not(d.GetInParam(x).IsDefaultParam && d.GetOutParam(x).IsDefaultParam)
-                    if inCnt.IsSome && inCnt.Value = i && empty then 
-                        Some d
-                    elif outCnt.IsSome && outCnt.Value = i && empty then 
-                        Some d
-                    else
-                     None
-                )
-                |> Seq.choose id
+            x.TaskDefs
+            |> Seq.mapi (fun i d -> 
+                let inCnt = x.JobTaskDevInfo.InCount
+                let outCnt = x.JobTaskDevInfo.OutCount
+                let empty = d.IsAddressEmpty && not(d.GetInParam(x).IsDefaultParam && d.GetOutParam(x).IsDefaultParam)
+                if inCnt.IsSome && inCnt.Value = i && empty then 
+                    Some d
+                elif outCnt.IsSome && outCnt.Value = i && empty then 
+                    Some d
+                else
+                    None
+            )
+            |> Seq.choose id
 
                         
     type Real with

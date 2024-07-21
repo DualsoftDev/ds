@@ -45,19 +45,17 @@ module ImportUtilVertex =
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
             |Some api ->
                 let devTask = 
-                    let devParam = match node.DevParam with
-                                    | Some devParam ->  devParam
-                                    | None -> defaultDevParaIO()  
+                    let devParam =  node.DevParam 
 
                     match sys.TaskDevs.TryFind(fun d->d.ApiItem = api ) with 
                     | Some (taskDev) ->
-                   
-                        taskDev.AddOrUpdateDevParam   (jobName, devParam )
+                        taskDev.AddOrUpdateDevParam(jobName, devParam)
                         taskDev
                     | _ -> 
                         TaskDev(api, jobName, devParam, loadSysName, sys)
 
                 let job = Job(node.Job, sys, [devTask])
+                job.UpdateDevParam(node.DevParam)
                 job.UpdateJobParam(node.JobParam)
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
@@ -65,8 +63,8 @@ module ImportUtilVertex =
             | None -> 
                 if device.AutoGenFromParentSystem
                 then
-                    let devParaIO = if node.DevParam.IsSome  then node.DevParam.Value else defaultDevParaIO()
-                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName devParaIO
+                    let devParam =  node.DevParam 
+                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName devParam
                     let job = Job(node.Job, sys, [autoTaskDev])
                     job.UpdateJobParam(node.JobParam)
                     sys.Jobs.Add job |> ignore
@@ -97,7 +95,7 @@ module ImportUtilVertex =
                         JobName = node.Job.CombineQuoteOnDemand()
                         DevName = node.DevName
                         ApiName = apiName
-                        DevParaIO = if node.DevParam.IsSome then node.DevParam.Value else defaultDevParaIO()
+                        DevParaIO = node.DevParam
                         Parent = parentWrapper
                         }
                     addNewCall callParams

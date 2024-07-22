@@ -190,7 +190,7 @@ module DsAddressModule =
                     |In ->  $"IB{cnt / 8}.{cnt % 8}" 
                     |Out -> $"OB{cnt / 8}.{cnt % 8}" 
                     |Memory -> $"M{memoryCnt}"
-                    |NotUsed -> failwithf $"{ioType} not support"
+                    |NotUsed -> failwithf $"{ioType} not support {name}"
 
                 elif RuntimeDS.Package.IsPLCorPLCSIM()
                 then
@@ -208,7 +208,7 @@ module DsAddressModule =
                             then
                                 getXgiIOTextBySize("Q", cnt ,sizeBit,  iSlot, sumBit)
                             else 
-                                failwithf $"Error {target} not support"
+                                failwithf $"Error {target} not support {name}"
 
                         elif target = PlatformTarget.XGK
                         then
@@ -224,14 +224,14 @@ module DsAddressModule =
                                 then
                                     getXgkTextByType("P", cnt+XGKAnalogOffsetByte+XGKAnalogOutOffsetByte, isBool)  //test ahn 임시 Q 는  시프트 ??
                                 else 
-                                    failwithf $"Error {target} not support" 
+                                    failwithf $"Error {target} not support {name}" 
                         
                         elif target = PlatformTarget.WINDOWS then
                             if ioType = IOType.In
                             then getPCIOMTextBySize("I", cnt ,sizeBit)
                             else getPCIOMTextBySize("O", cnt ,sizeBit)
                         else 
-                            failwithf $"Error {target} not support"
+                            failwithf $"Error {target} not support {name}"
 
                     |Memory -> if target = PlatformTarget.XGI
                                then 
@@ -242,11 +242,11 @@ module DsAddressModule =
                                elif target = PlatformTarget.WINDOWS then
                                     getPCIOMTextBySize("M", cnt ,sizeBit)
                                else 
-                                    failwithf $"Error {target} not support"
+                                    failwithf $"Error{name} {target} not support"
                                     
 
 
-                    |NotUsed -> failwithf $"{ioType} not support"
+                    |NotUsed -> failwithf $"{ioType} not support {name}"
 
                 else TextAddrEmpty
 
@@ -260,7 +260,7 @@ module DsAddressModule =
                     match tryParseXGKTagByBitType addr (dataType = DuBOOL) with
                     | Some (t) -> t |> getXgKTextByTag
                                   
-                    | _ -> failwithf $"주소가 잘못되었습니다. {addr} (dataType:{dataType})"
+                    | _ -> failwithf $"주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
                 else addr
      
         newAddr

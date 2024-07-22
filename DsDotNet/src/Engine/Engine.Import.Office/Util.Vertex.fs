@@ -39,10 +39,10 @@ module ImportUtilVertex =
         let jobName = node.Job.Combine()
 
 
-        match sys.Jobs |> Seq.tryFind (fun job -> job.QualifiedName = jobName) with
+        match sys.Jobs |> Seq.tryFind (fun job -> job.UnqualifiedName = jobName) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
-            match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
+            match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiPureName) with
             |Some api ->
                 let devTask = 
                     let TaskDevPara =  node.TaskDevPara 
@@ -84,18 +84,17 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                let  apiName =  node.ApiName
 
                 match   mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
                 |  Some dev -> 
-                    getCallFromLoadedSys mySys dev node apiName parentWrapper
+                    getCallFromLoadedSys mySys dev node node.ApiName parentWrapper
                 | _  ->
                     let callParams = {
                         MySys = mySys
                         Node = node
                         JobName = node.Job.CombineQuoteOnDemand()
                         DevName = node.DevName
-                        ApiName = apiName
+                        ApiName = node.ApiPureName
                         TaskDevParaIO = node.TaskDevPara
                         Parent = parentWrapper
                         }

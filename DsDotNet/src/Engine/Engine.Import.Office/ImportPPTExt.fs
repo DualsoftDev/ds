@@ -612,11 +612,11 @@ module ImportU =
             |> Seq.groupBy (fun (_, row) -> getDevName row)
             |> Seq.iter (fun (name, rows) ->
                 let rowsWithIndexes = rows |> Seq.toArray
-
                 if rowsWithIndexes.Length > 1 && name <> "" then
                     // Handle the exception for duplicate names here
                     failwithf "Duplicate name: %s" name)
 
+           
             ApplyIO(sys, pageTables)
 
         [<Extension>]

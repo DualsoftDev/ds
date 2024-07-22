@@ -229,6 +229,7 @@ module CoreExtensionModule =
 
             if not (x.DicTaskTaskDevParaIO.ContainsKey   jobFqdn)
             then 
+              
                 x.DicTaskTaskDevParaIO.Add(jobFqdn, {TaskDevParaIO = taskDevParaIO; ApiItem = api})
 
         member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 

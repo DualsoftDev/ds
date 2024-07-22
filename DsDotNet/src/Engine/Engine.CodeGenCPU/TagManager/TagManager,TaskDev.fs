@@ -2,7 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
-open System
+open System.Linq
 open System.Collections.Generic
 
 [<AutoOpen>]
@@ -21,7 +21,7 @@ module TaskDevManagerModule =
 
 
         do 
-            for api in td.ApiItems do
+            for api in td.ApiItems.Distinct() do
                 let ps = cpv TaskDevTag.planStart
                 let pe = cpv TaskDevTag.planEnd
                 pss.Add(api, ps)

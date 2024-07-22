@@ -72,11 +72,7 @@ module ImportIOTable =
                                     job.TaskDefs.Select(fun td->td.DeviceApiPureName(job), td))
                 |> dict
 
-            let dicJob =
-                sys.Jobs
-                |> Seq.map (fun j -> j.TaskDefs , j)
-                |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiPureName, j))
-                |> dict
+       
 
  
             let getInOutDataType (inOutText:string) =

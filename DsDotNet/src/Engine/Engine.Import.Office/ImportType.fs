@@ -123,8 +123,8 @@ module ImportType =
         dev.SetInSymbol(inSym) 
         dev.SetOutSymbol(outSym)
 
-        checkDataType dev.Name dev.InDataType inDataType   
-        checkDataType dev.Name dev.OutDataType outDataType
+        checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType   
+        checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
 
     let getPPTDataTypeText (inType:DataType) (outType:DataType) =
         let inTypeText  = inType.ToPLCText() 
@@ -143,8 +143,8 @@ module ImportType =
 
         hwDev.TaskDevParaIO <-  TaskDevParaIO(inPara|>Some, outPara|>Some)
 
-        checkDataType hwDev.Name hwDev.InDataType inDataType   
-        checkDataType hwDev.Name hwDev.OutDataType outDataType
+        checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType   
+        checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType
         
             
     let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, namePure:string, nameNFunc:string) =

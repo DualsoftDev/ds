@@ -283,6 +283,8 @@ module PPTNodeModule =
                 $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
         member x.ApiName = 
                 x.Job.Last()
+        member x.ApiPureName = 
+                x.JobPure.Last()
             
         member x.FlowName =  pageTitle
         member x.IsAlias: bool = x.Alias.IsSome

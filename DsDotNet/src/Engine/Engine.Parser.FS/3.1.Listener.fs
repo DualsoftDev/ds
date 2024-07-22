@@ -616,7 +616,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let callListings = commonCallParamExtractor ctx 
             let dicTaskDevs = Dictionary<string,TaskDev>()
 
-            let creaTaskDev (apiPoint:ApiItem) (device:string)  (taskDevPara:TaskDevParaIO)  (addr:Addresses) (jobName:string) =
+            let createTaskDev (apiPoint:ApiItem) (device:string)  (taskDevPara:TaskDevParaIO)  (addr:Addresses) (jobName:string) =
                 let apiPara = { TaskDevParaIO = taskDevPara; ApiItem= apiPoint}
                 let taskDev = TaskDev(apiPara, jobName, device, system)
                 let apiPureName = taskDev.DeviceApiPureName(jobName)
@@ -684,7 +684,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                     None
                                  
                                        
-                                            return creaTaskDev apiPoint  devApiName TaskDevParaIO addr jobName
+                                            return createTaskDev  apiPoint  devApiName TaskDevParaIO addr jobName
                                         }
 
                                     match taskFromLoaded with
@@ -692,8 +692,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     | _ -> 
                                         match tryFindLoadedSystem system device with
                                         | Some dev->
-                                            let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParaIO
-                                            creaTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParaIO addr jobName
+                                            let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
+                                            match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with 
+                                            | Some apiItem ->
+                                                createTaskDev apiItem device TaskDevParaIO addr jobName
+                                            | None ->
+                                                let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParaIO
+                                                createTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParaIO addr jobName
                                                
                                         | None -> failwithlog $"device({device}) api({api}) is not exist"
 

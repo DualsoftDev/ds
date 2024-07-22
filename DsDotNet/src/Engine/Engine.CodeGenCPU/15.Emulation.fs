@@ -14,7 +14,7 @@ type TaskDev with
         let rst = sys._off.Expr
 
         let inParam = d.GetInParam(job)
-        if inParam.Type = DuBOOL && api.PureName = api.Name //bool type 은 파라메터 있는 타입은 제외    
+        if inParam.Type = DuBOOL || api.PureName = api.Name //bool type 은 파라메터 있는 타입은 제외    
         then 
             let setBool = if inParam.Value.IsNull() || (inParam.Value |> Convert.ToBoolean)
                           then set 
@@ -23,10 +23,7 @@ type TaskDev with
             (setBool, rst) --| (d.InTag, getFuncName())
         else 
 
-            let setData = if inParam.DevValue.IsNull()
-                            then failWithLog $"{d.Name} {d.InAddress} 은 value 값을 입력해야 합니다." 
-                            else inParam.DevValue.Value|>literal2expr
-
+            let setData = inParam.Value|>literal2expr
             (set, setData) --> (d.InTag, getFuncName())
 
 type DsSystem with

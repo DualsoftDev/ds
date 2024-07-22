@@ -1,4 +1,5 @@
 using Diagram.View.MSAGL;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Presentation;
 using Dual.Common.Core;
 using Dual.Common.Winform;
@@ -127,14 +128,19 @@ namespace Diagram.View.MSAGL
                     DicTaskDevTag[tag].Add(viewVertex);
                 }
             }
+
             void UpdateDicTaskDevPlanTag(TaskDev td, ViewVertex viewVertex)
             {
-                var planEndTag = (td.TagManager as TaskDevManager).PE;
+                td.ApiItems.Iter(api =>
+                {
+                    var planEndTag = (td.TagManager as TaskDevManager).PE(api);
 
-                if (!DicMemoryTag.ContainsKey(planEndTag))
-                    DicMemoryTag.Add(planEndTag, new List<ViewVertex>());
-                DicMemoryTag[planEndTag].Add(viewVertex);
+                    if (!DicMemoryTag.ContainsKey(planEndTag))
+                        DicMemoryTag.Add(planEndTag, new List<ViewVertex>());
+                    DicMemoryTag[planEndTag].Add(viewVertex);
+                }); 
             }
+
             void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
             {
                 if (!DicMemoryTag.ContainsKey(tag))
@@ -156,12 +162,15 @@ namespace Diagram.View.MSAGL
                     {
                         HandleTaskDevEvent(rx as EventTaskDev);
                     }
-                 
+         
                     if (SaveLog)
                         DBLog.InsertValueLog(DateTime.Now, rx);
                 });
             }
         }
+
+   
+
         private static void HandleVertexEvent(EventVertex ev)
         {
             if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue && DicNode.ContainsKey(ev.Target)) 
@@ -216,8 +225,7 @@ namespace Diagram.View.MSAGL
                 });
             }
         }
-
-
+     
         private static void HandleTaskDevEvent(EventTaskDev td)
         {
             if (!DicMemoryTag.ContainsKey(td.Tag)) return;
@@ -229,7 +237,6 @@ namespace Diagram.View.MSAGL
                 {
                     if (!IsThisSystem(node)) return;
 
-                    var tags = n.TaskDevs.Cast<TaskDev>().Select(w => w.TagManager).Cast<TaskDevManager>().Select(s => s.PE);
 
                     switch (td.Tag.TagKind)
                     {
@@ -251,12 +258,33 @@ namespace Diagram.View.MSAGL
                             }
                         case (int)TaskDevTag.planEnd:
                             {
-                                var on = tags.All(s => Convert.ToBoolean(s.Value));
+                                bool on = false;
+
+                                bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)
+                                {
+                                    return n.TaskDevs.Select(t => (TaskDevManager)t.TagManager).All(predicate);
+                                }
+
+                                if (n.Vertex is Call c)
+                                {
+                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PE(c.TargetJob).Value));
+                                }
+                                else if (n.Vertex is Alias a)
+                                {
+                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PE(a.GetPureCall().Value.TargetJob).Value));
+                                }
+                                else
+                                {
+                                    throw new Exception("TaskDevTag.planEnd not CallType");
+                                }
+
+
                                 n.LampPlanEnd = on;
                                 var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
                                 ucView?.UpdatePlanEndValue(node, on);
                                 break;
                             }
+
                     }
                 });
             });

@@ -26,13 +26,14 @@ module private DsParserHelperModule =
         
     let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) = 
         let (inaddr, inParam), (outaddr, outParm) =
-            ctx.TryFindFirstChild<DevParamInOutContext>()
+            ctx.TryFindFirstChild<TaskDevParaInOutContext>()
             |> Option.get 
             |> commonDeviceParamExtractor
         let device = jobNameFqdn.Take(2).Combine(TextDeviceSplit)
-        let api = GetLastParenthesesReplaceName (jobNameFqdn.Last(), "")
-        let devParaIO = { InPara = inParam|>Some; OutPara = outParm|>Some }
-        {ApiFqnd = [|device; api|]; DevParaIO =devParaIO; InAddress = inaddr; OutAddress = outaddr}
+        let api = jobNameFqdn.Last()
+        //let api = GetLastParenthesesReplaceName (jobNameFqdn.Last(), "")
+        let TaskDevParaIO = TaskDevParaIO(inParam|>Some, outParm|>Some)
+        {ApiFqnd = [|device; api|]; TaskDevParaIO =TaskDevParaIO; InAddress = inaddr; OutAddress = outaddr}
 
     type DsSystem with
 
@@ -596,13 +597,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             }
             |> ignore
 
-        let createDeviceVariable (system: DsSystem)  (devPara:DevPara option) (stgKey:string) address =
-            if devPara.IsSome
+        let createDeviceVariable (system: DsSystem)  (taskDevPara:TaskDevPara option) (stgKey:string) address =
+            if taskDevPara.IsSome
             then
-                let devParam = devPara |> Option.get
-                match devParam.DevName with
+                let taskDevPara = taskDevPara |> Option.get
+                match taskDevPara.DevName with
                 | Some name ->
-                    let dataType = devParam.Type
+                    let dataType = taskDevPara.Type
                     let variable = createVariableByType name dataType
 
                     system.AddActionVariables (ActionVariable(name, address, stgKey, dataType)) |> ignore
@@ -615,16 +616,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let callListings = commonCallParamExtractor ctx 
             let dicTaskDevs = Dictionary<string,TaskDev>()
 
-            let creaTaskDev (apiPoint:ApiItem) (device:string)  (devParaIO:DevParaIO)  (addr:Addresses) (jobName:string) =
-                let taskDev = TaskDev(apiPoint, jobName, devParaIO, device, system)
+            let creaTaskDev (apiPoint:ApiItem) (device:string)  (taskDevPara:TaskDevParaIO)  (addr:Addresses) (jobName:string) =
+                let apiPara = { TaskDevParaIO = taskDevPara; ApiItem= apiPoint}
+                let taskDev = TaskDev(apiPara, jobName, device, system)
+                let apiPureName = taskDev.DeviceApiPureName(jobName)
                 let updatedTaskDev = 
-                    if dicTaskDevs.ContainsKey(taskDev.QualifiedName)
+                    if dicTaskDevs.ContainsKey(apiPureName)
                     then
-                        let oldTaskDev = dicTaskDevs[taskDev.QualifiedName]
-                        oldTaskDev.AddOrUpdateDevParam(jobName, devParaIO)
+                        let oldTaskDev = dicTaskDevs[apiPureName]
+                        oldTaskDev.AddOrUpdateApiTaskDevPara(jobName, apiPoint, taskDevPara)
                         oldTaskDev
                     else 
-                        dicTaskDevs.Add(taskDev.QualifiedName, taskDev)   
+                        dicTaskDevs.Add(apiPureName, taskDev)   
                         taskDev
 
                 if addr.In <> updatedTaskDev.InAddress 
@@ -648,13 +651,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         [for apiDefCtx in apiDefCtxs do
                             let apiPath = apiDefCtx.CollectNameComponents()
                             let (inaddr, inParam), (outaddr, outParm) =
-                                match apiDefCtx.TryFindFirstChild<DevParamInOutContext>() with
-                                | Some devParam -> 
-                                    commonDeviceParamExtractor devParam 
+                                match apiDefCtx.TryFindFirstChild<TaskDevParaInOutContext>() with
+                                | Some taskDevPara -> 
+                                    commonDeviceParamExtractor taskDevPara 
                                 | None ->
-                                     (TextAddrEmpty, defaultDevParam()), (TextAddrEmpty, defaultDevParam())
-                            let devParaIO = {InPara =Some(inParam); OutPara =Some(outParm)}
-                            yield {ApiFqnd = apiPath;  DevParaIO = devParaIO; InAddress = inaddr; OutAddress = outaddr}
+                                     (TextAddrEmpty, defaultTaskDevPara()), (TextAddrEmpty, defaultTaskDevPara())
+                            let TaskDevParaIO = TaskDevParaIO(inParam|>Some, outParm|>Some)
+                            yield {ApiFqnd = apiPath;  TaskDevParaIO = TaskDevParaIO; InAddress = inaddr; OutAddress = outaddr}
                         ]
                     else
                         [getAutoGenDevApi (jobNameFqdn,  callListingCtx)]
@@ -664,7 +667,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         for ad in apiDefs do
                             let apiFqnd = ad.ApiFqnd |> Seq.toList
                             let devApiName = apiFqnd.Head
-                            let addr, devParaIO = Addresses(ad.InAddress, ad.OutAddress), ad.DevParaIO
+                            let addr, TaskDevParaIO = Addresses(ad.InAddress, ad.OutAddress), ad.TaskDevParaIO
                             let task = 
                                 match apiFqnd with
                                 | device :: [ api ] ->
@@ -681,7 +684,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                     None
                                  
                                        
-                                            return creaTaskDev apiPoint  devApiName devParaIO addr jobName
+                                            return creaTaskDev apiPoint  devApiName TaskDevParaIO addr jobName
                                         }
 
                                     match taskFromLoaded with
@@ -689,8 +692,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     | _ -> 
                                         match tryFindLoadedSystem system device with
                                         | Some dev->
-                                            let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api devParaIO
-                                            creaTaskDev taskDev.ApiItem device devParaIO addr jobName
+                                            let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParaIO
+                                            creaTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParaIO addr jobName
                                                
                                         | None -> failwithlog $"device({device}) api({api}) is not exist"
 
@@ -700,8 +703,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             
                             let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName) options.Storages
                             let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
-                            createDeviceVariable system devParaIO.InPara plcName_I task.InAddress
-                            createDeviceVariable system devParaIO.OutPara plcName_O task.OutAddress
+                            createDeviceVariable system TaskDevParaIO.InPara plcName_I task.InAddress
+                            createDeviceVariable system TaskDevParaIO.OutPara plcName_O task.OutAddress
 
                             yield task
 

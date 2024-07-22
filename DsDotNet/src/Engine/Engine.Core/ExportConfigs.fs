@@ -60,24 +60,25 @@ module ExportConfigsMoudle =
     let getDsInterfaces (sys: DsSystem) =
         let ifs = HashSet<DsInterface>()
 
-        sys.GetDevicesCall()
-           |> Seq.filter(fun (dev,_)-> dev.ApiItem.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
+        sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
+           
+           |> Seq.filter(fun (dev,_)-> dev.FirstApi.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
            |> Seq.iter(fun (dev,v) ->
 
                     let dataSync = 
                         {
                             Id = ifs.Count
-                            Work = dev.ApiItem.RX.Name
-                            WorkInfo = dev.ApiItem.RX.Motion.Value
-                            ScriptStartTag = dev.ApiItem.RX.ScriptStartTag.Address
-                            ScriptEndTag = dev.ApiItem.RX.ScriptEndTag.Address
-                            MotionStartTag = dev.ApiItem.RX.MotionStartTag.Address
-                            MotionEndTag = dev.ApiItem.RX.MotionEndTag.Address
+                            Work = dev.FirstApi.RX.Name
+                            WorkInfo = dev.FirstApi.RX.Motion.Value
+                            ScriptStartTag = dev.FirstApi.RX.ScriptStartTag.Address
+                            ScriptEndTag = dev.FirstApi.RX.ScriptEndTag.Address
+                            MotionStartTag = dev.FirstApi.RX.MotionStartTag.Address
+                            MotionEndTag = dev.FirstApi.RX.MotionEndTag.Address
                             Station = v.Parent.GetFlow().Name
                             Device = dev.DeviceName
-                            Action = dev.ApiItem.Name
+                            Action = dev.FirstApi.Name
                             LibraryPath = sys.LoadedSystems.TryFindWithName(dev.DeviceName).Value.RelativeFilePath
-                            Motion = dev.ApiStgName
+                            Motion = dev.GetApiStgName(v.TargetJob)
                         }
                     ifs.Add dataSync |> ignore
                )

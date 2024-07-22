@@ -18,7 +18,7 @@ type Job with
                     let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
                     let sets =
                         if RuntimeDS.Package.IsPackageSIM() then _off
-                        else td.PE.Expr <&&> td.PS.Expr
+                        else td.GetPE(j).Expr <&&> td.GetPS(j).Expr
 
 
                     let outParam = td.GetOutParam(j)
@@ -33,5 +33,7 @@ type Job with
                         else 
                             yield (sets, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
         ]
+
+
    
 

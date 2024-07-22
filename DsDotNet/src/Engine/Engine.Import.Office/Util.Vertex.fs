@@ -45,26 +45,27 @@ module ImportUtilVertex =
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.Name = apiName) with
             |Some api ->
                 let devTask = 
-                    let devParam =  node.DevParam 
+                    let TaskDevPara =  node.TaskDevPara 
 
-                    match sys.TaskDevs.TryFind(fun d->d.ApiItem = api ) with 
+                    match sys.TaskDevs.TryFind(fun d->d.ApiItems.Contains(api)) with 
                     | Some (taskDev) ->
-                        taskDev.AddOrUpdateDevParam(jobName, devParam)
+                        taskDev.AddOrUpdateApiTaskDevPara(jobName, api, TaskDevPara)
                         taskDev
                     | _ -> 
-                        TaskDev(api, jobName, devParam, loadSysName, sys)
+                        let apiPara  = {TaskDevParaIO =  TaskDevPara; ApiItem = api}
+                        TaskDev(apiPara, jobName, loadSysName, sys)
 
                 let job = Job(node.Job, sys, [devTask])
-                job.UpdateDevParam(node.DevParam)
+                //job.UpdateTaskDevPara(node.TaskDevPara)
                 job.UpdateJobParam(node.JobParam)
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
 
             | None -> 
-                if device.AutoGenFromParentSystem
+                if device.AutoGenFromParentSystem || not(node.TaskDevPara.IsDefaultParam)
                 then
-                    let devParam =  node.DevParam 
-                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName devParam
+                    let TaskDevPara =  node.TaskDevPara 
+                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName TaskDevPara
                     let job = Job(node.Job, sys, [autoTaskDev])
                     job.UpdateJobParam(node.JobParam)
                     sys.Jobs.Add job |> ignore
@@ -95,11 +96,10 @@ module ImportUtilVertex =
                         JobName = node.Job.CombineQuoteOnDemand()
                         DevName = node.DevName
                         ApiName = apiName
-                        DevParaIO = node.DevParam
+                        TaskDevParaIO = node.TaskDevPara
                         Parent = parentWrapper
                         }
                     addNewCall callParams
-
 
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)

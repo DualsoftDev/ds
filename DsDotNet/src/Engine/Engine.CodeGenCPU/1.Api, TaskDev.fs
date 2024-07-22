@@ -6,66 +6,68 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 
-
-
-    
 type TaskDevManager with
 
     member d.TD1_PlanSend(activeSys:DsSystem, coins:Vertex seq) =
-
-        let sets = coins.Select(fun c->c.VC.MM)
-                        .ToOrElseOff()
-
-        (sets, activeSys._off.Expr) --| (d.PS, getFuncName())
-
-    member d.TD2_PlanReceive(activeSys:DsSystem) =
-
-        let sets =  d.TaskDev.ApiItem.APIEND.Expr
-        (sets, activeSys._off.Expr) --| (d.PE, getFuncName())
-
-
-
-type ApiItemManager with
-
-    member a.A1_ApiSet(td:TaskDev) =
         [
-            let sets = td.PS.Expr
-            yield! (sets, a.ApiItemSetPusleRelay, a.ApiItemSetPusleHold) --^ (a.ApiItemSetPusle, getFuncName())
-            yield  (a.ApiItemSetPusle.Expr, a.ApiItem.TX.VR.ET.Expr) ==| (a.APISET, getFuncName())
+            for c in coins.OfType<Call>() do
+                yield (c.VC.MM.Expr, activeSys._off.Expr) --| (d.TaskDev.GetPS(c.TargetJob), getFuncName())
         ]
-    member a.A2_ApiEnd(sys:DsSystem) =
+    
+    member d.TD2_PlanReceive(activeSys:DsSystem) =
+        [
+            for api in d.TaskDev.ApiItems do
+                let sets =  api.APIEND.Expr
+                yield (sets, activeSys._off.Expr) --| (d.PE(api), getFuncName())
+        ]
 
-        let sets =  a.ApiItem.RxET.Expr
-        (sets, sys._off.Expr) --| (a.APIEND, getFuncName())
+    member d.A1_ApiSet(call:Call) :  CommentedStatement list=
+        [
+            let a = d.TaskDev.GetApiItem(call.TargetJob) 
+            let ps = d.TaskDev.GetPS(call.TargetJob)
+            yield! (ps.Expr , a.ApiItemSetPusleRelay, a.ApiItemSetPusleHold) --^ (a.ApiItemSetPusle, getFuncName())
+            yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.APISET, getFuncName())
+        ]
 
-    member a.A3_SensorLinking(activeSys:DsSystem, coins:Call seq) =
-
-        let input = coins.First().GetEndAction(a.ApiItem)
+    member d.A2_ApiEnd() =
+        [
+            for a in d.TaskDev.ApiItems do
+                let sets = a.RxET.Expr
+                yield (sets, a.ApiSystem._off.Expr) --| (a.APIEND, getFuncName())
+        ]
         
-        let sets =
-            if input.IsSome
-            then
-                coins.Select(fun c->c.LinkExpr).ToOrElseOff()
-                <&&>  
-                (input.Value <&&> !@a.APIEND.Expr <&&> !@a.SL2.Expr)
-            else 
-                (activeSys._off.Expr)
+    member d.A3_SensorLinking(call:Call) =
+        [
+            for a in d.TaskDev.ApiItems do
+                if not(call.IsFlowCall)
+                    then
+                    let input =  d.TaskDev.GetInExpr(call.TargetJob)
+                    let _off = d.TaskDev.ParnetSystem._off.Expr
+                    let sets =
+                            call.RealLinkExpr <&&>  
+                            (input <&&> !@a.APIEND.Expr <&&> !@a.SL2.Expr)
 
-        (sets, activeSys._off.Expr) --| (a.SL1, getFuncName())
+                    yield (sets, _off) --| (a.SL1, getFuncName())
+        ]
 
-    member a.A4_SensorLinked(activeSys:DsSystem, coins:Call seq) =
+    member d.A4_SensorLinked(call:Call) =
+        [
+            for a in d.TaskDev.ApiItems do
+                if not(call.IsFlowCall)
+                then
+                    let input =  d.TaskDev.GetInExpr(call.TargetJob)
+                    let _off = d.TaskDev.ParnetSystem._off.Expr
+                    let sets =
+                        call.RealLinkExpr
+                        <&&> 
+                            (   (  input <&&> a.APIEND.Expr)
+                        <||> (!@input <&&> !@a.APIEND.Expr)
+                        <||> call.System._sim.Expr
+                            )
 
-        let input = coins.First().GetEndAction(a.ApiItem)
-        let sets = 
-            if input.IsSome
-            then
-                coins.Select(fun c->c.LinkExpr).ToOrElseOff()
-                <&&>( 
-                          (  input.Value <&&> a.APIEND.Expr)
-                     <||> (!@input.Value <&&> !@a.APIEND.Expr)
-                     <||> activeSys._sim.Expr
-                     )
-            else 
-                (activeSys._on.Expr)
+                    yield (sets, _off) ==| (a.SL2, getFuncName())
+        ]
+    
 
-        (sets, activeSys._off.Expr) ==| (a.SL2, getFuncName())
+
+  

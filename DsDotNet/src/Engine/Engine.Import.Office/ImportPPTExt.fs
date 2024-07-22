@@ -531,7 +531,7 @@ module ImportU =
                             //match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
                             //| Some masterJob ->
                             //        let job = Job(jobFqdn, mySys, masterJob.TaskDefs)
-                            //        //job.UpdateDevParam(devParams)
+                            //        //job.UpdateTaskDevPara(TaskDevParas)
                             //        mySys.Jobs.Add(job); job
 
                             //| None -> 
@@ -758,7 +758,7 @@ module ImportU =
                     let devApiDefinitions = WalkJobAddress(dsText, ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuName", None, DuNone))
                     devApiDefinitions 
                     |> Seq.iter(fun a->
-                         match mySys.TaskDevs.TryFind(fun td->td.DeviceApiName = a.ApiFqnd.Combine()) with
+                         match mySys.TaskDevs.TryFind(fun td->td.DeviceApiPureName(a.ApiFqnd.Combine()) = a.ApiFqnd.Combine()) with
                          | Some td -> 
                                 if td.IsInAddressEmpty 
                                 then 

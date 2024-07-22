@@ -45,7 +45,7 @@ module ExportIOTable =
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
-    let toTextPPTFunc (x:DevPara option) =
+    let toTextPPTFunc (x:TaskDevPara option) =
         if x.IsSome then 
             let x = x |> Option.get
             match x.DevValue, x.DevTime with 
@@ -63,8 +63,8 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let inSym =  toTextPPTFunc btn.DevParaIO.InPara 
-                    let outSym =  toTextPPTFunc btn.DevParaIO.OutPara
+                    let inSym =  toTextPPTFunc btn.TaskDevParaIO.InPara 
+                    let outSym =  toTextPPTFunc btn.TaskDevParaIO.OutPara
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
                     let dType = getPPTHwDevDataTypeText btn
                     
@@ -74,8 +74,8 @@ module ExportIOTable =
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let inSym =  toTextPPTFunc lamp.DevParaIO.InPara 
-                    let outSym =  toTextPPTFunc lamp.DevParaIO.OutPara
+                    let inSym =  toTextPPTFunc lamp.TaskDevParaIO.InPara 
+                    let outSym =  toTextPPTFunc lamp.TaskDevParaIO.OutPara
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) Util.runtimeTarget
                     let dType = getPPTHwDevDataTypeText lamp
                     dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,inSym, outSym)
@@ -113,7 +113,7 @@ module ExportIOTable =
         let outSym =  dev.GetOutParam(job).Name
         let inSkip, outSkip = dev.GetSkipInfo(job)
 
-        let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.Name}"
+        let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.GetApiItem(job).PureName}"
         [   
             TextXlsAddress
             flow
@@ -210,8 +210,8 @@ module ExportIOTable =
                     getPPTHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
-                    if cond.DevParaIO.InPara.IsSome then cond.DevParaIO.InPara.Value.Name else ""
-                    if cond.DevParaIO.OutPara.IsSome then cond.DevParaIO.OutPara.Value.Name else ""
+                    if cond.TaskDevParaIO.InPara.IsSome then cond.TaskDevParaIO.InPara.Value.Name else ""
+                    if cond.TaskDevParaIO.OutPara.IsSome then cond.TaskDevParaIO.OutPara.Value.Name else ""
                 ]
             )
         
@@ -477,7 +477,7 @@ module ExportIOTable =
             devCallSet.Select(fun (dev,call)-> 
                     
                     let hasSafety = call.SafetyConditions.Count > 0   
-                    rowDeviceItems dev.ApiStgName hasSafety)
+                    rowDeviceItems (dev.GetApiStgName(call.TargetJob)) hasSafety)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -567,7 +567,7 @@ module ExportIOTable =
 
         let rowItems (dev: TaskDev, addr:string) =
             [ 
-              dev.ApiName
+              dev.ApiPureName
               dev.InDataType.ToPLCText()
               addr
                ]

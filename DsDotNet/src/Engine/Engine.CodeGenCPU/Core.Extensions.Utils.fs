@@ -39,7 +39,7 @@ module ConvertCoreExtUtils =
         createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutDataType)
         |> iter (fun t -> x.OutTag  <- t)
 
-    let getInExpr (x:DevPara option, devTag:ITag, sys:DsSystem) = 
+    let getInExpr (x:TaskDevPara option, devTag:ITag, sys:DsSystem) = 
         let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool> 
         if devTag.IsNull() 
         then sysOff.Expr  :> IExpression
@@ -66,7 +66,7 @@ module ConvertCoreExtUtils =
         [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)    = getFM(x).GetFlowTag(typ )
 
         [<Extension>] static member GetInExpr (x:HwSystemDef) = 
-                            getInExpr (x.DevParaIO.InPara, x.InTag, x.System) :?> Expression<bool>
+                            getInExpr (x.TaskDevParaIO.InPara, x.InTag, x.System) :?> Expression<bool>
         [<Extension>] static member GetInExpr (x:TaskDev, job:Job) = 
-                            getInExpr (Some(x.GetInParam(job)), x.InTag, x.ApiItem.ApiSystem)  :?> Expression<bool>
+                            getInExpr (x.GetInParam(job)|>Some, x.InTag, x.GetApiItem(job).ApiSystem)  :?> Expression<bool>
                         

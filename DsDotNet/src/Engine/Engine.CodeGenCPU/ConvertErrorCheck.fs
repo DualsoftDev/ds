@@ -39,17 +39,17 @@ module ConvertErrorCheck =
 
           for coin in sys.GetVerticesOfJobCalls() do
                 for td in coin.TargetJob.TaskDefs do
-                    let api = td.ApiItem
-                    if api.RX.IsNull() then
-                        failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
-                    if api.TX.IsNull() then
-                        failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
+                    for api in td.ApiItems do
+                        if api.RX.IsNull() then
+                            failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
+                        if api.TX.IsNull() then
+                            failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
-                    if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction = Push 
-                    then 
-                        if coin.MutualResetCoins.isEmpty()
+                        if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction = Push 
                         then 
-                            failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
+                            if coin.MutualResetCoins.isEmpty()
+                            then 
+                                failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
                              
 
 
@@ -67,7 +67,7 @@ module ConvertErrorCheck =
 
     let checkMultiDevPair(sys: DsSystem) = 
         let devicesCalls = 
-            sys.GetDevicesCall()
+            sys.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
                .Where(fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1)
 
 
@@ -123,7 +123,7 @@ module ConvertErrorCheck =
         let allAddresses = 
             [
                 yield! sys.Jobs |> Seq.collect (fun j -> 
-                    j.TaskDefs|> Seq.collect (fun d -> [($"{d.ApiName}_IN", d.InAddress); ($"{d.ApiName}_OUT", d.OutAddress)])
+                    j.TaskDefs|> Seq.collect (fun d -> [($"{d.ApiPureName}_IN", d.InAddress); ($"{d.ApiPureName}_OUT", d.OutAddress)])
                                )
                     |> Seq.distinctBy(fun (name,_)-> name)
                     

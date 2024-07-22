@@ -214,7 +214,7 @@ module TagKindList =
     /// 14000 ~ 14999
     [<Flags>]
     type TaskDevTag    =
-    | planStart                = 14000
+    | planStart                = 14000 
     | planEnd                  = 14001
     | actionIn                 = 14002
     | actionOut                = 14003

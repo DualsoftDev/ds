@@ -65,7 +65,7 @@ type VertexMCall with
                 .Select(fun d->
                     if d.InAddress = TextAddrEmpty || d.InAddress = TextSkip
                     then //주소가 없으면 Plan 으로 처리
-                        d.PE.Expr
+                        d.GetPE(call.TargetJob).Expr
                     else    
                         d.GetInExpr(call.TargetJob)
                 ) 

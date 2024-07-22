@@ -193,28 +193,15 @@ module internal ModelFindModule =
                 .Where(fun v -> v.IsJob)
 
                 
-    let getVerticesOfCoins x = 
+    let getVerticesOfAliasNCalls x = 
         let vs =   getVerticesOfSystem(x)
         let calls = vs.OfType<Call>().Cast<Vertex>()
         let aliases = vs.OfType<Alias>().Cast<Vertex>()
         (calls@aliases)
-            .Where(fun c->c.Parent.GetCore() :? Real)     
 
-             
-    let getDistinctTaskDevs(x:DsSystem) =
-            let taskDevs =  getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.TaskDefs)
-                                .Distinct()
-            
-            let coinAll = getVerticesOfCoins x
-            taskDevs |> Seq.map(fun td->
-                    td, 
-                        coinAll.Filter(fun f->
-                        match f with
-                        | :? Call as c when c.IsJob ->  c.TargetJob.TaskDefs.Contains(td)
-                        | :? Alias as al->  al.TargetWrapper.CallTarget().Value.TargetJob.TaskDefs.Contains(td)
-                        |_ -> false
-                    )
-            )
+    let getVerticesOfCoins x = 
+        getVerticesOfAliasNCalls(x)
+            .Where(fun c->c.Parent.GetCore() :? Real)     
 
 
     let getSkipInfo(dev:TaskDev, job:Job) =
@@ -238,16 +225,33 @@ module internal ModelFindModule =
                 if outSkip then dev.OutAddress <- TextSkip
             )
 
-    let  getDevicesDisdict(x: DsSystem, onlyCoin:bool) =
+    let getTaskDevs(x: DsSystem, onlyCoin:bool) =
         let calls = getVerticesHasJob(x).DistinctBy(fun v-> v.TargetJob)
         let tds = calls
-                    .Where(fun c-> not(onlyCoin) || c.Parent.GetCore() :? Real)
-                    .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c) )
+                    .Where(fun c-> not(onlyCoin) || not(c.IsFlowCall))
+                    .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
         tds 
-        |> Seq.distinctBy (fun (td, _) -> td)
-        |> Seq.sortBy (fun (td, _c) -> 
-            //let paramSortKey = $"{td.GetInParam(c.TargetJob).Type.ToText()};{td.GetOutParam(c.TargetJob).Type.ToText()}"
-            (td.DeviceName, td.ApiItem.Name(*, paramSortKey*)))
+        |> Seq.sortBy (fun (td, c) -> 
+            (td.DeviceName, td.GetApiItem(c.TargetJob).Name))
+
+            
+    let getTaskDevCalls(x:DsSystem) =
+        let taskDevs =  getTaskDevs(x, false)
+                            .DistinctBy(fun (td, c) -> td, c.TargetJob)
+        let callAll = getVerticesOfAliasNCalls(x)
+        taskDevs
+        |> Seq.map(fun (td, call)->
+            td, 
+                callAll.Filter(fun f->
+                match f with
+                | :? Call as c when c.IsJob -> c.TargetJob = call.TargetJob 
+                | :? Alias as al-> 
+                        match al.TargetWrapper.CallTarget() with
+                        | Some c when c.IsJob -> c.TargetJob = call.TargetJob
+                        |_ -> false
+                |_ -> false
+            )
+        )
 
     type DsSystem with
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
@@ -317,12 +321,9 @@ type FindExtension =
                         .Where(fun v -> v.IsJob)
 
 
-    [<Extension>] static member GetTaskDevCoinsSet(x:DsSystem) = 
-                        getDistinctTaskDevs x 
+    [<Extension>] static member GetTaskDevCalls(x:DsSystem) =   getTaskDevCalls x 
+                      
                     
-    [<Extension>] static member GetApiCoinsSet(x:DsSystem) = 
-                        getDistinctTaskDevs(x).Select(fun (td,coins) -> td.ApiItem, coins)         
-            
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
 
@@ -339,28 +340,28 @@ type FindExtension =
                           .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
 
 
-    [<Extension>] static member GetDevicesCoin(x:DsSystem) = getDevicesDisdict(x, true)
+    [<Extension>] static member GetTaskDevsCoin(x:DsSystem) = getTaskDevs(x, true)
 
-    [<Extension>] static member GetDevicesCall(x:DsSystem) = getDevicesDisdict(x, false)
+    [<Extension>] static member GetTaskDevsCall(x:DsSystem) = getTaskDevs(x, false)
                   
     [<Extension>] static member GetDevicesHasOutput(x:DsSystem) = 
-                    x.GetDevicesCoin() //출력있는건 무조건  Coin
+                                //출력있는건 무조건  Coin
+                    x.GetTaskDevsCoin().DistinctBy(fun (td, c) -> (td, c.TargetJob))
                         .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
 
   
     [<Extension>] static member GetDevicesForHMI(x:DsSystem) = 
                  //kia demo //test ahn
-                    x.GetDevicesCoin()
+                    x.GetTaskDevsCoin().DistinctBy(fun (td, _c) -> td)
                         .Where(fun (dev, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
                          |> Seq.filter(fun (dev,c) -> c.TargetJob.TaskDefs.First() = dev)
                  //normal //test ahn
-                    //x.GetDevicesCoin()
+                    //x.GetTaskDevsCoin()
                     //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))
 
 
-
     [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
-                    x.GetDevicesCall()
+                    x.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
                         .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
 
     [<Extension>]

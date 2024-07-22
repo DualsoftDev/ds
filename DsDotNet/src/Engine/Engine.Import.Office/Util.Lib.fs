@@ -19,7 +19,7 @@ module ImportUtilForLib =
         JobName: string
         DevName: string
         ApiName: string
-        DevParaIO: DevParaIO
+        TaskDevParaIO: TaskDevParaIO
         Parent: ParentWrapper
     }
     with
@@ -31,12 +31,12 @@ module ImportUtilForLib =
         | Some f -> f.ReferenceSystem
         | None -> ParserLoader.LoadFromDevicePath libFilePath Util.runtimeTarget |> fst
 
-    let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (devParams: DeviceLoadParameters) =
-        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName devParams param.Node (param.Node.Job.Combine())) |> ignore
+    let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (taskDevParaIO: DeviceLoadParameters) =
+        tasks.Add(getLoadedTasks param.MySys devOrg loadedName apiPureName taskDevParaIO param.Node (param.Node.Job.Combine())) |> ignore
 
-    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string)  (devParaIO:DevParaIO)=
+    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string)  (taskDevParaIO:TaskDevParaIO)=
         match autoGenSys with
-        | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName devParaIO|> Some
+        | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName taskDevParaIO|> Some
         | None -> None
 
     let addSingleTask (tasks: HashSet<TaskDev>) (task: TaskDev option) =
@@ -55,12 +55,12 @@ module ImportUtilForLib =
 
     let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getProperty: string -> DeviceLoadParameters) =
         let devOrg = getDeviceOrganization param.MySys libFilePath loadedName
-        let devParams = getProperty loadedName
+        let TaskDevParas = getProperty loadedName
 
-        let task = getTaskDev autoGenSys loadedName (param.Node.Job.Combine()) param.ApiName  param.DevParaIO
+        let task = getTaskDev autoGenSys loadedName (param.Node.Job.Combine()) param.ApiName  param.TaskDevParaIO
         addSingleTask tasks task
         if task.IsNone then
-            processSingleTask tasks param devOrg loadedName param.ApiName devParams
+            processSingleTask tasks param devOrg loadedName param.ApiName TaskDevParas
 
 
     let handleMultiActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =
@@ -89,8 +89,8 @@ module ImportUtilForLib =
             | None -> 
                 let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
                 job.UpdateJobParam(param.Node.JobParam)
-                job.UpdateDevParam(param.Node.DevParam)
-                param.MySys.Jobs.Add(job); job
+                param.MySys.Jobs.Add(job)
+                job
 
         let call = Call.Create(jobForCall, param.Parent)
         call.Name <- param.Node.Job.Combine()

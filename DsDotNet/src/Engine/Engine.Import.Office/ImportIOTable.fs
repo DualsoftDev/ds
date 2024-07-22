@@ -63,24 +63,19 @@ module ImportIOTable =
                     then 
                         handleFunctionCreationOrUpdate sys funcName funcBodyText true
                     else 
-                        //let funcName =
-                        //    match funcName = "" with
-                        //    | true -> $"OP_{funcBodyText}"
-                        //    | false -> funcName
-
                         handleFunctionCreationOrUpdate sys funcName funcBodyText false
                         
                             
             let dicDev =
                 sys.Jobs
-                |> Seq.collect (fun f -> f.TaskDefs)
-                |> Seq.map (fun j -> j.DeviceApiName, j)
+                |> Seq.collect (fun job -> 
+                                    job.TaskDefs.Select(fun td->td.DeviceApiPureName(job), td))
                 |> dict
 
             let dicJob =
                 sys.Jobs
                 |> Seq.map (fun j -> j.TaskDefs , j)
-                |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiName, j))
+                |> Seq.collect (fun (devs, j) -> devs|>Seq.map(fun dev-> dev.ApiPureName, j))
                 |> dict
 
  
@@ -147,7 +142,7 @@ module ImportIOTable =
                 dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
 
 
-                updatePPTDevParam dev  (inSym,checkInType) (outSym, checkOutType)
+                updatePPTTaskDevPara dev  (inSym,checkInType) (outSym, checkOutType)
              
             let updateVarNConst (row: Data.DataRow, tableIO: Data.DataTable, page, isConst:bool) =
                 let name = $"{row.[(int) IOColumn.Name]}"

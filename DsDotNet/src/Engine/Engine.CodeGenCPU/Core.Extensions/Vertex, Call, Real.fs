@@ -30,7 +30,8 @@ module ConvertCpuVertex =
         member av.VM = av.TagManager :?> ActionVariableManager
 
 
-
+    let getAgvTimes(c:Call) = c.TargetJob.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeAvgExist))
+    let getDelayTimes(c:Call) = c.TargetJob.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeDelayExist))
     type Call with
         member c._on     = c.System._on
         member c._off    = c.System._off
@@ -42,9 +43,14 @@ module ConvertCpuVertex =
                     .Where(fun d-> d.ExistInput)
                     .any()
             | false -> false
-            
 
-        member c.UsingTon  = c.IsJob && c.TargetJob.OnDelayTime.IsSome //test ahn  real 의 타임으로 변경
+        member c.ExistAvgTime    = getAgvTimes(c).any()
+        member c.ExistDelayTime  = getDelayTimes(c).any()
+
+        member c.MaxAvgTime    = getAgvTimes(c).Max()
+        member c.MaxDelayTime  = getDelayTimes(c).Max()
+
+        member c.UsingTon  = c.IsJob && c.ExistDelayTime
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 
@@ -56,7 +62,7 @@ module ConvertCpuVertex =
             then
                 (c.TagManager :?> VertexMCall).CallOperatorValue.Expr
             else 
-                c.TargetJob.TaskDefs.Select(fun f-> f.PE).ToAnd()
+                c.TargetJob.TaskDefs.Select(fun td-> td.GetPE(c.TargetJob)).ToAnd()
 
         member c.EndAction = 
                     if c.IsJob 
@@ -73,54 +79,53 @@ module ConvertCpuVertex =
                 then c.VC.TDON.DN.Expr
                 else c.End
 
-        member c.GetEndAction(x:ApiItem) =
-            let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x) 
-            if td.ExistInput
+        member c.GetEndAction() =
+            let tds = c.TargetJob.TaskDefs.Where(fun td->td.ExistInput)
+                                          .Select(fun td->td.GetInExpr(c.TargetJob))
+            if tds.any()
             then 
-                Some(td.GetInExpr(c.TargetJob))
+                Some(tds.ToAnd())
             else 
                 None
-        
 
-        member c.UpdateChildRealExpr(x:ApiItem) =
-            let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x) 
-            if td.ExistInput
-            then 
-                Some(td.GetInExpr(c.TargetJob))
-            else 
-                None
-      
+        //member c.UpdateChildRealExpr(x:ApiItem) =
+        //    let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x) 
+        //    if td.ExistInput
+        //    then 
+        //        Some(td.GetInExpr(c.TargetJob))
+        //    else 
+        //        None
 
-        member c.LinkExpr =
+        member c.RealLinkExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
                  !@rv.Link.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)
 
         member c.PresetTime =   if c.UsingTon
-                                then c.TargetJob.OnDelayTime.Value.ToString() |> CountUnitType.Parse
+                                then c.MaxDelayTime.ToString() |> CountUnitType.Parse
                                 else failwith $"{c.Name} not use timer"
 
         //member c.PresetCounter = if c.UsingCtr
         //                         then c.TargetJob.Func.Value.GetRingCount()
         //                         else failwith $"{c.Name} not use counter"
         
-        member c.PSs =
-            if c.IsJob 
-            then c.TargetJob.TaskDefs.Select(fun f->f.PS)
-            else [c.VC._on]
+        //member c.PSs =
+        //    if c.IsJob 
+        //    then c.TargetJob.TaskDefs.Select(fun f->f.PS)
+        //    else [c.VC._on]
 
         member c.PEs =
             if c.IsJob 
-            then c.TargetJob.TaskDefs.Select(fun f->f.PE)
+            then c.TargetJob.TaskDefs.Select(fun f->f.GetPE(c.TargetJob))
             else [c.VC.CallCommandEnd]
 
         member c.TXs = 
             if c.IsJob
-            then c.TargetJob.TaskDefs |>Seq.map(fun j -> j.ApiItem.TX)
+            then c.TargetJob.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).TX)
             else []
 
         member c.RXs = 
             if c.IsJob
-            then c.TargetJob.TaskDefs |>Seq.map(fun j -> j.ApiItem.RX)
+            then c.TargetJob.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).RX)
             else []
 
         member c.Errors       = 

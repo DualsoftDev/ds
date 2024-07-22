@@ -6,6 +6,7 @@ open ConvertCoreExtUtils
 
 [<AutoOpen>]
 module ConvertCpuApiItem =
+    let getTM(td:TaskDev) = td.TagManager:?> TaskDevManager
     
     //let getLimitFromReals(api:ApiItem) = 
 
@@ -20,9 +21,8 @@ module ConvertCpuApiItem =
         member td.ExistInput   = addressExist td.InAddress
         member td.ExistOutput  = addressExist td.OutAddress
 
-        member td.PS     = getDM(td).PS
-        member td.PE     = getDM(td).PE
-
+        member td.GetPS(job:Job)  = getTM(td).PS(job)   
+        member td.GetPE(job:Job)  = getTM(td).PE(job)   
         
     type ApiItem with
         member a.APISET                 = getAM(a).APISET

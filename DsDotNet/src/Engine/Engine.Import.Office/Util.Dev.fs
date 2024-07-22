@@ -3,6 +3,7 @@ namespace Engine.Import.Office
 
 open Engine.Core
 open System.IO
+open System.Linq
 open Dual.Common.Core.FS
 open System.Reflection
 open LibraryLoaderModule
@@ -99,29 +100,36 @@ module ImportUtilForDev =
                 let newLoadedDev = createAutoGenDev (loadedName, mySys)
                 autoGenAbsolutePath, Some newLoadedDev
 
-    let addOrGetExistSystem (mySys:DsSystem)  loadedSys loadedName (devParams:DeviceLoadParameters) = 
+    let addOrGetExistSystem (mySys:DsSystem)  loadedSys loadedName (taskDevParaIO:DeviceLoadParameters) = 
         if not (mySys.LoadedSysExist(loadedName)) then
-            mySys.AddLoadedSystem(Device(loadedSys, devParams, false))
+            mySys.AddLoadedSystem(Device(loadedSys, taskDevParaIO, false))
             loadedSys
         else 
             loadedSys
 
-    let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName (devParaIO:DevParaIO)= 
+    let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName (taskDevParaIO:TaskDevParaIO)= 
         let referenceSystem = autoGenSys.ReferenceSystem
-        createTaskDevUsingApiName referenceSystem jobName loadedName apiName  devParaIO
+        createTaskDevUsingApiName referenceSystem jobName loadedName apiName  taskDevParaIO
 
-    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (devParams:DeviceLoadParameters) (node:pptNode) jobName =
+    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:pptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
-        let devParam =  node.DevParam 
+        let taskDevParam =  node.TaskDevPara 
 
-        match mySys.GetDevicesCall().TryFind(fun (d,c) -> d.ApiStgName = tastDevKey) with
+        let devCalls =  mySys.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
+
+        match devCalls.TryFind(fun (d,c) -> d.GetApiStgName(c.TargetJob) = tastDevKey) with
         | Some (taskDev, c) -> 
-                         taskDev.AddOrUpdateDevParam(jobName, devParam)
-                         taskDev 
+                    let api = loadedSys.ApiItems.First(fun f -> f.Name = apiPureName)
+                    if not(taskDevParam.IsDefaultParam)
+                    then
+                        taskDev.AddOrUpdateApiTaskDevPara(c.TargetJob, api, taskDevParam)
+                    taskDev 
         | None ->
-            let devOrg = addOrGetExistSystem mySys loadedSys newloadedName devParams
+            let devOrg = addOrGetExistSystem mySys loadedSys newloadedName loadParameters
             match devOrg.ApiItems.TryFind(fun f -> f.Name = apiPureName) with
-            | Some api -> TaskDev(api, jobName ,  devParam,  newloadedName, mySys)
+            | Some api -> 
+                        let apiPara  = {TaskDevParaIO =  taskDevParam; ApiItem = api}
+                        TaskDev(apiPara, jobName, newloadedName, mySys)
             | None ->
                 failWithLog $"Api {apiPureName} not found in {newloadedName}"
                     

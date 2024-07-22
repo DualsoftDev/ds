@@ -17,79 +17,85 @@ module rec DsTaskDevType =
     let addressPrint (addr: string) =
         if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
-    type DevParaIO =
-        {
-            InPara: DevPara option 
-            OutPara: DevPara option
-        }
+    type TaskDevParaIO(inPara: TaskDevPara option , outPara: TaskDevPara option) = 
+        let mutable inPara = inPara 
+        let mutable outPara = outPara 
+        
+        member x.InPara
+            with get() = inPara
+            and set(value) = inPara <- value    
+            
+        member x.OutPara
+            with get() = outPara
+            and set(value) = outPara <- value
+      
+        member x.IsDefaultParam = (x.InPara.IsNone || x.InPara.Value.IsDefaultParam)
+                                  && (x.OutPara.IsNone || x.OutPara.Value.IsDefaultParam)
 
-    type DevPara = {
-        DevName: string option
-        DevType: DataType option
-        DevValue: obj option
-        DevTime: int option
-    } with
-        member x.Value = x.DevValue |> Option.toObj
-        member x.Type = x.DevType |> Option.defaultValue DuBOOL
-        member x.Name = x.DevName |> Option.defaultValue ""
-        member x.Time = x.DevTime 
-        member x.IsDefaultParam =
-            x.DevName.IsNone 
-            && x.DevTime.IsNone
+        member x.ToDsText(addrSet:Addresses) =
+            match x.InPara, x.OutPara with
+            | Some inp, Some outp ->
+                        $"{inp.ToTextWithAddress(addrSet.In)}, {outp.ToTextWithAddress(addrSet.Out)}"
+            | Some inp, None ->
+                        $"{inp.ToTextWithAddress(addrSet.In)}, {addrSet.Out}"
+            | None, Some outp ->
+                        $"{addrSet.In}, {outp.ToTextWithAddress(addrSet.Out)}"
+            | _ -> failwithlog "TaskDevParaIO is not valid"
+
+
+    type TaskDevPara(devName: string option, devType: DataType option, devValue: obj option, devTime: int option) = 
+        let mutable devName = devName  //symolName
+
+        member x.DevName
+            with get() = devName
+            and set(value) = devName <- value
+
+        member x.DevType = devType
+        member x.DevValue= devValue
+        member x.DevTime = devTime
+        member x.Value = devValue |> Option.toObj
+        member x.Type = 
+            devType |> Option.defaultValue DuBOOL
+        member x.Name = 
+            devName |> Option.defaultValue ""
+        member x.Time = 
+            devTime
+
+        member x.IsDefaultParam = 
+            devName.IsNone 
+            && devTime.IsNone
             && x.Type = DuBOOL
-            && x.Value.IsNull()
+            && (devValue |> Option.isNone)
 
-        member x.ToTextWithAddress(addr: string) =
+        member this.ToTextWithAddress(addr: string) =
             let address = addressPrint addr
-            let name = x.DevName |> Option.defaultValue ""
-            let typ = x.DevType |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
-            let value = x.DevValue |> Option.map (fun v -> x.Type.ToStringValue(v)) |> Option.defaultValue ""
-            let time = x.DevTime |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
+            let name = devName |> Option.defaultValue ""
+            let typ = devType |> Option.map (fun t -> t.ToText()) |> Option.defaultValue ""
+            let value = devValue |> Option.map (fun v -> this.Type.ToStringValue(v)) |> Option.defaultValue ""
+            let time = devTime |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
 
             let parts = [address; name; typ; value; time]
             let result = parts |> List.filter (fun s -> not (String.IsNullOrEmpty(s))) |> String.concat ":"
             result
 
-    let defaultDevParam() = 
-        {
-            DevName = None
-            DevType = None
-            DevValue = None
-            DevTime = None
-        }
 
-    let defaultDevParaIO() =
-        {
-            InPara = None
-            OutPara = None
-        }
+    let defaultTaskDevPara() =  TaskDevPara(None, None, None, None)
+    let defaultTaskDevParaIO() = TaskDevParaIO (None, None)
 
-    let createDevParam(nametype: string option) (dutype: DataType option) (v: obj option) (t: int option) =
-        {
-            DevName = nametype
-            DevType = dutype
-            DevValue = v
-            DevTime = t
-        }
+    let createTaskDevPara(nametype: string option) (dutype: DataType option) (v: obj option) (t: int option) =
+        TaskDevPara(nametype, dutype, v, t)
 
-    let changeSymbolDevParam(x: DevPara option) (symbol: string option) =
-        if x.IsNone then defaultDevParam()
+    let changeSymbolTaskDevPara(x: TaskDevPara option) (symbol: string option) =
+        if x.IsNone then defaultTaskDevPara()
         else
             let x = x |> Option.get
-            createDevParam symbol x.DevType x.DevValue x.DevTime
+            createTaskDevPara symbol x.DevType x.DevValue x.DevTime
 
-    let addParam(jobName: string, paramDic: Dictionary<string, DevPara>, newParam: DevPara option) =
-        if not(paramDic.ContainsKey jobName) then
-            let param = if newParam.IsSome then newParam.Value else defaultDevParam()
-            paramDic.Add(jobName, param)
-
-    let changeParam(jobName: string, paramDic: Dictionary<string, DevPara>, symbol: string option) =
-        let changedDevParam = changeSymbolDevParam(Some(paramDic.[jobName])) (symbol)
+    let changeParam(jobName: string, paramDic: Dictionary<string, TaskDevPara>, symbol: string option) =
+        let changedTaskDevPara = changeSymbolTaskDevPara(Some(paramDic.[jobName])) (symbol)
         paramDic.Remove(jobName) |> ignore
-        paramDic.Add(jobName, changedDevParam)
+        paramDic.Add(jobName, changedTaskDevPara)
 
-    let toTextInOutDev(inp: DevPara, outp: DevPara, addr: Addresses) =
-        $"{inp.ToTextWithAddress(addr.In)}, {outp.ToTextWithAddress(addr.Out)}"
 
     let parseTime(item: string) =
         let timePattern = @"^(?i:(\d+(\.\d+)?)(ms|msec|sec))$"
@@ -117,7 +123,7 @@ module rec DsTaskDevType =
     let isValidName(name: string) =
         Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
-    let getDevParam (txt: string) =
+    let getTaskDevPara (txt: string) =
         let parts = txt.Split(':') |> Seq.toList
         let addr = parts.Head
         let remainingParts = parts.Tail
@@ -143,4 +149,4 @@ module rec DsTaskDevType =
         let nameOpt, typeOpt, valueOpt, timeOpt =
             remainingParts |> List.fold parseParts (None, None, None, None)
     
-        addr, (createDevParam nameOpt typeOpt valueOpt timeOpt)
+        addr, (createTaskDevPara nameOpt typeOpt valueOpt timeOpt)

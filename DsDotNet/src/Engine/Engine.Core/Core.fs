@@ -366,36 +366,70 @@ module CoreModule =
 
     type InOutDataType = DataType*DataType
 
+    
+    /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
+    and ApiItem private (name:string, dsSystem:DsSystem) =
+        (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
+        inherit FqdnObject(name, createFqdnObject([|dsSystem.Name|]))
+        interface INamedVertex
+
+        member _.Name = name
+        member _.PureName = name.Split([|'(';')'|]).First()
+        member _.ApiSystem = dsSystem
+        member val TimeParam:TimeParam option = None with get, set
+      
+        member val TX = getNull<Real>() with get, set
+        member val RX = getNull<Real>() with get, set
+        override x.ToText() = 
+            $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
+                 
+    /// API 의 reset 정보:  "+" <||> "-";
+    and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
+        member _.AutoGenByFlow = autoGenByFlow 
+        member _.Operand1 = operand1  // "+"
+        member _.Operand2 = operand2  // "-"
+        member _.Operator = operator  // "<|>", "|>", "<|"
+        member _.ToDsText() = 
+            let src = operand1
+            let tgt = operand2
+            sprintf "%s %s %s"  src (operator |> toTextModelEdge) tgt  //"+" <|> "-"
+        static member Create(system:DsSystem, operand1, operator, operand2, autoGenByFlow) =
+            let ri = ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
+            system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]"
+            ri
 
      
-      /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
+    /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
     ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
-    type TaskDev (api:ApiItem, parentJob:string, devParaIO:DevParaIO, deviceName:string, parentSys:DsSystem) =
-        inherit FqdnObject(api.Name, createFqdnObject([|parentSys.Name;deviceName|]))
-        let inParams  = Dictionary<string, DevPara>()
-        let outParams = Dictionary<string, DevPara>()
+    type ApiPara = 
+        {
+            ApiItem : ApiItem
+            TaskDevParaIO : TaskDevParaIO
+        }
+    let defaultApiPara(api:ApiItem) =
+        { 
+            ApiItem = api 
+            TaskDevParaIO = defaultTaskDevParaIO()
+        }
+
+    type TaskDev (apiPara:ApiPara, parentJob:string, deviceName:string, parentSys:DsSystem) =
+        inherit FqdnObject(apiPara.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
+        let dicTaskTaskDevParaIO  = Dictionary<string, ApiPara>()
         do  
+            dicTaskTaskDevParaIO.Add (parentJob, apiPara)
 
-            if devParaIO.InPara.IsSome
-            then inParams.Add (parentJob, devParaIO.InPara.Value)
-            else inParams.Add (parentJob, defaultDevParam())
-
-            if devParaIO.OutPara.IsSome
-            then outParams.Add (parentJob, devParaIO.OutPara.Value)
-            else outParams.Add (parentJob, defaultDevParam())
-
-        member x.ApiItem = api
-        ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
-        member x.ApiName = (x:>FqdnObject).QualifiedName
-        member x.ApiStgName = $"{deviceName}_{api.Name}"
-        member x.DeviceApiName = $"{deviceName}.{api.Name}"
-        member x.DeviceApiToDsText= $"{deviceName.QuoteOnDemand()}.{api.Name.QuoteOnDemand()}"
+        member x.ApiPureName = (x:>FqdnObject).QualifiedName
+        member x.ApiSystemName = apiPara.ApiItem.ApiSystem.Name //needs test animation
+    
         member x.DeviceName = deviceName
         member x.ParnetSystem = parentSys
 
-        member x.InParams = inParams 
-        member x.OutParams = outParams
-        
+        member x.InParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParaIO.InPara) 
+        member x.OutParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParaIO.OutPara) 
+
+        member x.DicTaskTaskDevParaIO = dicTaskTaskDevParaIO
+        member x.ApiItems = x.DicTaskTaskDevParaIO.Values.Select(fun f->f.ApiItem)
+
         member val InAddress = TextAddrEmpty with get, set
         member val OutAddress = TextAddrEmpty with get, set
         member val MaunualAddress = TextAddrEmpty with get, set
@@ -424,19 +458,18 @@ module CoreModule =
         member x.TaskDefs = tasks
         member x.Name = failWithLog $"{names.Combine()} Name using 'QualifiedName'"
                                 
-        member x.ApiDefs = tasks.Select(fun t->t.ApiItem)
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, devParaIO:DevParaIO, addr:Addresses)  =
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, TaskDevParaIO:TaskDevParaIO, addr:Addresses)  =
         inherit FqdnObject(name, system)
         member x.Name = name
         member x.System = system
         member val SettingFlows = flows with get, set
         //SettingFlows 없으면 전역 시스템 설정
         member val IsGlobalSystemHw = flows.IsEmpty()
-        member val DevParaIO  = devParaIO  with get, set
-        member x.InDataType  = if devParaIO.InPara.IsSome then devParaIO.InPara.Value.Type else DuBOOL
-        member x.OutDataType  = if devParaIO.OutPara.IsSome then devParaIO.OutPara.Value.Type else DuBOOL
+        member val TaskDevParaIO  = TaskDevParaIO  with get, set
+        member x.InDataType  = if TaskDevParaIO.InPara.IsSome then TaskDevParaIO.InPara.Value.Type else DuBOOL
+        member x.OutDataType  = if TaskDevParaIO.OutPara.IsSome then TaskDevParaIO.OutPara.Value.Type else DuBOOL
 
         member val InAddress = addr.In with get, set
         member val OutAddress = addr.Out with get, set
@@ -447,50 +480,20 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
 
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, devParaIO:DevParaIO,  addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, devParaIO, addr)
+    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, TaskDevParaIO:TaskDevParaIO,  addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, TaskDevParaIO, addr)
         member x.ButtonType = btnType
         member val ErrorEmergency = getNull<IStorage>() with get, set
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, devParaIO:DevParaIO, addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, devParaIO, addr) //inAddress lamp check bit
+    and LampDef (name: string, system:DsSystem,lampType: LampType, TaskDevParaIO:TaskDevParaIO, addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, TaskDevParaIO, addr) //inAddress lamp check bit
         member x.LampType = lampType
 
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, devParaIO:DevParaIO, addr:Addresses,  flows: HashSet<Flow>) =
-        inherit HwSystemDef(name,  system, flows, devParaIO, addr) // outAddress condition check bit
+    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, TaskDevParaIO:TaskDevParaIO, addr:Addresses,  flows: HashSet<Flow>) =
+        inherit HwSystemDef(name,  system, flows, TaskDevParaIO, addr) // outAddress condition check bit
         member x.ConditionType = conditionType
         member val ErrorCondition = getNull<IStorage>() with get, set
 
-
-    /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
-    and ApiItem private (name:string, system:DsSystem) =
-        (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
-        inherit FqdnObject(name, createFqdnObject([|system.Name|]))
-        interface INamedVertex
-
-        member _.Name = name
-        member _.ApiSystem = system
-        member val TimeParam:TimeParam option = None with get, set
-      
-        member val TX = getNull<Real>() with get, set
-        member val RX = getNull<Real>() with get, set
-        override x.ToText() = 
-            $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
-                 
-    /// API 의 reset 정보:  "+" <||> "-";
-    and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
-        member _.AutoGenByFlow = autoGenByFlow 
-        member _.Operand1 = operand1  // "+"
-        member _.Operand2 = operand2  // "-"
-        member _.Operator = operator  // "<|>", "|>", "<|"
-        member _.ToDsText() = 
-            let src = operand1
-            let tgt = operand2
-            sprintf "%s %s %s"  src (operator |> toTextModelEdge) tgt  //"+" <|> "-"
-        static member Create(system:DsSystem, operand1, operator, operand2, autoGenByFlow) =
-            let ri = ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
-            system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]"
-            ri
 
     (* Abbreviations *)
 

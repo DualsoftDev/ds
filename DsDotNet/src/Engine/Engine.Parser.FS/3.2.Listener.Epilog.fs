@@ -20,11 +20,11 @@ module EtcListenerModule =
         let name = nameNAddr.TryFindFirstChild<HwSysItemNameContext>().Value.GetText()
 
         let (inAddr, inParam), (outAddr, outParm) =
-            match nameNAddr.TryFindFirstChild<DevParamInOutContext>() with
-            |Some devParam -> 
-                commonDeviceParamExtractor devParam 
+            match nameNAddr.TryFindFirstChild<TaskDevParaInOutContext>() with
+            |Some taskDevPara -> 
+                commonDeviceParamExtractor taskDevPara 
             |None ->
-                (TextAddrEmpty, defaultDevParam()),(TextAddrEmpty, defaultDevParam())
+                (TextAddrEmpty, defaultTaskDevPara()),(TextAddrEmpty, defaultTaskDevPara())
         name, inParam, outParm, inAddr, outAddr
 
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)

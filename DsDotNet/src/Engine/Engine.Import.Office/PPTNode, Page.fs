@@ -34,7 +34,7 @@ module PPTNodeModule =
 
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable devParam: DevParaIO = defaultDevParaIO()  // Input/Output param
+        let mutable taskDevParam: TaskDevParaIO = defaultTaskDevParaIO()  // Input/Output param
         let mutable jobParam: JobParam = defaultJobPara()     // jobParam  param
 
         
@@ -166,8 +166,8 @@ module PPTNodeModule =
                     let jobPram =
                         match GetSquareBrackets(prop, false) with
                         |Some s ->
-                            let taskDevPara = names.Last() |> GetLastParenthesesContents
-                            if taskDevPara.StartsWith(TextJobNegative)
+                            let TaskDevPara = names.Last() |> GetLastParenthesesContents
+                            if TaskDevPara.StartsWith(TextJobNegative)
                             then 
                                 getParserJobType($"{s};{TextJobNegative}")
                             else 
@@ -204,10 +204,10 @@ module PPTNodeModule =
         member x.IsCall = nodeType = CALL
         member x.IsRootNode = rootNode
         member x.IsFunction = x.IsCall && not(name.Contains("."))
-        member x.DevParam = devParam
+        member x.TaskDevPara = taskDevParam
         member x.JobParam =  jobParam
-        member x.DevParamIn =  devParam.InPara
-        member x.DevParamOut = devParam.OutPara
+        member x.TaskDevParaIn = taskDevParam.InPara
+        member x.TaskDevParaOut =taskDevParam.OutPara
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -224,7 +224,7 @@ module PPTNodeModule =
 
             
         member x.Job = 
-            getJobNameWithDevParaIO(x.JobPure, devParam).ToArray()
+            getJobNameWithTaskDevParaIO(x.JobPure, taskDevParam).ToArray()
            
         member x.JobWithJobPara = 
             getJobNameWithJobParam(x.Job, jobParam).ToArray()
@@ -232,25 +232,26 @@ module PPTNodeModule =
         member x.UpdateNodeRoot(isRoot: bool, target) =
             rootNode <- Some isRoot
             if nodeType = CALL || nodeType = AUTOPRE then
-                let hasDevParam = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
+                let hasTaskDevPara = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
                 if name.Contains(".")  //isDevCall
                 then
-                    if hasDevParam then
-                        devParam <- getNodeDevParam (shape, nameNFunc(shape), iPage, target)
+                    if hasTaskDevPara then
+                        taskDevParam <- getNodeTaskDevPara (shape, nameNFunc(shape), iPage, target)
                     else 
                         if isRoot then
-                            let inPara = createDevParam  None (Some(DuBOOL)) None None |> Some  
-                            devParam <- {InPara = inPara;OutPara = None}
+                            let inPara = createTaskDevPara  None (Some(DuBOOL)) None None |> Some  
+                    
+                            taskDevParam <-TaskDevParaIO(inPara, None)
                 else 
-                    if hasDevParam then
-                        failWithLog "function call 'devParam' not support"
+                    if hasTaskDevPara then
+                        failWithLog "function call 'TaskDevPara' not support"
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
-            if x.IsRootNode.Value = false then 
-                call.TargetJob.TaskDefs.Iter(fun d->
-                    d.AddOrUpdateDevParam(x.Job.Combine(), x.DevParam)
-                )
+            //if x.IsRootNode.Value = false then 
+            //    call.TargetJob.TaskDefs.Iter(fun d->
+            //        d.AddOrUpdateApiTaskDevPara(x.Job.Combine(), x.ApiName,  x.TaskDevPara)
+            //    )
       
         member x.JobPure : string seq =
             if not (nodeType = CALL || nodeType = AUTOPRE) then
@@ -281,7 +282,7 @@ module PPTNodeModule =
         member x.DevName = 
                 $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
         member x.ApiName = 
-                x.JobPure.Last()
+                x.Job.Last()
             
         member x.FlowName =  pageTitle
         member x.IsAlias: bool = x.Alias.IsSome

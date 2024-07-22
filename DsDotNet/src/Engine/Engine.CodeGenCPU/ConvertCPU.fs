@@ -128,32 +128,61 @@ module ConvertCPU =
             
         ]
         
-    let private applyApiItem(s:DsSystem) =
+    //let private applyApiItem(s:DsSystem) = 
+    //    [
+    //        let devCallSet =  s.GetTaskDevCallSet()
+    //        for (td, coins) in devCallSet do
+    //            yield! td.A1_ApiSet(coins)
+    //            yield! td.A2_ApiEnd(coins)
+    //    ]
+
+                        
+        //let input = calls.First().GetEndAction(a.ApiItem)
+        
+        //let sets =
+        //    if input.IsSome
+        //    then
+        //        linkExpr
+        //        <&&>  
+        //        (input.Value <&&> !@a.APIEND.Expr <&&> !@a.SL2.Expr)
+        //    else 
+        //        (activeSys._off.Expr)
+
+        //(sets, activeSys._off.Expr) --| (a.SL1, getFuncName())
+
+                        //let input = coins.OfType<Call>().First().GetEndAction(a.ApiItem)     
+
+
+                        //yield am.A3_SensorLinking(s, coins.OfType<Call>())
+                        //yield am.A4_SensorLinked(s, coins.OfType<Call>())
+       // ]
+
+    let getMasterJob (calls : Vertex seq) = 
+        let pureCalls = 
+            calls.OfType<Call>()@calls.OfType<Alias>().Choose(fun a->a.GetPureCall())
+        
+        if pureCalls.Select(fun c->c.TargetJob).Distinct().Count() > 1
+        then failwithlog $"Error : {getFuncName()} {pureCalls.Select(fun c->c.TargetJob).Distinct().Count()}"
+
+        pureCalls.First()  // 동일 job으로 선정해서 아무거나 가져옴
+
+    let private applyTaskDev(s:DsSystem) = 
         [
-            let devCallSet =  s.GetTaskDevCoinsSet()
-            for (td, coins) in devCallSet do
-                let am = td.ApiItem.TagManager :?> ApiItemManager
-                yield am.A2_ApiEnd(s)
+            let devCallSet =  s.GetTaskDevCalls() //api는 job 기준으로 중복제거 
+            for (td, calls) in devCallSet do
+                let tm = td.TagManager :?> TaskDevManager
+                let masterCall= getMasterJob(calls)
+                yield! tm.TD1_PlanSend(s, calls)
+                yield! tm.TD2_PlanReceive(s)
+                yield! tm.A1_ApiSet(masterCall)
+                yield! tm.A2_ApiEnd()
 
-                if coins.any()
-                then
-                    yield! am.A1_ApiSet(td)
-                    yield am.A3_SensorLinking(s, coins.OfType<Call>())
-                    yield am.A4_SensorLinked(s, coins.OfType<Call>())
-        ]
-
-
-    let private applyTaskDev(s:DsSystem) =
-        [
-            let devCallSet =  s.GetTaskDevCoinsSet()
-            for (dev, coins) in devCallSet do
-                let tm = dev.TagManager :?> TaskDevManager
-                yield tm.TD2_PlanReceive(s)
-
-                if coins.any()
-                then
-                    yield tm.TD1_PlanSend(s, coins)
-               
+            let devCallSet =  devCallSet.DistinctBy(fun (td, _c)-> td) //SensorLink는 taskDev 단위로 중복제거
+            for (td, calls) in devCallSet do
+                let tm = td.TagManager :?> TaskDevManager
+                let masterCall= getMasterJob(calls) 
+                yield! tm.A3_SensorLinking(masterCall)
+                yield! tm.A4_SensorLinked(masterCall)
         ]
 
 
@@ -205,22 +234,22 @@ module ConvertCPU =
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
-            let devsCall =  s.GetDevicesCall()
-            for dev, call in devsCall do
-                if not(dev.IsRootOnlyDevice)
+            let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
+            for td, call in devsCall do
+                if not(td.IsRootOnlyDevice)
                 then
-                    if dev.InTag.IsNonNull() then  
-                        yield dev.SensorEmulation(s, call.TargetJob)
+                    if td.InTag.IsNonNull() then  
+                        yield td.SensorEmulation(s, call.TargetJob)
         ]
  
     let private updateRealParentExpr(x:DsSystem) =
-        for dev, call in x.GetDevicesCall() do
+        for dev, call in x.GetTaskDevsCall() do
             let sensorExpr = 
-                match call.GetEndAction(dev.ApiItem) with
+                match call.GetEndAction() with
                 | Some e -> e
                 | _ -> call._on.Expr
             
-            dev.ApiItem.RX.ParentApiSensorExpr <-sensorExpr
+            dev.GetApiItem(call.TargetJob).RX.ParentApiSensorExpr <-sensorExpr
                
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- sys
@@ -282,7 +311,7 @@ module ConvertCPU =
                 yield! applyVertexSpec v
 
             //Api 적용 
-            yield! applyApiItem sys
+            //yield! applyApiItem sys
             //TaskDev 적용 
             yield! applyTaskDev sys
             

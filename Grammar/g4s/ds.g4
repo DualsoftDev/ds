@@ -190,8 +190,8 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
     flowPath: identifier2;
 
-devParamInOut: '(' devParamInOutBody ')';
-devParamInOutBody:  inParam COMMA outParam;
+taskDevParaInOut: '(' taskDevParaInOutBody ')';
+taskDevParaInOutBody:  inParam COMMA outParam;
 content : .+?;
 inParam:  content (':'content)*;
 outParam:  content (':'content)*;
@@ -369,12 +369,12 @@ versionsBlock: '[' 'versions' ']' '=' '{' versionDef* '}';
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
-        jobName ('['jobTypeOption']')? '=' ('{' (callApiDef (SEMICOLON))* '}' | (devParamInOut SEMICOLON));
+        jobName ('['jobTypeOption']')? '=' ('{' (callApiDef (SEMICOLON))* '}' | (taskDevParaInOut SEMICOLON));
 
     jobName: identifier234;
     jobTypeOption : content;
 
-    callApiDef: (interfaceCall devParamInOut) | (interfaceCall);
+    callApiDef: (interfaceCall taskDevParaInOut) | (interfaceCall);
 
     interfaceCall: identifier12;
 
@@ -416,7 +416,7 @@ categoryBlocks:autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock | 
 
     hwSysItemDef:  hwSysItemNameAddr '=' '{' hwSysItems? '}' (SEMICOLON)?;
     hwSysItems: flowName? ( ';' flowName)* (';')+; 
-    hwSysItemNameAddr: hwSysItemName devParamInOut;
+    hwSysItemNameAddr: hwSysItemName taskDevParaInOut;
     hwSysItemName: identifier1;
     flowName: identifier1;
 

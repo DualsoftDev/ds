@@ -14,10 +14,10 @@ module CoreExtensionModule =
     
     
 
-    let getDevParamInOut (paramInOutText:string) = 
+    let getTaskDevParaInOut (paramInOutText:string) = 
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> getDevParam tx,  getDevParam rx.Head
-        | _-> failwithlog $"{paramInOutText} getDevParamInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
+        | tx::rx when rx.Length = 1 -> getTaskDevPara tx,  getTaskDevPara rx.Head
+        | _-> failwithlog $"{paramInOutText} getTaskDevParaInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
     
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
@@ -82,7 +82,7 @@ module CoreExtensionModule =
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
         member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
 
-        member x.AddButton(btnType:BtnType, btnName:string, devParaIO:DevParaIO,  addr:Addresses, flow:Flow) =
+        member x.AddButton(btnType:BtnType, btnName:string, taskDevParaIO:TaskDevParaIO,  addr:Addresses, flow:Flow) =
             checkSystem(x, flow, btnName)
           
             let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
@@ -94,13 +94,13 @@ module CoreExtensionModule =
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, devParaIO, addr, HashSet[|flow|]))
+                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParaIO, addr, HashSet[|flow|]))
                       |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
-            x.AddButton(btnType, btnName,  defaultDevParaIO(), Addresses(inAddress ,outAddress), flow)       
+            x.AddButton(btnType, btnName,  defaultTaskDevParaIO(), Addresses(inAddress ,outAddress), flow)       
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, devParaIO:DevParaIO, addr:Addresses, flow:Flow option) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParaIO:TaskDevParaIO, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
@@ -108,24 +108,24 @@ module CoreExtensionModule =
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
             | None -> 
                       let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
-                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, devParaIO, addr, flows))
+                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, taskDevParaIO, addr, flows))
                       |> verifyM $"중복 LampDef [name:{lmpName}]"
         
         member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
-                x.AddLamp(lmpType, lmpName, defaultDevParaIO(), Addresses(inAddress ,outAddress),  flow)       
+                x.AddLamp(lmpType, lmpName, defaultTaskDevParaIO(), Addresses(inAddress ,outAddress),  flow)       
 
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, devParaIO:DevParaIO, addr:Addresses, flow:Flow) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParaIO:TaskDevParaIO, addr:Addresses, flow:Flow) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, devParaIO,  addr, HashSet[|flow|]))
+                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, taskDevParaIO,  addr, HashSet[|flow|]))
                       |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddress:string, outAddress:string, flow:Flow) =
-                x.AddCondtion(condiType, condiName, defaultDevParaIO(), Addresses(inAddress ,outAddress), flow)       
+                x.AddCondtion(condiType, condiName, defaultTaskDevParaIO(), Addresses(inAddress ,outAddress), flow)       
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
@@ -178,7 +178,7 @@ module CoreExtensionModule =
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (loadSys:DsSystem) = x.LoadedSystems.TryFind(fun f-> f.ReferenceSystem = loadSys)
          
-    let getType (xs:DevPara seq) = 
+    let getType (xs:TaskDevPara seq) = 
         if xs.Where(fun f->f.DevType.IsSome).Any() 
                 then 
                     let types = xs.Choose(fun f->f.DevType)
@@ -190,8 +190,50 @@ module CoreExtensionModule =
 
                 else DuBOOL
 
+
     type TaskDev with
-    
+
+        member x.FirstApi = x.ApiItems.First()
+
+
+        member x.GetInParam(jobFqdn:string) =
+                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.InPara with
+                        | Some v -> v
+                        | None -> defaultTaskDevPara() 
+        member x.GetInParam(job:Job) = x.GetInParam (job.UnqualifiedName)
+         
+        member x.GetOutParam(jobFqdn:string) = 
+                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.OutPara with
+                        | Some v -> v
+                        | None -> defaultTaskDevPara() 
+        member x.GetOutParam(job:Job) = x.GetOutParam (job.UnqualifiedName)
+         
+        member x.GetApiItem(jobFqdn:string) = x.DicTaskTaskDevParaIO[jobFqdn].ApiItem
+        member x.GetApiItem(job:Job) = x.GetApiItem(job.UnqualifiedName)
+
+        ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
+        member x.GetApiStgName(jobFqdn:string) = $"{x.DeviceName}_{x.GetApiItem(jobFqdn).Name}"
+        member x.GetApiStgName(job:Job) =  x.GetApiStgName(job.UnqualifiedName)
+
+        member x.DeviceApiPureName(jobFqdn:string) = $"{x.DeviceName}.{x.GetApiItem(jobFqdn).PureName}"  //STN2.Device1."ROTATE(IN300_OUT400)"  파레메터 없는 ROTATE 순수이름만
+        member x.DeviceApiPureName(job:Job) = x.DeviceApiPureName(job.UnqualifiedName)
+
+        member x.DeviceApiToDsText(jobFqdn:string)= $"{x.DeviceName.QuoteOnDemand()}.{x.GetApiItem(jobFqdn).Name.QuoteOnDemand()}"
+        member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.UnqualifiedName)
+
+
+        member x.AddOrUpdateApiTaskDevPara(jobFqdn:string, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
+            if x.ApiItems.any(fun f->f.PureName <> api.PureName)
+            then 
+                failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
+
+            if not (x.DicTaskTaskDevParaIO.ContainsKey   jobFqdn)
+            then 
+                x.DicTaskTaskDevParaIO.Add(jobFqdn, {TaskDevParaIO = taskDevParaIO; ApiItem = api})
+
+        member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
+               x.AddOrUpdateApiTaskDevPara(job.UnqualifiedName, api, taskDevParaIO)
+   
         member x.IsInAddressEmpty = x.InAddress = TextAddrEmpty
         member x.IsInAddressSkipOrEmpty = x.InAddress = TextAddrEmpty || x.InAddress = TextSkip
         member x.IsOutAddressEmpty = x.OutAddress = TextAddrEmpty
@@ -201,43 +243,51 @@ module CoreExtensionModule =
         member x.IsMaunualAddressEmpty = x.MaunualAddress = TextAddrEmpty
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
 
-        member x.GetInParam(job:Job) = x.InParams[job.UnqualifiedName]
-        member x.GetOutParam(job:Job) = x.OutParams[job.UnqualifiedName]
+        //member x.GetTaskTaskDevParaIO(api:ApiItem) = x.DicTaskTaskDevParaIO.First(fun f->f.Value = api).Key
 
-        member x.AddOrUpdateDevParam(jobName:string, devParam:DevParaIO) = 
-                    addParam (jobName,  x.InParams, devParam.InPara)
-                    addParam (jobName,  x.OutParams, devParam.OutPara)
-
-        member x.SetInSymbol(symName:string option) =
-            x.InParams.ToList() |> Seq.iter(fun kv -> 
-                changeParam (kv.Key, x.InParams, symName)
-            )
-            
-
+        member x.SetInSymbol(symName:string option) = 
+            if symName.IsSome
+            then
+                x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
+                    if kv.TaskDevParaIO.InPara.IsSome
+                    then 
+                        kv.TaskDevParaIO.InPara.Value.DevName <- symName
+                    else 
+                        kv.TaskDevParaIO.InPara <- Some(TaskDevPara(symName, None, None, None))
+                )
+          
         member x.SetOutSymbol(symName:string option) = 
-                x.OutParams.ToList() |> Seq.iter(fun kv -> 
-                changeParam (kv.Key, x.OutParams, symName)
-            )
+            if symName.IsSome
+            then
+                x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
+                    if kv.TaskDevParaIO.OutPara.IsSome
+                    then 
+                        kv.TaskDevParaIO.OutPara.Value.DevName <- symName
+                    else 
+                        kv.TaskDevParaIO.OutPara <- Some(TaskDevPara(symName, None, None, None))
+                )
+          
 
-
-        member x.InDataType = getType x.InParams.Values
-        member x.OutDataType  =getType x.OutParams.Values
+        member x.InDataType = getType (x.InParams)
+        member x.OutDataType  =getType (x.OutParams)
         
     type Job with
-        member x.OnDelayTime = 
-            let times = x.TaskDefs.Choose(fun t-> t.InParams[x.UnqualifiedName].Time)
-            if times.GroupBy(fun t->t).Count() > 1
-            then 
-                let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.UnqualifiedName].Time}"))
-                failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
+
+        member x.ApiDefs = x.TaskDefs |> Seq.collect(fun t->t.ApiItems)
+        //member x.OnDelayTime =  //test ahn
+        //    let times = x.TaskDefs.Choose(fun t-> t.InParams[x.UnqualifiedName].Time)
+        //    if times.GroupBy(fun t->t).Count() > 1
+        //    then 
+        //        let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.UnqualifiedName].Time}"))
+        //        failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
                 
-            if times.any() then times.First() |> Some else None
+        //    if times.any() then times.First() |> Some else None
 
 
-        member x.UpdateDevParam(devParaIO: DevParaIO) =
-                x.TaskDefs.Iter(fun d-> 
-                    d.AddOrUpdateDevParam (x.UnqualifiedName, devParaIO)
-                )
+        //member x.UpdateTaskDevPara(api:ApiItem, TaskDevParaIO: TaskDevParaIO) =
+        //        x.TaskDefs.Iter(fun d-> 
+        //            d.AddOrUpdateApiTaskDevPara (x.UnqualifiedName, api, TaskDevParaIO)
+        //        )
 
 
         member x.GetNullAddressDevTask() = 
@@ -245,7 +295,7 @@ module CoreExtensionModule =
             |> Seq.mapi (fun i d -> 
                 let inCnt = x.JobTaskDevInfo.InCount
                 let outCnt = x.JobTaskDevInfo.OutCount
-                let empty = d.IsAddressEmpty && not(d.GetInParam(x).IsDefaultParam && d.GetOutParam(x).IsDefaultParam)
+                let empty = d.IsAddressEmpty// && not(d.GetInParam(x).IsDefaultParam && d.GetOutParam(x).IsDefaultParam)
                 if inCnt.IsSome && inCnt.Value = i && empty then 
                     Some d
                 elif outCnt.IsSome && outCnt.Value = i && empty then 
@@ -255,41 +305,43 @@ module CoreExtensionModule =
             )
             |> Seq.choose id
 
+    let getTime  (time:float option, nameFqdn:string)= 
+        let maxShortSpeedSec = (TimerModule.MinTickInterval|>float)/1000.0
+        let v = 
+            if time.IsNone then None
+            else 
+                if RuntimeDS.Package.IsPackageSIM() 
+                then
+                    match RuntimeDS.TimeSimutionMode  with
+                    | TimeSimutionMode.TimeNone -> None
+                    | TimeSimutionMode.TimeX1 ->   Some (time.Value * 1.0/1.0 )
+                    | TimeSimutionMode.TimeX2 ->   Some (time.Value * 1.0/2.0 )
+                    | TimeSimutionMode.TimeX4 ->   Some (time.Value * 1.0/4.0 )
+                    | TimeSimutionMode.TimeX8 ->   Some (time.Value * 1.0/8.0 )
+                    | TimeSimutionMode.TimeX16 ->  Some (time.Value * 1.0/16.0 ) 
+                    | TimeSimutionMode.TimeX100 -> Some (time.Value * 1.0/100.0 ) 
+                    | TimeSimutionMode.TimeX0_1 -> Some (time.Value * 1.0/0.1 )
+                    | TimeSimutionMode.TimeX0_5 -> Some (time.Value * 1.0/0.5 )
+                else 
+                    time
+
+        if v.IsSome && v.Value < maxShortSpeedSec 
+        then failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.TimeSimutionMode}) {nameFqdn}
+                        \r\n[최소동작시간 : {maxShortSpeedSec}, 배속반영 동작 시간 : {v.Value}]"
+        else v 
                         
     type Real with
 
-        member x.TimeAvg = 
-            let maxShortSpeedSec = (TimerModule.MinTickInterval|>float)/1000.0
-            let v = 
-                if x.DsTime.AVG.IsNone then None
-                else 
-                    if RuntimeDS.Package.IsPackageSIM() 
-                    then
-                        match RuntimeDS.TimeSimutionMode  with
-                        | TimeSimutionMode.TimeNone -> None
-                        | TimeSimutionMode.TimeX1 ->   Some (x.DsTime.AVG.Value * 1.0/1.0 )
-                        | TimeSimutionMode.TimeX2 ->   Some (x.DsTime.AVG.Value * 1.0/2.0 )
-                        | TimeSimutionMode.TimeX4 ->   Some (x.DsTime.AVG.Value * 1.0/4.0 )
-                        | TimeSimutionMode.TimeX8 ->   Some (x.DsTime.AVG.Value * 1.0/8.0 )
-                        | TimeSimutionMode.TimeX16 ->  Some (x.DsTime.AVG.Value * 1.0/16.0 ) 
-                        | TimeSimutionMode.TimeX100 -> Some (x.DsTime.AVG.Value * 1.0/100.0 ) 
-                        | TimeSimutionMode.TimeX0_1 -> Some (x.DsTime.AVG.Value * 1.0/0.1 )
-                        | TimeSimutionMode.TimeX0_5 -> Some (x.DsTime.AVG.Value * 1.0/0.5 )
-                    else 
-                        x.DsTime.AVG
+        member x.TimeDelay = getTime (x.DsTime.TON, x.QualifiedName) 
+        member x.TimeAvg = getTime (x.DsTime.AVG, x.QualifiedName) 
 
-            if v.IsSome && v.Value < maxShortSpeedSec 
-            then failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.TimeSimutionMode}) {x.QualifiedName}
-                            \r\n[최소동작시간 : {maxShortSpeedSec}, 배속반영 동작 시간 : {v.Value}]"
-            else v 
-                    
-
+        member x.TimeDelayExist = x.TimeDelay.IsSome && x.TimeDelay.Value <> 0.0 
+        member x.TimeAvgExist = x.TimeAvg.IsSome && x.TimeAvg.Value <> 0.0 
 
         member x.TimeAvgMsec = 
                 if x.TimeAvg.IsNone
                 then failwithf $"Error  TimeAvgMsec ({x.QualifiedName})"
                 else Convert.ToUInt32( x.TimeAvg.Value *1000.0 )
-
 
         member x.TimeStd = x.DsTime.STD
        
@@ -321,7 +373,7 @@ module CoreExtensionModule =
 
 
     type Call with
-        
+        member x.IsFlowCall = x.Parent.GetCore() :? Flow
         member x.NameForGraph = getCallName x 
 
         member x.System = x.Parent.GetSystem()
@@ -395,13 +447,13 @@ type SystemExt =
 
 
     //[<Extension>]
-    //static member ToTextForDevParam(x:TaskDev, jobName:string) = toTextInOutDev (x.GetInParam(jobName)) (x.GetOutParam(jobName))
+    //static member ToTextForTaskDevPara(x:TaskDev, jobName:string) = toTextInOutDev (x.GetInParam(jobName)) (x.GetOutParam(jobName))
 
     //[<Extension>]
-    //static member ToTextForDevParam(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
+    //static member ToTextForTaskDevPara(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
 
     //[<Extension>]
-    //static member IsSensorNot(x:DevParam) = 
+    //static member IsSensorNot(x:TaskDevPara) = 
     //            match x.DevValueNType with
     //            |Some(v, ty) when ty = DuBOOL -> not (Convert.ToBoolean(v))  //RX 기본은 True
     //            |_ -> false

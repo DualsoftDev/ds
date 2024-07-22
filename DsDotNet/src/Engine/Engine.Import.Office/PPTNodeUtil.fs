@@ -19,7 +19,7 @@ module PPTNodeUtilModule =
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
  
-        let getPostParam(param:DevPara option) =
+        let getPostParam(param:TaskDevPara option) =
             if param.IsNone then ""
             else
                 let param = param |> Option.get
@@ -29,15 +29,15 @@ module PPTNodeUtilModule =
                 | None, Some t -> $"{t}ms"
                 | None, None -> $""
 
-        let getJobNameWithDevParaIO(jobFqdn:string seq, devParaIO:DevParaIO) =
+        let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParaIO:TaskDevParaIO) =
             let newJob = 
                 let inParaText  =
-                    match  getPostParam devParaIO.InPara with
+                    match  getPostParam taskDevParaIO.InPara with
                     | "" -> "IN"
                     | x -> $"IN{x}"  
 
                 let outParaText  =
-                    match  getPostParam devParaIO.OutPara with
+                    match  getPostParam taskDevParaIO.OutPara with
                     | "" -> "OUT"
                     | x -> $"OUT{x}"
 
@@ -66,19 +66,19 @@ module PPTNodeUtilModule =
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
 
 
-        let getNodeDevParam (shape:Shape, name:string, iPage:int, target) = 
+        let getNodeTaskDevPara (shape:Shape, name:string, iPage:int, target) = 
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let getParam x = 
                         if x = TextSkip then 
-                            "" |> getDevParam |> snd
+                            "" |> getTaskDevPara |> snd
                         else
                             match getTextValueNType x with
                             | Some (v, t) ->
                                 if t = DuINT32 && target = XGK then  //xgk는 기본 word 규격인 us로 변환
-                                    $":{v}s" |> getDevParam |> snd
+                                    $":{v}s" |> getTaskDevPara |> snd
                                 else
-                                    $":{x}" |> getDevParam |> snd
+                                    $":{x}" |> getTaskDevPara |> snd
                             | None -> failwithf $"{x} 입력규격을 확인하세요"
 
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
@@ -87,10 +87,9 @@ module PPTNodeUtilModule =
                     let inFunc, outFunc =
                         func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobParam에서 다시 처리
                         func.Split(",").Last() |> trimSpaceNewLine
-
-                    {InPara =  Some(getParam inFunc); OutPara = Some(getParam outFunc)}
+                    TaskDevParaIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
                 else 
-                    {InPara =  Some(getParam func); OutPara = Some(defaultDevParam())} 
+                    TaskDevParaIO((getParam func)|>Some, (defaultTaskDevPara())|>Some)
             with _ ->
                 shape.ErrorName((error()), iPage)
 

@@ -75,7 +75,7 @@ module PPTNodeUtilModule =
                         else
                             match getTextValueNType x with
                             | Some (v, t) ->
-                                if t = DuINT32 && target = XGK then  //xgk는 기본 word 규격인 us로 변환
+                                if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
                                     $":{v}s" |> getTaskDevPara |> snd
                                 else
                                     $":{x}" |> getTaskDevPara |> snd

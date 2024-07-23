@@ -128,6 +128,7 @@ module internal XgiSymbolsModule =
                     DevicePos = devPos
                     Device = device.ToString()
                     InitValue = initValue
+                    AddressAlias = t.AliasNames
                     Kind = kindVar } |> Some
 
         // address 가 지정되지 않은 tag : e.g Timer, Counter 의 내부 멤버 변수들 EN, DN, CU, CD, ...
@@ -170,6 +171,7 @@ module internal XgiSymbolsModule =
                         Address = address // xgk address 는 xml에 저장 안됨 devPos 처리
                         DevicePos = devPos
                         InitValue = t.BoxedValue
+                        AddressAlias = t.AliasNames
                         Kind = kindVar }
 
             Some symbolInfo
@@ -181,6 +183,7 @@ module internal XgiSymbolsModule =
                 // Global 변수도 일단, XgiLocalVar type 으로 생성되므로, PLC 생성 시에만 global 로 override 해서 생성한다.
                     {   xgx.SymbolInfo with
                             Kind = kindVar
+                            AddressAlias = xgx.AliasNames
                             Address = xgx.Address }
                 else
                      xgx.SymbolInfo
@@ -194,6 +197,7 @@ module internal XgiSymbolsModule =
                         Kind = kindVar
                         Address = address
                         Device = device
+                        AddressAlias = xgx.AliasNames
                         DevicePos = devPos }
             | _ ->
                     failwithf "Invalid target type: %A" prjParam.TargetType
@@ -302,6 +306,7 @@ module internal XgiSymbolsModule =
             //check if there is any duplicated address
             let duplicatedAddresses =
                 usedAddresses
+                |> Array.filter(fun f -> f.AddressAlias.IsEmpty()) //AddressAlias 존재하면 중복 체크 제외
                 |> Array.groupBy (fun f -> f.Address)
                 |> Array.filter (fun (_, vs) -> vs.Length > 1)
 

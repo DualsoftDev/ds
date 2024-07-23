@@ -74,8 +74,23 @@ module ImportUtilVertex =
                     let ableApis = String.Join(", ", device.ReferenceSystem.ApiItems.Select(fun a->a.Name))
                     failwithlog $"Loading system ({loadSysName}:{device.AbsoluteFilePath}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
 
-   
 
+    let private createCall (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper) =
+        match  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
+            |  Some dev -> 
+                getCallFromLoadedSys mySys dev node node.ApiName parentWrapper
+            | _  ->
+                let callParams = {
+                    MySys = mySys
+                    Node = node
+                    JobName = node.Job.CombineQuoteOnDemand()
+                    DevName = node.DevName
+                    ApiName = node.ApiPureName
+                    TaskDevParaIO = node.TaskDevPara
+                    Parent = parentWrapper
+                    }
+                addNewCall callParams
+   
     let createCallVertex (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
         let call =
             if node.IsFunction then
@@ -84,24 +99,14 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-
-                match   mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
-                |  Some dev -> 
-                    getCallFromLoadedSys mySys dev node node.ApiName parentWrapper
-                | _  ->
-                    let callParams = {
-                        MySys = mySys
-                        Node = node
-                        JobName = node.Job.CombineQuoteOnDemand()
-                        DevName = node.DevName
-                        ApiName = node.ApiPureName
-                        TaskDevParaIO = node.TaskDevPara
-                        Parent = parentWrapper
-                        }
-                    addNewCall callParams
+                createCall (mySys, node, parentWrapper)
 
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)
+
+    let createAutoPre(mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
+        let autoPre =  createCall (mySys, node, parentWrapper)
+        dicSeg.Add(node.Key, autoPre)
 
     let  getParent
         (

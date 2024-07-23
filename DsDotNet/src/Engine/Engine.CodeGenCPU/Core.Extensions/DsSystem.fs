@@ -186,7 +186,7 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationTaskDevIOM() =
 
-            let jobDevices =x.GetDevicesSkipEmptyAddress().Distinct() 
+            let jobDevices =x.GetTaskDevsSkipEmptyAddress().Distinct() 
             
             for dev, call in jobDevices do
                 let apiStgName = dev.GetApiStgName(call.TargetJob)

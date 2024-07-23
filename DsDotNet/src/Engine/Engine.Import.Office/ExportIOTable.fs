@@ -135,7 +135,7 @@ module ExportIOTable =
           
 
                 let mutable extCnt = 0
-                let devsCall =  sys.GetDevicesSkipEmptyAddress()
+                let devsCall =  sys.GetTaskDevsSkipEmptyAddress()
 
                 for (dev, call) in  devsCall do
                     //외부입력 전용 확인하여 출력 생성하지 않는다.

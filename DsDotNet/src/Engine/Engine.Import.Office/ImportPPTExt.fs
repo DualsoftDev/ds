@@ -246,25 +246,45 @@ module ImportU =
                         real.NoTransData <- node.RealNoTrans
                         dicVertex.Add(node.Key, real))
 
-            let calls =
+            let callNAutoPres =
                 pptNodes
                 |> Seq.filter (fun node -> node.Alias.IsNone)
-                |> Seq.filter (fun node -> node.NodeType.IsCall)
+                |> Seq.filter (fun node -> node.NodeType.IsCall || node.NodeType = AUTOPRE)
 
 
-            let createCall () =
-                calls
+
+            let createCallNAutoPre () =
+                let libInfos, _ = getLibraryInfos()
+                callNAutoPres
+                    .GroupBy(fun node -> node.DevName)
+                    .Iter(fun kv -> 
+
+                        let libApis = kv.Where(fun d-> libInfos.ContainsKey(d.ApiPureName))
+                                        .Select(fun d-> d.ApiPureName).Distinct()
+                        let usedApis = kv.Select(fun d->d.ApiPureName).Distinct()
+
+                        if libApis.any() && libApis.Count() <> usedApis.Count()
+                        then
+                            let errApis = usedApis.Except(libApis).JoinWith(", ")
+                            let libFilePath  =libInfos[libApis.First()]
+                            failWithLog $"{kv.Key} ({libFilePath}) 디바이스에\r\n{errApis} 인터페이스가 없습니다."
+
+                     )
+
+                callNAutoPres
                 |> Seq.sortBy(fun node -> node.PageNum)
                 |> Seq.sortBy(fun node -> node.Position.Left)
                 |> Seq.sortBy(fun node -> node.Position.Top)
                 |> Seq.iter (fun node ->
                         try
-
-                            if dicChildParent.ContainsKey(node) then
-                                createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
-                            else
-                                createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex)
-
+                            if node.NodeType = AUTOPRE
+                            then 
+                                createAutoPre(mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
+                            else 
+                                if dicChildParent.ContainsKey(node) then
+                                    createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
+                                else
+                                    createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex)
                         with ex ->
                             node.Shape.ErrorName(ex.Message, node.PageNum)
                             )
@@ -328,15 +348,9 @@ module ImportU =
             //Real 부터
             createReal ()
             //Call 처리
-            createCall ()
+            createCallNAutoPre ()
             //Alias Node 처리 마감
             createAlias ()  
-
-       
-
-            //createFunction Node 처리 마감
-            //createAliasFunction ()
-
 
             updateSystemForSingleApi mySys
 

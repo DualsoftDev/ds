@@ -45,7 +45,7 @@ module XgxTestCommonModule =
             | XGK -> "P"
             | _ -> failwith "Not supported plc type"
         [
-            { Name="myBit00"; Kind=1; Type="BOOL"; Comment="FAKECOMMENT"; Device=device; Address="%IX0.0.0"; AddressIEC="%IX0.0.0"; InitValue=null; State=0; DevicePos=0 }
-            { Name="myBit01"; Kind=1; Type="BOOL"; Comment="FAKECOMMENT"; Device=device; Address="%IX0.0.1"; AddressIEC="%IX0.0.1"; InitValue=null; State=0; DevicePos=1 }
+            { Name="myBit00"; Kind=1; Type="BOOL"; Comment="FAKECOMMENT"; Device=device; Address="%IX0.0.0"; AddressIEC="%IX0.0.0"; InitValue=null; State=0; DevicePos=0; AddressAlias = ResizeArray<string>() }
+            { Name="myBit01"; Kind=1; Type="BOOL"; Comment="FAKECOMMENT"; Device=device; Address="%IX0.0.1"; AddressIEC="%IX0.0.1"; InitValue=null; State=0; DevicePos=1; AddressAlias = ResizeArray<string>() }
         ]
 

@@ -55,6 +55,7 @@ module XgiPrologModule =
         Kind:int
         State:int
         AddressIEC : string //XGK 일경우 IEC 주소로 변환해서 가지고 있음
+        AddressAlias : ResizeArray<string> //동일주소를 갖는 Tag를 별칭으로 이름을 저장 (AB PLC tag alias 유사)
     } with
         member x.Validate(targetType) =
             result {
@@ -76,6 +77,7 @@ module XgiPrologModule =
         Kind       = int Variable.Kind.VAR
         State      = 0
         AddressIEC = ""
+        AddressAlias = ResizeArray<string>()
     }
 
 

@@ -51,9 +51,7 @@ module ImportUtilForDev =
             mySys.AddLoadedSystem(dev)
             dev
 
-
-    let getNewDevice (mySys:DsSystem) loadedName apiName =
-        
+    let getLibraryInfos()= 
         let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
         let runDir  = if Path.Exists (Path.Combine(runDir, "dsLib"))
                         then runDir
@@ -69,9 +67,14 @@ module ImportUtilForDev =
 
 
         let libConfig = LoadLibraryConfig(libPath)
-        if libConfig.LibraryInfos.ContainsKey(apiName) 
+        libConfig.LibraryInfos, runDir
+
+    let getNewDevice (mySys:DsSystem) loadedName apiName =
+        let curDir = currentFileName  |> Path.GetDirectoryName
+        let LibraryInfos, runDir = getLibraryInfos()
+        if LibraryInfos.ContainsKey(apiName) 
         then
-            let libPath =  libConfig.LibraryInfos.[apiName]
+            let libPath =  LibraryInfos.[apiName]
                 
             let libAbsolutePath = Path.Combine(curDir, libPath)
             let curLibDir = Path.GetDirectoryName libAbsolutePath

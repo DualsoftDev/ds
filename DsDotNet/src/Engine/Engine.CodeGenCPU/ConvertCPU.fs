@@ -266,8 +266,8 @@ module ConvertCPU =
             | PCSIM -> 
                 setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
             | _->  
-                checkDuplicatesNNullAddress sys
-                //checkErrExternalStartRealExist sys //hmi 시작 가능
+                updateDuplicateAddress sys
+                checkNullAddress sys
                 checkJobs sys
                 checkErrHWItem(sys)
                 checkErrApi(sys)

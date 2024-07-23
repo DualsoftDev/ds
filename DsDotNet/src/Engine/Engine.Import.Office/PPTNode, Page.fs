@@ -248,10 +248,7 @@ module PPTNodeModule =
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
-            //if x.IsRootNode.Value = false then 
-            //    call.TargetJob.TaskDefs.Iter(fun d->
-            //        d.AddOrUpdateApiTaskDevPara(x.Job.Combine(), x.ApiName,  x.TaskDevPara)
-            //    )
+
       
         member x.JobPure : string seq =
             if not (nodeType = CALL || nodeType = AUTOPRE) then

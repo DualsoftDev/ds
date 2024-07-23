@@ -111,10 +111,11 @@ module XGITag = //IEC61131Tag =
         /// Symbol 관련 XML tag attributes 생성
         member private x.GetXmlArgs (prjParam: XgxProjectParams) =
             let targetType = prjParam.TargetType
-            [   $"Name=\"{x.Name}\""
-                $"Comment=\"{escapeXml x.Comment}\""
+            [  
                 match targetType with
                 | XGI ->
+                    $"Name=\"{x.Name}\""
+                    $"Comment=\"{escapeXml x.Comment}\""
                     $"Device=\"{x.Device}\""
                     $"Kind=\"{x.Kind}\""
                     if x.Kind <> int Variable.Kind.VAR_EXTERNAL then
@@ -142,6 +143,14 @@ module XGITag = //IEC61131Tag =
 
                         | ("LINT" | "ULINT" | _ ) -> 
                             failwithlog $"Not supported data type {x.Type}"
+
+                    if x.AddressAlias.any()  //주소 별칭이 있으면 이름 생성하지 않고 직접변수 스타일로 사용 (실제 이름은 Comment에 저장)
+                    then 
+                        $"Name=\"\""
+                        let aliasNames = x.AddressAlias.JoinWith(", ")
+                        $"Comment=\"{escapeXml x.Comment}//Alias List: {aliasNames}\""
+                    else 
+                        $"Name=\"{x.Name}\"";$"Comment=\"{escapeXml x.Comment}\""
 
                     $"Device=\"{x.Device}\""
                     $"DevicePos=\"{x.DevicePos}\""

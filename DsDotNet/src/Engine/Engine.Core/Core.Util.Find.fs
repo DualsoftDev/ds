@@ -360,7 +360,7 @@ type FindExtension =
                     //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))
 
 
-    [<Extension>] static member GetDevicesSkipEmptyAddress(x:DsSystem) = 
+    [<Extension>] static member GetTaskDevsSkipEmptyAddress(x:DsSystem) = 
                     x.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
                         .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
 

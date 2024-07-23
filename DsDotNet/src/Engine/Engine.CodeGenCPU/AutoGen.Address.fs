@@ -306,7 +306,7 @@ module DsAddressModule =
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
             
-        let devsCall =  sys.GetDevicesSkipEmptyAddress()
+        let devsCall =  sys.GetTaskDevsSkipEmptyAddress()
         let mutable extCnt = 0
         for dev, call in devsCall do
             let inSkip, outSkip = getSkipInfo(dev, call.TargetJob)

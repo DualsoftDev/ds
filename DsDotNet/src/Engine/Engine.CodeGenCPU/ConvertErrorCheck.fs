@@ -87,7 +87,7 @@ module ConvertErrorCheck =
             let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Parent.GetFlow().Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
 
-    let checkDuplicatesNNullAddress (sys: DsSystem) = 
+    let checkNullAddress (sys: DsSystem) = 
         // Check for null addresses in jobs
         let nullTagJobs = 
             sys.Jobs.SelectMany(fun j->j.GetNullAddressDevTask())
@@ -118,18 +118,18 @@ module ConvertErrorCheck =
         if nullLamps |> List.isEmpty |> not then 
             let errLamps = nullLamps |> List.map (fun l -> l.Name) |> String.concat "\n"
             failwithf $"램프 주소가 없습니다. \n{errLamps}"
-
+       
+    let updateDuplicateAddress (sys: DsSystem) = 
               // Aggregate all addresses to check for duplicates along with their API names
         let allAddresses = 
             [
-                yield! sys.Jobs |> Seq.collect (fun j -> 
-                    j.TaskDefs|> Seq.collect (fun d -> [($"{d.ApiPureName}_IN", d.InAddress); ($"{d.ApiPureName}_OUT", d.OutAddress)])
-                               )
-                    |> Seq.distinctBy(fun (name,_)-> name)
-                    
-                yield! sys.HWButtons |> Seq.collect (fun b -> [(b.Name, b.InAddress); (b.Name, b.OutAddress)])
-                yield! sys.HWLamps |> Seq.collect (fun l -> [(l.Name, l.OutAddress)])
-            ] |> Seq.filter (fun (_, addr) -> addr <> TextAddrEmpty && addr <> TextSkip) |> Seq.toList
+                yield! sys.GetTaskDevsSkipEmptyAddress().Select(fst).Distinct()
+                          |> Seq.collect(fun d -> [($"{d.ApiPureName}_IN", d.InTag); ($"{d.ApiPureName}_OUT", d.InTag)])
+                       
+                yield! sys.HwSystemDefs
+                          |> Seq.collect(fun h ->  [($"{h.Name}_IN", h.InTag); ($"{h.Name}_OUT", h.InTag)])
+            ] 
+            |> Seq.filter (fun (_, tag) -> tag.IsNonNull()) |> Seq.toList
 
         // Helper to find duplicate elements and group them by API names
         let findDuplicates list =
@@ -142,14 +142,10 @@ module ConvertErrorCheck =
         let duplicates = findDuplicates allAddresses
 
         if not (Seq.isEmpty duplicates) then
-            let dupMsg = 
-                duplicates 
-                |> Seq.map (fun (addr, apis) -> 
-                    let apiList = apis |> String.concat "\n"
-                    $"\n해당주소:{addr}\n{apiList}")
-                |> String.concat "\n "
-             
-            failwithf $"중복 주소 발견: {dupMsg}"
+            duplicates 
+            |> Seq.iter (fun (tag, apis) -> 
+                tag.AliasNames.AddRange apis 
+             )
 
     let setSimulationEmptyAddress(sys:DsSystem) = 
         sys.Jobs.ForEach(fun j->

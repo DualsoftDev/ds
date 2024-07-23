@@ -62,7 +62,10 @@ module LSEAddressPattern =
         if isBool
         then getXgkBitText(device, offset)
         else 
-           getXgkWordText(device, offset)  
+            if offset % 8 <> 0 then
+             failwithf $"XGK 주소는 Word {device} 타입 에러"
+
+            getXgkWordText(device, offset/8)  
 
             
     let getXgKTextByTag (device:LsTagInfo) : string =
@@ -187,12 +190,12 @@ module LSEAddressPattern =
 
             
           //D13411, R13411
-        | RegexPattern regexXGK3 [ DevicePattern device; Int32Pattern word; ] when wordCheck->
+        | RegexPattern regexXGK3 [ DevicePattern device; Int32Pattern word; ] ->
             let totalBitOffset = word * 16
             createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
 
           //D13411.9, R13411.F
-        | RegexPattern regexXGK4 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ] when bitCheck-> 
+        | RegexPattern regexXGK4 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ] -> 
             let totalBitOffset = word * 16 + hexaBit
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
   

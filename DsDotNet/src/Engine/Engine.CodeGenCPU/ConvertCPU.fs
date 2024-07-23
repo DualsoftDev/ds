@@ -288,6 +288,8 @@ module ConvertCPU =
                 yield! sys.B2_SWButtonOutput()
                 yield! sys.B4_SWModeLamp() 
 
+                yield! sys.E2_PLCOnly()
+
                 if RuntimeDS.Package.IsPackageSIM()
                 then 
                     yield! sys.Y1_SystemSimulationForFlow(sys)
@@ -295,7 +297,6 @@ module ConvertCPU =
                     for subSys in sys.GetRecursiveLoadedSystems() do
                         yield! subSys.Y1_SystemSimulationForFlow(sys) 
 
-                    yield! sys.E2_PLCOnly()
                     yield! emulationDevice sys
 
             //Variables  적용 

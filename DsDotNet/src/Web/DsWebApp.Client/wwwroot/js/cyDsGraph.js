@@ -225,54 +225,29 @@ var cy = window.cy = cytoscape({
         },
         {
             selector: 'edge.Start',
-            css: {
-                'target-arrow-color': 'navy',
-            }
+            css: { 'target-arrow-shape': 'triangle', }
         },
         {
             selector: 'edge.Reset',
-            css: {
-                'line-style': 'dashed',     // 'solid', 'dotted',
-            //    'line-color': 'green',
-            //    'target-arrow-shape': 'circle',
-            //    'target-arrow-color': 'red',
-            //    'line-style': 'dashed',     // 'solid', 'dotted',
-            }
+            css: { 'target-arrow-shape': 'circle', }
         },
         {
-            selector: 'edge.Start.ReverseReset',
-            css: {
-                'source-arrow-shape': 'circle',
-                'target-arrow-shape': 'triangle',
-            }
+            selector: 'edge.Start.Reset',
+            css: { 'target-arrow-shape': 'circle-triangle', }
+        },
+
+
+        {
+            selector: 'edge.ReverseStart',
+            css: { 'source-arrow-shape': 'triangle', }
         },
         {
-            selector: 'edge.Start.ReverseStart',
-            css: {
-                'source-arrow-shape': 'triangle',
-                'target-arrow-shape': 'triangle',
-            }
+            selector: 'edge.ReverseReset',
+            css: { 'source-arrow-shape': 'circle', }
         },
         {
-            selector: 'edge.Reset.ReverseReset',
-            css: {
-                'source-arrow-shape': 'circle',
-                'target-arrow-shape': 'circle',
-            }
-        },
-        {
-            selector: 'edge.Start.Reset.ReverseReset',
-            css: {
-                'source-arrow-shape': 'circle',
-                'target-arrow-shape': 'circle-triangle',
-            }
-        },
-        {
-            selector: 'edge.Start.ReverseStart.ReverseReset',
-            css: {
-                'source-arrow-shape': 'circle-triangle',
-                'target-arrow-shape': 'triangle',
-            }
+            selector: 'edge.ReverserStart.ReverseReset',
+            css: { 'source-arrow-shape': 'circle-triangle', }
         },
     ],
 

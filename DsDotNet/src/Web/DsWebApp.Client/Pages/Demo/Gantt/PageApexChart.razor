@@ -1,0 +1,21 @@
+@page "/demo/apex"
+
+<h3>PageApexChart</h3>
+
+<div id="controls">
+    <label><input type="checkbox" id="showDate" checked> Show Date</label>
+    <label><input type="checkbox" id="showHour" checked> Show Hour</label>
+    <label><input type="checkbox" id="showMinutes" checked> Show Minutes</label>
+    <label><input type="checkbox" id="showSeconds" checked> Show Seconds</label>
+    <label><input type="checkbox" id="showMilliseconds" checked> Show Milliseconds</label>
+</div>
+<div id="chart"></div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.EvalExternalScript("https://cdn.jsdelivr.net/npm/apexcharts");
+        await JsDual.EvalExternalScript("js/pages/PageApexChart_razor.js");
+    }
+}

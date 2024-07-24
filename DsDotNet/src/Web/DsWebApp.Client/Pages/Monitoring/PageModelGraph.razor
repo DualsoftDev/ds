@@ -76,8 +76,8 @@
                 var (graphJson, nodesJson) = (jsons[0], jsons[1]);
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{graphJson}");
                 await JsDual.EvalOnGlobalModule($"window.cyData = {graphJson};");
-                await JsDual.LoadScript("js/cyDsGraph.js");
-                await JsDual.LoadScript("js/pages/PageModelGraph_razor.js");
+                await JsDual.EvalScript("js/cyDsGraph.js");
+                await JsDual.EvalScript("js/pages/PageModelGraph_razor.js");
                 await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");       // default to Non-Monitoring mode
 
                 await JsRuntime.InvokeVoidAsync("setDotnetObjRef", _dotNetObjRef);

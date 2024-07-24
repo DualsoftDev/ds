@@ -8,6 +8,6 @@
     protected override async Task OnInitializedAsync()
     {
         await JsDual.LoadScript("https://www.gstatic.com/charts/loader.js");
-        await JsDual.LoadScript("js/pages/PageGoogleTimelineChart_razor.js");
+        await JsDual.EvalScript("js/pages/PageGoogleTimelineChart_razor.js");
     }
 }

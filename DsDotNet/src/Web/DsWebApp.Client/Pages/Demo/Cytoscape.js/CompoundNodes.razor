@@ -10,7 +10,7 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await JsDual.LoadScript("js/external/cytoscape/cytoscape.min.js");
+        await JsDual.EvalScript("js/external/cytoscape/cytoscape.min.js");
 
         await JsDual.Eval(@"
 var cy = window.cy = cytoscape({
@@ -34,14 +34,14 @@ var cy = window.cy = cytoscape({
         'text-valign': 'top',
         'text-halign': 'center',
         'shape': 'round-rectangle',
-        'corner-radius': ""10"",
+        'corner-radius': '10',
         'padding': 10
       }
     },
     {
       selector: 'node#e',
       css: {
-        'corner-radius': ""10"",
+        'corner-radius': '10',
         'padding': 0
       }
     },

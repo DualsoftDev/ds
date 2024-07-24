@@ -16,7 +16,7 @@
     {
         await base.OnInitializedAsync();
 
-        await JsDual.EvalExternalScript("https://cdn.jsdelivr.net/npm/apexcharts");     // LoadScript 시 2번째 page loading 부터 동작안함 (혹은 새로고침시)
-        await JsDual.EvalExternalScript("js/pages/PageApexChart_razor.js");
+        await JsDual.EvalScript("https://cdn.jsdelivr.net/npm/apexcharts");     // LoadScript 시 2번째 page loading 부터 동작안함 (혹은 새로고침시)
+        await JsDual.EvalScript("js/pages/PageApexChart_razor.js");
     }
 }

@@ -3,7 +3,7 @@ google.charts.setOnLoadCallback(drawChart);
 
 
 var chart;
-var data;
+var dataTable;
 var options;
 var viewWindowStart;
 var viewWindowEnd;
@@ -13,21 +13,33 @@ function drawChart() {
     console.log('Drawing GOOGLE chart')
     var container = document.getElementById('timeline');
     chart = new google.visualization.Timeline(container);
-    data = new google.visualization.DataTable();
-    data.addColumn({ type: 'string', id: 'Room' });
-    data.addColumn({ type: 'string', id: 'Name' });
-    data.addColumn({ type: 'date', id: 'Start' });
-    data.addColumn({ type: 'date', id: 'End' });
-    data.addRows([
-        ['Magnolia Room', 'CSS Fundamentals', new Date(0, 0, 0, 12, 0, 0, 1), new Date(0, 0, 0, 14, 0, 0, 100)],
-        ['Magnolia Room', 'Intro JavaScript', new Date(0, 0, 0, 14, 30, 0, 1), new Date(0, 0, 0, 16, 0, 0, 100)],
-        ['Magnolia Room', 'Advanced JavaScript', new Date(0, 0, 0, 16, 30, 0, 1), new Date(0, 0, 0, 19, 0, 0, 100)],
-        ['Gladiolus Room', 'Intermediate Perl', new Date(0, 0, 0, 12, 30, 0, 1), new Date(0, 0, 0, 14, 0, 0, 100)],
-        ['Gladiolus Room', 'Advanced Perl', new Date(0, 0, 0, 14, 30, 0, 1), new Date(0, 0, 0, 16, 0, 0, 100)],
-        ['Gladiolus Room', 'Applied Perl', new Date(0, 0, 0, 16, 30, 0, 1), new Date(0, 0, 0, 18, 0, 0, 100)],
-        ['Petunia Room', 'Google Charts', new Date(0, 0, 0, 12, 30, 0, 1), new Date(0, 0, 0, 14, 0, 0, 100)],
-        ['Petunia Room', 'Closure', new Date(0, 0, 0, 14, 30, 0, 1), new Date(0, 0, 0, 16, 0, 0, 100)],
-        ['Petunia Room', 'App Engine', new Date(0, 0, 0, 16, 30, 0, 1), new Date(0, 0, 0, 18, 30, 0, 100)]]);
+    dataTable = new google.visualization.DataTable();
+    dataTable.addColumn({ type: 'string', id: 'Room' });
+    dataTable.addColumn({ type: 'string', id: 'Name' });
+    dataTable.addColumn({ type: 'string', id: 'style', role: 'style' });
+    dataTable.addColumn({ type: 'string', role: 'tooltip' });
+    dataTable.addColumn({ type: 'date', id: 'Start' });
+    dataTable.addColumn({ type: 'date', id: 'End' });
+
+    /* https://developers.google.com/chart/interactive/docs/gallery/timeline
+     * When there are four columns in a timeline dataTable,
+     *  - the first is interpreted as the row label,
+     *  - the second as the bar label,
+     *  - and the third and fourth as start and end.
+     * 
+     * 5개 이상 column 이면 style column, tooltip column 등 이 추가된 것으로 해석
+     *  - tooltip column 이 null 이면 default tooltip 으로 보여진다.
+     */
+    dataTable.addRows([
+        ['Magnolia Room',   'CSS Fundamentals',     'yellow',       null,    new Date(0, 0, 0, 12,  0, 0, 1), new Date(0, 0, 0, 14, 0, 0, 100)],
+        ['Magnolia Room',   'Intro JavaScript',     '#cbb69d',      '2',     new Date(0, 0, 0, 14, 30, 0, 1), new Date(0, 0, 0, 16, 0, 0, 100)],
+        ['Magnolia Room',   'Advanced JavaScript',  '#cbb69d',      '3',     new Date(0, 0, 0, 16, 30, 0, 1), new Date(0, 0, 0, 19, 0, 0, 100)],
+        ['Gladiolus Room',  'Intermediate Perl',    '#cbb69d',      '4',     new Date(0, 0, 0, 12, 30, 0, 1), new Date(0, 0, 0, 14, 0, 0, 100)],
+        ['Gladiolus Room',  'Advanced Perl',        'green',        null,    new Date(0, 0, 0, 14, 30, 0, 1), new Date(0, 0, 0, 16, 0, 0, 100)],
+        ['Gladiolus Room',  'Applied Perl',         '#cbb69d',      '6',     new Date(0, 0, 0, 16, 30, 0, 1), new Date(0, 0, 0, 18, 0, 0, 100)],
+        ['Petunia Room',    'Google Charts',        '#cbb69d',      '7',     new Date(0, 0, 0, 12, 30, 0, 1), new Date(0, 0, 0, 14, 0, 0, 100)],
+        ['Petunia Room',    'Closure',              '#cbb69d',      '8',     new Date(0, 0, 0, 14, 30, 0, 1), new Date(0, 0, 0, 16, 0, 0, 100)],
+        ['Petunia Room',    'App Engine',           '#cbb69d',      '9',     new Date(0, 0, 0, 16, 30, 0, 1), new Date(0, 0, 0, 18, 30, 0, 100)]]);
 
     var originalStart = new Date(0, 0, 0, 12);
     var originalEnd = new Date(0, 0, 0, 18);
@@ -45,7 +57,7 @@ function drawChart() {
         tooltip: { trigger: 'focus' } // Enable tooltips initially
     };
 
-    chart.draw(data, options);
+    chart.draw(dataTable, options);
 }
 
 function hideAllTooltips() {
@@ -79,12 +91,12 @@ window.addEventListener('wheel', function (event) {
 
     options.hAxis.minValue = viewWindowStart;
     options.hAxis.maxValue = viewWindowEnd;
-    chart.draw(data, options);
+    chart.draw(dataTable, options);
 
     // Re-enable tooltips after zooming is complete
     zoomTimeout = setTimeout(function () {
         options.tooltip.trigger = 'focus';
-        chart.draw(data, options);
+        chart.draw(dataTable, options);
     }, 500); // Adjust the timeout as needed
 });
 

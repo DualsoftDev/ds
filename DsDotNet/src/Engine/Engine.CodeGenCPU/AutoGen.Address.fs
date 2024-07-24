@@ -12,8 +12,8 @@ module DsAddressModule =
  
     let mutable inDigitCnt = 0
     let mutable inAnalogCnt = 0
-    let mutable outDigitCnt = 0
-    let mutable outAnalogCnt = 0
+    let mutable outDigitByteCnt = 0
+    let mutable outAnalogByteCnt = 0
     let mutable memoryCnt = InitStartMemory
     let setMemoryIndex(index:int) = memoryCnt <- index;
     let getCurrentMemoryIndex() = memoryCnt;
@@ -21,8 +21,8 @@ module DsAddressModule =
                 memoryCnt <- InitStartMemory
                 inDigitCnt <- 0
                 inAnalogCnt <- 0
-                outDigitCnt <- 0
-                outAnalogCnt <- 0
+                outDigitByteCnt <- 0
+                outAnalogByteCnt <- 0
 
 
     let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
@@ -119,15 +119,15 @@ module DsAddressModule =
                     | Out     -> 
                         if sizeBit = 1 
                         then
-                            let ret = getCurrent outDigitCnt sizeBit
-                            outDigitCnt <- getNext outDigitCnt sizeBit ; ret
+                            let ret = getCurrent outDigitByteCnt sizeBit
+                            outDigitByteCnt <- getNext outDigitByteCnt sizeBit ; ret
                         else
                             if XGK = target then
-                                let ret = outAnalogCnt
-                                outAnalogCnt <- outAnalogCnt+sizeBit/8 ; ret
+                                let ret = outAnalogByteCnt
+                                outAnalogByteCnt <- outAnalogByteCnt+sizeBit/8 ; ret
                             else
-                                let ret = outAnalogCnt
-                                outAnalogCnt <- outAnalogCnt+1 ; ret
+                                let ret = outAnalogByteCnt
+                                outAnalogByteCnt <- outAnalogByteCnt+1 ; ret
                     
                     | Memory  -> let ret = getCurrent memoryCnt sizeBit  
                                  memoryCnt <- getNext memoryCnt sizeBit; ret
@@ -183,16 +183,24 @@ module DsAddressModule =
                     | Some (i, _, _) -> (i, assigned (i - 1))
                     | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다."
 
-
-                if RuntimeDS.Package.IsPCorPCSIM() 
+                if target = WINDOWS
                 then 
+                    let getPCIOM(head:string, offsetBit) =
+                        match sizeBit with
+                        | 1 -> $"{head}B{offsetBit / 8}.{offsetBit % 8}" 
+                        | 8 -> $"{head}B{offsetBit  / 8}"
+                        | 16 -> $"{head}W{offsetBit / 16}"
+                        | 32 -> $"{head}D{offsetBit / 32}"
+                        | 64 -> $"{head}L{offsetBit / 64}"
+                        | _ -> failwithf $"Invalid size :{sizeBit}"
+
                     match ioType with 
-                    |In ->  $"IB{cnt / 8}.{cnt % 8}" 
-                    |Out -> $"OB{cnt / 8}.{cnt % 8}" 
-                    |Memory -> $"M{memoryCnt}"
+                    |In      ->  if sizeBit = 1 then getPCIOM ("I", cnt) else getPCIOM ("I", cnt*8)
+                    |Out     ->  if sizeBit = 1 then getPCIOM ("O", cnt) else getPCIOM ("O", cnt*8)
+                    |Memory  ->  if sizeBit = 1 then getPCIOM ("M", cnt) else getPCIOM ("M", cnt*8)
                     |NotUsed -> failwithf $"{ioType} not support {name}"
 
-                elif RuntimeDS.Package.IsPLCorPLCSIM()
+                elif target = XGK || target = XGI
                 then
                     match ioType with 
                     |In |Out -> 

@@ -14,7 +14,7 @@ type VertexMCall with
     member v.C1_DoOperator() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
-        let sts = call.TargetFunc.Statements
+        let sts = call.TargetFunc.Value.Statements
         if sts.Count = 1
         then 
             [
@@ -32,7 +32,7 @@ type VertexMCall with
         let call = v.Vertex :?> Call
         let comment = getFuncName()
         [
-            if call.TargetFunc.Statements.any() 
+            if call.TargetFunc.Value.Statements.any() 
             then
                 let sets = 
                     if RuntimeDS.Package.IsPLCorPLCSIM() 
@@ -46,7 +46,7 @@ type VertexMCall with
                 yield! (v.MM.Expr, v.CallCommandPulseRelay, v.CallCommandPulseHold) --^ (v.CallCommandPulse, getFuncName()) 
 
                     ////test ahn
-                yield! call.TargetFunc.Statements |> Seq.collect(fun s->
+                yield! call.TargetFunc.Value.Statements |> Seq.collect(fun s->
                         [
                             match s with
                             | DuAssign (_, cmdExpr, target) ->

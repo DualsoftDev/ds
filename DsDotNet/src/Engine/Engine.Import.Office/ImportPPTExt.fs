@@ -2,7 +2,7 @@
 namespace Engine.Import.Office
 
 open System.Linq
-open System.Collections.Concurrent
+open System.Collections
 open PPTConnectionModule
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
@@ -216,7 +216,8 @@ module ImportU =
         static member MakeSegment(doc: pptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
             let dicVertex = doc.DicVertex
-
+            let dicAutoPreVertex = doc.DicAutoPreVertex
+            
             let pptNodes = doc.Nodes
             let parents = doc.Parents
 
@@ -256,6 +257,7 @@ module ImportU =
             let createCallNAutoPre () =
                 let libInfos, _ = getLibraryInfos()
                 callNAutoPres
+                    .Filter(fun node -> not(mySys.LoadedSystems.Select(fun d->d.Name).Contains(node.DevName)))
                     .GroupBy(fun node -> node.DevName)
                     .Iter(fun kv -> 
 
@@ -268,26 +270,23 @@ module ImportU =
                             let errApis = usedApis.Except(libApis).JoinWith(", ")
                             let libFilePath  =libInfos[libApis.First()]
                             failWithLog $"{kv.Key} ({libFilePath}) 디바이스에\r\n{errApis} 인터페이스가 없습니다."
-
                      )
 
                 callNAutoPres
-                |> Seq.sortBy(fun node -> node.PageNum)
-                |> Seq.sortBy(fun node -> node.Position.Left)
-                |> Seq.sortBy(fun node -> node.Position.Top)
+                |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
                 |> Seq.iter (fun node ->
-                        try
-                            if node.NodeType = AUTOPRE
-                            then 
-                                createAutoPre(mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
-                            else 
-                                if dicChildParent.ContainsKey(node) then
-                                    createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
-                                else
-                                    createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex)
-                        with ex ->
-                            node.Shape.ErrorName(ex.Message, node.PageNum)
-                            )
+                    try
+                        if node.NodeType = AUTOPRE
+                        then 
+                            createAutoPre(mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicAutoPreVertex)
+                        else 
+                            if dicChildParent.ContainsKey(node) then
+                                createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
+                            else
+                                createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex)
+                    with ex ->
+                        node.Shape.ErrorName(ex.Message, node.PageNum)
+                        )
 
             let createAlias () =
                 pptNodes
@@ -482,9 +481,9 @@ module ImportU =
         //Safety & AutoPre만들기
         [<Extension>]
         static member MakeSafetyAutoPre(doc: pptDoc, mySys: DsSystem) =
-            let dicVertex = doc.DicVertex
+            let vv = doc.DicVertex.Values@doc.DicAutoPreVertex.Values
             let dicJob =   
-                doc.DicVertex.Values
+                vv
                    .OfType<Call>().Where(fun call -> call.IsJob)
                    .SelectMany(fun call ->
                                 seq{
@@ -524,11 +523,11 @@ module ImportU =
                 node.Safeties
                 |> map (fun fullName -> dicJob.[fullName])
                 |> iter (fun condJob  ->
-                    match dicVertex.[node.Key].GetPure() |> box with
+                    match doc.DicVertex.[node.Key].GetPure() |> box with
                     | :? ISafetyAutoPreRequisiteHolder as holder ->
                             holder.SafetyConditions.Add(DuSafetyAutoPreConditionCall(condJob )) |> ignore
                     | _ ->
-                            node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
+                            node.Shape.ErrorName($"{ErrID._28}(err:{doc.DicVertex.[node.Key].QualifiedName})", node.PageNum))
 
                 node.AutoPres
                 |> iter (fun (jobFqdn)  ->
@@ -550,11 +549,11 @@ module ImportU =
 
                             //| None -> 
                         
-                    match dicVertex.[node.Key].GetPure() |> box with
+                    match doc.DicVertex.[node.Key].GetPure() |> box with
                     | :? ISafetyAutoPreRequisiteHolder as holder -> 
                             holder.AutoPreConditions.Add(DuSafetyAutoPreConditionCall(condJob)) |> ignore
                     | _ -> 
-                            node.Shape.ErrorName($"{ErrID._28}(err:{dicVertex.[node.Key].QualifiedName})", node.PageNum))
+                            node.Shape.ErrorName($"{ErrID._28}(err:{doc.DicVertex.[node.Key].QualifiedName})", node.PageNum))
             )
 
 

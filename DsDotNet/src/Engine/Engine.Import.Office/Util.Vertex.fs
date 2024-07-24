@@ -104,9 +104,9 @@ module ImportUtilVertex =
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)
 
-    let createAutoPre(mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
+    let createAutoPre(mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicAutoPreVertex: Dictionary<string, Vertex>) =
         let autoPre =  createCall (mySys, node, parentWrapper)
-        dicSeg.Add(node.Key, autoPre)
+        dicAutoPreVertex.Add(node.Key, autoPre)
 
     let  getParent
         (

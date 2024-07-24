@@ -356,12 +356,12 @@ module ExpressionModule =
             match x with
             | DuAssign (_, expr, target) ->
                 if target.DataType <> expr.DataType then
-                    failwith "ERROR: Type mismatch in assignment statement"
+                    failwith $"ERROR: {target.Name} Type mismatch in assignment statement"
                 target.BoxedValue <- expr.BoxedEvaluatedValue
 
             | DuVarDecl (expr, target) ->
                 if target.DataType <> expr.DataType then
-                    failwith "ERROR: Type mismatch in assignment statement"
+                    failwith $"ERROR: {target.Name} Type mismatch in assignment statement"
                 target.BoxedValue <- expr.BoxedEvaluatedValue
 
             | DuTimer timerStatement ->

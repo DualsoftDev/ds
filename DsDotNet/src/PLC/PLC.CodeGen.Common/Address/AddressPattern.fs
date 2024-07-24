@@ -62,14 +62,17 @@ module LSEAddressPattern =
         if isBool
         then getXgkBitText(device, offset)
         else 
-            if offset % 8 <> 0 then
-             failwithf $"XGK 주소는 Word {device} 타입 에러"
-
-            getXgkWordText(device, offset/8)  
+            getXgkWordText(device, offset)  
 
             
     let getXgKTextByTag (device:LsTagInfo) : string =
-        getXgkTextByType (device.Device.ToString(), device.BitOffset, device.DataType = DataType.Bit)
+        let isBit = device.DataType = DataType.Bit
+
+        let offset = if isBit 
+                     then  device.BitOffset 
+                     else  device.ByteOffset
+
+        getXgkTextByType (device.Device.ToString(), offset, isBit)
 
     let getXgiIOTextBySize (device:string, offset: int, bitSize:int, iSlot:int, sumBit:int) : string =
         if bitSize = 1

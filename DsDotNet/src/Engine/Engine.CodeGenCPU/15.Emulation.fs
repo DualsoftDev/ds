@@ -14,7 +14,7 @@ type TaskDev with
         let rst = sys._off.Expr
 
         let inParam = d.GetInParam(job)
-        if inParam.Type = DuBOOL || api.PureName = api.Name //bool type 은 파라메터 있는 타입은 제외    
+        if inParam.Type = DuBOOL// || api.PureName = api.Name //bool type 은 파라메터 있는 타입은 제외    
         then 
             let setBool = if inParam.Value.IsNull() || (inParam.Value |> Convert.ToBoolean)
                           then set 

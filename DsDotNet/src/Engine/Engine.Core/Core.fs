@@ -327,9 +327,9 @@ module CoreModule =
 
         member x.TargetFunc =
             match jobOrFunc with
-            | CommadFuncType func -> func :> Func
-            | OperatorFuncType func -> func :> Func
-            | _ -> failwithlog $"{x.QualifiedName} is not FunctionType."
+            | CommadFuncType func -> func :> Func |> Some
+            | OperatorFuncType func -> func :> Func  |> Some
+            | _ -> None
                          
         /// Indicates if the target includes a job.
         member _.IsJob = isJob jobOrFunc 

@@ -73,7 +73,7 @@ module internal rec Command =
             match x.Terminal with
             | Some t ->
                 match t.Variable, t.Literal with
-                | Some v, None -> v.Name
+                | Some v, None -> getStorageText v
                 | None, Some (:? ILiteralHolder as lh) ->
                     match prjParam.TargetType with
                     | XGK -> lh.ToTextWithoutTypeSuffix()
@@ -314,7 +314,13 @@ module internal rec Command =
 
             let outputCellXmls =
                 [   for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
-                        rxiFBParameter (fsx + 1, y + yoffset) terminal.StorageName ]
+                        let terminalText =
+                            match terminal with
+                            | :? IStorage as storage -> getStorageText storage
+                            | _ -> failwithlog "ERROR"
+
+                        rxiFBParameter (fsx + 1, y + yoffset) terminalText
+                ]
 
             /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
             let tentacleXmls =
@@ -368,7 +374,7 @@ module internal rec Command =
                                 match terminal.Literal, terminal.Variable with
                                 | Some(:? ILiteralHolder as literal), None -> literal.ToTextWithoutTypeSuffix()
                                 | Some literal, None -> literal.ToText()
-                                | None, Some variable -> variable.Name
+                                | None, Some variable -> getStorageText variable
                                 | _ -> failwithlog "ERROR"
                             | _ -> failwithlog "ERROR"
 
@@ -603,10 +609,12 @@ module internal rec Command =
                         match storage.Address, storage.Name with
                         | "", StartsWith("_") -> storage.Name
                         | _ -> storage.Address
-                | :? IStorage as storage, _ ->   storage.Name
+                | :? IStorage as storage, _ ->   getStorageText storage
                 | :? LiteralHolder<bool> as onoff, _ -> if onoff.Value then "_ON" else "_OFF"
                 | _ ->
-                    terminal.ToText()
+                    match terminal with
+                    | :? IStorage as storage -> getStorageText storage
+                    | _ -> failwithlog "ERROR"
 
             let str = elementBody mode c terminalText
 
@@ -764,7 +772,10 @@ module internal rec Command =
                         let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
                             match prjParam.TargetType, cmdExp.CoilTerminalTag with
                             | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
-                            | _ -> cmdExp.CoilTerminalTag.StorageName
+                            | _ -> 
+                                match cmdExp.CoilTerminalTag with
+                                | :? IStorage as storage -> getStorageText storage
+                                | _ -> failwithlog "ERROR"
                         bxiCoil (nx - 1, y) cmdExp coilText
                     | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
                         bxiCommand prjParam (nx, y) cmdExp
@@ -788,13 +799,15 @@ module internal rec Command =
         match prjParam.TargetType, cmdExp with
         | XGK, ActionCmd(Move(condition, source, target)) when source.Terminal.IsSome ->
             let fbParam, fbWidth =
-                let s, d = source.GetTerminalString(prjParam), target.Name
+                let s, d = source.GetTerminalString(prjParam), target.Address   
                 let mov =
                     let st, tt = source.DataType, target.DataType
                     // move 의 type 이 동일해야 한다.  timer/counter 는 예외.  reset coil 이나 preset 설정 등 허용.
                     assert (st = tt || tt = typeof<TimerCounterBaseStruct>)
                     operatorToXgkFunctionName "MOV" st
                 $"Param={dq}{mov},{s},{d}{dq}", 3           // Param="MOV,source,destination"
+
+
             rxiXgkFB prjParam (x, y) condition (fbParam, fbWidth)
 
         | _ ->

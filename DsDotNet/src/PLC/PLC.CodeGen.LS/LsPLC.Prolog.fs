@@ -65,6 +65,7 @@ module XgiPrologModule =
                          else validateAddress x.Name x.Address targetType
                 return! Ok()
             }
+        member x.IsDirectAddress = x.AddressAlias.any()
 
     let defaultSymbolInfo = {
         Name       = ""

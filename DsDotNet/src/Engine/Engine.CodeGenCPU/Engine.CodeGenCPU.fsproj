@@ -48,6 +48,7 @@
         <Compile Include="16.Functions.fs" />
         <Compile Include="17.Timer, Counter.fs" />
         <Compile Include="ConvertErrorCheck.fs" />
+        <Compile Include="ConvertAddress.fs" />
         <Compile Include="ConvertCPU.fs" />
         <Compile Include="Loader.fs" />
         <Compile Include="EntryPoint.fs" />

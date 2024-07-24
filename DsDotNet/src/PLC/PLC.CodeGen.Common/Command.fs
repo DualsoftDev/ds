@@ -44,7 +44,7 @@ module rec Command =
         interface IFunctionCommand with
             member this.TerminalEndTag: INamedExpressionizableTerminal =
                 match this with
-                | COMCoil(endTag) -> endTag
+                | COMCoil(endTag) ->  endTag
                 | COMPulseCoil(endTag) -> endTag
                 | COMNPulseCoil(endTag) -> endTag
                 | COMClosedCoil(endTag) -> endTag

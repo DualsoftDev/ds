@@ -1,5 +1,7 @@
 namespace Engine.Core
 
+open System.Linq
+
 [<AutoOpen>]
 module rec ExpressionForwardDeclModule =
 
@@ -14,6 +16,7 @@ module rec ExpressionForwardDeclModule =
     // Interface for tags
     type ITag =
         inherit IStorage
+        abstract AliasNames: ResizeArray<string>
 
     type ITag<'T> =
         inherit ITag
@@ -24,6 +27,20 @@ module rec ExpressionForwardDeclModule =
     type IVariable<'T> =
         inherit IVariable
         inherit IStorage<'T>
+
+    // 직접변수일 경우 주소 출력
+    let getStorageText (stg:IStorage) = 
+        match stg with
+        | :? ITag as t ->  if t.AliasNames.Any() then t.Address else t.Name
+        |_ -> stg.Name
+
+    type ITerminal with
+        member x.GetContact(): string =
+            match x.Variable, x.Literal with
+            | Some v, None -> getStorageText v
+            | None, Some literal -> literal.ToText()
+            | _ -> failwith "Invalid terminal"
+
 
     // Interface for PLC generation module
     type IFlatExpression = interface end

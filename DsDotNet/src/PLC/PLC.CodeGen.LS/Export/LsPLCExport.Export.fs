@@ -629,6 +629,7 @@ module XgiExportModule =
                 // timer, counter 등을 고려했을 때는 numNewGlobals <> globalStorages.Count 일 수 있다.
 
                 let xnGlobalVarSymbols = xdoc.GetXmlNode($"{xPathGlobalVar}/Symbols")
+                let xnGlobalDirectVarComments = xdoc.GetXmlNode($"{xPathGlobalVar}/DirectVarComment")
                 let xnCountConainer =
                     match targetType with
                     | XGI -> xdoc.GetXmlNode xPathGlobalVar
@@ -639,6 +640,8 @@ module XgiExportModule =
 
                 globalStoragesXmlNode.SelectNodes(".//Symbols/Symbol").ToEnumerables()
                 |> iter (xnGlobalVarSymbols.AdoptChild >> ignore)
+                globalStoragesXmlNode.SelectNodes(".//DirectVarComment/DirectVar").ToEnumerables()
+                |> iter (xnGlobalDirectVarComments.AdoptChild >> ignore)
 
                 (* UDT instance 삽입 : <Symbol> xml node 삽입 *)
                 pous

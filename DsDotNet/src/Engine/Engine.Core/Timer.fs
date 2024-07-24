@@ -165,7 +165,6 @@ module rec TimerModule =
             member x.ToText() = unsupported()
             member _.ToBoxedExpression() = unsupported()
             member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name) 
-            member x.AliasNames = ResizeArray<string>()
 
         member private x.This = x
         member _.Name:string = name

@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LS
 
 open Dual.Common.Core.FS
 open Engine.Core
+open System.Linq
 
 // IEC-61131 Addressing
 // http://www.microshadow.com/ladderdip/html/basic_iec_addressing.htm
@@ -144,7 +145,7 @@ module XGITag = //IEC61131Tag =
                         | ("LINT" | "ULINT" | _ ) -> 
                             failwithlog $"Not supported data type {x.Type}"
 
-                    if x.AddressAlias.any()  //주소 별칭이 있으면 이름 생성하지 않고 직접변수 스타일로 사용 (실제 이름은 Comment에 저장)
+                    if x.IsDirectAddress  //주소 별칭이 있으면 이름 생성하지 않고 직접변수 스타일로 사용 (실제 이름은 Comment에 저장)
                     then 
                         $"Name=\"\""
                         let aliasNames = x.AddressAlias.JoinWith(", ")
@@ -158,10 +159,10 @@ module XGITag = //IEC61131Tag =
                 | _ -> failwithlog "Not supported plc type"
             ] |> String.concat " "
 
-        /// Symbol 관련 XML tag 생성
-        member x.ToText(prjParam: XgxProjectParams) = $"<Symbol {x.GetXmlArgs prjParam}/>"
-        //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
 
+
+
+        //Address="" Trigger="" InitValue="" Comment="" Device="" DevicePos="-1" TotalSize="0" OrderIndex="0" HMI="0" EIP="0" SturctureArrayOffset="0" ModuleInfo="" ArrayPointer="0"><MemberAddresses></MemberAddresses>
         member x.GenerateXml (prjParam: XgxProjectParams) =
             [
                 let xml = x.GetXmlArgs prjParam
@@ -174,20 +175,51 @@ module XGITag = //IEC61131Tag =
                 yield "\t</Symbol>" ]
             |> String.concat "\r\n"
 
+        member x.GenerateDirectAddressXml () =
+            [  
+                $"\t<DirectVar  "
+                $"Device=\"{x.Address}\""
+                $"Name=\"\""
+                let aliasNames = x.AddressAlias.JoinWith(", ")
+                $"Comment=\"{escapeXml x.Comment}//Alias List: {aliasNames}\""
+                ">\t</DirectVar>"
+            ]|> String.concat " "
+
     /// Symbol variable 정의 구역 xml 의 string 을 생성
-    let private generateSymbolVarDefinitionXml (prjParam: XgxProjectParams) (varType: string) (FList(symbols: SymbolInfo list)) =
+    let private generateSymbolVarDefinitionXml (prjParam: XgxProjectParams) (varType: string) (FList(symbolInfos: SymbolInfo list)) =
         let symbols:SymbolInfo list =
-            symbols 
+            symbolInfos 
             |> List.filter (fun s -> not(s.Name.Contains(xgkTimerCounterContactMarking)))
+            |> List.filter (fun s -> not(s.IsDirectAddress))
             |> List.sortBy (fun s -> s.Name)
 
-        [   yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
-            yield "<Symbols>"
-            yield! symbols |> map (fun s -> s.GenerateXml prjParam)
-            yield "</Symbols>"
-            yield "<TempVar Count=\"0\"></TempVar>"
-            yield $"</{varType}>" ]
-        |> String.concat "\r\n"
+        let directSymbols =
+            symbolInfos 
+            |> Seq.filter (fun s -> s.IsDirectAddress)
+            |> Seq.distinctBy (fun s -> s.Address)
+            |> Seq.toList
+        let xmls = 
+            [   yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
+                yield "<Symbols>"  
+                let symbols = //xgk는 Symbols 규격에 directSymbols 을 넣는다.  xgi는 DirectVarComment 별도 구역에 생성
+                    if prjParam.TargetType = XGK && varType = "GlobalVariable" then  //LocalVar 에는 DirectVarComment 없음
+                        symbols@directSymbols 
+                    else 
+                        symbols
+
+                yield! symbols |> map (fun s -> s.GenerateXml prjParam)
+                yield "</Symbols>"
+           
+                yield "<TempVar Count=\"0\"></TempVar>"
+
+                if prjParam.TargetType = XGI && varType = "GlobalVariable" && directSymbols.length() > 0 then 
+                    yield $"<DirectVarComment Count=\"{directSymbols.length()}\">"
+                    yield! directSymbols |> map (fun s -> s.GenerateDirectAddressXml())
+                    yield "</DirectVarComment>"
+
+                yield $"</{varType}>"
+            ]
+        xmls |> String.concat "\r\n"
 
     let generateLocalSymbolsXml (prjParam: XgxProjectParams) symbols =
         generateSymbolVarDefinitionXml prjParam "LocalVar" symbols

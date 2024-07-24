@@ -77,7 +77,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="81"/>
-                                    <Element ElementType="33" Coordinate="2130" Param="RMOV,1.1,nn1"/>
+                                    <Element ElementType="33" Coordinate="2130" Param="RMOV,1.1,M0000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="4097">
@@ -89,7 +89,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="81"/>
-                                    <Element ElementType="33" Coordinate="5202" Param="RMOV,2.2,nn2"/>
+                                    <Element ElementType="33" Coordinate="5202" Param="RMOV,2.2,M0002"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
@@ -101,7 +101,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8274" Param="RMOV,0,sum"/>
+                                    <Element ElementType="33" Coordinate="8274" Param="RMOV,0,M0004"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="10241">
@@ -125,7 +125,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="13316" Param="81"/>
-                                    <Element ElementType="33" Coordinate="13394" Param="RMOV,-1.1,sub"/>
+                                    <Element ElementType="33" Coordinate="13394" Param="RMOV,-1.1,M0006"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
@@ -137,7 +137,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="16388" Param="81"/>
-                                    <Element ElementType="33" Coordinate="16466" Param="RMOV,2.42,mul"/>
+                                    <Element ElementType="33" Coordinate="16466" Param="RMOV,2.42,M0008"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="18433">
@@ -149,7 +149,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="19460" Param="81"/>
-                                    <Element ElementType="33" Coordinate="19538" Param="RMOV,0.5,div"/>
+                                    <Element ElementType="33" Coordinate="19538" Param="RMOV,0.5,M0010"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="22529" Param="90"/>

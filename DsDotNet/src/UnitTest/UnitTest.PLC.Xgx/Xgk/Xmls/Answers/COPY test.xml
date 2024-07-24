@@ -958,7 +958,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="17412" Param="81"/>
-                                    <Element ElementType="33" Coordinate="17490" Param="MOV,1,src"/>
+                                    <Element ElementType="33" Coordinate="17490" Param="MOV,1,M0000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="19457">
@@ -970,7 +970,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="20484" Param="81"/>
-                                    <Element ElementType="33" Coordinate="20562" Param="MOV,2,tgt"/>
+                                    <Element ElementType="33" Coordinate="20562" Param="MOV,2,M0001"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
@@ -982,7 +982,7 @@
                                         M00272
                                     </Element>
                                     <Element ElementType="2" Coordinate="23556" Param="81"/>
-                                    <Element ElementType="33" Coordinate="23634" Param="MOV,src,tgt"/>
+                                    <Element ElementType="33" Coordinate="23634" Param="MOV,src,M0001"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="25601">

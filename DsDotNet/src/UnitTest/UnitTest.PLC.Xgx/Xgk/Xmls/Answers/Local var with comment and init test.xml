@@ -86,7 +86,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="81"/>
-                                    <Element ElementType="33" Coordinate="5202" Param="MOV,16,myint16"/>
+                                    <Element ElementType="33" Coordinate="5202" Param="MOV,16,M0001"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="7169">
@@ -98,7 +98,7 @@
                                         _1ON
                                     </Element>
                                     <Element ElementType="2" Coordinate="8196" Param="81"/>
-                                    <Element ElementType="33" Coordinate="8274" Param="DMOV,32,myint32"/>
+                                    <Element ElementType="33" Coordinate="8274" Param="DMOV,32,M0002"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="11265" Param="90"/>

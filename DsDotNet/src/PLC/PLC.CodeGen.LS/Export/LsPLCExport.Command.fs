@@ -799,7 +799,11 @@ module internal rec Command =
         match prjParam.TargetType, cmdExp with
         | XGK, ActionCmd(Move(condition, source, target)) when source.Terminal.IsSome ->
             let fbParam, fbWidth =
-                let s, d = source.GetTerminalString(prjParam), target.Address   
+                let s, d = source.GetTerminalString(prjParam),
+                           match target with
+                           | :? TimerCounterBaseStruct as t -> t.XgkStructVariableName
+                           | _ -> target.Address   
+                            
                 let mov =
                     let st, tt = source.DataType, target.DataType
                     // move 의 type 이 동일해야 한다.  timer/counter 는 예외.  reset coil 이나 preset 설정 등 허용.

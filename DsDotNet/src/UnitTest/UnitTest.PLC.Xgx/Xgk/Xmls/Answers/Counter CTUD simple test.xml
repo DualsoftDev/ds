@@ -92,7 +92,7 @@
                                         P00003
                                     </Element>
                                     <Element ElementType="2" Coordinate="5124" Param="81"/>
-                                    <Element ElementType="33" Coordinate="5202" Param="DMOV,2000,myCTUD"/>
+                                    <Element ElementType="33" Coordinate="5202" Param="DMOV,2000,C0001"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="8193" Param="90"/>

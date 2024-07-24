@@ -1,15 +1,23 @@
-window.initializeChart = (data) => {
+/*
+ * Blazor SPA에서 페이지 전환 시 JavaScript 함수가 서로 충돌하지 않도록 각 페이지에 독립적으로 정의된 JavaScript 함수 이름을 사용해야 합니다
+ */
+
+window.initializeChartWithJsonData = (jsonData) => {
     google.charts.load('current', { 'packages': ['timeline'] });
-    google.charts.setOnLoadCallback(() => drawChart(data));
+    google.charts.setOnLoadCallback(() => drawChart(JSON.parse(jsonData), true));
 };
 
+window.initializeChartWithObjects = (data) => {
+    google.charts.load('current', { 'packages': ['timeline'] });
+    google.charts.setOnLoadCallback(() => drawChart(data, false));
+};
 
 var options;
 var viewWindowStart;
 var viewWindowEnd;
 var zoomTimeout;
 
-function drawChart(data) {
+function drawChart(data, isJsonData) {
     console.log('Drawing GOOGLE chart')
     var container = document.getElementById('timeline');
     window.chart = new google.visualization.Timeline(container);
@@ -32,7 +40,15 @@ function drawChart(data) {
      * 5개 이상 column 이면 style column, tooltip column 등 이 추가된 것으로 해석
      *  - tooltip column 이 null 이면 default tooltip 으로 보여진다.
      */
-    data.forEach(row => dataTable.addRow([row[0], row[1], row[2], row[3], new Date(row[colDateS]), new Date(row[colDateE])]));
+    //data.forEach(row => dataTable.addRow([row[0], row[1], row[2], row[3], new Date(row[colDateS]), new Date(row[colDateE])]));
+
+    if (isJsonData) {
+        data.forEach(row => dataTable.addRow([row.Room, row.Name, row.Color, row.Tooltip, new Date(row.Start), new Date(row.End)]));
+    }
+    else {
+        data.forEach(row => dataTable.addRow([row[0], row[1], row[2], row[3], new Date(row[colDateS]), new Date(row[colDateE])]));
+    }
+
 
     //dataTable.addRows([
     //    ['Magnolia Room',   'CSS Fundamentals',     'yellow',       null,    new Date(0, 0, 0, 12,  0, 0, 1), new Date(0, 0, 0, 14, 0, 0, 100)],

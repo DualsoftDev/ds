@@ -21,7 +21,7 @@
             "js/external/cytoscape/cytoscape-dagre.js",
         };
         foreach (var js in jss)
-            await JsDual.EvalExternalScript(js);
+            await JsDual.LoadScript(js);
 
 
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");

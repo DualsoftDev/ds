@@ -13,7 +13,7 @@
 
         if (firstRender)
         {
-            await JsDual.EvalExternalScript("js/external/cytoscape/cytoscape.min.js");
+            await JsDual.LoadScript("js/external/cytoscape/cytoscape.min.js");
             await JsDual.Eval(@"
 $(function(){ // on dom ready
 

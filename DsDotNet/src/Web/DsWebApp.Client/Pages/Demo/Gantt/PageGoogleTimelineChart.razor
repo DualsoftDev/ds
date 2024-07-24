@@ -7,22 +7,7 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
-        /* 이것만... External script 로 로딩이 안되는데.. */
-        // await JsDual.EvalExternalScript("https://www.gstatic.com/charts/loader.js");
-        await JsRuntime.InvokeVoidAsync("eval", @"
-            window.loadScript = (url) => {
-                return new Promise((resolve, reject) => {
-                    const script = document.createElement('script');
-                    script.src = url;
-                    script.onload = () => resolve();
-                    script.onerror = () => reject(new Error(`Script load error for ${url}`));
-                    document.head.appendChild(script);
-                });
-            };
-
-            loadScript('https://www.gstatic.com/charts/loader.js')
-");
-
-        await JsDual.EvalExternalScript("js/pages/PageGoogleTimelineChart_razor.js");
+        await JsDual.LoadScript("https://www.gstatic.com/charts/loader.js");
+        await JsDual.LoadScript("js/pages/PageGoogleTimelineChart_razor.js");
     }
 }

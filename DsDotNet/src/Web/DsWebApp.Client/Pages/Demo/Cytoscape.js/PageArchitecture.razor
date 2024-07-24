@@ -19,7 +19,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        await JsDual.EvalExternalScript("js/external/cytoscape/cytoscape.min.js");
+        await JsDual.LoadScript("js/external/cytoscape/cytoscape.min.js");
 
         prepareGraph();
 

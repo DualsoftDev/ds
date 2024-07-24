@@ -21,8 +21,8 @@ module EtcListenerModule =
 
         let (inAddr, inParam), (outAddr, outParm) =
             match nameNAddr.TryFindFirstChild<TaskDevParaInOutContext>() with
-            |Some taskDevPara -> 
-                commonDeviceParamExtractor taskDevPara 
+            |Some devParam -> 
+                commonDeviceParamExtractor devParam 
             |None ->
                 (TextAddrEmpty, defaultTaskDevPara()),(TextAddrEmpty, defaultTaskDevPara())
         name, inParam, outParm, inAddr, outAddr
@@ -32,10 +32,9 @@ module EtcListenerModule =
 
 
         member x.ProcessButtonBlock(ctx: ButtonBlockContext) =
-
-            let ctx = ctx.Descendants<CategoryBlocksContext>().ToArray()
-            for ctxChild in ctx do
-                    let first = ctxChild.Descendants<ParserRuleContext>()[1]
+            for ctxChild in ctx.children do
+                if ctxChild :? ParserRuleContext then
+                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
                     let system = x.TheSystem
 
                     let targetBtnType =
@@ -57,7 +56,7 @@ module EtcListenerModule =
                     let key = (system, category)
 
                     if x.ButtonCategories.Contains(key) then
-                        failwith $"중복 button category {category} near {first.GetText()}"
+                        failwith $"중복 button category {category} near {ctx.GetText()}"
                     else
                         x.ButtonCategories.Add(key) |> ignore
 
@@ -94,9 +93,9 @@ module EtcListenerModule =
                             system.AddButton(targetBtnType, btnName, inAddr, outAddr, flow)))
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
-            let ctx = ctx.Descendants<CategoryBlocksContext>().ToArray()
-            for ctxChild in ctx do
-                    let first = ctxChild.Descendants<ParserRuleContext>()[1]
+            for ctxChild in ctx.children do
+                if ctxChild :? ParserRuleContext then
+                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
                     let system = x.TheSystem
 
                     let targetLmpType =
@@ -137,9 +136,9 @@ module EtcListenerModule =
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
 
         member x.ProcessConditionBlock(ctx: ConditionBlockContext) =
-                let ctx = ctx.Descendants<CategoryBlocksContext>().ToArray()
-                for ctxChild in ctx do
-                    let first = ctxChild.Descendants<ParserRuleContext>()[1]
+            for ctxChild in ctx.children do
+                if ctxChild :? ParserRuleContext then
+                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
                     let system = x.TheSystem
 
                     let targetCndType =

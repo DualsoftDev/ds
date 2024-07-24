@@ -104,8 +104,8 @@ module ComparisionTestModule =
                     "(1 + 1) * 2 == 4"
                     "equal(1, (2 / 2), (3 / 3), 1)"
                 ]
-            //for t in trues do
-            "equal(1, (2 / 2), (3 / 3), 1)" |> evalExpr storages === true
+            for t in trues do
+                t |> evalExpr storages === true
 
         [<Test>]
         member __.``1 "==" with different type test`` () =

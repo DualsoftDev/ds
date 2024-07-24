@@ -153,7 +153,7 @@ module PPTNodeModule =
                 | AUTOPRE
                 | DUMMY -> ()
             
-                if nodeType = CALL || nodeType = AUTOPRE || name.Contains(".")  //isDevCall  
+                if nodeType = CALL || nodeType = AUTOPRE //|| name.Contains(".")  //isDevCall  
                 then
                     //Dev1[3(3,3)].Api(!300, 200)
                     let names = (nameNFunc shape).Split('.')

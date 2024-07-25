@@ -48,7 +48,7 @@
         await JsDual.LoadScript("js/pages/PageMermaidBasic_razor.js");
 
         await JsRuntime.InvokeVoidAsync("initializeMermaid");
-        StateHasChanged(); // Force re-render
+        // StateHasChanged(); // Force re-render
     }
 
     bool _rendered = false;
@@ -62,7 +62,7 @@
         {
             if (await JsDual.IsFunctionExists("renderMermaid"))
             {
-                await JsRuntime.InvokeVoidAsync("renderMermaid");
+                await JsRuntime.InvokeVoidAsync("renderMermaid", 0.5, 20);
                 _rendered = true;
             }
         }

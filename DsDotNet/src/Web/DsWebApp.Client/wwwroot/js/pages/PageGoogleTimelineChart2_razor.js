@@ -93,10 +93,6 @@ function drawChart(data, isJsonData) {
         }
     });
 
-    // 기존 이벤트 리스너를 제거합니다.
-    window.removeEventListener('wheel', handleWheelZoom);
-    window.addEventListener('wheel', handleWheelZoom);
-
     // 일정 시간 후 데이터 수정 (예: 5초 후)
     setTimeout(modifyData, 5000);
 
@@ -125,7 +121,7 @@ function hideAllTooltips() {
     });
 }
 
-function handleWheelZoom(event) {
+window.addEventListener('wheel', function (event) {
     // Clear the previous timeout
     if (zoomTimeout) {
         clearTimeout(zoomTimeout);

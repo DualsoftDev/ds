@@ -3,41 +3,44 @@
 <h3>Mermaid Basic</h3>
 
 <div class="mermaid">
-
-    gantt
-    title Example Starfish Trace
-    dateFormat x
-    axisFormat %S.%L
-
-    section Frontend
-    /checkout                                        :crit, 0, 1500ms
-    GET /api/session                                 :150, 170ms
-    POST /api/analytics                              :190, 70ms
-    GET /api/checkout/state                          :200, 500ms
-    GET /api/checkout/cart                           :1100, 140ms
-    App                                              :1300, 180ms
-    POST /api/analytics                              :done, 1450, 70ms
-    GET /assistant/poll                              :done, 1450, 120ms
-    POST /api/analytics                              :done, 1580, 70ms
-
-    section API Service
-    /api/checkout/state                              :crit, 240, 440ms
-    cache.get session#58;[redacted]                  :360, 10ms
-    db.query select from session                     :370, 20ms
-    db.query select from user                        :390, 20ms
-    db.query select from checkout                    :410, 20ms
-    http.request GET http#58;//payments/poll  :450, 210ms
-    thread.spawn refresh-checkout-cache              :done, 670, 220ms
-
-    section Payment Service
-    /poll                                            :crit, 470, 180ms
-    db.query select from payment                     :490, 30ms
-    db.query update payment                          :530, 60ms
-
+    @mermaidContent
 </div>
 
 
+
 @code {
+    string mermaidContent = @"
+        gantt
+        title Example Starfish Trace
+        dateFormat x
+        axisFormat %S.%L
+
+        section Frontend
+            /checkout                                        :crit, 0, 1500ms
+            GET /api/session                                 :150, 170ms
+            POST /api/analytics                              :190, 70ms
+            GET /api/checkout/state                          :200, 500ms
+            GET /api/checkout/cart                           :1100, 140ms
+            App                                              :1300, 180ms
+            POST /api/analytics                              :done, 1450, 70ms
+            GET /assistant/poll                              :done, 1450, 120ms
+            POST /api/analytics                              :done, 1580, 70ms
+
+        section API Service
+            /api/checkout/state                              :crit, 240, 440ms
+            cache.get session#58;[redacted]                  :360, 10ms
+            db.query select from session                     :370, 20ms
+            db.query select from user                        :390, 20ms
+            db.query select from checkout                    :410, 20ms
+            http.request GET http#58;//payments/poll         :450, 210ms
+            thread.spawn refresh-checkout-cache              :done, 670, 220ms
+
+        section Payment Service
+            /poll                                            :crit, 470, 180ms
+            db.query select from payment                     :490, 30ms
+            db.query update payment                          :530, 60ms
+    ";
+
     protected override async Task OnInitializedAsync()
     {
         await JsDual.LoadScript("https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js");

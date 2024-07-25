@@ -286,10 +286,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             )
             
     override x.EnterLangVersionDef(ctx: LangVersionDefContext) =
-        x.TheSystem.LangVersion <- Version.Parse(ctx.version().GetText())
+        let langVer = Version.Parse(ctx.version().GetText())
+        langVer.CheckCompatible(DsSystem.CurrentLangVersion, "Language")
+        x.TheSystem.LangVersion <- langVer
 
     override x.EnterEngineVersionDef(ctx: EngineVersionDefContext) =
-        x.TheSystem.EngineVersion <- Version.Parse(ctx.version().GetText())
+        let engineVer = Version.Parse(ctx.version().GetText())
+        engineVer.CheckCompatible(DsSystem.CurrentEngineVersion, "Engine")
+        x.TheSystem.EngineVersion <- engineVer
 
 
     /// parser rule context 에 대한 이름 기준의 정보를 얻는다.  system 이름, flow 이름, parenting 이름 등

@@ -169,8 +169,11 @@ module DBLoggerAnalysisDTOModule =
                 | [] -> dummySpan
                 | _ ->
                     let ats = logAnalInfo.PerRealLogs.Values |> collect id |> collect id |> map(fun l -> l.At) |> toArray
-                    let s, e = ats |> Seq.min, ats |> Seq.max
-                    (s, e)
+                    if ats.any() then
+                        let s, e = ats |> Seq.min, ats |> Seq.max
+                        (s, e)
+                    else
+                        dummySpan
                     //(logs.Head.At, logs.Last().At)
 
             SystemSpan(span, system.Name, realSpans)

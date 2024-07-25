@@ -62,7 +62,7 @@
             "js/external/cytoscape/cytoscape-dagre.js",
         };
         foreach(var js in jss)
-            await JsDual.EvalExternalScript(js);
+            await JsDual.LoadScript(js);
 
         /*
         * cytoscape.js 제작용 data 를 window.cyData 에 저장하고 이를 처리하기 위한 javascript 실행.  (cyDsGraph.js)
@@ -76,8 +76,8 @@
                 var (graphJson, nodesJson) = (jsons[0], jsons[1]);
                 Console.WriteLine($"--------------- Cytoscape data:\r\n{graphJson}");
                 await JsDual.EvalOnGlobalModule($"window.cyData = {graphJson};");
-                await JsDual.EvalExternalScript("js/cyDsGraph.js");
-                await JsDual.EvalExternalScript("js/pages/PageModelGraph_razor.js");
+                await JsDual.EvalScript("js/cyDsGraph.js");
+                await JsDual.EvalScript("js/pages/PageModelGraph_razor.js");
                 await JsDual.EvalOnGlobalModule("cy.nodes().addClass('NM')");       // default to Non-Monitoring mode
 
                 await JsRuntime.InvokeVoidAsync("setDotnetObjRef", _dotNetObjRef);

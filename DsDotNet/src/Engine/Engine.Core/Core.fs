@@ -1,4 +1,4 @@
-    // Copyright (c) Dualsoft  All Rights Reserved.
+// Copyright (c) Dualsoft  All Rights Reserved.
 // Dualsoft에 저작권이 있습니다. 모든 권한 보유.
 
 namespace rec Engine.Core
@@ -11,9 +11,18 @@ open System
 open System.Reactive.Subjects
 open System.ComponentModel
 open System.Runtime.CompilerServices
+open System.Reflection
 
 [<AutoOpen>]
 module CoreModule =
+    type Version with
+        member x.Duplicate() = new Version(x.Major, x.Minor, x.Build, x.Revision)
+        member this.IsCompatible(that:Version) = this.Major <= that.Major
+        member this.CheckCompatible(that:Version, versionCategory:string) =
+            if this <> that then
+                logWarn $"{versionCategory} version mismatch: {this} <> {that}"
+                if this.Major < that.Major then
+                    failwithlog " -- Update DS system"
 
 
     // 파서 로딩 타입 정의
@@ -88,6 +97,10 @@ module CoreModule =
         let variables = ResizeArray<VariableData>()
         let actionVariables = ResizeArray<ActionVariable>()
 
+        static let assem = Assembly.GetExecutingAssembly()
+        static let currentLangVersion = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion |> Version.Parse
+        static let currentEngineVersion = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version |> Version.Parse
+
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
         let channelInfos =
             loadedSystems 
@@ -133,8 +146,10 @@ module CoreModule =
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
 
-        member val LangVersion = Version() with get, set
-        member val EngineVersion = Version() with get, set
+        member val LangVersion = currentLangVersion.Duplicate() with get, set
+        member val EngineVersion = currentEngineVersion.Duplicate() with get, set
+        static member CurrentLangVersion = currentLangVersion
+        static member CurrentEngineVersion = currentEngineVersion
 
         member x.AddVariables(variableData:VariableData) = 
                 if variables.any(fun v->v.Name = variableData.Name)

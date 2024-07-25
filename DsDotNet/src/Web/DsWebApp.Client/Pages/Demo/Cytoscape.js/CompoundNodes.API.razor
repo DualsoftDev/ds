@@ -20,17 +20,21 @@
             "js/external/cytoscape/cytoscape.min.js",
             "js/external/cytoscape/cytoscape-dagre.js",
         };
+        Console.WriteLine("JS evaluating..");
         foreach (var js in jss)
-            await JsDual.EvalExternalScript(js);
+            await JsDual.EvalScript(js);
+        Console.WriteLine("JS evaluated");
 
 
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=HelloDS.STN1.Work1");
         // var data = await Http.GetRestResultAsync<string>($"/api/model/graph?fqdn=SIDE6.S200_CARTYPE_MOVE");
         var data = await Http.GetRestResultAsync<string>($"/api/model/graph");
+        Console.WriteLine($"Requested graph structure with : {data}");
         await data.IterAsync(
-            async json => {
-                Console.WriteLine($"--------------- Cytoscape data:\r\n{json}");
-                await JsDual.EvalOnGlobalModule($"window.cyData = {json};");
+            async jsons => {
+                var (graphJson, nodesJson) = (jsons[0], jsons[1]);
+                Console.WriteLine($"--------------- Cytoscape data:\r\n{graphJson}");
+                await JsDual.EvalOnGlobalModule($"window.cyData = {graphJson};");
             },
             async err => await JsDual.Alert($"Failed to get data: {err}")
             );

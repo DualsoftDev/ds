@@ -200,28 +200,28 @@ outParam:  content (':'content)*;
 comment: BLOCK_COMMENT | LINE_COMMENT;
 
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
-    sysBlock
-        : '{' (       flowBlock | jobBlock
+    sysBlock:
+          '{' (       flowBlock | jobBlock
                     | commandBlock | operatorBlock | variableBlock | interfaceBlock | conditionBlock 
                     | loadDeviceBlock | loadExternalSystemBlock
                     | buttonBlock | lampBlock
                     | propsBlock | versionsBlock)*
           '}'       // identifier1Listing|parenting|causal|call
           (SEMICOLON)?;
-    systemName:identifier1;
+    systemName: identifier1;
 
 
 //[device file="c:\my.ds"] A, B, C;
 loadDeviceBlock: '[' 'device' fileSpec? ']' deviceNameList SEMICOLON;
     deviceNameList: deviceName (COMMA deviceName)*;
-    deviceName:identifier1;
+    deviceName: identifier1;
     fileSpec: 'file' '=' filePath;
         etcName1: IDENTIFIER1;
         filePath: etcName1;
 
 //[external file="c:\my.ds"] B;
 loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEMICOLON;
-    externalSystemName:identifier1;
+    externalSystemName: identifier1;
 
 
 /*
@@ -250,6 +250,8 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
     }
 
  */
+
+// STANDFLMS
 propsBlock: '[' 'prop' ']' '=' '{' (
           safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock
         | timesBlock | motionBlock | scriptsBlock
@@ -398,7 +400,8 @@ interfaceBlock
     linkPhrase: identifier12;
     interfaceResetDef: identifier1 (causalOperatorReset identifier1)+ (';')?;
 
-categoryBlocks:autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock | errorOrEmgBlock | testBlock | homeBlock | readyBlock | idleBlock | originBlock;
+// predomi[CAT]h
+categoryBlocks: autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock | errorOrEmgBlock | testBlock | homeBlock | readyBlock | idleBlock | originBlock;
     autoBlock      :'[' ('a_in' | 'a') ']' '=' categoryBlock;
     manualBlock    :'[' ('m_in' | 'm') ']' '=' categoryBlock;
     driveBlock     :'[' ('d_in' | 'd') ']' '=' categoryBlock;

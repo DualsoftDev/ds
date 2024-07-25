@@ -53,20 +53,45 @@ Object.keys(edgeGroups).forEach(key => {
         edges.push(theEdge);
 
 
+        var c = theEdge.classes
         // 그룹 내에 여러 엣지가 있는 경우 처리
-        console.log(`Group ${key} has ${group.length} edges.`);
+        console.log(`Group ${key} has ${group.length} edges.  The edge classes=${c}`);
         group.slice(1).forEach(edge => {
-            var c = theEdge.classes
+            console.log(`\tEdge class=${edge.classes}`);
             var isForward = edge.data.source === theEdge.data.source && edge.data.target === theEdge.data.target
-            switch (edge.classes) {
-                case 'Reset':
-                    console.log(`updating ${theEdge.classes} += ${isForward ? ' Reset' : ' ReverseReset'}`)
-                    theEdge.classes = theEdge.classes + (isForward ? ' Reset' : ' ReverseReset');
-                    break;
-                default:
-                    console.error(`Unknown edge class: ${edge.classes}`);
-                    break;
-            }
+
+            // edge.classes 문자열을 공백 기준으로 분리하여 배열로 변환
+            const classesArray = edge.classes.split(' ');
+            // 각 클래스에 대해 처리
+            classesArray.forEach(cls => {
+                switch (cls) {
+                    case 'Reset':
+                        console.log(`updating ${theEdge.classes} += ${isForward ? ' Reset' : ' ReverseReset'}`);
+                        theEdge.classes = theEdge.classes + (isForward ? ' Reset' : ' ReverseReset');
+                        break;
+                    case 'Start':
+                        console.log(`updating ${theEdge.classes} += ${isForward ? ' Start' : ' ReverseStart'}`);
+                        theEdge.classes = theEdge.classes + (isForward ? ' Start' : ' ReverseStart');
+                        break;
+                    default:
+                        console.error(`Unknown edge class: ${cls}`);
+                        break;
+                }
+            });
+
+            //switch (edge.classes) {
+            //    case 'Reset':
+            //        console.log(`updating ${theEdge.classes} += ${isForward ? ' Reset' : ' ReverseReset'}`)
+            //        theEdge.classes = theEdge.classes + (isForward ? ' Reset' : ' ReverseReset');
+            //        break;
+            //    case 'Start':
+            //        console.log(`updating ${theEdge.classes} += ${isForward ? ' Start' : ' ReverseStart'}`)
+            //        theEdge.classes = theEdge.classes + (isForward ? ' Start' : ' ReverseStart');
+            //        break;
+            //    default:
+            //        console.error(`Unknown edge class: ${edge.classes}`);
+            //        break;
+            //}
             console.log(edge);
         });
     }
@@ -169,6 +194,22 @@ var cy = window.cy = cytoscape({
             css: { 'padding': 0 }
         },
 
+/* Edge Arrows
+
+    triangle
+    triangle-tee
+    circle-triangle
+    triangle-cross
+    triangle-backcurve
+    vee
+    tee
+    square
+    circle
+    diamond
+    chevron
+    none
+
+ */
 
         // "F:\Git\ds\DsDotNet\src\Doc\Edges.pptx" 파일 참고
 
@@ -184,40 +225,29 @@ var cy = window.cy = cytoscape({
         },
         {
             selector: 'edge.Start',
-            css: {
-                'target-arrow-color': 'navy',
-            }
+            css: { 'target-arrow-shape': 'triangle', }
         },
         {
             selector: 'edge.Reset',
-            css: {
-                'line-style': 'dashed',     // 'solid', 'dotted',
-            //    'line-color': 'green',
-            //    'target-arrow-shape': 'circle',
-            //    'target-arrow-color': 'red',
-            //    'line-style': 'dashed',     // 'solid', 'dotted',
-            }
+            css: { 'target-arrow-shape': 'circle', }
         },
         {
-            selector: 'edge.Start.ReverseReset',
-            css: {
-                'source-arrow-shape': 'circle',
-                'target-arrow-shape': 'triangle',
-            }
+            selector: 'edge.Start.Reset',
+            css: { 'target-arrow-shape': 'circle-triangle', }
+        },
+
+
+        {
+            selector: 'edge.ReverseStart',
+            css: { 'source-arrow-shape': 'triangle', }
         },
         {
-            selector: 'edge.Reset.ReverseReset',
-            css: {
-                'source-arrow-shape': 'triangle',
-                'target-arrow-shape': 'triangle',
-            }
+            selector: 'edge.ReverseReset',
+            css: { 'source-arrow-shape': 'circle', }
         },
         {
-            selector: 'edge.Start.Reset.ReverseReset',
-            css: {
-                'source-arrow-shape': 'circle',
-                'target-arrow-shape': 'triangle',
-            }
+            selector: 'edge.ReverserStart.ReverseReset',
+            css: { 'source-arrow-shape': 'circle-triangle', }
         },
     ],
 

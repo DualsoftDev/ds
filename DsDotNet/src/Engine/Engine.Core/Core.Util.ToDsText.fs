@@ -527,11 +527,8 @@ module internal ToDsTextModule =
 
             if printVersions then
                 yield $"{tab}[versions] = {lb}"
-                let assem = Assembly.GetExecutingAssembly()
-                let langVer = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion
-                let engineVer = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version
-                yield $"{tab2}DS-Langugage-Version = {langVer};"
-                yield $"{tab2}DS-Engine-Version = {engineVer};"
+                yield $"{tab2}DS-Langugage-Version = {system.LangVersion};"
+                yield $"{tab2}DS-Engine-Version = {system.EngineVersion};"
                 yield $"{tab}{rb}"
 
             yield rb

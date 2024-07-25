@@ -18,7 +18,7 @@
                 foreach (var s in spans)
                 {
                     foreach (var c in s.CallSpans)
-                        yield return new { Room = real, Name = c.Fqdn, Color = "yellow", Tooltip = (string)null, Start = c.Start, End = c.End };
+                        yield return new { Room = real, Name = c.Fqdn, Color = (string)null, Tooltip = (string)null, Start = c.Start, End = c.End };
                 }
             }
         }

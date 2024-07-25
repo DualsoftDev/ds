@@ -12,7 +12,6 @@ window.initializeChartWithObjects = (data) => {
     google.charts.setOnLoadCallback(() => drawChart(data, false));
 };
 
-var options;
 var viewWindowStart;
 var viewWindowEnd;
 var zoomTimeout;
@@ -68,14 +67,7 @@ function drawChart(data, isJsonData) {
     viewWindowStart = new Date(minDate.getTime() - timeRange * 0.1);
     viewWindowEnd = new Date(maxDate.getTime() + timeRange * 0.1);
 
-    options = {
-        timeline: { showRowLabels: true },
-        hAxis: {
-            minValue: viewWindowStart,
-            maxValue: viewWindowEnd
-        },
-        tooltip: { trigger: 'focus' } // Enable tooltips initially
-    };
+    window.options = createOptions(viewWindowStart, viewWindowEnd)
 
     chart.draw(dataTable, options);
 
@@ -97,9 +89,20 @@ function drawChart(data, isJsonData) {
     window.removeEventListener('wheel', handleWheelZoom);
     window.addEventListener('wheel', handleWheelZoom);
 
-    // 일정 시간 후 데이터 수정 (예: 5초 후)
-    setTimeout(modifyData, 5000);
+//    // 일정 시간 후 데이터 수정 (예: 5초 후)
+//    setTimeout(modifyData, 5000);
+}
 
+function createOptions(min, max) {
+    window.options = {
+        timeline: { showRowLabels: true },
+        hAxis: {
+            minValue: min,
+            maxValue: max
+        },
+        tooltip: { trigger: 'focus', isHtml: false } // Enable tooltips initially
+    };
+    return options;
 }
 
 function modifyData() {
@@ -126,10 +129,7 @@ function hideAllTooltips() {
 }
 
 function handleWheelZoom(event) {
-    // Clear the previous timeout
-    if (zoomTimeout) {
-        clearTimeout(zoomTimeout);
-    }
+    //console.log(`handleWheelZoom: ${viewWindowStart} - ${viewWindowEnd}`)
 
     // Hide all tooltips during zoom
     hideAllTooltips();
@@ -147,14 +147,57 @@ function handleWheelZoom(event) {
         viewWindowEnd = new Date(viewWindowEnd.getTime() + zoomLevel);
     }
 
-    options.hAxis.minValue = viewWindowStart;
-    options.hAxis.maxValue = viewWindowEnd;
-    chart.draw(dataTable, options);
 
-    // Re-enable tooltips after zooming is complete
-    zoomTimeout = setTimeout(function () {
-        options.tooltip.trigger = 'focus';
-        chart.draw(dataTable, options);
-    }, 500); // Adjust the timeout as needed
-});
+    // hAxis.minValue & hAxis.maxValue -- but these only appear to work when the min & max values are outside the range of the data, not within the range of the data.
+    // https://stackoverflow.com/questions/60316028/google-charts-timeline-min-and-max-date-range-haxis-issue
 
+    console.log(`Wheel Zoom: ${viewWindowStart} - ${viewWindowEnd}`)
+    drawFilteredChart(viewWindowStart, viewWindowEnd)
+    //options = createOptions(viewWindowStart, viewWindowEnd)
+
+    ////options.hAxis.minValue = viewWindowStart;
+    ////options.hAxis.maxValue = viewWindowEnd;
+    //chart.draw(dataTable, options);
+}
+
+
+function drawFilteredChart(min, max) {
+    var view = new google.visualization.DataView(dataTable);
+
+    var filteredRows = dataTable.getFilteredRows([
+        {
+            column: window.colDateS,
+            test: (value, rowId, columnId) => { return min < value }
+        },
+        {
+            column: window.colDateE,
+            test: (value, rowId, columnId) => { return value < max }
+        }
+        //    minValue: min,
+        //    maxValue: max
+    ])
+    view.setRows(filteredRows);
+
+    // 필터링된 데이터의 최소 및 최대 날짜 계산
+    var minDate = null;
+    var maxDate = null;
+    filteredRows.forEach(rowId => {
+        var startDate = dataTable.getValue(rowId, colDateS);
+        var endDate = dataTable.getValue(rowId, colDateE);
+
+        if (minDate === null || startDate < minDate) {
+            minDate = startDate;
+        }
+        if (maxDate === null || endDate > maxDate) {
+            maxDate = endDate;
+        }
+    });
+
+    // 최소 및 최대 날짜를 설정
+    if (minDate !== null && maxDate !== null) {
+        options.hAxis.minValue = minDate;
+        options.hAxis.maxValue = maxDate;
+    }
+
+    chart.draw(view, options);
+}

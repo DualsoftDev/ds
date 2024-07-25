@@ -2,12 +2,6 @@
 
 <h3>Mermaid Basic</h3>
 
-@if (_loading)
-{
-}
-else
-{
-}
 <div class="mermaid">
 
     gantt
@@ -44,29 +38,22 @@ else
 
 
 @code {
-    bool _loading = true;
     protected override async Task OnInitializedAsync()
     {
         await JsDual.LoadScript("https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js");
-        // await JsDual.EvalScript("https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js");
-        await JsRuntime.InvokeVoidAsync("eval", @"
-            window.initializeMermaid = () => {
-                mermaid.initialize({ startOnLoad: true });
-            };
-            window.renderMermaid = () => {
-                mermaid.contentLoaded();
-            };");
+        await JsDual.LoadScript("https://d3js.org/d3.v6.min.js");
+        await JsDual.LoadScript("js/pages/PageMermaidBasic_razor.js");
 
         await JsRuntime.InvokeVoidAsync("initializeMermaid");
-        _loading = false;
+        StateHasChanged(); // Force re-render
     }
 
     bool _rendered = false;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // if (firstRender)
-        // {
-        // }
+        if (firstRender)
+        {
+        }
 
         if (!_rendered)
         {

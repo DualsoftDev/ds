@@ -15,6 +15,10 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Content Remove="wwwroot\js\PageModelGraph_razor.js" />
+	  <Content Remove="wwwroot\js\pages\PageMermaidBasic_razor.js" />
+	</ItemGroup>
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="wwwroot\js\pages\PageMermaidBasic_razor.js" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -49,6 +53,7 @@
 	  <None Include="wwwroot\js\external\chartjs\chartjs-adapter-date-fns.bundle.min.js" />
 	  <None Include="wwwroot\js\external\chartjs\chartjs-plugin-datalabels%402.0.0.js" />
 	  <None Include="wwwroot\js\external\chartjs\timeline.min.js" />
+	  <None Include="wwwroot\js\pages\PageMermaidBasic_razor.js" />
 	  <None Include="wwwroot\lib\bootstrap-icons\fonts\bootstrap-icons.woff2" />
 	</ItemGroup>
 	

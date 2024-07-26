@@ -103,7 +103,7 @@ module ImportUtilForDev =
                 let newLoadedDev = createAutoGenDev (loadedName, mySys)
                 autoGenAbsolutePath, Some newLoadedDev
 
-    let addOrGetExistSystem (mySys:DsSystem)  loadedSys loadedName (taskDevParaIO:DeviceLoadParameters) = 
+    let addOrGetExistSystem (mySys:DsSystem)  loadedSys (loadedName:string) (taskDevParaIO:DeviceLoadParameters) = 
         if not (mySys.LoadedSysExist(loadedName)) then
             mySys.AddLoadedSystem(Device(loadedSys, taskDevParaIO, false))
             loadedSys
@@ -117,6 +117,7 @@ module ImportUtilForDev =
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:pptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
         let taskDevParam =  node.TaskDevPara 
+        let jobFqdn =  node.Job.Combine()
 
         let devCalls =  mySys.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
 
@@ -125,7 +126,7 @@ module ImportUtilForDev =
                     let api = loadedSys.ApiItems.First(fun f -> f.Name = apiPureName)
                     if not(taskDevParam.IsDefaultParam)
                     then
-                        taskDev.AddOrUpdateApiTaskDevPara(c.TargetJob, api, taskDevParam)
+                        taskDev.AddOrUpdateApiTaskDevPara(jobFqdn, api, taskDevParam)
                     taskDev 
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName loadParameters

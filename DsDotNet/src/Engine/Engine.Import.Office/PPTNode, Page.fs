@@ -153,7 +153,7 @@ module PPTNodeModule =
                 | AUTOPRE
                 | DUMMY -> ()
             
-                if nodeType = CALL || nodeType = AUTOPRE //|| name.Contains(".")  //isDevCall  
+                if nodeType = CALL || nodeType = AUTOPRE 
                 then
                     //Dev1[3(3,3)].Api(!300, 200)
                     let names = (nameNFunc shape).Split('.')
@@ -164,16 +164,26 @@ module PPTNodeModule =
                             failwith $"Error: {nameNFunc shape}" 
     
                     let jobPram =
-                        match GetSquareBrackets(prop, false) with
-                        |Some s ->
-                            let TaskDevPara = names.Last() |> GetLastParenthesesContents
-                            if TaskDevPara.StartsWith(TextJobNegative)
+                        if prop |> GetLastBracketContents <> ""
+                        then 
+                            let cntPara =    prop |> GetLastBracketContents |> GetLastParenthesesRemoveName
+                            let cntOptPara = prop |> GetLastBracketContents |> GetLastParenthesesContents
+                            let paraText = 
+                                match  cntPara,  cntOptPara with 
+                                | "", "" -> ""
+                                | "", _ -> failWithLog $"err: {name}MultiAction Count >= 1 : {cntPara}"
+                                | _ , "" -> $"{TextJobMulti}{cntPara}"
+                                | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
+
+
+                            if cntOptPara.StartsWith(TextJobNegative)
                             then 
-                                getParserJobType($"{s};{TextJobNegative}")
+                                getParserJobType(paraText+ $";{TextJobNegative}")
                             else 
-                                getParserJobType(s)
-                        |_->
+                                getParserJobType(paraText)
+                        else 
                             defaultJobPara() 
+
                     jobParam <- jobPram 
             with ex ->  
                 shape.ErrorShape(ex.Message, iPage)  
@@ -255,20 +265,23 @@ module PPTNodeModule =
                 shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
     
             let parts = GetLastParenthesesReplaceName(name, "").Split('.')
-    
+            if parts.Contains("")
+            then 
+                shape.ErrorName("이름 규격을 확인하세요", iPage)     
+
             match parts.Length with
             | 2 ->
                 let jobBody = 
                     [ pageTitle
-                      parts.[0] |> TrimSpace |> GetBracketsRemoveName ]
-                let api = GetLastParenthesesReplaceName(parts.[1] |> TrimSpace ,  "") |> GetBracketsRemoveName
+                      parts.[0] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
+                let api = GetLastParenthesesReplaceName(parts.[1] |> TrimSpace ,  "") |> TrimSpace
                 jobBody.Append api
     
             | 3 ->
                 let jobBody =
                     [ parts.[0] |> TrimSpace
-                      parts.[1] |> TrimSpace |> GetBracketsRemoveName ]
-                let api = GetLastParenthesesReplaceName(parts.[2] |> TrimSpace ,  "")|> GetBracketsRemoveName
+                      parts.[1] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
+                let api = GetLastParenthesesReplaceName(parts.[2] |> TrimSpace ,  "")|> TrimSpace
                 jobBody.Append api
     
             | _ -> 

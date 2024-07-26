@@ -104,9 +104,26 @@ module ImportUtilVertex =
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)
 
-    let createAutoPre(mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicAutoPreVertex: Dictionary<string, Vertex>) =
-        let autoPre =  createCall (mySys, node, parentWrapper)
-        dicAutoPreVertex.Add(node.Key, autoPre)
+    let createAutoPre(mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicAutoPreJob: Dictionary<string, Job>) =
+        let param = {
+                    MySys = mySys
+                    Node = node
+                    JobName = node.Job.CombineQuoteOnDemand()
+                    DevName = node.DevName
+                    ApiName = node.ApiPureName
+                    TaskDevParaIO = node.TaskDevPara
+                    Parent = parentWrapper
+                    }
+        let tasks = HashSet<TaskDev>()
+        handleActionJob tasks param
+        let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
+        match mySys.Jobs.TryFind(fun f -> f.UnqualifiedName = job.UnqualifiedName) with
+        | Some _existingJob -> ()   
+        | None -> 
+            mySys.Jobs.Add job
+        
+        dicAutoPreJob.Add(node.Key, job)
+
 
     let  getParent
         (

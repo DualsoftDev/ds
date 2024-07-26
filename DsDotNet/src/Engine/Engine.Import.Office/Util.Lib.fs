@@ -64,7 +64,7 @@ module ImportUtilForLib =
             processSingleTask tasks param devOrg loadedName param.ApiName TaskDevParas
 
 
-    let handleMultiActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =
+    let handleActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =
         
         for devIdx in 1 .. param.Node.JobParam.TaskDevCount do
             let devName =
@@ -81,9 +81,8 @@ module ImportUtilForLib =
         let jobName = param.Node.Job.CombineQuoteOnDemand()
         let tasks = HashSet<TaskDev>()
 
-        handleMultiActionJob tasks param
+        handleActionJob tasks param
 
-  
         let jobForCall =
             match param.MySys.Jobs.TryFind(fun f -> f.UnqualifiedName = jobName) with
             | Some existingJob -> existingJob

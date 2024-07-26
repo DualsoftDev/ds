@@ -83,9 +83,9 @@ module ImportType =
             name
 
     let getMultiDeviceName (loadedName:string) index = 
-            //index 2자리로 표현
-            let indexStr = index.ToString().PadLeft(2, '0')
-            $"{loadedName}_{indexStr}"
+        //index 2자리로 표현
+        let indexStr = index.ToString().PadLeft(2, '0')
+        $"{loadedName}_{indexStr}"
                     
 
     let checkPPTDataType (taskDevParamRaw:TaskDevParaRawItem) (taskDevParam:TaskDevPara) = 

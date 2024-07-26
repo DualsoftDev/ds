@@ -98,21 +98,28 @@ module DsType =
 
         startIdx, endIdx
 
-    // 첫 번째 대괄호 그룹 제거
-    let GetHeadBracketRemoveName (name: string) =
-        let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', true)
+
+    let getFindText (name:string)  startIdx endIdx= 
+        if startIdx <> -1 && endIdx <> -1 then
+            name.Substring(startIdx + 1, endIdx - startIdx - 1)
+        else 
+            ""
+
+    let getRemoveText (name:string)  startIdx endIdx= 
         if startIdx <> -1 && endIdx <> -1 then
             name.Substring(0, startIdx) + name.Substring(endIdx + 1)
         else
             name
 
+    // 첫 번째 대괄호 그룹 제거
+    let GetHeadBracketRemoveName (name: string) =
+        let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', true)
+        getRemoveText name startIdx endIdx 
+
     // 마지막 대괄호 그룹 제거
     let GetLastBracketRelaceName (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', false)
-        if startIdx <> -1 && endIdx <> -1 then
-            name.Substring(0, startIdx) + name.Substring(endIdx + 1)
-        else
-            name
+        getRemoveText name startIdx endIdx
 
     // 마지막 괄호 그룹을 주어진 문자열로 교체
     let GetLastParenthesesReplaceName (name: string, replaceName: string) =
@@ -125,18 +132,20 @@ module DsType =
     // 마지막 괄호 그룹 내용 반환
     let GetLastParenthesesContents (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '(', ')', false)
-        if startIdx <> -1 && endIdx <> -1 then
-            name.Substring(startIdx + 1, endIdx - startIdx - 1)
-        else
-            ""
+        getFindText name startIdx endIdx
+            
+    // 마지막 대괄호 그룹 내용 반환
+    let GetLastBracketContents (name: string) =
+        let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', false)
+        getFindText name startIdx endIdx
 
     // 첫 번째 또는 마지막 대괄호 그룹을 반환
     let GetSquareBrackets (name: string, bHead: bool): string option =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', bHead)
-        if startIdx <> -1 && endIdx <> -1 then
-            Some(name.Substring(startIdx + 1, endIdx - startIdx - 1))
-        else
-            None
+        let text = getFindText name startIdx endIdx
+        match text with
+        | "" -> None
+        | _ -> Some text
 
 
     // 특수 대괄호 제거 후 순수 이름 추출
@@ -144,6 +153,9 @@ module DsType =
     // 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
     let GetBracketsRemoveName (name: string) =
         name |> GetLastBracketRelaceName  |> GetHeadBracketRemoveName
+
+    let GetLastParenthesesRemoveName (name: string) =
+        GetLastParenthesesReplaceName (name ,  "" )
 
     let isStringDigit (str: string) =
         str |> Seq.forall Char.IsDigit

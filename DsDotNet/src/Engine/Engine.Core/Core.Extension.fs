@@ -229,8 +229,10 @@ module CoreExtensionModule =
 
             if not (x.DicTaskTaskDevParaIO.ContainsKey   jobFqdn)
             then 
-              
                 x.DicTaskTaskDevParaIO.Add(jobFqdn, {TaskDevParaIO = taskDevParaIO; ApiItem = api})
+            else
+                ()
+                //failWithLog $"중복된 TaskDevParaIO {jobFqdn} {x.QualifiedName}"
 
         member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
                x.AddOrUpdateApiTaskDevPara(job.UnqualifiedName, api, taskDevParaIO)
@@ -243,8 +245,6 @@ module CoreExtensionModule =
         member x.IsAddressSkipOrEmpty = x.IsOutAddressSkipOrEmpty  && x.IsInAddressSkipOrEmpty
         member x.IsMaunualAddressEmpty = x.MaunualAddress = TextAddrEmpty
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
-
-        //member x.GetTaskTaskDevParaIO(api:ApiItem) = x.DicTaskTaskDevParaIO.First(fun f->f.Value = api).Key
 
         member x.SetInSymbol(symName:string option) = 
             if symName.IsSome
@@ -283,12 +283,6 @@ module CoreExtensionModule =
         //        failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
                 
         //    if times.any() then times.First() |> Some else None
-
-
-        //member x.UpdateTaskDevPara(api:ApiItem, TaskDevParaIO: TaskDevParaIO) =
-        //        x.TaskDefs.Iter(fun d-> 
-        //            d.AddOrUpdateApiTaskDevPara (x.UnqualifiedName, api, TaskDevParaIO)
-        //        )
 
 
         member x.GetNullAddressDevTask() = 

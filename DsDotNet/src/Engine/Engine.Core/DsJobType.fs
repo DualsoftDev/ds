@@ -72,7 +72,7 @@ module DsJobType =
                     let parts = str.Split([| '('; ')' |], System.StringSplitOptions.RemoveEmptyEntries)
                     (parts.[0].TrimStart(TextJobMulti.ToCharArray()), if parts.Length > 1 then Some(parts.[1]) else None)
                 else
-                    (str, None)
+                    (str.TrimStart(TextJobMulti.ToCharArray()), None)
 
             let cnt = mainPart |> int
             let inCnt, outCnt =
@@ -82,7 +82,7 @@ module DsJobType =
                     let inCnt = if values.Length > 0 then Some(values.[0] |> int) else None
                     let outCnt = if values.Length > 1 then Some(values.[1] |> int) else None
                     (inCnt, outCnt)
-                | None -> (None, None)
+                | None -> (Some cnt, Some cnt)
 
             cnt, inCnt, outCnt
 
@@ -105,7 +105,7 @@ module DsJobType =
 
         let jobTypeTaskDevInfo = 
             items
-            |> Array.tryFind (fun item -> item.Contains(','))
+            |> Array.tryFind (fun item -> item.StartsWith(TextJobMulti))
             |> Option.map getJobTypeTaskDevInfo
             |> Option.defaultValue (defaultJobTypeTaskDevInfo())
 

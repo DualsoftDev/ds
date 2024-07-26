@@ -19,37 +19,31 @@ module PPTNodeUtilModule =
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
  
-        let getPostParam(param:TaskDevPara option) =
+        let getPostParam(param:TaskDevPara option) (prefix:string)=
             if param.IsNone then ""
             else
                 let param = param |> Option.get
                 match param.DevValue, param.DevTime with 
-                | Some v, None -> $"{v}"
-                | Some v, Some t -> $"{v}_{t}ms"
-                | None, Some t -> $"{t}ms"
+                | Some v, None -> $"{prefix}{v}"
+                | Some v, Some t -> $"{prefix}{v}_{t}ms"
+                | None, Some t -> $"{prefix}{t}ms"
                 | None, None -> $""
 
         let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParaIO:TaskDevParaIO) =
             let newJob = 
-                let inParaText  =
-                    match  getPostParam taskDevParaIO.InPara with
-                    | "" -> "IN"
-                    | x -> $"IN{x}"  
+                let inParaText  = getPostParam taskDevParaIO.InPara "IN"
+                let outParaText = getPostParam taskDevParaIO.OutPara "OUT"
 
-                let outParaText  =
-                    match  getPostParam taskDevParaIO.OutPara with
-                    | "" -> "OUT"
-                    | x -> $"OUT{x}"
 
-                if inParaText = "IN" && outParaText = "OUT" //둘다 없는경우
+                if inParaText = "" && outParaText = "" //둘다 없는경우
                 then
                     jobFqdn
 
-                elif inParaText = "IN" && outParaText <> "OUT"  //OUT 만 있는경우
+                elif inParaText = "" && outParaText <> ""  //OUT 만 있는경우
                 then 
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({outParaText})").ToArray()
                      
-                elif inParaText <> "IN" && outParaText = "OUT"  //IN 만 있는경우
+                elif inParaText <> "" && outParaText = ""  //IN 만 있는경우
                 then 
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText})").ToArray()
 

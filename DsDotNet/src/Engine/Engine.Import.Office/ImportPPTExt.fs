@@ -216,7 +216,7 @@ module ImportU =
         static member MakeSegment(doc: pptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
             let dicVertex = doc.DicVertex
-            let dicAutoPreVertex = doc.DicAutoPreVertex
+            let dicAutoPreJob = doc.DicAutoPreJob
             
             let pptNodes = doc.Nodes
             let parents = doc.Parents
@@ -278,7 +278,7 @@ module ImportU =
                     try
                         if node.NodeType = AUTOPRE
                         then 
-                            createAutoPre(mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicAutoPreVertex)
+                            createAutoPre(mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicAutoPreJob) |> ignore
                         else 
                             if dicChildParent.ContainsKey(node) then
                                 createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
@@ -481,22 +481,30 @@ module ImportU =
         //Safety & AutoPre만들기
         [<Extension>]
         static member MakeSafetyAutoPre(doc: pptDoc, mySys: DsSystem) =
-            let vv = doc.DicVertex.Values@doc.DicAutoPreVertex.Values
-            let dicJob =   
-                vv
-                   .OfType<Call>().Where(fun call -> call.IsJob)
-                   .SelectMany(fun call ->
-                                seq{
-                                    let JobName =  call.TargetJob.UnqualifiedName
-                                    let pureJobName = GetBracketsRemoveName call.TargetJob.UnqualifiedName
-                                    yield call.TargetJob.UnqualifiedName, call.TargetJob
+            let getJobInfo(job:Job) = 
+                seq{
+                    let JobName =  job.UnqualifiedName
+                    let pureJobName = GetBracketsRemoveName job.UnqualifiedName
+                    yield job.UnqualifiedName, job
 
-                                    if JobName <> pureJobName
-                                    then 
-                                        yield pureJobName, call.TargetJob
-                                }
-                            )
-                   |> dict
+                    if JobName <> pureJobName
+                    then 
+                        yield pureJobName, job
+                }
+
+            let dicJobFromCall =   
+                doc.DicVertex.Values
+                   .OfType<Call>().Where(fun call -> call.IsJob)
+                   .SelectMany(fun call -> getJobInfo call.TargetJob)
+
+
+            let dicJobFromAutoPre =   
+                doc.DicAutoPreJob.Values
+                   .SelectMany(fun job -> getJobInfo job)
+                
+
+
+            let dicJob = (dicJobFromCall@dicJobFromAutoPre) |> dict
 
             doc.Nodes
             |> Seq.filter (fun node -> node.NodeType.IsCall || node.NodeType = AUTOPRE)
@@ -703,15 +711,16 @@ module ImportU =
 
             (* Multi Call Api별 갯수 동일 체크*)
             let calls = doc.Nodes
-                                .Where(fun n -> n.NodeType.IsCall && not(n.IsFunction))
-                                .GroupBy(fun n -> $"{n.FlowName}.{n.DevName}")
+                                .Where(fun n -> (n.NodeType.IsCall || n.NodeType = AUTOPRE) && not(n.IsFunction))
+                                .GroupBy(fun n -> n.JobPure.Combine())
 
             calls.Iter(fun call -> 
                 let callEachCounts = call.Select(fun f->f.JobParam.TaskDevCount)
                 if callEachCounts.Distinct().Count() > 1
                 then
                     let errNode = call.Select(fun f->f).First() 
-                    errNode.Shape.ErrorShape(ErrID._72, errNode.PageNum)
+                    let errText = call.Select(fun f-> $"{f.Name} page {f.FlowName}").JoinWith("\r\n")
+                    errNode.Shape.ErrorShape(ErrID._72+ $"\r\n{errText}", errNode.PageNum)
             )
 
         [<Extension>]

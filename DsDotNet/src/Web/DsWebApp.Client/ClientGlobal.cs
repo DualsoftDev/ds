@@ -8,6 +8,8 @@ using Dual.Common.Core;
 using Dual.Web.Blazor.ClientSide;
 using Dual.Web.Blazor.ServerSide;
 
+using Engine.Core;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -34,6 +36,7 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
     public string ModelDsZipPath { get; set; }
     public bool IsCpuRunning { get; set; }
     public event PropertyChangedEventHandler PropertyChanged;
+    public bool IsDebugVersion => CommonAppSettings.IsDebugVersion;
 
     HttpClient _http;
     NavigationManager _navigationManager;

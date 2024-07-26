@@ -62,7 +62,7 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
 
     // api/info/log-anal-info
     [HttpGet("log-anal-info")]
-    public async Task<SystemSpan> GetLogAnalInfo([FromQuery] DateTime? start, [FromQuery] DateTime? end)
+    public async Task<RestResultString> GetLogAnalInfo([FromQuery] DateTime? start, [FromQuery] DateTime? end)
     {
         DateTime start1 = start ?? DateTime.MinValue;
         DateTime end1 = end ?? DateTime.MaxValue;
@@ -75,8 +75,10 @@ public class InfoController(ServerGlobal serverGlobal) : ControllerBaseWithLogge
 
         var sysSpan = SystemSpanEx.CreateSpan(_model.System, logs);
 
-        return sysSpan;
+        return RestResultString.Ok(NewtonsoftJson.SerializeObject(sysSpan));
     }
+
+
     // api/info/log-anal-info-flat
     [HttpGet("log-anal-info-flat")]
     public async Task<FlatSpans> GetLogAnalFlatInfo([FromQuery] DateTime? start, [FromQuery] DateTime? end)

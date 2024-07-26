@@ -712,7 +712,7 @@ module ImportU =
             (* Multi Call Api별 갯수 동일 체크*)
             let calls = doc.Nodes
                                 .Where(fun n -> (n.NodeType.IsCall || n.NodeType = AUTOPRE) && not(n.IsFunction))
-                                .GroupBy(fun n -> n.JobPure.Combine())
+                                .GroupBy(fun n -> n.DevName)
 
             calls.Iter(fun call -> 
                 let callEachCounts = call.Select(fun f->f.JobParam.TaskDevCount)

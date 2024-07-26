@@ -209,7 +209,7 @@ module internal ModelFindModule =
             let lastPart = dev.DeviceName.Split("_").Last()
             match System.Int32.TryParse(lastPart) with
             | (true, value) -> value
-            | (false, _) -> 0
+            | (false, _) -> 1
 
         let inSkip = job.AddressInCount < devIndex 
         let outSkip = job.AddressOutCount < devIndex 

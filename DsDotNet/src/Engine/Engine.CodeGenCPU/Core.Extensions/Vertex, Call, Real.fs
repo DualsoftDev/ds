@@ -79,6 +79,12 @@ module ConvertCpuVertex =
                 then c.VC.TDON.DN.Expr
                 else c.End
 
+
+        member c.IsAnalogOutput = 
+                c.TargetJob.TaskDefs.All(fun td-> 
+                        td.OutTag.IsNonNull() 
+                        && td.OutTag.DataType <> typedefof<bool>) 
+
         member c.GetEndAction() =
             let tds = c.TargetJob.TaskDefs.Where(fun td->td.ExistInput)
                                           .Select(fun td->td.GetInExpr(c.TargetJob))

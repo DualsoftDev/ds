@@ -239,22 +239,26 @@ module PPTNodeModule =
         member x.JobWithJobPara = 
             getJobNameWithJobParam(x.Job, jobParam).ToArray()
 
-        member x.UpdateNodeRoot(isRoot: bool, target) =
+        member x.UpdateNodeRoot(isRoot: bool) =
             rootNode <- Some isRoot
             if nodeType = CALL || nodeType = AUTOPRE then
                 let hasTaskDevPara = GetLastParenthesesReplaceName(nameNFunc(shape), "") <> nameNFunc(shape)
                 if name.Contains(".")  //isDevCall
                 then
                     if hasTaskDevPara then
-                        taskDevParam <- getNodeTaskDevPara (shape, nameNFunc(shape), iPage, target)
+                        let tPara = getNodeTaskDevPara (shape, nameNFunc(shape), iPage, isRoot , nodeType)
+                        taskDevParam <- tPara
+                        
                     else 
                         if isRoot then
                             let inPara = createTaskDevPara  None (Some(DuBOOL)) None None |> Some  
-                    
                             taskDevParam <-TaskDevParaIO(inPara, None)
+
+                        elif nodeType = AUTOPRE then
+                            taskDevParam <- createTaskDevParaIOInTrue()
                 else 
                     if hasTaskDevPara then
-                        failWithLog "function call 'TaskDevPara' not support"
+                        failWithLog $"{name} 'TaskDevPara' error"
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall

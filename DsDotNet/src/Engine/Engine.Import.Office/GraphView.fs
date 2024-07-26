@@ -55,6 +55,11 @@ module rec ViewModule =
                                     | _-> f.InTag.BoxedValue.ToString())
                                     )
 
+
+                if values = ""
+                then
+                    failWithLog $"Error tag address {sa.GetJob().QualifiedName}"
+
                 let jobFlow = condiJob.NameComponents.Head()
                 if call.Parent.GetFlow().Name = jobFlow
                 then 
@@ -179,32 +184,6 @@ module rec ViewModule =
                     coreVertex.Value.QualifiedName.GetHashCode().ToString()
                 else 
                     x.GetHashCode().ToString()
-
-            //if coreVertex.IsSome then   
-            //    let vKey = coreVertex.Value.QualifiedName.GetHashCode()
-            //    let safeties = match coreVertex.Value.GetPure() with
-            //                   | :? Call as c -> String.Join(", ", c.SafetyConditions.Select(fun f->f.Name))
-            //                   | :? Real -> ""
-            //                   |_-> failwithlog $"Error {coreVertex.Value.Name}"
-            //    let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""
-
-
-            //    let autoPres = match coreVertex.Value.GetPure() with
-            //                   | :? Call as c -> String.Join(", ", c.AutoPreConditions.Select(fun f->f.Name))
-            //                   | :? Real -> ""
-            //                   |_-> failwithlog $"Error {coreVertex.Value.Name}"
-
-            //    let autoPresName = if autoPres.Length > 0 then $"[{autoPres}]\r\n" else ""
-
-            //    match coreVertex.Value with
-            //    | :? Alias as a ->
-            //        if a.IsOtherFlowRealAlias || not(a.IsSameFlow)
-            //        then $"{safeName}{autoPresName}{a.GetPure().ParentNPureNames.Combine()};{vKey}"  
-            //        else  $"{safeName}{autoPresName}{name};{vKey}"
-            //    | _ -> $"{safeName}{autoPresName}{x.PureVertex.Value.Name};{vKey}"
-            //else
-            //    $"{name};{x.GetHashCode()}"
-
 
 
         [<Browsable(false)>]

@@ -443,6 +443,7 @@ module CoreModule =
         member x.OutParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParaIO.OutPara) 
 
         member x.DicTaskTaskDevParaIO = dicTaskTaskDevParaIO
+        member x.ApiParas = dicTaskTaskDevParaIO.Values
         member x.ApiItems = x.DicTaskTaskDevParaIO.Values.Select(fun f->f.ApiItem)
 
         member val InAddress = TextAddrEmpty with get, set

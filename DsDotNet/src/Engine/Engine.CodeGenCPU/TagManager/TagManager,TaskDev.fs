@@ -16,19 +16,19 @@ module TaskDevManagerModule =
             let pv:IStorage = createPlanVar stg name DuBOOL false td (int t) sys 
             pv :?> PlanVar<bool>
             
-        let pss = Dictionary<ApiItem, PlanVar<bool>>()
-        let pes = Dictionary<ApiItem, PlanVar<bool>>()
-        let pos = Dictionary<ApiItem, PlanVar<bool>>()
+        let pss = Dictionary<ApiPara, PlanVar<bool>>()
+        let pes = Dictionary<ApiPara, PlanVar<bool>>()
+        let pos = Dictionary<ApiPara, PlanVar<bool>>()
 
         
         do 
-            for api in td.ApiItems.Distinct() do
+            for apiPara in td.ApiParas do
                 let ps = cpv TaskDevTag.planStart
                 let pe = cpv TaskDevTag.planEnd
                 let po = cpv TaskDevTag.planOutput
-                pss.Add(api, ps)
-                pes.Add(api, pe)
-                pos.Add(api, po)
+                pss.Add(apiPara, ps)
+                pes.Add(apiPara, pe)
+                pos.Add(apiPara, po)
                 
         interface ITagManager with
             member _.Target = td
@@ -42,11 +42,12 @@ module TaskDevManagerModule =
          
         member _.TaskDev   = td
       
-        member x.PS(api:ApiItem)   = pss[api]
-        member x.PE(api:ApiItem)   = pes[api]
-        member x.PO(api:ApiItem)   = pos[api]
-        member x.PS(job:Job)   = x.PS(x.TaskDev.GetApiItem(job))
-        member x.PE(job:Job)   = x.PE(x.TaskDev.GetApiItem(job))
-        member x.PO(job:Job)   = x.PO(x.TaskDev.GetApiItem(job))
+        member x.PS(api:ApiPara)   = pss[api] 
+        member x.PE(api:ApiPara)   = pes[api] 
+        member x.PO(api:ApiPara)   = pos[api] 
+
+        member x.PS(job:Job)   = x.PS(x.TaskDev.GetApiPara(job))
+        member x.PE(job:Job)   = x.PE(x.TaskDev.GetApiPara(job)) 
+        member x.PO(job:Job)   = x.PO(x.TaskDev.GetApiPara(job)) 
 
         

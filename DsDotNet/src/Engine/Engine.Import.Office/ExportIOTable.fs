@@ -135,9 +135,9 @@ module ExportIOTable =
           
 
                 let mutable extCnt = 0
-                let devsCall =  sys.GetTaskDevsSkipEmptyAddress()
+                let devsJob =  sys.GetTaskDevsSkipEmptyAddress()
 
-                for (dev, call) in  devsCall do
+                for (dev, job) in  devsJob do
                     //외부입력 전용 확인하여 출력 생성하지 않는다.
                     if  dev.IsRootOnlyDevice
                     then
@@ -147,7 +147,7 @@ module ExportIOTable =
                             dev.InAddress  <-  getExternalTempMemory (target, extCnt)
                             extCnt <- extCnt+1
 
-                    yield rowIOItems (dev, call.TargetJob) target
+                    yield rowIOItems (dev, job) target
         }
 
         let dts = 

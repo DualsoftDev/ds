@@ -131,9 +131,9 @@ namespace Diagram.View.MSAGL
 
             void UpdateDicTaskDevPlanTag(TaskDev td, ViewVertex viewVertex)
             {
-                td.ApiItems.Iter(api =>
+                td.ApiParas.Iter(apiPara =>
                 {
-                    var planEndTag = (td.TagManager as TaskDevManager).PE(api);
+                    var planEndTag = (td.TagManager as TaskDevManager).PE(apiPara);
 
                     if (!DicMemoryTag.ContainsKey(planEndTag))
                         DicMemoryTag.Add(planEndTag, new List<ViewVertex>());

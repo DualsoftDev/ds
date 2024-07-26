@@ -9,8 +9,7 @@ open Dual.Common.Core.FS
 type TaskDev with
 
     member d.SensorEmulation(sys:DsSystem, job:Job) =
-        let api = d.GetApiItem(job)
-        let set = api.APIEND.Expr
+        let set = d.GetPE(job).Expr
         let rst = sys._off.Expr
 
         let inParam = d.GetInParam(job)

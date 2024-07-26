@@ -361,8 +361,8 @@ type FindExtension =
 
 
     [<Extension>] static member GetTaskDevsSkipEmptyAddress(x:DsSystem) = 
-                    x.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
-                        .Where(fun (dev,_) -> not(dev.OutAddress = TextSkip && dev.InAddress= TextSkip))
+                    x.Jobs.SelectMany(fun j->j.TaskDefs.Select(fun td->(td, j))).DistinctBy(fun (td, _j) -> td)
+                          .Where(fun (td, _j) -> not(td.OutAddress = TextSkip && td.InAddress= TextSkip))
 
     [<Extension>]
     static member GetQualifiedName(vertex:IVertex) =

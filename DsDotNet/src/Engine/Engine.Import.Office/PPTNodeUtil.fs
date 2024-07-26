@@ -60,7 +60,7 @@ module PPTNodeUtilModule =
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
 
 
-        let getNodeTaskDevPara (shape:Shape, name:string, iPage:int, target) = 
+        let getNodeTaskDevPara (shape:Shape, name:string, iPage:int, isRoot, nodeType) = 
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let getParam x = 
@@ -82,8 +82,12 @@ module PPTNodeUtilModule =
                         func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobParam에서 다시 처리
                         func.Split(",").Last() |> trimSpaceNewLine
                     TaskDevParaIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
-                else 
-                    TaskDevParaIO((getParam func)|>Some, (defaultTaskDevPara())|>Some)
+                else
+                    if isRoot || nodeType = AUTOPRE //생략 규격 입력시에 Root/AUTOPRE 는 조건으로 Real내부는 출력으로 인식
+                    then 
+                        TaskDevParaIO((getParam func)|>Some, (defaultTaskDevPara())|>Some)
+                    else 
+                        TaskDevParaIO((defaultTaskDevPara())|>Some, (getParam func)|>Some)
             with _ ->
                 shape.ErrorName((error()), iPage)
 

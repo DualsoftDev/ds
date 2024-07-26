@@ -87,21 +87,26 @@ type VertexManager with
                 else 
 
                     let setStart = coin.ST.Expr <&&> real.V.G.Expr
-                    let setEnd = call.PEs.ToAndElseOn() <&&> call.End
+                    let setEnd = (*call.PEs.ToAndElseOn() <&&> *)call.End
 
                     //if setEnd Pulse Mode
 
-                    if RuntimeDS.Package.IsPLCorPLCSIM() 
+                    //if RuntimeDS.Package.IsPLCorPLCSIM() 
+                    //then
+                    //    yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, getFuncName() )
+                    //elif RuntimeDS.Package.IsPCorPCSIM()
+                    //then 
+                        //yield! (setEnd, coin.System)  --^ (coin.GP, getFuncName()) 
+                        //yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
+
+
+                     //아날로그 전용 job 은 기다리지 않고 값 성립하면 Coin 뒤집기
+                    if call.IsAnalogOutput 
                     then
-                        yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, getFuncName() )
-                    elif RuntimeDS.Package.IsPCorPCSIM()
-                    then 
+                        yield (setStart<&&>setEnd, rsts) ==| (coin.ET, getFuncName() )
+                    else
                         yield! (setEnd, coin.System)  --^ (coin.GP, getFuncName()) 
                         yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
-
-                    ///if setEnd  Mode
-
-                    //yield (setStart<&&>setEnd, rsts) ==| (coin.ET, getFuncName() )
         ]
 
 

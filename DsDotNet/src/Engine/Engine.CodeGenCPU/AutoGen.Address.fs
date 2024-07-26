@@ -314,10 +314,10 @@ module DsAddressModule =
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
             
-        let devsCall =  sys.GetTaskDevsSkipEmptyAddress()
+        let devsJob =  sys.GetTaskDevsSkipEmptyAddress()
         let mutable extCnt = 0
-        for dev, call in devsCall do
-            let inSkip, outSkip = getSkipInfo(dev, call.TargetJob)
+        for dev, job in devsJob do
+            let inSkip, outSkip = getSkipInfo(dev, job)
 
             dev.InAddress  <- getValidAddress(dev.InAddress, dev.InDataType, dev.QualifiedName, inSkip,  IOType.In, target)
             dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)

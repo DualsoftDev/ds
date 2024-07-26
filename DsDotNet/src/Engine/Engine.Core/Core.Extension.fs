@@ -208,8 +208,11 @@ module CoreExtensionModule =
                         | None -> defaultTaskDevPara() 
         member x.GetOutParam(job:Job) = x.GetOutParam (job.UnqualifiedName)
          
-        member x.GetApiItem(jobFqdn:string) = x.DicTaskTaskDevParaIO[jobFqdn].ApiItem
-        member x.GetApiItem(job:Job) = x.GetApiItem(job.UnqualifiedName)
+        member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParaIO[jobFqdn]
+        member x.GetApiPara(job:Job) = x.GetApiPara(job.UnqualifiedName)
+
+        member x.GetApiItem(jobFqdn:string) = x.GetApiPara(jobFqdn).ApiItem
+        member x.GetApiItem(job:Job) = x.GetApiPara(job.UnqualifiedName).ApiItem
 
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member x.GetApiStgName(jobFqdn:string) = $"{x.DeviceName}_{x.GetApiItem(jobFqdn).Name}"

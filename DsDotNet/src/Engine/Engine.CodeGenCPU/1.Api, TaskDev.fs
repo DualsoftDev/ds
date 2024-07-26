@@ -11,24 +11,32 @@ type TaskDevManager with
     member d.TD1_PlanSend(activeSys:DsSystem, coins:Vertex seq) =
         [
             for c in coins.OfType<Call>() do
-                yield (c.VC.MM.Expr, activeSys._off.Expr) --| (d.TaskDev.GetPS(c.TargetJob), getFuncName())
+                yield (c.VC.MM.Expr, activeSys._off.Expr) --| (d.PS(c.TargetJob), getFuncName())
         ]
     
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         [
-            for api in d.TaskDev.ApiItems do
-                let sets =  api.APIEND.Expr
-                yield (sets, activeSys._off.Expr) --| (d.PE(api), getFuncName())
+            for kv in d.TaskDev.DicTaskTaskDevParaIO do
+                let apiPara = kv.Value
+
+                let sets = 
+                    let inPara = apiPara.TaskDevParaIO.InPara
+                    if inPara.IsSome && inPara.Value.Type <> DuBOOL
+                    then 
+                        apiPara.ApiItem.APIEND.Expr <&&> d.PS(apiPara).Expr
+                    else 
+                        apiPara.ApiItem.APIEND.Expr 
+
+                yield (sets, activeSys._off.Expr) --| (d.PE(apiPara), getFuncName())
         ]
 
     member d.TD3_PlanOutput(activeSys:DsSystem) =
         [
-            for api in d.TaskDev.ApiItems do
-                let sets =  d.PS(api).Expr <&&> d.PE(api).Expr
-                yield (sets, activeSys._off.Expr) --| (d.PO(api), getFuncName())
+            for kv in d.TaskDev.DicTaskTaskDevParaIO do
+                let apiPara = kv.Value
+                let sets =  d.PS(apiPara).Expr <&&> d.PE(apiPara).Expr
+                yield (sets, activeSys._off.Expr) --| (d.PO(apiPara), getFuncName())
         ]
-
-
 
     member d.A1_ApiSet(call:Call) :  CommentedStatement list=
         [

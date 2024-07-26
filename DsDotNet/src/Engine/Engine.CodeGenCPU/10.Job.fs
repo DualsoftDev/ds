@@ -37,19 +37,16 @@ type Job with
                         else 
                             if RuntimeDS.Package.IsPLCorPLCSIM() 
                             then
-                                yield (fbRisingAfter[sets], outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
+                                yield (sets, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
+                                yield (fbRising[sets], outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
 
                             elif RuntimeDS.Package.IsPCorPCSIM() then 
                                 
                                 let tempRising  = getSM(j).GetTempBoolTag(td.QualifiedName) 
                                 yield! (sets, j.System) --^ (tempRising,  getFuncName())
                                 yield (tempRising.Expr, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
-
-
                             else    
                                 failWithLog $"Not supported {RuntimeDS.Package} package"
-            
-
         ]
 
 

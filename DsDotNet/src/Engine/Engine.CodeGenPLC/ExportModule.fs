@@ -117,7 +117,7 @@ module ExportModule =
         let localStorage = new Storages()
         let pous = CpuLoaderExt.LoadStatements(system, globalStorage, plcType).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
-        let startMemory = DsAddressModule.getCurrentMemoryIndex();
+        let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
 
         // Create a list to hold <C>ommented <S>tatement<S>
         let mutable css = []
@@ -136,7 +136,7 @@ module ExportModule =
                 globalStorage.Remove(tagKV.Key)|>ignore
             )
 
-        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj (startMemory/8+1)  startTimer startCounter
+        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)
 

@@ -34,6 +34,7 @@
         <Compile Include="XgxAutoMemoryAllocTest.fs" />
         <Compile Include="NameAddressValidatorTest.fs" />
         <Compile Include="XgxBitwiseTest.fs" />
+        <Compile Include="XgxDirectAddressTest.fs" />
         <Compile Include="XgxUdtTest.fs" />
         <Compile Include="XgxSubroutineTest.fs" />
         <Compile Include="Arithmetic/XgxArithmeticTest.fs" />

@@ -1525,7 +1525,7 @@ module Program =
 
         ModelParser.ParseFromString(
             text,
-            ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuNA.me", None, DuNone)
+            ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuNA.me", None, DuNone)
         )
         |> ignore
 

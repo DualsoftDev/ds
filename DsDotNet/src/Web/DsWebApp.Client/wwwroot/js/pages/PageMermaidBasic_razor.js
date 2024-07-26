@@ -1,17 +1,33 @@
 window.initializeMermaid = () => {
     mermaid.initialize({ startOnLoad: true, securityLevel: 'loose' });
 };
-window.renderMermaid = (zoomMin, zoomMax) => {
+window.renderMermaid = (jsonOption) => {
     mermaid.contentLoaded();
-    handleZoomAndDrag(zoomMin, zoomMax);
+    var option = JSON.parse(jsonOption)
+    handleZoomAndDrag(option);
 };
 
 
+function getTaskInfo(event) {
+    if (!event.defaultPrevented) {  // Zoom or drag prevented
+        var target = d3.select(event.target);
+        //console.log(target)
+        return {
+            taskId:  target.attr('id'),
+            classes: target.node().classList
+        }
+    }
+
+    return null;
+}
 
 // https://jsfiddle.net/zu_min_com/2agy5ehm/26/
 // https://observablehq.com/@d3/drag-zoom
-function handleZoomAndDrag(zoomMin, zoomMax) {  // e.g: (zoomMin, zoomMax) = (0.5, 20)
+function handleZoomAndDrag({ zoomMin, zoomMax, enableConsoleLog }) {  // e.g: (zoomMin, zoomMax) = (0.5, 20)
     setTimeout(() => {
+        if (enableConsoleLog)
+            console.log(`zoomMin=${zoomMin}, zoomMax=${zoomMax}`)
+
         var svgs = d3.selectAll(".mermaid svg");
         svgs.each(function () {
             var svg = d3.select(this);
@@ -30,14 +46,20 @@ function handleZoomAndDrag(zoomMin, zoomMax) {  // e.g: (zoomMin, zoomMax) = (0.
 
             // Mermaid 클릭 이벤트와 충돌을 피하기 위한 설정
             svg.on('click', function (event) {
-                if (event.defaultPrevented) return; // Zoom or drag prevented
-                var target = d3.select(event.target);
-                if (target.classed('node') || target.classed('task')) {
-                    // Task or node clicked
-                    console.log('Task or node clicked', target.attr('id'));
-                }
+                var ti = getTaskInfo(event)
+                if (ti && enableConsoleLog)
+                    console.log(`Clicked: ${ti.taskId}, classes=${ti.classes}`);
+            })
+            .on('mouseover', function (event) {
+                var ti = getTaskInfo(event)
+                if (ti && enableConsoleLog)
+                    console.log(`Hovering over task: ${ti.taskId}`);
+            })
+            .on('mouseout', function (event) {
+                var ti = getTaskInfo(event)
+                if (ti && enableConsoleLog)
+                    console.log(`Mouse out from task: ${ti.taskId}`);
             });
         });
     }, 1000); // SVG가 렌더링될 시간을 기다리기 위해 지연 시간 추가
 }
-

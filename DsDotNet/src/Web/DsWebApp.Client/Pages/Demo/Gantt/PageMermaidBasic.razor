@@ -70,7 +70,14 @@
         {
             if (await JsDual.IsFunctionExists("renderMermaid"))
             {
-                await JsRuntime.InvokeVoidAsync("renderMermaid", 0.5, 20);
+                var option = new
+                {
+                    zoomMin = 0.5,
+                    zoomMax = 20,
+                    enableConsoleLog = ClientGlobal.IsDebugVersion,
+                };
+                var jsonOption = System.Text.Json.JsonSerializer.Serialize(option);
+                await JsRuntime.InvokeVoidAsync("renderMermaid", jsonOption);
                 _rendered = true;
             }
         }

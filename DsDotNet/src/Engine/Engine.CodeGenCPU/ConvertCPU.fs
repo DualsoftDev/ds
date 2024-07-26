@@ -174,6 +174,8 @@ module ConvertCPU =
                 let masterCall= getMasterJob(calls)
                 yield! tm.TD1_PlanSend(s, calls)
                 yield! tm.TD2_PlanReceive(s)
+                yield! tm.TD3_PlanOutput(s)
+                
                 yield! tm.A1_ApiSet(masterCall)
                 yield! tm.A2_ApiEnd()
 

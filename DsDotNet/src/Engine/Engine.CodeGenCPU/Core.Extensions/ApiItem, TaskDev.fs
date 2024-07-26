@@ -23,6 +23,7 @@ module ConvertCpuApiItem =
 
         member td.GetPS(job:Job)  = getTM(td).PS(job)   
         member td.GetPE(job:Job)  = getTM(td).PE(job)   
+        member td.GetPO(job:Job)  = getTM(td).PO(job)   
         
     type ApiItem with
         member a.APISET                 = getAM(a).APISET

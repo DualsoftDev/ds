@@ -47,8 +47,8 @@ type VertexManager with
                 yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
 
             elif RuntimeDS.Package.IsPCorPCSIM() then 
-                yield! (input, v.ErrShortRisingRelay, v.ErrShortRisingHold) --^ (v.ErrShortRising, getFuncName())
-                yield! (!@input, v.ErrOpenRisingRelay, v.ErrOpenRisingHold) --^ (v.ErrOpenRising,  getFuncName())
+                yield! (input, v.System) --^ (v.ErrShortRising, getFuncName())
+                yield! (!@input, v.System) --^ (v.ErrOpenRising,  getFuncName())
             else    
                 failWithLog $"Not supported {RuntimeDS.Package} package"
             

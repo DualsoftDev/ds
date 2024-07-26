@@ -65,14 +65,16 @@ module ExpressionExtension =
         DuAction(DuCopy(sets, copyExpr, target))  |> withExpressionComment comment
                 
     /// Create One Scan Relay Coils Statement
-    let (--^) (sets: Expression<bool>, risingRelay: TypedValueStorage<bool>, risingHold: TypedValueStorage<bool>) (rising: TypedValueStorage<bool>, comment:string) =
+    let (--^) (sets: Expression<bool>, sys:DsSystem) (rising: TypedValueStorage<bool>, comment:string) =
+        let sm = sys.TagManager :?> SystemManager
+        let risingRelay = sm.GetTempBoolTag("tempRisingRelay") 
+        let risingHold = sm.GetTempBoolTag("tempRisingHold")   
         [
         //순서 중요
             risingRelay <== (var2expr rising <||> var2expr risingRelay <&&>  sets ) |> withExpressionComment comment
             risingHold  <== (sets  <&&> !@(var2expr risingRelay)) |> withExpressionComment comment
             rising      <== (risingHold.Expr) |> withExpressionComment comment
         ]
-
 
     /// Create Timer Coil Statement
     let (--@) (rungInCondition: IExpression<bool>) (timerCoil: TimerStruct, preset:CountUnitType, comment:string) =

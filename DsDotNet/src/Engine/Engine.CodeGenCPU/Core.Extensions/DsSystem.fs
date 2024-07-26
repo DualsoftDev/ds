@@ -81,11 +81,7 @@ module ConvertCpuDsSystem =
         member s.S = s |> getSM
         member s.Storages = s.TagManager.Storages
 
-        member s.GetTempTag(x:TaskDev) = 
-            emptyAddressCheck x.InAddress x.Name
-            let name = x.InAddress.Replace("%", "_").Replace(".", "_")
-            getSM(s).GetTempBoolTag(name, x.InAddress, x)
-
+       
         member s.GetTempTimer(x:HwSystemDef) = 
             getSM(s).GetTempTimerTag(x.Name)
     

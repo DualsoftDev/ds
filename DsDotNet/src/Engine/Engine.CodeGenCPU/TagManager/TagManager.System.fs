@@ -120,10 +120,8 @@ module SystemManagerModule =
             
         member s.TargetType = target 
         member s.MutualCalls = mutualCalls 
-        member s.GetTempBoolTag(name:string, address:string, fqdn:IQualifiedNamed) : IStorage=
-                if stg.ContainsKey(name) then stg[name]
-                else
-                    createBridgeTag(stg, name, address, SystemTag.temp|>int, BridgeType.DummyTemp, sys, fqdn, DuBOOL).Value
+        member s.GetTempBoolTag(name:string) : PlanVar<bool>=
+                createPlanVar  stg  name DuBOOL true sys (int SystemTag.temp) sys :?> PlanVar<bool>
 
         member s.GetTempTimerTag(name:string) : TimerStruct =
                 timer stg name sys target

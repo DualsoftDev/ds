@@ -165,8 +165,6 @@ module TagKindList =
     | goingPulseHold            = 11039
 
     | callCommandPulse          = 11040
-    | callCommandPulseRelay     = 11041
-    | callCommandPulseHold      = 11042
     
     | callCommandEnd            = 11043
     | callOperatorValue         = 11044
@@ -189,14 +187,8 @@ module TagKindList =
     | txErrOffTimeOver          = 11063
     | rxErrShort                = 11070
     | rxErrShortRising          = 11071
-    | rxErrShortRisingRelay     = 11072
-    ///pulse 1scan 지연용도
-    | rxErrShortRisingHold      = 11073
     | rxErrOpen                 = 11074
     | rxErrOpenRising           = 11075
-    | rxErrOpenRisingRelay      = 11076
-    ///pulse 1scan 지연용도
-    | rxErrOpenRisingHold       = 11077
 
     | workErrOriginGoing        = 11080
 
@@ -216,9 +208,10 @@ module TagKindList =
     type TaskDevTag    =
     | planStart                = 14000 
     | planEnd                  = 14001
-    | actionIn                 = 14002
-    | actionOut                = 14003
-    | actionMemory             = 14004
+    | planOutput               = 14002
+    | actionIn                 = 14010
+    | actionOut                = 14011
+    | actionMemory             = 14012
 
     /// 15000 ~ 14999
     [<Flags>]

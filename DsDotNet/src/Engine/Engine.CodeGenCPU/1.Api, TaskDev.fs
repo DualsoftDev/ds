@@ -21,11 +21,20 @@ type TaskDevManager with
                 yield (sets, activeSys._off.Expr) --| (d.PE(api), getFuncName())
         ]
 
+    member d.TD3_PlanOutput(activeSys:DsSystem) =
+        [
+            for api in d.TaskDev.ApiItems do
+                let sets =  d.PS(api).Expr <&&> d.PE(api).Expr
+                yield (sets, activeSys._off.Expr) --| (d.PO(api), getFuncName())
+        ]
+
+
+
     member d.A1_ApiSet(call:Call) :  CommentedStatement list=
         [
             let a = d.TaskDev.GetApiItem(call.TargetJob) 
             let ps = d.TaskDev.GetPS(call.TargetJob)
-            yield! (ps.Expr , a.ApiItemSetPusleRelay, a.ApiItemSetPusleHold) --^ (a.ApiItemSetPusle, getFuncName())
+            yield! (ps.Expr , call.System) --^ (a.ApiItemSetPusle, getFuncName())
             yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.APISET, getFuncName())
         ]
 

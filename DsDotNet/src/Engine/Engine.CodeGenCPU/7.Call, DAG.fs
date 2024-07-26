@@ -96,7 +96,7 @@ type VertexManager with
                         yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, getFuncName() )
                     elif RuntimeDS.Package.IsPCorPCSIM()
                     then 
-                        yield! (setEnd, coin.GPR, coin.GPH)  --^ (coin.GP, getFuncName()) 
+                        yield! (setEnd, coin.System)  --^ (coin.GP, getFuncName()) 
                         yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
 
                     ///if setEnd  Mode

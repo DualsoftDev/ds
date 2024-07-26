@@ -43,7 +43,7 @@ type VertexMCall with
                     else   
                         failWithLog $"Not supported {RuntimeDS.Package} package"
 
-                yield! (v.MM.Expr, v.CallCommandPulseRelay, v.CallCommandPulseHold) --^ (v.CallCommandPulse, getFuncName()) 
+                yield! (v.MM.Expr, v.System) --^ (v.CallCommandPulse, getFuncName()) 
 
                     ////test ahn
                 yield! call.TargetFunc.Value.Statements |> Seq.collect(fun s->

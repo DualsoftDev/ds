@@ -275,8 +275,6 @@ module TagManagerModule =
         let timerOnDelayBit = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
         let memo           = createTag  false VertexTag.callMemo
         
-        let callCommandPulseRelay  = createTag  false VertexTag.callCommandPulseRelay
-        let callCommandPulseHold  = createTag  false VertexTag.callCommandPulseHold
         let callCommandPulse  = createTag  false VertexTag.callCommandPulse
         let callCommandEnd    = createTag  false VertexTag.callCommandEnd
         let callOperatorValue  = createTag false VertexTag.callOperatorValue
@@ -289,13 +287,8 @@ module TagManagerModule =
         let txErrOffTimeOver        = createTag  true    VertexTag.txErrOffTimeOver   
         let rxErrShort              = createTag  true    VertexTag.rxErrShort      
         let rxErrShortRising        = createTag  true    VertexTag.rxErrShortRising      
-        let rxErrShortRisingRelay   = createTag  true    VertexTag.rxErrShortRisingRelay      
-        let rxErrShortRisingHold   = createTag  true    VertexTag.rxErrShortRisingHold      
         let rxErrOpen               = createTag  true    VertexTag.rxErrOpen    
         let rxErrOpenRising         = createTag  true    VertexTag.rxErrOpenRising          
-        let rxErrOpenRisingRelay    = createTag  true    VertexTag.rxErrOpenRisingRelay          
-        let rxErrOpenRisingHold    = createTag  true    VertexTag.rxErrOpenRisingHold          
-
         let errors = 
             let err1 = if txErrOnTimeShortage.Value      then "감지시간부족" else ""
             let err2 = if txErrOnTimeOver.Value          then "감지시간초과" else ""
@@ -335,21 +328,14 @@ module TagManagerModule =
 
         member _.ErrShort        = rxErrShort    
         member _.ErrShortRising  = rxErrShortRising    
-        member _.ErrShortRisingRelay  = rxErrShortRisingRelay    
-        member _.ErrShortRisingHold  = rxErrShortRisingHold    
         
         member _.ErrOpen         = rxErrOpen     
         member _.ErrOpenRising   = rxErrOpenRising     
-        member _.ErrOpenRisingRelay   = rxErrOpenRisingRelay     
-        member _.ErrOpenRisingHold   = rxErrOpenRisingHold     
-
    
         ///callCommandEnd
         member _.CallCommandEnd           =  callCommandEnd
         ///callCommandPulse  
         member _.CallCommandPulse         =  callCommandPulse
-        member _.CallCommandPulseRelay    =  callCommandPulseRelay
-        member _.CallCommandPulseHold     =  callCommandPulseHold
 
         
         ///Call Operator 연산결과 값 (T/F)

@@ -27,15 +27,15 @@ module FlowManagerModule =
         let f_emg_st      = cpv   FlowTag.emergency_state             // Emergency  State
         let f_p_st        = cpv   FlowTag.pause_state             // pause  State
 
-        let f_auto_btn       = cpv  FlowTag.auto_btn       
-        let f_manual_btn     = cpv  FlowTag.manual_btn     
-        let f_drive_btn      = cpv  FlowTag.drive_btn
-        let f_pause_btn      = cpv  FlowTag.pause_btn
-        let f_ready_btn      = cpv  FlowTag.ready_btn
-        let f_clear_btn      = cpv  FlowTag.clear_btn
-        let f_emg_btn        = cpv  FlowTag.emg_btn
-        let f_test_btn       = cpv  FlowTag.test_btn
-        let f_home_btn       = cpv  FlowTag.home_btn
+        let f_auto_btn    = cpv  FlowTag.auto_btn       
+        let f_manual_btn  = cpv  FlowTag.manual_btn     
+        let f_drive_btn   = cpv  FlowTag.drive_btn
+        let f_pause_btn   = cpv  FlowTag.pause_btn
+        let f_ready_btn   = cpv  FlowTag.ready_btn
+        let f_clear_btn   = cpv  FlowTag.clear_btn
+        let f_emg_btn     = cpv  FlowTag.emg_btn
+        let f_test_btn    = cpv  FlowTag.test_btn
+        let f_home_btn    = cpv  FlowTag.home_btn
         
         let f_auto_lamp      = cpv   FlowTag.auto_lamp       
         let f_manual_lamp    = cpv   FlowTag.manual_lamp     

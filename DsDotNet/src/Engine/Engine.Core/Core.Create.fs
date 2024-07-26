@@ -12,7 +12,7 @@ open System.Runtime.CompilerServices
 module CoreCreateModule =
 
     let createDsSystem(systemName:string) =
-        let system = DsSystem(systemName)
+        let system = DsSystem.Create(systemName)
         system
 
     let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (taskDevParaIO:TaskDevParaIO): TaskDev =

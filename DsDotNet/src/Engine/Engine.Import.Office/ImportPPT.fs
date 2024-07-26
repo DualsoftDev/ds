@@ -149,7 +149,7 @@ module ImportPPTModule =
                         if sRepo.ContainsKey(key) then
                             ExternalSystem(sRepo[key], paras, false) :> LoadedSystem
                         else
-                            let newSys = DsSystem(paras.LoadedName)
+                            let newSys = DsSystem.Create(paras.LoadedName)
                             addNewLoadedSys (newSys, true, node.NodeType = OPEN_EXSYS_LINK)
 
                     theSys.AddLoadedSystem(exSys)
@@ -159,7 +159,7 @@ module ImportPPTModule =
                 | OPEN_EXSYS_CALL -> addNewExtSysLoaded 0
                 | OPEN_EXSYS_LINK -> addNewExtSysLoaded 1 //LINK 이면 형제 관계
                 | COPY_DEV ->
-                    let device = addNewLoadedSys (DsSystem(paras.LoadedName), false, false)
+                    let device = addNewLoadedSys (DsSystem.Create(paras.LoadedName), false, false)
                     theSys.AddLoadedSystem(device)
 
                 | _ -> failwithlog "error")
@@ -187,7 +187,7 @@ module ImportPPTModule =
             activeSysDir <- fileDirectory
             currentFileName <- filePath
             let sysName = getSystemName filePath
-            let mySys = DsSystem(sysName)
+            let mySys = DsSystem.Create(sysName)
 
             if mySys.Name <> TextLibrary
             then  activeSys <- Some mySys

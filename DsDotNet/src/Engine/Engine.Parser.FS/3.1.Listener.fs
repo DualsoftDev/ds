@@ -135,10 +135,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | _ -> ()
 
                 x.TheSystem <-
-                    let exSys = DsSystem(name)
+                    let exSys = DsSystem.Create(name)
                     registerSystem exSys
                     exSys
-            | _ -> x.TheSystem <- DsSystem(name)
+            | _ -> x.TheSystem <- DsSystem.Create(name)
             
             RuntimeDS.System <- x.TheSystem 
 

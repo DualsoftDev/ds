@@ -90,8 +90,9 @@ module CoreModule =
     and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
         inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
-    type DsSystem (name: string) =
+    type DsSystem (name: string, vertexDic, vertexHandlers:GraphVertexAddRemoveHandlers option) =
         inherit FqdnObject(name, createFqdnObject([||]))
+
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let variables = ResizeArray<VariableData>()
@@ -118,6 +119,28 @@ module CoreModule =
 
         
         interface ISystem 
+
+        new(name) =
+            assert (isInUnitTest())     // 현재는 UnitTest 에서만 사용.  일반 코드에서는 DsSystem.Create(name) 을 사용할 것.
+            DsSystem(name, null, None)
+
+        static member Create(name) =
+            let vertexDic = Dictionary<string, FqdnObject>()
+            let vertexHandlers =
+                let onAdded (v:INamed) = 
+                    let q = v :?> FqdnObject
+                    vertexDic.TryAdd(q.QualifiedName, q)
+                let onRemoved (v:INamed) = 
+                    let q = v :?> FqdnObject
+                    vertexDic.Remove(q.QualifiedName)
+
+                GraphVertexAddRemoveHandlers(onAdded, onRemoved)
+
+
+            DsSystem(name, vertexDic, Some vertexHandlers)
+        member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
+        member _.VertexDic = vertexDic
+
             
         member _.AddLoadedSystem(childSys) = 
             loadedSystems.Add(childSys)
@@ -227,7 +250,7 @@ module CoreModule =
         do 
             checkFlowName  name
         
-        member val Graph = DsGraph()
+        member val Graph = DsGraph(system.VertexAddRemoveHandlers)
         
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         
@@ -292,7 +315,7 @@ module CoreModule =
         
         member x.Flow = flow
 
-        member val Graph = DsGraph()
+        member val Graph = DsGraph(flow.System.VertexAddRemoveHandlers)
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val ExternalTags = HashSet<ExternalTagSet>()
         member val ParentApiSensorExpr = getNull<IExpression>() with get, set

@@ -1,4 +1,6 @@
 @page "/demo/google"
+@using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
+@using static Engine.Info.DBLoggerAnalysisDTOModule
 
 <h3>Google Timeline Chart</h3>
 
@@ -7,22 +9,26 @@
 @code {
     protected override async Task OnInitializedAsync()
     {
+        var result = await Http.GetDeserializedObjectAsycn<SystemSpan>("api/info/log-anal-info");
+        var sysSpan = result.Value;
+        IEnumerable<object> generateData()
+        {
+            foreach (var (real, spans) in sysSpan.RealSpans)
+            {
+                foreach (var s in spans)
+                {
+                    foreach (var c in s.CallSpans)
+                        yield return new { Room = real, Name = c.Fqdn, Color = (string)null, Tooltip = (string)null, Start = c.Start, End = c.End };
+                }
+            }
+        }
+
         await JsDual.LoadScript("https://www.gstatic.com/charts/loader.js");
         await JsDual.EvalScript("js/pages/PageGoogleTimelineChart_razor.js");
         string t(int h, int m, int s, int ms) => DateTime.Today.AddHours(h).AddMinutes(m).AddSeconds(s).AddMilliseconds(ms).ToString("o");
 
-        var dataTable = new List<object>
-        {
-            new { Room = "Magnolia Room", Name = "CSS Fundamentals", Color = "yellow", Tooltip = (string)null, Start = t(12, 0, 0, 1), End = t(14, 0, 0, 100) },
-            new { Room = "Magnolia Room", Name = "Intro JavaScript", Color = "#cbb69d", Tooltip = "2", Start = t(14, 30, 0, 1), End = t(16, 0, 0, 100) },
-            new { Room = "Magnolia Room", Name = "Advanced JavaScript", Color = "#cbb69d", Tooltip = "3", Start = t(16, 30, 0, 1), End = t(19, 0, 0, 100) },
-            new { Room = "Gladiolus Room", Name = "Intermediate Perl", Color = "#cbb69d", Tooltip = "4", Start = t(12, 30, 0, 1), End = t(14, 0, 0, 100) },
-            new { Room = "Gladiolus Room", Name = "Advanced Perl", Color = "green", Tooltip = (string)null, Start = t(14, 30, 0, 1), End = t(16, 0, 0, 100) },
-            new { Room = "Gladiolus Room", Name = "Applied Perl", Color = "#cbb69d", Tooltip = "6", Start = t(16, 30, 0, 1), End = t(18, 0, 0, 100) },
-            new { Room = "Petunia Room", Name = "Google Charts", Color = "#cbb69d", Tooltip = "7", Start = t(12, 30, 0, 1), End = t(14, 0, 0, 100) },
-            new { Room = "Petunia Room", Name = "Closure", Color = "#cbb69d", Tooltip = "8", Start = t(14, 30, 0, 1), End = t(16, 0, 0, 100) },
-            new { Room = "Petunia Room", Name = "App Engine", Color = "#cbb69d", Tooltip = "9", Start = t(16, 30, 0, 1), End = t(18, 30, 0, 100) }
-        };
+        var dataTable = generateData().ToList();
+
 
         var jsonData = System.Text.Json.JsonSerializer.Serialize(dataTable);
         await JsRuntime.InvokeVoidAsync("initializeChartWithJsonData", jsonData);

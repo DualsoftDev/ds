@@ -97,7 +97,7 @@ module CoreExtensionModule =
                       |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
-            x.AddButton(btnType, btnName,  defaultTaskDevParaIO(), Addresses(inAddress ,outAddress), flow)       
+            x.AddButton(btnType, btnName,  defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)       
 
         member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParaIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
@@ -111,7 +111,7 @@ module CoreExtensionModule =
                       |> verifyM $"중복 LampDef [name:{lmpName}]"
         
         member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
-                x.AddLamp(lmpType, lmpName, defaultTaskDevParaIO(), Addresses(inAddress ,outAddress),  flow)       
+                x.AddLamp(lmpType, lmpName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress),  flow)       
 
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParaIO:TaskDevParamIO, addr:Addresses, flow:Flow) =
@@ -124,7 +124,7 @@ module CoreExtensionModule =
                       |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddress:string, outAddress:string, flow:Flow) =
-                x.AddCondtion(condiType, condiName, defaultTaskDevParaIO(), Addresses(inAddress ,outAddress), flow)       
+                x.AddCondtion(condiType, condiName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)       
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
@@ -196,18 +196,18 @@ module CoreExtensionModule =
 
 
         member x.GetInParam(jobFqdn:string) =
-                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParamIO.InParam with
+                        match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
                         | Some v -> v
                         | None -> defaultTaskDevPara() 
         member x.GetInParam(job:Job) = x.GetInParam (job.DequotedQualifiedName)
          
         member x.GetOutParam(jobFqdn:string) = 
-                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParamIO.OutParam with
+                        match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.OutParam with
                         | Some v -> v
                         | None -> defaultTaskDevPara() 
         member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
          
-        member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParaIO[jobFqdn]
+        member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParamIO[jobFqdn]
         member x.GetApiPara(job:Job) = x.GetApiPara(job.DequotedQualifiedName)
 
         member x.GetApiItem(jobFqdn:string) = x.GetApiPara(jobFqdn).ApiItem
@@ -229,9 +229,9 @@ module CoreExtensionModule =
             then 
                 failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
 
-            if not (x.DicTaskTaskDevParaIO.ContainsKey   jobFqdn)
+            if not (x.DicTaskTaskDevParamIO.ContainsKey   jobFqdn)
             then 
-                x.DicTaskTaskDevParaIO.Add(jobFqdn, {TaskDevParamIO = taskDevParaIO; ApiItem = api})
+                x.DicTaskTaskDevParamIO.Add(jobFqdn, {TaskDevParamIO = taskDevParaIO; ApiItem = api})
             else
                 ()
                 //failWithLog $"중복된 TaskDevParamIO {jobFqdn} {x.QualifiedName}"
@@ -251,7 +251,7 @@ module CoreExtensionModule =
         member x.SetInSymbol(symName:string option) = 
             if symName.IsSome
             then
-                x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
+                x.DicTaskTaskDevParamIO.Values |> Seq.iter(fun kv -> 
                     if kv.TaskDevParamIO.InParam.IsSome
                     then 
                         kv.TaskDevParamIO.InParam.Value.DevName <- symName
@@ -262,7 +262,7 @@ module CoreExtensionModule =
         member x.SetOutSymbol(symName:string option) = 
             if symName.IsSome
             then
-                x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
+                x.DicTaskTaskDevParamIO.Values |> Seq.iter(fun kv -> 
                     if kv.TaskDevParamIO.OutParam.IsSome
                     then 
                         kv.TaskDevParamIO.OutParam.Value.DevName <- symName

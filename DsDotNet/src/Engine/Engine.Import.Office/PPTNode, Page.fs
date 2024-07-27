@@ -20,21 +20,21 @@ module PPTNodeModule =
         member x.Title = slidePart.PageTitle()
 
     type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq, target:PlatformTarget) =
-        let copySystems = Dictionary<string, string>() //copyName, orgiName
-        let safeties = HashSet<string>()
-        let autoPres = HashSet<string[]>()  //jobFqdn
+        let copySystems       = Dictionary<string, string>() //copyName, orgiName
+        let safeties          = HashSet<string>()
+        let autoPres          = HashSet<string[]>()  //jobFqdn
         
-        let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
-        let btnHeadPageDefs = Dictionary<string, BtnType>()
-        let btnDefs = Dictionary<string, BtnType>()
-        let lampHeadPageDefs = Dictionary<string, LampType>()
-        let lampDefs = Dictionary<string, LampType>()
+        let jobInfos          = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
+        let btnHeadPageDefs   = Dictionary<string, BtnType>()
+        let btnDefs           = Dictionary<string, BtnType>()
+        let lampHeadPageDefs  = Dictionary<string, LampType>()
+        let lampDefs          = Dictionary<string, LampType>()
         let condiHeadPageDefs = Dictionary<string, ConditionType>()
-        let condiDefs = Dictionary<string, ConditionType>()
+        let condiDefs         = Dictionary<string, ConditionType>()
 
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable taskDevParam: TaskDevParamIO = defaultTaskDevParaIO()  // Input/Output param
+        let mutable taskDevParam: TaskDevParamIO = defaultTaskDevParamIO()  // Input/Output param
         let mutable jobParam: JobParam = defaultJobParam()     // jobParam  param
 
         
@@ -117,9 +117,6 @@ module PPTNodeModule =
             GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
 
         do
-
-
-
             try 
                 nameCheck (shape, nodeType, iPage, namePure(shape), nameNFunc(shape))
                 match nodeType with
@@ -204,19 +201,19 @@ module PPTNodeModule =
         member x.IfTX = ifTX
         member x.IfRX = ifRX
 
-        member x.NodeType = nodeType
+        member x.NodeType       = nodeType
         
-        member x.PageTitle = pageTitle
-        member x.Position = shape.GetPosition(slieSize)
-        member x.OperatorName = pageTitle+"_"+name
-        member x.CommandName = pageTitle+"_"+name
-        member x.IsCall = nodeType = CALL
-        member x.IsRootNode = rootNode
-        member x.IsFunction = x.IsCall && not(name.Contains("."))
-        member x.TaskDevPara = taskDevParam
-        member x.JobParam =  jobParam
-        member x.TaskDevParaIn = taskDevParam.InParam
-        member x.TaskDevParaOut =taskDevParam.OutParam
+        member x.PageTitle      = pageTitle
+        member x.Position       = shape.GetPosition(slieSize)
+        member x.OperatorName   = pageTitle+"_"+name
+        member x.CommandName    = pageTitle+"_"+name
+        member x.IsCall         = nodeType = CALL
+        member x.IsRootNode     = rootNode
+        member x.IsFunction     = x.IsCall && not(name.Contains("."))
+        member x.TaskDevPara    = taskDevParam
+        member x.JobParam       = jobParam
+        member x.TaskDevParaIn  = taskDevParam.InParam
+        member x.TaskDevParaOut = taskDevParam.OutParam
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -250,7 +247,7 @@ module PPTNodeModule =
                         
                     else 
                         if isRoot then
-                            let inPara = createTaskDevPara  None (Some(DuBOOL)) None None |> Some  
+                            let inPara = createTaskDevParam  None (Some(DuBOOL)) None None |> Some  
                             taskDevParam <-TaskDevParamIO(inPara, None)
 
                         elif nodeType = AUTOPRE then
@@ -292,12 +289,9 @@ module PPTNodeModule =
 
      
 
-        member x.DevName = 
-                $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
-        member x.ApiName = 
-                x.Job.Last()
-        member x.ApiPureName = 
-                x.JobPure.Last()
+        member x.DevName = $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
+        member x.ApiName = x.Job.Last()
+        member x.ApiPureName = x.JobPure.Last()
             
         member x.FlowName =  pageTitle
         member x.IsAlias: bool = x.Alias.IsSome
@@ -307,9 +301,9 @@ module PPTNodeModule =
         member val Name = name with get, set
         member val AliasNumber: int = 0 with get, set
         member val ButtonHeadPageDefs = btnHeadPageDefs
-        member val ButtonDefs = btnDefs
-        member val LampHeadPageDefs = lampHeadPageDefs
-        member val LampDefs = lampDefs
-        member val CondiHeadPageDefs = condiHeadPageDefs
-        member val CondiDefs = condiDefs
+        member val ButtonDefs         = btnDefs
+        member val LampHeadPageDefs   = lampHeadPageDefs
+        member val LampDefs           = lampDefs
+        member val CondiHeadPageDefs  = condiHeadPageDefs
+        member val CondiDefs          = condiDefs
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)

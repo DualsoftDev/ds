@@ -340,17 +340,20 @@ module CoreModule =
         | CommadFuncType of CommandFunction
         | OperatorFuncType of OperatorFunction
 
-    type Call(jobOrFunc: CallType, parent:ParentWrapper) =
-        inherit Indirect
-            (match jobOrFunc with
+    type Call(jobOrFunc:CallType, parent:ParentWrapper) =
+        inherit Indirect (
+            // indirect 의 인자로 name, parent 를 제공
+            match jobOrFunc with
             | JobType job -> 
-                if job.NameComponents.Head() = parent.GetFlow().Name   
-                then job.NameComponents.Skip(1).CombineDequoteOnDemand()
-                else job.NameComponents.CombineDequoteOnDemand()
-                       
+                let jncs = job.NameComponents
+                if jncs.Head() = parent.GetFlow().Name then
+                    jncs.Skip(1).CombineDequoteOnDemand()
+                else
+                    jncs.CombineDequoteOnDemand()                       
             | CommadFuncType func -> func.Name
             | OperatorFuncType func -> func.Name
-            , parent)
+            , parent
+        )
 
         let isJob = function
             | JobType _  -> true
@@ -446,35 +449,35 @@ module CoreModule =
      
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
     ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
-    type ApiPara = 
+    type ApiParam = 
         {
             ApiItem : ApiItem
             TaskDevParamIO : TaskDevParamIO
         }
-    let defaultApiPara(api:ApiItem) =
+    let defaultApiParam(api:ApiItem) =
         { 
             ApiItem = api 
-            TaskDevParamIO = defaultTaskDevParaIO()
+            TaskDevParamIO = defaultTaskDevParamIO()
         }
 
-    type TaskDev (apiPara:ApiPara, parentJob:string, deviceName:string, parentSys:DsSystem) =
-        inherit FqdnObject(apiPara.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
-        let dicTaskTaskDevParaIO  = Dictionary<string, ApiPara>()
+    type TaskDev (apiParam:ApiParam, parentJob:string, deviceName:string, parentSys:DsSystem) =
+        inherit FqdnObject(apiParam.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
+        let dicTaskTaskDevParamIO  = Dictionary<string, ApiParam>()
         do  
-            dicTaskTaskDevParaIO.Add (parentJob, apiPara)
+            dicTaskTaskDevParamIO.Add (parentJob, apiParam)
 
         member x.ApiPureName = (x:>FqdnObject).QualifiedName
-        member x.ApiSystemName = apiPara.ApiItem.ApiSystem.Name //needs test animation
+        member x.ApiSystemName = apiParam.ApiItem.ApiSystem.Name //needs test animation
     
         member x.DeviceName = deviceName
         member x.ParnetSystem = parentSys
 
-        member x.InParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.InParam) 
-        member x.OutParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.OutParam) 
+        member x.InParams = dicTaskTaskDevParamIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.InParam) 
+        member x.OutParams = dicTaskTaskDevParamIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.OutParam) 
 
-        member x.DicTaskTaskDevParaIO = dicTaskTaskDevParaIO
-        member x.ApiParas = dicTaskTaskDevParaIO.Values
-        member x.ApiItems = x.DicTaskTaskDevParaIO.Values.Select(fun f->f.ApiItem)
+        member x.DicTaskTaskDevParamIO = dicTaskTaskDevParamIO
+        member x.ApiParams = dicTaskTaskDevParamIO.Values
+        member x.ApiItems = x.DicTaskTaskDevParamIO.Values.Select(fun f->f.ApiItem)
 
         member val InAddress = TextAddrEmpty with get, set
         member val OutAddress = TextAddrEmpty with get, set

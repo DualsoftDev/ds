@@ -16,7 +16,7 @@ type TaskDevManager with
     
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         [
-            for kv in d.TaskDev.DicTaskTaskDevParaIO do
+            for kv in d.TaskDev.DicTaskTaskDevParamIO do
                 let apiParam = kv.Value
 
                 let sets = 
@@ -32,7 +32,7 @@ type TaskDevManager with
 
     member d.TD3_PlanOutput(activeSys:DsSystem) =
         [
-            for kv in d.TaskDev.DicTaskTaskDevParaIO do
+            for kv in d.TaskDev.DicTaskTaskDevParamIO do
                 let apiPara = kv.Value
                 let sets =  d.PS(apiPara).Expr <&&> d.PE(apiPara).Expr
                 yield (sets, activeSys._off.Expr) --| (d.PO(apiPara), getFuncName())

@@ -80,21 +80,21 @@ module rec DsTaskDevType =
 
 
     let defaultTaskDevPara() = TaskDevPara(None, None, None, None)
-    let defaultTaskDevParaIO() = TaskDevParamIO (None, None)
+    let defaultTaskDevParamIO() = TaskDevParamIO (None, None)
 
-    let createTaskDevPara(nametype: string option) (dutype: DataType option) (v: obj option) (t: int option) =
+    let createTaskDevParam(nametype: string option) (dutype: DataType option) (v: obj option) (t: int option) =
         TaskDevPara(nametype, dutype, v, t)
 
 
     let createTaskDevParaIOInTrue() = 
-        let inPara = createTaskDevPara None (Some(DuBOOL)) (Some(true)) None
-        TaskDevParamIO (inPara|>Some, None)
+        let inParam = createTaskDevParam None (Some(DuBOOL)) (Some(true)) None
+        TaskDevParamIO (inParam|>Some, None)
 
     let changeSymbolTaskDevPara(x: TaskDevPara option) (symbol: string option) =
         if x.IsNone then defaultTaskDevPara()
         else
             let x = x |> Option.get
-            createTaskDevPara symbol x.DevType x.DevValue x.DevTime
+            createTaskDevParam symbol x.DevType x.DevValue x.DevTime
 
     let changeParam(jobName: string, paramDic: Dictionary<string, TaskDevPara>, symbol: string option) =
         let changedTaskDevPara = changeSymbolTaskDevPara(Some(paramDic.[jobName])) (symbol)
@@ -154,4 +154,4 @@ module rec DsTaskDevType =
         let nameOpt, typeOpt, valueOpt, timeOpt =
             remainingParts |> List.fold parseParts (None, None, None, None)
     
-        addr, (createTaskDevPara nameOpt typeOpt valueOpt timeOpt)
+        addr, (createTaskDevParam nameOpt typeOpt valueOpt timeOpt)

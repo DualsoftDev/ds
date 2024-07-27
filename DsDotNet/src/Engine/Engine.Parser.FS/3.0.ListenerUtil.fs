@@ -79,7 +79,7 @@ module ListnerCommonFunctionGeneratorUtil =
 
     type DevApiDefinition = {
             ApiFqnd : string array
-            TaskDevParaIO : TaskDevParaIO
+            TaskDevParamIO : TaskDevParamIO
             InAddress : string
             OutAddress : string
         }

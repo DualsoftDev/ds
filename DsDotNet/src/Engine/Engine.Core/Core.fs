@@ -103,18 +103,19 @@ module CoreModule =
         static let currentEngineVersion = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version |> Version.Parse
 
         let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
-        let channelInfos =
+        let getChannelInfos() =
             loadedSystems 
             |> Seq.collect(fun s-> 
-                s.ChannelPoints.Where(fun kv -> kv.Key <> TextEmtpyChannel)
-                               .Select(fun kv ->
-                                    let path = kv.Key
-                                    let xywh = kv.Value
-                                    let chName, url = path.Split(';')[0], path.Split(';')[1]
-                                    let typeScreen = if url = TextImageChannel
-                                                     then ScreenType.IMAGE  
-                                                     else ScreenType.CCTV
-                                    { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
+                s.ChannelPoints
+                    .Where(fun kv -> kv.Key <> TextEmtpyChannel)
+                    .Select(fun kv ->
+                        let path = kv.Key
+                        let xywh = kv.Value
+                        let chName, url = path.Split(';')[0], path.Split(';')[1]
+                        let typeScreen = if url = TextImageChannel
+                                            then ScreenType.IMAGE  
+                                            else ScreenType.CCTV
+                        { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
 
 
         
@@ -137,23 +138,26 @@ module CoreModule =
 
                 GraphVertexAddRemoveHandlers(onAdded, onRemoved)
 
-            DsSystem(name, vertexDic, Some vertexHandlers)
+            let system = DsSystem(name, vertexDic, Some vertexHandlers)
+            vertexDic.Add(name, system)
+            system
 
         member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
-        member _.VertexDic = vertexDic
+        member _.AddVertex(fqdn, vertex) = vertexDic.Add(fqdn, vertex)
+        member _.TryFindVertex(fqdn) = vertexDic.TryFind(fqdn)
         // [NOTE] GraphVertex }
 
             
-        member _.AddLoadedSystem(childSys) = 
-            loadedSystems.Add(childSys)
-            |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
+        member x.AddLoadedSystem(childSys) = 
+            loadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
+            x.AddVertex(childSys.Name, childSys)
             addApiItemsForDevice childSys
 
-        member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem)
+        member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
-        member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
-        member _.LayoutInfos = channelInfos
+        member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>()
+        member _.LayoutInfos = getChannelInfos()
       
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
@@ -163,10 +167,13 @@ module CoreModule =
         member _.ActionVariables = actionVariables |> seq
 
         member val Flows = createNamedHashSet<Flow>()
+
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()
+
         ///내시스템이 사용한 interface
         member x.TaskDevs = x.Jobs.SelectMany(fun j->j.TaskDefs)
+
         ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
@@ -177,26 +184,24 @@ module CoreModule =
         static member CurrentEngineVersion = currentEngineVersion
 
         member x.AddVariables(variableData:VariableData) = 
-                if variables.any(fun v->v.Name = variableData.Name)
-                then 
-                    failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
-                else 
-                    variables.Add(variableData) 
+            if variables.any(fun v-> v.Name = variableData.Name) then 
+                failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
+
+            variables.Add(variableData) 
                     
         member x.AddActionVariables(actionVariable:ActionVariable) = 
-                if actionVariables.any(fun v->v.Name = actionVariable.Name)
-                then 
-                    failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
-                else 
-                    actionVariables.Add(actionVariable)
+            if actionVariables.any(fun v-> v.Name = actionVariable.Name) then 
+                failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
+
+            actionVariables.Add(actionVariable)
 
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call
         member x.RealTarget() =
-            match x with | DuAliasTargetReal   r -> Some r |_ -> None
+            match x with | DuAliasTargetReal r -> Some r |_ -> None
         member x.CallTarget() =
-            match x with | DuAliasTargetCall   c -> Some c |_ -> None
+            match x with | DuAliasTargetCall c -> Some c |_ -> None
    
    
     // Subclasses = {Call}
@@ -444,12 +449,12 @@ module CoreModule =
     type ApiPara = 
         {
             ApiItem : ApiItem
-            TaskDevParaIO : TaskDevParaIO
+            TaskDevParamIO : TaskDevParamIO
         }
     let defaultApiPara(api:ApiItem) =
         { 
             ApiItem = api 
-            TaskDevParaIO = defaultTaskDevParaIO()
+            TaskDevParamIO = defaultTaskDevParaIO()
         }
 
     type TaskDev (apiPara:ApiPara, parentJob:string, deviceName:string, parentSys:DsSystem) =
@@ -464,8 +469,8 @@ module CoreModule =
         member x.DeviceName = deviceName
         member x.ParnetSystem = parentSys
 
-        member x.InParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParaIO.InPara) 
-        member x.OutParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParaIO.OutPara) 
+        member x.InParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.InParam) 
+        member x.OutParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.OutParam) 
 
         member x.DicTaskTaskDevParaIO = dicTaskTaskDevParaIO
         member x.ApiParas = dicTaskTaskDevParaIO.Values
@@ -485,7 +490,7 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-        let mutable jobParam = defaultJobPara()
+        let mutable jobParam = defaultJobParam()
         member x.JobParam = jobParam
         member x.UpdateJobParam(newJobParam: JobParam) =
             jobParam <- newJobParam
@@ -501,16 +506,16 @@ module CoreModule =
                                 
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, TaskDevParaIO:TaskDevParaIO, addr:Addresses)  =
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, taskDevParamIO:TaskDevParamIO, addr:Addresses)  =
         inherit FqdnObject(name, system)
         member x.Name = name
         member x.System = system
         member val SettingFlows = flows with get, set
         //SettingFlows 없으면 전역 시스템 설정
         member val IsGlobalSystemHw = flows.IsEmpty()
-        member val TaskDevParaIO  = TaskDevParaIO  with get, set
-        member x.InDataType  = if TaskDevParaIO.InPara.IsSome then TaskDevParaIO.InPara.Value.Type else DuBOOL
-        member x.OutDataType  = if TaskDevParaIO.OutPara.IsSome then TaskDevParaIO.OutPara.Value.Type else DuBOOL
+        member val TaskDevParamIO  = taskDevParamIO  with get, set
+        member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.Type | None -> DuBOOL
+        member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.Type | None -> DuBOOL
 
         member val InAddress = addr.In with get, set
         member val OutAddress = addr.Out with get, set
@@ -521,17 +526,17 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
 
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, TaskDevParaIO:TaskDevParaIO,  addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, TaskDevParaIO, addr)
+    and ButtonDef (name:string, system:DsSystem, btnType: BtnType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows:HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, taskDevParamIO, addr)
         member x.ButtonType = btnType
         member val ErrorEmergency = getNull<IStorage>() with get, set
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, TaskDevParaIO:TaskDevParaIO, addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, TaskDevParaIO, addr) //inAddress lamp check bit
+    and LampDef (name:string, system:DsSystem,lampType: LampType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows:HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) //inAddress lamp check bit
         member x.LampType = lampType
 
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, TaskDevParaIO:TaskDevParaIO, addr:Addresses,  flows: HashSet<Flow>) =
-        inherit HwSystemDef(name,  system, flows, TaskDevParaIO, addr) // outAddress condition check bit
+    and ConditionDef (name:string, system:DsSystem, conditionType: ConditionType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) // outAddress condition check bit
         member x.ConditionType = conditionType
         member val ErrorCondition = getNull<IStorage>() with get, set
 
@@ -569,9 +574,11 @@ module CoreModule =
             real
 
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
-                if x.Flow <> aliasFlow
-                then [|x.Flow.Name; x.Name|]  //other flow
-                else [| x.Name |]             //my    flow
+            [|
+                if x.Flow <> aliasFlow then
+                    yield x.Flow.Name // other flow
+                yield x.Name  // my flow
+            |]
 
     type OperatorFunction with
         static member Create(name:string,  excuteCode:string) =

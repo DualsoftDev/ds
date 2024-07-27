@@ -17,30 +17,30 @@ module rec DsTaskDevType =
     let addressPrint (addr: string) =
         if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
-    type TaskDevParaIO(inPara: TaskDevPara option , outPara: TaskDevPara option) = 
-        let mutable inPara = inPara 
-        let mutable outPara = outPara 
+    type TaskDevParamIO(inParam: TaskDevPara option, outParam: TaskDevPara option) = 
+        let mutable inParam = inParam 
+        let mutable outParam = outParam 
         
-        member x.InPara
-            with get() = inPara
-            and set(value) = inPara <- value    
+        member x.InParam
+            with get() = inParam
+            and set(value) = inParam <- value    
             
-        member x.OutPara
-            with get() = outPara
-            and set(value) = outPara <- value
+        member x.OutParam
+            with get() = outParam
+            and set(value) = outParam <- value
       
-        member x.IsDefaultParam = (x.InPara.IsNone || x.InPara.Value.IsDefaultParam)
-                                  && (x.OutPara.IsNone || x.OutPara.Value.IsDefaultParam)
+        member x.IsDefaultParam = (x.InParam.IsNone || x.InParam.Value.IsDefaultParam)
+                                  && (x.OutParam.IsNone || x.OutParam.Value.IsDefaultParam)
 
         member x.ToDsText(addrSet:Addresses) =
-            match x.InPara, x.OutPara with
+            match x.InParam, x.OutParam with
             | Some inp, Some outp ->
                         $"{inp.ToTextWithAddress(addrSet.In)}, {outp.ToTextWithAddress(addrSet.Out)}"
             | Some inp, None ->
                         $"{inp.ToTextWithAddress(addrSet.In)}, {addressPrint addrSet.Out}"
             | None, Some outp ->
                         $"{addressPrint addrSet.In}, {outp.ToTextWithAddress(addrSet.Out)}"
-            | _ -> failwithlog "TaskDevParaIO is not valid"
+            | _ -> failwithlog "TaskDevParamIO is not valid"
 
 
     type TaskDevPara(devName: string option, devType: DataType option, devValue: obj option, devTime: int option) = 
@@ -80,7 +80,7 @@ module rec DsTaskDevType =
 
 
     let defaultTaskDevPara() = TaskDevPara(None, None, None, None)
-    let defaultTaskDevParaIO() = TaskDevParaIO (None, None)
+    let defaultTaskDevParaIO() = TaskDevParamIO (None, None)
 
     let createTaskDevPara(nametype: string option) (dutype: DataType option) (v: obj option) (t: int option) =
         TaskDevPara(nametype, dutype, v, t)
@@ -88,7 +88,7 @@ module rec DsTaskDevType =
 
     let createTaskDevParaIOInTrue() = 
         let inPara = createTaskDevPara None (Some(DuBOOL)) (Some(true)) None
-        TaskDevParaIO (inPara|>Some, None)
+        TaskDevParamIO (inPara|>Some, None)
 
     let changeSymbolTaskDevPara(x: TaskDevPara option) (symbol: string option) =
         if x.IsNone then defaultTaskDevPara()

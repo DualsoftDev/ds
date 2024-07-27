@@ -97,7 +97,7 @@ module DsJobType =
         }
 
     let defaultJobTypeTaskDevInfo() =  { TaskDevCount = 1; InCount = Some 1; OutCount = Some 1 }
-    let defaultJobPara() = JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
+    let defaultJobParam() = JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
 
     let getParserJobType (param: string) =
         let param = param.TrimStart('[').TrimEnd(']')

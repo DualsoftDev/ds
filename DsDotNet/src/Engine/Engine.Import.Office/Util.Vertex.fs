@@ -52,7 +52,7 @@ module ImportUtilVertex =
                         taskDev.AddOrUpdateApiTaskDevPara(jobName, api, TaskDevPara)
                         taskDev
                     | _ -> 
-                        let apiPara  = {TaskDevParaIO =  TaskDevPara; ApiItem = api}
+                        let apiPara  = {TaskDevParamIO =  TaskDevPara; ApiItem = api}
                         TaskDev(apiPara, jobName, loadSysName, sys)
 
                 let job = Job(node.Job, sys, [devTask])
@@ -86,7 +86,7 @@ module ImportUtilVertex =
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
                     ApiName = node.ApiPureName
-                    TaskDevParaIO = node.TaskDevPara
+                    TaskDevParamIO = node.TaskDevPara
                     Parent = parentWrapper
                     }
                 addNewCall callParams
@@ -111,7 +111,7 @@ module ImportUtilVertex =
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
                     ApiName = node.ApiPureName
-                    TaskDevParaIO = node.TaskDevPara
+                    TaskDevParamIO = node.TaskDevPara
                     Parent = parentWrapper
                     }
         let tasks = HashSet<TaskDev>()

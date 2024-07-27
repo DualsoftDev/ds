@@ -63,8 +63,8 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let inSym =  toTextPPTFunc btn.TaskDevParaIO.InPara 
-                    let outSym =  toTextPPTFunc btn.TaskDevParaIO.OutPara
+                    let inSym =  toTextPPTFunc btn.TaskDevParamIO.InParam 
+                    let outSym =  toTextPPTFunc btn.TaskDevParamIO.OutParam
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
                     let dType = getPPTHwDevDataTypeText btn
                     
@@ -74,8 +74,8 @@ module ExportIOTable =
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let inSym =  toTextPPTFunc lamp.TaskDevParaIO.InPara 
-                    let outSym =  toTextPPTFunc lamp.TaskDevParaIO.OutPara
+                    let inSym =  toTextPPTFunc lamp.TaskDevParamIO.InParam
+                    let outSym =  toTextPPTFunc lamp.TaskDevParamIO.OutParam
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) Util.runtimeTarget
                     let dType = getPPTHwDevDataTypeText lamp
                     dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,inSym, outSym)
@@ -210,8 +210,8 @@ module ExportIOTable =
                     getPPTHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
-                    if cond.TaskDevParaIO.InPara.IsSome then cond.TaskDevParaIO.InPara.Value.Name else ""
-                    if cond.TaskDevParaIO.OutPara.IsSome then cond.TaskDevParaIO.OutPara.Value.Name else ""
+                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.Name else ""
+                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.Name else ""
                 ]
             )
         

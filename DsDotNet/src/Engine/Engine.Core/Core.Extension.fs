@@ -81,7 +81,7 @@ module CoreExtensionModule =
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
         member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
 
-        member x.AddButton(btnType:BtnType, btnName:string, taskDevParaIO:TaskDevParaIO,  addr:Addresses, flow:Flow) =
+        member x.AddButton(btnType:BtnType, btnName:string, taskDevParaIO:TaskDevParamIO,  addr:Addresses, flow:Flow) =
             checkSystem(x, flow, btnName)
           
             let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
@@ -99,7 +99,7 @@ module CoreExtensionModule =
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
             x.AddButton(btnType, btnName,  defaultTaskDevParaIO(), Addresses(inAddress ,outAddress), flow)       
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParaIO:TaskDevParaIO, addr:Addresses, flow:Flow option) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParaIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
@@ -114,7 +114,7 @@ module CoreExtensionModule =
                 x.AddLamp(lmpType, lmpName, defaultTaskDevParaIO(), Addresses(inAddress ,outAddress),  flow)       
 
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParaIO:TaskDevParaIO, addr:Addresses, flow:Flow) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParaIO:TaskDevParamIO, addr:Addresses, flow:Flow) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
@@ -196,13 +196,13 @@ module CoreExtensionModule =
 
 
         member x.GetInParam(jobFqdn:string) =
-                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.InPara with
+                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParamIO.InParam with
                         | Some v -> v
                         | None -> defaultTaskDevPara() 
         member x.GetInParam(job:Job) = x.GetInParam (job.DequotedQualifiedName)
          
         member x.GetOutParam(jobFqdn:string) = 
-                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.OutPara with
+                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParamIO.OutParam with
                         | Some v -> v
                         | None -> defaultTaskDevPara() 
         member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
@@ -224,19 +224,19 @@ module CoreExtensionModule =
         member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.DequotedQualifiedName)
 
 
-        member x.AddOrUpdateApiTaskDevPara(jobFqdn:string, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
+        member x.AddOrUpdateApiTaskDevPara(jobFqdn:string, api:ApiItem, taskDevParaIO:TaskDevParamIO) = 
             if x.ApiItems.any(fun f->f.PureName <> api.PureName)
             then 
                 failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
 
             if not (x.DicTaskTaskDevParaIO.ContainsKey   jobFqdn)
             then 
-                x.DicTaskTaskDevParaIO.Add(jobFqdn, {TaskDevParaIO = taskDevParaIO; ApiItem = api})
+                x.DicTaskTaskDevParaIO.Add(jobFqdn, {TaskDevParamIO = taskDevParaIO; ApiItem = api})
             else
                 ()
-                //failWithLog $"중복된 TaskDevParaIO {jobFqdn} {x.QualifiedName}"
+                //failWithLog $"중복된 TaskDevParamIO {jobFqdn} {x.QualifiedName}"
 
-        member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
+        member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParamIO) = 
                x.AddOrUpdateApiTaskDevPara(job.DequotedQualifiedName, api, taskDevParaIO)
    
         member x.IsInAddressEmpty = x.InAddress = TextAddrEmpty
@@ -252,22 +252,22 @@ module CoreExtensionModule =
             if symName.IsSome
             then
                 x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
-                    if kv.TaskDevParaIO.InPara.IsSome
+                    if kv.TaskDevParamIO.InParam.IsSome
                     then 
-                        kv.TaskDevParaIO.InPara.Value.DevName <- symName
+                        kv.TaskDevParamIO.InParam.Value.DevName <- symName
                     else 
-                        kv.TaskDevParaIO.InPara <- Some(TaskDevPara(symName, None, None, None))
+                        kv.TaskDevParamIO.InParam <- Some(TaskDevPara(symName, None, None, None))
                 )
           
         member x.SetOutSymbol(symName:string option) = 
             if symName.IsSome
             then
                 x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
-                    if kv.TaskDevParaIO.OutPara.IsSome
+                    if kv.TaskDevParamIO.OutParam.IsSome
                     then 
-                        kv.TaskDevParaIO.OutPara.Value.DevName <- symName
+                        kv.TaskDevParamIO.OutParam.Value.DevName <- symName
                     else 
-                        kv.TaskDevParaIO.OutPara <- Some(TaskDevPara(symName, None, None, None))
+                        kv.TaskDevParamIO.OutParam <- Some(TaskDevPara(symName, None, None, None))
                 )
           
 

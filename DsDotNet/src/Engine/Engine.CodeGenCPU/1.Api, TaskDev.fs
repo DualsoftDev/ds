@@ -17,17 +17,17 @@ type TaskDevManager with
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         [
             for kv in d.TaskDev.DicTaskTaskDevParaIO do
-                let apiPara = kv.Value
+                let apiParam = kv.Value
 
                 let sets = 
-                    let inPara = apiPara.TaskDevParaIO.InPara
-                    if inPara.IsSome && inPara.Value.Type <> DuBOOL
-                    then 
-                        apiPara.ApiItem.APIEND.Expr <&&> d.PS(apiPara).Expr
-                    else 
-                        apiPara.ApiItem.APIEND.Expr 
+                    let inParam = apiParam.TaskDevParamIO.InParam
 
-                yield (sets, activeSys._off.Expr) --| (d.PE(apiPara), getFuncName())
+                    if inParam.IsSome && inParam.Value.Type <> DuBOOL then 
+                        apiParam.ApiItem.APIEND.Expr <&&> d.PS(apiParam).Expr
+                    else 
+                        apiParam.ApiItem.APIEND.Expr 
+
+                yield (sets, activeSys._off.Expr) --| (d.PE(apiParam), getFuncName())
         ]
 
     member d.TD3_PlanOutput(activeSys:DsSystem) =

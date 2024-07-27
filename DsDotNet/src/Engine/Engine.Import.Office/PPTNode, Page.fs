@@ -34,8 +34,8 @@ module PPTNodeModule =
 
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable taskDevParam: TaskDevParaIO = defaultTaskDevParaIO()  // Input/Output param
-        let mutable jobParam: JobParam = defaultJobPara()     // jobParam  param
+        let mutable taskDevParam: TaskDevParamIO = defaultTaskDevParaIO()  // Input/Output param
+        let mutable jobParam: JobParam = defaultJobParam()     // jobParam  param
 
         
         let mutable ifTX = ""
@@ -45,36 +45,36 @@ module PPTNodeModule =
 
         let nodeType = getNodeType(shape, iPage)
         let updateSafety (barckets: string) =
-                barckets.Split(';')
-                    |> Seq.iter (fun f ->
-                        let safeItem = 
-                            let items = f.Split('.').Select(fun s->s.Trim())
-                            match items.length() with
-                            | 2 -> 
-                                $"{pageTitle}.{items.Combine()}"
-                            | 3 -> 
-                                items.Combine()
-                            | _ ->
-                                failWithLog ErrID._79
+            barckets.Split(';')
+            |> Seq.iter (fun f ->
+                let safeItem = 
+                    let items = f.Split('.').Select(fun s->s.Trim())
+                    match items.length() with
+                    | 2 -> 
+                        $"{pageTitle}.{items.Combine()}"
+                    | 3 -> 
+                        items.Combine()
+                    | _ ->
+                        failWithLog ErrID._79
                         
-                        safeties.Add(safeItem) |> ignore    
-                    )    
+                safeties.Add(safeItem) |> ignore    
+            )    
 
 
         let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
-                if (groupJob > 0) then
-                    shape.ErrorName(ErrID._19, iPage)
-                else
-                    let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
-                    let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextDeviceSplit}{sys}")
+            if (groupJob > 0) then
+                shape.ErrorName(ErrID._19, iPage)
+            else
+                let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
+                let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextDeviceSplit}{sys}")
 
-                    if copys.Distinct().length() <> copys.length() then
-                        Office.ErrorName(shape, ErrID._33, iPage)
+                if copys.Distinct().length() <> copys.length() then
+                    Office.ErrorName(shape, ErrID._33, iPage)
 
-                    copys
-                    |> Seq.iter (fun copy ->
-                        copySystems.Add(copy, orgiSysName)
-                        jobInfos.Add(copy, [ copy ] |> HashSet))
+                copys
+                |> Seq.iter (fun copy ->
+                    copySystems.Add(copy, orgiSysName)
+                    jobInfos.Add(copy, [ copy ] |> HashSet))
 
         let updateDeviceIF (text: string) =
             ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
@@ -103,12 +103,14 @@ module PPTNodeModule =
             realDelayTime <- delayT
 
         let nameNFunc(shape:Shape) = 
-                let mutable macroUpdateName = shape.InnerText.Replace("”", "\"").Replace("“", "\"") 
-                macros.Where(fun m->m.Page = iPage)
-                          .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}")
-                    )
+            let mutable macroUpdateName =
+                shape.InnerText.Replace("”", "\"").Replace("“", "\"") 
+            macros
+                .Where(fun m->m.Page = iPage)
+                .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}"))
 
-                macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+            macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+
         let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
         let name = 
             let nameTrim  = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
@@ -175,14 +177,11 @@ module PPTNodeModule =
                                 | _ , "" -> $"{TextJobMulti}{cntPara}"
                                 | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
 
+                            let jobNegative = if cntOptPara.StartsWith(TextJobNegative) then $";{TextJobNegative}" else ""
+                            getParserJobType(paraText + jobNegative)
 
-                            if cntOptPara.StartsWith(TextJobNegative)
-                            then 
-                                getParserJobType(paraText+ $";{TextJobNegative}")
-                            else 
-                                getParserJobType(paraText)
                         else 
-                            defaultJobPara() 
+                            defaultJobParam() 
 
                     jobParam <- jobPram 
             with ex ->  
@@ -216,8 +215,8 @@ module PPTNodeModule =
         member x.IsFunction = x.IsCall && not(name.Contains("."))
         member x.TaskDevPara = taskDevParam
         member x.JobParam =  jobParam
-        member x.TaskDevParaIn = taskDevParam.InPara
-        member x.TaskDevParaOut =taskDevParam.OutPara
+        member x.TaskDevParaIn = taskDevParam.InParam
+        member x.TaskDevParaOut =taskDevParam.OutParam
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -252,7 +251,7 @@ module PPTNodeModule =
                     else 
                         if isRoot then
                             let inPara = createTaskDevPara  None (Some(DuBOOL)) None None |> Some  
-                            taskDevParam <-TaskDevParaIO(inPara, None)
+                            taskDevParam <-TaskDevParamIO(inPara, None)
 
                         elif nodeType = AUTOPRE then
                             taskDevParam <- createTaskDevParaIOInTrue()

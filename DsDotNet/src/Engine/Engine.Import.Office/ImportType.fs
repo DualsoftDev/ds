@@ -138,10 +138,10 @@ module ImportType =
 
     let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
 
-        let inPara = changeSymbolTaskDevPara (hwDev.TaskDevParaIO.InPara) inSym  
-        let outPara = changeSymbolTaskDevPara (hwDev.TaskDevParaIO.OutPara) inSym 
+        let inPara = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.InParam) inSym  
+        let outPara = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.OutParam) inSym 
 
-        hwDev.TaskDevParaIO <-  TaskDevParaIO(inPara|>Some, outPara|>Some)
+        hwDev.TaskDevParamIO <-  TaskDevParamIO(inPara|>Some, outPara|>Some)
 
         checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType   
         checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType

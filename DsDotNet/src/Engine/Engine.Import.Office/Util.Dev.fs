@@ -110,7 +110,7 @@ module ImportUtilForDev =
         else 
             loadedSys
 
-    let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName (taskDevParaIO:TaskDevParaIO)= 
+    let getAutoGenTaskDev  (autoGenSys:LoadedSystem) loadedName jobName apiName (taskDevParaIO:TaskDevParamIO)= 
         let referenceSystem = autoGenSys.ReferenceSystem
         createTaskDevUsingApiName referenceSystem jobName loadedName apiName  taskDevParaIO
 
@@ -132,7 +132,7 @@ module ImportUtilForDev =
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName loadParameters
             match devOrg.ApiItems.TryFind(fun f -> f.Name = apiPureName) with
             | Some api -> 
-                        let apiPara  = {TaskDevParaIO =  taskDevParam; ApiItem = api}
+                        let apiPara  = {TaskDevParamIO =  taskDevParam; ApiItem = api}
                         TaskDev(apiPara, jobName, newloadedName, mySys)
             | None ->
                 failWithLog $"Api {apiPureName} not found in {newloadedName}"

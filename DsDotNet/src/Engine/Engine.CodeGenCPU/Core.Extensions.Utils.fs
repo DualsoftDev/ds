@@ -66,7 +66,7 @@ module ConvertCoreExtUtils =
         [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)    = getFM(x).GetFlowTag(typ )
 
         [<Extension>] static member GetInExpr (x:HwSystemDef) = 
-                            getInExpr (x.TaskDevParaIO.InPara, x.InTag, x.System) :?> Expression<bool>
+                            getInExpr (x.TaskDevParamIO.InParam, x.InTag, x.System) :?> Expression<bool>
         [<Extension>] static member GetInExpr (x:TaskDev, job:Job) = 
                             getInExpr (x.GetInParam(job)|>Some, x.InTag, x.GetApiItem(job).ApiSystem)  :?> Expression<bool>
                         

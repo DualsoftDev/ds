@@ -19,7 +19,7 @@ module ImportUtilForLib =
         JobName: string
         DevName: string
         ApiName: string
-        TaskDevParaIO: TaskDevParaIO
+        TaskDevParamIO: TaskDevParamIO
         Parent: ParentWrapper
     }
     with
@@ -35,7 +35,7 @@ module ImportUtilForLib =
         let task = getLoadedTasks param.MySys devOrg loadedName apiPureName taskDevParaIO param.Node (param.Node.Job.Combine())
         tasks.Add(task) |> ignore
 
-    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string)  (taskDevParaIO:TaskDevParaIO)=
+    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string)  (taskDevParaIO:TaskDevParamIO)=
         match autoGenSys with
         | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName taskDevParaIO|> Some
         | None -> None
@@ -58,7 +58,7 @@ module ImportUtilForLib =
         let devOrg = getDeviceOrganization param.MySys libFilePath loadedName
         let TaskDevParas = getProperty loadedName
 
-        let task = getTaskDev autoGenSys loadedName (param.Node.Job.Combine()) param.ApiName  param.TaskDevParaIO
+        let task = getTaskDev autoGenSys loadedName (param.Node.Job.Combine()) param.ApiName  param.TaskDevParamIO
         addSingleTask tasks task
         if task.IsNone then
             processSingleTask tasks param devOrg loadedName param.ApiName TaskDevParas

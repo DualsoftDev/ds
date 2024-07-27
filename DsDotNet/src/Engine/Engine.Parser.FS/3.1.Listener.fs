@@ -20,10 +20,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module private DsParserHelperModule =
 
-    let errorLoadCore (ctx:RuleContext) = 
-        let err = ParserError("", ctx).ToString() 
-        failwithlog ($"""규칙확인{err.Split('\n').Skip(1).Combine("\n")}""")
-        
+
     let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) = 
         let (inaddr, inParam), (outaddr, outParm) =
             ctx.TryFindFirstChild<TaskDevParaInOutContext>()

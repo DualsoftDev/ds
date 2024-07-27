@@ -43,6 +43,12 @@ module ParserOptionModule =
               IsNewModel = isNewModel
               }
 
+        static member Create4RuntimeLoadedSystem(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, autoGenDevice, loadedName) =
+            let runtime =
+                ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, autoGenDevice, false)
+
+            { runtime with LoadedSystemName = Some loadedName }
+
         static member Create4Simulation(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType) =
             let runtime =
                 ParserOptions.Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, false, true)

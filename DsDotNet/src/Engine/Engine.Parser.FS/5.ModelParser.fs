@@ -107,14 +107,16 @@ module ModelParser =
 
     let _DicParsingSystem = Dictionary<string, DsSystem>() //동일 절대경로는 기존 dsParser를 재사용하기 위함
     let ClearDicParsingText() = _DicParsingSystem.Clear()
+    let private getAbsolutePath(options: ParserOptions) = 
+        if options.AbsoluteFilePath.IsSome then 
+           options.AbsoluteFilePath.Value  else   "" 
 
     let ParseFromString (text: string, options: ParserOptions) : DsSystem =
 
         if options.IsNewModel then
             ClearDicParsingText()
 
-        let path = if options.AbsoluteFilePath.IsSome then 
-                      options.AbsoluteFilePath.Value  else   "" 
+        let path = getAbsolutePath options
                
         let newParsing skipAddDict  = 
             let sys = ParseFromString2(text, options).TheSystem

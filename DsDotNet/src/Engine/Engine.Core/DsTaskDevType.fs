@@ -37,9 +37,9 @@ module rec DsTaskDevType =
             | Some inp, Some outp ->
                         $"{inp.ToTextWithAddress(addrSet.In)}, {outp.ToTextWithAddress(addrSet.Out)}"
             | Some inp, None ->
-                        $"{inp.ToTextWithAddress(addrSet.In)}, {addrSet.Out}"
+                        $"{inp.ToTextWithAddress(addrSet.In)}, {addressPrint addrSet.Out}"
             | None, Some outp ->
-                        $"{addrSet.In}, {outp.ToTextWithAddress(addrSet.Out)}"
+                        $"{addressPrint addrSet.In}, {outp.ToTextWithAddress(addrSet.Out)}"
             | _ -> failwithlog "TaskDevParaIO is not valid"
 
 

@@ -13,6 +13,7 @@ open System
 open PathManager
 open Engine.Parser.FS
 open System.Text.RegularExpressions
+open System.Diagnostics
 
 [<AutoOpen>]
 module ImportPPTModule =
@@ -267,15 +268,29 @@ module ImportPPTModule =
             Util.runtimeTarget <- pptParams.TargetType
             ModelParser.ClearDicParsingText()
             pptRepo.Clear()
+
+#if DEBUG
+            let stopwatch = Stopwatch()
+            stopwatch.Start()
+#endif
+
            
             let model = loadingfromPPTs  fullName isLib pptParams |> Tuple.first
+
+            
+#if DEBUG
+            stopwatch.Stop()
+            stopwatch.ElapsedMilliseconds |> printfn "Elapsed time: %d ms"
+#endif
+
             let activePath = PathManager.changeExtension (fullName.ToFile()) ".ds" 
+
             let system, loadingPaths =
                 if pptParams.CreateFromPPT 
                 then 
                      model.System, model.LoadingPaths
                 else 
-                     ParserLoader.LoadFromActivePath (model.System.pptxToExportDS activePath) Util.runtimeTarget false
+                     ParserLoader.LoadFromActivePath (model.System.pptxToExportDS activePath)  Util.runtimeTarget false
 
             { 
                 System = system

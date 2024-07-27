@@ -29,7 +29,7 @@ module ImportUtilForLib =
     let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) =
         match mySys.LoadedSystems.TryFind(fun f -> f.Name = name) with
         | Some f -> f.ReferenceSystem
-        | None -> ParserLoader.LoadFromDevicePath libFilePath Util.runtimeTarget |> fst
+        | None -> ParserLoader.LoadFromDevicePath libFilePath name Util.runtimeTarget |> fst
 
     let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (taskDevParaIO: DeviceLoadParameters) =
         let task = getLoadedTasks param.MySys devOrg loadedName apiPureName taskDevParaIO param.Node (param.Node.Job.Combine())

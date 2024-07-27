@@ -16,10 +16,9 @@ module CoreExtensionModule =
 
     let getTaskDevParaInOut (paramInOutText:string) = 
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> getTaskDevPara tx,  getTaskDevPara rx.Head
-        | _-> failwithlog $"{paramInOutText} getTaskDevParaInOut format error ex) 출력값:출력유지시간~센서값:센서지연시간"
+        | tx::rx when rx.Length = 1 -> Some (getTaskDevPara tx,  getTaskDevPara rx.Head)
+        | _-> None 
     
-
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
                 if system <> targetFlow.System
                 then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"

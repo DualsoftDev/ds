@@ -11,21 +11,26 @@ open System.Diagnostics
 [<RequireQualifiedAccess>]
 module ParserLoader =
 
-    let private loadSystemFromDsFile (systemRepo: ShareableSystemRepository) (dsFilePath) autoGenDevice =
+    let private loadSystemFromDsFile (systemRepo: ShareableSystemRepository) dsFilePath (loadedName:string option) autoGenDevice =
+
         let text = File.ReadAllText(dsFilePath)
 
         if text.TrimStart().StartsWith("[sys]")
         then 
             let dir = Path.GetDirectoryName(dsFilePath)
             let option =
-                ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, false)
+                if loadedName.IsSome then
+                    ParserOptions.Create4RuntimeLoadedSystem(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, loadedName.Value)
+                else 
+                    ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, false)
+                    
 
             let system = ModelParser.ParseFromString(text, option)
             system
         else
             failwithf $"Invalid ds file format \r\n ds format is [sys] ... \r\n {dsFilePath}"
 
-    let loadingDS (loadingConfigDir: string) (dsFile: string )  autoGenDevice (target:PlatformTarget)=
+    let loadingDS (loadingConfigDir: string)  (dsFile: string ) (loadedName: string option)  autoGenDevice (target:PlatformTarget)=
         ParserUtil.runtimeTarget  <- target
         let systemRepo = ShareableSystemRepository()
 
@@ -36,7 +41,7 @@ module ParserLoader =
                 PathManager.getFullPath (dsFile.ToFile()) (loadingConfigDir |> DsDirectory)
                 |> FileManager.fileExistChecker 
 
-        let system = loadSystemFromDsFile  systemRepo sysPath autoGenDevice
+        let system = loadSystemFromDsFile  systemRepo sysPath loadedName autoGenDevice
 
         let loadings =
                 system.GetRecursiveLoadeds().Map(fun s -> s.AbsoluteFilePath)
@@ -54,32 +59,34 @@ module ParserLoader =
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
         let dir = PathManager.getDirectoryName (configPath.ToFile())
-        let system, loadings = loadingDS dir cfg.DsFilePath false target
+        let system, loadings = loadingDS dir  cfg.DsFilePath None false target
 
         { Config = cfg
           System = system
           LoadingPaths = loadings }
           
 
-    let LoadFromActivePath (activePath: string) (target:PlatformTarget) (usingGpt:bool)=
+    let LoadFromActivePath (activePath: string)  (target:PlatformTarget) (usingGpt:bool)=
         ModelParser.ClearDicParsingText()
-
+#if DEBUG
         let stopwatch = Stopwatch()
         stopwatch.Start()
-     
+#endif
 
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        let ret = loadingDS dir activePath  usingGpt  target 
+        let ret = loadingDS dir activePath None  usingGpt  target 
 
+#if DEBUG
         stopwatch.Stop()
         stopwatch.ElapsedMilliseconds |> printfn "Elapsed time: %d ms"
+#endif
         ret
 
-    let LoadFromDevicePath (activePath: string) (target:PlatformTarget)=
+    let LoadFromDevicePath (activePath: string) (loadedName: string) (target:PlatformTarget)=
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir activePath  false  target 
+        loadingDS dir activePath (Some(loadedName)) false  target 
 
     let LoadFromChatGptPath (activePath: string) (target:PlatformTarget)=
-        LoadFromActivePath activePath target true
+        LoadFromActivePath activePath  target true
 
         

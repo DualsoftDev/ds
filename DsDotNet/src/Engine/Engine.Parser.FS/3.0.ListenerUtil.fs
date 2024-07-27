@@ -9,9 +9,14 @@ open Engine.Parser
 open System.Collections.Generic
 open Antlr4.Runtime.Tree
 open System.Text.RegularExpressions
+open Antlr4.Runtime
 
 [<AutoOpen>]
 module ListnerCommonFunctionGeneratorUtil =
+
+    let errorLoadCore (ctx:RuleContext) = 
+        let err = ParserError("", ctx).ToString() 
+        failwithlog ($"""규칙확인{err.Split('\n').Skip(1).Combine("\n")}""")
 
     // Helper function to find Real or Call
     let getSafetyAutoPreCall (curSystem: DsSystem) (ns: Fqdn) =
@@ -177,9 +182,12 @@ module ListnerCommonFunctionGeneratorUtil =
         executeCode |> getCode
 
     let commonDeviceParamExtractor (devCtx: TaskDevParaInOutContext) : (string*TaskDevPara)*(string*TaskDevPara) =
-        devCtx.TryFindFirstChild<TaskDevParaInOutBodyContext>()
-        |> Option.map (fun ctx -> getTaskDevParaInOut $"{ctx.GetText()}")
-        |> Option.defaultWith(fun () -> failWithLog "commonDeviceParamExtractor error")
+        match devCtx.TryFindFirstChild<TaskDevParaInOutBodyContext>() with
+        | Some ctx ->
+            match getTaskDevParaInOut $"{ctx.GetText()}" with
+            | Some v -> v
+            |_ -> errorLoadCore ctx
+        | _-> errorLoadCore devCtx
 
     
     let commonCallParamExtractor (ctx: JobBlockContext) =

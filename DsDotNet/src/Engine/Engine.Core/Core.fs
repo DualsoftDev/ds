@@ -133,7 +133,13 @@ module CoreModule =
             
         member x.AddLoadedSystem(childSys) = 
             loadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
-            x.AddFqdnVertex(childSys.Name, childSys)
+
+            // loaded device 도 vertex dic 에 포함할지 말지 여부에 따라서
+            if isNull(fqdnVertexDic) then
+                assert(isInUnitTest())
+            else
+                x.AddFqdnVertex(childSys.Name, childSys)
+
             childSys.ReferenceSystem.ApiItems |> apiUsages.AddRange
 
         member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct

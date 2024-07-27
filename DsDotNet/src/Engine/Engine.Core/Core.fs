@@ -143,7 +143,7 @@ module CoreModule =
       
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
-        member val Functions = ResizeArray<Func>()
+        member val Functions = ResizeArray<DsFunc>()
 
         member _.Variables = variables |> seq
         member _.ActionVariables = actionVariables |> seq
@@ -357,8 +357,8 @@ module CoreModule =
 
         member x.TargetFunc =
             match jobOrFunc with
-            | CommadFuncType func -> func :> Func |> Some
-            | OperatorFuncType func -> func :> Func  |> Some
+            | CommadFuncType func -> func :> DsFunc |> Some
+            | OperatorFuncType func -> func :> DsFunc  |> Some
             | _ -> None
                          
         /// Indicates if the target includes a job.
@@ -589,7 +589,7 @@ module CoreModule =
                 addCallVertex parent call
                 call
 
-        static member Create(func:Func, parent:ParentWrapper) =
+        static member Create(func:DsFunc, parent:ParentWrapper) =
             let callType = 
                 match func with
                 | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)

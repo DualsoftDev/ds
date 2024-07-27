@@ -11,10 +11,13 @@ module ValidateMoudle =
 
 
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) =
-        let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
-                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
+        let invalidEdge =
+            (mei.Sources @ mei.Targets)
+                .OfType<Alias>()
+                .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
 
-        if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
+        if invalidEdge.any() then
+            failwith $"Vertex {invalidEdge.First().Name} children type error"
 
     let private validateEdge(graph:Graph<Vertex, Edge>, bRoot:bool) =
         graph.Edges
@@ -26,8 +29,7 @@ module ValidateMoudle =
                     //| _ -> failwithlog $"ResetEdge can only be used on Type Work \t[{edge.Source.Name} |> {edge.Target.Name}]"
             )
 
-        if bRoot  
-        then
+        if bRoot then
             graph.Edges
                 .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Start))
                 .Iter(fun edge ->
@@ -40,17 +42,17 @@ module ValidateMoudle =
     let validateSystemEdge(sys:DsSystem) =
          for f in sys.Flows do
             validateEdge (f.Graph ,true)
-            f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
-                    validateEdge (r.Graph, false)
-                )
+            f.Graph.Vertices
+                .OfType<Real>()
+                .Iter(fun r -> validateEdge (r.Graph, false))
 
     let validateGraphOfSystem(sys:DsSystem) =
         validateSystemEdge sys
         for f in sys.Flows do
             f.Graph.ValidateCylce(true) |> ignore    //flow는 사이클 허용
-            f.Graph.Vertices.OfType<Real>().Iter(fun r -> 
-                r.Graph.ValidateCylce(false) |> ignore //real는 사이클 허용 X
-                )
+            f.Graph.Vertices
+                .OfType<Real>()
+                .Iter(fun r -> r.Graph.ValidateCylce(false) |> ignore ) //real는 사이클 허용 X
 
     let guardedValidateSystem(sys:DsSystem) =
         try validateGraphOfSystem sys
@@ -62,8 +64,7 @@ module ValidateMoudle =
     let validateJobs(sys:DsSystem) =
         sys.ApiUsages.Iter(fun a->
             let parentJob = sys.Jobs.Where(fun j-> j.ApiDefs.Contains(a))
-            if(parentJob.Count() > 1)
-            then 
+            if parentJob.Count() > 1 then 
                 let jobNames = StringExt.JoinWith(parentJob.Select(fun j->j.QualifiedName), ", ")
                 failwithf $"{a.QualifiedName} is 중복 assigned ({jobNames})"
         )
@@ -71,11 +72,10 @@ module ValidateMoudle =
     let validateRootCallConnection(sys:DsSystem) =
         let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
         sys.GetVerticesCallOperator().Iter(fun callOp->
-            if not(rootEdgeSrcs.Contains (callOp))
-            then
-                failWithLog $"Flow에 존재하는 Action은 반드시 연결이 필요합니다. {callOp.QualifiedName}"
-            else 
+            if rootEdgeSrcs.Contains (callOp) then
                 ()
+            else 
+                failWithLog $"Flow에 존재하는 Action은 반드시 연결이 필요합니다. {callOp.QualifiedName}"
             )
 
                 

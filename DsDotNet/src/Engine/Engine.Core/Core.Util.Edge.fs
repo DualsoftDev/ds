@@ -75,10 +75,12 @@ module EdgeModule =
         | None -> ()
 
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) =
-        let invalidEdge =  (mei.Sources @ mei.Targets).OfType<Alias>()
-                             .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
+        let invalidEdge =
+            (mei.Sources @ mei.Targets).OfType<Alias>()
+                .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
 
-        if invalidEdge.any() then failwith $"Vertex {invalidEdge.First().Name} children type error"
+        if invalidEdge.any() then
+            failwith $"Vertex {invalidEdge.First().Name} children type error"
 
     let createFlowEdge(flow:Flow) (modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
         let mei = modelingEdgeInfo
@@ -94,15 +96,16 @@ module EdgeModule =
 
         createEdge segment.Graph modelingEdgeInfo
 
-    let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) = $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
+    let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) =
+        $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
 
     
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
+        edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
 
 
     let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
-            edges.Except(ofResetEdge edges)
+        edges.Except(ofResetEdge edges)
 
 
 
@@ -184,18 +187,17 @@ module EdgeModule =
         let g = Graph<Vertex, Edge>(None)
        
         for vertex in graph.Islands do
-            if vertex.GetPureCall().IsNone  //flow에서 조건으로 Call은 제외
-            then 
+            if vertex.GetPureCall().IsNone then  //flow에서 조건으로 Call은 제외
                 g.Vertices.Add (vertex.GetPureReal():>Vertex) |>ignore
 
         for edge in graph.Edges do
-            if edge.Source.GetPureCall().IsNone  //flow에서 조건으로 Call은 제외
-            then 
-                if not(g.Edges.any(fun (e:Edge)->   
+            if edge.Source.GetPureCall().IsNone then //flow에서 조건으로 Call은 제외
+                let isEdgeMatch =
+                    g.Edges.any(fun (e:Edge) ->
                         e.EdgeType = edge.EdgeType
                         && e.Source = edge.Source.GetPureReal() 
-                        && e.Target = edge.Target.GetPureReal()))
-                then
+                        && e.Target = edge.Target.GetPureReal())
+                if not isEdgeMatch then
                     Edge.Create(g, edge.Source.GetPureReal(), edge.Target.GetPureReal(), edge.EdgeType) |> ignore 
                 
         g
@@ -207,10 +209,10 @@ module EdgeModule =
     
         let getStartReals (src: Vertex, visited: HashSet<Real>) : Real seq =
             graph.Edges
-            |> Seq.filter isStartEdge
-            |> Seq.collect (fun e -> [e.Source; e.Target])
-            |> Seq.filter (fun n -> graphOrder src n = Some true)
-            |> Seq.choose (fun r ->
+            |> filter isStartEdge
+            |> collect (fun e -> [e.Source; e.Target])
+            |> filter (fun n -> graphOrder src n = Some true)
+            |> choose (fun r ->
                 match r with
                 | :? Real as real -> 
                     if not (visited.Contains real) 
@@ -232,15 +234,15 @@ module EdgeModule =
         // Find all Real objects connected by Start edges to the source Reals
         let startLinkReals =
             (srcs @ (getPathReals graph srcs).OfType<Vertex>())
-            |> Seq.distinct
+            |> distinct
 
         // Find all target Reals connected by a reset edge to the startLinkReals
         startLinkReals
-        |> Seq.collect (fun link ->
+        |> collect (fun link ->
             graph.Edges
-            |> Seq.filter isResetEdge
-            |> Seq.filter (fun e -> e.Source.GetPure() = link.GetPure())
-            |> Seq.map (fun e -> e.Target.GetPureReal())
+            |> filter isResetEdge
+            |> filter (fun e -> e.Source.GetPure() = link.GetPure())
+            |> map (fun e -> e.Target.GetPureReal())
         )
         |> Seq.distinct
 
@@ -249,12 +251,12 @@ module EdgeModule =
         let graph = sys.Flows.Select(fun f->f.Graph) |>  mergeGraphs |> changeRealGraph
         let apiNResetNodes =
             sys.ApiItems
-            |> Seq.map (fun api ->
+            |> map (fun api ->
                 let resetAbleReals = appendInterfaceReset  graph [api.TX]
                 api, resetAbleReals
             )
         apiNResetNodes
-        |> Seq.iter (fun (api, resetAbleReals) ->
+        |> iter (fun (api, resetAbleReals) ->
             sys.ApiItems
                 .Where(fun f -> f <> api && resetAbleReals.Contains(f.RX))
                 .Iter (fun f -> 
@@ -266,8 +268,8 @@ module EdgeModule =
     let updateDeviceRootInfo (x: DsSystem) =
         let calls = x.GetVerticesHasJob()
         calls.SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
-             |> Seq.groupBy fst
-             |> Seq.iter(fun (k, vs) -> 
+             |> groupBy fst
+             |> iter(fun (k, vs) -> 
                     k.IsRootOnlyDevice <- not(vs.any(fun (_, c)->c.Parent.GetCore() :? Real))
                 )
 

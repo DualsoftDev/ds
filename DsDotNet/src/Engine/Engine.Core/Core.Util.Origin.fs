@@ -58,28 +58,40 @@ module OriginModule =
             | None -> InitialType.NotCare
 
         let getTypeForMuiltTarget (vs:bool option seq)= 
-                if vs.any(fun d-> d.IsNone)  //하나라도 순서없으면
-                then InitialType.NotCare
+            if vs.any(fun d-> d.IsNone) then //하나라도 순서없으면
+                InitialType.NotCare
+            else
+                if vs.Choose(id).AllEqual(true) then
+                    InitialType.Off 
+                elif vs.Choose(id).AllEqual(false) then
+                    InitialType.On
                 else
-                    if vs.Choose(id).AllEqual(true)
-                    then InitialType.Off 
-                    elif vs.Choose(id).AllEqual(false)
-                    then InitialType.On
-                    else InitialType.NotCare
+                    InitialType.NotCare
 
         match targets.Count() with
         | 0 -> InitialType.NotCare
-        | 1 -> graphOrder source (targets.First()) |> getTypeForSingleTarget
-        | _ -> targets |> Seq.map (fun t -> graphOrder source t) |> getTypeForMuiltTarget
+        | 1 ->
+            graphOrder source (targets.First())
+            |> getTypeForSingleTarget
+        | _ ->
+            targets
+            |> Seq.map (fun t -> graphOrder source t)
+            |> getTypeForMuiltTarget
 
     let getOriginInfo (real: Real) =  
         let graphOrder = real.Graph.BuildPairwiseComparer()
-        let pureCalls  = (real.Graph.Vertices.OfType<Call>().Where(fun c->c.IsJob)
-                         @(real.Graph.Vertices.OfType<Alias>() 
-                            |> Seq.map (fun f -> f.GetPure():?>Call)
-                            |> Seq.filter (fun c -> c.IsJob)
-                            )
-                         ).Distinct().Cast<Vertex>()
+        let pureCalls =
+            let realJobs =
+                real.Graph.Vertices
+                    .OfType<Call>()
+                    .Where(fun c->c.IsJob)
+            let aliasJobs =
+                real.Graph.Vertices.OfType<Alias>() 
+                    .Select(fun f -> f.GetPure():?>Call)
+                    .Where(fun c -> c.IsJob)
+            ( realJobs @ aliasJobs )
+                .Distinct()
+                .Cast<Vertex>()
         
         let mutualInfo = getMutualInfo pureCalls
         let calls =
@@ -102,8 +114,8 @@ type OriginHelper =
     [<Extension>]
     static member GetOriginInfoByTaskName (real: Real) =
         getOriginInfo real
-        |> fun info -> info.CallInitials
-                           .SelectMany(fun (c, t) ->
-                            c.TargetJob.TaskDefs |> Seq.map (fun d-> d.QualifiedName, t) 
-                            )
+        |> fun info ->
+            info.CallInitials
+                .SelectMany(fun (c, t) ->
+                    c.TargetJob.TaskDefs |> Seq.map (fun d-> d.QualifiedName, t) )
 

@@ -51,7 +51,7 @@ type TagWebExt =
 
     [<Extension>]
     static member GetWebTag(x:IStorage, kindDescription:Dictionary<int, string>) : TagWeb =
-            TagWeb(x.Name, x.BoxedValue, x.TagKind, kindDescription[x.TagKind], "")
+        TagWeb(x.Name, x.BoxedValue, x.TagKind, kindDescription[x.TagKind], "")
         
     [<Extension>]
     static member SetValue(x:TagWeb, value:obj) =

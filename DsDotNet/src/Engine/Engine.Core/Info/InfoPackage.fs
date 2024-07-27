@@ -4,6 +4,7 @@ open System.Collections.Generic
 open System
 open System.Linq
 open System.Runtime.CompilerServices
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module InfoPackageModule =
@@ -171,7 +172,7 @@ type InfoExt =
                         if r.Fqdn = fqdn then
                             r :> IInfoBase |> Some
                         else
-                            r.InfoCalls  |> Seq.tryPick(fun c -> 
+                            r.InfoCalls |> Seq.tryPick(fun c -> 
                                 if c.Fqdn = fqdn then
                                     c :> IInfoBase |> Some
                                 else
@@ -184,4 +185,3 @@ type InfoExt =
                             )
                     )
             )
-

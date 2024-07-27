@@ -61,28 +61,25 @@ module ExportConfigsMoudle =
         let ifs = HashSet<DsInterface>()
 
         sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
-           
-           |> Seq.filter(fun (dev,_)-> dev.FirstApi.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
-           |> Seq.iter(fun (dev,v) ->
-
-                    let dataSync = 
-                        {
-                            Id = ifs.Count
-                            Work = dev.FirstApi.RX.Name
-                            WorkInfo = dev.FirstApi.RX.Motion.Value
-                            ScriptStartTag = dev.FirstApi.RX.ScriptStartTag.Address
-                            ScriptEndTag = dev.FirstApi.RX.ScriptEndTag.Address
-                            MotionStartTag = dev.FirstApi.RX.MotionStartTag.Address
-                            MotionEndTag = dev.FirstApi.RX.MotionEndTag.Address
-                            Station = v.Parent.GetFlow().Name
-                            Device = dev.DeviceName
-                            Action = dev.FirstApi.Name
-                            LibraryPath = sys.LoadedSystems.TryFindWithName(dev.DeviceName).Value.RelativeFilePath
-                            Motion = dev.GetApiStgName(v.TargetJob)
-                        }
-                    ifs.Add dataSync |> ignore
-               )
-           
+        |> Seq.filter(fun (dev,_)-> dev.FirstApi.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
+        |> Seq.iter(fun (dev,v) ->
+            let dataSync = 
+                {
+                    Id = ifs.Count
+                    Work = dev.FirstApi.RX.Name
+                    WorkInfo = dev.FirstApi.RX.Motion.Value
+                    ScriptStartTag = dev.FirstApi.RX.ScriptStartTag.Address
+                    ScriptEndTag = dev.FirstApi.RX.ScriptEndTag.Address
+                    MotionStartTag = dev.FirstApi.RX.MotionStartTag.Address
+                    MotionEndTag = dev.FirstApi.RX.MotionEndTag.Address
+                    Station = v.Parent.GetFlow().Name
+                    Device = dev.DeviceName
+                    Action = dev.FirstApi.Name
+                    LibraryPath = sys.LoadedSystems.TryFindWithName(dev.DeviceName).Value.RelativeFilePath
+                    Motion = dev.GetApiStgName(v.TargetJob)
+                }
+            ifs.Add dataSync |> ignore
+        )
 
         ifs.ToArray()
 
@@ -97,8 +94,9 @@ type ExportConfigsExt =
         let interfaceConfig = {SystemName = sys.Name; DsInterfaces = dsInterfaces}
         saveInterfaceConfig exportPath interfaceConfig
 
-        let dsSimpleInterfaces = dsInterfaces
-                                    .Select(fun f-> {MotionName =  f.Motion}).ToArray() 
+        let dsSimpleInterfaces =
+            dsInterfaces
+                .Select(fun f-> {MotionName =  f.Motion}).ToArray() 
 
         let interfaceSimpleConifg = {Motions =dsSimpleInterfaces}
         let exportSimplePath =  PathManager.changeExtension (DsFile(exportPath)) "dsConfigMoiton"

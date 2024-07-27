@@ -88,8 +88,7 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
-            if notMentioned.any() 
-            then 
+            if notMentioned.any() then 
                 let comment  = if pCooment then "// island"  else ""
                 let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(", ")
                 yield $"{getTab (indent)}{isLandCommas}; {comment}"
@@ -109,8 +108,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[aliases] = {lb}"
                 for a in flow.AliasDefs.Values do
                     let toTextAlias = a.AliasTexts.Select(fun f->f.QuoteOnDemand())
-                    if toTextAlias.any()
-                    then
+                    if toTextAlias.any() then
                         let aliasTexts = (toTextAlias |> String.concat "; ") + ";"
                         let tab = getTab (indent+2)
                         let aliasKey =
@@ -161,8 +159,7 @@ module internal ToDsTextModule =
                 let printDev (d:TaskDev) (job:Job) skipApiPrint=
                     let apiName = if skipApiPrint then "" else d.DeviceApiToDsText(job)
                     let para = d.DicTaskTaskDevParamIO[job.DequotedQualifiedName].TaskDevParamIO
-                    if para.IsDefaultParam
-                    then
+                    if para.IsDefaultParam then
                         $"{apiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
                     else
                         $"{apiName}({para.ToDsText(Addresses(d.InAddress, d.OutAddress))})" 
@@ -174,14 +171,12 @@ module internal ToDsTextModule =
                         |> Seq.map (fun d-> printDev d (j) false)
                           
                     let jobItemText = jobItems.JoinWith("; ") + ";"
-                    if j.JobParam.ToText() = ""
-                    then
-                        if j.TaskDefs.length() = 1 && j.TaskDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit)
-                        then
+                    if j.JobParam.ToText() = "" then
+                        if j.TaskDefs.length() = 1 && j.TaskDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit) then
                             yield $"{tab2}{j.QualifiedName} = {printDev (j.TaskDefs.Head()) (j) true};"
                         else
                             yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"  
-                    else 
+                    else
                         yield $"{tab2}{j.QualifiedName}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
                                         
                 yield $"{tab}{rb}"
@@ -192,8 +187,7 @@ module internal ToDsTextModule =
             let funcCodePrint funcName (code:string) =
                 let codeLines = code.Split([|"\r\n"; "\n"|], StringSplitOptions.None)
                 [
-                    if codeLines.length() > 1
-                    then 
+                    if codeLines.length() > 1 then 
                         yield $"{tab2}{funcName} = {lbCode}"
                         for line in codeLines  
                             do yield $"{tab3}{line}"
@@ -207,10 +201,9 @@ module internal ToDsTextModule =
                 yield $"{tab}[operators] = {lb}"
                 for op in operators do
                     let name = op.Name.QuoteOnDemand()
-                    if op.OperatorType = DuOPUnDefined
-                    then 
+                    if op.OperatorType = DuOPUnDefined then 
                         yield $"{tab2}{name};"
-                    else 
+                    else
                         yield! funcCodePrint name (op.ToDsText())
 
                 yield $"{tab}{rb}"
@@ -220,8 +213,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[commands] = {lb}"
                 for cmd in commands do
                     let name = cmd.Name.QuoteOnDemand()
-                    if cmd.CommandType = DuCMDUnDefined ||  cmd.CommandCode = ""
-                    then 
+                    if cmd.CommandType = DuCMDUnDefined ||  cmd.CommandCode = "" then 
                         yield $"{tab2}{name};"
                     else
                         yield! funcCodePrint $"{name}" (cmd.ToDsText())
@@ -270,11 +262,11 @@ module internal ToDsTextModule =
 
                 [
                     match hws.length() with
-                    |0-> ()
-                    |1-> 
+                    | 0-> ()
+                    | 1-> 
                         let itemText, inAddr, outAddr = getHwInfo (hws.Head())
                         yield $"{tab2}[{category}] = {lb} {hws.Head().Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {itemText} {rb} {rb}"
-                    |_->
+                    | _->
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
                             let itemText, inAddr, outAddr = getHwInfo hw
@@ -332,7 +324,7 @@ module internal ToDsTextModule =
                         yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
 
                         for r in f.Graph.Vertices.OfType<Real>() do
-                        yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
+                            yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
                 ] |> List.distinct
 
             let getSafetyAutoPreName (call:Call) =
@@ -361,7 +353,7 @@ module internal ToDsTextModule =
                         yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
 
                         for r in f.Graph.Vertices.OfType<Real>() do
-                        yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
+                            yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
                 ] |> List.distinct
 
             let withAutoPres = autoPreHolders.Where(fun h -> h.AutoPreConditions.Any())
@@ -377,16 +369,20 @@ module internal ToDsTextModule =
             
             
             
-            let layoutList = system.LoadedSystems 
-                             |> Seq.collect (fun f-> f.ChannelPoints.Select(fun kv->kv.Key))
-                             |> Seq.distinct
+            let layoutList =
+                system.LoadedSystems 
+                    |> collect (fun f-> f.ChannelPoints.Select(fun kv->kv.Key))
+                    |> distinct
 
-            let layoutPointDic = layoutList
-                                 |> Seq.map (fun f-> f, system.LoadedSystems 
-                                                        |> Seq.collect (fun dev-> dev.ChannelPoints.Select(fun kv-> dev.Name.QuoteOnDemand(), kv.Key, kv.Value))
-                                                        |> Seq.filter (fun (_, ch, _)-> ch = f)
-                                                        )
-                                 |> dict
+            let layoutPointDic =
+                layoutList
+                |> map (fun l ->
+                    let tpl3: (string * string * Xywh) seq = // DeviceName * PointName * Position
+                        system.LoadedSystems 
+                        |> collect (fun dev-> dev.ChannelPoints.Select(fun kv-> dev.Name.QuoteOnDemand(), kv.Key, kv.Value))
+                        |> filter (fun (_, ch, _)-> ch = l)
+                    l, tpl3)
+                |> dict
 
             let layouts =
                 let makeList (name:string) (xywh:Xywh) =
@@ -398,8 +394,7 @@ module internal ToDsTextModule =
                     $"{tab3}{name} = {posi}"
                 [
                     for file in layoutList do
-                        if file = TextEmtpyChannel 
-                        then
+                        if file = TextEmtpyChannel then
                             yield $"{tab2}[layouts] = {lb}"
                         else 
                             yield $"{tab2}[layouts file={quote file}] = {lb}"
@@ -489,7 +484,10 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let props = [| safeties; autoPres; layouts; motions; scripts; times; finished; disabled; noTransData |] |> filter(fun p -> p.NonNullAny())
+            let props =
+                [| safeties; autoPres; layouts; motions; scripts; times; finished; disabled; noTransData |]
+                |> filter(fun p -> p.NonNullAny())
+
             if props.Any() then
                 yield $"{tab}[prop] = {lb}"
                 for p in props do
@@ -540,10 +538,10 @@ module internal ToDsTextModule =
 
         ] |> combineLines
 
-    type DsSystem with
-        member x.ToDsText(printComment:bool, printVersions:bool) = systemToDs x 1 printComment printVersions
 
 
 [<Extension>]
 type SystemToDsExt =
-    [<Extension>] static member ToDsText (system:DsSystem, printComment:bool, printVersions:bool) = systemToDs system 1 printComment printVersions
+    [<Extension>]
+    static member ToDsText (system:DsSystem, printComment:bool, printVersions:bool) =
+        systemToDs system 1 printComment printVersions

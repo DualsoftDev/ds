@@ -20,7 +20,7 @@ module ImportUtilVertex =
         sys.Functions
         |> Seq.tryFind (fun f -> f.Name = node.OperatorName)
         |> Option.defaultWith (fun () ->
-            let newFunc = OperatorFunction(node.OperatorName) :> Func
+            let newFunc = OperatorFunction(node.OperatorName) :> DsFunc
             sys.Functions.Add newFunc |> ignore
             newFunc
         )
@@ -29,7 +29,7 @@ module ImportUtilVertex =
         sys.Functions
         |> Seq.tryFind (fun f -> f.Name = node.CommandName)
         |> Option.defaultWith (fun () ->
-            let newFunc = CommandFunction(node.CommandName) :> Func
+            let newFunc = CommandFunction(node.CommandName) :> DsFunc
             sys.Functions.Add newFunc |> ignore
             newFunc
         )

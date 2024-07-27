@@ -8,15 +8,6 @@ open ConvertCoreExtUtils
 module ConvertCpuApiItem =
     let getTM(td:TaskDev) = td.TagManager:?> TaskDevManager
     
-    //let getLimitFromReals(api:ApiItem) = 
-
-    //    let systemGraph = api.ApiSystem.MergeFlowGraphs()
-    //    let reals = api.TXs.GetPathReals(systemGraph)
-        
-    //    let timeout = reals.Sum(fun r->r.TimeParam.Value.USL)
-    //    let timeShort = reals.Sum(fun r->r.TimeParam.Value.LSL)
-    //    timeout, timeShort
-    
     type TaskDev with
         member td.ExistInput   = addressExist td.InAddress
         member td.ExistOutput  = addressExist td.OutAddress

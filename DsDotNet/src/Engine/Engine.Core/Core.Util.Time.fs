@@ -59,7 +59,9 @@ module TimeModule =
         graph.RemoveEdges dummyEdges |> ignore
         graph.RemoveVertex(dummySrc :> Vertex) |> ignore
         graph.RemoveVertex(dummyTgt :> Vertex) |> ignore
-
+        //flow Graph에서도 삭제해야함
+        dummySrc.Parent.GetGraph().RemoveVertex (dummySrc :> Vertex) |> ignore
+        dummyTgt.Parent.GetGraph().RemoveVertex (dummyTgt :> Vertex) |> ignore
         time    
 
     [<Extension>]

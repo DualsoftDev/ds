@@ -131,7 +131,7 @@ module EdgeModule =
                 .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
                 .ToArray()
 
-        let gr = Graph(Seq.empty, es)
+        let gr = Graph(Seq.empty, es, None)
         let vs = gr.Vertices.ToArray()
         let dic = Dictionary<'V*'V, bool>()     // v1 -> v2 : reachable?
         for i in vs do
@@ -168,7 +168,7 @@ module EdgeModule =
 
     let mergeGraphs (graphs:  Graph<Vertex, Edge> seq) : Graph<Vertex, Edge>  =
         
-        let g =new  Graph<Vertex, Edge>()
+        let g = Graph<Vertex, Edge>(None)
 
         for graph in graphs do
             for vertex in graph.Islands do
@@ -181,7 +181,7 @@ module EdgeModule =
 
     let changeRealGraph (graph: Graph<Vertex, Edge>) : Graph<Vertex, Edge>  =
         
-        let g = Graph<Vertex, Edge>()
+        let g = Graph<Vertex, Edge>(None)
        
         for vertex in graph.Islands do
             if vertex.GetPureCall().IsNone  //flow에서 조건으로 Call은 제외
@@ -308,9 +308,6 @@ type EdgeExt =
     [<Extension>] static member OfResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
 
-    [<Extension>] static member MergeGraphs(graphs:  Graph<Vertex, Edge> seq) : Graph<Vertex, Edge> =  mergeGraphs graphs
-    [<Extension>] static member MergeFlowGraphs(x:DsSystem) : Graph<Vertex, Edge> = 
-                         x.Flows.Select(fun f->f.Graph) |> mergeGraphs |> changeRealGraph
    
     [<Extension>] static member GetPathReals(inits:Real seq, g:Graph<Vertex,Edge>) : Real seq = getPathReals g (inits.OfType<Vertex>())
     

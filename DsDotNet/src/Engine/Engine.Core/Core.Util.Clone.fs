@@ -49,7 +49,7 @@ module rec CoreCloneModule =
             if x.GetVertices().OfType<Call>().Filter(fun c -> c.IsJob).Any() then
                 failwithlog "ERROR: Clone system Call is not supported"
 
-            let news = DsSystem(newName)
+            let news = DsSystem.Create(newName)
             let dicFlow = Dictionary<Flow, Flow>()  // old(Flow) -> new(Flow)
             let dicVertex = Dictionary<Vertex, Vertex>()  // old(Real, Alias) -> new(Real, Alias)
 

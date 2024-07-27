@@ -39,7 +39,7 @@ module ImportUtilForDev =
         | Some autoGenDev ->  autoGenDev
         | None ->
             let autoGenFile = $"./dsLib/AutoGen/{loadedName}.ds"
-            let autoSys = DsSystem("autoSys")
+            let autoSys = DsSystem.Create("autoSys")
             let libFilePath =
                 PathManager.getFullPath (autoGenFile |> DsFile) (activeSysDir |> DsDirectory)
             let libRelPath =

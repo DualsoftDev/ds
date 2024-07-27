@@ -57,10 +57,23 @@ module GraphModule =
         let es = new HashSet<'E>(edges_, edgeComparer)
 
         let addVertex(vertex:'V) =
+#if DEBUG
+            let result1 = vs.Add vertex
+            let result2 =
+                match vertexHandlers with
+                | None -> true
+                | Some handlers -> handlers.OnVertexAdded (vertex :> INamed)
+            if result1 && result2 then
+                true
+            else
+                false
+#else
             vs.Add vertex &&
                 match vertexHandlers with
                 | None -> true
                 | Some handlers -> handlers.OnVertexAdded (vertex :> INamed)
+#endif
+
         let removeVertex(vertex:'V) =
             vs.Remove vertex &&
                 match vertexHandlers with

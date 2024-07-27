@@ -19,34 +19,41 @@ module internal ModelFindModule =
 
 
     let tryFindSystemInner (system:DsSystem) (xs:string list) : IVertex option =
-        match xs with
-        | [] -> Some system
-        | f::xs1 when system.Flows.Any(nameEq f) ->
-            let flow = system.Flows.First(nameEq f)
-            match xs1 with
-            | [] -> Some flow
-            | r::xs2 ->   
-                match flow.Graph.FindVertex(r) |> box with
-                | :? Real as real->
-                    match xs2 with
-                    | [] -> Some real
-                    | _ ->
-                        option {
-                            let! v = real.Graph.TryFindVertex(xs2.Combine())
-                            return box v :?> IVertex
-                        }
-                | _ ->    
-                    match flow.Graph.FindVertex(xs1.CombineDequoteOnDemand()) |> box with
-                    | :? Call as call-> Some call
-                    | _ -> None
-
-        | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
-            let device = system.LoadedSystems.Find(nameEq dev)
+        let result:IVertex option =
             match xs with
-            | [] -> Some device
-            | _ -> None
-        | [x] -> failwithlog $"tryFindSystemInner error : single fqdn {x}"
-        | _ -> failwithlog "ERROR"
+            | [] -> Some system
+            | f::xs1 when system.Flows.Any(nameEq f) ->
+                let flow = system.Flows.First(nameEq f)
+                match xs1 with
+                | [] -> Some flow
+                | r::xs2 ->   
+                    match flow.Graph.FindVertex(r) |> box with
+                    | :? Real as real->
+                        match xs2 with
+                        | [] -> Some real
+                        | _ ->
+                            option {
+                                let! v = real.Graph.TryFindVertex(xs2.Combine())
+                                return box v :?> IVertex
+                            }
+                    | _ ->    
+                        match flow.Graph.FindVertex(xs1.CombineDequoteOnDemand()) |> box with
+                        | :? Call as call-> Some call
+                        | _ -> None
+
+            | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
+                let device = system.LoadedSystems.Find(nameEq dev)
+                match xs with
+                | [] -> Some device
+                | _ -> None
+            | [x] -> failwithlog $"tryFindSystemInner error : single fqdn {x}"
+            | _ -> failwithlog "ERROR"
+
+#if DEBUG
+        let result2 = system.VertexDic.TryFind( (system.Name :: xs).JoinWith(".")).Cast<FqdnObject, IVertex>()
+        assert( result = result2)
+#endif
+        result
 
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : IVertex option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)

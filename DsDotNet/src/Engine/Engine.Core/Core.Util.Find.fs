@@ -18,6 +18,7 @@ module internal ModelFindModule =
 
 
 
+    // [NOTE] GraphVertex
     let tryFindSystemInner (system:DsSystem) (xs:string list) : IVertex option =
         let result:IVertex option =
             match xs with
@@ -51,18 +52,34 @@ module internal ModelFindModule =
 
 #if DEBUG
         let fqdn = (system.Name :: xs).JoinWith(".")
-        let result2 = system.VertexDic.TryFind(fqdn).Cast<FqdnObject, IVertex>()
         let result2 =
-            match result2, xs with
-            | Some _, _ ->
-                result2
-            | None, dev::xs when system.LoadedSystems.Any(nameEq dev) ->
-                let device = system.LoadedSystems.Find(nameEq dev)
+            let inner = system.VertexDic.TryFind(fqdn).Cast<FqdnObject, IVertex>()
+            let outer =
                 match xs with
-                | [] -> Some device
+                | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
+                    let device = system.LoadedSystems.Find(nameEq dev)
+                    assert(device.ReferenceSystem <> system)
+                    match xs with
+                    | [] -> Some (device :> IVertex)
+                    | _ -> device.ReferenceSystem.VertexDic.TryFind(xs.JoinWith(".")).Cast<FqdnObject, IVertex>()
                 | _ -> None
-            | _ ->
-                None
+            match inner, outer with
+            | Some i, Some o -> failwith "ERROR: found both inner and outer fqdn name"
+            | _ -> inner.OrElse(outer)
+
+        //let result2 = system.VertexDic.TryFind(fqdn).Cast<FqdnObject, IVertex>()
+        //let result2 =
+        //    match result2, xs with
+        //    | Some _, _ ->
+        //        result2
+        //    | None, dev::xs when system.LoadedSystems.Any(nameEq dev) ->
+        //        let device = system.LoadedSystems.Find(nameEq dev)
+        //        match xs with
+        //        | [] -> Some device
+        //        | _ -> None
+        //    | _ ->
+        //        None
+
         assert( result = result2)
 #endif
         result

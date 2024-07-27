@@ -90,7 +90,7 @@ module CoreModule =
     and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
         inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
-    type DsSystem (name: string, vertexDic, vertexHandlers:GraphVertexAddRemoveHandlers option) =
+    type DsSystem private (name: string, vertexDic, vertexHandlers:GraphVertexAddRemoveHandlers option) =
         inherit FqdnObject(name, createFqdnObject([||]))
 
         let loadedSystems = createNamedHashSet<LoadedSystem>()
@@ -121,8 +121,8 @@ module CoreModule =
         interface ISystem 
 
         // [NOTE] GraphVertex {
-        new(name) =
-            assert (isInUnitTest())     // 현재는 UnitTest 에서만 사용.  일반 코드에서는 DsSystem.Create(name) 을 사용할 것.
+        static member Create4Test(name) =
+            assert (isInUnitTest())     // UnitTest 에서만 사용.  일반 코드에서는 DsSystem.Create(name) 을 사용할 것.
             DsSystem(name, null, None)
 
         static member Create(name) =

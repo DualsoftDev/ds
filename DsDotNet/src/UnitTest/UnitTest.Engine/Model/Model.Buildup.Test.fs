@@ -26,7 +26,7 @@ module ModelBuildupTests1 =
 
         let createSimpleSystem() =
             ModelParser.ClearDicParsingText()
-            let system = DsSystem("My")
+            let system = DsSystem.Create4Test("My")
             let flow = Flow.Create("F", system)
             let real = Real.Create("Main", flow)
             let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}/cylinder/double.ds", "./cylinder/double.ds")

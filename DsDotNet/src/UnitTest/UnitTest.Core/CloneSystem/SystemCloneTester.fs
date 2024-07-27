@@ -9,7 +9,7 @@ open FsUnit.Xunit
 type DsSystemCloneTests() =
 
     let createTestSystem() =
-        let system = DsSystem("OriginalSystem")
+        let system = DsSystem.Create4Test("OriginalSystem")
         let flow1 = Flow.Create("Flow1", system)
         let flow2 = Flow.Create("Flow2", system)
         system.Flows.Add(flow1) |> ignore

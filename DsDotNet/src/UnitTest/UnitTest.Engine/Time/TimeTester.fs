@@ -10,7 +10,7 @@ module TimeTestModule =
 
     type TimeTest() =
 
-        let system = DsSystem("My")
+        let system = DsSystem.Create4Test("My")
         let flow = Flow.Create("F", system)
 
         let createVertex name time =

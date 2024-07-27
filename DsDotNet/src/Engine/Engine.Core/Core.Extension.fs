@@ -80,21 +80,35 @@ module CoreExtensionModule =
         member x.HWButtons    = x.HwSystemDefs.OfType<ButtonDef>()
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
         member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
+        member x.LayoutInfos =
+            x.LoadedSystems 
+            |> Seq.collect(fun s-> 
+                s.ChannelPoints
+                    .Where(fun kv -> kv.Key <> TextEmtpyChannel)
+                    .Select(fun kv ->
+                        let path = kv.Key
+                        let xywh = kv.Value
+                        let chName, url = path.Split(';')[0], path.Split(';')[1]
+                        let typeScreen = if url = TextImageChannel
+                                            then ScreenType.IMAGE  
+                                            else ScreenType.CCTV
+                        { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
 
         member x.AddButton(btnType:BtnType, btnName:string, taskDevParaIO:TaskDevParamIO,  addr:Addresses, flow:Flow) =
             checkSystem(x, flow, btnName)
           
-            let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
-                            |>Seq.filter(fun b -> b.SettingFlows.Contains(flow))
+            let existBtns =
+                x.HWButtons.Where(fun f->f.ButtonType = btnType)
+                |> Seq.filter(fun b -> b.SettingFlows.Contains(flow))
 
-            if existBtns.Where(fun w->w.Name = btnName).any()
-            then failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
+            if existBtns.Any(fun w->w.Name = btnName) then
+                failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParaIO, addr, HashSet[|flow|]))
-                      |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
+                x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParaIO, addr, HashSet[|flow|]))
+                |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
             x.AddButton(btnType, btnName,  defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)       

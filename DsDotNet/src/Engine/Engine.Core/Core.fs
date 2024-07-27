@@ -90,7 +90,7 @@ module CoreModule =
     and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
         inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
-    type DsSystem private (name: string, vertexDic, vertexHandlers:GraphVertexAddRemoveHandlers option) =
+    type DsSystem private (name: string, fqdnVertexDic, vertexHandlers:GraphVertexAddRemoveHandlers option) =
         inherit FqdnObject(name, createFqdnObject([||]))
 
         let loadedSystems = createNamedHashSet<LoadedSystem>()
@@ -101,23 +101,6 @@ module CoreModule =
         static let assem = Assembly.GetExecutingAssembly()
         static let currentLangVersion = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion |> Version.Parse
         static let currentEngineVersion = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version |> Version.Parse
-
-        let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
-        let getChannelInfos() =
-            loadedSystems 
-            |> Seq.collect(fun s-> 
-                s.ChannelPoints
-                    .Where(fun kv -> kv.Key <> TextEmtpyChannel)
-                    .Select(fun kv ->
-                        let path = kv.Key
-                        let xywh = kv.Value
-                        let chName, url = path.Split(';')[0], path.Split(';')[1]
-                        let typeScreen = if url = TextImageChannel
-                                            then ScreenType.IMAGE  
-                                            else ScreenType.CCTV
-                        { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
-
-
         
         interface ISystem 
 
@@ -127,37 +110,36 @@ module CoreModule =
             DsSystem(name, null, None)
 
         static member Create(name) =
-            let vertexDic = Dictionary<string, FqdnObject>()
+            let fqdnVertexDic = Dictionary<string, FqdnObject>()
             let vertexHandlers =
                 let onAdded (v:INamed) = 
                     let q = v :?> FqdnObject
-                    vertexDic.TryAdd(q.DequotedQualifiedName, q)
+                    fqdnVertexDic.TryAdd(q.DequotedQualifiedName, q)
                 let onRemoved (v:INamed) = 
                     let q = v :?> FqdnObject
-                    vertexDic.Remove(q.DequotedQualifiedName)
+                    fqdnVertexDic.Remove(q.DequotedQualifiedName)
 
                 GraphVertexAddRemoveHandlers(onAdded, onRemoved)
 
-            let system = DsSystem(name, vertexDic, Some vertexHandlers)
-            vertexDic.Add(name, system)
+            let system = DsSystem(name, fqdnVertexDic, Some vertexHandlers)
+            fqdnVertexDic.Add(name, system)
             system
 
         member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
-        member _.AddVertex(fqdn, vertex) = vertexDic.Add(fqdn, vertex)
-        member _.TryFindVertex(fqdn) = vertexDic.TryFind(fqdn)
+        member _.AddFqdnVertex(fqdn, vertex) = fqdnVertexDic.Add(fqdn, vertex)
+        member _.TryFindFqdnVertex(fqdn) = fqdnVertexDic.TryFind(fqdn)
         // [NOTE] GraphVertex }
 
             
         member x.AddLoadedSystem(childSys) = 
             loadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
-            x.AddVertex(childSys.Name, childSys)
-            addApiItemsForDevice childSys
+            x.AddFqdnVertex(childSys.Name, childSys)
+            childSys.ReferenceSystem.ApiItems |> apiUsages.AddRange
 
         member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
         member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>()
-        member _.LayoutInfos = getChannelInfos()
       
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()

@@ -53,7 +53,7 @@ module internal ModelFindModule =
 #if DEBUG
         let fqdn = (system.Name :: xs).JoinWith(".")
         let result2 =
-            let inner = system.TryFindVertex(fqdn).Cast<FqdnObject, IVertex>()
+            let inner = system.TryFindFqdnVertex(fqdn).Cast<FqdnObject, IVertex>()
             let outer =
                 match xs with
                 | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
@@ -61,7 +61,7 @@ module internal ModelFindModule =
                     assert(device.ReferenceSystem <> system)
                     match xs with
                     | [] -> Some (device :> IVertex)
-                    | _ -> device.ReferenceSystem.TryFindVertex(xs.JoinWith(".")).Cast<FqdnObject, IVertex>()
+                    | _ -> device.ReferenceSystem.TryFindFqdnVertex(xs.JoinWith(".")).Cast<FqdnObject, IVertex>()
                 | _ -> None
             match inner, outer with
             | Some _i, Some _o -> failwith "ERROR: found both inner and outer fqdn name"

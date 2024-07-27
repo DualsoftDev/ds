@@ -20,69 +20,30 @@ module internal ModelFindModule =
 
     // [NOTE] GraphVertex
     let tryFindSystemInner (system:DsSystem) (xs:string list) : IVertex option =
-        let result:IVertex option =
+        let getOuter() =
             match xs with
-            | [] -> Some system
-            | f::xs1 when system.Flows.Any(nameEq f) ->
-                let flow = system.Flows.First(nameEq f)
-                match xs1 with
-                | [] -> Some flow
-                | r::xs2 ->   
-                    match flow.Graph.FindVertex(r) |> box with
-                    | :? Real as real->
-                        match xs2 with
-                        | [] -> Some real
-                        | _ ->
-                            option {
-                                let! v = real.Graph.TryFindVertex(xs2.Combine())
-                                return box v :?> IVertex
-                            }
-                    | _ ->    
-                        match flow.Graph.FindVertex(xs1.CombineDequoteOnDemand()) |> box with
-                        | :? Call as call-> Some call
-                        | _ -> None
-
             | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
                 let device = system.LoadedSystems.Find(nameEq dev)
+                assert(device.ReferenceSystem <> system)
                 match xs with
-                | [] -> Some device
-                | _ -> None
-            | [x] -> failwithlog $"tryFindSystemInner error : single fqdn {x}"
-            | _ -> failwithlog "ERROR"
+                | [] -> Some (device :> IVertex)
+                | _ -> device.ReferenceSystem.TryFindFqdnVertex(xs.JoinWith(".")).Cast<IVertex>()
+            | _ -> None
 
-#if DEBUG
+
         let fqdn = (system.Name :: xs).JoinWith(".")
-        let result2 =
-            let inner = system.TryFindFqdnVertex(fqdn).Cast<FqdnObject, IVertex>()
-            let outer =
-                match xs with
-                | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
-                    let device = system.LoadedSystems.Find(nameEq dev)
-                    assert(device.ReferenceSystem <> system)
-                    match xs with
-                    | [] -> Some (device :> IVertex)
-                    | _ -> device.ReferenceSystem.TryFindFqdnVertex(xs.JoinWith(".")).Cast<FqdnObject, IVertex>()
-                | _ -> None
-            match inner, outer with
-            | Some _i, Some _o -> failwith "ERROR: found both inner and outer fqdn name"
-            | _ -> inner.OrElse(outer)
-
-        //let result2 = system.VertexDic.TryFind(fqdn).Cast<FqdnObject, IVertex>()
-        //let result2 =
-        //    match result2, xs with
-        //    | Some _, _ ->
-        //        result2
-        //    | None, dev::xs when system.LoadedSystems.Any(nameEq dev) ->
-        //        let device = system.LoadedSystems.Find(nameEq dev)
-        //        match xs with
-        //        | [] -> Some device
-        //        | _ -> None
-        //    | _ ->
-        //        None
-
-        assert( result = result2)
+        let inner = system.TryFindFqdnVertex(fqdn).Cast<IVertex>()
+        match inner with
+        | Some _i ->
+#if DEBUG
+            let outer = getOuter()
+            assert(outer.IsNone)
+            inner
 #endif
-        result
+        | None ->
+            getOuter()
+
+
 
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : IVertex option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)

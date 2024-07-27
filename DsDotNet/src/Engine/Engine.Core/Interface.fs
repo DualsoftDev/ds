@@ -29,7 +29,7 @@ module Interface =
     type IQualifiedNamed =
         inherit INamed
         abstract QualifiedName: string with get
-        abstract UnqualifiedName: string with get
+        abstract DequotedQualifiedName: string with get
         abstract NameComponents: string[] with get
 
     type IStorage =

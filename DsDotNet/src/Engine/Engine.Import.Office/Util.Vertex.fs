@@ -39,7 +39,7 @@ module ImportUtilVertex =
         let jobName = node.Job.Combine()
 
 
-        match sys.Jobs |> Seq.tryFind (fun job -> job.UnqualifiedName = jobName) with
+        match sys.Jobs |> Seq.tryFind (fun job -> job.DequotedQualifiedName = jobName) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiPureName) with
@@ -117,7 +117,7 @@ module ImportUtilVertex =
         let tasks = HashSet<TaskDev>()
         handleActionJob tasks param
         let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
-        match mySys.Jobs.TryFind(fun f -> f.UnqualifiedName = job.UnqualifiedName) with
+        match mySys.Jobs.TryFind(fun f -> f.DequotedQualifiedName = job.DequotedQualifiedName) with
         | Some _existingJob -> ()   
         | None -> 
             mySys.Jobs.Add job

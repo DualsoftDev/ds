@@ -483,9 +483,9 @@ module ImportU =
         static member MakeSafetyAutoPre(doc: pptDoc, mySys: DsSystem) =
             let getJobInfo(job:Job) = 
                 seq{
-                    let JobName =  job.UnqualifiedName
-                    let pureJobName = GetBracketsRemoveName job.UnqualifiedName
-                    yield job.UnqualifiedName, job
+                    let JobName = job.DequotedQualifiedName
+                    let pureJobName = GetBracketsRemoveName JobName
+                    yield JobName, job
 
                     if JobName <> pureJobName
                     then 

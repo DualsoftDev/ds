@@ -72,7 +72,7 @@ module internal ModelFindModule =
         }
 
     let tryFindFlow(system:DsSystem) (name:string)    = system.Flows.TryFind(nameEq name)
-    let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(fun j->j.UnqualifiedName = name)
+    let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(fun j->j.DequotedQualifiedName = name)
     let tryFindFunc (system:DsSystem) name            = system.Functions.TryFind(fun s->s.Name = name)
     let tryFindExternalSystem (system:DsSystem) name  = system.ExternalSystems.TryFind(nameEq name)
     let tryFindLoadedSystem (system:DsSystem) name    = system.LoadedSystems.TryFind(fun s->s.LoadedName = name)

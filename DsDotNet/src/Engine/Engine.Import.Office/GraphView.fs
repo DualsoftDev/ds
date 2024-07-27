@@ -65,7 +65,7 @@ module rec ViewModule =
                 then 
                     $"{condiJob.NameComponents.Skip(1).Combine()} {values}"
                 else 
-                    $"{condiJob.UnqualifiedName} {values}"
+                    $"{condiJob.DequotedQualifiedName} {values}"
                     
             let safeties = String.Join(", ", call.SafetyConditions.Select(fun f->getNameNValue f))
             let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""

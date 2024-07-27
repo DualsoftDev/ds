@@ -172,7 +172,7 @@ module CoreExtensionModule =
 
             let resets = x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
 
-            resets.Select(fun s->x.ApiItems.Find(fun f->f.UnqualifiedName = $"{x.Name}.{s.Value}"))
+            resets.Select(fun s->x.ApiItems.Find(fun f->f.DequotedQualifiedName = $"{x.Name}.{s.Value}"))
 
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (loadSys:DsSystem) = x.LoadedSystems.TryFind(fun f-> f.ReferenceSystem = loadSys)
@@ -199,29 +199,29 @@ module CoreExtensionModule =
                         match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.InPara with
                         | Some v -> v
                         | None -> defaultTaskDevPara() 
-        member x.GetInParam(job:Job) = x.GetInParam (job.UnqualifiedName)
+        member x.GetInParam(job:Job) = x.GetInParam (job.DequotedQualifiedName)
          
         member x.GetOutParam(jobFqdn:string) = 
                         match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.OutPara with
                         | Some v -> v
                         | None -> defaultTaskDevPara() 
-        member x.GetOutParam(job:Job) = x.GetOutParam (job.UnqualifiedName)
+        member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
          
         member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParaIO[jobFqdn]
-        member x.GetApiPara(job:Job) = x.GetApiPara(job.UnqualifiedName)
+        member x.GetApiPara(job:Job) = x.GetApiPara(job.DequotedQualifiedName)
 
         member x.GetApiItem(jobFqdn:string) = x.GetApiPara(jobFqdn).ApiItem
-        member x.GetApiItem(job:Job) = x.GetApiPara(job.UnqualifiedName).ApiItem
+        member x.GetApiItem(job:Job) = x.GetApiPara(job.DequotedQualifiedName).ApiItem
 
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member x.GetApiStgName(jobFqdn:string) = $"{x.DeviceName}_{x.GetApiItem(jobFqdn).Name}"
-        member x.GetApiStgName(job:Job) =  x.GetApiStgName(job.UnqualifiedName)
+        member x.GetApiStgName(job:Job) =  x.GetApiStgName(job.DequotedQualifiedName)
 
         member x.DeviceApiPureName(jobFqdn:string) = $"{x.DeviceName}.{x.GetApiItem(jobFqdn).PureName}"  //STN2.Device1."ROTATE(IN300_OUT400)"  파레메터 없는 ROTATE 순수이름만
-        member x.DeviceApiPureName(job:Job) = x.DeviceApiPureName(job.UnqualifiedName)
+        member x.DeviceApiPureName(job:Job) = x.DeviceApiPureName(job.DequotedQualifiedName)
 
         member x.DeviceApiToDsText(jobFqdn:string)= $"{x.DeviceName.QuoteOnDemand()}.{x.GetApiItem(jobFqdn).Name.QuoteOnDemand()}"
-        member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.UnqualifiedName)
+        member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.DequotedQualifiedName)
 
 
         member x.AddOrUpdateApiTaskDevPara(jobFqdn:string, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
@@ -237,7 +237,7 @@ module CoreExtensionModule =
                 //failWithLog $"중복된 TaskDevParaIO {jobFqdn} {x.QualifiedName}"
 
         member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
-               x.AddOrUpdateApiTaskDevPara(job.UnqualifiedName, api, taskDevParaIO)
+               x.AddOrUpdateApiTaskDevPara(job.DequotedQualifiedName, api, taskDevParaIO)
    
         member x.IsInAddressEmpty = x.InAddress = TextAddrEmpty
         member x.IsInAddressSkipOrEmpty = x.InAddress = TextAddrEmpty || x.InAddress = TextSkip
@@ -278,10 +278,10 @@ module CoreExtensionModule =
 
         member x.ApiDefs = x.TaskDefs |> Seq.collect(fun t->t.ApiItems)
         //member x.OnDelayTime =  //test ahn
-        //    let times = x.TaskDefs.Choose(fun t-> t.InParams[x.UnqualifiedName].Time)
+        //    let times = x.TaskDefs.Choose(fun t-> t.InParams[x.DequotedQualifiedName].Time)
         //    if times.GroupBy(fun t->t).Count() > 1
         //    then 
-        //        let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.UnqualifiedName].Time}"))
+        //        let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.DequotedQualifiedName].Time}"))
         //        failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
                 
         //    if times.any() then times.First() |> Some else None

@@ -189,7 +189,7 @@ module EtcListenerModule =
                 let safetyConditions =
                     [
                         for value in values do
-                            match  curSystem.Jobs.TryFind(fun job-> job.UnqualifiedName = (value.Combine())) with
+                            match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
                             | Some j -> yield j
                             | None -> failWithLog $"{value} is not job Name"
                     ] 
@@ -210,7 +210,7 @@ module EtcListenerModule =
                     let autopreConditions =
                         [
                             for value in values do
-                                match  curSystem.Jobs.TryFind(fun job-> job.UnqualifiedName = (value.Combine())) with
+                                match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
                                 | Some j -> yield j
                                 | None -> failWithLog $"{value} is not job Name"
                         ] 

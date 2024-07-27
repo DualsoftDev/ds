@@ -84,7 +84,7 @@ module ImportUtilForLib =
         handleActionJob tasks param
 
         let jobForCall =
-            match param.MySys.Jobs.TryFind(fun f -> f.UnqualifiedName = jobName) with
+            match param.MySys.Jobs.TryFind(fun f -> f.DequotedQualifiedName = jobName) with
             | Some existingJob -> existingJob
             | None -> 
                 let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)

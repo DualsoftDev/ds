@@ -120,6 +120,7 @@ module CoreModule =
         
         interface ISystem 
 
+        // [NOTE] GraphVertex {
         new(name) =
             assert (isInUnitTest())     // 현재는 UnitTest 에서만 사용.  일반 코드에서는 DsSystem.Create(name) 을 사용할 것.
             DsSystem(name, null, None)
@@ -129,17 +130,18 @@ module CoreModule =
             let vertexHandlers =
                 let onAdded (v:INamed) = 
                     let q = v :?> FqdnObject
-                    vertexDic.TryAdd(q.QualifiedName, q)
+                    vertexDic.TryAdd(q.DequotedQualifiedName, q)
                 let onRemoved (v:INamed) = 
                     let q = v :?> FqdnObject
-                    vertexDic.Remove(q.QualifiedName)
+                    vertexDic.Remove(q.DequotedQualifiedName)
 
                 GraphVertexAddRemoveHandlers(onAdded, onRemoved)
 
-
             DsSystem(name, vertexDic, Some vertexHandlers)
+
         member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
         member _.VertexDic = vertexDic
+        // [NOTE] GraphVertex }
 
             
         member _.AddLoadedSystem(childSys) = 

@@ -57,7 +57,7 @@ module TextImpl =
         combine separator (nameComponents.Select(quoteOnDemand))
 
     let combineDequoteOnDemand (separator:string) (nameComponents:string seq) =
-        combine separator (nameComponents.Select(deQuoteOnDemand))
+        combine separator (nameComponents.Select(deQuoteOnDemand)) |> tee(fun str -> assert(!! str.Contains("\"")))
 
     let split (separator: string) (input: string) : string[] =
         if String.IsNullOrEmpty(input) then

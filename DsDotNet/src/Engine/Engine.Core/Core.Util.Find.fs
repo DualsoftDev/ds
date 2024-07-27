@@ -50,7 +50,19 @@ module internal ModelFindModule =
             | _ -> failwithlog "ERROR"
 
 #if DEBUG
-        let result2 = system.VertexDic.TryFind( (system.Name :: xs).JoinWith(".")).Cast<FqdnObject, IVertex>()
+        let fqdn = (system.Name :: xs).JoinWith(".")
+        let result2 = system.VertexDic.TryFind(fqdn).Cast<FqdnObject, IVertex>()
+        let result2 =
+            match result2, xs with
+            | Some _, _ ->
+                result2
+            | None, dev::xs when system.LoadedSystems.Any(nameEq dev) ->
+                let device = system.LoadedSystems.Find(nameEq dev)
+                match xs with
+                | [] -> Some device
+                | _ -> None
+            | _ ->
+                None
         assert( result = result2)
 #endif
         result

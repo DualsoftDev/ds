@@ -29,6 +29,7 @@ module GraphModule =
         member _.Target = target
         member _.EdgeType = edgeType
 
+    // [TAG] GraphVertex
     type GraphVertexAddRemoveHandlers(onVertexAdded, onVertexRemoved) =
         member _.OnVertexAdded: INamed -> bool = onVertexAdded
         member _.OnVertexRemoved: INamed -> bool = onVertexRemoved
@@ -56,6 +57,7 @@ module GraphModule =
         let vs = new HashSet<'V>(vertices, vertexComparer)
         let es = new HashSet<'E>(edges_, edgeComparer)
 
+        // [TAG] GraphVertex
         let addVertex(vertex:'V) =
 #if DEBUG
             let result1 = vs.Add vertex

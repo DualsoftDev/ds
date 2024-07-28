@@ -97,7 +97,7 @@ module ExportModule =
 
                 RungCounter = counterGenerator 0
 
-                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
+                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "R" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                 TimerCounterGenerator = counterGeneratorWithExclusionList startTimer usedByteIndices
                 CounterCounterGenerator = counterGeneratorWithExclusionList startCounter usedByteIndices
                 AutoVariableCounter = counterGenerator 0

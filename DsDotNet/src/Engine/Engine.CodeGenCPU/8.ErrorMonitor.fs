@@ -57,9 +57,9 @@ type VertexManager with
             (* open  error *)
             if call.UsingTon
             then
-                yield (checkCondi <&&>  rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr,   rst)  ==| (v.ErrOpen , getFuncName())
+                yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, getFuncName())
             else
-                yield (checkCondi <&&>  rxFinishExpr                      <&&> v.ErrOpenRising.Expr,   rst)  ==| (v.ErrOpen , getFuncName())
+                yield (checkCondi <&&> rxFinishExpr                      <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, getFuncName())
         ]
         
 
@@ -73,6 +73,6 @@ type VertexManager with
     member v.E5_CallErrorTotalMonitor() =
         let v= v :?> VertexMCall
         let call= v.Vertex.GetPure() :?> Call
-        (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX,   getFuncName())
+        (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())
 
 

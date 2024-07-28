@@ -442,11 +442,6 @@ module CoreModule =
             ApiItem : ApiItem
             TaskDevParamIO : TaskDevParamIO
         }
-    let defaultApiParam(api:ApiItem) =
-        { 
-            ApiItem = api 
-            TaskDevParamIO = defaultTaskDevParamIO()
-        }
 
     type TaskDev (apiParam:ApiParam, parentJob:string, deviceName:string, parentSys:DsSystem) =
         inherit FqdnObject(apiParam.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
@@ -585,14 +580,14 @@ module CoreModule =
             cmd 
 
 
-    let addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
     type Call with
+        static member private addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target|>JobType, parent)
             if parent.GetSystem().Flows.SelectMany(fun f->f.Graph.Vertices.OfType<Call>()).Any(fun c->c.QualifiedName = call.QualifiedName)
             then failwithlog $"중복 call name [{call.Name}]"
             else 
-                addCallVertex parent call
+                Call.addCallVertex parent call
                 call
 
         static member Create(func:DsFunc, parent:ParentWrapper) =
@@ -603,7 +598,7 @@ module CoreModule =
                 | _->failwithlog "Error"
 
             let call = Call(callType, parent)
-            addCallVertex parent call
+            Call.addCallVertex parent call
             call   
 
      

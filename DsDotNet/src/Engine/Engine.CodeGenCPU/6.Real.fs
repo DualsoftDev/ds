@@ -100,17 +100,17 @@ type VertexMReal with
     member v.R10_RealGoingTime(): CommentedStatement  list =
         [
             if v.Real.TimeAvg.IsSome then
-                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr,  v.ET.Expr) ==| (v.TimeRelay, getFuncName())
-                yield (v.G.Expr,  v.TimeRelay.Expr) --| (v.TimeStart, getFuncName())
+                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, getFuncName())
+                yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, getFuncName())
                 
-                if RuntimeDS.Package.IsPackageSIM() 
+                if RuntimeDS.Package.IsPackageSIM()
                 then
                     if RuntimeDS.RuntimeMotionMode = MotionAsync then
                         yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeAvgMsec, getFuncName())
-                        yield (v.TRealOnTime.DN.Expr,  v._off.Expr) --| (v.TimeEnd, getFuncName())
+                        yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, getFuncName())
                         
                 else 
-                    yield (v.TimeStart.Expr,  v._off.Expr) --| (v.TimeEnd, getFuncName())
+                    yield (v.TimeStart.Expr, v._off.Expr) --| (v.TimeEnd, getFuncName())
                     
         ]
 
@@ -148,6 +148,6 @@ type VertexMReal with
     member v.R12_RealGoingScript(): CommentedStatement  list =
         [
             if v.Real.Script.IsSome then
-                yield (v.ScriptStart.Expr<&&>v.ScriptEnd.Expr,  v.ET.Expr) ==| (v.ScriptRelay, getFuncName())
-                yield (v.G.Expr,  v.ScriptRelay.Expr) --| (v.ScriptStart, getFuncName())  
+                yield (v.ScriptStart.Expr<&&>v.ScriptEnd.Expr, v.ET.Expr) ==| (v.ScriptRelay, getFuncName())
+                yield (v.G.Expr, v.ScriptRelay.Expr) --| (v.ScriptStart, getFuncName())  
         ]

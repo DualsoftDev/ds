@@ -43,7 +43,7 @@ type Job with
                             elif RuntimeDS.Package.IsPCorPCSIM() then 
                                 
                                 let tempRising  = getSM(j).GetTempBoolTag(td.QualifiedName) 
-                                yield! (sets, j.System) --^ (tempRising,  getFuncName())
+                                yield! (sets, j.System) --^ (tempRising, getFuncName())
                                 yield (tempRising.Expr, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
                             else    
                                 failWithLog $"Not supported {RuntimeDS.Package} package"

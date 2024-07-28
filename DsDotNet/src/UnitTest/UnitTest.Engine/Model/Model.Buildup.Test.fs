@@ -25,6 +25,11 @@ module ModelBuildupTests1 =
         let systemRepo = ShareableSystemRepository()
 
         let createSimpleSystem() =
+            let defaultApiParam(api:ApiItem) =
+                { 
+                    ApiItem = api 
+                    TaskDevParamIO = defaultTaskDevParamIO()
+                }
             ModelParser.ClearDicParsingText()
             let system = DsSystem.Create4Test("My")
             let flow = Flow.Create("F", system)
@@ -37,14 +42,14 @@ module ModelBuildupTests1 =
             let callAp =
                 let jobFqdn = [|"F";"A";"p"|]
                 let jName = jobFqdn.Combine()
-                let apiItem = TaskDev(defaultApiParam(apiP), jName,   dev.Name, system)
+                let apiItem = TaskDev(defaultApiParam(apiP), jName, dev.Name, system)
                 apiItem.InAddress <-"%I1"
                 apiItem.OutAddress<- "%Q1"
                 Job(jobFqdn, system, [apiItem])
             let callAm =
                 let jobFqdn = [|"F";"A";"m"|]
                 let jName = jobFqdn.Combine()
-                let apiItem = TaskDev(defaultApiParam(apiM), jName,  dev.Name, system)
+                let apiItem = TaskDev(defaultApiParam(apiM), jName, dev.Name, system)
                 apiItem.InAddress <-"%I2"
                 apiItem.OutAddress<- "%Q2"
                 Job(jobFqdn, system, [apiItem])

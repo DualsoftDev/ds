@@ -37,7 +37,6 @@ type Job with
                         else 
                             if RuntimeDS.Package.IsPLCorPLCSIM() 
                             then
-                                yield (sets, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
                                 yield (fbRising[sets], outParam.DevValue.Value|>literal2expr) --> (td.OutTag, getFuncName())
 
                             elif RuntimeDS.Package.IsPCorPCSIM() then 

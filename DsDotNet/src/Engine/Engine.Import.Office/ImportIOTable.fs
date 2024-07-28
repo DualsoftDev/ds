@@ -126,19 +126,21 @@ module ImportIOTable =
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =
                 let devName = getDevName row
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
-                if not <| dicDev.ContainsKey(devName) then
-                    Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
+                if dicDev.ContainsKey(devName) then
+                    //Office.ErrorPPT(ErrorCase.Name, ErrID._1006, $"{devName}", page, 0u)
                 
-                let dev = dicDev.[devName]
-                let inAdd =    inAddress|>emptyToSkipAddress
-                let outAdd =   outAddress|>emptyToSkipAddress
-                let checkInType, checkOutType = getInOutDataType dataType
+                    let dev = dicDev.[devName]
+                    let inAdd =    inAddress|>emptyToSkipAddress
+                    let outAdd =   outAddress|>emptyToSkipAddress
+                    let checkInType, checkOutType = getInOutDataType dataType
 
-                dev.InAddress <-  getValidAddress(inAdd, checkInType,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget)
-                dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
+                    dev.InAddress <-  getValidAddress(inAdd, checkInType,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget)
+                    dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
 
 
-                updatePPTTaskDevPara dev  (inSym,checkInType) (outSym, checkOutType)
+                    updatePPTTaskDevPara dev  (inSym,checkInType) (outSym, checkOutType)
+                else 
+                    logDebug $"모델에 {devName} 이름이 없습니다."
              
             let updateVarNConst (row: Data.DataRow, tableIO: Data.DataTable, page, isConst:bool) =
                 let name = $"{row.[(int) IOColumn.Name]}"

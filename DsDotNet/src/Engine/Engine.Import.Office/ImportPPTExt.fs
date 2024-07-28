@@ -276,14 +276,20 @@ module ImportU =
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
                 |> Seq.iter (fun node ->
                     try
+                        
+                  
                         if node.NodeType = AUTOPRE
                         then 
-                            createAutoPre(mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicAutoPreJob) |> ignore
+                            if not(dicChildParent.ContainsKey node)
+                            then 
+                                failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
+
+                            createAutoPre(mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicAutoPreJob) |> ignore
                         else 
                             if dicChildParent.ContainsKey(node) then
-                                createCallVertex (mySys, node, (dicVertex.[dicChildParent.[node].Key] :?> Real)|>DuParentReal, dicVertex)
+                                createCallVertex (mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicVertex)
                             else
-                                createCallVertex (mySys, node, (dicFlow.[node.PageNum])|>DuParentFlow, dicVertex)
+                                createCallVertex (mySys, node, (dicFlow[node.PageNum])|>DuParentFlow, dicVertex)
                     with ex ->
                         node.Shape.ErrorName(ex.Message, node.PageNum)
                         )
@@ -709,19 +715,36 @@ module ImportU =
         [<Extension>]
         static member PreCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
 
-            (* Multi Call Api별 갯수 동일 체크*)
-            let calls = doc.Nodes
-                                .Where(fun n -> (n.NodeType.IsCall || n.NodeType = AUTOPRE) && not(n.IsFunction))
-                                .GroupBy(fun n -> n.DevName)
+            (* AUTOPRE Root에 배치 에러 체크*)
+            doc.Nodes.Where(fun n -> n.NodeType = AUTOPRE) 
+               .Iter(fun n -> 
+                if n.IsRootNode.IsSome && n.IsRootNode.Value 
+                then 
+                    n.Shape.ErrorShape(ErrID._28, n.PageNum)
+                    )
 
-            calls.Iter(fun call -> 
-                let callEachCounts = call.Select(fun f->f.JobParam.TaskDevCount)
-                if callEachCounts.Distinct().Count() > 1
+
+            let errCheck (calls:pptNode seq) = 
+                if calls.Count() > 1
                 then
-                    let errNode = call.Select(fun f->f).First() 
-                    let errText = call.Select(fun f-> $"{f.Name} page {f.FlowName}").JoinWith("\r\n")
+                    let errNode = calls.Select(fun f->f).First() 
+                    let errText = calls.Select(fun f-> $"{f.Name} page {f.FlowName}").JoinWith("\r\n")
                     errNode.Shape.ErrorShape(ErrID._72+ $"\r\n{errText}", errNode.PageNum)
-            )
+
+            let callSet = doc.Nodes.Where(fun n -> (n.NodeType.IsCall || n.NodeType = AUTOPRE) && not(n.IsFunction))
+            (* Multi Call Dev별 갯수 동일 체크*)
+            callSet.GroupBy(fun n -> n.DevName)
+                   .Select(fun calls -> 
+                            calls.DistinctBy(fun c-> (c.JobParam.TaskDevCount))
+                    ).Iter(errCheck)
+            
+            (* Multi Call Api별 갯수 동일 체크*)
+            callSet.GroupBy(fun n -> n.DevName+n.ApiPureName)
+                   .Select(fun calls -> 
+                            calls.DistinctBy(fun c-> (c.JobParam.TaskDevCount
+                                           , c.JobParam.TaskInCount
+                                           , c.JobParam.TaskOutCount))
+                    ).Iter(errCheck)
 
         [<Extension>]
         static member PostCheckPPTSystem(doc: pptDoc, sys: DsSystem) =

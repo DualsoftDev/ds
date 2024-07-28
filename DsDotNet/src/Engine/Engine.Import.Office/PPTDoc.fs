@@ -194,11 +194,6 @@ module PPTDocModule =
                     else
                         pages.Values |> Seq.exists (fun w -> w.PageNum = page))
 
-            let getMacroKey page master = $"{page}:{master}"
-            let masterMacros =  
-                Office.PagePlaceHolderShapes(doc)
-                |> Seq.map(fun (master, value, page) -> {Macro = master; MacroRelace = value; Page = page} )
-
             pages.Values
             |> Seq.iter (fun pptPage -> 
                 let ableShapes = shapes |> Seq.filter (fun (shape, page, _) -> pptPage.PageNum = page) |> Seq.map(fun (shape,_,_) -> shape)
@@ -211,6 +206,10 @@ module PPTDocModule =
             
             let slideSize = Office.SlideSize(doc)
             let headSlide = validSlidesAll |> Seq.find (fun (slidePart, page) -> page = pptHeadPage) |> fst
+            
+            let masterMacros =  
+                Office.PagePlaceHolderShapes(doc)
+                |> Seq.map(fun (master, value, page) -> {Macro = master; MacroRelace = value; Page = page} )
 
             shapes
             |> Seq.iter (fun (shape, page, _) ->
@@ -224,7 +223,13 @@ module PPTDocModule =
                 if node.Name = "" then
                     shape.ErrorName(ErrID._13, page)
 
-                nodes.Add(node.Key, node) |> ignore)
+                if nodes.ContainsKey node.Key
+                then 
+                    node.Shape.ErrorShape(ErrID._20, page)
+                else 
+                    nodes.Add(node.Key, node) |> ignore
+                
+                )
 
             let dicParentCheck = Dictionary<string, int>()
 

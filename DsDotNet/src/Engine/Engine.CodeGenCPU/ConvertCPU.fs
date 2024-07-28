@@ -128,34 +128,6 @@ module ConvertCPU =
             
         ]
         
-    //let private applyApiItem(s:DsSystem) = 
-    //    [
-    //        let devCallSet =  s.GetTaskDevCallSet()
-    //        for (td, coins) in devCallSet do
-    //            yield! td.A1_ApiSet(coins)
-    //            yield! td.A2_ApiEnd(coins)
-    //    ]
-
-                        
-        //let input = calls.First().GetEndAction(a.ApiItem)
-        
-        //let sets =
-        //    if input.IsSome
-        //    then
-        //        linkExpr
-        //        <&&>  
-        //        (input.Value <&&> !@a.APIEND.Expr <&&> !@a.SL2.Expr)
-        //    else 
-        //        (activeSys._off.Expr)
-
-        //(sets, activeSys._off.Expr) --| (a.SL1, getFuncName())
-
-                        //let input = coins.OfType<Call>().First().GetEndAction(a.ApiItem)     
-
-
-                        //yield am.A3_SensorLinking(s, coins.OfType<Call>())
-                        //yield am.A4_SensorLinked(s, coins.OfType<Call>())
-       // ]
 
     let getMasterJob (calls : Vertex seq) = 
         let pureCalls = 

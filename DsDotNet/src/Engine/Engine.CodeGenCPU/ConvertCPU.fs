@@ -236,7 +236,7 @@ module ConvertCPU =
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
-            let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
+            let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, _c) -> (td))//, c.TargetJob))
             for td, call in devsCall do
                 if not(td.IsRootOnlyDevice)
                 then

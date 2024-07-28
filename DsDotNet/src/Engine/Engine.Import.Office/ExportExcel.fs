@@ -31,7 +31,7 @@ module ExportExcelModule =
                     then headerRow.AppendChild(cell :> OpenXmlElement) |> ignore
                 sheetData.AppendChild(headerRow :> OpenXmlElement) |> ignore
 
-                let totalRowCnt = dt.Rows.Count - 2
+                let totalRowCnt = dt.Rows.Count - 1
                 // Populate the sheet data with data from the DataTable
                 for rowIndex in 0 .. totalRowCnt do
                     let dataRow = new Row()

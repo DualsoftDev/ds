@@ -144,7 +144,7 @@ module ConvertCPU =
         //    then
         //        linkExpr
         //        <&&>  
-        //        (input.Value <&&> !@a.APIEND.Expr <&&> !@a.SL2.Expr)
+        //        (input.Value <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
         //    else 
         //        (activeSys._off.Expr)
 

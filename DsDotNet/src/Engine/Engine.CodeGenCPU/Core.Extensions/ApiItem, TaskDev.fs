@@ -17,12 +17,12 @@ module ConvertCpuApiItem =
         member td.GetPlanOutput(job:Job) = getTM(td).PlanOutput(job)   
         
     type ApiItem with
-        member a.APISET                 = getAM(a).APISET
+        member a.ApiItemSet                 = getAM(a).ApiItemSet
         member a.ApiItemSetPusle        = getAM(a).ApiItemSetPusle
         member a.ApiItemSetPusleRelay   = getAM(a).ApiItemSetPusleRelay
         member a.ApiItemSetPusleHold    = getAM(a).ApiItemSetPusleHold
 
-        member a.APIEND     = getAM(a).APIEND
+        member a.ApiItemEnd     = getAM(a).ApiItemEnd
 
         ///sensorLinking
         member a.SL1     = getAM(a).SL1

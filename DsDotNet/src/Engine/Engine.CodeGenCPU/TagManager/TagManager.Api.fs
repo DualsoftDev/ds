@@ -10,6 +10,7 @@ module ApiTagManagerModule =
     type ApiItemManager (apiItem:ApiItem)  =
         let stg = apiItem.ApiSystem.TagManager.Storages
 
+        /// Create Plan Var
         let cpv (apiItemTag:ApiItemTag) =
             //let n = Enum.GetName(typeof<ApiItemTag>, apiItemTag)
             //let name = $"{apiItem.ApiSystem.Name}_{apiItem.Name}_{n}"
@@ -17,38 +18,30 @@ module ApiTagManagerModule =
             let pv:IStorage = createPlanVar stg name DuBOOL false apiItem (int apiItemTag) apiItem.ApiSystem 
             pv :?> PlanVar<bool>
             
-        let apiItemSet = cpv ApiItemTag.apiItemSet
-        let apiItemSetPusle = cpv ApiItemTag.apiItemSetPusle
-        let apiItemSetPusleRelay = cpv ApiItemTag.apiItemSetPusleRelay
-        let apiItemSetPusleHold = cpv ApiItemTag.apiItemSetPusleHold
-        let pe = cpv ApiItemTag.apiItemEnd
-        let sensorLinking = cpv ApiItemTag.sensorLinking
-        let sensorLinked = cpv ApiItemTag.sensorLinked
-   
         interface ITagManager with
             member _.Target = apiItem
             member _.Storages = stg
 
 
-        member _.GetApiTag (vt:ApiItemTag) :IStorage =
+        member x.GetApiTag (vt:ApiItemTag) :IStorage =
             match vt with 
-            | ApiItemTag.apiItemSet           -> apiItemSet           :> IStorage
-            | ApiItemTag.apiItemSetPusle      -> apiItemSetPusle      :> IStorage
-            | ApiItemTag.apiItemSetPusleRelay -> apiItemSetPusleRelay :> IStorage
-            | ApiItemTag.apiItemSetPusleHold  -> apiItemSetPusleHold  :> IStorage
-            | ApiItemTag.apiItemEnd           -> pe                   :> IStorage
-            | ApiItemTag.sensorLinking        -> sensorLinking        :> IStorage
-            | ApiItemTag.sensorLinked         -> sensorLinked         :> IStorage
+            | ApiItemTag.apiItemSet           -> x.ApiItemSet           :> IStorage
+            | ApiItemTag.apiItemSetPusle      -> x.ApiItemSetPusle      :> IStorage
+            | ApiItemTag.apiItemSetPusleRelay -> x.ApiItemSetPusleRelay :> IStorage
+            | ApiItemTag.apiItemSetPusleHold  -> x.ApiItemSetPusleHold  :> IStorage
+            | ApiItemTag.apiItemEnd           -> x.ApiItemEnd           :> IStorage
+            | ApiItemTag.sensorLinking        -> x.SL1                  :> IStorage
+            | ApiItemTag.sensorLinked         -> x.SL2                  :> IStorage
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
          
 
         member _.ApiItem = apiItem
     
-        member _.APISET  = apiItemSet
-        member _.ApiItemSetPusle      = apiItemSetPusle
-        member _.ApiItemSetPusleRelay = apiItemSetPusleRelay
-        member _.ApiItemSetPusleHold  = apiItemSetPusleHold
-        member _.APIEND = pe
-        member _.SL1    = sensorLinking
-        member _.SL2    = sensorLinked
+        member val ApiItemSet  = cpv ApiItemTag.apiItemSet
+        member val ApiItemSetPusle      = cpv ApiItemTag.apiItemSetPusle
+        member val ApiItemSetPusleRelay = cpv ApiItemTag.apiItemSetPusleRelay
+        member val ApiItemSetPusleHold  = cpv ApiItemTag.apiItemSetPusleHold
+        member val ApiItemEnd = cpv ApiItemTag.apiItemEnd
+        member val SL1    = cpv ApiItemTag.sensorLinking
+        member val SL2    = cpv ApiItemTag.sensorLinked
         

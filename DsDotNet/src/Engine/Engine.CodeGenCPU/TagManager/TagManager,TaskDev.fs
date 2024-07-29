@@ -11,6 +11,7 @@ module TaskDevManagerModule =
     type TaskDevManager (td:TaskDev, sys:DsSystem)  =
         let stg = sys.TagManager.Storages
 
+        /// Create Plan Var
         let cpv (t:TaskDevTag) =
             let name = getStorageName td (int t)
             let pv:IStorage = createPlanVar stg name DuBOOL false td (int t) sys 

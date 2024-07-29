@@ -23,9 +23,9 @@ type TaskDevManager with
                     let inParam = apiParam.TaskDevParamIO.InParam
 
                     if inParam.IsSome && inParam.Value.Type <> DuBOOL then 
-                        apiParam.ApiItem.APIEND.Expr <&&> d.PlanStart(apiParam).Expr
+                        apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(apiParam).Expr
                     else 
-                        apiParam.ApiItem.APIEND.Expr 
+                        apiParam.ApiItem.ApiItemEnd.Expr 
 
                 yield (sets, activeSys._off.Expr) --| (d.PlanEnd(apiParam), getFuncName())
         ]
@@ -43,14 +43,14 @@ type TaskDevManager with
             let a = d.TaskDev.GetApiItem(call.TargetJob) 
             let ps = d.TaskDev.GetPlanStart(call.TargetJob)
             yield! (ps.Expr , call.System) --^ (a.ApiItemSetPusle, getFuncName())
-            yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.APISET, getFuncName())
+            yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.ApiItemSet, getFuncName())
         ]
 
     member d.A2_ApiEnd() =
         [
             for a in d.TaskDev.ApiItems do
                 let sets = a.RxET.Expr
-                yield (sets, a.ApiSystem._off.Expr) --| (a.APIEND, getFuncName())
+                yield (sets, a.ApiSystem._off.Expr) --| (a.ApiItemEnd, getFuncName())
         ]
         
     member d.A3_SensorLinking(call:Call) =
@@ -62,7 +62,7 @@ type TaskDevManager with
                     let _off = d.TaskDev.ParnetSystem._off.Expr
                     let sets =
                             call.RealLinkExpr <&&>  
-                            (input <&&> !@a.APIEND.Expr <&&> !@a.SL2.Expr)
+                            (input <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
 
                     yield (sets, _off) --| (a.SL1, getFuncName())
         ]
@@ -77,8 +77,8 @@ type TaskDevManager with
                     let sets =
                         call.RealLinkExpr
                         <&&> 
-                            (   (  input <&&> a.APIEND.Expr)
-                        <||> (!@input <&&> !@a.APIEND.Expr)
+                            (   (  input <&&> a.ApiItemEnd.Expr)
+                        <||> (!@input <&&> !@a.ApiItemEnd.Expr)
                         <||> call.System._sim.Expr
                             )
 

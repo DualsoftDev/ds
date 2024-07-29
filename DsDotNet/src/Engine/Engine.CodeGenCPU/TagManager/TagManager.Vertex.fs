@@ -43,16 +43,19 @@ module TagManagerModule =
 
         member _.Name   = v.QualifiedName
         member _.Vertex = v
-        member _.IsOperator =
+
+        member val IsOperator =
             match v with 
             | :? Call as c -> c.CallOperatorType = DuOPCode
             |_-> false  
-        member _.IsCommand =
+        member val IsCommand =
             match v with 
             | :? Call as c -> c.CallCommandType = DuCMDCode
             |_-> false
         member _.Flow   = v.Parent.GetFlow()
-        member x.System = x.Flow.System
+        member x.System =
+            assert(sys = x.Flow.System)
+            x.Flow.System
         member _.Storages = s
 
         member x._on  = sysM.GetSystemTag(SystemTag._ON)  :?> PlanVar<bool>
@@ -153,11 +156,11 @@ module TagManagerModule =
          
    
 
-    and VertexMReal(v:Vertex) as this =
+    and VertexMReal(v:Vertex) =
         inherit VertexManager(v)
 
-        let s    = this.Storages
-        let sys = this.System
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
         let real = v:?> Real
         let sysManager = sys.TagManager :?> SystemManager
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
@@ -195,104 +198,83 @@ module TagManagerModule =
         member val ErrGoingOrigin = createTag false VertexTag.workErrOriginGoing
 
         ///DAG Coin Start Coil
-        member val CoinAnyOnST    = createTag false VertexTag.dummyCoinSTs
+        member val CoinAnyOnST  = createTag false VertexTag.dummyCoinSTs
         ///DAG Coin Reset Coil
-        member val CoinAnyOnRT    = createTag false VertexTag.dummyCoinRTs
+        member val CoinAnyOnRT  = createTag false VertexTag.dummyCoinRTs
         ///DAG Coin End Coil
-        member val CoinAnyOnET    = createTag false VertexTag.dummyCoinETs
+        member val CoinAnyOnET  = createTag false VertexTag.dummyCoinETs
 
         ///Timer time avg
-        member val TRealOnTime    = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
+        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
 
         member x.IsFinished = x.Real.Finished
 
-        member val ScriptStart  =  createTag true VertexTag.scriptStart
-        member val MotionStart  =  createTag true VertexTag.motionStart
-        member val TimeStart    =  createTag true VertexTag.timeStart  
+        member val ScriptStart  = createTag true VertexTag.scriptStart
+        member val MotionStart  = createTag true VertexTag.motionStart
+        member val TimeStart    = createTag true VertexTag.timeStart  
 
-        member val ScriptEnd    =  createTag true VertexTag.scriptEnd
-        member val MotionEnd    =  createTag true VertexTag.motionEnd
-        member val TimeEnd      =  createTag true VertexTag.timeEnd
+        member val ScriptEnd    = createTag true VertexTag.scriptEnd
+        member val MotionEnd    = createTag true VertexTag.motionEnd
+        member val TimeEnd      = createTag true VertexTag.timeEnd
 
-        member val ScriptRelay  =  createTag true VertexTag.scriptRelay
-        member val MotionRelay  =  createTag true VertexTag.motionRelay
-        member val TimeRelay    =  createTag true VertexTag.timeRelay
+        member val ScriptRelay  = createTag true VertexTag.scriptRelay
+        member val MotionRelay  = createTag true VertexTag.motionRelay
+        member val TimeRelay    = createTag true VertexTag.timeRelay
 
-    and VertexMCall(v:Vertex)as this =
+    and VertexMCall(v:Vertex) =
         inherit VertexManager(v)
-        let s    = this.Storages
-        let sys = this.System
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
         let sysManager = sys.TagManager :?> SystemManager
-        let createTag = createTagOnVertex v
+        let createTag (autoAddr:bool) (vertexTag:VertexTag) : PlanVar<bool> = createTagOnVertex v autoAddr vertexTag
 
-        let counterBit    = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)
-        let timerOnDelayBit = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
-        let memo           = createTag  false VertexTag.callMemo
+
+        ///Ring Counter
+        member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)
+        ///Timer on delay
+        member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
+
+        member val MM   = createTag  false VertexTag.callMemo
+
+        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
+
+        member val RXErrOpen          = createTag true VertexTag.rxErrOpen
+        member val RXErrShort         = createTag true VertexTag.rxErrShort       
+        member val RXErrOpenRising    = createTag true VertexTag.rxErrOpenRising
+        member val RXErrShortRising   = createTag true VertexTag.rxErrShortRising   
+
+        member val ErrOnTimeShortage  = createTag true VertexTag.txErrOnTimeShortage 
+        member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver   
+        member val ErrOffTimeShortage = createTag true VertexTag.txErrOffTimeShortage   
+        member val ErrOffTimeOver     = createTag true VertexTag.txErrOffTimeOver    
+
+        member val ErrShort           = createTag true VertexTag.rxErrShort      
+        member val ErrShortRising     = createTag true VertexTag.rxErrShortRising           
+        member val ErrOpen            = createTag true VertexTag.rxErrOpen    
+        member val ErrOpenRising      = createTag true VertexTag.rxErrOpenRising    
+
+        ///callCommandEnd
+        member val CallCommandEnd     =  createTag  false VertexTag.callCommandEnd
+        ///callCommandPulse  
+        member val CallCommandPulse   =  createTag  false VertexTag.callCommandPulse
         
-        let callCommandPulse  = createTag  false VertexTag.callCommandPulse
-        let callCommandEnd    = createTag  false VertexTag.callCommandEnd
-        let callOperatorValue  = createTag false VertexTag.callOperatorValue
-   
-        let timerTimeOutBit  = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
-       
-        let txErrOnTimeShortage     = createTag true VertexTag.txErrOnTimeShortage   
-        let txErrOnTimeOver         = createTag true VertexTag.txErrOnTimeOver  
-        let txErrOffTimeShortage    = createTag true VertexTag.txErrOffTimeShortage   
-        let txErrOffTimeOver        = createTag true VertexTag.txErrOffTimeOver   
-        let rxErrShort              = createTag true VertexTag.rxErrShort      
-        let rxErrShortRising        = createTag true VertexTag.rxErrShortRising      
-        let rxErrOpen               = createTag true VertexTag.rxErrOpen    
-        let rxErrOpenRising         = createTag true VertexTag.rxErrOpenRising          
-        let errors =
-            [|
-                if txErrOnTimeShortage.Value  then yield "감지시간부족"
-                if txErrOnTimeOver.Value      then yield "감지시간초과"
-                if txErrOffTimeShortage.Value then yield "해지시간부족"
-                if txErrOffTimeOver.Value     then yield "해지시간초과"
-                if rxErrShort.Value           then yield "센서감지"
-                if rxErrOpen.Value            then yield "센서오프"
-            |]
+        ///Call Operator 연산결과 값 (T/F)
+        member val CallOperatorValue  =  createTag false VertexTag.callOperatorValue
 
-        member _.ErrorList   =  errors
-        member _.ErrorText   = 
+        member x.ErrorList =
+            [|
+                if x.ErrOnTimeShortage.Value  then yield "감지시간부족"
+                if x.ErrOnTimeOver.Value      then yield "감지시간초과"
+                if x.ErrOffTimeShortage.Value then yield "해지시간부족"
+                if x.ErrOffTimeOver.Value     then yield "해지시간초과"
+                if x.ErrShort.Value           then yield "센서감지"
+                if x.ErrOpen.Value            then yield "센서오프"
+            |]
+        member x.ErrorText   = 
+            let errors = x.ErrorList
             if errors.any() then
                 let errText = String.Join(",", errors)
                 $"{_.Name} {errText} 이상"
             else 
                 ""
-
-        ///Ring Counter
-        member _.CTR     = counterBit
-        ///Timer on delay
-        member _.TDON    = timerOnDelayBit
-
-        member _.MM           =  memo
-
-        member _.TOUT   = timerTimeOutBit
-
-        member _.RXErrOpen       = rxErrOpen
-        member _.RXErrShort      = rxErrShort       
-        member _.RXErrOpenRising       = rxErrOpenRising
-        member _.RXErrShortRising      = rxErrShortRising   
-
-        member _.ErrOnTimeShortage = txErrOnTimeShortage 
-        member _.ErrOnTimeOver     = txErrOnTimeOver 
-        member _.ErrOffTimeShortage = txErrOffTimeShortage 
-        member _.ErrOffTimeOver     = txErrOffTimeOver 
-
-        member _.ErrShort        = rxErrShort    
-        member _.ErrShortRising  = rxErrShortRising    
-        
-        member _.ErrOpen         = rxErrOpen     
-        member _.ErrOpenRising   = rxErrOpenRising     
-   
-        ///callCommandEnd
-        member _.CallCommandEnd           =  callCommandEnd
-        ///callCommandPulse  
-        member _.CallCommandPulse         =  callCommandPulse
-
-        
-        ///Call Operator 연산결과 값 (T/F)
-        member _.CallOperatorValue    =  callOperatorValue
-
         

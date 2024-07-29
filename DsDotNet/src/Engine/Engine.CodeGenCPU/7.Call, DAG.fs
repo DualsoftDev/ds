@@ -35,10 +35,11 @@ type VertexTagManager with
         let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
 
         
+        let f = getFuncName()
         if call.Disabled then
-            (v._off.Expr, rsts) ==| (v.MM, getFuncName())
+            (v._off.Expr, rsts) ==| (v.MM, f)
         else
-            (sets, rsts) ==| (v.MM, getFuncName())
+            (sets, rsts) ==| (v.MM, f)
 
 
     member v.D1_DAGHeadStart() =
@@ -46,37 +47,44 @@ type VertexTagManager with
         let v = v :?> RealVertexTagManager
         let coins = real.Graph.Inits.Select(getVMCoin)
         [
+            let f = getFuncName()
             for coin in coins do
                 let call = coin.Vertex.GetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
-                yield (sets, rsts) ==| (coin.ST, getFuncName())
+                yield (sets, rsts) ==| (coin.ST, f)
         ]
 
     member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCoin)
         [
+            let f = getFuncName()
             for coin in coins do
                 let call = coin.Vertex.GetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
                 let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
-                yield (sets, rsts) ==| (coin.ST, getFuncName() )
+                yield (sets, rsts) ==| (coin.ST, f )
         ]
         
     member v.D3_DAGCoinEnd() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Select(getVMCoin)
         [
+#if DEBUG
+            // 대상이 유일하지 않으면 중복 생성될 텐데..
+            assert( coins.Select(fun coin -> coin.Vertex.GetPure().V.Vertex :?> Call).GroupBy(fun x -> x).All(fun g -> g.Count() = 1) )
+#endif
+            let f = getFuncName()
             for coin in coins do
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
                 let rsts = coin.RT.Expr
                 if call.Disabled then 
-                    yield (coin.ST.Expr <&&> real.V.G.Expr, rsts) ==| (coin.ET, getFuncName() )
+                    yield (coin.ST.Expr <&&> real.V.G.Expr, rsts) ==| (coin.ET, f )
                 else 
 
                     let setStart = coin.ST.Expr <&&> real.V.G.Expr
@@ -85,18 +93,18 @@ type VertexTagManager with
                     //if setEnd Pulse Mode
 
                     //if RuntimeDS.Package.IsPLCorPLCSIM() then
-                    //    yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, getFuncName() )
+                    //    yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, f )
                     //elif RuntimeDS.Package.IsPCorPCSIM() then 
-                        //yield! (setEnd, coin.System)  --^ (coin.GP, getFuncName()) 
-                        //yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
+                        //yield! (setEnd, coin.System)  --^ (coin.GP, f) 
+                        //yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, f )
 
 
                      //아날로그 전용 job 은 기다리지 않고 값 성립하면 Coin 뒤집기
                     if call.IsAnalogOutput then
-                        yield (setStart<&&>setEnd, rsts) ==| (coin.ET, getFuncName() )
+                        yield (setStart<&&>setEnd, rsts) ==| (coin.ET, f )
                     else
-                        yield! (setEnd, coin.System)  --^ (coin.GP, getFuncName()) 
-                        yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
+                        yield! (setEnd, coin.System)  --^ (coin.GP, f) 
+                        yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, f )
         ]
 
 
@@ -104,10 +112,11 @@ type VertexTagManager with
         let real = v.Vertex :?> Real
         let children = real.Graph.Vertices.Select(getVMCoin)
         [
+            let f = getFuncName()
             for child in children do
                 let sets = real.V.RT.Expr // <&&> !@real.V.G.Expr
                 let rsts = child.R.Expr
-                yield (sets, rsts) ==| (child.RT, getFuncName() )
+                yield (sets, rsts) ==| (child.RT, f )
         ]
 
 

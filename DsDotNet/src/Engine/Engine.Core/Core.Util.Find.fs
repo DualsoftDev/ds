@@ -190,7 +190,7 @@ module internal ModelFindModule =
 
     let getVerticesHasJob(x:DsSystem)=
             getVerticesOfSystem(x)
-                .Choose(fun v -> v|> getPureCall)
+                .Choose(fun v -> v|> tryGetPureCall)
                 .Where(fun v -> v.IsJob)
 
                 
@@ -288,7 +288,7 @@ type FindExtension =
     [<Extension>] static member GetSharedCall(v:Vertex) = v |> getSharedCall
 
     [<Extension>] static member GetPureReal  (v:Vertex) = v |> getPureReal
-    [<Extension>] static member GetPureCall  (v:Vertex) = v |> getPureCall
+    [<Extension>] static member GetPureCall  (v:Vertex) = v |> tryGetPureCall
     [<Extension>] static member GetPure (x:Vertex) = getPure x
       
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs

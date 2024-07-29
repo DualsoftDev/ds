@@ -14,8 +14,6 @@
         <PackageReference Include="log4net" Version="2.0.15"/>
         <PackageReference Include="NetMQ" Version="4.0.1.13"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.15"/>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.2.8"/>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\..\IO.Core\IO.Core.fsproj"/>

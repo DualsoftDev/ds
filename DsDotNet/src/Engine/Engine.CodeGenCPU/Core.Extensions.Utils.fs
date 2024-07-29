@@ -41,23 +41,22 @@ module ConvertCoreExtUtils =
 
     let getInExpr (x:TaskDevPara option, devTag:ITag, sys:DsSystem) = 
         let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool> 
-        if devTag.IsNull() 
-        then sysOff.Expr  :> IExpression
+        if devTag.IsNull() then
+            sysOff.Expr  :> IExpression
         else 
-            if x.IsNone 
-            then devTag.ToExpression()
+            if x.IsNone then
+                devTag.ToExpression()
             else  
                 let x = x |> Option.get
-                if x.Type = DuBOOL 
-                then 
-                    if x.DevValue.IsNull() 
-                        then devTag.ToExpression()
-                    elif Convert.ToBoolean(x.Value) 
-                        then  devTag.ToExpression()
+                if x.Type = DuBOOL then 
+                    if x.DevValue.IsNull() then
+                        devTag.ToExpression()
+                    elif Convert.ToBoolean(x.Value) then
+                        devTag.ToExpression()
                     else 
                         !@(devTag.ToExpression():?> Expression<bool>) :> IExpression
                 else // bool 타입아닌 경우 비교문 생성
-                    createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value ;devTag.ToExpression()]   
+                    createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value; devTag.ToExpression()]   
 
     [<AutoOpen>]
     [<Extension>]

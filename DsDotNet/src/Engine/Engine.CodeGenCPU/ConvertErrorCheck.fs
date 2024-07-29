@@ -13,13 +13,13 @@ module ConvertErrorCheck =
         let hwAutoFlows = sys.AutoHWButtons   |> Seq.collect(fun f -> f.SettingFlows)
         for btn in sys.AutoHWButtons do
             for flow in btn.SettingFlows do
-                if not(hwManuFlows.Contains flow)
-                then failwithf $"{flow.Name} manual btn not exist"
+                if not(hwManuFlows.Contains flow) then
+                    failwithf $"{flow.Name} manual btn not exist"
 
         for btn in sys.ManualHWButtons do
             for flow in btn.SettingFlows do
-                if not(hwAutoFlows.Contains flow)
-                then failwithf $"{flow.Name} auto btn not exist"
+                if not(hwAutoFlows.Contains flow) then
+                    failwithf $"{flow.Name} auto btn not exist"
 
         if RuntimeDS.Package.IsPLCorPLCSIM() then
             for btn in sys.HWButtons do
@@ -48,7 +48,7 @@ module ConvertErrorCheck =
 
     // unused
     let private checkErrExternalStartRealExist (sys:DsSystem) = 
-        let flowEdges = (sys.Flows |> Seq.collect(fun f-> f.Graph.Edges))        
+        let flowEdges = (sys.Flows |> Seq.collect(fun f -> f.Graph.Edges))        
         let exEdges =
             flowEdges
                 .Where(fun e ->
@@ -61,8 +61,9 @@ module ConvertErrorCheck =
 
     let internal checkMultiDevPair(sys: DsSystem) = 
         let devicesCalls = 
-            sys.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
-               .Where(fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1)
+            sys.GetTaskDevsCall()
+                .DistinctBy(fun (td, c) -> (td, c.TargetJob))
+                .Where(fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1)
 
         let groupDev = devicesCalls  |> Seq.groupBy (fun (dev, _) -> dev.DeviceName)
     
@@ -75,12 +76,13 @@ module ConvertErrorCheck =
                 let callTexts = String.Join("\r\n", calls.Select(fun (_, call) -> call.Name))
                 failwithf $"동일 다비이스의 multi 수량은 같아야 합니다. \r\n{callTexts}"
 
-    let CheckRealEdge (sys:DsSystem) (bStart:bool) =
+    let GetRealsWithError (sys:DsSystem) (bStart:bool) : Real array =
         let vs = sys.GetVertices()
         let reals = vs.OfType<Real>()
         [|
+            let vsAliasReals = vs.GetAliasTypeReals().ToArray()
             for real in reals do
-                let realAlias_ = vs.GetAliasTypeReals().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
+                let realAlias_ = vsAliasReals.Where(fun f -> f.GetPure() = real).OfType<Vertex>()
                 let checkList = ( [real:>Vertex] @ realAlias_ )
 
                 let checks =
@@ -92,7 +94,7 @@ module ConvertErrorCheck =
         |]
 
     let CheckRealReset (sys:DsSystem) =
-        let errors = CheckRealEdge sys false |> toArray
+        let errors = GetRealsWithError sys false
         if errors.Any() then
             let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Parent.GetFlow().Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
@@ -100,7 +102,7 @@ module ConvertErrorCheck =
     let CheckNullAddress (sys: DsSystem) = 
         // Check for null addresses in jobs
         let nullTagJobs = 
-            sys.Jobs.SelectMany(fun j->j.GetNullAddressDevTask()) |> toArray
+            sys.Jobs.SelectMany(fun j -> j.GetNullAddressDevTask()) |> toArray
 
         if nullTagJobs.any() then 
             let errJobs = String.Join ("\n", nullTagJobs.Select(fun s->s.QualifiedName))
@@ -133,9 +135,7 @@ module ConvertErrorCheck =
             for td in j.TaskDefs do
                 if td.ExistOutput then 
                     let outParam = td.GetOutParam(j)
-                    if j.ActionType = Push then 
-                        if outParam.Type = DuBOOL then
+                    if j.ActionType = Push && outParam.Type = DuBOOL then
                             failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
-                    else 
-                        if outParam.Type <> DuBOOL && outParam.DevValue.IsNull() then 
+                    elif outParam.Type <> DuBOOL && outParam.DevValue.IsNull() then 
                             failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다." 

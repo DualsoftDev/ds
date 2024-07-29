@@ -53,15 +53,17 @@ type DsSystem with
         
 
     member s.Y4_SystemConditionError() =
+        let fn = getFuncName()
         [
             for condi in s.HWConditions do
-                yield (!@condi.ActionINFunc, s._off.Expr) --| (condi.ErrorCondition, getFuncName())
+                yield (!@condi.ActionINFunc, s._off.Expr) --| (condi.ErrorCondition, fn)
         ]
         
     member s.Y5_SystemEmgAlramError() =
+        let fn = getFuncName()
         [
             for emg in s.HWButtons.Where(fun f -> f.ButtonType = DuEmergencyBTN) do
-                yield (emg.ActionINFunc, s._off.Expr) --| (emg.ErrorEmergency, getFuncName())
+                yield (emg.ActionINFunc, s._off.Expr) --| (emg.ErrorEmergency, fn)
         ]
         
     //// 외부신호 초기값 변화를 연산하기 위해 강제로 수식 추가 

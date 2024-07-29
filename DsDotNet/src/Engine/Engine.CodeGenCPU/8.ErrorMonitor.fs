@@ -17,13 +17,15 @@ type VertexTagManager with
 
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
+        let fn = getFuncName()
+
         [
             let running = v.MM.Expr <&&> !@call.End <&&> !@iop
-            yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
+            yield running --@ (v.TOUT, v.System._tout.Value, fn)
             if RuntimePackage.PCSIM = RuntimeDS.Package then
-                yield(vOff, rst) ==| (v.ErrOnTimeOver , getFuncName())
+                yield (vOff, rst) ==| (v.ErrOnTimeOver , fn)
             else 
-                yield(v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
+                yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , fn)
         ]
 
     member v.E3_CallErrorRXMonitor() =
@@ -33,6 +35,8 @@ type VertexTagManager with
         
         let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
+        let fn = getFuncName()
+
         [
             let using      = if call.HasSensor then v._on.Expr else  v._off.Expr 
             let input      = call.End
@@ -41,22 +45,22 @@ type VertexTagManager with
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
             if RuntimeDS.Package.IsPLCorPLCSIM() then
-                yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, getFuncName())
-                yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
+                yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, fn)
+                yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  fn)
 
             elif RuntimeDS.Package.IsPCorPCSIM() then 
-                yield! (input, v.System) --^ (v.ErrShortRising, getFuncName())
-                yield! (!@input, v.System) --^ (v.ErrOpenRising,  getFuncName())
+                yield! (input, v.System) --^ (v.ErrShortRising, fn)
+                yield! (!@input, v.System) --^ (v.ErrOpenRising,  fn)
             else    
                 failWithLog $"Not supported {RuntimeDS.Package} package"
             
             (* short error *)
-            yield (checkCondi <&&>  rxReadyExpr <&&> v.ErrShortRising.Expr,  rst)  ==| (v.ErrShort, getFuncName())
+            yield (checkCondi <&&>  rxReadyExpr <&&> v.ErrShortRising.Expr,  rst)  ==| (v.ErrShort, fn)
             (* open  error *)
             if call.UsingTon then
-                yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, getFuncName())
+                yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
             else
-                yield (checkCondi <&&> rxFinishExpr                      <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, getFuncName())
+                yield (checkCondi <&&> rxFinishExpr                      <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
         ]
         
 

@@ -3,30 +3,28 @@ namespace rec Engine.CodeGenCPU
 open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
-open System.Runtime.CompilerServices
-open System
-open System
 open ConvertCoreExtUtils
 
 [<AutoOpen>]
 module ConvertCpuFlow =
     
     let getButtonExpr(flow:Flow, btns:ButtonDef seq) : Expression<bool>  =
-        let tags = btns.Where(fun b -> b.SettingFlows.Contains(flow))
-                       .Where(fun b ->b.InTag.IsNonNull())
-                       .Select(fun b ->b.ActionINFunc)
+        let tags =
+            btns
+                .Where(fun b -> b.SettingFlows.Contains(flow))
+                .Where(fun b ->b.InTag.IsNonNull())
+                .Select(fun b ->b.ActionINFunc)
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
     let getConditionsToAndElseOn(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
-        let tags = condis
-                    .Where(fun c -> c.SettingFlows.Contains(flow))
-                    .Where(fun c ->c.InTag.IsNonNull())
-                    .Select(fun c -> !@c.ActionINFunc)
+        let tags =
+            condis
+                .Where(fun c -> c.SettingFlows.Contains(flow))
+                .Where(fun c ->c.InTag.IsNonNull())
+                .Select(fun c -> !@c.ActionINFunc)
         tags.ToAndElseOn()
 
-    type Flow with
-
-        
+    type Flow with        
         /// IDLE operation mode
         member f.iop    = getFM(f).GetFlowTag(FlowTag.idle_mode)
         /// AUTO operation mode
@@ -39,7 +37,7 @@ module ConvertCpuFlow =
         member f.d_st    = getFM(f).GetFlowTag(FlowTag.drive_state    )
         member f.t_st    = getFM(f).GetFlowTag(FlowTag.test_state     )
         member f.e_st    = getFM(f).GetFlowTag(FlowTag.error_state)
-        member f.emg_st    = getFM(f).GetFlowTag(FlowTag.emergency_state)
+        member f.emg_st  = getFM(f).GetFlowTag(FlowTag.emergency_state)
         member f.r_st    = getFM(f).GetFlowTag(FlowTag.ready_state    )
         member f.o_st    = getFM(f).GetFlowTag(FlowTag.origin_state)
         member f.g_st    = getFM(f).GetFlowTag(FlowTag.going_state)
@@ -105,8 +103,9 @@ module ConvertCpuFlow =
         member f.ManuExpr   =  !@f.AutoSelectExpr <&&> f.ManuSelectExpr
                
         member f.GetReadAbleTags() =
-            FlowTag.GetValues(typeof<FlowTag>).Cast<FlowTag>()
-                  .Select(getFM(f).GetFlowTag)
+            FlowTag.GetValues(typeof<FlowTag>)
+                .Cast<FlowTag>()
+                .Select(getFM(f).GetFlowTag)
 
         member f.GetWriteAbleTags() =
             let writeAble =

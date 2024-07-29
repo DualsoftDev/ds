@@ -3,16 +3,13 @@ namespace rec Engine.CodeGenCPU
 open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
-open System.Runtime.CompilerServices
-open System
 open ConvertCoreExtUtils
 
 [<AutoOpen>]
 module ConvertCpuDsSystem =
     let emptyAddressCheck(address:string) (name:string) = 
-        if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip
-            then
-                failwithf $"{name} 해당 주소가 없습니다."
+        if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip then
+            failwithf $"{name} 해당 주소가 없습니다."
     let getMemory name target = getValidAddress(TextAddrEmpty, DuBOOL, name, false, IOType.Memory, target)
 
     type DsSystem with
@@ -50,12 +47,12 @@ module ConvertCpuDsSystem =
         member s._dtimem      = s.GetPv<uint8>(SystemTag.datet_m )
         member s._dtimes      = s.GetPv<uint8>(SystemTag.datet_s )
 
-        member s._pause       = s.GetPv<bool>(SystemTag.pauseMonitor)
+        member s._pause         = s.GetPv<bool>(SystemTag.pauseMonitor)
         member s._autoMonitor   = s.GetPv<bool>(SystemTag.autoMonitor   )
         member s._manualMonitor = s.GetPv<bool>(SystemTag.manualMonitor )
         member s._driveMonitor  = s.GetPv<bool>(SystemTag.driveMonitor  )
         member s._errorMonitor  = s.GetPv<bool>(SystemTag.errorMonitor   )
-        member s._emgState    = s.GetPv<bool>(SystemTag.emergencyMonitor  )
+        member s._emgState      = s.GetPv<bool>(SystemTag.emergencyMonitor  )
         member s._testMonitor   = s.GetPv<bool>(SystemTag.testMonitor   )
         member s._readyMonitor  = s.GetPv<bool>(SystemTag.readyMonitor  )
         member s._idleMonitor   = s.GetPv<bool>(SystemTag.idleMonitor  )
@@ -73,10 +70,11 @@ module ConvertCpuDsSystem =
         member s._flicker2sec = s.GetPv<bool>(SystemTag._T2S)
         
         member s._homeHW  =  
-                    let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
-                    if homes.any()
-                        then homes.Select(fun s->s.ActionINFunc).ToOrElseOn()
-                        else s._off.Expr    
+            let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
+            if homes.any() then
+                homes.Select(fun s->s.ActionINFunc).ToOrElseOn()
+            else
+                s._off.Expr    
 
         member s.S = s |> getSM
         member s.Storages = s.TagManager.Storages
@@ -117,11 +115,11 @@ module ConvertCpuDsSystem =
                 cv.ErrOnTimeShortage.Address    <- getMemory call.Name  target 
                 cv.ErrOffTimeOver.Address       <- getMemory call.Name  target 
                 cv.ErrOffTimeShortage.Address   <- getMemory call.Name  target 
-                call.ExternalTags.Add(ErrorSensorOn, cv.ErrShort:> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorSensorOff, cv.ErrOpen  :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorOnTimeOver, cv.ErrOnTimeOver :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorOnTimeShortage, cv.ErrOnTimeShortage :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorOffTimeOver, cv.ErrOffTimeOver :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorSensorOn,        cv.ErrShort           :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorSensorOff,       cv.ErrOpen            :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorOnTimeOver,      cv.ErrOnTimeOver      :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorOnTimeShortage,  cv.ErrOnTimeShortage  :> IStorage) |>ignore
+                call.ExternalTags.Add(ErrorOffTimeOver,     cv.ErrOffTimeOver     :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorOffTimeShortage, cv.ErrOffTimeShortage :> IStorage) |>ignore
          
          
@@ -134,51 +132,47 @@ module ConvertCpuDsSystem =
         member  x.GenerationRealActionMemory()  = 
             for real in x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
-                rm.ScriptStart.Address    <- getMemory rm.Name (getTarget(x))
-                rm.MotionStart.Address    <- getMemory rm.Name (getTarget(x))
+                rm.ScriptStart.Address  <- getMemory rm.Name (getTarget(x))
+                rm.MotionStart.Address  <- getMemory rm.Name (getTarget(x))
 
                 rm.ScriptEnd.Address    <- getMemory rm.Name (getTarget(x))
                 rm.MotionEnd.Address    <- getMemory rm.Name (getTarget(x))
 
                 real.ExternalTags.Add(ScriptStart,  rm.ScriptStart :> IStorage) |>ignore
-                real.ExternalTags.Add(MotionStart,  rm.MotionStart   :> IStorage) |>ignore
+                real.ExternalTags.Add(MotionStart,  rm.MotionStart :> IStorage) |>ignore
 
                 real.ExternalTags.Add(ScriptEnd,    rm.ScriptEnd   :> IStorage) |>ignore
                 real.ExternalTags.Add(MotionEnd,    rm.MotionEnd   :> IStorage) |>ignore
 
     
         member private x.GenerationFlowHMIMemory()  = 
-                    x.GetFlowsOrderByName()
-                    |> Seq.iter (fun flow ->
-                            let name = $"{flow.Name}"  
-                            let fm =  flow.TagManager :?> FlowManager
-                            let target = getTarget(x)
-                            fm.GetFlowTag(FlowTag.auto_btn).Address     <- getMemory name target
-                            fm.GetFlowTag(FlowTag.auto_mode).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.manual_btn).Address   <- getMemory name target
-                            fm.GetFlowTag(FlowTag.manual_mode).Address  <- getMemory name target
-                            fm.GetFlowTag(FlowTag.drive_btn).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.drive_state).Address  <- getMemory name target
-                            fm.GetFlowTag(FlowTag.pause_btn).Address    <- getMemory name target
-                            fm.GetFlowTag(FlowTag.pause_state).Address  <- getMemory name target
-                            )
+            for flow in x.GetFlowsOrderByName() do
+                let name = $"{flow.Name}"  
+                let fm =  flow.TagManager :?> FlowManager
+                let target = getTarget(x)
+                fm.GetFlowTag(FlowTag.auto_btn).Address     <- getMemory name target
+                fm.GetFlowTag(FlowTag.auto_mode).Address    <- getMemory name target
+                fm.GetFlowTag(FlowTag.manual_btn).Address   <- getMemory name target
+                fm.GetFlowTag(FlowTag.manual_mode).Address  <- getMemory name target
+                fm.GetFlowTag(FlowTag.drive_btn).Address    <- getMemory name target
+                fm.GetFlowTag(FlowTag.drive_state).Address  <- getMemory name target
+                fm.GetFlowTag(FlowTag.pause_btn).Address    <- getMemory name target
+                fm.GetFlowTag(FlowTag.pause_state).Address  <- getMemory name target
 
         member private x.GenerationRealHMIMemory()  = 
-                    x.GetVerticesOfRealOrderByName().Distinct() 
-                    |> Seq.iter (fun real ->
-                            let name = $"{real.Flow.Name}_{real.Name}"  
-                            let rm =  real.TagManager :?> RealVertexTagManager
-                            let target = getTarget(x)
-                            rm.ON.Address     <- getMemory name target
-                            rm.RF.Address     <- getMemory name target
-                            rm.SF.Address     <- getMemory name target
-                            rm.OB.Address     <- getMemory name target
-                            rm.ErrTRX.Address <- getMemory name target
-                            rm.R.Address      <- getMemory name target
-                            rm.G.Address      <- getMemory name target
-                            rm.F.Address      <- getMemory name target
-                            rm.H.Address      <- getMemory name target
-                            )
+            for real in x.GetVerticesOfRealOrderByName().Distinct() do
+                let name = $"{real.Flow.Name}_{real.Name}"  
+                let rm =  real.TagManager :?> RealVertexTagManager
+                let target = getTarget(x)
+                rm.ON.Address     <- getMemory name target
+                rm.RF.Address     <- getMemory name target
+                rm.SF.Address     <- getMemory name target
+                rm.OB.Address     <- getMemory name target
+                rm.ErrTRX.Address <- getMemory name target
+                rm.R.Address      <- getMemory name target
+                rm.G.Address      <- getMemory name target
+                rm.F.Address      <- getMemory name target
+                rm.H.Address      <- getMemory name target
 
         member private x.GenerationTaskDevIOM() =
 
@@ -191,14 +185,12 @@ module ConvertCpuDsSystem =
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
-                if not(dev.IsRootOnlyDevice)
-                then
-                    if  dev.OutAddress <> TextSkip then
+                if not(dev.IsRootOnlyDevice) then
+                    if dev.OutAddress <> TextSkip then
                         let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut , BridgeType.Device, x , dev, dev.GetOutParam(job).Type).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
         member x.GenerationIO() =
-
             x.GenerationTaskDevIOM()
             x.GenerationButtonIO()
             x.GenerationLampIO()
@@ -241,11 +233,13 @@ module ConvertCpuDsSystem =
             let getOriginInfos(sys:DsSystem) =
                 let reals = sys.GetRealVertices()
                 reals.Select(fun r->
-                       let info = OriginHelper.GetOriginInfo r
-                       r, info)
-                       |> Tuple.toDictionary
+                    let info = OriginHelper.GetOriginInfo r
+                    r, info
+                ) |> Tuple.toDictionary
             let origins = getOriginInfos x
-            for (rv: RealVertexTagManager) in x.GetRealVertices().Select(fun f->f.TagManager :?> RealVertexTagManager) do
+
+            let rvms = x.GetRealVertices().Select(fun f -> f.TagManager :?> RealVertexTagManager)
+            for (rv: RealVertexTagManager) in rvms do
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send
@@ -254,8 +248,8 @@ module ConvertCpuDsSystem =
 
         member x.GetReadAbleTags() =
             SystemTag.GetValues(typeof<SystemTag>)
-                     .Cast<SystemTag>()
-                     .Select(getSM(x).GetSystemTag)
+                .Cast<SystemTag>()
+                .Select(getSM(x).GetSystemTag)
 
         member x.GetWriteAbleTags() =
             let writeAble =
@@ -271,6 +265,7 @@ module ConvertCpuDsSystem =
                     SystemTag.home_btn
                 ]
             let sm = getSM(x)
-            SystemTag.GetValues(typeof<SystemTag>).Cast<SystemTag>()
-                     .Where(fun typ -> writeAble.Contains(typ))
-                     .Select(sm.GetSystemTag)
+            SystemTag.GetValues(typeof<SystemTag>)
+                .Cast<SystemTag>()
+                .Where(fun typ -> writeAble.Contains(typ))
+                .Select(sm.GetSystemTag)

@@ -51,16 +51,6 @@ type VertexTagManager with
         else
             (sets, rsts) ==| (v.MM, fn)
 
-
-    //member private v.CheckCoinUniq(coins:Call seq) =
-    //    // 대상이 유일하지 않으면 중복 생성될 텐데..
-    //    let coins = coins.ToArray()
-    //    if coins.Any() then
-    //        let vertices = coins.GroupBy(fun x -> x).ToArray()
-    //        if vertices.All(fun g -> g.Count() <> 1) then
-    //            failwith "ERROR: Alias target not unique"
-
-
     member v.D1_DAGHeadStart() =
         let real = v.Vertex :?> Real
         let v = v :?> RealVertexTagManager

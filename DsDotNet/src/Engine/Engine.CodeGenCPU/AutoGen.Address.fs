@@ -68,40 +68,42 @@ module DsAddressModule =
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
 
 
-        let addr = if addr.IsNullOrEmpty()
-                    then failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  
-                    else
-                        if isSkip then 
-                            emptyToSkipAddress  addr
-                        else 
-                            addr
+        let addr =
+            if addr.IsNullOrEmpty() then
+                failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  
+            else
+                if isSkip then 
+                    emptyToSkipAddress  addr
+                else 
+                    addr
 
         let addr =  addr.Trim().ToUpper()
         let getCurrent(curr:int)(bitSize:int) = 
-            if curr%bitSize = 0 then curr
+            if curr%bitSize = 0 then
+                curr
             else
                 curr + bitSize - (curr%bitSize)
 
         let getNext (curr:int)(bitSize:int) = 
-            if curr%bitSize = 0 then  curr + bitSize
+            if curr%bitSize = 0 then
+                curr + bitSize
             else
                 curr + bitSize - (curr%bitSize) + bitSize
 
 
         let sizeBit = 
-                if target = PlatformTarget.XGI then dataType.ToPLCBitSize()
-                else
-                    match dataType.ToPLCBitSize() with
-                    | 1 -> 1
-                    | 8 -> 16
-                    | 16 -> 16
-                    | 32 -> 32
-                    | _ -> failwithf $"XGK {dataType} not support"
+            if target = PlatformTarget.XGI then
+                dataType.ToPLCBitSize()
+            else
+                match dataType.ToPLCBitSize() with
+                | 1 -> 1
+                | 8 -> 16
+                | 16 -> 16
+                | 32 -> 32
+                | _ -> failwithf $"XGK {dataType} not support"
         let newAddr =
-            if addr = TextAddrEmpty && not(isSkip)
-            then
+            if addr = TextAddrEmpty && not(isSkip) then
                 let cnt =
-
                     match ioType with 
                     | In      -> 
                         if sizeBit = 1 
@@ -150,7 +152,8 @@ module DsAddressModule =
                     match findAvailableSlots with
                     | Some (i, _, _) -> 
                         let startPoint = getStartPointXGK (i)
-                        if i = 0 then newCnt
+                        if i = 0 then
+                            newCnt
                         else 
                             let usedPoint = getUsedPointXGK (i, settingType)
                             startPoint + (newCnt - usedPoint)  
@@ -183,8 +186,8 @@ module DsAddressModule =
                     | Some (i, _, _) -> (i, assigned (i - 1))
                     | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다."
 
-                if target = WINDOWS
-                then 
+                match target with
+                | WINDOWS ->
                     let getPCIOM(head:string, offsetBit) =
                         match sizeBit with
                         | 1 -> $"{head}B{offsetBit / 8}.{offsetBit % 8}" 
@@ -195,68 +198,60 @@ module DsAddressModule =
                         | _ -> failwithf $"Invalid size :{sizeBit}"
 
                     match ioType with 
-                    |In      ->  if sizeBit = 1 then getPCIOM ("I", cnt) else getPCIOM ("I", cnt*8)
-                    |Out     ->  if sizeBit = 1 then getPCIOM ("O", cnt) else getPCIOM ("O", cnt*8)
-                    |Memory  ->  if sizeBit = 1 then getPCIOM ("M", cnt) else getPCIOM ("M", cnt*8)
-                    |NotUsed -> failwithf $"{ioType} not support {name}"
+                    | In      ->  if sizeBit = 1 then getPCIOM ("I", cnt) else getPCIOM ("I", cnt*8)
+                    | Out     ->  if sizeBit = 1 then getPCIOM ("O", cnt) else getPCIOM ("O", cnt*8)
+                    | Memory  ->  if sizeBit = 1 then getPCIOM ("M", cnt) else getPCIOM ("M", cnt*8)
+                    | NotUsed -> failwithf $"{ioType} not support {name}"
 
-                elif target = XGK || target = XGI
-                then
+                | (XGK | XGI) ->
                     match ioType with 
-                    |In |Out -> 
+                    | (In | Out) -> 
                         let iSlot, sumBit =  getSlotInfoIEC(ioType, cnt)
 
-                        if target = PlatformTarget.XGI 
-                        then
-                            if  ioType = IOType.In 
-                            then
-                                getXgiIOTextBySize("I", cnt ,sizeBit, iSlot, sumBit)
+                        match target with
+                        | PlatformTarget.XGI ->
+                            let io =
+                                match ioType with
+                                | IOType.In -> "I"
+                                | IOType.Out -> "Q"
+                                | _ -> failwithf $"Error {target} not support {name}"
+                                
+                            getXgiIOTextBySize(io, cnt ,sizeBit, iSlot, sumBit)
 
-                            elif ioType = IOType.Out
-                            then
-                                getXgiIOTextBySize("Q", cnt ,sizeBit, iSlot, sumBit)
-                            else 
-                                failwithf $"Error {target} not support {name}"
-
-                        elif target = PlatformTarget.XGK
-                        then
+                        | PlatformTarget.XGK ->
                             let isBool = dataType = DuBOOL
-                            if sizeBit = 1
-                            then
+                            if sizeBit = 1 then
                                 getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), isBool)
                             else 
-                                if ioType = IOType.In 
-                                then
+                                match ioType with
+                                | IOType.In ->
                                     getXgkTextByType("P", cnt+XGKAnalogOffsetByte, isBool)
-                                elif ioType = IOType.Out
-                                then
+                                | IOType.Out ->
                                     getXgkTextByType("P", cnt+XGKAnalogOffsetByte+XGKAnalogOutOffsetByte, isBool)  //test ahn 임시 Q 는  시프트 ??
-                                else 
+                                | _ ->
                                     failwithf $"Error {target} not support {name}" 
                         
-                        elif target = PlatformTarget.WINDOWS then
-                            if ioType = IOType.In
-                            then getPCIOMTextBySize("I", cnt ,sizeBit)
-                            else getPCIOMTextBySize("O", cnt ,sizeBit)
-                        else 
+                        | PlatformTarget.WINDOWS ->
+                            let io = if ioType = IOType.In then "I" else "O"
+                            getPCIOMTextBySize(io, cnt ,sizeBit)
+                        | _ ->
                             failwithf $"Error {target} not support {name}"
 
-                    |Memory -> if target = PlatformTarget.XGI
-                               then 
+                    | Memory ->
+                        match target with
+                    
+                        | PlatformTarget.XGI ->
                                     getXgiMemoryTextBySize("M", cnt ,sizeBit)
-                               elif target = PlatformTarget.XGK
-                               then
-                                    getXgkTextByType("M", cnt, dataType = DuBOOL)
-                               elif target = PlatformTarget.WINDOWS then
-                                    getPCIOMTextBySize("M", cnt ,sizeBit)
-                               else 
-                                    failwithf $"Error{name} {target} not support"
-                                    
+                        | PlatformTarget.XGK ->
+                            getXgkTextByType("M", cnt, dataType = DuBOOL)
+                        | PlatformTarget.WINDOWS ->
+                            getPCIOMTextBySize("M", cnt ,sizeBit)
+                        | _ ->
+                            failwithf $"Error{name} {target} not support"
 
+                    | NotUsed -> failwithf $"{ioType} not support {name}"
 
-                    |NotUsed -> failwithf $"{ioType} not support {name}"
-
-                else TextAddrEmpty
+                | _ -> TextAddrEmpty
 
             elif addr <> TextSkip && isSkip then
                  failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입 필요."
@@ -324,8 +319,7 @@ module DsAddressModule =
            
             if dev.IsRootOnlyDevice 
             then
-                if dev.InAddress = TextAddrEmpty && not(inSkip)
-                then
+                if dev.InAddress = TextAddrEmpty && not(inSkip) then
                     dev.InAddress  <-  getExternalTempMemory(target, extCnt)
                     extCnt <- extCnt+1
 

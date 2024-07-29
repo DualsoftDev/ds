@@ -18,11 +18,11 @@ module ParserUtilityModule =
     type IParseTree with
 
         member x.Descendants<'T when 'T :> IParseTree>
-            (
-                ?includeMe: bool,
-                ?predicate: ParseTreePredicate,
-                ?exclude: ParseTreePredicate
-            ) : ResizeArray<'T> =
+          (
+            ?includeMe: bool,
+            ?predicate: ParseTreePredicate,
+            ?exclude: ParseTreePredicate
+          ) : ResizeArray<'T> =
 
             let includeMe = includeMe |? false
             let predicate = predicate |? (isType<'T>)
@@ -46,11 +46,13 @@ module ParserUtilityModule =
             let predicate = predicate |? (isType<'T>)
 
             let rec helper (from: IParseTree, includeMe: bool) =
-                [ if from <> null then
-                      if (includeMe && predicate (from) && isType<'T> from) then
-                          yield forceCast<'T> (from)
+                [
+                    if from <> null then
+                        if (includeMe && predicate (from) && isType<'T> from) then
+                            yield forceCast<'T> (from)
 
-                      yield! helper (from.Parent, true) ]
+                        yield! helper (from.Parent, true)
+                ]
 
             helper (x, includeMe)
 
@@ -59,11 +61,12 @@ module ParserUtilityModule =
             x.Descendants<IParseTree>(includeMe) |> Seq.tryFind (predicate)
 
         member x.TryFindChildren<'T when 'T :> IParseTree>
-            (
-                ?includeMe: bool,
-                ?predicate: ParseTreePredicate,
-                ?exclude: ParseTreePredicate
-            ) : 'T seq = // :'T
+          (
+            ?includeMe: bool,
+            ?predicate: ParseTreePredicate,
+            ?exclude: ParseTreePredicate
+          ) : 'T seq = // :'T
+
             let includeMe = includeMe |? false
             let predicate = predicate |? truthyfy
             let predicate x = isType<'T> x && predicate x
@@ -71,12 +74,11 @@ module ParserUtilityModule =
             x.Descendants<'T>(includeMe, predicate, exclude) 
 
         member x.TryFindFirstChild<'T when 'T :> IParseTree>
-            (
-                ?includeMe: bool,
-                ?predicate: ParseTreePredicate,
-                ?exclude: ParseTreePredicate
-            ) : 'T option = // :'T
-
+          (
+            ?includeMe: bool,
+            ?predicate: ParseTreePredicate,
+            ?exclude: ParseTreePredicate
+          ) : 'T option = // :'T
             x.TryFindChildren(includeMe |? false, predicate |? truthyfy, exclude |? falsify) |> Seq.tryHead
           
 
@@ -122,8 +124,7 @@ module ParserUtilityModule =
             option {
                 let! idCtx = x.TryFindNameComponentContext()
 
-                if  idCtx :? Identifier1Context 
-                then
+                if  idCtx :? Identifier1Context then
                     return [| idCtx.GetText() |]
                 else
                     let name = idCtx.GetText()

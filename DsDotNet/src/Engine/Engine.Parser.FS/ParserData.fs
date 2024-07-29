@@ -11,7 +11,9 @@ module ParserDataModule =
         let createParam () =
             {
                 defaultStorageCreationParams(unbox v) (VariableTag.PcUserVariable|>int) with
-                    Name=name; Comment=comment}
+                    Name=name; Comment=comment
+            }
+
         match v.GetType().Name with
         | BOOL   -> new MemberVariable<bool>   (createParam())
         | CHAR   -> new MemberVariable<char>   (createParam())

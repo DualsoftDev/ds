@@ -39,8 +39,7 @@ module RunTime =
             let subscription =
                 CpusEvent.ValueSubject.Subscribe(fun (_, stg, _) ->
                     //TagWeb 전송 대상만 이벤트 처리
-                    if hmiTags.ContainsKey stg.Name   
-                    then 
+                    if hmiTags.ContainsKey stg.Name then 
                         let tagWeb = hmiTags[stg.Name]
                         debugfn $"Server Updating TagWeb from CPU: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"
                         tagWeb.SetValue(stg.BoxedValue)
@@ -48,10 +47,10 @@ module RunTime =
                 )
             disposables.Add subscription
 
-            if RuntimeDS.Package.IsPackageSIM()
-            then stopBtn.BoxedValue <- false
-                 systems.Iter(fun sys-> cpuSimOn(sys))
-                 systems.Iter(fun sys-> preAutoDriveAction(sys))
+            if RuntimeDS.Package.IsPackageSIM() then
+                stopBtn.BoxedValue <- false
+                systems.Iter(fun sys-> cpuSimOn(sys))
+                systems.Iter(fun sys-> preAutoDriveAction(sys))
 
 
         let subscription = 
@@ -82,29 +81,32 @@ module RunTime =
             chTags
 
         let storages = mySystem.Storages 
-        let tagIndexSet = storages 
-                          |> Seq.groupBy(fun f->f.Value.DataType)
-                          |> Seq.collect(fun (k, v) -> v |> Seq.mapi(fun i s -> s.Value.Name, (k, i)))
-                          |> dict
+        let tagIndexSet =
+            storages 
+            |> Seq.groupBy(fun f -> f.Value.DataType)
+            |> Seq.collect(fun (k, v) -> v |> Seq.mapi(fun i s -> s.Value.Name, (k, i)))
+            |> dict
 
 
         let mutable ctsScan = new CancellationTokenSource()
         let asyncStart = 
             async { 
-                        // 시스템 ON 및 값 변경이 없는 조건 수식은 관련 수식은 Changed Event가 없어서 한 번 수행해줌
+                // 시스템 ON 및 값 변경이 없는 조건 수식은 관련 수식은 Changed Event가 없어서 한 번 수행해줌
                 for s in statements do s.Do()
-                        //timer, counter 제외 timer.DN, ctn.UP, ctn.DN 은 TagKind 부여해서 동작
-                use _ = CpusEvent.ValueSubject
-                                 .Where(fun (_, stg, _) -> stg.TagKind <> skipValueChangedForTagKind) 
-                                 .Subscribe(fun _ -> if not(ctsScan.IsCancellationRequested) then ctsScan.Cancel())
+
+                //timer, counter 제외 timer.DN, ctn.UP, ctn.DN 은 TagKind 부여해서 동작
+                use _ =
+                    CpusEvent.ValueSubject
+                        .Where(fun (_, stg, _) -> stg.TagKind <> skipValueChangedForTagKind) 
+                        .Subscribe(fun _ -> if not ctsScan.IsCancellationRequested then ctsScan.Cancel())
                 
                 while run do
-                    scanOnce() |> ignore 
+                    scanOnce() |> ignore
                     try
-                        if RuntimeDS.Package.IsPackageSIM()
-                        then do! Async.Sleep(scanSimDelay)
+                        if RuntimeDS.Package.IsPackageSIM() then
+                            do! Async.Sleep(scanSimDelay)
                         else 
-                                         //10초 딜레이 크게 의미없음 CpusEvent.ValueSubject 되면 빠져나옴
+                            //10초 딜레이 크게 의미없음 CpusEvent.ValueSubject 되면 빠져나옴
                             do! Async.AwaitTask(Task.Delay(10000, ctsScan.Token))
                     with
                     | :? TaskCanceledException -> ctsScan <- new CancellationTokenSource()

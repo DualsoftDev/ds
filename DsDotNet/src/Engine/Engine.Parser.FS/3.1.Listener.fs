@@ -30,7 +30,12 @@ module private DsParserHelperModule =
         let api = jobNameFqdn.Last()
         //let api = GetLastParenthesesReplaceName (jobNameFqdn.Last(), "")
         let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
-        {ApiFqnd = [|device; api|]; TaskDevParamIO =TaskDevParamIO; InAddress = inaddr; OutAddress = outaddr}
+        
+        {
+            ApiFqnd = [|device; api|]
+            TaskDevParamIO = TaskDevParamIO
+            InAddress = inaddr; OutAddress = outaddr
+        }
 
     type DsSystem with
 
@@ -49,20 +54,22 @@ module private DsParserHelperModule =
             }
 
         member x.LoadExternalSystemAs
-            (
-                systemRepo: ShareableSystemRepository,
-                loadedName: string,
-                absoluteFilePath: string,
-                relativeFilePath: string
-            ) =
+          (
+            systemRepo: ShareableSystemRepository,
+            loadedName: string,
+            absoluteFilePath: string,
+            relativeFilePath: string
+          ) =
             let external =
                 let param =
-                    { ContainerSystem = x
-                      AbsoluteFilePath = absoluteFilePath
-                      RelativeFilePath = relativeFilePath
-                      LoadedName = loadedName
-                      ShareableSystemRepository = systemRepo
-                      LoadingType = DuExternal }
+                    {
+                        ContainerSystem = x
+                        AbsoluteFilePath = absoluteFilePath
+                        RelativeFilePath = relativeFilePath
+                        LoadedName = loadedName
+                        ShareableSystemRepository = systemRepo
+                        LoadingType = DuExternal
+                    }
 
                 match systemRepo.TryFind(absoluteFilePath) with
                 | Some existing -> ExternalSystem(existing, param, false) // 기존 loading 된 system share
@@ -119,8 +126,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let name =
                 options.LoadedSystemName |? (ctx.systemName().GetText())
 
-            
-
             let repo = options.ShareableSystemRepository
 
             match options.LoadingType, options.AbsoluteFilePath with
@@ -172,17 +177,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let pred (tree: IParseTree) = 
                 tree :? Identifier1Context || tree :? CausalOperatorResetContext
 
-            [| for des in ctx.Descendants<RuleContext>(false, pred) do
-                   des.GetText() |]
+            [|
+                for des in ctx.Descendants<RuleContext>(false, pred) do
+                   des.GetText()
+            |]
 
         createApiResetInfo terms x.TheSystem
         
     member x.GetValidFile(fileSpecCtx: FileSpecContext) =
           fileSpecCtx
-                    .TryFindFirstChild<FilePathContext>()
-                    .Value.GetText()
-                    .DeQuoteOnDemand()
-                |> PathManager.getValidFile
+            .TryFindFirstChild<FilePathContext>()
+            .Value.GetText()
+            .DeQuoteOnDemand()
+            |> PathManager.getValidFile
 
     member private x.GetFilePath(relativeFilePath: string) =
         let absoluteFilePath =
@@ -213,8 +220,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     override x.EnterLoadDeviceBlock(ctx: LoadDeviceBlockContext) =
          let file = 
              match ctx.TryFindFirstChild<FileSpecContext>() with
-             |Some f ->  x.GetValidFile f
-             |None -> ""
+             | Some f ->  x.GetValidFile f
+             | None -> ""
 
          let devs = ctx.TryFindFirstChild<DeviceNameListContext>().Value.Descendants<DeviceNameContext>()
          devs.Iter(fun dev->
@@ -231,15 +238,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
         let loadedName = ctx.CollectNameComponents().CombineDequoteOnDemand()
 
-       
-
         x.TheSystem.LoadExternalSystemAs(
             options.ShareableSystemRepository,
             loadedName,
             absoluteFilePath,
             simpleFilePath
-        )
-        |> ignore
+        ) |> ignore
 
     //override x.EnterCodeBlock(ctx: CodeBlockContext) =
     //    let code = ctx.GetOriginalText()
@@ -261,17 +265,15 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             x.TheSystem.AddVariables variableData   |>ignore
 
 
-        ctx.variableDef() |> Seq.iter (fun vari ->
+        for vari in ctx.variableDef() do
             let varName = vari.varName().GetText()
             let varType = vari.varType().GetText() |> textToDataType
-            if vari.TryFindFirstChild<InitValueContext>().IsSome
-            then 
+            if vari.TryFindFirstChild<InitValueContext>().IsSome then 
                 failWithLog $"{varName} = {vari.initValue().GetText()}; 할당은 Const 타입만 가능합니다.\nCommand를 이용하세요."
             let value = DsDataType.typeDefaultValue (varType.ToType())
             addVari varName varType  $"{value}" false
-            )   
 
-        ctx.constDef() |> Seq.iter (fun vari ->
+        for vari in ctx.constDef() do
             let constName = vari.constName().GetText()
             let varType = vari.varType().GetText() |> textToDataType
             if vari.TryFindFirstChild<InitValueContext>().IsNone
@@ -280,7 +282,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             let value = vari.initValue().GetText()
             addVari constName varType  value true
-            )
             
     override x.EnterLangVersionDef(ctx: LangVersionDefContext) =
         let langVer = Version.Parse(ctx.version().GetText())
@@ -314,11 +315,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let ns = ctx.CollectNameComponents().ToFSharpList()
 
-        { ContextType = ctx.GetType()
-          System = if system.IsSome then Some (system.Value.DeQuoteOnDemand()) else None
-          Flow = if flow.IsSome then Some (flow.Value.DeQuoteOnDemand()) else None
-          Parenting = if parenting.IsSome then Some (parenting.Value.DeQuoteOnDemand()) else None
-          Names = ns.Select(fun s->s.DeQuoteOnDemand()).ToFSharpList() }
+        {
+            ContextType = ctx.GetType()
+            System = if system.IsSome then Some (system.Value.DeQuoteOnDemand()) else None
+            Flow = if flow.IsSome then Some (flow.Value.DeQuoteOnDemand()) else None
+            Parenting = if parenting.IsSome then Some (parenting.Value.DeQuoteOnDemand()) else None
+            Names = ns.Select(fun s->s.DeQuoteOnDemand()).ToFSharpList()
+        }
 
     /// parser rule context 에 대한 객체 기준의 정보를 얻는다.  DsSystem 객체, flow 객체, parenting 객체 등
     member x.GetObjectContextInformation(system: DsSystem, parserRuleContext: ParserRuleContext) =
@@ -333,10 +336,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 return! flow.Graph.TryFindVertex<Real>(parentingName)
             }
 
-        { System = system
-          Flow = flow
-          Parenting = parenting
-          NamedContextInformation = ci }
+        {
+            System = system
+            Flow = flow
+            Parenting = parenting
+            NamedContextInformation = ci
+        }
 
     /// 인과 token 으로 사용된 context 에 해당하는 vertex 를 찾는다.
     member x.TryFindVertex(ctx: CausalTokenContext) : Vertex option =
@@ -350,31 +355,32 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
             let graph = parentWrapper.GetGraph()
             
+            let ciNamesCombined = ci.Names.Combine()
             match ci.Names with
             | [ realOrAlias ] -> 
                 return! graph.TryFindVertex(realOrAlias)
 
             | _n1 :: [ _n2 ] -> // (other flow real) or (call.api)
-                match graph.TryFindVertex(ci.Names.Combine()) with
+                match graph.TryFindVertex(ciNamesCombined) with
                 | Some v -> return v
                 | None ->
-                    return! graph.Vertices.TryFind(fun v -> 
+                    return!
+                        graph.Vertices.TryFind(fun v -> 
                             match v with
-                            | :? Alias as a -> a.TargetWrapper.RealTarget()
-                                                .Value.ParentNPureNames.Combine() = ci.Names.Combine()
-                            |_-> false)
+                            | :? Alias as a ->
+                                a.TargetWrapper.RealTarget().Value.ParentNPureNames.Combine() = ciNamesCombined
+                            | _ -> false)
                                         
-
             | _n1 :: [ _n2; _n3]  ->  //other flow call
                 if parentWrapper.GetCore() :? Real 
                     && parentWrapper.GetFlow().Name = _n1 
                 then 
                     return! graph.TryFindVertex(ci.Names.Skip(1).Combine())
                 else 
-                    return! graph.TryFindVertex(ci.Names.Combine())
+                    return! graph.TryFindVertex(ciNamesCombined)
 
             | _n1 :: [ _n2; _n3; _n4 ]  -> //other flow call
-                    return! graph.TryFindVertex(ci.Names.Combine())
+                    return! graph.TryFindVertex(ciNamesCombined)
               
             | _ -> failwithlog "ERROR"
         }
@@ -436,10 +442,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let ci = x.GetContextInformation(ctx)
             let system = x.TheSystem
             let parentWrapper = system.TryFindParentWrapper(ci)
-            if parentWrapper.IsSome then
-                (parentWrapper.Value, ci, ctx) |> Some
-            else
-                None
+            parentWrapper.Map(fun w -> (w, ci, ctx))
 
         let candidateCtxs: ParserRuleContext list =
             let normalCausalContext =  
@@ -496,9 +499,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for (optParent, ctxInfo, ctx) in candidates do
                     let parent = optParent
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-                    if  (ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> 
-                       ||ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
-                         && existing.IsNone
+                    if  ( ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> 
+                       || ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
+                       && existing.IsNone
                     then
                         let opCmd = ctxInfo.GetRawName().DeQuoteOnDemand()
                         match tryFindFunc system opCmd with
@@ -556,7 +559,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | _ ->
                                 errorLoadCore ctx
 
-
             loop
 
         let createRealVertex = tokenCreator 0
@@ -599,9 +601,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             |> ignore
 
         let createDeviceVariable (system: DsSystem)  (taskDevPara:TaskDevPara option) (stgKey:string) address =
-            if taskDevPara.IsSome
-            then
-                let taskDevPara = taskDevPara |> Option.get
+            match taskDevPara with
+            | Some taskDevPara ->
                 match taskDevPara.DevName with
                 | Some name ->
                     let dataType = taskDevPara.Type
@@ -611,6 +612,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     options.Storages.Add(name, variable) |> ignore
 
                 | None -> ()
+            | None -> ()
 
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
@@ -622,8 +624,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let taskDev = TaskDev(apiPara, jobName, device, system)
                 let apiPureName = taskDev.DeviceApiPureName(jobName)
                 let updatedTaskDev = 
-                    if dicTaskDevs.ContainsKey(apiPureName)
-                    then
+                    if dicTaskDevs.ContainsKey(apiPureName) then
                         let oldTaskDev = dicTaskDevs[apiPureName]
                         oldTaskDev.AddOrUpdateApiTaskDevPara(jobName, apiPoint, taskDevPara)
                         oldTaskDev
@@ -631,40 +632,43 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         dicTaskDevs.Add(apiPureName, taskDev)   
                         taskDev
 
-                if addr.In <> updatedTaskDev.InAddress 
-                then
-                    updatedTaskDev.InAddress <- if updatedTaskDev.IsInAddressEmpty
-                                                then addr.In
-                                                else failWithLog $"Address is already assigned {device} {apiPoint.QualifiedName}\n old:{addr.Out} new:{updatedTaskDev.OutAddress}"
-                if addr.Out <> updatedTaskDev.OutAddress 
-                then
-                    updatedTaskDev.OutAddress <- if updatedTaskDev.IsOutAddressEmpty 
-                                                 then addr.Out 
-                                                 else failWithLog $"Address is already assigned {device} {apiPoint.QualifiedName}\n old:{addr.Out} new:{updatedTaskDev.OutAddress}"
+                let msg = $"Address is already assigned {device} {apiPoint.QualifiedName}\n old:{addr.Out} new:{updatedTaskDev.OutAddress}"
+                if addr.In <> updatedTaskDev.InAddress then
+                    updatedTaskDev.InAddress <-
+                        if updatedTaskDev.IsInAddressEmpty then
+                            addr.In
+                        else
+                            failWithLog msg
+                if addr.Out <> updatedTaskDev.OutAddress then
+                    updatedTaskDev.OutAddress <-
+                        if updatedTaskDev.IsOutAddressEmpty then
+                            addr.Out
+                        else
+                            failWithLog msg
                 updatedTaskDev
 
             for jobNameFqdn, jobParam, apiDefCtxs, callListingCtx in callListings do
                 let jobName = jobNameFqdn.CombineDequoteOnDemand()
 
                 let apiDefs = 
-                    if apiDefCtxs.any()
-                    then  
-                        [for apiDefCtx in apiDefCtxs do
-                            let apiPath = apiDefCtx.CollectNameComponents()
-                            let (inaddr, inParam), (outaddr, outParm) =
-                                match apiDefCtx.TryFindFirstChild<TaskDevParaInOutContext>() with
-                                | Some taskDevPara -> 
-                                    commonDeviceParamExtractor taskDevPara 
-                                | None ->
-                                     (TextAddrEmpty, defaultTaskDevPara()), (TextAddrEmpty, defaultTaskDevPara())
-                            let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
-                            yield {ApiFqnd = apiPath;  TaskDevParamIO = TaskDevParamIO; InAddress = inaddr; OutAddress = outaddr}
+                    if apiDefCtxs.any() then  
+                        [
+                            for apiDefCtx in apiDefCtxs do
+                                let apiPath = apiDefCtx.CollectNameComponents()
+                                let (inaddr, inParam), (outaddr, outParm) =
+                                    match apiDefCtx.TryFindFirstChild<TaskDevParaInOutContext>() with
+                                    | Some taskDevPara -> 
+                                        commonDeviceParamExtractor taskDevPara 
+                                    | None ->
+                                         (TextAddrEmpty, defaultTaskDevPara()), (TextAddrEmpty, defaultTaskDevPara())
+                                let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
+                                yield {ApiFqnd = apiPath;  TaskDevParamIO = TaskDevParamIO; InAddress = inaddr; OutAddress = outaddr}
                         ]
                     else
-                        [getAutoGenDevApi (jobNameFqdn,  callListingCtx)]
+                        [ getAutoGenDevApi (jobNameFqdn,  callListingCtx) ]
 
                 let taskList =
-                    [   
+                    [
                         for ad in apiDefs do
                             let apiFqnd = ad.ApiFqnd |> Seq.toList
                             let devApiName = apiFqnd.Head
@@ -678,10 +682,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                 let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice 
                                                 match tryFindCallingApiItem system device api allowAutoGenDevice with
                                                 | Some api -> Some api
-                                                | None ->  
-                                                    if allowAutoGenDevice &&
-                                                        x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
-                                                    then x.CreateLoadedDeivce(device)
+                                                | None ->
+                                                    let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
+                                                    if createDevice then
+                                                        x.CreateLoadedDeivce(device)
                                                     None
                                  
                                        
@@ -704,12 +708,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                         | None -> failwithlog $"device({device}) api({api}) is not exist"
 
                                 | _ -> 
-                                    let errText = String.Join(", ", apiFqnd.ToArray())
+                                    let errText = String.Join(", ", apiFqnd)
                                     failwithlog $"loading type error ({errText})device"
                             
-                            let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName) options.Storages
+                            let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName)  options.Storages
                             let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
-                            createDeviceVariable system TaskDevParamIO.InParam plcName_I task.InAddress
+                            createDeviceVariable system TaskDevParamIO.InParam  plcName_I task.InAddress
                             createDeviceVariable system TaskDevParamIO.OutParam plcName_O task.OutAddress
 
                             yield task

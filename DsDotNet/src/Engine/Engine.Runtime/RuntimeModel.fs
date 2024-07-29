@@ -5,10 +5,7 @@ open IO.Core
 open Engine.Cpu
 open Engine.Core
 open Engine.Parser.FS
-open System.Collections.Generic
 open Dual.Common.Core.FS
-open Engine.CodeGenCPU
-open Engine.CodeGenHMI.ConvertHMI
 type FilePath = string
 
 

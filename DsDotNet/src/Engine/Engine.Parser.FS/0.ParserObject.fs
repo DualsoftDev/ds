@@ -1,9 +1,6 @@
 namespace Engine.Parser.FS
 
-open System
-open System.Collections.Generic
 open Engine.Core
-open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ParserOptionModule =
@@ -30,18 +27,19 @@ module ParserOptionModule =
     type ParserOptions with
 
         static member Create4Runtime(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, autoGenDevice, isNewModel) =
-            { ActiveCpuName = activeCpuName
-              IsSimulationMode = false
-              AllowSkipExternalSegment = false
-              AllowAutoGenDevice = autoGenDevice
-              Storages = Storages()
-              ReferencePath = referencePath
-              LoadedSystemName = None
-              ShareableSystemRepository = systemRepo
-              AbsoluteFilePath = absoluteFilePath
-              LoadingType = loadingType 
-              IsNewModel = isNewModel
-              }
+            {
+                ActiveCpuName = activeCpuName
+                IsSimulationMode = false
+                AllowSkipExternalSegment = false
+                AllowAutoGenDevice = autoGenDevice
+                Storages = Storages()
+                ReferencePath = referencePath
+                LoadedSystemName = None
+                ShareableSystemRepository = systemRepo
+                AbsoluteFilePath = absoluteFilePath
+                LoadingType = loadingType 
+                IsNewModel = isNewModel
+            }
 
         static member Create4RuntimeLoadedSystem(systemRepo, referencePath, activeCpuName, absoluteFilePath, loadingType, autoGenDevice, loadedName) =
             let runtime =

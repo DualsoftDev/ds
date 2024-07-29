@@ -58,22 +58,24 @@ module ListnerCommonFunctionGeneratorUtil =
             => "Main" = {A."+"; B."+"}
              *)
             let safetyKvs =
-                [ for safetyDef in ctx do
-                      let key =
-                          let safety =
-                              safetyDef.TryFindFirstChild(fun (t: IParseTree) -> t :? SafetyAutoPreKeyContext).Value
+                [
+                    for safetyDef in ctx do
+                        let key =
+                            let safety =
+                                safetyDef.TryFindFirstChild(fun (t: IParseTree) -> t :? SafetyAutoPreKeyContext).Value
 
-                          safety.CollectNameComponents() // ["Main"] or ["My", "Flow", "Main"]
+                            safety.CollectNameComponents() // ["Main"] or ["My", "Flow", "Main"]
 
-                      let valueHeader = safetyDef.Descendants<SafetyAutoPreValuesContext>().First()
+                        let valueHeader = safetyDef.Descendants<SafetyAutoPreValuesContext>().First()
 
-                      let values =
-                          valueHeader
-                              .Descendants<Identifier3Context>()
-                              .Select(collectNameComponents)
-                              .ToArray()
+                        let values =
+                            valueHeader
+                                .Descendants<Identifier3Context>()
+                                .Select(collectNameComponents)
+                                .ToArray()
 
-                      (key, values) ]
+                        (key, values)
+                ]
 
             safetyKvs
 
@@ -153,23 +155,22 @@ module ListnerCommonFunctionGeneratorUtil =
                 }
 
     let commonOpFunctionExtractor (funcCallCtxs: FuncCallContext array) (callName:string) (system:DsSystem) =
-        if funcCallCtxs.Length > 1 
-        then 
+        if funcCallCtxs.Length > 1 then 
             failwithlog $"not support job multi function {callName}"
 
-        if funcCallCtxs.any() 
-            then 
-                let funcName = funcCallCtxs.Head().GetText().TrimStart('$')
-                Some (system.Functions.Cast<OperatorFunction>().First(fun f->f.Name = funcName))
-            else None 
+        if funcCallCtxs.any() then 
+            let funcName = funcCallCtxs.Head().GetText().TrimStart('$')
+            Some (system.Functions.Cast<OperatorFunction>().First(fun f->f.Name = funcName))
+        else
+            None 
 
     let getCode (executeCode:String) =
         assert( (executeCode.StartsWith("${") || executeCode.StartsWith("#{")) && executeCode.EndsWith("}"))
         // 처음 "#{" or "${"와 끝의  "}" 제외
         let pureCode = executeCode.Substring(2, executeCode.Length - 2).TrimEnd('}') 
         pureCode.Split(';')
-                .Map(fun s->s.Trim().Trim([|'\r';'\n'|]))
-                .JoinWith(";\r\n").Trim([|'\r';'\n'|])
+            .Map(fun s->s.Trim().Trim([|'\r';'\n'|]))
+            .JoinWith(";\r\n").Trim([|'\r';'\n'|])
 
     let commonFunctionCommandExtractor (fDef: CommandDefContext)=
         // 함수 호출과 관련된 매개변수 추출

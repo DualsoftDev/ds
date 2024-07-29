@@ -292,11 +292,13 @@ module rec ExpressionParserModule =
                     | _ -> failwithlog "ERROR"
 
                 let tcParams =
-                    { Storages = storages
-                      Name = name
-                      Preset = preset
-                      RungInCondition = rungInCondtion
-                      FunctionName = functionName }
+                    {
+                        Storages = storages
+                        Name = name
+                        Preset = preset
+                        RungInCondition = rungInCondtion
+                        FunctionName = functionName
+                    }
 
                 let target = ParserUtil.runtimeTarget
                 match typ, functionName, args with
@@ -544,22 +546,25 @@ module rec ExpressionParserModule =
             let children = parser.toplevels().children
 
             let topLevels =
-                [   for t in children do
+                [
+                    for t in children do
                         match t with
                         | :? ToplevelContext as ctx -> ctx
                         | :? ITerminalNode as semicolon when semicolon.GetText() = ";" -> ()
-                        | _ -> failwithlog "ERROR" ]
+                        | _ -> failwithlog "ERROR"
+                ]
 
 
-            [   for t in topLevels do
+            [
+                for t in topLevels do
                     let text = t.GetOriginalText()
                     tracefn $"Toplevel: {text}"
                     assert (t.ChildCount = 1)
 
                     match t.children[0] with
                     | :? StatementContext as stmt -> tryCreateStatement parserData stmt
-                    | _ -> failwith $"ERROR: {text}: expect statements" ]
-            |> List.choose id
+                    | _ -> failwith $"ERROR: {text}: expect statements"
+            ] |> List.choose id
         with exn ->
             failwith $"Failed to parse code: {text}\r\n{exn}"
 
@@ -573,9 +578,11 @@ module rec ExpressionParserModule =
 
         member x.CreateBridgeTag(name: string, address: string, boxedValue: obj) : ITag =
             let createParam () =
-                {   defaultStorageCreationParams (unbox boxedValue) (VariableTag.PcUserVariable|>int) with
+                {
+                    defaultStorageCreationParams (unbox boxedValue) (VariableTag.PcUserVariable|>int) with
                         Name = name
-                        Address = Some address }
+                        Address = Some address
+                }
 
             match x.Name with
             | BOOL    -> new Tag<bool>  (createParam ())

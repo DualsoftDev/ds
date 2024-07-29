@@ -20,8 +20,7 @@ type VertexTagManager with
         [
             let running = v.MM.Expr <&&> !@call.End <&&> !@iop
             yield running --@ (v.TOUT, v.System._tout.Value, getFuncName())
-            if RuntimePackage.PCSIM = RuntimeDS.Package   
-            then
+            if RuntimePackage.PCSIM = RuntimeDS.Package then
                 yield(vOff, rst) ==| (v.ErrOnTimeOver , getFuncName())
             else 
                 yield(v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , getFuncName())
@@ -41,8 +40,7 @@ type VertexTagManager with
 
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
-            if RuntimeDS.Package.IsPLCorPLCSIM() 
-            then
+            if RuntimeDS.Package.IsPLCorPLCSIM() then
                 yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, getFuncName())
                 yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  getFuncName())
 
@@ -55,8 +53,7 @@ type VertexTagManager with
             (* short error *)
             yield (checkCondi <&&>  rxReadyExpr <&&> v.ErrShortRising.Expr,  rst)  ==| (v.ErrShort, getFuncName())
             (* open  error *)
-            if call.UsingTon
-            then
+            if call.UsingTon then
                 yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, getFuncName())
             else
                 yield (checkCondi <&&> rxFinishExpr                      <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, getFuncName())

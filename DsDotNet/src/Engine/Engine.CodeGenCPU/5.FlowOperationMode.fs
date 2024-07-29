@@ -18,8 +18,7 @@ type Flow with
     member f.O2_AutoOperationMode(isActive:bool) =
         let set = f.AutoExpr 
         let rst = !@f.r_st.Expr
-        if isActive
-        then 
+        if isActive then 
             (set, rst) --| (f.aop, getFuncName())
         else
             (f._on.Expr, f._off.Expr) --| (f.aop, getFuncName())

@@ -14,18 +14,18 @@ type CallVertexTagManager with
     member v.C1_DoOperator() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
-        let sts = call.TargetFunc.Value.Statements
-        if sts.Count = 1 then 
+        let sts = call.TargetFunc.Value.Statements.ToFSharpList()
+        match sts with
+        | [] -> []
+        | h::[] ->
             [
-                match sts.Head() with
+                match h with
                 | DuAssign (_, cmdExpr, _) ->
                     yield withExpressionComment comment (DuAssign (None, cmdExpr, v.CallOperatorValue))
                 |_ -> failWithLog $"err {comment}"
             ]
-        elif sts.Count > 1 then
+        | _ ->
             failwithlog $"Operator({call.Name})에는 하나의 수식이 필요합니다. \r\n테이블 정의 수식 Count:({sts.Count})"
-        else
-            []
          
 
     member v.C2_DoCommand() =

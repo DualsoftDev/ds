@@ -161,8 +161,8 @@ module ConvertCPU =
         let pureCalls = 
             calls.OfType<Call>()@calls.OfType<Alias>().Choose(fun a->a.GetPureCall())
         
-        if pureCalls.Select(fun c->c.TargetJob).Distinct().Count() > 1
-        then failwithlog $"Error : {getFuncName()} {pureCalls.Select(fun c->c.TargetJob).Distinct().Count()}"
+        if pureCalls.Select(fun c->c.TargetJob).Distinct().Count() > 1 then
+            failwithlog $"Error : {getFuncName()} {pureCalls.Select(fun c->c.TargetJob).Distinct().Count()}"
 
         pureCalls.First()  // 동일 job으로 선정해서 아무거나 가져옴
 
@@ -213,8 +213,8 @@ module ConvertCPU =
     let private applyVariables(s:DsSystem) =
         [
             for v in s.Variables do
-                if v.VariableType = Immutable
-                then yield v.VM.V1_ConstMove(s)
+                if v.VariableType = Immutable then
+                    yield v.VM.V1_ConstMove(s)
 
             for v in s.ActionVariables do
                 yield v.VM.V2_ActionVairableMove(s)
@@ -238,8 +238,7 @@ module ConvertCPU =
             yield s.SetFlagForEmulation()
             let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
             for td, call in devsCall do
-                if not(td.IsRootOnlyDevice)
-                then
+                if not(td.IsRootOnlyDevice) then
                     if td.InTag.IsNonNull() then  
                         yield td.SensorEmulation(s, call.TargetJob)
         ]
@@ -282,16 +281,14 @@ module ConvertCPU =
             
         [
             //Active 시스템 적용 
-            if isActive
-            then   
+            if isActive then   
                 yield! applySystemSpec sys
                 yield! sys.B2_SWButtonOutput()
                 yield! sys.B4_SWModeLamp() 
 
                 yield! sys.E2_PLCOnly()
 
-                if RuntimeDS.Package.IsPackageSIM()
-                then 
+                if RuntimeDS.Package.IsPackageSIM() then 
                     yield! sys.Y1_SystemSimulationForFlow(sys)
 
                     for subSys in sys.GetRecursiveLoadedSystems() do

@@ -9,8 +9,8 @@ open System
 module ConvertErrorCheck =
   
     let internal checkErrHWItem(sys:DsSystem) = 
-        let hwManuFlows = sys.ManualHWButtons |>Seq.collect(fun f->f.SettingFlows)
-        let hwAutoFlows = sys.AutoHWButtons |>Seq.collect(fun f->f.SettingFlows)
+        let hwManuFlows = sys.ManualHWButtons |> Seq.collect(fun f -> f.SettingFlows)
+        let hwAutoFlows = sys.AutoHWButtons   |> Seq.collect(fun f -> f.SettingFlows)
         for btn in sys.AutoHWButtons do
             for flow in btn.SettingFlows do
                 if not(hwManuFlows.Contains flow)
@@ -33,16 +33,16 @@ module ConvertErrorCheck =
 
     let internal checkErrApi(sys:DsSystem) =
         for coin in sys.GetVerticesOfJobCalls() do
-              for td in coin.TargetJob.TaskDefs do
-                  for api in td.ApiItems do
-                      if api.RX.IsNull() then
-                          failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
-                      if api.TX.IsNull() then
-                          failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
+            for td in coin.TargetJob.TaskDefs do
+                for api in td.ApiItems do
+                    if api.RX.IsNull() then
+                        failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
+                    if api.TX.IsNull() then
+                        failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
-                      if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction = Push then
-                          if coin.MutualResetCoins.isEmpty() then 
-                              failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
+                    if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction = Push then
+                        if coin.MutualResetCoins.isEmpty() then 
+                            failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
 
 
 
@@ -67,7 +67,10 @@ module ConvertErrorCheck =
         let groupDev = devicesCalls  |> Seq.groupBy (fun (dev, _) -> dev.DeviceName)
     
         for (_, calls) in groupDev  do
-            let jobMultis = calls |> Seq.map (fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount ) |> Seq.distinct
+            let jobMultis =
+                calls
+                |> Seq.map (fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount )
+                |> Seq.distinct
             if Seq.length jobMultis > 1 then
                 let callTexts = String.Join("\r\n", calls.Select(fun (_, call) -> call.Name))
                 failwithf $"동일 다비이스의 multi 수량은 같아야 합니다. \r\n{callTexts}"
@@ -89,7 +92,7 @@ module ConvertErrorCheck =
         |]
 
     let CheckRealReset (sys:DsSystem) =
-        let errors = CheckRealEdge sys false
+        let errors = CheckRealEdge sys false |> toArray
         if errors.Any() then
             let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Parent.GetFlow().Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
@@ -97,7 +100,7 @@ module ConvertErrorCheck =
     let CheckNullAddress (sys: DsSystem) = 
         // Check for null addresses in jobs
         let nullTagJobs = 
-            sys.Jobs.SelectMany(fun j->j.GetNullAddressDevTask())
+            sys.Jobs.SelectMany(fun j->j.GetNullAddressDevTask()) |> toArray
 
         if nullTagJobs.any() then 
             let errJobs = String.Join ("\n", nullTagJobs.Select(fun s->s.QualifiedName))
@@ -107,16 +110,20 @@ module ConvertErrorCheck =
         let nullBtns = 
             sys.HWButtons
             |> filter (fun b -> b.InTag.IsNull() || (b.OutTag.IsNull() && b.OutAddress <> TextSkip))
+            |> toArray
 
         if nullBtns.Any() then 
-            let errBtns = nullBtns |> map (fun b -> 
-                let inout = if b.InTag.IsNull() then "입력" else "출력"
-                $"{b.ButtonType} 해당 {inout} 주소가 없습니다. [{b.Name}]") |> String.concat "\n"
+            let errBtns =
+                nullBtns
+                |> map (fun b -> 
+                    let inout = if b.InTag.IsNull() then "입력" else "출력"
+                    $"{b.ButtonType} 해당 {inout} 주소가 없습니다. [{b.Name}]")
+                |> String.concat "\n"
             
             failwithf $"버튼 주소가 없습니다. \n{errBtns}"
 
         // Check for null lamps
-        let nullLamps = sys.HWLamps |> filter (fun l -> l.OutTag.IsNull())
+        let nullLamps = sys.HWLamps |> filter (fun l -> l.OutTag.IsNull()) |> toArray
         if nullLamps.Any() then 
             let errLamps = nullLamps |> map (fun l -> l.Name) |> String.concat "\n"
             failwithf $"램프 주소가 없습니다. \n{errLamps}"
@@ -127,8 +134,8 @@ module ConvertErrorCheck =
                 if td.ExistOutput then 
                     let outParam = td.GetOutParam(j)
                     if j.ActionType = Push then 
-                        if outParam.Type = DuBOOL then 
-                                failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
+                        if outParam.Type = DuBOOL then
+                            failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
                     else 
                         if outParam.Type <> DuBOOL && outParam.DevValue.IsNull() then 
                             failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다." 

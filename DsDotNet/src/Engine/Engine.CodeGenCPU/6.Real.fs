@@ -26,16 +26,16 @@ type RealVertexTagManager with
                     <&&> if v.Real.Motion.IsSome then   v.MotionRelay.Expr else v._on.Expr
 
 
-                if v.IsFinished && (RuntimeDS.Package.IsPackageSIM())
-                then
+                if v.IsFinished && (RuntimeDS.Package.IsPackageSIM()) then
                     endExpr <||> v.ON.Expr <||> !@v.Link.Expr
                 else                          
                     endExpr <||> v.ON.Expr 
 
             let rst = 
-                if real.Graph.Vertices.any()
-                then v.RT.Expr <&&> real.CoinAlloffExpr  
-                else v.RT.Expr 
+                if real.Graph.Vertices.any() then
+                    v.RT.Expr <&&> real.CoinAlloffExpr  
+                else
+                    v.RT.Expr 
 
             //수식 순서 중요 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
             //1. EndTag 
@@ -55,21 +55,24 @@ type RealVertexTagManager with
 
     member v.R4_RealLink() =
         let real = v.Vertex :?> Real
-        let set = real.Graph.Vertices.OfType<Call>()
-                      .Where(fun call -> call.IsJob)
-                      .SelectMany(fun call -> call.TargetJob.ApiDefs)
-                      .Select(fun api-> api.SL2).ToAndElseOn()
+        let set =
+            real.Graph.Vertices
+                .OfType<Call>()
+                .Where(fun call -> call.IsJob)
+                .SelectMany(fun call -> call.TargetJob.ApiDefs)
+                .Select(fun api-> api.SL2).ToAndElseOn()
 
         let rst = v._off.Expr
         (set, rst) --| (v.Link, getFuncName())
       
     member v.R5_DummyDAGCoils() =
+        let fn = getFuncName()
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
         [
-            (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, getFuncName())     // S
-            (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, getFuncName())     // R
-            (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, getFuncName())     // E
+            (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, fn)     // S
+            (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, fn)     // R
+            (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, fn)     // E
         ]
 
     member v.R6_RealDataMove() = ()
@@ -80,68 +83,63 @@ type RealVertexTagManager with
         let dop = v.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
         [
-            if not(RuntimeDS.Package.IsPackageSIM())
-            then 
+            if not(RuntimeDS.Package.IsPackageSIM()) then 
                 let checking = v.G.Expr <&&> !@v.OG.Expr <&&> !@v.RR.Expr <&&> dop
                 yield (checking, rst) ==| (v.ErrGoingOrigin , getFuncName())
         ]
         
-    member v.R8_RealGoingPulse(): CommentedStatement  list =
+    member v.R8_RealGoingPulse(): CommentedStatement list =
+        let fn = getFuncName()
         [ 
-            if RuntimeDS.Package.IsPLCorPLCSIM() 
-            then
-                yield(fbRising[v.G.Expr], v._off.Expr) --| (v.GP, getFuncName())
+            if RuntimeDS.Package.IsPLCorPLCSIM() then
+                yield (fbRising[v.G.Expr], v._off.Expr) --| (v.GP, fn)
             elif RuntimeDS.Package.IsPCorPCSIM() then 
-                yield! (v.G.Expr, v.System)  --^ (v.GP, getFuncName()) 
+                yield! (v.G.Expr, v.System)  --^ (v.GP, fn) 
             else    
                 failWithLog $"Not supported {RuntimeDS.Package} package"
         ]
 
     member v.R10_RealGoingTime(): CommentedStatement  list =
+        let fn = getFuncName()
         [
             if v.Real.TimeAvg.IsSome then
-                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, getFuncName())
-                yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, getFuncName())
+                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
+                yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
                 
-                if RuntimeDS.Package.IsPackageSIM()
-                then
+                if RuntimeDS.Package.IsPackageSIM() then
                     if RuntimeDS.RuntimeMotionMode = MotionAsync then
-                        yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeAvgMsec, getFuncName())
-                        yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, getFuncName())
-                        
+                        yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeAvgMsec, fn)
+                        yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, fn)                        
                 else 
-                    yield (v.TimeStart.Expr, v._off.Expr) --| (v.TimeEnd, getFuncName())
+                    yield (v.TimeStart.Expr, v._off.Expr) --| (v.TimeEnd, fn)
                     
         ]
 
-    member v.R11_RealGoingMotion(): CommentedStatement  list =
+    member v.R11_RealGoingMotion(): CommentedStatement list =
+        let fn = getFuncName()
         [
             if v.Real.Motion.IsSome then
-                yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,  v.ET.Expr) ==| (v.MotionRelay, getFuncName())
-                yield (v.G.Expr,  v.MotionEnd.Expr <||>  v.MotionRelay.Expr) --| (v.MotionStart, getFuncName())
+                yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,  v.ET.Expr) ==| (v.MotionRelay, fn)
+                yield (v.G.Expr,  v.MotionEnd.Expr <||>  v.MotionRelay.Expr) --| (v.MotionStart, fn)
 
-                if RuntimeDS.Package.IsPackageSIM() 
-                then
-                    if RuntimeDS.RuntimeMotionMode = MotionAsync
-                    then
-                        if v.Real.TimeAvg.IsSome
-                        then
-                            yield (v.TimeEnd.Expr    , v._off.Expr) --| (v.MotionEnd, getFuncName())   
+                if RuntimeDS.Package.IsPackageSIM() then
+                    if RuntimeDS.RuntimeMotionMode = MotionAsync then
+                        if v.Real.TimeAvg.IsSome then
+                            yield (v.TimeEnd.Expr    , v._off.Expr) --| (v.MotionEnd, fn)   
                         else 
-                            yield (v.MotionStart.Expr, v._off.Expr) --| (v.MotionEnd, getFuncName())   
+                            yield (v.MotionStart.Expr, v._off.Expr) --| (v.MotionEnd, fn)   
 
-                    elif RuntimeDS.RuntimeMotionMode = MotionSync 
-                    then
-                        if v.Real.TimeAvg.IsSome
-                        then
-                            yield (v.MotionEnd.Expr    , v._off.Expr) --| (v.TimeEnd, getFuncName())   
+                    elif RuntimeDS.RuntimeMotionMode = MotionSync then
+                        if v.Real.TimeAvg.IsSome then
+                            yield (v.MotionEnd.Expr    , v._off.Expr) --| (v.TimeEnd, fn)   
                     else 
                         failwithlog $"RuntimeMotionMode err : {RuntimeDS.RuntimeMotionMode}"
                 else
                     let realSensor  = v.Real.ParentApiSensorExpr
-                    if realSensor.IsNull()
-                    then yield (v.G.Expr, v._off.Expr) --| (v.MotionEnd, getFuncName())      //실제 rx에 해당하는 하지 않으면 action 안보고 going 후 바로 MotionEnd
-                    else yield (realSensor, v._off.Expr) --| (v.MotionEnd, getFuncName())    //실제 rx에 해당하는 하면 api 실 action sensor
+                    if realSensor.IsNull() then
+                        yield (v.G.Expr, v._off.Expr) --| (v.MotionEnd, fn)      //실제 rx에 해당하는 하지 않으면 action 안보고 going 후 바로 MotionEnd
+                    else
+                        yield (realSensor, v._off.Expr) --| (v.MotionEnd, fn)    //실제 rx에 해당하는 하면 api 실 action sensor
                     
         ]
 

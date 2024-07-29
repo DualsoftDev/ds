@@ -16,8 +16,7 @@ type VariableManager with
 type ActionVariableManager with
 
     member a.V2_ActionVairableMove(sys:DsSystem) =
-         if a.ActionVariableTag.DataType = typedefof<bool>
-         then 
+         if a.ActionVariableTag.DataType = typedefof<bool> then 
             (sys._on.Expr, a.ActionSourceTag.ToExpression()) --| (a.ActionVariableTag, getFuncName())
          else 
             (sys._on.Expr, a.ActionSourceTag.ToExpression()) --> (a.ActionVariableTag, getFuncName())

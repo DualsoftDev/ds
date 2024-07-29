@@ -16,17 +16,17 @@ type VertexTagManager with
         
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
-            if shareds.any()
-            then shareds.Select(fun s -> s.Vertex.GetStartRootAndCausals()).ToOrElseOn()
-            else v._off.Expr
+            if shareds.any() then
+                shareds.Select(fun s -> s.Vertex.GetStartRootAndCausals()).ToOrElseOn()
+            else
+                v._off.Expr
 
-        let sets = (
-                    (startCausals <||> wsShareds  <||> v.SF.Expr) <&&> v.Flow.d_st.Expr  
-                    <||> plans 
-                    <||> actionLinks 
-                    )
+        let sets =
+                ( (startCausals <||> wsShareds  <||> v.SF.Expr) <&&> v.Flow.d_st.Expr)  
+                <||> plans 
+                <||> actionLinks
 
-        let rsts  = (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
+        let rsts = (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
         (sets, rsts) ==| (v.ST, getFuncName())//조건에 의한 릴레이
 
 
@@ -36,19 +36,17 @@ type VertexTagManager with
 
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
-            if shareds.any()
-            then shareds.Select(fun s -> s.Vertex.GetResetRootAndCausals()).ToOrElseOn()
-            else v._off.Expr
+            if shareds.any() then
+                shareds.Select(fun s -> s.Vertex.GetResetRootAndCausals()).ToOrElseOn()
+            else
+                v._off.Expr
 
-        let sets =  (
-                        (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr
-                    ) 
-                    <||> 
-                    (
-                        v.RF.Expr <||> (*real.VR.OB.Expr <||> *)real.VR.OA.Expr
-                    )
+        let sets =
+            (   (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr ) 
+            <||> 
+            (   v.RF.Expr <||> (*real.VR.OB.Expr <||> *)real.VR.OA.Expr )
 
-        let rsts  = real.V.R.Expr
+        let rsts = real.V.R.Expr
         (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이
 
 
@@ -66,18 +64,17 @@ type VertexTagManager with
         let sets =
             let callExpr = v.SF.Expr <&&> !@v.RF.Expr
             let getExpr(call:Call) = 
-                if   call.IsOperator
-                then
-                     call.VC.CallOperatorValue.Expr  <||> callExpr
+                if call.IsOperator then
+                    call.VC.CallOperatorValue.Expr  <||> callExpr
                 else 
-                     call.End  <||> callExpr
+                    call.End  <||> callExpr
 
             match v.Vertex  with
             | :? Call as c ->   getExpr c
             | :? Alias as rf -> 
-                    match  rf.TargetWrapper with
-                    | DuAliasTargetReal _ -> failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
-                    | DuAliasTargetCall c ->    getExpr c
+                match  rf.TargetWrapper with
+                | DuAliasTargetReal _ -> failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
+                | DuAliasTargetCall c ->    getExpr c
             | _ ->
                 failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
              //자신 flow의 원위치 일경우 한번더 연산  /// 초기 외부 신호 off 조건 트리거용 

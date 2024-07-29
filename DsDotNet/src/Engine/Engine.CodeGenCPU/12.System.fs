@@ -9,47 +9,52 @@ open Dual.Common.Core.FS
 type DsSystem with
 
 
-    member s.Y1_SystemSimulationForFlow(activeSys:DsSystem) = [
+    member s.Y1_SystemSimulationForFlow(activeSys:DsSystem) =
+        let fn = getFuncName()
+        let aOff = activeSys._off.Expr
+        [
             for flow in s.Flows do
-                yield (activeSys._auto_btn.Expr  , activeSys._off.Expr) --| (flow.auto_btn,   getFuncName())
-                yield (activeSys._manual_btn.Expr, activeSys._off.Expr) --| (flow.manual_btn, getFuncName())
-                yield (activeSys._drive_btn.Expr , activeSys._off.Expr) --| (flow.drive_btn,  getFuncName())
-                yield (activeSys._pause_btn.Expr , activeSys._off.Expr) --| (flow.pause_btn,  getFuncName())
-                yield (activeSys._emg_btn.Expr   , activeSys._off.Expr) --| (flow.emg_btn,    getFuncName())
-                yield (activeSys._test_btn.Expr  , activeSys._off.Expr) --| (flow.test_btn,   getFuncName())
+                yield (activeSys._auto_btn.Expr  , aOff) --| (flow.auto_btn,   fn)
+                yield (activeSys._manual_btn.Expr, aOff) --| (flow.manual_btn, fn)
+                yield (activeSys._drive_btn.Expr , aOff) --| (flow.drive_btn,  fn)
+                yield (activeSys._pause_btn.Expr , aOff) --| (flow.pause_btn,  fn)
+                yield (activeSys._emg_btn.Expr   , aOff) --| (flow.emg_btn,    fn)
+                yield (activeSys._test_btn.Expr  , aOff) --| (flow.test_btn,   fn)
+
                 if RuntimeDS.Package.IsPCorPCSIM() then //PLC는  E2_PLCOnly 에서 처리중 
-                    yield (activeSys._home_btn.Expr  , activeSys._off.Expr) --| (flow.home_btn,   getFuncName())
-                    yield (activeSys._clear_btn.Expr , activeSys._off.Expr) --| (flow.clear_btn,  getFuncName())
-                    yield (activeSys._ready_btn.Expr , activeSys._off.Expr) --| (flow.ready_btn,  getFuncName())
+                    yield (activeSys._home_btn.Expr  , aOff) --| (flow.home_btn,   fn)
+                    yield (activeSys._clear_btn.Expr , aOff) --| (flow.clear_btn,  fn)
+                    yield (activeSys._ready_btn.Expr , aOff) --| (flow.ready_btn,  fn)
         ]
         
   
 
     member s.Y2_SystemPause() =
-        let sets =  s.Flows.Select(fun f->f.p_st).ToOrElseOff()
+        let sets =  s.Flows.Select(fun f -> f.p_st).ToOrElseOff()
         (sets, s._off.Expr) --| (s._pause, getFuncName())
 
 
     member s.Y3_SystemState() =
+        let fn = getFuncName()
+        let off = s._off.Expr
         [
-            (s.Flows.Select(fun f->f.iop).ToAndElseOff(), s._off.Expr)      --| (s._idleMonitor  , getFuncName())
-            (s.Flows.Select(fun f->f.aop).ToAndElseOff(), s._off.Expr)      --| (s._autoMonitor  , getFuncName())
-            (s.Flows.Select(fun f->f.mop).ToAndElseOff(), s._off.Expr)      --| (s._manualMonitor, getFuncName())
-            (s.Flows.Select(fun f->f.d_st).ToAndElseOff(), s._off.Expr)     --| (s._driveMonitor , getFuncName())
-            (s.Flows.Select(fun f->f.e_st).ToOrElseOff(), s._off.Expr)      --| (s._errorMonitor , getFuncName())
-            (s.Flows.Select(fun f->f.emg_st).ToOrElseOff(), s._off.Expr)    --| (s._emgState     , getFuncName())
-            (s.Flows.Select(fun f->f.t_st).ToAndElseOff(), s._off.Expr)     --| (s._testMonitor  , getFuncName())
-            (s.Flows.Select(fun f->f.r_st).ToAndElseOff(), s._off.Expr)     --| (s._readyMonitor , getFuncName())
-            (s.Flows.Select(fun f->f.o_st).ToAndElseOff(), s._off.Expr)     --| (s._originMonitor, getFuncName())
-            (s.Flows.Select(fun f->f.g_st).ToOrElseOff() , s._off.Expr)     --| (s._goingMonitor , getFuncName())
-            
+            (s.Flows.Select(fun f -> f.iop)   .ToAndElseOff(), off) --| (s._idleMonitor  , fn)
+            (s.Flows.Select(fun f -> f.aop)   .ToAndElseOff(), off) --| (s._autoMonitor  , fn)
+            (s.Flows.Select(fun f -> f.mop)   .ToAndElseOff(), off) --| (s._manualMonitor, fn)
+            (s.Flows.Select(fun f -> f.d_st)  .ToAndElseOff(), off) --| (s._driveMonitor , fn)
+            (s.Flows.Select(fun f -> f.e_st)  .ToOrElseOff(),  off) --| (s._errorMonitor , fn)
+            (s.Flows.Select(fun f -> f.emg_st).ToOrElseOff(),  off) --| (s._emgState     , fn)
+            (s.Flows.Select(fun f -> f.t_st)  .ToAndElseOff(), off) --| (s._testMonitor  , fn)
+            (s.Flows.Select(fun f -> f.r_st)  .ToAndElseOff(), off) --| (s._readyMonitor , fn)
+            (s.Flows.Select(fun f -> f.o_st)  .ToAndElseOff(), off) --| (s._originMonitor, fn)
+            (s.Flows.Select(fun f -> f.g_st)  .ToOrElseOff() , off) --| (s._goingMonitor , fn)            
         ]
 
         
 
     member s.Y4_SystemConditionError() =
         [
-            for condi in  s.HWConditions do
+            for condi in s.HWConditions do
                 yield (!@condi.ActionINFunc, s._off.Expr) --| (condi.ErrorCondition, getFuncName())
         ]
         

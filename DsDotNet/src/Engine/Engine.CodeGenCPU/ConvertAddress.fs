@@ -22,7 +22,8 @@ module ConvertAddressModule =
                         .Collect(fun h ->  [($"{h.Name}_IN", h.InTag); ($"{h.Name}_OUT", h.OutTag)])
             ] 
             |> Seq.distinctBy fst
-            |> Seq.filter (fun (_, tag) -> tag.IsNonNull()) |> Seq.toList
+            |> Seq.filter (fun (_, tag) -> tag.IsNonNull())
+            |> Seq.toList
 
         // Helper to find duplicate elements and group them by API names
         let findDuplicates (list:(string*ITag) list) =
@@ -34,13 +35,12 @@ module ConvertAddressModule =
           // Find and handle duplicates
         let duplicates = findDuplicates allAddresses
 
-        if not (Seq.isEmpty duplicates) then
-            duplicates 
-            |> Seq.iter (fun (_addr, dupliTagSet) -> 
-                let tags = dupliTagSet.Select(snd)
-                let aliasSet = tags.Select(fun f->f.Name)
-                tags.Iter(fun f->f.AliasNames.AddRange(aliasSet))
-                )
+        duplicates 
+        |> Seq.iter (fun (_addr, dupliTagSet) -> 
+            let tags = dupliTagSet.Select(snd)
+            let aliasSet = tags.Select(fun f->f.Name)
+            tags.Iter(fun f->f.AliasNames.AddRange(aliasSet))
+            )
              
 
     let setSimulationEmptyAddress(sys:DsSystem) = 

@@ -25,7 +25,7 @@ namespace Engine.TestSimulator
                 {
                     var reals = f.Graph.Vertices.OfType<Real>();
                     if (reals.Any())
-                        ((VertexManager)reals.First().TagManager).SF.Value = true;
+                        ((VertexTagManager)reals.First().TagManager).SF.Value = true;
                 });
                 dsCpu.RunInBackground();
 

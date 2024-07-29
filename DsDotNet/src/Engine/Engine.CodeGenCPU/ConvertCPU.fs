@@ -37,7 +37,7 @@ module ConvertCPU =
     let private applyVertexSpec(v:Vertex) =
         [
             if IsSpec (v, RealInFlow, AliasFalse) then
-                let vr = v.TagManager :?> VertexMReal
+                let vr = v.TagManager :?> RealVertexTagManager
                 yield vr.M1_OriginMonitor()
                 yield vr.E4_RealErrorTotalMonitor() 
 
@@ -66,25 +66,25 @@ module ConvertCPU =
 
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
-                let vm = v.TagManager :?> VertexMReal
+                let vm = v.TagManager :?> RealVertexTagManager
                 yield vm.F3_RealEndInFlow()    
 
             if IsSpec (v, CallInFlow, AliasNotCare) then
-                let vc = v.TagManager :?> VertexMCall
+                let vc = v.TagManager :?> CallVertexTagManager
                 yield vc.F4_CallEndInFlow()
 
             if IsSpec (v, CallInReal , AliasFalse) then
-                let vc = v.TagManager :?> VertexMCall
+                let vc = v.TagManager :?> CallVertexTagManager
                 yield! vc.E2_CallErrorTXMonitor() 
                 yield! vc.E3_CallErrorRXMonitor() 
                 yield vc.E5_CallErrorTotalMonitor() 
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
-                let vc = v.TagManager :?> VertexMCall
+                let vc = v.TagManager :?> CallVertexTagManager
                 yield vc.C1_CallMemo() 
                 
             if IsSpec (v, VertexAll, AliasNotCare) then
-                let vm = v.TagManager :?> VertexManager
+                let vm = v.TagManager :?> VertexTagManager
                 yield vm.M2_PauseMonitor()
                 yield! vm.S1_RGFH()
 

@@ -6,7 +6,7 @@ open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
-type VertexMReal with
+type RealVertexTagManager with
 
     member v.R1_RealInitialStart() =
         let set = v.G.Expr <&&> v.OG.Expr

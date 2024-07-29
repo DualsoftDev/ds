@@ -87,7 +87,7 @@ namespace Diagram.View.MSAGL
 
             _sys.GetRealVertices().Iter(real =>
             {
-                var og = (real.TagManager as VertexManager).OG;
+                var og = (real.TagManager as VertexTagManager).OG;
                 UpdateOriginVertexTag(og, DicNode[real]);
 
                 real.GetSharedReal().Iter(alias => UpdateOriginVertexTag(og, DicNode[alias]));

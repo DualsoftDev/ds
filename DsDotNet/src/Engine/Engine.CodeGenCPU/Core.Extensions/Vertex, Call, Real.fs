@@ -14,9 +14,9 @@ module ConvertCpuVertex =
 
 
     type Vertex with
-        member r.V = r.TagManager :?> VertexManager
-        member r.VC = r.TagManager :?> VertexMCall
-        member r.VR = r.TagManager :?> VertexMReal
+        member r.V = r.TagManager :?> VertexTagManager
+        member r.VC = r.TagManager :?> CallVertexTagManager
+        member r.VR = r.TagManager :?> RealVertexTagManager
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
         member r.MutualResetCoins = 
@@ -57,10 +57,10 @@ module ConvertCpuVertex =
         member c.EndPlan =  
             if c.IsCommand
             then
-                (c.TagManager :?> VertexMCall).CallCommandEnd.Expr
+                (c.TagManager :?> CallVertexTagManager).CallCommandEnd.Expr
             elif c.IsOperator
             then
-                (c.TagManager :?> VertexMCall).CallOperatorValue.Expr
+                (c.TagManager :?> CallVertexTagManager).CallOperatorValue.Expr
             else 
                 c.TargetJob.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
@@ -103,7 +103,7 @@ module ConvertCpuVertex =
         //        None
 
         member c.RealLinkExpr =
-                 let rv = c.Parent.GetCore().TagManager :?>  VertexMReal
+                 let rv = c.Parent.GetCore().TagManager :?>  RealVertexTagManager
                  !@rv.Link.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)
 
         member c.PresetTime =   if c.UsingTon
@@ -151,7 +151,7 @@ module ConvertCpuVertex =
         member c.StartPointExpr =
             match c.Parent.GetCore() with
             | :? Real as r ->
-                let rv = r.TagManager :?>  VertexMReal
+                let rv = r.TagManager :?>  RealVertexTagManager
                 let initOnCalls  = rv.OriginInfo.CallInitials
                                      .Where(fun (_,ty) -> ty = InitialType.On)
                                      .Select(fun (call,_)->call)
@@ -173,7 +173,7 @@ module ConvertCpuVertex =
 
 
     type Real with
-        member r.V = r.TagManager :?> VertexMReal
+        member r.V = r.TagManager :?> RealVertexTagManager
 
         member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ST)
         member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.RT)

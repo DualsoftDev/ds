@@ -28,7 +28,7 @@ module TagManagerModule =
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
-    type VertexManager (v:Vertex)  =
+    type VertexTagManager (v:Vertex)  =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
 
@@ -111,8 +111,8 @@ module TagManagerModule =
         member val ErrTRX = createTag false VertexTag.errorTRx
         
         member x.GetVertexTag (vt:VertexTag) :IStorage =
-            let callM() = v.TagManager:?> VertexMCall
-            let realM() = v.TagManager:?> VertexMReal
+            let callM() = v.TagManager:?> CallVertexTagManager
+            let realM() = v.TagManager:?> RealVertexTagManager
 
             match vt with 
             | VertexTag.startTag -> x.ST :> IStorage
@@ -156,8 +156,8 @@ module TagManagerModule =
          
    
 
-    and VertexMReal(v:Vertex) =
-        inherit VertexManager(v)
+    and RealVertexTagManager(v:Vertex) =
+        inherit VertexTagManager(v)
 
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
@@ -221,8 +221,8 @@ module TagManagerModule =
         member val MotionRelay  = createTag true VertexTag.motionRelay
         member val TimeRelay    = createTag true VertexTag.timeRelay
 
-    and VertexMCall(v:Vertex) =
-        inherit VertexManager(v)
+    and CallVertexTagManager(v:Vertex) =
+        inherit VertexTagManager(v)
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
         let sysManager = sys.TagManager :?> SystemManager

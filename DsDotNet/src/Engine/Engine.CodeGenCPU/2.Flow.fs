@@ -6,7 +6,7 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 
-type VertexManager with
+type VertexTagManager with
 
     member v.F1_RootStart() =
         let real = v.Vertex :?> Real

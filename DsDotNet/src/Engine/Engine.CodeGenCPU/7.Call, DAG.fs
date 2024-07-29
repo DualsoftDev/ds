@@ -6,9 +6,9 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 
-type VertexManager with
+type VertexTagManager with
     member v.C1_CallMemo() =
-        let v = v :?> VertexMCall
+        let v = v :?> CallVertexTagManager
         let call = v.Vertex.GetPureCall().Value
        
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
@@ -22,13 +22,10 @@ type VertexManager with
             <&&> call.SafetyExpr 
             
         let rst =
-            if call.UsingTon 
-            then
-                (v.TDON.DN.Expr  <&&> dop)
-                            <||>
-                (call.End <&&> mop)
+            if call.UsingTon then
+                (v.TDON.DN.Expr <&&> dop) <||> (call.End <&&> mop)
             else
-                call.End 
+                call.End
 
 
         let parentReal = call.Parent.GetCore() :?> Vertex
@@ -38,8 +35,7 @@ type VertexManager with
         let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
 
         
-        if call.Disabled 
-        then
+        if call.Disabled then
             (v._off.Expr, rsts) ==| (v.MM, getFuncName())
         else
             (sets, rsts) ==| (v.MM, getFuncName())
@@ -47,14 +43,13 @@ type VertexManager with
 
     member v.D1_DAGHeadStart() =
         let real = v.Vertex :?> Real
-        let v = v :?> VertexMReal
-        let coins = real.Graph.Inits.Select(getVM)
+        let v = v :?> RealVertexTagManager
+        let coins = real.Graph.Inits.Select(getVMCoin)
         [
             for coin in coins do
                 let call = coin.Vertex.GetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
-                let coin = coin :?> VertexMCall
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, getFuncName())
@@ -62,13 +57,12 @@ type VertexManager with
 
     member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
-        let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVM)
+        let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCoin)
         [
             for coin in coins do
                 let call = coin.Vertex.GetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
-                let coin = coin :?> VertexMCall
                 let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, getFuncName() )
@@ -76,10 +70,9 @@ type VertexManager with
         
     member v.D3_DAGCoinEnd() =
         let real = v.Vertex :?> Real
-        let children = real.Graph.Vertices.Select(getVM)
+        let coins = real.Graph.Vertices.Select(getVMCoin)
         [
-            for child in children do
-                let coin = child :?> VertexMCall
+            for coin in coins do
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
                 let rsts = coin.RT.Expr
                 if call.Disabled then 
@@ -91,18 +84,15 @@ type VertexManager with
 
                     //if setEnd Pulse Mode
 
-                    //if RuntimeDS.Package.IsPLCorPLCSIM() 
-                    //then
+                    //if RuntimeDS.Package.IsPLCorPLCSIM() then
                     //    yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, getFuncName() )
-                    //elif RuntimeDS.Package.IsPCorPCSIM()
-                    //then 
+                    //elif RuntimeDS.Package.IsPCorPCSIM() then 
                         //yield! (setEnd, coin.System)  --^ (coin.GP, getFuncName()) 
                         //yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, getFuncName() )
 
 
                      //아날로그 전용 job 은 기다리지 않고 값 성립하면 Coin 뒤집기
-                    if call.IsAnalogOutput 
-                    then
+                    if call.IsAnalogOutput then
                         yield (setStart<&&>setEnd, rsts) ==| (coin.ET, getFuncName() )
                     else
                         yield! (setEnd, coin.System)  --^ (coin.GP, getFuncName()) 
@@ -112,10 +102,9 @@ type VertexManager with
 
     member v.D4_DAGCoinReset() =
         let real = v.Vertex :?> Real
-        let children = real.Graph.Vertices.Select(getVM)
+        let children = real.Graph.Vertices.Select(getVMCoin)
         [
             for child in children do
-                let child = child :?> VertexMCall
                 let sets = real.V.RT.Expr // <&&> !@real.V.G.Expr
                 let rsts = child.R.Expr
                 yield (sets, rsts) ==| (child.RT, getFuncName() )

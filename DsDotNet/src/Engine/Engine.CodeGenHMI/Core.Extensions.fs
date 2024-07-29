@@ -20,7 +20,7 @@ module ConvertHMI =
             match tm with
             | :? SystemManager  as m -> m.GetSystemTag  (DU.tryGetEnumValue<SystemTag>(kind).Value)
             | :? FlowManager    as m -> m.GetFlowTag    (DU.tryGetEnumValue<FlowTag>(kind).Value)
-            | :? VertexManager  as m -> m.GetVertexTag  (DU.tryGetEnumValue<VertexTag>(kind).Value)
+            | :? VertexTagManager  as m -> m.GetVertexTag  (DU.tryGetEnumValue<VertexTag>(kind).Value)
             | :? ApiItemManager as m -> m.GetApiTag     (DU.tryGetEnumValue<ApiItemTag>(kind).Value)
             | :? TaskDevManager as m -> m.GetTaskDevTag (DU.tryGetEnumValue<TaskDevTag>(kind).Value)
             | _ -> failwithf "getPushWebTag error"
@@ -52,7 +52,7 @@ module ConvertHMI =
 
     type Call with
         member private x.GetHMI()   =
-            let tm = x.TagManager :?> VertexMCall
+            let tm = x.TagManager :?> CallVertexTagManager
             {
                 Name = x.Name
                 TimeOnShortageErrorLamp  = getLamp  tm (i VertexTag.txErrOnTimeShortage)
@@ -84,7 +84,7 @@ module ConvertHMI =
         member private x.GetHMI()   =
 
             let calls = x.Graph.Vertices.OfType<Call>()
-            let tm = x.TagManager :?> VertexManager
+            let tm = x.TagManager :?> VertexTagManager
             {
                 Name = x.Name
                 StartPush    = getPush tm (i VertexTag.startTag)

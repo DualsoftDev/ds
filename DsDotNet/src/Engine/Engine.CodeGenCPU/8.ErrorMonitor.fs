@@ -7,11 +7,11 @@ open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 
-type VertexManager with
+type VertexTagManager with
 
 
     member v.E2_CallErrorTXMonitor() =
-        let v= v :?> VertexMCall
+        let v= v :?> CallVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         let vOff = v._off.Expr
 
@@ -30,7 +30,7 @@ type VertexManager with
     member v.E3_CallErrorRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
-        let v = v:?> VertexMCall
+        let v = v:?> CallVertexTagManager
         
         let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
@@ -71,7 +71,7 @@ type VertexManager with
 
    
     member v.E5_CallErrorTotalMonitor() =
-        let v= v :?> VertexMCall
+        let v= v :?> CallVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())
 

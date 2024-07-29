@@ -53,7 +53,7 @@ module ExpressionExtension =
 
     /// set 조건, reset 조건을 받아서 --> 추가적으로 coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
     let (--|) (sets, rsts) = coilOp (fun s r c -> c <== (s <&&> (!@ r))) sets rsts
-    /// set 조건, 조건을 받아서 --> 추가적으로 자기 유지되는 reset coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
+    /// set 조건, reset 조건을 받아서 --> 추가적으로 자기 유지되는 reset coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
     let (==|) (sets, rsts) = coilOp (fun s r c -> c <== ((s <||> var2expr c) <&&> (!@ r))) sets rsts
 
     /// Create Add Statement   //test ahn  Add 함수로 변경 필요

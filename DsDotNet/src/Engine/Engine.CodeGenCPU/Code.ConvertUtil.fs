@@ -10,13 +10,13 @@ open System
 module CodeConvertUtil =
 
 
-    let private getOriginCalls(vr:VertexMReal, initialType:InitialType) =
+    let private getOriginCalls(vr:RealVertexTagManager, initialType:InitialType) =
         let origins = vr.OriginInfo.CallInitials
         origins
             |> filter (fun (_, init) -> init = initialType)
             |> map fst
 
-    let getOriginIOExprs(vr:VertexMReal, initialType:InitialType) =
+    let getOriginIOExprs(vr:RealVertexTagManager, initialType:InitialType) =
         getOriginCalls(vr, initialType).Select(fun d-> d.End)
 
  

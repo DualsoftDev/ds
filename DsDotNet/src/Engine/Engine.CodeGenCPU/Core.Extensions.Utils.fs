@@ -11,9 +11,9 @@ module ConvertCoreExtUtils =
     
     let hasNot  (x:OperatorFunction option) = x.IsSome && x.Value.OperatorType = DuOPNot
 
-    let getVM(v:Vertex)     = v.TagManager :?> VertexManager
-    let getVMReal(v:Vertex) = v.TagManager :?> VertexMReal
-    let getVMCoin(v:Vertex) = v.TagManager :?> VertexMCall
+    let getVM(v:Vertex)     = v.TagManager :?> VertexTagManager
+    let getVMReal(v:Vertex) = v.TagManager :?> RealVertexTagManager
+    let getVMCoin(v:Vertex) = v.TagManager :?> CallVertexTagManager
 
     let getTarget (x:DsSystem) = (x.TagManager :?> SystemManager).TargetType
     let getSM (x:DsSystem) = x.TagManager :?> SystemManager

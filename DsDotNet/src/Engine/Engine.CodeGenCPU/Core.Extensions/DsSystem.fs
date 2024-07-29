@@ -109,7 +109,7 @@ module ConvertCpuDsSystem =
 
             for call in calls do
 
-                let cv =  call.TagManager :?> VertexMCall
+                let cv =  call.TagManager :?> CallVertexTagManager
                 let target = getTarget(x)
                 cv.ErrShort.Address             <- getMemory call.Name  target 
                 cv.ErrOpen.Address              <- getMemory call.Name  target 
@@ -127,13 +127,13 @@ module ConvertCpuDsSystem =
          
         member private x.GenerationRealAlarmMemory()  = 
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
-                let rm =  real.TagManager :?> VertexMReal
+                let rm =  real.TagManager :?> RealVertexTagManager
                 rm.ErrGoingOrigin.Address <- getMemory rm.Name (getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
         member  x.GenerationRealActionMemory()  = 
             for real in x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name) do
-                let rm =  real.TagManager :?> VertexMReal
+                let rm =  real.TagManager :?> RealVertexTagManager
                 rm.ScriptStart.Address    <- getMemory rm.Name (getTarget(x))
                 rm.MotionStart.Address    <- getMemory rm.Name (getTarget(x))
 
@@ -167,7 +167,7 @@ module ConvertCpuDsSystem =
                     x.GetVerticesOfRealOrderByName().Distinct() 
                     |> Seq.iter (fun real ->
                             let name = $"{real.Flow.Name}_{real.Name}"  
-                            let rm =  real.TagManager :?> VertexMReal
+                            let rm =  real.TagManager :?> RealVertexTagManager
                             let target = getTarget(x)
                             rm.ON.Address     <- getMemory name target
                             rm.RF.Address     <- getMemory name target
@@ -207,7 +207,7 @@ module ConvertCpuDsSystem =
         member private x.GenerationCallManualMemory()  = 
             let devCalls = x.GetDevicesForHMI() 
             for (dev, call) in devCalls do
-                let cv =  call.TagManager :?> VertexMCall
+                let cv =  call.TagManager :?> CallVertexTagManager
                 if call.TargetJob.JobTaskDevInfo.TaskDevCount = 1
                     ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)   
                 then
@@ -245,7 +245,7 @@ module ConvertCpuDsSystem =
                        r, info)
                        |> Tuple.toDictionary
             let origins = getOriginInfos x
-            for (rv: VertexMReal) in x.GetRealVertices().Select(fun f->f.TagManager :?> VertexMReal) do
+            for (rv: RealVertexTagManager) in x.GetRealVertices().Select(fun f->f.TagManager :?> RealVertexTagManager) do
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
         //자신이 사용된 API Plan Set Send

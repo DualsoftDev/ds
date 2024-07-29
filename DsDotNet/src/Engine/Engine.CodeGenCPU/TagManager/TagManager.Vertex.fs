@@ -17,17 +17,23 @@ module TagManagerModule =
     // ACTION | IN	    | API. I| -	              | API. I    |
     // ACTION | OUT	    | API. O| -	              | API. O    |
 
+    let private createTagOnVertex (v:Vertex) (autoAddr:bool) (vertexTag:VertexTag)  =
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
+        let vertexTag = vertexTag |> int
+        let name = getStorageName v vertexTag
+        let t = createPlanVar  s name DuBOOL autoAddr v vertexTag sys
+        t :?> PlanVar<bool>
+
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
     type VertexManager (v:Vertex)  =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
-        let createTag autoAddr (vertexTag:VertexTag)  =
-            let vertexTag = vertexTag |> int
-            let name = getStorageName v vertexTag
-            let t = createPlanVar  s name DuBOOL autoAddr v vertexTag sys
-            t :?> PlanVar<bool>
+
+        let createTag = createTagOnVertex v
+
         let sysM = sys.TagManager :?> SystemManager
 
 
@@ -101,8 +107,6 @@ module TagManagerModule =
  
         member val ErrTRX = createTag false VertexTag.errorTRx
         
-        member _.CreateTag(name) = createTag name
-
         member x.GetVertexTag (vt:VertexTag) :IStorage =
             let callM() = v.TagManager:?> VertexMCall
             let realM() = v.TagManager:?> VertexMReal
@@ -157,7 +161,7 @@ module TagManagerModule =
         let real = v:?> Real
         let sysManager = sys.TagManager :?> SystemManager
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
-        let createTag name = this.CreateTag name
+        let createTag = createTagOnVertex v
 
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
         //let realData  = 
@@ -219,7 +223,7 @@ module TagManagerModule =
         let s    = this.Storages
         let sys = this.System
         let sysManager = sys.TagManager :?> SystemManager
-        let createTag name = this.CreateTag name 
+        let createTag = createTagOnVertex v
 
         let counterBit    = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)
         let timerOnDelayBit = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)

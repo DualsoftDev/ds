@@ -65,6 +65,7 @@ module Interface =
     type Storages() =
         inherit Dictionary<string, IStorage>(StringComparer.OrdinalIgnoreCase)
 
+    /// obsidian 문서 : DsDotNet/src/Doc/Obsidian/DS/Engine.Core/ITagManager.canvas 참고
     type ITagManager =
         abstract Target: IQualifiedNamed
         abstract Storages: Storages

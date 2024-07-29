@@ -21,8 +21,24 @@
                 }
               }
             }
+          },
+          {
+            "id": "c6339de9e3ad10fa",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "DS/Engine.Core/ITagManager.canvas",
+                "viewState": {
+                  "x": -120,
+                  "y": -82.5,
+                  "zoom": 0
+                }
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -149,7 +165,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "72d0372eb5107c97",
+  "active": "c6339de9e3ad10fa",
   "lastOpenFiles": [
     "DS/Engine.Core/Core 자료 구조.md",
     "DS/Engine.Core/ITagManager.canvas",

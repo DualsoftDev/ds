@@ -19,7 +19,7 @@ type Job with
                         if RuntimeDS.Package.IsPackageSIM() then
                             _off
                         else
-                            td.GetPO(j).Expr
+                            td.GetPlanOutput(j).Expr
 
                     let outParam = td.GetOutParam(j)
                   

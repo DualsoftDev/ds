@@ -133,7 +133,7 @@ namespace Diagram.View.MSAGL
             {
                 td.ApiParams.Iter(apiParam =>
                 {
-                    var planEndTag = (td.TagManager as TaskDevManager).PE(apiParam);
+                    var planEndTag = (td.TagManager as TaskDevManager).PlanEnd(apiParam);
 
                     if (!DicMemoryTag.ContainsKey(planEndTag))
                         DicMemoryTag.Add(planEndTag, new List<ViewVertex>());
@@ -267,11 +267,11 @@ namespace Diagram.View.MSAGL
 
                                 if (n.Vertex is Call c)
                                 {
-                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PE(c.TargetJob).Value));
+                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(c.TargetJob).Value));
                                 }
                                 else if (n.Vertex is Alias a)
                                 {
-                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PE(a.GetPureCall().Value.TargetJob).Value));
+                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(a.GetPureCall().Value.TargetJob).Value));
                                 }
                                 else
                                 {

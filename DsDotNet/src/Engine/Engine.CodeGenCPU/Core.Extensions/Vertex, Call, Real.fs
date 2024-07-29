@@ -62,7 +62,7 @@ module ConvertCpuVertex =
             then
                 (c.TagManager :?> VertexMCall).CallOperatorValue.Expr
             else 
-                c.TargetJob.TaskDefs.Select(fun td-> td.GetPE(c.TargetJob)).ToAnd()
+                c.TargetJob.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
         member c.EndAction = 
                     if c.IsJob 
@@ -121,7 +121,7 @@ module ConvertCpuVertex =
 
         member c.PEs =
             if c.IsJob 
-            then c.TargetJob.TaskDefs.Select(fun f->f.GetPE(c.TargetJob))
+            then c.TargetJob.TaskDefs.Select(fun f->f.GetPlanEnd(c.TargetJob))
             else [c.VC.CallCommandEnd]
 
         member c.TXs = 

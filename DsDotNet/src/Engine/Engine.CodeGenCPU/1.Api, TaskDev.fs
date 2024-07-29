@@ -11,7 +11,7 @@ type TaskDevManager with
     member d.TD1_PlanSend(activeSys:DsSystem, coins:Vertex seq) =
         [
             for c in coins.OfType<Call>() do
-                yield (c.VC.MM.Expr, activeSys._off.Expr) --| (d.PS(c.TargetJob), getFuncName())
+                yield (c.VC.MM.Expr, activeSys._off.Expr) --| (d.PlanStart(c.TargetJob), getFuncName())
         ]
     
     member d.TD2_PlanReceive(activeSys:DsSystem) =
@@ -23,25 +23,25 @@ type TaskDevManager with
                     let inParam = apiParam.TaskDevParamIO.InParam
 
                     if inParam.IsSome && inParam.Value.Type <> DuBOOL then 
-                        apiParam.ApiItem.APIEND.Expr <&&> d.PS(apiParam).Expr
+                        apiParam.ApiItem.APIEND.Expr <&&> d.PlanStart(apiParam).Expr
                     else 
                         apiParam.ApiItem.APIEND.Expr 
 
-                yield (sets, activeSys._off.Expr) --| (d.PE(apiParam), getFuncName())
+                yield (sets, activeSys._off.Expr) --| (d.PlanEnd(apiParam), getFuncName())
         ]
 
     member d.TD3_PlanOutput(activeSys:DsSystem) =
         [
             for kv in d.TaskDev.DicTaskTaskDevParamIO do
                 let apiPara = kv.Value
-                let sets =  d.PS(apiPara).Expr <&&> d.PE(apiPara).Expr
-                yield (sets, activeSys._off.Expr) --| (d.PO(apiPara), getFuncName())
+                let sets =  d.PlanStart(apiPara).Expr <&&> d.PlanEnd(apiPara).Expr
+                yield (sets, activeSys._off.Expr) --| (d.PlanOutput(apiPara), getFuncName())
         ]
 
     member d.A1_ApiSet(call:Call) :  CommentedStatement list=
         [
             let a = d.TaskDev.GetApiItem(call.TargetJob) 
-            let ps = d.TaskDev.GetPS(call.TargetJob)
+            let ps = d.TaskDev.GetPlanStart(call.TargetJob)
             yield! (ps.Expr , call.System) --^ (a.ApiItemSetPusle, getFuncName())
             yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.APISET, getFuncName())
         ]

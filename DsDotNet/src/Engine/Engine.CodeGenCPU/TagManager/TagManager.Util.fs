@@ -15,7 +15,9 @@ module TagManagerUtil =
     let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool, target:IQualifiedNamed, tagIndex:int,  system:ISystem) : IStorage =
         let v = dataType.DefaultValue()
         let address = if fillAutoAddress then Some TextAddrEmpty else None
-        let createParam () = {defaultStorageCreationParams(unbox v) tagIndex with Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex;System= system}
+        let createParam () =
+            {   defaultStorageCreationParams(unbox v) tagIndex with
+                    Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex; System= system}
         let t:IStorage =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam())
@@ -61,8 +63,8 @@ module TagManagerUtil =
         if address = TextSkip || address = "" then
             None
         else
-            let plcName =
-                let name =
+            let validTagName =
+                let nameCandidate =
                     match bridgeType with
                     | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
                     | Device ->
@@ -77,11 +79,11 @@ module TagManagerUtil =
                         | HwSysTag.HwSysIn      -> name |> getInActionName
                         | HwSysTag.HwSysOut     -> name |> getOutActionName
                         | _ -> failwithlog "error: HwSysTag create "
-                getPlcTagAbleName name stg
+                getPlcTagAbleName nameCandidate stg
 
-            if stg.ContainsKey plcName then
-                stg[plcName] :?> ITag  |> Some
+            if stg.ContainsKey validTagName then
+                stg[validTagName] :?> ITag  |> Some
             else 
-                let t = createTagByBoxedValue plcName {Object = duType.DefaultValue()} tagKind address sys fqdn
+                let t = createTagByBoxedValue validTagName {Object = duType.DefaultValue()} tagKind address sys fqdn
                 stg.Add(t.Name, t)
                 Some t

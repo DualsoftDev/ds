@@ -31,7 +31,7 @@ module TagManagerModule =
 
         let startTagBit   = createTag  true  VertexTag.startTag
         let resetTagBit   = createTag  true  VertexTag.resetTag
-        let endTagBit     =
+        let endTagBit =
             let et = createTag  true  VertexTag.endTag
             if RuntimeDS.Package.IsPackageSIM() then 
                 if v :? Real && (v :?> Real).Finished then 

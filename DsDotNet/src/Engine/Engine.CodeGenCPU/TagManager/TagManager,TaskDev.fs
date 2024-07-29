@@ -16,8 +16,11 @@ module TaskDevManagerModule =
             let pv:IStorage = createPlanVar stg name DuBOOL false td (int t) sys 
             pv :?> PlanVar<bool>
             
+        /// Plan StartS
         let pss = Dictionary<ApiParam, PlanVar<bool>>()
+        /// Plan EndS
         let pes = Dictionary<ApiParam, PlanVar<bool>>()
+        /// Plan OutputS
         let pos = Dictionary<ApiParam, PlanVar<bool>>()
 
         
@@ -42,12 +45,12 @@ module TaskDevManagerModule =
          
         member _.TaskDev   = td
       
-        member x.PS(api:ApiParam) = pss[api] 
-        member x.PE(api:ApiParam) = pes[api] 
-        member x.PO(api:ApiParam) = pos[api] 
+        member x.PlanStart(api:ApiParam)  = pss[api] 
+        member x.PlanEnd(api:ApiParam)    = pes[api] 
+        member x.PlanOutput(api:ApiParam) = pos[api] 
 
-        member x.PS(job:Job) = x.PS(x.TaskDev.GetApiPara(job))
-        member x.PE(job:Job) = x.PE(x.TaskDev.GetApiPara(job)) 
-        member x.PO(job:Job) = x.PO(x.TaskDev.GetApiPara(job)) 
+        member x.PlanStart(job:Job)  = x.PlanStart(x.TaskDev.GetApiPara(job))
+        member x.PlanEnd(job:Job)    = x.PlanEnd(x.TaskDev.GetApiPara(job)) 
+        member x.PlanOutput(job:Job) = x.PlanOutput(x.TaskDev.GetApiPara(job)) 
 
         

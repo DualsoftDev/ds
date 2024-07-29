@@ -2,10 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
-open System.Runtime.CompilerServices
 open System.Linq
-open System.Collections.Generic
-open System
 
 [<AutoOpen>]
 module ConvertAddressModule =
@@ -14,11 +11,15 @@ module ConvertAddressModule =
               // Aggregate all addresses to check for duplicates along with their API names
         let allAddresses = 
             [
-                yield! sys.GetTaskDevsSkipEmptyAddress().Select(fst).Distinct()
-                          |> Seq.collect(fun d -> [($"{d.ApiPureName}_IN", d.InTag); ($"{d.ApiPureName}_OUT", d.OutTag)])
+                yield!
+                    sys.GetTaskDevsSkipEmptyAddress()
+                        .Select(fst)
+                        .Distinct()
+                        .Collect(fun d -> [($"{d.ApiPureName}_IN", d.InTag); ($"{d.ApiPureName}_OUT", d.OutTag)])
                        
-                yield! sys.HwSystemDefs
-                          |> Seq.collect(fun h ->  [($"{h.Name}_IN", h.InTag); ($"{h.Name}_OUT", h.OutTag)])
+                yield!
+                    sys.HwSystemDefs
+                        .Collect(fun h ->  [($"{h.Name}_IN", h.InTag); ($"{h.Name}_OUT", h.OutTag)])
             ] 
             |> Seq.distinctBy fst
             |> Seq.filter (fun (_, tag) -> tag.IsNonNull()) |> Seq.toList
@@ -43,21 +44,19 @@ module ConvertAddressModule =
              
 
     let setSimulationEmptyAddress(sys:DsSystem) = 
-        sys.Jobs.ForEach(fun j->
-            j.TaskDefs.ForEach(fun d-> 
-                        if d.InAddress.IsNullOrEmpty() then  d.InAddress <- (TextAddrEmpty)
-                        if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- (TextAddrEmpty)
-                        if d.MaunualAddress.IsNullOrEmpty() then d.MaunualAddress <- (TextAddrEmpty)
-                )
-            )
-        sys.HWLamps.ForEach(fun l -> 
-                        if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <-TextAddrEmpty
-                        )
-        sys.HWButtons.ForEach(fun b->                                         
-                         if b.InAddress.IsNullOrEmpty() then   b.InAddress <-TextAddrEmpty
-                         if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <- TextAddrEmpty
-                        )   
-        sys.HWConditions.ForEach(fun c->                                         
-                         if c.InAddress.IsNullOrEmpty() then   c.InAddress <-TextAddrEmpty
-                         if c.OutAddress.IsNullOrEmpty() then  c.OutAddress <- TextAddrEmpty
-                        )   
+        for j in sys.Jobs do
+            for d in j.TaskDefs do
+                if d.InAddress.IsNullOrEmpty() then  d.InAddress <- (TextAddrEmpty)
+                if d.OutAddress.IsNullOrEmpty() then d.OutAddress <- (TextAddrEmpty)
+                if d.MaunualAddress.IsNullOrEmpty() then d.MaunualAddress <- (TextAddrEmpty)
+
+        for l in sys.HWLamps do
+            if l.OutAddress.IsNullOrEmpty() then  l.OutAddress <-TextAddrEmpty
+
+        for b in sys.HWButtons do
+            if b.InAddress.IsNullOrEmpty() then   b.InAddress <-TextAddrEmpty
+            if b.OutAddress.IsNullOrEmpty() then  b.OutAddress <- TextAddrEmpty
+
+        for c in sys.HWConditions do
+            if c.InAddress.IsNullOrEmpty() then   c.InAddress <-TextAddrEmpty
+            if c.OutAddress.IsNullOrEmpty() then  c.OutAddress <- TextAddrEmpty

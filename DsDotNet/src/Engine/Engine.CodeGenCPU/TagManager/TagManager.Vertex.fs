@@ -239,19 +239,19 @@ module TagManagerModule =
         let rxErrShortRising        = createTag true VertexTag.rxErrShortRising      
         let rxErrOpen               = createTag true VertexTag.rxErrOpen    
         let rxErrOpenRising         = createTag true VertexTag.rxErrOpenRising          
-        let errors = 
-            let err1 = if txErrOnTimeShortage.Value      then "감지시간부족" else ""
-            let err2 = if txErrOnTimeOver.Value          then "감지시간초과" else ""
-            let err3 = if txErrOffTimeShortage.Value     then "해지시간부족" else ""
-            let err4 = if txErrOffTimeOver.Value         then "해지시간초과" else ""
-            let err5 = if rxErrShort.Value      then "센서감지" else ""
-            let err6 = if rxErrOpen.Value       then "센서오프" else ""
-            [err1;err2;err3;err4;err5;err6]|> Seq.where(fun f->f <> "")
+        let errors =
+            [|
+                if txErrOnTimeShortage.Value  then yield "감지시간부족"
+                if txErrOnTimeOver.Value      then yield "감지시간초과"
+                if txErrOffTimeShortage.Value then yield "해지시간부족"
+                if txErrOffTimeOver.Value     then yield "해지시간초과"
+                if rxErrShort.Value           then yield "센서감지"
+                if rxErrOpen.Value            then yield "센서오프"
+            |]
 
         member _.ErrorList   =  errors
         member _.ErrorText   = 
-            if errors.any()
-            then
+            if errors.any() then
                 let errText = String.Join(",", errors)
                 $"{_.Name} {errText} 이상"
             else 

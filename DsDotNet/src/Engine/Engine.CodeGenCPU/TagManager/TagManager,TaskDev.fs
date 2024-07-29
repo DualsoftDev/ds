@@ -36,18 +36,18 @@ module TaskDevManagerModule =
 
         member _.GetTaskDevTag (vt:TaskDevTag) :IStorage =
             match vt with 
-            | TaskDevTag.actionIn           -> td.InTag :> IStorage
-            | TaskDevTag.actionOut          -> td.OutTag :> IStorage
+            | TaskDevTag.actionIn  -> td.InTag :> IStorage
+            | TaskDevTag.actionOut -> td.OutTag :> IStorage
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"  //planStart, planEnd 지원 안함
          
         member _.TaskDev   = td
       
-        member x.PS(api:ApiParam)   = pss[api] 
-        member x.PE(api:ApiParam)   = pes[api] 
-        member x.PO(api:ApiParam)   = pos[api] 
+        member x.PS(api:ApiParam) = pss[api] 
+        member x.PE(api:ApiParam) = pes[api] 
+        member x.PO(api:ApiParam) = pos[api] 
 
-        member x.PS(job:Job)   = x.PS(x.TaskDev.GetApiPara(job))
-        member x.PE(job:Job)   = x.PE(x.TaskDev.GetApiPara(job)) 
-        member x.PO(job:Job)   = x.PO(x.TaskDev.GetApiPara(job)) 
+        member x.PS(job:Job) = x.PS(x.TaskDev.GetApiPara(job))
+        member x.PE(job:Job) = x.PE(x.TaskDev.GetApiPara(job)) 
+        member x.PO(job:Job) = x.PO(x.TaskDev.GetApiPara(job)) 
 
         

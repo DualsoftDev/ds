@@ -32,23 +32,23 @@ module ApiTagManagerModule =
 
         member _.GetApiTag (vt:ApiItemTag) :IStorage =
             match vt with 
-            | ApiItemTag.apiItemSet             -> apiItemSet  :> IStorage
-            | ApiItemTag.apiItemSetPusle        -> apiItemSetPusle  :> IStorage
-            | ApiItemTag.apiItemSetPusleRelay   -> apiItemSetPusleRelay  :> IStorage
-            | ApiItemTag.apiItemSetPusleHold    -> apiItemSetPusleHold  :> IStorage
-            | ApiItemTag.apiItemEnd            -> pe  :> IStorage
-            | ApiItemTag.sensorLinking         -> sensorLinking  :> IStorage
-            | ApiItemTag.sensorLinked          -> sensorLinked  :> IStorage
+            | ApiItemTag.apiItemSet           -> apiItemSet           :> IStorage
+            | ApiItemTag.apiItemSetPusle      -> apiItemSetPusle      :> IStorage
+            | ApiItemTag.apiItemSetPusleRelay -> apiItemSetPusleRelay :> IStorage
+            | ApiItemTag.apiItemSetPusleHold  -> apiItemSetPusleHold  :> IStorage
+            | ApiItemTag.apiItemEnd           -> pe                   :> IStorage
+            | ApiItemTag.sensorLinking        -> sensorLinking        :> IStorage
+            | ApiItemTag.sensorLinked         -> sensorLinked         :> IStorage
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
          
 
-        member _.ApiItem   = apiItem
+        member _.ApiItem = apiItem
     
-        member _.APISET   = apiItemSet
-        member _.ApiItemSetPusle   = apiItemSetPusle
-        member _.ApiItemSetPusleRelay   = apiItemSetPusleRelay
-        member _.ApiItemSetPusleHold   = apiItemSetPusleHold
-        member _.APIEND   = pe
-        member _.SL1   = sensorLinking
-        member _.SL2   = sensorLinked
+        member _.APISET  = apiItemSet
+        member _.ApiItemSetPusle      = apiItemSetPusle
+        member _.ApiItemSetPusleRelay = apiItemSetPusleRelay
+        member _.ApiItemSetPusleHold  = apiItemSetPusleHold
+        member _.APIEND = pe
+        member _.SL1    = sensorLinking
+        member _.SL2    = sensorLinked
         

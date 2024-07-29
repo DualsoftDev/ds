@@ -1,11 +1,9 @@
 namespace Engine.CodeGenCPU
 
-open System.Diagnostics
-open Engine.Core
-open System.Collections.Generic
-open System.Linq
 open System
+open System.Diagnostics
 open Dual.Common.Core.FS
+open Engine.Core
 
 [<AutoOpen>]
 module TagManagerModule =
@@ -25,7 +23,7 @@ module TagManagerModule =
     type VertexManager (v:Vertex)  =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
-        let createTag  autoAddr (vertexTag:VertexTag)  =
+        let createTag autoAddr (vertexTag:VertexTag)  =
             let vertexTag = vertexTag |> int
             let name = getStorageName v vertexTag
             let t = createPlanVar  s name DuBOOL autoAddr v vertexTag sys
@@ -35,10 +33,9 @@ module TagManagerModule =
         let resetTagBit   = createTag  true  VertexTag.resetTag
         let endTagBit     =
             let et = createTag  true  VertexTag.endTag
-            if RuntimeDS.Package.IsPackageSIM()
-            then 
-                if v :? Real && (v :?> Real).Finished
-                then et.Value <- true           
+            if RuntimeDS.Package.IsPackageSIM() then 
+                if v :? Real && (v :?> Real).Finished then 
+                    et.Value <- true           
             et
 
         let originBit      = createTag  false  VertexTag.origin
@@ -71,19 +68,21 @@ module TagManagerModule =
 
         member _.Name   = v.QualifiedName
         member _.Vertex = v
-        member _.IsOperator = match v with 
-                              | :? Call as c -> c.CallOperatorType = DuOPCode
-                              |_-> false  
-        member _.IsCommand =  match v with 
-                              | :? Call as c -> c.CallCommandType = DuCMDCode
-                              |_-> false
+        member _.IsOperator =
+            match v with 
+            | :? Call as c -> c.CallOperatorType = DuOPCode
+            |_-> false  
+        member _.IsCommand =
+            match v with 
+            | :? Call as c -> c.CallCommandType = DuCMDCode
+            |_-> false
         member _.Flow   = v.Parent.GetFlow()
-        member _.System = v.Parent.GetFlow().System
+        member x.System = x.Flow.System
         member _.Storages = s
 
-        member _._on           = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag._ON)   :?> PlanVar<bool>
-        member _._off          = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF)  :?> PlanVar<bool>
-        member _._sim          = (v.Parent.GetFlow().System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
+        member x._on           = (x.Flow.System.TagManager :?> SystemManager).GetSystemTag(SystemTag._ON)  :?> PlanVar<bool>
+        member x._off          = (x.Flow.System.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool>
+        member x._sim          = (x.Flow.System.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member _.ST         = startTagBit
@@ -174,6 +173,7 @@ module TagManagerModule =
 
     and VertexMReal(v:Vertex) as this =
         inherit VertexManager(v)
+
         let s    = this.Storages
         let sys = this.System
         let real = v:?> Real
@@ -182,18 +182,18 @@ module TagManagerModule =
         let createTag name = this.CreateTag name
         let timerOnTimeBit = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
 
-        let relayGoingBit     = createTag false     VertexTag.goingRealy
+        let relayGoingBit     = createTag false VertexTag.goingRealy
 
-        let relayRealBit      = createTag false     VertexTag.relayReal
-        let realOriginInit    = createTag false     VertexTag.realOriginInit
-        let realOriginButton  = createTag false     VertexTag.realOriginButton
-        let realOriginAction  = createTag false     VertexTag.realOriginAction
+        let relayRealBit      = createTag false VertexTag.relayReal
+        let realOriginInit    = createTag false VertexTag.realOriginInit
+        let realOriginButton  = createTag false VertexTag.realOriginButton
+        let realOriginAction  = createTag false VertexTag.realOriginAction
         
-        let realLink          = createTag false     VertexTag.realLink
-        let dummyCoinSTs      = createTag false     VertexTag.dummyCoinSTs
-        let dummyCoinRTs      = createTag false     VertexTag.dummyCoinRTs
-        let dummyCoinETs      = createTag false     VertexTag.dummyCoinETs
-        let originGoingErr    = createTag false     VertexTag.workErrOriginGoing
+        let realLink          = createTag false VertexTag.realLink
+        let dummyCoinSTs      = createTag false VertexTag.dummyCoinSTs
+        let dummyCoinRTs      = createTag false VertexTag.dummyCoinRTs
+        let dummyCoinETs      = createTag false VertexTag.dummyCoinETs
+        let originGoingErr    = createTag false VertexTag.workErrOriginGoing
 
         let scriptStart    = createTag  true VertexTag.scriptStart
         let motionStart    = createTag  true VertexTag.motionStart
@@ -237,20 +237,19 @@ module TagManagerModule =
         ///link with physical sensors
         member _.Link       = realLink
         ///GoingOriginErr
-        member _.ErrGoingOrigin         = originGoingErr
+        member _.ErrGoingOrigin = originGoingErr
 
         ///DAG Coin Start Coil
-        member _.CoinAnyOnST         = dummyCoinSTs
+        member _.CoinAnyOnST    = dummyCoinSTs
         ///DAG Coin Reset Coil
-        member _.CoinAnyOnRT         = dummyCoinRTs
+        member _.CoinAnyOnRT    = dummyCoinRTs
         ///DAG Coin End Coil
-        member _.CoinAnyOnET         = dummyCoinETs
-
+        member _.CoinAnyOnET    = dummyCoinETs
 
         ///Timer time avg
         member _.TRealOnTime    = timerOnTimeBit
 
-        member _.IsFinished = (v :?> Real).Finished
+        member x.IsFinished = x.Real.Finished
 
         member _.ScriptStart  =  scriptStart
         member _.MotionStart  =  motionStart

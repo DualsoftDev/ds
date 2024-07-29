@@ -82,19 +82,6 @@ module EdgeModule =
         if invalidEdge.any() then
             failwith $"Vertex {invalidEdge.First().Name} children type error"
 
-    let createFlowEdge(flow:Flow) (modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-        let mei = modelingEdgeInfo
-        validateParentOfEdgeVertices mei flow
-        flow.ModelingEdges.Add(mei) |> verifyM $"중복 edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
-        createEdge flow.Graph mei
-
-    let createChildEdge(segment:Real) (modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-        let mei = modelingEdgeInfo
-        validateParentOfEdgeVertices mei segment
-        segment.ModelingEdges.Add(mei) |> verifyM $"중복 edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
-        validateChildrenVertexType mei
-
-        createEdge segment.Graph modelingEdgeInfo
 
     let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) =
         $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
@@ -277,30 +264,24 @@ module EdgeModule =
 
     let getResetRootEdges (v:Vertex) = getResetEdgeSources(v)
     let getStartRootEdges (v:Vertex) = getStartEdgeSources(v)
-    
-    let checkRealEdgeErrExist (sys:DsSystem) (bStart:bool)  =
-        let vs = sys.GetVertices()
-        let reals = vs.OfType<Real>()
-        let errors = System.Collections.Generic.List<Real>()
-
-        for real in reals do
-            let realAlias_ = vs.GetAliasTypeReals().Where(fun f -> f.GetPure() = real).OfType<Vertex>()
-            let checkList = ([real:>Vertex] @ realAlias_ )
-
-            let checks = if bStart then checkList |> Seq.collect(fun f -> getStartRootEdges(f))
-                                   else checkList |> Seq.collect(fun f -> getResetRootEdges(f))
-            if checks.IsEmpty() then
-                errors.Add(real)
-
-        errors
-
    
     type Flow with
         member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-            createFlowEdge x modelingEdgeInfo
+            let flow:Flow = x
+            let mei = modelingEdgeInfo
+            validateParentOfEdgeVertices mei flow
+            flow.ModelingEdges.Add(mei) |> verifyM $"중복 edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
+            createEdge flow.Graph mei
+
     type Real with
         member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
-            createChildEdge x modelingEdgeInfo
+            let segment:Real = x
+            let mei = modelingEdgeInfo
+            validateParentOfEdgeVertices mei segment
+            segment.ModelingEdges.Add(mei) |> verifyM $"중복 edge {mei.Sources[0].Name}{mei.EdgeSymbol}{mei.Targets[0].Name}"
+            validateChildrenVertexType mei
+
+            createEdge segment.Graph modelingEdgeInfo
 
 
 [<Extension>]

@@ -1,0 +1,22 @@
+{
+	"nodes":[
+		{"id":"46fbaef90017c549","type":"text","text":"ITagManager","x":-155,"y":-300,"width":158,"height":60},
+		{"id":"12ae315b357c950b","type":"text","text":"ActionVariableManager","x":-700,"y":-180,"width":240,"height":60},
+		{"id":"c2782cb1bd41f041","type":"text","text":"ApiItemManager","x":-400,"y":0,"width":185,"height":60},
+		{"id":"00af613acedde9f6","type":"text","text":"SystemManager","x":-95,"y":90,"width":190,"height":60},
+		{"id":"5f786b5e953dee9e","type":"text","text":"VariableManager","x":95,"y":0,"width":185,"height":60},
+		{"id":"8df3b374b09588c6","type":"text","text":"VertexManager","x":280,"y":-90,"width":180,"height":60},
+		{"id":"44c69bef58a61b9f","type":"text","text":"TaskDevManager","x":-552,"y":-90,"width":185,"height":60},
+		{"id":"63999af183575054","x":63,"y":-315,"width":307,"height":90,"type":"text","text":"type ITagManager =\n  abstract Target: IQualifiedNamed\n  abstract Storages: Storages"},
+		{"id":"9e49e8bd0409579e","type":"text","text":"FlowManager","x":-280,"y":90,"width":165,"height":60}
+	],
+	"edges":[
+		{"id":"fcc746d6d9b562c9","fromNode":"12ae315b357c950b","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"},
+		{"id":"2e971aaf5d918a60","fromNode":"44c69bef58a61b9f","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"},
+		{"id":"5e9f64ca03cca11e","fromNode":"c2782cb1bd41f041","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"},
+		{"id":"deba8d614cc612af","fromNode":"9e49e8bd0409579e","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"},
+		{"id":"85308ef4aba5fc90","fromNode":"00af613acedde9f6","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"},
+		{"id":"5dd45c16cca0aa19","fromNode":"5f786b5e953dee9e","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"},
+		{"id":"7c72e11ebaae1e66","fromNode":"8df3b374b09588c6","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"}
+	]
+}

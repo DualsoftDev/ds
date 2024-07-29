@@ -1,16 +1,13 @@
 namespace Engine.CodeGenCPU
 
 open Engine.Core
-open Engine.Parser.FS
 open Dual.Common.Core.FS
-open System.Reactive.Linq
-open System
-open Dual.Common.Core.FS.ForwardDecl.ShowForwardDeclSample
 
 [<AutoOpen>]
 module TagManagerUtil =
 
-    let addressExist address = address  <> TextSkip && address <> TextAddrEmpty
+    let addressExist address =
+        address  <> TextSkip && address <> TextAddrEmpty
 
 
 
@@ -61,27 +58,29 @@ module TagManagerUtil =
 
     type BridgeType = | Device | Button | Lamp | Condition | DummyTemp
     let createBridgeTag(stg:Storages, (name: string), address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed, duType:DataType): ITag option=
-        if address = TextSkip || address = "" 
-        then None
+        if address = TextSkip || address = "" then
+            None
         else
-            let name =
-                match bridgeType with
-                | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
-                | Device ->   match DU.tryGetEnumValue<TaskDevTag>(tagKind).Value with
-                              | TaskDevTag.actionIn     -> name |> getInActionName
-                              | TaskDevTag.actionOut    -> name |> getOutActionName
-                              | TaskDevTag.actionMemory -> name |> getMemoryActionName
-                              | _ -> failwithlog "error: TaskDevTag create "
+            let plcName =
+                let name =
+                    match bridgeType with
+                    | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
+                    | Device ->
+                        match DU.tryGetEnumValue<TaskDevTag>(tagKind).Value with
+                        | TaskDevTag.actionIn     -> name |> getInActionName
+                        | TaskDevTag.actionOut    -> name |> getOutActionName
+                        | TaskDevTag.actionMemory -> name |> getMemoryActionName
+                        | _ -> failwithlog "error: TaskDevTag create "
 
-                | Button | Lamp | Condition
-                    ->   match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with
-                              | HwSysTag.HwSysIn      -> name |> getInActionName
-                              | HwSysTag.HwSysOut     -> name |> getOutActionName
-                              | _ -> failwithlog "error: HwSysTag create "
+                    | (Button | Lamp | Condition) ->
+                        match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with
+                        | HwSysTag.HwSysIn      -> name |> getInActionName
+                        | HwSysTag.HwSysOut     -> name |> getOutActionName
+                        | _ -> failwithlog "error: HwSysTag create "
+                getPlcTagAbleName name stg
 
-            let plcName = getPlcTagAbleName name stg
-            if stg.ContainsKey plcName       
-            then stg[plcName] :?> ITag  |> Some
+            if stg.ContainsKey plcName then
+                stg[plcName] :?> ITag  |> Some
             else 
                 let t = createTagByBoxedValue plcName {Object = duType.DefaultValue()} tagKind address sys fqdn
                 stg.Add(t.Name, t)

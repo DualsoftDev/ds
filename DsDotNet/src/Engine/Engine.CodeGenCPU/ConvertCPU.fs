@@ -258,9 +258,7 @@ module ConvertCPU =
 
         sys.GenerationOrigins()
 
-        if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
-        then 
-           
+        if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출           
             sys.GenerationMemory()
             sys.GenerationIO()
 
@@ -269,7 +267,7 @@ module ConvertCPU =
                 setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
             | _->  
                 updateDuplicateAddress sys
-                checkNullAddress sys
+                CheckNullAddress sys
                 checkJobs sys
                 checkErrHWItem(sys)
                 checkErrApi(sys)
@@ -277,7 +275,7 @@ module ConvertCPU =
             checkMultiDevPair(sys)
 
         else 
-            checkErrRealResetExist(sys)
+            CheckRealReset(sys)
             updateRealParentExpr(sys)
             sys.GenerationRealActionMemory()
 

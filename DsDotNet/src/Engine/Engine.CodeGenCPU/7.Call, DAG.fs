@@ -77,7 +77,9 @@ type VertexTagManager with
         [
 #if DEBUG
             // 대상이 유일하지 않으면 중복 생성될 텐데..
-            assert( coins.Select(fun coin -> coin.Vertex.GetPure().V.Vertex :?> Call).GroupBy(fun x -> x).All(fun g -> g.Count() = 1) )
+            let xxxVertices = coins.Select(fun coin -> coin.Vertex.GetPure().V.Vertex :?> Call).GroupBy(fun x -> x).ToArray()
+            if xxxVertices.All(fun g -> g.Count() <> 1) then
+                failwith "ERROR: Alias target not unique"
 #endif
             let f = getFuncName()
             for coin in coins do

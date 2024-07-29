@@ -55,11 +55,15 @@ module CoreExtensionModule =
 
     /// Real 자신이거나 RealEx Target Real
     let getPureReal(v:Vertex) : Real =
-        tryGetPure(v).Cast<Real>()
-        |> Option.defaultWith(fun () -> failwithlog $"ERROR: {v.Name} is not real!!")
+        match tryGetPure(v) with
+        | Some (:? Real as r) -> r
+        | _ -> failwithlog $"ERROR: {v.Name} is not real!!"
 
     /// Call 자신이거나 Alias Target Call
-    let tryGetPureCall(v:Vertex) : Call option = tryGetPure(v).Cast<Call>()
+    let tryGetPureCall(v:Vertex) : Call option =
+        match tryGetPure(v) with
+        | Some (:? Call as c) -> Some c
+        | _ -> None
 
 
     type DsSystem with

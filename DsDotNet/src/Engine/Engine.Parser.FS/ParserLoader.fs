@@ -47,14 +47,14 @@ module ParserLoader =
                 .Map(fun s -> s.AbsoluteFilePath)
                 .Distinct()
                 .ToFSharpList()
-
+        system.Loading <- false
         system, loadings
 
 
     let LoadFromConfig (configPath: string) (target:PlatformTarget)=
         let jsonFileName =PathManager.getFileName (configPath.ToFile())
-        if jsonFileName  <> TextDSJson
-        then failwithf $"LoadFromConfig FileName must be {TextDSJson}: now {jsonFileName}"
+        if jsonFileName  <> TextDSJson then
+            failwithf $"LoadFromConfig FileName must be {TextDSJson}: now {jsonFileName}"
 
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
@@ -68,21 +68,17 @@ module ParserLoader =
         }
           
 
-    let LoadFromActivePath (activePath: string)  (target:PlatformTarget) (usingGpt:bool)=
+    let LoadFromActivePath (activePath: string) (target:PlatformTarget) (usingGpt:bool)=
         ModelParser.ClearDicParsingText()
-#if DEBUG
-        let stopwatch = Stopwatch()
-        stopwatch.Start()
-#endif
 
-        let dir = PathManager.getDirectoryName (activePath.ToFile())
-        let ret = loadingDS dir activePath None  usingGpt  target 
+        let f() = 
+            let dir = PathManager.getDirectoryName (activePath.ToFile())
+            loadingDS dir activePath None usingGpt target 
 
-#if DEBUG
-        stopwatch.Stop()
-        stopwatch.ElapsedMilliseconds |> printfn "Elapsed time: %d ms"
-#endif
+        let ret, millisecond = duration f
+        printfn $"Elapsed time: {millisecond} ms"
         ret
+
 
     let LoadFromDevicePath (activePath: string) (loadedName: string) (target:PlatformTarget)=
         let dir = PathManager.getDirectoryName (activePath.ToFile())

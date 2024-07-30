@@ -103,7 +103,9 @@ module TagModule =
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
                 failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
-
+            | DuAction (DuAdd _) -> failwith "DuCopy 같이 처리 필요"     
+            | DuAction (DuSub _) -> failwith "DuCopy 같이 처리 필요"     
+                
         member x.GetSourceStorages() =
             match x with
             | DuAssign (condi, expr, _target) ->
@@ -133,8 +135,10 @@ module TagModule =
                         yield! args |> collect(fun arg -> arg.CollectStorages())
                 ]
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
-            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
-                failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) -> failwith "ERROR: Not yet implemented"    
+            | DuAction (DuAdd _) -> failwith "DuCopy 같이 처리 필요"     
+            | DuAction (DuSub _) -> failwith "DuCopy 같이 처리 필요"     
+                
 
       
 

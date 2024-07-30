@@ -130,6 +130,8 @@ module CoreModule =
         member _.TryFindFqdnVertex(fqdn) = fqdnVertexDic.TryFind(fqdn)
         // [NOTE] GraphVertex }
 
+        /// System Loading (메모리 작업 중) 여부.  System 생성이 끝나는 순간에 false
+        member val Loading = true with get, set
             
         member x.AddLoadedSystem(childSys) = 
             loadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"

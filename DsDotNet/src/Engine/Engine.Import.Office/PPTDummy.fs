@@ -47,15 +47,15 @@ module PPTDummyModule =
 type PPTDummyExt =
 
     [<Extension>]
-    static member TryFindDummy(dummys: HashSet<pptDummy>, pptNode: pptNode) =
+    static member TryFindDummy(dummys: ISet<pptDummy>, pptNode: pptNode) =
         dummys |> Seq.tryFind (fun w -> w.Items.Contains(pptNode))
 
     [<Extension>]
-    static member IsMember(dummys: HashSet<pptDummy>, pptNode: pptNode) =
+    static member IsMember(dummys: ISet<pptDummy>, pptNode: pptNode) =
         dummys.TryFindDummy(pptNode).IsSome
 
     [<Extension>]
-    static member GetMembers(dummys: HashSet<pptDummy>, pptNode: pptNode) =
+    static member GetMembers(dummys: ISet<pptDummy>, pptNode: pptNode) =
         match dummys.TryFindDummy(pptNode) with
         | Some(findDummy) -> findDummy.Items
         | None -> HashSet<pptNode>()

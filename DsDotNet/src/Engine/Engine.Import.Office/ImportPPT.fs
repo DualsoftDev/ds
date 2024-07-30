@@ -18,8 +18,6 @@ module ImportPPTModule =
           LoadingPaths: string seq
           LayoutImgPaths: string seq
            }
-
-
     
     type PPTParams = {
         TargetType: PlatformTarget
@@ -27,13 +25,8 @@ module ImportPPTModule =
         CreateFromPPT : bool
         CreateBtnLamp : bool
     }
-
-    let dicPptDoc = Dictionary<string, PresentationDocument>()
-    let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
-    let loadedParentStack = Stack<DsSystem>() //LoadedSystem.AbsoluteParents 구성하여 ExternalSystem 구분 및 UI Tree 구조 구성
-    let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
     
-    let getHashKeys (skipCnt: int, path: string) =
+    let getHashKeys (skipCnt: int, path: string, loadedParentStack:Stack<DsSystem>) =
         String.Join(
             ",",
             loadedParentStack
@@ -69,7 +62,11 @@ module ImportPPTModule =
             paras: DeviceLoadParameters,
             isLib,
             pptParams:PPTParams,
-            dicLoaded:Dictionary<LoadedSystem, string>
+            dicLoaded:Dictionary<LoadedSystem, string>,
+            dicPptDoc:Dictionary<string, PresentationDocument>,
+            pathStack:Stack<string>,
+            loadedParentStack:Stack<DsSystem>,
+            layoutImgPaths:HashSet<string>
           ) =
             pathStack.Push(paras.AbsoluteFilePath)
             LoadingPPTNotify.Trigger(paras.AbsoluteFilePath)
@@ -124,7 +121,7 @@ module ImportPPTModule =
                 let addNewLoadedSys (newSys: DsSystem, bExtSys: bool, bOPEN_EXSYS_LINK: bool) =
 
                     loadedParentStack.Push(newSys)
-                    loadSystem (pptReop, newSys, paras, isLib, pptParams, dicLoaded) |> ignore
+                    loadSystem (pptReop, newSys, paras, isLib, pptParams, dicLoaded, dicPptDoc, pathStack, loadedParentStack, layoutImgPaths) |> ignore
                     currentFileName <- pathStack.Peek()
 
                     let parents = loadedParentStack.ToHashSet().Skip(1).Reverse() //자신 제외
@@ -134,7 +131,7 @@ module ImportPPTModule =
                             let skipCnt = if bOPEN_EXSYS_LINK then 2 else 1 //LINK 이면 형제 관계
                             let exSys = ExternalSystem(newSys, paras, false)
 
-                            let key = getHashKeys (skipCnt, paras.AbsoluteFilePath)
+                            let key = getHashKeys (skipCnt, paras.AbsoluteFilePath, loadedParentStack)
                             sRepo.Add(key, exSys.ReferenceSystem)
                             exSys :> LoadedSystem
                         else
@@ -146,7 +143,7 @@ module ImportPPTModule =
                     newLoad
 
                 let addNewExtSysLoaded (skipCnt) =
-                    let key = getHashKeys (skipCnt, paras.AbsoluteFilePath)
+                    let key = getHashKeys (skipCnt, paras.AbsoluteFilePath, loadedParentStack)
 
                     let exSys =
                         if sRepo.ContainsKey(key) then
@@ -184,7 +181,17 @@ module ImportPPTModule =
             pptReop.Add(theSys, doc)
             theSys, doc
 
-        let internal GetImportModel(pptReop: Dictionary<DsSystem, pptDoc>, filePath: string, isLib, pptParams) : DsSystem * pptDoc =
+        let internal GetImportModel
+          (
+            pptReop: Dictionary<DsSystem, pptDoc>,
+            filePath: string,
+            isLib,
+            pptParams,
+            dicPptDoc:Dictionary<string, PresentationDocument>,
+            pathStack:Stack<string>,
+            layoutImgPaths:HashSet<string>
+          ) : DsSystem * pptDoc =
+            let loadedParentStack = Stack<DsSystem>() //LoadedSystem.AbsoluteParents 구성하여 ExternalSystem 구분 및 UI Tree 구조 구성
             //active는 시스템이름으로 ppt 파일 이름을 사용
             let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile) 
             activeSysDir <- fileDirectory
@@ -192,30 +199,31 @@ module ImportPPTModule =
             let sysName = getSystemName filePath
             let mySys = DsSystem.Create(sysName)
 
-            if mySys.Name <> TextLibrary
-            then  activeSys <- Some mySys
+            if mySys.Name <> TextLibrary then
+                activeSys <- Some mySys
 
             let paras =
                 getParams (filePath, sysName + ".pptx", mySys.Name, mySys, DuNone, sRepo)
 
             let dicLoaded = Dictionary<LoadedSystem, string>() // LoadedSystem 부모, 형제 호출시 Runtime에 변경하기 위한 정보 사전
-            loadedParentStack.Clear()
-            layoutImgPaths.Clear()
 
             loadedParentStack.Push mySys
-            loadSystem (pptReop, mySys, paras, isLib, pptParams, dicLoaded)
+            loadSystem (pptReop, mySys, paras, isLib, pptParams, dicLoaded, dicPptDoc, pathStack, loadedParentStack, layoutImgPaths)
 
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 
-    let private loadFromPPTs (path: string ) isLib (pptParams:PPTParams)=
+    let private loadFromPPTs (path: string ) isLib (pptParams:PPTParams) (layoutImgPaths:HashSet<string>)=
         Copylibrary.Clear()
+        let dicPptDoc = Dictionary<string, PresentationDocument>()
+        let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
+
         try
             try
                 let cfg = { DsFilePath = path
                             HWIP =  RuntimeDS.IP
                     }
 
-                let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams)
+                let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams, dicPptDoc, pathStack, layoutImgPaths)
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
@@ -251,7 +259,6 @@ module ImportPPTModule =
                 failwithf $"{msg} \t◆파일명 {errFileName}"
         finally
             dicPptDoc.Where(fun f -> f.Value.IsNonNull()).Iter(fun f -> f.Value.Dispose())
-            dicPptDoc.Clear()
 
 
 
@@ -266,8 +273,9 @@ module ImportPPTModule =
             Util.runtimeTarget <- pptParams.TargetType
             ModelParser.ClearDicParsingText()
             pptRepo.Clear()
+            let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
 
-            let model, millisecond = duration (fun () -> loadFromPPTs fullName isLib pptParams |> Tuple.first)
+            let model, millisecond = duration (fun () -> loadFromPPTs fullName isLib pptParams layoutImgPaths |> Tuple.first)
             printfn $"Elapsed time: {millisecond} ms"
 
             let activePath = PathManager.changeExtension (fullName.ToFile()) ".ds" 

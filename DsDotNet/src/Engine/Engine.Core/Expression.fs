@@ -315,9 +315,9 @@ module ExpressionModule =
             | DuTimer (t:TimerStatement) -> t.Timer.Name
             | DuCounter (c:CounterStatement) -> c.Counter.Name
             | DuAction (a:ActionStatement) ->
-               match a with
-               | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
-               | DuCopyUdt { Target = target } -> target
+                match a with
+                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
+                | DuCopyUdt { Target = target } -> target
             | DuPLCFunction { FunctionName = fn } -> fn
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
@@ -397,10 +397,12 @@ module ExpressionModule =
                 let ts, t = timerStatement, timerStatement.Timer
                 let typ = t.Type.ToString()
                 let functionName = ts.FunctionName  // e.g "createTON"
-                let args = [    // [preset; rung-in-condition; (reset-condition)]
-                    sprintf "%A" t.PRE.Value
-                    match ts.RungInCondition with | Some c -> c.ToText() | None -> ()
-                    match ts.ResetCondition  with | Some c -> c.ToText() | None -> () ]
+                let args =   // [preset; rung-in-condition; (reset-condition)]
+                    [
+                        sprintf "%A" t.PRE.Value
+                        match ts.RungInCondition with | Some c -> c.ToText() | None -> ()
+                        match ts.ResetCondition  with | Some c -> c.ToText() | None -> ()
+                    ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {t.Name} = {functionName}({args});"
 
@@ -408,13 +410,15 @@ module ExpressionModule =
                 let cs, c = counterStatement, counterStatement.Counter
                 let typ = c.Type.ToString()
                 let functionName = cs.FunctionName  // e.g "createCTU"
-                let args = [    // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
-                    sprintf "%A" c.PRE.Value
-                    match cs.UpCondition    with | Some c -> c.ToText() | None -> ()
-                    match cs.DownCondition  with | Some c -> c.ToText() | None -> ()
-                    match cs.ResetCondition with | Some c -> c.ToText() | None -> ()
-                    if c.ACC.Value <> 0u then
-                        sprintf "%A" c.ACC.Value ]
+                let args =    // [preset; up-condition; (down-condition;) (reset-condition;) (accum;)]
+                    [
+                        sprintf "%A" c.PRE.Value
+                        match cs.UpCondition    with | Some c -> c.ToText() | None -> ()
+                        match cs.DownCondition  with | Some c -> c.ToText() | None -> ()
+                        match cs.ResetCondition with | Some c -> c.ToText() | None -> ()
+                        if c.ACC.Value <> 0u then
+                            sprintf "%A" c.ACC.Value
+                    ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args});"
             | DuAction (DuCopy (condition, source, target)) ->

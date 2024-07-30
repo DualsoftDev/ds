@@ -13,8 +13,8 @@ module private ExpressionHelperModule =
     let expectGteN (n:int) (xs:'a seq) =
         if xs.Count() < n then
             failwith $"Wrong number of arguments: expect at least {n} arguments"
-        else
-            xs
+
+        xs
 
     let evalArg (x:IExpression) = x.BoxedEvaluatedValue
     let castTo<'T> (x:obj) = x :?> 'T

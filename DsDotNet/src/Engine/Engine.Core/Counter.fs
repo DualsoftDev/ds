@@ -243,19 +243,22 @@ module rec CounterModule =
         let disposables = new CompositeDisposable()
 
         let cs = counterStruct
+        let system = (counterStruct:>IStorage).DsSystem
         let registerLoad() =
             let csd = box cs :?> ICTD       // CTD or CTUD 둘다 적용
-            CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
-                .Where(fun (_system, storage, _newValue) -> storage = csd.LD && csd.LD.Value)
-                .Subscribe(fun (_system, _storage, _newValue) ->
+            CpusEvent.ValueSubject
+                .Where(fun (sys, _storage, _value) -> sys = system)
+                .Where(fun (_sys, storage, _newValue) -> storage = csd.LD && csd.LD.Value)
+                .Subscribe(fun (_sys, _storage, _newValue) ->
                     cs.ACC.Value <- cs.PRE.Value
             ) |> disposables.Add
 
         let registerCTU() =
             let csu = box cs :?> ICTU
-            CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
-                .Where(fun (_system, storage, _newValue) -> storage = csu.CU && csu.CU.Value)
-                .Subscribe(fun (_system, _storage, _newValue) ->
+            CpusEvent.ValueSubject
+                .Where(fun (sys, _storage, _value) -> sys = system)
+                .Where(fun (_sys, storage, _newValue) -> storage = csu.CU && csu.CU.Value)
+                .Subscribe(fun (_sys, _storage, _newValue) ->
                     if cs.ACC.Value < 0u || cs.PRE.Value < 0u then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1u
                     if cs.ACC.Value >= cs.PRE.Value then
@@ -265,9 +268,10 @@ module rec CounterModule =
         let registerCTD() =
             let csd = box cs :?> ICTD
             registerLoad()
-            CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
-                .Where(fun (_system, storage, _newValue) -> storage = csd.CD && csd.CD.Value)
-                .Subscribe(fun (_system, _storage, _newValue) ->
+            CpusEvent.ValueSubject
+                .Where(fun (sys, _storage, _value) -> sys = system)
+                .Where(fun (_sys, storage, _newValue) -> storage = csd.CD && csd.CD.Value)
+                .Subscribe(fun (_sys, _storage, _newValue) ->
                     if cs.ACC.Value < 0u || cs.PRE.Value < 0u then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value - 1u
                     if cs.ACC.Value <= cs.PRE.Value then
@@ -277,9 +281,10 @@ module rec CounterModule =
 
         let registerCTR() =
             let csr = box cs :?> ICTR
-            CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
-                .Where(fun (_system, storage, _newValue) -> storage = csr.CD && csr.CD.Value)
-                .Subscribe(fun (_system, _storage, _newValue) ->
+            CpusEvent.ValueSubject
+                .Where(fun (sys, _storage, _value) -> sys = system)
+                .Where(fun (_sys, storage, _newValue) -> storage = csr.CD && csr.CD.Value)
+                .Subscribe(fun (_sys, _storage, _newValue) ->
                     if cs.ACC.Value < 0u || cs.PRE.Value < 0u then failwithlog "ERROR"
                     cs.ACC.Value <- cs.ACC.Value + 1u
                     if cs.ACC.Value = cs.PRE.Value then
@@ -292,9 +297,10 @@ module rec CounterModule =
 
 
         let registerReset() =
-            CpusEvent.ValueSubject.Where(fun (system, _storage, _value) -> system = (counterStruct:>IStorage).DsSystem)
-                .Where(fun (_system, storage, _newValue) -> storage = cs.RES && cs.RES.Value)
-                .Subscribe(fun (_system, _storage, _newValue) ->
+            CpusEvent.ValueSubject
+                .Where(fun (sys, _storage, _value) -> sys = (counterStruct:>IStorage).DsSystem)
+                .Where(fun (_sys, storage, _newValue) -> storage = cs.RES && cs.RES.Value)
+                .Subscribe(fun (_sys, _storage, _newValue) ->
                     debugfn "Counter reset requested"
                     if cs.ACC.Value < 0u || cs.PRE.Value < 0u then
                         failwithlog "ERROR"

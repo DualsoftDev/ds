@@ -143,11 +143,11 @@ module ConvertCPU =
             let devCallSet =  s.GetTaskDevCalls() //api는 job 기준으로 중복제거 
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                let masterCall= getMasterJob(calls)
                 yield! tm.TD1_PlanSend(s, calls)
                 yield! tm.TD2_PlanReceive(s)
                 yield! tm.TD3_PlanOutput(s)
                 
+                let masterCall= getMasterJob(calls)
                 yield! tm.A1_ApiSet(masterCall)
                 yield! tm.A2_ApiEnd()
 

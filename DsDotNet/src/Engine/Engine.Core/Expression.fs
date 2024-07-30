@@ -342,7 +342,12 @@ module ExpressionModule =
     let commentAndStatement = (|CommentAndStatement|)
     let withNoComment statement = CommentedStatement("", statement)
     let withExpressionComment (append:string) (statement: Statement) =
+#if DEBUG
         CommentedStatement(append, statement)
+#else
+        CommentedStatement("", statement)
+#endif
+
 
     /// UDT 구조체 멤버 값 복사.  source 및 target 이 string 으로 주어진다. (e.g "people[0]", "hong")
     /// PC 버젼에서는 UDT 변수 복사에 대한 실제 실행문.

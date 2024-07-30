@@ -355,6 +355,7 @@ type FindExtension =
                     x.GetTaskDevsCoin().DistinctBy(fun (td, _c) -> td)
                         .Where(fun (dev, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
                          |> Seq.filter(fun (dev,c) -> c.TargetJob.TaskDefs.First() = dev)
+                         //|> Seq.filter(fun (dev,_c) ->dev.OutTag.IsNonNull() && dev.OutTag.DataType = typedefof<bool>)
                  //normal //test ahn
                     //x.GetTaskDevsCoin()
                     //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))

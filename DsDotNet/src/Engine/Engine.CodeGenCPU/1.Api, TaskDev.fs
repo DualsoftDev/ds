@@ -10,8 +10,9 @@ type TaskDevManager with
 
     member d.TD1_PlanSend(activeSys:DsSystem, coins:Vertex seq) =
         [
-            for c in coins.OfType<Call>() do
-                yield (c.VC.MM.Expr, activeSys._off.Expr) --| (d.PS(c.TargetJob), getFuncName())
+            let job = coins.OfType<Call>().First().TargetJob
+            let coinMemos = coins.Select(fun s->s.VC.MM).ToOr()
+            yield (coinMemos, activeSys._off.Expr) --| (d.PS(job), getFuncName())
         ]
     
     member d.TD2_PlanReceive(activeSys:DsSystem) =

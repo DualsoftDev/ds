@@ -42,8 +42,21 @@ module PPTNodeModule =
         let mutable ifRX = ""
         let mutable realGoingTime:float option = None   
         let mutable realDelayTime:float option = None   
+        let nameNFunc(shape:Shape) = 
+            let mutable macroUpdateName =
+                shape.InnerText.Replace("”", "\"").Replace("“", "\"") 
+            macros
+                .Where(fun m->m.Page = iPage)
+                .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}"))
 
-        let nodeType = getNodeType(shape, iPage)
+            macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+
+        let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
+        let name = 
+            let nameTrim  = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
+            GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
+
+        let nodeType = getNodeType(shape, name, iPage)
         let updateSafety (barckets: string) =
             barckets.Split(';')
             |> Seq.iter (fun f ->
@@ -102,23 +115,10 @@ module PPTNodeModule =
             realGoingTime <- goingT
             realDelayTime <- delayT
 
-        let nameNFunc(shape:Shape) = 
-            let mutable macroUpdateName =
-                shape.InnerText.Replace("”", "\"").Replace("“", "\"") 
-            macros
-                .Where(fun m->m.Page = iPage)
-                .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}"))
-
-            macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
-
-        let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
-        let name = 
-            let nameTrim  = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
-            GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
 
         do
             try 
-                nameCheck (shape, nodeType, iPage, namePure(shape), nameNFunc(shape))
+                nameCheck (shape, nodeType, iPage, name)
                 match nodeType with
                 | CALL
                 | REAL ->

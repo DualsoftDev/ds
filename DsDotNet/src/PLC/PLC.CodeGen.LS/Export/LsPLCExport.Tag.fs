@@ -151,7 +151,11 @@ module XGITag = //IEC61131Tag =
                         let aliasNames = x.AddressAlias.JoinWith(", ")
                         $"Comment=\"{escapeXml x.Comment}//Alias List: {aliasNames}\""
                     else 
+#if DEBUG
                         $"Name=\"{x.Name}\"";$"Comment=\"{escapeXml x.Comment}\""
+#else
+                        $"Name=\"{x.Name}\""
+#endif
 
                     $"Device=\"{x.Device}\""
                     $"DevicePos=\"{x.DevicePos}\""

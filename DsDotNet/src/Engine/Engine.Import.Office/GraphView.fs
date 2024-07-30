@@ -45,16 +45,20 @@ module rec ViewModule =
                 let condiJob = sa.GetJob()
                 let values = String.Join(","
                     , condiJob
-                               .TaskDefs
-                               .Where(fun f-> f.InTag.IsNonNull())
-                               .Select(fun f->
-                                    match getDataType f.InTag.DataType  with
-                                    | DuBOOL -> 
-                                        if Convert.ToBoolean(f.InTag.BoxedValue)
-                                        then "T" else "F"
-                                    | _-> f.InTag.BoxedValue.ToString())
-                                    )
-
+                        .TaskDefs
+                        .Select(fun td ->
+                            if td.InTag.IsNonNull()
+                            then 
+                                match getDataType td.InTag.DataType  with
+                                | DuBOOL -> 
+                                    if Convert.ToBoolean(td.InTag.BoxedValue)
+                                    then "T" else "F"
+                                | _-> td.InTag.BoxedValue.ToString()
+                            else 
+                                let value  = (td.TagManager:?>TaskDevManager).PlanEnd(condiJob).Value
+                                if Convert.ToBoolean(value)
+                                then "T" else "F"
+                            ))
 
                 if values = ""
                 then

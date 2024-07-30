@@ -127,64 +127,39 @@ module ConvertCPU =
             yield f.F4_FlowDriveCondition()
             
         ]
-        
-    //let private applyApiItem(s:DsSystem) = 
-    //    [
-    //        let devCallSet =  s.GetTaskDevCallSet()
-    //        for (td, coins) in devCallSet do
-    //            yield! td.A1_ApiSet(coins)
-    //            yield! td.A2_ApiEnd(coins)
-    //    ]
-
-                        
-        //let input = calls.First().GetEndAction(a.ApiItem)
-        
-        //let sets =
-        //    if input.IsSome
-        //    then
-        //        linkExpr
-        //        <&&>  
-        //        (input.Value <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
-        //    else 
-        //        (activeSys._off.Expr)
-
-        //(sets, activeSys._off.Expr) --| (a.SL1, getFuncName())
-
-                        //let input = coins.OfType<Call>().First().GetEndAction(a.ApiItem)     
-
-
-                        //yield am.A3_SensorLinking(s, coins.OfType<Call>())
-                        //yield am.A4_SensorLinked(s, coins.OfType<Call>())
-       // ]
-
-    let getMasterJob (calls : Vertex seq) = 
+  
+    let getTryMasterCall(calls : Vertex seq) = 
         let pureCalls = 
             calls.OfType<Call>()@calls.OfType<Alias>().Choose(fun a->a.GetPureCall())
         
         if pureCalls.Select(fun c->c.TargetJob).Distinct().Count() > 1 then
             failwithlog $"Error : {getFuncName()} {pureCalls.Select(fun c->c.TargetJob).Distinct().Count()}"
 
-        pureCalls.First()  // 동일 job으로 선정해서 아무거나 가져옴
+          // 동일 job으로 선정해서 coin중에서 아무거나 가져옴
+        pureCalls.TryFind(fun f->not(f.IsFlowCall))
 
     let private applyTaskDev(s:DsSystem) = 
         [
             let devCallSet =  s.GetTaskDevCalls() //api는 job 기준으로 중복제거 
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                let masterCall= getMasterJob(calls)
+                let masterCall= getTryMasterCall(calls)
                 yield! tm.TD1_PlanSend(s, calls)
                 yield! tm.TD2_PlanReceive(s)
                 yield! tm.TD3_PlanOutput(s)
                 
-                yield! tm.A1_ApiSet(masterCall)
-                yield! tm.A2_ApiEnd()
+                if masterCall.IsSome then   
+                    yield! tm.A1_ApiSet(masterCall.Value)
+                    yield! tm.A2_ApiEnd()
 
             let devCallSet =  devCallSet.DistinctBy(fun (td, _c)-> td) //SensorLink는 taskDev 단위로 중복제거
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                let masterCall= getMasterJob(calls) 
-                yield! tm.A3_SensorLinking(masterCall)
-                yield! tm.A4_SensorLinked(masterCall)
+                let masterCall= getTryMasterCall(calls)
+                
+                if masterCall.IsSome then   
+                    yield! tm.A3_SensorLinking(masterCall.Value)
+                    yield! tm.A4_SensorLinked(masterCall.Value)
         ]
 
 

@@ -147,8 +147,7 @@ module ImportType =
         checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType
         
             
-    let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, namePure:string, nameNFunc:string) =
-        let name = GetLastParenthesesReplaceName(GetBracketsRemoveName(shape.InnerText) , "") |> trimSpace
+    let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, name:string) =
         
         if not(nodeType.IsLoadSys) && name.Split(".").Length > 3 then
                 failwithlog ErrID._73
@@ -168,7 +167,8 @@ module ImportType =
             if name.Contains(".") |> not then
                 failwithlog ErrID._54
         | CALL | AUTOPRE ->
-            if not(namePure.Contains(".")) &&  namePure <> nameNFunc  // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
+          // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
+            if not(name.Contains(".")) &&  GetSquareBrackets(name, false).IsSome
             then
                 failwithlog ErrID._70
 

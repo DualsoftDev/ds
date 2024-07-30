@@ -96,8 +96,8 @@ module ExportModule =
                 AppendDebugInfoToRungComment = isAddRungComment
 
                 RungCounter = counterGenerator 0
-
-                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
+                //XGI 초기값 때문에 M 사용 XGK는 R 사용
+                MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator (if plcType = XGI then "M" else "R") (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                 TimerCounterGenerator = counterGeneratorWithExclusionList startTimer usedByteIndices
                 CounterCounterGenerator = counterGeneratorWithExclusionList startCounter usedByteIndices
                 AutoVariableCounter = counterGenerator 0

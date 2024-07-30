@@ -51,6 +51,10 @@ module DsJobType =
 
         member x.TaskDevCount =
             x.JobTaskDevInfo.TaskDevCount
+        member x.TaskInCount =
+            x.JobTaskDevInfo.InCount
+        member x.TaskOutCount =
+            x.JobTaskDevInfo.OutCount
 
     let getJobTypeAction (name: string) =
         let endContents = GetSquareBrackets(name, false)

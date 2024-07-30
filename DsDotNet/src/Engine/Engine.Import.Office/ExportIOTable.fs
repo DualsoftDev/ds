@@ -126,14 +126,14 @@ module ExportIOTable =
         ]
 
     let IOchunkBySize = 22
+    let ExcelchunkBySize = 1000000
+    let PDFchunkBySize = 100
+    
 
-    let ToDeviceIOTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable seq =
+    let ToDeviceIOTables  (sys: DsSystem) (rowSize:int) target : DataTable seq =
         
         let totalRows =
             seq {
-
-          
-
                 let mutable extCnt = 0
                 let devsJob =  sys.GetTaskDevsSkipEmptyAddress()
 
@@ -152,7 +152,7 @@ module ExportIOTable =
 
         let dts = 
             totalRows 
-            |> Seq.chunkBySize(IOchunkBySize)
+            |> Seq.chunkBySize(rowSize)
             |> Seq.mapi(fun i rows->
                 let dt = new System.Data.DataTable($"{sys.Name} Device IO LIST {i+1}")
                 addIOColumn dt 
@@ -606,26 +606,26 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn_ControlPanel.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_ControlPanel.DataType}", typeof<string>) |> ignore
         dt.Columns.Add($"{ManualColumn_ControlPanel.Manual}", typeof<string>) |> ignore
-      
-        let rowItems (name  : string, address :string) =
-            [ 
-              name
-              "bit"
-              address
-            ]
 
-        let rows =
-            let hws = sys.HwSystemDefs.Where(fun f->f :? ButtonDef || f :? LampDef )
-                                      .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
-                                      .OrderBy(fun (name, addr) -> addr)
-            hws
-                |> Seq.map (fun (name, addr) -> 
-                    rowItems (name, addr)
-                    )
+        let hws = sys.HwSystemDefs
+                    .Where(fun f->f :? ButtonDef || f :? LampDef )
+                    .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
+                    |>dict
 
-
-        addRows rows dt
-
+        //HMI TAG와 맞춰야 해서 순서  중요
+        addRows [[ "AutoSelect"; "bool"; hws["AutoSelect"] ]] dt
+        addRows [[ "ManualSelect"; "bool"; hws["ManualSelect"] ]] dt
+        addRows [[ "DrivePushBtn"; "bool"; hws["DrivePushBtn"] ]] dt
+        addRows [[ "PausePushBtn"; "bool"; hws["PausePushBtn"] ]] dt
+        addRows [[ "ClearPushBtn"; "bool"; hws["ClearPushBtn"] ]] dt
+        addRows [[ "EmergencyBtn"; "bool"; hws["EmergencyBtn"] ]] dt
+        addRows [[ "AutoModeLamp"; "bool"; hws["AutoModeLamp"] ]] dt
+        addRows [[ "ManualModeLamp"; "bool"; hws["ManualModeLamp"] ]] dt
+        addRows [[ "IdleModeLamp"; "bool"; hws["IdleModeLamp"] ]] dt
+        addRows [[ "ErrorLamp"; "bool"; hws["ErrorLamp"] ]] dt
+        addRows [[ "OriginStateLamp"; "bool"; hws["OriginStateLamp"] ]] dt
+        addRows [[ "ReadyStateLamp"; "bool"; hws["ReadyStateLamp"] ]] dt
+        addRows [[ "DriveLamp"; "bool"; hws["DriveLamp"] ]] dt
         addRows [[ "SimulationLamp"; "bool"; RuntimeDS.EmulationAddress ]] dt
 
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
@@ -634,8 +634,8 @@ module ExportIOTable =
         dt
 
 
-    let ToIOListDataTables (system: DsSystem) target = 
-        let tableDeviceIOs = ToDeviceIOTables system system.Flows true target
+    let ToIOListDataTables (system: DsSystem) rowSize target = 
+        let tableDeviceIOs = ToDeviceIOTables system rowSize target
         let tablePanelIO = ToPanelIOTable system system.Flows true target
         let tabletableFuncVariExternal = ToFuncVariTables system system.Flows true target
         
@@ -688,15 +688,14 @@ module ExportIOTable =
     [<Extension>]
     type OfficeExcelExt =
         [<Extension>]
-        static member ExportIOListToExcel (system: DsSystem) (filePath: string) target=
-            let dataTables =  ToIOListDataTables system  target@  [|ToErrorTable system|]
-            createSpreadsheet filePath dataTables 25.0 true
+        static member ExportIOListToExcel (sys: DsSystem) (filePath: string) target=
+            let dataTables =  ToIOListDataTables sys ExcelchunkBySize target
+            createSpreadsheet filePath (dataTables) 25.0 true     
 
         [<Extension>]
         static member ExportIOListToPDF (system: DsSystem) (filePath: string) target=
-            let dataTables =  ToIOListDataTables system  target@  [|ToErrorTable system|]
+            let dataTables =  ToIOListDataTables system PDFchunkBySize target
             convertDataSetToPdf filePath dataTables 
-
             
         [<Extension>]
         static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) target=
@@ -721,7 +720,7 @@ module ExportIOTable =
 
         [<Extension>]
         static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool) target =
-            let dataTables = ToIOListDataTables system target
+            let dataTables = ToIOListDataTables system IOchunkBySize target
             toDataTablesToCSV dataTables "IOTABLE"
 
         [<Extension>]

@@ -99,9 +99,7 @@ module PPTNodeUtilModule =
                 else $"{pureName}[{text}]"   //AA[4] 
             | None -> nameTrim
 
-        let getNodeType(shape:Shape, iPage:int) = 
-            let nameNfunc = GetBracketsRemoveName(shape.InnerText)
-            let name = GetLastParenthesesReplaceName(nameNfunc, "")
+        let getNodeType(shape:Shape, name:string, iPage:int) = 
 
             match shape with
             | s when s.IsRectangle() ->

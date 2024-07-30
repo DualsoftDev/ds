@@ -76,13 +76,12 @@ type RealVertexTagManager with
         ]
 
     member v.R6_RealSEQMove() = 
-        let fn = getFuncName()
         let startCausals =  getStartRootEdges(v.Vertex).OfType<Real>()
         if startCausals.any() then
             [
                 let srcRealSeq = startCausals.First().VR.RealSEQData //임시로 처음 Real로
                 let tgtRealSeq = v.RealSEQData
-                yield (v.GP.Expr, srcRealSeq.BoxedValue|>literal2expr) --> (tgtRealSeq, getFuncName())
+                yield (v.GP.Expr,  srcRealSeq.ToExpression()) --> (tgtRealSeq, getFuncName())
             ]
         else 
             []

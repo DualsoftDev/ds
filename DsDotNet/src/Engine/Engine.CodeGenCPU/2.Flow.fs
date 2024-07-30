@@ -96,9 +96,13 @@ type VertexTagManager with
         let startCausals =  sEdges.Select(fun f->f.Source).OfType<Call>() //alias 는 제외
         if startCausals.any()
         then 
-            let nextSEQ = Convert.ToUInt32(real.VR.RealSEQData.BoxedValue)+1u
-            let srcTrigger = startCausals.First().End
-            [(srcTrigger, nextSEQ|>literal2expr) --> (real.VR.RealSEQData, getFuncName())]
+            [
+                let tempRisingRelay = (v.System.TagManager:?> SystemManager).GetTempBoolTag("tempRising") 
+                let srcTrigger = startCausals.First().End
+
+                yield  (srcTrigger, v._off.Expr) --| (tempRisingRelay, getFuncName())
+                yield  (tempRisingRelay.Expr, 1|>literal2expr, real.VR.RealSEQData.ToExpression()) --+ (real.VR.RealSEQData, getFuncName())
+            ]
         else 
             []      
 

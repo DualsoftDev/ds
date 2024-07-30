@@ -22,7 +22,7 @@ type VertexTagManager with
                 v._off.Expr
 
         let sets =
-                ( (startCausals <||> wsShareds  <||> v.SF.Expr) <&&> v.Flow.d_st.Expr)  
+                ((startCausals <||> wsShareds  <||> v.SF.Expr) <&&> v.Flow.d_st.Expr)
                 <||> plans 
                 <||> actionLinks
 

@@ -28,6 +28,11 @@ module CodeConvertUtil =
 
         [<Extension>]
         static member GetStartCausals(xs:Vertex seq, usingRoot:bool) =
+                let pureReals = xs.OfType<Real>()@xs.OfType<Alias>().Select(fun f->f.GetPureReal())
+                if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then 
+                    let error = String.Join("\r\n", (pureReals.Select(fun f->f.DequotedQualifiedName)))
+                    failwithlog $"복수의 작업에서 SEQ 전송을 시도하고 있습니다. \r\n복수 작업 :\r\n {error}"
+
                 xs.Select(fun f->
                 match f with
                 | :? Real    as r  -> r.V.F

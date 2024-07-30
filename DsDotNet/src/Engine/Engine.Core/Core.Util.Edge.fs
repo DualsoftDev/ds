@@ -260,11 +260,6 @@ module EdgeModule =
                     k.IsRootOnlyDevice <- not(vs.any(fun (_, c)->c.Parent.GetCore() :? Real))
                 )
 
-
-
-    let getResetRootEdges (v:Vertex) = getResetEdgeSources(v)
-    let getStartRootEdges (v:Vertex) = getStartEdgeSources(v)
-   
     type Flow with
         member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
             let flow:Flow = x

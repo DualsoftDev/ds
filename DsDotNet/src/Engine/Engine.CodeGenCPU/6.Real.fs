@@ -76,8 +76,12 @@ type RealVertexTagManager with
         ]
 
     member v.R6_RealSEQMove() = 
-        let fn = getFuncName()
-        let startCausals =  getStartRootEdges(v.Vertex).OfType<Real>()
+        let srcs = getStartEdgeSources(v.Vertex)
+        let startCausals =  srcs.OfType<Alias>().Select(fun s->s.GetPureReal())@srcs.OfType<Real>()
+
+        if startCausals.Where(fun w-> not(w.V.NoTransData)).length() > 1 then
+            failwithlog $"RealSEQMove Error : {v.Vertex.Name} has multiple RealSEQData"
+
         if startCausals.any() then
             [
                 let srcRealSeq = startCausals.First().VR.RealSEQData //임시로 처음 Real로

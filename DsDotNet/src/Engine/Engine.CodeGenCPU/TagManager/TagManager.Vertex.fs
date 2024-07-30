@@ -210,6 +210,7 @@ module TagManagerModule =
         member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
 
         member x.IsFinished = x.Real.Finished
+        member x.NoTransData = x.Real.NoTransData
 
         member val ScriptStart  = createTag true VertexTag.scriptStart
         member val MotionStart  = createTag true VertexTag.motionStart

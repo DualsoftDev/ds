@@ -86,7 +86,7 @@ module ConvertErrorCheck =
                 let checkList = ( [real:>Vertex] @ realAlias_ )
 
                 let checks =
-                    let f = if bStart then getStartRootEdges else getResetRootEdges
+                    let f = if bStart then getStartEdgeSources else getResetEdgeSources
                     checkList |> Seq.collect(f)
 
                 if checks.IsEmpty() then

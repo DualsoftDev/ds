@@ -6,14 +6,9 @@ open System.Collections.Generic
 open Dual.Common.Core.FS
 open Engine.Import.Office
 open Engine.Core
-open System.IO
-open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Packaging
 open System
-open PathManager
 open Engine.Parser.FS
-open System.Text.RegularExpressions
-open System.Diagnostics
 
 [<AutoOpen>]
 module ImportPPTModule =
@@ -36,7 +31,6 @@ module ImportPPTModule =
     let dicPptDoc = Dictionary<string, PresentationDocument>()
     let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
     let loadedParentStack = Stack<DsSystem>() //LoadedSystem.AbsoluteParents 구성하여 ExternalSystem 구분 및 UI Tree 구조 구성
-    let dicLoaded = Dictionary<LoadedSystem, string>() // LoadedSystem 부모, 형제 호출시 Runtime에 변경하기 위한 정보 사전
     let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
     
     let getHashKeys (skipCnt: int, path: string) =
@@ -68,7 +62,15 @@ module ImportPPTModule =
         let private sRepo = ShareableSystemRepository()
 
 
-        let rec private loadSystem (pptReop: Dictionary<DsSystem, pptDoc>, theSys: DsSystem, paras: DeviceLoadParameters, isLib, pptParams:PPTParams) =
+        let rec private loadSystem
+          (
+            pptReop: Dictionary<DsSystem, pptDoc>,
+            theSys: DsSystem,
+            paras: DeviceLoadParameters,
+            isLib,
+            pptParams:PPTParams,
+            dicLoaded:Dictionary<LoadedSystem, string>
+          ) =
             pathStack.Push(paras.AbsoluteFilePath)
             LoadingPPTNotify.Trigger(paras.AbsoluteFilePath)
             
@@ -122,7 +124,7 @@ module ImportPPTModule =
                 let addNewLoadedSys (newSys: DsSystem, bExtSys: bool, bOPEN_EXSYS_LINK: bool) =
 
                     loadedParentStack.Push(newSys)
-                    loadSystem (pptReop, newSys, paras, isLib, pptParams) |> ignore
+                    loadSystem (pptReop, newSys, paras, isLib, pptParams, dicLoaded) |> ignore
                     currentFileName <- pathStack.Peek()
 
                     let parents = loadedParentStack.ToHashSet().Skip(1).Reverse() //자신 제외
@@ -170,10 +172,10 @@ module ImportPPTModule =
             //ExternalSystem 위하여 인터페이스는 공통으로 시스템 생성시 만들어 줌
             doc.MakeInterfaces(theSys)
 
-            if paras.LoadingType = DuNone then
-                if paras.LoadingType = DuDevice then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
-                    doc.BuildSystem(theSys, isLib, pptParams.CreateBtnLamp)
+            if paras.LoadingType = DuNone || paras.LoadingType = DuDevice then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
+                doc.BuildSystem(theSys, isLib, pptParams.CreateBtnLamp)
 
+            if paras.LoadingType = DuNone then
                 doc.UpdateActionIO(theSys, pptParams.AutoIOM) 
                 doc.UpdateLayouts(theSys)
                 layoutImgPaths.AddRange(doc.SaveSlideImage())|>ignore
@@ -196,12 +198,12 @@ module ImportPPTModule =
             let paras =
                 getParams (filePath, sysName + ".pptx", mySys.Name, mySys, DuNone, sRepo)
 
-            dicLoaded.Clear()
+            let dicLoaded = Dictionary<LoadedSystem, string>() // LoadedSystem 부모, 형제 호출시 Runtime에 변경하기 위한 정보 사전
             loadedParentStack.Clear()
             layoutImgPaths.Clear()
 
             loadedParentStack.Push mySys
-            loadSystem (pptReop, mySys, paras, isLib, pptParams)
+            loadSystem (pptReop, mySys, paras, isLib, pptParams, dicLoaded)
 
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 

@@ -668,59 +668,59 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         [ getAutoGenDevApi (jobNameFqdn,  callListingCtx) ]
 
                 let taskList =
-                    [
-                        for ad in apiDefs do
-                            let apiFqnd = ad.ApiFqnd |> Seq.toList
-                            let devApiName = apiFqnd.Head
-                            let addr, TaskDevParamIO = Addresses(ad.InAddress, ad.OutAddress), ad.TaskDevParamIO
-                            let task = 
-                                match apiFqnd with
-                                | device :: [ api ] ->
-                                    let taskFromLoaded  =
-                                        option {
-                                            let! apiPoint =
-                                                let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice 
-                                                match tryFindCallingApiItem system device api allowAutoGenDevice with
-                                                | Some api -> Some api
-                                                | None ->
-                                                    let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
-                                                    if createDevice then
-                                                        x.CreateLoadedDeivce(device)
-                                                    None
+                    let tl =    // just for IDE
+                        [
+                            for ad in apiDefs do
+                                let apiFqnd = ad.ApiFqnd |> Seq.toList
+                                let devApiName = apiFqnd.Head
+                                let addr, TaskDevParamIO = Addresses(ad.InAddress, ad.OutAddress), ad.TaskDevParamIO
+                                let task = 
+                                    match apiFqnd with
+                                    | device :: [ api ] ->
+                                        let taskFromLoaded  =
+                                            option {
+                                                let! apiPoint =
+                                                    let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice 
+                                                    match tryFindCallingApiItem system device api allowAutoGenDevice with
+                                                    | Some api -> Some api
+                                                    | None ->
+                                                        let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
+                                                        if createDevice then
+                                                            x.CreateLoadedDeivce(device)
+                                                        None
                                  
                                        
-                                            return createTaskDev  apiPoint  devApiName TaskDevParamIO addr jobName
-                                        }
+                                                return createTaskDev  apiPoint  devApiName TaskDevParamIO addr jobName
+                                            }
 
-                                    match taskFromLoaded with
-                                    | Some t -> t
-                                    | _ -> 
-                                        match tryFindLoadedSystem system device with
-                                        | Some dev->
-                                            let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
-                                            match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with 
-                                            | Some apiItem ->
-                                                createTaskDev apiItem device TaskDevParamIO addr jobName
-                                            | None ->
-                                                let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParamIO
-                                                createTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParamIO addr jobName
+                                        match taskFromLoaded with
+                                        | Some t -> t
+                                        | _ -> 
+                                            match tryFindLoadedSystem system device with
+                                            | Some dev->
+                                                let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
+                                                match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with 
+                                                | Some apiItem ->
+                                                    createTaskDev apiItem device TaskDevParamIO addr jobName
+                                                | None ->
+                                                    let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParamIO
+                                                    createTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParamIO addr jobName
                                                
-                                        | None -> failwithlog $"device({device}) api({api}) is not exist"
+                                            | None -> failwithlog $"device({device}) api({api}) is not exist"
 
-                                | _ -> 
-                                    let errText = String.Join(", ", apiFqnd)
-                                    failwithlog $"loading type error ({errText})device"
+                                    | _ -> 
+                                        let errText = String.Join(", ", apiFqnd)
+                                        failwithlog $"loading type error ({errText})device"
                             
-                            let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName)  options.Storages
-                            let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
-                            createDeviceVariable system TaskDevParamIO.InParam  plcName_I task.InAddress
-                            createDeviceVariable system TaskDevParamIO.OutParam plcName_O task.OutAddress
+                                let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName)  options.Storages
+                                let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
+                                createDeviceVariable system TaskDevParamIO.InParam  plcName_I task.InAddress
+                                createDeviceVariable system TaskDevParamIO.OutParam plcName_O task.OutAddress
 
-                            yield task
+                                yield task
 
-                    ].Cast<TaskDev>() |> Seq.toList
-
-
+                        ]
+                    tl.Cast<TaskDev>() |> Seq.toList
 
 
                 assert (taskList.Any())
@@ -757,9 +757,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                     | flowOrRealorDev :: [ rc ] -> //FlowEx.R or Real.C
                         match tryFindFlow system flowOrRealorDev with
-                        | Some f -> match f.Graph.TryFindVertex<Real>(rc) with
-                                    |Some v-> v |> DuAliasTargetReal
-                                    |None -> errorLoadCore  ctx
+                        | Some f ->
+                            match f.Graph.TryFindVertex<Real>(rc) with
+                            | Some v-> v |> DuAliasTargetReal
+                            | None -> errorLoadCore  ctx
                         | None ->
                             match tryFindCall system ([ flow.Name ] @ ns.Select(fun f->f.QuoteOnDemand())) with
                             | Some v -> 
@@ -767,9 +768,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 | :? Call as c -> c |> DuAliasTargetCall 
                                 | _ -> errorLoadCore  ctx
                             | None ->  
-
                                     errorLoadCore  ctx
-
 
                     | _flowOrReal :: [ _dev; _api ] -> 
                             match tryFindCall system ([ flow.Name ] @ ns) with
@@ -777,8 +776,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 (v :?> Call) |> DuAliasTargetCall
                             |_ -> 
                                 match flow.GetVerticesOfFlow().OfType<Call>().TryFind(fun f->f.Name = ns.Combine())  with
-                                    | Some call -> call|>  DuAliasTargetCall
-                                    | _ -> errorLoadCore  ctx
+                                | Some call -> call|>  DuAliasTargetCall
+                                | _ -> errorLoadCore  ctx
                            
                     | _ -> errorLoadCore  ctx
 
@@ -801,19 +800,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let fillXywh (system: DsSystem) (listLayoutCtx: List<dsParser.LayoutBlockContext>) =
             let tryParseAndReturn (text: string) =
-                let mutable value = 0
-
-                if Int32.TryParse(text, &value) then
-                    value
-                else
-                    failwithlog "Conversion failed : xywh need to write into integer value"
+                match Int32.TryParse(text) with
+                | true, v -> v
+                | _ -> failwithlog "Conversion failed : xywh need to write into integer value"
 
             let genXywh (xywh: dsParser.XywhContext) =
                 new Xywh(
-                    tryParseAndReturn (getText (xywh.x ())),
-                    tryParseAndReturn (getText (xywh.y ())),
-                    tryParseAndReturn (getText (xywh.w ())),
-                    tryParseAndReturn (getText (xywh.h ()))
+                    tryParseAndReturn (getText (xywh.x())),
+                    tryParseAndReturn (getText (xywh.y())),
+                    tryParseAndReturn (getText (xywh.w())),
+                    tryParseAndReturn (getText (xywh.h()))
                 )
 
 
@@ -822,11 +818,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let fileSpecCtx = layoutCtx.TryFindFirstChild<FileSpecContext>();
                 let filePath = 
                     match fileSpecCtx with
-                    |Some s -> let path = x.GetLayoutPath(s)
-                               if path.Contains(';')
-                               then path
-                               else failwith $"layout format error \n ex) [layouts file=\"chName;chPath\"] \n but.. {path}"
-                    |None -> $"{TextEmtpyChannel}"
+                    | Some s ->
+                        let path = x.GetLayoutPath(s)
+                        if path.Contains(';') then
+                            path
+                        else
+                            failwith $"layout format error \n ex) [layouts file=\"chName;chPath\"] \n but.. {path}"
+                    | None ->
+                        $"{TextEmtpyChannel}"
 
                 let listPositionDefCtx = layoutCtx.Descendants<PositionDefContext>().ToList()
 
@@ -836,8 +835,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     let xywh = positionDef.TryFindFirstChild<XywhContext>() |> Option.get |> genXywh
                     let nameCompo = collectNameComponents nameCtx
 
-                    if (nameCompo).Count() = 1
-                    then 
+                    if (nameCompo).Count() = 1 then 
                         let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
                         device.ChannelPoints[filePath] <- xywh 
                     else 
@@ -851,10 +849,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     let fqdn = collectNameComponents finished // in array.. [0] : flow, [1] : real
                     let real = tryFindReal system (fqdn |> List.ofArray)
 
-                    if not (real.IsNone) then
-                        real.Value.Finished <- true
-                    else
-                        failwith $"Couldn't find target real object name {getText (finished)}"
+                    match real with
+                    | Some r -> r.Finished <- true
+                    | None -> failwith $"Couldn't find target real object name {getText (finished)}"
 
         let fillNoTrans (system: DsSystem) (listCtx: List<dsParser.NotransBlockContext>) =
             for notranCtx in listCtx do
@@ -864,10 +861,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     let fqdn = collectNameComponents notrans // in array.. [0] : flow, [1] : real
                     let real = tryFindReal system (fqdn |> List.ofArray)
 
-                    if not (real.IsNone) then
-                        real.Value.NoTransData <- true
-                    else
-                        failwith $"Couldn't find target real object name {getText (notrans)}"
+                    match real with
+                    | Some r -> r.NoTransData <- true
+                    | None -> failwith $"Couldn't find target real object name {getText (notrans)}"
+
+
 
         let fillDisabled (system: DsSystem) (listDisabledCtx: List<dsParser.DisableBlockContext>) =
             for disabledCtx in listDisabledCtx do
@@ -876,21 +874,21 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for disabled in listDisabled do
                     let fqdn = collectNameComponents disabled |> List.ofArray
                     let coin = tryFindSystemInner system fqdn
-
-                    if not (coin.IsNone) then
-                        (coin.Value :?> Call).Disabled <- true
-                    else
-                        failwith $"Couldn't find target coin object name {getText (disabled)}"
         
+                    match coin with
+                    | Some (:? Call as c) -> c.Disabled <- true
+                    | _ -> failwith $"Couldn't find target coin object name {getText (disabled)}"
         
 
         let fillTimes (system: DsSystem) (listTimeCtx: List<dsParser.TimesBlockContext> ) =
             let fqdnTimes = getTimes listTimeCtx
             for fqdn, t in fqdnTimes do
                 let real = (tryFindSystemInner system fqdn).Value :?> Real
-                if t.Average.IsSome then real.DsTime.AVG <- Some(t.Average.Value|>float)
-                if t.Std.IsSome     then real.DsTime.STD <- Some(t.Std.Value|>float)
-                if t.OnDelay.IsSome then real.DsTime.TON <- Some(t.OnDelay.Value|>float)
+
+                t.Average.Iter( fun x -> real.DsTime.AVG <- Some (float x))
+                t.Std.Iter(     fun x -> real.DsTime.STD <- Some (float x))
+                t.OnDelay.Iter( fun x -> real.DsTime.TON <- Some (float x))
+
 
         let fillActions (system: DsSystem) (listMotionCtx: List<dsParser.MotionBlockContext> ) =
             let fqdnPath = getMotions listMotionCtx
@@ -908,17 +906,17 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let fillProperties (x: DsParserListener) (ctx: PropsBlockContext) =
             let theSystem = x.TheSystem
             //device, call에 layout xywh 채우기
-            ctx.Descendants<LayoutBlockContext>().ToList() |> fillXywh theSystem
+            ctx.Descendants<LayoutBlockContext>() .ToList() |> fillXywh     theSystem
             //Real에 finished 채우기
-            ctx.Descendants<FinishBlockContext>().ToList() |> fillFinished theSystem
+            ctx.Descendants<FinishBlockContext>() .ToList() |> fillFinished theSystem
             //Real에 noTransData 채우기
-            ctx.Descendants<NotransBlockContext>().ToList() |> fillNoTrans theSystem
+            ctx.Descendants<NotransBlockContext>().ToList() |> fillNoTrans  theSystem
             //Real에 MotionBlock 채우기
-            ctx.Descendants<MotionBlockContext>().ToList() |> fillActions theSystem
+            ctx.Descendants<MotionBlockContext>() .ToList() |> fillActions  theSystem
             //Real에 scripts 채우기
-            ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts theSystem
+            ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts  theSystem
             //Real에 times 채우기
-            ctx.Descendants<TimesBlockContext>().ToList() |> fillTimes theSystem
+            ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem
 
             
             //Call에 disable 채우기
@@ -932,7 +930,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 x.TheSystem.Functions.Add(OperatorFunction(funcName.DeQuoteOnDemand())) )
         
             let functionDefs = ctx.operatorDef()
-            functionDefs |> Seq.iter (fun fDef ->
+            for fDef in functionDefs do
                 let funcName = fDef.operatorName().GetText()
                 let pureCode = commonFunctionOperatorExtractor fDef
 
@@ -945,14 +943,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | false ->  $"bool {funcName} = false;{code}" //op 결과 bool 변수를 임시로 만듬
 
                 let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
-                statements.Iter(fun s->
+                for s in statements do
                     match s with
                     | DuAssign (_, _, _) -> newFunc.Statements.Add s  //비교구문 있는 Statement만 추가
                     |_ -> ()  //bool {funcName} = false 부분은 추가하지 않음
-                    )
 
                 x.TheSystem.Functions.Add(newFunc) 
-                )
 
 
         let createCommand(ctx:CommandBlockContext) =
@@ -961,7 +957,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 x.TheSystem.Functions.Add(CommandFunction(funcName.DeQuoteOnDemand())) )
 
             let functionDefs = ctx.commandDef()
-            functionDefs |> Seq.iter (fun fDef ->
+            for fDef in functionDefs do
                 let funcName = fDef.commandName().GetText()
                 let pureCode = commonFunctionCommandExtractor fDef
 
@@ -970,7 +966,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
                 newFunc.Statements.AddRange(statements)
                 x.TheSystem.Functions.Add(newFunc)
-                )
 
         for ctx in sysctx.Descendants<JobBlockContext>() do
             createTaskDevice x.TheSystem ctx

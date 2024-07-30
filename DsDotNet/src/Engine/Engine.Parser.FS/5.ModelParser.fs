@@ -125,8 +125,7 @@ module ModelParser =
                 _DicParsingSystem.Add(path, sys) |> ignore
             sys
 
-        if _DicParsingSystem.ContainsKey(path)
-        then
+        if _DicParsingSystem.ContainsKey(path) then
             match options.LoadedSystemName with
             | Some loadedName -> 
                 let cloneSys = _DicParsingSystem[path].Clone(loadedName)

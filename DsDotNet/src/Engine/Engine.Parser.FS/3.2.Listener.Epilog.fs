@@ -21,9 +21,9 @@ module EtcListenerModule =
 
         let (inAddr, inParam), (outAddr, outParm) =
             match nameNAddr.TryFindFirstChild<TaskDevParaInOutContext>() with
-            |Some devParam -> 
+            | Some devParam -> 
                 commonDeviceParamExtractor devParam 
-            |None ->
+            | None ->
                 (TextAddrEmpty, defaultTaskDevPara()),(TextAddrEmpty, defaultTaskDevPara())
         name, inParam, outParm, inAddr, outAddr
 
@@ -41,15 +41,15 @@ module EtcListenerModule =
                         let fstType = first.GetType()
 
                         match first with
-                        | :? AutoBlockContext -> DuAutoBTN
-                        | :? ManualBlockContext -> DuManualBTN
-                        | :? DriveBlockContext -> DuDriveBTN
-                        | :? PauseBlockContext -> DuPauseBTN
-                        | :? ClearBlockContext -> DuClearBTN
+                        | :? AutoBlockContext       -> DuAutoBTN
+                        | :? ManualBlockContext     -> DuManualBTN
+                        | :? DriveBlockContext      -> DuDriveBTN
+                        | :? PauseBlockContext      -> DuPauseBTN
+                        | :? ClearBlockContext      -> DuClearBTN
                         | :? ErrorOrEmgBlockContext -> DuEmergencyBTN
-                        | :? TestBlockContext -> DuTestBTN
-                        | :? HomeBlockContext -> DuHomeBTN
-                        | :? ReadyBlockContext -> DuReadyBTN
+                        | :? TestBlockContext       -> DuTestBTN
+                        | :? HomeBlockContext       -> DuHomeBTN
+                        | :? ReadyBlockContext      -> DuReadyBTN
                         | _ -> failwith $"button type error {fstType}"
 
                     let category = first.GetChild(1).GetText() // [| '[', category, ']', buttonBlock |] 에서 category 만 추려냄 (e.g 'emg')
@@ -63,34 +63,33 @@ module EtcListenerModule =
                     let buttonDefs = first.Descendants<HwSysItemDefContext>().ToArray()
                
                     let flowBtnInfo =
-                        [ for bd in buttonDefs do
-                              option {
-                                  let btnName, inParam, outParam, inAddr, outAddr = getHwSysItem bd
-                                  let flows =
-                                      bd
-                                          .Descendants<FlowNameContext>()
-                                          .Select(fun flowCtx -> flowCtx.GetText())
-                                          .Tap(fun flowName ->
-                                              verifyM
-                                                  $"Flow [{flowName}] not exists!"
-                                                  (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
-                                          .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
-                                          .ToHashSet()
+                        [
+                            for bd in buttonDefs do
+                                option {
+                                    let btnName, inParam, outParam, inAddr, outAddr = getHwSysItem bd
+                                    let flows =
+                                        bd
+                                            .Descendants<FlowNameContext>()
+                                            .Select(fun flowCtx -> flowCtx.GetText())
+                                            .Tap(fun flowName ->
+                                                verifyM
+                                                    $"Flow [{flowName}] not exists!"
+                                                    (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
+                                            .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
+                                            .ToHashSet()
 
-                                  if flows.Count > 0 then
-                                      return targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr
-                                  else
-                                      failwithlog "There are no flows in button"
-                              } ]
+                                    if flows.Count > 0 then
+                                        return targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr
+                                    else
+                                        failwithlog "There are no flows in button"
+                                }
+                        ]
 
-                    flowBtnInfo
-                    |> List.choose id
-                    |> List.iter (fun ps ->
-                        let targetBtnType, btnName, _, _, flows, inAddr, outAddr = ps
+                    for fbi in flowBtnInfo |> List.choose id do
+                        let targetBtnType, btnName, _, _, flows, inAddr, outAddr = fbi
 
-                        flows
-                        |> Seq.iter (fun flow ->
-                            system.AddButton(targetBtnType, btnName, inAddr, outAddr, flow)))
+                        for flow in flows do
+                            system.AddButton(targetBtnType, btnName, inAddr, outAddr, flow)
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
             for ctxChild in ctx.children do
@@ -102,36 +101,34 @@ module EtcListenerModule =
                         let fstType = first.GetType()
 
                         match first with
-                        | :? AutoBlockContext -> DuAutoModeLamp
-                        | :? ManualBlockContext -> DuManualModeLamp
-                        | :? DriveBlockContext -> DuDriveStateLamp
+                        | :? AutoBlockContext       -> DuAutoModeLamp
+                        | :? ManualBlockContext     -> DuManualModeLamp
+                        | :? DriveBlockContext      -> DuDriveStateLamp
                         | :? ErrorOrEmgBlockContext -> DuErrorStateLamp
-                        | :? TestBlockContext -> DuTestDriveStateLamp
-                        | :? ReadyBlockContext -> DuReadyStateLamp
-                        | :? IdleBlockContext -> DuIdleModeLamp
-                        | :? OriginBlockContext -> DuOriginStateLamp
+                        | :? TestBlockContext       -> DuTestDriveStateLamp
+                        | :? ReadyBlockContext      -> DuReadyStateLamp
+                        | :? IdleBlockContext       -> DuIdleModeLamp
+                        | :? OriginBlockContext     -> DuOriginStateLamp
                         | _ -> failwith $"lamp type error {fstType}"
 
                     let lampDefs = first.Descendants<HwSysItemDefContext>().ToArray()
 
                     let flowLampInfo =
-                        [ for ld in lampDefs do
-                              option {
-                                  let! flowNameCtxs = ld.Descendants<FlowNameContext>().ToArray()
-                                  
-                                  let lmpName, _, _, inAddr, outAddr = getHwSysItem ld
-                                  if flowNameCtxs.length() > 1
-                                  then 
-                                       let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
-                                       failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
-                                    
-                                  if flowNameCtxs.length() = 0
-                                  then
-                                       return targetLmpType, lmpName , inAddr, outAddr, None
-                                  else
-                                       let! flow = flowNameCtxs.First().GetText() |> system.TryFindFlow
-                                       return targetLmpType, lmpName,  inAddr, outAddr, Some flow 
-                              } ]
+                        [
+                            for ld in lampDefs do
+                                option {
+                                    let flowNameCtxs = ld.Descendants<FlowNameContext>() |> toList
+                                    let lmpName, _, _, inAddr, outAddr = getHwSysItem ld
+                                    match flowNameCtxs with
+                                    | [] -> return targetLmpType, lmpName , inAddr, outAddr, None
+                                    | h::[] ->
+                                        let! flow = h.GetText() |> system.TryFindFlow
+                                        return targetLmpType, lmpName,  inAddr, outAddr, Some flow 
+                                    | _ ->
+                                        let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
+                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"                                  
+                                }
+                        ]
 
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
 
@@ -152,31 +149,29 @@ module EtcListenerModule =
                     let conditionDefs = first.Descendants<HwSysItemDefContext>().ToArray()
 
                     let flowConditionInfo =
-                        [ for cd in conditionDefs do
-                              option {
+                        [
+                            for cd in conditionDefs do
+                                option {
+                                    let cndName, inParam, outParam, inAddr, outAddr = getHwSysItem cd
+                                    let flows =
+                                        cd
+                                            .Descendants<FlowNameContext>()
+                                            .Select(fun flowCtx -> flowCtx.GetText())
+                                            .Tap(fun flowName ->
+                                                verifyM
+                                                    $"Flow [{flowName}] not exists!"
+                                                    (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
+                                            .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
+                                            .ToHashSet()
 
-                                  let cndName, inParam, outParam, inAddr, outAddr = getHwSysItem cd
-                                  let flows =
-                                      cd
-                                          .Descendants<FlowNameContext>()
-                                          .Select(fun flowCtx -> flowCtx.GetText())
-                                          .Tap(fun flowName ->
-                                              verifyM
-                                                  $"Flow [{flowName}] not exists!"
-                                                  (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
-                                          .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
-                                          .ToHashSet()
+                                    return targetCndType, cndName, inParam, outParam, flows, inAddr, outAddr 
+                                } ]
 
-                                  return targetCndType, cndName, inParam, outParam, flows, inAddr, outAddr 
-                              } ]
+                    for fci in flowConditionInfo |> List.choose id do                    
+                        let targetCndType, cndName, _, _,  flows, inAddr, outAddr = fci
 
-                    flowConditionInfo
-                    |> List.choose id
-                    |> List.iter (fun ps ->
-                        let targetCndType, cndName, _, _,  flows, inAddr, outAddr = ps
-
-                        flows
-                        |> Seq.iter (fun flow -> system.AddCondtion(targetCndType, cndName, inAddr, outAddr,  flow)))
+                        for flow in flows do
+                            system.AddCondtion(targetCndType, cndName, inAddr, outAddr,  flow)
 
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =
@@ -206,16 +201,16 @@ module EtcListenerModule =
             let curSystem = x.TheSystem
 
             for (key, values) in autopreKvs do
-                    let autopreKey =  getSafetyAutoPreCall curSystem key 
-                    let autopreConditions =
-                        [
-                            for value in values do
-                                match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
-                                | Some j -> yield j
-                                | None -> failWithLog $"{value} is not job Name"
-                        ] 
-                        |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
+                let autopreKey =  getSafetyAutoPreCall curSystem key 
+                let autopreConditions =
+                    [
+                        for value in values do
+                            match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
+                            | Some j -> yield j
+                            | None -> failWithLog $"{value} is not job Name"
+                    ] 
+                    |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
 
-                    autopreConditions.Iter(fun sc ->
-                        autopreKey.AutoPreConditions.Add(sc)
-                        |> verifyM $"중복 autopre condition[{(sc.Core :?> INamed).Name}]")
+                for sc in autopreConditions do
+                    autopreKey.AutoPreConditions.Add(sc)
+                    |> verifyM $"중복 autopre condition[{(sc.Core :?> INamed).Name}]"

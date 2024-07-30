@@ -15,8 +15,7 @@ module ParserLoader =
 
         let text = File.ReadAllText(dsFilePath)
 
-        if text.TrimStart().StartsWith("[sys]")
-        then 
+        if text.TrimStart().StartsWith("[sys]") then 
             let dir = Path.GetDirectoryName(dsFilePath)
             let option =
                 if loadedName.IsSome then
@@ -44,9 +43,10 @@ module ParserLoader =
         let system = loadSystemFromDsFile  systemRepo sysPath loadedName autoGenDevice
 
         let loadings =
-                system.GetRecursiveLoadeds().Map(fun s -> s.AbsoluteFilePath)
-                                            .Distinct()
-                                            .ToFSharpList()
+            system.GetRecursiveLoadeds()
+                .Map(fun s -> s.AbsoluteFilePath)
+                .Distinct()
+                .ToFSharpList()
 
         system, loadings
 
@@ -61,9 +61,11 @@ module ParserLoader =
         let dir = PathManager.getDirectoryName (configPath.ToFile())
         let system, loadings = loadingDS dir  cfg.DsFilePath None false target
 
-        { Config = cfg
-          System = system
-          LoadingPaths = loadings }
+        {
+            Config = cfg
+            System = system
+            LoadingPaths = loadings
+        }
           
 
     let LoadFromActivePath (activePath: string)  (target:PlatformTarget) (usingGpt:bool)=

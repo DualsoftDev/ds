@@ -12,12 +12,12 @@ open Engine.Parser.FS
 
 [<AutoOpen>]
 module ImportPPTModule =
-    type DSFromPPT =
-        { System: DsSystem 
-          ActivePath: string 
-          LoadingPaths: string seq
-          LayoutImgPaths: string seq
-           }
+    type DSFromPPT = {
+        System: DsSystem
+        ActivePath: string
+        LoadingPaths: string seq
+        LayoutImgPaths: string seq
+    }
     
     type PPTParams = {
         TargetType: PlatformTarget
@@ -54,7 +54,7 @@ module ImportPPTModule =
     module PowerPointImportor =
         let private sRepo = ShareableSystemRepository()
 
-
+        /// loadFromPPTs > GetImportModel > loadSystem
         let rec private loadSystem
           (
             pptReop: Dictionary<DsSystem, pptDoc>,
@@ -181,6 +181,7 @@ module ImportPPTModule =
             pptReop.Add(theSys, doc)
             theSys, doc
 
+        /// loadFromPPTs > GetImportModel > loadSystem
         let internal GetImportModel
           (
             pptReop: Dictionary<DsSystem, pptDoc>,
@@ -212,6 +213,7 @@ module ImportPPTModule =
 
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 
+    /// loadFromPPTs > GetImportModel > loadSystem
     let private loadFromPPTs (path: string ) isLib (pptParams:PPTParams) (layoutImgPaths:HashSet<string>)=
         Copylibrary.Clear()
         let dicPptDoc = Dictionary<string, PresentationDocument>()
@@ -262,10 +264,10 @@ module ImportPPTModule =
 
 
 
-    type PptResult =
-        { System: DsSystem
-          Views: ViewNode seq
-         }
+    type PptResult = {
+        System: DsSystem
+        Views: ViewNode seq
+    }
 
 
     type ImportPPT =    

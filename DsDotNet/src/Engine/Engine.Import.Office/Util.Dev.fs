@@ -38,9 +38,9 @@ module ImportUtilForDev =
             let autoGenFile = $"./dsLib/AutoGen/{loadedName}.ds"
             let autoSys = DsSystem.Create("autoSys")
             let libFilePath =
-                PathManager.getFullPath (autoGenFile |> DsFile) (activeSysDir |> DsDirectory)
+                PathManager.getFullPath (DsFile autoGenFile) (DsDirectory activeSysDir)
             let libRelPath =
-                PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
+                PathManager.getRelativePath (DsFile currentFileName) (DsFile libFilePath)
 
             let paras (loadedName) =
                 getParams (libFilePath, libRelPath, loadedName, mySys, DuDevice, ShareableSystemRepository())
@@ -69,6 +69,12 @@ module ImportUtilForDev =
         let libConfig = LoadLibraryConfig(libPath)
         libConfig.LibraryInfos, runDir
 
+    // Call Graph
+    // {
+    //      loadSystem > BuildSystem > MakeSegment > createCallVertex > createCall > addNewCall, 
+    //                               > MakeSegment > createAutoPre
+    // }
+    //  > handleActionJob > getLibraryPathsAndParams > getNewDevice
     let getNewDevice (mySys:DsSystem) loadedName apiName =
         let curDir = currentFileName  |> Path.GetDirectoryName
         let LibraryInfos, runDir = getLibraryInfos()

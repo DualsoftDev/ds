@@ -11,15 +11,34 @@
             "id": "d5bf3f026732fd5a",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "DS/DsWebServer/HMI/TagWeb.md",
-                "mode": "source",
-                "source": false
+                "file": "DS/Engine.Core/ITagManager.canvas",
+                "viewState": {
+                  "x": 0,
+                  "y": 0,
+                  "zoom": 0
+                }
+              }
+            }
+          },
+          {
+            "id": "c6339de9e3ad10fa",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "DS/Engine.Core/ITagManager.canvas",
+                "viewState": {
+                  "x": -120,
+                  "y": -82.5,
+                  "zoom": 0
+                }
               }
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -85,7 +104,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DS/DsWebServer/HMI/TagWeb.md",
+                "file": "DS/Engine.Core/ITagManager.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +121,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DS/DsWebServer/HMI/TagWeb.md",
+                "file": "DS/Engine.Core/ITagManager.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +144,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DS/DsWebServer/HMI/TagWeb.md"
+                "file": "DS/Engine.Core/ITagManager.canvas"
               }
             }
           }
@@ -146,8 +165,10 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "d5bf3f026732fd5a",
+  "active": "c6339de9e3ad10fa",
   "lastOpenFiles": [
+    "DS/Engine.Core/Core 자료 구조.md",
+    "DS/Engine.Core/ITagManager.canvas",
     "DS/DsWebServer/HMI/TagWeb.md",
     "DS/DsWebServer/HMI"
   ]

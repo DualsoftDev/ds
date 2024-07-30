@@ -1,8 +1,6 @@
 namespace Engine.Core
 
-open System
 open Dual.Common.Core.FS
-open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module DsJobType =
@@ -12,16 +10,16 @@ module DsJobType =
         | Push    
         member x.ToText() = 
             match x with
-            | ActionNormal   -> ""
-            | Push    -> TextJobPush
+            | ActionNormal -> ""
+            | Push -> TextJobPush
     
     type JobTypeSensing = 
         | SensingNormal  
         | SensingNegative 
         member x.ToText() = 
             match x with
-            | SensingNormal   -> ""
-            | SensingNegative   -> TextJobNegative
+            | SensingNormal -> ""
+            | SensingNegative -> TextJobNegative
 
     type JobTypeTaskDevInfo = 
         {
@@ -30,25 +28,26 @@ module DsJobType =
             OutCount : int option
         }
         with  
-            member x.AddressInCount = if x.InCount.IsSome then x.InCount.Value else x.TaskDevCount
-            member x.AddressOutCount = if x.OutCount.IsSome then x.OutCount.Value else x.TaskDevCount
+            member x.AddressInCount  = match x.InCount  with | Some c -> c | None -> x.TaskDevCount
+            member x.AddressOutCount = match x.OutCount with | Some c -> c | None -> x.TaskDevCount
             member x.ToText() = 
-                if x.TaskDevCount = 1 && x.AddressInCount = 1 && x.AddressOutCount  = 1 then
+                if x.TaskDevCount = 1 && x.AddressInCount = 1 && x.AddressOutCount = 1 then
                     ""
                 else
+                    // e.g "N3(1, 2)"
                     $"{TextJobMulti}{x.TaskDevCount}({x.AddressInCount}, {x.AddressOutCount})"
 
     type JobParam(action: JobTypeAction, jobTypeSensing: JobTypeSensing, jobTypeTaskDevInfo: JobTypeTaskDevInfo) =
-        member val JobAction = action with get
-        member val JobSensing = jobTypeSensing with get
-        member val JobTaskDevInfo = jobTypeTaskDevInfo with get
+        member _.JobAction = action
+        member _.JobSensing = jobTypeSensing
+        member _.JobTaskDevInfo = jobTypeTaskDevInfo
         
         member x.ToText() =
-            let actionText = x.JobAction.ToText()
-            let sensingText = x.JobSensing.ToText()
-            let multiText = x.JobTaskDevInfo.ToText()
-            let parts = [actionText; sensingText; multiText] |> List.filter (fun part -> not (String.IsNullOrEmpty(part)))
-            String.Join("; ", parts)
+            [|
+                x.JobAction.ToText()
+                x.JobSensing.ToText()
+                x.JobTaskDevInfo.ToText()
+            |] |> filter (String.any) |> String.concat("; ")
 
         member x.TaskDevCount =
             x.JobTaskDevInfo.TaskDevCount
@@ -101,7 +100,7 @@ module DsJobType =
         }
 
     let defaultJobTypeTaskDevInfo() =  { TaskDevCount = 1; InCount = Some 1; OutCount = Some 1 }
-    let defaultJobPara() = JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
+    let defaultJobParam() = JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
 
     let getParserJobType (param: string) =
         let param = param.TrimStart('[').TrimEnd(']')

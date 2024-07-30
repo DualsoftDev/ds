@@ -12,14 +12,14 @@ module ConvertCpuJob =
 
     type Job with
         member j.ActionInExpr = 
-            let inExprs = j.TaskDefs.Where(fun d-> d.ExistInput)
-                                    .Select(fun d->d.GetInExpr(j)
-                                                //if d.IsRootOnlyDevice
-                                                //then d.GetPE(j).Expr
-                                                //else d.GetInExpr(j)
-                                            )
-            if inExprs.any() 
-            then
+            let inExprs =
+                j.TaskDefs.Where(fun d-> d.ExistInput)
+                    .Select(fun d->
+                        if d.IsRootOnlyDevice then
+                            d.GetPlanEnd(j).Expr
+                        else
+                            d.GetInExpr(j))
+            if inExprs.any() then
                 match j.JobParam.JobSensing with
                 | SensingNormal -> inExprs.ToAnd() |>Some  
                 | SensingNegative -> !@inExprs.ToAnd() |>Some  

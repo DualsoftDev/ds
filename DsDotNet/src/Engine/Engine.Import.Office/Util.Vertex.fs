@@ -20,7 +20,7 @@ module ImportUtilVertex =
         sys.Functions
         |> Seq.tryFind (fun f -> f.Name = node.OperatorName)
         |> Option.defaultWith (fun () ->
-            let newFunc = OperatorFunction(node.OperatorName) :> Func
+            let newFunc = OperatorFunction(node.OperatorName) :> DsFunc
             sys.Functions.Add newFunc |> ignore
             newFunc
         )
@@ -29,7 +29,7 @@ module ImportUtilVertex =
         sys.Functions
         |> Seq.tryFind (fun f -> f.Name = node.CommandName)
         |> Option.defaultWith (fun () ->
-            let newFunc = CommandFunction(node.CommandName) :> Func
+            let newFunc = CommandFunction(node.CommandName) :> DsFunc
             sys.Functions.Add newFunc |> ignore
             newFunc
         )
@@ -39,7 +39,7 @@ module ImportUtilVertex =
         let jobName = node.Job.Combine()
 
 
-        match sys.Jobs |> Seq.tryFind (fun job -> job.UnqualifiedName = jobName) with
+        match sys.Jobs |> Seq.tryFind (fun job -> job.DequotedQualifiedName = jobName) with
         | Some job -> Call.Create(job, parentWrapper)
         | None ->
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiPureName) with
@@ -52,7 +52,7 @@ module ImportUtilVertex =
                         taskDev.AddOrUpdateApiTaskDevPara(jobName, api, TaskDevPara)
                         taskDev
                     | _ -> 
-                        let apiPara  = {TaskDevParaIO =  TaskDevPara; ApiItem = api}
+                        let apiPara  = {TaskDevParamIO =  TaskDevPara; ApiItem = api}
                         TaskDev(apiPara, jobName, loadSysName, sys)
 
                 let job = Job(node.Job, sys, [devTask])
@@ -86,7 +86,7 @@ module ImportUtilVertex =
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
                     ApiName = node.ApiPureName
-                    TaskDevParaIO = node.TaskDevPara
+                    TaskDevParamIO = node.TaskDevPara
                     Parent = parentWrapper
                     }
                 addNewCall callParams
@@ -111,13 +111,13 @@ module ImportUtilVertex =
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
                     ApiName = node.ApiPureName
-                    TaskDevParaIO = node.TaskDevPara
+                    TaskDevParamIO = node.TaskDevPara
                     Parent = parentWrapper
                     }
         let tasks = HashSet<TaskDev>()
         handleActionJob tasks param
         let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
-        match mySys.Jobs.TryFind(fun f -> f.UnqualifiedName = job.UnqualifiedName) with
+        match mySys.Jobs.TryFind(fun f -> f.DequotedQualifiedName = job.DequotedQualifiedName) with
         | Some _existingJob -> ()   
         | None -> 
             mySys.Jobs.Add job

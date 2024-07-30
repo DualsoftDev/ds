@@ -8,45 +8,45 @@ open Dual.Common.Core.FS
 open Engine.Parser.FS
 
 
-type VertexMCall with
+type CallVertexTagManager with
 
   
     member v.C1_DoOperator() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
         let sts = call.TargetFunc.Value.Statements
-        if sts.Count = 1
-        then 
+        if sts.Count = 1 then 
             [
-            match sts.Head() with
-            | DuAssign (_, cmdExpr, _) ->
-                yield withExpressionComment comment (DuAssign (None, cmdExpr, v.CallOperatorValue))
-            |_ -> failWithLog $"err {comment}"
+                match sts.Head() with
+                | DuAssign (_, cmdExpr, _) ->
+                    yield withExpressionComment comment (DuAssign (None, cmdExpr, v.CallOperatorValue))
+                |_ -> failWithLog $"err {comment}"
             ]
-        elif sts.Count > 1
-        then failwithlog $"Operator({call.Name})에는 하나의 수식이 필요합니다. \r\n테이블 정의 수식 Count:({sts.Count})"
-        else []
+        elif sts.Count > 1 then
+            failwithlog $"Operator({call.Name})에는 하나의 수식이 필요합니다. \r\n테이블 정의 수식 Count:({sts.Count})"
+        else
+            []
          
 
     member v.C2_DoCommand() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
         [
-            if call.TargetFunc.Value.Statements.any() 
-            then
+            if call.TargetFunc.Value.Statements.any() then
                 let sets = 
-                    if RuntimeDS.Package.IsPLCorPLCSIM() 
-                    then
+                    if RuntimeDS.Package.IsPLCorPLCSIM() then
                         fbRising [v.MM.Expr]:> IExpression<bool>
                     elif RuntimeDS.Package.IsPCorPCSIM() then
                         v.CallCommandPulse.Expr   
-                    else   
+                    else
                         failWithLog $"Not supported {RuntimeDS.Package} package"
 
                 yield! (v.MM.Expr, v.System) --^ (v.CallCommandPulse, getFuncName()) 
 
                     ////test ahn
-                yield! call.TargetFunc.Value.Statements |> Seq.collect(fun s->
+                yield!
+                    call.TargetFunc.Value.Statements
+                    |> Seq.collect(fun s->
                         [
                             match s with
                             | DuAssign (_, cmdExpr, target) ->
@@ -63,15 +63,14 @@ type VertexMCall with
         let inOps = 
             call.TargetJob.TaskDefs
                 .Select(fun d->
-                    if d.InAddress = TextAddrEmpty || d.InAddress = TextSkip
-                    then //주소가 없으면 Plan 으로 처리
-                        d.GetPE(call.TargetJob).Expr
-                    else    
+                    if d.InAddress.IsOneOf(TextAddrEmpty, TextSkip) then //주소가 없으면 Plan 으로 처리
+                        d.GetPlanEnd(call.TargetJob).Expr
+                    else
                         d.GetInExpr(call.TargetJob)
                 ) 
 
-        if inOps.IsEmpty()
-        then failwithlog $"Device({call.Name})에는 입력이 필요합니다."
+        if inOps.IsEmpty() then
+            failwithlog $"Device({call.Name})에는 입력이 필요합니다."
         else
             let sets = inOps.ToAndElseOff()    
             (sets, call._off.Expr) --| (v.CallOperatorValue, getFuncName()) //그대로 복사

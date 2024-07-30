@@ -90,8 +90,9 @@ module CoreModule =
     and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
         inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
-    type DsSystem (name: string) =
+    type DsSystem private (name: string, fqdnVertexDic, vertexHandlers:GraphVertexAddRemoveHandlers option) =
         inherit FqdnObject(name, createFqdnObject([||]))
+
         let loadedSystems = createNamedHashSet<LoadedSystem>()
         let apiUsages = ResizeArray<ApiItem>()
         let variables = ResizeArray<VariableData>()
@@ -100,48 +101,67 @@ module CoreModule =
         static let assem = Assembly.GetExecutingAssembly()
         static let currentLangVersion = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion |> Version.Parse
         static let currentEngineVersion = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version |> Version.Parse
-
-        let addApiItemsForDevice (device: LoadedSystem) = device.ReferenceSystem.ApiItems |> apiUsages.AddRange
-        let channelInfos =
-            loadedSystems 
-            |> Seq.collect(fun s-> 
-                s.ChannelPoints.Where(fun kv -> kv.Key <> TextEmtpyChannel)
-                               .Select(fun kv ->
-                                    let path = kv.Key
-                                    let xywh = kv.Value
-                                    let chName, url = path.Split(';')[0], path.Split(';')[1]
-                                    let typeScreen = if url = TextImageChannel
-                                                     then ScreenType.IMAGE  
-                                                     else ScreenType.CCTV
-                                    { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
-
-
         
         interface ISystem 
-            
-        member _.AddLoadedSystem(childSys) = 
-            loadedSystems.Add(childSys)
-            |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
-            addApiItemsForDevice childSys
 
-        member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem)
+        // [NOTE] GraphVertex {
+        static member Create4Test(name) =
+            assert (isInUnitTest())     // UnitTest 에서만 사용.  일반 코드에서는 DsSystem.Create(name) 을 사용할 것.
+            DsSystem(name, null, None)
+
+        static member Create(name) =
+            let fqdnVertexDic = Dictionary<string, FqdnObject>()
+            let vertexHandlers =
+                let onAdded (v:INamed) = 
+                    let q = v :?> FqdnObject
+                    fqdnVertexDic.TryAdd(q.DequotedQualifiedName, q)
+                let onRemoved (v:INamed) = 
+                    let q = v :?> FqdnObject
+                    fqdnVertexDic.Remove(q.DequotedQualifiedName)
+
+                GraphVertexAddRemoveHandlers(onAdded, onRemoved)
+
+            let system = DsSystem(name, fqdnVertexDic, Some vertexHandlers)
+            fqdnVertexDic.Add(name, system)
+            system
+
+        member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
+        member _.AddFqdnVertex(fqdn, vertex) = fqdnVertexDic.Add(fqdn, vertex)
+        member _.TryFindFqdnVertex(fqdn) = fqdnVertexDic.TryFind(fqdn)
+        // [NOTE] GraphVertex }
+
+            
+        member x.AddLoadedSystem(childSys) = 
+            loadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
+
+            // loaded device 도 vertex dic 에 포함할지 말지 여부에 따라서
+            if isNull(fqdnVertexDic) then
+                assert(isInUnitTest())
+            else
+                x.AddFqdnVertex(childSys.Name, childSys)
+
+            childSys.ReferenceSystem.ApiItems |> apiUsages.AddRange
+
+        member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
         member _.LoadedSystems = loadedSystems |> seq
         member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray 
-        member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>() |> Seq.toArray
-        member _.LayoutInfos = channelInfos
+        member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>()
       
         member _.ApiUsages = apiUsages |> seq
         member val Jobs = ResizeArray<Job>()
-        member val Functions = ResizeArray<Func>()
+        member val Functions = ResizeArray<DsFunc>()
 
         member _.Variables = variables |> seq
         member _.ActionVariables = actionVariables |> seq
 
         member val Flows = createNamedHashSet<Flow>()
+
         ///사용자 정의 API 
         member val ApiItems = createNamedHashSet<ApiItem>()
+
         ///내시스템이 사용한 interface
         member x.TaskDevs = x.Jobs.SelectMany(fun j->j.TaskDefs)
+
         ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
         member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
         member val ApiResetInfos = HashSet<ApiResetInfo>()
@@ -152,26 +172,24 @@ module CoreModule =
         static member CurrentEngineVersion = currentEngineVersion
 
         member x.AddVariables(variableData:VariableData) = 
-                if variables.any(fun v->v.Name = variableData.Name)
-                then 
-                    failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
-                else 
-                    variables.Add(variableData) 
+            if variables.any(fun v-> v.Name = variableData.Name) then 
+                failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
+
+            variables.Add(variableData) 
                     
         member x.AddActionVariables(actionVariable:ActionVariable) = 
-                if actionVariables.any(fun v->v.Name = actionVariable.Name)
-                then 
-                    failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
-                else 
-                    actionVariables.Add(actionVariable)
+            if actionVariables.any(fun v-> v.Name = actionVariable.Name) then 
+                failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
+
+            actionVariables.Add(actionVariable)
 
     and AliasTargetWrapper =
         | DuAliasTargetReal of Real
         | DuAliasTargetCall of Call
         member x.RealTarget() =
-            match x with | DuAliasTargetReal   r -> Some r |_ -> None
+            match x with | DuAliasTargetReal r -> Some r |_ -> None
         member x.CallTarget() =
-            match x with | DuAliasTargetCall   c -> Some c |_ -> None
+            match x with | DuAliasTargetCall c -> Some c |_ -> None
    
    
     // Subclasses = {Call}
@@ -227,7 +245,7 @@ module CoreModule =
         do 
             checkFlowName  name
         
-        member val Graph = DsGraph()
+        member val Graph = DsGraph(system.VertexAddRemoveHandlers)
         
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         
@@ -292,7 +310,7 @@ module CoreModule =
         
         member x.Flow = flow
 
-        member val Graph = DsGraph()
+        member val Graph = DsGraph(flow.System.VertexAddRemoveHandlers)
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val ExternalTags = HashSet<ExternalTagSet>()
         member val ParentApiSensorExpr = getNull<IExpression>() with get, set
@@ -310,17 +328,20 @@ module CoreModule =
         | CommadFuncType of CommandFunction
         | OperatorFuncType of OperatorFunction
 
-    type Call(jobOrFunc: CallType, parent:ParentWrapper) =
-        inherit Indirect
-            (match jobOrFunc with
+    type Call(jobOrFunc:CallType, parent:ParentWrapper) =
+        inherit Indirect (
+            // indirect 의 인자로 name, parent 를 제공
+            match jobOrFunc with
             | JobType job -> 
-                if job.NameComponents.Head() = parent.GetFlow().Name   
-                then job.NameComponents.Skip(1).CombineDequoteOnDemand()
-                else job.NameComponents.CombineDequoteOnDemand()
-                       
+                let jncs = job.NameComponents
+                if jncs.Head() = parent.GetFlow().Name then
+                    jncs.Skip(1).CombineDequoteOnDemand()
+                else
+                    jncs.CombineDequoteOnDemand()                       
             | CommadFuncType func -> func.Name
             | OperatorFuncType func -> func.Name
-            , parent)
+            , parent
+        )
 
         let isJob = function
             | JobType _  -> true
@@ -342,8 +363,8 @@ module CoreModule =
 
         member x.TargetFunc =
             match jobOrFunc with
-            | CommadFuncType func -> func :> Func |> Some
-            | OperatorFuncType func -> func :> Func  |> Some
+            | CommadFuncType func -> func :> DsFunc |> Some
+            | OperatorFuncType func -> func :> DsFunc  |> Some
             | _ -> None
                          
         /// Indicates if the target includes a job.
@@ -416,35 +437,30 @@ module CoreModule =
      
     /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.  
     ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
-    type ApiPara = 
+    type ApiParam = 
         {
             ApiItem : ApiItem
-            TaskDevParaIO : TaskDevParaIO
-        }
-    let defaultApiPara(api:ApiItem) =
-        { 
-            ApiItem = api 
-            TaskDevParaIO = defaultTaskDevParaIO()
+            TaskDevParamIO : TaskDevParamIO
         }
 
-    type TaskDev (apiPara:ApiPara, parentJob:string, deviceName:string, parentSys:DsSystem) =
-        inherit FqdnObject(apiPara.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
-        let dicTaskTaskDevParaIO  = Dictionary<string, ApiPara>()
+    type TaskDev (apiParam:ApiParam, parentJob:string, deviceName:string, parentSys:DsSystem) =
+        inherit FqdnObject(apiParam.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
+        let dicTaskTaskDevParamIO  = Dictionary<string, ApiParam>()
         do  
-            dicTaskTaskDevParaIO.Add (parentJob, apiPara)
+            dicTaskTaskDevParamIO.Add (parentJob, apiParam)
 
         member x.ApiPureName = (x:>FqdnObject).QualifiedName
-        member x.ApiSystemName = apiPara.ApiItem.ApiSystem.Name //needs test animation
+        member x.ApiSystemName = apiParam.ApiItem.ApiSystem.Name //needs test animation
     
         member x.DeviceName = deviceName
         member x.ParnetSystem = parentSys
 
-        member x.InParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParaIO.InPara) 
-        member x.OutParams = dicTaskTaskDevParaIO.Values.Choose(fun tdPara->tdPara.TaskDevParaIO.OutPara) 
+        member x.InParams = dicTaskTaskDevParamIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.InParam) 
+        member x.OutParams = dicTaskTaskDevParamIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.OutParam) 
 
-        member x.DicTaskTaskDevParaIO = dicTaskTaskDevParaIO
-        member x.ApiParas = dicTaskTaskDevParaIO.Values
-        member x.ApiItems = x.DicTaskTaskDevParaIO.Values.Select(fun f->f.ApiItem)
+        member x.DicTaskTaskDevParamIO = dicTaskTaskDevParamIO
+        member x.ApiParams = dicTaskTaskDevParamIO.Values
+        member x.ApiItems = x.DicTaskTaskDevParamIO.Values.Select(fun f->f.ApiItem)
 
         member val InAddress = TextAddrEmpty with get, set
         member val OutAddress = TextAddrEmpty with get, set
@@ -460,7 +476,7 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-        let mutable jobParam = defaultJobPara()
+        let mutable jobParam = defaultJobParam()
         member x.JobParam = jobParam
         member x.UpdateJobParam(newJobParam: JobParam) =
             jobParam <- newJobParam
@@ -476,16 +492,16 @@ module CoreModule =
                                 
 
     [<AbstractClass>]
-    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, TaskDevParaIO:TaskDevParaIO, addr:Addresses)  =
+    type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, taskDevParamIO:TaskDevParamIO, addr:Addresses)  =
         inherit FqdnObject(name, system)
         member x.Name = name
         member x.System = system
         member val SettingFlows = flows with get, set
         //SettingFlows 없으면 전역 시스템 설정
         member val IsGlobalSystemHw = flows.IsEmpty()
-        member val TaskDevParaIO  = TaskDevParaIO  with get, set
-        member x.InDataType  = if TaskDevParaIO.InPara.IsSome then TaskDevParaIO.InPara.Value.Type else DuBOOL
-        member x.OutDataType  = if TaskDevParaIO.OutPara.IsSome then TaskDevParaIO.OutPara.Value.Type else DuBOOL
+        member val TaskDevParamIO  = taskDevParamIO  with get, set
+        member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.Type | None -> DuBOOL
+        member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.Type | None -> DuBOOL
 
         member val InAddress = addr.In with get, set
         member val OutAddress = addr.Out with get, set
@@ -496,17 +512,17 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
 
-    and ButtonDef (name: string, system:DsSystem, btnType: BtnType, TaskDevParaIO:TaskDevParaIO,  addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, TaskDevParaIO, addr)
+    and ButtonDef (name:string, system:DsSystem, btnType: BtnType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows:HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, taskDevParamIO, addr)
         member x.ButtonType = btnType
         member val ErrorEmergency = getNull<IStorage>() with get, set
 
-    and LampDef (name: string, system:DsSystem,lampType: LampType, TaskDevParaIO:TaskDevParaIO, addr:Addresses, flows: HashSet<Flow>) =
-        inherit HwSystemDef(name, system, flows, TaskDevParaIO, addr) //inAddress lamp check bit
+    and LampDef (name:string, system:DsSystem,lampType: LampType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows:HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) //inAddress lamp check bit
         member x.LampType = lampType
 
-    and ConditionDef (name: string, system:DsSystem, conditionType: ConditionType, TaskDevParaIO:TaskDevParaIO, addr:Addresses,  flows: HashSet<Flow>) =
-        inherit HwSystemDef(name,  system, flows, TaskDevParaIO, addr) // outAddress condition check bit
+    and ConditionDef (name:string, system:DsSystem, conditionType: ConditionType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) // outAddress condition check bit
         member x.ConditionType = conditionType
         member val ErrorCondition = getNull<IStorage>() with get, set
 
@@ -544,9 +560,11 @@ module CoreModule =
             real
 
         member x.GetAliasTargetToDs(aliasFlow:Flow) =
-                if x.Flow <> aliasFlow
-                then [|x.Flow.Name; x.Name|]  //other flow
-                else [| x.Name |]             //my    flow
+            [|
+                if x.Flow <> aliasFlow then
+                    yield x.Flow.Name // other flow
+                yield x.Name  // my flow
+            |]
 
     type OperatorFunction with
         static member Create(name:string,  excuteCode:string) =
@@ -562,17 +580,17 @@ module CoreModule =
             cmd 
 
 
-    let addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
     type Call with
+        static member private addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target|>JobType, parent)
             if parent.GetSystem().Flows.SelectMany(fun f->f.Graph.Vertices.OfType<Call>()).Any(fun c->c.QualifiedName = call.QualifiedName)
             then failwithlog $"중복 call name [{call.Name}]"
             else 
-                addCallVertex parent call
+                Call.addCallVertex parent call
                 call
 
-        static member Create(func:Func, parent:ParentWrapper) =
+        static member Create(func:DsFunc, parent:ParentWrapper) =
             let callType = 
                 match func with
                 | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)
@@ -580,7 +598,7 @@ module CoreModule =
                 | _->failwithlog "Error"
 
             let call = Call(callType, parent)
-            addCallVertex parent call
+            Call.addCallVertex parent call
             call   
 
      

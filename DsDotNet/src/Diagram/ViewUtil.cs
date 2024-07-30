@@ -87,7 +87,7 @@ namespace Diagram.View.MSAGL
 
             _sys.GetRealVertices().Iter(real =>
             {
-                var og = (real.TagManager as VertexManager).OG;
+                var og = (real.TagManager as VertexTagManager).OG;
                 UpdateOriginVertexTag(og, DicNode[real]);
 
                 real.GetSharedReal().Iter(alias => UpdateOriginVertexTag(og, DicNode[alias]));
@@ -131,9 +131,9 @@ namespace Diagram.View.MSAGL
 
             void UpdateDicTaskDevPlanTag(TaskDev td, ViewVertex viewVertex)
             {
-                td.ApiParas.Iter(apiPara =>
+                td.ApiParams.Iter(apiParam =>
                 {
-                    var planEndTag = (td.TagManager as TaskDevManager).PE(apiPara);
+                    var planEndTag = (td.TagManager as TaskDevManager).PlanEnd(apiParam);
 
                     if (!DicMemoryTag.ContainsKey(planEndTag))
                         DicMemoryTag.Add(planEndTag, new List<ViewVertex>());
@@ -267,11 +267,11 @@ namespace Diagram.View.MSAGL
 
                                 if (n.Vertex is Call c)
                                 {
-                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PE(c.TargetJob).Value));
+                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(c.TargetJob).Value));
                                 }
                                 else if (n.Vertex is Alias a)
                                 {
-                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PE(a.GetPureCall().Value.TargetJob).Value));
+                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(a.GetPureCall().Value.TargetJob).Value));
                                 }
                                 else
                                 {

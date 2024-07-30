@@ -40,8 +40,11 @@ module HelloDSRuntimeTestModule =
             system
 
 
+        // Z:\ds\DsDotNet\src\UnitTest\TestData\ 폴더에 
+        // - 최신 버젼의 HelloDS.zip 파일 필요
+        // - HelloDS.Logger.UnitTest.sqlite3 파일도 최신 HelloDS.zip 으로 시뮬레이션 된 것이거나 삭제 필요
         [<Test>]
-        member __.``HelloDS runtime model test``() =
+        member __.``X HelloDS runtime model test``() =
             let system = getSystem()
             let runtimeModel = runtimeModel
 

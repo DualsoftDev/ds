@@ -29,7 +29,7 @@ module Interface =
     type IQualifiedNamed =
         inherit INamed
         abstract QualifiedName: string with get
-        abstract UnqualifiedName: string with get
+        abstract DequotedQualifiedName: string with get
         abstract NameComponents: string[] with get
 
     type IStorage =
@@ -65,6 +65,7 @@ module Interface =
     type Storages() =
         inherit Dictionary<string, IStorage>(StringComparer.OrdinalIgnoreCase)
 
+    /// obsidian 문서 : DsDotNet/src/Doc/Obsidian/DS/Engine.Core/ITagManager.canvas 참고
     type ITagManager =
         abstract Target: IQualifiedNamed
         abstract Storages: Storages

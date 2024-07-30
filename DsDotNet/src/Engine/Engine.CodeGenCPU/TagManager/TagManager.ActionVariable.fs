@@ -1,10 +1,6 @@
 namespace Engine.CodeGenCPU
 
-open System.Diagnostics
 open Engine.Core
-open System.Linq
-open System
-open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ActionVariableManagerModule =

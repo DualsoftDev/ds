@@ -92,23 +92,24 @@ module FqdnImpl =
                 member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
                 member _.NameComponents = nameComponents
                 member x.QualifiedName = failwithlog "ERROR"
-                member x.UnqualifiedName = failwithlog "ERROR"
+                member x.DequotedQualifiedName = failwithlog "ERROR"
         }
 
+    /// FQDN(Fully Qualified Domain Name) Object
     type FqdnObject(name:string, parent:IQualifiedNamed) =
         inherit Named(name)
         interface IVertex
         interface IQualifiedNamed with
             member x.NameComponents = [| yield! parent.NameComponents; x.Name |]
             member x.QualifiedName =  x.NameComponents.CombineQuoteOnDemand()
-            member x.UnqualifiedName =  x.NameComponents.CombineDequoteOnDemand()
+            member x.DequotedQualifiedName =  x.NameComponents.CombineDequoteOnDemand()
         member x.Name with get() = (x :> INamed).Name and set(v) = (x :> INamed).Name <- v
         [<Browsable(false)>]
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         [<Browsable(false)>]
         member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName  
         [<Browsable(false)>]
-        member x.UnqualifiedName = (x :> IQualifiedNamed).UnqualifiedName
+        member x.DequotedQualifiedName = (x :> IQualifiedNamed).DequotedQualifiedName
         abstract member GetRelativeName: Fqdn -> string
         default x.GetRelativeName(referencePath:Fqdn) =
             getRelativeName referencePath x.NameComponents

@@ -29,10 +29,10 @@ module PPTNodeUtilModule =
                 | None, Some t -> $"{prefix}{t}ms"
                 | None, None -> $""
 
-        let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParaIO:TaskDevParaIO) =
+        let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParaIO:TaskDevParamIO) =
             let newJob = 
-                let inParaText  = getPostParam taskDevParaIO.InPara "IN"
-                let outParaText = getPostParam taskDevParaIO.OutPara "OUT"
+                let inParaText  = getPostParam taskDevParaIO.InParam "IN"
+                let outParaText = getPostParam taskDevParaIO.OutParam "OUT"
 
 
                 if inParaText = "" && outParaText = "" //둘다 없는경우
@@ -81,13 +81,13 @@ module PPTNodeUtilModule =
                     let inFunc, outFunc =
                         func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobParam에서 다시 처리
                         func.Split(",").Last() |> trimSpaceNewLine
-                    TaskDevParaIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
+                    TaskDevParamIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
                 else
                     if isRoot || nodeType = AUTOPRE //생략 규격 입력시에 Root/AUTOPRE 는 조건으로 Real내부는 출력으로 인식
                     then 
-                        TaskDevParaIO((getParam func)|>Some, (defaultTaskDevPara())|>Some)
+                        TaskDevParamIO((getParam func)|>Some, (defaultTaskDevPara())|>Some)
                     else 
-                        TaskDevParaIO((defaultTaskDevPara())|>Some, (getParam func)|>Some)
+                        TaskDevParamIO((defaultTaskDevPara())|>Some, (getParam func)|>Some)
             with _ ->
                 shape.ErrorName((error()), iPage)
 

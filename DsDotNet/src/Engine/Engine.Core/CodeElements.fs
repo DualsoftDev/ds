@@ -58,7 +58,9 @@ module rec CodeElements =
 
 
     [<AbstractClass>]
-    type Func(name:string) =
+    type DsFunc(name:string) =
+        interface INamed with
+            member x.Name with get() = x.Name and set(_v) = failwithlog "ERROR: not supported"
         member x.Name = name
         member val Statements = StatementContainer()
         member x.ToDsText() =
@@ -69,7 +71,7 @@ module rec CodeElements =
 
     ///Comparison, Logical, ... Operators  (비교, 논리 연산자)
     and OperatorFunction(name:string) =
-        inherit Func(name)
+        inherit DsFunc(name)
         member val OperatorType = DuOPUnDefined with get, set
         member val OperatorCode = "" with get, set
 
@@ -77,7 +79,7 @@ module rec CodeElements =
 
     ///Copy, Assign, ... Commands (복사, 대입 명령)
     and CommandFunction(name:string) =
-        inherit Func(name)
+        inherit DsFunc(name)
         member val CommandType = DuCMDUnDefined with get, set
         member val CommandCode = "" with get, set
 

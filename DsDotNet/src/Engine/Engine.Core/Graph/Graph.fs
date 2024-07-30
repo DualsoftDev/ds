@@ -29,10 +29,18 @@ module GraphModule =
         member _.Target = target
         member _.EdgeType = edgeType
 
+    // [NOTE] GraphVertex
+    type GraphVertexAddRemoveHandlers(onVertexAdded, onVertexRemoved) =
+        member _.OnVertexAdded: INamed -> bool = onVertexAdded
+        member _.OnVertexRemoved: INamed -> bool = onVertexRemoved
+
     type Graph<'V, 'E
             when 'V :> INamed and 'V : equality
             and 'E :> IEdge<'V> and 'E: equality> (
-            vertices_:'V seq, edges_:'E seq) =
+            vertices_:'V seq,
+            edges_:'E seq,
+            vertexHandlers:GraphVertexAddRemoveHandlers option) =
+
         let edgeComparer = {
             new IEqualityComparer<'E> with
                 member _.Equals(x:'E, y:'E) = x.Source = y.Source && x.Target = y.Target && x.EdgeType = y.EdgeType
@@ -48,7 +56,36 @@ module GraphModule =
         let vertices = vertices_ @ edges_.Collect(fun e -> [e.Source; e.Target]).Distinct()
         let vs = new HashSet<'V>(vertices, vertexComparer)
         let es = new HashSet<'E>(edges_, edgeComparer)
-        new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>)
+
+        // [NOTE] GraphVertex
+        let addVertex(vertex:'V) =
+#if DEBUG
+            let result1 = vs.Add vertex
+            let result2 =
+                match vertexHandlers with
+                | None -> true
+                | Some handlers -> handlers.OnVertexAdded (vertex :> INamed)
+            if result1 && result2 then
+                true
+            else
+                false
+#else
+            vs.Add vertex &&
+                match vertexHandlers with
+                | None -> true
+                | Some handlers -> handlers.OnVertexAdded (vertex :> INamed)
+#endif
+
+        let removeVertex(vertex:'V) =
+            vs.Remove vertex &&
+                match vertexHandlers with
+                | None -> true
+                | Some handlers -> handlers.OnVertexRemoved (vertex :> INamed)
+
+        new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>, None)
+        new (vs, es) = Graph<'V, 'E>(vs, es, None)
+        new (vertexHandlers:GraphVertexAddRemoveHandlers option) = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>, vertexHandlers)
+
         member _.Vertices = vs
         member _.Edges = es
         /// 중복 edge 삽입은 허용되지 않으나, 중복된 항목이 존재하면 이를 무시하고 false 를 반환.  중복이 없으면 true 반환
@@ -57,12 +94,15 @@ module GraphModule =
             |> Seq.forall(fun e ->
                 [ e.Source; e.Target ]
                 |> Seq.filter(fun v -> not <| vs.Contains(v))
-                |> Seq.iter(fun v -> vs.Add(v) |> ignore)
+                |> Seq.iter(fun v -> addVertex v |> ignore)
                 es.Add(e))  // |> verifyMessage $"Duplicated edge [{e.Source.Name} -> {e.Target.Name}]"
 
         member _.RemoveEdges(edges:'E seq)       = edges    |> Seq.forall es.Remove
-        member _.AddVertices(vertices:'V seq)    = vertices |> Seq.forall vs.Add
-        member _.RemoveVertices(vertices:'V seq) = vertices |> Seq.forall vs.Remove
+
+        member _.AddVertices(vertices:'V seq)    = vertices |> Seq.forall addVertex
+        member _.RemoveVertices(vertices:'V seq) = vertices |> Seq.forall removeVertex
+
+
         member x.AddEdge(edge:'E)        = x.AddEdges([edge])
         member x.RemoveEdge(edge:'E)     = x.RemoveEdges([edge])
         member x.AddVertex(vertex:'V)    = x.AddVertices([vertex])

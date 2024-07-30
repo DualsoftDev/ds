@@ -20,74 +20,74 @@ module PPTNodeModule =
         member x.Title = slidePart.PageTitle()
 
     type pptNode(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq, target:PlatformTarget) =
-        let copySystems = Dictionary<string, string>() //copyName, orgiName
-        let safeties = HashSet<string>()
-        let autoPres = HashSet<string[]>()  //jobFqdn
+        let copySystems       = Dictionary<string, string>() //copyName, orgiName
+        let safeties          = HashSet<string>()
+        let autoPres          = HashSet<string[]>()  //jobFqdn
         
-        let jobInfos = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
-        let btnHeadPageDefs = Dictionary<string, BtnType>()
-        let btnDefs = Dictionary<string, BtnType>()
-        let lampHeadPageDefs = Dictionary<string, LampType>()
-        let lampDefs = Dictionary<string, LampType>()
+        let jobInfos          = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
+        let btnHeadPageDefs   = Dictionary<string, BtnType>()
+        let btnDefs           = Dictionary<string, BtnType>()
+        let lampHeadPageDefs  = Dictionary<string, LampType>()
+        let lampDefs          = Dictionary<string, LampType>()
         let condiHeadPageDefs = Dictionary<string, ConditionType>()
-        let condiDefs = Dictionary<string, ConditionType>()
+        let condiDefs         = Dictionary<string, ConditionType>()
 
         let mutable ifName = ""
         let mutable rootNode: bool option = None
-        let mutable taskDevParam: TaskDevParaIO = defaultTaskDevParaIO()  // Input/Output param
-        let mutable jobParam: JobParam = defaultJobPara()     // jobParam  param
+        let mutable taskDevParam: TaskDevParamIO = defaultTaskDevParamIO()  // Input/Output param
+        let mutable jobParam: JobParam = defaultJobParam()     // jobParam  param
 
         
         let mutable ifTX = ""
         let mutable ifRX = ""
         let mutable realGoingTime:float option = None   
         let mutable realDelayTime:float option = None   
-
         let nameNFunc(shape:Shape) = 
-                let mutable macroUpdateName = shape.InnerText.Replace("”", "\"").Replace("“", "\"") 
-                macros.Where(fun m->m.Page = iPage)
-                          .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}")
-                    )
+            let mutable macroUpdateName =
+                shape.InnerText.Replace("”", "\"").Replace("“", "\"") 
+            macros
+                .Where(fun m->m.Page = iPage)
+                .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}"))
 
-                macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+            macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+
         let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape), "") |> trimSpaceNewLine
         let name = 
             let nameTrim  = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
             GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
 
-
         let nodeType = getNodeType(shape, name, iPage)
         let updateSafety (barckets: string) =
-                barckets.Split(';')
-                    |> Seq.iter (fun f ->
-                        let safeItem = 
-                            let items = f.Split('.').Select(fun s->s.Trim())
-                            match items.length() with
-                            | 2 -> 
-                                $"{pageTitle}.{items.Combine()}"
-                            | 3 -> 
-                                items.Combine()
-                            | _ ->
-                                failWithLog ErrID._79
+            barckets.Split(';')
+            |> Seq.iter (fun f ->
+                let safeItem = 
+                    let items = f.Split('.').Select(fun s->s.Trim())
+                    match items.length() with
+                    | 2 -> 
+                        $"{pageTitle}.{items.Combine()}"
+                    | 3 -> 
+                        items.Combine()
+                    | _ ->
+                        failWithLog ErrID._79
                         
-                        safeties.Add(safeItem) |> ignore    
-                    )    
+                safeties.Add(safeItem) |> ignore    
+            )    
 
 
         let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
-                if (groupJob > 0) then
-                    shape.ErrorName(ErrID._19, iPage)
-                else
-                    let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
-                    let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextDeviceSplit}{sys}")
+            if (groupJob > 0) then
+                shape.ErrorName(ErrID._19, iPage)
+            else
+                let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
+                let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextDeviceSplit}{sys}")
 
-                    if copys.Distinct().length() <> copys.length() then
-                        Office.ErrorName(shape, ErrID._33, iPage)
+                if copys.Distinct().length() <> copys.length() then
+                    Office.ErrorName(shape, ErrID._33, iPage)
 
-                    copys
-                    |> Seq.iter (fun copy ->
-                        copySystems.Add(copy, orgiSysName)
-                        jobInfos.Add(copy, [ copy ] |> HashSet))
+                copys
+                |> Seq.iter (fun copy ->
+                    copySystems.Add(copy, orgiSysName)
+                    jobInfos.Add(copy, [ copy ] |> HashSet))
 
         let updateDeviceIF (text: string) =
             ifName <- GetBracketsRemoveName(text) |> trimSpace |> trimNewLine
@@ -115,12 +115,8 @@ module PPTNodeModule =
             realGoingTime <- goingT
             realDelayTime <- delayT
 
-        
 
         do
-
-
-
             try 
                 nameCheck (shape, nodeType, iPage, name)
                 match nodeType with
@@ -178,14 +174,11 @@ module PPTNodeModule =
                                 | _ , "" -> $"{TextJobMulti}{cntPara}"
                                 | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
 
+                            let jobNegative = if cntOptPara.StartsWith(TextJobNegative) then $";{TextJobNegative}" else ""
+                            getParserJobType(paraText + jobNegative)
 
-                            if cntOptPara.StartsWith(TextJobNegative)
-                            then 
-                                getParserJobType(paraText+ $";{TextJobNegative}")
-                            else 
-                                getParserJobType(paraText)
                         else 
-                            defaultJobPara() 
+                            defaultJobParam() 
 
                     jobParam <- jobPram 
             with ex ->  
@@ -208,19 +201,19 @@ module PPTNodeModule =
         member x.IfTX = ifTX
         member x.IfRX = ifRX
 
-        member x.NodeType = nodeType
+        member x.NodeType       = nodeType
         
-        member x.PageTitle = pageTitle
-        member x.Position = shape.GetPosition(slieSize)
-        member x.OperatorName = pageTitle+"_"+name
-        member x.CommandName = pageTitle+"_"+name
-        member x.IsCall = nodeType = CALL
-        member x.IsRootNode = rootNode
-        member x.IsFunction = x.IsCall && not(name.Contains("."))
-        member x.TaskDevPara = taskDevParam
-        member x.JobParam =  jobParam
-        member x.TaskDevParaIn = taskDevParam.InPara
-        member x.TaskDevParaOut =taskDevParam.OutPara
+        member x.PageTitle      = pageTitle
+        member x.Position       = shape.GetPosition(slieSize)
+        member x.OperatorName   = pageTitle+"_"+name
+        member x.CommandName    = pageTitle+"_"+name
+        member x.IsCall         = nodeType = CALL
+        member x.IsRootNode     = rootNode
+        member x.IsFunction     = x.IsCall && not(name.Contains("."))
+        member x.TaskDevPara    = taskDevParam
+        member x.JobParam       = jobParam
+        member x.TaskDevParaIn  = taskDevParam.InParam
+        member x.TaskDevParaOut = taskDevParam.OutParam
 
         member x.UpdateTime(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
@@ -254,8 +247,8 @@ module PPTNodeModule =
                         
                     else 
                         if isRoot then
-                            let inPara = createTaskDevPara  None (Some(DuBOOL)) None None |> Some  
-                            taskDevParam <-TaskDevParaIO(inPara, None)
+                            let inPara = createTaskDevParam  None (Some(DuBOOL)) None None |> Some  
+                            taskDevParam <-TaskDevParamIO(inPara, None)
 
                         elif nodeType = AUTOPRE then
                             taskDevParam <- createTaskDevParaIOInTrue()
@@ -296,12 +289,9 @@ module PPTNodeModule =
 
      
 
-        member x.DevName = 
-                $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
-        member x.ApiName = 
-                x.Job.Last()
-        member x.ApiPureName = 
-                x.JobPure.Last()
+        member x.DevName = $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
+        member x.ApiName = x.Job.Last()
+        member x.ApiPureName = x.JobPure.Last()
             
         member x.FlowName =  pageTitle
         member x.IsAlias: bool = x.Alias.IsSome
@@ -311,9 +301,9 @@ module PPTNodeModule =
         member val Name = name with get, set
         member val AliasNumber: int = 0 with get, set
         member val ButtonHeadPageDefs = btnHeadPageDefs
-        member val ButtonDefs = btnDefs
-        member val LampHeadPageDefs = lampHeadPageDefs
-        member val LampDefs = lampDefs
-        member val CondiHeadPageDefs = condiHeadPageDefs
-        member val CondiDefs = condiDefs
+        member val ButtonDefs         = btnDefs
+        member val LampHeadPageDefs   = lampHeadPageDefs
+        member val LampDefs           = lampDefs
+        member val CondiHeadPageDefs  = condiHeadPageDefs
+        member val CondiDefs          = condiDefs
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)

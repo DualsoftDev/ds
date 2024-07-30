@@ -3,25 +3,20 @@ namespace rec Engine.Core
 
 open System.Collections.Generic
 open System.Linq
-open System.Diagnostics
 open Dual.Common.Core.FS
 open System
 open System.Runtime.CompilerServices
-open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module CoreExtensionModule =
-    
-    
-
-    let getTaskDevParaInOut (paramInOutText:string) = 
+    let tryGetTaskDevParaInOut (paramInOutText:string) = 
         match paramInOutText.Split(',') |> Seq.toList with
         | tx::rx when rx.Length = 1 -> Some (getTaskDevPara tx,  getTaskDevPara rx.Head)
         | _-> None 
     
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
-                if system <> targetFlow.System
-                then failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
+        if system <> targetFlow.System then
+            failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
 
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.HwSystemDefs.OfType<ButtonDef>().Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.HwSystemDefs.OfType<LampDef>().Where(fun f->f.LampType = lampType)
@@ -45,86 +40,95 @@ module CoreExtensionModule =
 
         loadeds
 
-          ///Call 자신이거나 Alias Target Call
-    let getPureCall(v:Vertex) : Call option=
+    let tryGetPure(v:Vertex) : Vertex option =
         match v with
-        | :? Call  as c  ->  Some (c)
-        | :? Alias as a  ->
-            match a.TargetWrapper.GetTarget() with
-            | :? Call as call -> Some call
-            | _ -> None
-        |_ -> None
-
-        ///Real 자신이거나 RealEx Target Real
-    let getPureReal(v:Vertex)  : Real =
-        match v with
-        | :? Real   as r  -> r
-        | :? Alias  as a  ->
-            match a.TargetWrapper.GetTarget() with
-            | :? Real as real -> real
-            | _ -> failwithlog $"{v.Name} is not real!!"
-        |_ -> failwithlog $"{v.Name} is not real!!"
-
-    let getPure(v:Vertex) : Vertex =
-        match v with
-        | ( :? Real | :? Call) -> v
+        | ( :? Real | :? Call) -> Some v
         | :? Alias  as a  ->
             let target = a.TargetWrapper.GetTarget()
             match target with
-            | ( :? Real | :? Call) -> target
-            | _ -> failwithlog "Error"
-        |_ -> failwithlog "Error"
+            | ( :? Real | :? Call) -> Some target
+            | _ -> None
+        |_ -> None
+
+    let getPure(v:Vertex) : Vertex =
+        tryGetPure v |> Option.defaultWith(fun () -> failwithlog $"ERROR: Failed to getPure({v})")
+
+    /// Real 자신이거나 RealEx Target Real
+    let getPureReal(v:Vertex) : Real =
+        match tryGetPure(v) with
+        | Some (:? Real as r) -> r
+        | _ -> failwithlog $"ERROR: {v.Name} is not real!!"
+
+    /// Call 자신이거나 Alias Target Call
+    let tryGetPureCall(v:Vertex) : Call option =
+        match tryGetPure(v) with
+        | Some (:? Call as c) -> Some c
+        | _ -> None
 
 
     type DsSystem with
         member x.HWButtons    = x.HwSystemDefs.OfType<ButtonDef>()
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
         member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
+        member x.LayoutInfos =
+            x.LoadedSystems 
+            |> Seq.collect(fun s-> 
+                s.ChannelPoints
+                    .Where(fun kv -> kv.Key <> TextEmtpyChannel)
+                    .Select(fun kv ->
+                        let path = kv.Key
+                        let xywh = kv.Value
+                        let chName, url = path.Split(';')[0], path.Split(';')[1]
+                        let typeScreen = if url = TextImageChannel
+                                            then ScreenType.IMAGE  
+                                            else ScreenType.CCTV
+                        { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh })) 
 
-        member x.AddButton(btnType:BtnType, btnName:string, taskDevParaIO:TaskDevParaIO,  addr:Addresses, flow:Flow) =
+        member x.AddButton(btnType:BtnType, btnName:string, taskDevParaIO:TaskDevParamIO,  addr:Addresses, flow:Flow) =
             checkSystem(x, flow, btnName)
           
-            let existBtns = x.HWButtons.Where(fun f->f.ButtonType = btnType)
-                            |>Seq.filter(fun b -> b.SettingFlows.Contains(flow))
+            let existBtns =
+                x.HWButtons.Where(fun f->f.ButtonType = btnType)
+                |> Seq.filter(fun b -> b.SettingFlows.Contains(flow))
 
-            if existBtns.Where(fun w->w.Name = btnName).any()
-            then failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
+            if existBtns.Any(fun w->w.Name = btnName) then
+                failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParaIO, addr, HashSet[|flow|]))
-                      |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
+                x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParaIO, addr, HashSet[|flow|]))
+                |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
         member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
-            x.AddButton(btnType, btnName,  defaultTaskDevParaIO(), Addresses(inAddress ,outAddress), flow)       
+            x.AddButton(btnType, btnName,  defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)       
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParaIO:TaskDevParaIO, addr:Addresses, flow:Flow option) =
+        member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParaIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
             match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
             | None -> 
-                      let flows = if flow.IsSome then  HashSet[flow.Value] else HashSet[]
-                      x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, taskDevParaIO, addr, flows))
-                      |> verifyM $"중복 LampDef [name:{lmpName}]"
+                let flows = HashSet[match flow with | Some f -> f | None -> ()]
+                x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, taskDevParaIO, addr, flows))
+                |> verifyM $"중복 LampDef [name:{lmpName}]"
         
         member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
-                x.AddLamp(lmpType, lmpName, defaultTaskDevParaIO(), Addresses(inAddress ,outAddress),  flow)       
+            x.AddLamp(lmpType, lmpName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress),  flow)       
 
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParaIO:TaskDevParaIO, addr:Addresses, flow:Flow) =
+        member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParaIO:TaskDevParamIO, addr:Addresses, flow:Flow) =
             checkSystem(x, flow, condiName)
 
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None -> 
-                      x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, taskDevParaIO,  addr, HashSet[|flow|]))
-                      |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
+                x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, taskDevParaIO,  addr, HashSet[|flow|]))
+                |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
 
         member x.AddCondtion(condiType:ConditionType, condiName: string, inAddress:string, outAddress:string, flow:Flow) =
-                x.AddCondtion(condiType, condiName, defaultTaskDevParaIO(), Addresses(inAddress ,outAddress), flow)       
+                x.AddCondtion(condiType, condiName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)       
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
@@ -157,37 +161,35 @@ module CoreExtensionModule =
                 match apiInfo.Operator with
                 | ModelingEdgeType.Interlock  -> 
                     match src.Name = apiInfo.Operand1, src.Name = apiInfo.Operand2 with
-                    |true, false -> Some apiInfo.Operand2
-                    |false, true -> Some apiInfo.Operand1
-                    |_ -> None
+                    | true, false -> Some apiInfo.Operand2
+                    | false, true -> Some apiInfo.Operand1
+                    | _ -> None
                 | ModelingEdgeType.ResetEdge -> 
                     match src.Name = apiInfo.Operand1 with
-                    |true -> Some apiInfo.Operand2
-                    |_ -> None
+                    | true -> Some apiInfo.Operand2
+                    | _ -> None
                 | ModelingEdgeType.RevResetEdge -> 
                     match src.Name = apiInfo.Operand2 with
-                    |true -> Some apiInfo.Operand1
-                    |_ -> None
+                    | true -> Some apiInfo.Operand1
+                    | _ -> None
                 | _ -> None
 
             let resets = x.ApiResetInfos.Select(getMutual).Where(fun w-> w.IsSome)
 
-            resets.Select(fun s->x.ApiItems.Find(fun f->f.UnqualifiedName = $"{x.Name}.{s.Value}"))
+            resets.Select(fun s->x.ApiItems.Find(fun f -> f.DequotedQualifiedName = $"{x.Name}.{s.Value}"))
 
         member x.LoadedSysExist (name:string) = x.LoadedSystems.Select(fun f -> f.Name).Contains(name)
         member x.GetLoadedSys   (loadSys:DsSystem) = x.LoadedSystems.TryFind(fun f-> f.ReferenceSystem = loadSys)
          
     let getType (xs:TaskDevPara seq) = 
-        if xs.Where(fun f->f.DevType.IsSome).Any() 
-                then 
-                    let types = xs.Choose(fun f->f.DevType)
-                    if types.Distinct().Count() > 1
-                    then 
-                        failwithlog $"dataType miss matching error {String.Join(',', types.Select(fun f->f.ToText()))}"
-                    else
-                        types.First()
-
-                else DuBOOL
+        let types = xs.Choose(fun f -> f.DevType).Distinct().ToArray()
+        if types.Any() then 
+            if types.Length > 1 then 
+                failwithlog $"dataType miss matching error {String.Join(',', types.Select(fun f -> f.ToText()))}"
+            else
+                types.First()
+        else
+            DuBOOL
 
 
     type TaskDev with
@@ -196,92 +198,86 @@ module CoreExtensionModule =
 
 
         member x.GetInParam(jobFqdn:string) =
-                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.InPara with
-                        | Some v -> v
-                        | None -> defaultTaskDevPara() 
-        member x.GetInParam(job:Job) = x.GetInParam (job.UnqualifiedName)
+            match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
+            | Some v -> v
+            | None -> defaultTaskDevPara() 
+        member x.GetInParam(job:Job) = x.GetInParam (job.DequotedQualifiedName)
          
         member x.GetOutParam(jobFqdn:string) = 
-                        match x.DicTaskTaskDevParaIO[jobFqdn].TaskDevParaIO.OutPara with
-                        | Some v -> v
-                        | None -> defaultTaskDevPara() 
-        member x.GetOutParam(job:Job) = x.GetOutParam (job.UnqualifiedName)
+            match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.OutParam with
+            | Some v -> v
+            | None -> defaultTaskDevPara() 
+        member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
          
-        member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParaIO[jobFqdn]
-        member x.GetApiPara(job:Job) = x.GetApiPara(job.UnqualifiedName)
+        member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParamIO[jobFqdn]
+        member x.GetApiPara(job:Job) = x.GetApiPara(job.DequotedQualifiedName)
 
         member x.GetApiItem(jobFqdn:string) = x.GetApiPara(jobFqdn).ApiItem
-        member x.GetApiItem(job:Job) = x.GetApiPara(job.UnqualifiedName).ApiItem
+        member x.GetApiItem(job:Job) = x.GetApiPara(job.DequotedQualifiedName).ApiItem
 
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member x.GetApiStgName(jobFqdn:string) = $"{x.DeviceName}_{x.GetApiItem(jobFqdn).Name}"
-        member x.GetApiStgName(job:Job) =  x.GetApiStgName(job.UnqualifiedName)
+        member x.GetApiStgName(job:Job) =  x.GetApiStgName(job.DequotedQualifiedName)
 
         member x.DeviceApiPureName(jobFqdn:string) = $"{x.DeviceName}.{x.GetApiItem(jobFqdn).PureName}"  //STN2.Device1."ROTATE(IN300_OUT400)"  파레메터 없는 ROTATE 순수이름만
-        member x.DeviceApiPureName(job:Job) = x.DeviceApiPureName(job.UnqualifiedName)
+        member x.DeviceApiPureName(job:Job) = x.DeviceApiPureName(job.DequotedQualifiedName)
 
         member x.DeviceApiToDsText(jobFqdn:string)= $"{x.DeviceName.QuoteOnDemand()}.{x.GetApiItem(jobFqdn).Name.QuoteOnDemand()}"
-        member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.UnqualifiedName)
+        member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.DequotedQualifiedName)
 
 
-        member x.AddOrUpdateApiTaskDevPara(jobFqdn:string, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
-            if x.ApiItems.any(fun f->f.PureName <> api.PureName)
-            then 
+        member x.AddOrUpdateApiTaskDevPara(jobFqdn:string, api:ApiItem, taskDevParaIO:TaskDevParamIO) = 
+            if x.ApiItems.any(fun f->f.PureName <> api.PureName) then 
                 failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
 
-            if not (x.DicTaskTaskDevParaIO.ContainsKey   jobFqdn)
-            then 
-                x.DicTaskTaskDevParaIO.Add(jobFqdn, {TaskDevParaIO = taskDevParaIO; ApiItem = api})
+            if not (x.DicTaskTaskDevParamIO.ContainsKey   jobFqdn) then 
+                x.DicTaskTaskDevParamIO.Add(jobFqdn, {TaskDevParamIO = taskDevParaIO; ApiItem = api})
             else
                 ()
-                //failWithLog $"중복된 TaskDevParaIO {jobFqdn} {x.QualifiedName}"
+                //failWithLog $"중복된 TaskDevParamIO {jobFqdn} {x.QualifiedName}"
 
-        member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParaIO) = 
-               x.AddOrUpdateApiTaskDevPara(job.UnqualifiedName, api, taskDevParaIO)
+        member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParaIO:TaskDevParamIO) =
+            x.AddOrUpdateApiTaskDevPara(job.DequotedQualifiedName, api, taskDevParaIO)
    
-        member x.IsInAddressEmpty = x.InAddress = TextAddrEmpty
-        member x.IsInAddressSkipOrEmpty = x.InAddress = TextAddrEmpty || x.InAddress = TextSkip
-        member x.IsOutAddressEmpty = x.OutAddress = TextAddrEmpty
-        member x.IsOutAddressSkipOrEmpty = x.OutAddress = TextAddrEmpty || x.OutAddress = TextSkip
-        member x.IsAddressEmpty = x.IsInAddressEmpty  && x.IsOutAddressEmpty
-        member x.IsAddressSkipOrEmpty = x.IsOutAddressSkipOrEmpty  && x.IsInAddressSkipOrEmpty
-        member x.IsMaunualAddressEmpty = x.MaunualAddress = TextAddrEmpty
+        member x.IsInAddressEmpty            = x.InAddress  = TextAddrEmpty
+        member x.IsInAddressSkipOrEmpty      = x.InAddress  = TextAddrEmpty || x.InAddress = TextSkip
+        member x.IsOutAddressEmpty           = x.OutAddress = TextAddrEmpty
+        member x.IsOutAddressSkipOrEmpty     = x.OutAddress = TextAddrEmpty || x.OutAddress = TextSkip
+        member x.IsAddressEmpty              = x.IsInAddressEmpty  && x.IsOutAddressEmpty
+        member x.IsAddressSkipOrEmpty        = x.IsOutAddressSkipOrEmpty  && x.IsInAddressSkipOrEmpty
+        member x.IsMaunualAddressEmpty       = x.MaunualAddress = TextAddrEmpty
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
 
         member x.SetInSymbol(symName:string option) = 
-            if symName.IsSome
-            then
-                x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
-                    if kv.TaskDevParaIO.InPara.IsSome
-                    then 
-                        kv.TaskDevParaIO.InPara.Value.DevName <- symName
-                    else 
-                        kv.TaskDevParaIO.InPara <- Some(TaskDevPara(symName, None, None, None))
-                )
+            if symName.IsSome then
+                for param in x.DicTaskTaskDevParamIO.Values do
+                    match param.TaskDevParamIO.InParam with
+                    | Some inParam ->
+                        inParam.DevName <- symName
+                    | None ->
+                        param.TaskDevParamIO.InParam <- Some(TaskDevPara(symName, None, None, None))
           
         member x.SetOutSymbol(symName:string option) = 
-            if symName.IsSome
-            then
-                x.DicTaskTaskDevParaIO.Values |> Seq.iter(fun kv -> 
-                    if kv.TaskDevParaIO.OutPara.IsSome
-                    then 
-                        kv.TaskDevParaIO.OutPara.Value.DevName <- symName
-                    else 
-                        kv.TaskDevParaIO.OutPara <- Some(TaskDevPara(symName, None, None, None))
-                )
+            if symName.IsSome then
+                for param in x.DicTaskTaskDevParamIO.Values do
+                    match param.TaskDevParamIO.OutParam with
+                    | Some outParam ->
+                        outParam.DevName <- symName
+                    | None ->
+                        param.TaskDevParamIO.OutParam <- Some(TaskDevPara(symName, None, None, None))
           
 
-        member x.InDataType = getType (x.InParams)
-        member x.OutDataType  =getType (x.OutParams)
+        member x.InDataType  = getType (x.InParams)
+        member x.OutDataType = getType (x.OutParams)
         
     type Job with
 
         member x.ApiDefs = x.TaskDefs |> Seq.collect(fun t->t.ApiItems)
         //member x.OnDelayTime =  //test ahn
-        //    let times = x.TaskDefs.Choose(fun t-> t.InParams[x.UnqualifiedName].Time)
+        //    let times = x.TaskDefs.Choose(fun t-> t.InParams[x.DequotedQualifiedName].Time)
         //    if times.GroupBy(fun t->t).Count() > 1
         //    then 
-        //        let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.UnqualifiedName].Time}"))
+        //        let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.DequotedQualifiedName].Time}"))
         //        failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
                 
         //    if times.any() then times.First() |> Some else None
@@ -303,29 +299,28 @@ module CoreExtensionModule =
             |> Seq.choose id
 
     let getTime  (time:float option, nameFqdn:string)= 
-        let maxShortSpeedSec = (TimerModule.MinTickInterval|>float)/1000.0
+        let maxShortSpeedSec = (float TimerModule.MinTickInterval) / 1000.0
         let v = 
-            if time.IsNone then None
-            else 
-                if RuntimeDS.Package.IsPackageSIM() 
-                then
+            time |> bind(fun t -> 
+                if RuntimeDS.Package.IsPackageSIM() then
                     match RuntimeDS.TimeSimutionMode  with
                     | TimeSimutionMode.TimeNone -> None
-                    | TimeSimutionMode.TimeX1 ->   Some (time.Value * 1.0/1.0 )
-                    | TimeSimutionMode.TimeX2 ->   Some (time.Value * 1.0/2.0 )
-                    | TimeSimutionMode.TimeX4 ->   Some (time.Value * 1.0/4.0 )
-                    | TimeSimutionMode.TimeX8 ->   Some (time.Value * 1.0/8.0 )
-                    | TimeSimutionMode.TimeX16 ->  Some (time.Value * 1.0/16.0 ) 
-                    | TimeSimutionMode.TimeX100 -> Some (time.Value * 1.0/100.0 ) 
-                    | TimeSimutionMode.TimeX0_1 -> Some (time.Value * 1.0/0.1 )
-                    | TimeSimutionMode.TimeX0_5 -> Some (time.Value * 1.0/0.5 )
+                    | TimeSimutionMode.TimeX1 ->   Some (t * 1.0/1.0 )
+                    | TimeSimutionMode.TimeX2 ->   Some (t * 1.0/2.0 )
+                    | TimeSimutionMode.TimeX4 ->   Some (t * 1.0/4.0 )
+                    | TimeSimutionMode.TimeX8 ->   Some (t * 1.0/8.0 )
+                    | TimeSimutionMode.TimeX16 ->  Some (t * 1.0/16.0 ) 
+                    | TimeSimutionMode.TimeX100 -> Some (t * 1.0/100.0 ) 
+                    | TimeSimutionMode.TimeX0_1 -> Some (t * 1.0/0.1 )
+                    | TimeSimutionMode.TimeX0_5 -> Some (t * 1.0/0.5 )
                 else 
-                    time
+                    Some t)
 
-        if v.IsSome && v.Value < maxShortSpeedSec 
-        then failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.TimeSimutionMode}) {nameFqdn}
+        if v.IsSome && v.Value < maxShortSpeedSec then
+            failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.TimeSimutionMode}) {nameFqdn}
                         \r\n[최소동작시간 : {maxShortSpeedSec}, 배속반영 동작 시간 : {v.Value}]"
-        else v 
+        else
+            v 
                         
     type Real with
 
@@ -336,9 +331,10 @@ module CoreExtensionModule =
         member x.TimeAvgExist = x.TimeAvg.IsSome && x.TimeAvg.Value <> 0.0 
 
         member x.TimeAvgMsec = 
-                if x.TimeAvg.IsNone
-                then failwithf $"Error  TimeAvgMsec ({x.QualifiedName})"
-                else Convert.ToUInt32( x.TimeAvg.Value *1000.0 )
+            if x.TimeAvg.IsNone then
+                failwithf $"Error  TimeAvgMsec ({x.QualifiedName})"
+            else
+                Convert.ToUInt32( x.TimeAvg.Value *1000.0 )
 
         member x.TimeStd = x.DsTime.STD
        
@@ -355,18 +351,17 @@ module CoreExtensionModule =
 
     let getCallName (x:Call) = 
         match x.JobOrFunc with
-            | JobType job -> 
-                let jobFqdn = job.NameComponents
-                let callOwnerFlow =  x.Parent.GetFlow().Name
-                let jobOwnerFlow =  jobFqdn.Head()
-                if callOwnerFlow = jobOwnerFlow
-                then 
-                    jobFqdn.Skip(1).CombineQuoteOnDemand() 
-                else 
-                    jobFqdn.CombineQuoteOnDemand() //다른 Flow는 skip flow 없음
+        | JobType job -> 
+            let jobFqdn = job.NameComponents
+            let callOwnerFlow =  x.Parent.GetFlow().Name
+            let jobOwnerFlow =  jobFqdn.Head()
+            if callOwnerFlow = jobOwnerFlow then 
+                jobFqdn.Skip(1).CombineQuoteOnDemand() 
+            else 
+                jobFqdn.CombineQuoteOnDemand() //다른 Flow는 skip flow 없음
                              
-            | CommadFuncType func -> func.Name.QuoteOnDemand()+"()"
-            | OperatorFuncType func -> "#"+func.Name.QuoteOnDemand()
+        | CommadFuncType func -> func.Name.QuoteOnDemand()+"()"
+        | OperatorFuncType func -> "#"+func.Name.QuoteOnDemand()
 
 
     type Call with
@@ -374,35 +369,35 @@ module CoreExtensionModule =
         member x.NameForGraph = getCallName x 
 
         member x.System = x.Parent.GetSystem()
-        member x.ErrorSensorOn = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)|> snd
-        member x.ErrorSensorOff = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)|> snd
-        member x.ErrorOnTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeOver)|> snd
-        member x.ErrorOnTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeShortage)|> snd
-        member x.ErrorOffTimeOver = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeOver)|> snd
+        member x.ErrorSensorOn        = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)       |> snd
+        member x.ErrorSensorOff       = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)      |> snd
+        member x.ErrorOnTimeOver      = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeOver)     |> snd
+        member x.ErrorOnTimeShortage  = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeShortage) |> snd
+        member x.ErrorOffTimeOver     = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeOver)    |> snd
         member x.ErrorOffTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeShortage)|> snd
 
     let inValidTaskDevTags (x:DsSystem) = 
-                    x.Jobs |> Seq.collect(fun j-> j.TaskDefs)
-                           |> Seq.collect(fun d-> 
-                                  [  
-                                     yield d, "INPUT",d.InAddress
-                                     yield d, "OUTPUT",d.OutAddress
-                                  ])
-                           |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
-                           |> Seq.map(fun (d, inout, _) -> $"{d.QualifiedName} <-{inout}") 
+        x.Jobs
+        |> Seq.collect(fun j-> j.TaskDefs)
+        |> Seq.collect(fun d-> 
+                [  
+                    yield d, "INPUT",d.InAddress
+                    yield d, "OUTPUT",d.OutAddress
+                ])
+        |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
+        |> Seq.map(fun (d, inout, _) -> $"{d.QualifiedName} <-{inout}") 
 
     let inValidHwSystemTag (x:DsSystem) = 
-                    x.HwSystemDefs 
-                           |> Seq.collect(fun h -> 
-                                [
-                                    match h with
-                                    | :? ButtonDef
-                                    | :? ConditionDef -> yield h, "INPUT", h.InAddress
-                                    | :? LampDef      -> yield h, "OUTPUT", h.OutAddress
-                                    | _  -> failwith $"inValidHwSystemTag error {h.Name}"
-                                ])
-                           |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
-                           |> Seq.map(fun (h, inout, _) -> $"{h.Name} <-{inout}") 
+        x.HwSystemDefs 
+        |> Seq.collect(fun h -> 
+            [
+                match h with
+                | (:? ButtonDef | :? ConditionDef ) -> yield h, "INPUT", h.InAddress
+                | :? LampDef -> yield h, "OUTPUT", h.OutAddress
+                | _  -> failwith $"inValidHwSystemTag error {h.Name}"
+            ])
+        |> Seq.filter(fun (_, _, addr) -> addr = TextAddrEmpty) 
+        |> Seq.map(fun (h, inout, _) -> $"{h.Name} <-{inout}") 
 
 
 [<Extension>]
@@ -421,12 +416,12 @@ type SystemExt =
     static member ValidHwSystemTag(x:DsSystem) = x |> inValidHwSystemTag |> Seq.any
     [<Extension>]
     static member CheckValidInterfaceNchageParsingAddress(x:DsSystem) =
-                let inValidTaskDevTags = inValidTaskDevTags(x);
-                let inValidHwSystemTag = inValidHwSystemTag(x);
-                if inValidTaskDevTags.Any() then
-                     failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidTaskDevTags)}"
-                if inValidHwSystemTag.Any() then
-                    failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
+        let inValidTaskDevTags = inValidTaskDevTags(x);
+        let inValidHwSystemTag = inValidHwSystemTag(x);
+        if inValidTaskDevTags.Any() then
+            failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidTaskDevTags)}"
+        if inValidHwSystemTag.Any() then
+            failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
 
 
 

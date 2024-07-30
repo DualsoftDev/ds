@@ -35,15 +35,15 @@ module TagKindModule =
 
     let getTagKindFullSet(ft:bool) = //formatWithType
             EnumEx.Extract<SystemTag>(ft)
-                    @ EnumEx.Extract<FlowTag>(ft)
-                    @ EnumEx.Extract<VertexTag>(ft)
-                    @ EnumEx.Extract<ApiItemTag>(ft)
-                    @ EnumEx.Extract<TaskDevTag>(ft)
-                    @ EnumEx.Extract<HwSysTag>(ft)
-                    @ EnumEx.Extract<VariableTag>(ft)
+                @ EnumEx.Extract<FlowTag>(ft)
+                @ EnumEx.Extract<VertexTag>(ft)
+                @ EnumEx.Extract<ApiItemTag>(ft)
+                @ EnumEx.Extract<TaskDevTag>(ft)
+                @ EnumEx.Extract<HwSysTag>(ft)
+                @ EnumEx.Extract<VariableTag>(ft)
 
-    let allTagKindWithTypes =  getTagKindFullSet true
-    let allTagKinds =  getTagKindFullSet false |> dict
+    let allTagKindWithTypes = getTagKindFullSet true
+    let allTagKinds = getTagKindFullSet false |> dict
                 
     let getStorageName (fqdn:FqdnObject) (tagKind:TagKind) =
         $"{fqdn.QualifiedName}_{allTagKinds[tagKind]}" |> validStorageName
@@ -65,30 +65,32 @@ type TagKindExt =
     [<Extension>]
     static member GetTagInfo (x:IStorage) =
         match x.Target with
-        |Some obj ->
+        | Some obj ->
             match obj with
-            | :? DsSystem as s     ->  if DU.tryGetEnumValue<VariableTag>(x.TagKind).IsSome
-                                       then Some( EventVariable  (x, s, x.GetVariableTagKind().Value))
-                                       else Some( EventSystem  (x, s, x.GetSystemTagKind().Value))
+            | :? DsSystem as s ->
+                if DU.tryGetEnumValue<VariableTag>(x.TagKind).IsSome then
+                    Some( EventVariable(x, s, x.GetVariableTagKind().Value))
+                else
+                    Some( EventSystem(x, s, x.GetSystemTagKind().Value))
 
             | :? Flow as f         -> Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
             | :? Vertex as v       -> Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
             | :? ApiItem as a      -> Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-            | :? TaskDev  as d     -> Some( EventTaskDev  (x, d, x.GetTaskDevTagKind().Value))
+            | :? TaskDev  as d     -> Some( EventTaskDev (x, d, x.GetTaskDevTagKind().Value))
             | :? HwSystemDef as h  -> Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
-            |_ -> None
-        |None -> None
+            | _ -> None
+        | None -> None
    
     [<Extension>]
     static member GetStorage(x:TagDS) =
         match x with
-        |EventSystem    (i, _, _) -> i
-        |EventFlow      (i, _, _) -> i
-        |EventVertex    (i, _, _) -> i       
-        |EventApiItem   (i, _, _) -> i
-        |EventTaskDev   (i, _, _) -> i
-        |EventHwSys     (i, _, _) -> i
-        |EventVariable  (i, _, _) -> i
+        | EventSystem    (i, _, _) -> i
+        | EventFlow      (i, _, _) -> i
+        | EventVertex    (i, _, _) -> i       
+        | EventApiItem   (i, _, _) -> i
+        | EventTaskDev   (i, _, _) -> i
+        | EventHwSys     (i, _, _) -> i
+        | EventVariable  (i, _, _) -> i
 
 
 
@@ -96,24 +98,24 @@ type TagKindExt =
     [<Extension>]
     static member GetTarget(x:TagDS) =
         match x with
-        |EventSystem    ( _, target, _) -> target |> box
-        |EventFlow      ( _, target, _) -> target |> box
-        |EventVertex    ( _, target, _) -> target |> box
-        |EventApiItem   ( _, target, _) -> target |> box
-        |EventTaskDev   ( _, target, _) -> target |> box
-        |EventHwSys     ( _, target, _) -> target |> box
-        |EventVariable  ( _, target, _) -> target |> box
+        | EventSystem    ( _, target, _) -> target |> box
+        | EventFlow      ( _, target, _) -> target |> box
+        | EventVertex    ( _, target, _) -> target |> box
+        | EventApiItem   ( _, target, _) -> target |> box
+        | EventTaskDev   ( _, target, _) -> target |> box
+        | EventHwSys     ( _, target, _) -> target |> box
+        | EventVariable  ( _, target, _) -> target |> box
 
     [<Extension>]
     static member GetTagContents(x:TagDS) =
         match x with
-        |EventSystem    (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
-        |EventFlow      (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
-        |EventVertex    (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
-        |EventApiItem   (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
-        |EventTaskDev   (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
-        |EventHwSys     (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
-        |EventVariable  (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventSystem    (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventFlow      (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventVertex    (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventApiItem   (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventTaskDev   (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventHwSys     (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventVariable  (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
         
      
     [<Extension>]
@@ -124,47 +126,48 @@ type TagKindExt =
     [<Extension>]
     static member GetSystem(x:TagDS) =
         match x with
-        |EventSystem    (_, obj, _) -> obj
-        |EventFlow      (_, obj, _) -> obj.System
-        |EventVertex    (_, obj, _) -> obj.Parent.GetSystem()       
-        |EventApiItem   (_, obj, _) -> obj.ApiSystem           //active system이 아니고 loaded 시스템
-        |EventTaskDev   (_, obj, _) -> obj.ParnetSystem
-        |EventHwSys     (_, obj, _) -> obj.System
-        |EventVariable  (_, obj, _) -> obj
+        | EventSystem    (_, obj, _) -> obj
+        | EventFlow      (_, obj, _) -> obj.System
+        | EventVertex    (_, obj, _) -> obj.Parent.GetSystem()       
+        | EventApiItem   (_, obj, _) -> obj.ApiSystem           //active system이 아니고 loaded 시스템
+        | EventTaskDev   (_, obj, _) -> obj.ParnetSystem
+        | EventHwSys     (_, obj, _) -> obj.System
+        | EventVariable  (_, obj, _) -> obj
         
     [<Extension>]
     static member IsStatusTag(x:TagDS) =
         match x with
-        |EventVertex (_, _, kind) ->
+        | EventVertex (_, _, kind) ->
             kind.IsOneOf( VertexTag.ready
                         , VertexTag.going
                         , VertexTag.finish
                         , VertexTag.homing)
-        |_ -> false
+        | _ -> false
 
     [<Extension>]
     static member IsVertexOriginTag(x:TagDS) =
         match x with
-        |EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.origin
+        | EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.origin
                                                     )
-        |_->false
+        | _ -> false
 
 
     [<Extension>]
     static member IsVertexErrTag(x:TagDS) =
         match x with
-        |EventVertex (_, _, kind) ->  kind.IsOneOf(  
-                                                      VertexTag.errorTRx
-                                                    , VertexTag.rxErrOpen
-                                                    , VertexTag.rxErrShort
-                                                    , VertexTag.workErrOriginGoing
+        | EventVertex (_, _, kind) ->
+            kind.IsOneOf(  
+                  VertexTag.errorTRx
+                , VertexTag.rxErrOpen
+                , VertexTag.rxErrShort
+                , VertexTag.workErrOriginGoing
                                                     
-                                                    , VertexTag.txErrOnTimeOver
-                                                    , VertexTag.txErrOnTimeShortage  
-                                                    , VertexTag.txErrOffTimeOver
-                                                    , VertexTag.txErrOffTimeShortage
-                                                    )
-        |_->false
+                , VertexTag.txErrOnTimeOver
+                , VertexTag.txErrOnTimeShortage  
+                , VertexTag.txErrOffTimeOver
+                , VertexTag.txErrOffTimeShortage
+                )
+        | _ -> false
 
     [<Extension>]
     static member IsStatusTag(x:IStorage) =
@@ -183,38 +186,43 @@ type TagKindExt =
         then true
         else 
             match x with
-            |EventSystem (_, _, kind) ->  kind.IsOneOf(  
-                                                          SystemTag.autoMonitor     
-                                                        , SystemTag.manualMonitor   
-                                                        , SystemTag.driveMonitor    
-                                                        , SystemTag.errorMonitor     
-                                                        , SystemTag.emergencyMonitor      
-                                                        , SystemTag.testMonitor     
-                                                        , SystemTag.readyMonitor    
-                                                        , SystemTag.pauseMonitor
-                                                        , SystemTag.clear_btn)
+            | EventSystem (_, _, kind) ->
+                kind.IsOneOf(  
+                      SystemTag.autoMonitor     
+                    , SystemTag.manualMonitor   
+                    , SystemTag.driveMonitor    
+                    , SystemTag.errorMonitor     
+                    , SystemTag.emergencyMonitor      
+                    , SystemTag.testMonitor     
+                    , SystemTag.readyMonitor    
+                    , SystemTag.pauseMonitor
+                    , SystemTag.clear_btn)
 
-            |EventFlow   (_, _, kind) ->  kind.IsOneOf(  FlowTag.drive_state
-                                                        , FlowTag.pause_state
-                                                        , FlowTag.flowStopError
-                                                        )
+            | EventFlow (_, _, kind) ->
+                kind.IsOneOf(
+                      FlowTag.drive_state
+                    , FlowTag.pause_state
+                    , FlowTag.flowStopError
+                    )
 
-            |EventVertex (_, _, kind) ->  kind.IsOneOf(
-                                            VertexTag.ready,
-                                            VertexTag.going ,       
-                                            VertexTag.finish,        
-                                            VertexTag.homing,       
-                                            VertexTag.pause       
-                                            )
+            | EventVertex (_, _, kind) ->
+                kind.IsOneOf(
+                      VertexTag.ready
+                    , VertexTag.going
+                    , VertexTag.finish
+                    , VertexTag.homing
+                    , VertexTag.pause       
+                    )
                                           
-            |EventApiItem  (_, _, _) -> false
+            | EventApiItem (_, _, _) -> false
 
-            |EventTaskDev (_, _, kind) ->  kind.IsOneOf(
-                                            TaskDevTag.planStart,
-                                            TaskDevTag.planEnd,
-                                            TaskDevTag.actionIn,
-                                            TaskDevTag.actionOut,
-                                            TaskDevTag.actionMemory
-                                            )
-            |EventHwSys  (_, _, _) -> false
-            |EventVariable  (_, _, _) -> true
+            | EventTaskDev (_, _, kind) ->
+                kind.IsOneOf(
+                      TaskDevTag.planStart
+                    , TaskDevTag.planEnd
+                    , TaskDevTag.actionIn
+                    , TaskDevTag.actionOut
+                    , TaskDevTag.actionMemory
+                    )
+            | EventHwSys (_, _, _) -> false
+            | EventVariable (_, _, _) -> true

@@ -18,7 +18,7 @@ type Job with
                     let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
                     let sets =
                         if RuntimeDS.Package.IsPackageSIM() then _off
-                        else td.GetPO(j).Expr
+                        else td.GetPlanOutput(j).Expr
 
                     let outParam = td.GetOutParam(j)
                   

@@ -7,7 +7,7 @@ open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 
-type VertexManager with
+type VertexTagManager with
     ///Status
     member v.S1_RGFH() =
             let r = v.R <==  (( (!@) v.ST.Expr                       <&&> (!@) v.ET.Expr) //    R      x   -   x
@@ -25,7 +25,7 @@ type VertexManager with
 
     ///Monitor
     member v.M1_OriginMonitor() =
-        let v = v :?> VertexMReal
+        let v = v :?> RealVertexTagManager
 
         let ons       = getOriginIOExprs     (v, InitialType.On)
 

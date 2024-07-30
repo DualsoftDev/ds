@@ -18,35 +18,32 @@ module internal ModelFindModule =
 
 
 
+    // [NOTE] GraphVertex
     let tryFindSystemInner (system:DsSystem) (xs:string list) : IVertex option =
-        match xs with
-        | [] -> Some system
-        | f::xs1 when system.Flows.Any(nameEq f) ->
-            let flow = system.Flows.First(nameEq f)
-            match xs1 with
-            | [] -> Some flow
-            | r::xs2 ->   
-                match flow.Graph.FindVertex(r) |> box with
-                | :? Real as real->
-                    match xs2 with
-                    | [] -> Some real
-                    | _ ->
-                        option {
-                            let! v = real.Graph.TryFindVertex(xs2.Combine())
-                            return box v :?> IVertex
-                        }
-                | _ ->    
-                    match flow.Graph.FindVertex(xs1.CombineDequoteOnDemand()) |> box with
-                    | :? Call as call-> Some call
-                    | _ -> None
-
-        | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
-            let device = system.LoadedSystems.Find(nameEq dev)
+        let getOuter() =
             match xs with
-            | [] -> Some device
+            | dev::xs when system.LoadedSystems.Any(nameEq dev) ->
+                let device = system.LoadedSystems.Find(nameEq dev)
+                assert(device.ReferenceSystem <> system)
+                match xs with
+                | [] -> Some (device :> IVertex)
+                | _ -> device.ReferenceSystem.TryFindFqdnVertex(xs.JoinWith(".")).Cast<IVertex>()
             | _ -> None
-        | [x] -> failwithlog $"tryFindSystemInner error : single fqdn {x}"
-        | _ -> failwithlog "ERROR"
+
+
+        let fqdn = (system.Name :: xs).JoinWith(".")
+        let inner = system.TryFindFqdnVertex(fqdn).Cast<IVertex>()
+        match inner with
+        | Some _i ->
+#if DEBUG
+            let outer = getOuter()
+            assert(outer.IsNone)
+            inner
+#endif
+        | None ->
+            getOuter()
+
+
 
     let tryFindGraphVertex(system:DsSystem) (Fqdn(fqdn)) : IVertex option =
         //let inline nameComponentsEq xs ys = (^T: (member NameComponents: Fqdn) xs) = (^T: (member NameComponents: Fqdn) ys)
@@ -65,8 +62,8 @@ module internal ModelFindModule =
         }
 
     let tryFindFlow(system:DsSystem) (name:string)    = system.Flows.TryFind(nameEq name)
-    let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(fun j->j.UnqualifiedName = name)
-    let tryFindFunc (system:DsSystem) name            = system.Functions.TryFind(fun s->s.Name = name)
+    let tryFindJob (system:DsSystem) name             = system.Jobs.TryFind(fun j->j.DequotedQualifiedName = name)
+    let tryFindFunc (system:DsSystem) name            = system.Functions.TryFind(nameEq name)
     let tryFindExternalSystem (system:DsSystem) name  = system.ExternalSystems.TryFind(nameEq name)
     let tryFindLoadedSystem (system:DsSystem) name    = system.LoadedSystems.TryFind(fun s->s.LoadedName = name)
     let tryFindReferenceSystem (system:DsSystem) name = system.LoadedSystems.Select(fun s->s.ReferenceSystem).TryFind(nameEq name)
@@ -83,8 +80,10 @@ module internal ModelFindModule =
             let targetSystem = loadedSystem.ReferenceSystem
             system.ApiUsages.TryFind(nameComponentsEq [targetSystem.Name; targetApiName])
         | None ->
-            if allowAutoGenDevice then None
-            else  failwithf $"해당 디바이스를 Loading 해야 합니다. \n [device file= path] {targetSystemName}"
+            if allowAutoGenDevice then
+                None
+            else
+                failwithf $"해당 디바이스를 Loading 해야 합니다.\n [device file= path] {targetSystemName}"
 
     //jobs 에 등록 안되있으면 Real로 처리 한다.
     let tryFindCall (system:DsSystem) (Fqdn(callPath)) : Vertex option=
@@ -92,14 +91,12 @@ module internal ModelFindModule =
         //let func = tryFindFunc system (callPath.Last())
         //if job.IsSome  || func.IsSome
         //then
-        if callPath.Length = 1 then None
+        if callPath.Length = 1 then
+            None
         else 
             match tryFindGraphVertex system callPath with
-                 |Some(v) ->
-                    match v with
-                    | :? Call as c-> Some(c)
-                    | _ -> None
-                 |_ -> None
+            | Some(:? Call as c) -> Some(c)
+            | _ -> None
         //else None
 
     //let tryFindReal system flowName name =
@@ -112,13 +109,13 @@ module internal ModelFindModule =
         | f::_ when system.Flows.Any(nameEq f) ->
             let flow = tryFindFlow system f |> Option.get
             match flow.Graph.TryFindVertex(path.Last()) with
-            |Some(v) -> if v:? Real then Some(v :?> Real) else None
-            |None -> None
+            | Some(:? Real as r) -> Some r
+            | _ -> None
         | s::xs2 when system.Name = s ->
             let real = tryFindSystemInner system xs2
             match real with
-            |Some(v) -> if v:? Real then Some(v :?> Real) else None
-            |None -> None
+            | Some(:? Real as r) -> Some r
+            | _ -> None
         | _ -> None
 
     let tryFindAliasTarget (flow:Flow) aliasMnemonic =
@@ -143,34 +140,38 @@ module internal ModelFindModule =
 
     
     let getVerticesOfSystem(system:DsSystem) =
-        let realVertices = system.Flows.SelectMany(fun f ->
-                                    f.Graph.Vertices.OfType<Real>()
-                                        .SelectMany(fun r -> r.Graph.Vertices.Cast<Vertex>()))
-
-        let flowVertices = system.Flows.SelectMany(fun f -> f.Graph.Vertices.Cast<Vertex>())
-        realVertices @ flowVertices
-
-
+        [|
+            for f in system.Flows do
+            for v in f.Graph.Vertices do
+                yield v
+                match v with
+                | :? Real as r -> yield! r.Graph.Vertices.Cast<Vertex>()
+                | _ -> ()
+        |]
 
     let getDevicesOfFlow(flow:Flow) =
-        let devNames = getVerticesOfFlow(flow).OfType<Call>()   
-                             .SelectMany(fun c->c.TargetJob.TaskDefs.Select(fun d->d.DeviceName))
+        let devNames =
+            getVerticesOfFlow(flow)
+                .OfType<Call>()   
+                .SelectMany(fun c->c.TargetJob.TaskDefs.Select(fun d->d.DeviceName))
 
         flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
 
-    let getVerticesOfJobCalls x   =  
-        getVerticesOfSystem(x).OfType<Call>()
-                              .Where(fun c->c.IsJob)    
+    let getVerticesOfJobCalls x =  
+        getVerticesOfSystem(x)
+            .OfType<Call>()
+            .Where(fun c->c.IsJob)    
 
     let getDistinctApis(x:DsSystem) =
-        getVerticesOfJobCalls(x).SelectMany(fun c-> c.TargetJob.ApiDefs)
-                                .Distinct()
-
-      
+        getVerticesOfJobCalls(x)
+            .SelectMany(fun c-> c.TargetJob.ApiDefs)
+            .Distinct()
 
     let getVertexSharedReal(real:Real) =
         let vs = real.Parent.GetSystem() |> getVerticesOfSystem
-        vs.OfType<Alias>().Where(fun a->a.TargetWrapper.RealTarget().IsSome && a.TargetWrapper.RealTarget().Value = real)
+        vs
+            .OfType<Alias>()
+            .Where(fun a->a.TargetWrapper.RealTarget().IsSome && a.TargetWrapper.RealTarget().Value = real)
 
     let getVertexSharedCall(call:Call) =
         let sharedAlias =
@@ -189,15 +190,15 @@ module internal ModelFindModule =
 
     let getVerticesHasJob(x:DsSystem)=
             getVerticesOfSystem(x)
-                .Choose(fun v -> v|> getPureCall)
+                .Choose(fun v -> v|> tryGetPureCall)
                 .Where(fun v -> v.IsJob)
 
                 
     let getVerticesOfAliasNCalls x = 
-        let vs =   getVerticesOfSystem(x)
+        let vs = getVerticesOfSystem(x)
         let calls = vs.OfType<Call>().Cast<Vertex>()
         let aliases = vs.OfType<Alias>().Cast<Vertex>()
-        (calls@aliases)
+        (calls @ aliases)
 
     let getVerticesOfCoins x = 
         getVerticesOfAliasNCalls(x)
@@ -218,37 +219,42 @@ module internal ModelFindModule =
 
     let updateDeviceSkipAddress (x: DsSystem) =
         let calls = x|>getVerticesHasJob
-        calls.SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c.TargetJob))
-             |> Seq.iter(fun (dev, job) -> 
+        calls
+            |> collect(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c.TargetJob))
+            |> iter(fun (dev, job) -> 
                 let inSkip, outSkip = getSkipInfo(dev, job)
-                if inSkip then dev.InAddress <- TextSkip
-                if outSkip then dev.OutAddress <- TextSkip
-            )
+                if inSkip then
+                    dev.InAddress <- TextSkip
+                if outSkip then
+                    dev.OutAddress <- TextSkip )
 
     let getTaskDevs(x: DsSystem, onlyCoin:bool) =
         let calls = getVerticesHasJob(x).DistinctBy(fun v-> v.TargetJob)
-        let tds = calls
-                    .Where(fun c-> not(onlyCoin) || not(c.IsFlowCall))
-                    .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
+        let tds =
+            calls
+                .Where(fun c-> not(onlyCoin) || not(c.IsFlowCall))
+                .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
         tds 
         |> Seq.sortBy (fun (td, c) -> 
             (td.DeviceName, td.GetApiItem(c.TargetJob).Name))
 
             
     let getTaskDevCalls(x:DsSystem) =
-        let taskDevs =  getTaskDevs(x, false)
-                            .DistinctBy(fun (td, c) -> td, c.TargetJob)
+        let taskDevs =
+            getTaskDevs(x, false)
+                .DistinctBy(fun (td, c) -> td, c.TargetJob)
+
         let callAll = getVerticesOfAliasNCalls(x)
         taskDevs
-        |> Seq.map(fun (td, call)->
+        |> Seq.map(fun (td, call) ->
             td, 
                 callAll.Filter(fun f->
                 match f with
                 | :? Call as c when c.IsJob -> c.TargetJob = call.TargetJob 
                 | :? Alias as al-> 
-                        match al.TargetWrapper.CallTarget() with
-                        | Some c when c.IsJob -> c.TargetJob = call.TargetJob
-                        |_ -> false
+                    match al.TargetWrapper.CallTarget() with
+                    | Some c when c.IsJob -> c.TargetJob = call.TargetJob
+                    |_ -> false
                 |_ -> false
             )
         )
@@ -282,7 +288,7 @@ type FindExtension =
     [<Extension>] static member GetSharedCall(v:Vertex) = v |> getSharedCall
 
     [<Extension>] static member GetPureReal  (v:Vertex) = v |> getPureReal
-    [<Extension>] static member GetPureCall  (v:Vertex) = v |> getPureCall
+    [<Extension>] static member GetPureCall  (v:Vertex) = v |> tryGetPureCall
     [<Extension>] static member GetPure (x:Vertex) = getPure x
       
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
@@ -310,15 +316,17 @@ type FindExtension =
 
     [<Extension>] static member GetVerticesHasJob(x:DsSystem) =   getVerticesHasJob x
        
-    [<Extension>] static member GetVerticesHasJobOfFlow(x:Flow) =  
-                    getVerticesOfFlow(x)
-                        .Choose(fun v -> v.GetPureCall())
-                        .Where(fun v -> v.IsJob)
+    [<Extension>]
+        static member GetVerticesHasJobOfFlow(x:Flow) =  
+            getVerticesOfFlow(x)
+                .Choose(fun v -> v.GetPureCall())
+                .Where(fun v -> v.IsJob)
 
-    [<Extension>] static member GetVerticesHasJobInReal(x:DsSystem) =  
-                    x.GetVerticesOfCoins()
-                        .Choose(fun v -> v.GetPureCall())
-                        .Where(fun v -> v.IsJob)
+    [<Extension>]
+        static member GetVerticesHasJobInReal(x:DsSystem) =  
+            x.GetVerticesOfCoins()
+                .Choose(fun v -> v.GetPureCall())
+                .Where(fun v -> v.IsJob)
 
 
     [<Extension>] static member GetTaskDevCalls(x:DsSystem) =   getTaskDevCalls x 
@@ -329,47 +337,56 @@ type FindExtension =
 
     [<Extension>] static member GetSkipInfo(dev:TaskDev, job:Job) =  getSkipInfo (dev, job)
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
-    [<Extension>] static member GetAlarmCalls(x:DsSystem) = 
-                                        x.GetVerticesOfJobCalls()
-                                            //.Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)  
-                                            .Where(fun w->w.Parent.GetCore() :? Real)  
-                                            .OrderBy(fun c->c.Name)
+    [<Extension>]
+        static member GetAlarmCalls(x:DsSystem) = 
+            x.GetVerticesOfJobCalls()
+                //.Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)  
+                .Where(fun w->w.Parent.GetCore() :? Real)  
+                .OrderBy(fun c->c.Name)
 
-    [<Extension>] static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) = 
-                        xs.Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외
-                          .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
+    [<Extension>]
+        static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) = 
+            xs
+                .Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외
+                .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
 
 
     [<Extension>] static member GetTaskDevsCoin(x:DsSystem) = getTaskDevs(x, true)
 
     [<Extension>] static member GetTaskDevsCall(x:DsSystem) = getTaskDevs(x, false)
                   
-    [<Extension>] static member GetDevicesHasOutput(x:DsSystem) = 
-                                //출력있는건 무조건  Coin
-                    x.GetTaskDevsCoin().DistinctBy(fun (td, c) -> (td, c.TargetJob))
-                        .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
+    [<Extension>]
+    static member GetDevicesHasOutput(x:DsSystem) = 
+        //출력있는건 무조건  Coin
+        x.GetTaskDevsCoin()
+            .DistinctBy(fun (td, c) -> (td, c.TargetJob))
+            .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
 
   
-    [<Extension>] static member GetDevicesForHMI(x:DsSystem) = 
-                 //kia demo //test ahn
-                    x.GetTaskDevsCoin().DistinctBy(fun (td, _c) -> td)
-                        .Where(fun (dev, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
-                         |> Seq.filter(fun (dev,c) -> c.TargetJob.TaskDefs.First() = dev)
-                         //|> Seq.filter(fun (dev,_c) ->dev.OutTag.IsNonNull() && dev.OutTag.DataType = typedefof<bool>)
-                 //normal //test ahn
-                    //x.GetTaskDevsCoin()
-                    //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))
+    [<Extension>]
+        static member GetDevicesForHMI(x:DsSystem) = 
+            //kia demo //test ahn
+            x.GetTaskDevsCoin()
+                .DistinctBy(fun (td, _c) -> td)
+                .Where(fun (dev, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
+                .Where(fun (dev,c) -> c.TargetJob.TaskDefs.First() = dev)
+            //normal //test ahn
+            //x.GetTaskDevsCoin()
+            //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))
 
 
-    [<Extension>] static member GetTaskDevsSkipEmptyAddress(x:DsSystem) = 
-                    x.Jobs.SelectMany(fun j->j.TaskDefs.Select(fun td->(td, j))).DistinctBy(fun (td, _j) -> td)
-                          .Where(fun (td, _j) -> not(td.OutAddress = TextSkip && td.InAddress= TextSkip))
+    [<Extension>]
+        static member GetTaskDevsSkipEmptyAddress(x:DsSystem) = 
+            x.Jobs
+                .SelectMany(fun j->j.TaskDefs.Select(fun td->(td, j))).DistinctBy(fun (td, _j) -> td)
+                .Where(fun (td, _j) -> not(td.OutAddress = TextSkip && td.InAddress= TextSkip))
 
     [<Extension>]
     static member GetQualifiedName(vertex:IVertex) =
         match vertex with
         | :? IQualifiedNamed as q -> q.QualifiedName
         | _ -> failwithlog "ERROR"
+
     [<Extension>]
     static member GetParentName(vertex:IVertex) =
         match vertex with

@@ -84,7 +84,7 @@ module XgxGenerationTestModule =
 module XgxFixtures =
 
     let mutable runtimeTarget = WINDOWS
-    let sys = DsSystem("")
+    let sys = DsSystem.Create4Test("")
     let setRuntimeTarget(target:PlatformTarget) =
         let runtimeTargetBackup = target
         RuntimeDS.System <- sys
@@ -138,7 +138,7 @@ module XgxFixtures =
     type XgxTestBaseClass(xgx:PlatformTarget) =
         inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
 
-        let sys = DsSystem("testSys")
+        let sys = DsSystem.Create4Test("testSys")
         
         /// XML을 포맷팅하는 Node.js 스크립트를 실행한다.
         /// Exception 발생 할 경우 조치방법

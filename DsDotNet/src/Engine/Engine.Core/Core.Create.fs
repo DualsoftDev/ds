@@ -1,28 +1,23 @@
 // Copyright (c) Dualsoft  All Rights Reserved.
 namespace rec Engine.Core
 
-open System.Collections.Generic
 open System.Linq
-open System.Diagnostics
 open Dual.Common.Core.FS
-open System
-open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreCreateModule =
 
     let createDsSystem(systemName:string) =
-        let system = DsSystem(systemName)
+        let system = DsSystem.Create(systemName)
         system
 
-    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (taskDevParaIO:TaskDevParaIO): TaskDev =
+    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (taskDevParaIO:TaskDevParamIO): TaskDev =
         let apis = sys.ApiItems.Where(fun w -> w.Name = apiName)
 
         let api = 
             // Check if the API already exists
-            if apis.any()
-            then
-                if  apis.length() > 1 then
+            if apis.any() then
+                if apis.length() > 1 then
                     failwithf $"system {sys.Name} api {apiName} 중복 존재"
                 else
                     apis.First()
@@ -50,18 +45,18 @@ module CoreCreateModule =
                 let newApi = ApiItem.Create(apiName, sys, newReal, newReal)
                 sys.ApiItems.Add newApi |> ignore
              
-                if flow.Graph.Vertices.OfType<Real>().Count() > 1   //2개 부터 인터락 리셋처리
-                then
+                if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리                
                     // Iterate over reals up to newReal
-                    reals.TakeWhile(fun r -> r <> newReal)
-                         .Iter(fun r -> 
-                                let exAliasName = $"{r.Name}Alias_{newReal.Name}"
-                                let myAliasName = $"{newReal.Name}Alias_{r.Name}"
-                                let exAlias = Alias.Create(exAliasName, DuAliasTargetReal r, DuParentFlow flow, false)
-                                let myAlias = Alias.Create(myAliasName, DuAliasTargetReal newReal, DuParentFlow flow, false)
+                    reals
+                        .TakeWhile(fun r -> r <> newReal)
+                        .Iter(fun r -> 
+                            let exAliasName = $"{r.Name}Alias_{newReal.Name}"
+                            let myAliasName = $"{newReal.Name}Alias_{r.Name}"
+                            let exAlias = Alias.Create(exAliasName, DuAliasTargetReal r, DuParentFlow flow, false)
+                            let myAlias = Alias.Create(myAliasName, DuAliasTargetReal newReal, DuParentFlow flow, false)
                     
-                                // Create an edge between myAlias and exAlias
-                                flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
+                            // Create an edge between myAlias and exAlias
+                            flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
               
                     // Potentially update other ApiItems based on the new ApiItem  
                     //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
@@ -69,7 +64,7 @@ module CoreCreateModule =
                 
                 newApi
 
-        let apiPara  = {TaskDevParaIO =  taskDevParaIO; ApiItem = api}
+        let apiPara = {TaskDevParamIO =  taskDevParaIO; ApiItem = api}
         TaskDev(apiPara, jobName, devName, sys)
 
 
@@ -84,16 +79,17 @@ module CoreCreateModule =
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , "<|>", clearReal)) |> ignore
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , ">", clearReal)) |> ignore
 
-        let autoGenDevs = sys.LoadedSystems
-                             .Select(fun d->d.ReferenceSystem)
+        let autoGenDevs =
+            sys.LoadedSystems
+                .Select(fun d->d.ReferenceSystem)
 
-        autoGenDevs.Where(fun s->(s.GetVertices().OfType<Real>().Count()) = 1)
-                   .Iter(fun refSys-> updateSingleApi refSys (refSys.ApiItems.Head()))
+        autoGenDevs
+            .Where(fun s->(s.GetVertices().OfType<Real>().Count()) = 1)
+            .Iter(fun refSys-> updateSingleApi refSys (refSys.ApiItems.Head()))
 
     let loadedSystemsToDsFile(sys:DsSystem) =
 
         sys.LoadedSystems
-                   .Iter(fun refSys-> 
-                        let text = refSys.ReferenceSystem.ToDsText(false, true)
-                        fileWriteAllText (refSys.AbsoluteFilePath, text)
-                        )
+            .Iter(fun refSys-> 
+                let text = refSys.ReferenceSystem.ToDsText(false, true)
+                fileWriteAllText (refSys.AbsoluteFilePath, text) )

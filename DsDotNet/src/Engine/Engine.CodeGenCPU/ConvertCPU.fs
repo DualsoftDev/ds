@@ -37,7 +37,7 @@ module ConvertCPU =
     let private applyVertexSpec(v:Vertex) =
         [
             if IsSpec (v, RealInFlow, AliasFalse) then
-                let vr = v.TagManager :?> VertexMReal
+                let vr = v.TagManager :?> RealVertexTagManager
                 yield vr.M1_OriginMonitor()
                 yield vr.E4_RealErrorTotalMonitor() 
 
@@ -66,25 +66,25 @@ module ConvertCPU =
 
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
-                let vm = v.TagManager :?> VertexMReal
+                let vm = v.TagManager :?> RealVertexTagManager
                 yield vm.F3_RealEndInFlow()    
 
             if IsSpec (v, CallInFlow, AliasNotCare) then
-                let vc = v.TagManager :?> VertexMCall
+                let vc = v.TagManager :?> CallVertexTagManager
                 yield vc.F4_CallEndInFlow()
 
             if IsSpec (v, CallInReal , AliasFalse) then
-                let vc = v.TagManager :?> VertexMCall
+                let vc = v.TagManager :?> CallVertexTagManager
                 yield! vc.E2_CallErrorTXMonitor() 
                 yield! vc.E3_CallErrorRXMonitor() 
                 yield vc.E5_CallErrorTotalMonitor() 
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
-                let vc = v.TagManager :?> VertexMCall
+                let vc = v.TagManager :?> CallVertexTagManager
                 yield vc.C1_CallMemo() 
                 
             if IsSpec (v, VertexAll, AliasNotCare) then
-                let vm = v.TagManager :?> VertexManager
+                let vm = v.TagManager :?> VertexTagManager
                 yield vm.M2_PauseMonitor()
                 yield! vm.S1_RGFH()
 
@@ -127,36 +127,39 @@ module ConvertCPU =
             yield f.F4_FlowDriveCondition()
             
         ]
-        
-
-    let getMasterJob (calls : Vertex seq) = 
+  
+    let getTryMasterCall(calls : Vertex seq) = 
         let pureCalls = 
             calls.OfType<Call>()@calls.OfType<Alias>().Choose(fun a->a.GetPureCall())
         
         if pureCalls.Select(fun c->c.TargetJob).Distinct().Count() > 1
         then failwithlog $"Error : {getFuncName()} {pureCalls.Select(fun c->c.TargetJob).Distinct().Count()}"
 
-        pureCalls.First()  // 동일 job으로 선정해서 아무거나 가져옴
+          // 동일 job으로 선정해서 coin중에서 아무거나 가져옴
+        pureCalls.TryFind(fun f->not(f.IsFlowCall))
 
     let private applyTaskDev(s:DsSystem) = 
         [
             let devCallSet =  s.GetTaskDevCalls() //api는 job 기준으로 중복제거 
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
+                let masterCall= getTryMasterCall(calls)
                 yield! tm.TD1_PlanSend(s, calls)
                 yield! tm.TD2_PlanReceive(s)
                 yield! tm.TD3_PlanOutput(s)
                 
-                let masterCall= getMasterJob(calls)
-                yield! tm.A1_ApiSet(masterCall)
-                yield! tm.A2_ApiEnd()
+                if masterCall.IsSome then   
+                    yield! tm.A1_ApiSet(masterCall.Value)
+                    yield! tm.A2_ApiEnd()
 
             let devCallSet =  devCallSet.DistinctBy(fun (td, _c)-> td) //SensorLink는 taskDev 단위로 중복제거
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                let masterCall= getMasterJob(calls) 
-                yield! tm.A3_SensorLinking(masterCall)
-                yield! tm.A4_SensorLinked(masterCall)
+                let masterCall= getTryMasterCall(calls)
+                
+                if masterCall.IsSome then   
+                    yield! tm.A3_SensorLinking(masterCall.Value)
+                    yield! tm.A4_SensorLinked(masterCall.Value)
         ]
 
 
@@ -208,7 +211,7 @@ module ConvertCPU =
     let private emulationDevice(s:DsSystem) =
         [
             yield s.SetFlagForEmulation()
-            let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, _c) -> (td))//, c.TargetJob))
+            let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
             for td, call in devsCall do
                 if not(td.IsRootOnlyDevice)
                 then
@@ -230,9 +233,7 @@ module ConvertCPU =
 
         sys.GenerationOrigins()
 
-        if isActive //직접 제어하는 대상만 정렬(원위치) 정보 추출
-        then 
-           
+        if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출           
             sys.GenerationMemory()
             sys.GenerationIO()
 
@@ -241,7 +242,7 @@ module ConvertCPU =
                 setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
             | _->  
                 updateDuplicateAddress sys
-                checkNullAddress sys
+                CheckNullAddress sys
                 checkJobs sys
                 checkErrHWItem(sys)
                 checkErrApi(sys)
@@ -249,7 +250,7 @@ module ConvertCPU =
             checkMultiDevPair(sys)
 
         else 
-            checkErrRealResetExist(sys)
+            CheckRealReset(sys)
             updateRealParentExpr(sys)
             sys.GenerationRealActionMemory()
 

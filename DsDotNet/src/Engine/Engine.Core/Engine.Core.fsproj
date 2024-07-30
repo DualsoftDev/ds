@@ -80,7 +80,7 @@
 
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.14" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.16" />
         <PackageReference Include="System.Reactive" Version="6.0.0" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.9" />
         <PackageReference Include="Fody" Version="6.6.4">

@@ -15,16 +15,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.2.14" />
         <PackageReference Include="System.Reactive" Version="6.0.0" />
         <PackageReference Include="System.ServiceProcess.ServiceController" Version="7.0.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-        <ProjectReference Include="..\..\Engine\Engine.Parser\Engine.Parser.csproj" />
         <ProjectReference Include="..\IO.Core\IO.Core.fsproj" />
     </ItemGroup>
 

@@ -6,7 +6,7 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 
-type VertexManager with
+type VertexTagManager with
 
     member v.F1_RootStart() =
         let real = v.Vertex :?> Real
@@ -80,9 +80,8 @@ type VertexManager with
                     | DuAliasTargetCall c ->    getExpr c
             | _ ->
                 failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
-             //자신 flow의 원위치 일경우 한번더 연산  /// 초기 외부 신호 off 조건 트리거용 
-        //let trigger = (v.Flow.d_st.Expr <&&> v._off.Expr)
-        (sets (*<||> trigger*), v._off.Expr) --| (v.ET, getFuncName())
+
+        (sets, v._off.Expr) --| (v.ET, getFuncName())
 
     member v.F5_HomeCommand() =
         let real = v.Vertex :?> Real

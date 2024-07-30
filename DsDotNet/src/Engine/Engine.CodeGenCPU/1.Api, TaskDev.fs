@@ -12,46 +12,46 @@ type TaskDevManager with
         [
             let job = coins.OfType<Call>().First().TargetJob
             let coinMemos = coins.Select(fun s->s.VC.MM).ToOr()
-            yield (coinMemos, activeSys._off.Expr) --| (d.PS(job), getFuncName())
+            yield (coinMemos, activeSys._off.Expr) --| (d.PlanStart(job), getFuncName())
         ]
     
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         [
-            for kv in d.TaskDev.DicTaskTaskDevParaIO do
-                let apiPara = kv.Value
+            for kv in d.TaskDev.DicTaskTaskDevParamIO do
+                let apiParam = kv.Value
 
                 let sets = 
-                    let inPara = apiPara.TaskDevParaIO.InPara
-                    if inPara.IsSome && inPara.Value.Type <> DuBOOL
-                    then 
-                        apiPara.ApiItem.APIEND.Expr <&&> d.PS(apiPara).Expr
-                    else 
-                        apiPara.ApiItem.APIEND.Expr 
+                    let inParam = apiParam.TaskDevParamIO.InParam
 
-                yield (sets, activeSys._off.Expr) --| (d.PE(apiPara), getFuncName())
+                    if inParam.IsSome && inParam.Value.Type <> DuBOOL then 
+                        apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(apiParam).Expr
+                    else 
+                        apiParam.ApiItem.ApiItemEnd.Expr 
+
+                yield (sets, activeSys._off.Expr) --| (d.PlanEnd(apiParam), getFuncName())
         ]
 
     member d.TD3_PlanOutput(activeSys:DsSystem) =
         [
-            for kv in d.TaskDev.DicTaskTaskDevParaIO do
+            for kv in d.TaskDev.DicTaskTaskDevParamIO do
                 let apiPara = kv.Value
-                let sets =  d.PS(apiPara).Expr <&&> d.PE(apiPara).Expr
-                yield (sets, activeSys._off.Expr) --| (d.PO(apiPara), getFuncName())
+                let sets =  d.PlanStart(apiPara).Expr <&&> d.PlanEnd(apiPara).Expr
+                yield (sets, activeSys._off.Expr) --| (d.PlanOutput(apiPara), getFuncName())
         ]
 
     member d.A1_ApiSet(call:Call) :  CommentedStatement list=
         [
             let a = d.TaskDev.GetApiItem(call.TargetJob) 
-            let ps = d.TaskDev.GetPS(call.TargetJob)
+            let ps = d.TaskDev.GetPlanStart(call.TargetJob)
             yield! (ps.Expr , call.System) --^ (a.ApiItemSetPusle, getFuncName())
-            yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.APISET, getFuncName())
+            yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.ApiItemSet, getFuncName())
         ]
 
     member d.A2_ApiEnd() =
         [
             for a in d.TaskDev.ApiItems do
                 let sets = a.RxET.Expr
-                yield (sets, a.ApiSystem._off.Expr) --| (a.APIEND, getFuncName())
+                yield (sets, a.ApiSystem._off.Expr) --| (a.ApiItemEnd, getFuncName())
         ]
         
     member d.A3_SensorLinking(call:Call) =
@@ -63,7 +63,7 @@ type TaskDevManager with
                     let _off = d.TaskDev.ParnetSystem._off.Expr
                     let sets =
                             call.RealLinkExpr <&&>  
-                            (input <&&> !@a.APIEND.Expr <&&> !@a.SL2.Expr)
+                            (input <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
 
                     yield (sets, _off) --| (a.SL1, getFuncName())
         ]
@@ -78,8 +78,8 @@ type TaskDevManager with
                     let sets =
                         call.RealLinkExpr
                         <&&> 
-                            (   (  input <&&> a.APIEND.Expr)
-                        <||> (!@input <&&> !@a.APIEND.Expr)
+                            (   (  input <&&> a.ApiItemEnd.Expr)
+                        <||> (!@input <&&> !@a.ApiItemEnd.Expr)
                         <||> call.System._sim.Expr
                             )
 
@@ -87,5 +87,3 @@ type TaskDevManager with
         ]
     
 
-
-  

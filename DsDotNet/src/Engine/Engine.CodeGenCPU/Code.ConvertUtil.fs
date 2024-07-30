@@ -10,13 +10,13 @@ open System
 module CodeConvertUtil =
 
 
-    let private getOriginCalls(vr:VertexMReal, initialType:InitialType) =
+    let private getOriginCalls(vr:RealVertexTagManager, initialType:InitialType) =
         let origins = vr.OriginInfo.CallInitials
         origins
             |> filter (fun (_, init) -> init = initialType)
             |> map fst
 
-    let getOriginIOExprs(vr:VertexMReal, initialType:InitialType) =
+    let getOriginIOExprs(vr:RealVertexTagManager, initialType:InitialType) =
         getOriginCalls(vr, initialType).Select(fun d-> d.End)
 
  
@@ -41,7 +41,7 @@ module CodeConvertUtil =
 
                 if xs.Where(fun f -> f.GetPure() :? Real).Count() > 1
                 then 
-                    let error = String.Join(", ", (xs.Select(fun f->f.UnqualifiedName)))
+                    let error = String.Join(", ", (xs.Select(fun f->f.DequotedQualifiedName)))
                     failwithlog $"리셋은 하나의 작업에서 가능합니다. \r\n(복수 작업 : {error})"
 
                 xs.Select(fun f ->

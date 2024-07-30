@@ -147,7 +147,7 @@ module ScanDSImpl =
             dsCPU.MySystem.Flows.Iter(fun f ->
                     let reals = f.Graph.Vertices.OfType<Real>()
                     if reals.Any() then
-                        (reals.First().TagManager :?> VertexManager).SF.Value <- true;
+                        (reals.First().TagManager :?> VertexTagManager).SF.Value <- true;
             )
          
       

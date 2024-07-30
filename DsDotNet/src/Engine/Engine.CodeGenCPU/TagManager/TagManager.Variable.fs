@@ -1,10 +1,6 @@
 namespace Engine.CodeGenCPU
 
-open System.Diagnostics
 open Engine.Core
-open System.Linq
-open System
-open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module VariableManagerModule =
@@ -19,6 +15,7 @@ module VariableManagerModule =
         interface ITagManager with
             member _.Target = v
             member _.Storages = stg
-        member _.VariableTag   = variTag        
+
+        member _.VariableTag = variTag        
         member _.InitValue = v.Type.ToValue(v.InitValue)        
-        member _.VariableData   = v
+        member _.VariableData = v

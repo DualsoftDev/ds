@@ -45,9 +45,8 @@ module HmiPackageModule =
     with 
         member x.CollectTags () =
             seq {
-                    if x.ActionIN.IsSome then yield x.ActionIN.Value        
-                    if x.ActionOUT.IsSome then yield x.ActionOUT.Value
-                }
+                if x.ActionIN.IsSome then yield x.ActionIN.Value        
+                if x.ActionOUT.IsSome then yield x.ActionOUT.Value }
 
     ///수동 동작의 단위 jobA = { Dev1.ADV, Dev2.ADV, ... }
     ///하나의 명령으로 복수의 디바이스 행위  

@@ -23,7 +23,7 @@ module ImportIOTable =
                     match func with
                     | :? OperatorFunction as op when op.OperatorType = DuOPUnDefined ->
                             updateOperator op funcBodyText
-                            Some (op :> Func)
+                            Some (op :> DsFunc)
 
                     | :? CommandFunction as cmd when cmd.CommandType = DuCMDUnDefined ->
                         if funcBodyText = ""
@@ -32,7 +32,7 @@ module ImportIOTable =
                         else 
                             cmd.CommandType <- DuCMDCode
                             cmd.CommandCode <- funcBodyText
-                            Some (cmd :> Func)
+                            Some (cmd :> DsFunc)
 
                     | _ -> Some func
 

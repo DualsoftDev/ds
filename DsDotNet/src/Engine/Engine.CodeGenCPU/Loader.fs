@@ -81,9 +81,9 @@ module CpuLoader =
             sys.GetVertices().Iter(fun v->
                 match v with
                 | :? Real
-                    ->  v.TagManager <- VertexMReal(v)
+                    ->  v.TagManager <- RealVertexTagManager(v)
                 | (:? Call | :? Alias)
-                    -> v.TagManager <-  VertexMCall(v)
+                    -> v.TagManager <-  CallVertexTagManager(v)
                 | _ -> failwithlog (getFuncName()))
 
 

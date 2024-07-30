@@ -20,15 +20,13 @@ type DsSystem with
           
         [
             for call in calls do
-                if call.UsingTon
-                then 
+                if call.UsingTon then 
                     let sets = call.V.ST.Expr <||>  call.V.SF.Expr <&&> call.End
                     yield (sets) --@ (call.VC.TDON, call.PresetTime, getFuncName())
 
             for alias in aliasCalls do
                 let call = alias.V.Vertex.GetPureCall().Value
-                if call.UsingTon
-                then 
+                if call.UsingTon then 
                     let sets = alias.V.ST.Expr<||>  alias.V.SF.Expr  <&&> call.End
                     yield (sets) --@ (alias.VC.TDON, call.PresetTime, getFuncName())
         ]

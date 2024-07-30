@@ -29,8 +29,8 @@ module private DsParserHelperModule =
         let device = jobNameFqdn.Take(2).Combine(TextDeviceSplit)
         let api = jobNameFqdn.Last()
         //let api = GetLastParenthesesReplaceName (jobNameFqdn.Last(), "")
-        let TaskDevParaIO = TaskDevParaIO(inParam|>Some, outParm|>Some)
-        {ApiFqnd = [|device; api|]; TaskDevParaIO =TaskDevParaIO; InAddress = inaddr; OutAddress = outaddr}
+        let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
+        {ApiFqnd = [|device; api|]; TaskDevParamIO =TaskDevParamIO; InAddress = inaddr; OutAddress = outaddr}
 
     type DsSystem with
 
@@ -132,10 +132,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | _ -> ()
 
                 x.TheSystem <-
-                    let exSys = DsSystem(name)
+                    let exSys = DsSystem.Create(name)
                     registerSystem exSys
                     exSys
-            | _ -> x.TheSystem <- DsSystem(name)
+            | _ -> x.TheSystem <- DsSystem.Create(name)
             
             RuntimeDS.System <- x.TheSystem 
 
@@ -617,8 +617,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let callListings = commonCallParamExtractor ctx 
             let dicTaskDevs = Dictionary<string,TaskDev>()
 
-            let createTaskDev (apiPoint:ApiItem) (device:string)  (taskDevPara:TaskDevParaIO)  (addr:Addresses) (jobName:string) =
-                let apiPara = { TaskDevParaIO = taskDevPara; ApiItem= apiPoint}
+            let createTaskDev (apiPoint:ApiItem) (device:string)  (taskDevPara:TaskDevParamIO)  (addr:Addresses) (jobName:string) =
+                let apiPara = { TaskDevParamIO = taskDevPara; ApiItem= apiPoint}
                 let taskDev = TaskDev(apiPara, jobName, device, system)
                 let apiPureName = taskDev.DeviceApiPureName(jobName)
                 let updatedTaskDev = 
@@ -657,8 +657,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     commonDeviceParamExtractor taskDevPara 
                                 | None ->
                                      (TextAddrEmpty, defaultTaskDevPara()), (TextAddrEmpty, defaultTaskDevPara())
-                            let TaskDevParaIO = TaskDevParaIO(inParam|>Some, outParm|>Some)
-                            yield {ApiFqnd = apiPath;  TaskDevParaIO = TaskDevParaIO; InAddress = inaddr; OutAddress = outaddr}
+                            let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
+                            yield {ApiFqnd = apiPath;  TaskDevParamIO = TaskDevParamIO; InAddress = inaddr; OutAddress = outaddr}
                         ]
                     else
                         [getAutoGenDevApi (jobNameFqdn,  callListingCtx)]
@@ -668,7 +668,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         for ad in apiDefs do
                             let apiFqnd = ad.ApiFqnd |> Seq.toList
                             let devApiName = apiFqnd.Head
-                            let addr, TaskDevParaIO = Addresses(ad.InAddress, ad.OutAddress), ad.TaskDevParaIO
+                            let addr, TaskDevParamIO = Addresses(ad.InAddress, ad.OutAddress), ad.TaskDevParamIO
                             let task = 
                                 match apiFqnd with
                                 | device :: [ api ] ->
@@ -685,7 +685,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                     None
                                  
                                        
-                                            return createTaskDev  apiPoint  devApiName TaskDevParaIO addr jobName
+                                            return createTaskDev  apiPoint  devApiName TaskDevParamIO addr jobName
                                         }
 
                                     match taskFromLoaded with
@@ -696,10 +696,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                             let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
                                             match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with 
                                             | Some apiItem ->
-                                                createTaskDev apiItem device TaskDevParaIO addr jobName
+                                                createTaskDev apiItem device TaskDevParamIO addr jobName
                                             | None ->
-                                                let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParaIO
-                                                createTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParaIO addr jobName
+                                                let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParamIO
+                                                createTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParamIO addr jobName
                                                
                                         | None -> failwithlog $"device({device}) api({api}) is not exist"
 
@@ -709,8 +709,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             
                             let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName) options.Storages
                             let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
-                            createDeviceVariable system TaskDevParaIO.InPara plcName_I task.InAddress
-                            createDeviceVariable system TaskDevParaIO.OutPara plcName_O task.OutAddress
+                            createDeviceVariable system TaskDevParamIO.InParam plcName_I task.InAddress
+                            createDeviceVariable system TaskDevParamIO.OutParam plcName_O task.OutAddress
 
                             yield task
 

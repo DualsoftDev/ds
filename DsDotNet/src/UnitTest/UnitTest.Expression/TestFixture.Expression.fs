@@ -20,7 +20,7 @@ module ExpressionFixtures =
             failwith $"Failed to parse Statement: {text}\r\n{exn}"
 
 
-    let sys = DsSystem("testSys")
+    let sys = DsSystem.Create4Test("testSys")
     let mutable runtimeTarget = WINDOWS
     let setRuntimeTarget(target:PlatformTarget) =
             let runtimeTargetBackup = target

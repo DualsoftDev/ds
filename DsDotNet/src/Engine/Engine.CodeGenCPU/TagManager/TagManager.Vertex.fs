@@ -167,16 +167,19 @@ module TagManagerModule =
         let createTag = createTagOnVertex v
 
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
-        //let realData  = 
-        //    let vertexTag = VertexTag.realData |> int
-        //    let name = $"{v.QualifiedName}_RD"
-        //    createPlanVar  s name DuUINT16 true v vertexTag sys  
-            
+
+        let realSEQData  = 
+            let vertexTag = VertexTag.realSEQ |> int
+            let name = $"{v.QualifiedName}_{VertexTag.realSEQ}" |> validStorageName
+            createPlanVar  s name DuUINT32 true v vertexTag sys  
 
         member x.Real = x.Vertex :?> Real
         member x.OriginInfo
             with get() = originInfo
             and set(v) = originInfo <- v
+
+        ///Real SEQ Data
+        member val RealSEQData = realSEQData
 
         /// Real Origin Init
         member val RO         = createTag false VertexTag.realOriginInit
@@ -190,8 +193,7 @@ module TagManagerModule =
         ///Real Going Relay
         member val GG         = createTag false VertexTag.goingRealy
     
-        ///Real Data
-        //member val RD         = realData
+
         ///link with physical sensors
         member val Link       = createTag false VertexTag.realLink
         ///GoingOriginErr

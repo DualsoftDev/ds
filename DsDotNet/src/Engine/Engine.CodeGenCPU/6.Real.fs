@@ -75,9 +75,17 @@ type RealVertexTagManager with
             (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, fn)     // E
         ]
 
-    member v.R6_RealDataMove() = ()
-        //let set = v.RD.ToExpression() 
-        //(set) --> (v.RD, getFuncName())
+    member v.R6_RealSEQMove() = 
+        let fn = getFuncName()
+        let startCausals =  getStartRootEdges(v.Vertex).OfType<Real>()
+        if startCausals.any() then
+            [
+                let srcRealSeq = startCausals.First().VR.RealSEQData //임시로 처음 Real로
+                let tgtRealSeq = v.RealSEQData
+                yield (v.GP.Expr, srcRealSeq.BoxedValue|>literal2expr) --> (tgtRealSeq, getFuncName())
+            ]
+        else 
+            []
 
     member v.R7_RealGoingOriginError() =
         let dop = v.Flow.d_st.Expr

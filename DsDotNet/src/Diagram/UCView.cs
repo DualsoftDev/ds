@@ -132,7 +132,7 @@ public partial class UcView : UserControl
 
     private void UpdateLabelText(Node nNode, ViewNode viewNode)
     {
-        int goingCnt = viewNode.GoingCnt;
+        var goingCnt = viewNode.GoingCnt;
         var org = viewNode.DisplayName; 
         if (goingCnt > 0)
             nNode.LabelText = $"{org}\v\r\n({goingCnt})";

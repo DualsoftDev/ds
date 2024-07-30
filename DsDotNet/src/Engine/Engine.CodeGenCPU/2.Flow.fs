@@ -1,6 +1,7 @@
 [<AutoOpen>]
 module Engine.CodeGenCPU.ConvertFlow
 
+open System
 open System.Linq
 open Engine.CodeGenCPU
 open Engine.Core
@@ -83,4 +84,22 @@ type VertexTagManager with
     member v.F5_HomeCommand() =
         let real = v.Vertex :?> Real
         (real.Flow.HomeExpr , v._off.Expr) --| (real.VR.OA, getFuncName())
+
+
+    member v.F6_SEQTempNumGeneration() =
+        let real = v.Vertex :?> Real
+        let g = real.Parent.GetGraph()
+        let sEdges = g.Edges
+                        .Where(fun e -> e.EdgeType = EdgeType.Start)
+                        .Where(fun e -> e.Target.GetPure() = v.Vertex)
+                     
+        let startCausals =  sEdges.Select(fun f->f.Source).OfType<Call>() //alias 는 제외
+        if startCausals.any()
+        then 
+            let nextSEQ = Convert.ToUInt32(real.VR.RealSEQData.BoxedValue)+1u
+            let srcTrigger = startCausals.First().End
+            [(srcTrigger, nextSEQ|>literal2expr) --> (real.VR.RealSEQData, getFuncName())]
+        else 
+            []      
+
         

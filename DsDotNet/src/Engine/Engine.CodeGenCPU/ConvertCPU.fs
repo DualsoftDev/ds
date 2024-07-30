@@ -46,7 +46,7 @@ module ConvertCPU =
                 yield vr.R3_RealStartPoint()
                 yield vr.R4_RealLink() 
                 yield! vr.R5_DummyDAGCoils() 
-                //yield vm.R6_RealDataMove() 
+                yield! vr.R6_RealSEQMove() 
                 yield! vr.R7_RealGoingOriginError() 
                 yield! vr.R8_RealGoingPulse() 
                 yield! vr.R10_RealGoingTime() 
@@ -56,8 +56,9 @@ module ConvertCPU =
                 yield vr.F1_RootStart()
                 yield vr.F2_RootReset()
                 yield vr.F5_HomeCommand()
+                yield! vr.F6_SEQTempNumGeneration()
 
-
+                
                 yield! vr.D1_DAGHeadStart()
                 yield! vr.D2_DAGTailStart()
                 yield! vr.D3_DAGCoinEnd()

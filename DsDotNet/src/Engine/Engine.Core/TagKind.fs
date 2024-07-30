@@ -155,6 +155,7 @@ module TagKindList =
     | realData                  = 11026
     | realLink                  = 11027
     | callMemo                  = 11028
+    | realSEQ                   = 11029
 
     | dummyCoinSTs              = 11032
     | dummyCoinRTs              = 11033

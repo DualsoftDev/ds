@@ -32,7 +32,7 @@ module rec CoreCloneModule =
             // 향후 Real 항목 추가시 깊은복사 구현
             newReal.Motion <- x.Motion
             newReal.Script <- x.Script
-            newReal.RealData <- x.RealData
+            newReal.RealSEQ <- x.RealSEQ
             newReal.DsTime <- x.DsTime
             newReal.Finished <- x.Finished
             newReal.NoTransData <- x.NoTransData

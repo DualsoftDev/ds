@@ -18,14 +18,14 @@ module ImportPPTModule =
         LoadingPaths: string seq
         LayoutImgPaths: string seq
     }
-    
+
     type PPTParams = {
         TargetType: PlatformTarget
         AutoIOM: bool
         CreateFromPPT : bool
         CreateBtnLamp : bool
     }
-    
+
     let getHashKeys (skipCnt: int, path: string, loadedParentStack:Stack<DsSystem>) =
         String.Join(
             ",",
@@ -70,7 +70,7 @@ module ImportPPTModule =
           ) =
             pathStack.Push(paras.AbsoluteFilePath)
             LoadingPPTNotify.Trigger(paras.AbsoluteFilePath)
-            
+
             currentFileName <- pathStack.Peek()
 
             let pathPPT = paras.AbsoluteFilePath
@@ -173,10 +173,10 @@ module ImportPPTModule =
                 doc.BuildSystem(theSys, isLib, pptParams.CreateBtnLamp)
 
             if paras.LoadingType = DuNone then
-                doc.UpdateActionIO(theSys, pptParams.AutoIOM) 
+                doc.UpdateActionIO(theSys, pptParams.AutoIOM)
                 doc.UpdateLayouts(theSys)
                 layoutImgPaths.AddRange(doc.SaveSlideImage())|>ignore
-            
+
             pathStack.Pop() |> ignore
             pptReop.Add(theSys, doc)
             theSys, doc
@@ -194,7 +194,7 @@ module ImportPPTModule =
           ) : DsSystem * pptDoc =
             let loadedParentStack = Stack<DsSystem>() //LoadedSystem.AbsoluteParents 구성하여 ExternalSystem 구분 및 UI Tree 구조 구성
             //active는 시스템이름으로 ppt 파일 이름을 사용
-            let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile) 
+            let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile)
             activeSysDir <- fileDirectory
             currentFileName <- filePath
             let sysName = getSystemName filePath
@@ -270,7 +270,7 @@ module ImportPPTModule =
     }
 
 
-    type ImportPPT =    
+    type ImportPPT =
         static member GetDSFromPPTWithLib(fullName: string, isLib:bool, pptParams:PPTParams) =
             Util.runtimeTarget <- pptParams.TargetType
             ModelParser.ClearDicParsingText()
@@ -278,22 +278,22 @@ module ImportPPTModule =
             let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
 
             let model, millisecond = duration (fun () -> loadFromPPTs fullName isLib pptParams layoutImgPaths |> Tuple.first)
-            printfn $"Elapsed time: {millisecond} ms"
+            logInfo $"Elapsed time for reading {fullName}: {millisecond} ms"
 
-            let activePath = PathManager.changeExtension (fullName.ToFile()) ".ds" 
+            let activePath = PathManager.changeExtension (fullName.ToFile()) ".ds"
 
             let system, loadingPaths =
-                if pptParams.CreateFromPPT then 
+                if pptParams.CreateFromPPT then
                     model.System, model.LoadingPaths
                 else
                     model.System.ExportToDS activePath
                     ParserLoader.LoadFromActivePath activePath Util.runtimeTarget false
 
-            { 
+            {
                 System = system
                 ActivePath = activePath
-                LoadingPaths = loadingPaths 
-                LayoutImgPaths = layoutImgPaths 
+                LoadingPaths = loadingPaths
+                LayoutImgPaths = layoutImgPaths
             }
 
         static member GetRuntimeZipFromPPT(fullName: string, pptParams)=

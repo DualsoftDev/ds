@@ -220,7 +220,7 @@ module internal DBLoggerImpl =
         let createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
-                
+
                 let! dbSckeleton = ORMDBSkeletonDTOExt.CreateLoggerDBAsync(queryCriteria.ModelId, $"Data Source={commonAppSettings.LoggerDBSettings.ConnectionPath}")
                 ORMDBSkeleton4Debug <- dbSckeleton
 
@@ -342,7 +342,7 @@ module internal DBLoggerImpl =
 
                 let! newLogs =
                     conn.QueryAsync<ORMLog>(
-                        $"""SELECT * FROM [{Tn.Log}] 
+                        $"""SELECT * FROM [{Tn.Log}]
                             WHERE modelId = @ModelId AND id > @LastLogId ORDER BY id DESC;""",
                         {| ModelId = queryCriteria.ModelId; LastLogId = lastLogId; |}
                     )

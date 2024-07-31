@@ -24,7 +24,7 @@ module MemoryAllocator =
 
     let getByteSizeFromPrefix prefix target =
         match prefix with
-        | "B" -> 
+        | "B" ->
             match target with
             | XGI -> 1
             | XGK -> 2
@@ -54,15 +54,15 @@ module MemoryAllocator =
         let mutable byteCursor = startByte
 
         ///XGK 16bit 최소, XGI 8bit 최소
-        let unitSize = if target = XGK then 16 else 8  
-        let getMemType(memType) =  
-                if target = XGK && memType = "B" 
+        let unitSize = if target = XGK then 16 else 8
+        let getMemType(memType) =
+                if target = XGK && memType = "B"
                 then "W" //XGK는 byte 단위가 없어서 Word로 치환
                 else memType
 
         let rec getAddress (reqMemType: string) : string =
-            let reqMemType = getMemType reqMemType  
-     
+            let reqMemType = getMemType reqMemType
+
 
             match reqMemType with
             | "X" ->
@@ -93,7 +93,7 @@ module MemoryAllocator =
                 if reservedBytes |> List.contains byteIndex then
                     getAddress reqMemType
                 else
-                    let address = 
+                    let address =
                         if target = XGI then
                             $"%%{typ}{reqMemType}{bitIndex}"
                         elif target = XGK then
@@ -139,8 +139,8 @@ module MemoryAllocator =
                 if x then
                     getAddress reqMemType
                 else
-                    let address = 
-                        
+                    let address =
+
                         if target = XGI then
                             $"%%{typ}{reqMemType}{byteIndex / byteSize}"
                         elif target = XGK then
@@ -208,9 +208,9 @@ module IECAddressModule =
         match address with
         | "_" -> "_"
         | _ ->
-            let addr = if address.StartsWith("%") 
-                       then  address.ToUpper() 
-                       else  "%"+address.ToUpper() 
+            let addr = if address.StartsWith("%")
+                       then  address.ToUpper()
+                       else  "%"+address.ToUpper()
 
             match addr with
             | RegexPattern @"^%([IQUMLKFNRAW])(\d+)$" [ m; _ ]

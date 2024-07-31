@@ -25,7 +25,7 @@ module rec ExpressionParserModule =
         parser.AddErrorListener(listener_parser)
         parser
 
-    /// storage 이름이 주어졌을 때, 그 이름에 해당하는 storage 를 반환하는 함수의 type 
+    /// storage 이름이 주어졌을 때, 그 이름에 해당하는 storage 를 반환하는 함수의 type
     type StorageFinder = string -> IStorage option
 
     /// storages 에서 name 을 찾는 기본 함수
@@ -77,7 +77,7 @@ module rec ExpressionParserModule =
                         createCustomFunctionExpression funName args
                     else
                         match parserData.LambdaDefs.TryFind(fun lmbd -> lmbd.Prototype.Name = funName) with
-                        | Some lambdaDecl -> createLambdaCallExpression parserData.Storages args lambdaDecl.Body 
+                        | Some lambdaDecl -> createLambdaCallExpression parserData.Storages args lambdaDecl.Body
                         | None -> failwith "ERROR"
 
                 | :? CastingExprContext as exp -> // '(' type ')' expr
@@ -186,7 +186,7 @@ module rec ExpressionParserModule =
             expr
 
         helper ctx
-                
+
     let private getFirstChildExpressionContext (ctx: ParserRuleContext) : ExprContext =
         ctx.children.OfType<ExprContext>().First()
 
@@ -320,7 +320,7 @@ module rec ExpressionParserModule =
         let getStorageName = fun () -> ctx.Descendants<StorageNameContext>().First().GetText()
 
         let optStatement =
-            let fstChild = ctx.children[0] 
+            let fstChild = ctx.children[0]
             match fstChild with
             | :? VarDeclContext as varDeclCtx ->
                 let exp = createExpression parserData (defaultStorageFinder storages) (getFirstChildExpressionContext varDeclCtx)
@@ -496,7 +496,7 @@ module rec ExpressionParserModule =
                 | :? LambdaDeclContext as ctx ->
                     // e.g: int sum(int a, int b) => $a + $b;
                     let typ = ctx.``type``().GetText() |> textToSystemType
-                    
+
                     let bodyExp = ctx.Descendants<LambdaBodyExprContext>().First() |> getFirstChildExpressionContext |> createExpression parserData (storageFinder funName)
                     let lambdaDecl = {
                         Prototype = { Type = typ; Name = funName }

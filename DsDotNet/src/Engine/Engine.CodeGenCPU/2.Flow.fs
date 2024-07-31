@@ -97,7 +97,7 @@ type VertexTagManager with
         if startCausals.any()
         then 
             [
-                let tempRisingRelay = v.System.GetTempBoolTag("AAAtempRising") 
+                let tempRisingRelay = v.System.GetTempBoolTag("tempRising") 
                 let srcTrigger = startCausals.First().End
 
                 yield  (srcTrigger, v._off.Expr) --| (tempRisingRelay, getFuncName())

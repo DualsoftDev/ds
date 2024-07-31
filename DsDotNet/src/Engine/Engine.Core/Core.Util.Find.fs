@@ -33,15 +33,7 @@ module internal ModelFindModule =
 
         let fqdn = (system.Name :: xs).JoinWith(".")
         let inner = system.TryFindFqdnVertex(fqdn).Cast<IVertex>()
-        match inner with
-        | Some _i ->
-#if DEBUG
-            let outer = getOuter()
-            assert(outer.IsNone)
-            inner
-#endif
-        | None ->
-            getOuter()
+        inner.OrElseWith( fun () -> getOuter())
 
 
 
@@ -93,7 +85,7 @@ module internal ModelFindModule =
         //then
         if callPath.Length = 1 then
             None
-        else 
+        else
             match tryFindGraphVertex system callPath with
             | Some(:? Call as c) -> Some(c)
             | _ -> None
@@ -129,16 +121,16 @@ module internal ModelFindModule =
 
     let ofCallForOperator (xs:Vertex seq) =
         xs.OfType<Call>().Where(fun f -> f.Parent.GetCore() :? Flow).Cast<Vertex>()
-        
+
     let ofAliasForRealVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
         |> Seq.filter(fun a -> a.TargetWrapper.RealTarget().IsSome)
-    
+
     let ofAliasForCallVertex (xs:Vertex seq) =
         xs.OfType<Alias>()
-        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)  
+        |> Seq.filter(fun a -> a.TargetWrapper.CallTarget().IsSome)
 
-    
+
     let getVerticesOfSystem(system:DsSystem) =
         [|
             for f in system.Flows do
@@ -152,15 +144,15 @@ module internal ModelFindModule =
     let getDevicesOfFlow(flow:Flow) =
         let devNames =
             getVerticesOfFlow(flow)
-                .OfType<Call>()   
+                .OfType<Call>()
                 .SelectMany(fun c->c.TargetJob.TaskDefs.Select(fun d->d.DeviceName))
 
         flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
 
-    let getVerticesOfJobCalls x =  
+    let getVerticesOfJobCalls x =
         getVerticesOfSystem(x)
             .OfType<Call>()
-            .Where(fun c->c.IsJob)    
+            .Where(fun c->c.IsJob)
 
     let getDistinctApis(x:DsSystem) =
         getVerticesOfJobCalls(x)
@@ -193,16 +185,16 @@ module internal ModelFindModule =
                 .Choose(fun v -> v|> tryGetPureCall)
                 .Where(fun v -> v.IsJob)
 
-                
-    let getVerticesOfAliasNCalls x = 
+
+    let getVerticesOfAliasNCalls x =
         let vs = getVerticesOfSystem(x)
         let calls = vs.OfType<Call>().Cast<Vertex>()
         let aliases = vs.OfType<Alias>().Cast<Vertex>()
         (calls @ aliases)
 
-    let getVerticesOfCoins x = 
+    let getVerticesOfCoins x =
         getVerticesOfAliasNCalls(x)
-            .Where(fun c->c.Parent.GetCore() :? Real)     
+            .Where(fun c->c.Parent.GetCore() :? Real)
 
 
     let getSkipInfo(dev:TaskDev, job:Job) =
@@ -212,16 +204,16 @@ module internal ModelFindModule =
             | (true, value) -> value
             | (false, _) -> 1
 
-        let inSkip = job.AddressInCount < devIndex 
-        let outSkip = job.AddressOutCount < devIndex 
+        let inSkip = job.AddressInCount < devIndex
+        let outSkip = job.AddressOutCount < devIndex
 
-        inSkip, outSkip 
+        inSkip, outSkip
 
     let updateDeviceSkipAddress (x: DsSystem) =
         let calls = x|>getVerticesHasJob
         calls
             |> collect(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c.TargetJob))
-            |> iter(fun (dev, job) -> 
+            |> iter(fun (dev, job) ->
                 let inSkip, outSkip = getSkipInfo(dev, job)
                 if inSkip then
                     dev.InAddress <- TextSkip
@@ -234,11 +226,11 @@ module internal ModelFindModule =
             calls
                 .Where(fun c-> not(onlyCoin) || not(c.IsFlowCall))
                 .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
-        tds 
-        |> Seq.sortBy (fun (td, c) -> 
+        tds
+        |> Seq.sortBy (fun (td, c) ->
             (td.DeviceName, td.GetApiItem(c.TargetJob).Name))
 
-            
+
     let getTaskDevCalls(x:DsSystem) =
         let taskDevs =
             getTaskDevs(x, false)
@@ -247,11 +239,11 @@ module internal ModelFindModule =
         let callAll = getVerticesOfAliasNCalls(x)
         taskDevs
         |> Seq.map(fun (td, call) ->
-            td, 
+            td,
                 callAll.Filter(fun f->
                 match f with
-                | :? Call as c when c.IsJob -> c.TargetJob = call.TargetJob 
-                | :? Alias as al-> 
+                | :? Call as c when c.IsJob -> c.TargetJob = call.TargetJob
+                | :? Alias as al->
                     match al.TargetWrapper.CallTarget() with
                     | Some c when c.IsJob -> c.TargetJob = call.TargetJob
                     |_ -> false
@@ -307,48 +299,48 @@ type FindExtension =
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     [<Extension>] static member GetRealVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Real>()
     [<Extension>] static member GetCallVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Call>()
-    
+
     [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
-    [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =  
+    [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =
                     getVerticesOfSystem(x) |> ofCallForOperator
-                    
-    [<Extension>] static member GetVerticesOfRealOrderByName(x:DsSystem) = 
+
+    [<Extension>] static member GetVerticesOfRealOrderByName(x:DsSystem) =
                     x.GetRealVertices().OrderBy(fun r-> $"{r.Flow.Name}_{r.Name}" )
-    [<Extension>] static member GetFlowsOrderByName(x:DsSystem) = 
+    [<Extension>] static member GetFlowsOrderByName(x:DsSystem) =
                     x.Flows.OrderBy(fun f-> f.Name )
-                    
+
     [<Extension>] static member GetVerticesOfFlow(x:Flow) =  getVerticesOfFlow x
     [<Extension>] static member GetVerticesOfCoins(x:DsSystem) = getVerticesOfCoins x
-               
+
 
     [<Extension>] static member GetVerticesHasJob(x:DsSystem) =   getVerticesHasJob x
-       
+
     [<Extension>]
-        static member GetVerticesHasJobOfFlow(x:Flow) =  
+        static member GetVerticesHasJobOfFlow(x:Flow) =
             getVerticesOfFlow(x)
                 .Choose(fun v -> v.TryGetPureCall())
                 .Where(fun v -> v.IsJob)
 
     [<Extension>]
-        static member GetVerticesHasJobInReal(x:DsSystem) =  
+        static member GetVerticesHasJobInReal(x:DsSystem) =
             x.GetVerticesOfCoins()
                 .Choose(fun v -> v.TryGetPureCall())
                 .Where(fun v -> v.IsJob)
 
 
-    [<Extension>] static member GetTaskDevCalls(x:DsSystem) =   getTaskDevCalls x 
-                      
-                    
+    [<Extension>] static member GetTaskDevCalls(x:DsSystem) =   getTaskDevCalls x
+
+
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
 
     [<Extension>] static member GetSkipInfo(dev:TaskDev, job:Job) =  getSkipInfo (dev, job)
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
     [<Extension>]
-        static member GetAlarmCalls(x:DsSystem) = 
+        static member GetAlarmCalls(x:DsSystem) =
             x.GetVerticesOfJobCalls()
-                //.Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)  
-                .Where(fun w->w.Parent.GetCore() :? Real)  
+                //.Where(fun w->w.TargetJob.ActionType <> JobActionType.NoneTRx)
+                .Where(fun w->w.Parent.GetCore() :? Real)
                 .OrderBy(fun c->c.Name)
 
     [<Extension>]
@@ -362,17 +354,17 @@ type FindExtension =
     [<Extension>] static member GetTaskDevsCoin(x:DsSystem) = getTaskDevs(x, true)
 
     [<Extension>] static member GetTaskDevsCall(x:DsSystem) = getTaskDevs(x, false)
-                  
+
     [<Extension>]
-    static member GetDevicesHasOutput(x:DsSystem) = 
+    static member GetDevicesHasOutput(x:DsSystem) =
         //출력있는건 무조건  Coin
         x.GetTaskDevsCoin()
             .DistinctBy(fun (td, c) -> (td, c.TargetJob))
             .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
 
-  
+
     [<Extension>]
-        static member GetDevicesForHMI(x:DsSystem) = 
+        static member GetDevicesForHMI(x:DsSystem) =
             //kia demo //test ahn
             x.GetTaskDevsCoin()
                 .DistinctBy(fun (td, _c) -> td)
@@ -384,7 +376,7 @@ type FindExtension =
 
 
     [<Extension>]
-        static member GetTaskDevsSkipEmptyAddress(x:DsSystem) = 
+        static member GetTaskDevsSkipEmptyAddress(x:DsSystem) =
             x.Jobs
                 .SelectMany(fun j->j.TaskDefs.Select(fun td->(td, j))).DistinctBy(fun (td, _j) -> td)
                 .Where(fun (td, _j) -> not(td.OutAddress = TextSkip && td.InAddress= TextSkip))

@@ -64,7 +64,7 @@ type ModelLoaderExt =
 
 
     [<Extension>] 
-    static member pptxToExportDS (sys:DsSystem, dsFilePath:string) = 
+    static member ExportToDS (sys:DsSystem, dsFilePath:string) = 
         //sys.CheckValidInterfaceNchageParsingAddress() //test ahn ppt로부터 가져오면 체크시 주소가 없다.
         
         for s in sys.GetRecursiveLoadeds() do
@@ -74,8 +74,6 @@ type ModelLoaderExt =
             | _ -> ()
 
         FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false, true))
-
-        dsFilePath
 
     [<Extension>] 
     static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq) = 

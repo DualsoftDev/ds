@@ -52,31 +52,31 @@ module PPTDocModule =
             ||> Seq.map2 (fun node nameSet -> node, nameSet)
             |> Seq.iter (fun (node, (name, aliasNumber)) ->
                 if (aliasNumber > 0) then
-                    let orgNode = 
+                    let orgNode =
                         if isExFlow
                         then
                              match  allNodes.TryFind(fun f -> $"{f.PageTitle}.{f.Name}" = name) with
                              | Some f -> f
                              | None -> node.Shape.ErrorName( $"해당 Flow.Work를 찾을 수 없습니다 {name}", node.PageNum)
-                  
-                        else aliasCheckNodes |> Seq.filter (fun f -> 
-                                                    let keyName = 
+
+                        else aliasCheckNodes |> Seq.filter (fun f ->
+                                                    let keyName =
                                                         match f.NodeType with
                                                             | CALL -> f.Job.Combine()
                                                             | _ -> f.Name
-                                                    keyName = name) 
+                                                    keyName = name)
                                                     |> Seq.head
 
                     node.Alias <- Some(orgNode)
                     node.AliasNumber <- aliasNumber)
 
         let settingAlias (nodes: pptNode seq) (exFlowReal:bool) =
-            let nodes = nodes.OrderByDescending(fun o -> parents.ContainsKey(o)) 
-            let filterNodes, allNodes = 
+            let nodes = nodes.OrderByDescending(fun o -> parents.ContainsKey(o))
+            let filterNodes, allNodes =
                 let findNodes =
                     if  exFlowReal
-                    then nodes |> Seq.filter (fun f -> f.NodeType = REALExF) 
-                    else nodes |> Seq.filter (fun f -> f.NodeType <> REALExF) 
+                    then nodes |> Seq.filter (fun f -> f.NodeType = REALExF)
+                    else nodes |> Seq.filter (fun f -> f.NodeType <> REALExF)
 
                 if  not(exFlowReal)
                 then findNodes, findNodes
@@ -84,7 +84,7 @@ module PPTDocModule =
 
             let nameNums= GetAliasNumber
                             (filterNodes
-                                |> Seq.map (fun f -> 
+                                |> Seq.map (fun f ->
                                     match f.NodeType with
                                     | CALL -> f.Job.Combine()
                                     | _ -> f.Name
@@ -125,14 +125,14 @@ module PPTDocModule =
         // Recursively get IDs of real and call shapes used in the group and its subgroups
         let rec getGroupMembers (subG: GroupShape, shapeIds: HashSet<uint32>) =
             subG.Descendants<Shape>()
-            |> Seq.filter (fun shape -> shape.IsRectangle() 
-                                        || shape.IsEllipse() 
+            |> Seq.filter (fun shape -> shape.IsRectangle()
+                                        || shape.IsEllipse()
                                         || shape.IsFlowChartPreparation())
             |> Seq.iter (fun shape -> shapeIds.Add(shape.GetId().Value) |> ignore)
 
             subG.Descendants<GroupShape>()
             |> Seq.iter (fun childGroup -> getGroupMembers (childGroup, shapeIds) |> ignore)
-        
+
         let shapeIds = HashSet<uint32>()
         getGroupMembers (subG, shapeIds)
         shapeIds |> Seq.map (fun id -> nodes.[Objkey(page, id)])
@@ -154,30 +154,66 @@ module PPTDocModule =
 
 
 
-    type pptDoc(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =
+    type pptDoc private(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target,
+        pages:IDictionary<SlidePart, pptPage>,
+        nodes:IDictionary<string, pptNode>,
+        parents:IDictionary<pptNode, seq<pptNode>>,
+        edges:pptEdge seq,
+        dummys:ISet<pptDummy>
+    ) =
+        member x.GetTables(colCnt: int) = doc.GetTablesWithPageNumbers colCnt
+        member x.GetLayouts() = doc.GetLayouts()
+        member x.SaveSlideImage() = doc.SaveSlideImage(PathManager.getFileName (path|>DsFile))
 
-        let pages = Dictionary<SlidePart, pptPage>()
-        let nodes = Dictionary<string, pptNode>()
-        let parents = Dictionary<pptNode, seq<pptNode>>()
-        let dummys = HashSet<pptDummy>()
-        let edges = HashSet<pptEdge>()
+        member x.GetPage(pageNum: int) =
+            pages.Values |> Seq.find (fun p -> p.PageNum = pageNum)
 
-        do
+        member val Pages = pages.Values |> Seq.sortBy (fun p -> p.PageNum) |> toArray
+        member val PageNames = pages.Values.Select(fun f -> f.Title).ToArray()
+        member val NodesHeadPage = nodes.Values |> Seq.filter (fun p -> p.PageNum = pptHeadPage) |> toArray
+        member val Nodes = nodes.Values |> filter (fun p -> p.PageNum <> pptHeadPage) |> Seq.sortBy (fun p -> p.PageNum) |> toArray
+        member val Edges = edges |> Seq.sortBy (fun p -> p.PageNum) |> toArray
+
+        member val DicNodes = nodes
+        member val Parents = parents
+        member val Dummys = dummys
+
+        member val Name = (pages.Keys |> Seq.find (fun f -> f.GetPage() = pptHeadPage)).PageTitle()
+        member val Path = path
+        member val DirectoryName = PathManager.getDirectoryName (DsFile path)
+
+        member val DicFlow = Dictionary<int, Flow>() // page , flow
+        member val DicVertex = Dictionary<string, Vertex>()
+        member val DicAutoPreJob = Dictionary<string, Job>()
+        member val IsBuilded = false with get, set
+
+        member x.Parameter: DeviceLoadParameters = parameter.Value
+        member x.Doc = doc
+
+    type pptDoc with
+        static member Create(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =
+
+            let pages = Dictionary<SlidePart, pptPage>()
+            let nodes = Dictionary<string, pptNode>()
+            let parents = Dictionary<pptNode, seq<pptNode>>()
+            let dummys = HashSet<pptDummy>()
+            let edges = HashSet<pptEdge>()
+
             // 숨김 페이지, blank page 제외한 모든 페이지
-            let validSlidesAll =  
+            let validSlidesAll =
                 Office.SlidesSkipHide(doc)
                 |> Seq.filter (fun (s, _) -> not (s.IsSlideLayoutBlankType()))
-            
+
 
             if validSlidesAll |> Seq.exists (fun (slidePart, page) -> page = pptHeadPage) |> not then
                 Office.ErrorPPT(Page, ErrID._12, "Title Slide", 0, 0u)
 
             // pages 구성 (및 제목 누락 페이지 에러)
-            validSlidesAll 
+            validSlidesAll
             |> Seq.iter (fun (slidePart, page) ->
                 if slidePart.PageTitle() = "" then
                     Office.ErrorPPT(Page, ErrID._59, "Title Error", page, 0u)
-                else 
+                else
                     pages.Add(slidePart, pptPage (slidePart, page, true)) |> ignore)
 
             // 페이지 별 group 정보
@@ -195,7 +231,7 @@ module PPTDocModule =
                         pages.Values |> Seq.exists (fun w -> w.PageNum = page))
 
             pages.Values
-            |> Seq.iter (fun pptPage -> 
+            |> Seq.iter (fun pptPage ->
                 let ableShapes = shapes |> Seq.filter (fun (shape, page, _) -> pptPage.PageNum = page) |> Seq.map(fun (shape,_,_) -> shape)
                 pptPage.SlidePart.CheckValidShapes(pptPage.PageNum, ableShapes))
 
@@ -203,7 +239,7 @@ module PPTDocModule =
                 Connections(doc)
                 |> Seq.filter (fun (slide, _) -> slide.GetPage() <> pptHeadPage)
                 |> Seq.filter (fun (slide, _) -> pages.ContainsKey(slide))
-            
+
             let slideSize = Office.SlideSize(doc)
             let headSlide = validSlidesAll |> Seq.find (fun (slidePart, page) -> page = pptHeadPage) |> fst
             
@@ -217,8 +253,8 @@ module PPTDocModule =
                 let headPageName = headSlide.PageTitle()
                 let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
                 let headPage = page = pptHeadPage
-                
-                let node = pptNode (shape, page, flowName, slideSize, headPage, masterMacros, target)
+
+                let node = pptNode.Create(shape, page, flowName, slideSize, headPage, masterMacros)
 
                 if node.Name = "" then
                     shape.ErrorName(ErrID._13, page)
@@ -265,13 +301,13 @@ module PPTDocModule =
                 )
 
             connections
-            |> Seq.iter (fun (slide, conns) -> 
+            |> Seq.iter (fun (slide, conns) ->
                 conns
                 |> Seq.iter (fun (conn, Id, startId, endId) ->
                     let iPage = pages.[slide].PageNum
 
                     match startId, endId with
-                    | 0u, 0u -> conn.ErrorConnect(ErrID._4, "", "", iPage)                         
+                    | 0u, 0u -> conn.ErrorConnect(ErrID._4, "", "", iPage)
                     | 0u, _ ->
                         conn.ErrorConnect(ErrID._15, "", $"{nodes.[Objkey(iPage, endId)].Name}", iPage)
                     | _, 0u ->
@@ -281,10 +317,10 @@ module PPTDocModule =
                         let sKey = Objkey(iPage, startId)
                         let eKey = Objkey(iPage, endId)
                         if not(nodes.ContainsKey(sKey) && nodes.ContainsKey(eKey))
-                        then 
+                        then
                             conn.ErrorConnect(ErrID._14, "", "", iPage)
-                        
-                        
+
+
                         let sNode = nodes.[sKey]
                         let eNode = nodes.[eKey]
 
@@ -304,35 +340,9 @@ module PPTDocModule =
                             edges.Add(pptEdge (conn, Id, iPage, sNode, eNode)) |> ignore))
 
             updateAliasPPT (nodes, pages, parents)
+            pptDoc(path, parameter, doc, target,
+                pages, nodes, parents, edges, dummys)
 
-        member x.GetTables(colCnt: int) = doc.GetTablesWithPageNumbers colCnt
-        member x.GetLayouts() = doc.GetLayouts()
-        member x.SaveSlideImage() = doc.SaveSlideImage(PathManager.getFileName (path|>DsFile))
-        
-        member x.GetPage(pageNum: int) =
-            pages.Values |> Seq.find (fun p -> p.PageNum = pageNum)
-
-        member val Pages = pages.Values |> Seq.sortBy (fun p -> p.PageNum)
-        member val PageNames = pages.Values.Select(fun f -> f.Title)
-        member val NodesHeadPage = nodes.Values |> Seq.filter (fun p -> p.PageNum = pptHeadPage)
-        member val Nodes = nodes.Values |> Seq.filter (fun p -> p.PageNum <> pptHeadPage) |> Seq.sortBy (fun p -> p.PageNum)
-        member val Edges = edges |> Seq.sortBy (fun p -> p.PageNum)
-
-        member val DicNodes = nodes
-        member val Parents = parents
-        member val Dummys = dummys
-
-        member val Name = (pages.Keys |> Seq.find (fun f -> f.GetPage() = pptHeadPage)).PageTitle()    
-        member val Path = path
-        member val DirectoryName = PathManager.getDirectoryName (path|>DsFile)
-
-        member val DicFlow = Dictionary<int, Flow>() // page , flow
-        member val DicVertex = Dictionary<string, Vertex>()
-        member val DicAutoPreJob = Dictionary<string, Job>()
-        member val IsBuilded = false with get, set
-
-        member x.Parameter: DeviceLoadParameters = parameter.Value
-        member x.Doc = doc
 
 [<Extension>]
 type PPTDocExt =
@@ -340,24 +350,24 @@ type PPTDocExt =
     [<Extension>]
     static member GetCopyPathNName(doc: pptDoc) =
 
-        let callJobDic = 
+        let callJobDic =
             doc.Nodes
             |> Seq.filter (fun node -> node.IsCall)
             |> Seq.filter (fun node -> not (node.IsFunction))
             |> Seq.map (fun node -> node.DevName, node.JobParam.TaskDevCount)
             |> dict
 
-        let getDevCount (devName) = 
-            if callJobDic.ContainsKey(devName) 
-            then callJobDic.[devName] 
+        let getDevCount (devName) =
+            if callJobDic.ContainsKey(devName)
+            then callJobDic.[devName]
             else 1
-            
+
         doc.Nodes
         |> Seq.filter (fun node -> node.NodeType.IsLoadSys)
         |> Seq.collect (fun node ->
             node.CopySys |> Seq.collect (fun copy ->
                 let devCount = getDevCount(copy.Key)
-                let loadFilePath = 
+                let loadFilePath =
                     if copy.Value.EndsWith(".pptx") then copy.Value
                     else copy.Value + ".pptx"
 

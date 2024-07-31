@@ -22,23 +22,23 @@ module ParserUtilityModule =
             ?includeMe: bool,
             ?predicate: ParseTreePredicate,
             ?exclude: ParseTreePredicate
-          ) : ResizeArray<'T> =
+          ) : 'T seq =
 
             let includeMe = includeMe |? false
             let predicate = predicate |? (isType<'T>)
             let exclude = exclude |? (fun _ -> false)
 
-            let rec helper (rslt: ResizeArray<'T>, frm: IParseTree, incMe: bool) =
-                if not (exclude (frm)) then
-                    if (incMe && predicate (frm)) then
-                        rslt.Add(forceCast<'T> (frm))
+            let rec helper (frm: IParseTree, incMe: bool) =
+                seq {
+                    if not (exclude (frm)) then
+                        if (incMe && predicate (frm)) then
+                            yield forceCast<'T> (frm)
 
-                    for index in [ 0 .. frm.ChildCount - 1 ] do
-                        helper (rslt, frm.GetChild(index), true)
+                        for index in [ 0 .. frm.ChildCount - 1 ] do
+                            yield! helper (frm.GetChild(index), true)
+                }
 
-            let result = ResizeArray<'T>()
-            helper (result, x, includeMe)
-            result
+            helper (x, includeMe)
 
         member x.Ascendants<'T when 'T :> IParseTree>(?includeMe: bool, ?predicate: ParseTreePredicate) =
 
@@ -71,7 +71,7 @@ module ParserUtilityModule =
             let predicate = predicate |? truthyfy
             let predicate x = isType<'T> x && predicate x
             let exclude = exclude |? falsify
-            x.Descendants<'T>(includeMe, predicate, exclude) 
+            x.Descendants<'T>(includeMe, predicate, exclude)
 
         member x.TryFindFirstChild<'T when 'T :> IParseTree>
           (
@@ -80,7 +80,7 @@ module ParserUtilityModule =
             ?exclude: ParseTreePredicate
           ) : 'T option = // :'T
             x.TryFindChildren(includeMe |? false, predicate |? truthyfy, exclude |? falsify) |> Seq.tryHead
-          
+
 
         member x.TryFindFirstAscendant(predicate: ParseTreePredicate, ?includeMe: bool) = //:IParseTree option=
             let includeMe = includeMe |? false

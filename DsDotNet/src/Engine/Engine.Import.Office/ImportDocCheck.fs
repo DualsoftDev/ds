@@ -43,7 +43,7 @@ module ImportDocCheck =
 
         sys
 
-    let SameParent (parents: Dictionary<pptNode, seq<pptNode>>, edge: pptEdge) =
+    let SameParent (parents: IDictionary<pptNode, seq<pptNode>>, edge: pptEdge) =
         let failError (parents: pptNode seq, node: pptNode) =
             let error =
                 seq {

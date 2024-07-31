@@ -6,31 +6,21 @@ open Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 
-[<AutoOpen>]
-module private UniqCheckerModule =
-    let inline checkCoinUniq(coins:'a seq) =
-        // 대상이 유일하지 않으면 중복 생성될 텐데..
-        let coins = coins.ToArray()
-        if coins.Any() then
-            let vertices = coins.GroupBy(fun x -> x).ToArray()
-            if vertices.All(fun g -> g.Count() <> 1) then
-                failwith "ERROR: Alias target not unique"
-
 type VertexTagManager with
     member v.C1_CallMemo() =
         let v = v :?> CallVertexTagManager
         let call = v.Vertex.GetPureCall().Value
-       
+
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
-        
-        let sets = 
+
+        let sets =
             (
                 call.StartPointExpr
                 <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr )
                 <||> (mop <&&> v.SF.Expr)
             )
-            <&&> call.SafetyExpr 
-            
+            <&&> call.SafetyExpr
+
         let rst =
             if call.UsingTon then
                 (v.TDON.DN.Expr <&&> dop) <||> (call.End <&&> mop)
@@ -40,11 +30,11 @@ type VertexTagManager with
 
         let parentReal = call.Parent.GetCore() :?> Vertex
         let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
-        
+
         let sets = sets <&&> !@rstMemos.ToOrElseOff()
         let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
 
-        
+
         let fn = getFuncName()
         if call.Disabled then
             (v._off.Expr, rsts) ==| (v.MM, fn)
@@ -55,9 +45,7 @@ type VertexTagManager with
         let real = v.Vertex :?> Real
         let v = v :?> RealVertexTagManager
         let coins = real.Graph.Inits.Select(getVMCoin)
-#if DEBUG
-        checkCoinUniq(coins.Select(fun coin -> coin.Vertex.GetPureCall().Value))
-#endif
+
         [
             let fn = getFuncName()
             for coin in coins do
@@ -65,16 +53,14 @@ type VertexTagManager with
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
-                let rsts = coin.ET.Expr <||> coin.RT.Expr 
+                let rsts = coin.ET.Expr <||> coin.RT.Expr
                 yield (sets, rsts) ==| (coin.ST, fn)
         ]
 
     member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCoin).ToArray()
-#if DEBUG
-        checkCoinUniq(coins.Select(fun coin -> coin.Vertex.GetPureCall().Value))
-#endif
+
         [
             let fn = getFuncName()
             for coin in coins do
@@ -82,24 +68,22 @@ type VertexTagManager with
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
                 let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
-                let rsts = coin.ET.Expr <||> coin.RT.Expr  
+                let rsts = coin.ET.Expr <||> coin.RT.Expr
                 yield (sets, rsts) ==| (coin.ST, fn )
         ]
-        
+
     member v.D3_DAGCoinEnd() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Select(getVMCoin)
-#if DEBUG
-        checkCoinUniq(coins.Select(fun coin -> coin.Vertex.GetPure().V.Vertex :?> Call))
-#endif
+
         [
             let fn = getFuncName()
             for coin in coins do
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
                 let rsts = coin.RT.Expr
-                if call.Disabled then 
+                if call.Disabled then
                     yield (coin.ST.Expr <&&> real.V.G.Expr, rsts) ==| (coin.ET, fn )
-                else 
+                else
 
                     let setStart = coin.ST.Expr <&&> real.V.G.Expr
                     let setEnd = (*call.PEs.ToAndElseOn() <&&> *)call.End
@@ -108,8 +92,8 @@ type VertexTagManager with
 
                     //if RuntimeDS.Package.IsPLCorPLCSIM() then
                     //    yield (fbRisingAfter[setStart<&&>setEnd], rsts) ==| (coin.ET, f )
-                    //elif RuntimeDS.Package.IsPCorPCSIM() then 
-                        //yield! (setEnd, coin.System)  --^ (coin.GP, f) 
+                    //elif RuntimeDS.Package.IsPCorPCSIM() then
+                        //yield! (setEnd, coin.System)  --^ (coin.GP, f)
                         //yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, f )
 
 
@@ -117,7 +101,7 @@ type VertexTagManager with
                     if call.IsAnalogOutput then
                         yield (setStart<&&>setEnd, rsts) ==| (coin.ET, fn )
                     else
-                        yield! (setEnd, coin.System)  --^ (coin.GP, fn) 
+                        yield! (setEnd, coin.System)  --^ (coin.GP, fn)
                         yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, fn )
         ]
 
@@ -125,9 +109,7 @@ type VertexTagManager with
     member v.D4_DAGCoinReset() =
         let real = v.Vertex :?> Real
         let children = real.Graph.Vertices.Select(getVMCoin)
-#if DEBUG
-        checkCoinUniq(children)
-#endif
+
         [
             let fn = getFuncName()
             for child in children do
@@ -137,10 +119,9 @@ type VertexTagManager with
         ]
 
 
-       
-    
 
 
 
 
-    
+
+

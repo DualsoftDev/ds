@@ -14,8 +14,8 @@ open Antlr4.Runtime
 [<AutoOpen>]
 module ListnerCommonFunctionGeneratorUtil =
 
-    let errorLoadCore (ctx:RuleContext) = 
-        let err = ParserError("", ctx).ToString() 
+    let errorLoadCore (ctx:RuleContext) =
+        let err = ParserError("", ctx).ToString()
         failwithlog ($"""규칙확인{err.Split('\n').Skip(1).Combine("\n")}""")
 
     // Helper function to find Real or Call
@@ -33,14 +33,14 @@ module ListnerCommonFunctionGeneratorUtil =
 
         | f :: [real; call; api] ->
             findFlowOrFail f
-            |> fun flow -> 
+            |> fun flow ->
                 flow.GetVerticesOfFlow().OfType<Call>()
                     .Where(fun c -> c.Parent.GetCore().Name = real)
                     .First(fun c -> c.Name = $"{call}.{api}")
 
         | f :: [real; otherFlow; call; api] ->
             findFlowOrFail f
-            |> fun flow -> 
+            |> fun flow ->
                 flow.GetVerticesOfFlow().OfType<Call>()
                     .Where(fun c -> c.Parent.GetCore().Name = real)
                     .First(fun c -> c.Name = $"{otherFlow}.{call}.{api}")
@@ -48,7 +48,7 @@ module ListnerCommonFunctionGeneratorUtil =
         | _ -> failwithlog "ERROR"
 
 
-    let getSafetyAutoPreDefs  (ctx: List<dsParser.SafetyAutoPreDefContext>) =
+    let getSafetyAutoPreDefs  (ctx: dsParser.SafetyAutoPreDefContext seq) =
             (*
              * safety block 을 parsing 해서 key / value 의 dictionary 로 저장
              *
@@ -96,13 +96,13 @@ module ListnerCommonFunctionGeneratorUtil =
             | AVG of float
             | STD of float
             | TON of float
-        
+
     let getTimes (listTimeCtx: List<dsParser.TimesBlockContext>) : seq<string list * TimeDefinition> =
         let parseTimeParams (name, timeParams: string) : TimeDefinition =
             let regex = new Regex(@"(AVG|STD|TON)\((\d+(\.\d+)?)\)")
-    
+
             let matches = regex.Matches(timeParams)
-    
+
             let extractParam (avg, std, delay) (paramType, value) =
                 validateDecimalPlaces name value
                 match paramType with
@@ -110,15 +110,15 @@ module ListnerCommonFunctionGeneratorUtil =
                 | "STD" -> avg, Some value, delay
                 | "TON" -> avg, std, Some value
                 | _ -> avg, std, delay
-    
+
             let initial = (None, None, None)
-    
+
             let (average, std, onDelay) =
                 matches
                 |> Seq.cast<Match>
                 |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value |> float))
                 |> Seq.fold extractParam initial
-    
+
             { Average = average; Std = std; OnDelay = onDelay }
 
         seq {
@@ -155,19 +155,19 @@ module ListnerCommonFunctionGeneratorUtil =
                 }
 
     let commonOpFunctionExtractor (funcCallCtxs: FuncCallContext array) (callName:string) (system:DsSystem) =
-        if funcCallCtxs.Length > 1 then 
+        if funcCallCtxs.Length > 1 then
             failwithlog $"not support job multi function {callName}"
 
-        if funcCallCtxs.any() then 
+        if funcCallCtxs.any() then
             let funcName = funcCallCtxs.Head().GetText().TrimStart('$')
             Some (system.Functions.Cast<OperatorFunction>().First(fun f->f.Name = funcName))
         else
-            None 
+            None
 
     let getCode (executeCode:String) =
         assert( (executeCode.StartsWith("${") || executeCode.StartsWith("#{")) && executeCode.EndsWith("}"))
         // 처음 "#{" or "${"와 끝의  "}" 제외
-        let pureCode = executeCode.Substring(2, executeCode.Length - 2).TrimEnd('}') 
+        let pureCode = executeCode.Substring(2, executeCode.Length - 2).TrimEnd('}')
         pureCode.Split(';')
             .Map(fun s->s.Trim().Trim([|'\r';'\n'|]))
             .JoinWith(";\r\n").Trim([|'\r';'\n'|])
@@ -190,14 +190,14 @@ module ListnerCommonFunctionGeneratorUtil =
             |_ -> errorLoadCore ctx
         | _-> errorLoadCore devCtx
 
-    
+
     let commonCallParamExtractor (ctx: JobBlockContext) =
         let callListings = ctx.Descendants<CallListingContext>().ToArray()
         [
             for callListingCtx in callListings do
                 let item = callListingCtx.TryFindFirstChild<JobNameContext>().Value.GetText()
-                
-                let jobFqdn = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()  
+
+                let jobFqdn = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()
                 let jobParam =
                     match callListingCtx.TryFindFirstChild<JobTypeOptionContext>() with
                     | Some ctx ->
@@ -209,7 +209,7 @@ module ListnerCommonFunctionGeneratorUtil =
                 yield jobFqdn, jobParam, apiDefCtxs, callListingCtx
         ]
     let createApiResetInfo (terms:string array) (sys:DsSystem) =
-        if terms.Contains("|>") || terms.Contains("<|") then 
+        if terms.Contains("|>") || terms.Contains("<|") then
             // I1 |> I2 <| I3 <|> I4 에 대해서 해석
             let processTerms (terms: string[]) =
                 let mutable currentTerms = []
@@ -244,12 +244,12 @@ module ListnerCommonFunctionGeneratorUtil =
         else
             // I1 <|> I2 와 I2 <|> I3 에 대해서 해석
             let apis = terms |> Array.filter (fun f -> f <> "<|>")
-            let resets = 
+            let resets =
                 apis
                 |> Seq.allPairs apis
-                |> Seq.filter (fun (l, r) -> l <> r) 
+                |> Seq.filter (fun (l, r) -> l <> r)
                 |> Seq.distinctBy (fun (l, r) -> [| l; r |] |> Array.sort |> String.concat ";")
-            
+
             for (left, right) in resets do
                 let opnd1, op, opnd2 = left, "<|>", right
                 ApiResetInfo.Create(sys, opnd1, op |> toModelEdge, opnd2, false) |> ignore

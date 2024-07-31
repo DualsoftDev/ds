@@ -251,6 +251,7 @@ module ImportU =
                 pptNodes
                 |> Seq.filter (fun node -> node.Alias.IsNone)
                 |> Seq.filter (fun node -> node.NodeType.IsCall || node.NodeType = AUTOPRE)
+                |> Seq.toArray
 
 
 

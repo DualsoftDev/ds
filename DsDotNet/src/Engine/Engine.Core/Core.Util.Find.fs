@@ -287,9 +287,16 @@ type FindExtension =
     [<Extension>] static member GetSharedReal(v:Vertex) = v |> getSharedReal
     [<Extension>] static member GetSharedCall(v:Vertex) = v |> getSharedCall
 
-    [<Extension>] static member GetPureReal  (v:Vertex) = v |> getPureReal
-    [<Extension>] static member GetPureCall  (v:Vertex) = v |> tryGetPureCall
+    [<Extension>] static member GetPureReal  (v:Vertex) = v |> tryGetPureReal |> Option.get
+    [<Extension>] static member GetPureCall  (v:Vertex) = v |> tryGetPureCall |> Option.get
+    [<Extension>] static member TryGetPureReal  (v:Vertex) = v |> tryGetPureReal
+    [<Extension>] static member TryGetPureCall  (v:Vertex) = v |> tryGetPureCall
     [<Extension>] static member GetPure (x:Vertex) = getPure x
+
+    [<Extension>] static member GetPureReals (xs:Vertex seq) = 
+                    let reals = xs.OfType<Real>()
+                    let aliasTargetReals = xs.OfType<Alias>().Choose(fun s->s.TryGetPureReal())
+                    reals@aliasTargetReals
       
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
@@ -319,13 +326,13 @@ type FindExtension =
     [<Extension>]
         static member GetVerticesHasJobOfFlow(x:Flow) =  
             getVerticesOfFlow(x)
-                .Choose(fun v -> v.GetPureCall())
+                .Choose(fun v -> v.TryGetPureCall())
                 .Where(fun v -> v.IsJob)
 
     [<Extension>]
         static member GetVerticesHasJobInReal(x:DsSystem) =  
             x.GetVerticesOfCoins()
-                .Choose(fun v -> v.GetPureCall())
+                .Choose(fun v -> v.TryGetPureCall())
                 .Where(fun v -> v.IsJob)
 
 
@@ -346,9 +353,10 @@ type FindExtension =
 
     [<Extension>]
         static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) = 
-            xs
-                .Where(fun v-> v.GetPureCall().IsSome && v.GetPureCall().Value.IsJob) //command 제외
-                .Where(fun v-> v.GetPureCall().Value.TargetJob = job)
+            xs.Where(fun v-> 
+                    match v.TryGetPureCall() with
+                    | Some c -> c.IsJob && c.TargetJob = job
+                    | _ -> false)
 
 
     [<Extension>] static member GetTaskDevsCoin(x:DsSystem) = getTaskDevs(x, true)

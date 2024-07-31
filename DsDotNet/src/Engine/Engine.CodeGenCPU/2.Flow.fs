@@ -97,11 +97,11 @@ type VertexTagManager with
         if startCausals.any()
         then 
             [
-                let tempRisingRelay = (v.System.TagManager:?> SystemManager).GetTempBoolTag("tempRising") 
+                let tempRisingRelay = v.System.GetTempBoolTag("AAAtempRising") 
                 let srcTrigger = startCausals.First().End
 
                 yield  (srcTrigger, v._off.Expr) --| (tempRisingRelay, getFuncName())
-                yield  (tempRisingRelay.Expr, 1|>literal2expr, real.VR.RealSEQData.ToExpression()) --+ (real.VR.RealSEQData, getFuncName())
+                yield  (tempRisingRelay.Expr, 1u|>literal2expr, real.VR.RealSEQData.ToExpression()) --+ (real.VR.RealSEQData, getFuncName())
             ]
         else 
             []      

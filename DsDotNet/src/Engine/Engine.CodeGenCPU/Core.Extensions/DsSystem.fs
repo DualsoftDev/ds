@@ -82,7 +82,9 @@ module ConvertCpuDsSystem =
        
         member s.GetTempTimer(x:HwSystemDef) = 
             getSM(s).GetTempTimerTag(x.Name)
-    
+        member s.GetTempBoolTag(name:string) : PlanVar<bool>=
+            getSM(s).GetTempBoolTag(name)
+
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
         member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))  

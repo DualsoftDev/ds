@@ -229,8 +229,6 @@ module ExpressionModule =
 
     type ActionStatement =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
-        | DuAdd  of condition:IExpression<bool> * sourceAdd1:IExpression * sourceAdd2:IExpression * target:IStorage
-        | DuSub  of condition:IExpression<bool> * sourceSub1:IExpression * sourceSub2:IExpression * target:IStorage
         | DuCopyUdt of CopyUdtStatement
 
    

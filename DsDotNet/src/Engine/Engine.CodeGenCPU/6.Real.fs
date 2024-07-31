@@ -77,15 +77,14 @@ type RealVertexTagManager with
 
     member v.R6_RealSEQMove() = 
         let srcs = getStartEdgeSources(v.Vertex)
-        let transCausalReals =  srcs.OfType<Alias>().Select(fun s->s.GetPureReal())@srcs.OfType<Real>()
-                                    .Where(fun w-> not(w.V.NoTransData))
-
+        let transCausalReals =  srcs.GetPureReals()
+                                    .Where(fun w-> not(w.NoTransData))
 
         if transCausalReals.any() then
             [
-                let srcRealSeq = transCausalReals.First().VR.RealSEQData 
-                let tgtRealSeq = v.RealSEQData
-                yield (v.GP.Expr, srcRealSeq.BoxedValue|>literal2expr) --> (tgtRealSeq, getFuncName())
+                let srcTagSEQ = transCausalReals.First().VR.RealSEQData  
+                let tgtTagSEQ = v.RealSEQData
+                yield (v.GP.Expr, srcTagSEQ.BoxedValue|>literal2expr) --> (tgtTagSEQ, getFuncName())
             ]
         else 
             []

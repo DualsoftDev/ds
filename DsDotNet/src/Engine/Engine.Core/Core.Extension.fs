@@ -54,10 +54,10 @@ module CoreExtensionModule =
         tryGetPure v |> Option.defaultWith(fun () -> failwithlog $"ERROR: Failed to getPure({v})")
 
     /// Real 자신이거나 RealEx Target Real
-    let getPureReal(v:Vertex) : Real =
+    let tryGetPureReal(v:Vertex) : Real option=
         match tryGetPure(v) with
-        | Some (:? Real as r) -> r
-        | _ -> failwithlog $"ERROR: {v.Name} is not real!!"
+        | Some (:? Real as r) -> Some r
+        | _ -> None
 
     /// Call 자신이거나 Alias Target Call
     let tryGetPureCall(v:Vertex) : Call option =

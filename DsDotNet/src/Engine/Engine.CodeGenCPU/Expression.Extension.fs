@@ -56,12 +56,16 @@ module ExpressionExtension =
     /// set 조건, reset 조건을 받아서 --> 추가적으로 자기 유지되는 reset coil 과 comment 를 받아서 CommentedStatement 생성하는 함수를 반환하는 curried function
     let (==|) (sets, rsts) = coilOp (fun s r c -> c <== ((s <||> var2expr c) <&&> (!@ r))) sets rsts
 
-    /// Create Add Statement   //todo DuAdd 내부 처리 필요
-    let (--+)  (sets, src1, src2) (target, comment:string)  = 
-        DuAction(DuAdd(sets, src1, src2, target))  |> withExpressionComment comment
-    /// Create Sub Statement   //todo DuAdd 내부 처리 필요
-    let (---)  (sets, src1, src2) (target, comment:string)  = 
-        DuAction(DuSub(sets, src1, src2, target))  |> withExpressionComment comment
+    /// Create Add Statement   
+    let (--+)  (sets:Expression<bool>, src1:IExpression, src2:IExpression) (target, comment:string)  = 
+        let addExpr = fAdd [src1;src2]
+        DuAssign(Some(sets), addExpr,  target)  |> withExpressionComment comment
+
+    /// Create Sub Statement   
+    let (---)  (sets:Expression<bool>, src1:IExpression, src2:IExpression) (target, comment:string)  = 
+        let addExpr = fSub [src1;src2]
+        DuAssign(Some(sets), addExpr,  target)  |> withExpressionComment comment
+
     /// Create Copy Statement 
     let (-->) (sets, copyExpr) (target, comment:string) = 
         DuAction(DuCopy(sets, copyExpr, target))  |> withExpressionComment comment

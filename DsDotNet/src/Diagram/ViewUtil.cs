@@ -271,7 +271,7 @@ namespace Diagram.View.MSAGL
                                 }
                                 else if (n.Vertex is Alias a)
                                 {
-                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(a.GetPureCall().Value.TargetJob).Value));
+                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(a.TryGetPureCall().Value.TargetJob).Value));
                                 }
                                 else
                                 {

@@ -52,8 +52,8 @@ module ConvertErrorCheck =
         let exEdges =
             flowEdges
                 .Where(fun e ->
-                    e.Source.GetPureCall().IsSome
-                        || e.Target.GetPureCall().IsSome)  
+                    e.Source.TryGetPureCall().IsSome
+                        || e.Target.TryGetPureCall().IsSome)  
 
         if not(exEdges.any()) then
             failwithf $"PLC 시스템은 외부시작 신호가 없으면 시작 불가 입니다. HelloDS 모델을 참고하세요"

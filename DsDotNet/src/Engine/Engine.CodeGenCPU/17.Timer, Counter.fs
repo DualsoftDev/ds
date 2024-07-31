@@ -26,7 +26,7 @@ type DsSystem with
                     yield (sets) --@ (call.VC.TDON, call.PresetTime, fn)
 
             for alias in aliasCalls do
-                let call = alias.V.Vertex.GetPureCall().Value
+                let call = alias.V.Vertex.TryGetPureCall().Value
                 if call.UsingTon then 
                     let sets = alias.V.ST.Expr<||>  alias.V.SF.Expr  <&&> call.End
                     yield (sets) --@ (alias.VC.TDON, call.PresetTime, fn)

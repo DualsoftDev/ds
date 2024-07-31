@@ -174,11 +174,11 @@ module EdgeModule =
         let g = Graph<Vertex, Edge>(None)
        
         for vertex in graph.Islands do
-            if vertex.GetPureCall().IsNone then  //flow에서 조건으로 Call은 제외
+            if vertex.TryGetPureCall().IsNone then  //flow에서 조건으로 Call은 제외
                 g.Vertices.Add (vertex.GetPureReal():>Vertex) |>ignore
 
         for edge in graph.Edges do
-            if edge.Source.GetPureCall().IsNone then //flow에서 조건으로 Call은 제외
+            if edge.Source.TryGetPureCall().IsNone then //flow에서 조건으로 Call은 제외
                 let isEdgeMatch =
                     g.Edges.any(fun (e:Edge) ->
                         e.EdgeType = edge.EdgeType

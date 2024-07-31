@@ -34,7 +34,7 @@ module ConvertCPU =
         isValidVertex
 
     ///Vertex 타입이 Spec에 해당하면 적용
-    let private applyVertexSpec(v:Vertex) =
+    let private applyVertexSpec(v:Vertex) isActive =
         [
             if IsSpec (v, RealInFlow, AliasFalse) then
                 let vr = v.TagManager :?> RealVertexTagManager
@@ -46,7 +46,6 @@ module ConvertCPU =
                 yield vr.R3_RealStartPoint()
                 yield vr.R4_RealLink() 
                 yield! vr.R5_DummyDAGCoils() 
-                yield! vr.R6_RealSEQMove() 
                 yield! vr.R7_RealGoingOriginError() 
                 yield! vr.R8_RealGoingPulse() 
                 yield! vr.R10_RealGoingTime() 
@@ -56,7 +55,10 @@ module ConvertCPU =
                 yield vr.F1_RootStart()
                 yield vr.F2_RootReset()
                 yield vr.F5_HomeCommand()
-                yield! vr.F6_SEQTempNumGeneration()
+
+                if isActive then
+                    yield! vr.R6_RealSEQMove() 
+                    yield! vr.F6_SEQTempNumGeneration()
 
                 
                 yield! vr.D1_DAGHeadStart()
@@ -131,7 +133,7 @@ module ConvertCPU =
   
     let getTryMasterCall(calls : Vertex seq) = 
         let pureCalls = 
-            calls.OfType<Call>()@calls.OfType<Alias>().Choose(fun a->a.GetPureCall())
+            calls.OfType<Call>()@calls.OfType<Alias>().Choose(fun a->a.TryGetPureCall())
         
         if pureCalls.Select(fun c->c.TargetJob).Distinct().Count() > 1 then
             failwithlog $"Error : {getFuncName()} {pureCalls.Select(fun c->c.TargetJob).Distinct().Count()}"
@@ -282,7 +284,7 @@ module ConvertCPU =
 
             //Vertex 적용
             for v in sys.GetVertices() do
-                yield! applyVertexSpec v
+                yield! applyVertexSpec v isActive
 
             //Api 적용 
             //yield! applyApiItem sys

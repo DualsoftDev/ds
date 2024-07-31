@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 type VertexTagManager with
     member v.C1_CallMemo() =
         let v = v :?> CallVertexTagManager
-        let call = v.Vertex.GetPureCall().Value
+        let call = v.Vertex.GetPureCall()
        
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
         
@@ -49,7 +49,7 @@ type VertexTagManager with
         [
             let f = getFuncName()
             for coin in coins do
-                let call = coin.Vertex.GetPureCall().Value
+                let call = coin.Vertex.TryGetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
@@ -63,7 +63,7 @@ type VertexTagManager with
         [
             let f = getFuncName()
             for coin in coins do
-                let call = coin.Vertex.GetPureCall().Value
+                let call = coin.Vertex.TryGetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
                 let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr

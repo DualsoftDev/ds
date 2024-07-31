@@ -25,24 +25,39 @@ type XgxConvertDsCPU(target:PlatformTarget) =
         let testCode = """
              [sys] HelloDS = {
                 [flow] STN1 = {
+                    외부시작.ADV > Work1_1;
+                    Work1 > Work3 => Work4 =|> 클리어;
+                    Work1 => Work2 => Work4;
                     Work1 = {
-                        Device1.ADV; 
-                        Device2.ADV; 
-                        Device1.RET; 
-                        Device2.RET; 
+                        Device1.ADV > Device1.RET;
+                    }
+                    [aliases] = {
+                        Work1 = { Work1_1; }
                     }
                 }
                 [jobs] = {
-                    STN1.Device1.ADV = { STN1_Device1.ADV(-, -); }
-                    STN1.Device2.ADV = { STN1_Device2.ADV(-, -); }
-                    STN1.Device1.RET = { STN1_Device1.RET(-, -); }
-                    STN1.Device2.RET = { STN1_Device2.RET(-, -); }
+                    STN1.Device1.ADV = (_, _);
+                    STN1.Device1.RET = (_, _);
+                    STN1.외부시작.ADV = (_, -);
                 }
-   
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_EXT; 
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_Device1; 
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1_Device2; 
+                [prop] = {
+                    [layouts] = {
+                        STN1__Device1 = (402, 710, 220, 80);
+                        STN1__외부시작 = (1103, 95, 220, 80);
+                    }
+                    [notrans] = {
+                        STN1.Work2;
+                    }
+                }
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
+                    STN1__Device1,
+                    STN1__외부시작; 
+                [versions] = {
+                    DS-Langugage-Version = 1.0.0.1;
+                    DS-Engine-Version = 0.9.9.7;
+                }
             }
+            //DS Library Date = [Library Release Date 24.3.26]
             """
 
         let systemRepo = ShareableSystemRepository()

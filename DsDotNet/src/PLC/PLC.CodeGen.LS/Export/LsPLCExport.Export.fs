@@ -174,7 +174,6 @@ module XgiExportModule =
 
         // Rung 별로 생성
         for CommentAndStatements(cmt, stmts) in commentedStatements do
-
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if cmt.NonNullAny() then
                 let xml =
@@ -186,6 +185,7 @@ module XgiExportModule =
                 //tracefn $"Generating statement::{stmt.ToText()}"
                 match stmt with
                 | DuAssign(condition, expr, target) when isXgk || expr.DataType <> typeof<bool> ->
+                
                     let cond =
                         match condition with
                         | Some c -> c

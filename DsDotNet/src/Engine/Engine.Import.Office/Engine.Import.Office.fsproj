@@ -4,7 +4,7 @@
 		<LangVersion>8.0</LangVersion>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RootNamespace>Engine.Import.Office</RootNamespace>
-        <OutputType>Library</OutputType>
+		<OutputType>Library</OutputType>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <AssemblyName>Engine.Import.Office</AssemblyName>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -41,6 +41,7 @@
         <Compile Include="ImportPPTExt.fs" />
         <Compile Include="ImportPPT.fs" />
         <Compile Include="LibraryPPTLoader.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>

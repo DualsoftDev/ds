@@ -50,7 +50,7 @@ module ImportUtilForLib =
 
     let getLibraryPathsAndParams (param: CallParams) =
         let libFilePath, autoGenSys = getNewDevice param.MySys param.DevName param.ApiName
-        let relPath = PathManager.getRelativePath (currentFileName |> DsFile) (libFilePath |> DsFile)
+        let relPath = PathManager.getRelativePath (DsFile currentFileName) (DsFile libFilePath)
         let getProperty name = getParams (libFilePath, relPath, name, param.MySys, DuDevice, ShareableSystemRepository())
         (libFilePath, autoGenSys, getProperty)
 

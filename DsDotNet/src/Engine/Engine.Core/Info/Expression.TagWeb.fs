@@ -55,7 +55,7 @@ type TagWebExt =
         
     [<Extension>]
     static member SetValue(x:TagWeb, value:obj) =
-        if value = true then
+        if value = true then    // obj 이므로 '= true' 생략 못함
             debugfn $"Found true set value for {x.Name}"
         x._SerializedObject <- ObjectHolder.Create(value).Serialize()
     [<Extension>]

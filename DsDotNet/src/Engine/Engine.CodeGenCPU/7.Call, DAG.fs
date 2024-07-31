@@ -12,15 +12,15 @@ type VertexTagManager with
         let call = v.Vertex.GetPureCall()
        
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
-        
-        let sets = 
+
+        let sets =
             (
                 call.StartPointExpr
                 <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr )
                 <||> (mop <&&> v.SF.Expr)
             )
-            <&&> call.SafetyExpr 
-            
+            <&&> call.SafetyExpr
+
         let rst =
             if call.UsingTon then
                 (v.TDON.DN.Expr <&&> dop) <||> (call.End <&&> mop)
@@ -30,7 +30,7 @@ type VertexTagManager with
 
         let parentReal = call.Parent.GetCore() :?> Vertex
         let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
-        
+
         let sets = sets <&&> !@rstMemos.ToOrElseOff()
         let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
 
@@ -59,7 +59,8 @@ type VertexTagManager with
 
     member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
-        let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCoin)
+        let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCoin).ToArray()
+
         [
             let f = getFuncName()
             for coin in coins do
@@ -70,7 +71,7 @@ type VertexTagManager with
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, f )
         ]
-        
+
     member v.D3_DAGCoinEnd() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Select(getVMCoin)
@@ -107,10 +108,9 @@ type VertexTagManager with
         ]
 
 
-       
-    
 
 
 
 
-    
+
+

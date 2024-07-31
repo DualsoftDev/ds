@@ -128,7 +128,7 @@ module ImportUtilVertex =
     let  getParent
         (
             edge: pptEdge,
-            parents: Dictionary<pptNode, seq<pptNode>>,
+            parents: IDictionary<pptNode, seq<pptNode>>,
             dicSeg: Dictionary<string, Vertex>
         ) =
         ImportDocCheck.SameParent(parents, edge)

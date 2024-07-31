@@ -254,7 +254,7 @@ module PPTDocModule =
                 let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
                 let headPage = page = pptHeadPage
 
-                let node = pptNode (shape, page, flowName, slideSize, headPage, masterMacros, target)
+                let node = pptNode.Create(shape, page, flowName, slideSize, headPage, masterMacros)
 
                 if node.Name = "" then
                     shape.ErrorName(ErrID._13, page)

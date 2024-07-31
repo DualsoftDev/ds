@@ -748,7 +748,7 @@ module ImportU =
         
         
         [<Extension>]
-        static member PostCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
+        static member PostCheckPPTSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =
 
             (* Root Call 연결 없음 체크 *)
             let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
@@ -761,18 +761,18 @@ module ImportU =
                                 n.Shape.ErrorShape(ErrID._71, n.PageNum)
                 )
           
-          
             (* 복수의 작업에서 SEQ 전송 Start Edge 체크*)
-            doc.Nodes.Where(fun n -> n.NodeType.IsReal) 
-                .Iter(fun n -> 
-                    let xs = doc.Edges.Where(fun e -> e.IsStartEdge && e.EndNode = n)
-                                      .Select(fun e-> doc.DicVertex.[e.StartNode.Key])
+            if not(isLib) then
+                doc.Nodes.Where(fun n -> n.NodeType.IsReal) 
+                    .Iter(fun n -> 
+                        let xs = doc.Edges.Where(fun e -> e.IsStartEdge && e.EndNode = n)
+                                          .Select(fun e-> doc.DicVertex.[e.StartNode.Key])
 
-                    let pureReals = xs.GetPureReals()
-                    if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then 
-                        let error = String.Join("\r\n", (pureReals.Select(fun f->f.DequotedQualifiedName)))
-                        failwithlog $"복수의 작업에서 SEQ 전송을 시도하고 있습니다. \r\n복수 작업 :\r\n {error}"
-                )
+                        let pureReals = xs.GetPureReals()
+                        if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then 
+                            let error = String.Join("\r\n", (pureReals.Select(fun f->f.DequotedQualifiedName)))
+                            failwithlog $"복수의 작업에서 SEQ 전송을 시도하고 있습니다. \r\n복수 작업 :\r\n {error}"
+                    )
 
                                 
            
@@ -843,13 +843,13 @@ module ImportU =
 
         [<Extension>]
         static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
-            
+            let isActive = activeSys.IsSome && activeSys.Value = sys
             doc.PreCheckPPTSystem(sys)
 
             doc.MakeFlows(sys) |> ignore
 
             //자동생성
-            if activeSys.IsSome && activeSys.Value = sys && not(isLib) && isCreateBtnLLib
+            if isActive && not(isLib) && isCreateBtnLLib
             then                 
                 sys.CreateGenBtnLamp()
 
@@ -874,5 +874,5 @@ module ImportU =
             //Job 기본 Address SlideNote로 부터 가져오기 
             doc.MakeAddressBySlideNote(sys)
             
-            doc.PostCheckPPTSystem(sys)
+            doc.PostCheckPPTSystem(sys, isLib)
             doc.IsBuilded <- true

@@ -141,7 +141,9 @@ type RealVertexTagManager with
 
                     elif RuntimeDS.RuntimeMotionMode = MotionSync then
                         if v.Real.TimeAvg.IsSome then
-                            yield (v.MotionEnd.Expr    , v._off.Expr) --| (v.TimeEnd, fn)   
+                            yield (v.MotionEnd.Expr    , v._off.Expr) --| (v.TimeEnd, fn)   //3D 사용하면   시간도 모션에 의해서 끝남
+                        else 
+                            ()
                     else 
                         failwithlog $"RuntimeMotionMode err : {RuntimeDS.RuntimeMotionMode}"
                 else

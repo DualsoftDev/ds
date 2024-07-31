@@ -66,8 +66,6 @@ module DsAddressModule =
 
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
-
-
         let addr =
             if addr.IsNullOrEmpty() then
                 failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  

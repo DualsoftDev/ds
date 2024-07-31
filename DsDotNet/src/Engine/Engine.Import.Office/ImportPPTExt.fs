@@ -239,13 +239,12 @@ module ImportU =
                     | REALExF -> // isOtherFlowRealAlias is false  (외부 플로우에 있을뿐 Or Alias가 아님)
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                         dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine("_"), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
-                        node.UpdateTime(real)
+                        node.UpdateRealProperty(real)
                     | _ ->
                         let real = Real.Create(node.Name, dicFlow.[node.PageNum])
-                        node.UpdateTime(real)
-                        real.Finished <- node.RealFinished
-                        real.NoTransData <- node.RealNoTrans
-                        dicVertex.Add(node.Key, real))
+                        dicVertex.Add(node.Key, real)
+                        node.UpdateRealProperty(real)
+                        )
 
             let callNAutoPres =
                 pptNodes
@@ -308,7 +307,7 @@ module ImportU =
                         let flow = dicFlow.[node.PageNum]
                         if node.NodeType = REALExF then // isOtherFlowRealAlias is true
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
-                            node.UpdateTime(real)
+                            node.UpdateRealProperty(real)
                             let name = real.ParentNPureNames.Combine("_")
                             Alias.Create(
                                 $"{name}_{node.AliasNumber}" ,
@@ -319,7 +318,7 @@ module ImportU =
                         elif dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
-                            node.UpdateTime(real)
+                            node.UpdateRealProperty(real)
                             let name = call.DeviceNApi.Combine("_")
                             Alias.Create(
                                 $"{name}_{node.AliasNumber}" ,
@@ -330,7 +329,7 @@ module ImportU =
 
                             match segOrg with
                             | :? Real as rt ->
-                                node.UpdateTime(rt)
+                                node.UpdateRealProperty(rt)
                                 let otherFlow  =  flow <> rt.Flow
                                 let name = if otherFlow then $"{rt.Flow.Name}{rt.Name}"else rt.Name
                                 Alias.Create(
@@ -746,7 +745,8 @@ module ImportU =
                                            , c.JobParam.TaskInCount
                                            , c.JobParam.TaskOutCount))
                     ).Iter(errCheck)
-
+        
+        
         [<Extension>]
         static member PostCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
 
@@ -761,6 +761,18 @@ module ImportU =
                                 n.Shape.ErrorShape(ErrID._71, n.PageNum)
                 )
           
+          
+            (* 복수의 작업에서 SEQ 전송 Start Edge 체크*)
+            doc.Nodes.Where(fun n -> n.NodeType.IsReal) 
+                .Iter(fun n -> 
+                    let xs = doc.Edges.Where(fun e -> e.IsStartEdge && e.EndNode = n)
+                                      .Select(fun e-> doc.DicVertex.[e.StartNode.Key])
+
+                    let pureReals = xs.GetPureReals()
+                    if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then 
+                        let error = String.Join("\r\n", (pureReals.Select(fun f->f.DequotedQualifiedName)))
+                        failwithlog $"복수의 작업에서 SEQ 전송을 시도하고 있습니다. \r\n복수 작업 :\r\n {error}"
+                )
 
                                 
            

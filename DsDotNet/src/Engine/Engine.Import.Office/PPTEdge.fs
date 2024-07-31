@@ -45,4 +45,8 @@ module PPTEdgeModule =
                 $"{iPage};{sName}{causal.ToText()}{eName}"
 
         member val Causal: ModelingEdgeType = causal
+        member x.IsStartEdge =  causal = ModelingEdgeType.StartEdge
+                             || causal = ModelingEdgeType.StartReset
+                             || causal = ModelingEdgeType.SelfReset
+                
 

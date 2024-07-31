@@ -215,7 +215,7 @@ module PPTNodeModule =
         member x.TaskDevParaIn  = taskDevParam.InParam
         member x.TaskDevParaOut = taskDevParam.OutParam
 
-        member x.UpdateTime(real: Real) =
+        member x.UpdateRealProperty(real: Real) =
             let checkAndUpdateTime (newTime: float option) getField setField =
                 match newTime with
                 | Some newValue ->
@@ -228,7 +228,14 @@ module PPTNodeModule =
             checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
 
-            
+            if real.Finished = true && x.RealFinished = false then  //이미 설정을 true 하고 다른데서 변경        
+                shape.ErrorName(ErrID._77, iPage)
+            if real.NoTransData = true && x.RealNoTrans = false then //이미 설정을 true 하고 다른데서 변경        
+                shape.ErrorName(ErrID._77, iPage)
+
+            real.Finished <- x.RealFinished
+            real.NoTransData <- x.RealNoTrans
+
         member x.Job = 
             getJobNameWithTaskDevParaIO(x.JobPure, taskDevParam).ToArray()
            

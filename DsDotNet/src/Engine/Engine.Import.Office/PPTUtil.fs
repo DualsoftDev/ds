@@ -138,19 +138,15 @@ module PPTUtil =
         [<Extension>]
         static member GetId(shape: Shape) =
             shape
-                .Descendants<NonVisualShapeProperties>()
-                .First()
-                .Descendants<NonVisualDrawingProperties>()
-                .First()
+                .Descendants<NonVisualShapeProperties>().First()
+                .Descendants<NonVisualDrawingProperties>().First()
                 .Id
-
 
         [<Extension>]
         static member IsOutlineExist(shape: Shape) =
             let outline =
                 shape
-                    .Descendants<ShapeProperties>()
-                    .First()
+                    .Descendants<ShapeProperties>().First()
                     .Descendants<Drawing.Outline>()
                     .FirstOrDefault()
 
@@ -163,8 +159,7 @@ module PPTUtil =
         static member IsOutlineConnectionExist(shape: #ConnectionShape) =
             let outline =
                 shape
-                    .Descendants<ShapeProperties>()
-                    .First()
+                    .Descendants<ShapeProperties>().First()
                     .Descendants<Drawing.Outline>()
                     .FirstOrDefault()
 
@@ -195,10 +190,8 @@ module PPTUtil =
         static member IsNonDirectional(shape: #ConnectionShape) =
             let outline =
                 shape
-                    .Descendants<ShapeProperties>()
-                    .First()
-                    .Descendants<Drawing.Outline>()
-                    .FirstOrDefault()
+                    .Descendants<ShapeProperties>().First()
+                    .Descendants<Drawing.Outline>().FirstOrDefault()
 
             if (outline = null) then
                 true
@@ -249,27 +242,27 @@ module PPTUtil =
 
         [<Extension>]
         static member ShapeID(shape: Shape) =
-            let shapeProperties = shape.Descendants<NonVisualShapeProperties>().FirstOrDefault()
+            let shapeProperties = shape.Descendants<NonVisualShapeProperties>().First()
 
             let prop =
-                shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault()
+                shapeProperties.Descendants<NonVisualDrawingProperties>().First()
 
             prop.Id.Value
 
         [<Extension>]
         static member ConnectionShapeID(shape: ConnectionShape) =
             let shapeProperties =
-                shape.Descendants<NonVisualConnectionShapeProperties>().FirstOrDefault()
+                shape.Descendants<NonVisualConnectionShapeProperties>().First()
 
             let prop =
-                shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault()
+                shapeProperties.Descendants<NonVisualDrawingProperties>().First()
 
             prop.Id.Value
 
         [<Extension>]
         static member GroupName(gShape: #GroupShape) =
             let shapeProperties =
-                gShape.Descendants<NonVisualGroupShapeProperties>().FirstOrDefault()
+                gShape.Descendants<NonVisualGroupShapeProperties>().First()
 
             let prop = shapeProperties.Descendants<NonVisualDrawingProperties>().First()
             prop.Name.Value
@@ -308,8 +301,7 @@ module PPTUtil =
         static member IsRound(geometry: #Drawing.PresetGeometry) =
             let shapeGuide =
                 geometry
-                    .Descendants<Drawing.AdjustValueList>()
-                    .First()
+                    .Descendants<Drawing.AdjustValueList>().First()
                     .Descendants<Drawing.ShapeGuide>()
 
             shapeGuide.Any() |> not || shapeGuide.First().Formula.Value = "val 0" |> not
@@ -317,8 +309,7 @@ module PPTUtil =
         [<Extension>]
         static member GetGeometry(shape: Shape) =
                     shape
-                        .Descendants<ShapeProperties>()
-                        .First()
+                        .Descendants<ShapeProperties>().First()
                         .Descendants<Drawing.PresetGeometry>()
                         .FirstOrDefault()
 
@@ -532,30 +523,26 @@ module PPTUtil =
         static member IsDashShape(shape: Shape) =
             if
                 (shape
-                    .Descendants<ShapeProperties>()
-                    .First()
-                    .Descendants<Drawing.Outline>()
-                    .Any()
+                    .Descendants<ShapeProperties>().First()
+                    .Descendants<Drawing.Outline>().Any()
                  |> not)
             then
                 false
             else
                 let presetDash =
                     shape
-                        .Descendants<ShapeProperties>()
-                        .First()
-                        .Descendants<Drawing.Outline>()
-                        .FirstOrDefault()
+                        .Descendants<ShapeProperties>().First()
+                        .Descendants<Drawing.Outline>().First()
                         .Descendants<Drawing.PresetDash>()
 
                 presetDash.Any()
-                && presetDash.FirstOrDefault().Val.Value = Drawing.PresetLineDashValues.Solid
+                && presetDash.First().Val.Value = Drawing.PresetLineDashValues.Solid
                    |> not
 
         [<Extension>]
         static member IsDashLine(conn: ConnectionShape) =
-            let shapeProperties = conn.Descendants<ShapeProperties>().FirstOrDefault()
-            let outline = shapeProperties.Descendants<Drawing.Outline>().FirstOrDefault()
+            let shapeProperties = conn.Descendants<ShapeProperties>().First()
+            let outline = shapeProperties.Descendants<Drawing.Outline>().First()
             let presetDash = outline.Descendants<Drawing.PresetDash>().FirstOrDefault()
 
             (presetDash = null || presetDash.Val.Value = Drawing.PresetLineDashValues.Solid)
@@ -564,10 +551,10 @@ module PPTUtil =
         [<Extension>]
         static member EdgeName(conn: #ConnectionShape) =
             let shapeProperties =
-                conn.Descendants<NonVisualConnectionShapeProperties>().FirstOrDefault()
+                conn.Descendants<NonVisualConnectionShapeProperties>().First()
 
             let prop =
-                shapeProperties.Descendants<NonVisualDrawingProperties>().FirstOrDefault()
+                shapeProperties.Descendants<NonVisualDrawingProperties>().First()
 
             prop.Name.Value
 
@@ -577,8 +564,7 @@ module PPTUtil =
                 false
             elif
                 (shape
-                    .Descendants<ApplicationNonVisualDrawingProperties>()
-                    .First()
+                    .Descendants<ApplicationNonVisualDrawingProperties>().First()
                     .Descendants<PlaceholderShape>()
                     .Any()
                  |> not)
@@ -601,20 +587,21 @@ module PPTUtil =
 
         [<Extension>]
         static member PageTitle(slidePart: #SlidePart) =
-            let tilteTexts =
+            let titleTexts =
                 slidePart.Slide.CommonSlideData.ShapeTree.Descendants<Shape>()
-                |> Seq.filter (fun shape -> shape.Descendants<ApplicationNonVisualDrawingProperties>().Any())
-                |> Seq.map (fun shape -> shape, shape.Descendants<ApplicationNonVisualDrawingProperties>().First())
-                |> Seq.filter (fun (shape, tilte) -> tilte.Descendants<PlaceholderShape>().Any())
-                |> Seq.filter (fun (shape, tilte) -> tilte.Descendants<PlaceholderShape>().First().Type <> null)
-                |> Seq.filter (fun (shape, tilte) ->
-                        let titleType = tilte.Descendants<PlaceholderShape>().First().Type.InnerText.ToLower()
-                        titleType.Contains "title"
-                        )
-                |> Seq.map (fun (shape, tilte) -> shape.InnerText)
+                |> Seq.choose (fun shape -> 
+                    let appNonVisProps = shape.Descendants<ApplicationNonVisualDrawingProperties>() |> Seq.tryHead
+                    match appNonVisProps with
+                    | Some xs -> 
+                        let placeholderShape = xs.Descendants<PlaceholderShape>() |> Seq.tryHead
+                        match placeholderShape with
+                        | Some ps when ps.Type <> null && ps.Type.InnerText.ToLower().Contains("title") -> 
+                            Some(shape.InnerText)
+                        | _ -> None
+                    | None -> None)
 
-            if (tilteTexts.Any()) then
-                tilteTexts |> Seq.head |> trimSpace |> trimNewLine
+            if titleTexts |> Seq.isEmpty |> not then
+                titleTexts |> Seq.head |> trimSpace |> trimNewLine
             else
                 ""
 

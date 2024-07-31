@@ -26,11 +26,6 @@ module CodeConvertUtil =
     type CodeConvertUtilExt =
         [<Extension>]
         static member GetStartCausals(xs:Vertex seq, usingRoot:bool) =
-                let pureReals = xs.GetPureReals()
-                if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then 
-                    let error = String.Join("\r\n", (pureReals.Select(fun f->f.DequotedQualifiedName)))
-                    failwithlog $"복수의 작업에서 SEQ 전송을 시도하고 있습니다. \r\n복수 작업 :\r\n {error}"
-
                 xs.Select(fun f->
                 match f with
                 | :? Real    as r  -> r.V.F
@@ -38,19 +33,20 @@ module CodeConvertUtil =
                 | :? Alias   as a  -> if usingRoot then getPure(a.V.Vertex).V.F else a.V.F
                 | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
+
         //리셋 원인
         [<Extension>]
         static member GetResetCausals(xs:Vertex seq) =
 
                 if xs.Where(fun f -> f.GetPure() :? Real).Count() > 1 then 
-                    let error = String.Join(", ", (xs.Select(fun f->f.DequotedQualifiedName)))
-                    failwithlog $"리셋은 하나의 작업에서 가능합니다. \r\n(복수 작업 : {error})"
+                    let error = String.Join("\r\n", (xs.Select(fun f->f.DequotedQualifiedName)))
+                    failwithlog $"리셋은 하나의 작업에서 가능합니다. \r\n(복수 작업 :\r\n {error})"
 
                 xs.Select(fun f ->
                     match getPure f with
                     | :? Real    as r  -> r.V.GP
                     | :? Call as c(* when c.IsOperator*) -> c.V.ET
-                    | _ -> failwithlog $"Error GetResetCausals()"
+                    | _ -> failwithlog $"Error {getFuncName()}"
                 ).Distinct()
 
         [<Extension>]

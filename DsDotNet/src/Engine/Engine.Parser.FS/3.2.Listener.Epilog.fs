@@ -14,15 +14,15 @@ open System.Collections.Generic
 [<AutoOpen>]
 module EtcListenerModule =
 
-    let getHwSysItem (hwItem:HwSysItemDefContext)= 
+    let getHwSysItem (hwItem:HwSysItemDefContext)=
 
         let nameNAddr = hwItem.TryFindFirstChild<HwSysItemNameAddrContext>().Value
         let name = nameNAddr.TryFindFirstChild<HwSysItemNameContext>().Value.GetText()
 
         let (inAddr, inParam), (outAddr, outParm) =
             match nameNAddr.TryFindFirstChild<TaskDevParaInOutContext>() with
-            | Some devParam -> 
-                commonDeviceParamExtractor devParam 
+            | Some devParam ->
+                commonDeviceParamExtractor devParam
             | None ->
                 (TextAddrEmpty, defaultTaskDevPara()),(TextAddrEmpty, defaultTaskDevPara())
         name, inParam, outParm, inAddr, outAddr
@@ -61,7 +61,7 @@ module EtcListenerModule =
                         x.ButtonCategories.Add(key) |> ignore
 
                     let buttonDefs = first.Descendants<HwSysItemDefContext>().ToArray()
-               
+
                     let flowBtnInfo =
                         [
                             for bd in buttonDefs do
@@ -123,10 +123,10 @@ module EtcListenerModule =
                                     | [] -> return targetLmpType, lmpName , inAddr, outAddr, None
                                     | h::[] ->
                                         let! flow = h.GetText() |> system.TryFindFlow
-                                        return targetLmpType, lmpName,  inAddr, outAddr, Some flow 
+                                        return targetLmpType, lmpName,  inAddr, outAddr, Some flow
                                     | _ ->
                                         let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
-                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"                                  
+                                        failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
                                 }
                         ]
 
@@ -164,10 +164,10 @@ module EtcListenerModule =
                                             .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
                                             .ToHashSet()
 
-                                    return targetCndType, cndName, inParam, outParam, flows, inAddr, outAddr 
+                                    return targetCndType, cndName, inParam, outParam, flows, inAddr, outAddr
                                 } ]
 
-                    for fci in flowConditionInfo |> List.choose id do                    
+                    for fci in flowConditionInfo |> List.choose id do
                         let targetCndType, cndName, _, _,  flows, inAddr, outAddr = fci
 
                         for flow in flows do
@@ -178,16 +178,16 @@ module EtcListenerModule =
             let safetyDefs = ctx.Descendants<SafetyAutoPreDefContext>()
             let safetyKvs = getSafetyAutoPreDefs safetyDefs
             let curSystem = x.TheSystem
-           
+
             for (key, values) in safetyKvs do
-                let safetyholder=  getSafetyAutoPreCall curSystem key 
+                let safetyholder=  getSafetyAutoPreCall curSystem key
                 let safetyConditions =
                     [
                         for value in values do
                             match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
                             | Some j -> yield j
                             | None -> failWithLog $"{value} is not job Name"
-                    ] 
+                    ]
                     |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
 
                 safetyConditions.Iter(fun sc ->
@@ -197,18 +197,18 @@ module EtcListenerModule =
         member x.ProcessAutoPreBlock(ctx: AutoPreBlockContext) =
             let autopreDefs = ctx.Descendants<SafetyAutoPreDefContext>()
             let autopreKvs = getSafetyAutoPreDefs autopreDefs
-              
+
             let curSystem = x.TheSystem
 
             for (key, values) in autopreKvs do
-                let autopreKey =  getSafetyAutoPreCall curSystem key 
+                let autopreKey =  getSafetyAutoPreCall curSystem key
                 let autopreConditions =
                     [
                         for value in values do
                             match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
                             | Some j -> yield j
                             | None -> failWithLog $"{value} is not job Name"
-                    ] 
+                    ]
                     |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
 
                 for sc in autopreConditions do

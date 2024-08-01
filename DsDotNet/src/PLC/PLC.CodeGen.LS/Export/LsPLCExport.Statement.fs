@@ -93,12 +93,6 @@ module StatementExtensionModule =
                             Output = target }
                     augs.Statements.Add augFunc
 
-                //| cond (* , None when && exp.DataType <> typedefof<bool>*) ->
-                //    let newExp = exp.CollectExpandedExpression(pack)
-                //    if exp.DataType = typedefof<bool> then
-                //    else
-                //    failwith $"ERROR: not yet."
-
                 | _ ->
                     assert(exp.FunctionName.IsNone || isOpL(exp.FunctionName.Value))
                     assert(condition.IsNone)

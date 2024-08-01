@@ -516,7 +516,6 @@ module internal rec Command =
 
     /// 왼쪽에 condition (None 이면 _ON) 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
     let xmlXgkFBRight (prjParam: XgxProjectParams) (x, y) (condition:IExpression<bool> option) (fbParam: string) : XmlOutput =
-        //assert (x = 0)
         let inner =
             [ 
                 let cond = condition |? fakeAlwaysOnExpression

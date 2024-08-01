@@ -99,14 +99,14 @@ module internal Common =
     let hlineStartMarkAt (x, y) =
         elementFull (int ElementType.HorzLineMode) (coord (x, y)) "" ""
 
-    /// debugging 용 xml comment 생성
+    /// [rxi] debugging 용 xml comment 생성
     let rxiCommentAtCoordinate (c: EncodedXYCoordinate) (comment: string) =
         { Coordinate = c
           Xml = $"<!-- {comment} -->"
           SpanX = maxNumHorizontalContact
           SpanY = 1 }
 
-    /// debugging 용 xml comment 생성
+    /// [rxi] debugging 용 xml comment 생성
     let rxiCommentAt (x, y) comment =
         rxiCommentAtCoordinate (coord (x, y)) comment
 
@@ -126,7 +126,7 @@ module internal Common =
 
         tryHlineTo (x, y) endX |> List.exactlyOne
 
-    /// x y 위치에서 수직선 한개를 긋는다
+    /// [rxi] x y 위치에서 수직선 한개를 긋는다
     let rxiVLineAt (x, y) : RungXmlInfo =
         verify (x >= 0)
         let c = coord (x, y) + 2
@@ -134,7 +134,7 @@ module internal Common =
 
     let mutable EnableXmlComment = false
 
-    /// x y 위치에서 수직으로 n 개의 line 을 긋는다
+    /// [rxi] x y 위치에서 수직으로 n 개의 line 을 긋는다
     let rxisVLineDownN (x, y) n : RungXmlInfo list =
         [ if EnableXmlComment then
               rxiCommentAt (x, y) $"vlineDownN ({x}, {y}) {n}"
@@ -145,7 +145,7 @@ module internal Common =
 
     let rxisVLineUpN (x, y) n = rxisVLineDownN (x, y - n) n
 
-    /// x y 위치에서 수직으로 endY 까지 line 을 긋는다
+    /// [rxi] x y 위치에서 수직으로 endY 까지 line 을 긋는다
     let rxisVLineDownTo (x, y) endY = rxisVLineDownN (x, y) (endY - y)
     let rxisVLineUpTo (x, y) endY = rxisVLineUpN (x, y) (y - endY)
 

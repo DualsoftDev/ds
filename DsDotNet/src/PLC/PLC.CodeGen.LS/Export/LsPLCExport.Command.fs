@@ -537,6 +537,7 @@ module internal rec Command =
             ] |> joinLines
         wrapWithRung inner
 
+    /// [rxi] for XGK Function Block
     let rxiXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : RungXmlInfo =
         assert (x = 0)
         let conditionBlockXml = bxiFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
@@ -751,7 +752,7 @@ module internal rec Command =
     type FlatExpression with
         member exp.BxiLadderBlock (prjParam: XgxProjectParams, (x, y)) = bxiLadderBlock prjParam (x, y) exp
 
-    /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
+    /// [rxi] Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     ///
     /// - xml 및 다음 y 좌표 반환
     ///
@@ -759,6 +760,7 @@ module internal rec Command =
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
     let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+        /// [rxi]
         let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with

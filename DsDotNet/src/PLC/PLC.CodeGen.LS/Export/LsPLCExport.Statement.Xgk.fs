@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.LS
 
+open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
@@ -30,12 +31,11 @@ module XgkTypeConvertorModule =
                         return variable = target
                     } |> Option.defaultValue false
 
+                // 변형된 추가 문장이 존재하지 않거나, .. => 새로운 문장 추가 필요.
                 let needAdd = augs.Statements.Count = numStatementsBefore || (exp <> exp2 && not duplicated)
                 if needAdd then
                     let assignStatement = DuAssign(condition, exp2, target)
-                    assignStatement.ToStatements(pack)
-                else
-                    ()
+                    assignStatement.ToStatementsXgx(pack)
 
 
             | DuTimer tmr ->
@@ -94,6 +94,6 @@ module XgkTypeConvertorModule =
 
             | _ ->
                 // 공용 처리
-                x.ToStatements(pack)
+                x.ToStatementsXgx(pack)
 
 

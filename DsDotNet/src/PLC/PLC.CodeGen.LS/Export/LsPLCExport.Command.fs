@@ -514,15 +514,19 @@ module internal rec Command =
         wrapWithRung inner
 
 
-    /// 왼쪽에 _ON 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
-    let xmlXgkFBRight (x, y) (fbParam: string) : XmlOutput =
-        assert (x = 0)
+    /// 왼쪽에 condition (None 이면 _ON) 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
+    let xmlXgkFBRight (prjParam: XgxProjectParams) (x, y) (condition:IExpression<bool> option) (fbParam: string) : XmlOutput =
         let inner =
             [ 
-                let c = coord (x, y)
-                elementFull (int ElementType.ContactMode) c "" "_ON"
+                let cond = condition |? fakeAlwaysOnExpression
+                let sub = bxiLadderBlock prjParam (x, y) (cond.Flatten() :?> FlatExpression)
+                mergeXmls sub.XmlElements
 
-                let c = coord (x + 1, y)
+                let c =
+                    let newX = x + sub.TotalSpanX
+                    let newY = y + sub.TotalSpanY - 1
+                    coord(newX, newY)
+
                 let spanX = coilCellX - 4
                 let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                 elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
@@ -532,6 +536,7 @@ module internal rec Command =
             ] |> joinLines
         wrapWithRung inner
 
+    /// [rxi] for XGK Function Block
     let rxiXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : RungXmlInfo =
         assert (x = 0)
         let conditionBlockXml = bxiFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
@@ -583,7 +588,7 @@ module internal rec Command =
     /// x y 위치에서 expression 표현하기 위한 정보 반환
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
     /// - Xml : 좌표 * 결과 xml 문자열
-    let rec private bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
+    let rec internal bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
         let c = coord (x, y)
         let isXgk, isXgi = prjParam.TargetType = XGK, prjParam.TargetType = XGI
 
@@ -746,7 +751,7 @@ module internal rec Command =
     type FlatExpression with
         member exp.BxiLadderBlock (prjParam: XgxProjectParams, (x, y)) = bxiLadderBlock prjParam (x, y) exp
 
-    /// Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
+    /// [rxi] Flat expression 을 논리 Cell 좌표계 x y 에서 시작하는 rung 를 작성한다.
     ///
     /// - xml 및 다음 y 좌표 반환
     ///
@@ -754,6 +759,7 @@ module internal rec Command =
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
     let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+        /// [rxi]
         let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
@@ -771,7 +777,8 @@ module internal rec Command =
                     | CoilCmd _cc ->
                         let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
                             match prjParam.TargetType, cmdExp.CoilTerminalTag with
-                            | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
+                            | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
+                                stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
                             | _ -> 
                                 match cmdExp.CoilTerminalTag with
                                 | :? IStorage as storage -> getStorageText storage

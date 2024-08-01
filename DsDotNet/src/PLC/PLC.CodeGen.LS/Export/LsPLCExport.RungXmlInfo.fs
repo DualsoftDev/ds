@@ -11,7 +11,7 @@ module internal RungXmlInfoModule =
     /// 좌표.  상호 변환: coord, xyOfCoord, xOfCoord, yOfCoord
     type EncodedXYCoordinate = int
 
-    /// Rung 구성 기본 요소
+    /// [rxi] Rung 구성 기본 요소.  하나의 Rung 자체의 정보
     type RungXmlInfo =
         {
             /// Xgi 출력시 순서 결정하기 위한 coordinate.
@@ -22,7 +22,7 @@ module internal RungXmlInfoModule =
             SpanY: int
         }
 
-    /// Rung 구성 요소 조합
+    /// [bxi] Rung 구성 요소 조합.  하나의 Rung 내의 block 정보
     type BlockXmlInfo =
         {
             /// Block 시작 좌상단 x 좌표
@@ -37,7 +37,7 @@ module internal RungXmlInfoModule =
             XmlElements: RungXmlInfo list
         }
 
-    /// Rung 을 생성하기 위한 정보
+    /// [rgi] Rung 을 생성하기 위한 정보
     ///
     /// - Xmls: 생성된 xml string 의 list
     type RungGenerationInfo =
@@ -75,6 +75,7 @@ module internal RungXmlInfoModule =
         |> Seq.map (fun ri -> ri.Xml) //snd
         |> String.concat "\r\n"
 
+    /// [rxi]
     let rxiBlockXmlInfoToRungXmlInfo (block:BlockXmlInfo) : RungXmlInfo =
         let bx, by = block.X, block.Y
         let c = coord (bx, by)

@@ -6,6 +6,22 @@ open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module XgxTypeConvertorModule =
+    (*
+        [DuAssign] 문장 변환:
+            - condition 이 존재하는 경우
+                - BOOL type 인 경우
+                    - XGK : BAND, BOR 를 이용한 변환
+                    - XGI : DuPLCFunction({FunctionName = XgiConstants.FunctionNameMove ...}) 이용 변환
+                - 'T type 인 경우
+                    - XGK : MOVE command 이용
+                    - XGI : DuPLCFunction({FunctionName = XgiConstants.FunctionNameMove ...}) 이용 변환
+            - condition 이 존재하지 않는 경우
+                - BOOL type 인 경우
+                    - DuAssign 그대로 사용 (normal ladder)
+                - 'T type 인 경우
+                    - ?? XGK : MOVE command 이용
+                    - XGI : DuPLCFunction({FunctionName = XgiConstants.FunctionNameMove ...}) 이용 변환
+     *)
     type CommentedStatement with
         /// (Commented Statement) To (Commented Statements)
         ///
@@ -56,7 +72,7 @@ module XgxTypeConvertorModule =
                 let newStatement = newStatement.AugmentXgiFunctionParameters(pack)
 
                 match prjParam.TargetType with
-                | XGI -> newStatement.ToStatements(pack)
+                | XGI -> newStatement.ToStatementsXgx(pack)
                 | XGK -> newStatement.ToStatementsXgk(pack)
                 | _ -> failwith "Not supported runtime target"                
 

@@ -56,16 +56,18 @@ module StatementExtensionModule =
     type ExpressionVisitor = DynamicDictionary -> IExpression list -> IExpression -> IExpression
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
-        member internal x.ToStatements (pack:DynamicDictionary) : unit =
+        member internal x.ToStatementsXgx (pack:DynamicDictionary) : unit =
             let statement = x
             let _prjParam, augs = pack.Unpack()
 
             match statement with
             | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _) -> failwith "Should have been processed in early stage"
             | DuAssign(condition, exp, target) ->
+                assert(exp.DataType = target.DataType)
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
-                match exp.FunctionName with
-                | Some(IsOpABC op) ->
+                match condition, exp.FunctionName with
+                | _, Some(IsOpABC op) ->
+                    // XGI, XGK 공용!!
                     let exp = exp.FlattenArithmeticOperator(pack, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
@@ -76,9 +78,26 @@ module StatementExtensionModule =
                                 OriginalExpression = exp
                                 Output = target }
                         augs.Statements.Add augFunc
-                | _ ->
+
+                | _, Some op when not (isOpL op) ->
+                    failwith $"ERROR: {op} unexpected."
+
+                | Some cond, None -> // terminal 을 target 으로 assign 하는 경우
                     let newExp = exp.CollectExpandedExpression(pack)
-                    DuAssign(condition, newExp, target) |> augs.Statements.Add 
+                    let augFunc =
+                        DuPLCFunction {
+                            Condition = condition
+                            FunctionName = XgiConstants.FunctionNameMove
+                            Arguments = [cond; newExp]
+                            OriginalExpression = exp
+                            Output = target }
+                    augs.Statements.Add augFunc
+
+                | _ ->
+                    assert(exp.FunctionName.IsNone || isOpL(exp.FunctionName.Value))
+                    assert(condition.IsNone)
+                    let newExp = exp.CollectExpandedExpression(pack)
+                    DuAssign(None, newExp, target) |> augs.Statements.Add 
 
             | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->
                 augs.Statements.Add statement 

@@ -210,3 +210,4 @@ module XgxFixtures =
 
         member __.saveTestResult testFunctionName (xml:string) = saveXgxTestResult xgx testFunctionName (formatXml xml)
         member __.generateXmlForTest = generateXmlForTest xgx
+        member __.PlatformTarget = xgx

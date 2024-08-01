@@ -9,6 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open System
 open PLC.CodeGen.Common.K
+open Command
 
 
 [<AutoOpen>]
@@ -61,7 +62,7 @@ module XgiExportModule =
             let xml = getCommentRungXml rgi.NextRungY prologComment
             rgi <- rgi.AddSingleLineXml(xml)
 
-        let simpleRung (*(condition:IExpression)*) (expr: IExpression) (target: IStorage) : unit =
+        let simpleRung (condition:IExpression<bool> option) (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when isOpABC funName ->
             
@@ -72,7 +73,7 @@ module XgiExportModule =
                     let targetContact = if target.Address.IsNullOrEmpty() then target.Name else target.Address
                     if isOpA funName then
                         let param = $"Param={dq}{op},{ls},{rs},{targetContact}{dq}"        // XGK 에서는 직접변수를 사용
-                        xmlXgkFBRight xy param
+                        xmlXgkFBRight prjParam xy condition param
                     elif isOpB funName then
                         let wordCount = 1
                         match l.Terminal with
@@ -81,7 +82,7 @@ module XgiExportModule =
                         | _ -> ()
 
                         let param = $"Param={dq}{op},{ls},{rs},{targetContact},{wordCount}{dq}"
-                        xmlXgkFBRight xy param
+                        xmlXgkFBRight prjParam xy condition param
                     elif isOpC funName then
                         let param = $"Param={dq}{op},{ls},{rs}{dq}"
                         xmlXgkFBLeft xy param targetContact
@@ -205,12 +206,11 @@ module XgiExportModule =
                         | Some _, Some _ -> //when expr.DataType <> typeof<bool> ->
                             moveCmdRungXgk cond expr target
                         | _ ->
-                            assert(condition.IsNone)
-                            simpleRung expr target
+                            simpleRung condition expr target
 
                 | DuAssign(condition, expr, target) ->
                     assert(condition.IsNone)
-                    simpleRung expr target
+                    simpleRung condition expr target
 
 
                 | DuPLCFunction({
@@ -219,7 +219,7 @@ module XgiExportModule =
                         OriginalExpression = originalExpr
                         Output = output }) ->
                     let expr = originalExpr.WithNewFunctionArguments args
-                    simpleRung expr output
+                    simpleRung None expr output
 
                 | DuPLCFunction({
                         FunctionName = XgiConstants.FunctionNameMove as _op
@@ -305,6 +305,8 @@ module XgiExportModule =
     let internal getGlobalTagSkipSysTag(xs:IStorage seq) = 
                     xs |> filter(fun stg-> not(stg.GetSystemTagKind().IsSome && stg.Name.StartsWith("_")))
 
+    /// (Commented Statement) To (Commented Statements)
+    ///
     /// [S] -> [XS]
     let internal css2Css
         (prjParam: XgxProjectParams)

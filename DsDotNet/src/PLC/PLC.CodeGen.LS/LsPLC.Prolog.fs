@@ -9,7 +9,7 @@ open PLC.CodeGen.Common
 [<AutoOpen>]
 module XgiPrologModule =
     /// XML 특수 문자 escape.  '&' 등
-    let escapeXml xml =
+    let escapeXml (xml:string) =
         let removeXmlSpecialChars (input: string) : string =
             let pattern = "&amp;|&lt;|&gt;|&quot;|&apos;"
             Regex.Replace(input, pattern, "")
@@ -18,7 +18,7 @@ module XgiPrologModule =
             //Regex.IsMatch(removed, @"[]<>&'")
             Regex.IsMatch(removed, "[<>&\"']")
 
-        if containsXmlSpecialChars xml then
+        if (xml.NonNullAny() && containsXmlSpecialChars xml) then
             SecurityElement.Escape xml
         else
             xml

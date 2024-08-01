@@ -112,6 +112,7 @@ module K =
     let ErrNameIsNullOrEmpty = "Name is null or empty."
     let ErrAddressIsNullOrEmpty = "Address is null or empty."
 
+    let logicalOperators = HashSet([|"&&"; "||"; "!"|])
 
     /// A: "+"|"-"|"*"|"/"
     let arithmaticOperators = HashSet([|"+"; "-"; "*"; "/"|])
@@ -146,9 +147,20 @@ module OperatorActivePatterns =
     /// IsArithmeticOrBitwiseOrComparisonOperator: ("+"|"-"|"*"|"/")  |  ("&"|"&&&"| "|"|"|||"| "^"|"^^^"|  "~"|"~~~"| ">>"|">>>"| "<<"|"<<<")  |  (">"|">="|"<"|"<="|"=="|"!="|"<>")
     let (|IsOpABC|_|) (op:string) = contains op K.arithmaticOrBitwiseOrComparisionOperators
 
-    let isOpC   op = (|IsOpC|_|)   op |> Option.isSome
+    /// isLogicalOperator
+    let (|IsOpL|_|) (op:string) = contains op K.logicalOperators
+
+    /// IsArithmeticOperator: "+"|"-"|"*"|"/"
     let isOpA   op = (|IsOpA|_|)   op |> Option.isSome
+    /// IsBitwiseOperator: "&";"&&&"; "|";"|||"; "^";"^^^";  "~";"~~~"; ">>";">>>"; "<<";"<<<"
     let isOpB   op = (|IsOpB|_|)   op |> Option.isSome
+    /// IsComparisonOperator: ">"|">="|"<"|"<="|"=="|"!="|"<>"
+    let isOpC   op = (|IsOpC|_|)   op |> Option.isSome
+    /// is Arithmatic or Bitwise operator
     let isOpAB  op = (|IsOpAB|_|)  op |> Option.isSome
+    /// is Arithmatic or Comparison operator
     let isOpAC  op = (|IsOpAC|_|)  op |> Option.isSome
+    /// is Arithmatic, Bitwise or Comparison operator
     let isOpABC op = (|IsOpABC|_|) op |> Option.isSome
+    /// isLogicalOperator
+    let isOpL op = (|IsOpL|_|) op |> Option.isSome

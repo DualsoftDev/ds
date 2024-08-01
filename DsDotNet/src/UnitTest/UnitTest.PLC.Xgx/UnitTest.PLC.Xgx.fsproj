@@ -36,6 +36,7 @@
         <Compile Include="XgxDirectAddressTest.fs" />
         <Compile Include="XgxUdtTest.fs" />
         <Compile Include="XgxSubroutineTest.fs" />
+        <Compile Include="XgxFromStatement.fs" />
         <Compile Include="Arithmetic/XgxArithmeticTest.fs" />
         <Compile Include="Comparison/XgxComparisonTest.fs" />
         <Compile Include="Rung/XgxDrawing.fs" />

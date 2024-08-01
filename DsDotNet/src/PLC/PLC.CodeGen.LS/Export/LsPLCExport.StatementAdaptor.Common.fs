@@ -150,7 +150,7 @@ module ConvertorPrologModule =
         | _ -> ()
 
         let createParam () =
-            {   defaultStorageCreationParams (unbox initValue) (VariableTag.PlcUserVariable|>int) with
+            {   defaultStorageCreationParams (unbox initValue) (int VariableTag.PlcUserVariable) with
                     Name = name
                     Comment = Some comment }
 

@@ -771,7 +771,8 @@ module internal rec Command =
                     | CoilCmd _cc ->
                         let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
                             match prjParam.TargetType, cmdExp.CoilTerminalTag with
-                            | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) -> stg.Address
+                            | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
+                                stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
                             | _ -> 
                                 match cmdExp.CoilTerminalTag with
                                 | :? IStorage as storage -> getStorageText storage

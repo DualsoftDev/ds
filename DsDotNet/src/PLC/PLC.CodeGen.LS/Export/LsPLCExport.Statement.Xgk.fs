@@ -1,5 +1,6 @@
 namespace PLC.CodeGen.LS
 
+open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
@@ -36,6 +37,10 @@ module XgkTypeConvertorModule =
                     let assignStatement = DuAssign(condition, exp2, target)
                     assignStatement.ToStatementsXgx(pack)
                 else
+                    //let news = augs.Statements.Skip(numStatementsBefore).ToArray()
+                    //augs.Statements.RemoveRange(numStatementsBefore, augs.Statements.Count)
+                    //for stmt in news do
+                    //    stmt.ToStatementsXgx(pack)
                     ()
 
 

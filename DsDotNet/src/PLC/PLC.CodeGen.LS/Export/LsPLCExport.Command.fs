@@ -514,15 +514,20 @@ module internal rec Command =
         wrapWithRung inner
 
 
-    /// 왼쪽에 _ON 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
-    let xmlXgkFBRight (x, y) (fbParam: string) : XmlOutput =
-        assert (x = 0)
+    /// 왼쪽에 condition (None 이면 _ON) 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
+    let xmlXgkFBRight (prjParam: XgxProjectParams) (x, y) (condition:IExpression<bool> option) (fbParam: string) : XmlOutput =
+        //assert (x = 0)
         let inner =
             [ 
-                let c = coord (x, y)
-                elementFull (int ElementType.ContactMode) c "" "_ON"
+                let cond = condition |? fakeAlwaysOnExpression
+                let sub = bxiLadderBlock prjParam (x, y) (cond.Flatten() :?> FlatExpression)
+                mergeXmls sub.XmlElements
 
-                let c = coord (x + 1, y)
+                let c =
+                    let newX = x + sub.TotalSpanX
+                    let newY = y + sub.TotalSpanY - 1
+                    coord(newX, newY)
+
                 let spanX = coilCellX - 4
                 let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                 elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
@@ -583,7 +588,7 @@ module internal rec Command =
     /// x y 위치에서 expression 표현하기 위한 정보 반환
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
     /// - Xml : 좌표 * 결과 xml 문자열
-    let rec private bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
+    let rec internal bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
         let c = coord (x, y)
         let isXgk, isXgi = prjParam.TargetType = XGK, prjParam.TargetType = XGI
 

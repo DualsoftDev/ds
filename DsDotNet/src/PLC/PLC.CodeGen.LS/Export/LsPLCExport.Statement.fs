@@ -63,9 +63,10 @@ module StatementExtensionModule =
             match statement with
             | (DuVarDecl _ | DuUdtDecl _ | DuUdtDef _) -> failwith "Should have been processed in early stage"
             | DuAssign(condition, exp, target) ->
+                assert(exp.DataType = target.DataType)
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
-                match exp.FunctionName with
-                | Some(IsOpABC op) ->
+                match condition, exp.FunctionName with
+                | _, Some(IsOpABC op) ->
                     // XGI, XGK 공용!!
                     let exp = exp.FlattenArithmeticOperator(pack, Some target)
                     if exp.FunctionArguments.Any() then
@@ -77,8 +78,27 @@ module StatementExtensionModule =
                                 OriginalExpression = exp
                                 Output = target }
                         augs.Statements.Add augFunc
-                | Some op when not (isOpL op) ->
+
+                | _, Some op when not (isOpL op) ->
                     failwith $"ERROR: {op} unexpected."
+
+                | Some cond, None -> // terminal 을 target 으로 assign 하는 경우
+                    let newExp = exp.CollectExpandedExpression(pack)
+                    let augFunc =
+                        DuPLCFunction {
+                            Condition = condition
+                            FunctionName = XgiConstants.FunctionNameMove
+                            Arguments = [cond; newExp]
+                            OriginalExpression = exp
+                            Output = target }
+                    augs.Statements.Add augFunc
+
+                //| cond (* , None when && exp.DataType <> typedefof<bool>*) ->
+                //    let newExp = exp.CollectExpandedExpression(pack)
+                //    if exp.DataType = typedefof<bool> then
+                //    else
+                //    failwith $"ERROR: not yet."
+
                 | _ ->
                     assert(exp.FunctionName.IsNone || isOpL(exp.FunctionName.Value))
                     assert(condition.IsNone)

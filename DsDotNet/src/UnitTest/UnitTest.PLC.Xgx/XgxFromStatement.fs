@@ -69,7 +69,6 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
      *)
     member x.``DuCopy bool with condition statement test`` () =
         let varName = "XX"
-        let noComment:string = null
 
         let condition = true
         let cmtStmts =
@@ -101,14 +100,55 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
 
         xml.StartsWith(answer) === true
 
+    member x.MyTestCode (funcName:string, statements:Statement list, storages:Storages) =
+        let xml = x.generateXmlForTest funcName storages (map withNoComment statements)
+        x.saveTestResult funcName xml
+        storages, statements
+
+    member x.``DuCopy int with condition statement test`` () =
+        let varName = "XX"
+        let condition = literal2expr true
+        let source = literal2expr 3
+        let target =
+            prjParam.CreateTypedAutoVariable(varName, 0, null)
+            |> tee (fun x ->
+                if prjParam.TargetType = XGK then
+                    x.Address <- "P0000"   // 일단 test 용으로 name 을 그대로 address 로 할당.  XGK 에서는 address 가 반드시 필요.
+                prjParam.GlobalStorages.Add (x.Name, x))
+
+
+        let statements = [DuAssign(Some condition, source, target)]
+        x.MyTestCode(getFuncName(), statements, prjParam.GlobalStorages) |> ignore
+        ()
+
+    member x.``DuCopy int add with condition statement test`` () =
+        let varName = "XX"
+        let condition = literal2expr true
+        let source = 
+            createBinaryExpression (literal2expr 3) "+" (literal2expr 5)
+        let target =
+            prjParam.CreateTypedAutoVariable(varName, 0, null)
+            |> tee (fun x ->
+                if prjParam.TargetType = XGK then
+                    x.Address <- "P0000"   // 일단 test 용으로 name 을 그대로 address 로 할당.  XGK 에서는 address 가 반드시 필요.
+                prjParam.GlobalStorages.Add (x.Name, x))
+
+
+        let statements = [DuAssign(Some condition, source, target)]
+        x.MyTestCode(getFuncName(), statements, prjParam.GlobalStorages) |> ignore
+        ()
 
 
 type XgiFromStatementTest() =
     inherit XgxFromStatementTest(XGI)
     [<Test>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
     [<Test>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
+    [<Test>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
+    [<Test>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()
 
 type XgkFromStatementTest() =
     inherit XgxFromStatementTest(XGK)
     [<Test>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
     [<Test>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
+    [<Test>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
+    [<Test>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()

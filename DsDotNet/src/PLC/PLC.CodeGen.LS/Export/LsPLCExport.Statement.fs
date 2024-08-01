@@ -56,7 +56,7 @@ module StatementExtensionModule =
     type ExpressionVisitor = DynamicDictionary -> IExpression list -> IExpression -> IExpression
     type Statement with
         /// Statement to XGx Statements. XGK/XGI 공용 Statement 확장
-        member internal x.ToStatements (pack:DynamicDictionary) : unit =
+        member internal x.ToStatementsXgx (pack:DynamicDictionary) : unit =
             let statement = x
             let _prjParam, augs = pack.Unpack()
 
@@ -66,6 +66,7 @@ module StatementExtensionModule =
                 // todo : "sum = tag1 + tag2" 의 처리 : DuPLCFunction 하나로 만들고, 'OUT' output 에 sum 을 할당하여야 한다.
                 match exp.FunctionName with
                 | Some(IsOpABC op) ->
+                    // XGI, XGK 공용!!
                     let exp = exp.FlattenArithmeticOperator(pack, Some target)
                     if exp.FunctionArguments.Any() then
                         let augFunc =
@@ -76,9 +77,13 @@ module StatementExtensionModule =
                                 OriginalExpression = exp
                                 Output = target }
                         augs.Statements.Add augFunc
+                | Some op when not (isOpL op) ->
+                    failwith $"ERROR: {op} unexpected."
                 | _ ->
+                    assert(exp.FunctionName.IsNone || isOpL(exp.FunctionName.Value))
+                    assert(condition.IsNone)
                     let newExp = exp.CollectExpandedExpression(pack)
-                    DuAssign(condition, newExp, target) |> augs.Statements.Add 
+                    DuAssign(None, newExp, target) |> augs.Statements.Add 
 
             | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->
                 augs.Statements.Add statement 

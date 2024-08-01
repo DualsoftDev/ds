@@ -52,7 +52,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
 
 
     (*
-        DuAssign 문장 변환:
+        [DuAssign] 문장 변환:
             - condition 이 존재하는 경우
                 - BOOL type 인 경우
                     - XGK : BAND, BOR 를 이용한 변환

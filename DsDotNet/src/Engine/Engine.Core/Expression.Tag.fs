@@ -130,7 +130,7 @@ module TagModule =
                 [
                     if condi.IsSome then
                         yield! condi.Value.CollectStorages()
-                        yield! args |> collect(fun arg -> arg.CollectStorages())
+                        yield! args |> collect(fun arg -> arg.CollectStorages()) 
                 ]
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) -> failwith "ERROR: Not yet implemented"    

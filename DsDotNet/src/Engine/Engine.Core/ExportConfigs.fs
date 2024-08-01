@@ -84,6 +84,7 @@ module ExportConfigsMoudle =
         ifs.ToArray()
 
 
+    let getDsInterfaceConfig (sys: DsSystem) = { DsInterfaces = getDsInterfaces sys; SystemName = sys.Name}
 
 [<AutoOpen>]
 type ExportConfigsExt =

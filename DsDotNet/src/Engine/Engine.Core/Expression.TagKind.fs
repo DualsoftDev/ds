@@ -142,6 +142,15 @@ type TagKindExt =
                         , VertexTag.going
                         , VertexTag.finish
                         , VertexTag.homing)
+        | _ -> false   
+    
+    [<Extension>]
+    static member IsTagForRedis(x:TagDS) =
+        match x with
+        | EventVertex (_, _, kind) ->
+            kind.IsOneOf( VertexTag.scriptStart
+                        , VertexTag.motionStart
+                        )
         | _ -> false
 
     [<Extension>]

@@ -58,7 +58,7 @@ module ConvertCPU =
 
                 if isActive then
                     yield! vr.R6_RealSEQMove() 
-                    yield! vr.F6_SEQTempNumGeneration()
+                //    yield! vr.F6_SEQTempNumGeneration() //test ahn
 
                 
                 yield! vr.D1_DAGHeadStart()

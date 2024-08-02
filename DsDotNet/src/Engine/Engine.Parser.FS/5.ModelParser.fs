@@ -61,14 +61,15 @@ module ModelParser =
 
 
     let ExtractPropsBlock (sysctx: ParserRuleContext) =
-        seq{
-            for ctx in sysctx.Descendants<PropsBlockContext>() do
+        seq {
+            let propsBlockCtxs = sysctx.Descendants<PropsBlockContext>().ToArray()
+            for ctx in propsBlockCtxs do
                 let actions = ctx.Descendants<MotionBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getMotions 
-                yield! actions.Select(fun (fqdn, value)-> {Type = "Motion"; FQDN = fqdn; Value = value})
+                yield! actions.Select(fun (fqdn, value) -> {Type = "Motion"; FQDN = fqdn; Value = value})
 
-            for ctx in sysctx.Descendants<PropsBlockContext>() do
+            for ctx in propsBlockCtxs do
                 let scripts = ctx.Descendants<ScriptsBlockContext>().ToList() |> ListnerCommonFunctionGeneratorUtil.getScripts 
-                yield! scripts.Select(fun (fqdn, value)-> {Type = "Script"; FQDN = fqdn; Value = value})
+                yield! scripts.Select(fun (fqdn, value) -> {Type = "Script"; FQDN = fqdn; Value = value})
         }
 
     let ExtractJobBlock  (sysctx: ParserRuleContext) =
@@ -83,6 +84,7 @@ module ModelParser =
         WalkAndExtract(text, options) |> snd |> ExtractPropsBlock
 
 
+    /// [job] block 내에 정의된 motion 및 script 에 대한 device api 추출?
     let WalkJobAddress (text: string, options: ParserOptions) =
         WalkAndExtract(text, options) |> snd |> ExtractJobBlock
     

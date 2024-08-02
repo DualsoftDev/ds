@@ -58,7 +58,7 @@ module ConvertCPU =
 
                 if isActive then
                     yield! vr.R6_RealSEQMove() 
-                //    yield! vr.F6_SEQTempNumGeneration() //test ahn
+                    yield! vr.F6_SEQTempNumGeneration() //test ahn
 
                 
                 yield! vr.D1_DAGHeadStart()
@@ -286,8 +286,6 @@ module ConvertCPU =
             for v in sys.GetVertices() do
                 yield! applyVertexSpec v isActive
 
-            //Api 적용 
-            //yield! applyApiItem sys
             //TaskDev 적용 
             yield! applyTaskDev sys
             

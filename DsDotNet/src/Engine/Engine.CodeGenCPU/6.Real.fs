@@ -84,7 +84,7 @@ type RealVertexTagManager with
             [
                 let srcTagSEQ = transCausalReals.First().VR.RealSEQData  
                 let tgtTagSEQ = v.RealSEQData
-                yield (v.GP.Expr, srcTagSEQ.BoxedValue|>literal2expr) --> (tgtTagSEQ, getFuncName())
+                yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, getFuncName())
             ]
         else 
             []

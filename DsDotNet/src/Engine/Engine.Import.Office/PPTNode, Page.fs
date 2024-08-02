@@ -282,16 +282,14 @@ module PPTNodeModule =
             try
                 nameCheck (shape, nodeType, iPage, name)
                 match nodeType with
-                | CALL
-                | REAL ->
+                | ( CALL | REAL ) ->
                     match GetSquareBrackets(shape.InnerText, true) with
                     | Some text -> updateSafety text
                     | None -> ()
                     if nodeType = REAL then updateTime()
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
-                | OPEN_EXSYS_CALL
-                | OPEN_EXSYS_LINK
-                | COPY_DEV ->
+
+                | ( OPEN_EXSYS_CALL | OPEN_EXSYS_LINK | COPY_DEV ) ->
                     let name, number = GetTailNumber(shape.InnerText)
                     match GetSquareBrackets(name, false) with
                     | Some text -> updateCopySys (text, (GetBracketsRemoveName(name) |> trimSpace), number)

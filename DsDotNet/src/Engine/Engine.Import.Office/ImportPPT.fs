@@ -54,7 +54,7 @@ module ImportPPTModule =
     module PowerPointImportor =
         let private sRepo = ShareableSystemRepository()
 
-        /// loadFromPPTs > GetImportModel > loadSystem,   GetDSFromPPTWithLib > loadSystem
+        /// GetDSFromPPTWithLib > (loadFromPPTs > GetImportModel >) loadSystem
         let rec private loadSystem
           (
             pptReop: Dictionary<DsSystem, pptDoc>,
@@ -181,7 +181,7 @@ module ImportPPTModule =
             pptReop.Add(theSys, doc)
             theSys, doc
 
-        /// loadFromPPTs > GetImportModel > loadSystem
+        /// GetDSFromPPTWithLib > (loadFromPPTs > GetImportModel >) loadSystem
         let internal GetImportModel
           (
             pptReop: Dictionary<DsSystem, pptDoc>,
@@ -213,7 +213,7 @@ module ImportPPTModule =
 
     let pptRepo = Dictionary<DsSystem, pptDoc>()
 
-    /// loadFromPPTs > GetImportModel > loadSystem
+    /// GetDSFromPPTWithLib > (loadFromPPTs > GetImportModel >) loadSystem
     let private loadFromPPTs (path: string ) isLib (pptParams:PPTParams) (layoutImgPaths:HashSet<string>)=
         Copylibrary.Clear()
         let dicPptDoc = Dictionary<string, PresentationDocument>()
@@ -221,38 +221,30 @@ module ImportPPTModule =
 
         try
             try
-                let cfg = { DsFilePath = path
-                            HWIP =  RuntimeDS.IP
-                    }
-
+                let cfg = { DsFilePath = path; HWIP = RuntimeDS.IP }
                 let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams, dicPptDoc, pathStack, layoutImgPaths)
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
-                    .Where(fun dic -> not <| dic.Value.IsBuilded)
-                    .ForEach(fun dic ->
-                        let dsSystem = dic.Key
-                        let pptDoc = dic.Value
+                    .Where(fun dic -> not dic.Value.IsBuilded)
+                    .ForEach(fun (KeyValue(dsSystem, pptDoc)) ->
                         pathStack.Push(pptDoc.Path)
                         pptDoc.BuildSystem(dsSystem, isLib, pptParams.CreateBtnLamp)
                         pathStack.Pop() |> ignore)
 
-                { Config = cfg
-                  System = sys
-                  LoadingPaths = [] },
+                {   Config = cfg
+                    System = sys
+                    LoadingPaths = [] },
                 pptRepo
 
             with ex ->
-                let errFileName =
-                    if pathStack.any () then
-                        pathStack.First()
-                    else
-                        path
-
+                let errFileName = pathStack.TryHead().DefaultValue(path)
                 let fileErr= "File contains corrupted data."
-                let msg = if ex.Message.Contains(fileErr)
-                          then ex.Message.Replace(fileErr, "문서보안 복호화가 필요하거나 파일문제가 있습니다.")
-                          else ex.Message
+                let msg =
+                    if ex.Message.Contains(fileErr) then
+                        ex.Message.Replace(fileErr, "문서보안 복호화가 필요하거나 파일문제가 있습니다.")
+                    else
+                        ex.Message
 
                 if not (msg.EndsWith(ErrorNotify)) then
                     ErrorPPTNotify.Trigger(errFileName, 0, 0u, "")
@@ -260,18 +252,18 @@ module ImportPPTModule =
                 //첫페이지 아니면 stack에 존재
                 failwithf $"{msg} \t◆파일명 {errFileName}"
         finally
-            dicPptDoc.Where(fun f -> f.Value.IsNonNull()).Iter(fun f -> f.Value.Dispose())
+            dicPptDoc.Values.Where(fun doc -> doc.IsNonNull()).Iter(dispose)
 
 
 
-    type PptResult = {
-        System: DsSystem
-        Views: ViewNode seq
-    }
+    //type PptResult = {
+    //    System: DsSystem
+    //    Views: ViewNode seq
+    //}
 
 
     type ImportPPT =
-        static member GetDSFromPPTWithLib(fullName: string, isLib:bool, pptParams:PPTParams) =
+        static member GetDSFromPPTWithLib(fullName: string, isLib:bool, pptParams:PPTParams): DSFromPPT =
             Util.runtimeTarget <- pptParams.TargetType
             ModelParser.ClearDicParsingText()
             pptRepo.Clear()

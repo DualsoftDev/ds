@@ -5,7 +5,7 @@ open System
 [<AutoOpen>]
 module DsLogModule =
     
-    type DsLog(time, stg:IStorage, token:Nullable<uint64>) =
+    type DsLog(time, stg:IStorage, token:Nullable<uint32>) =
         member x.Time: System.DateTime = time
         member x.Storage = stg
         member x.Token = token

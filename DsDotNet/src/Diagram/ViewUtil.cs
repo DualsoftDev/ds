@@ -168,8 +168,8 @@ namespace Diagram.View.MSAGL
          
                     if (SaveLog)
                     {
-                        ulong? token = null;
-                        if (eventVertex.Target is Real r)
+                        uint? token = null;
+                        if (eventVertex?.Target is Real r)
                             token = r.GetRealSEQ();
 
                         DBLog.InsertValueLog(DateTime.Now, rx, token);

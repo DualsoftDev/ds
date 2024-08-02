@@ -98,7 +98,7 @@ CREATE TABLE [{Tn.Log}] (
     , [at]          TEXT NOT NULL       -- SQLite DateTime 지원 안함.  DATETIME2(7)
     , [value]       NUMERIC NOT NULL
     , [modelId]     INTEGER NOT NULL
-    , [token]       INTEGER NOT NULL    -- SEQ token
+    , [token]       INTEGER             -- SEQ token
     , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
 );
 
@@ -169,7 +169,7 @@ CREATE VIEW [{Vn.Storage}] AS
 """
 
     type IDBRow = interface end
-    let private nullToken = Nullable<uint64>()
+    let private nullToken = Nullable<uint32>()
 
 
     /// DB storage table 의 row 항목
@@ -188,7 +188,7 @@ CREATE VIEW [{Vn.Storage}] AS
         member val ModelId = modelId with get, set
 
     /// DB log table 의 row 항목
-    type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int, token:Nullable<uint64>) =
+    type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int, token:Nullable<uint32>) =
         do
             let x = 1
             ()
@@ -225,7 +225,7 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Name = "" with get, set
 
     /// Runtime 생성 log 항목
-    type Log(id: int, storage: ORMStorage, at: DateTime, value: obj, modelId:int, token:Nullable<uint64>) =
+    type Log(id: int, storage: ORMStorage, at: DateTime, value: obj, modelId:int, token:Nullable<uint32>) =
         inherit ORMLog(id, storage.Id, at, value, modelId, token)
         new() = Log(-1, getNull<ORMStorage> (), DateTime.MaxValue, null, -1, nullToken)
 
@@ -234,7 +234,7 @@ CREATE VIEW [{Vn.Storage}] AS
         member val At = at with get, set
         member val Value: obj = value with get, set
 
-    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj, modelId:int, token:Nullable<uint64>) =
+    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj, modelId:int, token:Nullable<uint32>) =
         inherit ORMLog(logId, storageId, at, value, modelId, token)
         new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null, -1, nullToken)
         member val Name = name with get, set

@@ -318,7 +318,6 @@ module CoreModule =
         member val ParentApiSensorExpr = getNull<IExpression>() with get, set
 
         //member val RealData:byte[] = [||] with get, set
-        member val RealSEQ:uint = 0u with get, set
         member val DsTime:DsTime = DsTime() with get, set
 
         member val Finished:bool = false with get, set

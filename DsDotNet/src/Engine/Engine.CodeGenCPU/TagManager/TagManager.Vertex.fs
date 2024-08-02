@@ -148,6 +148,7 @@ module TagManagerModule =
             | VertexTag.realOriginAction     -> realM().OA :> IStorage
             | VertexTag.relayReal            -> realM().RR :> IStorage
             | VertexTag.goingRealy           -> realM().GG :> IStorage
+            | VertexTag.realSEQ              -> realM().RealSEQData :> IStorage
           
             | (VertexTag.counter | VertexTag.timerOnDelay) ->
                 failwithlog $"Error : Time Counter Type {vt} not support!!"

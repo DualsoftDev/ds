@@ -359,10 +359,16 @@ module ExpressionModule =
     type Statement with
         member x.Do() =
             match x with
-            | DuAssign (_, expr, target) ->
+            | DuAssign (condition, expr, target) ->
                 if target.DataType <> expr.DataType then
                     failwith $"ERROR: {target.Name} Type mismatch in assignment statement"
-                target.BoxedValue <- expr.BoxedEvaluatedValue
+
+                let isEvaluate = match condition with
+                                 | None -> true
+                                 | Some condi -> condi.EvaluatedValue
+                  
+                if isEvaluate then
+                    target.BoxedValue <- expr.BoxedEvaluatedValue
 
             | DuVarDecl (expr, target) ->
                 if target.DataType <> expr.DataType then

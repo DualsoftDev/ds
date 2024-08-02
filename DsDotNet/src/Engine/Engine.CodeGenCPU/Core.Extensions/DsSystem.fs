@@ -11,11 +11,8 @@ module ConvertCpuDsSystem =
         if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip then
             failwithf $"{name} 해당 주소가 없습니다."
 
-    let getMemory name (tag:IStorage) (target:PlatformTarget) = 
-        if RuntimeDS.Package.IsPCorPCSIM() then
-            tag.Name
-        else 
-            getValidAddress(TextAddrEmpty, DuBOOL, name, false, IOType.Memory, target)
+    let getMemory (tag:IStorage) (target:PlatformTarget) = 
+        getValidAddress(TextAddrEmpty, DuBOOL, tag.Name, false, IOType.Memory, target)
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -116,12 +113,12 @@ module ConvertCpuDsSystem =
 
                 let cv =  call.TagManager :?> CallVertexTagManager
                 let target = getTarget(x)
-                cv.ErrShort.Address             <- getMemory call.Name cv.ErrShort target 
-                cv.ErrOpen.Address              <- getMemory call.Name cv.ErrOpen  target 
-                cv.ErrOnTimeOver.Address        <- getMemory call.Name cv.ErrOnTimeOver  target 
-                cv.ErrOnTimeShortage.Address    <- getMemory call.Name cv.ErrOnTimeShortage target 
-                cv.ErrOffTimeOver.Address       <- getMemory call.Name cv.ErrOffTimeOver target 
-                cv.ErrOffTimeShortage.Address   <- getMemory call.Name cv.ErrOffTimeShortage target 
+                cv.ErrShort.Address             <- getMemory  cv.ErrShort target 
+                cv.ErrOpen.Address              <- getMemory  cv.ErrOpen  target 
+                cv.ErrOnTimeOver.Address        <- getMemory  cv.ErrOnTimeOver  target 
+                cv.ErrOnTimeShortage.Address    <- getMemory  cv.ErrOnTimeShortage target 
+                cv.ErrOffTimeOver.Address       <- getMemory  cv.ErrOffTimeOver target 
+                cv.ErrOffTimeShortage.Address   <- getMemory  cv.ErrOffTimeShortage target 
                 call.ExternalTags.Add(ErrorSensorOn,        cv.ErrShort           :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOff,       cv.ErrOpen            :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorOnTimeOver,      cv.ErrOnTimeOver      :> IStorage) |>ignore
@@ -133,18 +130,18 @@ module ConvertCpuDsSystem =
         member private x.GenerationRealAlarmMemory()  = 
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
-                rm.ErrGoingOrigin.Address <- getMemory rm.Name rm.ErrGoingOrigin (getTarget(x))
+                rm.ErrGoingOrigin.Address <- getMemory rm.ErrGoingOrigin (getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
         member  x.GenerationRealActionMemory()  = 
             for real in x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
                   
-                rm.ScriptStart.Address  <- getMemory rm.Name rm.ScriptStart (getTarget(x))
-                rm.MotionStart.Address  <- getMemory rm.Name rm.MotionStart (getTarget(x))
+                rm.ScriptStart.Address  <- getMemory  rm.ScriptStart (getTarget(x))
+                rm.MotionStart.Address  <- getMemory  rm.MotionStart (getTarget(x))
 
-                rm.ScriptEnd.Address    <- getMemory rm.Name rm.ScriptEnd  (getTarget(x))
-                rm.MotionEnd.Address    <- getMemory rm.Name rm.MotionEnd  (getTarget(x))
+                rm.ScriptEnd.Address    <- getMemory  rm.ScriptEnd  (getTarget(x))
+                rm.MotionEnd.Address    <- getMemory  rm.MotionEnd  (getTarget(x))
 
                 real.ExternalTags.Add(ScriptStart,  rm.ScriptStart :> IStorage) |>ignore
                 real.ExternalTags.Add(MotionStart,  rm.MotionStart :> IStorage) |>ignore
@@ -155,32 +152,30 @@ module ConvertCpuDsSystem =
     
         member private x.GenerationFlowHMIMemory()  = 
             for flow in x.GetFlowsOrderByName() do
-                let name = $"{flow.Name}"  
                 let fm =  flow.TagManager :?> FlowManager
                 let target = getTarget(x)
-                let tag = fm.GetFlowTag(FlowTag.auto_btn)   in tag.Address  <- getMemory name tag target
-                let tag = fm.GetFlowTag(FlowTag.auto_mode)  in tag.Address  <- getMemory name tag target
-                let tag = fm.GetFlowTag(FlowTag.manual_btn) in tag.Address  <- getMemory name tag target
-                let tag = fm.GetFlowTag(FlowTag.manual_mode)in tag.Address  <- getMemory name tag target
-                let tag = fm.GetFlowTag(FlowTag.drive_btn)  in tag.Address  <- getMemory name tag target
-                let tag = fm.GetFlowTag(FlowTag.drive_state)in tag.Address  <- getMemory name tag target
-                let tag = fm.GetFlowTag(FlowTag.pause_btn)  in tag.Address  <- getMemory name tag target
-                let tag = fm.GetFlowTag(FlowTag.pause_state)in tag.Address  <- getMemory name tag target
+                let tag = fm.GetFlowTag(FlowTag.auto_btn)   in tag.Address  <- getMemory tag target
+                let tag = fm.GetFlowTag(FlowTag.auto_mode)  in tag.Address  <- getMemory tag target
+                let tag = fm.GetFlowTag(FlowTag.manual_btn) in tag.Address  <- getMemory tag target
+                let tag = fm.GetFlowTag(FlowTag.manual_mode)in tag.Address  <- getMemory tag target
+                let tag = fm.GetFlowTag(FlowTag.drive_btn)  in tag.Address  <- getMemory tag target
+                let tag = fm.GetFlowTag(FlowTag.drive_state)in tag.Address  <- getMemory tag target
+                let tag = fm.GetFlowTag(FlowTag.pause_btn)  in tag.Address  <- getMemory tag target
+                let tag = fm.GetFlowTag(FlowTag.pause_state)in tag.Address  <- getMemory tag target
 
         member private x.GenerationRealHMIMemory()  = 
             for real in x.GetVerticesOfRealOrderByName().Distinct() do
-                let name = $"{real.Flow.Name}_{real.Name}"  
                 let rm =  real.TagManager :?> RealVertexTagManager
                 let target = getTarget(x)
-                rm.ON.Address     <- getMemory name rm.ON target
-                rm.RF.Address     <- getMemory name rm.RF target
-                rm.SF.Address     <- getMemory name rm.SF target
-                rm.OB.Address     <- getMemory name rm.OB target
-                rm.ErrTRX.Address <- getMemory name rm.ErrTRX target
-                rm.R.Address      <- getMemory name rm.R target
-                rm.G.Address      <- getMemory name rm.G target
-                rm.F.Address      <- getMemory name rm.F target
-                rm.H.Address      <- getMemory name rm.H target
+                rm.ON.Address     <- getMemory rm.ON target
+                rm.RF.Address     <- getMemory rm.RF target
+                rm.SF.Address     <- getMemory rm.SF target
+                rm.OB.Address     <- getMemory rm.OB target
+                rm.ErrTRX.Address <- getMemory rm.ErrTRX target
+                rm.R.Address      <- getMemory rm.R target
+                rm.G.Address      <- getMemory rm.G target
+                rm.F.Address      <- getMemory rm.F target
+                rm.H.Address      <- getMemory rm.H target
 
         member private x.GenerationTaskDevIOM() =
 
@@ -211,7 +206,7 @@ module ConvertCpuDsSystem =
                 if call.TargetJob.JobTaskDevInfo.TaskDevCount = 1
                     ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)   
                 then
-                    cv.SF.Address    <- getMemory (cv.SF.Name) cv.SF (getTarget(x))
+                    cv.SF.Address    <- getMemory  cv.SF (getTarget(x))
                     dev.MaunualAddress  <- cv.SF.Address
                 else 
                     dev.MaunualAddress  <- TextSkip  //다중 작업은 수동 작업을 사용하지 않는다.

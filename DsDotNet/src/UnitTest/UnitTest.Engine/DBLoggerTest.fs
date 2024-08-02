@@ -11,6 +11,7 @@ module DBLoggerTestModule =
     type DBLoggerTest() =
         inherit EngineTestBaseClass()
         let dllPath = @$"{__SOURCE_DIRECTORY__}/../Engine.Custom.Sample/bin/Debug/net7.0/Engine.Custom.Sample.dll"
+        let nullToken = Nullable<uint64>()
 
         let createStorage =
             let counter = counterGenerator 1
@@ -22,7 +23,7 @@ module DBLoggerTestModule =
             let counter = counterGenerator 1
             let helper (storage:ORMStorage) (at:DateTime) (value:obj) =
                 let modelId = -1
-                ORMLog(counter(), storage.Id, at, value, modelId)
+                ORMLog(counter(), storage.Id, at, value, modelId, nullToken)
             helper
 
         let nextSecond =

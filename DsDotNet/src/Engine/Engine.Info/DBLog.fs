@@ -9,8 +9,8 @@ open System.ComponentModel
 module DBLog =
 
 
-    type ValueLog(time: DateTime, tag: TagDS) =
-        inherit DsLog(time, tag.GetStorage())
+    type ValueLog(time: DateTime, tag: TagDS, token:Nullable<uint64>) =
+        inherit DsLog(time, tag.GetStorage(), token)
 
         let tagName, value, objName, kind = tag.GetTagContents()     
         let _time = time
@@ -30,8 +30,8 @@ module DBLog =
         member x.GetTime() =
             _time
 
-    let InsertValueLog (time: DateTime) (tag: TagDS) : ValueLog =
-        let vlog = ValueLog(time, tag)
+    let InsertValueLog (time: DateTime) (tag: TagDS) (token:Nullable<uint64>) : ValueLog =
+        let vlog = ValueLog(time, tag, token)
         if tag.IsNeedSaveDBLog() then
             DBLogger.EnqueLog(vlog)
         vlog

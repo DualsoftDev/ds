@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using static Engine.CodeGenCPU.ApiTagManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.CodeGenCPU.TaskDevManagerModule;
+using static Engine.CodeGenCPU.ConvertCpuVertex;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.ExpressionForwardDeclModule;
@@ -154,9 +155,11 @@ namespace Diagram.View.MSAGL
                 _Disposable?.Dispose();
                 _Disposable = VertexChangeSubject.Subscribe(rx =>
                 {
-                    if (rx.IsEventVertex)
+                    EventVertex eventVertex = null;
+                    if (rx is EventVertex ev)
                     {
-                        HandleVertexEvent(rx as EventVertex);
+                        eventVertex = ev;
+                        HandleVertexEvent(ev);
                     }
                     else if (rx.IsEventTaskDev)
                     {
@@ -164,7 +167,13 @@ namespace Diagram.View.MSAGL
                     }
          
                     if (SaveLog)
-                        DBLog.InsertValueLog(DateTime.Now, rx);
+                    {
+                        ulong? token = null;
+                        if (eventVertex.Target is Real r)
+                            token = r.GetRealSEQ();
+
+                        DBLog.InsertValueLog(DateTime.Now, rx, token);
+                    }
                 });
             }
         }

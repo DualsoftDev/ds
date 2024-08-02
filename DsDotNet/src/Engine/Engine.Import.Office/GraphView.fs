@@ -163,11 +163,11 @@ module rec ViewModule =
         member x.UpdateGoingCnt() = goingCont <- goingCont+1
         member x.GoingCnt = 
             if coreVertex.IsNull()
-            then 0u
+            then 0UL
             else 
                 match coreVertex.Value.GetPure() with
                 | :? Real as r -> r.RealSEQ
-                |_-> 0u
+                |_-> 0UL
      
         member x.DisplayName =   
             if coreVertex.IsSome then   

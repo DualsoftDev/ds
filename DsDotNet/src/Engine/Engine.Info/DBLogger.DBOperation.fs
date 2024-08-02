@@ -10,6 +10,7 @@ open System.Threading.Tasks
 open System.Collections.Generic
 open System.Collections.Concurrent
 open DBLoggerORM
+open DBLoggerORM
 
 
 [<AutoOpen>]
@@ -30,7 +31,7 @@ module internal DBLoggerImpl =
 
     let ormLog2Log (logSet: LogSet) (l: ORMLog) =
         let storage = logSet.StoragesById[l.StorageId]
-        Log(l.Id, storage, l.At, l.Value, l.ModelId)
+        Log(l.Id, storage, l.At, l.Value, l.ModelId, l.Token)
 
     type LogSet with
         // ormLogs: id 순(시간 순) 정렬
@@ -170,8 +171,8 @@ module internal DBLoggerImpl =
 //#endif
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
-                                (at, storageId, value, modelId)
-                                VALUES (@At, @StorageId, @Value, @ModelId)
+                                (at, storageId, value, modelId, token)
+                                VALUES (@At, @StorageId, @Value, @ModelId, @Token)
                             """
 
                         let! _ =
@@ -180,7 +181,8 @@ module internal DBLoggerImpl =
                                 {| At = l.At
                                    StorageId = l.StorageId
                                    Value = l.Value
-                                   ModelId = modelId |},
+                                   ModelId = modelId
+                                   Token = l.Token |},
                                 tr
                             )
                         ()
@@ -211,7 +213,7 @@ module internal DBLoggerImpl =
 
                     let value = toDecimal x.Storage.BoxedValue
                     let modelId = logSet.QuerySet.ModelId
-                    ORMLog(-1, storageId, x.Time, value, modelId) |> queue.Enqueue
+                    ORMLog(-1, storageId, x.Time, value, modelId, x.Token) |> queue.Enqueue
                 | None -> failwithlog "NOT yet!!"
 
         let enqueLog (x: DsLog) : unit = enqueLogs ([ x ])

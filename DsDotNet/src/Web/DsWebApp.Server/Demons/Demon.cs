@@ -11,6 +11,9 @@ using System.ServiceModel.Channels;
 using Dual.Common.Base.FS;
 using Newtonsoft.Json;
 using DsWebApp.Server.Common;
+using static Engine.Core.TagKindModule.TagDS;
+using static Engine.CodeGenCPU.ConvertCpuVertex;
+using static Engine.CodeGenCPU.RealExt;
 
 namespace DsWebApp.Server.Demons;
 public partial class Demon : BackgroundService
@@ -80,7 +83,11 @@ public partial class Demon : BackgroundService
                         {
                             var ti = storage.GetTagInfo();
                             if (ti != null && ti.Value.IsNeedSaveDBLog())
-                                DBLogger.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage));
+                            {
+                                ulong? token = (ti.Value is EventVertex ev && ev.Target is Real r) ? r.GetRealSEQ() : null;
+
+                                DBLogger.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, token));
+                            }
                         }
                     });
             _modelSubscription.Add(subscription);

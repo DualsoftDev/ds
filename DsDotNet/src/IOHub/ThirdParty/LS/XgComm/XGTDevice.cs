@@ -60,7 +60,7 @@ namespace XGTComm
 
 
         public int Offset => _offsetBit / 8;
-        public abstract string ToTextValue();
+        public abstract object ToValue();
     }
 
     /// <summary>
@@ -87,9 +87,11 @@ namespace XGTComm
         {
         }
 
-        public override string ToTextValue()
+ 
+
+        public override object ToValue()
         {
-            return Value.ToString();
+            return value;
         }
     }
 
@@ -118,9 +120,10 @@ namespace XGTComm
         {
         }
 
-        public override string ToTextValue()
+ 
+        public override object ToValue()
         {
-            return Value.ToString();
+            return value;
         }
     }
 
@@ -149,9 +152,10 @@ namespace XGTComm
         {
         }
 
-        public override string ToTextValue()
+  
+        public override object ToValue()
         {
-            return Value.ToString();
+            return value;
         }
     }
     /// <summary>
@@ -178,9 +182,10 @@ namespace XGTComm
         {
         }
 
-        public override string ToTextValue()
+ 
+        public override object ToValue()
         {
-            return Value.ToString();
+            return value;
         }
     }
 
@@ -208,9 +213,10 @@ namespace XGTComm
         {
         }
 
-        public override string ToTextValue()
+ 
+        public override object ToValue()
         {
-            return Value.ToString();
+            return value;
         }
     }
 }

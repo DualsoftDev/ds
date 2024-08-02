@@ -278,7 +278,7 @@ module TagManagerModule =
             let errors = x.ErrorList
             if errors.any() then
                 let errText = String.Join(",", errors)
-                $"{_.Name} {errText} 이상"
+                $"{errText} 이상"
             else 
                 ""
         

@@ -18,6 +18,9 @@ module ExportConfigsMoudle =
 
     type InterfaceConfig = {
         SystemName: string
+        HW: string //XGI, XGK, PC
+        Ip: string //"127.0.0.1"
+        Port: string //"2004"
         DsPlanInterfaces: DsPlanInterface[]
         DsActionInterfaces: DsActionInterface[]
     }
@@ -45,8 +48,10 @@ module ExportConfigsMoudle =
     
     type DsActionInterface = {
         Id: int
-        InputTag: string*string
-        OutputTag: string*string
+        Name : string
+        Address : string
+        DataType : string //bool. int32, float
+        DeviceType : string //input, output, memory
     }
     with 
         member x.ToJson() = JsonConvert.SerializeObject(x, Formatting.Indented)
@@ -98,21 +103,42 @@ module ExportConfigsMoudle =
 
         sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
         |> Seq.iter(fun (dev,_) ->  
-            let dataSync = 
-                {
-                    Id = ifs.Count
-                    InputTag = if dev.InTag.IsNonNull() then dev.InTag.Name, dev.InTag.Address else "", ""
-                    OutputTag = if dev.OutTag.IsNonNull() then dev.OutTag.Name, dev.OutTag.Address else "", ""
-                }
-            ifs.Add dataSync |> ignore
+            
+            if dev.InTag.IsNonNull()
+            then
+                let dataIn = 
+                    {
+                        Id = ifs.Count
+                        Name = dev.InTag.Name
+                        Address = dev.InTag.Address
+                        DataType = dev.InTag.DataType.ToDsDataTypeString()
+                        DeviceType = "input"
+                    }   
+                ifs.Add dataIn |> ignore
+
+            if dev.OutTag.IsNonNull()
+            then
+                let dataOut = 
+                    {
+                        Id = ifs.Count
+                        Name = dev.OutTag.Name
+                        Address = dev.OutTag.Address
+                        DataType = dev.OutTag.DataType.ToDsDataTypeString()
+                        DeviceType = "output"
+                    }
+
+                ifs.Add dataOut |> ignore
         )
 
         ifs.ToArray()
 
-    let getDsInterfaceConfig (sys: DsSystem) =
+    let getDsInterfaceConfig (sys: DsSystem, target:PlatformTarget) =
         { 
             DsPlanInterfaces = getDsPlanInterfaces sys
             DsActionInterfaces = getDsActionInterfaces sys
+            HW  = target.ToString()
+            Ip = "127.0.0.1"  //test ahn 임시 시뮬레이터만
+            Port = "2004"
             SystemName = sys.Name
         }
 
@@ -120,14 +146,12 @@ module ExportConfigsMoudle =
 type ExportConfigsExt =
 
     [<Extension>] 
-    static member ExportDSInterface (sys:DsSystem, exportPath:string) =
-        let pIFs = getDsPlanInterfaces(sys)
-        let aIFs = getDsActionInterfaces(sys)
-        let interfaceConfig = {SystemName = sys.Name; DsPlanInterfaces = pIFs; DsActionInterfaces = aIFs}
+    static member ExportDSInterface (sys:DsSystem, exportPath:string, target:PlatformTarget) =
+        let interfaceConfig = getDsInterfaceConfig (sys, target)
         saveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces =
-            pIFs
+            interfaceConfig.DsPlanInterfaces
                 .Select(fun f-> {MotionName =  f.Motion}).ToArray() 
 
         let interfaceSimpleConifg = {Motions =dsSimpleInterfaces}

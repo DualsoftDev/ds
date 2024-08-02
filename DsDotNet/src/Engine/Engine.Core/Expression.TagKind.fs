@@ -145,12 +145,23 @@ type TagKindExt =
         | _ -> false   
     
     [<Extension>]
-    static member IsTagForRedis(x:TagDS) =
+    static member IsTagForRedisMotion(x:TagDS) =
         match x with
         | EventVertex (_, _, kind) ->
             kind.IsOneOf( VertexTag.scriptStart
                         , VertexTag.motionStart
                         )
+
+        | _ -> false
+
+    [<Extension>]
+    static member IsTagForRedisActionOutput(x:TagDS) =
+        match x with
+        | EventTaskDev (_, _, kind) ->
+                kind.IsOneOf(
+                            TaskDevTag.actionOut
+                           , TaskDevTag.actionMemory
+                    )
         | _ -> false
 
     [<Extension>]

@@ -1,14 +1,18 @@
 namespace T
 
-open NUnit.Framework
 
 open Engine.Core
 open Dual.Common.Core.FS
 open Dual.UnitTest.Common.FS
-open Engine.Parser.FS
 open PLC.CodeGen.LS
-open Dual.Common.Core.FS.Reflection
+open Xunit
 
+
+[<CollectionDefinition("XgiFromStatementTestCollection", DisableParallelization = true)>]
+type XgiFromStatementTestCollection() = class end
+
+[<CollectionDefinition("XgkFromStatementTestCollection", DisableParallelization = true)>]
+type XgkFromStatementTestCollection() = class end
 
 type XgxFromStatementTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
@@ -35,7 +39,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
 		<Element ElementType="14" Coordinate="94" >{targetVarname}</Element>	</Rung>"""
         //tracefn "%s" xml
         //tracefn "%s" answer
-        xml.StartsWith(answer) === true
+        xml.Replace("\r\n", "\n").StartsWith(answer) === true
 
 
         let targetVarname = if xgx = XGI then $"_t2_{varName}" else varName
@@ -48,7 +52,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
 		<Element ElementType="2" Coordinate="4" Param="90"></Element>
 		<Element ElementType="14" Coordinate="94" >{targetVarname}</Element>	</Rung>"""
         //tracefn "%s" xml
-        xml.StartsWith(answer) === true
+        xml.Replace("\r\n", "\n").StartsWith(answer) === true
 
 
     (*
@@ -98,7 +102,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
 		<Element ElementType="70" Coordinate="1025" >False</Element>
 		<Element ElementType="70" Coordinate="1031" >_t1_XX</Element>	</Rung>"""
 
-        xml.StartsWith(answer) === true
+        xml.Replace("\r\n", "\n").StartsWith(answer) === true
 
     member x.MyTestCode (funcName:string, statements:Statement list, storages:Storages) =
         let xml = x.generateXmlForTest funcName storages (map withNoComment statements)
@@ -139,16 +143,18 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
         ()
 
 
+[<Collection("XgiFromStatementTestCollection")>]
 type XgiFromStatementTest() =
     inherit XgxFromStatementTest(XGI)
-    [<Test>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
-    [<Test>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
-    [<Test>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
-    [<Test>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()
+    [<Fact>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
+    [<Fact>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
+    [<Fact>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
+    [<Fact>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()
 
+[<Collection("XgkFromStatementTestCollection")>]
 type XgkFromStatementTest() =
     inherit XgxFromStatementTest(XGK)
-    [<Test>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
-    [<Test>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
-    [<Test>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
-    [<Test>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()
+    [<Fact>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
+    [<Fact>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
+    [<Fact>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
+    [<Fact>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()

@@ -23,14 +23,12 @@ type DsSystemCloneTests() =
         // Setting members for Real instances
         real1.Motion <- Some "Motion1"
         real1.Script <- Some "Script1"
-        real1.RealSEQ <- 42u
         real1.DsTime <- DsTime() // Assuming DsTime has a default constructor
         real1.Finished <- true
         real1.NoTransData <- true
 
         real2.Motion <- Some "Motion2"
         real2.Script <- Some "Script2"
-        real2.RealSEQ <- 24u
         real2.DsTime <- DsTime() // Assuming DsTime has a default constructor
         real2.Finished <- false
         real2.NoTransData <- false
@@ -98,14 +96,12 @@ type DsSystemCloneTests() =
         let real1Clone = clonedSystem.GetVertices().OfType<Real>().First(fun r -> r.Name = "Real1")
         real1Clone.Motion |> should equal (Some "Motion1")
         real1Clone.Script |> should equal (Some "Script1")
-        real1Clone.RealSEQ |> should equal 42u
         real1Clone.Finished |> should equal true
         real1Clone.NoTransData |> should equal true
         
         let real2Clone = clonedSystem.GetVertices().OfType<Real>().First(fun r -> r.Name = "Real2")
         real2Clone.Motion |> should equal (Some "Motion2")
         real2Clone.Script |> should equal (Some "Script2")
-        real2Clone.RealSEQ |> should equal 24u
         real2Clone.Finished |> should equal false
         real2Clone.NoTransData |> should equal false
 

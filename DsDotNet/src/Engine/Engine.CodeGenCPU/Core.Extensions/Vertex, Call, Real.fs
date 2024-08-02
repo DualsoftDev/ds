@@ -175,6 +175,8 @@ module ConvertCpuVertex =
     type Real with
         member r.V = r.TagManager :?> RealVertexTagManager
 
+        member r.RealSEQ:uint = r.V.GetVertexTag(VertexTag.realSEQ).BoxedValue :?> uint 
+
         member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ST)
         member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.RT)
         member r.CoinETContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)

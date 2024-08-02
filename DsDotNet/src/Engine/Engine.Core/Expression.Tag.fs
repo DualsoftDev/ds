@@ -108,9 +108,10 @@ module TagModule =
             match x with
             | DuAssign (condi, expr, _target) ->
                 [
-                    yield! expr.CollectStorages()
                     if condi.IsSome then
                         yield! condi.Value.CollectStorages()
+                    else 
+                        yield! expr.CollectStorages()
                 ]                        
             | DuVarDecl (expr, _var) -> expr.CollectStorages()
             | DuTimer timerStatement -> 
@@ -119,18 +120,16 @@ module TagModule =
             | DuCounter counterStatement ->
                 [ for s in counterStatement.Counter.InputEvaluateStatements do
                     yield! s.GetSourceStorages() ]
-            | DuAction (DuCopy (condition, source, _target)) ->
-                condition.CollectStorages()@source.CollectStorages()
-            | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Condition=condition; Source=source}) ->
+            | DuAction (DuCopy (condition, _source, _target)) ->
+                condition.CollectStorages()
+            | DuAction (DuCopyUdt { Storages=_storages; UdtDecl=_udtDecl; Condition=condition; Source=_source}) ->
                 [
                     yield! condition.CollectStorages()
-                    yield! udtDecl.Members |> map (fun m -> storages[$"{source}.{m.Name}"] )
                 ]
-            | DuPLCFunction {Condition = condi; Arguments=args} ->
+            | DuPLCFunction {Condition = condi; Arguments=_args} ->
                 [
-                    if condi.IsSome then
-                        yield! condi.Value.CollectStorages()
-                        yield! args |> collect(fun arg -> arg.CollectStorages()) 
+                    //if condi.IsSome then  //예외 발생시에 확인 필요?
+                    yield! condi.Value.CollectStorages()
                 ]
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) -> failwith "ERROR: Not yet implemented"    

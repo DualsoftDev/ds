@@ -5,6 +5,7 @@ open System.Linq
 open Newtonsoft.Json
 open System.Collections.Generic
 open System.Runtime.CompilerServices
+open Dual.Common.Core.FS
 
 
 [<AutoOpen>]
@@ -17,9 +18,10 @@ module ExportConfigsMoudle =
 
     type InterfaceConfig = {
         SystemName: string
-        DsInterfaces: DsPlanInterface[]
+        DsPlanInterfaces: DsPlanInterface[]
+        DsActionInterfaces: DsActionInterface[]
     }
-
+    
     type DsPlanInterface = {
         Id: int
         Work: string
@@ -41,6 +43,13 @@ module ExportConfigsMoudle =
         member x.ToJson() = JsonConvert.SerializeObject(x, Formatting.Indented)
         member x.ToJsonSimpleFormat() = JsonConvert.SerializeObject({MotionName =  x.Motion}, Formatting.Indented)
     
+    type DsActionInterface = {
+        Id: int
+        InputTag: string*string
+        OutputTag: string*string
+    }
+    with 
+        member x.ToJson() = JsonConvert.SerializeObject(x, Formatting.Indented)
     
 
     let private jsonSettings = JsonSerializerSettings()
@@ -57,7 +66,7 @@ module ExportConfigsMoudle =
         let json = JsonConvert.SerializeObject(interfaceSimpleConfig, Formatting.Indented, jsonSettings)
         File.WriteAllText(path, json)
 
-    let getDsInterfaces (sys: DsSystem) =
+    let getDsPlanInterfaces (sys: DsSystem) =
         let ifs = HashSet<DsPlanInterface>()
 
         sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
@@ -84,20 +93,41 @@ module ExportConfigsMoudle =
 
         ifs.ToArray()
 
+    let getDsActionInterfaces (sys: DsSystem) =
+        let ifs = HashSet<DsActionInterface>()
 
-    let getDsInterfaceConfig (sys: DsSystem) = { DsInterfaces = getDsInterfaces sys; SystemName = sys.Name}
+        sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
+        |> Seq.iter(fun (dev,_) ->  
+            let dataSync = 
+                {
+                    Id = ifs.Count
+                    InputTag = if dev.InTag.IsNonNull() then dev.InTag.Name, dev.InTag.Address else "", ""
+                    OutputTag = if dev.OutTag.IsNonNull() then dev.OutTag.Name, dev.OutTag.Address else "", ""
+                }
+            ifs.Add dataSync |> ignore
+        )
+
+        ifs.ToArray()
+
+    let getDsInterfaceConfig (sys: DsSystem) =
+        { 
+            DsPlanInterfaces = getDsPlanInterfaces sys
+            DsActionInterfaces = getDsActionInterfaces sys
+            SystemName = sys.Name
+        }
 
 [<AutoOpen>]
 type ExportConfigsExt =
 
     [<Extension>] 
     static member ExportDSInterface (sys:DsSystem, exportPath:string) =
-        let dsInterfaces = getDsInterfaces(sys)
-        let interfaceConfig = {SystemName = sys.Name; DsInterfaces = dsInterfaces}
+        let pIFs = getDsPlanInterfaces(sys)
+        let aIFs = getDsActionInterfaces(sys)
+        let interfaceConfig = {SystemName = sys.Name; DsPlanInterfaces = pIFs; DsActionInterfaces = aIFs}
         saveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces =
-            dsInterfaces
+            pIFs
                 .Select(fun f-> {MotionName =  f.Motion}).ToArray() 
 
         let interfaceSimpleConifg = {Motions =dsSimpleInterfaces}

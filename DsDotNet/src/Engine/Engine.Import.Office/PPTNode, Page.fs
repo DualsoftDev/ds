@@ -310,26 +310,25 @@ module PPTNodeModule =
                         .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getConditionType))
 
                 | REALExF -> updateTime()
-                | LAYOUT
-                | AUTOPRE
-                | DUMMY -> ()
+                | (LAYOUT | AUTOPRE | DUMMY) -> ()
 
-                if nodeType = CALL || nodeType = AUTOPRE
-                then
+                if nodeType.IsOneOf(CALL, AUTOPRE) then
                     //Dev1[3(3,3)].Api(!300, 200)
-                    let names = (nameNFunc(shape, macros, iPage)).Split('.')
+                    // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
+                    let names = (nameNFunc(shape, macros, iPage)).Split('.').ToFSharpList()
                     let prop =
-                        if names.Count() = 2    then names.First()
-                        elif names.Count() = 3  then names.Skip(1).First()
-                        else
+                        match names with
+                        | n1::n2::[] -> n1
+                        | n1::n2::n3::[] -> n2
+                        | _ ->
                             failwith $"Error: {nameNFunc(shape, macros, iPage)}"
 
                     let jobPram =
-                        if prop |> GetLastBracketContents <> ""
-                        then
-                            let cntPara =    prop |> GetLastBracketContents |> GetLastParenthesesRemoveName
-                            let cntOptPara = prop |> GetLastBracketContents |> GetLastParenthesesContents
-                            let paraText =
+                        let lbc = prop |> GetLastBracketContents    // e.g "5(5,1)"
+                        if lbc <> "" then
+                            let cntPara =    lbc |> GetLastParenthesesRemoveName    // e.g "5"
+                            let cntOptPara = lbc |> GetLastParenthesesContents      // e.g "5,1"
+                            let paraText =  // e.g "N5(5,1)"
                                 match  cntPara,  cntOptPara with
                                 | "", "" -> ""
                                 | "", _ -> failWithLog $"err: {name}MultiAction Count >= 1 : {cntPara}"
@@ -345,6 +344,8 @@ module PPTNodeModule =
                     jobParam <- jobPram
             with ex ->
                 shape.ErrorShape(ex.Message, iPage)
+
+
             pptNode(shape, iPage, pageTitle, slieSize, isHeadPage, macros
                     , copySystems
                     , safeties

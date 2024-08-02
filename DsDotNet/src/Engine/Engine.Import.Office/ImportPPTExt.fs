@@ -623,39 +623,41 @@ module ImportU =
         static member UpdateActionIO(doc: pptDoc, sys: DsSystem, autoIO:bool) =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
             if not(autoIO)
-            && activeSys.IsSome && activeSys.Value = sys
-            && pageTables.isEmpty()
-            then  failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
+                && activeSys.IsSome && activeSys.Value = sys
+                && pageTables.isEmpty()
+            then
+                failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
             
+            // io table 에서 첫 row 가 "CASE" 인 table 들의 모든 row 들을 device name 별로 중복 검사?
             pageTables
-            |> Seq.filter (fun (_, table) -> table.Rows.Count > 0)
-            |> Seq.filter (fun (_, table) -> table.Rows[0].ItemArray[(int) IOColumn.Case] = $"{IOColumn.Case}")
-            |> Seq.collect (fun (pageIndex, table) ->
+            |> Seq.map (snd)        // only tables
+            |> Seq.filter (fun table -> table.Rows.Count > 0)
+            |> Seq.filter (fun table -> table.Rows[0].ItemArray[(int) IOColumn.Case] = $"{IOColumn.Case}")
+            |> Seq.collect (fun table ->
                 table.Rows
                     .Cast<DataRow>()
-                    .ToArray()
                     .Where(fun r -> r.ItemArray[(int) IOColumn.Case] <> $"{IOColumn.Case}") // head row 제외
-                |> Seq.map (fun row -> pageIndex, row))
-            |> Seq.groupBy (fun (_, row) -> getDevName row)
+                    .Select(fun row -> row))    // only rows
+            |> Seq.groupBy (getDevName)
             |> Seq.iter (fun (name, rows) ->
                 let rowsWithIndexes = rows |> Seq.toArray
                 if rowsWithIndexes.Length > 1 && name <> "" then
                     // Handle the exception for duplicate names here
                     failwithf "Duplicate name: %s" name)
 
-           
             ApplyIO(sys, pageTables)
 
         [<Extension>]
         static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =
             let layouts = doc.GetLayouts()
             layouts.Iter(fun (layout, path, dev, rect)->
-                let device = sys.Devices.FirstOrDefault(fun f-> f.Name = dev)
-                if(device.IsNonNull()) 
-                then let xywh = Xywh(rect.X, rect.Y, rect.Width, rect.Height)
-                     let lay = layout.Replace(";", "_")
-                     device.ChannelPoints.Add($"{lay};{path.Trim()}", xywh) |> ignore
-                else Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
+                match sys.Devices.TryFind(fun f-> f.Name = dev) with
+                | Some device ->
+                    let xywh = Xywh(rect.X, rect.Y, rect.Width, rect.Height)
+                    let lay = layout.Replace(";", "_")
+                    device.ChannelPoints.Add($"{lay};{path.Trim()}", xywh) |> ignore
+                | None ->
+                    Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
             )        
 
 
@@ -694,34 +696,32 @@ module ImportU =
         [<Extension>]
         static member CreateGenBtnLamp(mySys: DsSystem) =
             let flows = mySys.Flows
-            flows.Iter(fun flow ->
-                        mySys.AddButton(BtnType.DuAutoBTN, "AutoSelect", "", "-", flow)
-                        mySys.AddButton(BtnType.DuManualBTN, "ManualSelect", "", "-", flow)
-                        mySys.AddButton(BtnType.DuDriveBTN, "DrivePushBtn", "", "-", flow)
-                        mySys.AddButton(BtnType.DuPauseBTN, "PausePushBtn", "", "-", flow)
-                        mySys.AddButton(BtnType.DuClearBTN, "ClearPushBtn", "", "-", flow)
-                        mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow)
-                )
+            for flow in flows do
+                mySys.AddButton(BtnType.DuAutoBTN,      "AutoSelect", "", "-", flow)
+                mySys.AddButton(BtnType.DuManualBTN,    "ManualSelect", "", "-", flow)
+                mySys.AddButton(BtnType.DuDriveBTN,     "DrivePushBtn", "", "-", flow)
+                mySys.AddButton(BtnType.DuPauseBTN,     "PausePushBtn", "", "-", flow)
+                mySys.AddButton(BtnType.DuClearBTN,     "ClearPushBtn", "", "-", flow)
+                mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow)
 
             mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "-", "", None)
             mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "-", "", None)
             mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "-", "", None)
 
-            mySys.AddLamp(LampType.DuErrorStateLamp, "ErrorLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuErrorStateLamp,  "ErrorLamp", "-", "", None)
             mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None)
-            mySys.AddLamp(LampType.DuReadyStateLamp , "ReadyStateLamp", "-", "", None)
-            mySys.AddLamp(LampType.DuDriveStateLamp, "DriveLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuReadyStateLamp,  "ReadyStateLamp", "-", "", None)
+            mySys.AddLamp(LampType.DuDriveStateLamp,  "DriveLamp", "-", "", None)
             
         [<Extension>]
         static member PreCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
 
             (* AUTOPRE Root에 배치 에러 체크*)
-            doc.Nodes.Where(fun n -> n.NodeType = AUTOPRE) 
-               .Iter(fun n -> 
-                if n.IsRootNode.IsSome && n.IsRootNode.Value 
-                then 
-                    n.Shape.ErrorShape(ErrID._28, n.PageNum)
-                    )
+            doc.Nodes
+                .Where(fun n -> n.NodeType = AUTOPRE) 
+                .Iter(fun n -> 
+                    if n.IsRootNode.IsSome && n.IsRootNode.Value then 
+                        n.Shape.ErrorShape(ErrID._28, n.PageNum) )
 
 
             let errCheck (calls:pptNode seq) = 
@@ -731,7 +731,11 @@ module ImportU =
                     let errText = calls.Select(fun f-> $"{f.Name} page {f.FlowName}").JoinWith("\r\n")
                     errNode.Shape.ErrorShape(ErrID._72+ $"\r\n{errText}", errNode.PageNum)
 
-            let callSet = doc.Nodes.Where(fun n -> (n.NodeType.IsCall || n.NodeType = AUTOPRE) && not(n.IsFunction))
+            let callSet =
+                doc.Nodes
+                    .Where(fun n -> (n.NodeType.IsCall || n.NodeType = AUTOPRE) && not(n.IsFunction))
+                    .ToArray()
+
             (* Multi Call Dev별 갯수 동일 체크*)
             callSet.GroupBy(fun n -> n.DevName)
                    .Select(fun calls -> 
@@ -816,21 +820,19 @@ module ImportU =
                     let devApiDefinitions = WalkJobAddress(dsText, ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuName", None, DuNone))
                     devApiDefinitions 
                     |> Seq.iter(fun a->
-                         match mySys.TaskDevs.TryFind(fun td->td.DeviceApiPureName(a.ApiFqnd.Combine()) = a.ApiFqnd.Combine()) with
-                         | Some td -> 
-                                if td.IsInAddressEmpty 
-                                then 
-                                    td.InAddress <- a.InAddress
-                                else    
-                                    failwithf "Error: %s InAddress already exists" (a.ApiFqnd.Combine())
+                        let apiFqdn = a.ApiFqnd.Combine()
+                        match mySys.TaskDevs.TryFind(fun td->td.DeviceApiPureName(apiFqdn) = apiFqdn) with
+                        | Some td -> 
+                            if not td.IsInAddressEmpty then 
+                                failwithf $"Error: {apiFqdn} InAddress already exists"
 
-                                if td.IsOutAddressEmpty 
-                                then 
-                                    td.OutAddress <- a.OutAddress
-                                else    
-                                    failwithf "Error: %s OutAddress already exists" (a.ApiFqnd.Combine())
+                            if not td.IsOutAddressEmpty then
+                                failwithf $"Error: {apiFqdn} OutAddress already exists"
 
-                         | None -> failwithf "Error: %s not found" (a.ApiFqnd.Combine())
+                            td.InAddress <- a.InAddress
+                            td.OutAddress <- a.OutAddress
+
+                        | None -> failwithf $"Error: {apiFqdn} not found"
                     )
 
                 | _ -> ()

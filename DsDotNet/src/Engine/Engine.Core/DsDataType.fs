@@ -75,6 +75,7 @@ module DsDataType =
         | DuSTRING
         | DuUINT16
         | DuUINT32
+        /// Obsolete: XGK PLC 에서 지원되지 않는 type.  모듈 공용화를 위해서 가급적 사용하지 않는 걸로..
         | DuUINT64
         | DuUINT8
 
@@ -148,16 +149,16 @@ module DsDataType =
             | DuBOOL     , _ -> value.ToString()
             | DuCHAR     , _ -> sprintf "'%c'" (Convert.ToChar(value))
             | DuFLOAT32  , (:? float32 as v) -> sprintf "%gf" v
-            | DuFLOAT64  , (:? float as v) -> sprintf "%g" v
-            | DuINT16    , (:? int16 as v) -> sprintf "%ds" v
-            | DuINT32    , (:? int as v) -> sprintf "%d" v
-            | DuINT64    , (:? int64 as v) -> sprintf "%dL" v
-            | DuINT8     , (:? sbyte as v) -> sprintf "%dy" v
-            | DuSTRING   , (:? string as v) -> sprintf "\"%s\"" v
-            | DuUINT16   , (:? uint16 as v) -> sprintf "%dus" v
-            | DuUINT32   , (:? uint32 as v) -> sprintf "%du" v
-            | DuUINT64   , (:? uint64 as v) -> sprintf "%dUL" v
-            | DuUINT8    , (:? byte as v) -> sprintf "%duy" v
+            | DuFLOAT64  , (:? float   as v) -> sprintf "%g" v
+            | DuINT16    , (:? int16   as v) -> sprintf "%ds" v
+            | DuINT32    , (:? int     as v) -> sprintf "%d" v
+            | DuINT64    , (:? int64   as v) -> sprintf "%dL" v
+            | DuINT8     , (:? sbyte   as v) -> sprintf "%dy" v
+            | DuSTRING   , (:? string  as v) -> sprintf "\"%s\"" v
+            | DuUINT16   , (:? uint16  as v) -> sprintf "%dus" v
+            | DuUINT32   , (:? uint32  as v) -> sprintf "%du" v
+            | DuUINT64   , (:? uint64  as v) -> sprintf "%dUL" v
+            | DuUINT8    , (:? byte    as v) -> sprintf "%duy" v
             | _  -> failwithf "ERROR: Unsupported type %s for value %O" (x.ToText()) value
 
             

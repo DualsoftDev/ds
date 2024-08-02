@@ -172,7 +172,7 @@ module TagManagerModule =
         let realSEQData  = 
             let vertexTag = VertexTag.realSEQ |> int
             let name = $"{v.QualifiedName}_{VertexTag.realSEQ}" |> validStorageName
-            createPlanVar  s name DuUINT32 true v vertexTag sys  
+            createPlanVar s name DuUINT32 true v vertexTag sys  
 
         member x.Real = x.Vertex :?> Real
         member x.OriginInfo

@@ -175,7 +175,7 @@ module ConvertCpuVertex =
     type Real with
         member r.V = r.TagManager :?> RealVertexTagManager
 
-        member r.RealSEQ:uint = r.V.GetVertexTag(VertexTag.realSEQ).BoxedValue :?> uint 
+        member r.RealSEQ:uint32 = r.V.GetVertexTag(VertexTag.realSEQ).BoxedValue :?> uint32
 
         member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ST)
         member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.RT)
@@ -197,5 +197,8 @@ module ConvertCpuVertex =
                             @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages 
                             @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
 
-
+[<Extension>]
+type RealExt =
+    [<Extension>]
+    static member GetRealSEQ(r:Real):uint32 = r.RealSEQ
 

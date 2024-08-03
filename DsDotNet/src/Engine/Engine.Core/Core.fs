@@ -477,15 +477,12 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-        let mutable jobParam = defaultJobParam()
-        member x.JobParam = jobParam
-        member x.UpdateJobParam(newJobParam: JobParam) =
-            jobParam <- newJobParam
+        member val JobParam = defaultJobParam() with get, set
        
         member x.ActionType = x.JobParam.JobAction 
         member x.JobTaskDevInfo = x.JobParam.JobTaskDevInfo 
-        member x.AddressInCount = x.JobParam.JobTaskDevInfo.AddressInCount
-        member x.AddressOutCount = x.JobParam.JobTaskDevInfo.AddressOutCount
+        member x.AddressInCount = x.JobTaskDevInfo.AddressInCount
+        member x.AddressOutCount = x.JobTaskDevInfo.AddressOutCount
 
         member x.System = system
         member x.TaskDefs = tasks

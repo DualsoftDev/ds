@@ -251,6 +251,7 @@ public static class CustomServerExtension
         //};
         Task.Run(async () =>
         {
+            // Dirty hack : 1초후 해당 프로세스 존재 check
             await Task.Delay(1000);
             if (! ProcessExt.IsRunning(commonAppSettings.RedisServerExePath))
                 logger.Error($"Failed to start Redis server");

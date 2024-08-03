@@ -57,7 +57,7 @@ module ImportUtilVertex =
 
                 let job = Job(node.Job, sys, [devTask])
                 //job.UpdateTaskDevPara(node.TaskDevPara)
-                job.UpdateJobParam(node.JobParam)
+                job.JobParam <- node.JobParam
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
 
@@ -67,7 +67,7 @@ module ImportUtilVertex =
                     let TaskDevPara =  node.TaskDevPara 
                     let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName TaskDevPara
                     let job = Job(node.Job, sys, [autoTaskDev])
-                    job.UpdateJobParam(node.JobParam)
+                    job.JobParam <- node.JobParam
                     sys.Jobs.Add job |> ignore
                     Call.Create(job, parentWrapper)
                 else 

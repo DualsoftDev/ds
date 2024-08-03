@@ -727,7 +727,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
           
 
                 let job = Job(jobNameFqdn, system, taskList)
-                job.UpdateJobParam(jobParam)
+                job.JobParam <- jobParam
 
                 job |> system.Jobs.Add
 

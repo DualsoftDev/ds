@@ -88,7 +88,7 @@ module ImportUtilForLib =
             | Some existingJob -> existingJob
             | None -> 
                 let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
-                job.UpdateJobParam(param.Node.JobParam)
+                job.JobParam <- param.Node.JobParam
                 param.MySys.Jobs.Add(job)
                 job
 

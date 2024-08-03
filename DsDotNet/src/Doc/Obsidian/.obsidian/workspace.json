@@ -28,11 +28,11 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "DS/Engine.Core/ITagManager.canvas",
+                "file": "DS/Engine.Core/FQDN.canvas",
                 "viewState": {
-                  "x": -120,
-                  "y": -82.5,
-                  "zoom": 0
+                  "x": -306,
+                  "y": -31.5,
+                  "zoom": -0.039552358915012735
                 }
               }
             }
@@ -104,7 +104,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DS/Engine.Core/ITagManager.canvas",
+                "file": "DS/Engine.Core/FQDN.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -121,7 +121,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DS/Engine.Core/ITagManager.canvas",
+                "file": "DS/Engine.Core/FQDN.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -144,7 +144,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DS/Engine.Core/ITagManager.canvas"
+                "file": "DS/Engine.Core/FQDN.canvas"
               }
             }
           }
@@ -167,8 +167,13 @@
   },
   "active": "c6339de9e3ad10fa",
   "lastOpenFiles": [
-    "DS/Engine.Core/Core 자료 구조.md",
     "DS/Engine.Core/ITagManager.canvas",
+    "DS/Engine.Core/FQDN.canvas",
+    "DS/Engine.Core/DsSystem.md",
+    "DS/Engine.Core/DsCPU.md",
+    "DS/Engine.Core/Core Dll hierarchy.canvas",
+    "DS/Engine.Core/Core 자료 구조.md",
+    "DS/Engine.Core/Untitled.canvas",
     "DS/DsWebServer/HMI/TagWeb.md",
     "DS/DsWebServer/HMI"
   ]

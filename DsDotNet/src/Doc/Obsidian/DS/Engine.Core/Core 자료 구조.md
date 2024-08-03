@@ -1,0 +1,45 @@
+- Engine
+	- Core, Cpu, CodeGen, Parser, ImportPpt, Runtime, Info
+## Engine.Core
+-  Graph, Expression, DsXXX
+- `[sys] my = {}`
+	- flow, jobs, 
+	- command, operation, variable, condition, interface
+	- button, hmi   -> PREDOMICATH
+	- device, external
+	- props             -> STANDFLMS
+	- versions
+- DsSystem
+	- Flows, loadedDevices, apiUsage, GetHMI(), _on, ...
+- Flow
+	- Graph, modelingEdges, AliaseDefs, GetHMI()
+- FQDNObject
+	- DsSystem
+	- LoadedSystem
+		- Device, ExternalSystem
+	- Flow
+	- Vertex
+		- Real
+		- Call
+		- Alias
+	- ApiItem, Job, VariableData, ActionVariable, TaskDev
+	- HwSystemDef
+		- ButtonDef, LampDef, ConditionDef
+	- 
+- _ITagManager
+	- { System, Flow, TaskDev, ApiItem, ActionVariable, VariableData  }Manager,
+	- VertexTagManager
+		- CallVertexTagManager, RealVertexTagManager
+- TaskDev
+	- {In, Out} x {Params, Address, Tag}, ManualAddress, ApiParams, ApiItems, 
+- Real
+	- Graph, ModelingEdges,
+	- ExternalTags
+	- STANDFLMS : T, N, F, M, S (Time, Notrans, Finished, Motion, Script)
+	-  _    _   _   _ _
+- Call
+	- Job or Command or Operator
+- ApiItem
+	- Tx/Rx (Real), Time
+- Alias
+	- Target

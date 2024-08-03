@@ -12,7 +12,7 @@ type DsSystem with
     member s.Y1_SystemSimulationForFlow(activeSys:DsSystem) =
         let fn = getFuncName()
         let aOff = activeSys._off.Expr
-        [
+        [|
             for flow in s.Flows do
                 yield (activeSys._auto_btn.Expr  , aOff) --| (flow.auto_btn,   fn)
                 yield (activeSys._manual_btn.Expr, aOff) --| (flow.manual_btn, fn)
@@ -25,7 +25,7 @@ type DsSystem with
                     yield (activeSys._home_btn.Expr  , aOff) --| (flow.home_btn,   fn)
                     yield (activeSys._clear_btn.Expr , aOff) --| (flow.clear_btn,  fn)
                     yield (activeSys._ready_btn.Expr , aOff) --| (flow.ready_btn,  fn)
-        ]
+        |]
         
   
 

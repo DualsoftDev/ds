@@ -31,7 +31,8 @@ type CallVertexTagManager with
     member v.C2_DoCommand() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
-        [
+        let fn = comment
+        [|
             if call.TargetFunc.Value.Statements.any() then
                 let sets = 
                     if RuntimeDS.Package.IsPLCorPLCSIM() then
@@ -41,7 +42,7 @@ type CallVertexTagManager with
                     else
                         failWithLog $"Not supported {RuntimeDS.Package} package"
 
-                yield! (v.MM.Expr, v.System) --^ (v.CallCommandPulse, getFuncName()) 
+                yield! (v.MM.Expr, v.System) --^ (v.CallCommandPulse, fn) 
 
                     ////test ahn
                 yield!
@@ -55,11 +56,12 @@ type CallVertexTagManager with
                         ]
                     )
 
-                yield (v.CallCommandPulse.Expr, v._off.Expr) --| (v.CallCommandEnd, getFuncName())
-        ]
+                yield (v.CallCommandPulse.Expr, v._off.Expr) --| (v.CallCommandEnd, fn)
+        |]
 
     member v.C3_DoOperatorDevice() =
         let call = v.Vertex :?> Call
+
         let inOps = 
             call.TargetJob.TaskDefs
                 .Select(fun d->

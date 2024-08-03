@@ -19,14 +19,14 @@ type VertexTagManager with
         let rst = v.Flow.ClearExpr
         let fn = getFuncName()
 
-        [
+        [|
             let running = v.MM.Expr <&&> !@call.End <&&> !@iop
             yield running --@ (v.TOUT, v.System._tout.Value, fn)
             if RuntimePackage.PCSIM = RuntimeDS.Package then
                 yield (vOff, rst) ==| (v.ErrOnTimeOver , fn)
             else 
                 yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , fn)
-        ]
+        |]
 
     member v.E3_CallErrorRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
@@ -37,7 +37,7 @@ type VertexTagManager with
         let rst = v.Flow.ClearExpr
         let fn = getFuncName()
 
-        [
+        [|
             let using      = if call.HasSensor then v._on.Expr else  v._off.Expr 
             let input      = call.End
             let checkCondi = using <&&> dop <&&> real.V.G.Expr 
@@ -61,7 +61,7 @@ type VertexTagManager with
                 yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
             else
                 yield (checkCondi <&&> rxFinishExpr                      <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
-        ]
+        |]
         
 
     member v.E4_RealErrorTotalMonitor() =

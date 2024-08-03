@@ -8,37 +8,18 @@
         "type": "tabs",
         "children": [
           {
-            "id": "d5bf3f026732fd5a",
-            "type": "leaf",
-            "state": {
-              "type": "canvas",
-              "state": {
-                "file": "DS/Engine.Core/ITagManager.canvas",
-                "viewState": {
-                  "x": 0,
-                  "y": 0,
-                  "zoom": 0
-                }
-              }
-            }
-          },
-          {
             "id": "c6339de9e3ad10fa",
             "type": "leaf",
             "state": {
-              "type": "canvas",
+              "type": "markdown",
               "state": {
-                "file": "DS/Engine.Core/FQDN.canvas",
-                "viewState": {
-                  "x": -306,
-                  "y": -31.5,
-                  "zoom": -0.039552358915012735
-                }
+                "file": "DS/Engine.Core/Core 자료 구조.md",
+                "mode": "source",
+                "source": false
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -104,7 +85,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DS/Engine.Core/FQDN.canvas",
+                "file": "DS/Engine.Core/Core 자료 구조.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -121,7 +102,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DS/Engine.Core/FQDN.canvas",
+                "file": "DS/Engine.Core/Core 자료 구조.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -144,7 +125,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DS/Engine.Core/FQDN.canvas"
+                "file": "DS/Engine.Core/Core 자료 구조.md"
               }
             }
           }
@@ -167,12 +148,14 @@
   },
   "active": "c6339de9e3ad10fa",
   "lastOpenFiles": [
-    "DS/Engine.Core/ITagManager.canvas",
     "DS/Engine.Core/FQDN.canvas",
+    "DS/Engine.Core/Core 자료 구조.md",
+    "DS/Engine.Core/ITagManager.canvas",
+    "DS/DsWebServer/HMI/Browser UI/CompHmiButtonColumn.md",
+    "DS/DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
     "DS/Engine.Core/DsSystem.md",
     "DS/Engine.Core/DsCPU.md",
     "DS/Engine.Core/Core Dll hierarchy.canvas",
-    "DS/Engine.Core/Core 자료 구조.md",
     "DS/Engine.Core/Untitled.canvas",
     "DS/DsWebServer/HMI/TagWeb.md",
     "DS/DsWebServer/HMI"

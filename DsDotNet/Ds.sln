@@ -157,6 +157,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RedisDS", "RedisDS", "{F963
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisDSPLCServer", "Apps\RedisDS\RedisDSPLCServer\RedisDSPLCServer.csproj", "{E42C511A-6043-43CB-94E1-7AC090A8B084}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget.Candidates", "Nuget.Candidates", "{E6C42E55-8BA2-46A1-BAFA-A345A019C387}"
+	ProjectSection(SolutionItems) = preProject
+		src\Nuget.Candidates\Readm.txt = src\Nuget.Candidates\Readm.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Nuget.Common", "src\Nuget.Candidates\Engine.Nuget.Common\Engine.Nuget.Common.csproj", "{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Engine.Nuget.Common.FS", "src\Nuget.Candidates\Engine.Nuget.Common.FS\Engine.Nuget.Common.FS.fsproj", "{C88754F9-CD43-4835-8D1E-E531D210F362}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -538,6 +547,22 @@ Global
 		{E42C511A-6043-43CB-94E1-7AC090A8B084}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E42C511A-6043-43CB-94E1-7AC090A8B084}.Release|x86.ActiveCfg = Release|Any CPU
 		{E42C511A-6043-43CB-94E1-7AC090A8B084}.Release|x86.Build.0 = Release|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Debug|x86.Build.0 = Debug|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Release|x86.ActiveCfg = Release|Any CPU
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}.Release|x86.Build.0 = Release|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Debug|x86.Build.0 = Debug|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Release|x86.ActiveCfg = Release|Any CPU
+		{C88754F9-CD43-4835-8D1E-E531D210F362}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -604,6 +629,9 @@ Global
 		{3A0FB890-6C14-47CE-BEF6-072356C98622} = {41943432-DEAF-4D4C-80A2-D9716416A24D}
 		{F9634660-09E7-4F84-B63C-FA0D735389C7} = {A0DABA06-FC1F-4129-B89E-1EAA3E01A6A9}
 		{E42C511A-6043-43CB-94E1-7AC090A8B084} = {F9634660-09E7-4F84-B63C-FA0D735389C7}
+		{E6C42E55-8BA2-46A1-BAFA-A345A019C387} = {BF60BC93-E09B-4E5F-9D85-95A519479D54}
+		{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7} = {E6C42E55-8BA2-46A1-BAFA-A345A019C387}
+		{C88754F9-CD43-4835-8D1E-E531D210F362} = {E6C42E55-8BA2-46A1-BAFA-A345A019C387}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

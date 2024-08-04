@@ -197,6 +197,12 @@ type TagKindExt =
             , int VertexTag.finish
             , int VertexTag.homing)
 
+    [<Extension>]
+    static member IsActionOutTag(x:IStorage) =
+        x.TagKind.IsOneOf(
+                int TaskDevTag.actionMemory
+              , int TaskDevTag.actionOut
+              )
 
 
 

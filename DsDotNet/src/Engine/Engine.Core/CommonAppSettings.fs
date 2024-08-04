@@ -31,6 +31,7 @@ type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, 
     member val DbWriter = dbWriter with get, set
     member val ModelFilePath = modelFilePath with get, set
     member val ModelId = -1 with get, set
+    member val UseLogDB:bool = true with get, set
 
 
 type LoggerDBSettings with

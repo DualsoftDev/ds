@@ -18,9 +18,11 @@ module HelloDSRuntimeTestModule =
         inherit EngineTestBaseClass()
         do
             RuntimeDS.Package <- PCSIM
+            RuntimeDS.TimeoutCall <- 15000u
 
         let helloDSPptPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
         let helloDSZipPath = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.zip"
+        
         let runtimeModel = new RuntimeModel(helloDSZipPath, PlatformTarget.WINDOWS)
 
         let getSystem() =

@@ -4,7 +4,7 @@ namespace Engine.Nuget.Common
 {
     public static class ProcessExt
     {
-        public static Process? TryFindRunningProcess(string processName) => Process.GetProcesses().FirstOrDefault(p => p.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase));
+        public static Process TryFindRunningProcess(string processName) => Process.GetProcesses().FirstOrDefault(p => p.ProcessName.Equals(processName, StringComparison.OrdinalIgnoreCase));
         public static bool IsRunning(string processName) => TryFindRunningProcess(processName) != null;
         /// <summary>
         /// 해당 process 가 구동중이 아닐 때에만 Process.Start 호출함.

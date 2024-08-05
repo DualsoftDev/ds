@@ -4,23 +4,13 @@ open System
 open Dual.Common.Core.FS
 open Engine.Core
 open System.Collections.Generic
+open Dual.Common.Core.FS.Functions
 
 [<AutoOpen>]
 module internal DBLoggerQueryImpl =
 
-    let sum (logSet: LogSet, fqdn: string, tagKind: int) : double =
-        if ( fqdn = "my.STN01_UsingLIB1.WORK1" || fqdn = "my.STN01_UsingLIB1.WORK2") && tagKind = int VertexTag.going then
-            tracefn "HERE..."
-        let summary = logSet.GetSummary(tagKind, fqdn)
-        summary.Sum
-
-    let average (logSet: LogSet, fqdn: string, tagKind: int) : double =
-        let summary = logSet.GetSummary(tagKind, fqdn)
-
-        if summary.Count > 0 then
-            summary.Sum / (double summary.Count)
-        else
-            0
+    let sum     (logSet: LogSet, fqdn: string, tagKind: int) : double = logSet.GetSummary(tagKind, fqdn).Sum
+    let average (logSet: LogSet, fqdn: string, tagKind: int) : double = logSet.GetSummary(tagKind, fqdn).Average
 
     [<Obsolete("failwithlogf 로 대체 되어야 함")>]
     let pseudoFail msg =
@@ -34,9 +24,6 @@ module internal DBLoggerQueryImpl =
     type Summary with
         // logs: id 순
         member x.Build(FList(logs: Log list), lastLogs:Dictionary<ORMStorage, Log>) =
-            let mutable count = 0
-            let mutable sum = 0.0
-
             let rec updateSummary (logs: Log list) =
                 match logs with
                 | ([] | [ _ ]) -> ()
@@ -46,19 +33,14 @@ module internal DBLoggerQueryImpl =
 
                     match b1, b2 with
                     | true, false ->
-                        count <- count + 1
                         let duration = (log2.At - log1.At).TotalSeconds
-                        assert (duration >= 0)
-                        sum <- sum + duration
+                        x.Durations.Add duration
                         updateSummary tails
                     //| _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected. ({log1.Storage.Name}:{b1}, {log2.Storage.Name}:{b2})"
                     | _ when b1 = b2 -> ()  // todo: replace this line with above line
                     | _ -> logError $"ERROR.  Expect ({log1.Storage.Name}:rising, {log2.Storage.Name}:falling)."
 
             logs |> updateSummary
-
-            x.Count <- count
-            x.Sum <- sum
 
             logs
             |> groupBy(fun l -> l.Storage)
@@ -75,8 +57,7 @@ module internal DBLoggerQueryImpl =
                         logWarn  $"Warning: Duplicated consecutive values detected for log id = {current.Id}, prev log id = {last.Id}."
 
                     if isOff (current) then
-                        x.Count <- x.Count + 1
-                        x.Sum <- x.Sum + (current.At - last.At).TotalSeconds
+                        (current.At - last.At).TotalSeconds |> x.Durations.Add
                 | None ->
                     if isOff (current) then
                         logWarn $"Warning: Invalid value starts: OFF(false)."

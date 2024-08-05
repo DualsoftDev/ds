@@ -71,7 +71,7 @@ module private DsParserHelperModule =
                         LoadingType = DuExternal
                     }
 
-                match systemRepo.TryFind(absoluteFilePath) with
+                match systemRepo.TryFindValue(absoluteFilePath) with
                 | Some existing -> ExternalSystem(existing, param, false) // 기존 loading 된 system share
                 | None ->
                     let exSystem = fwdLoadExternalSystem param
@@ -299,7 +299,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let ctx = parserRuleContext
 
         let system = 
-            match x.Rule2SystemNameDictionary.TryFind(parserRuleContext) with
+            match x.Rule2SystemNameDictionary.TryFindValue(parserRuleContext) with
             | Some systemName -> Some systemName
             | None -> Some x.TheSystem.Name  //parserRuleContext.TryGetSystemName()대신에 한번 저장된거 사용해서 성능개선
 

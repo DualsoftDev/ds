@@ -30,7 +30,7 @@ module rec ExpressionParserModule =
 
     /// storages 에서 name 을 찾는 기본 함수
     let defaultStorageFinder (storages: Storages) (name: string) : IStorage option =
-        storages.TryFind name
+        storages.TryFindValue name
 
     let createLambdaCallExpression (storages:Storages) args (exp: IExpression) =
         let newExp =
@@ -373,7 +373,7 @@ module rec ExpressionParserModule =
                     let exp = createExp (children[0] :?> StructMemberAssignContext)
                     let stgType = parserData.TryGetMemberVariableDataType storageName
                     let pseudoMemberVar =
-                        match storages.TryFind storageName with
+                        match storages.TryFindValue storageName with
                         | Some v -> v
                         | None ->
                             let v = createMemberVariable storageName exp (Some (exp.ToText()))
@@ -465,7 +465,7 @@ module rec ExpressionParserModule =
 
                 let storageFinder (funName:string) (stgName:string): IStorage option =
                     let localStgName = getFormalParameterName funName stgName
-                    storages.TryFind localStgName
+                    storages.TryFindValue localStgName
                     |> Option.orElseWith (fun () -> defaultStorageFinder storages stgName)
 
                 let funName =

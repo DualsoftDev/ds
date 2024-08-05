@@ -69,7 +69,7 @@ module internal DBLoggerQueryImpl =
 
         member x.BuildIncremental(FList(newLogs: Log list), lastLogs:Dictionary<ORMStorage, Log>) =
             let helper (current: Log) =
-                match lastLogs.TryFind(current.Storage) with
+                match lastLogs.TryFindValue(current.Storage) with
                 | Some last ->
                     if current.Id >= 0 && isOn (last) = isOn (current) then
                         logWarn  $"Warning: Duplicated consecutive values detected for log id = {current.Id}, prev log id = {last.Id}."

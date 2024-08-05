@@ -7,10 +7,8 @@ open System.Linq
 open System.Diagnostics
 open System.Collections.Generic
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System
-open System.Reactive.Subjects
-open System.ComponentModel
-open System.Runtime.CompilerServices
 open System.Reflection
 
 [<AutoOpen>]
@@ -127,7 +125,7 @@ module CoreModule =
 
         member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
         member _.AddFqdnVertex(fqdn, vertex) = fqdnVertexDic.Add(fqdn, vertex)
-        member _.TryFindFqdnVertex(fqdn) = fqdnVertexDic.TryFind(fqdn)
+        member _.TryFindFqdnVertex(fqdn) = fqdnVertexDic.TryFindValue(fqdn)
         // [NOTE] GraphVertex }
 
         /// System Loading (메모리 작업 중) 여부.  System 생성이 끝나는 순간에 false
@@ -631,7 +629,7 @@ module CoreModule =
                     | DuAliasTargetCall c -> c.GetAliasTargetToDs(flow).ToArray()
                     | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow).ToArray()
 
-                match flow.AliasDefs.TryFind(aliasKey) with
+                match flow.AliasDefs.TryFindValue(aliasKey) with
                 | Some ad -> ad.AliasTexts.AddIfNotContains(name) |> ignore
                 | None -> flow.AliasDefs.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
                 

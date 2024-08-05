@@ -280,7 +280,7 @@ CREATE VIEW [{Vn.Storage}] AS
 
     /// DB logging 관련 전체 설정
     and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: ORMStorage seq, readerWriterType: DBLoggerType) as this =
-        let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
+        let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toReadOnlyDictionary
         let lastLogs = Dictionary<ORMStorage, Log>()
 
         let summaryDic =
@@ -288,7 +288,7 @@ CREATE VIEW [{Vn.Storage}] AS
             |> map (fun s ->
                 let key = getStorageKey s
                 key, Summary(this, key, 0, 0.))
-            |> Tuple.toDictionary
+            |> Tuple.toReadOnlyDictionary
 
         let storageByIdDic = Dictionary<int, ORMStorage>()
         let systems = systems |> toArray

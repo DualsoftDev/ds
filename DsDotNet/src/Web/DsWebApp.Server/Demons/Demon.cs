@@ -84,7 +84,7 @@ public partial class Demon : BackgroundService
                             var ti = storage.GetTagInfo();
                             if (ti != null && ti.Value.IsNeedSaveDBLog())
                             {
-                                uint? token = (ti.Value is EventVertex ev && ev.Target is Real r) ? r.GetRealSEQ() : null;
+                                uint? token = (ti.Value is EventVertex ev && ev.Target is Real r) ? r.GetRealToken() : null;
 
                                 DBLogger.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, token));
                             }

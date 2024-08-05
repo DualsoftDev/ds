@@ -101,7 +101,7 @@ type VertexTagManager with
                 let srcTrigger = startCausals.First().VC.ET.Expr
 
                 yield (srcTrigger, v._off.Expr) --| (tempRisingRelay, fn)
-                yield (tempRisingRelay.Expr, 1u|>literal2expr, real.VR.RealSEQData.ToExpression()) --+ (real.VR.RealSEQData, fn)
+                yield (tempRisingRelay.Expr, 1u|>literal2expr, real.VR.RealTokenData.ToExpression()) --+ (real.VR.RealTokenData, fn)
         |]
 
         

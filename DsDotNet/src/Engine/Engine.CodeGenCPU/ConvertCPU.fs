@@ -56,7 +56,7 @@ module ConvertCPU =
                 yield vr.F2_RootReset()
 
                 if isActive then
-                    yield! vr.R6_RealSEQMove() 
+                    yield! vr.R6_RealTokenMove() 
                     yield! vr.F6_SEQTempNumGeneration() //test ahn
                     yield vr.F5_HomeCommand()
 

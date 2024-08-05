@@ -76,7 +76,7 @@ type RealVertexTagManager with
             (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, fn)     // E
         |]
 
-    member v.R6_RealSEQMove() = 
+    member v.R6_RealTokenMove() = 
         let srcs = getStartEdgeSources(v.Vertex)
         let transCausalReals =
             srcs.GetPureReals()
@@ -85,8 +85,8 @@ type RealVertexTagManager with
 
         [|
             if transCausalReals.any() then
-                let srcTagSEQ = transCausalReals.First().VR.RealSEQData  
-                let tgtTagSEQ = v.RealSEQData
+                let srcTagSEQ = transCausalReals.First().VR.RealTokenData  
+                let tgtTagSEQ = v.RealTokenData
                 yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, fn)
         |]
 

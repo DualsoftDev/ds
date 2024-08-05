@@ -148,7 +148,7 @@ module TagManagerModule =
             | VertexTag.realOriginAction     -> realM().OA :> IStorage
             | VertexTag.relayReal            -> realM().RR :> IStorage
             | VertexTag.goingRealy           -> realM().GG :> IStorage
-            | VertexTag.realSEQ              -> realM().RealSEQData :> IStorage
+            | VertexTag.realToken            -> realM().RealTokenData :> IStorage
           
             | (VertexTag.counter | VertexTag.timerOnDelay) ->
                 failwithlog $"Error : Time Counter Type {vt} not support!!"
@@ -169,9 +169,9 @@ module TagManagerModule =
 
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
 
-        let realSEQData  = 
-            let vertexTag = VertexTag.realSEQ |> int
-            let name = $"{v.QualifiedName}_{VertexTag.realSEQ}" |> validStorageName
+        let realTokenData  = 
+            let vertexTag = VertexTag.realToken |> int
+            let name = $"{v.QualifiedName}_{VertexTag.realToken}" |> validStorageName
             createPlanVar s name DuUINT32 true v vertexTag sys  
 
         member x.Real = x.Vertex :?> Real
@@ -180,7 +180,7 @@ module TagManagerModule =
             and set(v) = originInfo <- v
 
         ///Real SEQ Data
-        member val RealSEQData = realSEQData
+        member val RealTokenData = realTokenData
 
         /// Real Origin Init
         member val RO         = createTag false VertexTag.realOriginInit

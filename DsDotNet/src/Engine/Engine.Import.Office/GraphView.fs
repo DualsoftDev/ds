@@ -166,7 +166,7 @@ module rec ViewModule =
             then 0u
             else 
                 match coreVertex.Value.GetPure() with
-                | :? Real as r -> r.RealSEQ
+                | :? Real as r -> r.RealToken
                 |_-> 0u
      
         member x.DisplayName =   

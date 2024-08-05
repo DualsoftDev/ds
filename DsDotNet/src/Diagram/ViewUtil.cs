@@ -176,7 +176,7 @@ namespace Diagram.View.MSAGL
                     {
                         uint? token = null;
                         if (eventVertex?.Target is Real r)
-                            token = r.GetRealSEQ();
+                            token = r.GetRealToken();
 
                         DBLog.InsertValueLog(DateTime.Now, rx, token);
                     }

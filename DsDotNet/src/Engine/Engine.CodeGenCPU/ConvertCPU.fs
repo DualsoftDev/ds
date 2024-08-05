@@ -142,7 +142,7 @@ module ConvertCPU =
         pureCalls.TryFind(fun f->not(f.IsFlowCall))
 
     let private applyTaskDev(s:DsSystem) = 
-        [
+        [|
             let devCallSet =  s.GetTaskDevCalls() //api는 job 기준으로 중복제거 
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
@@ -163,7 +163,7 @@ module ConvertCPU =
                 if masterCall.IsSome then   
                     yield! tm.A3_SensorLinking(masterCall.Value)
                     yield! tm.A4_SensorLinked(masterCall.Value)
-        ]
+        |]
 
 
     let private funcCall(s:DsSystem) =
@@ -176,7 +176,7 @@ module ConvertCPU =
         let pureCommandFuncs =
             s.GetVertices().OfType<Call>().Where(fun c->c.IsCommand)
                           
-        [
+        [|
 
             for coin in pureOperatorFuncs do
                 yield! coin.VC.C1_DoOperator()   //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
@@ -186,40 +186,40 @@ module ConvertCPU =
                 
             for coin in flowOperatorFuncs do
                 yield coin.VC.C3_DoOperatorDevice()
-        ]
+        |]
 
     let private applyVariables(s:DsSystem) =
-        [
+        [|
             for v in s.Variables do
                 if v.VariableType = Immutable then
                     yield v.VM.V1_ConstMove(s)
 
             for v in s.ActionVariables do
                 yield v.VM.V2_ActionVairableMove(s)
-        ]   
+        |]   
             
     let private applyJob(s:DsSystem) =
-        [
+        [|
             let callDevices =s.GetDevicesHasOutput()
             
             for _, call in callDevices do
                 yield! call.TargetJob.J1_JobActionOuts(call)
-        ]
+        |]
 
     let private applyCallOnDelay(s:DsSystem) =
-        [
+        [|
            yield!  s.T1_DelayCall()  
-        ]
+        |]
         
     let private emulationDevice(s:DsSystem) =
-        [
+        [|
             yield s.SetFlagForEmulation()
             let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
             for td, call in devsCall do
                 if not(td.IsRootOnlyDevice) then
                     if td.InTag.IsNonNull() then  
                         yield td.SensorEmulation(s, call.TargetJob)
-        ]
+        |]
  
     let private updateRealParentExpr(x:DsSystem) =
         for dev, call in x.GetTaskDevsCall() do

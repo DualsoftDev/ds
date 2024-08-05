@@ -10,6 +10,7 @@ using Microsoft.Data.Sqlite;
 using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
 using static Engine.Info.DBLoggerORM;
+using Engine.Nuget.Common;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 
@@ -214,12 +215,48 @@ public static class CustomServerExtension
 {
     public static async Task<IServiceCollection> AddUnsafeServicesAsync(this IServiceCollection services, ServerGlobal serverGlobal, ILog logger)
     {
-        if (serverGlobal.DsCommonAppSettings.LoggerDBSettings.ModelId >= 0)
-            await DBLogger.InitializeLogDbOnDemandAsync(serverGlobal.DsCommonAppSettings, cleanExistingDb:false);
+        var commonAppSettings = serverGlobal.DsCommonAppSettings;
+        if (commonAppSettings.LoggerDBSettings.ModelId >= 0)
+            await DBLogger.InitializeLogDbOnDemandAsync(commonAppSettings, cleanExistingDb:false);
             //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
             //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
 
         ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
+
+
+        //
+        // REDIS server 구동 시의 error 를 전달 받아야 하지만, 방법이 마땅치 않다.!!
+        // DsWebServer 의 Console 에 출력은 가능하나, logging 이 불가능하고...
+        //
+        var psi = new ProcessStartInfo(commonAppSettings.RedisServerExePath)
+        {
+            UseShellExecute = true,
+            //RedirectStandardError = true,
+        };
+
+        psi.ArgumentList.Add(commonAppSettings.DsConfigPath);
+        var process = ProcessExt.RestartSingleon(psi);
+
+        // Not working!!
+        //
+        //process.ErrorDataReceived += (sender, e) =>
+        //{
+        //    if (!string.IsNullOrEmpty(e.Data))
+        //        logger.Error($"[ERR REDIS] {e.Data}");
+        //};
+        //process.OutputDataReceived += (sender, e) =>
+        //{
+        //    if (!string.IsNullOrEmpty(e.Data))
+        //        logger.Info($"[REDIS] {e.Data}");
+        //};
+        Task.Run(async () =>
+        {
+            // Dirty hack : 1초후 해당 프로세스 존재 check
+            await Task.Delay(1000);
+            if (! ProcessExt.IsRunning(commonAppSettings.RedisServerExePath))
+                logger.Error($"Failed to start Redis server");
+        }).FireAndForget();
+
         return services;
     }
 

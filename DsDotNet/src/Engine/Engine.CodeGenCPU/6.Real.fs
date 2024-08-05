@@ -14,9 +14,10 @@ type RealVertexTagManager with
 
         (set, rst) ==| (v.RR, getFuncName())
 
-    member v.R2_RealJobComplete(): CommentedStatement list =
+    member v.R2_RealJobComplete(): CommentedStatement [] =
         let real = v.Vertex :?> Real
-        [   
+        let fn = getFuncName()
+        [|
             let set = 
                 let endExpr =  
                     v.GG.Expr
@@ -39,10 +40,10 @@ type RealVertexTagManager with
 
             //수식 순서 중요 1.ET -> 2.GG (바뀌면 full scan Step제어 안됨)
             //1. EndTag 
-            (set, rst) ==| (v.ET, getFuncName())              
+            (set, rst) ==| (v.ET, fn)              
             //2. 다른 Real Reset Tag Relay을 위한 1Scan 소비 (Scan에서 제어방식 바뀌면 H/S 필요)
-            (v.G.Expr, v._off.Expr) --| (v.GG, getFuncName()) 
-        ]
+            (v.G.Expr, v._off.Expr) --| (v.GG, fn) 
+        |]
 
 
         
@@ -69,49 +70,50 @@ type RealVertexTagManager with
         let fn = getFuncName()
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
-        [
+        [|
             (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, fn)     // S
             (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, fn)     // R
             (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, fn)     // E
-        ]
+        |]
 
     member v.R6_RealSEQMove() = 
         let srcs = getStartEdgeSources(v.Vertex)
-        let transCausalReals =  srcs.GetPureReals()
-                                    .Where(fun w-> not(w.NoTransData))
+        let transCausalReals =
+            srcs.GetPureReals()
+                .Where(fun w-> not(w.NoTransData))
+        let fn = getFuncName()
 
-        if transCausalReals.any() then
-            [
+        [|
+            if transCausalReals.any() then
                 let srcTagSEQ = transCausalReals.First().VR.RealSEQData  
                 let tgtTagSEQ = v.RealSEQData
-                yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, getFuncName())
-            ]
-        else 
-            []
+                yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, fn)
+        |]
 
     member v.R7_RealGoingOriginError() =
+        let fn = getFuncName()
         let dop = v.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
-        [
+        [|
             if not(RuntimeDS.Package.IsPackageSIM()) then 
                 let checking = v.G.Expr <&&> !@v.OG.Expr <&&> !@v.RR.Expr <&&> dop
-                yield (checking, rst) ==| (v.ErrGoingOrigin , getFuncName())
-        ]
+                yield (checking, rst) ==| (v.ErrGoingOrigin , fn)
+        |]
         
-    member v.R8_RealGoingPulse(): CommentedStatement list =
+    member v.R8_RealGoingPulse(): CommentedStatement [] =
         let fn = getFuncName()
-        [ 
+        [|
             if RuntimeDS.Package.IsPLCorPLCSIM() then
                 yield (fbRising[v.G.Expr], v._off.Expr) --| (v.GP, fn)
             elif RuntimeDS.Package.IsPCorPCSIM() then 
                 yield! (v.G.Expr, v.System)  --^ (v.GP, fn) 
             else    
                 failWithLog $"Not supported {RuntimeDS.Package} package"
-        ]
+        |]
 
-    member v.R10_RealGoingTime(): CommentedStatement  list =
+    member v.R10_RealGoingTime(): CommentedStatement [] =
         let fn = getFuncName()
-        [
+        [|
             if v.Real.TimeAvg.IsSome then
                 yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
                 yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
@@ -123,11 +125,11 @@ type RealVertexTagManager with
                 else 
                     yield (v.TimeStart.Expr, v._off.Expr) --| (v.TimeEnd, fn)
                     
-        ]
+        |]
 
-    member v.R11_RealGoingMotion(): CommentedStatement list =
+    member v.R11_RealGoingMotion(): CommentedStatement [] =
         let fn = getFuncName()
-        [
+        [|
             if v.Real.Motion.IsSome then
                 yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,  v.ET.Expr) ==| (v.MotionRelay, fn)
                 yield (v.G.Expr,  v.MotionEnd.Expr <||>  v.MotionRelay.Expr) --| (v.MotionStart, fn)
@@ -153,11 +155,12 @@ type RealVertexTagManager with
                     else
                         yield (realSensor, v._off.Expr) --| (v.MotionEnd, fn)    //실제 rx에 해당하는 하면 api 실 action sensor
                     
-        ]
+        |]
 
-    member v.R12_RealGoingScript(): CommentedStatement  list =
-        [
+    member v.R12_RealGoingScript(): CommentedStatement [] =
+        let fn = getFuncName()
+        [|
             if v.Real.Script.IsSome then
-                yield (v.ScriptStart.Expr<&&>v.ScriptEnd.Expr, v.ET.Expr) ==| (v.ScriptRelay, getFuncName())
-                yield (v.G.Expr, v.ScriptRelay.Expr) --| (v.ScriptStart, getFuncName())  
-        ]
+                yield (v.ScriptStart.Expr<&&>v.ScriptEnd.Expr, v.ET.Expr) ==| (v.ScriptRelay, fn)
+                yield (v.G.Expr, v.ScriptRelay.Expr) --| (v.ScriptStart, fn)  
+        |]

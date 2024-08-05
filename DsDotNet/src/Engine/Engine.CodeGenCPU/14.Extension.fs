@@ -13,7 +13,7 @@ type DsSystem with
         let fn = getFuncName()
         let rst = s._off.Expr
             (*clear btn  => _ready_btn  동시 동작   /  누름 유지시 _home_btn 동작*)
-        [ 
+        [| 
             
             for btn in s.ClearHWButtons do
                 let set = btn.ActionINFunc
@@ -32,4 +32,4 @@ type DsSystem with
                 yield (set, rst) --| (flow.clear_btn, fn)
                 yield (set, rst) --| (flow.ready_btn, fn)
 
-        ]
+        |]

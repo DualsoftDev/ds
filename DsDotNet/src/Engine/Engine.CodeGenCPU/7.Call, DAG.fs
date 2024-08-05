@@ -46,8 +46,8 @@ type VertexTagManager with
         let real = v.Vertex :?> Real
         let v = v :?> RealVertexTagManager
         let coins = real.Graph.Inits.Select(getVMCoin)
-        [
-            let f = getFuncName()
+        let f = getFuncName()
+        [|
             for coin in coins do
                 let call = coin.Vertex.TryGetPureCall().Value
                 let safety = call.SafetyExpr
@@ -55,13 +55,13 @@ type VertexTagManager with
                 let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, f)
-        ]
+        |]
 
     member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCoin).ToArray()
 
-        [
+        [|
             let f = getFuncName()
             for coin in coins do
                 let call = coin.Vertex.TryGetPureCall().Value
@@ -70,13 +70,13 @@ type VertexTagManager with
                 let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, f )
-        ]
+        |]
 
     member v.D3_DAGCoinEnd() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Select(getVMCoin)
-        [
-            let f = getFuncName()
+        let f = getFuncName()
+        [|
             for coin in coins do
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
                 let rsts = coin.RT.Expr
@@ -93,19 +93,19 @@ type VertexTagManager with
                     else
                         yield! (setEnd, coin.System)  --^ (coin.GP, f) 
                         yield (setStart <&&> coin.GP.Expr, rsts) ==| (coin.ET, f )
-        ]
+        |]
 
 
     member v.D4_DAGCoinReset() =
         let real = v.Vertex :?> Real
         let children = real.Graph.Vertices.Select(getVMCoin)
-        [
-            let f = getFuncName()
+        let f = getFuncName()
+        [|
             for child in children do
                 let sets = real.V.RT.Expr // <&&> !@real.V.G.Expr
                 let rsts = child.R.Expr
                 yield (sets, rsts) ==| (child.RT, f )
-        ]
+        |]
 
 
 

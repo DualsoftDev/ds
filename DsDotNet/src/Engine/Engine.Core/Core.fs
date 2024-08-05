@@ -456,15 +456,15 @@ module CoreModule =
         member x.DeviceName = deviceName
         member x.ParnetSystem = parentSys
 
-        member x.InParams = dicTaskTaskDevParamIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.InParam) 
-        member x.OutParams = dicTaskTaskDevParamIO.Values.Choose(fun tdPara->tdPara.TaskDevParamIO.OutParam) 
+        member x.ApiParams = dicTaskTaskDevParamIO.Values
+        member x.ApiItems  = x.ApiParams.Select(fun f -> f.ApiItem)
+        member x.InParams  = x.ApiParams.Choose(fun tdPara -> tdPara.TaskDevParamIO.InParam) 
+        member x.OutParams = x.ApiParams.Choose(fun tdPara -> tdPara.TaskDevParamIO.OutParam) 
 
         member x.DicTaskTaskDevParamIO = dicTaskTaskDevParamIO
-        member x.ApiParams = dicTaskTaskDevParamIO.Values
-        member x.ApiItems = x.DicTaskTaskDevParamIO.Values.Select(fun f->f.ApiItem)
 
-        member val InAddress = TextAddrEmpty with get, set
-        member val OutAddress = TextAddrEmpty with get, set
+        member val InAddress      = TextAddrEmpty with get, set
+        member val OutAddress     = TextAddrEmpty with get, set
         member val MaunualAddress = TextAddrEmpty with get, set
               
         //CPU 생성시 할당됨 InTag
@@ -477,15 +477,12 @@ module CoreModule =
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
         inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-        let mutable jobParam = defaultJobParam()
-        member x.JobParam = jobParam
-        member x.UpdateJobParam(newJobParam: JobParam) =
-            jobParam <- newJobParam
+        member val JobParam = defaultJobParam() with get, set
        
-        member x.ActionType = x.JobParam.JobAction 
-        member x.JobTaskDevInfo = x.JobParam.JobTaskDevInfo 
-        member x.AddressInCount = x.JobParam.JobTaskDevInfo.AddressInCount
-        member x.AddressOutCount = x.JobParam.JobTaskDevInfo.AddressOutCount
+        member x.ActionType      = x.JobParam.JobAction 
+        member x.JobTaskDevInfo  = x.JobParam.JobTaskDevInfo 
+        member x.AddressInCount  = x.JobTaskDevInfo.AddressInCount
+        member x.AddressOutCount = x.JobTaskDevInfo.AddressOutCount
 
         member x.System = system
         member x.TaskDefs = tasks
@@ -585,18 +582,22 @@ module CoreModule =
         static member private addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
         static member Create(target:Job, parent:ParentWrapper) =
             let call = Call(target|>JobType, parent)
-            if parent.GetSystem().Flows.SelectMany(fun f->f.Graph.Vertices.OfType<Call>()).Any(fun c->c.QualifiedName = call.QualifiedName)
-            then failwithlog $"중복 call name [{call.Name}]"
-            else 
-                Call.addCallVertex parent call
-                call
+            let duplicated =
+                parent.GetSystem().Flows
+                    .SelectMany(fun f -> f.Graph.Vertices.OfType<Call>())
+                    .Any(fun c -> c.QualifiedName = call.QualifiedName)
+            if duplicated then
+                failwithlog $"중복 call name [{call.Name}]"
+
+            Call.addCallVertex parent call
+            call
 
         static member Create(func:DsFunc, parent:ParentWrapper) =
             let callType = 
                 match func with
                 | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)
                 | :? OperatorFunction -> OperatorFuncType (func :?> OperatorFunction)
-                | _->failwithlog "Error"
+                | _ -> failwithlog "Error"
 
             let call = Call(callType, parent)
             Call.addCallVertex parent call
@@ -606,16 +607,15 @@ module CoreModule =
         member x.DeviceNApi = x.TargetJob.NameComponents.Skip(1)
         member x.GetAliasTargetToDs(aliasFlow:Flow) = 
                 let orgFlowName = x.TargetJob.NameComponents.Head()
-                if orgFlowName <> aliasFlow.Name
-                then 
-                    [orgFlowName]@x.DeviceNApi //other flow
-                else  
+                if orgFlowName = aliasFlow.Name then 
                     match x.Parent.GetCore() with
                         | :? Real as r -> [r.Name]@x.DeviceNApi
                         | :? Flow -> x.DeviceNApi
-                        | _->failwithlog "Error"
+                        | _ -> failwithlog "Error"
 
-        member x.SafetyConditions = (x :> ISafetyAutoPreRequisiteHolder).SafetyConditions
+                else  
+                    [orgFlowName]@x.DeviceNApi //other flow
+        member x.SafetyConditions  = (x :> ISafetyAutoPreRequisiteHolder).SafetyConditions
         member x.AutoPreConditions = (x :> ISafetyAutoPreRequisiteHolder).AutoPreConditions
 
 
@@ -640,8 +640,7 @@ module CoreModule =
 
 
             let alias = Alias(name, target, parent, isExFlowReal)
-            if parent.GetCore() :? Real
-            then
+            if parent.GetCore() :? Real then
                 target.RealTarget().IsNone
                 |> verifyM $"Vertex {name} children type error"
 
@@ -655,8 +654,8 @@ module CoreModule =
             cp
         static member Create(name, system, tx, rx) =
             let ai4e = ApiItem.Create(name, system)
-            ai4e.TX <-  tx
-            ai4e.RX <-  rx
+            ai4e.TX <- tx
+            ai4e.RX <- rx
             ai4e
 
 

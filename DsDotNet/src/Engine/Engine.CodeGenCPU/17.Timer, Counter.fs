@@ -19,7 +19,7 @@ type DsSystem with
         //    <||>
         //    (call.EndActionOnlyIO <&&> !!call.VC._sim.Expr)
           
-        [
+        [|
             for call in calls do
                 if call.UsingTon then 
                     let sets = call.V.ST.Expr <||>  call.V.SF.Expr <&&> call.End
@@ -30,4 +30,4 @@ type DsSystem with
                 if call.UsingTon then 
                     let sets = alias.V.ST.Expr<||>  alias.V.SF.Expr  <&&> call.End
                     yield (sets) --@ (alias.VC.TDON, call.PresetTime, fn)
-        ]
+        |]

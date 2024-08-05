@@ -1,0 +1,3 @@
+공용 모듈 중, 추후 Nuget package 로 이동할 항목을 일단 여기에 작성
+- Engine.Nuget.Common : C# 구현
+- Engine.Nuget.Common.FS : F# 구현

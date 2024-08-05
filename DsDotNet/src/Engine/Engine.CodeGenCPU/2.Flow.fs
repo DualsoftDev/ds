@@ -89,21 +89,20 @@ type VertexTagManager with
     member v.F6_SEQTempNumGeneration() =
         let real = v.Vertex :?> Real
         let g = real.Parent.GetGraph()
-        let sEdges = g.Edges
-                        .Where(fun e -> e.EdgeType = EdgeType.Start)
-                        .Where(fun e -> e.Target.GetPure() = v.Vertex)
+        let sEdges =
+            g.Edges
+                .Where(fun e -> e.EdgeType = EdgeType.Start)
+                .Where(fun e -> e.Target.GetPure() = v.Vertex)
                      
         let startCausals =  sEdges.Select(fun f->f.Source).OfType<Call>() //alias 는 제외
-        if startCausals.any()
-        then 
-            [
+        let fn = getFuncName()
+        [|
+            if startCausals.any() then 
                 let tempRisingRelay = v.System.GetTempBoolTag("tempRising") 
                 let srcTrigger = startCausals.First().VC.ET.Expr
 
-                yield  (srcTrigger, v._off.Expr) --| (tempRisingRelay, getFuncName())
-                yield  (tempRisingRelay.Expr, 1u|>literal2expr, real.VR.RealSEQData.ToExpression()) --+ (real.VR.RealSEQData, getFuncName())
-            ]
-        else 
-            []      
+                yield (srcTrigger, v._off.Expr) --| (tempRisingRelay, fn)
+                yield (tempRisingRelay.Expr, 1u|>literal2expr, real.VR.RealSEQData.ToExpression()) --+ (real.VR.RealSEQData, fn)
+        |]
 
         

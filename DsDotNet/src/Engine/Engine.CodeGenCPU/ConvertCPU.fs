@@ -18,7 +18,7 @@ module ConvertCPU =
                 match c.Parent with
                 | DuParentFlow _ -> aliasNoSpec && vaild.HasFlag(CallInFlow)
                 | DuParentReal _ -> aliasNoSpec && vaild.HasFlag(CallInReal)
-
+                
             | :? Alias as a  ->
                  match a.Parent with
                  | DuParentFlow _ ->

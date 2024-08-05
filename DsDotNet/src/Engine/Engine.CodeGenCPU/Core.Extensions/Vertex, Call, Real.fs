@@ -9,10 +9,6 @@ open System
 [<AutoOpen>]
 module ConvertCpuVertex =
 
-
-       
-
-
     type Vertex with
         member r.V = r.TagManager :?> VertexTagManager
         member r.VC = r.TagManager :?> CallVertexTagManager
@@ -55,41 +51,41 @@ module ConvertCpuVertex =
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 
         member c.EndPlan =  
-            if c.IsCommand
-            then
+            if c.IsCommand then
                 (c.TagManager :?> CallVertexTagManager).CallCommandEnd.Expr
-            elif c.IsOperator
-            then
+            elif c.IsOperator then
                 (c.TagManager :?> CallVertexTagManager).CallOperatorValue.Expr
             else 
                 c.TargetJob.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
         member c.EndAction = 
-                    if c.IsJob 
-                    then c.TargetJob.ActionInExpr 
-                    else None   
+            if c.IsJob then
+                c.TargetJob.ActionInExpr 
+            else
+                None   
                         
-        member c.End = 
-                if c.EndAction.IsSome 
-                then c.EndAction.Value
-                else c.EndPlan
+        member c.End = c.EndAction.DefaultValue(c.EndPlan)
 
         member c.EndWithTimer = 
-                if  c.UsingTon
-                then c.VC.TDON.DN.Expr
-                else c.End
+            if  c.UsingTon then
+                c.VC.TDON.DN.Expr
+            else
+                c.End
 
 
         member c.IsAnalogOutput = 
-                c.TargetJob.TaskDefs.All(fun td-> 
-                        td.OutTag.IsNonNull() 
-                        && td.OutTag.DataType <> typedefof<bool>) 
+            c.TargetJob.TaskDefs
+                .All(fun td-> 
+                    td.OutTag.IsNonNull() 
+                    && td.OutTag.DataType <> typedefof<bool>) 
 
         member c.GetEndAction() =
-            let tds = c.TargetJob.TaskDefs.Where(fun td->td.ExistInput)
-                                          .Select(fun td->td.GetInExpr(c.TargetJob))
-            if tds.any()
-            then 
+            let tds =
+                c.TargetJob.TaskDefs
+                    .Where(fun td->td.ExistInput)
+                    .Select(fun td->td.GetInExpr(c.TargetJob))
+
+            if tds.any() then 
                 Some(tds.ToAnd())
             else 
                 None
@@ -134,15 +130,16 @@ module ConvertCpuVertex =
             then c.TargetJob.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).RX)
             else []
 
-        member c.Errors       = 
-                                [
-                                    getVMCoin(c).ErrOnTimeOver
-                                    getVMCoin(c).ErrOnTimeShortage 
-                                    getVMCoin(c).ErrOffTimeOver
-                                    getVMCoin(c).ErrOffTimeShortage 
-                                    getVMCoin(c).ErrShort 
-                                    getVMCoin(c).ErrOpen 
-                                ]
+        member c.Errors = 
+            let vmc = getVMCoin(c)
+            [|
+                vmc.ErrOnTimeOver
+                vmc.ErrOnTimeShortage 
+                vmc.ErrOffTimeOver
+                vmc.ErrOffTimeShortage 
+                vmc.ErrShort 
+                vmc.ErrOpen 
+            |]
                          
           
         member c.SafetyExpr   = c.SafetyConditions.Choose(fun f->f.GetJob().ActionInExpr).ToAndElseOn()

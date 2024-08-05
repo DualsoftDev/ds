@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Info.DBLoggerORM;
 
 namespace Engine.TestSimulator
 {

@@ -12,6 +12,7 @@ using System.Reactive.Subjects;
 
 using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Info.DBLoggerORM2;
 
 namespace DsWebApp.Server.Common;
 
@@ -28,7 +29,7 @@ public class ServerGlobal
     public Subject<RuntimeModel> RuntimeModelChangedSubject { get; } = new();
 
 
-    internal DBLoggerORM.LogSet LogSet { get; set; }
+    internal LogSet LogSet { get; set; }
 
     public ILog Logger { get; set; }
 

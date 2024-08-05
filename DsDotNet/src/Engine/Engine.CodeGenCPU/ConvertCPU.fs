@@ -54,11 +54,11 @@ module ConvertCPU =
 
                 yield vr.F1_RootStart()
                 yield vr.F2_RootReset()
-                yield vr.F5_HomeCommand()
 
                 if isActive then
                     yield! vr.R6_RealSEQMove() 
                     yield! vr.F6_SEQTempNumGeneration() //test ahn
+                    yield vr.F5_HomeCommand()
 
                 
                 yield! vr.D1_DAGHeadStart()
@@ -268,12 +268,14 @@ module ConvertCPU =
                     yield! sys.E2_PLCOnly()
 
                 if RuntimeDS.Package.IsPackageSIM() then 
-                    yield! sys.Y1_SystemSimulationForFlow(sys)
-
-                    for subSys in sys.GetRecursiveLoadedSystems() do
-                        yield! subSys.Y1_SystemSimulationForFlow(sys) 
-
                     yield! emulationDevice sys
+
+
+                yield! sys.Y1_SystemBtnForFlow(sys)
+
+                for subSys in sys.GetRecursiveLoadedSystems() do
+                    yield! subSys.Y1_SystemBtnForFlow(sys) 
+
 
             //Variables  적용 
             yield! applyVariables sys

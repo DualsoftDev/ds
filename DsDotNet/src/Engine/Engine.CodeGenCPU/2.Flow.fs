@@ -85,7 +85,6 @@ type VertexTagManager with
         let real = v.Vertex :?> Real
         (real.Flow.HomeExpr , v._off.Expr) --| (real.VR.OA, getFuncName())
 
-
     member v.F6_SEQTempNumGeneration() =
         let real = v.Vertex :?> Real
         let g = real.Parent.GetGraph()

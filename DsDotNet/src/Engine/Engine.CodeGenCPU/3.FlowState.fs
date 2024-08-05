@@ -47,13 +47,13 @@ type Flow with
            
         (set, rst) ==| (f.e_st, getFuncName())
 
-    member f.ST6_DriveState (isActive:bool) =
+    member f.ST6_DriveState (_isActive:bool) = //test ahn
         let set = f.DriveExpr <&&> f.driveCondition.Expr
         let rst = !@f.aop.Expr <||> f.t_st.Expr  <||> f.p_st.Expr
-        if isActive then 
-            (set, rst) ==| (f.d_st, getFuncName())
-        else
-            (f._on.Expr, f._off.Expr) --| (f.d_st, getFuncName())
+        //if isActive then 
+        (set, rst) ==| (f.d_st, getFuncName())
+        //else
+        //    (f._on.Expr, f._off.Expr) --| (f.d_st, getFuncName())
 
 
     member f.ST7_TestState () =

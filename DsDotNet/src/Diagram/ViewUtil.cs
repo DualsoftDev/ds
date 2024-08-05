@@ -135,10 +135,16 @@ namespace Diagram.View.MSAGL
                 td.ApiParams.Iter(apiParam =>
                 {
                     var planEndTag = (td.TagManager as TaskDevManager).PlanEnd(apiParam);
+                    var planStartTag = (td.TagManager as TaskDevManager).PlanStart(apiParam);
+                    var planOutputTag = (td.TagManager as TaskDevManager).PlanOutput(apiParam);
 
-                    if (!DicMemoryTag.ContainsKey(planEndTag))
-                        DicMemoryTag.Add(planEndTag, new List<ViewVertex>());
-                    DicMemoryTag[planEndTag].Add(viewVertex);
+                    if (!DicTaskDevTag.ContainsKey(planEndTag)) DicTaskDevTag.Add(planEndTag, new List<ViewVertex>());
+                    if (!DicTaskDevTag.ContainsKey(planStartTag)) DicTaskDevTag.Add(planStartTag, new List<ViewVertex>());
+                    if (!DicTaskDevTag.ContainsKey(planOutputTag)) DicTaskDevTag.Add(planOutputTag, new List<ViewVertex>());
+
+                    DicTaskDevTag[planEndTag].Add(viewVertex);
+                    DicTaskDevTag[planStartTag].Add(viewVertex);
+                    DicTaskDevTag[planOutputTag].Add(viewVertex);
                 }); 
             }
 
@@ -237,8 +243,8 @@ namespace Diagram.View.MSAGL
      
         private static void HandleTaskDevEvent(EventTaskDev td)
         {
-            if (!DicMemoryTag.ContainsKey(td.Tag)) return;
-            var viewNodes = DicMemoryTag[td.Tag];
+            //if (!DicMemoryTag.ContainsKey(td.Tag)) return;
+            var viewNodes = DicTaskDevTag[td.Tag];
 
             viewNodes.Iter(n =>
             {

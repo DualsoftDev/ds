@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 type DsSystem with
 
 
-    member s.Y1_SystemSimulationForFlow(activeSys:DsSystem) =
+    member s.Y1_SystemBtnForFlow(activeSys:DsSystem) =
         let fn = getFuncName()
         let aOff = activeSys._off.Expr
         [|
@@ -25,7 +25,7 @@ type DsSystem with
                     yield (activeSys._home_btn.Expr  , aOff) --| (flow.home_btn,   fn)
                     yield (activeSys._clear_btn.Expr , aOff) --| (flow.clear_btn,  fn)
                     yield (activeSys._ready_btn.Expr , aOff) --| (flow.ready_btn,  fn)
-        |]
+        |] 
         
   
 

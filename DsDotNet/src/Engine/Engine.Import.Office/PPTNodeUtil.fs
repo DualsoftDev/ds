@@ -56,19 +56,19 @@ module PPTNodeUtilModule =
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
 
 
-        let getNodeTaskDevPara (shape:Shape, name:string, iPage:int, isRoot, nodeType) =
+        let getNodeTaskDevParam (shape:Shape, name:string, iPage:int, isRoot, nodeType) =
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let getParam x =
                         if x = TextSkip then
-                            "" |> getTaskDevPara |> snd
+                            "" |> getTaskDevParam |> snd
                         else
                             match getTextValueNType x with
                             | Some (v, t) ->
                                 if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
-                                    $":{v}s" |> getTaskDevPara |> snd
+                                    $":{v}s" |> getTaskDevParam |> snd
                                 else
-                                    $":{x}" |> getTaskDevPara |> snd
+                                    $":{x}" |> getTaskDevParam |> snd
                             | None -> failwithf $"{x} 입력규격을 확인하세요"
 
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine

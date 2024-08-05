@@ -8,9 +8,9 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
-        A.m > Main2;	     
-        A.p > Main;		
-	                    
+        A.m > Main2;
+        A.p > Main;
+
         Main = {
             A.p > A.m;		// A.p(Call)> A.m(Call);
         }
@@ -30,7 +30,7 @@ namespace Engine
     [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]  A;
 }
 
-"; 
+";
     public static string AutoPreValid = @"
 [sys] HelloDS = {
     [flow] STN2 = {
@@ -56,20 +56,20 @@ namespace Engine
             STN2_Device11111_03 = (1369, 815, 220, 80);
         }
     }
-    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] 
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]
         STN2_Device11111_01,
         STN2_Device11111_02,
-        STN2_Device11111_03; 
+        STN2_Device11111_03;
 }
 ";
 
-        
+
         public static string LayoutValid = @"
 [sys] L = {
     [flow] F = {
-        A.m > Main2;	     
-        A.p > Main;		
-	                    
+        A.m > Main2;
+        A.p > Main;
+
         Main = {
             A.p > A.m;		// A.p(Call)> A.m(Call);
         }
@@ -95,9 +95,9 @@ namespace Engine
         public static string FinishValid = @"
 [sys] L = {
     [flow] F = {
-        A.m > Main2;	     
-        A.p > Main;		
-	                    
+        A.m > Main2;
+        A.p > Main;
+
         Main = {
             A.p > A.m;		// A.p(Call)> A.m(Call);
         }
@@ -126,7 +126,7 @@ namespace Engine
         Work2 => Work1 => Work2;
         Work1 = {
             Device1.ADV > Device2.ADV;
-            Device2_ADV_1; 
+            Device2_ADV_1;
         }
         [aliases] = {
             Work1 = { Work1_1; }
@@ -138,16 +138,16 @@ namespace Engine
         STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
         STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
-   
+
     [prop] = {
         [disable] = {
             STN1.Work1.""Device2.ADV"";
         }
     }
-    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] 
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]
         STN1_외부시작,
         STN1_Device1,
-        STN1_Device2; 
+        STN1_Device2;
 }
 //DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
@@ -423,7 +423,7 @@ namespace Engine
             Run.R > Run.L;
         }
     }
-    
+
     [jobs] = {
         F.Run.R = { sysR.RUN(%I1, %Q1); }
         F.Run.L = { sysL.RUN(%I2, %Q2); }
@@ -490,7 +490,7 @@ namespace Engine
         Work2 => Work1 => Work2;
         Work1 = {
             Device1.ADV > Device2.ADV;
-            Device2_ADV_1; 
+            Device2_ADV_1;
         }
         [aliases] = {
             Work1 = { Work1_1; }
@@ -502,15 +502,15 @@ namespace Engine
         STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
         STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
-   
-    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] 
+
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]
         STN1_외부시작,
         STN1_Device1,
-        STN1_Device2; 
+        STN1_Device2;
 }
 
 ";
-      
+
 
         public static string Diamond = @"
 [sys] L = {
@@ -539,7 +539,7 @@ namespace Engine
 
         public static string Call3 = @"
 [sys] MY = {
-    [flow] F1 = {     
+    [flow] F1 = {
         ER1 > R1;
         R2 = { ER2 > C1; }
         R3 = { C1; }
@@ -587,12 +587,12 @@ namespace Engine
 
 
 
-        public static string TaskDevPara = @"
+        public static string TaskDevParam = @"
     [sys] Control = {
     [flow] F = {
-        #OP1, #OP2 > Main <|> Reset;	
+        #OP1, #OP2 > Main <|> Reset;
         Main = {
-            mv1.up > mv1.dn;		
+            mv1.up > mv1.dn;
         }
     }
     [jobs] = {
@@ -604,16 +604,16 @@ namespace Engine
         OP1 = #{$ABC == false;}
         OP2 = #{$symbol1 > 12us;}
     }
-    [device file=""cylinder.ds""] A; 
+    [device file=""cylinder.ds""] A;
 }
 ";
 
         public static string Operators = @"
     [sys] Control = {
     [flow] F = {
-        #OP1, #OP2 > Main <|> Reset;	
+        #OP1, #OP2 > Main <|> Reset;
         Main = {
-            mv1.up > mv1.dn;		
+            mv1.up > mv1.dn;
         }
     }
     [jobs] = {
@@ -625,7 +625,7 @@ namespace Engine
         OP1 = #{$symbol1 == 0us;}
         OP2 = #{$symbol1 > 12us;}
     }
-    [device file=""cylinder.ds""] A; 
+    [device file=""cylinder.ds""] A;
 }
 ";
 
@@ -634,7 +634,7 @@ namespace Engine
     [flow] F = {
         Main <|> Reset;	
         Main = {
-            mv1.up > mv1.dn > CMD1(), CMD2();		
+            mv1.up > mv1.dn > CMD1(), CMD2();
         }
     }
     [jobs] = {

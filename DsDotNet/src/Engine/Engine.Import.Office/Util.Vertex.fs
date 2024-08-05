@@ -2,15 +2,9 @@ namespace Engine.Import.Office
 
 open System.Linq
 open System.Collections.Generic
-open PPTConnectionModule
 open Dual.Common.Core.FS
 open Engine.Core
 open System
-open System.IO
-open System.Data
-open LibraryLoaderModule
-open System.Reflection
-open Engine.Parser.FS
 
 [<AutoOpen>]
 module ImportUtilVertex =
@@ -44,14 +38,14 @@ module ImportUtilVertex =
         | None ->
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiPureName) with
             |Some api ->
-                let devTask = 
-                    let TaskDevPara =  node.TaskDevPara 
+                let devTask =
+                    let TaskDevPara =  node.TaskDevParam
 
-                    match sys.TaskDevs.TryFind(fun d->d.ApiItems.Contains(api)) with 
+                    match sys.TaskDevs.TryFind(fun d->d.ApiItems.Contains(api)) with
                     | Some (taskDev) ->
-                        taskDev.AddOrUpdateApiTaskDevPara(jobName, api, TaskDevPara)
+                        taskDev.AddOrUpdateApiTaskDevParam(jobName, api, TaskDevPara)
                         taskDev
-                    | _ -> 
+                    | _ ->
                         let apiPara  = {TaskDevParamIO =  TaskDevPara; ApiItem = api}
                         TaskDev(apiPara, jobName, loadSysName, sys)
 
@@ -61,23 +55,23 @@ module ImportUtilVertex =
                 sys.Jobs.Add job |> ignore
                 Call.Create(job, parentWrapper)
 
-            | None -> 
-                if device.AutoGenFromParentSystem || not(node.TaskDevPara.IsDefaultParam)
+            | None ->
+                if device.AutoGenFromParentSystem || not(node.TaskDevParam.IsDefaultParam)
                 then
-                    let TaskDevPara =  node.TaskDevPara 
+                    let TaskDevPara =  node.TaskDevParam
                     let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName TaskDevPara
                     let job = Job(node.Job, sys, [autoTaskDev])
                     job.JobParam <- node.JobParam
                     sys.Jobs.Add job |> ignore
                     Call.Create(job, parentWrapper)
-                else 
+                else
                     let ableApis = String.Join(", ", device.ReferenceSystem.ApiItems.Select(fun a->a.Name))
                     failwithlog $"Loading system ({loadSysName}:{device.AbsoluteFilePath}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
 
 
     let private createCall (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper) =
         match  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
-            |  Some dev -> 
+            |  Some dev ->
                 getCallFromLoadedSys mySys dev node node.ApiName parentWrapper
             | _  ->
                 let callParams = {
@@ -86,11 +80,11 @@ module ImportUtilVertex =
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
                     ApiName = node.ApiPureName
-                    TaskDevParamIO = node.TaskDevPara
+                    TaskDevParamIO = node.TaskDevParam
                     Parent = parentWrapper
                     }
                 addNewCall callParams
-   
+
     let createCallVertex (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
         let call =
             if node.IsFunction then
@@ -111,17 +105,17 @@ module ImportUtilVertex =
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
                     ApiName = node.ApiPureName
-                    TaskDevParamIO = node.TaskDevPara
+                    TaskDevParamIO = node.TaskDevParam
                     Parent = parentWrapper
                     }
         let tasks = HashSet<TaskDev>()
         handleActionJob tasks param
         let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
         match mySys.Jobs.TryFind(fun f -> f.DequotedQualifiedName = job.DequotedQualifiedName) with
-        | Some _existingJob -> ()   
-        | None -> 
+        | Some _existingJob -> ()
+        | None ->
             mySys.Jobs.Add job
-        
+
         dicAutoPreJob.Add(node.Key, job)
 
 

@@ -21,7 +21,7 @@ module private DsParserHelperModule =
 
     let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) =
         let (inaddr, inParam), (outaddr, outParm) =
-            ctx.TryFindFirstChild<TaskDevParaInOutContext>()
+            ctx.TryFindFirstChild<TaskDevParamInOutContext>()
             |> Option.get
             |> commonDeviceParamExtractor
         let device = jobNameFqdn.Take(2).Combine(TextDeviceSplit)
@@ -623,7 +623,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let updatedTaskDev =
                     if dicTaskDevs.ContainsKey(apiPureName) then
                         let oldTaskDev = dicTaskDevs[apiPureName]
-                        oldTaskDev.AddOrUpdateApiTaskDevPara(jobName, apiPoint, taskDevParam)
+                        oldTaskDev.AddOrUpdateApiTaskDevParam(jobName, apiPoint, taskDevParam)
                         oldTaskDev
                     else
                         dicTaskDevs.Add(apiPureName, taskDev)
@@ -652,13 +652,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         [
                             for apiDefCtx in apiDefCtxs do
                                 let apiPath = apiDefCtx.CollectNameComponents()
-                                let (inaddr, inParam), (outaddr, outParm) =
-                                    match apiDefCtx.TryFindFirstChild<TaskDevParaInOutContext>() with
-                                    | Some taskDevPara ->
-                                        commonDeviceParamExtractor taskDevPara
+                                let (inaddr, inParam), (outaddr, outParam) =
+                                    match apiDefCtx.TryFindFirstChild<TaskDevParamInOutContext>() with
+                                    | Some taskDevParam ->
+                                        commonDeviceParamExtractor taskDevParam
                                     | None ->
                                          (TextAddrEmpty, defaultTaskDevParam()), (TextAddrEmpty, defaultTaskDevParam())
-                                let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
+                                let TaskDevParamIO = TaskDevParamIO(Some inParam, Some outParam)
                                 yield {ApiFqnd = apiPath;  TaskDevParamIO = TaskDevParamIO; InAddress = inaddr; OutAddress = outaddr}
                         ]
                     else

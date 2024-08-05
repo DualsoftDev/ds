@@ -51,12 +51,12 @@ module ImportUtilForLib =
 
     let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getProperty: string -> DeviceLoadParameters) =
         let devOrg = getDeviceOrganization param.MySys libFilePath loadedName
-        let TaskDevParas = getProperty loadedName
+        let TaskDevParams = getProperty loadedName
 
         let task = getTaskDev autoGenSys loadedName (param.Node.Job.Combine()) param.ApiName  param.TaskDevParamIO
         addSingleTask tasks task
         if task.IsNone then
-            processSingleTask tasks param devOrg loadedName param.ApiName TaskDevParas
+            processSingleTask tasks param devOrg loadedName param.ApiName TaskDevParams
 
 
     let handleActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =

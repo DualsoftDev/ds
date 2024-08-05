@@ -67,7 +67,7 @@ module ModelTests1 =
         [<Test>]
         member __.``CausalsText test`` () =
             logInfo "=== CausalsText"
-            compareExact Program.CausalsText 
+            compareExact Program.CausalsText
 
         [<Test>]
         member __.``AdoptoedValidText test`` () =
@@ -109,7 +109,7 @@ module ModelTests1 =
         member __.``Model component [DisableValid] test`` () =
             compare ParserTest.DisableValid answerDisableValid
 
-   
+
         [<Test>]
         member __.``Model component [Buttons] test`` () =
             compare ParserTest.Buttons answerButtons
@@ -122,7 +122,7 @@ module ModelTests1 =
         member __.``Model component [Conditions] test`` () =
             compare ParserTest.Conditions answerConditions
 
-  
+
         [<Test>]
         member __.``Model component [Aliases] test`` () =
             compare ParserTest.Aliases answerAliases
@@ -138,14 +138,14 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [Function/Commands] test`` () =
-            compareExact ParserTest.Commnads    
+            compareExact ParserTest.Commnads
         [<Test>]
         member __.``Model component [Function/Operators] test`` () =
-            compareExact ParserTest.Operators 
+            compareExact ParserTest.Operators
         [<Test>]
-        member __.``Model component [TaskDevPara] test`` () =
-            compareExact ParserTest.TaskDevPara 
-            
+        member __.``Model component [TaskDevParam] test`` () =
+            compareExact ParserTest.TaskDevParam
+
         //[<Test>]
         //member __.``X Ppt20221213Text test`` () =
         //    // 현재 test 실패
@@ -260,7 +260,7 @@ module ModelTests1 =
             logInfo "=== Interlock extract"
             let testCode = """
             [sys] DoubleCylinder = {
-                
+
                 [flow] F1 = {
                     R1 > R3;
                     R2 > R3;
@@ -278,7 +278,7 @@ module ModelTests1 =
                         R3 = { Copy1_R3; }
                     }
                 }
-                
+
                 [interfaces] = {
                     "+" = { F1.R1 ~ F1.R3 }
                     "-" = { F2.R1 ~ F2.R3 }
@@ -292,4 +292,3 @@ module ModelTests1 =
 
 
             helperSys.ApiResetInfos.Count === 2
-  

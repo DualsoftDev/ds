@@ -171,12 +171,12 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier3: IDENTIFIER3;
     identifier4: IDENTIFIER4;
     identifier5: IDENTIFIER5;
-    
+
     identifier12: (identifier1 | identifier2);
     identifier23: (identifier2 | identifier3);
     identifier34: (identifier3 | identifier4);
     identifier45: (identifier4 | identifier5);
-    
+
     identifier123: (identifier1 | identifier2 | identifier3);
     identifier234: (identifier2 | identifier3 | identifier4);
     identifier123CNF: identifier123 (COMMA identifier123)*;
@@ -190,8 +190,8 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
 
     flowPath: identifier2;
 
-taskDevParaInOut: '(' taskDevParaInOutBody ')';
-taskDevParaInOutBody:  inParam COMMA outParam;
+taskDevParamInOut: '(' taskDevParamInOutBody ')';
+taskDevParamInOutBody:  inParam COMMA outParam;
 content : .+?;
 inParam:  content (':'content)*;
 outParam:  content (':'content)*;
@@ -202,7 +202,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock:
           '{' (       flowBlock | jobBlock
-                    | commandBlock | operatorBlock | variableBlock | interfaceBlock | conditionBlock 
+                    | commandBlock | operatorBlock | variableBlock | interfaceBlock | conditionBlock
                     | loadDeviceBlock | loadExternalSystemBlock
                     | buttonBlock | lampBlock
                     | propsBlock | versionsBlock)*
@@ -243,9 +243,9 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
             F.Work1  = {./Assets/dsLib/Cylinder/DoubleType.obj:ADV};
             F.Work2  = {./Assets/dsLib/Cylinder/DoubleType.obj:RET};
         }
-        [scripts] = {                                         
-            F.WorkA = {ThirdParty.AddressInfo.Provider.testFunc1()}; // 
-            F.WorkB = {ThirdParty.AddressInfo.Provider.testFunc2()}; // 
+        [scripts] = {
+            F.WorkA = {ThirdParty.AddressInfo.Provider.testFunc1()}; //
+            F.WorkB = {ThirdParty.AddressInfo.Provider.testFunc2()}; //
         }
     }
 
@@ -256,12 +256,12 @@ propsBlock: '[' 'prop' ']' '=' '{' (
           safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock
         | timesBlock | motionBlock | scriptsBlock
         | layoutBlock )* '}';
-    safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';    
+    safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';
         safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
             safetyAutoPreKey: identifier45;
             safetyAutoPreValues: identifier3 (SEMICOLON identifier3)* (SEMICOLON)?;
 
-    autoPreBlock: '[' 'autopre' ']' '=' '{' (safetyAutoPreDef)* '}';    
+    autoPreBlock: '[' 'autopre' ']' '=' '{' (safetyAutoPreDef)* '}';
 
     layoutBlock: '[' 'layouts' fileSpec? ']' '=' '{' (positionDef)* '}';
         positionDef: deviceOrApiName '=' xywh;
@@ -281,7 +281,7 @@ propsBlock: '[' 'prop' ']' '=' '{' (
         disableTarget: identifier23;
         disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;
 
-  
+
     motionBlock: '[' 'motions' ']' '=' '{' (motionDef)* '}';
     motionDef: motionKey '=' '{' motionParams '}' SEMICOLON;
     motionKey: identifier23;
@@ -300,15 +300,15 @@ propsBlock: '[' 'prop' ']' '=' '{' (
 
 flowBlock
     : '[' 'flow' ']' identifier1 '=' '{' (
-        causal | parentingBlock 
-        | nonCausal | nonCausals 
+        causal | parentingBlock
+        | nonCausal | nonCausals
         | aliasBlock
         )* '}'  (SEMICOLON)?   // |flowTask|callDef
     ;
     parentingBlock: identifier1 '=' '{' (causal | nonCausal | nonCausals)* '}';
     nonCausal : (identifier123 | identifierCommand);
     nonCausals: (nonCausal (COMMA nonCausal)*)?  SEMICOLON;     // A, B(), C;
-        
+
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
     // [aliases] = { X; Y; Z } = P.Q        // {OtherFlow}.{real}
     aliasBlock: '[' 'aliases' ']' '=' '{' (aliasListing)* '}';
@@ -325,10 +325,10 @@ varType: identifier1;
     // identifier1에서 varType 이름과 같게 사용하면 예외처리 필요  ex) [sys] Single = {..} <- 예외
    //    'int8' | 'sbyte' | 'Int8' | 'Sbyte'
    //    | 'uint8' | 'byte' | 'UInt8' | 'Byte'
-   //    | 'int16' | 'short' | 'word' | 'Int16' | 'Short' | 'Word' |     
+   //    | 'int16' | 'short' | 'word' | 'Int16' | 'Short' | 'Word' |
    //    | 'uint16'| 'ushort'| 'UInt16'| 'Ushort'
    //    | 'int32' | 'int'   | 'dword' | 'Int32' | 'Int'   | 'Dword'
-   //    | 'uint32'| 'uint' |    'UInt32'| 'Uint' 
+   //    | 'uint32'| 'uint' |    'UInt32'| 'Uint'
    //    | 'int64' | 'long' | 'Int64' | 'Long'
    //    | 'uint64'| 'ulong' | 'UInt64'| 'Ulong'
    //    | 'double' | 'float64' | 'Double' | 'Float64'
@@ -351,7 +351,7 @@ operatorBlock: '[' 'operators' ']' '=' '{' (operatorNameOnly | operatorDef)* '}'
     operatorDef :  operatorName '=' operator;
     operatorName: identifier1;
     operator : codeBlock;
-    
+
 commandBlock:  '[' 'commands' ']'  '=' '{' (commandNameOnly | commandDef)* '}' ;
     commandNameOnly: commandName SEMICOLON;
     commandDef :  commandName '=' command;
@@ -366,17 +366,17 @@ versionsBlock: '[' 'versions' ']' '=' '{' versionDef* '}';
         date: isoDate;  // | usDate | euDate;
             // usDate: month '/' day '/' year;
             // euDate: day '-' month '-' year;
-            isoDate: year=INTEGER '-' month=INTEGER '-' day=INTEGER;    
+            isoDate: year=INTEGER '-' month=INTEGER '-' day=INTEGER;
     version: major=INTEGER '.' minor=INTEGER ( '.' build=INTEGER ( '.' revision=INTEGER )? )?;
 
 jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
     callListing:
-        jobName ('['jobTypeOption']')? '=' ('{' (callApiDef (SEMICOLON))* '}' | (taskDevParaInOut SEMICOLON));
+        jobName ('['jobTypeOption']')? '=' ('{' (callApiDef (SEMICOLON))* '}' | (taskDevParamInOut SEMICOLON));
 
     jobName: identifier234;
     jobTypeOption : content;
 
-    callApiDef: (interfaceCall taskDevParaInOut) | (interfaceCall);
+    callApiDef: (interfaceCall taskDevParamInOut) | (interfaceCall);
 
     interfaceCall: identifier12;
 
@@ -413,13 +413,13 @@ categoryBlocks: autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock |
     readyBlock     :'[' ('r_in' | 'r') ']' '=' categoryBlock;
     idleBlock      :'[' ('i_in' | 'i') ']' '=' categoryBlock;
     originBlock    :'[' ('o_in' | 'o') ']' '=' categoryBlock;
-    
+
     categoryBlock: '{' (() | (hwSysItemDef)*) '}';
-  
+
 
     hwSysItemDef:  hwSysItemNameAddr '=' '{' hwSysItems? '}' (SEMICOLON)?;
-    hwSysItems: flowName? ( ';' flowName)* (';')+; 
-    hwSysItemNameAddr: hwSysItemName taskDevParaInOut;
+    hwSysItems: flowName? ( ';' flowName)* (';')+;
+    hwSysItemNameAddr: hwSysItemName taskDevParamInOut;
     hwSysItemName: identifier1;
     flowName: identifier1;
 

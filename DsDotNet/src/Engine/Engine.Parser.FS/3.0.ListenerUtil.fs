@@ -182,10 +182,10 @@ module ListnerCommonFunctionGeneratorUtil =
         let executeCode = fDef.operator().GetText()
         executeCode |> getCode
 
-    let commonDeviceParamExtractor (devCtx: TaskDevParaInOutContext) : (string*TaskDevParam)*(string*TaskDevParam) =
-        match devCtx.TryFindFirstChild<TaskDevParaInOutBodyContext>() with
+    let commonDeviceParamExtractor (devCtx: TaskDevParamInOutContext) : (string*TaskDevParam)*(string*TaskDevParam) =
+        match devCtx.TryFindFirstChild<TaskDevParamInOutBodyContext>() with
         | Some ctx ->
-            match tryGetTaskDevParaInOut $"{ctx.GetText()}" with
+            match tryGetTaskDevParamInOut $"{ctx.GetText()}" with
             | Some v -> v
             |_ -> errorLoadCore ctx
         | _-> errorLoadCore devCtx

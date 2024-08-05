@@ -63,7 +63,7 @@ module ImportType =
             Page : int
         }
 
-    type TaskDevParaRawItem  = string*DataType*string //address, dataType, func
+    type TaskDevParamRawItem  = string*DataType*string //address, dataType, func
 
     let getDevName (row: Data.DataRow) =
         let flowName = row.[(int) IOColumn.Flow].ToString()
@@ -85,19 +85,19 @@ module ImportType =
         $"{loadedName}_{indexStr}"
 
 
-    let checkPPTDataType (taskDevParamRaw:TaskDevParaRawItem) (taskDevParam:TaskDevParam) =
+    let checkPPTDataType (taskDevParamRaw:TaskDevParamRawItem) (taskDevParam:TaskDevParam) =
         let address, typePPT = taskDevParamRaw |>fun (addr,t,_) -> addr, t
         if (address <> TextSkip) && (typePPT <> taskDevParam.Type)
         then
             failWithLog $"error datatype : {taskDevParamRaw} <> {taskDevParam.Type}"
 
 
-    let getPPTTaskDevParaInOut (inParamRaw:TaskDevParaRawItem) (outParamRaw:TaskDevParaRawItem) =
+    let getPPTTaskDevParaInOut (inParamRaw:TaskDevParamRawItem) (outParamRaw:TaskDevParamRawItem) =
         let paramFromText paramRaw =
             let addr, (dataType:DataType), func = paramRaw
             if func <> ""
             then
-                getTaskDevPara $"{addr}:{func}" |> snd
+                getTaskDevParam $"{addr}:{func}" |> snd
             else
                 defaultTaskDevParam()
 
@@ -115,7 +115,7 @@ module ImportType =
                 then failWithLog $"error datatype : {name}\r\n [{taskDevParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
 
 
-    let updatePPTTaskDevPara (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
+    let updatePPTTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
 
         dev.SetInSymbol(inSym)
         dev.SetOutSymbol(outSym)

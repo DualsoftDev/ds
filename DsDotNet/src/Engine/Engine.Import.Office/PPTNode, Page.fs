@@ -83,7 +83,7 @@ module PPTNodeModule =
         member x.IsCall         = nodeType = CALL
         member x.IsRootNode     = rootNode
         member x.IsFunction     = x.IsCall && not(name.Contains("."))
-        member x.TaskDevPara    = taskDevParam
+        member x.TaskDevParam   = taskDevParam
         member x.JobParam       = jobParam
         member x.TaskDevParaIn  = taskDevParam.InParam
         member x.TaskDevParaOut = taskDevParam.OutParam
@@ -101,9 +101,9 @@ module PPTNodeModule =
             checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
             checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
 
-            if real.Finished = true && x.RealFinished = false then  //이미 설정을 true 하고 다른데서 변경        
+            if real.Finished = true && x.RealFinished = false then  //이미 설정을 true 하고 다른데서 변경
                 shape.ErrorName(ErrID._77, iPage)
-            if real.NoTransData = true && x.RealNoTrans = false then //이미 설정을 true 하고 다른데서 변경        
+            if real.NoTransData = true && x.RealNoTrans = false then //이미 설정을 true 하고 다른데서 변경
                 shape.ErrorName(ErrID._77, iPage)
 
             real.Finished <- x.RealFinished
@@ -118,11 +118,11 @@ module PPTNodeModule =
         member x.UpdateNodeRoot(isRoot: bool) =
             rootNode <- Some isRoot
             if nodeType = CALL || nodeType = AUTOPRE then
-                let hasTaskDevPara = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") <> nameNFunc(shape, macros, iPage)
+                let hasTaskDevParam = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") <> nameNFunc(shape, macros, iPage)
                 if name.Contains(".")  //isDevCall
                 then
-                    if hasTaskDevPara then
-                        let tPara = getNodeTaskDevPara (shape, nameNFunc(shape, macros, iPage), iPage, isRoot , nodeType)
+                    if hasTaskDevParam then
+                        let tPara = getNodeTaskDevParam (shape, nameNFunc(shape, macros, iPage), iPage, isRoot , nodeType)
                         taskDevParam <- tPara
 
                     else
@@ -133,8 +133,8 @@ module PPTNodeModule =
                         elif nodeType = AUTOPRE then
                             taskDevParam <- createTaskDevParaIOInTrue()
                 else
-                    if hasTaskDevPara then
-                        failWithLog $"{name} 'TaskDevPara' error"
+                    if hasTaskDevParam then
+                        failWithLog $"{name} 'TaskDevParam' error"
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall

@@ -18,7 +18,7 @@ module EtcListenerModule =
         let name = nameNAddr.TryFindFirstChild<HwSysItemNameContext>().Value.GetText()
 
         let (inAddr, inParam), (outAddr, outParm) =
-            match nameNAddr.TryFindFirstChild<TaskDevParaInOutContext>() with
+            match nameNAddr.TryFindFirstChild<TaskDevParamInOutContext>() with
             | Some devParam ->
                 commonDeviceParamExtractor devParam
             | None ->

@@ -128,7 +128,7 @@ module rec DsTaskDevType =
     let isValidName(name: string) =
         Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
-    let getTaskDevPara (txt: string) =
+    let getTaskDevParam (txt: string) =
         let parts = txt.Split(':') |> Seq.toList
         let addr = parts.Head
         let remainingParts = parts.Tail

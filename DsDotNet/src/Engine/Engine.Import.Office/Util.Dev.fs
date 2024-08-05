@@ -120,7 +120,7 @@ module ImportUtilForDev =
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:pptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
-        let taskDevParam = node.TaskDevPara
+        let taskDevParam = node.TaskDevParam
         let jobFqdn = node.Job.Combine()
 
         let devCalls = mySys.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
@@ -129,7 +129,7 @@ module ImportUtilForDev =
         | Some (taskDev, c) ->
             let api = loadedSys.ApiItems.First(fun f -> f.Name = apiPureName)
             if not (taskDevParam.IsDefaultParam) then
-                taskDev.AddOrUpdateApiTaskDevPara(jobFqdn, api, taskDevParam)
+                taskDev.AddOrUpdateApiTaskDevParam(jobFqdn, api, taskDevParam)
             taskDev
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName loadParameters

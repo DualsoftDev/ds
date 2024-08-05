@@ -9,9 +9,9 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module CoreExtensionModule =
-    let tryGetTaskDevParaInOut (paramInOutText:string) =
+    let tryGetTaskDevParamInOut (paramInOutText:string) =
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> Some (getTaskDevPara tx,  getTaskDevPara rx.Head)
+        | tx::rx when rx.Length = 1 -> Some (getTaskDevParam tx,  getTaskDevParam rx.Head)
         | _-> None
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
@@ -226,7 +226,7 @@ module CoreExtensionModule =
         member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.DequotedQualifiedName)
 
 
-        member x.AddOrUpdateApiTaskDevPara(jobFqdn:string, api:ApiItem, taskDevParamIO:TaskDevParamIO) =
+        member x.AddOrUpdateApiTaskDevParam(jobFqdn:string, api:ApiItem, taskDevParamIO:TaskDevParamIO) =
             if x.ApiItems.any(fun f->f.PureName <> api.PureName) then
                 failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
 
@@ -236,8 +236,8 @@ module CoreExtensionModule =
                 ()
                 //failWithLog $"중복된 TaskDevParamIO {jobFqdn} {x.QualifiedName}"
 
-        member x.AddOrUpdateApiTaskDevPara(job:Job, api:ApiItem, taskDevParamIO:TaskDevParamIO) =
-            x.AddOrUpdateApiTaskDevPara(job.DequotedQualifiedName, api, taskDevParamIO)
+        member x.AddOrUpdateApiTaskDevParam(job:Job, api:ApiItem, taskDevParamIO:TaskDevParamIO) =
+            x.AddOrUpdateApiTaskDevParam(job.DequotedQualifiedName, api, taskDevParamIO)
 
         member x.IsInAddressEmpty            = x.InAddress  = TextAddrEmpty
         member x.IsInAddressSkipOrEmpty      = x.InAddress  = TextAddrEmpty || x.InAddress = TextSkip
@@ -445,7 +445,7 @@ type SystemExt =
     //static member ToTextForTaskDevPara(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
 
     //[<Extension>]
-    //static member IsSensorNot(x:TaskDevPara) =
+    //static member IsSensorNot(x:TaskDevParam) =
     //            match x.DevValueNType with
     //            |Some(v, ty) when ty = DuBOOL -> not (Convert.ToBoolean(v))  //RX 기본은 True
     //            |_ -> false

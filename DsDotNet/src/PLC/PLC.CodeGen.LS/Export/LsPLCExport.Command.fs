@@ -273,7 +273,7 @@ module internal rec Command =
 
                 [   for (i, s) in outputSpecs.Indexed() do
                         option {
-                            let! terminal = oDic.TryFind(s.Name)
+                            let! terminal = oDic.TryFindValue(s.Name)
 
                             match terminal with
                             | :? IStorage as storage ->

@@ -1,10 +1,9 @@
 namespace PLC.CodeGen.Common
 
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Globalization
-open System.Text.RegularExpressions
-open System
 
 
 [<AutoOpen>]

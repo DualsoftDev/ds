@@ -200,13 +200,13 @@ module CoreExtensionModule =
         member x.GetInParam(jobFqdn:string) =
             match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
             | Some v -> v
-            | None -> defaultTaskDevPara()
+            | None -> defaultTaskDevParam()
         member x.GetInParam(job:Job) = x.GetInParam (job.DequotedQualifiedName)
 
         member x.GetOutParam(jobFqdn:string) =
             match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.OutParam with
             | Some v -> v
-            | None -> defaultTaskDevPara()
+            | None -> defaultTaskDevParam()
         member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
 
         member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParamIO[jobFqdn]

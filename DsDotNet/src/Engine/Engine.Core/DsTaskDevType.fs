@@ -79,7 +79,7 @@ module rec DsTaskDevType =
             result
 
 
-    let defaultTaskDevPara() = TaskDevParam(None, None, None, None)
+    let defaultTaskDevParam() = TaskDevParam(None, None, None, None)
     let defaultTaskDevParamIO() = TaskDevParamIO (None, None)
 
     let createTaskDevParam(nametype: string option) (dutype: DataType option) (v: obj option) (t: int option) =
@@ -91,7 +91,7 @@ module rec DsTaskDevType =
         TaskDevParamIO (inParam|>Some, None)
 
     let changeSymbolTaskDevPara(x: TaskDevParam option) (symbol: string option) =
-        if x.IsNone then defaultTaskDevPara()
+        if x.IsNone then defaultTaskDevParam()
         else
             let x = x |> Option.get
             createTaskDevParam symbol x.DevType x.DevValue x.DevTime

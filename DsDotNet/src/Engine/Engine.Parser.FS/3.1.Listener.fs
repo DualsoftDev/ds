@@ -113,8 +113,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     override x.EnterSystem(ctx: SystemContext) =
         match options.LoadedSystemName with
-        | Some systemName ->
-            let sysName = systemName
+        | Some sysName ->
             x.OptLoadedSystemName <- Some sysName
             x.Rule2SystemNameDictionary.Add(ctx, sysName)
         | _ -> ()
@@ -658,7 +657,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     | Some taskDevPara ->
                                         commonDeviceParamExtractor taskDevPara
                                     | None ->
-                                         (TextAddrEmpty, defaultTaskDevPara()), (TextAddrEmpty, defaultTaskDevPara())
+                                         (TextAddrEmpty, defaultTaskDevParam()), (TextAddrEmpty, defaultTaskDevParam())
                                 let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
                                 yield {ApiFqnd = apiPath;  TaskDevParamIO = TaskDevParamIO; InAddress = inaddr; OutAddress = outaddr}
                         ]

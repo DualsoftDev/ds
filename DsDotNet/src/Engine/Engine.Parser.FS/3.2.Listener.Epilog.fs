@@ -3,13 +3,11 @@ namespace Engine.Parser.FS
 open System
 open System.Linq
 
-open Antlr4.Runtime.Tree
 open Antlr4.Runtime
 
 open Dual.Common.Core.FS
 open Engine.Core
 open type Engine.Parser.dsParser
-open System.Collections.Generic
 
 [<AutoOpen>]
 module EtcListenerModule =
@@ -24,7 +22,7 @@ module EtcListenerModule =
             | Some devParam ->
                 commonDeviceParamExtractor devParam
             | None ->
-                (TextAddrEmpty, defaultTaskDevPara()),(TextAddrEmpty, defaultTaskDevPara())
+                (TextAddrEmpty, defaultTaskDevParam()),(TextAddrEmpty, defaultTaskDevParam())
         name, inParam, outParm, inAddr, outAddr
 
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)

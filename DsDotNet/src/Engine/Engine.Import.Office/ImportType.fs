@@ -2,11 +2,8 @@
 namespace Engine.Import.Office
 
 open System
-open System.Linq
 open Dual.Common.Core.FS
 open Engine.Core
-open System.Collections.Generic
-open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ImportType =
@@ -102,7 +99,7 @@ module ImportType =
             then
                 getTaskDevPara $"{addr}:{func}" |> snd
             else
-                defaultTaskDevPara()
+                defaultTaskDevParam()
 
         let inP =  paramFromText inParamRaw
         let outP = paramFromText outParamRaw

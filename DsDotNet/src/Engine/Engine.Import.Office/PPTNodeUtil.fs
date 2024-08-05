@@ -1,11 +1,7 @@
 namespace Engine.Import.Office
 
-open DocumentFormat.OpenXml.Packaging
-open System
 open System.Linq
-open DocumentFormat.OpenXml
 open Engine.Core
-open System.Collections.Generic
 open Microsoft.FSharp.Core
 open Dual.Common.Core.FS
 open System.Text.RegularExpressions
@@ -85,9 +81,9 @@ module PPTNodeUtilModule =
                 else
                     if isRoot || nodeType = AUTOPRE //생략 규격 입력시에 Root/AUTOPRE 는 조건으로 Real내부는 출력으로 인식
                     then
-                        TaskDevParamIO((getParam func)|>Some, (defaultTaskDevPara())|>Some)
+                        TaskDevParamIO((getParam func)|>Some, (defaultTaskDevParam())|>Some)
                     else
-                        TaskDevParamIO((defaultTaskDevPara())|>Some, (getParam func)|>Some)
+                        TaskDevParamIO((defaultTaskDevParam())|>Some, (getParam func)|>Some)
             with _ ->
                 shape.ErrorName((error()), iPage)
 

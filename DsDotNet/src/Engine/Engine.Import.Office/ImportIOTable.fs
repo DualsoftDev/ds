@@ -138,7 +138,7 @@ module ImportIOTable =
                     dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
 
 
-                    updatePPTTaskDevParam dev  (inSym,checkInType) (outSym, checkOutType)
+                    updatePptTaskDevParam dev  (inSym,checkInType) (outSym, checkOutType)
                 else
                     logDebug $"모델에 {devName} 이름이 없습니다."
 
@@ -171,7 +171,7 @@ module ImportIOTable =
                 let name = getDevName row
                 let func = $"{row.[(int) IOColumn.Output]}"
                 if func = "" then
-                    Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
+                    Office.ErrorPpt(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
 
                 if not(func.Contains(" = "))
                         then
@@ -183,7 +183,7 @@ module ImportIOTable =
                 let name = getDevName row
                 let func = $"{row.[(int) IOColumn.Input]}"
                 if func = "" then
-                    Office.ErrorPPT(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
+                    Office.ErrorPpt(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
 
                 getFunctionNUpdate (name, name, func,   false,  page) |> ignore
 
@@ -196,9 +196,9 @@ module ImportIOTable =
                 | Some btn ->
                     updateHwAddress (btn) (inAddress, outAddress) Util.runtimeTarget
                     let checkInType, checkOutType = getInOutDataType dataType
-                    updatePPTHwParam btn (inSym,checkInType) (outSym, checkOutType)
+                    updatePptHwParam btn (inSym,checkInType) (outSym, checkOutType)
 
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
+                | None -> Office.ErrorPpt(ErrorCase.Name, ErrID._1001, $"{name}", page, 0u)
 
 
             let updateLamp (row: Data.DataRow, lampType: LampType, tableIO: Data.DataTable, page) =
@@ -209,10 +209,10 @@ module ImportIOTable =
                 | Some lamp ->
                     updateHwAddress (lamp) (inAddress, outAddress) Util.runtimeTarget
                     let checkInType, checkOutType = getInOutDataType dataType
-                    updatePPTHwParam lamp (inSym,checkInType) (outSym, checkOutType)
+                    updatePptHwParam lamp (inSym,checkInType) (outSym, checkOutType)
 
 
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
+                | None -> Office.ErrorPpt(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
             let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
@@ -222,11 +222,11 @@ module ImportIOTable =
                 | Some cond ->
                     updateHwAddress (cond) (inAddress, outAddress) Util.runtimeTarget
                     let checkInType, checkOutType = getInOutDataType dataType
-                    updatePPTHwParam cond (inSym,checkInType) (outSym, checkOutType)
+                    updatePptHwParam cond (inSym,checkInType) (outSym, checkOutType)
 
 
 
-                | None -> Office.ErrorPPT(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
+                | None -> Office.ErrorPpt(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 
             dts
             |> Seq.iter (fun (page, dt) ->

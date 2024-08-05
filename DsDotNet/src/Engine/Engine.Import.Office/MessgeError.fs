@@ -93,7 +93,7 @@ module ErrID =
     let _75 = "Table Device 이름규격은 dev.Api 입니다."
     let _76 = "Work 설정시간이 중복 정의 되었습니다."
     let _77 = "Work 속성이 중복 정의 되었습니다."
- 
+
     let _78 = "전제조건은 자신을 조건으로 사용불가 입니다."
     let _79 = "Safety는 Action만 조건으로 가능합니다."
     let _80 = "Safety  이름이 시스템 내부에 존재하지 않습니다."
@@ -118,7 +118,7 @@ module ErrID =
 //
 
 [<AutoOpen>]
-module MessgePPT =
+module MessgePpt =
 
     type ErrorCase =
         | Shape
@@ -139,15 +139,15 @@ module MessgePPT =
 
 
     ///file(Item1), page(Item2), objID(Item3), msg(Item4)
-    let ErrorPPTNotify = new Event<string * int * uint * string>()
-    let LoadingPPTNotify = new Event<string>()
+    let ErrorPptNotify = new Event<string * int * uint * string>()
+    let LoadingPptNotify = new Event<string>()
     let ErrorNotify = "ERROR "
 
     [<Extension>]
     type Office =
 
         [<Extension>]
-        static member ErrorPPT
+        static member ErrorPpt
             (
                 case: ErrorCase,
                 msg: string,
@@ -163,5 +163,5 @@ module MessgePPT =
                 else
                     $"◆페이지{page} {objName}"
 
-            ErrorPPTNotify.Trigger(currentFileName, page, objID, itemName)
+            ErrorPptNotify.Trigger(currentFileName, page, objID, itemName)
             failwithf $"[{case.ToText()}] {msg} \t\t{itemName} {ErrorNotify}"

@@ -10,19 +10,18 @@ open Engine.Cpu
 open Engine.Core
 open Engine.CodeGenCPU
 
-module HMIPackageTEST = 
+module HMIPackageTEST =
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
     [<Fact>]
-    let ``HMIPackage Create Test`` () = 
-        let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPPT = false; CreateBtnLamp = true}
-        
-        
+    let ``HMIPackage Create Test`` () =
+        let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = true}
+
+
         clearNFullSlotHwSlotDataTypes()
-        let dsPPT = ImportPPT.GetDSFromPPTWithLib (testPath, false, pptParms)
-        assignAutoAddress (dsPPT.System, 0 , 0)  WINDOWS
+        let dsPpt = ImportPpt.GetDSFromPptWithLib (testPath, false, pptParms)
+        assignAutoAddress (dsPpt.System, 0 , 0)  WINDOWS
 
         RuntimeDS.Package <- RuntimePackage.PC
-        let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU(dsPPT.System) pptParms.TargetType;
+        let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU(dsPpt.System) pptParms.TargetType;
 
         hmiPackage.Devices.Length > 0  |> Assert.True
-  

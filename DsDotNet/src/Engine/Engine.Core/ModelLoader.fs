@@ -88,9 +88,9 @@ type ModelLoaderExt =
         let targetPaths = (loadingPaths @ [activeFilePath])
         let zipPathDS  = targetPaths.ToDsZip()
 
-        let zipPathPPT = targetPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
+        let zipPathPpt = targetPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
                               .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
-                              .ToZipPPT()
+                              .ToZipPpt()
 
         let zipDir    = PathManager.getDirectoryName (zipPathDS|>DsFile)   
         let zipFile   = PathManager.getFileNameWithoutExtension (zipPathDS|>DsFile)   
@@ -103,7 +103,7 @@ type ModelLoaderExt =
 
         let config = SaveConfigWithPath jsFilePath activeRelaPath 
 
-        addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPPT;config]@layoutImgFiles.ToList())
+        addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPpt;config]@layoutImgFiles.ToList())
 
         zipPathDS
 

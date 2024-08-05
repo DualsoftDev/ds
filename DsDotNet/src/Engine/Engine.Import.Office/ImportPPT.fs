@@ -11,18 +11,18 @@ open System
 open Engine.Parser.FS
 
 [<AutoOpen>]
-module ImportPPTModule =
-    type DSFromPPT = {
+module ImportPptModule =
+    type DSFromPpt = {
         System: DsSystem
         ActivePath: string
         LoadingPaths: string seq
         LayoutImgPaths: string seq
     }
 
-    type PPTParams = {
+    type PptParams = {
         TargetType: PlatformTarget
         AutoIOM: bool
-        CreateFromPPT : bool
+        CreateFromPpt : bool
         CreateBtnLamp : bool
     }
 
@@ -37,7 +37,7 @@ module ImportPPTModule =
                 .Append(path)
         )
 
-    let pathPPTWithEnvironmentVariablePaths loadFilePath parasAbsoluteFilePath : string =
+    let pathPptWithEnvironmentVariablePaths loadFilePath parasAbsoluteFilePath : string =
         let loadFile = DsFile loadFilePath
         let baseDirectory = DsFile parasAbsoluteFilePath |> PathManager.getDirectoryName
 
@@ -54,14 +54,14 @@ module ImportPPTModule =
     module PowerPointImportor =
         let private sRepo = ShareableSystemRepository()
 
-        /// GetDSFromPPTWithLib > (loadFromPPTs > GetImportModel >) loadSystem
+        /// GetDSFromPptWithLib > (loadFromPpts > GetImportModel >) loadSystem
         let rec private loadSystem
           (
-            pptReop: Dictionary<DsSystem, pptDoc>,
+            pptReop: Dictionary<DsSystem, PptDoc>,
             theSys: DsSystem,
             paras: DeviceLoadParameters,
             isLib,
-            pptParams:PPTParams,
+            pptParams:PptParams,
             dicLoaded:Dictionary<LoadedSystem, string>,
             dicPptDoc:Dictionary<string, PresentationDocument>,
             pathStack:Stack<string>,
@@ -69,19 +69,19 @@ module ImportPPTModule =
             layoutImgPaths:HashSet<string>
           ) =
             pathStack.Push(paras.AbsoluteFilePath)
-            LoadingPPTNotify.Trigger(paras.AbsoluteFilePath)
+            LoadingPptNotify.Trigger(paras.AbsoluteFilePath)
 
             currentFileName <- pathStack.Peek()
 
-            let pathPPT = paras.AbsoluteFilePath
+            let pathPpt = paras.AbsoluteFilePath
 
             let doc =
-                match dicPptDoc.TryGetValue pathPPT with
-                | true, existingDoc -> pptDoc.Create (pathPPT, paras |> Some, existingDoc, pptParams.TargetType)
+                match dicPptDoc.TryGetValue pathPpt with
+                | true, existingDoc -> PptDoc.Create (pathPpt, Some paras, existingDoc, pptParams.TargetType)
                 | false, _ ->
-                    let newDoc = Office.Open(pathPPT)
-                    dicPptDoc.Add(pathPPT, newDoc)
-                    pptDoc.Create (pathPPT, paras |> Some, newDoc, pptParams.TargetType)
+                    let newDoc = Office.Open(pathPpt)
+                    dicPptDoc.Add(pathPpt, newDoc)
+                    PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.TargetType)
 
 
 
@@ -96,16 +96,16 @@ module ImportPPTModule =
             |> Seq.iter (fun (loadFilePath, loadedName, node) ->
                 currentFileName <- pathStack.Peek()
 
-                let pathPPT =
+                let pathPpt =
                     try
-                        pathPPTWithEnvironmentVariablePaths loadFilePath paras.AbsoluteFilePath
+                        pathPptWithEnvironmentVariablePaths loadFilePath paras.AbsoluteFilePath
                     with ex ->
-                        Office.ErrorPPT(ErrorCase.Path, ErrID._29, node.Name, node.PageNum, node.Id)
+                        Office.ErrorPpt(ErrorCase.Path, ErrID._29, node.Name, node.PageNum, node.Id)
 
                 let loadRelativePath =
-                    PathManager.getRelativePath (paras.AbsoluteFilePath.ToFile()) (pathPPT.ToFile())
+                    PathManager.getRelativePath (paras.AbsoluteFilePath.ToFile()) (pathPpt.ToFile())
 
-                let loadAbsolutePath = pathPPT
+                let loadAbsolutePath = pathPpt
 
                 let paras =
                     getParams (
@@ -181,17 +181,17 @@ module ImportPPTModule =
             pptReop.Add(theSys, doc)
             theSys, doc
 
-        /// GetDSFromPPTWithLib > (loadFromPPTs > GetImportModel >) loadSystem
+        /// GetDSFromPptWithLib > (loadFromPpts > GetImportModel >) loadSystem
         let internal GetImportModel
           (
-            pptReop: Dictionary<DsSystem, pptDoc>,
+            pptReop: Dictionary<DsSystem, PptDoc>,
             filePath: string,
             isLib,
             pptParams,
             dicPptDoc:Dictionary<string, PresentationDocument>,
             pathStack:Stack<string>,
             layoutImgPaths:HashSet<string>
-          ) : DsSystem * pptDoc =
+          ) : DsSystem * PptDoc =
             let loadedParentStack = Stack<DsSystem>() //LoadedSystem.AbsoluteParents 구성하여 ExternalSystem 구분 및 UI Tree 구조 구성
             //active는 시스템이름으로 ppt 파일 이름을 사용
             let fileDirectory = PathManager.getDirectoryName (filePath|>DsFile)
@@ -211,10 +211,10 @@ module ImportPPTModule =
             loadedParentStack.Push mySys
             loadSystem (pptReop, mySys, paras, isLib, pptParams, dicLoaded, dicPptDoc, pathStack, loadedParentStack, layoutImgPaths)
 
-    let pptRepo = Dictionary<DsSystem, pptDoc>()
+    let pptRepo = Dictionary<DsSystem, PptDoc>()
 
-    /// GetDSFromPPTWithLib > (loadFromPPTs > GetImportModel >) loadSystem
-    let private loadFromPPTs (path: string ) isLib (pptParams:PPTParams) (layoutImgPaths:HashSet<string>)=
+    /// GetDSFromPptWithLib > (loadFromPpts > GetImportModel >) loadSystem
+    let private loadFromPpts (path: string ) isLib (pptParams:PptParams) (layoutImgPaths:HashSet<string>)=
         Copylibrary.Clear()
         let dicPptDoc = Dictionary<string, PresentationDocument>()
         let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
@@ -247,7 +247,7 @@ module ImportPPTModule =
                         ex.Message
 
                 if not (msg.EndsWith(ErrorNotify)) then
-                    ErrorPPTNotify.Trigger(errFileName, 0, 0u, "")
+                    ErrorPptNotify.Trigger(errFileName, 0, 0u, "")
 
                 //첫페이지 아니면 stack에 존재
                 failwithf $"{msg} \t◆파일명 {errFileName}"
@@ -262,21 +262,21 @@ module ImportPPTModule =
     //}
 
 
-    type ImportPPT =
-        static member GetDSFromPPTWithLib(fullName: string, isLib:bool, pptParams:PPTParams): DSFromPPT =
+    type ImportPpt =
+        static member GetDSFromPptWithLib(fullName: string, isLib:bool, pptParams:PptParams): DSFromPpt =
             Util.runtimeTarget <- pptParams.TargetType
             ModelParser.ClearDicParsingText()
             pptRepo.Clear()
             let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
 
-            let model, millisecond = duration (fun () -> loadFromPPTs fullName isLib pptParams layoutImgPaths |> Tuple.first)
+            let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths |> Tuple.first)
             tracefn $"Elapsed time for reading1 {fullName}: {millisecond} ms"
 
             let activePath = PathManager.changeExtension (fullName.ToFile()) ".ds"
 
             let (system, loadingPaths), millisecond =
                 duration(fun () ->
-                    if pptParams.CreateFromPPT then
+                    if pptParams.CreateFromPpt then
                         model.System, model.LoadingPaths
                     else
                         model.System.ExportToDS activePath
@@ -290,7 +290,7 @@ module ImportPPTModule =
                 LayoutImgPaths = layoutImgPaths
             }
 
-        static member GetRuntimeZipFromPPT(fullName: string, pptParams)=
-            let ret = ImportPPT.GetDSFromPPTWithLib(fullName, false, pptParams)
+        static member GetRuntimeZipFromPpt(fullName: string, pptParams)=
+            let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams)
             ModelLoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths), ret.System
 

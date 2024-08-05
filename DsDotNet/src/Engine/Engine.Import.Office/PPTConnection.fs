@@ -1,21 +1,14 @@
 namespace Engine.Import.Office
 
 open System.Linq
-open System.Collections.Concurrent
 open DocumentFormat.OpenXml.Packaging
 open DocumentFormat.OpenXml.Drawing
-open DocumentFormat.OpenXml
-open System.IO
-open System
-open PPTUtil
-open Dual.Common.Core.FS
+open PptUtil
 open Engine.Import.Office
-open System.Collections.Generic
 open Engine.Core
-open System.Runtime.CompilerServices
 
 [<AutoOpen>]
-module PPTConnectionModule =
+module PptConnectionModule =
 
     ///전체 사용된 화살표 반환 (앞뒤연결 필수)
     let Connections (doc: PresentationDocument) =
@@ -104,12 +97,12 @@ module PPTConnectionModule =
 
         //인과 타입과 <START, END> 역전여부
         match existHead, existTail, dashLine with
-        | true, true, true -> 
+        | true, true, true ->
              if (not headArrow && tailArrow) then
                 SelfReset, false
              else if (headArrow && not tailArrow) then
                 SelfReset, true //반대로 뒤집기 필요
-             else 
+             else
                 Interlock, false
         | true, true, false ->
             if (not headArrow && tailArrow) then
@@ -120,7 +113,7 @@ module PPTConnectionModule =
             match single, tailArrow, dashLine with
             | true, true, false -> StartEdge, isChangeHead
             //| false, true, false -> StartPush, isChangeHead //강연결 사용안함 24/03.08
-            | false, true, false -> StartEdge, isChangeHead 
+            | false, true, false -> StartEdge, isChangeHead
             | true, true, true -> ResetEdge, isChangeHead
             //| false, true, true -> ResetPush, isChangeHead   //강연결 사용안함 24/03.08
             | false, true, true -> ResetEdge, isChangeHead

@@ -85,14 +85,14 @@ module ImportType =
         $"{loadedName}_{indexStr}"
 
 
-    let checkPPTDataType (taskDevParamRaw:TaskDevParamRawItem) (taskDevParam:TaskDevParam) =
-        let address, typePPT = taskDevParamRaw |>fun (addr,t,_) -> addr, t
-        if (address <> TextSkip) && (typePPT <> taskDevParam.Type)
+    let checkPptDataType (taskDevParamRaw:TaskDevParamRawItem) (taskDevParam:TaskDevParam) =
+        let address, typePpt = taskDevParamRaw |>fun (addr,t,_) -> addr, t
+        if (address <> TextSkip) && (typePpt <> taskDevParam.Type)
         then
             failWithLog $"error datatype : {taskDevParamRaw} <> {taskDevParam.Type}"
 
 
-    let getPPTTaskDevParaInOut (inParamRaw:TaskDevParamRawItem) (outParamRaw:TaskDevParamRawItem) =
+    let getPptTaskDevParaInOut (inParamRaw:TaskDevParamRawItem) (outParamRaw:TaskDevParamRawItem) =
         let paramFromText paramRaw =
             let addr, (dataType:DataType), func = paramRaw
             if func <> ""
@@ -104,8 +104,8 @@ module ImportType =
         let inP =  paramFromText inParamRaw
         let outP = paramFromText outParamRaw
 
-        checkPPTDataType  inParamRaw inP
-        checkPPTDataType  outParamRaw outP
+        checkPptDataType  inParamRaw inP
+        checkPptDataType  outParamRaw outP
 
         inP, outP
 
@@ -115,7 +115,7 @@ module ImportType =
                 then failWithLog $"error datatype : {name}\r\n [{taskDevParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
 
 
-    let updatePPTTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
+    let updatePptTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
 
         dev.SetInSymbol(inSym)
         dev.SetOutSymbol(outSym)
@@ -123,17 +123,17 @@ module ImportType =
         checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
         checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
 
-    let getPPTDataTypeText (inType:DataType) (outType:DataType) =
+    let getPptDataTypeText (inType:DataType) (outType:DataType) =
         let inTypeText  = inType.ToPLCText()
         let outTypeText = outType.ToPLCText()
         if inTypeText = outTypeText
         then inTypeText
         else $"{inTypeText}:{outTypeText}"
 
-    let getPPTTDevDataTypeText (dev:TaskDev) =   getPPTDataTypeText dev.InDataType dev.OutDataType
-    let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InDataType hwDev.OutDataType
+    let getPptDevDataTypeText (dev:TaskDev) =   getPptDataTypeText dev.InDataType dev.OutDataType
+    let getPptHwDevDataTypeText (hwDev:HwSystemDef) = getPptDataTypeText hwDev.InDataType hwDev.OutDataType
 
-    let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
+    let updatePptHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
 
         let inParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.InParam) inSym
         let outParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.OutParam) inSym

@@ -219,8 +219,8 @@ module rec ViewModule =
     let getViewEdge
         (
             edge: ModelingEdgeInfo<string>,
-            dummy: pptDummy,
-            dummys: pptDummy seq,
+            dummy: PptDummy,
+            dummys: PptDummy seq,
             dicV: IDictionary<Vertex, ViewNode>,
             dicDummy: IDictionary<string, ViewNode>
         ) =
@@ -256,7 +256,7 @@ type ViewModuleExt =
     static member GetDummyEdgeFlow
         (
             flow: Flow,
-            dummys: pptDummy seq,
+            dummys: PptDummy seq,
             dicV: IDictionary<Vertex, ViewNode>,
             dicDummy: IDictionary<string, ViewNode>
         ) =
@@ -270,7 +270,7 @@ type ViewModuleExt =
     static member GetDummySingleFlow
         (
             flow: Flow,
-            dummys: pptDummy seq,
+            dummys: PptDummy seq,
             dicV: IDictionary<Vertex, ViewNode>,
             dicDummy: IDictionary<string, ViewNode>
         ) =
@@ -294,7 +294,7 @@ type ViewModuleExt =
     static member GetDummyEdgeReal
         (
             real: Real,
-            dummys: pptDummy seq,
+            dummys: PptDummy seq,
             dicV: IDictionary<Vertex, ViewNode>,
             dicDummy: IDictionary<string, ViewNode>
         ) =
@@ -308,7 +308,7 @@ type ViewModuleExt =
     static member GetDummySingleReal
         (
             real: Real,
-            dummys: pptDummy seq,
+            dummys: PptDummy seq,
             dicV: IDictionary<Vertex, ViewNode>,
             dicDummy: IDictionary<string, ViewNode>
         ) =
@@ -330,5 +330,5 @@ type ViewModuleExt =
 
 
     [<Extension>]
-    static member GetDummyMembers(dummys: pptDummy seq) =
+    static member GetDummyMembers(dummys: PptDummy seq) =
         dummys |> Seq.collect (fun f -> f.Members)

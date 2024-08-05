@@ -3,7 +3,7 @@ namespace Engine.Import.Office
 
 open System.Linq
 open System.Collections
-open PPTConnectionModule
+open PptConnectionModule
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Dual.Common.Core.FS
@@ -22,11 +22,11 @@ open Engine.Parser.FS.ModelParser
 module ImportU =
 
     [<Extension>]
-    type ImportPPTExt =
+    type ImportPptExt =
 
         //Interface Reset 정보 만들기
         [<Extension>]
-        static member MakeInterfaceResets(doc: pptDoc, sys: DsSystem) =
+        static member MakeInterfaceResets(doc: PptDoc, sys: DsSystem) =
             let resets = HashSet<string * string>()
 
             doc.Edges
@@ -69,9 +69,9 @@ module ImportU =
 
         //Interface 만들기
         [<Extension>]
-        static member MakeInterfaces(doc: pptDoc, sys: DsSystem) =
+        static member MakeInterfaces(doc: PptDoc, sys: DsSystem) =
             let checkName = HashSet<string>()
-            let IFNodes= 
+            let IFNodes=
                 doc.Nodes
                 |> Seq.filter (fun node -> node.NodeType.IsIF)
 
@@ -79,7 +79,7 @@ module ImportU =
             |> Seq.iter (fun node ->
 
                 if checkName.Add(node.IfName) |> not then
-                    let dupNode = IFNodes.First(fun n->n.IfName = node.IfName && n <> node) 
+                    let dupNode = IFNodes.First(fun n->n.IfName = node.IfName && n <> node)
                     node.Shape.ErrorName($"{ErrID._25} 위치 \n page:{dupNode.PageNum},  name:{dupNode.PageTitle}", node.PageNum)
 
                 let apiName = node.IfName
@@ -89,7 +89,7 @@ module ImportU =
 
         //MFlow 리스트 만들기
         [<Extension>]
-        static member MakeFlows(doc: pptDoc, sys: DsSystem) =
+        static member MakeFlows(doc: PptDoc, sys: DsSystem) =
             let checkName = HashSet<string>()
             let dicFlow = doc.DicFlow
 
@@ -101,14 +101,14 @@ module ImportU =
 
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 let flowName = if page.PageNum = pptHeadPage then $"{sysName}_Page1" else flowName
-   
+
                 dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
 
 
 
         //MakeButtons 리스트 만들기
         [<Extension>]
-        static member MakeButtons(doc: pptDoc, mySys: DsSystem) =
+        static member MakeButtons(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
 
             doc.Nodes
@@ -120,16 +120,16 @@ module ImportU =
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
             |> Seq.iter (fun node ->
-                        
+
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
-                else 
+                else
                     dicFlow.Iter(fun flow ->
                         node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value)))
-                )        
-                
+                )
+
         //MakeLamps 리스트 만들기
         [<Extension>]
-        static member MakeLamps(doc: pptDoc, mySys: DsSystem) =
+        static member MakeLamps(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
             let headPageLamps=  doc.NodesHeadPage |> Seq.filter (fun node -> node.LampHeadPageDefs.any())
             let flowPageLamps=  doc.Nodes |> Seq.filter (fun node -> node.LampDefs.any())
@@ -150,14 +150,14 @@ module ImportU =
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
                 node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}.{l.Key}", "", "", Some flow)))
-            
+
             headPageLamps
             |> Seq.iter (fun node ->
                 node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None)))
-                
+
         //MakeReadyConditions 리스트 만들기
         [<Extension>]
-        static member MakeConditions(doc: pptDoc, mySys: DsSystem) =
+        static member MakeConditions(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
             doc.Nodes
             |> Seq.filter (fun node -> node.CondiDefs.any())
@@ -166,31 +166,31 @@ module ImportU =
 
                     let flow = dicFlow.[node.PageNum]
                     node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow))
-                with _ -> 
+                with _ ->
                     Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
                     )
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.CondiHeadPageDefs.any())
             |> Seq.iter (fun node ->
-                        
+
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
-                else 
+                else
                     dicFlow.Iter(fun flow ->
                         node.CondiHeadPageDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, c.Key, "", "", flow.Value)))
-                )     
-                
-        [<Extension>]
-        static member MakeAnimationPoint(doc: pptDoc, mySys: DsSystem) =
+                )
 
-            let addChannelPoints (loaded:LoadedSystem) (node:pptNode) = 
+        [<Extension>]
+        static member MakeAnimationPoint(doc: PptDoc, mySys: DsSystem) =
+
+            let addChannelPoints (loaded:LoadedSystem) (node:PptNode) =
                 if loaded.IsNull()
                     then node.Shape.ErrorName(ErrID._61, node.PageNum)
                     else
                         if node.Position.X >=0 && node.Position.Y >= 0
-                        then 
+                        then
                              let xywh = Xywh(node.Position.X, node.Position.Y
-                                           , node.Position.Width, node.Position.Height) 
+                                           , node.Position.Width, node.Position.Height)
                              loaded.ChannelPoints[TextEmtpyChannel] <-xywh
 
             doc.Nodes
@@ -198,26 +198,26 @@ module ImportU =
             |> Seq.filter (fun node -> not(node.IsFunction))
             |> Seq.iter (fun node ->
                 let cnt = node.JobParam.TaskDevCount
-                for i in [1..cnt] do 
-                    let multiName = 
+                for i in [1..cnt] do
+                    let multiName =
                         if cnt = 1
-                        then 
+                        then
                             node.DevName
-                        else 
+                        else
                             getMultiDeviceName node.DevName  i
-                            
+
                     let dev = mySys.LoadedSystems.FirstOrDefault(fun f->f.Name = multiName)
                     addChannelPoints dev node
                     )
-           
+
 
         //real call alias  만들기
         [<Extension>]
-        static member MakeSegment(doc: pptDoc, mySys: DsSystem) =
+        static member MakeSegment(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
             let dicVertex = doc.DicVertex
             let dicAutoPreJob = doc.DicAutoPreJob
-            
+
             let pptNodes = doc.Nodes
             let parents = doc.Parents
 
@@ -259,7 +259,7 @@ module ImportU =
                 callNAutoPres
                     .Filter(fun node -> not(mySys.LoadedSystems.Select(fun d->d.Name).Contains(node.DevName)))
                     .GroupBy(fun node -> node.DevName)
-                    .Iter(fun kv -> 
+                    .Iter(fun kv ->
 
                         let libApis = kv.Where(fun d-> libInfos.ContainsKey(d.ApiPureName))
                                         .Select(fun d-> d.ApiPureName).Distinct()
@@ -276,16 +276,16 @@ module ImportU =
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
                 |> Seq.iter (fun node ->
                     try
-                        
-                  
+
+
                         if node.NodeType = AUTOPRE
-                        then 
+                        then
                             if not(dicChildParent.ContainsKey node)
-                            then 
+                            then
                                 failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
 
                             createAutoPre(mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicAutoPreJob) |> ignore
-                        else 
+                        else
                             if dicChildParent.ContainsKey(node) then
                                 createCallVertex (mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicVertex)
                             else
@@ -302,7 +302,7 @@ module ImportU =
                     //if node.IsFunction then
                     //    node.Shape.ErrorName($"Alias Function은 지원하지 않습니다.", node.PageNum)
                     let segOrg =    dicVertex.[node.Alias.Value.Key]
-                  
+
                     let alias =
                         let flow = dicFlow.[node.PageNum]
                         if node.NodeType = REALExF then // isOtherFlowRealAlias is true
@@ -355,21 +355,21 @@ module ImportU =
             //Call 처리
             createCallNAutoPre ()
             //Alias Node 처리 마감
-            createAlias ()  
+            createAlias ()
 
             updateSystemForSingleApi mySys
 
 
         //pptEdge 변환 및 등록
         [<Extension>]
-        static member MakeEdges(doc: pptDoc, mySys: DsSystem) =
+        static member MakeEdges(doc: PptDoc, mySys: DsSystem) =
             let dicVertex = doc.DicVertex
             let dicFlow = doc.DicFlow
             let pptEdges = doc.Edges
             let parents = doc.Parents
             let dummys = doc.Dummys
 
-            let convertEdge (edge: pptEdge, flow: Flow, srcs: Vertex seq, tgts: Vertex seq) =
+            let convertEdge (edge: PptEdge, flow: Flow, srcs: Vertex seq, tgts: Vertex seq) =
 
                 let mei = ModelingEdgeInfo<Vertex>(srcs, edge.Causal.ToText(), tgts)
 
@@ -416,22 +416,22 @@ module ImportU =
                             srcDummy.Value.DummyNodeKey
 
                     tgtDummy.Value.AddInEdge(edge.Causal, src))
-        
-            let getVertexs (pptNodes: pptNode seq) =
+
+            let getVertexs (pptNodes: PptNode seq) =
                 pptNodes.Select(fun s -> dicVertex.[s.Key])
 
-            let updateAutoPre(edge:pptEdge) = 
+            let updateAutoPre(edge:PptEdge) =
                 if edge.EndNode.NodeType = AUTOPRE
-                then 
+                then
                     edge.EndNode.Shape.ErrorName(ErrID._8, edge.EndNode.PageNum)
-                    
+
                 let tgts =
                     if (dummys.IsMember(edge.EndNode)) then
                         dummys.GetMembers(edge.EndNode)|>toArray
                     else
                         [|edge.EndNode|]
 
-                tgts.Iter(fun node-> 
+                tgts.Iter(fun node->
                         let autoPreCondition =edge.StartNode.Job
                         node.AutoPres.Add(autoPreCondition)|>ignore
                         )
@@ -449,12 +449,12 @@ module ImportU =
                         edges.Iter(fun edge ->
 
                             if edge.StartNode.NodeType = AUTOPRE
-                            then 
+                            then
                                 updateAutoPre(edge)
-                            else 
+                            else
                                 let flow = dicFlow.[edge.PageNum]
 
-                                
+
                                 let srcs =
                                     if (dummys.IsMember(edge.StartNode)) then
                                         dummys.GetMembers(edge.StartNode) |> getVertexs
@@ -486,28 +486,28 @@ module ImportU =
 
         //Safety & AutoPre만들기
         [<Extension>]
-        static member MakeSafetyAutoPre(doc: pptDoc, mySys: DsSystem) =
-            let getJobInfo(job:Job) = 
+        static member MakeSafetyAutoPre(doc: PptDoc, mySys: DsSystem) =
+            let getJobInfo(job:Job) =
                 seq{
                     let JobName = job.DequotedQualifiedName
                     let pureJobName = GetBracketsRemoveName JobName
                     yield JobName, job
 
                     if JobName <> pureJobName
-                    then 
+                    then
                         yield pureJobName, job
                 }
 
-            let dicJobFromCall =   
+            let dicJobFromCall =
                 doc.DicVertex.Values
                    .OfType<Call>().Where(fun call -> call.IsJob)
                    .SelectMany(fun call -> getJobInfo call.TargetJob)
 
 
-            let dicJobFromAutoPre =   
+            let dicJobFromAutoPre =
                 doc.DicAutoPreJob.Values
                    .SelectMany(fun job -> getJobInfo job)
-                
+
 
 
             let dicJob = (dicJobFromCall@dicJobFromAutoPre) |> dict
@@ -515,7 +515,7 @@ module ImportU =
             doc.Nodes
             |> Seq.filter (fun node -> node.NodeType.IsCall || node.NodeType = AUTOPRE)
             |> Seq.iter(fun node ->
-        
+
                 node.Safeties
                 |> iter (fun safeName ->
                     if not (dicJob.ContainsKey safeName) then
@@ -523,8 +523,8 @@ module ImportU =
 
                     if node.Job.Combine() = safeName then
                         node.Shape.ErrorName($"{ErrID._81}(err:{safeName})", node.PageNum)
-                        )   
-                        
+                        )
+
                 node.AutoPres.Select(fun (j) -> j.Combine())
                 |> iter (fun autoPres ->
                     if not (dicJob.ContainsKey autoPres) then
@@ -545,35 +545,35 @@ module ImportU =
 
                 node.AutoPres
                 |> iter (fun (jobFqdn)  ->
-                    let condJob = 
+                    let condJob =
                         if dicJob.ContainsKey (jobFqdn.Combine())
-                        then 
+                        then
                             dicJob[jobFqdn.Combine()]
-                        else 
+                        else
                             failWithLog $"AutoPres 대상이 없습니다. {jobFqdn}"
-                    //let condJob = 
+                    //let condJob =
                     //    match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with
                     //    | Some existingJob -> existingJob
-                    //    | None -> 
+                    //    | None ->
                             //match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
                             //| Some masterJob ->
                             //        let job = Job(jobFqdn, mySys, masterJob.TaskDefs)
                             //        //job.UpdateTaskDevPara(TaskDevParas)
                             //        mySys.Jobs.Add(job); job
 
-                            //| None -> 
-                        
+                            //| None ->
+
                     match doc.DicVertex.[node.Key].GetPure() |> box with
-                    | :? ISafetyAutoPreRequisiteHolder as holder -> 
+                    | :? ISafetyAutoPreRequisiteHolder as holder ->
                             holder.AutoPreConditions.Add(DuSafetyAutoPreConditionCall(condJob)) |> ignore
-                    | _ -> 
+                    | _ ->
                             node.Shape.ErrorName($"{ErrID._28}(err:{doc.DicVertex.[node.Key].QualifiedName})", node.PageNum))
             )
 
 
 
         [<Extension>]
-        static member MakeApiTxRx(doc: pptDoc) =
+        static member MakeApiTxRx(doc: PptDoc) =
             let dicFlow = doc.DicFlow
             //1. 원본처리
             doc.Nodes
@@ -591,7 +591,7 @@ module ImportU =
                             flow.Name, trxName
 
                     if dicFlow.Values.Where(fun w -> w.Name = flowName).IsEmpty() then
-                        Office.ErrorPPT(
+                        Office.ErrorPpt(
                             Name,
                             ErrID._42,
                             $"원인이름{flowName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]",
@@ -602,7 +602,7 @@ module ImportU =
                     let vertex = sys.TryFindRealVertex(flowName, realName)
 
                     if vertex.IsNone then
-                        Office.ErrorPPT(
+                        Office.ErrorPpt(
                             Name,
                             ErrID._41,
                             $"원인이름{realName}: 전체이름[{node.Shape.InnerText}] 해당도형[{node.Shape.ShapeName()}]",
@@ -616,18 +616,18 @@ module ImportU =
 
                 let tx = node.IfTX |>  findReal
                 let rx = node.IfRX |>  findReal
-                api.TX <- tx 
-                api.RX <- rx 
+                api.TX <- tx
+                api.RX <- rx
                 )
         [<Extension>]
-        static member UpdateActionIO(doc: pptDoc, sys: DsSystem, autoIO:bool) =
+        static member UpdateActionIO(doc: PptDoc, sys: DsSystem, autoIO:bool) =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
             if not(autoIO)
                 && activeSys.IsSome && activeSys.Value = sys
                 && pageTables.isEmpty()
             then
                 failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
-            
+
             // io table 에서 첫 row 가 "CASE" 인 table 들의 모든 row 들을 device name 별로 중복 검사?
             pageTables
             |> Seq.map (snd)        // only tables
@@ -648,7 +648,7 @@ module ImportU =
             ApplyIO(sys, pageTables)
 
         [<Extension>]
-        static member UpdateLayouts(doc: pptDoc, sys: DsSystem) =
+        static member UpdateLayouts(doc: PptDoc, sys: DsSystem) =
             let layouts = doc.GetLayouts()
             layouts.Iter(fun (layout, path, dev, rect)->
                 match sys.Devices.TryFind(fun f-> f.Name = dev) with
@@ -657,12 +657,12 @@ module ImportU =
                     let lay = layout.Replace(";", "_")
                     device.ChannelPoints.Add($"{lay};{path.Trim()}", xywh) |> ignore
                 | None ->
-                    Office.ErrorPPT(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
-            )        
+                    Office.ErrorPpt(ErrorCase.Name, ErrID._61, $"layout {dev}", 0, 0u)
+            )
 
 
         [<Extension>]
-        static member GetLoadNodes(doc: pptDoc) =
+        static member GetLoadNodes(doc: PptDoc) =
             let calls = doc.Nodes.Where(fun n -> n.NodeType.IsCall && n.Alias.IsNone)
 
             let loads =
@@ -712,22 +712,22 @@ module ImportU =
             mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None)
             mySys.AddLamp(LampType.DuReadyStateLamp,  "ReadyStateLamp", "-", "", None)
             mySys.AddLamp(LampType.DuDriveStateLamp,  "DriveLamp", "-", "", None)
-            
+
         [<Extension>]
-        static member PreCheckPPTSystem(doc: pptDoc, sys: DsSystem) =
+        static member PreCheckPptSystem(doc: PptDoc, sys: DsSystem) =
 
             (* AUTOPRE Root에 배치 에러 체크*)
             doc.Nodes
-                .Where(fun n -> n.NodeType = AUTOPRE) 
-                .Iter(fun n -> 
-                    if n.IsRootNode.IsSome && n.IsRootNode.Value then 
+                .Where(fun n -> n.NodeType = AUTOPRE)
+                .Iter(fun n ->
+                    if n.IsRootNode.IsSome && n.IsRootNode.Value then
                         n.Shape.ErrorShape(ErrID._28, n.PageNum) )
 
 
-            let errCheck (calls:pptNode seq) = 
+            let errCheck (calls:PptNode seq) =
                 if calls.Count() > 1
                 then
-                    let errNode = calls.Select(fun f->f).First() 
+                    let errNode = calls.Select(fun f->f).First()
                     let errText = calls.Select(fun f-> $"{f.Name} page {f.FlowName}").JoinWith("\r\n")
                     errNode.Shape.ErrorShape(ErrID._72+ $"\r\n{errText}", errNode.PageNum)
 
@@ -738,64 +738,64 @@ module ImportU =
 
             (* Multi Call Dev별 갯수 동일 체크*)
             callSet.GroupBy(fun n -> n.DevName)
-                   .Select(fun calls -> 
+                   .Select(fun calls ->
                             calls.DistinctBy(fun c-> (c.JobParam.TaskDevCount))
                     ).Iter(errCheck)
-            
+
             (* Multi Call Api별 갯수 동일 체크*)
             callSet.GroupBy(fun n -> n.DevName+n.ApiPureName)
-                   .Select(fun calls -> 
+                   .Select(fun calls ->
                             calls.DistinctBy(fun c-> (c.JobParam.TaskDevCount
                                            , c.JobParam.TaskInCount
                                            , c.JobParam.TaskOutCount))
                     ).Iter(errCheck)
-        
-        
+
+
         [<Extension>]
-        static member PostCheckPPTSystem(doc: pptDoc, sys: DsSystem, isLib:bool) =
+        static member PostCheckPptSystem(doc: PptDoc, sys: DsSystem, isLib:bool) =
 
             (* Root Call 연결 없음 체크 *)
             let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
-       
+
             doc.Nodes.Where(fun n -> n.NodeType.IsCall && n.IsRootNode.Value)
-                     .Iter(fun n -> 
+                     .Iter(fun n ->
                             let call = doc.DicVertex[n.Key]
                             if not(rootEdgeSrcs.Contains (call))
                             then
                                 n.Shape.ErrorShape(ErrID._71, n.PageNum)
                 )
-          
+
             (* 복수의 작업에서 SEQ 전송 Start Edge 체크*)
             if not(isLib) then
-                doc.Nodes.Where(fun n -> n.NodeType.IsReal) 
-                    .Iter(fun n -> 
+                doc.Nodes.Where(fun n -> n.NodeType.IsReal)
+                    .Iter(fun n ->
                         let xs = doc.Edges.Where(fun e -> e.IsStartEdge && e.EndNode = n)
                                           .Select(fun e-> doc.DicVertex.[e.StartNode.Key])
 
                         let pureReals = xs.GetPureReals()
-                        if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then 
+                        if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then
                             let error = String.Join("\r\n", (pureReals.Select(fun f->f.DequotedQualifiedName)))
                             failwithlog $"복수의 작업에서 SEQ 전송을 시도하고 있습니다. \r\n미전송 작업 이름에 취소선을 사용하세요 \r\n복수 작업 :\r\n {error}"
                     )
 
-                                
-           
+
+
         [<Extension>]
-        static member MakeRealProperty(doc: pptDoc, mySys: DsSystem) =
+        static member MakeRealProperty(doc: PptDoc, mySys: DsSystem) =
             let processProperty (mySys: DsSystem) (prop: DsProperty) =
                 if prop.FQDN.Length <> 2 then
                     failwithf "Error: Name format Flow.Work: %s" (String.concat "." prop.FQDN)
-        
+
                 match mySys.TryFindRealVertex(prop.FQDN.[0], prop.FQDN.[1]) with
                 | Some real ->
                     match prop.Type with
                     | "Motion" -> real.Motion <- Some prop.Value
                     | "Script" -> real.Script <- Some prop.Value
                     | _ -> failwithf "Error: %s Type not found" prop.Type
-                | None -> 
+                | None ->
                     failwithf "Error: Real not found: %s" (String.concat "." prop.FQDN)
 
-            let processPage (doc: pptDoc) (mySys: DsSystem) (systemRepo: ShareableSystemRepository) (page: pptPage) =
+            let processPage (doc: PptDoc) (mySys: DsSystem) (systemRepo: ShareableSystemRepository) (page: PptPage) =
                 match Office.GetSlideNoteText(doc.Doc, page.PageNum) with
                 | note when
                        note.StartsWith ("[motions]")
@@ -807,23 +807,23 @@ module ImportU =
                 | _ -> ()
 
             let systemRepo = ShareableSystemRepository()
-            doc.Pages 
+            doc.Pages
                 |> Seq.filter (fun page -> page.PageNum <> 1)
                 |> Seq.iter (processPage doc mySys systemRepo)
 
         [<Extension>]
-        static member MakeAddressBySlideNote(doc: pptDoc, mySys: DsSystem) =
-            let processPage (doc: pptDoc) (mySys: DsSystem) (systemRepo: ShareableSystemRepository) (page: pptPage) =
+        static member MakeAddressBySlideNote(doc: PptDoc, mySys: DsSystem) =
+            let processPage (doc: PptDoc) (mySys: DsSystem) (systemRepo: ShareableSystemRepository) (page: PptPage) =
                 match Office.GetSlideNoteText(doc.Doc, page.PageNum) with
                 | note when not(note.StartsWith("[sys]"))  ->
                     let dsText = $"[sys] temp = {{ [jobs] ={{ {note} }} }}"
                     let devApiDefinitions = WalkJobAddress(dsText, ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuName", None, DuNone))
-                    devApiDefinitions 
+                    devApiDefinitions
                     |> Seq.iter(fun a->
                         let apiFqdn = a.ApiFqnd.Combine()
                         match mySys.TaskDevs.TryFind(fun td->td.DeviceApiPureName(apiFqdn) = apiFqdn) with
-                        | Some td -> 
-                            if not td.IsInAddressEmpty then 
+                        | Some td ->
+                            if not td.IsInAddressEmpty then
                                 failwithf $"Error: {apiFqdn} InAddress already exists"
 
                             if not td.IsOutAddressEmpty then
@@ -838,21 +838,21 @@ module ImportU =
                 | _ -> ()
 
             let systemRepo = ShareableSystemRepository()
-            doc.Pages 
+            doc.Pages
                 |> Seq.filter (fun page -> page.PageNum = 1)
                 |> Seq.iter (processPage doc mySys systemRepo)
 
 
         [<Extension>]
-        static member BuildSystem(doc: pptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
+        static member BuildSystem(doc: PptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
             let isActive = activeSys.IsSome && activeSys.Value = sys
-            doc.PreCheckPPTSystem(sys)
+            doc.PreCheckPptSystem(sys)
 
             doc.MakeFlows(sys) |> ignore
 
             //자동생성
             if isActive && not(isLib) && isCreateBtnLLib
-            then                 
+            then
                 sys.CreateGenBtnLamp()
 
             //수동생성
@@ -873,8 +873,8 @@ module ImportU =
 
             //RealTime속성 만들기
             doc.MakeRealProperty(sys)
-            //Job 기본 Address SlideNote로 부터 가져오기 
+            //Job 기본 Address SlideNote로 부터 가져오기
             doc.MakeAddressBySlideNote(sys)
-            
-            doc.PostCheckPPTSystem(sys, isLib)
+
+            doc.PostCheckPptSystem(sys, isLib)
             doc.IsBuilded <- true

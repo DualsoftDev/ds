@@ -118,7 +118,7 @@ module ImportUtilForDev =
         let referenceSystem = autoGenSys.ReferenceSystem
         createTaskDevUsingApiName referenceSystem jobName loadedName apiName  taskDevParamIO
 
-    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:pptNode) jobName =
+    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:PptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
         let taskDevParam = node.TaskDevParam
         let jobFqdn = node.Job.Combine()

@@ -15,7 +15,7 @@ using static Engine.Core.DsConstants;
 using static Engine.Core.DsText;
 using static Engine.Core.DsType;
 using static Engine.Import.Office.InterfaceClass;
-using static Engine.Import.Office.PPTDummyModule;
+using static Engine.Import.Office.PptDummyModule;
 using static Engine.Import.Office.ViewModule;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
@@ -76,7 +76,7 @@ public partial class UcView : UserControl
 
     private readonly Dictionary<string, Node> _dicDrawing = new();
 
-    private bool IsDummyMember(List<pptDummy> lstDummy, Vertex vertex)
+    private bool IsDummyMember(List<PptDummy> lstDummy, Vertex vertex)
     {
         return lstDummy.Any(w => w.Members.Contains(vertex));
     }
@@ -91,7 +91,7 @@ public partial class UcView : UserControl
         //sub 그래프 가능
         viewer.Graph = new Graph();
         Microsoft.Msagl.Layout.Layered.SugiyamaLayoutSettings layoutSetting = new();
-        //layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings(); 
+        //layoutSetting = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
 
         if (viewNode.UsedViewNodes.Count() > 30)
         {
@@ -133,7 +133,7 @@ public partial class UcView : UserControl
     private void UpdateLabelText(Node nNode, ViewNode viewNode)
     {
         var goingCnt = viewNode.GoingCnt;
-        var org = viewNode.DisplayName; 
+        var org = viewNode.DisplayName;
         if (goingCnt > 0)
             nNode.LabelText = $"{org}\v\r\n({goingCnt})";
         else
@@ -229,7 +229,7 @@ public partial class UcView : UserControl
 
         gEdge.Attr.Color = Color.DarkGray;
 
-        void updateRowSource(bool bRev) 
+        void updateRowSource(bool bRev)
         {
             if (bRev)
             {
@@ -242,7 +242,7 @@ public partial class UcView : UserControl
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
             }
         }
-   
+
 
 
         ModelingEdgeType et = edge.EdgeSymbol.ToModelEdge();
@@ -253,7 +253,7 @@ public partial class UcView : UserControl
             gEdge.Attr.ArrowheadLength = edge_attr_HeadSize;
             updateRowSource(et == ModelingEdgeType.RevStartEdge);
         }
-       
+
         else if (et == ModelingEdgeType.ResetEdge || et == ModelingEdgeType.RevResetEdge)
         {
             gEdge.Attr.AddStyle(Style.Dashed);
@@ -267,7 +267,7 @@ public partial class UcView : UserControl
             gEdge.Attr.ArrowheadAtSource = ArrowStyle.Normal;
             gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
         }
-        
+
         else if (et == ModelingEdgeType.StartReset|| et == ModelingEdgeType.RevStartReset)
         {
             gEdge.Attr.AddStyle(Style.Solid);
@@ -296,7 +296,7 @@ public partial class UcView : UserControl
                 gEdge.Attr.ArrowheadAtTarget = ArrowStyle.Normal;
             }
         }
-        else    
+        else
         {
            throw new Exception($"Error {et.ToText()} not DrawEdgeStyle");
         }
@@ -625,8 +625,8 @@ public partial class UcView : UserControl
 
     private void UpdateFillColor(bool dataExist, Node node, Color color)
     {
-        node.Attr.Color = dataExist 
-            ? color 
+        node.Attr.Color = dataExist
+            ? color
             : Color.Black;
     }
 

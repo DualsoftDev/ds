@@ -8,7 +8,7 @@ open DocumentFormat.OpenXml.Drawing
 open DocumentFormat.OpenXml
 open System.IO
 open System
-open PPTUtil
+open PptUtil
 open Dual.Common.Core.FS
 open Engine.Import.Office
 open System.Collections.Generic
@@ -17,7 +17,7 @@ open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Presentation
 
 [<AutoOpen>]
-module PPTDocModule =
+module PptDocModule =
 
     let [<Literal>] pptHeadPage = 1
 
@@ -25,18 +25,18 @@ module PPTDocModule =
         let fileName = PathManager.getFileNameWithoutExtension (name.ToFile())
 
         if fileName.Contains(" ") then
-            Office.ErrorPPT(ErrorCase.Name, ErrID._57, $"{fileName}", 0, 0u)
+            Office.ErrorPpt(ErrorCase.Name, ErrID._57, $"{fileName}", 0, 0u)
 
         if fileName.IsQuotationRequired() then
-            Office.ErrorPPT(ErrorCase.Name, ErrID._58, $"{fileName}", 0, 0u)
+            Office.ErrorPpt(ErrorCase.Name, ErrID._58, $"{fileName}", 0, 0u)
 
         fileName
 
-    let updateAliasPPT
+    let updateAliasPpt
         (
-            nodes: Dictionary<string, pptNode>,
-            pages: Dictionary<SlidePart, pptPage>,
-            parents: Dictionary<pptNode, seq<pptNode>>
+            nodes: Dictionary<string, PptNode>,
+            pages: Dictionary<SlidePart, PptPage>,
+            parents: Dictionary<PptNode, seq<PptNode>>
         ) =
 
         let pptNodes = nodes.Values
@@ -47,7 +47,7 @@ module PPTDocModule =
             |> Seq.map (fun page -> page.PageNum, pptNodes |> Seq.filter (fun node -> node.PageNum = page.PageNum))
             |> dict
 
-        let updateAlias (aliasCheckNodes: pptNode seq) (allNodes: pptNode seq) (nameNums: (string*int) seq) (isExFlow:bool) =
+        let updateAlias (aliasCheckNodes: PptNode seq) (allNodes: PptNode seq) (nameNums: (string*int) seq) (isExFlow:bool) =
             (aliasCheckNodes, nameNums)
             ||> Seq.map2 (fun node nameSet -> node, nameSet)
             |> Seq.iter (fun (node, (name, aliasNumber)) ->
@@ -70,7 +70,7 @@ module PPTDocModule =
                     node.Alias <- Some(orgNode)
                     node.AliasNumber <- aliasNumber)
 
-        let settingAlias (nodes: pptNode seq) (exFlowReal:bool) =
+        let settingAlias (nodes: PptNode seq) (exFlowReal:bool) =
             let nodes = nodes.OrderByDescending(fun o -> parents.ContainsKey(o))
             let filterNodes, allNodes =
                 let findNodes =
@@ -120,7 +120,7 @@ module PPTDocModule =
         callInFlowSet |> Seq.iter(fun f-> settingAlias f false)
         callInRealSet |> Seq.iter(fun f-> settingAlias f false)
 
-    let getGroupParentsChildren (page: int, subG: GroupShape, nodes: Dictionary<string, pptNode>) =
+    let getGroupParentsChildren (page: int, subG: GroupShape, nodes: Dictionary<string, PptNode>) =
 
         // Recursively get IDs of real and call shapes used in the group and its subgroups
         let rec getGroupMembers (subG: GroupShape, shapeIds: HashSet<uint32>) =
@@ -154,12 +154,12 @@ module PPTDocModule =
 
 
 
-    type pptDoc private(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target,
-        pages:IDictionary<SlidePart, pptPage>,
-        nodes:IDictionary<string, pptNode>,
-        parents:IDictionary<pptNode, seq<pptNode>>,
-        edges:pptEdge seq,
-        dummys:ISet<pptDummy>
+    type PptDoc private(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target,
+        pages:IDictionary<SlidePart, PptPage>,
+        nodes:IDictionary<string, PptNode>,
+        parents:IDictionary<PptNode, seq<PptNode>>,
+        edges:PptEdge seq,
+        dummys:ISet<PptDummy>
     ) =
         member x.GetTables(colCnt: int) = doc.GetTablesWithPageNumbers colCnt
         member x.GetLayouts() = doc.GetLayouts()
@@ -190,14 +190,14 @@ module PPTDocModule =
         member x.Parameter: DeviceLoadParameters = parameter.Value
         member x.Doc = doc
 
-    type pptDoc with
+    type PptDoc with
         static member Create(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =
 
-            let pages = Dictionary<SlidePart, pptPage>()
-            let nodes = Dictionary<string, pptNode>()
-            let parents = Dictionary<pptNode, seq<pptNode>>()
-            let dummys = HashSet<pptDummy>()
-            let edges = HashSet<pptEdge>()
+            let pages = Dictionary<SlidePart, PptPage>()
+            let nodes = Dictionary<string, PptNode>()
+            let parents = Dictionary<PptNode, seq<PptNode>>()
+            let dummys = HashSet<PptDummy>()
+            let edges = HashSet<PptEdge>()
 
             // 숨김 페이지, blank page 제외한 모든 페이지
             let validSlidesAll =
@@ -206,15 +206,15 @@ module PPTDocModule =
 
 
             if validSlidesAll |> Seq.exists (fun (slidePart, page) -> page = pptHeadPage) |> not then
-                Office.ErrorPPT(Page, ErrID._12, "Title Slide", 0, 0u)
+                Office.ErrorPpt(Page, ErrID._12, "Title Slide", 0, 0u)
 
             // pages 구성 (및 제목 누락 페이지 에러)
             validSlidesAll
             |> Seq.iter (fun (slidePart, page) ->
                 if slidePart.PageTitle() = "" then
-                    Office.ErrorPPT(Page, ErrID._59, "Title Error", page, 0u)
+                    Office.ErrorPpt(Page, ErrID._59, "Title Error", page, 0u)
                 else
-                    pages.Add(slidePart, pptPage (slidePart, page, true)) |> ignore)
+                    pages.Add(slidePart, PptPage (slidePart, page, true)) |> ignore)
 
             // 페이지 별 group 정보
             let allGroups =
@@ -242,29 +242,29 @@ module PPTDocModule =
 
             let slideSize = Office.SlideSize(doc)
             let headSlide = validSlidesAll |> Seq.find (fun (slidePart, page) -> page = pptHeadPage) |> fst
-            
-            let masterMacros =  
+
+            let masterMacros =
                 Office.PagePlaceHolderShapes(doc)
                 |> Seq.map(fun (master, value, page) -> {Macro = master; MacroRelace = value; Page = page} )
 
             shapes
             |> Seq.iter (fun (shape, page, _) ->
-                let pagePPT = pages.Values |> Seq.find (fun w -> w.PageNum = page)
+                let pagePpt = pages.Values |> Seq.find (fun w -> w.PageNum = page)
                 let headPageName = headSlide.PageTitle()
-                let sysName, flowName = GetSysNFlow(headPageName, pagePPT.Title, pagePPT.PageNum)
+                let sysName, flowName = GetSysNFlow(headPageName, pagePpt.Title, pagePpt.PageNum)
                 let headPage = page = pptHeadPage
 
-                let node = pptNode.Create(shape, page, flowName, slideSize, headPage, masterMacros)
+                let node = PptNode.Create(shape, page, flowName, slideSize, headPage, masterMacros)
 
                 if node.Name = "" then
                     shape.ErrorName(ErrID._13, page)
 
                 if nodes.ContainsKey node.Key
-                then 
+                then
                     node.Shape.ErrorShape(ErrID._20, page)
-                else 
+                else
                     nodes.Add(node.Key, node) |> ignore
-                
+
                 )
 
             let dicParentCheck = Dictionary<string, int>()
@@ -277,14 +277,14 @@ module PPTDocModule =
                     let groupAllNodes = getGroupParentsChildren (page, group, nodes)
 
                     if groupAllNodes |> Seq.isEmpty |> not then
-                        let pptGroup = pptRealGroup (page, groupAllNodes)
+                        let pptGroup = PptRealGroup (page, groupAllNodes)
 
                         match pptGroup.Parent with
                         | Some parent ->
                             if dicParentCheck.TryAdd(pptGroup.RealKey, pptGroup.PageNum) then
                                 parents.Add(parent, pptGroup.Children)
                             else
-                                Office.ErrorPPT(
+                                Office.ErrorPpt(
                                     Group,
                                     ErrID._17,
                                     $"{dicParentCheck.[pptGroup.RealKey]}-{parent.Name}",
@@ -337,18 +337,18 @@ module PPTDocModule =
                         if conn.IsNonDirectional() then
                             dummys.AddDummys(sNode, eNode)
                         else
-                            edges.Add(pptEdge (conn, Id, iPage, sNode, eNode)) |> ignore))
+                            edges.Add(PptEdge (conn, Id, iPage, sNode, eNode)) |> ignore))
 
-            updateAliasPPT (nodes, pages, parents)
-            pptDoc(path, parameter, doc, target,
+            updateAliasPpt (nodes, pages, parents)
+            PptDoc(path, parameter, doc, target,
                 pages, nodes, parents, edges, dummys)
 
 
 [<Extension>]
-type PPTDocExt =
+type PptDocExt =
 
     [<Extension>]
-    static member GetCopyPathNName(doc: pptDoc) =
+    static member GetCopyPathNName(doc: PptDoc) =
 
         let callJobDic =
             doc.Nodes

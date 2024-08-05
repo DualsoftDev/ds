@@ -10,7 +10,7 @@ open System
 module ImportUtilVertex =
 
 
-    let getOperatorFunc (sys: DsSystem) (node: pptNode) =
+    let getOperatorFunc (sys: DsSystem) (node: PptNode) =
         sys.Functions
         |> Seq.tryFind (fun f -> f.Name = node.OperatorName)
         |> Option.defaultWith (fun () ->
@@ -19,7 +19,7 @@ module ImportUtilVertex =
             newFunc
         )
 
-    let getCommandFunc (sys: DsSystem) (node: pptNode) =
+    let getCommandFunc (sys: DsSystem) (node: PptNode) =
         sys.Functions
         |> Seq.tryFind (fun f -> f.Name = node.CommandName)
         |> Option.defaultWith (fun () ->
@@ -28,7 +28,7 @@ module ImportUtilVertex =
             newFunc
         )
 
-    let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: pptNode) (apiName: string) parentWrapper =
+    let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: PptNode) (apiName: string) parentWrapper =
         let loadSysName = device.Name
         let jobName = node.Job.Combine()
 
@@ -69,7 +69,7 @@ module ImportUtilVertex =
                     failwithlog $"Loading system ({loadSysName}:{device.AbsoluteFilePath}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
 
 
-    let private createCall (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper) =
+    let private createCall (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper) =
         match  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
             |  Some dev ->
                 getCallFromLoadedSys mySys dev node node.ApiName parentWrapper
@@ -85,7 +85,7 @@ module ImportUtilVertex =
                     }
                 addNewCall callParams
 
-    let createCallVertex (mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
+    let createCallVertex (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
         let call =
             if node.IsFunction then
                 if node.IsRootNode.Value then
@@ -98,7 +98,7 @@ module ImportUtilVertex =
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)
 
-    let createAutoPre(mySys: DsSystem, node: pptNode, parentWrapper: ParentWrapper, dicAutoPreJob: Dictionary<string, Job>) =
+    let createAutoPre(mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, dicAutoPreJob: Dictionary<string, Job>) =
         let param = {
                     MySys = mySys
                     Node = node
@@ -121,8 +121,8 @@ module ImportUtilVertex =
 
     let  getParent
         (
-            edge: pptEdge,
-            parents: IDictionary<pptNode, seq<pptNode>>,
+            edge: PptEdge,
+            parents: IDictionary<PptNode, seq<PptNode>>,
             dicSeg: Dictionary<string, Vertex>
         ) =
         ImportDocCheck.SameParent(parents, edge)
@@ -141,7 +141,7 @@ module ImportUtilVertex =
             None
 
 
-    let getOtherFlowReal (flows: Flow seq, nodeEx: pptNode) =
+    let getOtherFlowReal (flows: Flow seq, nodeEx: PptNode) =
         let flowName, nodeName = nodeEx.Name.Split('.')[0], nodeEx.Name.Split('.')[1]
 
         match flows.TryFind(fun f -> f.Name = flowName) with

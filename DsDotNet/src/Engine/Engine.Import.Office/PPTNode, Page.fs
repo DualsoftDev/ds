@@ -11,9 +11,9 @@ open Dual.Common.Core.FS
 
 
 [<AutoOpen>]
-module PPTNodeModule =
+module PptNodeModule =
 
-    type pptPage(slidePart: SlidePart, iPage: int, bShow: bool) =
+    type PptPage(slidePart: SlidePart, iPage: int, bShow: bool) =
         member x.PageNum = iPage
         member x.SlidePart = slidePart
         member x.IsUsing = bShow
@@ -28,7 +28,7 @@ module PPTNodeModule =
 
         macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
 
-    type pptNode private(
+    type PptNode private(
         shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq
         , copySystems       : Dictionary<string, string> //copyName, orgiName
         , safeties          : HashSet<string>
@@ -175,7 +175,7 @@ module PPTNodeModule =
 
         member x.FlowName =  pageTitle
         member x.IsAlias: bool = x.Alias.IsSome
-        member val Alias: pptNode option = None with get, set
+        member val Alias: PptNode option = None with get, set
         member val Id = shape.GetId()
         member val Key = Objkey(iPage, shape.GetId())
         member val Name = name with get, set
@@ -189,7 +189,7 @@ module PPTNodeModule =
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)
 
 
-    type pptNode with
+    type PptNode with
         static member Create(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq) =
             let copySystems       = Dictionary<string, string>() //copyName, orgiName
             let safeties          = HashSet<string>()
@@ -344,7 +344,7 @@ module PPTNodeModule =
                 shape.ErrorShape(ex.Message, iPage)
 
 
-            pptNode(shape, iPage, pageTitle, slieSize, isHeadPage, macros
+            PptNode(shape, iPage, pageTitle, slieSize, isHeadPage, macros
                     , copySystems
                     , safeties
                     , autoPres

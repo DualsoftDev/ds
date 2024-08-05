@@ -13,19 +13,19 @@ open Engine.TestSimulator
 open System.Text.Json
 open System.Text.Json.Serialization
 
-module RuntimeTest = 
-    let testPPT =  @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/testA/testMy/my.pptx"
+module RuntimeTest =
+    let testPpt =  @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/testA/testMy/my.pptx"
     RuntimeDS.HwIP  <- "192.168.9.100"
     RuntimeDS.Package <- RuntimePackage.PCSIM
-    let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true;  CreateFromPPT = false; CreateBtnLamp = true}
+    let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true;  CreateFromPpt = false; CreateBtnLamp = true}
 
-    let zipPath, sys = ImportPPT.GetRuntimeZipFromPPT (testPPT, pptParms)
+    let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (testPpt, pptParms)
     let runtimeModel = new RuntimeModel(zipPath, pptParms.TargetType)
 
-   
+
     [<Fact>]
-    let ``Runtime Running Test`` () = 
-        
+    let ``Runtime Running Test`` () =
+
         (*시뮬레이션 구동 테스트*)
         let systems = [| runtimeModel.System|]
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
@@ -48,8 +48,7 @@ module RuntimeTest =
         let options = JsonSerializerOptions()
         options.NumberHandling <- JsonNumberHandling.AllowNamedFloatingPointLiterals
         let json = JsonSerializer.Serialize(info, options)
-        let data = JsonSerializer.Deserialize(json, options)      
+        let data = JsonSerializer.Deserialize(json, options)
         info.Name = runtimeModel.System.Name |> Assert.True
 
-        
-  
+

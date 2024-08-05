@@ -11,7 +11,7 @@ open System.Runtime.CompilerServices
 
 [<AutoOpen>]
 module ImportViewModule =
-    let ConvertReal (real: Real, newNode: ViewNode, dummys: pptDummy seq) =
+    let ConvertReal (real: Real, newNode: ViewNode, dummys: PptDummy seq) =
         let edgeInfos = real.ModelingEdges
         let lands = real.Graph.Islands
         let dicV = real.Graph.Vertices |> Seq.map (fun v -> v, ViewNode(v)) |> dict
@@ -50,7 +50,7 @@ module ImportViewModule =
             ss |> Seq.iter (fun v -> newNode.AddSingles(v) |> ignore)
 
 
-    let ConvertFlow (flow: Flow, dummys: pptDummy seq) =
+    let ConvertFlow (flow: Flow, dummys: PptDummy seq) =
         let newNode = ViewNode(flow.Name, VFLOW)
         newNode.Flow <- Some flow
         let edgeInfos = flow.ModelingEdges

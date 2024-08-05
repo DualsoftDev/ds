@@ -63,7 +63,7 @@ let main argv =
     //let sampleDirectory = testDir
     //let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../UnitTest.PLC.Xgx/XgiXmls/{testName}.xml")
     //let pptPath = sampleDirectory + "/s_car.pptx"
-    //let model = ImportPPT.GetModel [ pptPath ]
+    //let model = ImportPpt.GetModel [ pptPath ]
     //model.Systems.ForEach(testAddressSetting)
 
     ////let result = exportXMLforXGI(model.Systems.First(), myTemplate "XXXXXXXXX", None)

@@ -18,7 +18,7 @@
         <Compile Include="Types.fs" />
         <Compile Include="Util.fs" />
         <Compile Include="MessgeError.fs" />
-        <Compile Include="PPTUtil.fs" />
+        <Compile Include="PptUtil.fs" />
         <Compile Include="ImportType.fs" />
         <Compile Include="PPTConnection.fs" />
         <Compile Include="PPTNodeUtil.fs" />
@@ -38,8 +38,8 @@
         <Compile Include="Util.Dev.fs" />
         <Compile Include="Util.Lib.fs" />
         <Compile Include="Util.Vertex.fs" />
-        <Compile Include="ImportPPTExt.fs" />
-        <Compile Include="ImportPPT.fs" />
+        <Compile Include="ImportPptExt.fs" />
+        <Compile Include="ImportPpt.fs" />
         <Compile Include="LibraryPPTLoader.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>

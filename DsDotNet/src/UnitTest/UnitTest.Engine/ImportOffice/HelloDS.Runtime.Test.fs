@@ -22,17 +22,17 @@ module HelloDSRuntimeTestModule =
 
         let helloDSPptPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
         let helloDSZipPath = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.zip"
-        
+
         let runtimeModel = new RuntimeModel(helloDSZipPath, PlatformTarget.WINDOWS)
 
         let getSystem() =
-            let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPPT = false;  CreateBtnLamp = true}
-            let result = ImportPPT.GetDSFromPPTWithLib (helloDSPptPath, false, pptParms)
-            let { 
+            let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false;  CreateBtnLamp = true}
+            let result = ImportPpt.GetDSFromPptWithLib (helloDSPptPath, false, pptParms)
+            let {
                 System = system
-                ActivePath =  exportPath 
-                LoadingPaths = loadingPaths 
-                LayoutImgPaths = layoutImgPaths 
+                ActivePath =  exportPath
+                LoadingPaths = loadingPaths
+                LayoutImgPaths = layoutImgPaths
             } = result
 
             system.TagManager === null
@@ -42,7 +42,7 @@ module HelloDSRuntimeTestModule =
             system
 
 
-        // Z:\ds\DsDotNet\src\UnitTest\TestData\ 폴더에 
+        // Z:\ds\DsDotNet\src\UnitTest\TestData\ 폴더에
         // - 최신 버젼의 HelloDS.zip 파일 필요
         // - HelloDS.Logger.UnitTest.sqlite3 파일도 최신 HelloDS.zip 으로 시뮬레이션 된 것이거나 삭제 필요
         [<Test>]

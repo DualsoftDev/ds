@@ -45,7 +45,7 @@ module ExportIOTable =
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
-    let toTextPPTFunc (x:TaskDevParam option) =
+    let toTextPptFunc (x:TaskDevParam option) =
         if x.IsSome then
             let x = x |> Option.get
             match x.DevValue, x.DevTime with
@@ -63,10 +63,10 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let inSym =  toTextPPTFunc btn.TaskDevParamIO.InParam
-                    let outSym =  toTextPPTFunc btn.TaskDevParamIO.OutParam
+                    let inSym =  toTextPptFunc btn.TaskDevParamIO.InParam
+                    let outSym =  toTextPptFunc btn.TaskDevParamIO.OutParam
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
-                    let dType = getPPTHwDevDataTypeText btn
+                    let dType = getPptHwDevDataTypeText btn
 
                     dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, dType,  btn.InAddress, btn.OutAddress ,inSym, outSym)
                     |> ignore
@@ -74,10 +74,10 @@ module ExportIOTable =
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let inSym =  toTextPPTFunc lamp.TaskDevParamIO.InParam
-                    let outSym =  toTextPPTFunc lamp.TaskDevParamIO.OutParam
+                    let inSym =  toTextPptFunc lamp.TaskDevParamIO.InParam
+                    let outSym =  toTextPptFunc lamp.TaskDevParamIO.OutParam
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) Util.runtimeTarget
-                    let dType = getPPTHwDevDataTypeText lamp
+                    let dType = getPptHwDevDataTypeText lamp
                     dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,inSym, outSym)
                     |> ignore
 
@@ -118,7 +118,7 @@ module ExportIOTable =
             TextXlsAddress
             flow
             name
-            getPPTTDevDataTypeText (dev)
+            getPptDevDataTypeText (dev)
             getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
             getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
             inSym
@@ -207,7 +207,7 @@ module ExportIOTable =
                     ExcelCase.XlsConditionReady.ToText()
                     ""
                     cond.Name
-                    getPPTHwDevDataTypeText cond
+                    getPptHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
                     if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.Name else ""

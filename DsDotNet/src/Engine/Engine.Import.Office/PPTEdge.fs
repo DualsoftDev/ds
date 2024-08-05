@@ -11,9 +11,9 @@ open Dual.Common.Core.FS
 open System.Text.RegularExpressions
 
 [<AutoOpen>]
-module PPTEdgeModule =
+module PptEdgeModule =
 
-    type pptEdge(conn: Presentation.ConnectionShape, iEdge: UInt32Value, iPage: int, sNode: pptNode, eNode: pptNode) =
+    type PptEdge(conn: Presentation.ConnectionShape, iEdge: UInt32Value, iPage: int, sNode: PptNode, eNode: PptNode) =
 
         let (causal:ModelingEdgeType), (reverse:bool) = GetCausal(conn, iPage, sNode.Name, eNode.Name)
 
@@ -21,8 +21,8 @@ module PPTEdgeModule =
         member x.ConnectionShape = conn
         member x.Id = iEdge
         member x.IsInterfaceEdge: bool = x.StartNode.NodeType.IsIF || x.EndNode.NodeType.IsIF
-        member x.StartNode: pptNode = if (reverse) then eNode else sNode
-        member x.EndNode: pptNode = if (reverse) then sNode else eNode
+        member x.StartNode: PptNode = if (reverse) then eNode else sNode
+        member x.EndNode: PptNode = if (reverse) then sNode else eNode
         member x.ParentId = 0 //reserve
 
         member val Name = conn.EdgeName()

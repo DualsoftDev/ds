@@ -10,7 +10,7 @@ module ImportUtilForLib =
 
     type CallParams = {
         MySys: DsSystem
-        Node: pptNode
+        Node: PptNode
         JobName: string
         DevName: string
         ApiName: string

@@ -13,7 +13,7 @@ open System.Collections.Generic
 open Dual.Common.Core.FS
 
 [<AutoOpen>]
-module PPTUtil =
+module PptUtil =
     //open DocumentFormat.OpenXml.Presentation
     //open Presentation 사용금지 직접 네임스페이스 추가 혹은 type 정의 (Drawing 와 혼선)
     //ex) type GroupShape = DocumentFormat.OpenXml.Presentation.GroupShape
@@ -98,7 +98,7 @@ module PPTUtil =
     type Office =
         [<Extension>]
         static member ErrorName(shape: Shape, errMsg: string, page: int) =
-            Office.ErrorPPT(
+            Office.ErrorPpt(
                 ErrorCase.Name,
                 errMsg,
                 Office.ShapeName(shape),
@@ -109,11 +109,11 @@ module PPTUtil =
 
         [<Extension>]
         static member ErrorPath(shape: Shape, errMsg: string, page: int, path: string) =
-            Office.ErrorPPT(ErrorCase.Page, errMsg, Office.ShapeName(shape), page, Office.ShapeID(shape), path)
+            Office.ErrorPpt(ErrorCase.Page, errMsg, Office.ShapeName(shape), page, Office.ShapeID(shape), path)
 
         [<Extension>]
         static member ErrorShape(shape: Shape, errMsg: string, page: int) =
-            Office.ErrorPPT(
+            Office.ErrorPpt(
                 ErrorCase.Shape,
                 errMsg,
                 Office.ShapeName(shape),
@@ -124,7 +124,7 @@ module PPTUtil =
 
         [<Extension>]
         static member ErrorConnect(conn: #ConnectionShape, errMsg: string, text: string, page: int) =
-            Office.ErrorPPT(ErrorCase.Conn, errMsg, $"{text}", page, Office.ConnectionShapeID(conn), conn.InnerText)
+            Office.ErrorPpt(ErrorCase.Conn, errMsg, $"{text}", page, Office.ConnectionShapeID(conn), conn.InnerText)
 
         [<Extension>]
         static member ErrorConnect(conn: #ConnectionShape, errMsg: string, src: string, tgt: string, page: int) =
@@ -734,14 +734,14 @@ module PPTUtil =
                            
                         if layoutList.Contains layout
                         then 
-                             Office.ErrorPPT(ErrorCase.Page, ErrID._66, "Duplicate layout names found", pageIndex, 0u)
+                             Office.ErrorPpt(ErrorCase.Page, ErrID._66, "Duplicate layout names found", pageIndex, 0u)
                         else 
                             layoutList.Add  layout|>ignore
 
                         shapes.Where(fun s-> s.IsLayout())        
                               .Select(fun s-> layout, path, s.InnerText, s.GetPosition(doc.SlideSize()))
                     else
-                        Office.ErrorPPT(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)
+                        Office.ErrorPpt(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)
                   )
             layouts
 
@@ -752,7 +752,7 @@ module PPTUtil =
                 let imagePart = slidePart.GetPartsOfType<ImagePart>().FirstOrDefault()
                 match imagePart with
                 | null ->
-                    Office.ErrorPPT(ErrorCase.Page, ErrID._65, "Layouts image Error", slidePart.GetPage(), 0u)
+                    Office.ErrorPpt(ErrorCase.Page, ErrID._65, "Layouts image Error", slidePart.GetPage(), 0u)
                 | _ ->
                     use fileStream = new FileStream(outputImagePath, FileMode.Create)
                     imagePart.GetStream().CopyTo(fileStream)
@@ -776,7 +776,7 @@ module PPTUtil =
                         extractSlideImage (slidePart, outputImagePath)
                         
                 else
-                    Office.ErrorPPT(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)
+                    Office.ErrorPpt(ErrorCase.Page, ErrID._63, "Layouts page Error", pageIndex, 0u)
                 )
             imgs
 

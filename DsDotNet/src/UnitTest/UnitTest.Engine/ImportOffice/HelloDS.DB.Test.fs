@@ -25,13 +25,13 @@ module HelloDSDBTestModule =
 
         let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
         let getSystem() =
-            let pptParms:PPTParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPPT = false;  CreateBtnLamp = true}
-            let result = ImportPPT.GetDSFromPPTWithLib (helloDSPath, false, pptParms)
-            let { 
+            let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false;  CreateBtnLamp = true}
+            let result = ImportPpt.GetDSFromPptWithLib (helloDSPath, false, pptParms)
+            let {
                 System = system
-                ActivePath =  exportPath 
-                LoadingPaths = loadingPaths 
-                LayoutImgPaths = layoutImgPaths 
+                ActivePath =  exportPath
+                LoadingPaths = loadingPaths
+                LayoutImgPaths = layoutImgPaths
             } = result
 
             system.TagManager === null
@@ -49,7 +49,7 @@ module HelloDSDBTestModule =
                 - 위 과정 수행 후 test 실행.
              *)
 
-            let connStr = 
+            let connStr =
                 let path = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.Logger.UnitTest.sqlite3"
                 $"Data Source={path}"
             new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
@@ -146,7 +146,7 @@ module HelloDSDBTestModule =
         [<Test>]
         member __.``Load logger database test``() =
             let conn = createConnection()
-            let loggerDb = 
+            let loggerDb =
                 ORMDBSkeletonDTOExt.CreateAsync(1, conn, null).Result |> ORMDBSkeleton
             let log1 = conn.QueryFirst<ORMLog>($"SELECT * FROM {Vn.Log} WHERE id = 1;")
             let vwLog1 = loggerDb.ToView(log1)

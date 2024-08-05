@@ -7,7 +7,7 @@ open Dual.Common.Core.FS
 open System.Text.RegularExpressions
 
 [<AutoOpen>]
-module PPTNodeUtilModule =
+module PptNodeUtilModule =
 
         let trimNewLine (text: string) = text.Replace("\n", "")
         let trimSpace (text: string) = text.TrimStart(' ').TrimEnd(' ')

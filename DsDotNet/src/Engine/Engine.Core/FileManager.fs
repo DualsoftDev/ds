@@ -203,7 +203,7 @@ module FileManager =
 type FileHelper =
     [<Extension>] static member ToDsZip(filePaths: string seq)  = 
                         saveZip (filePaths, ".dsz")|> fst
-    [<Extension>] static member ToZipPPT(filePaths: string seq)  = 
+    [<Extension>] static member ToZipPpt(filePaths: string seq)  = 
                         saveZip (filePaths, ".7z")|> fst  //".Zip" 형태지만 구분위해 확장자 다르게
     [<Extension>] static member ToZipStream(filePaths: string seq)  = 
                         saveZip (filePaths, ".Zip") |> fun (_, memoryStram) -> memoryStram.ToArray()    

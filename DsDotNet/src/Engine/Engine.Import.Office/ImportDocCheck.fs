@@ -2,7 +2,7 @@
 namespace Engine.Import.Office
 
 open System.Linq
-open PPTConnectionModule
+open PptConnectionModule
 open System
 open System.Collections.Concurrent
 open Dual.Common.Core.FS
@@ -43,8 +43,8 @@ module ImportDocCheck =
 
         sys
 
-    let SameParent (parents: IDictionary<pptNode, seq<pptNode>>, edge: pptEdge) =
-        let failError (parents: pptNode seq, node: pptNode) =
+    let SameParent (parents: IDictionary<PptNode, seq<PptNode>>, edge: PptEdge) =
+        let failError (parents: PptNode seq, node: PptNode) =
             let error =
                 seq {
                     yield "그룹오류 : 자식은 한부모에만 존재 가능합니다."
@@ -74,7 +74,7 @@ module ImportDocCheck =
 
 
 
-    let SameEdgeErr (pptEdges: pptEdge seq) =
+    let SameEdgeErr (pptEdges: PptEdge seq) =
         let dicSameCheck = Dictionary<string, string>()
 
         pptEdges
@@ -82,8 +82,8 @@ module ImportDocCheck =
             if (dicSameCheck.TryAdd(edge.Text, edge.Text) |> not) then
                 edge.ConnectionShape.ErrorConnect(ErrID._22, edge.Text, edge.PageNum))
 
-    let CheckSameCopy (doc: pptDoc) =
-        let dicSame = Dictionary<string, pptNode>()
+    let CheckSameCopy (doc: PptDoc) =
+        let dicSame = Dictionary<string, PptNode>()
 
         doc.Nodes
         |> Seq.filter (fun node -> node.NodeType.IsLoadSys)
@@ -99,7 +99,7 @@ module ImportDocCheck =
 
 
     //page 타이틀 중복체크
-    let SameFlowName (doc: pptDoc) =
+    let SameFlowName (doc: PptDoc) =
         let duplicatePages =
             doc.Pages
                 .Where(fun f -> f.PageNum <> pptHeadPage && f.IsUsing && not <| f.Title.IsNullOrEmpty())
@@ -107,5 +107,5 @@ module ImportDocCheck =
                 .SelectMany(fun f -> f.Skip(1))
 
         duplicatePages.Iter(fun page ->
-            Office.ErrorPPT(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}", page.PageNum, 0u, $"중복페이지"))
+            Office.ErrorPpt(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}", page.PageNum, 0u, $"중복페이지"))
              

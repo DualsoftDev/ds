@@ -9,13 +9,13 @@ open Microsoft.FSharp.Core
 open Dual.Common.Core.FS
 
 [<AutoOpen>]
-module PPTGroupModule =
+module PptGroupModule =
     
-    type pptRealGroup(iPage: int, nodes: pptNode seq) =
-        let mutable parent: pptNode option = None
-        let childSet = HashSet<pptNode>()
+    type PptRealGroup(iPage: int, nodes: PptNode seq) =
+        let mutable parent: PptNode option = None
+        let childSet = HashSet<PptNode>()
 
-        let nodeNames (nodes: pptNode seq) =
+        let nodeNames (nodes: PptNode seq) =
             nodes.Select(fun s -> s.Name).JoinWith(", ")
 
         do
@@ -23,7 +23,7 @@ module PPTGroupModule =
             let calls = nodes.Where(fun w -> w.NodeType.IsCall)
 
             if (reals.Count() > 1) then
-                Office.ErrorPPT(
+                Office.ErrorPpt(
                     Group,
                     ErrID._23,
                     $"Reals:{reals |> nodeNames}",
@@ -43,5 +43,5 @@ module PPTGroupModule =
 
         member x.RealKey = sprintf "%d;%s" iPage (parent.Value.Name)
         member x.PageNum = iPage
-        member x.Parent: pptNode option = parent
+        member x.Parent: PptNode option = parent
         member x.Children = childSet

@@ -54,7 +54,7 @@ type DsSystem with
                         (test  <&&> s._flicker100msec.Expr)
                                     
 
-                    | DuErrorStateLamp      -> s._emgState.Expr <||> (s._errorMonitor.Expr <&&> s._flicker1sec.Expr)
+                    | DuErrorStateLamp      -> s._emergencyMonitor.Expr <||> (s._errorMonitor.Expr <&&> s._flicker1sec.Expr)
                     | DuTestDriveStateLamp -> s._testMonitor.Expr   
                     | DuReadyStateLamp     -> (s._readyMonitor.Expr  <&&> !@s._pause.Expr )<||> (s._pause.Expr <&&> s._flicker1sec.Expr)
                     | DuIdleModeLamp      ->  s._idleMonitor.Expr

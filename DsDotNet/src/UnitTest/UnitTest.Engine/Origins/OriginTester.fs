@@ -17,10 +17,7 @@ module OriginTestModule =
             
         let configFile = PathManager.getFullPath  (@"dualsoft.json"|>DsFile) (libdir.ToDirectory())
         let genConfig (filePath:string) =
-            let cfg = {
-                    DsFilePath = $@"{libdir}/MultipleJobdefCallExample/{filePath}"
-                    HWIP =  RuntimeDS.IP
-                }
+            let cfg = createModelConfigWithPath  $@"{libdir}/MultipleJobdefCallExample/{filePath}" 
             ModelLoader.SaveConfig configFile cfg
 
         let answerChecker

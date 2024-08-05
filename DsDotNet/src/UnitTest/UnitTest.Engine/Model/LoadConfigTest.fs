@@ -16,10 +16,7 @@ module LoadConfigTestModule =
         let configFile = PathManager.getFullPath  ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
         
         let loadConfigTest() =
-            let cfg =
-                {   DsFilePath =  $@"{dsFileDir}/Factory.ds" 
-                    HWIP =  RuntimeDS.IP
-                    }
+            let cfg = createModelConfigWithPath  $@"{dsFileDir}/Factory.ds"     
             ModelLoader.SaveConfig configFile cfg
             let cfg2 = ModelLoader.LoadConfig configFile
             cfg === cfg2

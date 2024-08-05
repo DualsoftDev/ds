@@ -49,17 +49,17 @@ module ConvertCpuDsSystem =
         member s._dtimem      = s.GetPv<uint8>(SystemTag.datet_m )
         member s._dtimes      = s.GetPv<uint8>(SystemTag.datet_s )
 
-        member s._pause         = s.GetPv<bool>(SystemTag.pauseMonitor)
-        member s._autoMonitor   = s.GetPv<bool>(SystemTag.autoMonitor   )
-        member s._manualMonitor = s.GetPv<bool>(SystemTag.manualMonitor )
-        member s._driveMonitor  = s.GetPv<bool>(SystemTag.driveMonitor  )
-        member s._errorMonitor  = s.GetPv<bool>(SystemTag.errorMonitor   )
-        member s._emgState      = s.GetPv<bool>(SystemTag.emergencyMonitor  )
-        member s._testMonitor   = s.GetPv<bool>(SystemTag.testMonitor   )
-        member s._readyMonitor  = s.GetPv<bool>(SystemTag.readyMonitor  )
-        member s._idleMonitor   = s.GetPv<bool>(SystemTag.idleMonitor  )
-        member s._originMonitor = s.GetPv<bool>(SystemTag.originMonitor  )
-        member s._goingMonitor  = s.GetPv<bool>(SystemTag.goingMonitor  )
+        member s._pause            = s.GetPv<bool>(SystemTag.pauseMonitor)
+        member s._autoMonitor      = s.GetPv<bool>(SystemTag.autoMonitor   )
+        member s._manualMonitor    = s.GetPv<bool>(SystemTag.manualMonitor )
+        member s._driveMonitor     = s.GetPv<bool>(SystemTag.driveMonitor  )
+        member s._errorMonitor     = s.GetPv<bool>(SystemTag.errorMonitor   )
+        member s._emergencyMonitor = s.GetPv<bool>(SystemTag.emergencyMonitor  )
+        member s._testMonitor      = s.GetPv<bool>(SystemTag.testMonitor   )
+        member s._readyMonitor     = s.GetPv<bool>(SystemTag.readyMonitor  )
+        member s._idleMonitor      = s.GetPv<bool>(SystemTag.idleMonitor  )
+        member s._originMonitor    = s.GetPv<bool>(SystemTag.originMonitor  )
+        member s._goingMonitor     = s.GetPv<bool>(SystemTag.goingMonitor  )
 
         
 

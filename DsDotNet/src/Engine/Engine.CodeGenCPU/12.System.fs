@@ -38,16 +38,16 @@ type DsSystem with
         let fn = getFuncName()
         let off = s._off.Expr
         [
-            (s.Flows.Select(fun f -> f.iop)   .ToAndElseOff(), off) --| (s._idleMonitor  , fn)
-            (s.Flows.Select(fun f -> f.aop)   .ToAndElseOff(), off) --| (s._autoMonitor  , fn)
-            (s.Flows.Select(fun f -> f.mop)   .ToAndElseOff(), off) --| (s._manualMonitor, fn)
-            (s.Flows.Select(fun f -> f.d_st)  .ToAndElseOff(), off) --| (s._driveMonitor , fn)
-            (s.Flows.Select(fun f -> f.e_st)  .ToOrElseOff(),  off) --| (s._errorMonitor , fn)
-            (s.Flows.Select(fun f -> f.emg_st).ToOrElseOff(),  off) --| (s._emgState     , fn)
-            (s.Flows.Select(fun f -> f.t_st)  .ToAndElseOff(), off) --| (s._testMonitor  , fn)
-            (s.Flows.Select(fun f -> f.r_st)  .ToAndElseOff(), off) --| (s._readyMonitor , fn)
-            (s.Flows.Select(fun f -> f.o_st)  .ToAndElseOff(), off) --| (s._originMonitor, fn)
-            (s.Flows.Select(fun f -> f.g_st)  .ToOrElseOff() , off) --| (s._goingMonitor , fn)            
+            (s.Flows.Select(fun f -> f.iop)     .ToAndElseOff(), off) --| (s._idleMonitor  , fn)
+            (s.Flows.Select(fun f -> f.aop)     .ToAndElseOff(), off) --| (s._autoMonitor  , fn)
+            (s.Flows.Select(fun f -> f.mop)     .ToAndElseOff(), off) --| (s._manualMonitor, fn)
+            (s.Flows.Select(fun f -> f.d_st)    .ToAndElseOff(), off) --| (s._driveMonitor , fn)
+            (s.Flows.Select(fun f -> f.e_st)    .ToOrElseOff(),  off) --| (s._errorMonitor , fn)
+            (s.Flows.Select(fun f -> f.t_st)    .ToAndElseOff(), off) --| (s._testMonitor  , fn)
+            (s.Flows.Select(fun f -> f.r_st)    .ToAndElseOff(), off) --| (s._readyMonitor , fn)
+            (s.Flows.Select(fun f -> f.o_st)    .ToAndElseOff(), off) --| (s._originMonitor, fn)
+            (s.Flows.Select(fun f -> f.g_st)    .ToOrElseOff() , off) --| (s._goingMonitor , fn)            
+            (s.Flows.Select(fun f -> f.emg_st)  .ToOrElseOff() , off) --| (s._emergencyMonitor , fn)            
         ]
 
         

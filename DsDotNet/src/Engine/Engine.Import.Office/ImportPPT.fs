@@ -221,7 +221,7 @@ module ImportPPTModule =
 
         try
             try
-                let cfg = { DsFilePath = path; HWIP = RuntimeDS.IP }
+                let cfg =  createModelConfigWithPath path
                 let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams, dicPptDoc, pathStack, layoutImgPaths)
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기

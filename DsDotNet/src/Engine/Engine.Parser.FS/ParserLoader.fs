@@ -58,6 +58,12 @@ module ParserLoader =
 
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
+
+        RuntimeDS.HwIP <- cfg.HwIP
+        RuntimeDS.TimeoutCall <- cfg.TimeoutCall
+        RuntimeDS.RuntimeMotionMode <- cfg.RuntimeMotionMode
+        RuntimeDS.TimeSimutionMode <- cfg.TimeSimutionMode
+
         let dir = PathManager.getDirectoryName (configPath.ToFile())
         let system, loadings = loadingDS dir  cfg.DsFilePath None false target
 

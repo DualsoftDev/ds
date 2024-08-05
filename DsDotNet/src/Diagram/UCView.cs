@@ -529,19 +529,19 @@ public partial class UcView : UserControl
 
     public void UpdateInValue(ViewNode viewNode, object item2, bool vRefresh = true)
     {
-        //Node node = findNode(viewNode);  //시뮬레이션 임시 막음
-        //if (node == null) return;
-        //bool dataExist = Convert.ToDouble(item2) != 0;
-        //UpdateFillColor(dataExist, node, Color.DarkBlue);
-        //if (vRefresh) RefreshGraph();
+        Node node = findNode(viewNode);  //시뮬레이션 임시 막음
+        if (node == null) return;
+        bool dataExist = Convert.ToDouble(item2) != 0;
+        UpdateFillColor(dataExist, node, Color.DarkBlue);
+        if (vRefresh) RefreshGraph();
     }
     public void UpdateOutValue(ViewNode viewNode, object item2, bool vRefresh = true)
     {
-        //Node node = findNode(viewNode); //시뮬레이션 임시 막음
-        //if (node == null) return;
-        //bool dataExist = Convert.ToDouble(item2) != 0;
-        //UpdateLineWidth(dataExist, node);
-        //if (vRefresh) RefreshGraph();
+        Node node = findNode(viewNode); //시뮬레이션 임시 막음
+        if (node == null) return;
+        bool dataExist = Convert.ToDouble(item2) != 0;
+        UpdateLineWidth(dataExist, node);
+        if (vRefresh) RefreshGraph();
     }
 
     public void UpdateViewNode(ViewNode viewNode, ViewVertex vv)

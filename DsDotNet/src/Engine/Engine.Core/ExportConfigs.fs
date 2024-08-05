@@ -18,9 +18,7 @@ module ExportConfigsMoudle =
 
     type InterfaceConfig = {
         SystemName: string
-        HW: string //XGI, XGK, PC
-        Ip: string //"127.0.0.1"
-        Port: string //"2004"
+        HwName: string //LS-XGI, LS-XGK, PC
         DsPlanInterfaces: DsPlanInterface[]
         DsActionInterfaces: DsActionInterface[]
     }
@@ -132,13 +130,11 @@ module ExportConfigsMoudle =
 
         ifs.ToArray()
 
-    let getDsInterfaceConfig (sys: DsSystem, target:PlatformTarget) =
+    let getDsInterfaceConfig (sys: DsSystem, hwName:string) =
         { 
             DsPlanInterfaces = getDsPlanInterfaces sys
             DsActionInterfaces = getDsActionInterfaces sys
-            HW  = target.ToString()
-            Ip = "127.0.0.1"  //test ahn 임시 시뮬레이터만
-            Port = "2004"
+            HwName  = hwName
             SystemName = sys.Name
         }
 
@@ -146,8 +142,8 @@ module ExportConfigsMoudle =
 type ExportConfigsExt =
 
     [<Extension>] 
-    static member ExportDSInterface (sys:DsSystem, exportPath:string, target:PlatformTarget) =
-        let interfaceConfig = getDsInterfaceConfig (sys, target)
+    static member ExportDSInterface (sys:DsSystem, exportPath:string, hwName:string) =
+        let interfaceConfig = getDsInterfaceConfig (sys, hwName)
         saveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces =

@@ -10,7 +10,10 @@ open System.Runtime.CompilerServices
 module ModelLoaderModule =
     type ModelConfig = {
         DsFilePath: string 
-        HWIP: string 
+        HwIP: string 
+        RuntimeMotionMode: RuntimeMotionMode 
+        TimeSimutionMode : TimeSimutionMode
+        TimeoutCall : uint32
     }
     type Model = {
         Config: ModelConfig
@@ -32,12 +35,17 @@ module ModelLoader =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
+    let createModelConfigWithPath (sysRunPaths: string) =
+        {
+            DsFilePath =  sysRunPaths.Replace("\\", "/")
+            HwIP =  RuntimeDS.HwIP
+            RuntimeMotionMode=  RuntimeDS.RuntimeMotionMode
+            TimeSimutionMode =  RuntimeDS.TimeSimutionMode
+            TimeoutCall=  RuntimeDS.TimeoutCall
+        }
+
     let SaveConfigWithPath (path: string) (sysRunPaths: string) =
-        let cfg =
-            {
-                DsFilePath =  sysRunPaths.Replace("\\", "/")
-                HWIP =  RuntimeDS.IP
-            }
+        let cfg = createModelConfigWithPath sysRunPaths
         SaveConfig path cfg 
         path
 

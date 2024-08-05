@@ -263,8 +263,9 @@ module ConvertCPU =
                 yield! applySystemSpec sys
                 yield! sys.B2_SWButtonOutput()
                 yield! sys.B4_SWModeLamp() 
-
-                yield! sys.E2_PLCOnly()
+                
+                if RuntimeDS.Package.IsPLCorPLCSIM() then 
+                    yield! sys.E2_PLCOnly()
 
                 if RuntimeDS.Package.IsPackageSIM() then 
                     yield! sys.Y1_SystemSimulationForFlow(sys)

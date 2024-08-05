@@ -93,7 +93,8 @@ module RuntimeGeneratorModule =
         static let mutable emulationAddress = ""
 
         static member val HwSlotDataTypes  =  ResizeArray<SlotDataType>() with get, set
-        static member val IP = "192.168.9.100" with get, set
+        static member val HwIP = "192.168.9.100" with get, set
+        static member val HwName = "LS-XGI" with get, set //PC 제어시 Hw maker 별 이름 (지금은 LS 태그타입 구분용)
 
         static member val TimeoutCall = callTimeout  with get, set
         static member val EmulationAddress = emulationAddress  with get, set

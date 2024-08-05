@@ -27,6 +27,7 @@ type RuntimeModel(zipDsPath:FilePath, target)  =
     member x.JsonPath = jsonPath
     member x.Storages = storages
     member x.PlatformTarget = target
+    member x.RunHwIP = model.Config.HwIP;
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU

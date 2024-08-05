@@ -37,7 +37,7 @@ module internal DBLoggerQueryImpl =
             let mutable count = 0
             let mutable sum = 0.0
 
-            let rec inspectLog (logs: Log list) =
+            let rec updateSummary (logs: Log list) =
                 match logs with
                 | ([] | [ _ ]) -> ()
 
@@ -50,12 +50,12 @@ module internal DBLoggerQueryImpl =
                         let duration = (log2.At - log1.At).TotalSeconds
                         assert (duration >= 0)
                         sum <- sum + duration
-                        inspectLog tails
+                        updateSummary tails
                     //| _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected. ({log1.Storage.Name}:{b1}, {log2.Storage.Name}:{b2})"
                     | _ when b1 = b2 -> ()  // todo: replace this line with above line
                     | _ -> logError $"ERROR.  Expect ({log1.Storage.Name}:rising, {log2.Storage.Name}:falling)."
 
-            logs |> inspectLog
+            logs |> updateSummary
 
             x.Count <- count
             x.Sum <- sum

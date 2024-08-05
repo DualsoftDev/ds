@@ -281,7 +281,6 @@ CREATE VIEW [{Vn.Storage}] AS
     /// DB logging 관련 전체 설정
     and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: ORMStorage seq, readerWriterType: DBLoggerType) as this =
         let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toReadOnlyDictionary
-        let lastLogs = Dictionary<ORMStorage, Log>()
 
         let summaryDic =
             storages
@@ -290,7 +289,6 @@ CREATE VIEW [{Vn.Storage}] AS
                 key, Summary(this, key, 0, 0.))
             |> Tuple.toReadOnlyDictionary
 
-        let storageByIdDic = Dictionary<int, ORMStorage>()
         let systems = systems |> toArray
 
         let disposables = new CompositeDisposable()
@@ -299,9 +297,9 @@ CREATE VIEW [{Vn.Storage}] AS
         member val QuerySet = queryCriteria with get, set
         member x.Summaries = summaryDic
         member x.Storages = storageDic
-        member x.LastLogs = lastLogs
+        member val StoragesById = Dictionary<int, ORMStorage>() // mutable
+        member val LastLogs = Dictionary<ORMStorage, Log>() // mutable
         member val TheLastLog: Log option = None with get, set
-        member x.StoragesById = storageByIdDic
         member x.ModelId = queryCriteria.ModelId
         member x.ReaderWriterType = readerWriterType
         member x.Disposables = disposables

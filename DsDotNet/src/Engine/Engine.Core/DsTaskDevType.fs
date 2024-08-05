@@ -8,7 +8,7 @@ open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module rec DsTaskDevType =
-   
+
     [<AllowNullLiteral>]
     type Addresses(inAddress: string, outAddress: string) =
         member x.In = inAddress
@@ -17,18 +17,18 @@ module rec DsTaskDevType =
     let addressPrint (addr: string) =
         if addr.IsNullOrEmpty() then TextAddrEmpty else addr
 
-    type TaskDevParamIO(inParam: TaskDevPara option, outParam: TaskDevPara option) = 
-        let mutable inParam = inParam 
-        let mutable outParam = outParam 
-        
+    type TaskDevParamIO(inParam: TaskDevParam option, outParam: TaskDevParam option) =
+        let mutable inParam = inParam
+        let mutable outParam = outParam
+
         member x.InParam
             with get() = inParam
-            and set(value) = inParam <- value    
-            
+            and set(value) = inParam <- value
+
         member x.OutParam
             with get() = outParam
             and set(value) = outParam <- value
-      
+
         member x.IsDefaultParam = (x.InParam.IsNone || x.InParam.Value.IsDefaultParam)
                                   && (x.OutParam.IsNone || x.OutParam.Value.IsDefaultParam)
 
@@ -43,7 +43,7 @@ module rec DsTaskDevType =
             | _ -> failwithlog "TaskDevParamIO is not valid"
 
 
-    type TaskDevPara(devName: string option, devType: DataType option, devValue: obj option, devTime: int option) = 
+    type TaskDevParam(devName: string option, devType: DataType option, devValue: obj option, devTime: int option) =
         let mutable devName = devName  //symolName
 
         member x.DevName
@@ -54,15 +54,15 @@ module rec DsTaskDevType =
         member x.DevValue= devValue
         member x.DevTime = devTime
         member x.Value = devValue |> Option.toObj
-        member x.Type = 
+        member x.Type =
             devType |> Option.defaultValue DuBOOL
-        member x.Name = 
+        member x.Name =
             devName |> Option.defaultValue ""
-        member x.Time = 
+        member x.Time =
             devTime
 
-        member x.IsDefaultParam = 
-            devName.IsNone 
+        member x.IsDefaultParam =
+            devName.IsNone
             && devTime.IsNone
             && x.Type = DuBOOL
             && (devValue |> Option.isNone)
@@ -79,24 +79,24 @@ module rec DsTaskDevType =
             result
 
 
-    let defaultTaskDevPara() = TaskDevPara(None, None, None, None)
+    let defaultTaskDevPara() = TaskDevParam(None, None, None, None)
     let defaultTaskDevParamIO() = TaskDevParamIO (None, None)
 
     let createTaskDevParam(nametype: string option) (dutype: DataType option) (v: obj option) (t: int option) =
-        TaskDevPara(nametype, dutype, v, t)
+        TaskDevParam(nametype, dutype, v, t)
 
 
-    let createTaskDevParaIOInTrue() = 
+    let createTaskDevParaIOInTrue() =
         let inParam = createTaskDevParam None (Some(DuBOOL)) (Some(true)) None
         TaskDevParamIO (inParam|>Some, None)
 
-    let changeSymbolTaskDevPara(x: TaskDevPara option) (symbol: string option) =
+    let changeSymbolTaskDevPara(x: TaskDevParam option) (symbol: string option) =
         if x.IsNone then defaultTaskDevPara()
         else
             let x = x |> Option.get
             createTaskDevParam symbol x.DevType x.DevValue x.DevTime
 
-    let changeParam(jobName: string, paramDic: Dictionary<string, TaskDevPara>, symbol: string option) =
+    let changeParam(jobName: string, paramDic: Dictionary<string, TaskDevParam>, symbol: string option) =
         let changedTaskDevPara = changeSymbolTaskDevPara(Some(paramDic.[jobName])) (symbol)
         paramDic.Remove(jobName) |> ignore
         paramDic.Add(jobName, changedTaskDevPara)
@@ -150,8 +150,8 @@ module rec DsTaskDevType =
                 Some part, typeOpt, valueOpt, timeOpt
             | _ ->
                 failwithlog $"Unknown format detected: text '{part}'"
-    
+
         let nameOpt, typeOpt, valueOpt, timeOpt =
             remainingParts |> List.fold parseParts (None, None, None, None)
-    
+
         addr, (createTaskDevParam nameOpt typeOpt valueOpt timeOpt)

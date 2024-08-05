@@ -10,9 +10,7 @@ open Antlr4.Runtime
 open Dual.Common.Core.FS
 open Engine.Parser
 open Engine.Core
-open Engine.Core.DsText
 open type Engine.Parser.dsParser
-open type DsParser
 open System.Collections.Generic
 
 
@@ -21,16 +19,16 @@ open System.Collections.Generic
 module private DsParserHelperModule =
 
 
-    let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) = 
+    let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) =
         let (inaddr, inParam), (outaddr, outParm) =
             ctx.TryFindFirstChild<TaskDevParaInOutContext>()
-            |> Option.get 
+            |> Option.get
             |> commonDeviceParamExtractor
         let device = jobNameFqdn.Take(2).Combine(TextDeviceSplit)
         let api = jobNameFqdn.Last()
         //let api = GetLastParenthesesReplaceName (jobNameFqdn.Last(), "")
-        let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
-        
+        let TaskDevParamIO = TaskDevParamIO(Some inParam, Some outParm)
+
         {
             ApiFqnd = [|device; api|]
             TaskDevParamIO = TaskDevParamIO
@@ -93,7 +91,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     inherit dsBaseListener()
 
     do parser.Reset()
-   
+
     member val AntlrParser = parser
     member val ParserOptions = options with get, set
 
@@ -141,8 +139,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     registerSystem exSys
                     exSys
             | _ -> x.TheSystem <- DsSystem.Create(name)
-            
-            RuntimeDS.System <- x.TheSystem 
+
+            RuntimeDS.System <- x.TheSystem
 
             debugfn ($"System: {name}")
         | None -> failwithlog "ERROR"
@@ -174,7 +172,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     override x.EnterInterfaceResetDef(ctx: InterfaceResetDefContext) =
         // I1 <|> I2 <|> I3;  ==> [| I1; <|>; I2; <|>; I3; |]
         let terms =
-            let pred (tree: IParseTree) = 
+            let pred (tree: IParseTree) =
                 tree :? Identifier1Context || tree :? CausalOperatorResetContext
 
             [|
@@ -183,7 +181,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             |]
 
         createApiResetInfo terms x.TheSystem
-        
+
     member x.GetValidFile(fileSpecCtx: FileSpecContext) =
           fileSpecCtx
             .TryFindFirstChild<FilePathContext>()
@@ -200,7 +198,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         absoluteFilePath, relativeFilePath
 
-        
+
     member private x.CreateLoadedDeivce(loadedName:string) =
         let file = $"./dsLib/AutoGen/{loadedName}.ds"
         let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
@@ -218,7 +216,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             .DeQuoteOnDemand()
 
     override x.EnterLoadDeviceBlock(ctx: LoadDeviceBlockContext) =
-         let file = 
+         let file =
              match ctx.TryFindFirstChild<FileSpecContext>() with
              | Some f ->  x.GetValidFile f
              | None -> ""
@@ -228,7 +226,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let loadedName = dev.CollectNameComponents().CombineDequoteOnDemand()
                 let file = if file <> "" then file else $"dsLib/{loadedName}.ds"
                 let absoluteFilePath, simpleFilePath = x.GetFilePath(file)
-            
+
                 x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)    |> ignore
             )
 
@@ -251,10 +249,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     //    let pureCode = code.Substring(3, code.Length - 6) // 처음과 끝의 "<@{" 와 "}@>" 제외
     //    let statements = parseCodeForTarget options.Storages pureCode runtimeTarget
     //    x.TheSystem.Statements.AddRange statements
-    
+
     override x.EnterVariableBlock(ctx: VariableBlockContext) =
 
-        let addVari varName varType (value:string) (isImmutable:bool)= 
+        let addVari varName varType (value:string) (isImmutable:bool)=
             let variableData = VariableData (varName, varType, if isImmutable then Immutable else Mutable)
 
             let variable = createVariableByType varName varType
@@ -268,7 +266,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         for vari in ctx.variableDef() do
             let varName = vari.varName().GetText()
             let varType = vari.varType().GetText() |> textToDataType
-            if vari.TryFindFirstChild<InitValueContext>().IsSome then 
+            if vari.TryFindFirstChild<InitValueContext>().IsSome then
                 failWithLog $"{varName} = {vari.initValue().GetText()}; 할당은 Const 타입만 가능합니다.\nCommand를 이용하세요."
             let value = DsDataType.typeDefaultValue (varType.ToType())
             addVari varName varType  $"{value}" false
@@ -277,12 +275,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let constName = vari.constName().GetText()
             let varType = vari.varType().GetText() |> textToDataType
             if vari.TryFindFirstChild<InitValueContext>().IsNone
-            then 
+            then
                 failWithLog $"Const 타입은 초기값 설정이 필요합니다. ({varType.ToText()} {constName})"
 
             let value = vari.initValue().GetText()
             addVari constName varType  value true
-            
+
     override x.EnterLangVersionDef(ctx: LangVersionDefContext) =
         let langVer = Version.Parse(ctx.version().GetText())
         langVer.CheckCompatible(DsSystem.CurrentLangVersion, "Language")
@@ -298,7 +296,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     member x.GetContextInformation(parserRuleContext: ParserRuleContext) = // collectUpwardContextInformation
         let ctx = parserRuleContext
 
-        let system = 
+        let system =
             match x.Rule2SystemNameDictionary.TryFindValue(parserRuleContext) with
             | Some systemName -> Some systemName
             | None -> Some x.TheSystem.Name  //parserRuleContext.TryGetSystemName()대신에 한번 저장된거 사용해서 성능개선
@@ -348,16 +346,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let ci = x.GetContextInformation ctx
 
         option {
-            let parentWrapper = 
+            let parentWrapper =
                 match x.TheSystem.TryFindParentWrapper(ci) with
                 | Some pw -> pw
                 | None -> failwithlog "ERROR"
 
             let graph = parentWrapper.GetGraph()
-            
+
             let ciNamesCombined = ci.Names.Combine()
             match ci.Names with
-            | [ realOrAlias ] -> 
+            | [ realOrAlias ] ->
                 return! graph.TryFindVertex(realOrAlias)
 
             | _n1 :: [ _n2 ] -> // (other flow real) or (call.api)
@@ -365,23 +363,23 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 | Some v -> return v
                 | None ->
                     return!
-                        graph.Vertices.TryFind(fun v -> 
+                        graph.Vertices.TryFind(fun v ->
                             match v with
                             | :? Alias as a ->
                                 a.TargetWrapper.RealTarget().Value.ParentNPureNames.Combine() = ciNamesCombined
                             | _ -> false)
-                                        
+
             | _n1 :: [ _n2; _n3]  ->  //other flow call
-                if parentWrapper.GetCore() :? Real 
-                    && parentWrapper.GetFlow().Name = _n1 
-                then 
+                if parentWrapper.GetCore() :? Real
+                    && parentWrapper.GetFlow().Name = _n1
+                then
                     return! graph.TryFindVertex(ci.Names.Skip(1).Combine())
-                else 
+                else
                     return! graph.TryFindVertex(ciNamesCombined)
 
             | _n1 :: [ _n2; _n3; _n4 ]  -> //other flow call
                     return! graph.TryFindVertex(ciNamesCombined)
-              
+
             | _ -> failwithlog "ERROR"
         }
 
@@ -445,7 +443,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             parentWrapper.Map(fun w -> (w, ci, ctx))
 
         let candidateCtxs: ParserRuleContext list =
-            let normalCausalContext =  
+            let normalCausalContext =
                 let nonCausalsContext = sysctx.TryFindChildren<NonCausalsContext>()
                 [
                     if nonCausalsContext.any() then
@@ -453,12 +451,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         yield!  nonCausalGroup.TryFindChildren<Identifier1Context>().Cast<ParserRuleContext>()
                         yield!  nonCausalGroup.TryFindChildren<IdentifierCommandNameContext>().Cast<ParserRuleContext>()
                 ]
-            [ 
+            [
                 yield! normalCausalContext
-                yield! sysctx.Descendants<IdentifierCommandNameContext>().Cast<ParserRuleContext>() 
-                yield! sysctx.Descendants<IdentifierOperatorNameContext>().Cast<ParserRuleContext>() 
-                yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>() 
-                yield! sysctx.Descendants<NonCausalContext>().Cast<ParserRuleContext>() 
+                yield! sysctx.Descendants<IdentifierCommandNameContext>().Cast<ParserRuleContext>()
+                yield! sysctx.Descendants<IdentifierOperatorNameContext>().Cast<ParserRuleContext>()
+                yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>()
+                yield! sysctx.Descendants<NonCausalContext>().Cast<ParserRuleContext>()
             ]
 
         let candidates = candidateCtxs.Choose(getContainerChildPair)
@@ -485,7 +483,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let isJobOrAlias (pw: ParentWrapper, Fqdn(vetexPath)) =
                 isJobName (pw.GetFlow().System, vetexPath.Last())
                 || isAliasMnemonic (pw, vetexPath.Combine())
-                
+
             let createAlias(parent: ParentWrapper, name: string ) =
                 let flow = parent.GetFlow()
                 let isRoot = parent.GetCore() :? Flow
@@ -494,19 +492,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 //flow.Real     //flow.Call.Api     //Real.Call.Api
                 let exFlow = (aliasFqdnCnt = 2 || (aliasFqdnCnt = 3 && isRoot))
                 Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
-              
+
             let loop () =
                 for (optParent, ctxInfo, ctx) in candidates do
                     let parent = optParent
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-                    if  ( ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> 
+                    if  ( ctxInfo.ContextType = typeof<IdentifierOperatorNameContext>
                        || ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
                        && existing.IsNone
                     then
                         let opCmd = ctxInfo.GetRawName().DeQuoteOnDemand()
                         match tryFindFunc system opCmd with
                         | Some func -> Call.Create(func, parent) |> ignore
-                        | _ -> 
+                        | _ ->
                             if ctxInfo.ContextType = typeof<IdentifierCommandNameContext> then
                                 failwithlog $"Command({opCmd}) is not exist"
                             elif ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> then
@@ -520,38 +518,38 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             let name = ctxInfo.Names.Combine()
                             match cycle, ctxInfo.Names with
                             | 0, [ real ] when not <| (isJobOrAlias (parent, ctxInfo.Names)) ->
-                                
+
                                 match parent.GetCore()  with
                                 | :? Flow as flow->
                                     if not <| isCallName (parent, ctxInfo.Names)  then
                                         Real.Create(real, flow) |> ignore
                                 |_ ->
                                     errorLoadCore  ctx
-                                    
+
 
                             | 1, _ when not <| (isAliasMnemonic (parent, name)) ->
                                 match tryFindJob system (getJobName (parent, ctxInfo.Names)) with
-                                | Some job -> 
+                                | Some job ->
                                     Call.Create(job, parent) |> ignore
                                 | None ->
                                     match system.Flows.TryFind(fun f->f.Name = ctxInfo.Names.Head) with
                                     | Some _f -> ()  //exFlow alisas 면  | cycle 2, _x1 :: [ _x2 ] 에서 등록
                                     |_->
                                         errorLoadCore  ctx
-                            
+
                             | 2, _x1 :: [ _x2 ]  ->
                                   match parent.GetCore() with
                                   | :? Flow as _myflow ->
                                         let otherFlowReal = tryFindReal system [ _x1; _x2 ] |> Option.get
                                         Alias.Create(ctxInfo.Names.Combine("_"), DuAliasTargetReal otherFlowReal, parent, false) |> ignore
-                                  |_ when isAliasMnemonic (parent, name) -> 
-                                        createAlias(parent, ctxInfo.Names.Combine("_")) 
-                                  |_ -> 
-                                    errorLoadCore ctx   
+                                  |_ when isAliasMnemonic (parent, name) ->
+                                        createAlias(parent, ctxInfo.Names.Combine("_"))
+                                  |_ ->
+                                    errorLoadCore ctx
 
                             | 2, [ _ ]  when isAliasMnemonic (parent, name) ->
-                                 createAlias(parent, ctxInfo.Names.Combine("_")) 
-                                
+                                 createAlias(parent, ctxInfo.Names.Combine("_"))
+
                             | _, [ _q ] -> ()
                             | _, _ofn :: [ _ofrn ] -> ()
                             | _, _ofn :: [ _ofrn; _jobExpr ] -> ()
@@ -566,7 +564,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let createAliasVertex = tokenCreator 2
 
         let fillInterfaceDef (system: DsSystem) (ctx: InterfaceDefContext) =
-               
+
             let collectCallComponents (ctx: CallComponentsContext) : Fqdn[] =
                 ctx.Descendants<Identifier123Context>().Select(collectNameComponents).ToArray()
 
@@ -589,23 +587,23 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 .ToArray())
                         .ToArray()
 
-            
+
                 let n = ser.Length
                 let findSegment (fqdn: Fqdn) : Real = tryFindReal system (fqdn |> List.ofArray) |> Option.get
                 match n with
                 | 2 ->
                     api.TX <- findSegment (ser[0].Head())
-                    api.RX <- findSegment (ser[1].Head()) 
+                    api.RX <- findSegment (ser[1].Head())
                 | _ -> failWithLog $"ERROR {api.Name} [startWork ~ endWork]"
             }
             |> ignore
 
-        let createDeviceVariable (system: DsSystem)  (taskDevPara:TaskDevPara option) (stgKey:string) address =
-            match taskDevPara with
-            | Some taskDevPara ->
-                match taskDevPara.DevName with
+        let createDeviceVariable (system: DsSystem)  (taskDevParam:TaskDevParam option) (stgKey:string) address =
+            match taskDevParam with
+            | Some tdp ->
+                match tdp.DevName with
                 | Some name ->
-                    let dataType = taskDevPara.Type
+                    let dataType = tdp.Type
                     let variable = createVariableByType name dataType
 
                     system.AddActionVariables (ActionVariable(name, address, stgKey, dataType)) |> ignore
@@ -616,20 +614,20 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
-            let callListings = commonCallParamExtractor ctx 
+            let callListings = commonCallParamExtractor ctx
             let dicTaskDevs = Dictionary<string,TaskDev>()
 
-            let createTaskDev (apiPoint:ApiItem) (device:string)  (taskDevPara:TaskDevParamIO)  (addr:Addresses) (jobName:string) =
-                let apiPara = { TaskDevParamIO = taskDevPara; ApiItem= apiPoint}
+            let createTaskDev (apiPoint:ApiItem) (device:string)  (taskDevParam:TaskDevParamIO)  (addr:Addresses) (jobName:string) =
+                let apiPara = { TaskDevParamIO = taskDevParam; ApiItem= apiPoint}
                 let taskDev = TaskDev(apiPara, jobName, device, system)
                 let apiPureName = taskDev.DeviceApiPureName(jobName)
-                let updatedTaskDev = 
+                let updatedTaskDev =
                     if dicTaskDevs.ContainsKey(apiPureName) then
                         let oldTaskDev = dicTaskDevs[apiPureName]
-                        oldTaskDev.AddOrUpdateApiTaskDevPara(jobName, apiPoint, taskDevPara)
+                        oldTaskDev.AddOrUpdateApiTaskDevPara(jobName, apiPoint, taskDevParam)
                         oldTaskDev
-                    else 
-                        dicTaskDevs.Add(apiPureName, taskDev)   
+                    else
+                        dicTaskDevs.Add(apiPureName, taskDev)
                         taskDev
 
                 let msg = $"Address is already assigned {device} {apiPoint.QualifiedName}\n old:{addr.Out} new:{updatedTaskDev.OutAddress}"
@@ -650,15 +648,15 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             for jobNameFqdn, jobParam, apiDefCtxs, callListingCtx in callListings do
                 let jobName = jobNameFqdn.CombineDequoteOnDemand()
 
-                let apiDefs = 
-                    if apiDefCtxs.any() then  
+                let apiDefs =
+                    if apiDefCtxs.any() then
                         [
                             for apiDefCtx in apiDefCtxs do
                                 let apiPath = apiDefCtx.CollectNameComponents()
                                 let (inaddr, inParam), (outaddr, outParm) =
                                     match apiDefCtx.TryFindFirstChild<TaskDevParaInOutContext>() with
-                                    | Some taskDevPara -> 
-                                        commonDeviceParamExtractor taskDevPara 
+                                    | Some taskDevPara ->
+                                        commonDeviceParamExtractor taskDevPara
                                     | None ->
                                          (TextAddrEmpty, defaultTaskDevPara()), (TextAddrEmpty, defaultTaskDevPara())
                                 let TaskDevParamIO = TaskDevParamIO(inParam|>Some, outParm|>Some)
@@ -674,13 +672,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 let apiFqnd = ad.ApiFqnd |> Seq.toList
                                 let devApiName = apiFqnd.Head
                                 let addr, TaskDevParamIO = Addresses(ad.InAddress, ad.OutAddress), ad.TaskDevParamIO
-                                let task = 
+                                let task =
                                     match apiFqnd with
                                     | device :: [ api ] ->
                                         let taskFromLoaded  =
                                             option {
                                                 let! apiPoint =
-                                                    let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice 
+                                                    let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice
                                                     match tryFindCallingApiItem system device api allowAutoGenDevice with
                                                     | Some api -> Some api
                                                     | None ->
@@ -688,30 +686,30 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                         if createDevice then
                                                             x.CreateLoadedDeivce(device)
                                                         None
-                                 
-                                       
+
+
                                                 return createTaskDev  apiPoint  devApiName TaskDevParamIO addr jobName
                                             }
 
                                         match taskFromLoaded with
                                         | Some t -> t
-                                        | _ -> 
+                                        | _ ->
                                             match tryFindLoadedSystem system device with
                                             | Some dev->
                                                 let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
-                                                match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with 
+                                                match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with
                                                 | Some apiItem ->
                                                     createTaskDev apiItem device TaskDevParamIO addr jobName
                                                 | None ->
                                                     let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) (jobName) device api TaskDevParamIO
                                                     createTaskDev (taskDev.GetApiItem(jobName)) device TaskDevParamIO addr jobName
-                                               
+
                                             | None -> failwithlog $"device({device}) api({api}) is not exist"
 
-                                    | _ -> 
+                                    | _ ->
                                         let errText = String.Join(", ", apiFqnd)
                                         failwithlog $"loading type error ({errText})device"
-                            
+
                                 let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName)  options.Storages
                                 let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
                                 createDeviceVariable system TaskDevParamIO.InParam  plcName_I task.InAddress
@@ -724,14 +722,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 assert (taskList.Any())
-          
+
 
                 let job = Job(jobNameFqdn, system, taskList)
                 job.JobParam <- jobParam
 
                 job |> system.Jobs.Add
 
-   
+
         let fillTargetOfAliasDef (x: DsParserListener) (ctx: AliasListingContext) =
             let system = x.TheSystem
             let ci = x.GetContextInformation ctx
@@ -751,7 +749,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             match flow.System.TryFindCall([ flow.Name; rc ].ToArray()) with
                             | Some v ->
                                  match v with
-                                 | :? Call as c -> c |> DuAliasTargetCall 
+                                 | :? Call as c -> c |> DuAliasTargetCall
                                  | _ -> errorLoadCore  ctx
                             | _ -> errorLoadCore  ctx
 
@@ -763,22 +761,22 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | None -> errorLoadCore  ctx
                         | None ->
                             match tryFindCall system ([ flow.Name ] @ ns.Select(fun f->f.QuoteOnDemand())) with
-                            | Some v -> 
+                            | Some v ->
                                 match v with
-                                | :? Call as c -> c |> DuAliasTargetCall 
+                                | :? Call as c -> c |> DuAliasTargetCall
                                 | _ -> errorLoadCore  ctx
-                            | None ->  
+                            | None ->
                                     errorLoadCore  ctx
 
-                    | _flowOrReal :: [ _dev; _api ] -> 
+                    | _flowOrReal :: [ _dev; _api ] ->
                             match tryFindCall system ([ flow.Name ] @ ns) with
                             | Some v ->
                                 (v :?> Call) |> DuAliasTargetCall
-                            |_ -> 
+                            |_ ->
                                 match flow.GetVerticesOfFlow().OfType<Call>().TryFind(fun f->f.Name = ns.Combine())  with
                                 | Some call -> call|>  DuAliasTargetCall
                                 | _ -> errorLoadCore  ctx
-                           
+
                     | _ -> errorLoadCore  ctx
 
 
@@ -814,9 +812,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
             for layoutCtx in listLayoutCtx do
-                
+
                 let fileSpecCtx = layoutCtx.TryFindFirstChild<FileSpecContext>();
-                let filePath = 
+                let filePath =
                     match fileSpecCtx with
                     | Some s ->
                         let path = x.GetLayoutPath(s)
@@ -835,10 +833,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     let xywh = positionDef.TryFindFirstChild<XywhContext>() |> Option.get |> genXywh
                     let nameCompo = collectNameComponents nameCtx
 
-                    if (nameCompo).Count() = 1 then 
+                    if (nameCompo).Count() = 1 then
                         let device = FindExtension.TryFindLoadedSystem(system, name) |> Option.get
-                        device.ChannelPoints[filePath] <- xywh 
-                    else 
+                        device.ChannelPoints[filePath] <- xywh
+                    else
                         failwithlog "invalid parser name component"
 
         let fillFinished (system: DsSystem) (listFinishedCtx: List<dsParser.FinishBlockContext>) =
@@ -874,11 +872,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for disabled in listDisabled do
                     let fqdn = collectNameComponents disabled |> List.ofArray
                     let coin = tryFindSystemInner system fqdn
-        
+
                     match coin with
                     | Some (:? Call as c) -> c.Disabled <- true
                     | _ -> failwith $"Couldn't find target coin object name {getText (disabled)}"
-        
+
 
         let fillTimes (system: DsSystem) (listTimeCtx: List<dsParser.TimesBlockContext> ) =
             let fqdnTimes = getTimes listTimeCtx
@@ -918,17 +916,17 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             //Real에 times 채우기
             ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem
 
-            
+
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
 
 
-              
+
         let createOperator(ctx:OperatorBlockContext) =
             ctx.operatorNameOnly() |> Seq.iter (fun fDef ->
                 let funcName = fDef.TryFindIdentifier1FromContext().Value
                 x.TheSystem.Functions.Add(OperatorFunction(funcName.DeQuoteOnDemand())) )
-        
+
             let functionDefs = ctx.operatorDef()
             for fDef in functionDefs do
                 let funcName = fDef.operatorName().GetText()
@@ -937,9 +935,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 // 추출한 함수 이름과 매개변수를 사용하여 시스템의 함수 목록에 추가
                 let newFunc = OperatorFunction.Create(funcName, pureCode)
                 let code = $"${funcName} = {pureCode};"
-                let assignCode = 
+                let assignCode =
                     match options.Storages.any(fun s->s.Key = funcName) with
-                    | true ->   code // EnterJobBlock job Tag 에서 이미 만듬 
+                    | true ->   code // EnterJobBlock job Tag 에서 이미 만듬
                     | false ->  $"bool {funcName} = false;{code}" //op 결과 bool 변수를 임시로 만듬
 
                 let statements = parseCodeForTarget options.Storages assignCode runtimeTarget
@@ -948,7 +946,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | DuAssign (_, _, _) -> newFunc.Statements.Add s  //비교구문 있는 Statement만 추가
                     |_ -> ()  //bool {funcName} = false 부분은 추가하지 않음
 
-                x.TheSystem.Functions.Add(newFunc) 
+                x.TheSystem.Functions.Add(newFunc)
 
 
         let createCommand(ctx:CommandBlockContext) =
@@ -997,7 +995,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             fillProperties x ctx
 
         guardedValidateSystem system
-      
+
 
 [<AutoOpen>]
 module ParserLoadApiModule =

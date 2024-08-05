@@ -59,7 +59,7 @@ module ImportType =
         | Manual = 2
 
 
-    type MasterPageMacro = 
+    type MasterPageMacro =
         {
             Macro : string
             MacroRelace : string
@@ -68,38 +68,38 @@ module ImportType =
 
     type TaskDevParaRawItem  = string*DataType*string //address, dataType, func
 
-    let getDevName (row: Data.DataRow) = 
+    let getDevName (row: Data.DataRow) =
         let flowName = row.[(int) IOColumn.Flow].ToString()
         let name = row.[(int) IOColumn.Name].ToString()
-        
+
         if row.[(int) IOColumn.Case].ToString() = TextXlsAddress
         then
 
             if name.Split(".").Length <> 2 then
                 failwithlog ErrID._75
-            else 
+            else
                 $"{flowName}{TextDeviceSplit}{name}"
-        else 
+        else
             name
 
-    let getMultiDeviceName (loadedName:string) index = 
+    let getMultiDeviceName (loadedName:string) index =
         //index 2자리로 표현
         let indexStr = index.ToString().PadLeft(2, '0')
         $"{loadedName}_{indexStr}"
-                    
 
-    let checkPPTDataType (taskDevParamRaw:TaskDevParaRawItem) (taskDevParam:TaskDevPara) = 
+
+    let checkPPTDataType (taskDevParamRaw:TaskDevParaRawItem) (taskDevParam:TaskDevParam) =
         let address, typePPT = taskDevParamRaw |>fun (addr,t,_) -> addr, t
-        if (address <> TextSkip) && (typePPT <> taskDevParam.Type)  
-        then    
+        if (address <> TextSkip) && (typePPT <> taskDevParam.Type)
+        then
             failWithLog $"error datatype : {taskDevParamRaw} <> {taskDevParam.Type}"
 
 
-    let getPPTTaskDevParaInOut (inParamRaw:TaskDevParaRawItem) (outParamRaw:TaskDevParaRawItem) = 
+    let getPPTTaskDevParaInOut (inParamRaw:TaskDevParaRawItem) (outParamRaw:TaskDevParaRawItem) =
         let paramFromText paramRaw =
             let addr, (dataType:DataType), func = paramRaw
             if func <> ""
-            then 
+            then
                 getTaskDevPara $"{addr}:{func}" |> snd
             else
                 defaultTaskDevPara()
@@ -109,46 +109,46 @@ module ImportType =
 
         checkPPTDataType  inParamRaw inP
         checkPPTDataType  outParamRaw outP
-        
+
         inP, outP
 
 
-    let checkDataType name (taskDevParamDataType:DataType) (dataType:DataType)= 
+    let checkDataType name (taskDevParamDataType:DataType) (dataType:DataType)=
           if taskDevParamDataType <> dataType
                 then failWithLog $"error datatype : {name}\r\n [{taskDevParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
 
 
-    let updatePPTTaskDevPara (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
+    let updatePPTTaskDevPara (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
 
-        dev.SetInSymbol(inSym) 
+        dev.SetInSymbol(inSym)
         dev.SetOutSymbol(outSym)
 
-        checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType   
+        checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
         checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
 
     let getPPTDataTypeText (inType:DataType) (outType:DataType) =
-        let inTypeText  = inType.ToPLCText() 
-        let outTypeText = outType.ToPLCText() 
-        if inTypeText = outTypeText 
+        let inTypeText  = inType.ToPLCText()
+        let outTypeText = outType.ToPLCText()
+        if inTypeText = outTypeText
         then inTypeText
         else $"{inTypeText}:{outTypeText}"
 
     let getPPTTDevDataTypeText (dev:TaskDev) =   getPPTDataTypeText dev.InDataType dev.OutDataType
     let getPPTHwDevDataTypeText (hwDev:HwSystemDef) = getPPTDataTypeText hwDev.InDataType hwDev.OutDataType
 
-    let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  = 
+    let updatePPTHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
 
-        let inParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.InParam) inSym  
-        let outParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.OutParam) inSym 
+        let inParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.InParam) inSym
+        let outParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.OutParam) inSym
 
         hwDev.TaskDevParamIO <-  TaskDevParamIO(Some inParam, Some outParam)
 
-        checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType   
+        checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType
         checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType
-        
-            
+
+
     let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, name:string) =
-        
+
         if not(nodeType.IsLoadSys) && name.Split(".").Length > 3 then
                 failwithlog ErrID._73
 
@@ -159,7 +159,7 @@ module ImportType =
         let checkDotErr () =
             if nodeType <> REALExF && name.Contains(".") then
                 failwithlog ErrID._19
-        
+
 
         match nodeType with
         | REAL -> checkDotErr();

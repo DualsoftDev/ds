@@ -8,7 +8,7 @@ open System
 
 [<AutoOpen>]
 module ConvertCoreExtUtils =
-    
+
     let hasNot  (x:OperatorFunction option) = x.IsSome && x.Value.OperatorType = DuOPNot
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexTagManager
@@ -21,17 +21,17 @@ module ConvertCoreExtUtils =
     let getAM (x:ApiItem)  = x.TagManager :?> ApiItemManager
     let getDM (x:TaskDev)  = x.TagManager :?> TaskDevManager
 
-   
+
     let errText (x:Call)  = getVMCoin(x).ErrorText
 
-    let createHwApiBridgeTag (x:HwSystemDef, sys:DsSystem)  = 
+    let createHwApiBridgeTag (x:HwSystemDef, sys:DsSystem)  =
         let hwApi =   sys.HwSystemDefs.First(fun f->f.Name = x.Name)
-        let bridgeType = 
+        let bridgeType =
             match x with
             | :? ButtonDef -> BridgeType.Button
             | :? LampDef -> BridgeType.Lamp
             | :? ConditionDef -> BridgeType.Condition
-            | _ -> 
+            | _ ->
                 failwithf "bridgeType err"
 
         createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InDataType)
@@ -39,24 +39,24 @@ module ConvertCoreExtUtils =
         createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutDataType)
         |> iter (fun t -> x.OutTag  <- t)
 
-    let getInExpr (x:TaskDevPara option, devTag:ITag, sys:DsSystem) = 
-        let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool> 
+    let getInExpr (x:TaskDevParam option, devTag:ITag, sys:DsSystem) =
+        let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool>
         if devTag.IsNull() then
             sysOff.Expr  :> IExpression
-        else 
+        else
             if x.IsNone then
                 devTag.ToExpression()
-            else  
+            else
                 let x = x |> Option.get
-                if x.Type = DuBOOL then 
+                if x.Type = DuBOOL then
                     if x.DevValue.IsNull() then
                         devTag.ToExpression()
                     elif Convert.ToBoolean(x.Value) then
                         devTag.ToExpression()
-                    else 
+                    else
                         !@(devTag.ToExpression():?> Expression<bool>) :> IExpression
                 else // bool 타입아닌 경우 비교문 생성
-                    createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value; devTag.ToExpression()]   
+                    createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value; devTag.ToExpression()]
 
     [<AutoOpen>]
     [<Extension>]
@@ -64,8 +64,7 @@ module ConvertCoreExtUtils =
         [<Extension>] static member GetTagSys  (x:DsSystem ,typ:SystemTag)  = getSM(x).GetSystemTag(typ)
         [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)    = getFM(x).GetFlowTag(typ )
 
-        [<Extension>] static member GetInExpr (x:HwSystemDef) = 
+        [<Extension>] static member GetInExpr (x:HwSystemDef) =
                             getInExpr (x.TaskDevParamIO.InParam, x.InTag, x.System) :?> Expression<bool>
-        [<Extension>] static member GetInExpr (x:TaskDev, job:Job) = 
+        [<Extension>] static member GetInExpr (x:TaskDev, job:Job) =
                             getInExpr (x.GetInParam(job)|>Some, x.InTag, x.GetApiItem(job).ApiSystem)  :?> Expression<bool>
-                        

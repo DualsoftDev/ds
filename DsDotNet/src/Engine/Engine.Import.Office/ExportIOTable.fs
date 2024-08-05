@@ -16,7 +16,7 @@ open Engine.CodeGenCPU
 module ExportIOTable =
 
 
-    let addRows rows (dt:DataTable) = 
+    let addRows rows (dt:DataTable) =
         rows
         |> Seq.iter (fun row ->
             let rowTemp = dt.NewRow()
@@ -28,7 +28,7 @@ module ExportIOTable =
         row.ItemArray <- cols.Select(fun f -> "" |> box).ToArray()
         row |> dt.Rows.Add |> ignore
 
- 
+
     let  addIOColumn(dt:DataTable) =
 
         dt.Columns.Add($"{IOColumn.Case}", typeof<string>) |> ignore
@@ -45,14 +45,14 @@ module ExportIOTable =
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
-    let toTextPPTFunc (x:TaskDevPara option) =
-        if x.IsSome then 
+    let toTextPPTFunc (x:TaskDevParam option) =
+        if x.IsSome then
             let x = x |> Option.get
-            match x.DevValue, x.DevTime with 
+            match x.DevValue, x.DevTime with
             | Some(v), Some(t) -> $"{v}:{t}ms"
             | Some(v), None    -> $"{v}"
-            | None, Some(v)       -> $"{v}ms"
-            | None, None          -> $""
+            | None, Some(v)    -> $"{v}ms"
+            | None, None       -> $""
         else ""
 
     let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable =
@@ -63,11 +63,11 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let inSym =  toTextPPTFunc btn.TaskDevParamIO.InParam 
+                    let inSym =  toTextPPTFunc btn.TaskDevParamIO.InParam
                     let outSym =  toTextPPTFunc btn.TaskDevParamIO.OutParam
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
                     let dType = getPPTHwDevDataTypeText btn
-                    
+
                     dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, dType,  btn.InAddress, btn.OutAddress ,inSym, outSym)
                     |> ignore
 
@@ -82,31 +82,31 @@ module ExportIOTable =
                     |> ignore
 
 
-        toBtnText (sys.AutoHWButtons, ExcelCase.XlsAutoBTN)
-        toBtnText (sys.ManualHWButtons, ExcelCase.XlsManualBTN)
-        toBtnText (sys.DriveHWButtons, ExcelCase.XlsDriveBTN)
-        toBtnText (sys.PauseHWButtons, ExcelCase.XlsPauseBTN)
-        toBtnText (sys.ClearHWButtons, ExcelCase.XlsClearBTN)
-        toBtnText (sys.EmergencyHWButtons, ExcelCase.XlsEmergencyBTN)
-        toBtnText (sys.HomeHWButtons, ExcelCase.XlsHomeBTN)
-        toBtnText (sys.TestHWButtons, ExcelCase.XlsTestBTN)
-        toBtnText (sys.ReadyHWButtons, ExcelCase.XlsReadyBTN)
-        toLampText (sys.AutoHWLamps, ExcelCase.XlsAutoLamp)
-        toLampText (sys.ManualHWLamps, ExcelCase.XlsManualLamp)
-        toLampText (sys.IdleHWLamps, ExcelCase.XlsIdleLamp)
-        toLampText (sys.ErrorHWLamps, ExcelCase.XlsErrorLamp)
-        toLampText (sys.OriginHWLamps, ExcelCase.XlsHomingLamp)
-        toLampText (sys.ReadyHWLamps, ExcelCase.XlsReadyLamp)
-        toLampText (sys.DriveHWLamps, ExcelCase.XlsDriveLamp)
-        toLampText (sys.TestHWLamps, ExcelCase.XlsTestLamp)
+        toBtnText  (sys.AutoHWButtons,      ExcelCase.XlsAutoBTN)
+        toBtnText  (sys.ManualHWButtons,    ExcelCase.XlsManualBTN)
+        toBtnText  (sys.DriveHWButtons,     ExcelCase.XlsDriveBTN)
+        toBtnText  (sys.PauseHWButtons,     ExcelCase.XlsPauseBTN)
+        toBtnText  (sys.ClearHWButtons,     ExcelCase.XlsClearBTN)
+        toBtnText  (sys.EmergencyHWButtons, ExcelCase.XlsEmergencyBTN)
+        toBtnText  (sys.HomeHWButtons,      ExcelCase.XlsHomeBTN)
+        toBtnText  (sys.TestHWButtons,      ExcelCase.XlsTestBTN)
+        toBtnText  (sys.ReadyHWButtons,     ExcelCase.XlsReadyBTN)
+        toLampText (sys.AutoHWLamps,        ExcelCase.XlsAutoLamp)
+        toLampText (sys.ManualHWLamps,      ExcelCase.XlsManualLamp)
+        toLampText (sys.IdleHWLamps,        ExcelCase.XlsIdleLamp)
+        toLampText (sys.ErrorHWLamps,       ExcelCase.XlsErrorLamp)
+        toLampText (sys.OriginHWLamps,      ExcelCase.XlsHomingLamp)
+        toLampText (sys.ReadyHWLamps,       ExcelCase.XlsReadyLamp)
+        toLampText (sys.DriveHWLamps,       ExcelCase.XlsDriveLamp)
+        toLampText (sys.TestHWLamps,        ExcelCase.XlsTestLamp)
 
 
         dt
 
-    let splitNameForRow(name:string) = 
-        let head = name.Split(TextDeviceSplit)[0];   
+    let splitNameForRow(name:string) =
+        let head = name.Split(TextDeviceSplit)[0];
         let tail = name[(head.Length+TextDeviceSplit.length())..]
-        head, tail 
+        head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
         let inSym  =  dev.GetInParam(job).Name
@@ -114,7 +114,7 @@ module ExportIOTable =
         let inSkip, outSkip = dev.GetSkipInfo(job)
 
         let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.GetApiItem(job).PureName}"
-        [   
+        [
             TextXlsAddress
             flow
             name
@@ -128,10 +128,10 @@ module ExportIOTable =
     let IOchunkBySize = 22
     let ExcelchunkBySize = 1000000
     let PDFchunkBySize = 100
-    
+
 
     let ToDeviceIOTables  (sys: DsSystem) (rowSize:int) target : DataTable seq =
-        
+
         let totalRows =
             seq {
                 let mutable extCnt = 0
@@ -150,12 +150,12 @@ module ExportIOTable =
                     yield rowIOItems (dev, job) target
         }
 
-        let dts = 
-            totalRows 
+        let dts =
+            totalRows
             |> Seq.chunkBySize(rowSize)
             |> Seq.mapi(fun i rows->
                 let dt = new System.Data.DataTable($"{sys.Name} Device IO LIST {i+1}")
-                addIOColumn dt 
+                addIOColumn dt
                 addRows rows dt
                 dt
             )
@@ -165,7 +165,7 @@ module ExportIOTable =
     type Statement with
         member x.ToConditionText() =
             match x with
-            | DuAssign (_condition, expr, _) -> $"{expr.ToText()}" 
+            | DuAssign (_condition, expr, _) -> $"{expr.ToText()}"
             | DuVarDecl (expr, _) -> $"{expr.ToText()}"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
@@ -201,7 +201,7 @@ module ExportIOTable =
 
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
-            
+
                 updateHwAddress (cond) (cond.InAddress, cond.OutAddress) Util.runtimeTarget
                 [
                     ExcelCase.XlsConditionReady.ToText()
@@ -214,12 +214,12 @@ module ExportIOTable =
                     if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.Name else ""
                 ]
             )
-        
+
         let funcText (xs:Statement seq)=    String.Join(";", xs.Select(fun s->s.ToText()))
         let funcOperatorText (xs:Statement seq)=    String.Join(";", xs.Select(fun s->s.ToConditionText()))
-        
+
         let operatorRows =
-            
+
             sys.Functions
                 .OfType<OperatorFunction>()
                                     .Map(fun func->
@@ -236,7 +236,7 @@ module ExportIOTable =
                                       TextSkip
                                       TextSkip
                                       ]
-                                      )   
+                                      )
 
         let commandRows =
             sys.Functions
@@ -244,7 +244,7 @@ module ExportIOTable =
                                     .Map(fun func->
                                     let flow, name = splitNameForRow func.Name
                                     let funcText =    funcText func.Statements
-         
+
 
                                     [ TextXlsCommand
                                       flow
@@ -258,26 +258,26 @@ module ExportIOTable =
                                       )
 
         let variRows = sys.Variables.Map(fun vari->
-                [ 
+                [
                   TextXlsVariable
                   TextXlsAllFlow
                   vari.Name
                   vari.Type.ToText()
-                  if vari.VariableType = Mutable then  TextSkip else vari.InitValue 
+                  if vari.VariableType = Mutable then  TextSkip else vari.InitValue
                   TextSkip
                   TextSkip
                   TextSkip
                   ]
                   )
-                  
+
 
         let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"";"-";"-";"-"]]
         let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"";"-";"-"]]
         let sampleConstRows=  if variRows.any() then [] else  [[TextXlsConst;"-";"";"";"";"-";"-";"-"]]
         let sampleVariRows  =  if variRows.any() then [] else  [[TextXlsVariable;"-";"";"";"-";"-";"-";"-"]]
-        let dts = 
-            getConditionDefListRows (sys.ReadyConditions)  
-            @ commandRows 
+        let dts =
+            getConditionDefListRows (sys.ReadyConditions)
+            @ commandRows
             @ operatorRows
             @ variRows
             @ sampleOperatorRows
@@ -291,15 +291,15 @@ module ExportIOTable =
                 addRows rows dt
                 dt
             )
-     
+
         dts
 
     let getErrorRows(sys:DsSystem) =
-        
+
         let mutable no = 0
         let rowItems (name:string, address :string) =
             no <- no+1
-            [ 
+            [
               $"Alarm{no}"
               name
               address
@@ -307,7 +307,7 @@ module ExportIOTable =
 
         let rows =
             let calls = sys.GetAlarmCalls()
-                        
+
             seq {
                 //1. call, real 부터
                 for call in calls |> Seq.sortBy (fun c -> c.Name) do
@@ -342,7 +342,7 @@ module ExportIOTable =
         addRows rows dt
 
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ErrorColumn>)) dt
-     
+
         emptyLine ()
         dt
 
@@ -358,9 +358,9 @@ module ExportIOTable =
         dt.Columns.Add($"{TextColumn.UnderLine}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.StrikeOut}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.Bold}", typeof<string>) |> ignore
-      
+
         let rowItems (name: string) =
-            [ 
+            [
               name
               ""
               ""
@@ -374,22 +374,22 @@ module ExportIOTable =
 
 
         let alarmList = getErrorRows(sys)
-        let rows= 
+        let rows=
             alarmList
             |> Seq.map (fun err ->
-                                rowItems (err[ErrorColumn.Name|>int]) 
+                                rowItems (err[ErrorColumn.Name|>int])
                         )
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
-     
+
         emptyLine ()
         dt
 
 
-        
 
-    let getLabelTable(name:string) = 
+
+    let getLabelTable(name:string) =
         let dt=  new System.Data.DataTable($"{name}")
         dt.Columns.Add($"{TextColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{TextColumn.Empty1}", typeof<string>) |> ignore
@@ -403,7 +403,7 @@ module ExportIOTable =
         dt
 
     let rowDeviceItems (dev: string) (hasSafety:bool)=
-            [ 
+            [
               dev
               ""
               ""
@@ -420,12 +420,12 @@ module ExportIOTable =
 
         let rows =
             let devs =  sys.GetDevicesForHMI()
-            devs.Select(fun (dev, _)-> 
-                let text = 
+            devs.Select(fun (dev, _)->
+                let text =
                     if dev.MaunualAddress = TextSkip then
-                        ""//"·" 
+                        ""//"·"
                     else
-                        "□" 
+                        "□"
 
                 rowDeviceItems text false
 
@@ -433,7 +433,7 @@ module ExportIOTable =
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
-     
+
         emptyLine ()
         dt
 
@@ -441,14 +441,14 @@ module ExportIOTable =
     let ToFlowNamesTable (sys: DsSystem)  : DataTable =
 
         let dt = getLabelTable "Flow이름"
-      
+
         let rows =
             sys.GetFlowsOrderByName()
                 .Select(fun flow -> rowDeviceItems flow.Name false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
-     
+
         emptyLine ()
         dt
 
@@ -456,14 +456,14 @@ module ExportIOTable =
     let ToWorkNamesTable (sys: DsSystem)  : DataTable =
 
         let dt = getLabelTable "Work이름"
-      
+
         let rows =
                   sys.GetVerticesOfRealOrderByName()
                      .Select(fun r -> rowDeviceItems $"{r.Flow.Name}.{r.Name}" false)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
-     
+
         emptyLine ()
         dt
 
@@ -471,17 +471,17 @@ module ExportIOTable =
     let ToDevicesTable (sys: DsSystem)  : DataTable =
 
         let dt = getLabelTable "디바이스이름"
-      
+
         let rows =
             let devCallSet =  sys.GetDevicesForHMI()
-            devCallSet.Select(fun (dev,call)-> 
-                    
-                    let hasSafety = call.SafetyConditions.Count > 0   
+            devCallSet.Select(fun (dev,call)->
+
+                    let hasSafety = call.SafetyConditions.Count > 0
                     rowDeviceItems (dev.GetApiStgName(call.TargetJob)) hasSafety)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
-     
+
         emptyLine ()
         dt
 
@@ -500,23 +500,23 @@ module ExportIOTable =
         let rows =
             sys.GetVerticesOfRealOrderByName()
             |> Seq.collect (fun real ->
-                let name = $"{real.Flow.Name}_{real.Name}"  
-                [   
-                    yield rowItems ($"{name}_SET", real.V.ON.Address)    
-                    yield rowItems ($"{name}_RESET", real.V.RF.Address)    
-                    yield rowItems ($"{name}_START", real.V.SF.Address)    
-                    yield rowItems ($"{name}_ORIGIN", real.V.OB.Address)    
-                    yield rowItems ($"{name}_ERROR", real.V.ErrTRX.Address)    
-                    yield rowItems ($"{name}_STATE_R", real.V.R.Address)    
-                    yield rowItems ($"{name}_STATE_G", real.V.G.Address)    
-                    yield rowItems ($"{name}_STATE_F", real.V.F.Address)    
-                    yield rowItems ($"{name}_STATE_H", real.V.H.Address)    
+                let name = $"{real.Flow.Name}_{real.Name}"
+                [
+                    yield rowItems ($"{name}_SET", real.V.ON.Address)
+                    yield rowItems ($"{name}_RESET", real.V.RF.Address)
+                    yield rowItems ($"{name}_START", real.V.SF.Address)
+                    yield rowItems ($"{name}_ORIGIN", real.V.OB.Address)
+                    yield rowItems ($"{name}_ERROR", real.V.ErrTRX.Address)
+                    yield rowItems ($"{name}_STATE_R", real.V.R.Address)
+                    yield rowItems ($"{name}_STATE_G", real.V.G.Address)
+                    yield rowItems ($"{name}_STATE_F", real.V.F.Address)
+                    yield rowItems ($"{name}_STATE_H", real.V.H.Address)
                 ]
             )
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
-     
+
         emptyLine ()
         dt
 
@@ -533,7 +533,7 @@ module ExportIOTable =
         let rows =
             sys.GetFlowsOrderByName()
             |> Seq.collect (fun flow ->
-                [   
+                [
                     yield rowItems ($"{flow.Name}_FlowAutoSelect", flow.auto_btn.Address)
                     yield rowItems ($"{flow.Name}_FlowAutoLamp", flow.aop.Address)
                     yield rowItems ($"{flow.Name}_FlowManualSelect", flow.manual_btn.Address)
@@ -547,7 +547,7 @@ module ExportIOTable =
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
-     
+
         emptyLine ()
         dt
 
@@ -566,35 +566,35 @@ module ExportIOTable =
         dt.Columns.Add($"{ManualColumn.Address}", typeof<string>) |> ignore
 
         let rowItems (dev: TaskDev, addr:string) =
-            [ 
+            [
               dev.ApiPureName
               dev.InDataType.ToPLCText()
               addr
                ]
 
         let rows =
-            
+
             let devs = sys.GetDevicesForHMI()
             devs
             |> Seq.collect (fun (dev,_) ->
-                 [   
-                   
+                 [
+
                     match iomType with
                     | IOType.Memory ->
                         yield rowItems (dev, if dev.IsMaunualAddressSkipOrEmpty then HMITempManualAction else dev.MaunualAddress)
                     | IOType.In->
                         yield rowItems (dev, if dev.IsInAddressSkipOrEmpty then HMITempMemory else dev.InAddress)
-                    | IOType.Out ->                            
+                    | IOType.Out ->
                         yield rowItems (dev, if dev.IsOutAddressSkipOrEmpty then HMITempMemory else dev.OutAddress)
 
                     | _ -> failwith "Invalid action tag"
                  ]
-            ) 
+            )
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
 
-     
+
         emptyLine ()
         dt
 
@@ -629,30 +629,30 @@ module ExportIOTable =
         addRows [[ "SimulationLamp"; "bool"; RuntimeDS.EmulationAddress ]] dt
 
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
-     
+
         emptyLine ()
         dt
 
 
-    let ToIOListDataTables (system: DsSystem) rowSize target = 
+    let ToIOListDataTables (system: DsSystem) rowSize target =
         let tableDeviceIOs = ToDeviceIOTables system rowSize target
         let tablePanelIO = ToPanelIOTable system system.Flows true target
         let tabletableFuncVariExternal = ToFuncVariTables system system.Flows true target
-        
+
         let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal
-     
+
         tables
-    
-    
+
+
     let toDataTablesToCSV (dataTables: seq<DataTable>) (fileName:string) =
         let csvContent = new StringBuilder()
 
         // 각 DataTable을 순회
         for dataTable in dataTables do
             // 컬럼 헤더 추가
-            let columnNames = 
-                dataTable.Columns 
-                |> Seq.cast<DataColumn> 
+            let columnNames =
+                dataTable.Columns
+                |> Seq.cast<DataColumn>
                 |> Seq.map (fun col -> "\""+col.ColumnName+"\"")
                 |> Seq.toArray
                 |> (fun array -> String.Join("\t", array))
@@ -690,18 +690,18 @@ module ExportIOTable =
         [<Extension>]
         static member ExportIOListToExcel (sys: DsSystem) (filePath: string) target=
             let dataTables =  ToIOListDataTables sys ExcelchunkBySize target
-            createSpreadsheet filePath (dataTables) 25.0 true     
+            createSpreadsheet filePath (dataTables) 25.0 true
 
         [<Extension>]
         static member ExportIOListToPDF (system: DsSystem) (filePath: string) target=
             let dataTables =  ToIOListDataTables system PDFchunkBySize target
-            convertDataSetToPdf filePath dataTables 
-            
+            convertDataSetToPdf filePath dataTables
+
         [<Extension>]
         static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) target=
             let dataTables = [|
 
-                ToManualTable sys IOType.Memory    
+                ToManualTable sys IOType.Memory
                 ToManualTable sys IOType.In
                 ToManualTable sys IOType.Out
                 ToManualTable_BtnLamp sys
@@ -709,7 +709,7 @@ module ExportIOTable =
                 ToAutoFlowTable sys target
                 ToAutoWorkTable sys target
 
-                ToFlowNamesTable sys 
+                ToFlowNamesTable sys
                 ToWorkNamesTable sys
                 ToDevicesTable sys
                 ToDevicesApiTable sys
@@ -725,6 +725,5 @@ module ExportIOTable =
 
         [<Extension>]
         static member ToDataCSVLayouts (xs: Flow seq) =
-            let dataTable = ToLayoutTable xs 
+            let dataTable = ToLayoutTable xs
             toDataTablesToCSV [dataTable] "LAYOUT"
-      

@@ -14,7 +14,7 @@ module ImportUtilForDev =
 
 
     type DevInfo = { DevName: string; ApiName: string }
-    
+
     let getParams (
         absoluteFilePath: string,
         relativeFilePath: string,
@@ -29,9 +29,9 @@ module ImportUtilForDev =
             LoadedName = loadedName
             ShareableSystemRepository = sRepo
             LoadingType = loadingType }
-          
-  
-    let createAutoGenDev(loadedName, (mySys: DsSystem)) =        
+
+
+    let createAutoGenDev(loadedName, (mySys: DsSystem)) =
         match mySys.LoadedSystems.TryFind(fun f->f.Name = loadedName) with
         | Some autoGenDev ->  autoGenDev
         | None ->
@@ -48,14 +48,14 @@ module ImportUtilForDev =
             mySys.AddLoadedSystem(dev)
             dev
 
-    let getLibraryInfos()= 
+    let getLibraryInfos()=
         let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
         let runDir =
             if Path.Exists (Path.Combine(runDir, "dsLib")) then
                 runDir
             else
-                @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/"      
-                     
+                @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/"
+
         let curDir = currentFileName |> Path.GetDirectoryName
 
         let libConfigPath = Path.Combine(runDir, "dsLib", "Library.config")
@@ -71,7 +71,7 @@ module ImportUtilForDev =
 
     // Call Graph
     // {
-    //      loadSystem > BuildSystem > MakeSegment > createCallVertex > createCall > addNewCall, 
+    //      loadSystem > BuildSystem > MakeSegment > createCallVertex > createCall > addNewCall,
     //                               > MakeSegment > createAutoPre
     // }
     //  > handleActionJob > getLibraryPathsAndParams > getNewDevice
@@ -81,7 +81,7 @@ module ImportUtilForDev =
 
         if LibraryInfos.ContainsKey(apiName) then
             let libPath =  LibraryInfos.[apiName]
-                
+
             let libAbsolutePath = Path.Combine(curDir, libPath)
             let curLibDir = Path.GetDirectoryName libAbsolutePath
             if not (Copylibrary.Contains(libAbsolutePath)) then  //시스템 라이브러리는 한번 덮어쓰기
@@ -91,13 +91,13 @@ module ImportUtilForDev =
                 let sourcePath = PathManager.combineFullPathFile([|runDir; libPath|])
                 let libAbsolutePath = PathManager.combineFullPathFile([|libAbsolutePath|])
                 if sourcePath <> libAbsolutePath
-                then 
+                then
                     File.Copy(sourcePath, libAbsolutePath, true)
 
-                Copylibrary.Add libAbsolutePath |> ignore   
+                Copylibrary.Add libAbsolutePath |> ignore
 
             libAbsolutePath, None
-        else 
+        else
             let autoGenFile = $"./dsLib/AutoGen/{loadedName}.ds"
             let autoGenAbsolutePath =
                 PathManager.getFullPath (autoGenFile |> DsFile) (activeSysDir |> DsDirectory)
@@ -108,33 +108,33 @@ module ImportUtilForDev =
                 let newLoadedDev = createAutoGenDev (loadedName, mySys)
                 autoGenAbsolutePath, Some newLoadedDev
 
-    let addOrGetExistSystem (mySys:DsSystem) loadedSys (loadedName:string) (taskDevParaIO:DeviceLoadParameters) = 
+    let addOrGetExistSystem (mySys:DsSystem) loadedSys (loadedName:string) (taskDevParamIO:DeviceLoadParameters) =
         if not (mySys.LoadedSysExist(loadedName)) then
-            mySys.AddLoadedSystem(Device(loadedSys, taskDevParaIO, false))
+            mySys.AddLoadedSystem(Device(loadedSys, taskDevParamIO, false))
 
         loadedSys
 
-    let getAutoGenTaskDev (autoGenSys:LoadedSystem) loadedName jobName apiName (taskDevParaIO:TaskDevParamIO)= 
+    let getAutoGenTaskDev (autoGenSys:LoadedSystem) loadedName jobName apiName (taskDevParamIO:TaskDevParamIO)=
         let referenceSystem = autoGenSys.ReferenceSystem
-        createTaskDevUsingApiName referenceSystem jobName loadedName apiName  taskDevParaIO
+        createTaskDevUsingApiName referenceSystem jobName loadedName apiName  taskDevParamIO
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:pptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
-        let taskDevParam = node.TaskDevPara 
+        let taskDevParam = node.TaskDevPara
         let jobFqdn = node.Job.Combine()
 
         let devCalls = mySys.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
 
         match devCalls.TryFind(fun (d,c) -> d.GetApiStgName(c.TargetJob) = tastDevKey) with
-        | Some (taskDev, c) -> 
+        | Some (taskDev, c) ->
             let api = loadedSys.ApiItems.First(fun f -> f.Name = apiPureName)
             if not (taskDevParam.IsDefaultParam) then
                 taskDev.AddOrUpdateApiTaskDevPara(jobFqdn, api, taskDevParam)
-            taskDev 
+            taskDev
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName loadParameters
             match devOrg.ApiItems.TryFind(fun f -> f.Name = apiPureName) with
-            | Some api -> 
+            | Some api ->
                 let apiParam = {TaskDevParamIO =  taskDevParam; ApiItem = api}
                 TaskDev(apiParam, jobName, newloadedName, mySys)
             | None ->

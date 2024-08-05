@@ -2,13 +2,8 @@ namespace Engine.Import.Office
 
 open System.Collections.Generic
 open Engine.Core
-open DocumentFormat.OpenXml.Packaging
-open System.Linq
-open System.IO
 open Dual.Common.Core.FS
 open Engine.Parser.FS
-open System.Reflection
-open LibraryLoaderModule
 
 [<AutoOpen>]
 module ImportUtilForLib =
@@ -31,13 +26,13 @@ module ImportUtilForLib =
         | Some f -> f.ReferenceSystem
         | None -> ParserLoader.LoadFromDevicePath libFilePath name Util.runtimeTarget |> fst
 
-    let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (taskDevParaIO: DeviceLoadParameters) =
-        let task = getLoadedTasks param.MySys devOrg loadedName apiPureName taskDevParaIO param.Node (param.Node.Job.Combine())
+    let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (taskDevParamIO: DeviceLoadParameters) =
+        let task = getLoadedTasks param.MySys devOrg loadedName apiPureName taskDevParamIO param.Node (param.Node.Job.Combine())
         tasks.Add(task) |> ignore
 
-    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string)  (taskDevParaIO:TaskDevParamIO)=
+    let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string) (jobName: string) (apiName: string)  (taskDevParamIO:TaskDevParamIO)=
         match autoGenSys with
-        | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName taskDevParaIO|> Some
+        | Some autoGenSys -> getAutoGenTaskDev autoGenSys loadedName jobName apiName taskDevParamIO|> Some
         | None -> None
 
     let addSingleTask (tasks: HashSet<TaskDev>) (task: TaskDev option) =
@@ -65,13 +60,13 @@ module ImportUtilForLib =
 
 
     let handleActionJob (tasks: HashSet<TaskDev>) (param: CallParams) =
-        
+
         for devIdx in 1 .. param.Node.JobParam.TaskDevCount do
             let devName =
                 if param.Node.JobParam.TaskDevCount = 1
-                then 
+                then
                     param.Node.DevName
-                else 
+                else
                     getMultiDeviceName param.Node.DevName devIdx
 
             let libFilePath, autoGenSys, getProperty = getLibraryPathsAndParams (param.WithDevName(devName))
@@ -86,7 +81,7 @@ module ImportUtilForLib =
         let jobForCall =
             match param.MySys.Jobs.TryFind(fun f -> f.DequotedQualifiedName = jobName) with
             | Some existingJob -> existingJob
-            | None -> 
+            | None ->
                 let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
                 job.JobParam <- param.Node.JobParam
                 param.MySys.Jobs.Add(job)

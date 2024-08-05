@@ -11,10 +11,10 @@ module CoreCreateModule =
         let system = DsSystem.Create(systemName)
         system
 
-    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (taskDevParaIO:TaskDevParamIO): TaskDev =
+    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (taskDevParamIO:TaskDevParamIO): TaskDev =
         let apis = sys.ApiItems.Where(fun w -> w.Name = apiName)
 
-        let api = 
+        let api =
             // Check if the API already exists
             if apis.any() then
                 if apis.length() > 1 then
@@ -32,40 +32,40 @@ module CoreCreateModule =
                 let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
                 if reals.Any(fun w -> w.Name = realName) then
                     failwithf $"real {realName} 중복 생성에러"
-               
+
                 // Create a new Real
                 let newReal = Real.Create(realName, flow)
 
-               
+
                 flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
                 newReal.Finished <- true    //마지막 Real이 원위치
-           
-                 
+
+
                   // Create and add a new ApiItem
                 let newApi = ApiItem.Create(apiName, sys, newReal, newReal)
                 sys.ApiItems.Add newApi |> ignore
-             
-                if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리                
+
+                if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리
                     // Iterate over reals up to newReal
                     reals
                         .TakeWhile(fun r -> r <> newReal)
-                        .Iter(fun r -> 
+                        .Iter(fun r ->
                             let exAliasName = $"{r.Name}Alias_{newReal.Name}"
                             let myAliasName = $"{newReal.Name}Alias_{r.Name}"
                             let exAlias = Alias.Create(exAliasName, DuAliasTargetReal r, DuParentFlow flow, false)
                             let myAlias = Alias.Create(myAliasName, DuAliasTargetReal newReal, DuParentFlow flow, false)
-                    
+
                             // Create an edge between myAlias and exAlias
                             flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
-              
-                    // Potentially update other ApiItems based on the new ApiItem  
+
+                    // Potentially update other ApiItems based on the new ApiItem
                     //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
                     //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
-                
+
                 newApi
 
-        let apiPara = {TaskDevParamIO =  taskDevParaIO; ApiItem = api}
-        TaskDev(apiPara, jobName, devName, sys)
+        let apiParam = {TaskDevParamIO =  taskDevParamIO; ApiItem = api}
+        TaskDev(apiParam, jobName, devName, sys)
 
 
     let updateSystemForSingleApi(sys:DsSystem) =
@@ -90,6 +90,6 @@ module CoreCreateModule =
     let loadedSystemsToDsFile(sys:DsSystem) =
 
         sys.LoadedSystems
-            .Iter(fun refSys-> 
+            .Iter(fun refSys->
                 let text = refSys.ReferenceSystem.ToDsText(false, true)
                 fileWriteAllText (refSys.AbsoluteFilePath, text) )

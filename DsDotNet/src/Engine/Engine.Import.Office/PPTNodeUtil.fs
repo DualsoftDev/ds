@@ -18,21 +18,21 @@ module PPTNodeUtilModule =
         let trimSpaceNewLine (text: string) = text |> trimSpace |> trimNewLine
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
- 
-        let getPostParam(param:TaskDevPara option) (prefix:string)=
+
+        let getPostParam(param:TaskDevParam option) (prefix:string)=
             if param.IsNone then ""
             else
                 let param = param |> Option.get
-                match param.DevValue, param.DevTime with 
+                match param.DevValue, param.DevTime with
                 | Some v, None -> $"{prefix}{v}"
                 | Some v, Some t -> $"{prefix}{v}_{t}ms"
                 | None, Some t -> $"{prefix}{t}ms"
                 | None, None -> $""
 
-        let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParaIO:TaskDevParamIO) =
-            let newJob = 
-                let inParaText  = getPostParam taskDevParaIO.InParam "IN"
-                let outParaText = getPostParam taskDevParaIO.OutParam "OUT"
+        let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParamIO:TaskDevParamIO) =
+            let newJob =
+                let inParaText  = getPostParam taskDevParamIO.InParam "IN"
+                let outParaText = getPostParam taskDevParamIO.OutParam "OUT"
 
 
                 if inParaText = "" && outParaText = "" //둘다 없는경우
@@ -40,19 +40,19 @@ module PPTNodeUtilModule =
                     jobFqdn
 
                 elif inParaText = "" && outParaText <> ""  //OUT 만 있는경우
-                then 
+                then
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({outParaText})").ToArray()
-                     
+
                 elif inParaText <> "" && outParaText = ""  //IN 만 있는경우
-                then 
+                then
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText})").ToArray()
 
                 else //둘다 있는경우
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText}_{outParaText})").ToArray()
             newJob
-            
 
-        let getJobNameWithJobParam(jobFqdn:string seq, jobParam:JobParam) =  
+
+        let getJobNameWithJobParam(jobFqdn:string seq, jobParam:JobParam) =
             let jobParamText =  jobParam.ToText()
             match jobParamText with
             | "" -> jobFqdn
@@ -60,11 +60,11 @@ module PPTNodeUtilModule =
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
 
 
-        let getNodeTaskDevPara (shape:Shape, name:string, iPage:int, isRoot, nodeType) = 
+        let getNodeTaskDevPara (shape:Shape, name:string, iPage:int, isRoot, nodeType) =
             let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
-                let getParam x = 
-                        if x = TextSkip then 
+                let getParam x =
+                        if x = TextSkip then
                             "" |> getTaskDevPara |> snd
                         else
                             match getTextValueNType x with
@@ -76,7 +76,7 @@ module PPTNodeUtilModule =
                             | None -> failwithf $"{x} 입력규격을 확인하세요"
 
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-                if func.Contains(",") then 
+                if func.Contains(",") then
 
                     let inFunc, outFunc =
                         func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobParam에서 다시 처리
@@ -84,22 +84,22 @@ module PPTNodeUtilModule =
                     TaskDevParamIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
                 else
                     if isRoot || nodeType = AUTOPRE //생략 규격 입력시에 Root/AUTOPRE 는 조건으로 Real내부는 출력으로 인식
-                    then 
+                    then
                         TaskDevParamIO((getParam func)|>Some, (defaultTaskDevPara())|>Some)
-                    else 
+                    else
                         TaskDevParamIO((defaultTaskDevPara())|>Some, (getParam func)|>Some)
             with _ ->
                 shape.ErrorName((error()), iPage)
 
         let getTrimName(shape:Shape, nameTrim:string) =
             match GetSquareBrackets(nameTrim, false) with
-            | Some text -> 
+            | Some text ->
                 let pureName = nameTrim |> GetBracketsRemoveName |> trimSpaceNewLine
-                if shape.IsHomePlate() then pureName //AA [xxx ~ yyy] 
-                else $"{pureName}[{text}]"   //AA[4] 
+                if shape.IsHomePlate() then pureName //AA [xxx ~ yyy]
+                else $"{pureName}[{text}]"   //AA[4]
             | None -> nameTrim
 
-        let getNodeType(shape:Shape, name:string, iPage:int) = 
+        let getNodeType(shape:Shape, name:string, iPage:int) =
 
             match shape with
             | s when s.IsRectangle() ->
@@ -113,15 +113,15 @@ module PPTNodeUtilModule =
             | s when s.IsBevelShapeRound() -> BUTTON
             | s when s.IsBevelShapeMaxRound() -> CONDITION
             | s when s.IsLayout() -> shape.ErrorName(ErrID._62, iPage)
-            
+
             | _ ->
                 failWithLog ErrID._1
 
 
         let updateRealTime (contents: string) =
-            
+
             let parseSeconds (timeStr: string) : float option =
-                if timeStr = TextSkip 
+                if timeStr = TextSkip
                 then None
                 else
                     let timeStr =timeStr.ToLower().Trim()
@@ -153,7 +153,7 @@ module PPTNodeUtilModule =
 
             let parts = (GetLastParenthesesContents contents).Split(',')
 
-            let goingT, delayT = 
+            let goingT, delayT =
                 if parts.[0] = "" then None, None
                 else
                     match parts.Length with
@@ -167,7 +167,7 @@ module PPTNodeUtilModule =
                     | _ -> (None, None)
 
             goingT, delayT
-        
+
 
         let getBracketItems (name: string) =
                 name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")

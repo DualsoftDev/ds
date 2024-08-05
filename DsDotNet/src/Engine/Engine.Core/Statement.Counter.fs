@@ -1,6 +1,7 @@
 namespace Engine.Core
 
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 
 [<AutoOpen>]
 module CounterStatementModule =

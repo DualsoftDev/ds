@@ -3,6 +3,7 @@ namespace PLC.CodeGen.LS
 open Engine.Core
 open PLC.CodeGen.Common
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System.Collections.Generic
 
 [<AutoOpen>]

@@ -420,8 +420,8 @@ module internal DBLoggerImpl =
     /// 지정된 조건에 따라 마지막 'Value'를 반환
     let getLastValue (logSet: LogSet, fqdn: string, tagKind: int) : bool option =
         option {
-            let! storage = logSet.Storages.TryFind((tagKind, fqdn))
-            let! lastLog = logSet.LastLogs.TryFind(storage)
+            let! storage = logSet.Storages.TryFindValue((tagKind, fqdn))
+            let! lastLog = logSet.LastLogs.TryFindValue(storage)
             return lastLog.Value |> toBool
         }
 

@@ -369,12 +369,12 @@ module XgiExportModule =
         /// XgxPOUParams 의 commented statements 중에서 UDT 선언을 제외한 나머지를 복사하여 반환
         member x.DuplicateExcludingUdtDeclarations() : XgxPOUParams =
             let g = x.GroupStatementsByUdtDeclaration()
-            { x with CommentedStatements = g.TryFindIt("non-udt").DefaultValue([]) }
+            { x with CommentedStatements = g.TryFindValue("non-udt").DefaultValue([]) }
 
         /// XgxPOUParams 의 commented statements 중에서 UDT 선언문 반환
         member x.GetUdtDeclarations() : UdtDecl list =
             let g = x.GroupStatementsByUdtDeclaration()
-            match g.TryFindIt("udt-decl") with
+            match g.TryFindValue("udt-decl") with
             | Some decl -> decl |> map (fun cs ->
                 match cs.Statement with
                 | DuUdtDecl udt -> udt
@@ -384,7 +384,7 @@ module XgiExportModule =
         /// XgxPOUParams 의 commented statements 중에서 UDT 변수 정의문 반환
         member x.GetUdtDefs() : UdtDef list =
             let g = x.GroupStatementsByUdtDeclaration()
-            match g.TryFindIt("udt-instances") with
+            match g.TryFindValue("udt-instances") with
             | Some inst -> inst |> map (fun cs ->
                 match cs.Statement with
                 | DuUdtDef udt -> udt

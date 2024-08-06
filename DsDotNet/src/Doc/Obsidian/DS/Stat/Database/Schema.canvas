@@ -1,9 +1,9 @@
 {
 	"nodes":[
-		{"id":"ca4fa6fc75c028d7","x":-880,"y":-300,"width":660,"height":300,"type":"file","file":"Stat/Database/Tables/Storage.md"},
-		{"id":"98b2d898533b265b","x":-40,"y":-300,"width":580,"height":260,"type":"file","file":"Stat/Database/Tables/Log.md"},
-		{"id":"e91fc87aed67721a","x":-40,"y":29,"width":580,"height":271,"type":"file","file":"Stat/Database/Tables/Property.md"},
-		{"id":"fa6fe62c711df343","x":-890,"y":80,"width":680,"height":251,"type":"file","file":"Stat/Database/Tables/TagKind.md"}
+		{"id":"ca4fa6fc75c028d7","type":"file","file":"DS/Stat/Database/Tables/Storage.md","x":-880,"y":-300,"width":660,"height":300},
+		{"id":"98b2d898533b265b","type":"file","file":"DS/Stat/Database/Tables/Log.md","x":-40,"y":-300,"width":580,"height":260},
+		{"id":"e91fc87aed67721a","type":"file","file":"DS/Stat/Database/Tables/Property.md","x":-40,"y":29,"width":580,"height":271},
+		{"id":"fa6fe62c711df343","type":"file","file":"DS/Stat/Database/Tables/TagKind.md","x":-890,"y":80,"width":680,"height":251}
 	],
 	"edges":[
 		{"id":"7d3d52d481519d17","fromNode":"ca4fa6fc75c028d7","fromSide":"bottom","toNode":"fa6fe62c711df343","toSide":"top"},

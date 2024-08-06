@@ -11,11 +11,14 @@
             "id": "c6339de9e3ad10fa",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "DS/Engine.Core/Core 자료 구조.md",
-                "mode": "source",
-                "source": false
+                "file": "DS/Stat/Database/Schema.canvas",
+                "viewState": {
+                  "x": -175,
+                  "y": 15.5,
+                  "zoom": -0.40013443495352524
+                }
               }
             }
           }
@@ -85,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "DS/Engine.Core/Core 자료 구조.md",
+                "file": "DS/Stat/Database/Schema.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -102,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "DS/Engine.Core/Core 자료 구조.md",
+                "file": "DS/Stat/Database/Schema.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -125,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "DS/Engine.Core/Core 자료 구조.md"
+                "file": "DS/Stat/Database/Schema.canvas"
               }
             }
           }
@@ -148,14 +151,24 @@
   },
   "active": "c6339de9e3ad10fa",
   "lastOpenFiles": [
+    "DS/Stat/Database/Tables/Property.md",
+    "DS/Stat/Database/Schema.canvas",
+    "DS/Stat/Database/Schema.md",
+    "DS/Stat/Database/Tables/Storage.md",
+    "DS/Stat/Database/Database.md",
+    "DS/Stat/Database/Tables/TagKind.md",
+    "DS/Stat/Database/Tables/Log.md",
+    "DS/Others/Powerpoint Addin's.md",
+    "DS/Others/PLC 생성.md",
+    "DS/Global/Common assembly.md",
+    "DS/Engine.Core/DsSystem.md",
+    "DS/Engine.Core/DsCPU.md",
     "DS/Engine.Core/Core Dll hierarchy.canvas",
     "DS/Engine.Core/Core 자료 구조.md",
-    "DS/Engine.Core/DsSystem.md",
     "DS/Engine.Core/FQDN.canvas",
     "DS/Engine.Core/ITagManager.canvas",
     "DS/DsWebServer/HMI/Browser UI/CompHmiButtonColumn.md",
     "DS/DsWebServer/HMI/Browser UI/0. PageHmi.canvas",
-    "DS/Engine.Core/DsCPU.md",
     "DS/Engine.Core/Untitled.canvas",
     "DS/DsWebServer/HMI/TagWeb.md",
     "DS/DsWebServer/HMI"

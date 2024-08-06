@@ -10,7 +10,8 @@
 	- props             -> STANDFLMS
 	- versions
 - DsSystem
-	- Flows, loadedDevices, apiUsage, GetHMI(), _on, ...
+	- Flows, Jobs, TaskDevs, Functions, Variables,  loadedDevices, HwSystemDefs, ApiItems,  Versions
+	- GetHMI()
 - Flow
 	- Graph, modelingEdges, AliaseDefs, GetHMI()
 - FQDNObject
@@ -34,6 +35,7 @@
 	- {In, Out} x {Params, Address, Tag}, ManualAddress, ApiParams, ApiItems, 
 	- PlanStart, PlanEnd
 	- "Device1".Adv 에서 Device1 에 해당
+	- System.Devices 에 소속
 - TaskDevParam
 	- name, type, value, time
 - Real
@@ -47,3 +49,7 @@
 	- Tx/Rx (Real), Time
 - Alias
 	- Target
+- STANDFLMS
+	- REAL : T, N, F, M, S
+	- Call : S, A, D (Safety, AutoPre, Disabled)
+	- Device: L (Layout -> Device.ChannelPoints)

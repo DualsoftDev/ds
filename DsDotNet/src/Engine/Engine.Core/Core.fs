@@ -444,7 +444,7 @@ module CoreModule =
 
     type TaskDev (apiParam:ApiParam, parentJob:string, deviceName:string, parentSys:DsSystem) =
         inherit FqdnObject(apiParam.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
-        let dicTaskTaskDevParamIO  = Dictionary<string, ApiParam>()
+        let dicTaskTaskDevParamIO = Dictionary<string, ApiParam>()
         do
             dicTaskTaskDevParamIO.Add (parentJob, apiParam)
 
@@ -495,7 +495,7 @@ module CoreModule =
         member val SettingFlows = flows with get, set
         //SettingFlows 없으면 전역 시스템 설정
         member val IsGlobalSystemHw = flows.IsEmpty()
-        member val TaskDevParamIO  = taskDevParamIO  with get, set
+        member val TaskDevParamIO = taskDevParamIO with get, set
         member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.Type | None -> DuBOOL
         member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.Type | None -> DuBOOL
 

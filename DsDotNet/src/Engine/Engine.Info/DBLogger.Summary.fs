@@ -74,8 +74,6 @@ module DBLoggerORM2 =
 
     /// DB logging 관련 전체 설정
     and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: ORMStorage seq, readerWriterType: DBLoggerType) as this =
-        let storageDic = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toReadOnlyDictionary
-
         let summaryDic =
             storages
             |> map (fun s ->
@@ -83,21 +81,21 @@ module DBLoggerORM2 =
                 key, Summary(this, key, [||]))
             |> Tuple.toReadOnlyDictionary
 
-        let systems = systems |> toArray
-
-        let disposables = new CompositeDisposable()
-
-        member x.Systems = systems
-        member val QuerySet = queryCriteria with get, set
         member x.Summaries = summaryDic
-        member x.Storages = storageDic
-        member val StoragesById = Dictionary<int, ORMStorage>() // mutable
-        member val LastLogs = Dictionary<ORMStorage, Log>() // mutable
-        member val TheLastLog: Log option = None with get, set
         member x.ModelId = queryCriteria.ModelId
         member x.ReaderWriterType = readerWriterType
-        member x.Disposables = disposables
         member x.GetSummary(summaryKey: StorageKey) = summaryDic[summaryKey]
+
+        member val Systems = systems |> toArray
+        member val QuerySet = queryCriteria with get, set
+        member val Storages = storages |> map (fun s -> getStorageKey s, s) |> Tuple.toReadOnlyDictionary
+
+        // { mutables
+        member val StoragesById = Dictionary<int, ORMStorage>()
+        member val LastLogs = Dictionary<ORMStorage, Log>()
+        member val TheLastLog: Log option = None with get, set
+        member val Disposables = new CompositeDisposable()
+        // } mutables
 
         interface ILogSet with
             override x.Dispose() =
@@ -229,7 +227,7 @@ type LoggerDBSettingsExt =
 
         match optModel with
         | Some m ->
-            let propSql = 
+            let propSql =
                 $"""INSERT OR REPLACE INTO [{Tn.Property}]
                     (name, value)
                     VALUES(@Name, @Value);"""
@@ -239,7 +237,7 @@ type LoggerDBSettingsExt =
             logInfo $"With new Model: id = {m.Id}, path={path}"
             loggerDBSettings.ModelId <- m.Id
         | _ ->
-            let modelId = 
+            let modelId =
                 conn.InsertAndQueryLastRowIdAsync(tr,
                     $"""INSERT INTO [{Tn.Model}]
                         (path, runtime)
@@ -255,12 +253,12 @@ type LoggerDBSettingsExt =
                 let query = $"INSERT INTO [{Tn.TagKind}] (id, name) VALUES (@Id, @Name);"
                 conn.Execute(query, {| Id = id; Name = name |}, tr) |> ignore
 
-                
+
         tr.Commit()
 
         loggerDBSettings.ModelId, path
 
-            
+
 
 
 [<AutoOpen>]

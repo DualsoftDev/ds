@@ -32,6 +32,10 @@
 		- CallVertexTagManager, RealVertexTagManager
 - TaskDev
 	- {In, Out} x {Params, Address, Tag}, ManualAddress, ApiParams, ApiItems, 
+	- PlanStart, PlanEnd
+	- "Device1".Adv 에서 Device1 에 해당
+- TaskDevParam
+	- name, type, value, time
 - Real
 	- Graph, ModelingEdges,
 	- ExternalTags

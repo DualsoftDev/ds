@@ -209,11 +209,11 @@ module CoreExtensionModule =
             | None -> defaultTaskDevParam()
         member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
 
-        member x.GetApiPara(jobFqdn:string) = x.DicTaskTaskDevParamIO[jobFqdn]
-        member x.GetApiPara(job:Job) = x.GetApiPara(job.DequotedQualifiedName)
+        member x.GetApiParam(jobFqdn:string) = x.DicTaskTaskDevParamIO[jobFqdn]
+        member x.GetApiParam(job:Job) = x.GetApiParam(job.DequotedQualifiedName)
 
-        member x.GetApiItem(jobFqdn:string) = x.GetApiPara(jobFqdn).ApiItem
-        member x.GetApiItem(job:Job) = x.GetApiPara(job.DequotedQualifiedName).ApiItem
+        member x.GetApiItem(jobFqdn:string) = x.GetApiParam(jobFqdn).ApiItem
+        member x.GetApiItem(job:Job) = x.GetApiParam(job.DequotedQualifiedName).ApiItem
 
         ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
         member x.GetApiStgName(jobFqdn:string) = $"{x.DeviceName}_{x.GetApiItem(jobFqdn).Name}"
@@ -222,7 +222,7 @@ module CoreExtensionModule =
         member x.DeviceApiPureName(jobFqdn:string) = $"{x.DeviceName}.{x.GetApiItem(jobFqdn).PureName}"  //STN2.Device1."ROTATE(IN300_OUT400)"  파레메터 없는 ROTATE 순수이름만
         member x.DeviceApiPureName(job:Job) = x.DeviceApiPureName(job.DequotedQualifiedName)
 
-        member x.DeviceApiToDsText(jobFqdn:string)= $"{x.DeviceName.QuoteOnDemand()}.{x.GetApiItem(jobFqdn).Name.QuoteOnDemand()}"
+        member x.DeviceApiToDsText(jobFqdn:string) = $"{x.DeviceName.QuoteOnDemand()}.{x.GetApiItem(jobFqdn).Name.QuoteOnDemand()}"
         member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.DequotedQualifiedName)
 
 
@@ -230,7 +230,7 @@ module CoreExtensionModule =
             if x.ApiItems.any(fun f->f.PureName <> api.PureName) then
                 failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
 
-            if not (x.DicTaskTaskDevParamIO.ContainsKey   jobFqdn) then
+            if not (x.DicTaskTaskDevParamIO.ContainsKey jobFqdn) then
                 x.DicTaskTaskDevParamIO.Add(jobFqdn, {TaskDevParamIO = taskDevParamIO; ApiItem = api})
             else
                 ()

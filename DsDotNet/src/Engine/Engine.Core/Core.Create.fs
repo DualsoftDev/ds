@@ -12,17 +12,12 @@ module CoreCreateModule =
         system
 
     let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (taskDevParamIO:TaskDevParamIO): TaskDev =
-        let apis = sys.ApiItems.Where(fun w -> w.Name = apiName)
+        let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
 
         let api =
             // Check if the API already exists
-            if apis.any() then
-                if apis.length() > 1 then
-                    failwithf $"system {sys.Name} api {apiName} 중복 존재"
-                else
-                    apis.First()
-
-            else
+            match apis with
+            | [] ->
                 // Add a default flow if no flows exist
                 if sys.Flows.IsEmpty() then
                     sys.Flows.Add(Flow.Create("genFlow", sys)) |> ignore
@@ -63,6 +58,9 @@ module CoreCreateModule =
                     //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
 
                 newApi
+            | api::[] -> api
+            | _ ->
+                failwithf $"system {sys.Name} api {apiName} 중복 존재"
 
         let apiParam = {TaskDevParamIO =  taskDevParamIO; ApiItem = api}
         TaskDev(apiParam, jobName, devName, sys)

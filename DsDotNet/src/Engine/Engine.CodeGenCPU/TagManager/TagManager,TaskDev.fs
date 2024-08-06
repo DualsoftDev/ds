@@ -50,8 +50,8 @@ module TaskDevManagerModule =
         member x.PlanEnd(api:ApiParam)    = pes[api] 
         member x.PlanOutput(api:ApiParam) = pos[api] 
 
-        member x.PlanStart(job:Job)  = x.PlanStart(x.TaskDev.GetApiPara(job))
-        member x.PlanEnd(job:Job)    = x.PlanEnd(x.TaskDev.GetApiPara(job)) 
-        member x.PlanOutput(job:Job) = x.PlanOutput(x.TaskDev.GetApiPara(job)) 
+        member x.PlanStart(job:Job)  = x.PlanStart(x.TaskDev.GetApiParam(job))
+        member x.PlanEnd(job:Job)    = x.PlanEnd(x.TaskDev.GetApiParam(job)) 
+        member x.PlanOutput(job:Job) = x.PlanOutput(x.TaskDev.GetApiParam(job)) 
 
         

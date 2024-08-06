@@ -90,14 +90,14 @@ module rec DsTaskDevType =
         let inParam = createTaskDevParam None (Some(DuBOOL)) (Some(true)) None
         TaskDevParamIO (inParam|>Some, None)
 
-    let changeSymbolTaskDevPara(x: TaskDevParam option) (symbol: string option) =
+    let changeSymbolTaskDevParam(x: TaskDevParam option) (symbol: string option) =
         if x.IsNone then defaultTaskDevParam()
         else
             let x = x |> Option.get
             createTaskDevParam symbol x.DevType x.DevValue x.DevTime
 
     let changeParam(jobName: string, paramDic: Dictionary<string, TaskDevParam>, symbol: string option) =
-        let changedTaskDevPara = changeSymbolTaskDevPara(Some(paramDic.[jobName])) (symbol)
+        let changedTaskDevPara = changeSymbolTaskDevParam(Some(paramDic.[jobName])) (symbol)
         paramDic.Remove(jobName) |> ignore
         paramDic.Add(jobName, changedTaskDevPara)
 

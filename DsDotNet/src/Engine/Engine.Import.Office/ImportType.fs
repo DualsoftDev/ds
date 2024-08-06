@@ -135,8 +135,8 @@ module ImportType =
 
     let updatePptHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
 
-        let inParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.InParam) inSym
-        let outParam = changeSymbolTaskDevPara (hwDev.TaskDevParamIO.OutParam) inSym
+        let inParam = changeSymbolTaskDevParam (hwDev.TaskDevParamIO.InParam) inSym
+        let outParam = changeSymbolTaskDevParam (hwDev.TaskDevParamIO.OutParam) inSym
 
         hwDev.TaskDevParamIO <-  TaskDevParamIO(Some inParam, Some outParam)
 

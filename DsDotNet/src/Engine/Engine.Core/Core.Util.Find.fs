@@ -289,6 +289,11 @@ type FindExtension =
                     let reals = xs.OfType<Real>()
                     let aliasTargetReals = xs.OfType<Alias>().Choose(fun s->s.TryGetPureReal())
                     reals@aliasTargetReals
+
+    [<Extension>] static member GetPureCalls (xs:Vertex seq) = 
+                    let calls = xs.OfType<Call>()
+                    let aliasTargetCalls = xs.OfType<Alias>().Choose(fun s->s.TryGetPureCall())
+                    calls@aliasTargetCalls
       
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs

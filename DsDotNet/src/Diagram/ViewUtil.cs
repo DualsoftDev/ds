@@ -28,6 +28,8 @@ using static Engine.Core.TagKindModule.TagDS;
 using static Engine.Import.Office.ImportViewModule;
 using static Engine.Import.Office.ViewModule;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.VariantTypes;
 
 namespace Diagram.View.MSAGL
 {
@@ -171,13 +173,19 @@ namespace Diagram.View.MSAGL
                     {
                         HandleTaskDevEvent(rx as EventTaskDev);
                     }
-         
+
                     if (SaveLog)
                     {
                         uint? token = null;
-                        if (eventVertex?.Target is Real r)
-                            token = r.GetRealToken();
-
+                        uint? srctoken = null;
+                        if (rx.IsVertexTokenTag())
+                        {
+                            if (eventVertex?.Target is Real r)
+                                token = r.GetRealToken();
+                            if (eventVertex?.Target is Call c)  //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
+                                srctoken = c.GetSourceToken();
+                        }
+                        //srctoken 처리 대기
                         DBLog.InsertValueLog(DateTime.Now, rx, token);
                     }
                 });

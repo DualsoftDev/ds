@@ -57,8 +57,7 @@ module ConvertCPU =
 
                 if isActive then
                     yield! vr.R6_RealTokenMove() 
-                    yield! vr.F6_SEQTempNumGeneration() //test ahn
-                    yield vr.F5_HomeCommand()
+                    yield vr.F7_HomeCommand()
 
                 
                 yield! vr.D1_DAGHeadStart()
@@ -75,6 +74,7 @@ module ConvertCPU =
             if IsSpec (v, CallInFlow, AliasNotCare) then
                 let vc = v.TagManager :?> CallVertexTagManager
                 yield vc.F4_CallEndInFlow()
+                yield! vc.F5_SourceTokenNumGeneration()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CallVertexTagManager

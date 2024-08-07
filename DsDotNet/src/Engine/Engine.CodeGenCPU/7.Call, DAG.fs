@@ -45,7 +45,7 @@ type VertexTagManager with
     member v.D1_DAGHeadStart() =
         let real = v.Vertex :?> Real
         let v = v :?> RealVertexTagManager
-        let coins = real.Graph.Inits.Select(getVMCoin)
+        let coins = real.Graph.Inits.Select(getVMCall)
         let f = getFuncName()
         [|
             for coin in coins do
@@ -59,7 +59,7 @@ type VertexTagManager with
 
     member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
-        let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCoin).ToArray()
+        let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCall).ToArray()
 
         [|
             let f = getFuncName()
@@ -74,7 +74,7 @@ type VertexTagManager with
 
     member v.D3_DAGCoinEnd() =
         let real = v.Vertex :?> Real
-        let coins = real.Graph.Vertices.Select(getVMCoin)
+        let coins = real.Graph.Vertices.Select(getVMCall)
         let f = getFuncName()
         [|
             for coin in coins do
@@ -98,7 +98,7 @@ type VertexTagManager with
 
     member v.D4_DAGCoinReset() =
         let real = v.Vertex :?> Real
-        let children = real.Graph.Vertices.Select(getVMCoin)
+        let children = real.Graph.Vertices.Select(getVMCall)
         let f = getFuncName()
         [|
             for child in children do

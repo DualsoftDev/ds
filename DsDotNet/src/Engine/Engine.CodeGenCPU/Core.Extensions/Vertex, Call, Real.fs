@@ -131,7 +131,7 @@ module ConvertCpuVertex =
             else []
 
         member c.Errors = 
-            let vmc = getVMCoin(c)
+            let vmc = getVMCall(c)
             [|
                 vmc.ErrOnTimeOver
                 vmc.ErrOnTimeShortage 
@@ -168,27 +168,28 @@ module ConvertCpuVertex =
             | _ ->  
                 c._off.Expr
 
+        member r.SourceToken:uint32 = r.V.GetVertexTag(VertexTag.sourceToken).BoxedValue :?> uint32
 
     type Real with
         member r.V = r.TagManager :?> RealVertexTagManager
 
         member r.RealToken:uint32 = r.V.GetVertexTag(VertexTag.realToken).BoxedValue :?> uint32
 
-        member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ST)
-        member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.RT)
-        member r.CoinETContacts = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ET)
-        member r.CoinAllContacts = r.Graph.Vertices.Select(getVMCoin)|>Seq.collect(fun f->[f.ST;f.RT;f.ET])
+        member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ST)
+        member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.RT)
+        member r.CoinETContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ET)
+        member r.CoinAllContacts = r.Graph.Vertices.Select(getVMCall)|>Seq.collect(fun f->[f.ST;f.RT;f.ET])
 
         member r.CoinAlloffExpr = !@r.V.CoinAnyOnST.Expr <&&> !@r.V.CoinAnyOnRT.Expr <&&> !@r.V.CoinAnyOnET.Expr
 
-        member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOnTimeOver) 
-        member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOnTimeShortage) 
+        member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeOver) 
+        member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeShortage) 
         
-        member r.ErrOffTimeOvers   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOffTimeOver) 
-        member r.ErrOffTimeShortages   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOffTimeShortage) 
+        member r.ErrOffTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeOver) 
+        member r.ErrOffTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeShortage) 
 
-        member r.ErrOpens   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrOpen) 
-        member r.ErrShorts   = r.Graph.Vertices.Select(getVMCoin).Select(fun f->f.ErrShort) 
+        member r.ErrOpens   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOpen) 
+        member r.ErrShorts   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrShort) 
 
         member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeShortages 
                             @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages 
@@ -198,4 +199,9 @@ module ConvertCpuVertex =
 type RealExt =
     [<Extension>]
     static member GetRealToken(r:Real):uint32 = r.RealToken
+
+[<Extension>]
+type CallExt =
+    [<Extension>]
+    static member GetSourceToken(c:Call):uint32 = c.SourceToken  
 

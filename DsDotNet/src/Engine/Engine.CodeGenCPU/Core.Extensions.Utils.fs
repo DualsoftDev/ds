@@ -13,7 +13,7 @@ module ConvertCoreExtUtils =
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexTagManager
     let getVMReal(v:Vertex) = v.TagManager :?> RealVertexTagManager
-    let getVMCoin(v:Vertex) = v.TagManager :?> CallVertexTagManager
+    let getVMCall(v:Vertex) = v.TagManager :?> CallVertexTagManager
 
     let getTarget (x:DsSystem) = (x.TagManager :?> SystemManager).TargetType
     let getSM (x:DsSystem) = x.TagManager :?> SystemManager
@@ -22,7 +22,7 @@ module ConvertCoreExtUtils =
     let getDM (x:TaskDev)  = x.TagManager :?> TaskDevManager
 
 
-    let errText (x:Call)  = getVMCoin(x).ErrorText
+    let errText (x:Call)  = getVMCall(x).ErrorText
 
     let createHwApiBridgeTag (x:HwSystemDef, sys:DsSystem)  =
         let hwApi =   sys.HwSystemDefs.First(fun f->f.Name = x.Name)

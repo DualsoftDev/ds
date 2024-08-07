@@ -171,6 +171,13 @@ type TagKindExt =
                                                     )
         | _ -> false
 
+    [<Extension>]
+    static member IsVertexTokenTag(x:TagDS) =
+        match x with
+        | EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.sourceToken
+                                                     , VertexTag.sourceToken
+                                                    )
+        | _ -> false
 
     [<Extension>]
     static member IsVertexErrTag(x:TagDS) =

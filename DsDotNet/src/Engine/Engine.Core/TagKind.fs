@@ -156,7 +156,8 @@ module TagKindList =
     | realLink                  = 11027
     | callMemo                  = 11028
     | realToken                 = 11029
-
+    | sourceToken               = 11030
+    
     | dummyCoinSTs              = 11032
     | dummyCoinRTs              = 11033
     | dummyCoinETs              = 11034

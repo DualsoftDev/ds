@@ -77,18 +77,32 @@ type RealVertexTagManager with
         |]
 
     member v.R6_RealTokenMove() = 
+        let fn = getFuncName()
         let srcs = getStartEdgeSources(v.Vertex)
-        let transCausalReals =
+        let causalReals =
             srcs.GetPureReals()
                 .Where(fun w-> not(w.NoTransData))
-        let fn = getFuncName()
+        
+        let causalCalls = srcs.GetPureCalls()
+        let tgtTagSEQ = v.RealTokenData
 
-        [|
-            if transCausalReals.any() then
-                let srcTagSEQ = transCausalReals.First().VR.RealTokenData  
-                let tgtTagSEQ = v.RealTokenData
+        match causalReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
+        | _, true -> 
+
+            let srcTagSEQ = causalCalls.First().VC.SourceTokenData  
+            [|
                 yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, fn)
-        |]
+            |]  
+        | true, false -> 
+
+            let srcTagSEQ = causalReals.First().VR.RealTokenData  
+            [|
+                yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, fn)
+            |]
+
+        | false, false ->
+            [||]
+
 
     member v.R7_RealGoingOriginError() =
         let fn = getFuncName()

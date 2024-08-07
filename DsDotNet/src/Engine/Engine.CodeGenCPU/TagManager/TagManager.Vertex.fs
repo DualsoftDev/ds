@@ -142,6 +142,7 @@ module TagManagerModule =
             | VertexTag.txErrOffTimeOver     -> callM().ErrOffTimeOver     :> IStorage
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
+            | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
 
             | VertexTag.realOriginInit       -> realM().RO :> IStorage
             | VertexTag.realOriginButton     -> realM().OB :> IStorage
@@ -181,7 +182,7 @@ module TagManagerModule =
 
         ///Real SEQ Data
         member val RealTokenData = realTokenData
-
+        
         /// Real Origin Init
         member val RO         = createTag false VertexTag.realOriginInit
         /// Real Origin Btn
@@ -231,7 +232,14 @@ module TagManagerModule =
         let s =  sys.TagManager.Storages
         let sysManager = sys.TagManager :?> SystemManager
         let createTag (autoAddr:bool) (vertexTag:VertexTag) : PlanVar<bool> = createTagOnVertex v autoAddr vertexTag
+        
+        let sourceTokenData  = 
+            let vertexTag = VertexTag.sourceToken |> int
+            let name = $"{v.QualifiedName}_{VertexTag.sourceToken}" |> validStorageName
+            createPlanVar s name DuUINT32 true v vertexTag sys  
 
+        ///Source SEQ Data
+        member val SourceTokenData = sourceTokenData
 
         ///Ring Counter
         member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)

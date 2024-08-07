@@ -81,27 +81,18 @@ type VertexTagManager with
 
         (sets, v._off.Expr) --| (v.ET, getFuncName())
 
-    member v.F5_HomeCommand() =
-        let real = v.Vertex :?> Real
-        (real.Flow.HomeExpr , v._off.Expr) --| (real.VR.OA, getFuncName())
-
-    member v.F6_SEQTempNumGeneration() =
-        let real = v.Vertex :?> Real
-        let g = real.Parent.GetGraph()
-        let sEdges =
-            g.Edges
-                .Where(fun e -> e.EdgeType = EdgeType.Start)
-                .Where(fun e -> e.Target.GetPure() = v.Vertex)
-                     
-        let startCausals =  sEdges.Select(fun f->f.Source).OfType<Call>() //alias 는 제외
+ 
+    member v.F5_SourceTokenNumGeneration() =
+        let vc = getVMCall v.Vertex
         let fn = getFuncName()
         [|
-            if startCausals.any() then 
-                let tempRisingRelay = v.System.GetTempBoolTag("tempRising") 
-                let srcTrigger = startCausals.First().VC.ET.Expr
-
-                yield (srcTrigger, v._off.Expr) --| (tempRisingRelay, fn)
-                yield (tempRisingRelay.Expr, 1u|>literal2expr, real.VR.RealTokenData.ToExpression()) --+ (real.VR.RealTokenData, fn)
+            let tempRisingRelay = v.System.GetTempBoolTag("tempSourceTokenNumRising") 
+            yield (v.ET.Expr, v._off.Expr) --| (tempRisingRelay, fn)
+            yield (tempRisingRelay.Expr, 1u|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
         |]
 
-        
+     
+
+    member v.F7_HomeCommand() =
+        let real = v.Vertex :?> Real
+        (real.Flow.HomeExpr , v._off.Expr) --| (real.VR.OA, getFuncName())

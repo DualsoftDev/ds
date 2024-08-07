@@ -460,6 +460,9 @@ module XgiExportModule =
              *)
             let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> DualXmlNode.ofString
 
+            (*
+             * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.  추후 다른 대안 모색 필요.
+             *)
             for r in rungsXml.GetChildrenNodes() do
                 onlineUploadData.InsertBefore r |> ignore
 
@@ -487,7 +490,7 @@ module XgiExportModule =
                     let newPrjParam = {
                         prjParam with
                             CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
-                            TimerCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
+                            TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
                     }
                     doc, newPrjParam
                 | _, None ->
@@ -500,13 +503,14 @@ module XgiExportModule =
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
             prjParam.SanityCheck()
 
-            let {   ProjectName = projName
+            let {
+                    ProjectName = projName
                     TargetType = targetType
                     ProjectComment = projComment
                     GlobalStorages = globalStorages
                     EnableXmlComment = enableXmlComment
-                    POUs = pous } =
-                prjParam
+                    POUs = pous
+                } = prjParam
 
             // todo : 사전에 처리 되었어야...
             for g in globalStorages.Values do
@@ -520,10 +524,12 @@ module XgiExportModule =
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
 
             let existingTaskPous =
-                    [   for p in programs do
-                            let taskName = p.GetAttribute("Task")
-                            let pouName = p.FirstChild.OuterXml
-                            taskName, pouName ]
+                [
+                    for p in programs do
+                        let taskName = p.GetAttribute("Task")
+                        let pouName = p.FirstChild.OuterXml
+                        taskName, pouName
+                ]
 
 
             (* validation : POU 중복 이름 체크 *)
@@ -666,11 +672,11 @@ module XgiExportModule =
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
                 let mainScanName =
-                    if existingTaskPous.any() then
-                        existingTaskPous.First() |> fst
-                    else
+                    match existingTaskPous with
+                    | [] ->
                         let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First()
                         task.FirstChild.OuterXml
+                    | p::_ -> p |> fst
 
 
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램

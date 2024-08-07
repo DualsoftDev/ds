@@ -460,12 +460,26 @@ module XgiExportModule =
              *)
             let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> DualXmlNode.ofString
 
-            (*
-             * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.  추후 다른 대안 모색 필요.
-             *)
-            for r in rungsXml.GetChildrenNodes() do
-                onlineUploadData.InsertBefore r |> ignore
+            let _, ms = duration(fun() ->
+                (*
+                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.
+                 *)
+                // (* Naive version *)
+                //for r in rungsXml.GetChildrenNodes() do
+                //    onlineUploadData.InsertBefore r |> ignore
 
+                // (* 성능 고려 version *)
+                match rungsXml.GetChildrenNodes().ToFSharpList() with
+                | [] -> ()
+                | r::[] -> onlineUploadData.InsertBefore r |> ignore
+                | r::tails ->
+                    if tails.Length > 30 then
+                        ()
+                    let node = onlineUploadData.InsertBefore r
+                    for r in tails.Reverse() do
+                        node.InsertAfter r |> ignore
+            )
+            tracefn ($"Total {ms} milliseconds")
             (*
              * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
              *)

@@ -124,6 +124,22 @@ type TagKindExt =
         $"{tagName}({value})"
 
     [<Extension>]
+    static member GetTagToHMIText(x:TagDS) = 
+        match x with
+        | EventVertex (_, _, kind) ->
+            match kind with
+            | VertexTag.errorTRx -> "작업이상발생"
+            | VertexTag.workErrOriginGoing -> "작업원위치필요"
+            | _ -> x.GetTagToText();
+
+        | EventSystem (_, _, kind) ->
+            match kind with
+            | SystemTag.emergencyMonitor -> "비상버튼눌림"
+            | _ -> x.GetTagToText();
+        | _-> 
+            x.GetTagToText();
+
+    [<Extension>]
     static member GetSystem(x:TagDS) =
         match x with
         | EventSystem    (_, obj, _) -> obj
@@ -193,6 +209,17 @@ type TagKindExt =
                 , VertexTag.txErrOnTimeShortage  
                 , VertexTag.txErrOffTimeOver
                 , VertexTag.txErrOffTimeShortage
+                )
+        | _ -> false
+
+
+        
+    [<Extension>]
+    static member IsSystemErrTag(x:TagDS) =
+        match x with
+        | EventSystem (_, _, kind) ->
+            kind.IsOneOf(  
+                 SystemTag.emergencyMonitor
                 )
         | _ -> false
 

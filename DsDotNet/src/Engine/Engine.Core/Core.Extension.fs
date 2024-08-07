@@ -282,19 +282,18 @@ module CoreExtensionModule =
 
         //    if times.any() then times.First() |> Some else None
 
-
         member x.GetNullAddressDevTask() =
             x.TaskDefs
             |> Seq.mapi (fun i d ->
-                let inCnt = x.JobTaskDevInfo.InCount
-                let outCnt = x.JobTaskDevInfo.OutCount
-                let empty = d.IsAddressEmpty// && not(d.GetInParam(x).IsDefaultParam && d.GetOutParam(x).IsDefaultParam)
-                if inCnt.IsSome && inCnt.Value = i && empty then
-                    Some d
-                elif outCnt.IsSome && outCnt.Value = i && empty then
-                    Some d
-                else
-                    None
+                match x.JobTaskDevInfo.InCount, x.JobTaskDevInfo.OutCount with
+                | None, None -> None
+                | inCntOpt, outCntOpt ->
+                    let inCnt = Option.defaultValue 0 inCntOpt
+                    let outCnt = Option.defaultValue 0 outCntOpt
+                    let inNullAddr = i < inCnt && d.IsInAddressEmpty
+                    let outNullAddr = i < outCnt && d.IsOutAddressEmpty
+
+                    if inNullAddr || outNullAddr then Some d else None
             )
             |> Seq.choose id
 

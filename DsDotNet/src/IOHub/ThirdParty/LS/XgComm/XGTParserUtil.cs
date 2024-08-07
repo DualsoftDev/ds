@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using static XGTComm.XGTDevice;
 
@@ -56,6 +57,26 @@ namespace XGTComm
                     return 32;
                 case XGTDeviceSize.LWord:
                     return 64;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
+            }
+        }
+
+        public static XGTDevice CreateXGTDevice(string devHead, XGTDeviceSize dataType, int bitOffset)
+        {
+            var head = devHead.ToCharArray().First();
+            switch (dataType)
+            {
+                case XGTDeviceSize.Bit:
+                    return new XGTDeviceBit(head, bitOffset);
+                case XGTDeviceSize.Byte:
+                    return new XGTDeviceByte(head, bitOffset);
+                case XGTDeviceSize.Word:
+                    return new XGTDeviceWord(head, bitOffset); 
+                case XGTDeviceSize.DWord:
+                    return new XGTDeviceDWord(head, bitOffset);
+                case XGTDeviceSize.LWord:
+                    return new XGTDeviceLWord(head, bitOffset);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
             }

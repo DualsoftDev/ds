@@ -60,7 +60,8 @@ namespace XGTComm
 
 
         public int Offset => _offsetBit / 8;
-        public abstract object ToValue();
+        public abstract void SetValue(object obj);
+        public abstract object GetValue();
     }
 
     /// <summary>
@@ -87,12 +88,17 @@ namespace XGTComm
         {
         }
 
- 
 
-        public override object ToValue()
+
+        public override object GetValue()
         {
             return value;
         }
+        public override void SetValue(object v)
+        {
+            value = (bool)v;
+        }
+        
     }
 
     /// <summary>
@@ -121,9 +127,13 @@ namespace XGTComm
         }
 
  
-        public override object ToValue()
+        public override object GetValue()
         {
             return value;
+        }
+        public override void SetValue(object v)
+        {
+            value = (byte)v;
         }
     }
 
@@ -153,9 +163,13 @@ namespace XGTComm
         }
 
   
-        public override object ToValue()
+        public override object GetValue()
         {
             return value;
+        }
+        public override void SetValue(object v)
+        {
+            value = Convert.ToUInt16(v);
         }
     }
     /// <summary>
@@ -183,9 +197,13 @@ namespace XGTComm
         }
 
  
-        public override object ToValue()
+        public override object GetValue()
         {
             return value;
+        }
+        public override void SetValue(object v)
+        {
+            value = Convert.ToUInt32(v);
         }
     }
 
@@ -214,9 +232,13 @@ namespace XGTComm
         }
 
  
-        public override object ToValue()
+        public override object GetValue()
         {
             return value;
+        }
+        public override void SetValue(object v)
+        {
+            value = (UInt64)v;
         }
     }
 }

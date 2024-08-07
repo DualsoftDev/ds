@@ -65,9 +65,9 @@ module PptNodeUtilModule =
                         else
                             match getTextValueNType x with
                             | Some (v, t) ->
-                                if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
-                                    $":{v}s" |> getTaskDevParam |> snd
-                                else
+                                //if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
+                                //    $":{v}s" |> getTaskDevParam |> snd
+                                //else
                                     $":{x}" |> getTaskDevParam |> snd
                             | None -> failwithf $"{x} 입력규격을 확인하세요"
 

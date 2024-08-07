@@ -85,24 +85,20 @@ type RealVertexTagManager with
         
         let causalCalls = srcs.GetPureCalls()
         let tgtTagSEQ = v.RealTokenData
+        let srcTagSEQ = 
+            match causalReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
+            | _, true -> 
+                causalCalls.First().VC.SourceTokenData  |>Some
+            | true, false -> 
+                causalReals.First().VR.RealTokenData  |>Some
+            | false, false -> 
+                None
 
-        match causalReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
-        | _, true -> 
-
-            let srcTagSEQ = causalCalls.First().VC.SourceTokenData  
-            [|
-                yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, fn)
-            |]  
-        | true, false -> 
-
-            let srcTagSEQ = causalReals.First().VR.RealTokenData  
-            [|
-                yield (v.GP.Expr, srcTagSEQ.ToExpression()) --> (tgtTagSEQ, fn)
-            |]
-
-        | false, false ->
+        if srcTagSEQ.IsSome
+        then 
+            [| yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) |]
+        else 
             [||]
-
 
     member v.R7_RealGoingOriginError() =
         let fn = getFuncName()

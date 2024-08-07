@@ -181,7 +181,13 @@ namespace XGTComm
                 return true;
             }
             else
-                return false;
+            {
+                //ReConnect();
+                //if (IsConnected)
+                //    return ReadRandomDevice(buf, xgtDevices.Select(s => s.ToText()));
+                //else 
+                    return false;
+            }
         }
 
         /// <summary>

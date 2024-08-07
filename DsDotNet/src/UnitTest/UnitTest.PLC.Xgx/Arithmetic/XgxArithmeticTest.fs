@@ -19,6 +19,25 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         """
         code |> x.TestCode (getFuncName()) |> ignore
 
+    member x.``ADD 500 items test`` () =
+        let numSum = 500
+        let repeat = 10
+        // "$nn1 + $nn2 + ... +$nn{count}"
+        let sumText = [1..numSum] |> map (fun n -> $"$nn{n}") |> joinWith "+"
+        let code =
+            let sums =
+                [
+                    for i in [1..10] do
+                        $"""
+    int16 sum{i} = 0s;
+    $sum{i} = {sumText};
+    """
+                ] |> joinLines
+            generateInt16VariableDeclarations 1 numSum + sums
+
+        code |> x.TestCode (getFuncName()) |> ignore
+
+
     member x.``ADD 3 items test`` () =
         let code = """
             int16 nn1 = 1s;
@@ -114,7 +133,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let test =
-            fun () -> 
+            fun () ->
                 let xml = x.generateXmlForTest f storages (map withNoComment statements)
                 x.saveTestResult f xml
         match xgx with
@@ -142,7 +161,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
         let test =
-            fun () -> 
+            fun () ->
                 let xml = x.generateXmlForTest f storages (map withNoComment statements)
                 x.saveTestResult f xml
         match xgx with
@@ -251,6 +270,7 @@ type XgiArithematicTest() =
     inherit XgxArithematicTest(XGI)
 
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
+    [<Test>] member __.``ADD 500 items test`` () = base.``ADD 500 items test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
     [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()
@@ -277,6 +297,7 @@ type XgkArithematicTest() =
     inherit XgxArithematicTest(XGK)
 
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
+    [<Test>] member __.``ADD 500 items test`` () = base.``ADD 500 items test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
     [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()

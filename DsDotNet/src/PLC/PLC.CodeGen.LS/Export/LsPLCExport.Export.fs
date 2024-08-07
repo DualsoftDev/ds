@@ -65,7 +65,7 @@ module XgiExportModule =
         let simpleRung (condition:IExpression<bool> option) (expr: IExpression) (target: IStorage) : unit =
             match prjParam.TargetType, expr.FunctionName, expr.FunctionArguments with
             | XGK, Some funName, l::r::[] when isOpABC funName ->
-            
+
                 let op = operatorToXgkFunctionName funName l.DataType |> escapeXml
                 let ls, rs = l.GetTerminalString(prjParam) , r.GetTerminalString(prjParam)
                 let xmls:XmlOutput =
@@ -138,7 +138,7 @@ module XgiExportModule =
                         tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
 
                         let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
-                        
+
                         let condWithTrue, condWithFalse =
                             match source with
                             | :? Expression<bool> as DuTerminal(DuLiteral lh) when lh.Value  ->
@@ -186,7 +186,7 @@ module XgiExportModule =
                 //tracefn $"Generating statement::{stmt.ToText()}"
                 match stmt with
                 | DuAssign(condition, expr, target) when isXgk || expr.DataType <> typeof<bool> ->
-                
+
                     let cond =
                         match condition with
                         | Some c -> c
@@ -226,7 +226,7 @@ module XgiExportModule =
                         Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
                         OriginalExpression = _originalExpr
                         Output = destination }) when isXgk && source.DataType = typeof<bool> ->
-                    
+
                     moveCmdRungXgk condition source destination
                     //let rgiSub = rgiXgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
                     //rgi <-
@@ -302,7 +302,7 @@ module XgiExportModule =
         rgi <- rgi.AddSingleLineXml(rungEnd)
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
-    let internal getGlobalTagSkipSysTag(xs:IStorage seq) = 
+    let internal getGlobalTagSkipSysTag(xs:IStorage seq) =
                     xs |> filter(fun stg-> not(stg.GetSystemTagKind().IsSome && stg.Name.StartsWith("_")))
 
     /// (Commented Statement) To (Commented Statements)
@@ -460,9 +460,26 @@ module XgiExportModule =
              *)
             let rungsXml = $"<Rungs>{rungsXml}</Rungs>" |> DualXmlNode.ofString
 
-            for r in rungsXml.GetChildrenNodes() do
-                onlineUploadData.InsertBefore r |> ignore
+            let _, ms = duration(fun() ->
+                (*
+                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.
+                 *)
+                // (* Naive version *)
+                //for r in rungsXml.GetChildrenNodes() do
+                //    onlineUploadData.InsertBefore r |> ignore
 
+                // (* 성능 고려 version *)
+                match rungsXml.GetChildrenNodes().ToFSharpList() with
+                | [] -> ()
+                | r::[] -> onlineUploadData.InsertBefore r |> ignore
+                | r::tails ->
+                    if tails.Length > 30 then
+                        ()
+                    let node = onlineUploadData.InsertBefore r
+                    for r in tails.Reverse() do
+                        node.InsertAfter r |> ignore
+            )
+            tracefn ($"Total {ms} milliseconds")
             (*
              * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
              *)
@@ -487,7 +504,7 @@ module XgiExportModule =
                     let newPrjParam = {
                         prjParam with
                             CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
-                            TimerCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
+                            TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
                     }
                     doc, newPrjParam
                 | _, None ->
@@ -500,13 +517,14 @@ module XgiExportModule =
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
             prjParam.SanityCheck()
 
-            let {   ProjectName = projName
+            let {
+                    ProjectName = projName
                     TargetType = targetType
                     ProjectComment = projComment
                     GlobalStorages = globalStorages
                     EnableXmlComment = enableXmlComment
-                    POUs = pous } =
-                prjParam
+                    POUs = pous
+                } = prjParam
 
             // todo : 사전에 처리 되었어야...
             for g in globalStorages.Values do
@@ -518,12 +536,14 @@ module XgiExportModule =
 
 
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
-            
+
             let existingTaskPous =
-                    [   for p in programs do
-                            let taskName = p.GetAttribute("Task")
-                            let pouName = p.FirstChild.OuterXml
-                            taskName, pouName ]
+                [
+                    for p in programs do
+                        let taskName = p.GetAttribute("Task")
+                        let pouName = p.FirstChild.OuterXml
+                        taskName, pouName
+                ]
 
 
             (* validation : POU 중복 이름 체크 *)
@@ -548,7 +568,7 @@ module XgiExportModule =
                     xe.SetAttribute("Comment", projComment)
 
             (* xn = Xml Node *)
-            
+
             (* Tasks/Task 삽입 *)
             do
                 let xnTasks = xdoc.SelectSingleNode("//Configurations/Configuration/Tasks")
@@ -565,7 +585,7 @@ module XgiExportModule =
                         |> DualXmlNode.ofString
                         |> xnTasks.AdoptChild
                         |> ignore
-             
+
 
 
             let xPathGlobalVar = getXPathGlobalVariable targetType
@@ -614,8 +634,8 @@ module XgiExportModule =
                     globalStorages.Values
                     |> getGlobalTagSkipSysTag
                     |> Seq.sortByDescending (fun t ->
-                        if t :? TimerCounterBaseStruct 
-                            || isNull t.Address 
+                        if t :? TimerCounterBaseStruct
+                            || isNull t.Address
                             || TextAddrEmpty <> t.Address
                         then
                             0
@@ -666,11 +686,11 @@ module XgiExportModule =
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
                 let mainScanName =
-                    if existingTaskPous.any() then
-                        existingTaskPous.First() |> fst
-                    else 
-                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First() 
-                        task.FirstChild.OuterXml 
+                    match existingTaskPous with
+                    | [] ->
+                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First()
+                        task.FirstChild.OuterXml
+                    | p::_ -> p |> fst
 
 
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
@@ -736,13 +756,13 @@ module XgiExportModule =
                     // XGK 에서는 LWord 사용(double, long)을 지원하지 않는다.
                     for v in vars do
                         if v :? IMemberVariable || v :? TimerCounterBaseStruct then
-                            // todo: timer, counter 등의 구조체 변수는 기본적으로 LWord 등으로 선언되어 있는데... 
+                            // todo: timer, counter 등의 구조체 변수는 기본적으로 LWord 등으로 선언되어 있는데...
                             ()
                         else
                             let t = v.DataType
                             match t  with
                             | _ when t.IsOneOf(typeof<int64>, typeof<uint64>) ->
-                                failwith $"Error on variable declararion {v.Name} ({t.Name}): XGK does not support int64 types (LWORD)" 
+                                failwith $"Error on variable declararion {v.Name} ({t.Name}): XGK does not support int64 types (LWORD)"
                             | _ -> ()
 
 
@@ -771,7 +791,7 @@ module XgiExportModule =
                     "DevicePos", devicePos
                 ]) |> ignore
 
-                // get type length 
+                // get type length
                 devicePos <-
                     let bitLength = dataType.ToPLCBitSize()
                     devicePos + bitLength

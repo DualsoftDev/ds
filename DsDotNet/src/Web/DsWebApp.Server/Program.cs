@@ -33,7 +33,6 @@ services.AddTraceLogAppender("DsWebAppServerLogger");
 logger.Info($"======================= DsWebApp started.");
 logger.Info($"Debugger.IsAttached = {Debugger.IsAttached}");
 Log4NetWrapper.SetLogger(logger);
-Dual.Common.Core.Log4NetLogger.Logger = logger;
 logger.Debug($"==================== DEBUG");
 // Add services to the container.
 services.AddSignalR();

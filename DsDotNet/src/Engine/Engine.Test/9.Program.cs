@@ -1,5 +1,7 @@
 using System.Reflection;
 using System.Threading;
+
+using Dual.Common.Base.CS;
 using Dual.Common.Core;
 using Dual.Common.Core.FS;
 
@@ -22,7 +24,7 @@ class Program
         //PrepareThreadPool();
         SimpleExceptionHandler.InstallExceptionHandler();
         //DllVersionChecker.IsValidExDLL(Assembly.GetExecutingAssembly());
-        var logger = Log4NetLogger.PrepareLog4Net("UnitTestLogger");
+        var logger = DcLogger.PrepareLog4Net("UnitTestLogger");
         Log4NetWrapper.SetLogger(logger);
 
         logger.Info("Sample Runner started.");

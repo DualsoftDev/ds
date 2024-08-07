@@ -59,6 +59,7 @@ public class FilesController : ControllerBaseWithLogger
     [HttpPost("activate")]
     public async Task<ActionResult<RestResultString>> MyActivate([FromBody] string fileName)
     {
+        await Task.Yield();
         _onFileUploaded(Path.Combine(_global.ServerSettings.ServiceFolder, fileName));
         return RestResultString.Ok($"OK: {fileName}");
     }

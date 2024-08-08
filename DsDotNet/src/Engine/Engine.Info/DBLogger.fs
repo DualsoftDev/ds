@@ -7,15 +7,16 @@ open System.IO
 
 
 
+
 type DBLogger() =
     //static let queryCriteria = QuerySet()
     //static let queryCriteria = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
 
     static member EnqueLog(log: DsLog) =
-        DBLoggerImpl.Writer.enqueLog (log: DsLog)
+        DbWriter.enqueLog (log: DsLog)
 
     static member EnqueLogs(logs: DsLog seq) =
-        DBLoggerImpl.Writer.enqueLogs (logs: DsLog seq)
+        DbWriter.enqueLogs (logs: DsLog seq)
 
     static member InitializeLogWriterOnDemandAsync
         (
@@ -28,21 +29,21 @@ type DBLogger() =
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
+                DbWriter.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
 
             return logSet :> ILogSet
         }
 
     /// model 정보 없이, database schema 만 생성
     static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings, cleanExistingDb:bool) =
-        DBLoggerImpl.Writer.initializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
+        DbWriter.initializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
 
-        
+
 
     static member InitializeLogReaderOnDemandAsync(queryCriteria: QueryCriteria, systems: DsSystem seq) =
         task {
             Log4NetWrapper.logWithTrace <- true
-            let! logSet = DBLoggerImpl.Reader.initializeLogReaderOnDemandAsync (queryCriteria, systems)
+            let! logSet = DbReader.initializeLogReaderOnDemandAsync (queryCriteria, systems)
             return logSet :> ILogSet
         }
 
@@ -58,7 +59,7 @@ type DBLogger() =
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DBLoggerImpl.Writer.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
+                DbWriter.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
 
             return logSet //:> ILogSet
         }
@@ -74,7 +75,7 @@ type DBLogger() =
             failwith "Not yet implemented"
             let modelId = -1
             let queryCriteria = QueryCriteria(commonAppSettings, modelId, startAt, endAt)
-            let! newLogSet = DBLoggerImpl.Reader.changeQueryDurationAsync (logSet, queryCriteria)
+            let! newLogSet = DbReader.changeQueryDurationAsync (logSet, queryCriteria)
             dispose (logSet :> IDisposable)
             return newLogSet :> ILogSet
         }

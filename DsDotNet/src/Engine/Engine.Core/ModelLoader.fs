@@ -11,6 +11,7 @@ module ModelLoaderModule =
     type ModelConfig = {
         DsFilePath: string 
         HwIP: string 
+        HwDriver: string //LS-XGI, LS-XGK, Paix hw drive 이름
         RuntimeMotionMode: RuntimeMotionMode 
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
@@ -39,6 +40,7 @@ module ModelLoader =
         {
             DsFilePath =  sysRunPaths.Replace("\\", "/")
             HwIP =  RuntimeDS.HwIP
+            HwDriver =  RuntimeDS.HwDriver.ToString()
             RuntimeMotionMode=  RuntimeDS.RuntimeMotionMode
             TimeSimutionMode =  RuntimeDS.TimeSimutionMode
             TimeoutCall=  RuntimeDS.TimeoutCall

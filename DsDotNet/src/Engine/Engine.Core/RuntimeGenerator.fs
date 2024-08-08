@@ -14,6 +14,14 @@ module RuntimeGeneratorModule =
         | AB 
         | MELSEC
 
+    type HwDriveTarget = 
+        | LS_XGI_IO 
+        | LS_XGK_IO
+        | AB_IO
+        | MELSEC_IO
+        | SIEMENS_IO
+        | PAIX_IO
+
     type RuntimeMotionMode = 
         | MotionAsync
         | MotionSync
@@ -94,7 +102,7 @@ module RuntimeGeneratorModule =
 
         static member val HwSlotDataTypes  =  ResizeArray<SlotDataType>() with get, set
         static member val HwIP = "192.168.9.100" with get, set
-        static member val HwName = "LS-XGI" with get, set //PC 제어시 Hw maker 별 이름 (지금은 LS 태그타입 구분용)
+        static member val HwDriver = HwDriveTarget.LS_XGK_IO with get, set //PC 제어시 Hw maker 별 이름 (지금은 LS 태그타입 구분용)
 
         static member val TimeoutCall = callTimeout  with get, set
         static member val EmulationAddress = emulationAddress  with get, set
@@ -126,7 +134,35 @@ module RuntimeGeneratorModule =
         // 기존의 리스트를 지우고 새로운 데이터로 대체합니다.
         RuntimeDS.HwSlotDataTypes.Clear()
         RuntimeDS.HwSlotDataTypes.AddRange(hw)
+        
+        
+module PlatformTargetExtensions =
+        let fromString s =
+            match s with
+            | "WINDOWS"-> WINDOWS
+            | "XGI"    -> XGI
+            | "XGK"    -> XGK
+            | "AB"     -> AB
+            | "MELSEC" -> MELSEC
+            | _ -> failwithf $"Error ToPlatformTarget: {s}"
 
+        let allPlatforms = 
+            [ WINDOWS; XGI; XGK; AB; MELSEC]
+
+
+module HwDriveTargetExtensions =     
+    let fromString s =
+            match s with
+            | "LS_XGI_IO"  -> LS_XGI_IO
+            | "LS_XGK_IO"  -> LS_XGK_IO
+            | "AB_IO"      -> AB_IO
+            | "MELSEC_IO"  -> MELSEC_IO
+            | "SIEMENS_IO" -> SIEMENS_IO
+            | "PAIX_IO"    -> PAIX_IO
+            | _ -> failwithf $"Error ToHwDriveTarget: {s}"
+
+    let allDrivers = 
+        [ LS_XGI_IO; LS_XGK_IO; AB_IO; MELSEC_IO; SIEMENS_IO; PAIX_IO ]
 
         
 module TimeSimutionModeExtensions =

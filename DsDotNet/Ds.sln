@@ -159,7 +159,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RedisControlServer", "Apps\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppHMI", "Apps\HMI.Obsolete\AppHMI\AppHMI.csproj", "{A034FE71-1806-466A-81DF-A1FEAFCD4C8A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSPilot.Winform.Beta", "Apps\DSPilot\DSPilot.Winform.Beta.csproj", "{D3AD31C8-DCF3-4F26-ABDC-14974D1F73F9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSPilot.Winform", "Apps\DSPilot\DSPilot.Winform.csproj", "{D3AD31C8-DCF3-4F26-ABDC-14974D1F73F9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{E6C42E55-8BA2-46A1-BAFA-A345A019C387}"
 EndProject

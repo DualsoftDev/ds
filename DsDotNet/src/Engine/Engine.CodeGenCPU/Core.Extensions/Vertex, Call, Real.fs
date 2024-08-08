@@ -39,6 +39,15 @@ module ConvertCpuVertex =
                     .Where(fun d-> d.ExistInput)
                     .any()
             | false -> false
+        
+        member c.HasAnalogSensor  =
+            if c.HasSensor 
+            then 
+                c.TargetJob.TaskDefs
+                    .Where(fun d-> d.ExistInput && d.InTag.DataType <> typedefof<bool>)
+                    .any()
+            else 
+                false
 
         member c.ExistAvgTime    = getAgvTimes(c).any()
         member c.ExistDelayTime  = getDelayTimes(c).any()

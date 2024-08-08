@@ -32,7 +32,7 @@ namespace XGTComm
                 throw new Exception($"connection failed: {name}");
             }
             else
-            {
+             {
                 int result = f(arg);
                 if (result != 1)
                 {

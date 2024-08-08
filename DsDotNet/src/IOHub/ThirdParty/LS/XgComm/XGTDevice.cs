@@ -61,6 +61,7 @@ namespace XGTComm
 
         public int Offset => _offsetBit / 8;
         public abstract void SetValue(object obj);
+        public abstract object GetValue(Type dataType);
         public abstract object GetValue();
     }
 
@@ -88,12 +89,15 @@ namespace XGTComm
         {
         }
 
-
-
+        public override object GetValue(Type dataType)
+        {
+            return XGTParserUtil.GetValueByType(dataType, value);
+        }
         public override object GetValue()
         {
             return value;
         }
+
         public override void SetValue(object v)
         {
             value = (bool)v;
@@ -126,7 +130,11 @@ namespace XGTComm
         {
         }
 
- 
+
+        public override object GetValue(Type dataType)
+        {
+            return XGTParserUtil.GetValueByType(dataType, value);
+        }
         public override object GetValue()
         {
             return value;
@@ -162,7 +170,11 @@ namespace XGTComm
         {
         }
 
-  
+
+        public override object GetValue(Type dataType)
+        {
+            return XGTParserUtil.GetValueByType(dataType, value);
+        }
         public override object GetValue()
         {
             return value;
@@ -197,6 +209,10 @@ namespace XGTComm
         }
 
  
+        public override object GetValue(Type dataType)
+        {
+            return XGTParserUtil.GetValueByType(dataType, value);
+        }
         public override object GetValue()
         {
             return value;
@@ -231,7 +247,11 @@ namespace XGTComm
         {
         }
 
- 
+
+        public override object GetValue(Type dataType)
+        {
+            return XGTParserUtil.GetValueByType(dataType, value);
+        }
         public override object GetValue()
         {
             return value;

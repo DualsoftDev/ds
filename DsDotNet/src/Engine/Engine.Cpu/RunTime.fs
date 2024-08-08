@@ -67,6 +67,9 @@ module RunTime =
             //Changed 있는것만 IO Hub로 전송
             if chTags.any() then tagChangedForIOHub.OnNext chTags 
              
+            if chTags.Select(fun s ->s.Name).any(fun f->f.Contains "STN1__Device1__GO_O") then
+                ()
+
             //ChangedTagsClear 전에 exeStates 만들기
             let exeStates = chTags.ExecutableStatements(mapRungs) 
             //ChangedTagsClear

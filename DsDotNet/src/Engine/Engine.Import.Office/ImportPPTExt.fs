@@ -318,11 +318,11 @@ module ImportU =
                         elif dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
-                            node.UpdateRealProperty(real)
+                            ////node.UpdateRealProperty(real)
                             let name = call.DeviceNApi.Combine("_")
                             Alias.Create(
                                 $"{name}_{node.AliasNumber}" ,
-                                DuAliasTargetCall(segOrg :?> Call),
+                                DuAliasTargetCall(segOrg :?> Call), 
                                 DuParentReal(real), false
                             )
                         else

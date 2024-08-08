@@ -17,6 +17,8 @@
         <Compile Include="DBLogger.Token.fs" />
         <Compile Include="DBLogger.ORMDBSkeleton.fs" />
         <Compile Include="DBLogger.DBOperation.fs" />
+        <Compile Include="DBLogger.DbWriter.fs" />
+        <Compile Include="DBLogger.DbReader.fs" />
         <Compile Include="DBLogger.fs" />
         <Compile Include="DBLog.fs" />
         <Compile Include="DBLogger.Api.fs" />

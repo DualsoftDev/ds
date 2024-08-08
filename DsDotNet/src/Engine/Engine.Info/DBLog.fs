@@ -5,14 +5,13 @@ open Dual.Common.Core.FS
 open System
 open System.IO
 open System.ComponentModel
+open System.Runtime.CompilerServices
 
 module DBLog =
-
-
     type ValueLog(time: DateTime, tag: TagDS, token:Nullable<uint32>) =
         inherit DsLog(time, tag.GetStorage(), token)
 
-        let tagName, value, objName, kind = tag.GetTagContents()     
+        let tagName, value, objName, kind = tag.GetTagContents()
         let _time = time
 
         member val Time = _time.ToString("HH:mm:ss.fff") with get
@@ -30,8 +29,11 @@ module DBLog =
         member x.GetTime() =
             _time
 
-    let InsertValueLog (time: DateTime) (tag: TagDS) (token:Nullable<uint32>) : ValueLog =
-        let vlog = ValueLog(time, tag, token)
+
+[<Extension>]
+type DbWriterExtension =
+    static member InsertValueLog(dbWriter:DbWriter, time: DateTime, tag: TagDS, token:Nullable<uint32>) =
+        let vlog = DBLog.ValueLog(time, tag, token)
         if tag.IsNeedSaveDBLog() then
-            DBLogger.EnqueLog(vlog)
+            dbWriter.EnqueLog(vlog)
         vlog

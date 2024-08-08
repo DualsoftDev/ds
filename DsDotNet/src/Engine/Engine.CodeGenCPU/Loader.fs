@@ -66,7 +66,7 @@ module CpuLoader =
 
 
 
-    let applyTagManager(system:DsSystem, storages:Storages, target) =
+    let applyTagManager(system:DsSystem, storages:Storages, target:HwTarget) =
         let createTagM  (rootSys:DsSystem) (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
 

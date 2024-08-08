@@ -111,7 +111,7 @@ module DsDataType =
             | DuUINT64  -> PLCUINT64
             | DuUINT8   -> PLCUINT8
 
-        member x.ToPLCBitSize() =
+        member x.ToBitSize() =
             match x with
             | DuBOOL    -> 1
             | DuCHAR    -> 8  //test ahn 확인필요

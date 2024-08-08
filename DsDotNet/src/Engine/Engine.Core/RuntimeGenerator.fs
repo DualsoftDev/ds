@@ -7,6 +7,7 @@ open System.Collections.Generic
 [<AutoOpen>]
 module RuntimeGeneratorModule =
 
+    //제어 HW CPU 기기 타입
     type PlatformTarget = 
         | WINDOWS 
         | XGI 
@@ -14,6 +15,7 @@ module RuntimeGeneratorModule =
         | AB 
         | MELSEC
 
+    //제어 Driver IO 기기 타입
     type HwDriveTarget = 
         | LS_XGI_IO 
         | LS_XGK_IO
@@ -21,6 +23,8 @@ module RuntimeGeneratorModule =
         | MELSEC_IO
         | SIEMENS_IO
         | PAIX_IO
+    //HW CPU,  Driver IO  조합
+    type HwTarget = PlatformTarget*HwDriveTarget
 
     type RuntimeMotionMode = 
         | MotionAsync
@@ -83,13 +87,12 @@ module RuntimeGeneratorModule =
     let HMITempManualAction =  "%HX0"  //iec xgk 구분안함
 
 
-    let getExternalTempMemory (target:PlatformTarget, index:int) =
+    let getExternalTempMemory (target:HwTarget, index:int) =
         match target with
-        | XGI -> ExternalTempIECMemory+index.ToString()
-        | XGK -> ExternalTempNoIECMemory+index.ToString("00000")
-        | WINDOWS  -> ExternalTempMemory+($"{index/8}.{index%8}")
-        | AB 
-        | MELSEC  -> failwithlog $"{target} not support"
+        | XGI, _ -> ExternalTempIECMemory+index.ToString()
+        | XGK, _ -> ExternalTempNoIECMemory+index.ToString("00000")
+        | WINDOWS, _-> ExternalTempMemory+($"{index/8}.{index%8}")
+        | _ -> failwithlog $"{target} not support"
    
     type RuntimeDS() =
         static let mutable runtimePackage = PCSIM

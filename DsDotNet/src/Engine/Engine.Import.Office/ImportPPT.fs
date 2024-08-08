@@ -21,10 +21,13 @@ module ImportPptModule =
 
     type PptParams = {
         TargetType: PlatformTarget
+        DriverIO: HwDriveTarget
         AutoIOM: bool
         CreateFromPpt : bool
         CreateBtnLamp : bool
     }
+
+    let defaultPptParams() = {TargetType = WINDOWS; DriverIO = LS_XGK_IO; AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = true}
 
     let getHashKeys (skipCnt: int, path: string, loadedParentStack:Stack<DsSystem>) =
         String.Join(
@@ -264,7 +267,7 @@ module ImportPptModule =
 
     type ImportPpt =
         static member GetDSFromPptWithLib(fullName: string, isLib:bool, pptParams:PptParams): DSFromPpt =
-            Util.runtimeTarget <- pptParams.TargetType
+            Util.runtimeTarget <- pptParams.TargetType, pptParams.DriverIO
             ModelParser.ClearDicParsingText()
             pptRepo.Clear()
             let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
@@ -280,7 +283,7 @@ module ImportPptModule =
                         model.System, model.LoadingPaths
                     else
                         model.System.ExportToDS activePath
-                        ParserLoader.LoadFromActivePath activePath Util.runtimeTarget false )
+                        ParserLoader.LoadFromActivePath activePath (Util.runtimeTarget|>fst) false )
             tracefn $"Elapsed time for reading2 {fullName}: {millisecond} ms"
 
             {

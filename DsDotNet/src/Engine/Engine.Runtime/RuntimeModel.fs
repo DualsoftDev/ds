@@ -9,10 +9,11 @@ open Dual.Common.Core.FS
 type FilePath = string
 
 
-type RuntimeModel(zipDsPath:FilePath, target)  =
+type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
     let jsonPath = unZip zipDsPath
     let model:Model = ParserLoader.LoadFromConfig (jsonPath) target
-    let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU model.System target
+    let hwDriver = HwDriveTargetExtensions.fromString model.Config.HwDriver
+    let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU model.System (target, hwDriver)
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
     let storages =
         let skipInternal = true
@@ -28,7 +29,7 @@ type RuntimeModel(zipDsPath:FilePath, target)  =
     member x.Storages = storages
     member x.PlatformTarget = target
     member x.HwIP = model.Config.HwIP;
-    member x.HwDriver = model.Config.HwDriver;
+    member x.HwDriver = hwDriver;
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU

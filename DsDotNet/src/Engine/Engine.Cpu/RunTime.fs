@@ -181,7 +181,7 @@ module RunTime =
     [<Extension>]
     type DsCpuExt  =
         [<Extension>]
-        static member GetDsCPU (dsSys:DsSystem) (target) : DsCPU*HMIPackage*(PouGen seq) =
+        static member GetDsCPU (dsSys:DsSystem) (target:HwTarget) : DsCPU*HMIPackage*(PouGen seq) =
             let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
             // Initialize storages and load CPU statements

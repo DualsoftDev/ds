@@ -84,20 +84,20 @@ module XgxGenerationTestModule =
 [<AutoOpen>]
 module XgxFixtures =
 
-    let mutable runtimeTarget = WINDOWS
+    let mutable runtimeTarget = WINDOWS, LS_XGK_IO
     let sys = DsSystem.Create4Test("")
     let setRuntimeTarget(target:PlatformTarget) =
-        let runtimeTargetBackup = target
+        let runtimeTargetBackup = target, LS_XGK_IO
         RuntimeDS.System <- sys
         ParserUtil.runtimeTarget <-target
-        runtimeTarget <- target
+        runtimeTarget <- target, LS_XGK_IO
         disposable { runtimeTarget <- runtimeTargetBackup }
 
     let parseExpression4UnitTest (storages: Storages) (text: string) : IExpression =
         try
             let parser = createParser (text)
             let ctx = parser.expr ()
-            let parserData = ParserData(WINDOWS, Storages(), None)
+            let parserData = ParserData((WINDOWS), Storages(), None)
 
             createExpression parserData (defaultStorageFinder storages) ctx
         with exn ->

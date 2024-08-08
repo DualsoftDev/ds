@@ -65,7 +65,8 @@ module DsAddressModule =
 
 
 
-    let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:PlatformTarget) =
+    let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
+
         let addr =
             if addr.IsNullOrEmpty() then
                 failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"  
@@ -88,17 +89,20 @@ module DsAddressModule =
             else
                 curr + bitSize - (curr%bitSize) + bitSize
 
-
+        let cpu, driver = target
         let sizeBit = 
-            if target = PlatformTarget.XGI then
-                dataType.ToPLCBitSize()
-            else
-                match dataType.ToPLCBitSize() with
+            if cpu = PlatformTarget.XGI then
+                dataType.ToBitSize()
+            elif cpu = PlatformTarget.XGK then
+                match dataType.ToBitSize() with
                 | 1 -> 1
                 | 8 -> 16
                 | 16 -> 16
                 | 32 -> 32
                 | _ -> failwithf $"XGK {dataType} not support"
+            else 
+                dataType.ToBitSize()
+
         let newAddr =
             if addr = TextAddrEmpty && not(isSkip) then
                 let cnt =
@@ -109,7 +113,7 @@ module DsAddressModule =
                             let ret = getCurrent inDigitCnt sizeBit
                             inDigitCnt <- getNext inDigitCnt sizeBit ; ret
                         else
-                            if XGK = target then
+                            if XGK = cpu then
                                 let ret = inAnalogCnt
                                 inAnalogCnt <- inAnalogCnt+sizeBit/8 ; ret
                             else
@@ -122,7 +126,7 @@ module DsAddressModule =
                             let ret = getCurrent outDigitByteCnt sizeBit
                             outDigitByteCnt <- getNext outDigitByteCnt sizeBit ; ret
                         else
-                            if XGK = target then
+                            if XGK = cpu then
                                 let ret = outAnalogByteCnt
                                 outAnalogByteCnt <- outAnalogByteCnt+sizeBit/8 ; ret
                             else
@@ -185,7 +189,7 @@ module DsAddressModule =
                     | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다."
 
                 match target with
-                | WINDOWS ->
+                | WINDOWS, PAIX_IO ->
                     let getPCIOM(head:string, offsetBit) =
                         match sizeBit with
                         | 1 -> $"{head}B{offsetBit / 8}.{offsetBit % 8}" 
@@ -201,13 +205,14 @@ module DsAddressModule =
                     | Memory  ->  if sizeBit = 1 then getPCIOM ("M", cnt) else getPCIOM ("M", cnt*8)
                     | NotUsed -> failwithf $"{ioType} not support {name}"
 
-                | (XGK | XGI) ->
+                | (WINDOWS, LS_XGK_IO | WINDOWS, LS_XGI_IO)
+                | (XGK, _ | XGI, _) ->
                     match ioType with 
                     | (In | Out) -> 
                         let iSlot, sumBit =  getSlotInfoIEC(ioType, cnt)
 
-                        match target with
-                        | PlatformTarget.XGI ->
+                        match driver with
+                        | LS_XGI_IO ->
                             let io =
                                 match ioType with
                                 | IOType.In -> "I"
@@ -216,7 +221,7 @@ module DsAddressModule =
                                 
                             getXgiIOTextBySize(io, cnt ,sizeBit, iSlot, sumBit)
 
-                        | PlatformTarget.XGK ->
+                        | LS_XGK_IO ->
                             let isBool = dataType = DuBOOL
                             if sizeBit = 1 then
                                 getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), isBool)
@@ -229,21 +234,20 @@ module DsAddressModule =
                                 | _ ->
                                     failwithf $"Error {target} not support {name}" 
                         
-                        | PlatformTarget.WINDOWS ->
-                            let io = if ioType = IOType.In then "I" else "O"
-                            getPCIOMTextBySize(io, cnt ,sizeBit)
+                        //| PlatformTarget.WINDOWS ->
+                        //    let io = if ioType = IOType.In then "I" else "O"
+                        //    getPCIOMTextBySize(io, cnt ,sizeBit)
                         | _ ->
                             failwithf $"Error {target} not support {name}"
 
                     | Memory ->
-                        match target with
-                    
-                        | PlatformTarget.XGI ->
-                                    getXgiMemoryTextBySize("M", cnt ,sizeBit)
-                        | PlatformTarget.XGK ->
+                        match driver with
+                        | LS_XGI_IO ->
+                            getXgiMemoryTextBySize("M", cnt ,sizeBit)
+                        | LS_XGK_IO ->
                             getXgkTextByType("M", cnt, dataType = DuBOOL)
-                        | PlatformTarget.WINDOWS ->
-                            getPCIOMTextBySize("M", cnt ,sizeBit)
+                        //| PlatformTarget.WINDOWS ->
+                        //    getPCIOMTextBySize("M", cnt ,sizeBit)
                         | _ ->
                             failwithf $"Error{name} {target} not support"
 
@@ -256,7 +260,7 @@ module DsAddressModule =
             elif addr = TextSkip then TextSkip 
                 
             else
-                if target = PlatformTarget.XGK
+                if driver = LS_XGK_IO
                 then
                     match tryParseXGKTagByBitType addr (dataType = DuBOOL) with
                     | Some (t) -> t |> getXgKTextByTag
@@ -269,12 +273,12 @@ module DsAddressModule =
 
 
   
-    let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) target=
+    let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) (target:HwTarget)=
         let inAddr = getValidAddress(hwItem.InAddress, hwItem.InDataType, hwItem.Name, skipIn, IOType.Memory, target)
         let outAddr = getValidAddress(hwItem.OutAddress, hwItem.OutDataType , hwItem.Name, skipOut, IOType.Memory, target)
         inAddr, outAddr
 
-    let updateHwAddress (hwItem: HwSystemDef) (inAddr, outAddr) target   =
+    let updateHwAddress (hwItem: HwSystemDef) (inAddr, outAddr) (target:HwTarget)   =
         hwItem.InAddress <- inAddr
         hwItem.OutAddress <- outAddr
 
@@ -288,7 +292,7 @@ module DsAddressModule =
         hwItem.InAddress <- inA
         hwItem.OutAddress <- outA
 
-    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) target =
+    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) (target:HwTarget)=
         
         setMemoryIndex(startMemory);
 

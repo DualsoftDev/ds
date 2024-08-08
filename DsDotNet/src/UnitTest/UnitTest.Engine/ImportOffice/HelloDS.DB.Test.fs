@@ -25,7 +25,7 @@ module HelloDSDBTestModule =
 
         let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
         let getSystem() =
-            let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false;  CreateBtnLamp = true}
+            let pptParms:PptParams = defaultPptParams()
             let result = ImportPpt.GetDSFromPptWithLib (helloDSPath, false, pptParms)
             let {
                 System = system
@@ -35,7 +35,7 @@ module HelloDSDBTestModule =
             } = result
 
             system.TagManager === null
-            let _ = DsCpuExt.GetDsCPU (system) PlatformTarget.WINDOWS
+            let _ = DsCpuExt.GetDsCPU (system) (pptParms.TargetType, pptParms.DriverIO) 
             system.TagManager.Storages.Count > 0 === true
 
             system

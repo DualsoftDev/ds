@@ -38,12 +38,12 @@ module TagManagerUtil =
         t
 
 
-    let timer  (storages:Storages)  name sys target =
+    let timer  (storages:Storages)  name sys (target:PlatformTarget) =
         let name = getPlcTagAbleName name storages
         let ts = TimerStruct.Create(TimerType.TON, storages, name, 0u, 0u, sys, target)
         ts
 
-    let counter (storages:Storages) name sys target=
+    let counter (storages:Storages) name sys (target:PlatformTarget)=
         let name = getPlcTagAbleName name storages
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0u, 0u, sys, target)
         cs

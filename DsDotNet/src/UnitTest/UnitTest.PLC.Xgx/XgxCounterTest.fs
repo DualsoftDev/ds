@@ -11,7 +11,7 @@ type XgxCounterTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Counter CTD simple test`` () =
-        use _ = setRuntimeTarget XGI
+        use _ = setRuntimeTarget (XGI)
         let storages = Storages()
         let code =
             match xgx with

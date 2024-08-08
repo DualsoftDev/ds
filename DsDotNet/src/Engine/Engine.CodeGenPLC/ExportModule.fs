@@ -111,12 +111,17 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (plcType:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter) =
-        assert(plcType.IsOneOf(XGI, XGK))
+    let exportXMLforLSPLC (target:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter) =
+        let targetNDriver =
+            match target with
+            | XGI -> XGI,  LS_XGI_IO
+            | XGK -> XGK,  LS_XGK_IO
+            | _ -> failwith $"Not supported plc {target} type"
+
         use _ = logTraceEnabler()
         let globalStorage = new Storages()
         let localStorage = new Storages()
-        let pous = CpuLoaderExt.LoadStatements(system, globalStorage, plcType).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
+        let pous = CpuLoaderExt.LoadStatements(system, globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
         let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
 
@@ -137,7 +142,7 @@ module ExportModule =
                 globalStorage.Remove(tagKV.Key)|>ignore
             )
 
-        let xml = generateXmlXGX plcType system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter
+        let xml = generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter
         let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
         File.WriteAllText(path, crlfXml)
 
@@ -149,10 +154,10 @@ type ExportModuleExt =
     [<Extension>]
     static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter)
+        exportXMLforLSPLC ((XGI), system, path, existingLSISprj, startTimer, startCounter)
 
     [<Extension>]
     static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter)
+        exportXMLforLSPLC ((XGK), system, path, existingLSISprj,  startTimer, startCounter)
 

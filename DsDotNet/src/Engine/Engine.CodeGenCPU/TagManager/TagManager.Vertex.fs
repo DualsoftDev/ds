@@ -209,7 +209,7 @@ module TagManagerModule =
         member val CoinAnyOnET  = createTag false VertexTag.dummyCoinETs
 
         ///Timer time avg
-        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
+        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType |> fst)
 
         member x.IsFinished = x.Real.Finished
         member x.NoTransData = x.Real.NoTransData
@@ -242,13 +242,13 @@ module TagManagerModule =
         member val SourceTokenData = sourceTokenData
 
         ///Ring Counter
-        member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)
+        member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType|>fst)
         ///Timer on delay
-        member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
+        member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType|>fst)
 
         member val MM   = createTag  false VertexTag.callMemo
 
-        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
+        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType|>fst)
 
         member val RXErrOpen          = createTag true VertexTag.rxErrOpen
         member val RXErrShort         = createTag true VertexTag.rxErrShort       

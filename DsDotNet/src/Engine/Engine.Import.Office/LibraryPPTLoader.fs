@@ -19,7 +19,7 @@ type LibraryPptLoaderExt =
             let informationalLib = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyDescriptionAttribute>().Description
             let infos = Dictionary<string, string>()
             let configPath = Path.Combine(directoryPath, "Library.config");
-            let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = false}
+            let pptParms:PptParams = {TargetType = (WINDOWS); DriverIO = (LS_XGK_IO); AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = false}
 
             for file in files do
                 if not (file.Contains("~$")) then //pptx 사용중 임시파일 무시 ~$HelloDS.pptx

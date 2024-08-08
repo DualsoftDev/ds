@@ -22,6 +22,7 @@ type XgxConvertDsCPU(target:PlatformTarget) =
         RuntimeDS.Package <- RuntimePackage.PLC
         
         let f = getFuncName()
+     
         let testCode = """
              [sys] HelloDS = {
                 [flow] STN1 = {
@@ -36,9 +37,9 @@ type XgxConvertDsCPU(target:PlatformTarget) =
                     }
                 }
                 [jobs] = {
-                    STN1.Device1.ADV = (_, _);
-                    STN1.Device1.RET = (_, _);
-                    STN1.외부시작.ADV = (_, -);
+                    STN1.Device1.ADV[N1(0,0)] =  (_, _);
+                    STN1.Device1.RET[N1(0,0)] =  (_, _);
+                    STN1.외부시작.ADV[N1(0,0)] = (_, _);
                 }
                 [prop] = {
                     [layouts] = {

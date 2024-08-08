@@ -15,15 +15,16 @@ open System.Linq
 [<AutoOpen>]
 module CpuTestUtil =
 
-    type CpuTestSample(target) =
-
+    type CpuTestSample(target:PlatformTarget) =
+        let targetNDrvier =  (target, PAIX_IO)
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- sys
             RuntimeDS.Package <- RuntimePackage.PC
-            applyTagManager (sys, Storages(), target)
+            
+            applyTagManager (sys, Storages(), targetNDrvier)
             checkCausalModel sys
             sys
 
@@ -45,7 +46,7 @@ module CpuTestUtil =
         do
             
             RuntimeGeneratorModule.clearNFullSlotHwSlotDataTypes()
-            DsAddressModule.assignAutoAddress(sys, 0, 100000) target
+            DsAddressModule.assignAutoAddress(sys, 0, 100000) targetNDrvier
             
             sys.GenerationIO()
             sys.GenerationOrigins()

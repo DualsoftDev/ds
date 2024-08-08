@@ -793,7 +793,7 @@ module XgiExportModule =
 
                 // get type length
                 devicePos <-
-                    let bitLength = dataType.ToPLCBitSize()
+                    let bitLength = dataType.ToBitSize()
                     devicePos + bitLength
 
                 symbols.AdoptChild symbol |> ignore

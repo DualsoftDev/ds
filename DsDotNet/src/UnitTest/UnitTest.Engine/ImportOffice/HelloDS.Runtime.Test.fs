@@ -26,7 +26,7 @@ module HelloDSRuntimeTestModule =
         let runtimeModel = new RuntimeModel(helloDSZipPath, PlatformTarget.WINDOWS)
 
         let getSystem() =
-            let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false;  CreateBtnLamp = true}
+            let pptParms:PptParams = defaultPptParams()
             let result = ImportPpt.GetDSFromPptWithLib (helloDSPptPath, false, pptParms)
             let {
                 System = system
@@ -36,7 +36,7 @@ module HelloDSRuntimeTestModule =
             } = result
 
             system.TagManager === null
-            let _ = DsCpuExt.GetDsCPU (system) PlatformTarget.WINDOWS
+            let _ = DsCpuExt.GetDsCPU (system) (pptParms.TargetType, pptParms.DriverIO)
             system.TagManager.Storages.Count > 0 === true
 
             system

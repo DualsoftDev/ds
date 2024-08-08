@@ -22,8 +22,9 @@ type StoragesTest() =
         let sys = ModelParser.ParseFromString(dsText, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
         /// 파싱후에는 TagManager가 없어야 한다.
         sys.TagManager === null
-        DsAddressModule.assignAutoAddress(sys, 0, 100000) PlatformTarget.WINDOWS
-        let _ = DsCpuExt.GetDsCPU (sys) PlatformTarget.WINDOWS
+        let targetNDrvier =  (WINDOWS, PAIX_IO)
+        DsAddressModule.assignAutoAddress(sys, 0, 100000) targetNDrvier
+        let _ = DsCpuExt.GetDsCPU (sys) targetNDrvier
 
         /// CPU 생성후 기본 Storage 생성 확인
         sys.TagManager.Storages.Count > 0 === true

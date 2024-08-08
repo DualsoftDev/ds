@@ -44,7 +44,7 @@ module rec CounterModule =
         ACC: VariableBase<CountUnitType>
     }
 
-    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType,  target:PlatformTarget) =
+    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType, target:PlatformTarget) =
         let nullB = getNull<VariableBase<bool>>()
         let mutable cu  = nullB  // Count up enable bit
         let mutable cd  = nullB  // Count down enable bit

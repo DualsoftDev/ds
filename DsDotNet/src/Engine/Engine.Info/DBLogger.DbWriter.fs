@@ -23,7 +23,7 @@ module DBWriterModule =
         let originalToken2TokenIdDic = Dictionary<uint, int>()
 
         new(commonAppSettings) = DbWriter(commonAppSettings, None)
-        //시뮬레이션 초기화 시에만 사용 
+        //시뮬레이션 초기화 시에만 사용
         member x.ClearToken() = originalToken2TokenIdDic.Clear()
         member x.GetTokenId(originalToken:uint) = originalToken2TokenIdDic[originalToken]
         member x.AllocateTokenId(originalToken:uint, at:DateTime) =
@@ -35,8 +35,15 @@ module DBWriterModule =
                     null,
                     $"INSERT INTO {Tn.Token} (at, originalToken, modelId) VALUES (@At, @OriginalToken, @ModelId)",
                     {|At = at; OriginalToken=originalToken; ModelId=commonAppSettings.LoggerDBSettings.ModelId|}).Result
-            
+
             originalToken2TokenIdDic.Add(originalToken, tokenId)
+
+        /// branchToken 이 trunkToken 에 병합되는 event 를 db 에 기록
+        member x.OnTokenMerged(branchToken, trunkToken) =
+            let bTokenId, tTokenId = x.GetTokenId(branchToken), x.GetTokenId(trunkToken)
+            use conn = commonAppSettings.CreateConnection()
+            conn.Execute($"UPDATE {Tn.Token} SET mergedTokenId = {tTokenId} WHERE id = {bTokenId}")
+
 
 
         /// 주기적으로 memory -> DB 로 log 를 write

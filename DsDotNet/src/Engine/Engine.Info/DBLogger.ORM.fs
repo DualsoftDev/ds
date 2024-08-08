@@ -79,8 +79,10 @@ CREATE TABLE [{Tn.Log}] (
 CREATE TABLE [{Tn.Token}] (
     [id]                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [at]              TEXT NOT NULL       -- SQLite DateTime 지원 안함.  DATETIME2(7)
-    , [originalToken]   INTEGER NOT NULL    -- System 에서 발번한 원래의 token 번호
+    , [originalToken]   INTEGER NOT NULL    -- System 에서 발번한 원래의 token 번호 (not ID)
+    , [mergedTokenId]   INTEGER             -- this token 이 병합되는 대상 turnk 의 tokenId
     , [modelId]         INTEGER NOT NULL
+    , FOREIGN KEY(mergedTokenId) REFERENCES {Tn.Token}(id)  -- 자기 참조 외래 키(self-referencing foreign key)
 );
 
 CREATE TABLE [{Tn.TagKind}] (

@@ -190,12 +190,12 @@ namespace Diagram.View.MSAGL
                                     break;
                                 case (int)VertexTag.mergeToken:
                                     var real = (Real)rx.GetTarget();
-                                    var removedToken = real.GetRealToken(); //삭제된 자신 토큰번호
-                                    var mergedToken  = real.GetMergeToken(); //삭제한 메인경로 토큰번호
-                                    //tokenId = dbWriter.GetTokenId(mergeToken); //작업 필요
+                                    var branchToken = real.GetRealToken(); //삭제된 자신 토큰번호
+                                    var trunkToken  = real.GetMergeToken(); //삭제한 메인경로 토큰번호
+                                    dbWriter.OnTokenMerged(branchToken, trunkToken);
                                     break;
 
-                                case (int)VertexTag.sourceToken:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능 
+                                case (int)VertexTag.sourceToken:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
                                     var sourceToken = ((Call)rx.GetTarget()).GetSourceToken();
                                     dbWriter.AllocateTokenId(sourceToken, now);
                                     break;

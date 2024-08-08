@@ -97,8 +97,7 @@ module DBWriterModule =
 
                 use conn = commonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
-                let mutable readerWriterType = DBLoggerType.Writer
-                readerWriterType <- readerWriterType ||| DBLoggerType.Reader
+                let readerWriterType = DBLoggerType.Writer ||| DBLoggerType.Reader
                 do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
 
                 let! logSet = createLogInfoSetCommonAsync(queryCriteria, commonAppSettings, systems, conn, tr, readerWriterType)

@@ -116,6 +116,7 @@ module ImportUtilVertex =
         | None ->
             mySys.Jobs.Add job
 
+        job.JobParam <- param.Node.JobParam
         dicAutoPreJob.Add(node.Key, job)
 
 

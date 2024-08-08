@@ -6,10 +6,22 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
+open Dual.Common.Base.CS
 open Dual.UnitTest.Common.FS
+open type Dual.Common.Base.CS.DcLogger
 
 type XgxArithematicTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
+
+    let enableTraceCache = DcLogger.EnableTrace
+
+    [<SetUp>]
+    member x.Setup () =
+        // 이 test 는 trace 시간이 너무 걸리므로, 이 test 에 한해 disable
+        DcLogger.EnableTrace <- false
+    [<TearDown>]
+    member __.TearDown () =
+        DcLogger.EnableTrace <- enableTraceCache
 
     member x.``ADD 10 items test`` () =
         let code = generateInt16VariableDeclarations 1 10 + """
@@ -19,7 +31,7 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         """
         code |> x.TestCode (getFuncName()) |> ignore
 
-    member x.``ADD 500 items test`` () =
+    member x.``ADD 5000 items test`` () =
         let numSum = 500
         let repeat = 10
         // "$nn1 + $nn2 + ... +$nn{count}"
@@ -270,7 +282,7 @@ type XgiArithematicTest() =
     inherit XgxArithematicTest(XGI)
 
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
-    [<Test>] member __.``ADD 500 items test`` () = base.``ADD 500 items test``()
+    [<Test>] member __.``ADD 5000 items test`` () = base.``ADD 5000 items test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
     [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()
@@ -297,7 +309,7 @@ type XgkArithematicTest() =
     inherit XgxArithematicTest(XGK)
 
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
-    [<Test>] member __.``ADD 500 items test`` () = base.``ADD 500 items test``()
+    [<Test>] member __.``ADD 5000 items test`` () = base.``ADD 5000 items test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
     [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()

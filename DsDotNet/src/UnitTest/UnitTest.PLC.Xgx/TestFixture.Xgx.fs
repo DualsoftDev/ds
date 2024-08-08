@@ -46,7 +46,7 @@ module XgxGenerationTestModule =
                     | XGK -> sprintf "%s%04d%X" addressPrefix (i / 16) (i % 16)
                     | _ -> failwith "Not supported runtime target"
                 yield sprintf "bool %s%02d = createTag(\"%s\", false);" varPrefix (i-start) tag
-        } 
+        }
 
     let private getAddressPrefix (xgx:PlatformTarget) =
         match xgx with
@@ -71,7 +71,7 @@ module XgxGenerationTestModule =
             yield! generateBitTagVariableDeclarationSeq xgx "x" addressPrefix 0 40
             yield! generateVariableDeclarationSeq "int32" "nn" (fun i -> sprintf "%d" i) 1 9
         } |> String.concat "\n"
-        
+
     let internal saveXgxTestResult (xgx:PlatformTarget) (testFunctionName:string) (xml:string) =
         let xmlDir = Path.Combine(projectDir, $"{xgx}/Xmls")
         let xmlAnswerDir = Path.Combine(xmlDir, "Answers")
@@ -140,11 +140,11 @@ module XgxFixtures =
         inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
 
         let sys = DsSystem.Create4Test("testSys")
-        
+
         /// XML을 포맷팅하는 Node.js 스크립트를 실행한다.
         /// Exception 발생 할 경우 조치방법
         ///
-        /// - Node.js 설치 (동작 확인 버젼: v18.17.1) 
+        /// - Node.js 설치 (동작 확인 버젼: v18.17.1)
         ///
         /// - NPM package 설치
         ///
@@ -187,7 +187,7 @@ module XgxFixtures =
             // 포맷된 XML 반환
             output.Replace("\r\n", "\n").Replace("\n", "\r\n")
 
-            
+
 
         /// 주어진 ds expression 코드를 파싱해서 PLC 코드 생성
         ///

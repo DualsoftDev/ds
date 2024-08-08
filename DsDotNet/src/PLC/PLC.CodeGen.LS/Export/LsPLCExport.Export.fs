@@ -462,7 +462,7 @@ module XgiExportModule =
 
             let _, ms = duration(fun() ->
                 (*
-                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.
+                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.  ``ADD 5000 items test`` 기준, 112 ms vs 25 ms
                  *)
                 // (* Naive version *)
                 //for r in rungsXml.GetChildrenNodes() do
@@ -479,7 +479,7 @@ module XgiExportModule =
                     for r in tails.Reverse() do
                         node.InsertAfter r |> ignore
             )
-            tracefn ($"Total {ms} milliseconds")
+            forceTrace ($"Total {ms} milliseconds")
             (*
              * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
              *)

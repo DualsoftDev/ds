@@ -9,11 +9,7 @@ open System.Reactive.Linq
 
 [<AutoOpen>]
 module CommonAppSettings =
-#if DEBUG
-    let IsDebugVersion = true
-#else
-    let IsDebugVersion = false
-#endif
+    let IsDebugVersion = Dual.Common.Base.CS.Common.IsDebugVersion
 
     let internal createConnectionWith (connStr) =
         new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
@@ -21,7 +17,7 @@ module CommonAppSettings =
 
 
 /// ServerSettings 에서부터 연결되어 오므로, System.Text.Json 으로 serialize 가능해야 함.
-type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, syncIntervalMilliSeconds:int) = 
+type LoggerDBSettings(sqlitePath:string, dbWriter:string, modelFilePath:string, syncIntervalMilliSeconds:int) =
     do
         noop()
     new() = LoggerDBSettings("", "", "", 0)

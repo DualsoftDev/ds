@@ -56,7 +56,7 @@ module ConvertCPU =
                 yield vr.F2_RootReset()
 
                 if isActive then
-                    yield! vr.R6_RealTokenMove() 
+                    yield! vr.R6_RealTokenMoveNSink() 
                     yield vr.F7_HomeCommand()
 
                 

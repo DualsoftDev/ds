@@ -20,20 +20,22 @@ module DBWriterModule =
     type DbWriter(commonAppSettings: DSCommonAppSettings, logSet) =
         inherit DbHandler(commonAppSettings, logSet)
         let queue = ConcurrentQueue<ORMLog>()
-        let originalToken2TokenIdDic = Dictionary<int64, int64>()
+        let originalToken2TokenIdDic = Dictionary<uint, int>()
 
         new(commonAppSettings) = DbWriter(commonAppSettings, None)
 
-        member x.GetTokenId(originalToken:int64) = originalToken2TokenIdDic[originalToken]
-        member x.AllocateTokenId(originalToken:int64, at:DateTime):int64 =
+        member x.GetTokenId(originalToken:uint) = originalToken2TokenIdDic[originalToken]
+        member x.AllocateTokenId(originalToken:uint, at:DateTime) =
             assert(!! originalToken2TokenIdDic.ContainsKey(originalToken))
+
             use conn = commonAppSettings.CreateConnection()
             let tokenId =
                 conn.InsertAndQueryLastRowIdAsync(
                     null,
                     $"INSERT INTO {Tn.Token} (at, originalToken, modelId) VALUES (@At, @OriginalToken, @ModelId)",
                     {|At = at; OriginalToken=originalToken; ModelId=commonAppSettings.LoggerDBSettings.ModelId|}).Result
-            tokenId
+            
+            originalToken2TokenIdDic.Add(originalToken, tokenId)
 
 
         /// 주기적으로 memory -> DB 로 log 를 write

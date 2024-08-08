@@ -190,7 +190,7 @@ type TagKindExt =
     [<Extension>]
     static member IsVertexTokenTag(x:TagDS) =
         match x with
-        | EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.sourceToken
+        | EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.realToken
                                                      , VertexTag.sourceToken
                                                     )
         | _ -> false

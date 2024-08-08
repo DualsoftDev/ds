@@ -190,7 +190,7 @@ namespace Diagram.View.MSAGL
                                     break;
                                 case Call c:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
                                     var sourceToken = c.GetSourceToken();
-                                    tokenId = dbWriter.AllocateTokenId(sourceToken, now);
+                                    dbWriter.AllocateTokenId(sourceToken, now);
                                     break;
                                 default:
                                     break;

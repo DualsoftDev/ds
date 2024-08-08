@@ -100,6 +100,6 @@ type ORMDBSkeletonDTOExt =
         match db.Storages.TryFindValue(log.StorageId) with
         | Some stg ->
             let tagKind = db.TagKinds[stg.TagKind]
-            ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value, log.ModelId, log.Token)
+            ORMVwLog(log.Id, log.StorageId, stg.Name, stg.Fqdn, stg.TagKind, tagKind.Name, log.At, log.Value, log.ModelId, log.TokenId)
         | None ->
             failwith $"Failed to expand log item to view:: {log.Serialize()}"

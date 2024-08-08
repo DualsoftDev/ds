@@ -176,17 +176,28 @@ namespace Diagram.View.MSAGL
 
                     if (SaveLog)
                     {
-                        uint? token = null;
-                        uint? srctoken = null;
+                        var dbWriter = DBLogger.TheDbWriter;
+                        var now = DateTime.Now;
+
+                        long? tokenId = null;
                         if (rx.IsVertexTokenTag())
                         {
-                            if (eventVertex?.Target is Real r)
-                                token = r.GetRealToken();
-                            if (eventVertex?.Target is Call c)  //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
-                                srctoken = c.GetSourceToken();
+                            switch (eventVertex?.Target)
+                            {
+                                case Real r:
+                                    var realToken = r.GetRealToken();
+                                    tokenId = dbWriter.GetTokenId(realToken);
+                                    break;
+                                case Call c:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
+                                    var sourceToken = c.GetSourceToken();
+                                    tokenId = dbWriter.AllocateTokenId(sourceToken, now);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                         //srctoken 처리 대기
-                        DbWriterExtension.InsertValueLog(DBLogger.TheDbWriter, DateTime.Now, rx, token);
+                        dbWriter.InsertValueLog(now, rx, tokenId);
                     }
                 });
             }

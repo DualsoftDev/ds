@@ -7,6 +7,7 @@ open Dual.Common.Db
 open System.Threading.Tasks
 open System.Collections.Concurrent
 open DBLoggerORM
+open System.Collections.Generic
 
 [<AutoOpen>]
 module DBWriterModule =
@@ -19,8 +20,21 @@ module DBWriterModule =
     type DbWriter(commonAppSettings: DSCommonAppSettings, logSet) =
         inherit DbHandler(commonAppSettings, logSet)
         let queue = ConcurrentQueue<ORMLog>()
+        let originalToken2TokenIdDic = Dictionary<int64, int64>()
 
         new(commonAppSettings) = DbWriter(commonAppSettings, None)
+
+        member x.GetTokenId(originalToken:int64) = originalToken2TokenIdDic[originalToken]
+        member x.AllocateTokenId(originalToken:int64, at:DateTime):int64 =
+            assert(!! originalToken2TokenIdDic.ContainsKey(originalToken))
+            use conn = commonAppSettings.CreateConnection()
+            let tokenId =
+                conn.InsertAndQueryLastRowIdAsync(
+                    null,
+                    $"INSERT INTO {Tn.Token} (at, originalToken, modelId) VALUES (@At, @OriginalToken, @ModelId)",
+                    {|At = at; OriginalToken=originalToken; ModelId=commonAppSettings.LoggerDBSettings.ModelId|}).Result
+            tokenId
+
 
         /// 주기적으로 memory -> DB 로 log 를 write
         member x.dequeAndWriteDBAsync (nPeriod: int64) =
@@ -66,8 +80,8 @@ module DBWriterModule =
 //#endif
                         let query =
                             $"""INSERT INTO [{Tn.Log}]
-                                (at, storageId, value, modelId, token)
-                                VALUES (@At, @StorageId, @Value, @ModelId, @Token)
+                                (at, storageId, value, modelId, tokenId)
+                                VALUES (@At, @StorageId, @Value, @ModelId, @TokenId)
                             """
 
                         let! _ =
@@ -77,7 +91,7 @@ module DBWriterModule =
                                    StorageId = l.StorageId
                                    Value = l.Value
                                    ModelId = modelId
-                                   Token = l.Token |},
+                                   TokenId = l.TokenId |},
                                 tr
                             )
                         ()
@@ -117,7 +131,31 @@ module DBWriterModule =
                 return logSet
             }
 
+        member x.EnqueLogs (ys: DsLog seq) : unit =
+            let toDecimal (value: obj) =
+                match toBool value with
+                | Bool b -> (if b then 1 else 0) |> decimal
+                | UInt64 d -> decimal d
+                | _ -> failwithlog "ERROR"
 
+
+            verify (x.LogSet.Value.ReaderWriterType.HasFlag(DBLoggerType.Writer))
+
+            for y in ys do
+                match y.Storage.Target with
+                | Some t ->
+                    let key = y.Storage.TagKind, t.QualifiedName
+                    let storageId = x.LogSet.Value.Storages[key].Id
+
+                    if storageId = 0 then
+                        noop ()
+
+                    let value = toDecimal y.Storage.BoxedValue
+                    let modelId = x.LogSet.Value.QuerySet.ModelId
+                    ORMLog(-1, storageId, y.Time, value, modelId, y.TokenId) |> queue.Enqueue
+                | None -> failwithlog "NOT yet!!"
+
+        member x.EnqueLog (log: DsLog) : unit = x.EnqueLogs ([ log ])
 
         /// Log DB schema 생성
         static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
@@ -149,30 +187,4 @@ module DBWriterModule =
                 return dbWriter
             }
 
-
-        member x.EnqueLogs (ys: DsLog seq) : unit =
-            let toDecimal (value: obj) =
-                match toBool value with
-                | Bool b -> (if b then 1 else 0) |> decimal
-                | UInt64 d -> decimal d
-                | _ -> failwithlog "ERROR"
-
-
-            verify (x.LogSet.Value.ReaderWriterType.HasFlag(DBLoggerType.Writer))
-
-            for y in ys do
-                match y.Storage.Target with
-                | Some t ->
-                    let key = y.Storage.TagKind, t.QualifiedName
-                    let storageId = x.LogSet.Value.Storages[key].Id
-
-                    if storageId = 0 then
-                        noop ()
-
-                    let value = toDecimal y.Storage.BoxedValue
-                    let modelId = x.LogSet.Value.QuerySet.ModelId
-                    ORMLog(-1, storageId, y.Time, value, modelId, y.Token) |> queue.Enqueue
-                | None -> failwithlog "NOT yet!!"
-
-        member x.EnqueLog (log: DsLog) : unit = x.EnqueLogs ([ log ])
 

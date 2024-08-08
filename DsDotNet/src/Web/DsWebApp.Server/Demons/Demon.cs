@@ -14,6 +14,7 @@ using DsWebApp.Server.Common;
 using static Engine.Core.TagKindModule.TagDS;
 using static Engine.CodeGenCPU.ConvertCpuVertex;
 using static Engine.CodeGenCPU.RealExt;
+using static Engine.Info.DBWriterModule;
 
 namespace DsWebApp.Server.Demons;
 public partial class Demon : BackgroundService
@@ -25,6 +26,7 @@ public partial class Demon : BackgroundService
     IHubContext<DbHub> _hubContextDb;
     ILog _logger => _serverGlobal.Logger;
     DsSystem _dsSystem => _serverGlobal.RuntimeModel?.System;
+    DbWriter _dbWriter;
 
     public Demon(
         ServerGlobal serverGlobal
@@ -67,11 +69,12 @@ public partial class Demon : BackgroundService
 
             _modelSubscription.Dispose();
             _modelSubscription = new();
-            var loggerDBSettings = serverGlobal.DsCommonAppSettings.LoggerDBSettings;            
+            var loggerDBSettings = serverGlobal.DsCommonAppSettings.LoggerDBSettings;
             (var modelId, var path) = loggerDBSettings.FillModelId();
             var queryCriteria = new QueryCriteria(_serverGlobal.DsCommonAppSettings, modelId, DateTime.Now.Date.AddDays(-1), null);
-            var logSetW = DBLogger.InitializeLogReaderWriterOnDemandAsync(queryCriteria, systems, cleanExistingDb:false).Result;
-            _modelSubscription.Add(logSetW);
+            _dbWriter = DBLogger.InitializeLogReaderWriterOnDemandAsync(queryCriteria, systems, cleanExistingDb:false).Result;
+            DBLogger.TheDbWriter = _dbWriter;
+            _modelSubscription.Add(_dbWriter.LogSet.Value);
 
 
             IDisposable subscription =
@@ -86,7 +89,7 @@ public partial class Demon : BackgroundService
                             {
                                 uint? token = (ti.Value is EventVertex ev && ev.Target is Real r) ? r.GetRealToken() : null;
 
-                                DBLogger.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, token));
+                                _dbWriter.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, token));
                             }
                         }
                     });

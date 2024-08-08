@@ -44,7 +44,7 @@ namespace Diagram.View.MSAGL
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
         static private DsSystem _sys = null;
         static public bool SaveLog = false;
-        
+
         public static List<ViewNode> CreateViews(DsSystem sys)
         {
             _sys = sys;
@@ -95,7 +95,7 @@ namespace Diagram.View.MSAGL
 
                 real.GetSharedReal().Iter(alias => UpdateOriginVertexTag(og, DicNode[alias]));
             });
-             
+
 
             return flowViewNodes;
 
@@ -147,7 +147,7 @@ namespace Diagram.View.MSAGL
                     DicTaskDevTag[planEndTag].Add(viewVertex);
                     DicTaskDevTag[planStartTag].Add(viewVertex);
                     DicTaskDevTag[planOutputTag].Add(viewVertex);
-                }); 
+                });
             }
 
             void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
@@ -157,7 +157,7 @@ namespace Diagram.View.MSAGL
                 DicMemoryTag[tag].Add(viewVertex);
             }
 
-            
+
             void ViewChangeSubject()
             {
                 _Disposable?.Dispose();
@@ -186,17 +186,17 @@ namespace Diagram.View.MSAGL
                                 srctoken = c.GetSourceToken();
                         }
                         //srctoken 처리 대기
-                        DBLog.InsertValueLog(DateTime.Now, rx, token);
+                        DbWriterExtension.InsertValueLog(DBLogger.TheDbWriter, DateTime.Now, rx, token);
                     }
                 });
             }
         }
 
-   
+
 
         private static void HandleVertexEvent(EventVertex ev)
         {
-            if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue && DicNode.ContainsKey(ev.Target)) 
+            if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue && DicNode.ContainsKey(ev.Target))
             {
                 Status4 status = ev.TagKind switch
                 {
@@ -248,7 +248,7 @@ namespace Diagram.View.MSAGL
                 });
             }
         }
-     
+
         private static void HandleTaskDevEvent(EventTaskDev td)
         {
             //if (!DicMemoryTag.ContainsKey(td.Tag)) return;
@@ -322,4 +322,4 @@ namespace Diagram.View.MSAGL
         }
     }
 }
-    
+

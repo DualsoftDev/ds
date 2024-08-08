@@ -4,7 +4,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System
 open System.IO
-
+open System.Threading.Tasks
 
 
 
@@ -12,31 +12,32 @@ type DBLogger() =
     //static let queryCriteria = QuerySet()
     //static let queryCriteria = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
 
-    static member EnqueLog(log: DsLog) =
-        DbWriter.enqueLog (log: DsLog)
+    //static member EnqueLog(log: DsLog) =
+    //    DbWriter.EnqueLog (log: DsLog)
 
-    static member EnqueLogs(logs: DsLog seq) =
-        DbWriter.enqueLogs (logs: DsLog seq)
+    //static member EnqueLogs(logs: DsLog seq) =
+    //    DbWriter.EnqueLogs (logs: DsLog seq)
 
+    static member val TheDbWriter = getNull<DbWriter>() with get, set
     static member InitializeLogWriterOnDemandAsync
         (
             queryCriteria: QueryCriteria,
             systems: DsSystem seq,
             cleanExistingDb: bool
-        ) =
-        ()
+        ): Task<DbWriter> =
+
         task {
             Log4NetWrapper.logWithTrace <- true
 
-            let! logSet =
-                DbWriter.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
+            let! dbWriter =
+                DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
 
-            return logSet :> ILogSet
+            return dbWriter
         }
 
     /// model 정보 없이, database schema 만 생성
     static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings, cleanExistingDb:bool) =
-        DbWriter.initializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
+        DbWriter.InitializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
 
 
 
@@ -59,7 +60,7 @@ type DBLogger() =
             Log4NetWrapper.logWithTrace <- true
 
             let! logSet =
-                DbWriter.initializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
+                DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
 
             return logSet //:> ILogSet
         }

@@ -36,6 +36,8 @@ module ExpressionExtension =
     let (<=^) rising exp   = DuAssign(None, exp, rising)
     /// storage 에 expression falling 값을 assign 하는 statement 생성
     let (<=!^) falling exp = DuAssign(None, exp, falling)
+    /// logical equal for expression 
+    let (==@) left right = binaryOp fbEqual left right
   
     /// set 조건, reset 조건을 op 에 의해서 coil 에 assign 하는 CommentedStatement 생성
     let inline coilOp op sets rsts (coil, comment) = 

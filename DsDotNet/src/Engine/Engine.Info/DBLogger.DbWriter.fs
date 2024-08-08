@@ -23,7 +23,8 @@ module DBWriterModule =
         let originalToken2TokenIdDic = Dictionary<uint, int>()
 
         new(commonAppSettings) = DbWriter(commonAppSettings, None)
-
+        //시뮬레이션 초기화 시에만 사용 
+        member x.ClearToken() = originalToken2TokenIdDic.Clear()
         member x.GetTokenId(originalToken:uint) = originalToken2TokenIdDic[originalToken]
         member x.AllocateTokenId(originalToken:uint, at:DateTime) =
             assert(!! originalToken2TokenIdDic.ContainsKey(originalToken))

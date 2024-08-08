@@ -239,6 +239,8 @@ module ConvertCPU =
             sys.GenerationMemory()
             sys.GenerationIO()
 
+            updateSourceTokenOrder sys
+
             match RuntimeDS.Package with
             | PCSIM -> 
                 setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기

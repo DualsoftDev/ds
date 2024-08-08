@@ -81,16 +81,27 @@ type VertexTagManager with
 
         (sets, v._off.Expr) --| (v.ET, getFuncName())
 
- 
+
+
+
     member v.F5_SourceTokenNumGeneration() =
         let vc = getVMCall v.Vertex
         let fn = getFuncName()
-        [|
-            let tempRisingRelay = v.System.GetTempBoolTag("tempSourceTokenNumRising") 
-            yield (v.ET.Expr, v._off.Expr) --| (tempRisingRelay, fn)
-            yield (tempRisingRelay.Expr, 1u|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
-        |]
+        match v.Vertex.TokenSourceOrder with
+        | Some order ->
+            [|  
+                let tempInit= v.System.GetTempBoolTag("tempInitCheckTokenSrc") 
+                let initExpr = 0u|>literal2expr ==@ vc.SourceTokenData.ToExpression() 
+                yield (initExpr, v._off.Expr) --| (tempInit, fn)
 
+                let totalSrcToken = v.System.GetSourceTokenCount() 
+                
+                //처음에는 자기 순서로 시작
+                yield (tempInit.Expr   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
+                //이후부터는 전체 값 만큼 증가
+                yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+            |]
+        |None -> [||]
      
 
     member v.F7_HomeCommand() =

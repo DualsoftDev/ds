@@ -5,19 +5,11 @@ open Dual.Common.Core.FS
 open System
 open System.IO
 open System.Threading.Tasks
+open Dual.Common.Base.CS
 
 
 
 type DBLogger() =
-    //static let queryCriteria = QuerySet()
-    //static let queryCriteria = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
-
-    //static member EnqueLog(log: DsLog) =
-    //    DbWriter.EnqueLog (log: DsLog)
-
-    //static member EnqueLogs(logs: DsLog seq) =
-    //    DbWriter.EnqueLogs (logs: DsLog seq)
-
     static member val TheDbWriter = getNull<DbWriter>() with get, set
     static member InitializeLogWriterOnDemandAsync
         (
@@ -27,7 +19,7 @@ type DBLogger() =
         ): Task<DbWriter> =
 
         task {
-            Log4NetWrapper.logWithTrace <- true
+            //DcLogger.EnableTrace <- true
 
             let! dbWriter =
                 DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
@@ -43,7 +35,6 @@ type DBLogger() =
 
     static member InitializeLogReaderOnDemandAsync(queryCriteria: QueryCriteria, systems: DsSystem seq) =
         task {
-            Log4NetWrapper.logWithTrace <- true
             let! logSet = DbReader.initializeLogReaderOnDemandAsync (queryCriteria, systems)
             return logSet :> ILogSet
         }
@@ -57,8 +48,6 @@ type DBLogger() =
         ) =
         ()
         task {
-            Log4NetWrapper.logWithTrace <- true
-
             let! logSet =
                 DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
 

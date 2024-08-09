@@ -9,7 +9,7 @@ open System.Reactive.Linq
 
 [<AutoOpen>]
 module CommonAppSettings =
-    let IsDebugVersion = Dual.Common.Base.CS.Common.IsDebugVersion
+    let IsDebugVersion = Dual.Common.Base.CS.DcApp.IsDebugVersion
 
     let internal createConnectionWith (connStr) =
         new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())

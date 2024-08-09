@@ -195,6 +195,8 @@ module CoreExtensionModule =
     type TaskDev with
 
         member x.FirstApi = x.ApiItems.First()
+        member x.IsAnalogSensor = x.InTag.DataType <> typedefof<bool>
+        member x.IsAnalogActuator = x.OutTag.DataType <> typedefof<bool>
 
 
         member x.GetInParam(jobFqdn:string) =

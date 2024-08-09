@@ -143,17 +143,25 @@ module ConvertCPU =
 
     let private applyTaskDev(s:DsSystem) = 
         [|
+            //let devCoinSet =  s.GetTaskDevsCoin() 
+            //for (td, coin) in devCoinSet do
+            //    let tm = td.TagManager :?> TaskDevManager
+            //    yield! tm.TD1_PlanSend(s, coin) 
+
+
             let devCallSet =  s.GetTaskDevCalls() //api는 job 기준으로 중복제거 
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
                 let masterCall= getTryMasterCall(calls)
-                yield! tm.TD1_PlanSend(s, calls)
+                yield! tm.TD1_PlanSend(s, calls) 
                 yield! tm.TD2_PlanReceive(s)
                 yield! tm.TD3_PlanOutput(s)
                 
                 if masterCall.IsSome then   
                     yield! tm.A1_ApiSet(masterCall.Value)
-                    yield! tm.A2_ApiEnd()
+
+            for a in s.ApiItems.Select(getAM) do
+                yield a.A2_ApiEnd()
 
             let devCallSet =  devCallSet.DistinctBy(fun (td, _c)-> td) //SensorLink는 taskDev 단위로 중복제거
             for (td, calls) in devCallSet do

@@ -143,10 +143,10 @@ namespace Diagram.View.MSAGL
                     if (!DicTaskDevTag.ContainsKey(planEndTag)) DicTaskDevTag.Add(planEndTag, new List<ViewVertex>());
                     if (!DicTaskDevTag.ContainsKey(planStartTag)) DicTaskDevTag.Add(planStartTag, new List<ViewVertex>());
                     if (!DicTaskDevTag.ContainsKey(planOutputTag)) DicTaskDevTag.Add(planOutputTag, new List<ViewVertex>());
-
-                    DicTaskDevTag[planEndTag].Add(viewVertex);
-                    DicTaskDevTag[planStartTag].Add(viewVertex);
-                    DicTaskDevTag[planOutputTag].Add(viewVertex);
+                    //TaskDev는 여러군대 사용 하므로 처음에 한번만 추가
+                    if (DicTaskDevTag[planEndTag].Count == 0) DicTaskDevTag[planEndTag].Add(viewVertex);
+                    if (DicTaskDevTag[planStartTag].Count == 0) DicTaskDevTag[planStartTag].Add(viewVertex);
+                    if (DicTaskDevTag[planOutputTag].Count == 0) DicTaskDevTag[planOutputTag].Add(viewVertex);
                 });
             }
 

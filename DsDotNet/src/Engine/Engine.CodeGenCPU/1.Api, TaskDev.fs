@@ -16,6 +16,14 @@ type TaskDevManager with
             yield (coinMemos, activeSys._off.Expr) --| (d.PlanStart(job), fn)
         |]
     
+    //member d.TD1_PlanSend(activeSys:DsSystem, coin:Vertex) =
+    //    let fn = getFuncName()
+    //    [|
+    //        let call = coin.GetPureCall()
+    //        yield (call.VC.MM.Expr, activeSys._off.Expr) --| (d.PlanStart(call.TargetJob), fn)
+    //    |]
+
+
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         let fn = getFuncName()
         [|
@@ -51,14 +59,6 @@ type TaskDevManager with
             yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.ApiItemSet, fn)
         |]
 
-    member d.A2_ApiEnd() =
-        let fn = getFuncName()
-        [|
-            for a in d.TaskDev.ApiItems do
-                let sets = a.RxET.Expr
-                yield (sets, a.ApiSystem._off.Expr) --| (a.ApiItemEnd, fn)
-        |]
-        
     member d.A3_SensorLinking(call:Call) =
         let fn = getFuncName()
         [|
@@ -94,3 +94,11 @@ type TaskDevManager with
         |]
     
 
+type ApiItemManager with
+ 
+    member a.A2_ApiEnd() =
+        let fn = getFuncName()
+        let api= a.ApiItem
+        (api.RxET.Expr, api.ApiSystem._off.Expr) --| (api.ApiItemEnd, fn)
+        
+  

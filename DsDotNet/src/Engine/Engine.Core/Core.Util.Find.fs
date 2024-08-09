@@ -232,9 +232,8 @@ module internal ModelFindModule =
 
 
     let getTaskDevCalls(x:DsSystem) =
-        let taskDevs =
-            getTaskDevs(x, false)
-                .DistinctBy(fun (td, c) -> td, c.TargetJob)
+        let taskDevs = getTaskDevs(x, false)
+                        .DistinctBy(fun (td, _c) -> td)
 
         let callAll = getVerticesOfAliasNCalls(x)
         taskDevs
@@ -385,6 +384,8 @@ type FindExtension =
             x.Jobs
                 .SelectMany(fun j->j.TaskDefs.Select(fun td->(td, j))).DistinctBy(fun (td, _j) -> td)
                 .Where(fun (td, _j) -> not(td.OutAddress = TextSkip && td.InAddress= TextSkip))
+                .OrderBy(fun (td, c) ->
+                        (td.DeviceName, td.GetApiItem(c).Name))
 
     [<Extension>]
     static member GetQualifiedName(vertex:IVertex) =

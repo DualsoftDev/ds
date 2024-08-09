@@ -28,10 +28,10 @@ module ImportUtilVertex =
             newFunc
         )
 
-    let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: PptNode) (apiName: string) parentWrapper =
+    let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: PptNode) parentWrapper =
         let loadSysName = device.Name
         let jobName = node.Job.Combine()
-
+        let apiName = node.ApiPureName
 
         match sys.Jobs |> Seq.tryFind (fun job -> job.DequotedQualifiedName = jobName) with
         | Some job -> Call.Create(job, parentWrapper)
@@ -72,7 +72,7 @@ module ImportUtilVertex =
     let private createCall (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper) =
         match  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
             |  Some dev ->
-                getCallFromLoadedSys mySys dev node node.ApiName parentWrapper
+                getCallFromLoadedSys mySys dev node parentWrapper
             | _  ->
                 let callParams = {
                     MySys = mySys

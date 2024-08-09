@@ -30,11 +30,11 @@ module DBLog =
             _time
 
 
-[<Extension>]
-type DbWriterExtension =
-    [<Extension>]
-    static member InsertValueLog(dbWriter:DbWriter, time: DateTime, tag: TagDS, tokenId:TokenIdType) =
-        let vlog = DBLog.ValueLog(time, tag, tokenId)
-        if tag.IsNeedSaveDBLog() then
-            dbWriter.EnqueLog(vlog)
-        vlog
+//[<Extension>]
+//type DbWriterExtension =
+//    [<Extension>]
+//    static member InsertValueLog(dbWriter:DbWriter, time: DateTime, tag: TagDS, tokenId:TokenIdType) =
+//        let vlog = DBLog.ValueLog(time, tag, tokenId)
+//        if tag.IsNeedSaveDBLog() then
+//            dbWriter.EnqueLog(vlog)
+//        vlog

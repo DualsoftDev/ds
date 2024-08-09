@@ -132,7 +132,7 @@ CREATE VIEW [{Vn.Log}] AS
     ON [stg].[id] = [log].[storageId]
     JOIN [{Tn.TagKind}] tagKind
     ON [stg].[tagKind] = [tagKind].[id]
-    JOIN [{Tn.Token}] token
+    LEFT JOIN [{Tn.Token}] token
     ON [log].[tokenId] = [token].[id]
     ;
 

@@ -30,6 +30,7 @@ using static Engine.Import.Office.ViewModule;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
+using static Engine.Info.DBWriterModule;
 
 namespace Diagram.View.MSAGL
 {
@@ -176,7 +177,7 @@ namespace Diagram.View.MSAGL
 
                     if (SaveLog)
                     {
-                        var dbWriter = DBLogger.TheDbWriter;
+                        var dbWriter = DbWriter.TheDbWriter;
                         var now = DateTime.Now;
 
                         long? tokenId = null;

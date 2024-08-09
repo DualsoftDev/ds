@@ -4,56 +4,19 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System
 open System.IO
-open System.Threading.Tasks
-open Dual.Common.Base.CS
 
 
 
 type DBLogger() =
-    static member val TheDbWriter = getNull<DbWriter>() with get, set
-    static member InitializeLogWriterOnDemandAsync
-        (
-            queryCriteria: QueryCriteria,
-            systems: DsSystem seq,
-            cleanExistingDb: bool
-        ): Task<DbWriter> =
-
-        task {
-            //DcLogger.EnableTrace <- true
-
-            let! dbWriter =
-                DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
-
-            return dbWriter
-        }
-
     /// model 정보 없이, database schema 만 생성
     static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings, cleanExistingDb:bool) =
         DbWriter.InitializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
-
-
 
     static member InitializeLogReaderOnDemandAsync(queryCriteria: QueryCriteria, systems: DsSystem seq) =
         task {
             let! logSet = DbReader.initializeLogReaderOnDemandAsync (queryCriteria, systems)
             return logSet :> ILogSet
         }
-
-    /// Reader + Writer 일체형
-    static member InitializeLogReaderWriterOnDemandAsync
-        (
-            queryCriteria: QueryCriteria,
-            systems: DsSystem seq,
-            cleanExistingDb:bool
-        ) =
-        ()
-        task {
-            let! logSet =
-                DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
-
-            return logSet //:> ILogSet
-        }
-
 
 
     /// 조회 기간 변경 (reader)

@@ -8,6 +8,7 @@ open System.Threading.Tasks
 open System.Collections.Concurrent
 open DBLoggerORM
 open System.Collections.Generic
+open System.Reactive.Disposables
 
 [<AutoOpen>]
 module DBWriterModule =
@@ -21,8 +22,15 @@ module DBWriterModule =
         inherit DbHandler(commonAppSettings, logSet)
         let queue = ConcurrentQueue<ORMLog>()
         let originalToken2TokenIdDic = Dictionary<uint, int>()
+        let disposables = CompositeDisposable()
 
         new(commonAppSettings) = DbWriter(commonAppSettings, None)
+
+        static member val TheDbWriter = getNull<DbWriter>() with get, set
+        interface IDisposable with
+            member _.Dispose() = disposables.Dispose()
+
+
         //시뮬레이션 초기화 시에만 사용
         member x.ClearToken() = originalToken2TokenIdDic.Clear()
         member x.GetTokenId(originalToken:uint) = originalToken2TokenIdDic[originalToken]
@@ -194,6 +202,7 @@ module DBWriterModule =
                 commonAppSettings.LoggerDBSettings.SyncInterval.Subscribe(fun counter -> dbWriter.writePeriodicAsync(counter).Wait())
                 |> logSet.Disposables.Add
 
+                DbWriter.TheDbWriter <- dbWriter
                 return dbWriter
             }
 

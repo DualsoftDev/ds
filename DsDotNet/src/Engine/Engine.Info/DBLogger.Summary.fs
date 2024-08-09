@@ -94,13 +94,14 @@ module DBLoggerORM2 =
         member val StoragesById = Dictionary<int, ORMStorage>()
         member val LastLogs = Dictionary<ORMStorage, Log>()
         member val TheLastLog: Log option = None with get, set
-        member val Disposables = new CompositeDisposable()
+        //member val Disposables = new CompositeDisposable()
         // } mutables
 
-        interface ILogSet with
-            override x.Dispose() =
-                x.Disposables.Dispose()
-                tracefn "------------------ LogSet disposed"
+        interface ILogSet
+        //interface ILogSet with
+        //    override x.Dispose() =
+        //        x.Disposables.Dispose()
+        //        tracefn "------------------ LogSet disposed"
 
 
 

@@ -6,7 +6,6 @@ open System
 open System.IO
 
 
-
 type DBLogger() =
 
     /// 조회 기간 변경 (reader)
@@ -18,9 +17,8 @@ type DBLogger() =
             failwith "Not yet implemented"
             let modelId = -1
             let queryCriteria = QueryCriteria(commonAppSettings, modelId, startAt, endAt)
-            let! newLogSet = DbReader.changeQueryDurationAsync (logSet, queryCriteria)
-            dispose (logSet :> IDisposable)
-            return newLogSet :> ILogSet
+            let! dbReader = DbReader.Create (logSet, queryCriteria)
+            return dbReader.LogSet.Value :> ILogSet
         }
 
     // { unit test 등의 debugging 용
@@ -41,21 +39,21 @@ type DBLogger() =
     // }
 
     static member Count(fqdns: string seq, tagKinds: int seq) =
-        DBLoggerImpl.count (DBLoggerImpl.logSet, fqdns, tagKinds, true)
+        DBLoggerImpl.count (DbHandler.TheDbHandler.LogSet.Value, fqdns, tagKinds, true)
 
     static member Count(fqdn: string, tagKind: int) =
         DBLogger.Count([| fqdn |], [| tagKind |])
 
     static member GetLastValue(fqdn: string, tagKind: int) =
-        DBLoggerImpl.getLastValue (DBLoggerImpl.logSet, fqdn, tagKind)
+        DBLoggerImpl.getLastValue (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)
         |> Option.toNullable
 
 
     static member Sum(fqdn, tagKind) =
-        DBLoggerQueryImpl.sum (DBLoggerImpl.logSet, fqdn, tagKind)
+        DBLoggerQueryImpl.sum (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)
 
     static member Average(fqdn, tagKind) =
-        DBLoggerQueryImpl.average (DBLoggerImpl.logSet, fqdn, tagKind)
+        DBLoggerQueryImpl.average (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)
 
     static member GetDsFilePath(connectionString: string) =
         let filePathOption = connectionString.Split('=').TryLast()

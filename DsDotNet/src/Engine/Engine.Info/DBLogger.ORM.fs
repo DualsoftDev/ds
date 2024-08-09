@@ -7,8 +7,7 @@ open Dual.Common.Core.FS
 open Newtonsoft.Json
 
 
-type ILogSet =
-    inherit IDisposable
+type ILogSet = interface end
 
 [<Flags>]
 type DBLoggerType =

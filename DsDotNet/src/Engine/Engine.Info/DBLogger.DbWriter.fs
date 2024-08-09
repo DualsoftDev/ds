@@ -12,23 +12,31 @@ open System.Reactive.Disposables
 
 [<AutoOpen>]
 module DBWriterModule =
+    /// DbReader 및 DbWriter 의 공통 조상 class
     [<AbstractClass>]
-    type DbHandler(commonAppSettings: DSCommonAppSettings, logSet:LogSet option) =
+    type DbHandler(queryCriteria:QueryCriteria, logSet:LogSet option) as this =
+        do
+            DbHandler.TheDbHandler <- this
+        static member val TheDbHandler = getNull<DbHandler>() with get, set
+        interface IDisposable with
+            member x.Dispose() = x.Dispose()
+        member val Disposables = new CompositeDisposable() with get, set
         member val LogSet = logSet with get, set
-        member x.CommonAppSettings = commonAppSettings
+        member x.CommonAppSettings = queryCriteria.CommonAppSettings
+        member x.Dispose() =
+            tracefn "------------------ DbHandler disposing.."
+            x.Disposables.Dispose()
+            x.Disposables <- new CompositeDisposable()
 
     /// DB log writer.  Runtime engine
-    type DbWriter(commonAppSettings: DSCommonAppSettings, logSet) =
-        inherit DbHandler(commonAppSettings, logSet)
+    type DbWriter(queryCriteria:QueryCriteria, logSet) =
+        inherit DbHandler(queryCriteria, logSet)
         let queue = ConcurrentQueue<ORMLog>()
         let originalToken2TokenIdDic = Dictionary<uint, int>()
-        let disposables = CompositeDisposable()
 
-        new(commonAppSettings) = DbWriter(commonAppSettings, None)
+        new(queryCriteria) = new DbWriter(queryCriteria, None)
 
         static member val TheDbWriter = getNull<DbWriter>() with get, set
-        interface IDisposable with
-            member _.Dispose() = disposables.Dispose()
 
 
         //시뮬레이션 초기화 시에만 사용
@@ -37,19 +45,19 @@ module DBWriterModule =
         member x.AllocateTokenId(originalToken:uint, at:DateTime) =
             assert(!! originalToken2TokenIdDic.ContainsKey(originalToken))
 
-            use conn = commonAppSettings.CreateConnection()
+            use conn = x.CommonAppSettings.CreateConnection()
             let tokenId =
                 conn.InsertAndQueryLastRowIdAsync(
                     null,
                     $"INSERT INTO {Tn.Token} (at, originalToken, modelId) VALUES (@At, @OriginalToken, @ModelId)",
-                    {|At = at; OriginalToken=originalToken; ModelId=commonAppSettings.LoggerDBSettings.ModelId|}).Result
+                    {|At = at; OriginalToken=originalToken; ModelId=x.CommonAppSettings.LoggerDBSettings.ModelId|}).Result
 
             originalToken2TokenIdDic.Add(originalToken, tokenId)
 
         /// branchToken 이 trunkToken 에 병합되는 event 를 db 에 기록
         member x.OnTokenMerged(branchToken, trunkToken) =
             let bTokenId, tTokenId = x.GetTokenId(branchToken), x.GetTokenId(trunkToken)
-            use conn = commonAppSettings.CreateConnection()
+            use conn = x.CommonAppSettings.CreateConnection()
             conn.Execute($"UPDATE {Tn.Token} SET mergedTokenId = {tTokenId} WHERE id = {bTokenId}")
 
 
@@ -80,13 +88,13 @@ module DBWriterModule =
 
                 if newLogs.any () then
                     logDebug $"{DateTime.Now}: Writing {newLogs.length ()} new logs."
-                    use conn = commonAppSettings.CreateConnection()
+                    use conn = x.CommonAppSettings.CreateConnection()
                     use! tr = conn.BeginTransactionAsync()
 
                     if (x.LogSet.Value.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log x.LogSet.Value) |> toList
                         x.LogSet.Value.BuildIncremental newLogs
-                    let currentModelId = commonAppSettings.LoggerDBSettings.ModelId
+                    let currentModelId = x.CommonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
                         let! stg = conn.QueryFirstAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
                         let modelId = stg.ModelId
@@ -195,12 +203,12 @@ module DBWriterModule =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
                 do! DbWriter.CreateSchemaAsync commonAppSettings cleanExistingDb
-                let dbWriter = new DbWriter(commonAppSettings)
+                let dbWriter = new DbWriter(queryCriteria)
                 let! logSet = dbWriter.createLogInfoSetForWriterAsync queryCriteria systems
                 dbWriter.LogSet <- Some logSet
 
                 commonAppSettings.LoggerDBSettings.SyncInterval.Subscribe(fun counter -> dbWriter.writePeriodicAsync(counter).Wait())
-                |> logSet.Disposables.Add
+                |> dbWriter.Disposables.Add
 
                 DbWriter.TheDbWriter <- dbWriter
                 return dbWriter

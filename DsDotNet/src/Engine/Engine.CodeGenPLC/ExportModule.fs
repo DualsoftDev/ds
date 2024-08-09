@@ -20,7 +20,7 @@ module ExportModule =
         (startMemory:int) (startTimer:int) (startCounter:int)
       : string =
         let projName = system.Name
-        
+
         let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
             let pouParams: XgxPOUParams = {
                 // POU name.  "DsLogic"
@@ -37,34 +37,34 @@ module ExportModule =
             pouParams
 
         let usedByteIndices =
-            let getBytes addr = 
-                [  
+            let getBytes addr =
+                [
                     match plcType with
                     | XGI ->
                         match tryParseXGITag addr with
-                        |Some tag -> 
-                            if tag.DataType = PLCHwModel.DataType.Bit 
-                            then 
+                        |Some tag ->
+                            if tag.DataType = PLCHwModel.DataType.Bit
+                            then
                                 yield tag.ByteOffset
-                            else 
+                            else
                                 yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
                         |None ->
                             failwithlog $"tryParse{plcType} {addr} error"
 
-                    | XGK ->    
+                    | XGK ->
                         match tryParseXGKTag addr with
-                            |Some tag -> 
+                            |Some tag ->
                                 match tag.DataType with
                                 | PLCHwModel.DataType.Bit -> yield tag.ByteOffset
-                                | PLCHwModel.DataType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]   
+                                | PLCHwModel.DataType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]
                                 | _-> failwithlog $"XGK Not supported plc {plcType} type"
-                         
+
                             |None ->
                                 failwithlog $"tryParse{plcType} {addr} error"
 
                     | _ -> failwithlog $"Not supported plc {plcType} type"
                 ]
-  
+
 
             let autoMemoryAllocationTags =
                 system.TagManager.Storages.Values
@@ -88,7 +88,7 @@ module ExportModule =
 
         let prjParam: XgxProjectParams =
             let isAddRungComment = IsDebugVersion || isInUnitTest()
-            let defaultProjectParams = if plcType = XGI then defaultXGIProjectParams else defaultXGKProjectParams       
+            let defaultProjectParams = if plcType = XGI then defaultXGIProjectParams else defaultXGKProjectParams
             { defaultProjectParams with
                 TargetType = plcType
                 ProjectName = projName
@@ -118,7 +118,7 @@ module ExportModule =
             | XGK -> XGK,  LS_XGK_IO
             | _ -> failwith $"Not supported plc {target} type"
 
-        use _ = logTraceEnabler()
+        //use _ = logTraceEnabler()
         let globalStorage = new Storages()
         let localStorage = new Storages()
         let pous = CpuLoaderExt.LoadStatements(system, globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
@@ -133,12 +133,12 @@ module ExportModule =
             css <- css @ cpu.CommentedStatements() |> List.ofSeq
 
         let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
-        globalStorage.Iter(fun tagKV-> 
+        globalStorage.Iter(fun tagKV->
 
-            if not (usedTagNames.ContainsKey(tagKV.Key)) 
+            if not (usedTagNames.ContainsKey(tagKV.Key))
                && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림
                && TagKindExt.GetVariableTagKind(tagKV.Value).IsNone //VariableTag 살림
-            then 
+            then
                 globalStorage.Remove(tagKV.Key)|>ignore
             )
 

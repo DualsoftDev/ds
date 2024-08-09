@@ -18,7 +18,16 @@ module TagKindModule =
         | EventTaskDev  of Tag: IStorage * Target: TaskDev      * TagKind: TaskDevTag
         | EventHwSys    of Tag: IStorage * Target: HwSystemDef  * TagKind: HwSysTag
         | EventVariable of Tag: IStorage * Target: DsSystem     * TagKind: VariableTag
-        
+        with 
+            member x.TagKind =
+                match x with
+                | EventSystem   (_, _, kind) -> kind |> int
+                | EventFlow     (_, _, kind) -> kind |> int
+                | EventVertex   (_, _, kind) -> kind |> int
+                | EventApiItem  (_, _, kind) -> kind |> int
+                | EventTaskDev  (_, _, kind) -> kind |> int
+                | EventHwSys    (_, _, kind) -> kind |> int
+                | EventVariable (_, _, kind) -> kind |> int
 
     let TagDSSubject = new Subject<TagDS>()
     type TagKind = int
@@ -190,8 +199,9 @@ type TagKindExt =
     [<Extension>]
     static member IsVertexTokenTag(x:TagDS) =
         match x with
-        | EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.sourceToken
+        | EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.realToken
                                                      , VertexTag.sourceToken
+                                                     , VertexTag.mergeToken
                                                     )
         | _ -> false
 

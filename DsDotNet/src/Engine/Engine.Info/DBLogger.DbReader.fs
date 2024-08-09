@@ -11,39 +11,10 @@ open DBLoggerORM
 [<AutoOpen>]
 module DBReaderModule =
     /// DB log reader.  Dashboard 및 CCTV 등
-    type DbReader() =
-        /// 주기적으로 DB -> memory 로 log 를 read
-        static let readPeriodicAsync (nPeriod: int64, queryCriteria: QueryCriteria) =
-            task {
-                use conn = queryCriteria.CommonAppSettings.CreateConnection()
+    type DbReader(queryCriteria:QueryCriteria, logSet:LogSet option) =
+        inherit DbHandler(queryCriteria, logSet)
 
-                if nPeriod % 10L = 0L then
-                    let! dbDsConfigJsonPath = queryPropertyAsync (queryCriteria.ModelId, PropName.ConfigPath, conn, null)
-
-                    if dbDsConfigJsonPath <> queryCriteria.DsConfigJsonPath then
-                        failwithlogf
-                            $"DS Source file change detected:\r\n\t{dbDsConfigJsonPath} <> {queryCriteria.DsConfigJsonPath}"
-
-                let lastLogId =
-                    match logSet.TheLastLog with
-                    | Some l -> l.Id
-                    | _ -> -1
-
-                let! newLogs =
-                    conn.QueryAsync<ORMLog>(
-                        $"""SELECT * FROM [{Tn.Log}]
-                            WHERE modelId = @ModelId AND id > @LastLogId ORDER BY id DESC;""",
-                        {| ModelId = queryCriteria.ModelId; LastLogId = lastLogId; |}
-                    )
-                // TODO: logSet.QuerySet.StartTime, logSet.QuerySet.EndTime 구간 내의 것만 필터
-                if newLogs.any () then
-                    let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
-                    logDebug $"Feteched {newLogs.length ()} new logs."
-                    logSet.BuildIncremental newLogs
-            }
-
-
-        static let createLoggerInfoSetForReaderAsync (queryCriteria: QueryCriteria, commonAppSettings: DSCommonAppSettings, systems: DsSystem seq) : Task<LogSet> =
+        static let createLogSetForReaderAsync (queryCriteria: QueryCriteria, commonAppSettings: DSCommonAppSettings, systems: DsSystem seq) : Task<LogSet> =
             task {
                 use conn = queryCriteria.CommonAppSettings.CreateConnection()
                 use! tr = conn.BeginTransactionAsync()
@@ -71,23 +42,50 @@ module DBReaderModule =
                 return logSet
             }
 
-
-
-
-        static member initializeLogReaderOnDemandAsync (queryCriteria: QueryCriteria, systems: DsSystem seq) =
-
+        /// 주기적으로 DB -> memory 로 log 를 read
+        member private x.readPeriodicAsync (nPeriod: int64, queryCriteria: QueryCriteria) =
             task {
-                let loggerDBSettings = queryCriteria.CommonAppSettings.LoggerDBSettings
-                let! logSet_ = createLoggerInfoSetForReaderAsync (queryCriteria, queryCriteria.CommonAppSettings, systems)
-                logSet <- logSet_
+                use conn = queryCriteria.CommonAppSettings.CreateConnection()
 
-                loggerDBSettings.SyncInterval.Subscribe(fun counter -> readPeriodicAsync(counter, queryCriteria).Wait())
-                |> logSet_.Disposables.Add
+                if nPeriod % 10L = 0L then
+                    let! dbDsConfigJsonPath = queryPropertyAsync (queryCriteria.ModelId, PropName.ConfigPath, conn, null)
 
-                return logSet_
+                    if dbDsConfigJsonPath <> queryCriteria.DsConfigJsonPath then
+                        failwithlogf
+                            $"DS Source file change detected:\r\n\t{dbDsConfigJsonPath} <> {queryCriteria.DsConfigJsonPath}"
+
+                let logSet = x.LogSet.Value
+                let lastLogId =
+                    match logSet.TheLastLog with
+                    | Some l -> l.Id
+                    | _ -> -1
+
+                let! newLogs =
+                    conn.QueryAsync<ORMLog>(
+                        $"""SELECT * FROM [{Tn.Log}]
+                            WHERE modelId = @ModelId AND id > @LastLogId ORDER BY id DESC;""",
+                        {| ModelId = queryCriteria.ModelId; LastLogId = lastLogId; |}
+                    )
+                // TODO: logSet.QuerySet.StartTime, logSet.QuerySet.EndTime 구간 내의 것만 필터
+                if newLogs.any () then
+                    let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
+                    logDebug $"Feteched {newLogs.length ()} new logs."
+                    logSet.BuildIncremental newLogs
             }
 
-        static member changeQueryDurationAsync (logSet: LogSet, queryCriteria: QueryCriteria) =
-            DbReader.initializeLogReaderOnDemandAsync (queryCriteria, logSet.Systems)
+        static member Create (logSet: LogSet, queryCriteria: QueryCriteria) =
+            let systems = logSet.Systems
+            task {
+                if !! isItNull(DbHandler.TheDbHandler) then
+                    DbHandler.TheDbHandler.Dispose()
+                let loggerDBSettings = queryCriteria.CommonAppSettings.LoggerDBSettings
+                let! logSet = createLogSetForReaderAsync (queryCriteria, queryCriteria.CommonAppSettings, systems)
+                let dbReader = new DbReader(queryCriteria, Some logSet)
+
+                loggerDBSettings.SyncInterval.Subscribe(fun counter -> dbReader.readPeriodicAsync(counter, queryCriteria).Wait())
+                |> dbReader.Disposables.Add
+
+                return dbReader
+            }
 
 

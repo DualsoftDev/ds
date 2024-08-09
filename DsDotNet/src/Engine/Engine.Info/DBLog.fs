@@ -8,8 +8,8 @@ open System.ComponentModel
 open System.Runtime.CompilerServices
 
 module DBLog =
-    type ValueLog(time: DateTime, tag: TagDS, token:Nullable<uint32>) =
-        inherit DsLog(time, tag.GetStorage(), token)
+    type ValueLog(time: DateTime, tag: TagDS, tokenId:TokenIdType) =
+        inherit DsLog(time, tag.GetStorage(), tokenId)
 
         let tagName, value, objName, kind = tag.GetTagContents()
         let _time = time
@@ -32,8 +32,9 @@ module DBLog =
 
 [<Extension>]
 type DbWriterExtension =
-    static member InsertValueLog(dbWriter:DbWriter, time: DateTime, tag: TagDS, token:Nullable<uint32>) =
-        let vlog = DBLog.ValueLog(time, tag, token)
+    [<Extension>]
+    static member InsertValueLog(dbWriter:DbWriter, time: DateTime, tag: TagDS, tokenId:TokenIdType) =
+        let vlog = DBLog.ValueLog(time, tag, tokenId)
         if tag.IsNeedSaveDBLog() then
             dbWriter.EnqueLog(vlog)
         vlog

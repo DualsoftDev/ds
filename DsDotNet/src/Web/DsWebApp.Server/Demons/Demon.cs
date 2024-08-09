@@ -72,9 +72,8 @@ public partial class Demon : BackgroundService
             var loggerDBSettings = serverGlobal.DsCommonAppSettings.LoggerDBSettings;
             (var modelId, var path) = loggerDBSettings.FillModelId();
             var queryCriteria = new QueryCriteria(_serverGlobal.DsCommonAppSettings, modelId, DateTime.Now.Date.AddDays(-1), null);
-            _dbWriter = DBLogger.InitializeLogReaderWriterOnDemandAsync(queryCriteria, systems, cleanExistingDb:false).Result;
-            DBLogger.TheDbWriter = _dbWriter;
-            _modelSubscription.Add(_dbWriter.LogSet.Value);
+            _dbWriter = DbWriter.CreateAsync(queryCriteria, systems, cleanExistingDb:false).Result;
+            _modelSubscription.Add(_dbWriter);
 
 
             IDisposable subscription =

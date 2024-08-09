@@ -7,8 +7,7 @@ open Dual.Common.Core.FS
 open Newtonsoft.Json
 
 
-type ILogSet =
-    inherit IDisposable
+type ILogSet = interface end
 
 [<Flags>]
 type DBLoggerType =
@@ -17,7 +16,7 @@ type DBLoggerType =
     | Reader = 2
 
 type internal NewtonsoftJson = Newtonsoft.Json.JsonConvert
-
+type TokenIdType = Nullable<int64>
 
 [<AutoOpen>]
 module DBLoggerORM =
@@ -26,6 +25,7 @@ module DBLoggerORM =
         let Storage = "storage"
         let Model = "model"
         let Log = "log"
+        let Token = "token"
         let Error = "error"
         let TagKind = "tagKind"
         let Property = "property"
@@ -70,10 +70,19 @@ CREATE TABLE [{Tn.Log}] (
     , [at]          TEXT NOT NULL       -- SQLite DateTime 지원 안함.  DATETIME2(7)
     , [value]       NUMERIC NOT NULL
     , [modelId]     INTEGER NOT NULL
-    , [token]       INTEGER             -- SEQ token
+    , [tokenId]     INTEGER             -- SEQ token
     , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
+    , FOREIGN KEY(tokenId) REFERENCES {Tn.Token}(id)
 );
 
+CREATE TABLE [{Tn.Token}] (
+    [id]                INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    , [at]              TEXT NOT NULL       -- SQLite DateTime 지원 안함.  DATETIME2(7)
+    , [originalToken]   INTEGER NOT NULL    -- System 에서 발번한 원래의 token 번호 (not ID)
+    , [mergedTokenId]   INTEGER             -- this token 이 병합되는 대상 turnk 의 tokenId
+    , [modelId]         INTEGER NOT NULL
+    , FOREIGN KEY(mergedTokenId) REFERENCES {Tn.Token}(id)  -- 자기 참조 외래 키(self-referencing foreign key)
+);
 
 CREATE TABLE [{Tn.TagKind}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
@@ -115,12 +124,16 @@ CREATE VIEW [{Vn.Log}] AS
         , log.[at] AS at
         , log.[value] AS value
         , log.[modelId] AS modelId
-        , log.[token] AS token
+        , log.[tokenId] AS tokenId
+        , token.[originalToken] AS originalToken
+        , token.[at] AS tokenAt
     FROM [{Tn.Log}] log
     JOIN [{Tn.Storage}] stg
     ON [stg].[id] = [log].[storageId]
     JOIN [{Tn.TagKind}] tagKind
     ON [stg].[tagKind] = [tagKind].[id]
+    JOIN [{Tn.Token}] token
+    ON [log].[tokenId] = [token].[id]
     ;
 
 CREATE VIEW [{Vn.Storage}] AS
@@ -141,7 +154,8 @@ CREATE VIEW [{Vn.Storage}] AS
 """
 
     type IDBRow = interface end
-    let private nullToken = Nullable<uint32>()
+    let private nullToken = Nullable<int64>()
+    let private nullTokenId = TokenIdType()
 
 
     /// DB storage table 의 row 항목
@@ -160,12 +174,12 @@ CREATE VIEW [{Vn.Storage}] AS
         member val ModelId = modelId with get, set
 
     /// DB log table 의 row 항목
-    type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int, token:Nullable<uint32>) =
+    type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =
         do
             let x = 1
             ()
 
-        new() = ORMLog(-1, -1, DateTime.MaxValue, null, -1, nullToken)
+        new() = ORMLog(-1, -1, DateTime.MaxValue, null, -1, TokenIdType())
 
         interface IDBRow
         member val Id = id with get, set
@@ -173,7 +187,7 @@ CREATE VIEW [{Vn.Storage}] AS
         member val At = at with get, set
         member val Value = value with get, set
         member val ModelId = modelId with get, set
-        member val Token = token with get, set
+        member val TokenId = tokenId with get, set
         static member private settings =
             let settings = new JsonSerializerSettings(TypeNameHandling = TypeNameHandling.All)
             settings.Converters.Insert(0, new ObjTypePreservingConverter([|"Value"|]))
@@ -197,18 +211,18 @@ CREATE VIEW [{Vn.Storage}] AS
         member val Name = "" with get, set
 
     /// Runtime 생성 log 항목
-    type Log(id: int, storage: ORMStorage, at: DateTime, value: obj, modelId:int, token:Nullable<uint32>) =
-        inherit ORMLog(id, storage.Id, at, value, modelId, token)
-        new() = Log(-1, getNull<ORMStorage> (), DateTime.MaxValue, null, -1, nullToken)
+    type Log(id: int, storage: ORMStorage, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =
+        inherit ORMLog(id, storage.Id, at, value, modelId, tokenId)
+        new() = Log(-1, getNull<ORMStorage> (), DateTime.MaxValue, null, -1, nullTokenId)
 
         interface IDBRow
         member val Storage = storage with get, set
         member val At = at with get, set
         member val Value: obj = value with get, set
 
-    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj, modelId:int, token:Nullable<uint32>) =
-        inherit ORMLog(logId, storageId, at, value, modelId, token)
-        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null, -1, nullToken)
+    type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =
+        inherit ORMLog(logId, storageId, at, value, modelId, tokenId)
+        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null, -1, nullTokenId)
         member val Name = name with get, set
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set

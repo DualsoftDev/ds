@@ -30,6 +30,7 @@ using static Engine.Import.Office.ViewModule;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
+using static Engine.Info.DBWriterModule;
 
 namespace Diagram.View.MSAGL
 {
@@ -176,17 +177,35 @@ namespace Diagram.View.MSAGL
 
                     if (SaveLog)
                     {
-                        uint? token = null;
-                        uint? srctoken = null;
+                        var dbWriter = DbWriter.TheDbWriter;
+                        var now = DateTime.Now;
+
+                        long? tokenId = null;
                         if (rx.IsVertexTokenTag())
                         {
-                            if (eventVertex?.Target is Real r)
-                                token = r.GetRealToken();
-                            if (eventVertex?.Target is Call c)  //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
-                                srctoken = c.GetSourceToken();
+                            switch (rx.TagKind)
+                            {
+                                case (int)VertexTag.realToken:
+                                    var realToken = ((Real)rx.GetTarget()).GetRealToken();
+                                    tokenId = dbWriter.GetTokenId(realToken);
+                                    break;
+                                case (int)VertexTag.mergeToken:
+                                    var real = (Real)rx.GetTarget();
+                                    var branchToken = real.GetRealToken(); //삭제된 자신 토큰번호
+                                    var trunkToken  = real.GetMergeToken(); //삭제한 메인경로 토큰번호
+                                    dbWriter.OnTokenMerged(branchToken, trunkToken);
+                                    break;
+
+                                case (int)VertexTag.sourceToken:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
+                                    var sourceToken = ((Call)rx.GetTarget()).GetSourceToken();
+                                    dbWriter.AllocateTokenId(sourceToken, now);
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                         //srctoken 처리 대기
-                        DbWriterExtension.InsertValueLog(DBLogger.TheDbWriter, DateTime.Now, rx, token);
+                        dbWriter.InsertValueLog(now, rx, tokenId);
                     }
                 });
             }

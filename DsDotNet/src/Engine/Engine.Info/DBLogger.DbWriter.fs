@@ -175,19 +175,18 @@ module DBWriterModule =
 
         member x.EnqueLog (log: DsLog) : unit = x.EnqueLogs ([ log ])
 
-        /// Log DB schema 생성
-        static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
+        /// Log DB schema 생성: model 정보 없이, database schema 만 생성
+        static member CreateSchemaAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
                 logDebug $":::initializeLogDbOnDemandAsync()"
                 let loggerDBSettings = commonAppSettings.LoggerDBSettings
                 if cleanExistingDb then
                     loggerDBSettings.DropDatabase()
                 loggerDBSettings.FillModelId() |> ignore
-                return DbWriter(commonAppSettings)
             }
 
 
-        static member InitializeLogWriterOnDemandAsync
+        static member CreateAsync
             (
                 queryCriteria: QueryCriteria,      // reader + writer 인 경우에만 non null 값
                 systems: DsSystem seq,
@@ -195,7 +194,8 @@ module DBWriterModule =
             ) =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
-                let! dbWriter = DbWriter.InitializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
+                do! DbWriter.CreateSchemaAsync commonAppSettings cleanExistingDb
+                let dbWriter = new DbWriter(commonAppSettings)
                 let! logSet = dbWriter.createLogInfoSetForWriterAsync queryCriteria systems
                 dbWriter.LogSet <- Some logSet
 

@@ -8,16 +8,6 @@ open System.IO
 
 
 type DBLogger() =
-    /// model 정보 없이, database schema 만 생성
-    static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings, cleanExistingDb:bool) =
-        DbWriter.InitializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
-
-    static member InitializeLogReaderOnDemandAsync(queryCriteria: QueryCriteria, systems: DsSystem seq) =
-        task {
-            let! logSet = DbReader.initializeLogReaderOnDemandAsync (queryCriteria, systems)
-            return logSet :> ILogSet
-        }
-
 
     /// 조회 기간 변경 (reader)
     /// call site 에서는 기존 인자로 주어진 logSet 은 자동 dispose 되며, 새로 return 되는 logSet 을 이용하여야 한다.

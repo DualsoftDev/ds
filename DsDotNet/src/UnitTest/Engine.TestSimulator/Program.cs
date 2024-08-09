@@ -30,7 +30,7 @@ namespace Engine.TestSimulator
 
             DSCommonAppSettings commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
             var queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), null);
-            _ = await DbWriter.InitializeLogWriterOnDemandAsync(queryCriteria, systems, false);
+            _ = await DbWriter.CreateAsync(queryCriteria, systems, false);
             _ = DsSimulator.Do(runModel.Cpu, 10000);
             Console.ReadKey();
         }

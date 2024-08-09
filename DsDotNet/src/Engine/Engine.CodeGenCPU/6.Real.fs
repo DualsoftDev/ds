@@ -76,29 +76,38 @@ type RealVertexTagManager with
             (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, fn)     // E
         |]
 
-    member v.R6_RealTokenMove() = 
+
+
+    member v.R6_RealTokenMoveNSink() = 
         let fn = getFuncName()
         let srcs = getStartEdgeSources(v.Vertex)
-        let causalReals =
-            srcs.GetPureReals()
-                .Where(fun w-> not(w.NoTransData))
-        
+        let srcReals = srcs.GetPureReals().ToArray()
+        let sinkReals =srcReals.Where(fun w-> w.NoTransData)
+        let moveReals =srcReals.Where(fun w-> not(w.NoTransData))      
         let causalCalls = srcs.GetPureCalls()
+
+
         let tgtTagSEQ = v.RealTokenData
         let srcTagSEQ = 
-            match causalReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
+            match moveReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
             | _, true -> 
                 causalCalls.First().VC.SourceTokenData  |>Some
             | true, false -> 
-                causalReals.First().VR.RealTokenData  |>Some
+                moveReals.First().VR.RealTokenData  |>Some
             | false, false -> 
                 None
 
         if srcTagSEQ.IsSome
         then 
-            [| yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) |]
+            [| 
+                yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) 
+                for sinkReal in sinkReals do
+                    yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (sinkReal.VR.MergeTokenData, fn) 
+            |]
         else 
             [||]
+
+
 
     member v.R7_RealGoingOriginError() =
         let fn = getFuncName()

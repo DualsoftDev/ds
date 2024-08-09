@@ -277,6 +277,7 @@ module CoreModule =
 
         member _.PureNames = names
         member val Time: int option = None with get, set
+        member val TokenSourceOrder: int option = None with get, set //1 부터 할당
 
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
         override x.GetRelativeName(_referencePath:Fqdn) = x.PureNames.Combine()

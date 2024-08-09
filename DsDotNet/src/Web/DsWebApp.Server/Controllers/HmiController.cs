@@ -8,6 +8,7 @@ using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTime;
 using static Engine.Info.DBLoggerORM;
+using static Engine.Info.DBWriterModule;
 
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 
@@ -48,7 +49,7 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
             _model.HMIPackage.UpdateTag(tagWeb);
             cpu.TagWebChangedFromWebSubject.OnNext(tagWeb);
             var storage = global.RuntimeModel.Storages[tagWeb.Name];
-            DBLogger.TheDbWriter.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, nullToken));
+            DbWriter.TheDbWriter.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, nullToken));
 
             //await hubContext.Clients.All.SendAsync(SK.S2CNTagWebChanged, tagWeb);     <-- cpu.TagWebChangedSubject.OnNext 에서 수행 됨..
             return RestResultString.Ok("OK");

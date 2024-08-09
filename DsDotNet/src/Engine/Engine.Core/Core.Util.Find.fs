@@ -354,6 +354,9 @@ type FindExtension =
                     | Some c -> c.IsJob && c.TargetJob = job
                     | _ -> false)
 
+    [<Extension>]
+        static member GetSourceTokenCount(x:DsSystem) =
+            x.GetVertices().Where(fun v->v.TokenSourceOrder.IsSome).Count()
 
     [<Extension>] static member GetTaskDevsCoin(x:DsSystem) = getTaskDevs(x, true)
 

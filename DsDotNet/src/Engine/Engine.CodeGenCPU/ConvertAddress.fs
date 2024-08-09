@@ -42,7 +42,10 @@ module ConvertAddressModule =
             tags.Iter(fun f->f.AliasNames.AddRange(aliasSet))
             )
              
-
+    let updateSourceTokenOrder(sys: DsSystem) = 
+              // Aggregate all addresses to check for duplicates along with their API names
+        sys.GetVerticesCallOperator().OrderBy(fun f->f.QualifiedName) |> Seq.iteri(fun i v -> v.TokenSourceOrder <- Some (i+1))
+             
     let setSimulationEmptyAddress(sys:DsSystem) = 
         for j in sys.Jobs do
             for d in j.TaskDefs do

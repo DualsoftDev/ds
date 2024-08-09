@@ -30,7 +30,7 @@ module internal DBLoggerImpl =
 
     let ormLog2Log (logSet: LogSet) (l: ORMLog) =
         let storage = logSet.StoragesById[l.StorageId]
-        Log(l.Id, storage, l.At, l.Value, l.ModelId, l.Token)
+        Log(l.Id, storage, l.At, l.Value, l.ModelId, l.TokenId)
 
     type LogSet with
         // ormLogs: id 순(시간 순) 정렬
@@ -59,7 +59,6 @@ module internal DBLoggerImpl =
 
             x.TheLastLog <- logs |> Seq.tryLast
 
-    let mutable logSet = getNull<LogSet> ()
 
     let internal createLogInfoSetCommonAsync
         (

@@ -11,6 +11,7 @@ using Dual.Web.Blazor.ClientSide;
 using Microsoft.AspNetCore.StaticFiles;
 using static Engine.Info.DBLoggerORM;
 using Engine.Nuget.Common;
+using static Engine.Info.DBWriterModule;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 
@@ -215,9 +216,11 @@ public static class CustomServerExtension
     {
         var commonAppSettings = serverGlobal.DsCommonAppSettings;
         if (commonAppSettings.LoggerDBSettings.ModelId >= 0)
-            await DBLogger.InitializeLogDbOnDemandAsync(commonAppSettings, cleanExistingDb:false);
+        {
+            await DbWriter.CreateSchemaAsync(commonAppSettings, cleanExistingDb: false);
             //var connectionString = commonAppSettings.LoggerDBSettings.ConnectionString;
             //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
+        }
 
         ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
 

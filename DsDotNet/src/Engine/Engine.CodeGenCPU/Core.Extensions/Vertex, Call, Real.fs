@@ -184,6 +184,7 @@ module ConvertCpuVertex =
         member r.V = r.TagManager :?> RealVertexTagManager
 
         member r.RealToken:uint32 = r.V.GetVertexTag(VertexTag.realToken).BoxedValue :?> uint32
+        member r.MergeToken:uint32 = r.V.GetVertexTag(VertexTag.mergeToken).BoxedValue :?> uint32
 
         member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ST)
         member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.RT)
@@ -209,6 +210,8 @@ module ConvertCpuVertex =
 type RealExt =
     [<Extension>]
     static member GetRealToken(r:Real):uint32 = r.RealToken
+    [<Extension>]
+    static member GetMergeToken(r:Real):uint32 = r.MergeToken
 
 [<Extension>]
 type CallExt =

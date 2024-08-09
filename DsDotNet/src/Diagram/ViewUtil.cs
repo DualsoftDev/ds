@@ -175,38 +175,38 @@ namespace Diagram.View.MSAGL
                         HandleTaskDevEvent(rx as EventTaskDev);
                     }
 
-                    if (SaveLog)
-                    {
-                        var dbWriter = DbWriter.TheDbWriter;
-                        var now = DateTime.Now;
+                    //if (SaveLog)
+                    //{
+                    //    var dbWriter = DbWriter.TheDbWriter;
+                    //    var now = DateTime.Now;
 
-                        long? tokenId = null;
-                        if (rx.IsVertexTokenTag())
-                        {
-                            switch (rx.TagKind)
-                            {
-                                case (int)VertexTag.realToken:
-                                    var realToken = ((Real)rx.GetTarget()).GetRealToken();
-                                    tokenId = dbWriter.GetTokenId(realToken);
-                                    break;
-                                case (int)VertexTag.mergeToken:
-                                    var real = (Real)rx.GetTarget();
-                                    var branchToken = real.GetRealToken(); //삭제된 자신 토큰번호
-                                    var trunkToken  = real.GetMergeToken(); //삭제한 메인경로 토큰번호
-                                    dbWriter.OnTokenMerged(branchToken, trunkToken);
-                                    break;
+                    //    long? tokenId = null;
+                    //    if (rx.IsVertexTokenTag())
+                    //    {
+                    //        switch (rx.TagKind)
+                    //        {
+                    //            case (int)VertexTag.realToken:
+                    //                var realToken = ((Real)rx.GetTarget()).GetRealToken();
+                    //                tokenId = dbWriter.GetTokenId(realToken);
+                    //                break;
+                    //            case (int)VertexTag.mergeToken:
+                    //                var real = (Real)rx.GetTarget();
+                    //                var branchToken = real.GetRealToken(); //삭제된 자신 토큰번호
+                    //                var trunkToken  = real.GetMergeToken(); //삭제한 메인경로 토큰번호
+                    //                dbWriter.OnTokenMerged(branchToken, trunkToken);
+                    //                break;
 
-                                case (int)VertexTag.sourceToken:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
-                                    var sourceToken = ((Call)rx.GetTarget()).GetSourceToken();
-                                    dbWriter.AllocateTokenId(sourceToken, now);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        //srctoken 처리 대기
-                        dbWriter.InsertValueLog(now, rx, tokenId);
-                    }
+                    //            case (int)VertexTag.sourceToken:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능
+                    //                var sourceToken = ((Call)rx.GetTarget()).GetSourceToken();
+                    //                dbWriter.AllocateTokenId(sourceToken, now);
+                    //                break;
+                    //            default:
+                    //                break;
+                    //        }
+                    //    }
+                    //    //srctoken 처리 대기
+                    //    dbWriter.InsertValueLog(now, rx, tokenId);
+                    //}
                 });
             }
         }

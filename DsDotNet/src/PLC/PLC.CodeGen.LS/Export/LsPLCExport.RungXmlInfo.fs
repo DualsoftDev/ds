@@ -69,7 +69,7 @@ module internal RungXmlInfoModule =
     let yOfCoord : (EncodedXYCoordinate -> int) = xyOfCoord >> fst >> snd
 
     /// RungXmlInfo list 로부터 coordinate 순으로 최종 xml 문자열 생성
-    let mergeXmls(xmls:RungXmlInfo seq) : string = 
+    let mergeXmls(xmls:RungXmlInfo seq) : string =
         xmls
         |> Seq.sortBy (fun ri -> ri.Coordinate) // fst
         |> Seq.map (fun ri -> ri.Xml) //snd

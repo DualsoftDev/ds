@@ -282,7 +282,7 @@ module LsPLCExportExpressionModule =
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None -> expr
                     | None, Some "!" ->
-                        args.ExactlyOne() |> visitArgs true 
+                        args.ExactlyOne() |> visitArgs true
                     | None, Some _fn ->
                         let newArgs = args |> map (visitArgs false)
                         expr.WithNewFunctionArguments newArgs

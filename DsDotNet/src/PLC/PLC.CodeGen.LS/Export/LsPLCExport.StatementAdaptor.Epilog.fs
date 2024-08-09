@@ -74,7 +74,7 @@ module XgxTypeConvertorModule =
                 match prjParam.TargetType with
                 | XGI -> newStatement.ToStatementsXgx(pack)
                 | XGK -> newStatement.ToStatementsXgk(pack)
-                | _ -> failwith "Not supported runtime target"                
+                | _ -> failwith "Not supported runtime target"
 
             let rungComment =
                 [

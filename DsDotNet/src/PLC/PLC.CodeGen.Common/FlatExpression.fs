@@ -186,7 +186,7 @@ module FlatExpressionModule =
                 let spanY = spanXYs |> map snd |> List.sum
                 spanX, spanY
             | FlatNary(Neg, [ neg ]) -> helper neg
-            
+
             | FlatNary(risingOrFallingAfter, args) when risingOrFallingAfter = RisingAfter || risingOrFallingAfter = FallingAfter ->
                 let spanXYs = args |> map helper
                 let spanX = (spanXYs |> map fst |> List.sum) + 1

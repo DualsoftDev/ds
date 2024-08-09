@@ -36,7 +36,7 @@ module internal XgiFile =
             yy
             (int ElementType.FBMode)
             (yy + 93)
-        |> wrapWithRung 
+        |> wrapWithRung
 
 
     /// Template XGI XML 문자열을 반환

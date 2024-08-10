@@ -39,26 +39,6 @@ module FlatExpressionModule =
             | OpArithmetic _ -> failwith "ERROR: Negation not supported for Arithmetic operator."
             | _ -> failwith "ERROR"
 
-    [<AbstractClass>]
-    type BoolLiteralValue() =
-        interface IExpressionizableTerminal with
-            member x.ToText() = x.ToText()
-        interface IType with
-            member x.DataType = typedefof<bool>
-        interface ITerminal with
-            member x.Variable = None
-            member x.Literal = Some(x:>IExpressionizableTerminal)
-        abstract ToText: unit -> string
-        default x.ToText() = "TRUE"
-
-    type TrueValue() =
-        inherit BoolLiteralValue()
-        override x.ToText() = "TRUE"
-
-    type FalseValue() =
-        inherit BoolLiteralValue()
-        override x.ToText() = "FALSE"
-
     [<DebuggerDisplay("{ToText()}")>]
     type FlatExpression =
         /// pulse identifier 및 negation 여부 (pulse coil 은 지원하지 않을 예정)

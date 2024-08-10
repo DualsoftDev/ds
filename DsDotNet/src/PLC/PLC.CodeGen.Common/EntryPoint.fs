@@ -5,4 +5,6 @@ open Engine.Core
 module ModuleInitializer =
     let Initialize () =
         printfn "PLC.CodeGen.Common Module is being initialized..."
-        fwdFlattenExpression <- flattenExpression
+        //fwdFlattenExpression <- flattenExpression
+        fwdFlattenExpression <- flattenOptimizeExpression
+        fwdOptmizeFlatExpression <- optmizeFlatExpression

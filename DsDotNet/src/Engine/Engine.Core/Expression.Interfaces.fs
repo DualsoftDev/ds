@@ -29,7 +29,7 @@ module rec ExpressionForwardDeclModule =
         inherit IStorage<'T>
 
     // 직접변수일 경우 주소 출력
-    let getStorageText (stg:IStorage) = 
+    let getStorageText (stg:IStorage) =
         match stg with
         | :? ITag as t ->  if t.AliasNames.Any() then t.Address else t.Name
         |_ -> stg.Name
@@ -43,7 +43,8 @@ module rec ExpressionForwardDeclModule =
 
 
     // Interface for PLC generation module
-    type IFlatExpression = interface end
+    type IFlatExpression =
+        abstract member Optimize: unit -> IFlatExpression
 
     /// e.g 가령 Person UDT 에서 "int age", 혹은 Lambda function 의 arg list;
     type TypeDecl = {

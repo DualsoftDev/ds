@@ -62,7 +62,7 @@ module TagVariableModule =
         member val Comment: string = comment with get, set
 
         // interface IExpression<'T> 를 지원해야 하지만, 정의 위치상 구현하기 힘듦.
-        // interface IExpression<'T> with ... 
+        // interface IExpression<'T> with ...
         // IStorage 로 casting 해서 IStorage::ToExpression extension method 를 사용하도록 한다.
         member x.ToExpression():IExpression<'T> = x.ToBoxedExpression() :?> IExpression<'T>
 
@@ -79,8 +79,8 @@ module TagVariableModule =
             /// null 인 경우, memory 주소를 할당하지 않는다.   "" 인 경우, memory 주소를 할당한다.   다른 정상 문자열이 있으면 그대로 둔다.
             member x.Address with get() = x.Address and set(v) = x.Address <- v
             member x.ToBoxedExpression() = x.ToBoxedExpression()
-            member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name) 
-            
+            member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name)
+
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v
 
@@ -114,7 +114,7 @@ module TagVariableModule =
 
         interface ITag<'T> with
             member val AliasNames = ResizeArray<string>()
-                
+
         override x.ToText() = "$" + name
         member x.AliasNames = (x:> ITag<'T>).AliasNames
 
@@ -181,10 +181,15 @@ module ExpressionPrologModule =
             failwithlog "Should be reimplemented."
         dummy
 
-    let mutable fwdCreateBoolMemberVariable   = let dummy (_tagName:string) (_initValue:bool)  (_tagKind:int)  : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
-    let mutable fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) (_tagKind:int) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
-    let mutable fwdCreateUInt32MemberVariable = let dummy (_tagName:string) (_initValue:uint32) (_tagKind:int) : VariableBase<uint32> = failwithlog "Should be reimplemented." in dummy
-    let mutable fwdFlattenExpression          = let dummy (_expr:IExpression)                   : IFlatExpression      = failwithlog "Should be reimplemented." in dummy
+    let mutable internal fwdCreateBoolMemberVariable   = let dummy (_tagName:string) (_initValue:bool)   (_tagKind:int) : VariableBase<bool>   = failwithlog "Should be reimplemented." in dummy
+    let mutable internal fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) (_tagKind:int) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
+    let mutable internal fwdCreateUInt32MemberVariable = let dummy (_tagName:string) (_initValue:uint32) (_tagKind:int) : VariableBase<uint32> = failwithlog "Should be reimplemented." in dummy
+
+    // { 실제 구현 body 가 Engine.CodeGen.Common 에 존재
+    // FlatExpression 은 PLC 생성에서만 사용된다.
+    let mutable          fwdFlattenExpression          = let dummy (_expr:IExpression)                   : IFlatExpression                     = failwithlog "Should be reimplemented." in dummy
+    let mutable          fwdOptmizeFlatExpression      = let dummy (_expr:IFlatExpression)               : IFlatExpression                     = failwithlog "Should be reimplemented." in dummy
+    // } 실제 구현 body 가 Engine.CodeGen.Common 에 존재
 
     let clearVarBoolsOnDemand(varbools:VariableBase<bool> seq) =
         varbools

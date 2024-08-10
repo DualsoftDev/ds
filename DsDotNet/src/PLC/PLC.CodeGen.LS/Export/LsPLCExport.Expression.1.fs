@@ -22,24 +22,14 @@ module LsPLCExportExpressionModule =
         member val Statements = statements    // ResizeArray<Statement>
         member val ExpressionStore:IStorage option = None with get, set
 
-    /// '_ON' 에 대한 flat expression
-    let fakeAlwaysOnFlatExpression =
-        let on =
-            {   new System.Object() with
-                    member x.Finalize() = ()
-                interface IExpressionizableTerminal with
-                    member x.ToText() = "_ON"
-                    member x.DataType = typedefof<bool>
-                interface ITerminal with
-                    member x.Variable = None
-                    member x.Literal = Some(x:?>IExpressionizableTerminal)
-                  }
-
-        FlatTerminal(on, None, false)
-
     /// '_ON' 에 대한 expression
     let fakeAlwaysOnExpression: Expression<bool> =
         let on = createXgxVariable "_ON" true "가짜 _ON" :?> XgxVar<bool>
+        DuTerminal(DuVariable on)
+
+    /// '_OFF' 에 대한 expression
+    let fakeAlwaysOffExpression: Expression<bool> =
+        let on = createXgxVariable "_OFF" true "가짜 _OFF" :?> XgxVar<bool>
         DuTerminal(DuVariable on)
 
     /// '_1ON' 에 대한 expression

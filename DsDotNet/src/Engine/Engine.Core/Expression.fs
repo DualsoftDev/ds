@@ -32,7 +32,7 @@ open ExpressionModule
 [<AutoOpen>]
 module ExpressionModule =
     let private unsupported() = failwithlog "ERROR: not supported"
-    
+
 
     [<DebuggerDisplay("{ToText()}")>]
     type Terminal<'T when 'T:equality> =
@@ -63,7 +63,7 @@ module ExpressionModule =
         | DuTerminal of Terminal<'T>
         | DuFunction of FunctionSpec<'T>  //FunctionBody:(Arguments -> 'T) * Name * Arguments
         interface IExpression<'T> with
-            member x.DataType = x.DataType 
+            member x.DataType = x.DataType
             member x.EvaluatedValue = x.Evaluate()
             member x.BoxedEvaluatedValue = x.Evaluate() |> box
             member x.GetBoxedRawObject() = x.GetBoxedRawObject()
@@ -231,7 +231,7 @@ module ExpressionModule =
         | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
         | DuCopyUdt of CopyUdtStatement
 
-   
+
     type FunctionParameters = {
         /// Enable bit
         Condition:IExpression<bool> option
@@ -366,7 +366,7 @@ module ExpressionModule =
                 let isEvaluate = match condition with
                                  | None -> true
                                  | Some condi -> condi.EvaluatedValue
-                  
+
                 if isEvaluate then
                     target.BoxedValue <- expr.BoxedEvaluatedValue
 

@@ -35,7 +35,7 @@ module FlatExpressionModule2 =
 
 
 [<Extension>]
-type FlatExpressionExt =
+type private FlatExpressionExt =
     /// FlatExpression 이 _ON 이나 _OFF 상수인 경우, Some(true), Some(false) 값을 반환하고, 그 이외의 모든 경우에는 None 반환
     [<Extension>]
     static member TryGetLiteralBoolValue(exp:FlatExpression) =
@@ -51,25 +51,8 @@ type FlatExpressionExt =
         | Some (:? ILiteralHolder as h) -> Some (h.BoxedEvaluatedValue = true)
         | _ -> None
 
-    //[<Extension>]
-    //static member IsTrue(exp:IExpressionizableTerminal) =
-    //    match exp with
-    //    | :? INamedExpressionizableTerminal as v when v.StorageName.ToUpper().IsOneOf("_ON", "TRUE") -> true
-    //    | :? ILiteralHolder as h when h.BoxedEvaluatedValue = true -> true
-    //    | _ -> false
-    //[<Extension>]
-    //static member IsFalse(exp:IExpressionizableTerminal) =
-    //    match exp with
-    //    | :? INamedExpressionizableTerminal as v when v.StorageName.ToUpper().IsOneOf("_OFF", "FALSE") -> true
-    //    | :? ILiteralHolder as h when h.BoxedEvaluatedValue = false -> true
-    //    | _ -> false
-    //[<Extension>] static member IsTrue(exp:FlatExpression)  = exp.TryGetTerminal().Map(fun t -> t.IsTrue()) .DefaultValue(false)
-    //[<Extension>] static member IsFalse(exp:FlatExpression) = exp.TryGetTerminal().Map(fun t -> t.IsFalse()).DefaultValue(false)
-
 [<AutoOpen>]
 module FlatExpressionModule3 =
-
-
     let rec flattenExpressionT (expression: IExpression<'T>) : IFlatExpression =
         match expression with
         | :? Expression<'T> as express ->
@@ -122,19 +105,19 @@ module FlatExpressionModule3 =
     // <kwak> IExpression<'T> vs IExpression : 강제 변환
     and flattenExpression (expression: IExpression) : IFlatExpression =
         match expression with
-        | :? IExpression<bool> as exp -> flattenExpressionT exp
-        | :? IExpression<int8> as exp -> flattenExpressionT exp
-        | :? IExpression<uint8> as exp -> flattenExpressionT exp
-        | :? IExpression<int16> as exp -> flattenExpressionT exp
+        | :? IExpression<bool>   as exp -> flattenExpressionT exp
+        | :? IExpression<int8>   as exp -> flattenExpressionT exp
+        | :? IExpression<uint8>  as exp -> flattenExpressionT exp
+        | :? IExpression<int16>  as exp -> flattenExpressionT exp
         | :? IExpression<uint16> as exp -> flattenExpressionT exp
-        | :? IExpression<int32> as exp -> flattenExpressionT exp
+        | :? IExpression<int32>  as exp -> flattenExpressionT exp
         | :? IExpression<uint32> as exp -> flattenExpressionT exp
-        | :? IExpression<int64> as exp -> flattenExpressionT exp
+        | :? IExpression<int64>  as exp -> flattenExpressionT exp
         | :? IExpression<uint64> as exp -> flattenExpressionT exp
         | :? IExpression<single> as exp -> flattenExpressionT exp
         | :? IExpression<double> as exp -> flattenExpressionT exp
         | :? IExpression<string> as exp -> flattenExpressionT exp
-        | :? IExpression<char> as exp -> flattenExpressionT exp
+        | :? IExpression<char>   as exp -> flattenExpressionT exp
 
         | _ -> failwithlog "NOT yet"
     and flattenOptimizeExpression (expression: IExpression) : IFlatExpression =
@@ -145,89 +128,70 @@ module FlatExpressionModule3 =
 
     and optmizeFlatExpression (iexpr: IFlatExpression) : IFlatExpression =
         let expr = iexpr :?> FlatExpression
-        let xxx =
-            match expr with
-            // negation 이 정의된 bool 상수 변환.  e.g !_ON -> _OFF 로 변환
-            | FlatTerminal (_t, None, true) ->
-                match expr.TryGetLiteralBoolValue() with
-                | Some true  -> fakeAlwaysOnFlatExpression
-                | Some false -> fakeAlwaysOffFlatExpression
-                | _ -> iexpr
+        let on, off = fakeAlwaysOnFlatExpression, fakeAlwaysOffFlatExpression
+        match expr with
+        // negation 이 정의된 bool 상수 변환.  e.g !_ON -> _OFF 로 변환
+        | FlatTerminal (_t, None, true) ->
+            match expr.TryGetLiteralBoolValue() with
+            | Some true  -> on
+            | Some false -> off
+            | _ -> iexpr
 
-            // 그외 모든 terminal case : don't touch
-            | FlatTerminal (_t, _p, _n) -> iexpr
+        // 그외 모든 terminal case : don't touch
+        | FlatTerminal (_t, _p, _n) -> iexpr
 
-            | FlatNary(And, terms) ->
-                let mutable shortCircuited = false // e.g: TRUE || .... -> TRUE,    FALSE && ... -> FALSE
-                let validTerms = ResizeArray<IFlatExpression>()
-                for term in terms |> map (fun a -> optmizeFlatExpression a :?> FlatExpression) do
-                    if not shortCircuited then
-                        match term with
-                        | FlatTerminal (_t, _p, _n) ->
-                            match term.TryGetLiteralBoolValue() with
-                            | Some true -> ()                       // AND TRUE 는 (* 1) 와 마찬가지로 무시
-                            | Some false -> shortCircuited <- true  // AND FALSE 는 (* 0) 와 마찬가지로 short circuiting
-                            | None -> validTerms.Add (term :> IFlatExpression)
-                        // ! TRUE -> FALSE 처리
-                        | FlatNary(Neg, [neg]) when neg.TryGetLiteralBoolValue().IsSome ->
-                            if neg.TryGetLiteralBoolValue().Value then
-                                fakeAlwaysOffFlatExpression
-                            else
-                                fakeAlwaysOnFlatExpression
-                            |> validTerms.Add
-                        | _ ->
-                            validTerms.Add(term)
+        | FlatNary(And, terms) ->
+            let mutable shortCircuited = false // e.g: TRUE || .... -> TRUE,    FALSE && ... -> FALSE
+            let validTerms = ResizeArray<IFlatExpression>()
+            for term in terms |> map (fun a -> optmizeFlatExpression a :?> FlatExpression) do
+                if not shortCircuited then
+                    match term with
+                    | FlatTerminal (_t, _p, _n) ->
+                        match term.TryGetLiteralBoolValue() with
+                        | Some true -> ()                       // AND TRUE 는 (* 1) 와 마찬가지로 무시
+                        | Some false -> shortCircuited <- true  // AND FALSE 는 (* 0) 와 마찬가지로 short circuiting
+                        | None -> validTerms.Add (term :> IFlatExpression)
+                    | _ ->
+                        validTerms.Add(term)
 
-                if shortCircuited then
-                    fakeAlwaysOffFlatExpression // OFF
-                elif validTerms.isEmpty() then
-                    fakeAlwaysOnFlatExpression // ON
-                else
-                    FlatNary(And, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)
+            if shortCircuited then
+                off
+            elif validTerms.isEmpty() then
+                on
+            else
+                FlatNary(And, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)
 
-            | FlatNary(Or, terms) ->
-                let mutable shortCircuited = false // e.g: TRUE || .... -> TRUE,    FALSE && ... -> FALSE
-                let validTerms = ResizeArray<IFlatExpression>()
-                for term in terms |> map (fun a -> optmizeFlatExpression a :?> FlatExpression) do
-                    if not shortCircuited then
-                        match term with
-                        | FlatTerminal (_t, _p, _n) ->
-                            match term.TryGetLiteralBoolValue() with
-                            | Some true -> shortCircuited <- true    // OR TRUE 는 (* 1) 와 마찬가지로 무시
-                            | Some false -> ()                       // OR FALSE 는 (* 0) 와 마찬가지로 short circuiting
-                            | None -> validTerms.Add (term :> IFlatExpression)
-                        // ! TRUE -> FALSE 처리
-                        | FlatNary(Neg, [neg]) when neg.TryGetLiteralBoolValue().IsSome ->
-                            if neg.TryGetLiteralBoolValue().Value then
-                                fakeAlwaysOffFlatExpression
-                            else
-                                fakeAlwaysOnFlatExpression
-                            |> validTerms.Add
-                        | _ ->
-                            validTerms.Add(term)
+        | FlatNary(Or, terms) ->
+            let mutable shortCircuited = false // e.g: TRUE || .... -> TRUE,    FALSE && ... -> FALSE
+            let validTerms = ResizeArray<IFlatExpression>()
+            for term in terms |> map (fun a -> optmizeFlatExpression a :?> FlatExpression) do
+                if not shortCircuited then
+                    match term with
+                    | FlatTerminal (_t, _p, _n) ->
+                        match term.TryGetLiteralBoolValue() with
+                        | Some true -> shortCircuited <- true    // OR TRUE 는 (* 1) 와 마찬가지로 무시
+                        | Some false -> ()                       // OR FALSE 는 (* 0) 와 마찬가지로 short circuiting
+                        | None -> validTerms.Add (term :> IFlatExpression)
+                    | _ ->
+                        validTerms.Add(term)
 
-                if shortCircuited then
-                    fakeAlwaysOnFlatExpression  // ON
-                elif validTerms.isEmpty() then
-                    fakeAlwaysOffFlatExpression // OFF
-                else
-                    FlatNary(Or, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)
+            if shortCircuited then
+                on
+            elif validTerms.isEmpty() then
+                off
+            else
+                FlatNary(Or, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)
 
 
+        // ! TRUE -> FALSE 처리
+        | FlatNary(Neg, [neg]) ->
+            match neg.TryGetLiteralBoolValue() with
+            | Some true  -> off
+            | Some false -> on
+            | None -> iexpr
 
-
-            //| FlatNary(Neg, [ FlatNary(Neg, [x]) ]) -> x :> IFlatExpression
-            //| FlatNary(Neg, [ FlatTerminal (value, pulse, neg)]) ->
-            //    match t.Literal with
-            //    | Some l when t..
-
-            //| FlatNary(risingOrFallingAfter, args) when risingOrFallingAfter = RisingAfter || risingOrFallingAfter = FallingAfter ->
-            //    iexpr
-
-            //| _ -> failwithlog "ERROR"
-            | _ ->
-                iexpr
-        xxx
+        | _ ->
+            iexpr
 
 
     /// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.

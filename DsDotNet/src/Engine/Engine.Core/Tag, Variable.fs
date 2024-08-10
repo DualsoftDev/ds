@@ -185,11 +185,10 @@ module ExpressionPrologModule =
     let mutable internal fwdCreateUShortMemberVariable = let dummy (_tagName:string) (_initValue:uint16) (_tagKind:int) : VariableBase<uint16> = failwithlog "Should be reimplemented." in dummy
     let mutable internal fwdCreateUInt32MemberVariable = let dummy (_tagName:string) (_initValue:uint32) (_tagKind:int) : VariableBase<uint32> = failwithlog "Should be reimplemented." in dummy
 
-    // { 실제 구현 body 가 Engine.CodeGen.Common 에 존재
-    // FlatExpression 은 PLC 생성에서만 사용된다.
+    /// 실제 구현 body 가 Engine.CodeGen.Common 에 존재
+    ///
+    /// FlatExpression 은 PLC 생성에서만 사용된다.
     let mutable          fwdFlattenExpression          = let dummy (_expr:IExpression)                   : IFlatExpression                     = failwithlog "Should be reimplemented." in dummy
-    let mutable          fwdOptmizeFlatExpression      = let dummy (_expr:IFlatExpression)               : IFlatExpression                     = failwithlog "Should be reimplemented." in dummy
-    // } 실제 구현 body 가 Engine.CodeGen.Common 에 존재
 
     let clearVarBoolsOnDemand(varbools:VariableBase<bool> seq) =
         varbools

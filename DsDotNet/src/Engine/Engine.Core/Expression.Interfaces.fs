@@ -43,8 +43,7 @@ module rec ExpressionForwardDeclModule =
 
 
     // Interface for PLC generation module
-    type IFlatExpression =
-        abstract member Optimize: unit -> IFlatExpression
+    type IFlatExpression = interface end
 
     /// e.g 가령 Person UDT 에서 "int age", 혹은 Lambda function 의 arg list;
     type TypeDecl = {

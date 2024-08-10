@@ -1,10 +1,8 @@
 namespace PLC.CodeGen.Common
 
-open System.Diagnostics
 open Dual.Common.Core.FS
 open Engine.Core
 open System.Runtime.CompilerServices
-open System
 
 [<AutoOpen>]
 module FlatExpressionModule2 =
@@ -15,22 +13,14 @@ module FlatExpressionModule2 =
             | FlatTerminal (t, _p, _n) -> Some t
             | _ -> None
 
-    let private createTerminal(text:string) : IExpressionizableTerminal =
-        {   new System.Object() with
-                member x.Finalize() = ()
-            interface IExpressionizableTerminal with
-                member x.ToText() = text
-                member x.DataType = typedefof<bool>
-            interface ITerminal with
-                member x.Variable = None
-                member x.Literal = Some(x:?>IExpressionizableTerminal)
-        }
     /// '_ON' 에 대한 flat expression
-    //let fakeAlwaysOnFlatExpression:FlatExpression = FlatTerminal(createTerminal("_ON"), None, false)
+    ///
+    /// - PLC.CodeGen.LS 의 EntryPoint 에서 실제 값을 설정한다.
     let mutable fakeAlwaysOnFlatExpression:IFlatExpression = getNull<IFlatExpression>()
 
     /// '_OFF' 에 대한 flat expression
-    //let fakeAlwaysOffFlatExpression:FlatExpression = FlatTerminal(createTerminal("_OFF"), None, false)
+    ///
+    /// - PLC.CodeGen.LS 의 EntryPoint 에서 실제 값을 설정한다.
     let mutable fakeAlwaysOffFlatExpression:IFlatExpression = getNull<IFlatExpression>()
 
 
@@ -53,7 +43,7 @@ type private FlatExpressionExt =
 
 [<AutoOpen>]
 module FlatExpressionModule3 =
-    let rec flattenExpressionT (expression: IExpression<'T>) : IFlatExpression =
+    let rec private flattenExpressionT (expression: IExpression<'T>) : IFlatExpression =
         match expression with
         | :? Expression<'T> as express ->
             match express with
@@ -103,7 +93,7 @@ module FlatExpressionModule3 =
         | _ -> failwithlog "Not yet for non boolean expression"
 
     // <kwak> IExpression<'T> vs IExpression : 강제 변환
-    and flattenExpression (expression: IExpression) : IFlatExpression =
+    and private flattenOnlyExpression (expression: IExpression) : IFlatExpression =
         match expression with
         | :? IExpression<bool>   as exp -> flattenExpressionT exp
         | :? IExpression<int8>   as exp -> flattenExpressionT exp
@@ -120,13 +110,8 @@ module FlatExpressionModule3 =
         | :? IExpression<char>   as exp -> flattenExpressionT exp
 
         | _ -> failwithlog "NOT yet"
-    and flattenOptimizeExpression (expression: IExpression) : IFlatExpression =
-        flattenExpression expression |> optmizeFlatExpression
 
-        //|> optmizeFlatExpression
-
-
-    and optmizeFlatExpression (iexpr: IFlatExpression) : IFlatExpression =
+    and private optmizeFlatExpression (iexpr: IFlatExpression) : IFlatExpression =
         let expr = iexpr :?> FlatExpression
         let on, off = fakeAlwaysOnFlatExpression, fakeAlwaysOffFlatExpression
         match expr with
@@ -192,6 +177,16 @@ module FlatExpressionModule3 =
 
         | _ ->
             iexpr
+
+    /// 주어진 IExpression 에 대해
+    ///
+    /// - flatten (IFlatExpression) 수행 후,
+    ///
+    /// - ladder logic optimize 수행
+    and flattenExpression (expression: IExpression) : IFlatExpression =
+        flattenOnlyExpression expression |> optmizeFlatExpression
+
+
 
 
     /// expression 이 차지하는 가로, 세로 span 의 width 와 height 를 반환한다.

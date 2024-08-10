@@ -69,8 +69,7 @@ module FlatExpressionModule =
         /// N-ary Expressions : And / Or 및 terms
         | FlatNary of Op * FlatExpression list
 
-        interface IFlatExpression with
-            member x.Optimize() = fwdOptmizeFlatExpression x
+        interface IFlatExpression
 
         interface IType with
             member x.DataType = x.DataType

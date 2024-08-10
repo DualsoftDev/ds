@@ -113,12 +113,9 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="18433">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="18436">
                                         _t4_GT
                                     </Element>
-                                    <Element ElementType="2" Coordinate="18439" Param="87"/>
+                                    <Element ElementType="2" Coordinate="18436" Param="90"/>
                                     <Element ElementType="14" Coordinate="18526">
                                         qq
                                     </Element>

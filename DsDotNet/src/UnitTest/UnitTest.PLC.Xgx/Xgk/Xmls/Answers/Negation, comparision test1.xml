@@ -86,50 +86,16 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="4097">
-                                        M00000
+                                        _ON
                                     </Element>
-                                    <Element ElementType="0" Coordinate="4099"/>
-                                    <Element ElementType="7" Coordinate="4100">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="4103">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="4105"/>
-                                    <Element ElementType="6" Coordinate="4106">
-                                        M00001
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="4108"/>
-                                    <Element ElementType="2" Coordinate="4109" Param="81"/>
+                                    <Element ElementType="2" Coordinate="4100" Param="90"/>
                                     <Element ElementType="14" Coordinate="4190">
                                         P00001
                                     </Element>
-                                    <Element ElementType="6" Coordinate="5124">
-                                        P00000
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="5127">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="5132"/>
-                                    <Element ElementType="6" Coordinate="6145">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="6147"/>
-                                    <Element ElementType="6" Coordinate="6148">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="6150"/>
-                                    <Element ElementType="2" Coordinate="6151" Param="3"/>
-                                    <Element ElementType="6" Coordinate="7169">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="7172">
-                                        P00000
-                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="9217" Param="90"/>
-                                    <Element ElementType="33" Coordinate="9310" Param="END">
+                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="END">
                                         END
                                     </Element>
                                 </Rung>

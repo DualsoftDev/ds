@@ -165,8 +165,8 @@ module FlatExpressionModule3 =
                         match term with
                         | FlatTerminal (_t, _p, _n) ->
                             match term.TryGetLiteralBoolValue() with
-                            | Some true -> ()                       // AND TRUE 는 + 0 와 마찬가지로 무시
-                            | Some false -> shortCircuited <- true  // AND FALSE 는 * 0 와 마찬가지로 short circuiting
+                            | Some true -> ()                       // AND TRUE 는 (* 1) 와 마찬가지로 무시
+                            | Some false -> shortCircuited <- true  // AND FALSE 는 (* 0) 와 마찬가지로 short circuiting
                             | None -> validTerms.Add (term :> IFlatExpression)
                         // ! TRUE -> FALSE 처리
                         | FlatNary(Neg, [neg]) when neg.TryGetLiteralBoolValue().IsSome ->
@@ -179,12 +179,43 @@ module FlatExpressionModule3 =
                             validTerms.Add(term)
 
                 if shortCircuited then
-                    fakeAlwaysOffFlatExpression
+                    fakeAlwaysOffFlatExpression // OFF
+                elif validTerms.isEmpty() then
+                    fakeAlwaysOnFlatExpression // ON
                 else
                     FlatNary(And, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)
 
-            | FlatNary(Or, ors) ->
-                iexpr
+            | FlatNary(Or, terms) ->
+                let mutable shortCircuited = false // e.g: TRUE || .... -> TRUE,    FALSE && ... -> FALSE
+                let validTerms = ResizeArray<IFlatExpression>()
+                for term in terms |> map (fun a -> optmizeFlatExpression a :?> FlatExpression) do
+                    if not shortCircuited then
+                        match term with
+                        | FlatTerminal (_t, _p, _n) ->
+                            match term.TryGetLiteralBoolValue() with
+                            | Some true -> shortCircuited <- true    // OR TRUE 는 (* 1) 와 마찬가지로 무시
+                            | Some false -> ()                       // OR FALSE 는 (* 0) 와 마찬가지로 short circuiting
+                            | None -> validTerms.Add (term :> IFlatExpression)
+                        // ! TRUE -> FALSE 처리
+                        | FlatNary(Neg, [neg]) when neg.TryGetLiteralBoolValue().IsSome ->
+                            if neg.TryGetLiteralBoolValue().Value then
+                                fakeAlwaysOffFlatExpression
+                            else
+                                fakeAlwaysOnFlatExpression
+                            |> validTerms.Add
+                        | _ ->
+                            validTerms.Add(term)
+
+                if shortCircuited then
+                    fakeAlwaysOnFlatExpression  // ON
+                elif validTerms.isEmpty() then
+                    fakeAlwaysOffFlatExpression // OFF
+                else
+                    FlatNary(Or, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)
+
+
+
+
             //| FlatNary(Neg, [ FlatNary(Neg, [x]) ]) -> x :> IFlatExpression
             //| FlatNary(Neg, [ FlatTerminal (value, pulse, neg)]) ->
             //    match t.Literal with

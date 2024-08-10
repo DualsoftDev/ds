@@ -93,38 +93,16 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="14337">
-                                        _t1_NE
+                                        _ON
                                     </Element>
-                                    <Element ElementType="6" Coordinate="14340">
-                                        _t2_EQ
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="14343">
-                                        _t3_LE
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="14345"/>
-                                    <Element ElementType="2" Coordinate="14346" Param="84"/>
+                                    <Element ElementType="2" Coordinate="14340" Param="90"/>
                                     <Element ElementType="14" Coordinate="14430">
                                         qx
                                     </Element>
-                                    <Element ElementType="6" Coordinate="15361">
-                                        _OFF
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="15363"/>
-                                    <Element ElementType="6" Coordinate="15364">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="0" Coordinate="15366"/>
-                                    <Element ElementType="2" Coordinate="15367" Param="0"/>
-                                    <Element ElementType="6" Coordinate="16385">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="16388">
-                                        ix
-                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="18433" Param="90"/>
-                                    <Element ElementType="33" Coordinate="18526" Param="END">
+                                    <Element ElementType="2" Coordinate="16385" Param="90"/>
+                                    <Element ElementType="33" Coordinate="16478" Param="END">
                                         END
                                     </Element>
                                 </Rung>

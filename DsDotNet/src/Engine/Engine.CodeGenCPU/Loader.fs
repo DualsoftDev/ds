@@ -23,7 +23,7 @@ module CpuLoader =
             | ExternalPou  (e, _p) -> e.ReferenceSystem
 
         member x.ToExternalSystem() =
-            match x with
+            match x with 
             | ActivePou    (_, _p) -> None
             | DevicePou    (_, _p) -> None 
             | ExternalPou  (e, _p) -> Some e

@@ -359,8 +359,8 @@ type FindExtension =
 
     [<Extension>]
     static member GetDistinctApisWithDeviceCall(x:DsSystem) =
-        x.GetTaskDevsCoin()
-            .SelectMany(fun (td, c)-> td.ApiItems.Select(fun api-> api, td, c))
+        getTaskDevCalls(x)
+            .SelectMany(fun (td, calls)-> td.ApiItems.Select(fun api-> api, td, calls))
             .DistinctBy(fun (api, _td, _c)-> api)
                       
     [<Extension>]

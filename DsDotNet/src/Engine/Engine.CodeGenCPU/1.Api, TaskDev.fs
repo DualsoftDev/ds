@@ -11,9 +11,15 @@ type TaskDevManager with
     member d.TD1_PlanSend(activeSys:DsSystem, coins:Vertex seq) =
         let fn = getFuncName()
         [|
-            let job = coins.OfType<Call>().First().TargetJob
-            let coinMemos = coins.Select(fun s->s.VC.MM).ToOr()
-            yield (coinMemos, activeSys._off.Expr) --| (d.PlanStart(job), fn)
+            if d.TaskDev.IsAnalogSensor
+            then
+                for coin in coins do
+                    let ps = d.PlanStart(coin.GetPureCall().TargetJob)
+                    yield (coin.VC.MM.Expr, activeSys._off.Expr) --| (ps, fn)
+            else 
+                let job = coins.OfType<Call>().First().TargetJob
+                let coinMemos = coins.Select(fun s->s.VC.MM).ToOr()
+                yield (coinMemos, activeSys._off.Expr) --| (d.PlanStart(job), fn)
         |]
     
     member d.TD2_PlanReceive(activeSys:DsSystem) =
@@ -48,15 +54,13 @@ type TaskDevManager with
         let fn = getFuncName()
         [|
             for a in d.TaskDev.ApiItems do
-                //if not(call.IsFlowCall)
-                //    then
-                    let input =  d.TaskDev.GetInExpr(call.TargetJob)
-                    let _off = d.TaskDev.ParnetSystem._off.Expr
-                    let sets =
-                            call.RealLinkExpr <&&>  
-                            (input <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
+                let input =  d.TaskDev.GetInExpr(call.TargetJob)
+                let _off = d.TaskDev.ParnetSystem._off.Expr
+                let sets =
+                        call.RealLinkExpr <&&>  
+                        (input <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
 
-                    yield (sets, _off) --| (a.SL1, fn)
+                yield (sets, _off) --| (a.SL1, fn)
         |]
 
     member d.TD5_SensorLinked(call:Call) =
@@ -82,12 +86,12 @@ type TaskDevManager with
 type ApiItemManager with
 
 
-    member am.A1_ApiSet(td:TaskDev, job:Job) :  CommentedStatement [] =
+    member am.A1_ApiSet(td:TaskDev, calls:Vertex seq) :  CommentedStatement [] =
         let fn = getFuncName()
         [|
             let api = am.ApiItem
-            let ps = td.GetPlanStart(job)
-            yield! (ps.Expr , td.ParnetSystem) --^ (am.ApiItemSetPusle, fn)
+            let pss = calls.Select(fun c-> td.GetPlanStart(c.GetPureCall().TargetJob)).ToOr()
+            yield! (pss, td.ParnetSystem) --^ (am.ApiItemSetPusle, fn)
             yield  (am.ApiItemSetPusle.Expr, api.TX.VR.ET.Expr) ==| (am.ApiItemSet, fn)
         |]
  

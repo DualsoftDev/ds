@@ -154,9 +154,9 @@ module ConvertCPU =
     let private applyApiItem(s:DsSystem) = 
         [|
             let apiDevSet = s.GetDistinctApisWithDeviceCall()
-            for (api, td, call) in apiDevSet do
+            for (api, td, calls) in apiDevSet do
                 let am = api.TagManager :?> ApiItemManager
-                yield! am.A1_ApiSet(td, call.TargetJob)
+                yield! am.A1_ApiSet(td, calls)
                 yield am.A2_ApiEnd()
         |]
 
@@ -221,13 +221,7 @@ module ConvertCPU =
             let devCallSet =  s.GetTaskDevCalls() 
             for (td, calls) in devCallSet do
                 if not(td.IsRootOnlyDevice) && td.InTag.IsNonNull() then
-                    yield td.SensorEmulation(s, calls)
-
-            //let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
-            //for td, call in devsCall do
-            //    if not(td.IsRootOnlyDevice) then
-            //        if td.InTag.IsNonNull() then  
-            //            yield td.SensorEmulation(s, call.TargetJob)
+                    yield! td.SensorEmulation(s, calls)
         |]
  
     let private updateRealParentExpr(x:DsSystem) =

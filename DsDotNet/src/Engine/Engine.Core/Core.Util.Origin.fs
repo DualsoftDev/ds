@@ -82,7 +82,7 @@ module OriginModule =
         let graphOrder = real.Graph.BuildPairwiseComparer()
         let pureCalls = real.Graph.Vertices
                             .GetPureCalls().Where(fun c->c.IsJob)
-                            .DistinctBy(fun c -> c.TargetJob.TaskDefs)
+                            //.DistinctBy(fun c -> c.TargetJob.TaskDefs)
                             .Cast<Vertex>()
         
         let mutualInfo = getMutualInfo pureCalls

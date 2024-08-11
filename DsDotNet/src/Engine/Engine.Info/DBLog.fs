@@ -11,11 +11,11 @@ module DBLog =
         let tagName, value, objName, kind = tag.GetTagContents()
         let _time = time
 
-        member val Time = _time.ToString("HH:mm:ss.fff") with get
-        member val Name = tagName with get, set
-        member val Value = value with get, set
-        member val System = objName with get, set
-        member val TagKind = kind with get, set
+        member val Time    = _time.ToString("HH:mm:ss.fff") with get
+        member val Name    = tagName with get, set
+        member val Value   = value   with get, set
+        member val System  = objName with get, set
+        member val TagKind = kind    with get, set
 
         [<Browsable(false)>]
         member x.Storage = (x :> DsLog).Storage.Name

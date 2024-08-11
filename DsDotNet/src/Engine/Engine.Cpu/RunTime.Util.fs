@@ -5,16 +5,16 @@ open System.Linq
 open Engine.CodeGenCPU
 
 [<AutoOpen>]
-module internal RunTimeUtil =    
+module internal RunTimeUtil =
     let notifyPreExcute ( x:IStorage) =
         x.GetTagInfo() |> Option.iter(fun t -> t.OnChanged())
-        
+
 
     ///시뮬레이션 비트 ON
     let cpuSimOn(sys:DsSystem) =
-        let simTag = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim) 
+        let simTag = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag.sim)
         simTag.BoxedValue <- true
-   
+
     ///HMI Reset
     let syncReset(system:DsSystem ) =
         let stgs = system.TagManager.Storages

@@ -1,11 +1,8 @@
 namespace Engine.Info
 
 open Engine.Core
-open Dual.Common.Core.FS
 open System
-open System.IO
 open System.ComponentModel
-open System.Runtime.CompilerServices
 
 module DBLog =
     type ValueLog(time: DateTime, tag: TagDS, tokenId:TokenIdType) =
@@ -28,13 +25,3 @@ module DBLog =
 
         member x.GetTime() =
             _time
-
-
-[<Extension>]
-type DbWriterExtension =
-    [<Extension>]
-    static member InsertValueLog(dbWriter:DbWriter, time: DateTime, tag: TagDS, tokenId:TokenIdType) =
-        let vlog = DBLog.ValueLog(time, tag, tokenId)
-        if tag.IsNeedSaveDBLog() then
-            dbWriter.EnqueLog(vlog)
-        vlog

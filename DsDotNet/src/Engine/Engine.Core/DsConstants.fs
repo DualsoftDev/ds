@@ -27,12 +27,12 @@ module DsConstants =
         | None                       = 0b00000000    // Invalid state
         | Start                      = 0b00000001    // Start, Weak
         | Reset                      = 0b00000010    // else start
-        | Strong                     = 0b00000100    // else weak  
+        | Strong                     = 0b00000100    // else weak
         | AugmentedTransitiveClosure = 0b00001000    // 강한 상호 reset 관계 확장 edge
 
     type internal MET = ModelingEdgeType
     type internal RET = EdgeType
-    
+
     /// 뒤집힌 edge 판정.  뒤집혀 있으면 source target 을 반대로 하고 edge 를 다시 뒤집을 것.
     let isReversedEdge(modelingEdgeType:ModelingEdgeType) =
         match modelingEdgeType with

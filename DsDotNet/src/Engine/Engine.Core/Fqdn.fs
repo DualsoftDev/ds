@@ -22,15 +22,15 @@ module FqdnImpl =
         match fqdnList with
         | [n] when quoteOnSingle -> quoteOnDemand n
         | [n] -> n
-        | _ -> 
+        | _ ->
             if fqdn.length() > 4
-            then 
+            then
                 failwithlog (sprintf "Fqdn length is too long: %s" (fqdn.Combine()))
-            else 
+            else
                 if quoteOnSingle
-                then 
+                then
                     combineQuoteOnDemand "." fqdnList
-                else 
+                else
                     combine "." fqdnList
 
     let internal getRelativeNames(referencePath:Fqdn) (fqdn:Fqdn) =
@@ -44,7 +44,7 @@ module FqdnImpl =
 
     let internal getRelativeName(referencePath:Fqdn) (fqdn:Fqdn) =
         let relativeNames = getRelativeNames referencePath fqdn
-    
+
         // Placeholder for quoteOnDemand. If it's defined elsewhere, you can remove this.
         let quoteOnDemand s = s // Placeholder: just returns the input string
 
@@ -86,7 +86,7 @@ module FqdnImpl =
         default x.ToText() = x.Name
 
     /// FQDN(Fully Qualified Domain Name) 객체를 생성합니다.
-    let createFqdnObject (nameComponents: string array) = 
+    let createFqdnObject (nameComponents: string array) =
         {
             new IQualifiedNamed with
                 member _.Name with get() = nameComponents.LastOrDefault() and set(_v) = failwithlog "ERROR"
@@ -107,7 +107,7 @@ module FqdnImpl =
         [<Browsable(false)>]
         member x.NameComponents = (x :> IQualifiedNamed).NameComponents
         [<Browsable(false)>]
-        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName  
+        member x.QualifiedName = (x :> IQualifiedNamed).QualifiedName
         [<Browsable(false)>]
         member x.DequotedQualifiedName = (x :> IQualifiedNamed).DequotedQualifiedName
         abstract member GetRelativeName: Fqdn -> string

@@ -5,3 +5,4 @@ UnitTest.PLC.Xgx/Xgk/Xmls/*.xml
 UnitTest.PLC.Xgx/Xgi/Xmls/Answers/Test\ All\ Case.xml
 UnitTest.PLC.Xgx/Xgi/Xmls/Answers/Test\ DS\ Case.xml
 UnitTest.Model/ImportOfficeExample/exportDS.dsz
+Engine.TestSimulator/App.config

@@ -29,7 +29,7 @@ module rec ExpressionForwardDeclModule =
         inherit IStorage<'T>
 
     // 직접변수일 경우 주소 출력
-    let getStorageText (stg:IStorage) = 
+    let getStorageText (stg:IStorage) =
         match stg with
         | :? ITag as t ->  if t.AliasNames.Any() then t.Address else t.Name
         |_ -> stg.Name

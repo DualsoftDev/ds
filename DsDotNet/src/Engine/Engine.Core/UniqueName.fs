@@ -20,7 +20,7 @@ module UniqueName =
         Regex.Replace(name, $"^{prefix}", prefix, RegexOptions.IgnoreCase)
 
     let resetAll() = genDict.Clear()
-    
+
 [<AutoOpen>]
 module UniquePlcTagName =
     let getPlcTagAbleName (name:string) (storages:Storages) =
@@ -33,7 +33,7 @@ module UniquePlcTagName =
 
         name |> validStorageName |> generateUntilValid
 
-     
+
     let getInActionName name = $"{name}_I"
     let getOutActionName name = $"{name}_O"
     let getMemoryActionName name = $"{name}_M"

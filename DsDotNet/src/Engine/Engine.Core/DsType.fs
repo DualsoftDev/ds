@@ -44,19 +44,19 @@ module DsType =
         | DuErrorStateLamp     // Error  state lamp
         | DuReadyStateLamp     // ready_state lamp
         | DuOriginStateLamp    // origin_state lamp
-        
+
 
     /// Represents different condition types
     type ConditionType =
         | DuReadyState
         | DuDriveState
 
-    type ExternalTag = 
-        | ErrorSensorOn 
-        | ErrorSensorOff 
-        | ErrorOnTimeOver 
+    type ExternalTag =
+        | ErrorSensorOn
+        | ErrorSensorOff
+        | ErrorOnTimeOver
         | ErrorOnTimeShortage
-        | ErrorOffTimeOver 
+        | ErrorOffTimeOver
         | ErrorOffTimeShortage
         | ErrGoingOrigin
         | MotionStart
@@ -65,8 +65,8 @@ module DsType =
         | ScriptEnd
 
     type ExternalTagSet = ExternalTag * IStorage
-    
-    [<Flags>]    
+
+    [<Flags>]
     type ScreenType =
         | CCTV = 0
         | IMAGE  = 1
@@ -91,21 +91,21 @@ module DsType =
                     if startIdx = -1 || endIdx = -1 then loop (i + direction)
             loop startPos
 
-        if searchFromStart then 
+        if searchFromStart then
             if name.StartsWith(openSymbol.ToString()) then findIndices 1 0
-        else 
+        else
             if name.EndsWith(closeSymbol.ToString()) then findIndices -1 (name.Length - 1)
 
         startIdx, endIdx
 
 
-    let getFindText (name:string)  startIdx endIdx= 
+    let getFindText (name:string)  startIdx endIdx=
         if startIdx <> -1 && endIdx <> -1 then
             name.Substring(startIdx + 1, endIdx - startIdx - 1)
-        else 
+        else
             ""
 
-    let getRemoveText (name:string)  startIdx endIdx= 
+    let getRemoveText (name:string)  startIdx endIdx=
         if startIdx <> -1 && endIdx <> -1 then
             name.Substring(0, startIdx) + name.Substring(endIdx + 1)
         else
@@ -114,7 +114,7 @@ module DsType =
     // 첫 번째 대괄호 그룹 제거
     let GetHeadBracketRemoveName (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', true)
-        getRemoveText name startIdx endIdx 
+        getRemoveText name startIdx endIdx
 
     // 마지막 대괄호 그룹 제거
     let GetLastBracketRelaceName (name: string) =
@@ -133,7 +133,7 @@ module DsType =
     let GetLastParenthesesContents (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '(', ')', false)
         getFindText name startIdx endIdx
-            
+
     // 마지막 대괄호 그룹 내용 반환
     let GetLastBracketContents (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', false)

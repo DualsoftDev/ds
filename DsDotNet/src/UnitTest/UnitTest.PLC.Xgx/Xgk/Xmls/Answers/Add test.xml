@@ -179,12 +179,9 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="24577">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="24580">
                                         M00090
                                     </Element>
-                                    <Element ElementType="2" Coordinate="24583" Param="87"/>
+                                    <Element ElementType="2" Coordinate="24580" Param="90"/>
                                     <Element ElementType="14" Coordinate="24670">
                                         P00001
                                     </Element>

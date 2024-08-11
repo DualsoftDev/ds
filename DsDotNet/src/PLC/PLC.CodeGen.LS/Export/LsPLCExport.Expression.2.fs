@@ -23,7 +23,7 @@ module XgxExpressionConvertorModule =
         ///
         ///   * 새로 생성되는 expression 을 반환한다.
         member internal exp.ReplaceInnerArithmeticOrComparisionToFunctionStatements
-            (pack:DynamicDictionary) 
+            (pack:DynamicDictionary)
           : IExpression =
             let prjParam, augs = pack.Unpack()
             let newLocalStorages, expandFunctionStatements, expStore =
@@ -318,8 +318,8 @@ module XgxExpressionConvertorModule =
                             | _ -> failwithlog "ERROR"
                         newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                     else
-                        // XGK 에는 IEC Function 을 이용할 수 없으므로, 
-                        // XGI 에는 사칙 연산을 중간 expression 으로 이용은 가능하나, ladder 그리는 로직이 너무 복잡해 지므로, 
+                        // XGK 에는 IEC Function 을 이용할 수 없으므로,
+                        // XGI 에는 사칙 연산을 중간 expression 으로 이용은 가능하나, ladder 그리는 로직이 너무 복잡해 지므로,
                         // 수식 내에 포함된 사칙 연산이나 비교 연산을 따로 빼내어서 임시 변수에 대입하는 assign 문장으로 으로 변환한다.
                         let newExp = exp.WithNewFunctionArguments [lexpr; rexpr]
 

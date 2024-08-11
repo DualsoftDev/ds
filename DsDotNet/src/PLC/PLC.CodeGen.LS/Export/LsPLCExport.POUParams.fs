@@ -100,7 +100,7 @@ module POUParametersModule =
 
     let defaultMemorySize = 640 * 1024
     let defaultXGIProjectParams = createDefaultProjectParams XGI defaultMemorySize   // 640K "M" memory 영역
-    let defaultXGKProjectParams = createDefaultProjectParams XGK defaultMemorySize 
+    let defaultXGKProjectParams = createDefaultProjectParams XGK defaultMemorySize
 
     let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
         assert(isInUnitTest())
@@ -109,7 +109,7 @@ module POUParametersModule =
             | XGI -> defaultXGIProjectParams
             | XGK -> defaultXGKProjectParams
             | _ -> failwithf "Invalid target type: %A" targetType
-        {   getProjectParams with 
+        {   getProjectParams with
                 ProjectName = projectName; TargetType = targetType;
                 MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, defaultMemorySize) [] targetType)
                 TimerCounterGenerator   = counterGeneratorWithExclusionList 0 []
@@ -153,7 +153,7 @@ module POUParametersModule =
                     verifyM $"Invalid down/load condition for {name}" (down.IsNone && ld.IsNone)
 
                 (*
-                 * XGK CTUD 에서 load 
+                 * XGK CTUD 에서 load
                  * - 별도의 statement 로 분리해서 구현 가능함: ldcondition --- MOV PV C0001
                  * - statement2statements 에서 이미 새로운 Rung 으로 분리되어 있어야 한다.
                  *)
@@ -198,4 +198,3 @@ module POUParametersModule =
                 stmt.SanityCheck prjParam
 
             // todo: POU 내에서의 double coil (이중 코일) 체크
-            

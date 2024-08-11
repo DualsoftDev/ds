@@ -268,7 +268,7 @@ module internal rec Command =
             let alignedOutputParameters =
                 /// e.g ["ENO, 0x00200001, , 0"; "OUT, 0x00200001, , 0";]
                 let outputSpecs = getFunctionOutputSpecs functionName |> Array.ofSeq
-                
+
                 let typeCheckExcludes = [| "AND2"; "OR2"; "XOR2"; "NOT" |] @ [|"SHL"; "SHR"|] |> HashSet
 
                 [   for (i, s) in outputSpecs.Indexed() do
@@ -477,7 +477,7 @@ module internal rec Command =
 
     let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
         let cmdWidth = 3
-        let cmdParam = 
+        let cmdParam =
             match fbc with
             | TimerMode ts ->
                 let t = ts.Timer
@@ -491,7 +491,7 @@ module internal rec Command =
                 let c = cs.Counter
                 let typ = c.Type.ToString()
                 let var = c.Name
-                let value = c.PRE.Value 
+                let value = c.PRE.Value
                 $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
         bxiXgkFBCommandWithParam (x, y) (cmdParam, cmdWidth)
 
@@ -500,7 +500,7 @@ module internal rec Command =
     let xmlXgkFBLeft (x, y) (fbParam: string) (target: string) : XmlOutput =
         assert (x = 0)
         let inner =
-            [ 
+            [
                 xgkFBAt fbParam (x, y)
 
                 let c = coord (x + 3, y)
@@ -517,7 +517,7 @@ module internal rec Command =
     /// 왼쪽에 condition (None 이면 _ON) 을 조건으로 우측에 FB (사칙 연산) 을 그린다.
     let xmlXgkFBRight (prjParam: XgxProjectParams) (x, y) (condition:IExpression<bool> option) (fbParam: string) : XmlOutput =
         let inner =
-            [ 
+            [
                 let cond = condition |? fakeAlwaysOnExpression
                 let sub = bxiLadderBlock prjParam (x, y) (cond.Flatten() :?> FlatExpression)
                 mergeXmls sub.XmlElements
@@ -779,7 +779,7 @@ module internal rec Command =
                             match prjParam.TargetType, cmdExp.CoilTerminalTag with
                             | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
                                 stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
-                            | _ -> 
+                            | _ ->
                                 match cmdExp.CoilTerminalTag with
                                 | :? IStorage as storage -> getStorageText storage
                                 | _ -> failwithlog "ERROR"
@@ -809,8 +809,8 @@ module internal rec Command =
                 let s, d = source.GetTerminalString(prjParam),
                            match target with
                            | :? TimerCounterBaseStruct as t -> t.XgkStructVariableName
-                           | _ -> target.Address   
-                            
+                           | _ -> target.Address
+
                 let mov =
                     let st, tt = source.DataType, target.DataType
                     // move 의 type 이 동일해야 한다.  timer/counter 는 예외.  reset coil 이나 preset 설정 등 허용.

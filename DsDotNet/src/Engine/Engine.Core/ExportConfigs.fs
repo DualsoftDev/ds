@@ -22,12 +22,12 @@ module ExportConfigsMoudle =
         DsPlanInterfaces: DsPlanInterface[]
         DsActionInterfaces: DsActionInterface[]
     }
-    
+
     type DsPlanInterface = {
         Id: int
         Work: string
         WorkInfo: string
-   
+
         ScriptStartTag: string*string
         ScriptEndTag: string*string
 
@@ -40,10 +40,10 @@ module ExportConfigsMoudle =
         LibraryPath: string
         Motion: string
     }
-    with 
+    with
         member x.ToJson() = JsonConvert.SerializeObject(x, Formatting.Indented)
         member x.ToJsonSimpleFormat() = JsonConvert.SerializeObject({MotionName =  x.Motion}, Formatting.Indented)
-    
+
     type DsActionInterface = {
         Id: int
         Name : string
@@ -51,9 +51,9 @@ module ExportConfigsMoudle =
         DataType : string //bool. int32, float
         DeviceType : string //input, output, memory
     }
-    with 
+    with
         member x.ToJson() = JsonConvert.SerializeObject(x, Formatting.Indented)
-    
+
 
     let private jsonSettings = JsonSerializerSettings()
 
@@ -74,9 +74,9 @@ module ExportConfigsMoudle =
 
         sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
         |> Seq.filter(fun (dev,_)-> dev.FirstApi.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
-        |> Seq.iter(fun (dev,v) ->  
+        |> Seq.iter(fun (dev,v) ->
             let real = dev.FirstApi.RX
-            let dataSync = 
+            let dataSync =
                 {
                     Id = ifs.Count
                     Work = real.Name
@@ -100,23 +100,23 @@ module ExportConfigsMoudle =
         let ifs = HashSet<DsActionInterface>()
 
         sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
-        |> Seq.iter(fun (dev,_) ->  
-            
+        |> Seq.iter(fun (dev,_) ->
+
             if dev.InTag.IsNonNull()
             then
-                let dataIn = 
+                let dataIn =
                     {
                         Id = ifs.Count
                         Name = dev.InTag.Name
                         Address = dev.InTag.Address
                         DataType = dev.InTag.DataType.ToDsDataTypeString()
                         DeviceType = "input"
-                    }   
+                    }
                 ifs.Add dataIn |> ignore
 
             if dev.OutTag.IsNonNull()
             then
-                let dataOut = 
+                let dataOut =
                     {
                         Id = ifs.Count
                         Name = dev.OutTag.Name
@@ -131,7 +131,7 @@ module ExportConfigsMoudle =
         ifs.ToArray()
 
     let getDsInterfaceConfig (sys: DsSystem, hwName:string) =
-        { 
+        {
             DsPlanInterfaces = getDsPlanInterfaces sys
             DsActionInterfaces = getDsActionInterfaces sys
             HwName  = hwName
@@ -141,18 +141,18 @@ module ExportConfigsMoudle =
 [<AutoOpen>]
 type ExportConfigsExt =
 
-    [<Extension>] 
+    [<Extension>]
     static member ExportDSInterface (sys:DsSystem, exportPath:string, hwName:string) =
         let interfaceConfig = getDsInterfaceConfig (sys, hwName)
         saveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces =
             interfaceConfig.DsPlanInterfaces
-                .Select(fun f-> {MotionName =  f.Motion}).ToArray() 
+                .Select(fun f-> {MotionName =  f.Motion}).ToArray()
 
         let interfaceSimpleConifg = {Motions =dsSimpleInterfaces}
         let exportSimplePath =  PathManager.changeExtension (DsFile(exportPath)) "dsConfigMoiton"
         saveInterfaceSimpleConfig exportSimplePath interfaceSimpleConifg
 
-    [<Extension>] 
+    [<Extension>]
     static member LoadInterfaceConfig (path:string) = loadInterfaceConfig path

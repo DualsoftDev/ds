@@ -62,7 +62,7 @@ module DsDataType =
         | UINT8     -> "0uy"
         | _  -> failwithlog "ERROR"
 
- 
+
     type DataType =
         | DuBOOL
         | DuCHAR
@@ -161,13 +161,13 @@ module DsDataType =
             | DuUINT8    , (:? byte    as v) -> sprintf "%duy" v
             | _  -> failwithf "ERROR: Unsupported type %s for value %O" (x.ToText()) value
 
-            
+
         member x.ToTextLower() = x.ToText().ToLower()
-        member x.ToBlockSizeNText() = 
+        member x.ToBlockSizeNText() =
             match x with
-            | DuUINT16  -> 16, PLCUINT16 
-            | DuUINT32  -> 32, PLCUINT32 
-            | DuUINT64  -> 64, PLCUINT64 
+            | DuUINT16  -> 16, PLCUINT16
+            | DuUINT32  -> 32, PLCUINT32
+            | DuUINT64  -> 64, PLCUINT64
             | DuUINT8   -> 8 , PLCUINT8
             | _ -> failwithf $"'{x}' not support ToBlockSize"
 
@@ -186,32 +186,32 @@ module DsDataType =
             | DuUINT32  -> typedefof<uint32>
             | DuUINT64  -> typedefof<uint64>
             | DuUINT8   -> typedefof<uint8>
-            
 
-             
+
+
 
         member x.ToValue(valueText:string) =
-            
-            let valueText = 
+
+            let valueText =
                 if x = DuCHAR || x = DuSTRING || x = DuBOOL  //"false" //"' '" //""
-                then  valueText 
+                then  valueText
                 else valueText.TrimEnd([|'f';'s';'L';'u';'s';'U';'L';'y'|])   //"0.0f" //"0.0" //"0s" //"0" //"0L" //"0y" //"0us" //"0u" //"0UL" //"0uy"
-              
+
             match x with
 
-            | DuBOOL    -> valueText |> Convert.ToBoolean |> box       
-            | DuCHAR    -> valueText |> Convert.ToChar    |> box 
-            | DuFLOAT32 -> valueText |> Convert.ToSingle  |> box 
-            | DuFLOAT64 -> valueText |> Convert.ToDouble  |> box 
-            | DuINT16   -> valueText |> Convert.ToInt16   |> box 
-            | DuINT32   -> valueText |> Convert.ToInt32   |> box 
-            | DuINT64   -> valueText |> Convert.ToInt64   |> box 
-            | DuINT8    -> valueText |> Convert.ToSByte   |> box 
-            | DuSTRING  -> valueText                      |> box 
-            | DuUINT16  -> valueText |> Convert.ToUInt16  |> box 
-            | DuUINT32  -> valueText |> Convert.ToUInt32  |> box 
-            | DuUINT64  -> valueText |> Convert.ToUInt64  |> box 
-            | DuUINT8   -> valueText |> Convert.ToByte    |> box 
+            | DuBOOL    -> valueText |> Convert.ToBoolean |> box
+            | DuCHAR    -> valueText |> Convert.ToChar    |> box
+            | DuFLOAT32 -> valueText |> Convert.ToSingle  |> box
+            | DuFLOAT64 -> valueText |> Convert.ToDouble  |> box
+            | DuINT16   -> valueText |> Convert.ToInt16   |> box
+            | DuINT32   -> valueText |> Convert.ToInt32   |> box
+            | DuINT64   -> valueText |> Convert.ToInt64   |> box
+            | DuINT8    -> valueText |> Convert.ToSByte   |> box
+            | DuSTRING  -> valueText                      |> box
+            | DuUINT16  -> valueText |> Convert.ToUInt16  |> box
+            | DuUINT32  -> valueText |> Convert.ToUInt32  |> box
+            | DuUINT64  -> valueText |> Convert.ToUInt64  |> box
+            | DuUINT8   -> valueText |> Convert.ToByte    |> box
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
@@ -252,7 +252,7 @@ module DsDataType =
         | _ when x.EndsWith("UL") && UInt64.TryParse(x.TrimEnd([|'U';'L'|]))|> fst  ->
             Some (x.TrimEnd([|'U';'L'|]), DuUINT64)
         | _ when x.ToLower() = "true" || x.ToLower() = "false" ->
-            Some (x, DuBOOL) 
+            Some (x, DuBOOL)
         | _ when x.ToLower() = "t" -> Some ("true", DuBOOL)
         | _ when x.ToLower() = "f" -> Some ("false", DuBOOL)
         | _ when x.EndsWith("L") && Int64.TryParse(x.TrimEnd('L'))|> fst  ->
@@ -264,11 +264,11 @@ module DsDataType =
         | _ when x.EndsWith("y") && SByte.TryParse(x.TrimEnd('y'))|> fst  ->
             Some (x.TrimEnd('y'), DuINT8)
 
-        | _ when Int32.TryParse(x) |> fst -> 
+        | _ when Int32.TryParse(x) |> fst ->
             Some (x, DuINT32)
         | _ -> None
-        
-    let getTrimmedValueNType(x)  = 
+
+    let getTrimmedValueNType(x)  =
         let trimmedTextValueNDataType = getTextValueNType x
         match trimmedTextValueNDataType with
         | Some (v,ty) -> ty.ToValue(v), ty

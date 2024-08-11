@@ -2,14 +2,16 @@
 module Engine.CodeGenCPU.ConvertEmulation
 
 open System
+open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 type TaskDev with
 
-    member d.SensorEmulation(sys:DsSystem, job:Job) =
-        let set = d.GetPlanEnd(job).Expr
+    member d.SensorEmulation(sys:DsSystem, coins:Vertex seq) =
+        let job = coins.OfType<Call>().First().TargetJob
+        let set = coins.GetPureCalls().Select(fun c-> d.GetPlanEnd(c.TargetJob)).ToOr()
         let rst = sys._off.Expr
 
         let inParam = d.GetInParam(job)

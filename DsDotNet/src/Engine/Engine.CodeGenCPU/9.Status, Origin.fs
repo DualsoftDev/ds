@@ -38,8 +38,7 @@ type VertexTagManager with
 
         let set =   onExpr <&&> (!@offExpr) <&&> v.Link.Expr
               
-              //test  ahn 
-        (set, v.GP.Expr) ==| (v.OG, getFuncName())
+        (set, v.GP.Expr) --| (v.OG, getFuncName())
 
 
     member v.M2_PauseMonitor() =

@@ -16,55 +16,40 @@ type TaskDevManager with
             yield (coinMemos, activeSys._off.Expr) --| (d.PlanStart(job), fn)
         |]
     
-    //member d.TD1_PlanSend(activeSys:DsSystem, coin:Vertex) =
-    //    let fn = getFuncName()
-    //    [|
-    //        let call = coin.GetPureCall()
-    //        yield (call.VC.MM.Expr, activeSys._off.Expr) --| (d.PlanStart(call.TargetJob), fn)
-    //    |]
-
-
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         let fn = getFuncName()
         [|
             for kv in d.TaskDev.DicTaskTaskDevParamIO do
+                let jobFqdn = kv.Key
                 let apiParam = kv.Value
 
                 let sets = 
                     let inParam = apiParam.TaskDevParamIO.InParam
 
                     if inParam.IsSome && inParam.Value.Type <> DuBOOL then 
-                        apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(apiParam).Expr
+                        apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(jobFqdn).Expr
                     else 
                         apiParam.ApiItem.ApiItemEnd.Expr 
 
-                yield (sets, activeSys._off.Expr) --| (d.PlanEnd(apiParam), fn)
+                yield (sets, activeSys._off.Expr) --| (d.PlanEnd(jobFqdn), fn)
         |]
 
     member d.TD3_PlanOutput(activeSys:DsSystem) =
         let fn = getFuncName()
         [|
             for kv in d.TaskDev.DicTaskTaskDevParamIO do
-                let apiPara = kv.Value
-                let sets =  d.PlanStart(apiPara).Expr <&&> d.PlanEnd(apiPara).Expr
-                yield (sets, activeSys._off.Expr) --| (d.PlanOutput(apiPara), fn)
+                let jobFqdn = kv.Key
+                let sets =  d.PlanStart(jobFqdn).Expr <&&> d.PlanEnd(jobFqdn).Expr
+                yield (sets, activeSys._off.Expr) --| (d.PlanOutput(jobFqdn), fn)
         |]
 
-    member d.A1_ApiSet(call:Call) :  CommentedStatement [] =
-        let fn = getFuncName()
-        [|
-            let a = d.TaskDev.GetApiItem(call.TargetJob) 
-            let ps = d.TaskDev.GetPlanStart(call.TargetJob)
-            yield! (ps.Expr , call.System) --^ (a.ApiItemSetPusle, fn)
-            yield  (a.ApiItemSetPusle.Expr, a.TX.VR.ET.Expr) ==| (a.ApiItemSet, fn)
-        |]
 
-    member d.A3_SensorLinking(call:Call) =
+    member d.TD4_SensorLinking(call:Call) =
         let fn = getFuncName()
         [|
             for a in d.TaskDev.ApiItems do
-                if not(call.IsFlowCall)
-                    then
+                //if not(call.IsFlowCall)
+                //    then
                     let input =  d.TaskDev.GetInExpr(call.TargetJob)
                     let _off = d.TaskDev.ParnetSystem._off.Expr
                     let sets =
@@ -74,7 +59,7 @@ type TaskDevManager with
                     yield (sets, _off) --| (a.SL1, fn)
         |]
 
-    member d.A4_SensorLinked(call:Call) =
+    member d.TD5_SensorLinked(call:Call) =
         let fn = getFuncName()
         [|
             for a in d.TaskDev.ApiItems do
@@ -95,10 +80,20 @@ type TaskDevManager with
     
 
 type ApiItemManager with
- 
-    member a.A2_ApiEnd() =
+
+
+    member am.A1_ApiSet(td:TaskDev, job:Job) :  CommentedStatement [] =
         let fn = getFuncName()
-        let api= a.ApiItem
+        [|
+            let api = am.ApiItem
+            let ps = td.GetPlanStart(job)
+            yield! (ps.Expr , td.ParnetSystem) --^ (am.ApiItemSetPusle, fn)
+            yield  (am.ApiItemSetPusle.Expr, api.TX.VR.ET.Expr) ==| (am.ApiItemSet, fn)
+        |]
+ 
+    member am.A2_ApiEnd() =
+        let fn = getFuncName()
+        let api= am.ApiItem
         (api.RxET.Expr, api.ApiSystem._off.Expr) --| (api.ApiItemEnd, fn)
         
   

@@ -24,6 +24,10 @@ module TaskDevManagerModule =
         /// Plan OutputS
         let pos = td.ApiParams |> map(fun p -> p, cpv TaskDevTag.planOutput) |> Tuple.toReadOnlyDictionary
 
+        let getPlanStart(api:ApiParam)  = pss[api]
+        let getPlanEnd(api:ApiParam)    = pes[api]
+        let getPlanOutput(api:ApiParam) = pos[api]
+
         interface ITagManager with
             member _.Target = td
             member _.Storages = stg
@@ -36,11 +40,12 @@ module TaskDevManagerModule =
 
         member _.TaskDev   = td
 
-        member x.PlanStart(api:ApiParam)  = pss[api]
-        member x.PlanEnd(api:ApiParam)    = pes[api]
-        member x.PlanOutput(api:ApiParam) = pos[api]
+   
+        member x.PlanStart(job:Job)  = getPlanStart(x.TaskDev.GetApiParam(job))
+        member x.PlanEnd(job:Job)    = getPlanEnd(x.TaskDev.GetApiParam(job))
+        member x.PlanOutput(job:Job) = getPlanOutput(x.TaskDev.GetApiParam(job))
 
-        member x.PlanStart(job:Job)  = x.PlanStart(x.TaskDev.GetApiParam(job))
-        member x.PlanEnd(job:Job)    = x.PlanEnd(x.TaskDev.GetApiParam(job))
-        member x.PlanOutput(job:Job) = x.PlanOutput(x.TaskDev.GetApiParam(job))
+        member x.PlanStart(jobFqdn:string)  = getPlanStart(x.TaskDev.GetApiParam(jobFqdn))
+        member x.PlanEnd(jobFqdn:string)    = getPlanEnd(x.TaskDev.GetApiParam(jobFqdn))
+        member x.PlanOutput(jobFqdn:string) = getPlanOutput(x.TaskDev.GetApiParam(jobFqdn))
 

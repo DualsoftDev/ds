@@ -221,11 +221,11 @@ module internal ModelFindModule =
                     dev.OutAddress <- TextSkip )
 
     let getTaskDevs(x: DsSystem, onlyCoin:bool) =
-        let calls = getVerticesHasJob(x).DistinctBy(fun v-> v.TargetJob)
-        let tds =
-            calls
-                .Where(fun c-> not(onlyCoin) || not(c.IsFlowCall))
-                .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
+        let calls = getVerticesHasJob(x)
+        let tds = calls
+                    .Where(fun c-> not(onlyCoin) || not(c.IsFlowCall))
+                    .DistinctBy(fun v-> v.TargetJob)
+                    .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
         tds
         |> Seq.sortBy (fun (td, c) ->
             (td.DeviceName, td.GetApiItem(c.TargetJob).Name))
@@ -237,18 +237,13 @@ module internal ModelFindModule =
 
         let callAll = getVerticesOfAliasNCalls(x)
         taskDevs
-        |> Seq.map(fun (td, call) ->
+        |> Seq.map(fun (td, _call) ->
             td,
-                callAll.Filter(fun f->
-                match f with
-                | :? Call as c when c.IsJob -> c.TargetJob = call.TargetJob
-                | :? Alias as al->
-                    match al.TargetWrapper.CallTarget() with
-                    | Some c when c.IsJob -> c.TargetJob = call.TargetJob
-                    |_ -> false
-                |_ -> false
+                callAll.Filter(fun v->
+                    match tryGetPureCall(v) with
+                    | Some v -> v.TargetJob.TaskDefs.Contains td
+                    | _->false)
             )
-        )
 
     type DsSystem with
         member x.TryFindGraphVertex<'V when 'V :> IVertex>(Fqdn(fqdn)) = tryFindGraphVertexT<'V> x fqdn
@@ -363,12 +358,17 @@ type FindExtension =
     [<Extension>] static member GetTaskDevsCall(x:DsSystem) = getTaskDevs(x, false)
 
     [<Extension>]
+    static member GetDistinctApisWithDeviceCall(x:DsSystem) =
+        x.GetTaskDevsCoin()
+            .SelectMany(fun (td, c)-> td.ApiItems.Select(fun api-> api, td, c))
+            .DistinctBy(fun (api, _td, _c)-> api)
+                      
+    [<Extension>]
     static member GetDevicesHasOutput(x:DsSystem) =
         //출력있는건 무조건  Coin
         x.GetTaskDevsCoin()
             .DistinctBy(fun (td, c) -> (td, c.TargetJob))
             .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
-
 
     [<Extension>]
         static member GetDevicesForHMI(x:DsSystem) =

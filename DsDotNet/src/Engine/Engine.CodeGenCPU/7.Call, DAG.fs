@@ -69,7 +69,7 @@ type VertexTagManager with
                 let autoPreExpr = call.AutoPreExpr
                 let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
-                yield (sets, rsts) ==| (coin.ST, f )
+                yield (sets, rsts) ==| (coin.ST, f)
         |]
 
     member v.D3_DAGCoinEnd() =

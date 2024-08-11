@@ -143,36 +143,31 @@ module ConvertCPU =
 
     let private applyTaskDev(s:DsSystem) = 
         [|
-            //let devCoinSet =  s.GetTaskDevsCoin() 
-            //for (td, coin) in devCoinSet do
-            //    let tm = td.TagManager :?> TaskDevManager
-            //    yield! tm.TD1_PlanSend(s, coin) 
-
-
-            let devCallSet =  s.GetTaskDevCalls() //api는 job 기준으로 중복제거 
+            let devCallSet =  s.GetTaskDevCalls() 
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                let masterCall= getTryMasterCall(calls)
                 yield! tm.TD1_PlanSend(s, calls) 
                 yield! tm.TD2_PlanReceive(s)
                 yield! tm.TD3_PlanOutput(s)
-                
-                if masterCall.IsSome then   
-                    yield! tm.A1_ApiSet(masterCall.Value)
-
-            for a in s.ApiItems.Select(getAM) do
-                yield a.A2_ApiEnd()
-
-            let devCallSet =  devCallSet.DistinctBy(fun (td, _c)-> td) //SensorLink는 taskDev 단위로 중복제거
-            for (td, calls) in devCallSet do
-                let tm = td.TagManager :?> TaskDevManager
-                let masterCall= getTryMasterCall(calls)
-                
-                if masterCall.IsSome then   
-                    yield! tm.A3_SensorLinking(masterCall.Value)
-                    yield! tm.A4_SensorLinked(masterCall.Value)
         |]
 
+    let private applyApiItem(s:DsSystem) = 
+        [|
+            let apiDevSet = s.GetDistinctApisWithDeviceCall()
+            for (api, td, call) in apiDevSet do
+                let am = api.TagManager :?> ApiItemManager
+                yield! am.A1_ApiSet(td, call.TargetJob)
+                yield am.A2_ApiEnd()
+        |]
+
+    let private applyTaskDevSensorLink(s:DsSystem) = 
+        [|
+            let devCallSet =  s.GetTaskDevsCoin() 
+            for (td, call) in devCallSet do
+                let tm = td.TagManager :?> TaskDevManager
+                yield! tm.TD4_SensorLinking(call)
+                yield! tm.TD5_SensorLinked(call)
+        |]
 
     let private funcCall(s:DsSystem) =
         let pureOperatorFuncs =
@@ -222,11 +217,17 @@ module ConvertCPU =
     let private emulationDevice(s:DsSystem) =
         [|
             yield s.SetFlagForEmulation()
-            let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
-            for td, call in devsCall do
-                if not(td.IsRootOnlyDevice) then
-                    if td.InTag.IsNonNull() then  
-                        yield td.SensorEmulation(s, call.TargetJob)
+
+            let devCallSet =  s.GetTaskDevCalls() 
+            for (td, calls) in devCallSet do
+                if not(td.IsRootOnlyDevice) && td.InTag.IsNonNull() then
+                    yield td.SensorEmulation(s, calls)
+
+            //let devsCall =  s.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
+            //for td, call in devsCall do
+            //    if not(td.IsRootOnlyDevice) then
+            //        if td.InTag.IsNonNull() then  
+            //            yield td.SensorEmulation(s, call.TargetJob)
         |]
  
     let private updateRealParentExpr(x:DsSystem) =
@@ -301,10 +302,12 @@ module ConvertCPU =
 
             //TaskDev 적용 
             yield! applyTaskDev sys
-            
+            //TaskDev Sensor Link 적용
+            yield! applyTaskDevSensorLink sys
+            //ApiItem 적용
+            yield! applyApiItem sys
             //funcCall 적용 
             yield! funcCall sys
-
             //allpyJob 적용 
             yield! applyJob sys
             ///CallOnDelay 적용  

@@ -44,7 +44,7 @@
 	- STANDFLMS : T, N, F, M, S (Time, Notrans, Finished, Motion, Script)
 	-  _    _   _   _ _
 - Call
-	- Job or Command or Operator
+	- Job or Command or Operator, SAD
 - ApiItem
 	- Tx/Rx (Real), Time
 - Alias

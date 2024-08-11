@@ -40,7 +40,7 @@ module TaskDevManagerModule =
 
         member _.TaskDev   = td
 
-   
+
         member x.PlanStart(job:Job)  = getPlanStart(x.TaskDev.GetApiParam(job))
         member x.PlanEnd(job:Job)    = getPlanEnd(x.TaskDev.GetApiParam(job))
         member x.PlanOutput(job:Job) = getPlanOutput(x.TaskDev.GetApiParam(job))

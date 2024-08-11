@@ -16,12 +16,12 @@ type TaskDevManager with
                 for coin in coins do
                     let ps = d.PlanStart(coin.GetPureCall().TargetJob)
                     yield (coin.VC.MM.Expr, activeSys._off.Expr) --| (ps, fn)
-            else 
+            else
                 let job = coins.OfType<Call>().First().TargetJob
                 let coinMemos = coins.Select(fun s->s.VC.MM).ToOr()
                 yield (coinMemos, activeSys._off.Expr) --| (d.PlanStart(job), fn)
         |]
-    
+
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         let fn = getFuncName()
         [|
@@ -29,13 +29,13 @@ type TaskDevManager with
                 let jobFqdn = kv.Key
                 let apiParam = kv.Value
 
-                let sets = 
+                let sets =
                     let inParam = apiParam.TaskDevParamIO.InParam
 
-                    if inParam.IsSome && inParam.Value.Type <> DuBOOL then 
+                    if inParam.IsSome && inParam.Value.Type <> DuBOOL then
                         apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(jobFqdn).Expr
-                    else 
-                        apiParam.ApiItem.ApiItemEnd.Expr 
+                    else
+                        apiParam.ApiItem.ApiItemEnd.Expr
 
                 yield (sets, activeSys._off.Expr) --| (d.PlanEnd(jobFqdn), fn)
         |]
@@ -57,7 +57,7 @@ type TaskDevManager with
                 let input =  d.TaskDev.GetInExpr(call.TargetJob)
                 let _off = d.TaskDev.ParnetSystem._off.Expr
                 let sets =
-                        call.RealLinkExpr <&&>  
+                        call.RealLinkExpr <&&>
                         (input <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
 
                 yield (sets, _off) --| (a.SL1, fn)
@@ -73,7 +73,7 @@ type TaskDevManager with
                     let _off = d.TaskDev.ParnetSystem._off.Expr
                     let sets =
                         call.RealLinkExpr
-                        <&&> 
+                        <&&>
                             (   (  input <&&> a.ApiItemEnd.Expr)
                         <||> (!@input <&&> !@a.ApiItemEnd.Expr)
                         <||> call.System._sim.Expr
@@ -81,7 +81,7 @@ type TaskDevManager with
 
                     yield (sets, _off) ==| (a.SL2, fn)
         |]
-    
+
 
 type ApiItemManager with
 
@@ -94,10 +94,9 @@ type ApiItemManager with
             yield! (pss, td.ParnetSystem) --^ (am.ApiItemSetPusle, fn)
             yield  (am.ApiItemSetPusle.Expr, api.TX.VR.ET.Expr) ==| (am.ApiItemSet, fn)
         |]
- 
+
     member am.A2_ApiEnd() =
         let fn = getFuncName()
         let api= am.ApiItem
         (api.RxET.Expr, api.ApiSystem._off.Expr) --| (api.ApiItemEnd, fn)
-        
-  
+

@@ -188,7 +188,7 @@ module DBWriterModule =
 
         member x.EnqueLog (log: DsLog) : unit = x.EnqueLogs ([ log ])
 
-        member x.InsertValueLog(time: DateTime, tag: TagDS, tokenId:TokenIdType) =
+        member x.InsertValueLog(time: DateTime, tag: TagEvent, tokenId:TokenIdType) =
             let vlog = DBLog.ValueLog(time, tag, tokenId)
             if tag.IsNeedSaveDBLog() then
                 x.EnqueLog(vlog)

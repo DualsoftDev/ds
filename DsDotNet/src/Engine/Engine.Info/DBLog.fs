@@ -5,7 +5,7 @@ open System
 open System.ComponentModel
 
 module DBLog =
-    type ValueLog(time: DateTime, tag: TagDS, tokenId:TokenIdType) =
+    type ValueLog(time: DateTime, tag: TagEvent, tokenId:TokenIdType) =
         inherit DsLog(time, tag.GetStorage(), tokenId)
 
         let tagName, value, objName, kind = tag.GetTagContents()

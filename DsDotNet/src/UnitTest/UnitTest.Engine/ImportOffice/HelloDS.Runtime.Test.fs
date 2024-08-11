@@ -21,7 +21,7 @@ module HelloDSRuntimeTestModule =
             RuntimeDS.TimeoutCall <- 15000u
 
         let helloDSPptPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
-        let helloDSZipPath = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.zip"
+        let helloDSZipPath = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.dsz"
 
         let runtimeModel = new RuntimeModel(helloDSZipPath, PlatformTarget.WINDOWS)
 
@@ -43,8 +43,8 @@ module HelloDSRuntimeTestModule =
 
 
         // Z:\ds\DsDotNet\src\UnitTest\TestData\ 폴더에
-        // - 최신 버젼의 HelloDS.zip 파일 필요
-        // - HelloDS.Logger.UnitTest.sqlite3 파일도 최신 HelloDS.zip 으로 시뮬레이션 된 것이거나 삭제 필요
+        // - 최신 버젼의 HelloDS.dsz 파일 필요
+        // - HelloDS.Logger.UnitTest.sqlite3 파일도 최신 HelloDS.dsz 으로 시뮬레이션 된 것이거나 삭제 필요
         [<Test>]
         member __.``X HelloDS runtime model test``() =
             let system = getSystem()

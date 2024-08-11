@@ -5,10 +5,10 @@ open System
 open System.ComponentModel
 
 module DBLog =
-    type ValueLog(time: DateTime, tag: TagEvent, tokenId:TokenIdType) =
-        inherit DsLog(time, tag.GetStorage(), tokenId)
+    type ValueLog(time: DateTime, tagEvent: TagEvent, tokenId:TokenIdType) =
+        inherit DsLog(time, tagEvent.GetStorage(), tokenId)
 
-        let tagName, value, objName, kind = tag.GetTagContents()
+        let tagName, value, objName, kind = tagEvent.GetTagContents()
         let _time = time
 
         member val Time    = _time.ToString("HH:mm:ss.fff") with get

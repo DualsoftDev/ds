@@ -227,7 +227,7 @@ module DBWriterModule =
                 let theSystem = systems.First()
                 let rt, mt, st = int VertexTag.realToken, int VertexTag.mergeToken, int VertexTag.sourceToken
                 let now = DateTime.Now
-                TagDSSubject.Subscribe(fun tag ->
+                TagEventSubject.Subscribe(fun tag ->
                     let mutable tokenId = TokenIdType()
                     if tag.GetSystem() = theSystem && tag.IsVertexTokenTag() then
                         let target = tag.GetTarget()

@@ -60,11 +60,11 @@ module rec CounterModule =
         let add = addTagsToStorages storages
         let dnName = if target = XGK
                      then $"{name}{xgkTimerCounterContactMarking}"
-                     else 
-                        if typ = CTUD 
-                        then $"{name}.QU" 
-                        else $"{name}.Q" 
-                                
+                     else
+                        if typ = CTUD
+                        then $"{name}.QU"
+                        else $"{name}.Q"
+
         match target, typ with
         | (WINDOWS | XGI| XGK), CTU ->
             cu  <- createBool     $"{name}.CU" false  // Count up enable bit

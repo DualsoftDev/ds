@@ -279,16 +279,16 @@ type FindExtension =
     [<Extension>] static member TryGetPureCall  (v:Vertex) = v |> tryGetPureCall
     [<Extension>] static member GetPure (x:Vertex) = getPure x
 
-    [<Extension>] static member GetPureReals (xs:Vertex seq) = 
+    [<Extension>] static member GetPureReals (xs:Vertex seq) =
                     let reals = xs.OfType<Real>()
                     let aliasTargetReals = xs.OfType<Alias>().Choose(fun s->s.TryGetPureReal())
                     reals@aliasTargetReals
 
-    [<Extension>] static member GetPureCalls (xs:Vertex seq) = 
+    [<Extension>] static member GetPureCalls (xs:Vertex seq) =
                     let calls = xs.OfType<Call>()
                     let aliasTargetCalls = xs.OfType<Alias>().Choose(fun s->s.TryGetPureCall())
                     calls@aliasTargetCalls
-      
+
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
     [<Extension>] static member GetFlowEdges(x:DsSystem) = x.Flows.Collect(fun f-> f.Graph.Edges)
@@ -343,8 +343,8 @@ type FindExtension =
                 .OrderBy(fun c->c.Name)
 
     [<Extension>]
-        static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) = 
-            xs.Where(fun v-> 
+        static member GetVerticesOfJobCoins(xs:Vertex seq, job:Job) =
+            xs.Where(fun v->
                     match v.TryGetPureCall() with
                     | Some c -> c.IsJob && c.TargetJob = job
                     | _ -> false)
@@ -362,7 +362,7 @@ type FindExtension =
         getTaskDevCalls(x)
             .SelectMany(fun (td, calls)-> td.ApiItems.Select(fun api-> api, td, calls))
             .DistinctBy(fun (api, _td, _c)-> api)
-                      
+
     [<Extension>]
     static member GetDevicesHasOutput(x:DsSystem) =
         //출력있는건 무조건  Coin

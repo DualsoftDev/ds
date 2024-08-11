@@ -4,7 +4,7 @@ open System.Linq
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Runtime.CompilerServices
-open System.Reflection     
+open System.Reflection
 open System
 
 [<AutoOpen>]
@@ -16,8 +16,8 @@ module internal ToDsTextModule =
     let mutable  pCooment = true //printComment
 
     let getName (v: Vertex) =
-        let name = 
-            match v with    
+        let name =
+            match v with
             | :? Real as r -> r.Name.QuoteOnDemand()
             | :? Call as c -> c.NameForGraph
             | :? Alias as a -> a.Name.QuoteOnDemand()
@@ -26,8 +26,8 @@ module internal ToDsTextModule =
                     //|None ->
                     //    a.Name.QuoteOnDemand()
 
-            | _ -> failWithLog "ERROR"          
-        name 
+            | _ -> failWithLog "ERROR"
+        name
 
 
     type private MEI = ModelingEdgeInfo<Vertex>
@@ -50,7 +50,7 @@ module internal ToDsTextModule =
         let es  = es |> Seq.sortBy(fun e -> e.EdgeSymbol.Count(fun ch -> ch = '|'))
         let ess = es |> Seq.fold folder []
 
-            
+
         let getNames (vs:Vertex seq) = vs.Select(getName).JoinWith(", ")
         [
             for es in ess do
@@ -88,7 +88,7 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
-            if notMentioned.any() then 
+            if notMentioned.any() then
                 let comment  = if pCooment then "// island"  else ""
                 let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(", ")
                 yield $"{getTab (indent)}{isLandCommas}; {comment}"
@@ -99,10 +99,10 @@ module internal ToDsTextModule =
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (DuParentFlow flow) (indent+1)
-            let aliasDefExist = flow.AliasDefs.Values.any() 
+            let aliasDefExist = flow.AliasDefs.Values.any()
                                     //.Where(fun a-> a.AliasTexts.Count <> a.AliasTexts.Where(fun w->w.Contains('.')).length())
                                     //.any()       //외부 Flow Alias 외에 하나라도 있으면
-                                
+
             if aliasDefExist then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
@@ -148,13 +148,13 @@ module internal ToDsTextModule =
         let tab = getTab indent
         let tab2 = getTab 2
         let tab3 = getTab 3
-       
+
         [
             yield $"[sys] {system.Name.QuoteOnDemand()} = {lb}"
 
             for f in system.Flows do
                 yield flowToDs f indent
-                
+
             if system.Jobs.Any() then
                 let printDev (d:TaskDev) (job:Job) skipApiPrint=
                     let apiName = if skipApiPrint then "" else d.DeviceApiToDsText(job)
@@ -162,37 +162,37 @@ module internal ToDsTextModule =
                     if para.IsDefaultParam then
                         $"{apiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
                     else
-                        $"{apiName}({para.ToDsText(Addresses(d.InAddress, d.OutAddress))})" 
+                        $"{apiName}({para.ToDsText(Addresses(d.InAddress, d.OutAddress))})"
 
                 yield $"{tab}[jobs] = {lb}"
                 for j in system.Jobs do
                     let jobItems =
                         j.TaskDefs
                         |> Seq.map (fun d-> printDev d (j) false)
-                          
+
                     let jobItemText = jobItems.JoinWith("; ") + ";"
                     if j.JobParam.ToText() = "" then
                         if j.TaskDefs.length() = 1 && j.TaskDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit) then
                             yield $"{tab2}{j.QualifiedName} = {printDev (j.TaskDefs.Head()) (j) true};"
                         else
-                            yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"  
+                            yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"
                     else
-                        yield $"{tab2}{j.QualifiedName}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"  
-                                        
+                        yield $"{tab2}{j.QualifiedName}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"
+
                 yield $"{tab}{rb}"
             elif system.Functions.Any() then
-                yield $"{tab}[jobs] = {lb}{rb}" 
+                yield $"{tab}[jobs] = {lb}{rb}"
             yield printVariables system
 
             let funcCodePrint funcName (code:string) =
                 let codeLines = code.Split([|"\r\n"; "\n"|], StringSplitOptions.None)
                 [
-                    if codeLines.length() > 1 then 
+                    if codeLines.length() > 1 then
                         yield $"{tab2}{funcName} = {lbCode}"
-                        for line in codeLines  
+                        for line in codeLines
                             do yield $"{tab3}{line}"
                         yield $"{tab2}{rbCode}"
-                    else 
+                    else
                         yield $"{tab2}{funcName} = {lbCode}{code}{rbCode}"
                 ]
 
@@ -201,7 +201,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[operators] = {lb}"
                 for op in operators do
                     let name = op.Name.QuoteOnDemand()
-                    if op.OperatorType = DuOPUnDefined then 
+                    if op.OperatorType = DuOPUnDefined then
                         yield $"{tab2}{name};"
                     else
                         yield! funcCodePrint name (op.ToDsText())
@@ -213,7 +213,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[commands] = {lb}"
                 for cmd in commands do
                     let name = cmd.Name.QuoteOnDemand()
-                    if cmd.CommandType = DuCMDUnDefined ||  cmd.CommandCode = "" then 
+                    if cmd.CommandType = DuCMDUnDefined ||  cmd.CommandCode = "" then
                         yield $"{tab2}{name};"
                     else
                         yield! funcCodePrint $"{name}" (cmd.ToDsText())
@@ -253,17 +253,17 @@ module internal ToDsTextModule =
 
 
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
-                let getHwInfo(hw:HwSystemDef) = 
+                let getHwInfo(hw:HwSystemDef) =
                     let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).CombineQuoteOnDemand())
                     let itemText = if flows.any() then (flows |> String.concat "; ") + ";" else ""
-                    let inAddr =  addressPrint  hw.InAddress  
-                    let outAddr = addressPrint  hw.OutAddress 
+                    let inAddr =  addressPrint  hw.InAddress
+                    let outAddr = addressPrint  hw.OutAddress
                     itemText, inAddr, outAddr
 
                 [
                     match hws.length() with
                     | 0-> ()
-                    | 1-> 
+                    | 1->
                         let itemText, inAddr, outAddr = getHwInfo (hws.Head())
                         yield $"{tab2}[{category}] = {lb} {hws.Head().Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {itemText} {rb} {rb}"
                     | _->
@@ -271,15 +271,15 @@ module internal ToDsTextModule =
                         for hw in hws do
                             let itemText, inAddr, outAddr = getHwInfo hw
                             let inType, outType = hw.InDataType, hw.OutDataType
-                            
+
                             yield $"{tab3}{getInOutTypeText (hw.Name.QuoteOnDemand()) inType outType}({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
-                          
+
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
 
             if btns.Any() then
-                yield $"{tab}[buttons] = {lb}"                
+                yield $"{tab}[buttons] = {lb}"
                 yield HwSystemToDs("a", system.AutoHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("m", system.ManualHWButtons.Cast<HwSystemDef>())
                 yield HwSystemToDs("d", system.DriveHWButtons.Cast<HwSystemDef>())
@@ -329,14 +329,14 @@ module internal ToDsTextModule =
 
             let getSafetyAutoPreName (call:Call) =
                     match call.Parent with
-                    | DuParentReal r-> 
+                    | DuParentReal r->
                             $"{r.Flow.Name.QuoteOnDemand()}.{r.Name.QuoteOnDemand()}.{call.NameForGraph}"
-                                     
+
                     | DuParentFlow _ -> failWithLog $"ERROR getSafetyAutoPreName {call.QualifiedName}"
 
             let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
 
-         
+
 
             let safeties =
                 [
@@ -347,7 +347,7 @@ module internal ToDsTextModule =
                             yield $"{tab3}{safetyHolder.GetCall()|> getSafetyAutoPreName } = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
-                
+
             let autoPreHolders =
                 [   for f in system.Flows do
                         yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
@@ -366,11 +366,11 @@ module internal ToDsTextModule =
                             yield $"{tab3}{autoPreHolder.GetCall()|>getSafetyAutoPreName} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
-            
-            
-            
+
+
+
             let layoutList =
-                system.LoadedSystems 
+                system.LoadedSystems
                     |> collect (fun f-> f.ChannelPoints.Select(fun kv->kv.Key))
                     |> distinct
 
@@ -378,7 +378,7 @@ module internal ToDsTextModule =
                 layoutList
                 |> map (fun l ->
                     let tpl3: (string * string * Xywh) seq = // DeviceName * PointName * Position
-                        system.LoadedSystems 
+                        system.LoadedSystems
                         |> collect (fun dev-> dev.ChannelPoints.Select(fun kv-> dev.Name.QuoteOnDemand(), kv.Key, kv.Value))
                         |> filter (fun (_, ch, _)-> ch = l)
                     l, tpl3)
@@ -396,13 +396,13 @@ module internal ToDsTextModule =
                     for file in layoutList do
                         if file = TextEmtpyChannel then
                             yield $"{tab2}[layouts] = {lb}"
-                        else 
+                        else
                             yield $"{tab2}[layouts file={quote file}] = {lb}"
 
                         for device, _, xy in layoutPointDic[file] do
                             yield makeList device xy
 
-                        yield $"{tab2}{rb}"                  
+                        yield $"{tab2}{rb}"
                 ] |> combineLines
 
 
@@ -412,7 +412,7 @@ module internal ToDsTextModule =
             let motionReals = reals.Where(fun f->f.Motion.IsSome)
             let scriptReals = reals.Where(fun f->f.Script.IsSome)
             let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome || f.DsTime.TON.IsSome)
-            let times = 
+            let times =
                 [
                     if timeReals.Any() then
                         yield $"{tab2}[times] = {lb}"
@@ -425,7 +425,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let motions = 
+            let motions =
                 [
                     if motionReals.Any() then
                         yield $"{tab2}[motions] = {lb}"
@@ -434,7 +434,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let scripts = 
+            let scripts =
                 [
                     if scriptReals.Any() then
                         yield $"{tab2}[scripts] = {lb}"
@@ -443,7 +443,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let finished = 
+            let finished =
                 [
                     if finishedReals.Any() then
                         yield $"{tab2}[finish] = {lb}"
@@ -452,7 +452,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let noTransData = 
+            let noTransData =
                 [
                     if noTransDataReals.Any() then
                         yield $"{tab2}[notrans] = {lb}"
@@ -461,7 +461,7 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let disabledVertices = 
+            let disabledVertices =
                 [
                     for flow in system.Flows do
                     for rootVert in flow.Graph.Vertices do
@@ -474,7 +474,7 @@ module internal ToDsTextModule =
                                 | _ -> ()
                         | _ -> ()
                 ]
-            let disabled = 
+            let disabled =
                 [
                     if disabledVertices.Any() then
                         yield $"{tab2}[disable] = {lb}"
@@ -491,28 +491,28 @@ module internal ToDsTextModule =
             if props.Any() then
                 yield $"{tab}[prop] = {lb}"
                 for p in props do
-                    yield p                
+                    yield p
                 yield $"{tab}{rb}"
 
             let commentDevice(absoluteFilePath:string) = if pCooment then  $"// {absoluteFilePath}" else "";
-         
-            let groupedDevices = 
+
+            let groupedDevices =
                 system.Devices
-                |> Seq.groupBy (fun d -> d.RelativeFilePath)  
+                |> Seq.groupBy (fun d -> d.RelativeFilePath)
 
             for (path, devices) in groupedDevices do
-                
-                let textDevices = 
+
+                let textDevices =
                     if devices.Count() = 1 then
                         devices.First().Name.QuoteOnDemand()
                     else
                         $"\r\n{tab2}" + String.Join($",\r\n{tab2}", devices.Select(fun d -> d.Name.QuoteOnDemand()))
-                    
+
                 yield $"{tab}[device file={quote path}] {textDevices}; {commentDevice (devices.First().AbsoluteFilePath)}"
 
             for es in system.ExternalSystems do
                 yield $"{tab}[external file={quote es.RelativeFilePath}] {es.Name}; {commentDevice es.AbsoluteFilePath}"
-            
+
 
             //Commands/Observes는 JobDef에 저장 (Variables는 OriginalCodeBlocks ?? System.Variables ??)
             //yield codeBlockToDs system
@@ -520,7 +520,7 @@ module internal ToDsTextModule =
             // todo 복수개의 block 이 허용되면, serialize 할 때 해당 위치에 맞춰서 serialize 해야 하는데...
             //for code in system.OriginalCodeBlocks do
             //    yield code
-            
+
             // code 는 [Commands] = { cmd1 = ${code1}$, cmd2 = ${code2}$ } 복수개 저장
 
             if printVersions then
